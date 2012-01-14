@@ -22,7 +22,7 @@
 //
 
 // Authors:
-//   Michael Eddington (mike@phed.org)
+//   Mikhail Davidov (sirus@haxsys.net)
 
 // $Id$
 
@@ -30,29 +30,31 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
+using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Core.Transformers.Encode
 {
-	[FixupAttribute("CopyValueFixup", "Fixup used in testing.  Will copy another elements value into us.")]
-	[FixupAttribute("CopyValue", "Fixup used in testing.  Will copy another elements value into us.")]
-    [ParameterAttribute("ref", typeof(DataElement), "Reference to data element", true)]
-    [Serializable]
-	public class CopyValueFixup : Fixup
-	{
-		public CopyValueFixup(Dictionary<string, Variant> args) : base(args)
+    [TransformerAttribute("Ipv4StringToOctet", "Encode on output from a dot notation string to a 4 byte octet reprisentaiton.")]
+    [TransformerAttribute("encode.Ipv4StringToOctet", "Encode on output from a dot notation string to a 4 byte octet reprisentaiton.")]
+    public class Ipv4StringToOctet : Transformer
+    {
+        public Ipv4StringToOctet(Dictionary<string,Variant>  args) : base(args)
 		{
-			if (!args.ContainsKey("ref"))
-				throw new PeachException("Error, CopyValueFixup requires a 'ref' argument!");
 		}
 
-		protected override Variant fixupImpl(DataElement obj)
-		{
-			string objRef = (string)args["ref"];
-			DataElement from = obj.find(objRef);
-			return new Variant(from.Value);
-		}
-	}
+        protected override BitStream internalEncode(BitStream data)
+        {
+            string sip = System.Text.ASCIIEncoding.ASCII.GetString(data.Value);
+            var ip = System.Net.IPAddress.Parse(sip);
+
+            return new BitStream(ip.GetAddressBytes());
+        }
+
+        protected override BitStream internalDecode(BitStream data)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 
 // end

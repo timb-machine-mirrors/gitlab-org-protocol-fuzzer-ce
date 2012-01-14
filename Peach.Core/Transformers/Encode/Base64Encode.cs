@@ -22,7 +22,7 @@
 //
 
 // Authors:
-//   Michael Eddington (mike@phed.org)
+//   Mikhail Davidov (sirus@haxsys.net)
 
 // $Id$
 
@@ -30,29 +30,31 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
+using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Core.Transformers.Encode
 {
-	[FixupAttribute("CopyValueFixup", "Fixup used in testing.  Will copy another elements value into us.")]
-	[FixupAttribute("CopyValue", "Fixup used in testing.  Will copy another elements value into us.")]
-    [ParameterAttribute("ref", typeof(DataElement), "Reference to data element", true)]
-    [Serializable]
-	public class CopyValueFixup : Fixup
-	{
-		public CopyValueFixup(Dictionary<string, Variant> args) : base(args)
+    [TransformerAttribute("Base64Encode", "Encode on output as Base64.")]
+    [TransformerAttribute("encode.Base64Encode", "Encode on output as Base64.")]
+    public class Base64Encode : Transformer
+    {
+        public Base64Encode(Dictionary<string,Variant>  args) : base(args)
 		{
-			if (!args.ContainsKey("ref"))
-				throw new PeachException("Error, CopyValueFixup requires a 'ref' argument!");
 		}
 
-		protected override Variant fixupImpl(DataElement obj)
-		{
-			string objRef = (string)args["ref"];
-			DataElement from = obj.find(objRef);
-			return new Variant(from.Value);
-		}
-	}
+        protected override BitStream internalEncode(BitStream data)
+        {
+            var b64s = System.Convert.ToBase64String(data.Value);
+            var bytes = System.Text.ASCIIEncoding.ASCII.GetBytes(b64s);
+            return new BitStream(bytes);
+        }
+        
+        protected override BitStream internalDecode(BitStream data)
+        {
+            var b64s = System.Text.ASCIIEncoding.ASCII.GetString(data.Value);
+            return new BitStream(System.Convert.FromBase64String(b64s));
+        }
+    }
 }
 
 // end

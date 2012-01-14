@@ -29,28 +29,59 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO.Compression;
+using System.IO;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
+using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Core.Transformers.Compress
 {
-	[FixupAttribute("CopyValueFixup", "Fixup used in testing.  Will copy another elements value into us.")]
-	[FixupAttribute("CopyValue", "Fixup used in testing.  Will copy another elements value into us.")]
-    [ParameterAttribute("ref", typeof(DataElement), "Reference to data element", true)]
-    [Serializable]
-	public class CopyValueFixup : Fixup
+	[TransformerAttribute("GzipCompress", "Compress on output using gzip.")]
+    [TransformerAttribute("compress.GzipCompress", "Compress on output using gzip.")]
+	public class GzipCompress : Transformer
 	{
-		public CopyValueFixup(Dictionary<string, Variant> args) : base(args)
+		public GzipCompress(Dictionary<string,Variant> args) : base(args)
 		{
-			if (!args.ContainsKey("ref"))
-				throw new PeachException("Error, CopyValueFixup requires a 'ref' argument!");
 		}
 
-		protected override Variant fixupImpl(DataElement obj)
+		protected override BitStream internalEncode(BitStream data)
 		{
-			string objRef = (string)args["ref"];
-			DataElement from = obj.find(objRef);
-			return new Variant(from.Value);
+			byte[] buff = new byte[1024];
+			int ret;
+
+			MemoryStream sin = new MemoryStream(data.Value);
+			MemoryStream sout = new MemoryStream();
+
+			GZipStream gzip = new GZipStream(sin, CompressionMode.Compress);
+
+			do
+			{
+				ret = gzip.Read(buff, 0, buff.Length);
+				sout.Write(buff, 0, ret);
+			}
+			while (ret != 0);
+
+			return new BitStream(sout.ToArray());
+		}
+
+		protected override BitStream internalDecode(BitStream data)
+		{
+			byte[] buff = new byte[1024];
+			int ret;
+
+			MemoryStream sin = new MemoryStream(data.Value);
+			MemoryStream sout = new MemoryStream();
+
+			GZipStream gzip = new GZipStream(sin, CompressionMode.Decompress);
+
+			do
+			{
+				ret = gzip.Read(buff, 0, buff.Length);
+				sout.Write(buff, 0, ret);
+			}
+			while (ret != 0);
+
+			return new BitStream(sout.ToArray());
 		}
 	}
 }
