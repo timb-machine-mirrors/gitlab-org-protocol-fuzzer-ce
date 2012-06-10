@@ -31,20 +31,25 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Security.Cryptography;
 using Peach.Core.Dom;
 
 namespace Peach.Core.Fixups
 {
-    [FixupAttribute("IcmpChecksumFixup", "Standard ICMP checksum.")]
-    [FixupAttribute("checksums.IcmpChecksumFixup", "Standard ICMP checksum.")]
+
+    
+    [FixupAttribute("SHA224Fixup", "Standard SHA256 checksum.")]
+    [FixupAttribute("checksums.SHA224Fixup", "Standard SHA256 checksum.")]
     [ParameterAttribute("ref", typeof(DataElement), "Reference to data element", true)]
     [Serializable]
-    public class IcmpChecksumFixup : Fixup
+    public class SHA224Fixup : Fixup
     {
-        public IcmpChecksumFixup(Dictionary<string, Variant> args) : base(args)
+
+        public SHA224Fixup(Dictionary<string, Variant> args)
+            : base(args)
         {
             if (!args.ContainsKey("ref"))
-                throw new PeachException("Error, IcmpChecksumFixup requires a 'ref' argument!");
+                throw new PeachException("Error, SHA224Fixup requires a 'ref' argument!");
         }
 
         protected override Variant fixupImpl(DataElement obj)
@@ -53,27 +58,12 @@ namespace Peach.Core.Fixups
             DataElement from = obj.find(objRef);
 
             if (from == null)
-                throw new PeachException(string.Format("IcmpChecksumFixup could not find ref element '{0}'", objRef));
+                throw new PeachException(string.Format("SHA224Fixup could not find ref element '{0}'", objRef));
 
             byte[] data = from.Value.Value;
-            uint chcksm = 0;
-            int idx = 0;
-
-            // add a byte if not divisible by 2
-            if (data.Length % 2 != 0)
-                data = ArrayExtensions.Combine(data, new byte[] { 0x00 });
-
-            // calculate checksum
-            while (idx < data.Length)
-            {
-                chcksm += Convert.ToUInt32(BitConverter.ToUInt16(data, idx));
-                idx += 2;
-            }
-
-            chcksm = (chcksm >> 16) + (chcksm & 0xFFFF);
-            chcksm += (chcksm >> 16);
-
-            return new Variant((ushort)(~chcksm));
+            Libraries.SHA224Managed sha224Tool = new Libraries.SHA224Managed();
+         
+            return new Variant(sha224Tool.ComputeHash(data));
         }
     }
 }
