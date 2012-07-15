@@ -8,6 +8,7 @@ deps = [
 	'System.dll',
 	'System.Management.dll',
 	'System.Xml.dll',
+	'System.Core.dll',
 	'System.Data.dll',
 	'System.Web.dll',
 	'Ionic.Zip.dll',
@@ -17,6 +18,7 @@ deps = [
 	'IronRuby.Libraries.dll',
 	'IronRuby.Libraries.Yaml.dll',
 	'Microsoft.Dynamic.dll',
+	'Microsoft.CSharp.dll',
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 ]
