@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+  <Run name="defaultrun">
+    <Test ref="doGetCachedPageTest" />
+    <Test ref="doGetCachedPageTest" />
+    <Test ref="doSpellingSuggestionTest" />
+    <Test ref="doSpellingSuggestionTest" />
+    <Test ref="doGoogleSearchTest" />
+    <Test ref="doGoogleSearchTest" />
+    <Test ref="doGetCachedPageTest" />
+    <Test ref="doGetCachedPageTest" />
+    <Test ref="doSpellingSuggestionTest" />
+    <Test ref="doSpellingSuggestionTest" />
+    <Test ref="doGoogleSearchTest" />
+    <Test ref="doGoogleSearchTest" />
+  </Run>
+  <DataModel name="Any" />
+	<DataModel name="_Array">
+	</DataModel>
+
+<DataModel name="urn_GoogleSearch_ResultElementArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+    <DataModel name="urn_GoogleSearch_DirectoryCategoryArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="urn_GoogleSearch_DirectoryCategory">
+    <Block name="All">
+      <String name="_fullViewableName" value="" />
+      <String name="_specialEncoding" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="urn_GoogleSearch_GoogleSearchResult">
+    <Block name="All">
+      <String name="_documentFiltering" value="false" />
+      <String name="_searchComments" value="" />
+      <Number name="_estimatedTotalResultsCount" size="32" />
+      <String name="_estimateIsExact" value="false" />
+      <Block name="_resultElements" ref="urn_GoogleSearch_ResultElementArray" />
+      <String name="_searchQuery" value="" />
+      <Number name="_startIndex" size="32" />
+      <Number name="_endIndex" size="32" />
+      <String name="_searchTips" value="" />
+      <Block name="_directoryCategories" ref="urn_GoogleSearch_DirectoryCategoryArray" />
+      <Number name="_searchTime" size="32" />
+    </Block>
+  </DataModel>
+  <DataModel name="urn_GoogleSearch_ResultElement">
+    <Block name="All">
+      <String name="_summary" value="" />
+      <String name="_URL" value="" />
+      <String name="_snippet" value="" />
+      <String name="_title" value="" />
+      <String name="_cachedSize" value="" />
+      <String name="_relatedInformationPresent" value="false" />
+      <String name="_hostName" value="" />
+      <Block name="_directoryCategory" ref="urn_GoogleSearch_DirectoryCategory" />
+      <String name="_directoryTitle" value="" />
+    </Block>
+  </DataModel>
+
+ <DataModel name="doGetCachedPage">
+    <String name="key" value="" />
+    <String name="url" value="" />
+  </DataModel>
+  <DataModel name="doGetCachedPageResponse">
+    <Blob name="return" valuetype="hex" />
+  </DataModel>
+  <DataModel name="doSpellingSuggestion">
+    <String name="key" value="" />
+    <String name="phrase" value="" />
+  </DataModel>
+  <DataModel name="doSpellingSuggestionResponse">
+    <String name="return" value="" />
+  </DataModel>
+  <DataModel name="doGoogleSearch">
+    <String name="key" value="" />
+    <String name="q" value="" />
+    <Number name="start" size="32" />
+    <Number name="maxResults" size="32" />
+    <String name="filter" value="false" />
+		<String name="restrict" value="" />
+    <String name="safeSearch" value="false" />
+    <String name="lr" value="" />
+    <String name="ie" value="" />
+    <String name="oe" value="" />
+  </DataModel>
+  
+	<DataModel name="doGoogleSearchResponse">
+    <Block name="return" ref="urn_GoogleSearch_GoogleSearchResult" />
+  </DataModel>
+
+  <Test name="doGetCachedPageTest">
+    <StateModel ref="doGetCachedPageStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGetCachedPageStateModel">
+    <State name="initial">
+      <Action name="doGetCachedPageAction" type="output">
+        <DataModel ref="doGetCachedPage" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGetCachedPageTest">
+    <StateModel ref="doGetCachedPageStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGetCachedPageStateModel">
+    <State name="initial">
+      <Action name="doGetCachedPageAction" type="output">
+        <DataModel ref="doGetCachedPageResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doSpellingSuggestionTest">
+    <StateModel ref="doSpellingSuggestionStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doSpellingSuggestionStateModel">
+    <State name="initial">
+      <Action name="doSpellingSuggestionAction" type="output">
+        <DataModel ref="doSpellingSuggestion" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doSpellingSuggestionTest">
+    <StateModel ref="doSpellingSuggestionStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doSpellingSuggestionStateModel">
+    <State name="initial">
+      <Action name="doSpellingSuggestionAction" type="output">
+        <DataModel ref="doSpellingSuggestionResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGoogleSearchTest">
+    <StateModel ref="doGoogleSearchStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGoogleSearchStateModel">
+    <State name="initial">
+      <Action name="doGoogleSearchAction" type="output">
+        <DataModel ref="doGoogleSearch" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGoogleSearchTest">
+    <StateModel ref="doGoogleSearchStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGoogleSearchStateModel">
+    <State name="initial">
+      <Action name="doGoogleSearchAction" type="output">
+        <DataModel ref="doGoogleSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGetCachedPageTest">
+    <StateModel ref="doGetCachedPageStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGetCachedPageStateModel">
+    <State name="initial">
+      <Action name="doGetCachedPageAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGetCachedPageTest">
+    <StateModel ref="doGetCachedPageStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGetCachedPageStateModel">
+    <State name="initial">
+      <Action name="doGetCachedPageAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doSpellingSuggestionTest">
+    <StateModel ref="doSpellingSuggestionStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doSpellingSuggestionStateModel">
+    <State name="initial">
+      <Action name="doSpellingSuggestionAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doSpellingSuggestionTest">
+    <StateModel ref="doSpellingSuggestionStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doSpellingSuggestionStateModel">
+    <State name="initial">
+      <Action name="doSpellingSuggestionAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGoogleSearchTest">
+    <StateModel ref="doGoogleSearchStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGoogleSearchStateModel">
+    <State name="initial">
+      <Action name="doGoogleSearchAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="doGoogleSearchTest">
+    <StateModel ref="doGoogleSearchStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="doGoogleSearchStateModel">
+    <State name="initial">
+      <Action name="doGoogleSearchAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+</Peach>

@@ -1,0 +1,1214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+  <Run name="defaultrun">
+    <Test ref="HelpInputTest" />
+    <Test ref="HelpOutputTest" />
+    <Test ref="ItemSearchInputTest" />
+    <Test ref="ItemSearchOutputTest" />
+    <Test ref="ItemLookupInputTest" />
+    <Test ref="ItemLookupOutputTest" />
+    <Test ref="BrowseNodeLookupInputTest" />
+    <Test ref="BrowseNodeLookupOutputTest" />
+    <Test ref="ListSearchInputTest" />
+    <Test ref="ListSearchOutputTest" />
+    <Test ref="ListLookupInputTest" />
+    <Test ref="ListLookupOutputTest" />
+    <Test ref="CustomerContentSearchInputTest" />
+    <Test ref="CustomerContentSearchOutputTest" />
+    <Test ref="CustomerContentLookupInputTest" />
+    <Test ref="CustomerContentLookupOutputTest" />
+    <Test ref="SimilarityLookupInputTest" />
+    <Test ref="SimilarityLookupOutputTest" />
+    <Test ref="SellerLookupInputTest" />
+    <Test ref="SellerLookupOutputTest" />
+    <Test ref="CartGetInputTest" />
+    <Test ref="CartGetOutputTest" />
+    <Test ref="CartCreateInputTest" />
+    <Test ref="CartCreateOutputTest" />
+    <Test ref="CartAddInputTest" />
+    <Test ref="CartAddOutputTest" />
+    <Test ref="CartModifyInputTest" />
+    <Test ref="CartModifyOutputTest" />
+    <Test ref="CartClearInputTest" />
+    <Test ref="CartClearOutputTest" />
+    <Test ref="TransactionLookupInputTest" />
+    <Test ref="TransactionLookupOutputTest" />
+    <Test ref="SellerListingSearchInputTest" />
+    <Test ref="SellerListingSearchOutputTest" />
+    <Test ref="SellerListingLookupInputTest" />
+    <Test ref="SellerListingLookupOutputTest" />
+    <Test ref="TagLookupInputTest" />
+    <Test ref="TagLookupOutputTest" />
+    <Test ref="VehicleSearchInputTest" />
+    <Test ref="VehicleSearchOutputTest" />
+    <Test ref="VehiclePartSearchInputTest" />
+    <Test ref="VehiclePartSearchOutputTest" />
+    <Test ref="VehiclePartLookupInputTest" />
+    <Test ref="VehiclePartLookupOutputTest" />
+    <Test ref="MultiOperationInputTest" />
+    <Test ref="MultiOperationOutputTest" />
+  </Run>
+  <DataModel name="Any" />
+  <DataModel name="HelpRequestMsg">
+    <Block name="body" ref="2009-02-01_Help" />
+  </DataModel>
+  <DataModel name="HelpResponseMsg">
+    <Block name="body" ref="2009-02-01_HelpResponse" />
+  </DataModel>
+  <DataModel name="ItemSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_ItemSearch" />
+  </DataModel>
+  <DataModel name="ItemSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_ItemSearchResponse" />
+  </DataModel>
+  <DataModel name="ItemLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_ItemLookup" />
+  </DataModel>
+  <DataModel name="ItemLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_ItemLookupResponse" />
+  </DataModel>
+  <DataModel name="BrowseNodeLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_BrowseNodeLookup" />
+  </DataModel>
+  <DataModel name="BrowseNodeLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_BrowseNodeLookupResponse" />
+  </DataModel>
+  <DataModel name="ListSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_ListSearch" />
+  </DataModel>
+  <DataModel name="ListSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_ListSearchResponse" />
+  </DataModel>
+  <DataModel name="ListLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_ListLookup" />
+  </DataModel>
+  <DataModel name="ListLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_ListLookupResponse" />
+  </DataModel>
+  <DataModel name="CustomerContentSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_CustomerContentSearch" />
+  </DataModel>
+  <DataModel name="CustomerContentSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_CustomerContentSearchResponse" />
+  </DataModel>
+  <DataModel name="CustomerContentLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_CustomerContentLookup" />
+  </DataModel>
+  <DataModel name="CustomerContentLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_CustomerContentLookupResponse" />
+  </DataModel>
+  <DataModel name="SimilarityLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_SimilarityLookup" />
+  </DataModel>
+  <DataModel name="SimilarityLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_SimilarityLookupResponse" />
+  </DataModel>
+  <DataModel name="SellerLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_SellerLookup" />
+  </DataModel>
+  <DataModel name="SellerLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_SellerLookupResponse" />
+  </DataModel>
+  <DataModel name="CartGetRequestMsg">
+    <Block name="body" ref="2009-02-01_CartGet" />
+  </DataModel>
+  <DataModel name="CartGetResponseMsg">
+    <Block name="body" ref="2009-02-01_CartGetResponse" />
+  </DataModel>
+  <DataModel name="CartAddRequestMsg">
+    <Block name="body" ref="2009-02-01_CartAdd" />
+  </DataModel>
+  <DataModel name="CartAddResponseMsg">
+    <Block name="body" ref="2009-02-01_CartAddResponse" />
+  </DataModel>
+  <DataModel name="CartCreateRequestMsg">
+    <Block name="body" ref="2009-02-01_CartCreate" />
+  </DataModel>
+  <DataModel name="CartCreateResponseMsg">
+    <Block name="body" ref="2009-02-01_CartCreateResponse" />
+  </DataModel>
+  <DataModel name="CartModifyRequestMsg">
+    <Block name="body" ref="2009-02-01_CartModify" />
+  </DataModel>
+  <DataModel name="CartModifyResponseMsg">
+    <Block name="body" ref="2009-02-01_CartModifyResponse" />
+  </DataModel>
+  <DataModel name="CartClearRequestMsg">
+    <Block name="body" ref="2009-02-01_CartClear" />
+  </DataModel>
+  <DataModel name="CartClearResponseMsg">
+    <Block name="body" ref="2009-02-01_CartClearResponse" />
+  </DataModel>
+  <DataModel name="TransactionLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_TransactionLookup" />
+  </DataModel>
+  <DataModel name="TransactionLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_TransactionLookupResponse" />
+  </DataModel>
+  <DataModel name="SellerListingSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_SellerListingSearch" />
+  </DataModel>
+  <DataModel name="SellerListingSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_SellerListingSearchResponse" />
+  </DataModel>
+  <DataModel name="SellerListingLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_SellerListingLookup" />
+  </DataModel>
+  <DataModel name="TagLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_TagLookup" />
+  </DataModel>
+  <DataModel name="TagLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_TagLookupResponse" />
+  </DataModel>
+  <DataModel name="SellerListingLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_SellerListingLookupResponse" />
+  </DataModel>
+  <DataModel name="VehicleSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_VehicleSearch" />
+  </DataModel>
+  <DataModel name="VehicleSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_VehicleSearchResponse" />
+  </DataModel>
+  <DataModel name="VehiclePartSearchRequestMsg">
+    <Block name="body" ref="2009-02-01_VehiclePartSearch" />
+  </DataModel>
+  <DataModel name="VehiclePartSearchResponseMsg">
+    <Block name="body" ref="2009-02-01_VehiclePartSearchResponse" />
+  </DataModel>
+  <DataModel name="VehiclePartLookupRequestMsg">
+    <Block name="body" ref="2009-02-01_VehiclePartLookup" />
+  </DataModel>
+  <DataModel name="VehiclePartLookupResponseMsg">
+    <Block name="body" ref="2009-02-01_VehiclePartLookupResponse" />
+  </DataModel>
+  <DataModel name="MultiOperationRequestMsg">
+    <Block name="body" ref="2009-02-01_MultiOperation" />
+  </DataModel>
+  <DataModel name="MultiOperationResponseMsg">
+    <Block name="body" ref="2009-02-01_MultiOperationResponse" />
+  </DataModel>
+  <DataModel name="2009-02-01_HelpRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_About" value="" />
+      <Block name="2009-02-01_HelpType" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_ItemSearchRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_Actor" value="" />
+      <String name="2009-02-01_Artist" value="" />
+      <Block name="2009-02-01_Availability" ref="_" />
+      <Block ref="2009-02-01_AudienceRating" />
+      <String name="2009-02-01_Author" value="" />
+      <String name="2009-02-01_Brand" value="" />
+      <String name="2009-02-01_BrowseNode" value="" />
+      <String name="2009-02-01_City" value="" />
+      <String name="2009-02-01_Composer" value="" />
+      <Block ref="2009-02-01_Condition" />
+      <String name="2009-02-01_Conductor" value="" />
+      <Block name="2009-02-01_Count" ref="positiveInteger" />
+      <String name="2009-02-01_Cuisine" value="" />
+      <Block ref="2009-02-01_DeliveryMethod" />
+      <String name="2009-02-01_Director" value="" />
+      <String name="2009-02-01_FutureLaunchDate" value="" />
+      <String name="2009-02-01_ISPUPostalCode" value="" />
+      <Block name="2009-02-01_ItemPage" ref="positiveInteger" />
+      <String name="2009-02-01_Keywords" value="" />
+      <String name="2009-02-01_Manufacturer" value="" />
+      <Block name="2009-02-01_MaximumPrice" ref="nonNegativeInteger" />
+      <String name="2009-02-01_MerchantId" value="" />
+      <Block name="2009-02-01_MinimumPrice" ref="nonNegativeInteger" />
+      <String name="2009-02-01_MusicLabel" value="" />
+      <String name="2009-02-01_Neighborhood" value="" />
+      <String name="2009-02-01_Orchestra" value="" />
+      <String name="2009-02-01_PostalCode" value="" />
+      <String name="2009-02-01_Power" value="" />
+      <String name="2009-02-01_Publisher" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_ReviewSort" value="" />
+      <String name="2009-02-01_SearchIndex" value="" />
+      <String name="2009-02-01_Sort" value="" />
+      <String name="2009-02-01_State" value="" />
+      <Block name="2009-02-01_TagPage" ref="positiveInteger" />
+      <Block name="2009-02-01_TagsPerPage" ref="positiveInteger" />
+      <String name="2009-02-01_TagSort" value="" />
+      <String name="2009-02-01_TextStream" value="" />
+      <String name="2009-02-01_Title" value="" />
+      <String name="2009-02-01_ReleaseDate" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_ItemLookupRequest">
+    <Block name="Sequence">
+      <Block ref="2009-02-01_Condition" />
+      <Block ref="2009-02-01_DeliveryMethod" />
+      <String name="2009-02-01_FutureLaunchDate" value="" />
+      <Block name="2009-02-01_IdType" ref="_" />
+      <String name="2009-02-01_ISPUPostalCode" value="" />
+      <String name="2009-02-01_MerchantId" value="" />
+      <Block name="2009-02-01_OfferPage" ref="positiveInteger" />
+      <String name="2009-02-01_ItemId" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <Block name="2009-02-01_ReviewPage" ref="positiveInteger" />
+      <String name="2009-02-01_ReviewSort" value="" />
+      <String name="2009-02-01_SearchIndex" value="" />
+      <String name="2009-02-01_SearchInsideKeywords" value="" />
+      <Block name="2009-02-01_TagPage" ref="positiveInteger" />
+      <Block name="2009-02-01_TagsPerPage" ref="positiveInteger" />
+      <String name="2009-02-01_TagSort" value="" />
+      <Block name="2009-02-01_VariationPage" ref="2009-02-01_positiveIntegerOrAll" />
+      <Block name="2009-02-01_RelatedItemPage" ref="2009-02-01_positiveIntegerOrAll" />
+      <String name="2009-02-01_RelationshipType" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_ListSearchRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_City" value="" />
+      <String name="2009-02-01_Email" value="" />
+      <String name="2009-02-01_FirstName" value="" />
+      <String name="2009-02-01_LastName" value="" />
+      <Block name="2009-02-01_ListPage" ref="positiveInteger" />
+      <Block name="2009-02-01_ListType" ref="_" />
+      <String name="2009-02-01_Name" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_State" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_ListLookupRequest">
+    <Block name="Sequence">
+      <Block ref="2009-02-01_Condition" />
+      <Block ref="2009-02-01_DeliveryMethod" />
+      <String name="2009-02-01_ISPUPostalCode" value="" />
+      <String name="2009-02-01_ListId" value="" />
+      <Block name="2009-02-01_ListType" ref="_" />
+      <String name="2009-02-01_MerchantId" value="" />
+      <String name="2009-02-01_ProductGroup" value="" />
+      <Block name="2009-02-01_ProductPage" ref="positiveInteger" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_ReviewSort" value="" />
+      <String name="2009-02-01_Sort" value="" />
+      <String name="2009-02-01_IsOmitPurchasedItems" value="false" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CustomerContentSearchRequest">
+    <Block name="Sequence">
+      <Block name="2009-02-01_CustomerPage" ref="positiveInteger" />
+      <String name="2009-02-01_Email" value="" />
+      <String name="2009-02-01_Name" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CustomerContentLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_CustomerId" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <Block name="2009-02-01_ReviewPage" ref="positiveInteger" />
+      <Block name="2009-02-01_TagPage" ref="positiveInteger" />
+      <Block name="2009-02-01_TagsPerPage" ref="positiveInteger" />
+      <String name="2009-02-01_TagSort" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_SimilarityLookupRequest">
+    <Block name="Sequence">
+      <Block ref="2009-02-01_Condition" />
+      <Block ref="2009-02-01_DeliveryMethod" />
+      <String name="2009-02-01_ItemId" value="" />
+      <String name="2009-02-01_ISPUPostalCode" value="" />
+      <String name="2009-02-01_MerchantId" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_ReviewSort" value="" />
+      <Block name="2009-02-01_SimilarityType" ref="_" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_SellerLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_SellerId" value="" />
+      <Block name="2009-02-01_FeedbackPage" ref="positiveInteger" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartGetRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_CartId" value="" />
+      <String name="2009-02-01_HMAC" value="" />
+      <String name="2009-02-01_MergeCart" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartAddRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_CartId" value="" />
+      <String name="2009-02-01_HMAC" value="" />
+      <String name="2009-02-01_MergeCart" value="" />
+      <Block name="2009-02-01_Items" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartCreateRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_MergeCart" value="" />
+      <Block name="2009-02-01_Items" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartModifyRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_CartId" value="" />
+      <String name="2009-02-01_HMAC" value="" />
+      <String name="2009-02-01_MergeCart" value="" />
+      <Block name="2009-02-01_Items" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartClearRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_CartId" value="" />
+      <String name="2009-02-01_HMAC" value="" />
+      <String name="2009-02-01_MergeCart" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_TransactionLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_TransactionId" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_SellerListingSearchRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_Keywords" value="" />
+      <Block name="2009-02-01_ListingPage" ref="positiveInteger" />
+      <Block name="2009-02-01_OfferStatus" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+      <String name="2009-02-01_SellerId" value="" />
+      <String name="2009-02-01_Sort" value="" />
+      <String name="2009-02-01_Title" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_SellerListingLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_Id" value="" />
+      <String name="2009-02-01_SellerId" value="" />
+      <Block name="2009-02-01_IdType" ref="_" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_TagLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_TagName" value="" />
+      <String name="2009-02-01_CustomerId" value="" />
+      <Block name="2009-02-01_TagPage" ref="positiveInteger" />
+      <Block name="2009-02-01_Count" ref="positiveInteger" />
+      <String name="2009-02-01_TagSort" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_BrowseNodeLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_BrowseNodeId" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_VehicleSearchRequest">
+    <Block name="Sequence">
+      <Block name="2009-02-01_Year" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_MakeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_ModelId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_TrimId" ref="nonNegativeInteger" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_VehiclePartSearchRequest">
+    <Block name="Sequence">
+      <Block name="2009-02-01_Year" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_MakeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_ModelId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_TrimId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BedId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BodyStyleId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BrakesId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_DriveTypeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_EngineId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_MfrBodyCodeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_SpringTypesId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_SteeringId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_TransmissionId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_WheelbaseId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BrowseNodeId" ref="nonNegativeInteger" />
+      <String name="2009-02-01_Brand" value="" />
+      <Block name="2009-02-01_Count" ref="nonNegativeInteger" />
+      <String name="2009-02-01_FromItemId" value="" />
+      <String name="2009-02-01_PartPageDirection" value="" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_VehiclePartLookupRequest">
+    <Block name="Sequence">
+      <String name="2009-02-01_ItemId" value="" />
+      <String name="2009-02-01_IdType" value="" />
+      <Block name="2009-02-01_Year" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_MakeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_ModelId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_TrimId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BedId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BodyStyleId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BrakesId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_DriveTypeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_EngineId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_MfrBodyCodeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_SpringTypesId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_SteeringId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_TransmissionId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_WheelbaseId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_BrowseNodeId" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_FitmentPage" ref="nonNegativeInteger" />
+      <Block name="2009-02-01_FitmentCount" ref="nonNegativeInteger" />
+      <String name="2009-02-01_ResponseGroup" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_Tagging">
+    <Block name="Sequence">
+      <String name="2009-02-01_Name" value="" />
+      <String name="2009-02-01_EntityId" value="" />
+      <String name="2009-02-01_UserId" value="" />
+      <String name="2009-02-01_Time" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_PromotionEligibilityRequirements">
+    <Block name="Sequence">
+      <Block name="2009-02-01_EligibilityRequirement" ref="2009-02-01_PromotionEligibilityRequirement" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_PromotionBenefits">
+    <Block name="Sequence">
+      <Block name="2009-02-01_Benefit" ref="2009-02-01_PromotionBenefit" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_PromotionBenefit">
+    <Block name="Sequence">
+      <String name="2009-02-01_BenefitType" value="" />
+      <String name="2009-02-01_ComponentType" value="" />
+      <Number name="2009-02-01_Quantity" size="32" />
+      <Number name="2009-02-01_PercentOff" size="32" />
+      <Block name="2009-02-01_FixedAmount" ref="2009-02-01_Price" />
+      <Block name="2009-02-01_Ceiling" ref="2009-02-01_Price" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_PromotionEligibilityRequirement">
+    <Block name="Sequence">
+      <String name="2009-02-01_EligibilityRequirementType" value="" />
+      <Number name="2009-02-01_Quantity" size="32" />
+      <Block name="2009-02-01_CurrencyAmount" ref="2009-02-01_Price" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_PromotionItemApplicability">
+    <Block name="Sequence">
+      <String name="2009-02-01_ASIN" value="" />
+      <String name="2009-02-01_IsInBenefitSet" value="false" />
+      <String name="2009-02-01_IsInEligibilityRequirementSet" value="false" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_CartItem">
+    <Block name="Sequence">
+      <String name="2009-02-01_CartItemId" value="" />
+      <String name="2009-02-01_ASIN" value="" />
+      <String name="2009-02-01_ExchangeId" value="" />
+      <String name="2009-02-01_MerchantId" value="" />
+      <String name="2009-02-01_SellerId" value="" />
+      <String name="2009-02-01_SellerNickname" value="" />
+      <String name="2009-02-01_Quantity" value="" />
+      <String name="2009-02-01_Title" value="" />
+      <String name="2009-02-01_ProductGroup" value="" />
+      <String name="2009-02-01_ListOwner" value="" />
+      <String name="2009-02-01_ListType" value="" />
+      <Block name="2009-02-01_MetaData" ref="_" />
+      <Block name="2009-02-01_Price" ref="2009-02-01_Price" />
+      <Block name="2009-02-01_ItemTotal" ref="2009-02-01_Price" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_Address">
+    <Block name="Sequence">
+      <String name="2009-02-01_Name" value="" />
+      <String name="2009-02-01_Address1" value="" />
+      <String name="2009-02-01_Address2" value="" />
+      <String name="2009-02-01_Address3" value="" />
+      <String name="2009-02-01_City" value="" />
+      <String name="2009-02-01_State" value="" />
+      <String name="2009-02-01_PostalCode" value="" />
+      <String name="2009-02-01_Country" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_Price">
+    <Block name="Sequence">
+      <Block name="2009-02-01_Amount" ref="integer" />
+      <String name="2009-02-01_CurrencyCode" value="" />
+      <String name="2009-02-01_FormattedPrice" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_Image">
+    <Block name="Sequence">
+      <String name="2009-02-01_URL" value="" />
+      <Block name="2009-02-01_Height" ref="2009-02-01_DecimalWithUnits" />
+      <Block name="2009-02-01_Width" ref="2009-02-01_DecimalWithUnits" />
+      <String name="2009-02-01_IsVerified" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="2009-02-01_NonNegativeIntegerWithUnits">
+    <Block name="nonNegativeInteger" ref="nonNegativeInteger" />
+  </DataModel>
+  <DataModel name="2009-02-01_DecimalWithUnits">
+    <Block name="decimal" ref="decimal" />
+  </DataModel>
+  <DataModel name="2009-02-01_StringWithUnits">
+    <String name="string" value="" />
+  </DataModel>
+  <DataModel name="2009-02-01_positiveIntegerOrAll">
+    <Choice name="Union" />
+  </DataModel>
+  <Test name="HelpInputTest">
+    <StateModel ref="HelpInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="HelpInputStateModel">
+    <State name="initial">
+      <Action name="HelpInputAction" type="output">
+        <DataModel ref="HelpRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="HelpOutputTest">
+    <StateModel ref="HelpOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="HelpOutputStateModel">
+    <State name="initial">
+      <Action name="HelpOutputAction" type="output">
+        <DataModel ref="HelpResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ItemSearchInputTest">
+    <StateModel ref="ItemSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ItemSearchInputStateModel">
+    <State name="initial">
+      <Action name="ItemSearchInputAction" type="output">
+        <DataModel ref="ItemSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ItemSearchOutputTest">
+    <StateModel ref="ItemSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ItemSearchOutputStateModel">
+    <State name="initial">
+      <Action name="ItemSearchOutputAction" type="output">
+        <DataModel ref="ItemSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ItemLookupInputTest">
+    <StateModel ref="ItemLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ItemLookupInputStateModel">
+    <State name="initial">
+      <Action name="ItemLookupInputAction" type="output">
+        <DataModel ref="ItemLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ItemLookupOutputTest">
+    <StateModel ref="ItemLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ItemLookupOutputStateModel">
+    <State name="initial">
+      <Action name="ItemLookupOutputAction" type="output">
+        <DataModel ref="ItemLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeLookupInputTest">
+    <StateModel ref="BrowseNodeLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeLookupInputStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeLookupInputAction" type="output">
+        <DataModel ref="BrowseNodeLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeLookupOutputTest">
+    <StateModel ref="BrowseNodeLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeLookupOutputStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeLookupOutputAction" type="output">
+        <DataModel ref="BrowseNodeLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListSearchInputTest">
+    <StateModel ref="ListSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListSearchInputStateModel">
+    <State name="initial">
+      <Action name="ListSearchInputAction" type="output">
+        <DataModel ref="ListSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListSearchOutputTest">
+    <StateModel ref="ListSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListSearchOutputStateModel">
+    <State name="initial">
+      <Action name="ListSearchOutputAction" type="output">
+        <DataModel ref="ListSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListLookupInputTest">
+    <StateModel ref="ListLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListLookupInputStateModel">
+    <State name="initial">
+      <Action name="ListLookupInputAction" type="output">
+        <DataModel ref="ListLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListLookupOutputTest">
+    <StateModel ref="ListLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListLookupOutputStateModel">
+    <State name="initial">
+      <Action name="ListLookupOutputAction" type="output">
+        <DataModel ref="ListLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CustomerContentSearchInputTest">
+    <StateModel ref="CustomerContentSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CustomerContentSearchInputStateModel">
+    <State name="initial">
+      <Action name="CustomerContentSearchInputAction" type="output">
+        <DataModel ref="CustomerContentSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CustomerContentSearchOutputTest">
+    <StateModel ref="CustomerContentSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CustomerContentSearchOutputStateModel">
+    <State name="initial">
+      <Action name="CustomerContentSearchOutputAction" type="output">
+        <DataModel ref="CustomerContentSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CustomerContentLookupInputTest">
+    <StateModel ref="CustomerContentLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CustomerContentLookupInputStateModel">
+    <State name="initial">
+      <Action name="CustomerContentLookupInputAction" type="output">
+        <DataModel ref="CustomerContentLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CustomerContentLookupOutputTest">
+    <StateModel ref="CustomerContentLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CustomerContentLookupOutputStateModel">
+    <State name="initial">
+      <Action name="CustomerContentLookupOutputAction" type="output">
+        <DataModel ref="CustomerContentLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilarityLookupInputTest">
+    <StateModel ref="SimilarityLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilarityLookupInputStateModel">
+    <State name="initial">
+      <Action name="SimilarityLookupInputAction" type="output">
+        <DataModel ref="SimilarityLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilarityLookupOutputTest">
+    <StateModel ref="SimilarityLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilarityLookupOutputStateModel">
+    <State name="initial">
+      <Action name="SimilarityLookupOutputAction" type="output">
+        <DataModel ref="SimilarityLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerLookupInputTest">
+    <StateModel ref="SellerLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerLookupInputStateModel">
+    <State name="initial">
+      <Action name="SellerLookupInputAction" type="output">
+        <DataModel ref="SellerLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerLookupOutputTest">
+    <StateModel ref="SellerLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerLookupOutputStateModel">
+    <State name="initial">
+      <Action name="SellerLookupOutputAction" type="output">
+        <DataModel ref="SellerLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartGetInputTest">
+    <StateModel ref="CartGetInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartGetInputStateModel">
+    <State name="initial">
+      <Action name="CartGetInputAction" type="output">
+        <DataModel ref="CartGetRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartGetOutputTest">
+    <StateModel ref="CartGetOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartGetOutputStateModel">
+    <State name="initial">
+      <Action name="CartGetOutputAction" type="output">
+        <DataModel ref="CartGetResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartCreateInputTest">
+    <StateModel ref="CartCreateInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartCreateInputStateModel">
+    <State name="initial">
+      <Action name="CartCreateInputAction" type="output">
+        <DataModel ref="CartCreateRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartCreateOutputTest">
+    <StateModel ref="CartCreateOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartCreateOutputStateModel">
+    <State name="initial">
+      <Action name="CartCreateOutputAction" type="output">
+        <DataModel ref="CartCreateResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartAddInputTest">
+    <StateModel ref="CartAddInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartAddInputStateModel">
+    <State name="initial">
+      <Action name="CartAddInputAction" type="output">
+        <DataModel ref="CartAddRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartAddOutputTest">
+    <StateModel ref="CartAddOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartAddOutputStateModel">
+    <State name="initial">
+      <Action name="CartAddOutputAction" type="output">
+        <DataModel ref="CartAddResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartModifyInputTest">
+    <StateModel ref="CartModifyInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartModifyInputStateModel">
+    <State name="initial">
+      <Action name="CartModifyInputAction" type="output">
+        <DataModel ref="CartModifyRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartModifyOutputTest">
+    <StateModel ref="CartModifyOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartModifyOutputStateModel">
+    <State name="initial">
+      <Action name="CartModifyOutputAction" type="output">
+        <DataModel ref="CartModifyResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartClearInputTest">
+    <StateModel ref="CartClearInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartClearInputStateModel">
+    <State name="initial">
+      <Action name="CartClearInputAction" type="output">
+        <DataModel ref="CartClearRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CartClearOutputTest">
+    <StateModel ref="CartClearOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="CartClearOutputStateModel">
+    <State name="initial">
+      <Action name="CartClearOutputAction" type="output">
+        <DataModel ref="CartClearResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="TransactionLookupInputTest">
+    <StateModel ref="TransactionLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="TransactionLookupInputStateModel">
+    <State name="initial">
+      <Action name="TransactionLookupInputAction" type="output">
+        <DataModel ref="TransactionLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="TransactionLookupOutputTest">
+    <StateModel ref="TransactionLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="TransactionLookupOutputStateModel">
+    <State name="initial">
+      <Action name="TransactionLookupOutputAction" type="output">
+        <DataModel ref="TransactionLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerListingSearchInputTest">
+    <StateModel ref="SellerListingSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerListingSearchInputStateModel">
+    <State name="initial">
+      <Action name="SellerListingSearchInputAction" type="output">
+        <DataModel ref="SellerListingSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerListingSearchOutputTest">
+    <StateModel ref="SellerListingSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerListingSearchOutputStateModel">
+    <State name="initial">
+      <Action name="SellerListingSearchOutputAction" type="output">
+        <DataModel ref="SellerListingSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerListingLookupInputTest">
+    <StateModel ref="SellerListingLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerListingLookupInputStateModel">
+    <State name="initial">
+      <Action name="SellerListingLookupInputAction" type="output">
+        <DataModel ref="SellerListingLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerListingLookupOutputTest">
+    <StateModel ref="SellerListingLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerListingLookupOutputStateModel">
+    <State name="initial">
+      <Action name="SellerListingLookupOutputAction" type="output">
+        <DataModel ref="SellerListingLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="TagLookupInputTest">
+    <StateModel ref="TagLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="TagLookupInputStateModel">
+    <State name="initial">
+      <Action name="TagLookupInputAction" type="output">
+        <DataModel ref="TagLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="TagLookupOutputTest">
+    <StateModel ref="TagLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="TagLookupOutputStateModel">
+    <State name="initial">
+      <Action name="TagLookupOutputAction" type="output">
+        <DataModel ref="TagLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehicleSearchInputTest">
+    <StateModel ref="VehicleSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehicleSearchInputStateModel">
+    <State name="initial">
+      <Action name="VehicleSearchInputAction" type="output">
+        <DataModel ref="VehicleSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehicleSearchOutputTest">
+    <StateModel ref="VehicleSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehicleSearchOutputStateModel">
+    <State name="initial">
+      <Action name="VehicleSearchOutputAction" type="output">
+        <DataModel ref="VehicleSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehiclePartSearchInputTest">
+    <StateModel ref="VehiclePartSearchInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehiclePartSearchInputStateModel">
+    <State name="initial">
+      <Action name="VehiclePartSearchInputAction" type="output">
+        <DataModel ref="VehiclePartSearchRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehiclePartSearchOutputTest">
+    <StateModel ref="VehiclePartSearchOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehiclePartSearchOutputStateModel">
+    <State name="initial">
+      <Action name="VehiclePartSearchOutputAction" type="output">
+        <DataModel ref="VehiclePartSearchResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehiclePartLookupInputTest">
+    <StateModel ref="VehiclePartLookupInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehiclePartLookupInputStateModel">
+    <State name="initial">
+      <Action name="VehiclePartLookupInputAction" type="output">
+        <DataModel ref="VehiclePartLookupRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="VehiclePartLookupOutputTest">
+    <StateModel ref="VehiclePartLookupOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="VehiclePartLookupOutputStateModel">
+    <State name="initial">
+      <Action name="VehiclePartLookupOutputAction" type="output">
+        <DataModel ref="VehiclePartLookupResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MultiOperationInputTest">
+    <StateModel ref="MultiOperationInputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MultiOperationInputStateModel">
+    <State name="initial">
+      <Action name="MultiOperationInputAction" type="output">
+        <DataModel ref="MultiOperationRequestMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MultiOperationOutputTest">
+    <StateModel ref="MultiOperationOutputStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="AWSECommerceService" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MultiOperationOutputStateModel">
+    <State name="initial">
+      <Action name="MultiOperationOutputAction" type="output">
+        <DataModel ref="MultiOperationResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+</Peach>

@@ -1,0 +1,2102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+  <Run name="defaultrun">
+    <Test ref="KeywordSearchRequestTest" />
+    <Test ref="KeywordSearchRequestTest" />
+    <Test ref="PowerSearchRequestTest" />
+    <Test ref="PowerSearchRequestTest" />
+    <Test ref="BrowseNodeSearchRequestTest" />
+    <Test ref="BrowseNodeSearchRequestTest" />
+    <Test ref="AsinSearchRequestTest" />
+    <Test ref="AsinSearchRequestTest" />
+    <Test ref="BlendedSearchRequestTest" />
+    <Test ref="BlendedSearchRequestTest" />
+    <Test ref="UpcSearchRequestTest" />
+    <Test ref="UpcSearchRequestTest" />
+    <Test ref="AuthorSearchRequestTest" />
+    <Test ref="AuthorSearchRequestTest" />
+    <Test ref="ArtistSearchRequestTest" />
+    <Test ref="ArtistSearchRequestTest" />
+    <Test ref="ActorSearchRequestTest" />
+    <Test ref="ActorSearchRequestTest" />
+    <Test ref="ManufacturerSearchRequestTest" />
+    <Test ref="ManufacturerSearchRequestTest" />
+    <Test ref="DirectorSearchRequestTest" />
+    <Test ref="DirectorSearchRequestTest" />
+    <Test ref="ListManiaSearchRequestTest" />
+    <Test ref="ListManiaSearchRequestTest" />
+    <Test ref="WishlistSearchRequestTest" />
+    <Test ref="WishlistSearchRequestTest" />
+    <Test ref="ExchangeSearchRequestTest" />
+    <Test ref="ExchangeSearchRequestTest" />
+    <Test ref="MarketplaceSearchRequestTest" />
+    <Test ref="MarketplaceSearchRequestTest" />
+    <Test ref="SellerProfileSearchRequestTest" />
+    <Test ref="SellerProfileSearchRequestTest" />
+    <Test ref="SellerSearchRequestTest" />
+    <Test ref="SellerSearchRequestTest" />
+    <Test ref="SimilaritySearchRequestTest" />
+    <Test ref="SimilaritySearchRequestTest" />
+    <Test ref="GetShoppingCartRequestTest" />
+    <Test ref="GetShoppingCartRequestTest" />
+    <Test ref="ClearShoppingCartRequestTest" />
+    <Test ref="ClearShoppingCartRequestTest" />
+    <Test ref="AddShoppingCartItemsRequestTest" />
+    <Test ref="AddShoppingCartItemsRequestTest" />
+    <Test ref="RemoveShoppingCartItemsRequestTest" />
+    <Test ref="RemoveShoppingCartItemsRequestTest" />
+    <Test ref="ModifyShoppingCartItemsRequestTest" />
+    <Test ref="ModifyShoppingCartItemsRequestTest" />
+    <Test ref="KeywordSearchRequestTest" />
+    <Test ref="KeywordSearchRequestTest" />
+    <Test ref="PowerSearchRequestTest" />
+    <Test ref="PowerSearchRequestTest" />
+    <Test ref="BrowseNodeSearchRequestTest" />
+    <Test ref="BrowseNodeSearchRequestTest" />
+    <Test ref="AsinSearchRequestTest" />
+    <Test ref="AsinSearchRequestTest" />
+    <Test ref="BlendedSearchRequestTest" />
+    <Test ref="BlendedSearchRequestTest" />
+    <Test ref="UpcSearchRequestTest" />
+    <Test ref="UpcSearchRequestTest" />
+    <Test ref="AuthorSearchRequestTest" />
+    <Test ref="AuthorSearchRequestTest" />
+    <Test ref="ArtistSearchRequestTest" />
+    <Test ref="ArtistSearchRequestTest" />
+    <Test ref="ActorSearchRequestTest" />
+    <Test ref="ActorSearchRequestTest" />
+    <Test ref="ManufacturerSearchRequestTest" />
+    <Test ref="ManufacturerSearchRequestTest" />
+    <Test ref="DirectorSearchRequestTest" />
+    <Test ref="DirectorSearchRequestTest" />
+    <Test ref="ExchangeSearchRequestTest" />
+    <Test ref="ExchangeSearchRequestTest" />
+    <Test ref="ListManiaSearchRequestTest" />
+    <Test ref="ListManiaSearchRequestTest" />
+    <Test ref="WishlistSearchRequestTest" />
+    <Test ref="WishlistSearchRequestTest" />
+    <Test ref="SellerProfileSearchRequestTest" />
+    <Test ref="SellerProfileSearchRequestTest" />
+    <Test ref="SellerSearchRequestTest" />
+    <Test ref="SellerSearchRequestTest" />
+    <Test ref="MarketplaceSearchRequestTest" />
+    <Test ref="MarketplaceSearchRequestTest" />
+    <Test ref="SimilaritySearchRequestTest" />
+    <Test ref="SimilaritySearchRequestTest" />
+    <Test ref="GetShoppingCartRequestTest" />
+    <Test ref="GetShoppingCartRequestTest" />
+    <Test ref="ClearShoppingCartRequestTest" />
+    <Test ref="ClearShoppingCartRequestTest" />
+    <Test ref="AddShoppingCartItemsRequestTest" />
+    <Test ref="AddShoppingCartItemsRequestTest" />
+    <Test ref="RemoveShoppingCartItemsRequestTest" />
+    <Test ref="RemoveShoppingCartItemsRequestTest" />
+    <Test ref="ModifyShoppingCartItemsRequestTest" />
+    <Test ref="ModifyShoppingCartItemsRequestTest" />
+  </Run>
+  <DataModel name="Any" />
+  <DataModel name="soap.amazon.com_ProductLineArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ProductLine">
+    <Block name="All">
+      <String name="_Mode" value="" />
+      <Block name="_ProductInfo" ref="soap.amazon.com_ProductInfo" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ProductInfo">
+    <Block name="All">
+      <String name="_TotalResults" value="" />
+      <String name="_TotalPages" value="" />
+      <String name="_ListName" value="" />
+      <Block name="_Details" ref="soap.amazon.com_DetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_DetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_Details">
+    <Block name="All">
+      <String name="_Url" value="" />
+      <String name="_Asin" value="" />
+      <String name="_ProductName" value="" />
+      <String name="_Catalog" value="" />
+      <Block name="_KeyPhrases" ref="soap.amazon.com_KeyPhraseArray" />
+      <Block name="_Artists" ref="soap.amazon.com_ArtistArray" />
+      <Block name="_Authors" ref="soap.amazon.com_AuthorArray" />
+      <String name="_Mpn" value="" />
+      <Block name="_Starring" ref="soap.amazon.com_StarringArray" />
+      <Block name="_Directors" ref="soap.amazon.com_DirectorArray" />
+      <String name="_TheatricalReleaseDate" value="" />
+      <String name="_ReleaseDate" value="" />
+      <String name="_Manufacturer" value="" />
+      <String name="_Distributor" value="" />
+      <String name="_ImageUrlSmall" value="" />
+      <String name="_ImageUrlMedium" value="" />
+      <String name="_ImageUrlLarge" value="" />
+      <String name="_ListPrice" value="" />
+      <String name="_OurPrice" value="" />
+      <String name="_UsedPrice" value="" />
+      <String name="_RefurbishedPrice" value="" />
+      <String name="_CollectiblePrice" value="" />
+      <String name="_ThirdPartyNewPrice" value="" />
+      <String name="_NumberOfOfferings" value="" />
+      <String name="_ThirdPartyNewCount" value="" />
+      <String name="_UsedCount" value="" />
+      <String name="_CollectibleCount" value="" />
+      <String name="_RefurbishedCount" value="" />
+      <Block name="_ThirdPartyProductInfo" ref="soap.amazon.com_ThirdPartyProductInfo" />
+      <String name="_SalesRank" value="" />
+      <Block name="_BrowseList" ref="soap.amazon.com_BrowseNodeArray" />
+      <String name="_Media" value="" />
+      <String name="_ReadingLevel" value="" />
+      <String name="_NumberOfPages" value="" />
+      <String name="_NumberOfIssues" value="" />
+      <String name="_IssuesPerYear" value="" />
+      <String name="_SubscriptionLength" value="" />
+      <String name="_DeweyNumber" value="" />
+      <String name="_RunningTime" value="" />
+      <String name="_Publisher" value="" />
+      <String name="_NumMedia" value="" />
+      <String name="_Isbn" value="" />
+      <Block name="_Features" ref="soap.amazon.com_FeaturesArray" />
+      <String name="_MpaaRating" value="" />
+      <String name="_EsrbRating" value="" />
+      <String name="_AgeGroup" value="" />
+      <String name="_Availability" value="" />
+      <String name="_Upc" value="" />
+      <Block name="_Tracks" ref="soap.amazon.com_TrackArray" />
+      <Block name="_Accessories" ref="soap.amazon.com_AccessoryArray" />
+      <Block name="_Platforms" ref="soap.amazon.com_PlatformArray" />
+      <String name="_Encoding" value="" />
+      <Block name="_Reviews" ref="soap.amazon.com_Reviews" />
+      <Block name="_SimilarProducts" ref="soap.amazon.com_SimilarProductsArray" />
+      <Block name="_Lists" ref="soap.amazon.com_ListArray" />
+      <String name="_Status" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_KeyPhraseArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_KeyPhrase">
+    <Block name="All">
+      <String name="_KeyPhrase" value="" />
+      <String name="_Type" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ArtistArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_AuthorArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_StarringArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_DirectorArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_BrowseNodeArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_BrowseNode">
+    <Block name="All">
+      <String name="_BrowseId" value="" />
+      <String name="_BrowseName" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_FeaturesArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_TrackArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_Track">
+    <Block name="All">
+      <String name="_TrackName" value="" />
+      <String name="_ByArtist" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_AccessoryArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_PlatformArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_Reviews">
+    <Block name="All">
+      <String name="_AvgCustomerRating" value="" />
+      <String name="_TotalCustomerReviews" value="" />
+      <Block name="_CustomerReviews" ref="soap.amazon.com_CustomerReviewArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_CustomerReviewArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_CustomerReview">
+    <Block name="All">
+      <String name="_Rating" value="" />
+      <String name="_Summary" value="" />
+      <String name="_Comment" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SimilarProductsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ListArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_MarketplaceSearch">
+    <Block name="All">
+      <Block name="_MarketplaceSearchDetails" ref="soap.amazon.com_MarketplaceSearchDetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerProfile">
+    <Block name="All">
+      <Block name="_SellerProfileDetails" ref="soap.amazon.com_SellerProfileDetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerSearch">
+    <Block name="All">
+      <Block name="_SellerSearchDetails" ref="soap.amazon.com_SellerSearchDetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_MarketplaceSearchDetails">
+    <Block name="All">
+      <String name="_NumberOfOpenListings" value="" />
+      <Block name="_ListingProductInfo" ref="soap.amazon.com_ListingProductInfo" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_MarketplaceSearchDetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerProfileDetails">
+    <Block name="All">
+      <String name="_SellerNickname" value="" />
+      <String name="_OverallFeedbackRating" value="" />
+      <String name="_NumberOfFeedback" value="" />
+      <String name="_NumberOfCanceledBids" value="" />
+      <String name="_NumberOfCanceledAuctions" value="" />
+      <String name="_StoreId" value="" />
+      <String name="_StoreName" value="" />
+      <Block name="_SellerFeedback" ref="soap.amazon.com_SellerFeedback" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerProfileDetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerSearchDetails">
+    <Block name="All">
+      <String name="_SellerNickname" value="" />
+      <String name="_StoreId" value="" />
+      <String name="_StoreName" value="" />
+      <String name="_NumberOfOpenListings" value="" />
+      <Block name="_ListingProductInfo" ref="soap.amazon.com_ListingProductInfo" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerSearchDetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ListingProductInfo">
+    <Block name="All">
+      <Block name="_ListingProductDetails" ref="soap.amazon.com_ListingProductDetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ListingProductDetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ListingProductDetails">
+    <Block name="All">
+      <String name="_ExchangeId" value="" />
+      <String name="_ListingId" value="" />
+      <String name="_ExchangeTitle" value="" />
+      <String name="_ExchangePrice" value="" />
+      <String name="_ExchangeAsin" value="" />
+      <String name="_ExchangeEndDate" value="" />
+      <String name="_ExchangeTinyImage" value="" />
+      <String name="_ExchangeSellerId" value="" />
+      <String name="_ExchangeSellerNickname" value="" />
+      <String name="_ExchangeStartDate" value="" />
+      <String name="_ExchangeStatus" value="" />
+      <String name="_ExchangeQuantity" value="" />
+      <String name="_ExchangeQuantityAllocated" value="" />
+      <String name="_ExchangeFeaturedCategory" value="" />
+      <String name="_ExchangeCondition" value="" />
+      <String name="_ExchangeConditionType" value="" />
+      <String name="_ExchangeAvailability" value="" />
+      <String name="_ExchangeOfferingType" value="" />
+      <String name="_ExchangeSellerState" value="" />
+      <String name="_ExchangeSellerCountry" value="" />
+      <String name="_ExchangeSellerRating" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerFeedback">
+    <Block name="All">
+      <Block name="_Feedback" ref="soap.amazon.com_FeedbackArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_FeedbackArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_Feedback">
+    <Block name="All">
+      <String name="_FeedbackRating" value="" />
+      <String name="_FeedbackComments" value="" />
+      <String name="_FeedbackDate" value="" />
+      <String name="_FeedbackRater" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ThirdPartyProductInfo">
+    <Block name="All">
+      <Block name="_ThirdPartyProductDetails" ref="soap.amazon.com_ThirdPartyProductDetailsArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ThirdPartyProductDetailsArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ThirdPartyProductDetails">
+    <Block name="All">
+      <String name="_OfferingType" value="" />
+      <String name="_SellerId" value="" />
+      <String name="_SellerNickname" value="" />
+      <String name="_ExchangeId" value="" />
+      <String name="_OfferingPrice" value="" />
+      <String name="_Condition" value="" />
+      <String name="_ConditionType" value="" />
+      <String name="_ExchangeAvailability" value="" />
+      <String name="_SellerCountry" value="" />
+      <String name="_SellerState" value="" />
+      <String name="_ShipComments" value="" />
+      <String name="_SellerRating" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_KeywordRequest">
+    <Block name="All">
+      <String name="_keyword" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_PowerRequest">
+    <Block name="All">
+      <String name="_power" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_BrowseNodeRequest">
+    <Block name="All">
+      <String name="_browse_node" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_AsinRequest">
+    <Block name="All">
+      <String name="_asin" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_offer" value="" />
+      <String name="_offerpage" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_BlendedRequest">
+    <Block name="All">
+      <String name="_blended" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_UpcRequest">
+    <Block name="All">
+      <String name="_upc" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ArtistRequest">
+    <Block name="All">
+      <String name="_artist" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_AuthorRequest">
+    <Block name="All">
+      <String name="_author" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ActorRequest">
+    <Block name="All">
+      <String name="_actor" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_DirectorRequest">
+    <Block name="All">
+      <String name="_director" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ExchangeRequest">
+    <Block name="All">
+      <String name="_exchange_id" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ManufacturerRequest">
+    <Block name="All">
+      <String name="_manufacturer" value="" />
+      <String name="_page" value="" />
+      <String name="_mode" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_sort" value="" />
+      <String name="_variations" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ListManiaRequest">
+    <Block name="All">
+      <String name="_lm_id" value="" />
+      <String name="_page" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_WishlistRequest">
+    <Block name="All">
+      <String name="_wishlist_id" value="" />
+      <String name="_page" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_MarketplaceRequest">
+    <Block name="All">
+      <String name="_marketplace_search" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_page" value="" />
+      <String name="_keyword" value="" />
+      <String name="_keyword_search" value="" />
+      <String name="_browse_id" value="" />
+      <String name="_zipcode" value="" />
+      <String name="_area_id" value="" />
+      <String name="_geo" value="" />
+      <String name="_sort" value="" />
+      <String name="_listing_id" value="" />
+      <String name="_locale" value="" />
+      <String name="_index" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerProfileRequest">
+    <Block name="All">
+      <String name="_seller_id" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_page" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SellerRequest">
+    <Block name="All">
+      <String name="_seller_id" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_offerstatus" value="" />
+      <String name="_page" value="" />
+      <String name="_seller_browse_id" value="" />
+      <String name="_keyword" value="" />
+      <String name="_locale" value="" />
+      <String name="_index" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_SimilarityRequest">
+    <Block name="All">
+      <String name="_asin" value="" />
+      <String name="_tag" value="" />
+      <String name="_type" value="" />
+      <String name="_devtag" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ItemIdArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ItemArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_Item">
+    <Block name="All">
+      <String name="_ItemId" value="" />
+      <String name="_ProductName" value="" />
+      <String name="_Catalog" value="" />
+      <String name="_Asin" value="" />
+      <String name="_ExchangeId" value="" />
+      <String name="_Quantity" value="" />
+      <String name="_ListPrice" value="" />
+      <String name="_OurPrice" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ItemQuantityArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_ItemQuantity">
+    <Block name="All">
+      <String name="_ItemId" value="" />
+      <String name="_Quantity" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_AddItemArray">
+    <Block name="_Array" ref="_Array" />
+  </DataModel>
+  <DataModel name="soap.amazon.com_AddItem">
+    <Block name="All">
+      <String name="_Asin" value="" />
+      <String name="_ExchangeId" value="" />
+      <String name="_Quantity" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ShoppingCart">
+    <Block name="All">
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <String name="_PurchaseUrl" value="" />
+      <Block name="_Items" ref="soap.amazon.com_ItemArray" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_GetShoppingCartRequest">
+    <Block name="All">
+      <String name="_tag" value="" />
+      <String name="_devtag" value="" />
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ClearShoppingCartRequest">
+    <Block name="All">
+      <String name="_tag" value="" />
+      <String name="_devtag" value="" />
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_AddShoppingCartItemsRequest">
+    <Block name="All">
+      <String name="_tag" value="" />
+      <String name="_devtag" value="" />
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <Block name="_Items" ref="soap.amazon.com_AddItemArray" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_RemoveShoppingCartItemsRequest">
+    <Block name="All">
+      <String name="_tag" value="" />
+      <String name="_devtag" value="" />
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <Block name="_Items" ref="soap.amazon.com_ItemIdArray" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="soap.amazon.com_ModifyShoppingCartItemsRequest">
+    <Block name="All">
+      <String name="_tag" value="" />
+      <String name="_devtag" value="" />
+      <String name="_CartId" value="" />
+      <String name="_HMAC" value="" />
+      <Block name="_Items" ref="soap.amazon.com_ItemQuantityArray" />
+      <String name="_locale" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="KeywordSearchRequest">
+    <Block name="KeywordSearchRequest" ref="http_//soap.amazon.com_KeywordRequest" />
+  </DataModel>
+  <DataModel name="KeywordSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="PowerSearchRequest">
+    <Block name="PowerSearchRequest" ref="http_//soap.amazon.com_PowerRequest" />
+  </DataModel>
+  <DataModel name="PowerSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="BrowseNodeSearchRequest">
+    <Block name="BrowseNodeSearchRequest" ref="http_//soap.amazon.com_BrowseNodeRequest" />
+  </DataModel>
+  <DataModel name="BrowseNodeSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="AsinSearchRequest">
+    <Block name="AsinSearchRequest" ref="http_//soap.amazon.com_AsinRequest" />
+  </DataModel>
+  <DataModel name="AsinSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="BlendedSearchRequest">
+    <Block name="BlendedSearchRequest" ref="http_//soap.amazon.com_BlendedRequest" />
+  </DataModel>
+  <DataModel name="BlendedSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductLineArray" />
+  </DataModel>
+  <DataModel name="UpcSearchRequest">
+    <Block name="UpcSearchRequest" ref="http_//soap.amazon.com_UpcRequest" />
+  </DataModel>
+  <DataModel name="UpcSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="AuthorSearchRequest">
+    <Block name="AuthorSearchRequest" ref="http_//soap.amazon.com_AuthorRequest" />
+  </DataModel>
+  <DataModel name="AuthorSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="ArtistSearchRequest">
+    <Block name="ArtistSearchRequest" ref="http_//soap.amazon.com_ArtistRequest" />
+  </DataModel>
+  <DataModel name="ArtistSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="ActorSearchRequest">
+    <Block name="ActorSearchRequest" ref="http_//soap.amazon.com_ActorRequest" />
+  </DataModel>
+  <DataModel name="ActorSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="DirectorSearchRequest">
+    <Block name="DirectorSearchRequest" ref="http_//soap.amazon.com_DirectorRequest" />
+  </DataModel>
+  <DataModel name="DirectorSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="ExchangeSearchRequest">
+    <Block name="ExchangeSearchRequest" ref="http_//soap.amazon.com_ExchangeRequest" />
+  </DataModel>
+  <DataModel name="ExchangeSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ListingProductDetails" />
+  </DataModel>
+  <DataModel name="ManufacturerSearchRequest">
+    <Block name="ManufacturerSearchRequest" ref="http_//soap.amazon.com_ManufacturerRequest" />
+  </DataModel>
+  <DataModel name="ManufacturerSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="MarketplaceSearchRequest">
+    <Block name="MarketplaceSearchRequest" ref="http_//soap.amazon.com_MarketplaceRequest" />
+  </DataModel>
+  <DataModel name="MarketplaceSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_MarketplaceSearch" />
+  </DataModel>
+  <DataModel name="ListManiaSearchRequest">
+    <Block name="ListManiaSearchRequest" ref="http_//soap.amazon.com_ListManiaRequest" />
+  </DataModel>
+  <DataModel name="ListManiaSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="WishlistSearchRequest">
+    <Block name="WishlistSearchRequest" ref="http_//soap.amazon.com_WishlistRequest" />
+  </DataModel>
+  <DataModel name="WishlistSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="SellerProfileSearchRequest">
+    <Block name="SellerProfileSearchRequest" ref="http_//soap.amazon.com_SellerProfileRequest" />
+  </DataModel>
+  <DataModel name="SellerProfileSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_SellerProfile" />
+  </DataModel>
+  <DataModel name="SellerSearchRequest">
+    <Block name="SellerSearchRequest" ref="http_//soap.amazon.com_SellerRequest" />
+  </DataModel>
+  <DataModel name="SellerSearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_SellerSearch" />
+  </DataModel>
+  <DataModel name="SimilaritySearchRequest">
+    <Block name="SimilaritySearchRequest" ref="http_//soap.amazon.com_SimilarityRequest" />
+  </DataModel>
+  <DataModel name="SimilaritySearchResponse">
+    <Block name="return" ref="http_//soap.amazon.com_ProductInfo" />
+  </DataModel>
+  <DataModel name="GetShoppingCartRequest">
+    <Block name="GetShoppingCartRequest" ref="http_//soap.amazon.com_GetShoppingCartRequest" />
+  </DataModel>
+  <DataModel name="ClearShoppingCartRequest">
+    <Block name="ClearShoppingCartRequest" ref="http_//soap.amazon.com_ClearShoppingCartRequest" />
+  </DataModel>
+  <DataModel name="AddShoppingCartItemsRequest">
+    <Block name="AddShoppingCartItemsRequest" ref="http_//soap.amazon.com_AddShoppingCartItemsRequest" />
+  </DataModel>
+  <DataModel name="RemoveShoppingCartItemsRequest">
+    <Block name="RemoveShoppingCartItemsRequest" ref="http_//soap.amazon.com_RemoveShoppingCartItemsRequest" />
+  </DataModel>
+  <DataModel name="ModifyShoppingCartItemsRequest">
+    <Block name="ModifyShoppingCartItemsRequest" ref="http_//soap.amazon.com_ModifyShoppingCartItemsRequest" />
+  </DataModel>
+  <DataModel name="ShoppingCartResponse">
+    <Block name="ShoppingCart" ref="http_//soap.amazon.com_ShoppingCart" />
+  </DataModel>
+  <Test name="KeywordSearchRequestTest">
+    <StateModel ref="KeywordSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="KeywordSearchRequestStateModel">
+    <State name="initial">
+      <Action name="KeywordSearchRequestAction" type="output">
+        <DataModel ref="KeywordSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="KeywordSearchRequestTest">
+    <StateModel ref="KeywordSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="KeywordSearchRequestStateModel">
+    <State name="initial">
+      <Action name="KeywordSearchRequestAction" type="output">
+        <DataModel ref="KeywordSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="PowerSearchRequestTest">
+    <StateModel ref="PowerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="PowerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="PowerSearchRequestAction" type="output">
+        <DataModel ref="PowerSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="PowerSearchRequestTest">
+    <StateModel ref="PowerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="PowerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="PowerSearchRequestAction" type="output">
+        <DataModel ref="PowerSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeSearchRequestTest">
+    <StateModel ref="BrowseNodeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeSearchRequestAction" type="output">
+        <DataModel ref="BrowseNodeSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeSearchRequestTest">
+    <StateModel ref="BrowseNodeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeSearchRequestAction" type="output">
+        <DataModel ref="BrowseNodeSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AsinSearchRequestTest">
+    <StateModel ref="AsinSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AsinSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AsinSearchRequestAction" type="output">
+        <DataModel ref="AsinSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AsinSearchRequestTest">
+    <StateModel ref="AsinSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AsinSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AsinSearchRequestAction" type="output">
+        <DataModel ref="AsinSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BlendedSearchRequestTest">
+    <StateModel ref="BlendedSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BlendedSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BlendedSearchRequestAction" type="output">
+        <DataModel ref="BlendedSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BlendedSearchRequestTest">
+    <StateModel ref="BlendedSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BlendedSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BlendedSearchRequestAction" type="output">
+        <DataModel ref="BlendedSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="UpcSearchRequestTest">
+    <StateModel ref="UpcSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="UpcSearchRequestStateModel">
+    <State name="initial">
+      <Action name="UpcSearchRequestAction" type="output">
+        <DataModel ref="UpcSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="UpcSearchRequestTest">
+    <StateModel ref="UpcSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="UpcSearchRequestStateModel">
+    <State name="initial">
+      <Action name="UpcSearchRequestAction" type="output">
+        <DataModel ref="UpcSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthorSearchRequestTest">
+    <StateModel ref="AuthorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AuthorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AuthorSearchRequestAction" type="output">
+        <DataModel ref="AuthorSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthorSearchRequestTest">
+    <StateModel ref="AuthorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AuthorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AuthorSearchRequestAction" type="output">
+        <DataModel ref="AuthorSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ArtistSearchRequestTest">
+    <StateModel ref="ArtistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ArtistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ArtistSearchRequestAction" type="output">
+        <DataModel ref="ArtistSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ArtistSearchRequestTest">
+    <StateModel ref="ArtistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ArtistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ArtistSearchRequestAction" type="output">
+        <DataModel ref="ArtistSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ActorSearchRequestTest">
+    <StateModel ref="ActorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ActorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ActorSearchRequestAction" type="output">
+        <DataModel ref="ActorSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ActorSearchRequestTest">
+    <StateModel ref="ActorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ActorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ActorSearchRequestAction" type="output">
+        <DataModel ref="ActorSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ManufacturerSearchRequestTest">
+    <StateModel ref="ManufacturerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ManufacturerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ManufacturerSearchRequestAction" type="output">
+        <DataModel ref="ManufacturerSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ManufacturerSearchRequestTest">
+    <StateModel ref="ManufacturerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ManufacturerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ManufacturerSearchRequestAction" type="output">
+        <DataModel ref="ManufacturerSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DirectorSearchRequestTest">
+    <StateModel ref="DirectorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="DirectorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="DirectorSearchRequestAction" type="output">
+        <DataModel ref="DirectorSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DirectorSearchRequestTest">
+    <StateModel ref="DirectorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="DirectorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="DirectorSearchRequestAction" type="output">
+        <DataModel ref="DirectorSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListManiaSearchRequestTest">
+    <StateModel ref="ListManiaSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListManiaSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ListManiaSearchRequestAction" type="output">
+        <DataModel ref="ListManiaSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListManiaSearchRequestTest">
+    <StateModel ref="ListManiaSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListManiaSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ListManiaSearchRequestAction" type="output">
+        <DataModel ref="ListManiaSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="WishlistSearchRequestTest">
+    <StateModel ref="WishlistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="WishlistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="WishlistSearchRequestAction" type="output">
+        <DataModel ref="WishlistSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="WishlistSearchRequestTest">
+    <StateModel ref="WishlistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="WishlistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="WishlistSearchRequestAction" type="output">
+        <DataModel ref="WishlistSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ExchangeSearchRequestTest">
+    <StateModel ref="ExchangeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ExchangeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ExchangeSearchRequestAction" type="output">
+        <DataModel ref="ExchangeSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ExchangeSearchRequestTest">
+    <StateModel ref="ExchangeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ExchangeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ExchangeSearchRequestAction" type="output">
+        <DataModel ref="ExchangeSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MarketplaceSearchRequestTest">
+    <StateModel ref="MarketplaceSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MarketplaceSearchRequestStateModel">
+    <State name="initial">
+      <Action name="MarketplaceSearchRequestAction" type="output">
+        <DataModel ref="MarketplaceSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MarketplaceSearchRequestTest">
+    <StateModel ref="MarketplaceSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MarketplaceSearchRequestStateModel">
+    <State name="initial">
+      <Action name="MarketplaceSearchRequestAction" type="output">
+        <DataModel ref="MarketplaceSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerProfileSearchRequestTest">
+    <StateModel ref="SellerProfileSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerProfileSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerProfileSearchRequestAction" type="output">
+        <DataModel ref="SellerProfileSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerProfileSearchRequestTest">
+    <StateModel ref="SellerProfileSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerProfileSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerProfileSearchRequestAction" type="output">
+        <DataModel ref="SellerProfileSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerSearchRequestTest">
+    <StateModel ref="SellerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerSearchRequestAction" type="output">
+        <DataModel ref="SellerSearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerSearchRequestTest">
+    <StateModel ref="SellerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerSearchRequestAction" type="output">
+        <DataModel ref="SellerSearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilaritySearchRequestTest">
+    <StateModel ref="SimilaritySearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilaritySearchRequestStateModel">
+    <State name="initial">
+      <Action name="SimilaritySearchRequestAction" type="output">
+        <DataModel ref="SimilaritySearchRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilaritySearchRequestTest">
+    <StateModel ref="SimilaritySearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilaritySearchRequestStateModel">
+    <State name="initial">
+      <Action name="SimilaritySearchRequestAction" type="output">
+        <DataModel ref="SimilaritySearchResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetShoppingCartRequestTest">
+    <StateModel ref="GetShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="GetShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="GetShoppingCartRequestAction" type="output">
+        <DataModel ref="GetShoppingCartRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetShoppingCartRequestTest">
+    <StateModel ref="GetShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="GetShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="GetShoppingCartRequestAction" type="output">
+        <DataModel ref="ShoppingCartResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ClearShoppingCartRequestTest">
+    <StateModel ref="ClearShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ClearShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="ClearShoppingCartRequestAction" type="output">
+        <DataModel ref="ClearShoppingCartRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ClearShoppingCartRequestTest">
+    <StateModel ref="ClearShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ClearShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="ClearShoppingCartRequestAction" type="output">
+        <DataModel ref="ShoppingCartResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AddShoppingCartItemsRequestTest">
+    <StateModel ref="AddShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AddShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="AddShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="AddShoppingCartItemsRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AddShoppingCartItemsRequestTest">
+    <StateModel ref="AddShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AddShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="AddShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="ShoppingCartResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveShoppingCartItemsRequestTest">
+    <StateModel ref="RemoveShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RemoveShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="RemoveShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="RemoveShoppingCartItemsRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveShoppingCartItemsRequestTest">
+    <StateModel ref="RemoveShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RemoveShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="RemoveShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="ShoppingCartResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ModifyShoppingCartItemsRequestTest">
+    <StateModel ref="ModifyShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ModifyShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="ModifyShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="ModifyShoppingCartItemsRequest" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ModifyShoppingCartItemsRequestTest">
+    <StateModel ref="ModifyShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ModifyShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="ModifyShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="ShoppingCartResponse" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="KeywordSearchRequestTest">
+    <StateModel ref="KeywordSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="KeywordSearchRequestStateModel">
+    <State name="initial">
+      <Action name="KeywordSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="KeywordSearchRequestTest">
+    <StateModel ref="KeywordSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="KeywordSearchRequestStateModel">
+    <State name="initial">
+      <Action name="KeywordSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="PowerSearchRequestTest">
+    <StateModel ref="PowerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="PowerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="PowerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="PowerSearchRequestTest">
+    <StateModel ref="PowerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="PowerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="PowerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeSearchRequestTest">
+    <StateModel ref="BrowseNodeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BrowseNodeSearchRequestTest">
+    <StateModel ref="BrowseNodeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BrowseNodeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BrowseNodeSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AsinSearchRequestTest">
+    <StateModel ref="AsinSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AsinSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AsinSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AsinSearchRequestTest">
+    <StateModel ref="AsinSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AsinSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AsinSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BlendedSearchRequestTest">
+    <StateModel ref="BlendedSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BlendedSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BlendedSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="BlendedSearchRequestTest">
+    <StateModel ref="BlendedSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="BlendedSearchRequestStateModel">
+    <State name="initial">
+      <Action name="BlendedSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="UpcSearchRequestTest">
+    <StateModel ref="UpcSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="UpcSearchRequestStateModel">
+    <State name="initial">
+      <Action name="UpcSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="UpcSearchRequestTest">
+    <StateModel ref="UpcSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="UpcSearchRequestStateModel">
+    <State name="initial">
+      <Action name="UpcSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthorSearchRequestTest">
+    <StateModel ref="AuthorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AuthorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AuthorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthorSearchRequestTest">
+    <StateModel ref="AuthorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AuthorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="AuthorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ArtistSearchRequestTest">
+    <StateModel ref="ArtistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ArtistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ArtistSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ArtistSearchRequestTest">
+    <StateModel ref="ArtistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ArtistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ArtistSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ActorSearchRequestTest">
+    <StateModel ref="ActorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ActorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ActorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ActorSearchRequestTest">
+    <StateModel ref="ActorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ActorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ActorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ManufacturerSearchRequestTest">
+    <StateModel ref="ManufacturerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ManufacturerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ManufacturerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ManufacturerSearchRequestTest">
+    <StateModel ref="ManufacturerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ManufacturerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ManufacturerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DirectorSearchRequestTest">
+    <StateModel ref="DirectorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="DirectorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="DirectorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DirectorSearchRequestTest">
+    <StateModel ref="DirectorSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="DirectorSearchRequestStateModel">
+    <State name="initial">
+      <Action name="DirectorSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ExchangeSearchRequestTest">
+    <StateModel ref="ExchangeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ExchangeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ExchangeSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ExchangeSearchRequestTest">
+    <StateModel ref="ExchangeSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ExchangeSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ExchangeSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListManiaSearchRequestTest">
+    <StateModel ref="ListManiaSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListManiaSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ListManiaSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ListManiaSearchRequestTest">
+    <StateModel ref="ListManiaSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ListManiaSearchRequestStateModel">
+    <State name="initial">
+      <Action name="ListManiaSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="WishlistSearchRequestTest">
+    <StateModel ref="WishlistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="WishlistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="WishlistSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="WishlistSearchRequestTest">
+    <StateModel ref="WishlistSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="WishlistSearchRequestStateModel">
+    <State name="initial">
+      <Action name="WishlistSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerProfileSearchRequestTest">
+    <StateModel ref="SellerProfileSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerProfileSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerProfileSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerProfileSearchRequestTest">
+    <StateModel ref="SellerProfileSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerProfileSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerProfileSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerSearchRequestTest">
+    <StateModel ref="SellerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SellerSearchRequestTest">
+    <StateModel ref="SellerSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SellerSearchRequestStateModel">
+    <State name="initial">
+      <Action name="SellerSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MarketplaceSearchRequestTest">
+    <StateModel ref="MarketplaceSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MarketplaceSearchRequestStateModel">
+    <State name="initial">
+      <Action name="MarketplaceSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MarketplaceSearchRequestTest">
+    <StateModel ref="MarketplaceSearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="MarketplaceSearchRequestStateModel">
+    <State name="initial">
+      <Action name="MarketplaceSearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilaritySearchRequestTest">
+    <StateModel ref="SimilaritySearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilaritySearchRequestStateModel">
+    <State name="initial">
+      <Action name="SimilaritySearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SimilaritySearchRequestTest">
+    <StateModel ref="SimilaritySearchRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SimilaritySearchRequestStateModel">
+    <State name="initial">
+      <Action name="SimilaritySearchRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetShoppingCartRequestTest">
+    <StateModel ref="GetShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="GetShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="GetShoppingCartRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetShoppingCartRequestTest">
+    <StateModel ref="GetShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="GetShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="GetShoppingCartRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ClearShoppingCartRequestTest">
+    <StateModel ref="ClearShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ClearShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="ClearShoppingCartRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ClearShoppingCartRequestTest">
+    <StateModel ref="ClearShoppingCartRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ClearShoppingCartRequestStateModel">
+    <State name="initial">
+      <Action name="ClearShoppingCartRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AddShoppingCartItemsRequestTest">
+    <StateModel ref="AddShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AddShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="AddShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AddShoppingCartItemsRequestTest">
+    <StateModel ref="AddShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="AddShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="AddShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveShoppingCartItemsRequestTest">
+    <StateModel ref="RemoveShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RemoveShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="RemoveShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveShoppingCartItemsRequestTest">
+    <StateModel ref="RemoveShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RemoveShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="RemoveShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  
+  <Test name="ModifyShoppingCartItemsRequestTest">
+    <StateModel ref="ModifyShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  
+  <StateModel name="ModifyShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="ModifyShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.InputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+  
+  <Test name="ModifyShoppingCartItemsRequestTest">
+    <StateModel ref="ModifyShoppingCartItemsRequestStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  
+  <StateModel name="ModifyShoppingCartItemsRequestStateModel">
+    <State name="initial">
+      <Action name="ModifyShoppingCartItemsRequestAction" type="output">
+        <DataModel ref="System.Web.Services.Description.OutputBinding" />
+      </Action>
+    </State>
+  </StateModel>
+</Peach>

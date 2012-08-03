@@ -1,0 +1,1806 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+  <DataModel name="EmptyBlock" />
+  <DataModel name="SoapEnvelope">
+    <XmlElement ns=" http://schemas.xmlsoap.org/soap/envelope" name="Envelope" elementName="Envelope">
+      <XmlAttribute name="xmlns_soap" ns="http://www.w3.org/2000/xmlns/" attributeName="xmlns:soap" minOccurs="1" maxOccurs="1">
+        <String name="xmlns_soapValue" value="http://schemas.xmlsoap.org/soap/envelope" minOccurs="1" maxOccurs="1" />
+      </XmlAttribute>
+      <XmlAttribute name="xmlns_xsi" ns="http://www.w3.org/2000/xmlns/" attributeName="xmlns:xsi" minOccurs="1" maxOccurs="1">
+        <String name="xmlns_xsiValue" value="http://www.w3.org/2001/XMLSchema-instance" minOccurs="1" maxOccurs="1" />
+      </XmlAttribute>
+      <XmlAttribute name="xmlns_xsd" ns="http://www.w3.org/2000/xmlns" attributeName="xmlns:xsd" minOccurs="1" maxOccurs="1">
+        <String name="xmlns_xsdValue" value="http://www.w3.org/2001/XMLSchema" minOccurs="1" maxOccurs="1" />
+      </XmlAttribute>
+    </XmlElement>
+    <XmlElement ns="http://schemas.xmlsoap.org/soap/envelope" name="Header" elementName="Header" />
+    <XmlElement ns="http://schemas.xmlsoap.org/soap/envelope" name="Body" elementName="Body" />
+  </DataModel>
+  <DataModel name="Any" />
+  <Test name="SoapTestTeststdout">
+    <StateModel ref="SoapTestStateModel" />
+    <Publisher name="SoapTestPublisher" class="stdout.Stdout" />
+  </Test>
+  <StateModel name="SoapTestStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SoapTestAction" type="output">
+        <DataModel ref="SoapEnvelope" />
+      </Action>
+    </State>
+  </StateModel>
+  <DataModel name="_MAKKeyMode" />
+  <DataModel name="_MAKKeyMode">
+    <XmlElement ns="" name="string" elementName="string">
+      <String name="stringData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ConsumerType" />
+  <DataModel name="_ConsumerType">
+    <XmlElement ns="" name="string" elementName="string">
+      <String name="stringData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_PermissionAction" />
+  <DataModel name="_PermissionAction">
+    <XmlElement ns="" name="string" elementName="string">
+      <String name="stringData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MAKPublicKeyAlgorithm" />
+  <DataModel name="_MAKPublicKeyAlgorithm">
+    <XmlElement ns="" name="string" elementName="string">
+      <String name="stringData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_AttributeValue">
+    <XmlElement ns="" name="attribute" elementName="attribute">
+      <String name="_attributeData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="value" elementName="value">
+      <String name="_valueData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MAK">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_key-mode" ref="_MAKKeyMode" />
+    <XmlElement ns="" name="keyid" elementName="keyid">
+      <String name="_keyidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="subkeyid" elementName="subkeyid">
+      <String name="_subkeyidData" value="default" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement ns="" name="keyblock" elementName="keyblock">
+      <String name="_keyblockData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="location" elementName="location">
+      <String name="_locationData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_created" ref="dateTime" />
+    <XmlElement name="_attribute" ref="_AttributeValue" />
+  </DataModel>
+  <DataModel name="_MEKSeries">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="num-meks" elementName="num-meks">
+      <String name="_num-meksData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_created" ref="dateTime" />
+    <XmlElement name="_validity-duration" ref="dateTime" />
+    <XmlElement name="_end-of-life" ref="dateTime" />
+    <XmlElement ns="" name="parent-mak-uuid" elementName="parent-mak-uuid">
+      <String name="_parent-mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_attribute" ref="_AttributeValue" />
+  </DataModel>
+  <DataModel name="_MEK">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_created" ref="dateTime" />
+    <XmlElement name="_valid-after" ref="dateTime" />
+    <XmlElement name="_valid-before" ref="dateTime" />
+    <XmlElement ns="" name="parent-mak-uuid" elementName="parent-mak-uuid">
+      <String name="_parent-mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="parent-mek-series-uuid" elementName="parent-mek-series-uuid">
+      <String name="_parent-mek-series-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_attribute" ref="_AttributeValue" />
+  </DataModel>
+  <DataModel name="_MSD">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="mime-type" elementName="mime-type">
+      <String name="_mime-typeData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="parent-mak-uuid" elementName="parent-mak-uuid">
+      <String name="_parent-mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="unencrypted-size" elementName="unencrypted-size">
+      <String name="_unencrypted-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="encrypted-to-mak" elementName="encrypted-to-mak">
+      <String name="_encrypted-to-makData" value="false" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_attribute" ref="_AttributeValue" />
+  </DataModel>
+  <DataModel name="_PermissionRule">
+    <XmlElement name="_action" ref="_PermissionAction" />
+  </DataModel>
+  <DataModel name="_Consumer">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_consumer-type" ref="_ConsumerType" />
+    <XmlElement name="_permission" ref="_PermissionRule" />
+    <XmlElement name="_attribute" ref="_AttributeValue" />
+  </DataModel>
+  <DataModel name="_AuthenticateCookie">
+    <XmlElement ns="" name="cookie" elementName="cookie">
+      <String name="_cookieData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_AuthenticateCookieResponse" />
+  <DataModel name="_AuthenticatePassphrase">
+    <XmlElement ns="" name="username" elementName="username">
+      <String name="_usernameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="passphrase" elementName="passphrase">
+      <String name="_passphraseData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_AuthenticatePassphraseResponse" />
+  <DataModel name="_AuthenticatePublicKeyChallenge">
+    <XmlElement ns="" name="cookie" elementName="cookie">
+      <String name="_cookieData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="signature" elementName="signature">
+      <String name="_signatureData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_AuthenticatePublicKeyChallengeResponse" />
+  <DataModel name="_GetPublicKeyAuthenticationChallenge">
+    <XmlElement ns="" name="username" elementName="username">
+      <String name="_usernameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_GetPublicKeyAuthenticationChallengeResponse">
+    <XmlElement ns="" name="cookie" elementName="cookie">
+      <String name="_cookieData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_GetAuthenticationCookie" />
+  <DataModel name="_GetAuthenticationCookieResponse">
+    <XmlElement ns="" name="cookie" elementName="cookie">
+      <String name="_cookieData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_GetCapabilities" />
+  <DataModel name="_GetCapabilitiesResponse">
+    <XmlElement name="_now" ref="dateTime" />
+    <XmlElement ns="" name="password-auth" elementName="password-auth">
+      <String name="_password-authData" value="false" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_GetVersion" />
+  <DataModel name="_GetVersionResponse">
+    <XmlElement ns="" name="version" elementName="version">
+      <String name="_versionData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_CreateMAK">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_CreateMAKResponse">
+    <XmlElement name="_mak" ref="_MAK" />
+  </DataModel>
+  <DataModel name="_CreateMAKCustom">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="size" elementName="size">
+      <String name="_sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement name="_algorithm" ref="_MAKPublicKeyAlgorithm" />
+  </DataModel>
+  <DataModel name="_CreateMAKCustomResponse">
+    <XmlElement name="_mak" ref="_MAK" />
+  </DataModel>
+  <DataModel name="_ImportMAK">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="keyblock" elementName="keyblock">
+      <String name="_keyblockData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ImportMAKResponse">
+    <XmlElement name="_mak" ref="_MAK" />
+  </DataModel>
+  <DataModel name="_CreateMEKSeries">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="mak-uuid" elementName="mak-uuid">
+      <String name="_mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_CreateMEKSeriesResponse">
+    <XmlElement name="_mek-series" ref="_MEKSeries" />
+  </DataModel>
+  <DataModel name="_CreateMSD">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="mak-uuid" elementName="mak-uuid">
+      <String name="_mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_CreateMSDResponse">
+    <XmlElement name="_msd" ref="_MSD" />
+  </DataModel>
+  <DataModel name="_ImportMSD">
+    <XmlElement ns="" name="name" elementName="name">
+      <String name="_nameData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="mak-uuid" elementName="mak-uuid">
+      <String name="_mak-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="unencrypted-size" elementName="unencrypted-size">
+      <String name="_unencrypted-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="encrypted-to-mak" elementName="encrypted-to-mak">
+      <String name="_encrypted-to-makData" value="false" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ImportMSDResponse">
+    <XmlElement name="_msd" ref="_MSD" />
+  </DataModel>
+  <DataModel name="_DecodeESK">
+    <XmlElement ns="" name="esks" elementName="esks">
+      <Blob name="_esks" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="keyid" elementName="keyid">
+      <String name="_keyidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_DecodeESKResponse">
+    <XmlElement ns="" name="session-key" elementName="session-key">
+      <Blob name="_session-key" valuetype="hex" />
+    </XmlElement>
+    <XmlElement name="_mak" ref="_MAK" />
+    <XmlElement ns="" name="decryption-subkey-id" elementName="decryption-subkey-id">
+      <String name="_decryption-subkey-idData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_SaveMAKChanges">
+    <XmlElement name="_mak" ref="_MAK" />
+  </DataModel>
+  <DataModel name="_SaveMAKChangesResponse" />
+  <DataModel name="_RemoveMAK">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_RemoveMAKResponse" />
+  <DataModel name="_CreateMEK">
+    <XmlElement ns="" name="mek-series-uuid" elementName="mek-series-uuid">
+      <String name="_mek-series-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_CreateMEKResponse">
+    <XmlElement name="_mek" ref="_MEK" />
+  </DataModel>
+  <DataModel name="_ImportMEK">
+    <XmlElement ns="" name="mek-series-uuid" elementName="mek-series-uuid">
+      <String name="_mek-series-uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="unencrypted-size" elementName="unencrypted-size">
+      <String name="_unencrypted-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ImportMEKResponse">
+    <XmlElement name="_mek" ref="_MEK" />
+  </DataModel>
+  <DataModel name="_SaveMEKSeriesChanges">
+    <XmlElement name="_mek-series" ref="_MEKSeries" />
+  </DataModel>
+  <DataModel name="_SaveMEKSeriesChangesResponse" />
+  <DataModel name="_RemoveMEKSeries">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_RemoveMEKSeriesResponse" />
+  <DataModel name="_GetMEKData">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_GetMEKDataResponse">
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="encrypted-to-mak" elementName="encrypted-to-mak">
+      <String name="_encrypted-to-makData" value="false" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_SaveMEKData">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="original-data-size" elementName="original-data-size">
+      <String name="_original-data-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+    <XmlElement ns="" name="new-data-size" elementName="new-data-size">
+      <String name="_new-data-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_SaveMEKDataResponse" />
+  <DataModel name="_SaveMEKChanges">
+    <XmlElement name="_mek" ref="_MEK" />
+  </DataModel>
+  <DataModel name="_SaveMEKChangesResponse" />
+  <DataModel name="_ResizeMEK">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="new-data-size" elementName="new-data-size">
+      <String name="_new-data-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ResizeMEKResponse">
+    <XmlElement ns="" name="data" elementName="data">
+      <Blob name="_data" valuetype="hex" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_SaveMSDChanges">
+    <XmlElement name="_msd" ref="_MSD" />
+  </DataModel>
+  <DataModel name="_SaveMSDChangesResponse" />
+  <DataModel name="_RemoveMSD">
+    <XmlElement ns="" name="uuid" elementName="uuid">
+      <String name="_uuidData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_RemoveMSDResponse" />
+  <DataModel name="_SaveConsumerChanges">
+    <XmlElement name="_consumer" ref="_Consumer" />
+  </DataModel>
+  <DataModel name="_SaveConsumerChangesResponse" />
+  <DataModel name="_MAKSearch">
+    <XmlElement ns="" name="filter" elementName="filter">
+      <String name="_filterData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-size" elementName="page-size">
+      <String name="_page-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-number" elementName="page-number">
+      <String name="_page-numberData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MAKSearchResponse">
+    <XmlElement ns="" name="approx-num-responses" elementName="approx-num-responses">
+      <String name="_approx-num-responsesData" value="41" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement name="_mak" ref="_MAK" />
+  </DataModel>
+  <DataModel name="_MEKSeriesSearch">
+    <XmlElement ns="" name="filter" elementName="filter">
+      <String name="_filterData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-size" elementName="page-size">
+      <String name="_page-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-number" elementName="page-number">
+      <String name="_page-numberData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MEKSeriesSearchResponse">
+    <XmlElement ns="" name="approx-num-responses" elementName="approx-num-responses">
+      <String name="_approx-num-responsesData" value="41" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement name="_mek-series" ref="_MEKSeries" />
+  </DataModel>
+  <DataModel name="_MEKSearch">
+    <XmlElement ns="" name="filter" elementName="filter">
+      <String name="_filterData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-size" elementName="page-size">
+      <String name="_page-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-number" elementName="page-number">
+      <String name="_page-numberData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MEKSearchResponse">
+    <XmlElement ns="" name="approx-num-responses" elementName="approx-num-responses">
+      <String name="_approx-num-responsesData" value="41" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement name="_mek" ref="_MEK" />
+  </DataModel>
+  <DataModel name="_MSDSearch">
+    <XmlElement ns="" name="filter" elementName="filter">
+      <String name="_filterData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-size" elementName="page-size">
+      <String name="_page-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-number" elementName="page-number">
+      <String name="_page-numberData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_MSDSearchResponse">
+    <XmlElement ns="" name="approx-num-responses" elementName="approx-num-responses">
+      <String name="_approx-num-responsesData" value="41" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement name="_msd" ref="_MSD" />
+  </DataModel>
+  <DataModel name="_ConsumerSearch">
+    <XmlElement ns="" name="filter" elementName="filter">
+      <String name="_filterData" value="default" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-size" elementName="page-size">
+      <String name="_page-sizeData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+    <XmlElement ns="" name="page-number" elementName="page-number">
+      <String name="_page-numberData" value="41" minOccurs="1" maxOccurs="1" />
+    </XmlElement>
+  </DataModel>
+  <DataModel name="_ConsumerSearchResponse">
+    <XmlElement ns="" name="approx-num-responses" elementName="approx-num-responses">
+      <String name="_approx-num-responsesData" value="41" minOccurs="0" maxOccurs="0" />
+    </XmlElement>
+    <XmlElement name="_consumer" ref="_Consumer" />
+  </DataModel>
+  <DataModel name="AuthenticateCookie">
+    <XmlElement name="parameters" ref="_AuthenticateCookie" />
+  </DataModel>
+  <DataModel name="AuthenticateCookieResponse">
+    <XmlElement name="parameters" ref="_AuthenticateCookieResponse" />
+  </DataModel>
+  <DataModel name="AuthenticatePassphrase">
+    <XmlElement name="parameters" ref="_AuthenticatePassphrase" />
+  </DataModel>
+  <DataModel name="AuthenticatePassphraseResponse">
+    <XmlElement name="parameters" ref="_AuthenticatePassphraseResponse" />
+  </DataModel>
+  <DataModel name="AuthenticatePublicKeyChallenge">
+    <XmlElement name="parameters" ref="_AuthenticatePublicKeyChallenge" />
+  </DataModel>
+  <DataModel name="AuthenticatePublicKeyChallengeResponse">
+    <XmlElement name="parameters" ref="_AuthenticatePublicKeyChallengeResponse" />
+  </DataModel>
+  <DataModel name="GetPublicKeyAuthenticationChallengeRequest">
+    <XmlElement name="parameters" ref="_GetPublicKeyAuthenticationChallenge" />
+  </DataModel>
+  <DataModel name="GetPublicKeyAuthenticationChallengeResponse">
+    <XmlElement name="parameters" ref="_GetPublicKeyAuthenticationChallengeResponse" />
+  </DataModel>
+  <DataModel name="GetAuthenticationCookieRequest">
+    <XmlElement name="parameters" ref="_GetAuthenticationCookie" />
+  </DataModel>
+  <DataModel name="GetAuthenticationCookieResponse">
+    <XmlElement name="parameters" ref="_GetAuthenticationCookieResponse" />
+  </DataModel>
+  <DataModel name="GetCapabilities">
+    <XmlElement name="parameters" ref="_GetCapabilities" />
+  </DataModel>
+  <DataModel name="GetCapabilitiesResponse">
+    <XmlElement name="parameters" ref="_GetCapabilitiesResponse" />
+  </DataModel>
+  <DataModel name="GetVersionRequest">
+    <XmlElement name="parameters" ref="_GetVersion" />
+  </DataModel>
+  <DataModel name="GetVersionResponse">
+    <XmlElement name="parameters" ref="_GetVersionResponse" />
+  </DataModel>
+  <DataModel name="CreateMAK">
+    <XmlElement name="parameters" ref="_CreateMAK" />
+  </DataModel>
+  <DataModel name="CreateMAKResponse">
+    <XmlElement name="parameters" ref="_CreateMAKResponse" />
+  </DataModel>
+  <DataModel name="CreateMAKCustom">
+    <XmlElement name="parameters" ref="_CreateMAKCustom" />
+  </DataModel>
+  <DataModel name="CreateMAKCustomResponse">
+    <XmlElement name="parameters" ref="_CreateMAKCustomResponse" />
+  </DataModel>
+  <DataModel name="ImportMAK">
+    <XmlElement name="parameters" ref="_ImportMAK" />
+  </DataModel>
+  <DataModel name="ImportMAKResponse">
+    <XmlElement name="parameters" ref="_ImportMAKResponse" />
+  </DataModel>
+  <DataModel name="CreateMEKSeries">
+    <XmlElement name="parameters" ref="_CreateMEKSeries" />
+  </DataModel>
+  <DataModel name="CreateMEKSeriesResponse">
+    <XmlElement name="parameters" ref="_CreateMEKSeriesResponse" />
+  </DataModel>
+  <DataModel name="CreateMSD">
+    <XmlElement name="parameters" ref="_CreateMSD" />
+  </DataModel>
+  <DataModel name="CreateMSDResponse">
+    <XmlElement name="parameters" ref="_CreateMSDResponse" />
+  </DataModel>
+  <DataModel name="ImportMSD">
+    <XmlElement name="parameters" ref="_ImportMSD" />
+  </DataModel>
+  <DataModel name="ImportMSDResponse">
+    <XmlElement name="parameters" ref="_ImportMSDResponse" />
+  </DataModel>
+  <DataModel name="DecodeESK">
+    <XmlElement name="parameters" ref="_DecodeESK" />
+  </DataModel>
+  <DataModel name="DecodeESKResponse">
+    <XmlElement name="parameters" ref="_DecodeESKResponse" />
+  </DataModel>
+  <DataModel name="SaveMAKChanges">
+    <XmlElement name="parameters" ref="_SaveMAKChanges" />
+  </DataModel>
+  <DataModel name="SaveMAKChangesResponse">
+    <XmlElement name="parameters" ref="_SaveMAKChangesResponse" />
+  </DataModel>
+  <DataModel name="RemoveMAK">
+    <XmlElement name="parameters" ref="_RemoveMAK" />
+  </DataModel>
+  <DataModel name="RemoveMAKResponse">
+    <XmlElement name="parameters" ref="_RemoveMAKResponse" />
+  </DataModel>
+  <DataModel name="CreateMEK">
+    <XmlElement name="parameters" ref="_CreateMEK" />
+  </DataModel>
+  <DataModel name="CreateMEKResponse">
+    <XmlElement name="parameters" ref="_CreateMEKResponse" />
+  </DataModel>
+  <DataModel name="ImportMEK">
+    <XmlElement name="parameters" ref="_ImportMEK" />
+  </DataModel>
+  <DataModel name="ImportMEKResponse">
+    <XmlElement name="parameters" ref="_ImportMEKResponse" />
+  </DataModel>
+  <DataModel name="SaveMEKSeriesChanges">
+    <XmlElement name="parameters" ref="_SaveMEKSeriesChanges" />
+  </DataModel>
+  <DataModel name="SaveMEKSeriesChangesResponse">
+    <XmlElement name="parameters" ref="_SaveMEKSeriesChangesResponse" />
+  </DataModel>
+  <DataModel name="RemoveMEKSeries">
+    <XmlElement name="parameters" ref="_RemoveMEKSeries" />
+  </DataModel>
+  <DataModel name="RemoveMEKSeriesResponse">
+    <XmlElement name="parameters" ref="_RemoveMEKSeriesResponse" />
+  </DataModel>
+  <DataModel name="GetMEKData">
+    <XmlElement name="parameters" ref="_GetMEKData" />
+  </DataModel>
+  <DataModel name="GetMEKDataResponse">
+    <XmlElement name="parameters" ref="_GetMEKDataResponse" />
+  </DataModel>
+  <DataModel name="SaveMEKData">
+    <XmlElement name="parameters" ref="_SaveMEKData" />
+  </DataModel>
+  <DataModel name="SaveMEKDataResponse">
+    <XmlElement name="parameters" ref="_SaveMEKDataResponse" />
+  </DataModel>
+  <DataModel name="SaveMEKChanges">
+    <XmlElement name="parameters" ref="_SaveMEKChanges" />
+  </DataModel>
+  <DataModel name="SaveMEKChangesResponse">
+    <XmlElement name="parameters" ref="_SaveMEKChangesResponse" />
+  </DataModel>
+  <DataModel name="ResizeMEK">
+    <XmlElement name="parameters" ref="_ResizeMEK" />
+  </DataModel>
+  <DataModel name="ResizeMEKResponse">
+    <XmlElement name="parameters" ref="_ResizeMEKResponse" />
+  </DataModel>
+  <DataModel name="SaveMSDChanges">
+    <XmlElement name="parameters" ref="_SaveMSDChanges" />
+  </DataModel>
+  <DataModel name="SaveMSDChangesResponse">
+    <XmlElement name="parameters" ref="_SaveMSDChangesResponse" />
+  </DataModel>
+  <DataModel name="RemoveMSD">
+    <XmlElement name="parameters" ref="_RemoveMSD" />
+  </DataModel>
+  <DataModel name="RemoveMSDResponse">
+    <XmlElement name="parameters" ref="_RemoveMSDResponse" />
+  </DataModel>
+  <DataModel name="SaveConsumerChanges">
+    <XmlElement name="parameters" ref="_SaveConsumerChanges" />
+  </DataModel>
+  <DataModel name="SaveConsumerChangesResponse">
+    <XmlElement name="parameters" ref="_SaveConsumerChangesResponse" />
+  </DataModel>
+  <DataModel name="MAKSearch">
+    <XmlElement name="parameters" ref="_MAKSearch" />
+  </DataModel>
+  <DataModel name="MAKSearchResponse">
+    <XmlElement name="parameters" ref="_MAKSearchResponse" />
+  </DataModel>
+  <DataModel name="MEKSeriesSearch">
+    <XmlElement name="parameters" ref="_MEKSeriesSearch" />
+  </DataModel>
+  <DataModel name="MEKSeriesSearchResponse">
+    <XmlElement name="parameters" ref="_MEKSeriesSearchResponse" />
+  </DataModel>
+  <DataModel name="MEKSearch">
+    <XmlElement name="parameters" ref="_MEKSearch" />
+  </DataModel>
+  <DataModel name="MEKSearchResponse">
+    <XmlElement name="parameters" ref="_MEKSearchResponse" />
+  </DataModel>
+  <DataModel name="MSDSearch">
+    <XmlElement name="parameters" ref="_MSDSearch" />
+  </DataModel>
+  <DataModel name="MSDSearchResponse">
+    <XmlElement name="parameters" ref="_MSDSearchResponse" />
+  </DataModel>
+  <DataModel name="ConsumerSearch">
+    <XmlElement name="parameters" ref="_ConsumerSearch" />
+  </DataModel>
+  <DataModel name="ConsumerSearchResponse">
+    <XmlElement name="parameters" ref="_ConsumerSearchResponse" />
+  </DataModel>
+  <Test name="AuthenticateCookieInputTestSoap">
+    <StateModel ref="AuthenticateCookieInputStateModel" />
+    <Publisher name="AuthenticateCookieInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticateCookieSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticateCookie" />
+  </DataModel>
+  <StateModel name="AuthenticateCookieInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticateCookieInputAction" type="output">
+        <DataModel ref="AuthenticateCookieSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthenticateCookieOutputTestSoap">
+    <StateModel ref="AuthenticateCookieOutputStateModel" />
+    <Publisher name="AuthenticateCookieOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticateCookieResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticateCookieResponse" />
+  </DataModel>
+  <StateModel name="AuthenticateCookieOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticateCookieOutputAction" type="output">
+        <DataModel ref="AuthenticateCookieResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthenticatePassphraseInputTestSoap">
+    <StateModel ref="AuthenticatePassphraseInputStateModel" />
+    <Publisher name="AuthenticatePassphraseInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticatePassphraseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticatePassphrase" />
+  </DataModel>
+  <StateModel name="AuthenticatePassphraseInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticatePassphraseInputAction" type="output">
+        <DataModel ref="AuthenticatePassphraseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthenticatePassphraseOutputTestSoap">
+    <StateModel ref="AuthenticatePassphraseOutputStateModel" />
+    <Publisher name="AuthenticatePassphraseOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticatePassphraseResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticatePassphraseResponse" />
+  </DataModel>
+  <StateModel name="AuthenticatePassphraseOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticatePassphraseOutputAction" type="output">
+        <DataModel ref="AuthenticatePassphraseResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthenticatePublicKeyChallengeInputTestSoap">
+    <StateModel ref="AuthenticatePublicKeyChallengeInputStateModel" />
+    <Publisher name="AuthenticatePublicKeyChallengeInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticatePublicKeyChallengeSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticatePublicKeyChallenge" />
+  </DataModel>
+  <StateModel name="AuthenticatePublicKeyChallengeInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticatePublicKeyChallengeInputAction" type="output">
+        <DataModel ref="AuthenticatePublicKeyChallengeSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="AuthenticatePublicKeyChallengeOutputTestSoap">
+    <StateModel ref="AuthenticatePublicKeyChallengeOutputStateModel" />
+    <Publisher name="AuthenticatePublicKeyChallengeOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="AuthenticatePublicKeyChallengeResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="AuthenticatePublicKeyChallengeResponse" />
+  </DataModel>
+  <StateModel name="AuthenticatePublicKeyChallengeOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="AuthenticatePublicKeyChallengeOutputAction" type="output">
+        <DataModel ref="AuthenticatePublicKeyChallengeResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetPublicKeyAuthenticationChallengeInputTestSoap">
+    <StateModel ref="GetPublicKeyAuthenticationChallengeInputStateModel" />
+    <Publisher name="GetPublicKeyAuthenticationChallengeInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetPublicKeyAuthenticationChallengeRequestSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetPublicKeyAuthenticationChallengeRequest" />
+  </DataModel>
+  <StateModel name="GetPublicKeyAuthenticationChallengeInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetPublicKeyAuthenticationChallengeInputAction" type="output">
+        <DataModel ref="GetPublicKeyAuthenticationChallengeRequestSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetPublicKeyAuthenticationChallengeOutputTestSoap">
+    <StateModel ref="GetPublicKeyAuthenticationChallengeOutputStateModel" />
+    <Publisher name="GetPublicKeyAuthenticationChallengeOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetPublicKeyAuthenticationChallengeResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetPublicKeyAuthenticationChallengeResponse" />
+  </DataModel>
+  <StateModel name="GetPublicKeyAuthenticationChallengeOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetPublicKeyAuthenticationChallengeOutputAction" type="output">
+        <DataModel ref="GetPublicKeyAuthenticationChallengeResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetAuthenticationCookieInputTestSoap">
+    <StateModel ref="GetAuthenticationCookieInputStateModel" />
+    <Publisher name="GetAuthenticationCookieInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetAuthenticationCookieRequestSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetAuthenticationCookieRequest" />
+  </DataModel>
+  <StateModel name="GetAuthenticationCookieInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetAuthenticationCookieInputAction" type="output">
+        <DataModel ref="GetAuthenticationCookieRequestSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetAuthenticationCookieOutputTestSoap">
+    <StateModel ref="GetAuthenticationCookieOutputStateModel" />
+    <Publisher name="GetAuthenticationCookieOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetAuthenticationCookieResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetAuthenticationCookieResponse" />
+  </DataModel>
+  <StateModel name="GetAuthenticationCookieOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetAuthenticationCookieOutputAction" type="output">
+        <DataModel ref="GetAuthenticationCookieResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetCapabilitiesInputTestSoap">
+    <StateModel ref="GetCapabilitiesInputStateModel" />
+    <Publisher name="GetCapabilitiesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetCapabilitiesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetCapabilities" />
+  </DataModel>
+  <StateModel name="GetCapabilitiesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetCapabilitiesInputAction" type="output">
+        <DataModel ref="GetCapabilitiesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetCapabilitiesOutputTestSoap">
+    <StateModel ref="GetCapabilitiesOutputStateModel" />
+    <Publisher name="GetCapabilitiesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetCapabilitiesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetCapabilitiesResponse" />
+  </DataModel>
+  <StateModel name="GetCapabilitiesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetCapabilitiesOutputAction" type="output">
+        <DataModel ref="GetCapabilitiesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetVersionInputTestSoap">
+    <StateModel ref="GetVersionInputStateModel" />
+    <Publisher name="GetVersionInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetVersionRequestSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetVersionRequest" />
+  </DataModel>
+  <StateModel name="GetVersionInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetVersionInputAction" type="output">
+        <DataModel ref="GetVersionRequestSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetVersionOutputTestSoap">
+    <StateModel ref="GetVersionOutputStateModel" />
+    <Publisher name="GetVersionOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetVersionResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetVersionResponse" />
+  </DataModel>
+  <StateModel name="GetVersionOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetVersionOutputAction" type="output">
+        <DataModel ref="GetVersionResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMAKInputTestSoap">
+    <StateModel ref="CreateMAKInputStateModel" />
+    <Publisher name="CreateMAKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMAKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMAK" />
+  </DataModel>
+  <StateModel name="CreateMAKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMAKInputAction" type="output">
+        <DataModel ref="CreateMAKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMAKOutputTestSoap">
+    <StateModel ref="CreateMAKOutputStateModel" />
+    <Publisher name="CreateMAKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMAKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMAKResponse" />
+  </DataModel>
+  <StateModel name="CreateMAKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMAKOutputAction" type="output">
+        <DataModel ref="CreateMAKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMAKCustomInputTestSoap">
+    <StateModel ref="CreateMAKCustomInputStateModel" />
+    <Publisher name="CreateMAKCustomInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMAKCustomSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMAKCustom" />
+  </DataModel>
+  <StateModel name="CreateMAKCustomInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMAKCustomInputAction" type="output">
+        <DataModel ref="CreateMAKCustomSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMAKCustomOutputTestSoap">
+    <StateModel ref="CreateMAKCustomOutputStateModel" />
+    <Publisher name="CreateMAKCustomOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMAKCustomResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMAKCustomResponse" />
+  </DataModel>
+  <StateModel name="CreateMAKCustomOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMAKCustomOutputAction" type="output">
+        <DataModel ref="CreateMAKCustomResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMAKInputTestSoap">
+    <StateModel ref="ImportMAKInputStateModel" />
+    <Publisher name="ImportMAKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMAKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMAK" />
+  </DataModel>
+  <StateModel name="ImportMAKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMAKInputAction" type="output">
+        <DataModel ref="ImportMAKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMAKOutputTestSoap">
+    <StateModel ref="ImportMAKOutputStateModel" />
+    <Publisher name="ImportMAKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMAKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMAKResponse" />
+  </DataModel>
+  <StateModel name="ImportMAKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMAKOutputAction" type="output">
+        <DataModel ref="ImportMAKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMEKSeriesInputTestSoap">
+    <StateModel ref="CreateMEKSeriesInputStateModel" />
+    <Publisher name="CreateMEKSeriesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMEKSeriesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMEKSeries" />
+  </DataModel>
+  <StateModel name="CreateMEKSeriesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMEKSeriesInputAction" type="output">
+        <DataModel ref="CreateMEKSeriesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMEKSeriesOutputTestSoap">
+    <StateModel ref="CreateMEKSeriesOutputStateModel" />
+    <Publisher name="CreateMEKSeriesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMEKSeriesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMEKSeriesResponse" />
+  </DataModel>
+  <StateModel name="CreateMEKSeriesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMEKSeriesOutputAction" type="output">
+        <DataModel ref="CreateMEKSeriesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMSDInputTestSoap">
+    <StateModel ref="CreateMSDInputStateModel" />
+    <Publisher name="CreateMSDInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMSDSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMSD" />
+  </DataModel>
+  <StateModel name="CreateMSDInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMSDInputAction" type="output">
+        <DataModel ref="CreateMSDSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMSDOutputTestSoap">
+    <StateModel ref="CreateMSDOutputStateModel" />
+    <Publisher name="CreateMSDOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMSDResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMSDResponse" />
+  </DataModel>
+  <StateModel name="CreateMSDOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMSDOutputAction" type="output">
+        <DataModel ref="CreateMSDResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMSDInputTestSoap">
+    <StateModel ref="ImportMSDInputStateModel" />
+    <Publisher name="ImportMSDInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMSDSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMSD" />
+  </DataModel>
+  <StateModel name="ImportMSDInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMSDInputAction" type="output">
+        <DataModel ref="ImportMSDSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMSDOutputTestSoap">
+    <StateModel ref="ImportMSDOutputStateModel" />
+    <Publisher name="ImportMSDOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMSDResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMSDResponse" />
+  </DataModel>
+  <StateModel name="ImportMSDOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMSDOutputAction" type="output">
+        <DataModel ref="ImportMSDResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DecodeESKInputTestSoap">
+    <StateModel ref="DecodeESKInputStateModel" />
+    <Publisher name="DecodeESKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="DecodeESKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="DecodeESK" />
+  </DataModel>
+  <StateModel name="DecodeESKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="DecodeESKInputAction" type="output">
+        <DataModel ref="DecodeESKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="DecodeESKOutputTestSoap">
+    <StateModel ref="DecodeESKOutputStateModel" />
+    <Publisher name="DecodeESKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="DecodeESKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="DecodeESKResponse" />
+  </DataModel>
+  <StateModel name="DecodeESKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="DecodeESKOutputAction" type="output">
+        <DataModel ref="DecodeESKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMAKChangesInputTestSoap">
+    <StateModel ref="SaveMAKChangesInputStateModel" />
+    <Publisher name="SaveMAKChangesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMAKChangesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMAKChanges" />
+  </DataModel>
+  <StateModel name="SaveMAKChangesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMAKChangesInputAction" type="output">
+        <DataModel ref="SaveMAKChangesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMAKChangesOutputTestSoap">
+    <StateModel ref="SaveMAKChangesOutputStateModel" />
+    <Publisher name="SaveMAKChangesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMAKChangesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMAKChangesResponse" />
+  </DataModel>
+  <StateModel name="SaveMAKChangesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMAKChangesOutputAction" type="output">
+        <DataModel ref="SaveMAKChangesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMAKInputTestSoap">
+    <StateModel ref="RemoveMAKInputStateModel" />
+    <Publisher name="RemoveMAKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMAKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMAK" />
+  </DataModel>
+  <StateModel name="RemoveMAKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMAKInputAction" type="output">
+        <DataModel ref="RemoveMAKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMAKOutputTestSoap">
+    <StateModel ref="RemoveMAKOutputStateModel" />
+    <Publisher name="RemoveMAKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMAKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMAKResponse" />
+  </DataModel>
+  <StateModel name="RemoveMAKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMAKOutputAction" type="output">
+        <DataModel ref="RemoveMAKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMEKInputTestSoap">
+    <StateModel ref="CreateMEKInputStateModel" />
+    <Publisher name="CreateMEKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMEKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMEK" />
+  </DataModel>
+  <StateModel name="CreateMEKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMEKInputAction" type="output">
+        <DataModel ref="CreateMEKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="CreateMEKOutputTestSoap">
+    <StateModel ref="CreateMEKOutputStateModel" />
+    <Publisher name="CreateMEKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="CreateMEKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="CreateMEKResponse" />
+  </DataModel>
+  <StateModel name="CreateMEKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="CreateMEKOutputAction" type="output">
+        <DataModel ref="CreateMEKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMEKInputTestSoap">
+    <StateModel ref="ImportMEKInputStateModel" />
+    <Publisher name="ImportMEKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMEKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMEK" />
+  </DataModel>
+  <StateModel name="ImportMEKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMEKInputAction" type="output">
+        <DataModel ref="ImportMEKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ImportMEKOutputTestSoap">
+    <StateModel ref="ImportMEKOutputStateModel" />
+    <Publisher name="ImportMEKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="ImportMEKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ImportMEKResponse" />
+  </DataModel>
+  <StateModel name="ImportMEKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ImportMEKOutputAction" type="output">
+        <DataModel ref="ImportMEKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKSeriesChangesInputTestSoap">
+    <StateModel ref="SaveMEKSeriesChangesInputStateModel" />
+    <Publisher name="SaveMEKSeriesChangesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKSeriesChangesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKSeriesChanges" />
+  </DataModel>
+  <StateModel name="SaveMEKSeriesChangesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKSeriesChangesInputAction" type="output">
+        <DataModel ref="SaveMEKSeriesChangesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKSeriesChangesOutputTestSoap">
+    <StateModel ref="SaveMEKSeriesChangesOutputStateModel" />
+    <Publisher name="SaveMEKSeriesChangesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKSeriesChangesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKSeriesChangesResponse" />
+  </DataModel>
+  <StateModel name="SaveMEKSeriesChangesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKSeriesChangesOutputAction" type="output">
+        <DataModel ref="SaveMEKSeriesChangesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMEKSeriesInputTestSoap">
+    <StateModel ref="RemoveMEKSeriesInputStateModel" />
+    <Publisher name="RemoveMEKSeriesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMEKSeriesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMEKSeries" />
+  </DataModel>
+  <StateModel name="RemoveMEKSeriesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMEKSeriesInputAction" type="output">
+        <DataModel ref="RemoveMEKSeriesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMEKSeriesOutputTestSoap">
+    <StateModel ref="RemoveMEKSeriesOutputStateModel" />
+    <Publisher name="RemoveMEKSeriesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMEKSeriesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMEKSeriesResponse" />
+  </DataModel>
+  <StateModel name="RemoveMEKSeriesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMEKSeriesOutputAction" type="output">
+        <DataModel ref="RemoveMEKSeriesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetMEKDataInputTestSoap">
+    <StateModel ref="GetMEKDataInputStateModel" />
+    <Publisher name="GetMEKDataInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetMEKDataSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetMEKData" />
+  </DataModel>
+  <StateModel name="GetMEKDataInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetMEKDataInputAction" type="output">
+        <DataModel ref="GetMEKDataSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="GetMEKDataOutputTestSoap">
+    <StateModel ref="GetMEKDataOutputStateModel" />
+    <Publisher name="GetMEKDataOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="GetMEKDataResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="GetMEKDataResponse" />
+  </DataModel>
+  <StateModel name="GetMEKDataOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="GetMEKDataOutputAction" type="output">
+        <DataModel ref="GetMEKDataResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKDataInputTestSoap">
+    <StateModel ref="SaveMEKDataInputStateModel" />
+    <Publisher name="SaveMEKDataInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKDataSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKData" />
+  </DataModel>
+  <StateModel name="SaveMEKDataInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKDataInputAction" type="output">
+        <DataModel ref="SaveMEKDataSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKDataOutputTestSoap">
+    <StateModel ref="SaveMEKDataOutputStateModel" />
+    <Publisher name="SaveMEKDataOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKDataResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKDataResponse" />
+  </DataModel>
+  <StateModel name="SaveMEKDataOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKDataOutputAction" type="output">
+        <DataModel ref="SaveMEKDataResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKChangesInputTestSoap">
+    <StateModel ref="SaveMEKChangesInputStateModel" />
+    <Publisher name="SaveMEKChangesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKChangesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKChanges" />
+  </DataModel>
+  <StateModel name="SaveMEKChangesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKChangesInputAction" type="output">
+        <DataModel ref="SaveMEKChangesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMEKChangesOutputTestSoap">
+    <StateModel ref="SaveMEKChangesOutputStateModel" />
+    <Publisher name="SaveMEKChangesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMEKChangesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMEKChangesResponse" />
+  </DataModel>
+  <StateModel name="SaveMEKChangesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMEKChangesOutputAction" type="output">
+        <DataModel ref="SaveMEKChangesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ResizeMEKInputTestSoap">
+    <StateModel ref="ResizeMEKInputStateModel" />
+    <Publisher name="ResizeMEKInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="ResizeMEKSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ResizeMEK" />
+  </DataModel>
+  <StateModel name="ResizeMEKInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ResizeMEKInputAction" type="output">
+        <DataModel ref="ResizeMEKSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ResizeMEKOutputTestSoap">
+    <StateModel ref="ResizeMEKOutputStateModel" />
+    <Publisher name="ResizeMEKOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="ResizeMEKResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ResizeMEKResponse" />
+  </DataModel>
+  <StateModel name="ResizeMEKOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ResizeMEKOutputAction" type="output">
+        <DataModel ref="ResizeMEKResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMSDChangesInputTestSoap">
+    <StateModel ref="SaveMSDChangesInputStateModel" />
+    <Publisher name="SaveMSDChangesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMSDChangesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMSDChanges" />
+  </DataModel>
+  <StateModel name="SaveMSDChangesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMSDChangesInputAction" type="output">
+        <DataModel ref="SaveMSDChangesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveMSDChangesOutputTestSoap">
+    <StateModel ref="SaveMSDChangesOutputStateModel" />
+    <Publisher name="SaveMSDChangesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveMSDChangesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveMSDChangesResponse" />
+  </DataModel>
+  <StateModel name="SaveMSDChangesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveMSDChangesOutputAction" type="output">
+        <DataModel ref="SaveMSDChangesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMSDInputTestSoap">
+    <StateModel ref="RemoveMSDInputStateModel" />
+    <Publisher name="RemoveMSDInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMSDSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMSD" />
+  </DataModel>
+  <StateModel name="RemoveMSDInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMSDInputAction" type="output">
+        <DataModel ref="RemoveMSDSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RemoveMSDOutputTestSoap">
+    <StateModel ref="RemoveMSDOutputStateModel" />
+    <Publisher name="RemoveMSDOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="RemoveMSDResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="RemoveMSDResponse" />
+  </DataModel>
+  <StateModel name="RemoveMSDOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="RemoveMSDOutputAction" type="output">
+        <DataModel ref="RemoveMSDResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveConsumerChangesInputTestSoap">
+    <StateModel ref="SaveConsumerChangesInputStateModel" />
+    <Publisher name="SaveConsumerChangesInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveConsumerChangesSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveConsumerChanges" />
+  </DataModel>
+  <StateModel name="SaveConsumerChangesInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveConsumerChangesInputAction" type="output">
+        <DataModel ref="SaveConsumerChangesSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SaveConsumerChangesOutputTestSoap">
+    <StateModel ref="SaveConsumerChangesOutputStateModel" />
+    <Publisher name="SaveConsumerChangesOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="SaveConsumerChangesResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="SaveConsumerChangesResponse" />
+  </DataModel>
+  <StateModel name="SaveConsumerChangesOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="SaveConsumerChangesOutputAction" type="output">
+        <DataModel ref="SaveConsumerChangesResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MAKSearchInputTestSoap">
+    <StateModel ref="MAKSearchInputStateModel" />
+    <Publisher name="MAKSearchInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="MAKSearchSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MAKSearch" />
+  </DataModel>
+  <StateModel name="MAKSearchInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MAKSearchInputAction" type="output">
+        <DataModel ref="MAKSearchSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MAKSearchOutputTestSoap">
+    <StateModel ref="MAKSearchOutputStateModel" />
+    <Publisher name="MAKSearchOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="MAKSearchResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MAKSearchResponse" />
+  </DataModel>
+  <StateModel name="MAKSearchOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MAKSearchOutputAction" type="output">
+        <DataModel ref="MAKSearchResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MEKSeriesSearchInputTestSoap">
+    <StateModel ref="MEKSeriesSearchInputStateModel" />
+    <Publisher name="MEKSeriesSearchInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="MEKSeriesSearchSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MEKSeriesSearch" />
+  </DataModel>
+  <StateModel name="MEKSeriesSearchInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MEKSeriesSearchInputAction" type="output">
+        <DataModel ref="MEKSeriesSearchSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MEKSeriesSearchOutputTestSoap">
+    <StateModel ref="MEKSeriesSearchOutputStateModel" />
+    <Publisher name="MEKSeriesSearchOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="MEKSeriesSearchResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MEKSeriesSearchResponse" />
+  </DataModel>
+  <StateModel name="MEKSeriesSearchOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MEKSeriesSearchOutputAction" type="output">
+        <DataModel ref="MEKSeriesSearchResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MEKSearchInputTestSoap">
+    <StateModel ref="MEKSearchInputStateModel" />
+    <Publisher name="MEKSearchInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="MEKSearchSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MEKSearch" />
+  </DataModel>
+  <StateModel name="MEKSearchInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MEKSearchInputAction" type="output">
+        <DataModel ref="MEKSearchSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MEKSearchOutputTestSoap">
+    <StateModel ref="MEKSearchOutputStateModel" />
+    <Publisher name="MEKSearchOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="MEKSearchResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MEKSearchResponse" />
+  </DataModel>
+  <StateModel name="MEKSearchOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MEKSearchOutputAction" type="output">
+        <DataModel ref="MEKSearchResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MSDSearchInputTestSoap">
+    <StateModel ref="MSDSearchInputStateModel" />
+    <Publisher name="MSDSearchInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="MSDSearchSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MSDSearch" />
+  </DataModel>
+  <StateModel name="MSDSearchInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MSDSearchInputAction" type="output">
+        <DataModel ref="MSDSearchSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="MSDSearchOutputTestSoap">
+    <StateModel ref="MSDSearchOutputStateModel" />
+    <Publisher name="MSDSearchOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="MSDSearchResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="MSDSearchResponse" />
+  </DataModel>
+  <StateModel name="MSDSearchOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="MSDSearchOutputAction" type="output">
+        <DataModel ref="MSDSearchResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ConsumerSearchInputTestSoap">
+    <StateModel ref="ConsumerSearchInputStateModel" />
+    <Publisher name="ConsumerSearchInputPublisherSoap" class="http.HttpPost">
+      <Param name="url" value="" />
+    </Publisher>
+  </Test>
+  <DataModel name="ConsumerSearchSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ConsumerSearch" />
+  </DataModel>
+  <StateModel name="ConsumerSearchInputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ConsumerSearchInputAction" type="output">
+        <DataModel ref="ConsumerSearchSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ConsumerSearchOutputTestSoap">
+    <StateModel ref="ConsumerSearchOutputStateModel" />
+    <Publisher name="ConsumerSearchOutputPublisherSoap" class="tcp.TcpListener">
+      <Param name="host" value="127.0.0.1" />
+      <Param name="port" value="80" />
+    </Publisher>
+  </Test>
+  <DataModel name="ConsumerSearchResponseSoap" ref="SoapEnvelope">
+    <XmlElement name="soapBodyData" ref="ConsumerSearchResponse" />
+  </DataModel>
+  <StateModel name="ConsumerSearchOutputStateModel" initialState="initial">
+    <State name="initial">
+      <Action name="ConsumerSearchOutputAction" type="output">
+        <DataModel ref="ConsumerSearchResponseSoap" />
+      </Action>
+    </State>
+  </StateModel>
+  <Run name="DefaultRun">
+    <Logger class="logger.Filesystem">
+      <Param name="path" value="C:\peach\logtest" />
+    </Logger>
+    <Test ref="SoapTestTeststdout" />
+    <Test ref="AuthenticateCookieInputTestSoap" />
+    <Test ref="AuthenticateCookieOutputTestSoap" />
+    <Test ref="AuthenticatePassphraseInputTestSoap" />
+    <Test ref="AuthenticatePassphraseOutputTestSoap" />
+    <Test ref="AuthenticatePublicKeyChallengeInputTestSoap" />
+    <Test ref="AuthenticatePublicKeyChallengeOutputTestSoap" />
+    <Test ref="GetPublicKeyAuthenticationChallengeInputTestSoap" />
+    <Test ref="GetPublicKeyAuthenticationChallengeOutputTestSoap" />
+    <Test ref="GetAuthenticationCookieInputTestSoap" />
+    <Test ref="GetAuthenticationCookieOutputTestSoap" />
+    <Test ref="GetCapabilitiesInputTestSoap" />
+    <Test ref="GetCapabilitiesOutputTestSoap" />
+    <Test ref="GetVersionInputTestSoap" />
+    <Test ref="GetVersionOutputTestSoap" />
+    <Test ref="CreateMAKInputTestSoap" />
+    <Test ref="CreateMAKOutputTestSoap" />
+    <Test ref="CreateMAKCustomInputTestSoap" />
+    <Test ref="CreateMAKCustomOutputTestSoap" />
+    <Test ref="ImportMAKInputTestSoap" />
+    <Test ref="ImportMAKOutputTestSoap" />
+    <Test ref="CreateMEKSeriesInputTestSoap" />
+    <Test ref="CreateMEKSeriesOutputTestSoap" />
+    <Test ref="CreateMSDInputTestSoap" />
+    <Test ref="CreateMSDOutputTestSoap" />
+    <Test ref="ImportMSDInputTestSoap" />
+    <Test ref="ImportMSDOutputTestSoap" />
+    <Test ref="DecodeESKInputTestSoap" />
+    <Test ref="DecodeESKOutputTestSoap" />
+    <Test ref="SaveMAKChangesInputTestSoap" />
+    <Test ref="SaveMAKChangesOutputTestSoap" />
+    <Test ref="RemoveMAKInputTestSoap" />
+    <Test ref="RemoveMAKOutputTestSoap" />
+    <Test ref="CreateMEKInputTestSoap" />
+    <Test ref="CreateMEKOutputTestSoap" />
+    <Test ref="ImportMEKInputTestSoap" />
+    <Test ref="ImportMEKOutputTestSoap" />
+    <Test ref="SaveMEKSeriesChangesInputTestSoap" />
+    <Test ref="SaveMEKSeriesChangesOutputTestSoap" />
+    <Test ref="RemoveMEKSeriesInputTestSoap" />
+    <Test ref="RemoveMEKSeriesOutputTestSoap" />
+    <Test ref="GetMEKDataInputTestSoap" />
+    <Test ref="GetMEKDataOutputTestSoap" />
+    <Test ref="SaveMEKDataInputTestSoap" />
+    <Test ref="SaveMEKDataOutputTestSoap" />
+    <Test ref="SaveMEKChangesInputTestSoap" />
+    <Test ref="SaveMEKChangesOutputTestSoap" />
+    <Test ref="ResizeMEKInputTestSoap" />
+    <Test ref="ResizeMEKOutputTestSoap" />
+    <Test ref="SaveMSDChangesInputTestSoap" />
+    <Test ref="SaveMSDChangesOutputTestSoap" />
+    <Test ref="RemoveMSDInputTestSoap" />
+    <Test ref="RemoveMSDOutputTestSoap" />
+    <Test ref="SaveConsumerChangesInputTestSoap" />
+    <Test ref="SaveConsumerChangesOutputTestSoap" />
+    <Test ref="MAKSearchInputTestSoap" />
+    <Test ref="MAKSearchOutputTestSoap" />
+    <Test ref="MEKSeriesSearchInputTestSoap" />
+    <Test ref="MEKSeriesSearchOutputTestSoap" />
+    <Test ref="MEKSearchInputTestSoap" />
+    <Test ref="MEKSearchOutputTestSoap" />
+    <Test ref="MSDSearchInputTestSoap" />
+    <Test ref="MSDSearchOutputTestSoap" />
+    <Test ref="ConsumerSearchInputTestSoap" />
+    <Test ref="ConsumerSearchOutputTestSoap" />
+  </Run>
+</Peach>

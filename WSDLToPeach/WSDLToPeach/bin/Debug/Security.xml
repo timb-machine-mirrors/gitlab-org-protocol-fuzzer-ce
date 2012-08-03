@@ -1,0 +1,948 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+  <Run name="defaultrun">
+    <Test ref="SecurityTokenResponseTest" />
+    <Test ref="SecurityTokenResponse2Test" />
+    <Test ref="ChallengeTest" />
+    <Test ref="ChallengeTest" />
+    <Test ref="Challenge2Test" />
+    <Test ref="Challenge2Test" />
+    <Test ref="RequestSecurityTokenTest" />
+    <Test ref="RequestSecurityTokenCollectionTest" />
+    <Test ref="RequestSecurityTokenTest" />
+    <Test ref="RequestSecurityTokenTest" />
+    <Test ref="RequestSecurityToken2Test" />
+    <Test ref="RequestSecurityToken2Test" />
+  </Run>
+  <DataModel name="Any" />
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString">
+    <String name="string" value="" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_PasswordString">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_UsernameTokenType">
+    <Block name="Sequence">
+      <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Username" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_AttributedString" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_BinarySecurityTokenType">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_KeyIdentifierType">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_tUsage">
+    <Block name="list">
+      <String name="list" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_ReferenceType" />
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_EmbeddedType">
+    <Choice name="Choice">
+      <Block name="Any" ref="Any" />
+    </Choice>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityTokenReferenceType">
+    <Choice name="Choice">
+      <Block name="Any" ref="Any" />
+    </Choice>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityHeaderType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_TransformationParametersType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_UsernameToken">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_UsernameToken" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_UsernameTokenType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_BinarySecurityToken">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_BinarySecurityToken" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_BinarySecurityTokenType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Reference">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Reference" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_ReferenceType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Embedded">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Embedded" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_EmbeddedType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_KeyIdentifier">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_KeyIdentifier" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_KeyIdentifierType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityTokenReference">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityTokenReference" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityTokenReferenceType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Security">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Security" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityHeaderType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_TransformationParameters">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_TransformationParameters" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_TransformationParametersType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Password">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Password" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_PasswordString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Nonce">
+    <Block name="oasis-200401-wss-wssecurity-secext-1.0.xsd_Nonce" ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_EncodedString" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-secext-1.0.xsd_FaultcodeEnum">
+    <String name="QName" value="" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_tTimestampFault">
+    <String name="QName" value="" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_AttributedDateTime">
+    <String name="string" value="" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_AttributedURI">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_TimestampType">
+    <Block name="Sequence">
+      <Block ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_Created" />
+      <Block ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_Expires" />
+    </Block>
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Timestamp">
+    <Block name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Timestamp" ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_TimestampType" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Expires">
+    <Block name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Expires" ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_AttributedDateTime" />
+  </DataModel>
+  <DataModel name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Created">
+    <Block name="oasis-200401-wss-wssecurity-utility-1.0.xsd_Created" ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_AttributedDateTime" />
+  </DataModel>
+  <DataModel name="policy_All">
+    <Block name="policy_All" ref="policy_OperatorContentType" />
+  </DataModel>
+  <DataModel name="policy_ExactlyOne">
+    <Block name="policy_ExactlyOne" ref="policy_OperatorContentType" />
+  </DataModel>
+  <DataModel name="policy_OperatorContentType">
+    <Block name="Sequence" />
+  </DataModel>
+  <DataModel name="_RequestSecurityToken">
+    <Block name="_RequestSecurityToken" ref="_RequestSecurityTokenType" />
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_TokenType">
+    <Block name="_TokenType" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_RequestType">
+    <Block name="_RequestType" ref="_RequestTypeOpenEnum" />
+  </DataModel>
+  <DataModel name="_RequestTypeOpenEnum">
+    <Choice name="Union">
+      <Block name="_RequestTypeEnum" ref="_RequestTypeEnum" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="_RequestTypeEnum">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenResponse">
+    <Block name="_RequestSecurityTokenResponse" ref="_RequestSecurityTokenResponseType" />
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenResponseType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_RequestedSecurityToken">
+    <Block name="_RequestedSecurityToken" ref="_RequestedSecurityTokenType" />
+  </DataModel>
+  <DataModel name="_RequestedSecurityTokenType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_BinarySecret">
+    <Block name="_BinarySecret" ref="_BinarySecretType" />
+  </DataModel>
+  <DataModel name="_BinarySecretType">
+    <Blob name="base64Binary" valuetype="hex" />
+  </DataModel>
+  <DataModel name="_BinarySecretTypeEnum">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="_BinarySecretTypeOpenEnum">
+    <Choice name="Union">
+      <Block name="_BinarySecretTypeEnum" ref="_BinarySecretTypeEnum" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="_Claims">
+    <Block name="_Claims" ref="_ClaimsType" />
+  </DataModel>
+  <DataModel name="_ClaimsType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Entropy">
+    <Block name="_Entropy" ref="_EntropyType" />
+  </DataModel>
+  <DataModel name="_EntropyType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Lifetime">
+    <Block name="_Lifetime" ref="_LifetimeType" />
+  </DataModel>
+  <DataModel name="_LifetimeType">
+    <Block name="Sequence">
+      <Block ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_Created" />
+      <Block ref="oasis-200401-wss-wssecurity-utility-1.0.xsd_Expires" />
+    </Block>
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenCollection">
+    <Block name="_RequestSecurityTokenCollection" ref="_RequestSecurityTokenCollectionType" />
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenCollectionType">
+    <Block name="Sequence">
+      <Block name="_RequestSecurityToken" ref="_RequestSecurityTokenType" />
+    </Block>
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenResponseCollection">
+    <Block name="_RequestSecurityTokenResponseCollection" ref="_RequestSecurityTokenResponseCollectionType" />
+  </DataModel>
+  <DataModel name="_RequestSecurityTokenResponseCollectionType">
+    <Block name="Sequence">
+      <Block ref="_RequestSecurityTokenResponse" />
+    </Block>
+  </DataModel>
+  <DataModel name="_ComputedKey">
+    <Block name="_ComputedKey" ref="_ComputedKeyOpenEnum" />
+  </DataModel>
+  <DataModel name="_ComputedKeyEnum">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="_ComputedKeyOpenEnum">
+    <Choice name="Union">
+      <Block name="_ComputedKeyEnum" ref="_ComputedKeyEnum" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="_RequestedAttachedReference">
+    <Block name="_RequestedAttachedReference" ref="_RequestedReferenceType" />
+  </DataModel>
+  <DataModel name="_RequestedUnattachedReference">
+    <Block name="_RequestedUnattachedReference" ref="_RequestedReferenceType" />
+  </DataModel>
+  <DataModel name="_RequestedReferenceType">
+    <Block name="Sequence">
+      <Block ref="oasis-200401-wss-wssecurity-secext-1.0.xsd_SecurityTokenReference" />
+    </Block>
+  </DataModel>
+  <DataModel name="_RequestedProofToken">
+    <Block name="_RequestedProofToken" ref="_RequestedProofTokenType" />
+  </DataModel>
+  <DataModel name="_RequestedProofTokenType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_IssuedTokens">
+    <Block name="_IssuedTokens" ref="_RequestSecurityTokenResponseCollectionType" />
+  </DataModel>
+  <DataModel name="_RenewTarget">
+    <Block name="_RenewTarget" ref="_RenewTargetType" />
+  </DataModel>
+  <DataModel name="_RenewTargetType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_AllowPostdating">
+    <Block name="_AllowPostdating" ref="_AllowPostdatingType" />
+  </DataModel>
+  <DataModel name="_AllowPostdatingType" />
+  <DataModel name="_Renewing">
+    <Block name="_Renewing" ref="_RenewingType" />
+  </DataModel>
+  <DataModel name="_RenewingType" />
+  <DataModel name="_CancelTarget">
+    <Block name="_CancelTarget" ref="_CancelTargetType" />
+  </DataModel>
+  <DataModel name="_CancelTargetType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_RequestedTokenCancelled">
+    <Block name="_RequestedTokenCancelled" ref="_RequestedTokenCancelledType" />
+  </DataModel>
+  <DataModel name="_RequestedTokenCancelledType" />
+  <DataModel name="_ValidateTarget">
+    <Block name="_ValidateTarget" ref="_ValidateTargetType" />
+  </DataModel>
+  <DataModel name="_ValidateTargetType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Status">
+    <Block name="_Status" ref="_StatusType" />
+  </DataModel>
+  <DataModel name="_StatusType">
+    <Block name="Sequence">
+      <Block name="_Code" ref="_StatusCodeOpenEnum" />
+      <String name="_Reason" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="_StatusCodeEnum">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="_StatusCodeOpenEnum">
+    <Choice name="Union">
+      <Block name="_StatusCodeEnum" ref="_StatusCodeEnum" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="_SignChallenge">
+    <Block name="_SignChallenge" ref="_SignChallengeType" />
+  </DataModel>
+  <DataModel name="_SignChallengeResponse">
+    <Block name="_SignChallengeResponse" ref="_SignChallengeType" />
+  </DataModel>
+  <DataModel name="_SignChallengeType">
+    <Block name="Sequence">
+      <Block ref="_Challenge" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Challenge">
+    <Block name="_Challenge" ref="XMLSchema_string" />
+  </DataModel>
+  <DataModel name="_BinaryExchange">
+    <Block name="_BinaryExchange" ref="_BinaryExchangeType" />
+  </DataModel>
+  <DataModel name="_BinaryExchangeType">
+    <String name="string" value="" />
+  </DataModel>
+  <DataModel name="_RequestKET">
+    <Block name="_RequestKET" ref="_RequestKETType" />
+  </DataModel>
+  <DataModel name="_RequestKETType" />
+  <DataModel name="_KeyExchangeToken">
+    <Block name="_KeyExchangeToken" ref="_KeyExchangeTokenType" />
+  </DataModel>
+  <DataModel name="_KeyExchangeTokenType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Authenticator">
+    <Block name="_Authenticator" ref="_AuthenticatorType" />
+  </DataModel>
+  <DataModel name="_AuthenticatorType">
+    <Block name="Sequence">
+      <Block ref="_CombinedHash" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_CombinedHash">
+    <Block name="_CombinedHash" ref="XMLSchema_base64Binary" />
+  </DataModel>
+  <DataModel name="_OnBehalfOf">
+    <Block name="_OnBehalfOf" ref="_OnBehalfOfType" />
+  </DataModel>
+  <DataModel name="_OnBehalfOfType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Issuer">
+    <Block name="_Issuer" ref="addressing_EndpointReferenceType" />
+  </DataModel>
+  <DataModel name="_AuthenticationType">
+    <Block name="_AuthenticationType" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_KeyType">
+    <Block name="_KeyType" ref="_KeyTypeOpenEnum" />
+  </DataModel>
+  <DataModel name="_KeyTypeEnum">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="_KeyTypeOpenEnum">
+    <Choice name="Union">
+      <Block name="_KeyTypeEnum" ref="_KeyTypeEnum" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="_KeySize">
+    <Block name="_KeySize" ref="XMLSchema_unsignedInt" />
+  </DataModel>
+  <DataModel name="_SignatureAlgorithm">
+    <Block name="_SignatureAlgorithm" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_EncryptionAlgorithm">
+    <Block name="_EncryptionAlgorithm" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_CanonicalizationAlgorithm">
+    <Block name="_CanonicalizationAlgorithm" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_ComputedKeyAlgorithm">
+    <Block name="_ComputedKeyAlgorithm" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_Encryption">
+    <Block name="_Encryption" ref="_EncryptionType" />
+  </DataModel>
+  <DataModel name="_EncryptionType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_ProofEncryption">
+    <Block name="_ProofEncryption" ref="_ProofEncryptionType" />
+  </DataModel>
+  <DataModel name="_ProofEncryptionType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_UseKey">
+    <Block name="_UseKey" ref="_UseKeyType" />
+  </DataModel>
+  <DataModel name="_UseKeyType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_KeyWrapAlgorithm">
+    <Block name="_KeyWrapAlgorithm" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_SignWith">
+    <Block name="_SignWith" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_EncryptWith">
+    <Block name="_EncryptWith" ref="XMLSchema_anyURI" />
+  </DataModel>
+  <DataModel name="_DelegateTo">
+    <Block name="_DelegateTo" ref="_DelegateToType" />
+  </DataModel>
+  <DataModel name="_DelegateToType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_Forwardable">
+    <Block name="_Forwardable" ref="XMLSchema_boolean" />
+  </DataModel>
+  <DataModel name="_Delegatable">
+    <Block name="_Delegatable" ref="XMLSchema_boolean" />
+  </DataModel>
+  <DataModel name="_Participants">
+    <Block name="_Participants" ref="_ParticipantsType" />
+  </DataModel>
+  <DataModel name="_ParticipantsType">
+    <Block name="Sequence">
+      <Block name="_Primary" ref="_ParticipantType" />
+      <Block name="_Participant" ref="_ParticipantType" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="_ParticipantType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="addressing_EndpointReference">
+    <Block name="addressing_EndpointReference" ref="addressing_EndpointReferenceType" />
+  </DataModel>
+  <DataModel name="addressing_EndpointReferenceType">
+    <Block name="Sequence">
+      <Block name="addressing_Address" ref="addressing_AttributedURIType" />
+      <Block ref="addressing_ReferenceParameters" />
+      <Block ref="addressing_Metadata" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="addressing_ReferenceParameters">
+    <Block name="addressing_ReferenceParameters" ref="addressing_ReferenceParametersType" />
+  </DataModel>
+  <DataModel name="addressing_ReferenceParametersType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="addressing_Metadata">
+    <Block name="addressing_Metadata" ref="addressing_MetadataType" />
+  </DataModel>
+  <DataModel name="addressing_MetadataType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="addressing_MessageID">
+    <Block name="addressing_MessageID" ref="addressing_AttributedURIType" />
+  </DataModel>
+  <DataModel name="addressing_RelatesTo">
+    <Block name="addressing_RelatesTo" ref="addressing_RelatesToType" />
+  </DataModel>
+  <DataModel name="addressing_RelatesToType">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="addressing_RelationshipTypeOpenEnum">
+    <Choice name="Union">
+      <Block name="addressing_RelationshipType" ref="addressing_RelationshipType" />
+      <String name="anyURI" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="addressing_RelationshipType">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="addressing_ReplyTo">
+    <Block name="addressing_ReplyTo" ref="addressing_EndpointReferenceType" />
+  </DataModel>
+  <DataModel name="addressing_From">
+    <Block name="addressing_From" ref="addressing_EndpointReferenceType" />
+  </DataModel>
+  <DataModel name="addressing_FaultTo">
+    <Block name="addressing_FaultTo" ref="addressing_EndpointReferenceType" />
+  </DataModel>
+  <DataModel name="addressing_To">
+    <Block name="addressing_To" ref="addressing_AttributedURIType" />
+  </DataModel>
+  <DataModel name="addressing_Action">
+    <Block name="addressing_Action" ref="addressing_AttributedURIType" />
+  </DataModel>
+  <DataModel name="addressing_AttributedURIType">
+    <String name="anyURI" value="" />
+  </DataModel>
+  <DataModel name="addressing_FaultCodesOpenEnumType">
+    <Choice name="Union">
+      <Block name="addressing_FaultCodesType" ref="addressing_FaultCodesType" />
+      <String name="QName" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="addressing_FaultCodesType">
+    <String name="QName" value="" />
+  </DataModel>
+  <DataModel name="addressing_RetryAfter">
+    <Block name="addressing_RetryAfter" ref="addressing_AttributedUnsignedLongType" />
+  </DataModel>
+  <DataModel name="addressing_AttributedUnsignedLongType">
+    <Block name="unsignedLong" ref="unsignedLong" />
+  </DataModel>
+  <DataModel name="addressing_ProblemHeaderQName">
+    <Block name="addressing_ProblemHeaderQName" ref="addressing_AttributedQNameType" />
+  </DataModel>
+  <DataModel name="addressing_AttributedQNameType">
+    <String name="QName" value="" />
+  </DataModel>
+  <DataModel name="addressing_ProblemIRI">
+    <Block name="addressing_ProblemIRI" ref="addressing_AttributedURIType" />
+  </DataModel>
+  <DataModel name="addressing_ProblemAction">
+    <Block name="addressing_ProblemAction" ref="addressing_ProblemActionType" />
+  </DataModel>
+  <DataModel name="addressing_ProblemActionType">
+    <Block name="Sequence">
+      <Block ref="addressing_Action" />
+      <String name="addressing_SoapAction" value="" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_CryptoBinary">
+    <Blob name="base64Binary" valuetype="hex" />
+  </DataModel>
+  <DataModel name="xmldsig#_Signature">
+    <Block name="xmldsig#_Signature" ref="xmldsig#_SignatureType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_SignedInfo" />
+      <Block ref="xmldsig#_SignatureValue" />
+      <Block ref="xmldsig#_KeyInfo" />
+      <Block ref="xmldsig#_Object" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureValue">
+    <Block name="xmldsig#_SignatureValue" ref="xmldsig#_SignatureValueType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureValueType">
+    <Blob name="base64Binary" valuetype="hex" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignedInfo">
+    <Block name="xmldsig#_SignedInfo" ref="xmldsig#_SignedInfoType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignedInfoType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_CanonicalizationMethod" />
+      <Block ref="xmldsig#_SignatureMethod" />
+      <Block ref="xmldsig#_Reference" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_CanonicalizationMethod">
+    <Block name="xmldsig#_CanonicalizationMethod" ref="xmldsig#_CanonicalizationMethodType" />
+  </DataModel>
+  <DataModel name="xmldsig#_CanonicalizationMethodType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureMethod">
+    <Block name="xmldsig#_SignatureMethod" ref="xmldsig#_SignatureMethodType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureMethodType">
+    <Block name="Sequence">
+      <Block name="xmldsig#_HMACOutputLength" ref="xmldsig#_HMACOutputLengthType" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_Reference">
+    <Block name="xmldsig#_Reference" ref="xmldsig#_ReferenceType" />
+  </DataModel>
+  <DataModel name="xmldsig#_ReferenceType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_Transforms" />
+      <Block ref="xmldsig#_DigestMethod" />
+      <Block ref="xmldsig#_DigestValue" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_Transforms">
+    <Block name="xmldsig#_Transforms" ref="xmldsig#_TransformsType" />
+  </DataModel>
+  <DataModel name="xmldsig#_TransformsType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_Transform" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_Transform">
+    <Block name="xmldsig#_Transform" ref="xmldsig#_TransformType" />
+  </DataModel>
+  <DataModel name="xmldsig#_TransformType">
+    <Choice name="Choice">
+      <Block name="Any" ref="Any" />
+      <String name="xmldsig#_XPath" value="" />
+    </Choice>
+  </DataModel>
+  <DataModel name="xmldsig#_DigestMethod">
+    <Block name="xmldsig#_DigestMethod" ref="xmldsig#_DigestMethodType" />
+  </DataModel>
+  <DataModel name="xmldsig#_DigestMethodType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_DigestValue">
+    <Block name="xmldsig#_DigestValue" ref="xmldsig#_DigestValueType" />
+  </DataModel>
+  <DataModel name="xmldsig#_DigestValueType">
+    <Blob name="base64Binary" valuetype="hex" />
+  </DataModel>
+  <DataModel name="xmldsig#_KeyInfo">
+    <Block name="xmldsig#_KeyInfo" ref="xmldsig#_KeyInfoType" />
+  </DataModel>
+  <DataModel name="xmldsig#_KeyInfoType">
+    <Choice name="Choice">
+      <Block ref="xmldsig#_KeyName" />
+      <Block ref="xmldsig#_KeyValue" />
+      <Block ref="xmldsig#_RetrievalMethod" />
+      <Block ref="xmldsig#_X509Data" />
+      <Block ref="xmldsig#_PGPData" />
+      <Block ref="xmldsig#_SPKIData" />
+      <Block ref="xmldsig#_MgmtData" />
+      <Block name="Any" ref="Any" />
+    </Choice>
+  </DataModel>
+  <DataModel name="xmldsig#_KeyName">
+    <Block name="xmldsig#_KeyName" ref="XMLSchema_string" />
+  </DataModel>
+  <DataModel name="xmldsig#_MgmtData">
+    <Block name="xmldsig#_MgmtData" ref="XMLSchema_string" />
+  </DataModel>
+  <DataModel name="xmldsig#_KeyValue">
+    <Block name="xmldsig#_KeyValue" ref="xmldsig#_KeyValueType" />
+  </DataModel>
+  <DataModel name="xmldsig#_KeyValueType">
+    <Choice name="Choice">
+      <Block ref="xmldsig#_DSAKeyValue" />
+      <Block ref="xmldsig#_RSAKeyValue" />
+      <Block name="Any" ref="Any" />
+    </Choice>
+  </DataModel>
+  <DataModel name="xmldsig#_RetrievalMethod">
+    <Block name="xmldsig#_RetrievalMethod" ref="xmldsig#_RetrievalMethodType" />
+  </DataModel>
+  <DataModel name="xmldsig#_RetrievalMethodType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_Transforms" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_X509Data">
+    <Block name="xmldsig#_X509Data" ref="xmldsig#_X509DataType" />
+  </DataModel>
+  <DataModel name="xmldsig#_X509DataType">
+    <Block name="Sequence" />
+  </DataModel>
+  <DataModel name="xmldsig#_X509IssuerSerialType">
+    <Block name="Sequence">
+      <String name="xmldsig#_X509IssuerName" value="" />
+      <Block name="xmldsig#_X509SerialNumber" ref="integer" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_PGPData">
+    <Block name="xmldsig#_PGPData" ref="xmldsig#_PGPDataType" />
+  </DataModel>
+  <DataModel name="xmldsig#_PGPDataType">
+    <Choice name="Choice" />
+  </DataModel>
+  <DataModel name="xmldsig#_SPKIData">
+    <Block name="xmldsig#_SPKIData" ref="xmldsig#_SPKIDataType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SPKIDataType">
+    <Block name="Sequence">
+      <Blob name="xmldsig#_SPKISexp" valuetype="hex" />
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_Object">
+    <Block name="xmldsig#_Object" ref="xmldsig#_ObjectType" />
+  </DataModel>
+  <DataModel name="xmldsig#_ObjectType">
+    <Block name="Sequence">
+      <Block name="Any" ref="Any" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_Manifest">
+    <Block name="xmldsig#_Manifest" ref="xmldsig#_ManifestType" />
+  </DataModel>
+  <DataModel name="xmldsig#_ManifestType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_Reference" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureProperties">
+    <Block name="xmldsig#_SignatureProperties" ref="xmldsig#_SignaturePropertiesType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignaturePropertiesType">
+    <Block name="Sequence">
+      <Block ref="xmldsig#_SignatureProperty" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_SignatureProperty">
+    <Block name="xmldsig#_SignatureProperty" ref="xmldsig#_SignaturePropertyType" />
+  </DataModel>
+  <DataModel name="xmldsig#_SignaturePropertyType">
+    <Choice name="Choice">
+      <Block name="Any" ref="Any" />
+    </Choice>
+  </DataModel>
+  <DataModel name="xmldsig#_HMACOutputLengthType">
+    <Block name="integer" ref="integer" />
+  </DataModel>
+  <DataModel name="xmldsig#_DSAKeyValue">
+    <Block name="xmldsig#_DSAKeyValue" ref="xmldsig#_DSAKeyValueType" />
+  </DataModel>
+  <DataModel name="xmldsig#_DSAKeyValueType">
+    <Block name="Sequence">
+      <Block name="xmldsig#_G" ref="xmldsig#_CryptoBinary" />
+      <Block name="xmldsig#_Y" ref="xmldsig#_CryptoBinary" />
+      <Block name="xmldsig#_J" ref="xmldsig#_CryptoBinary" />
+    </Block>
+  </DataModel>
+  <DataModel name="xmldsig#_RSAKeyValue">
+    <Block name="xmldsig#_RSAKeyValue" ref="xmldsig#_RSAKeyValueType" />
+  </DataModel>
+  <DataModel name="xmldsig#_RSAKeyValueType">
+    <Block name="Sequence">
+      <Block name="xmldsig#_Modulus" ref="xmldsig#_CryptoBinary" />
+      <Block name="xmldsig#_Exponent" ref="xmldsig#_CryptoBinary" />
+    </Block>
+  </DataModel>
+  <DataModel name="RequestSecurityTokenMsg">
+    <Block name="request" ref="_RequestSecurityToken" />
+  </DataModel>
+  <DataModel name="RequestSecurityTokenCollectionMsg">
+    <Block name="request" ref="_RequestSecurityTokenCollection" />
+  </DataModel>
+  <DataModel name="RequestSecurityTokenResponseMsg">
+    <Block name="response" ref="_RequestSecurityTokenResponse" />
+  </DataModel>
+  <DataModel name="RequestSecurityTokenResponseCollectionMsg">
+    <Block name="responseCollection" ref="_RequestSecurityTokenResponseCollection" />
+  </DataModel>
+  <Test name="SecurityTokenResponseTest">
+    <StateModel ref="SecurityTokenResponseStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SecurityTokenResponseStateModel">
+    <State name="initial">
+      <Action name="SecurityTokenResponseAction" type="output">
+        <DataModel ref="RequestSecurityTokenResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="SecurityTokenResponse2Test">
+    <StateModel ref="SecurityTokenResponse2StateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="SecurityTokenResponse2StateModel">
+    <State name="initial">
+      <Action name="SecurityTokenResponse2Action" type="output">
+        <DataModel ref="RequestSecurityTokenResponseCollectionMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ChallengeTest">
+    <StateModel ref="ChallengeStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ChallengeStateModel">
+    <State name="initial">
+      <Action name="ChallengeAction" type="output">
+        <DataModel ref="RequestSecurityTokenResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="ChallengeTest">
+    <StateModel ref="ChallengeStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="ChallengeStateModel">
+    <State name="initial">
+      <Action name="ChallengeAction" type="output">
+        <DataModel ref="RequestSecurityTokenResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="Challenge2Test">
+    <StateModel ref="Challenge2StateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="Challenge2StateModel">
+    <State name="initial">
+      <Action name="Challenge2Action" type="output">
+        <DataModel ref="RequestSecurityTokenResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="Challenge2Test">
+    <StateModel ref="Challenge2StateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="Challenge2StateModel">
+    <State name="initial">
+      <Action name="Challenge2Action" type="output">
+        <DataModel ref="RequestSecurityTokenResponseCollectionMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityTokenTest">
+    <StateModel ref="RequestSecurityTokenStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityTokenStateModel">
+    <State name="initial">
+      <Action name="RequestSecurityTokenAction" type="output">
+        <DataModel ref="RequestSecurityTokenMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityTokenCollectionTest">
+    <StateModel ref="RequestSecurityTokenCollectionStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityTokenCollectionStateModel">
+    <State name="initial">
+      <Action name="RequestSecurityTokenCollectionAction" type="output">
+        <DataModel ref="RequestSecurityTokenCollectionMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityTokenTest">
+    <StateModel ref="RequestSecurityTokenStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityTokenStateModel">
+    <State name="initial">
+      <Action name="RequestSecurityTokenAction" type="output">
+        <DataModel ref="RequestSecurityTokenMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityTokenTest">
+    <StateModel ref="RequestSecurityTokenStateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityTokenStateModel">
+    <State name="initial">
+      <Action name="RequestSecurityTokenAction" type="output">
+        <DataModel ref="RequestSecurityTokenResponseMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityToken2Test">
+    <StateModel ref="RequestSecurityToken2StateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityToken2StateModel">
+    <State name="initial">
+      <Action name="RequestSecurityToken2Action" type="output">
+        <DataModel ref="RequestSecurityTokenMsg" />
+      </Action>
+    </State>
+  </StateModel>
+  <Test name="RequestSecurityToken2Test">
+    <StateModel ref="RequestSecurityToken2StateModel" />
+    <Publisher name="tcp.Tcp">
+      <Param host="127.0.0.1" />
+      <Param port="80" />
+    </Publisher>
+  </Test>
+  <StateModel name="RequestSecurityToken2StateModel">
+    <State name="initial">
+      <Action name="RequestSecurityToken2Action" type="output">
+        <DataModel ref="RequestSecurityTokenResponseCollectionMsg" />
+      </Action>
+    </State>
+  </StateModel>
+</Peach>

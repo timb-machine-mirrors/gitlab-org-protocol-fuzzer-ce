@@ -1,0 +1,538 @@
+   at WSDLToFuzzer.PeachEmitter..ctor() in C:\Users\v-adamce\Documents\Visual Studio 2008\Projects\WSDLToPeach\WSDLToPeach\PeachEmitter.cs:line 27
+Object reference not set to an instance of an object.
+Importing ws-discovery.wsdl
+http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+http://schemas.xmlsoap.org/ws/2004/08/addressing
+schema:
+
+http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+http://schemas.xmlsoap.org/ws/2004/08/addressing
+System.Web.Services.Description.ImportCollection
+System.Web.Services.Description.Types
+System.Xml.Schema.XmlSchema
+
+	System.Xml.Schema.XmlSchemaImport
+	Location:http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+	SourceURI:
+System.Xml.Schema.XmlSchema
+http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+	System.Xml.Schema.XmlSchemaElement
+	Name: Hello
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:HelloType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: HelloType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReference
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Types
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Scopes
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:XAddrs
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:MetadataVersion
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: RelationshipType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeRestriction
+		Name:http://www.w3.org/2001/XMLSchema:QName
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			tns:Suppression
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: OpenRelationshipType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeUnion
+		http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+	System.Xml.Schema.XmlSchemaElement
+	Name: Bye
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ByeType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ByeType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReference
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Types
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Scopes
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:XAddrs
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:MetadataVersion
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaElement
+	Name: Probe
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ProbeType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ProbeType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Types
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Scopes
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaElement
+	Name: ProbeMatches
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ProbeMatchesType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ProbeMatchesType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: ProbeMatch
+			Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ProbeMatchType
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ProbeMatchType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReference
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Types
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Scopes
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:XAddrs
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:MetadataVersion
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaElement
+	Name: Resolve
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ResolveType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ResolveType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReference
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaElement
+	Name: ResolveMatches
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ResolveMatchesType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ResolveMatchesType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: ResolveMatch
+			Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ResolveMatchType
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ResolveMatchType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReference
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Types
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Scopes
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:XAddrs
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:MetadataVersion
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaElement
+	Name: Types
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:QNameListType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: QNameListType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeList
+		
+	System.Xml.Schema.XmlSchemaElement
+	Name: Scopes
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:ScopesType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ScopesType
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://schemas.xmlsoap.org/ws/2005/04/discovery:UriListType
+			System.Xml.Schema.XmlSchemaAttribute
+			Name: MatchBy
+			Type: http://www.w3.org/2001/XMLSchema:anyURI
+	System.Xml.Schema.XmlSchemaElement
+	Name: XAddrs
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:UriListType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: UriListType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeList
+		
+	System.Xml.Schema.XmlSchemaElement
+	Name: MetadataVersion
+	Type: http://www.w3.org/2001/XMLSchema:unsignedInt
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: FaultCodeType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeRestriction
+		Name:http://www.w3.org/2001/XMLSchema:QName
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			tns:MatchingRuleNotSupported
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: FaultCodeOpenType
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeUnion
+		http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+	System.Xml.Schema.XmlSchemaElement
+	Name: SupportedMatchingRules
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:UriListType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaAttribute
+	Name: Id
+	Type: http://www.w3.org/2001/XMLSchema:ID
+	System.Xml.Schema.XmlSchemaElement
+	Name: Security
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:SecurityType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: SecurityType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: 
+			Type: 
+			Ref:  http://schemas.xmlsoap.org/ws/2005/04/discovery:Sig
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: Sig
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:SigType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: SigType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+		System.Xml.Schema.XmlSchemaAttribute
+		Name: Scheme
+		Type: http://www.w3.org/2001/XMLSchema:anyURI
+		System.Xml.Schema.XmlSchemaAttribute
+		Name: KeyId
+		Type: http://www.w3.org/2001/XMLSchema:base64Binary
+		System.Xml.Schema.XmlSchemaAttribute
+		Name: Refs
+		Type: http://www.w3.org/2001/XMLSchema:IDREFS
+		System.Xml.Schema.XmlSchemaAttribute
+		Name: Sig
+		Type: http://www.w3.org/2001/XMLSchema:base64Binary
+	System.Xml.Schema.XmlSchemaElement
+	Name: AppSequence
+	Type: http://schemas.xmlsoap.org/ws/2005/04/discovery:AppSequenceType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: AppSequenceType
+		System.Xml.Schema.XmlSchemaComplexContentRestriction
+	System.Xml.Schema.XmlSchemaImport
+	Location:http://schemas.xmlsoap.org/ws/2004/08/addressing
+	SourceURI:http://schemas.xmlsoap.org/ws/2005/04/discovery/ws-discovery.xsd
+System.Xml.Schema.XmlSchema
+http://schemas.xmlsoap.org/ws/2004/08/addressing
+	System.Xml.Schema.XmlSchemaElement
+	Name: EndpointReference
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReferenceType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: EndpointReferenceType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaElement
+			Name: Address
+			Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:AttributedURI
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: ReferenceProperties
+			Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:ReferencePropertiesType
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: ReferenceParameters
+			Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:ReferenceParametersType
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: PortType
+			Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:AttributedQName
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaElement
+			Name: ServiceName
+			Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:ServiceNameType
+			Ref:  
+
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ReferencePropertiesType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ReferenceParametersType
+		System.Xml.Schema.XmlSchemaSequence
+			System.Xml.Schema.XmlSchemaAny
+			Any Type
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ServiceNameType
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:QName
+			System.Xml.Schema.XmlSchemaAttribute
+			Name: PortName
+			Type: http://www.w3.org/2001/XMLSchema:NCName
+	System.Xml.Schema.XmlSchemaElement
+	Name: MessageID
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:AttributedURI
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: RelatesTo
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:Relationship
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: To
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:AttributedURI
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: Action
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:AttributedURI
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: From
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReferenceType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: ReplyTo
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReferenceType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaElement
+	Name: FaultTo
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:EndpointReferenceType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: Relationship
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:anyURI
+			System.Xml.Schema.XmlSchemaAttribute
+			Name: RelationshipType
+			Type: http://www.w3.org/2001/XMLSchema:QName
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: RelationshipTypeValues
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeRestriction
+		Name:http://www.w3.org/2001/XMLSchema:QName
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:Reply
+	System.Xml.Schema.XmlSchemaElement
+	Name: ReplyAfter
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:ReplyAfterType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: ReplyAfterType
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:nonNegativeInteger
+	System.Xml.Schema.XmlSchemaElement
+	Name: RetryAfter
+	Type: http://schemas.xmlsoap.org/ws/2004/08/addressing:RetryAfterType
+	Ref:  
+
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: RetryAfterType
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:nonNegativeInteger
+	System.Xml.Schema.XmlSchemaSimpleType
+	Name: FaultSubcodeValues
+	Type: None
+		System.Xml.Schema.XmlSchemaSimpleTypeRestriction
+		Name:http://www.w3.org/2001/XMLSchema:QName
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:InvalidMessageInformationHeader
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:MessageInformationHeaderRequired
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:DestinationUnreachable
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:ActionNotSupported
+			System.Xml.Schema.XmlSchemaEnumerationFacet
+			wsa:EndpointUnavailable
+	System.Xml.Schema.XmlSchemaAttribute
+	Name: Action
+	Type: http://www.w3.org/2001/XMLSchema:anyURI
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: AttributedQName
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:QName
+	System.Xml.Schema.XmlSchemaComplexType
+	Name: AttributedURI
+		System.Xml.Schema.XmlSchemaSimpleContentExtension
+		Name:http://www.w3.org/2001/XMLSchema:anyURI
+System.Web.Services.Description.ServiceCollection
+System.Web.Services.Description.MessageCollection
+	System.Web.Services.Description.Message
+	HelloMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:Hello
+	System.Web.Services.Description.Message
+	ByeMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:Bye
+	System.Web.Services.Description.Message
+	ProbeMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:Probe
+	System.Web.Services.Description.Message
+	ProbeMatchMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:ProbeMatches
+	System.Web.Services.Description.Message
+	ResolveMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:Resolve
+	System.Web.Services.Description.Message
+	ResolveMatchMsg
+		System.Web.Services.Description.MessagePart
+		body
+		http://schemas.xmlsoap.org/ws/2005/04/discovery:ResolveMatches
+System.Web.Services.Description.PortTypeCollection
+	System.Web.Services.Description.PortType
+	TargetService
+		System.Web.Services.Description.Operation
+		HelloOp
+			System.Web.Services.Description.OperationOutput
+			
+		System.Web.Services.Description.Operation
+		ByeOp
+			System.Web.Services.Description.OperationOutput
+			
+		System.Web.Services.Description.Operation
+		ProbeOp
+			System.Web.Services.Description.OperationInput
+			
+		System.Web.Services.Description.Operation
+		ProbeMatchOp
+			System.Web.Services.Description.OperationOutput
+			
+		System.Web.Services.Description.Operation
+		ResolveOp
+			System.Web.Services.Description.OperationInput
+			
+		System.Web.Services.Description.Operation
+		ResolveMatchOp
+			System.Web.Services.Description.OperationOutput
+			
+	System.Web.Services.Description.PortType
+	DiscoveryProxy
+System.Web.Services.Description.BindingCollection

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://phed.org/2008/Peach ../../../../peach/peach.xsd" version="1.0" author="Emitter" description="EmittedPeachWSDL">
+  <include ns="default" src="file:defaults.xml" />
+  <include ns="pt" src="file:PeachTypes.xml" />
+
+  <run name="defaultrun">
+    <test ref="HelloOpTest" />
+    <test ref="ByeOpTest" />
+    <test ref="ProbeOpTest" />
+    <test ref="ProbeMatchOpTest" />
+    <test ref="ResolveOpTest" />
+    <test ref="ResolveMatchOpTest" />
+  </run>
+
+  <test name="HelloOpTest">
+    <StateModel ref="HelloOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+  <StateModel name="HelloOpStateModel">
+    <State name="initial">
+      <Action name="HelloOpAction" type="output">
+        <DataModel ref="HelloMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+  <test name="ByeOpTest">
+    <StateModel ref="ByeOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+  <StateModel name="ByeOpStateModel">
+    <State name="initial">
+      <Action name="ByeOpAction" type="output">
+        <DataModel ref="ByeMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+  <test name="ProbeOpTest">
+    <StateModel ref="ProbeOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+  <StateModel name="ProbeOpStateModel">
+    <State name="initial">
+      <Action name="ProbeOpAction" type="output">
+        <DataModel ref="ProbeMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+  <test name="ProbeMatchOpTest">
+    <StateModel ref="ProbeMatchOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+
+  <StateModel name="ProbeMatchOpStateModel">
+    <State name="initial">
+      <Action name="ProbeMatchOpAction" type="output">
+        <DataModel ref="ProbeMatchMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <test name="ResolveOpTest">
+    <StateModel ref="ResolveOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+
+  <StateModel name="ResolveOpStateModel">
+    <State name="initial">
+      <Action name="ResolveOpAction" type="output">
+        <DataModel ref="ResolveMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <test name="ResolveMatchOpTest">
+    <StateModel ref="ResolveMatchOpStateModel" />
+    <Publisher name="tcp.Tcp">
+      <param host="127.0.0.1" />
+      <param port="80" />
+    </Publisher>
+  </test>
+
+  <StateModel name="ResolveMatchOpStateModel">
+    <State name="initial">
+      <Action name="ResolveMatchOpAction" type="output">
+        <DataModel ref="ResolveMatchMsgDataModel" />
+      </Action>
+    </State>
+  </StateModel>
+
+</peach>
