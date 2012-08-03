@@ -1,0 +1,6 @@
+c:\audits\adobe\js\PdfJsMaker\bin\Release\PdfJsMaker.exe
+c:\audits\adobe\js\PdfJsMaker\bin\Release\PdfJsMaker.pdb
+c:\audits\adobe\js\PdfJsMaker\bin\Release\itextsharp.dll
+c:\audits\adobe\js\PdfJsMaker\obj\Release\ResolveAssemblyReference.cache
+c:\audits\adobe\js\PdfJsMaker\obj\Release\PdfJsMaker.exe
+c:\audits\adobe\js\PdfJsMaker\obj\Release\PdfJsMaker.pdb

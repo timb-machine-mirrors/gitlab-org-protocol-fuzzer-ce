@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml" />
+	<Include ns="pt" src="file:PeachTypes.xml" />
+	
+	<DataModel name="Mp3Frame">
+		<Flags name="Header" size="32" endian="big">
+			<Flag name="FrameSync" position="0" size="11" />
+			<Flag name="MpegAudioVersion" position="11" size="2" />
+			<Flag name="LayerDescription" position="13" size="2"/>
+			<Flag name="ProtectionBit" position="15" size="1"/>			<!-- If set a CRC (16bit) follows header -->
+			<Flag name="BitrateIndex" position="16" size="4" />
+			<Flag name="SamplingRate" position="20" size="2" />
+			<Flag name="PadingPit" position="22" size="1" />				<!-- 0 - frame not padded; 1 - frame padded -->
+			<Flag name="PrivateBit" position="23" size="1" />
+			<Flag name="ChannelMode" position="24" size="2" />
+			<Flag name="ModeExtension" position="26" size="2" />
+			<Flag name="Copyright" position="28" size="1" />
+			<Flag name="Original" position="29" size="1" />
+			<Flag name="Emphasis" position="30" size="1" />
+		</Flags>
+	</DataModel>
+	
+	<DataModel name="ID3v1">
+		<Flags name="Header1" size="64">
+			<Flag name="TagId" position="0" size="3" value="TAG" />		<!-- IS STATIC, convert to hex -->
+		</Flags>
+	</DataModel>
+	
+	<!-- TODO: Create data model -->
+	<DataModel name="TheDataModel">
+	</DataModel>
+	
+	<!-- TODO: Create state model -->
+	<StateModel name="TheState" initialState="Initial">
+		
+		<State name="Initial">
+		</State>
+		
+	</StateModel>
+	
+	<!-- TODO: Configure agent/monitors
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Monitor class="test.TestStopOnFirst" />
+	</Agent>
+	-->
+	
+	<Test name="TheTest">
+		<!-- <Agent ref="LocalAgent"/> -->
+		<StateModel ref="TheState"/>
+		
+		<!-- TODO: Complete publisher -->
+		<Publisher class="file.FileWriterLauncher" >
+			<Param name="fileName" value="fuzzed.mp3"/>
+		</Publisher>
+	</Test>
+	
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		
+		<Test ref="TheTest" />
+		
+	</Run>
+	
+</Peach>
+<!-- end -->

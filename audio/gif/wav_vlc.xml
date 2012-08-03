@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml" />
+	<Include ns="pt" src="file:PeachTypes.xml" />
+	
+	<DataModel name="Param">
+		<String name="Value" isStatic="true" />
+	</DataModel>
+	
+	<!-- Defines the common wave chunk -->
+	<DataModel name="Chunk">
+		<String name="ID" length="4" padCharacter=" " />
+		<Number name="Size" size="32" signed="false">
+			<Relation type="size" of="Data"/>
+		</Number>
+		<Blob name="Data"/>
+		<Blob lengthType="calc" length="int((int(self.parent['Size'].getInternalValue()) % 2 == 0) and '0' or '1')" />
+	</DataModel>
+	
+	<DataModel name="ChunkFmt" ref="Chunk">
+		<String name="ID" value="fmt " isStatic="true"/>
+		<Block name="Data">
+			<Number name="CompressionCode" size="16" signed="false"/>
+			<Number name="NumberOfChannels" size="16" signed="false"/>
+			<Number name="SampleRate" size="32" signed="false"/>
+			<Number name="AverageBytesPerSecond" size="32" signed="false"/>
+			<Number name="BlockAlign" size="16" signed="false"/>
+			<Number name="SignificantBitsPerSample" size="16" signed="false"/>
+			<Number name="ExtraFormatBytes" size="16" signed="false"/>
+			<Blob name="ExtraData" />
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkData" ref="Chunk">
+		<String name="ID" value="data" isStatic="true"/>
+	</DataModel>
+	
+	<DataModel name="ChunkFact" ref="Chunk">
+		<String name="ID" value="fact" isStatic="true"/>
+		<Block name="Data">
+			<Number size="32" signed="false"/>
+			<Blob/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkSint" ref="Chunk">
+		<String name="ID" value="sInt" isStatic="true"/>
+		<Block name="Data">
+			<Number size="32" signed="false"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkWavl" ref="Chunk">
+		<String name="ID" value="wavl" isStatic="true"/>
+		<Block name="Data">
+			<Block name="ArrayOfChunks" maxOccurs="3000">
+				<Block ref="ChunkSint"/>
+				<Block ref="ChunkData" />
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkCue" ref="Chunk">
+		<String name="ID" value="cue " isStatic="true"/>
+		<Block name="Data">
+			<Block name="ArrayOfCues" maxOccurs="3000">
+				<String length="4" />
+				<Number size="32" signed="false"/>
+				<String length="4" />
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkPlst" ref="Chunk">
+		<String name="ID" value="plst" isStatic="true"/>
+		<Block name="Data">
+			<Number name="NumberOfSegments" size="32" signed="false">
+				<Relation type="count" of="ArrayOfSegments"/>
+			</Number>
+			<Block name="ArrayOfSegments" maxOccurs="3000">
+				<String length="4" />
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkAligned" ref="Chunk">
+	</DataModel>
+	
+	<DataModel name="ChunkLabl" ref="ChunkAligned">
+		<String name="ID" value="labl" isStatic="true"/>
+		<Block name="Data">
+			<Number size="32" signed="false"/>
+			<String nullTerminated="true" />
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkNote" ref="ChunkLabl">
+		<String name="ID" value="note" isStatic="true"/>
+	</DataModel>
+	
+	<DataModel name="ChunkLtxt" ref="ChunkAligned">
+		<String name="ID" value="ltxt" isStatic="true"/>
+		<Block name="Data">
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="16" signed="false"/>
+			<Number size="16" signed="false"/>
+			<Number size="16" signed="false"/>
+			<Number size="16" signed="false"/>
+			<String nullTerminated="true" />
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkLtxt" ref="Chunk">
+		<String name="ID" value="ltxt" isStatic="true"/>
+		<Block name="Data">
+			<String length="4" />
+			<Choice maxOccurs="3000">
+				<Block ref="ChunkLabl"/>
+				<Block ref="ChunkNote"/>
+				<Block ref="ChunkLtxt"/>
+				<Block ref="ChunkAligned"/>
+			</Choice>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkSmpl" ref="Chunk">
+		<String name="ID" value="smpl" isStatic="true"/>
+		<Block name="Data">
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Number size="32" signed="false"/>
+			<Block maxOccurs="3000">
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+				<Number size="32" signed="false"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ChunkInst" ref="Chunk">
+		<String name="ID" value="inst" isStatic="true"/>
+		<Block name="Data">
+			<Number size="8"/>
+			<Number size="8"/>
+			<Number size="8"/>
+			<Number size="8"/>
+			<Number size="8"/>
+			<Number size="8"/>
+			<Number size="8"/>
+		</Block>
+	</DataModel>
+	
+	<!-- Defines the format of a WAV file -->
+	<DataModel name="Wav">
+		<!-- wave header -->
+		<Block name="Wave" ref="Chunk">
+			<String name="ID" value="RIFF" isStatic="true" />
+			<Block name="Data">
+				<String name="Type" value="WAVE" isStatic="true"/>
+				
+				<Choice name="ChunkChoice" maxOccurs="30000">
+					<Block name="ChunkFmt" ref="ChunkFmt"/>
+					<Block name="ChunkData" ref="ChunkData"/>
+					<Block name="ChunkFact" ref="ChunkFact"/>
+					<Block name="ChunkSint" ref="ChunkSint"/>
+					<Block name="ChunkWavl" ref="ChunkWavl"/>
+					<Block name="ChunkCue" ref="ChunkCue"/>
+					<Block name="ChunkPlst" ref="ChunkPlst"/>
+					<Block name="ChunkLtxt" ref="ChunkLtxt"/>
+					<Block name="ChunkSmpl" ref="ChunkSmpl"/>
+					<Block name="ChunkInst" ref="ChunkInst"/>
+					<Block name="ChunkAfsp" ref="Chunk">
+						<String name="ID" value="afsp" isStatic="true"/>
+						<!-- TODO: Add 0x00 as token! -->
+						<String name="Data"  />
+					</Block>
+					<Block name="ChunkList" ref="Chunk">
+						<String name="ID" value="LIST" isStatic="true"/>
+						<Block name="Data">
+							<Choice name="TypeChoice">
+								<Block name="Info">
+									<String name="Type" value="INFO" isStatic="true"/>
+									<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+										<String name="Data" nullTerminated="true" />
+									</Block>
+								</Block>
+								<Block name="Unknown">
+									<String name="Type" length="4"/>
+									<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+								</Block>
+							</Choice>
+						</Block>
+					</Block>
+					<Block name="Unknown" ref="Chunk"/>
+				</Choice>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<!-- This is our simple wave state model -->
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			
+			<!-- Write out our wave file -->
+			<Action type="output">
+				<DataModel ref="Wav"/>
+				<!-- This is our sample file to read in -->
+				<Data name="data" fileName="sample1.wav"/>
+			</Action>
+			
+			<Action type="close"/>
+			
+			<!-- Launch the target process -->
+			<Action type="call" method="vlc.bat">
+				<Param name="wav file" type="in">
+					<DataModel ref="Param"/>
+					<Data name="filename">
+						<!-- Name of fuzzed output file -->
+						<Field name="Value" value="fuzzed.wav"/>
+					</Data>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="vlc.exe" />
+		</Monitor>
+		<Monitor class="debugger.WindowsAppVerifier">
+			<Param name="Application" value="vlc.exe" />
+		</Monitor>
+        <Monitor class="gui.PopupWatcher">
+          <Param name="WindowNames" value="Errors,Error" />
+          <Param name="CloseWindows" value="true" />
+          <Param name="TriggerFaults" value="false" />
+        </Monitor>
+
+		<!-- <Monitor class="test.TestStopOnFirst" /> -->
+	</Agent>
+	
+	<Test name="TheTest">
+		<!-- Don't fuzz the actual wave data -->
+		<Exclude xpath="//ChunkData/Data"/>
+		
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+		
+		<Publisher class="file.FileWriterLauncherGui">
+			<Param name="fileName" value="fuzzed.wav"/>
+            <Param name="windowName" value="VLC media player" />
+		</Publisher>
+	</Test>
+	
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		
+		<Test ref="TheTest" />
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs" />
+		</Logger>
+	</Run>
+	
+</Peach>
+<!-- end -->

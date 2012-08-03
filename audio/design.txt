@@ -1,0 +1,30 @@
+
+Audio Peach Pack
+================
+
+ * Wave - Done (dd)
+ * MPEG Layer 1/2
+ * MP3 - Started (dd)
+ * MP4
+ * AIFF
+ * AU
+ * MIDI
+ * WMA 1, 2, 3
+ * OGG
+ * FLAC
+ * Quicktime QDM2/QDMC
+ * Real Audio ???
+ 
+Maybe
+-----
+
+ * AC3/AAC/DTS/A52
+ * Creative Voice
+ 
+Extensions
+----------
+
+ * ID3v1
+ * ID3v2
+ * ??
+ 

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!--
+		DHCPv6 Fuzzer
+		
+		This fuzzer targets the basic DHCPv6 protocol of AMT 6.1.
+		
+		Peach Version: 2.3.8
+		
+		Author:
+			Michael Eddington (mike@dejavusecurity.com)
+		
+	-->
+	
+	<Include ns="default" src="file:defaults.xml"/>
+	
+	<Import from="dhcpv6" import="*" />
+	
+	<Defaults>
+		<Number size="8" endian="network"/>
+	</Defaults>
+
+	<DataModel name="DuidTypes">
+		<Choice name="DuidChoice">
+			<!-- 
+      1. Link-layer address plus time
+      2. Vendor-assigned unique ID based on Enterprise Number
+      3. Link-layer address
+      -->
+			<Block name="LinkLayerAddressPlusTime">
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Number name="HardwareType" size="16" value="1"/>
+				<Number name="Time" size="32" value="1000"/>
+				<Blob name="Address" length="6" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+			
+			<Block name="EnterpriseNumber">
+				<Number name="Type" size="16" value="2" token="true"/>
+				
+				<Blob name="EnterpriseNumber" length="4" valueType="hex" value="00 00 01 57"/>
+				<Blob name="Identifier" valueType="hex" value="3bbfd82d71bd2b44be155ec7ba7f35c1" />
+			</Block>
+			
+			<Block name="LinkLayerAddress">
+				<Number name="Type" size="16" value="3" token="true"/>
+				<Number name="HardwareType" size="16" value="1"/>
+				<Blob name="Address" length="6" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+
+			<!--<Block name="VendorAssignedIdBasedOnEnterpriseNumber"></Block>-->
+		</Choice>
+	</DataModel>
+	<!--
+      OPTION_CLIENTID       1
+      OPTION_SERVERID       2
+      OPTION_IA_NA          3
+      OPTION_IA_TA          4
+      OPTION_IAADDR         5
+      OPTION_ORO            6
+      OPTION_PREFERENCE     7
+      OPTION_ELAPSED_TIME   8
+      OPTION_RELAY_MSG      9
+      OPTION_AUTH           11
+      OPTION_UNICAST        12
+      OPTION_STATUS_CODE    13
+      OPTION_RAPID_COMMIT   14
+      OPTION_USER_CLASS     15
+      OPTION_VENDOR_CLASS   16
+      OPTION_VENDOR_OPTS    17
+      OPTION_INTERFACE_ID   18
+      OPTION_RECONF_MSG     19
+      OPTION_RECONF_ACCEPT  20
+      -->
+
+	<DataModel name="IaOption">
+		<Choice name="IaOptionChoice">
+			<Block name="IaAddress">
+				<Number name="Option" size="16" value="5" token="true"/>
+				<Number name="Length" size="16" >
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="fe 80 00 00 00 00 00 00 09 08 7A 38 61 56 AC CE"/> -->
+					<Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>
+					<Number name="PreferredLifetime" size="32" value="2000"/>
+					<Number name="ValidLifetime" size="32" value="3000"/>
+				</Block>
+				
+			</Block>
+		</Choice>
+	</DataModel>
+	
+	<DataModel name="DhcpOption">
+		<Choice name="OptionChoice">
+
+			<Block name="ClientIdentifier">
+				<Number name="Option" size="16" value="1" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Duid"/>
+				</Number>
+				<Block name="Duid" ref="DuidTypes"/>
+			</Block>
+
+			<Block name="ElapsedTime">
+				<Number name="Option" size="16" value="8" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Time"/>
+				</Number>
+				<Number name="Time" size="16"/>
+			</Block>
+
+			<Block name="OptionRequest">
+				<Number name="Option" size="16" value="6" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="RequestedOption"/>
+				</Number>
+				<Number name="RequestedOption" size="16" minOccurs="0" maxOccurs="65535"/>
+			</Block>
+
+			<Block name="ServerIdentifier">
+				<Number name="Option" size="16" value="2" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Duid"/>
+				</Number>
+				<Block name="Duid" ref="DuidTypes"/>
+			</Block>
+
+			<Block name="StatusCode">
+				<Number name="Option" size="16" value="13" token="true"/>
+				<Number name="Length" size="16" >
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="Code" size="16" value="0"/>
+					<String name="Msg" value="Peachy DHCP Message!" />
+				</Block>
+				
+			</Block>
+
+			<Block name="IdentityAssociationForNonTemporary">
+				<Number name="Option" size="16" value="3" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="IAID" size="32" value="2"/>
+					<Number name="T1" size="32" value="2000"/>
+					<Number name="T2" size="32" value="3000"/>
+					<Block name="IaOptions" ref="IaOption" minOccurs="0" maxOccurs="65535"/>
+				</Block>
+			</Block>
+
+			<Block name="IdentityAssociationForTemporary">
+				<Number name="Option" size="16" value="4" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="IAID" size="32"/>
+					<Block name="IaOptions" ref="IaOption" minOccurs="0" maxOccurs="65535"/>
+				</Block>
+			</Block>
+
+			<Block name="Fqdn">
+				<Number name="Option" size="16" value="39" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="FqdnName"/>
+				</Number>
+				<String name="FqdnName"/>
+			</Block>
+			
+			<Block name="ServerUnicast">
+				<Number name="Option" size="16" value="12" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Address"/>
+				</Number>
+				<Blob name="Address" valueType="hex" value="fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f"/>
+			</Block>
+			
+			<Block name="VendorClass">
+				<Number name="Option" size="16" value="16" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number size="32"/>
+					<String name="VendorName"/>
+				</Block>
+			</Block>
+
+		</Choice>
+	</DataModel>
+
+	<DataModel name="DhcpPacket">
+		<Number name="MsgType" size="8"/>
+		<Number name="XID" size="24"/>
+		<Block name="Option" ref="DhcpOption" minOccurs="0" maxOccurs="100000"/>
+	</DataModel>
+
+	<StateModel name="DHCPTransaction" initialState="Accept">
+		
+		<State name="Accept">
+			<Action type="accept" publisher="Listen" />
+			<Action type="changeState" ref="GetReceive"/>
+		</State>
+		
+		<State name="GetReceive">
+			<Action type="input" name="DhcpRequest"
+			publisher="Listen">
+				<DataModel ref="DhcpPacket"/>
+			</Action>
+			
+			<Action type="changeState" ref="Advertise"
+				when="Action.getRoot().getByName(
+						str(
+							getXml().xpath('//DhcpRequest//MsgType')[0].getAttributeNS(None, 'fullName')
+							)
+						).getInternalValue() == '1'" />
+			
+			<Action type="changeState" ref="Reply"
+				when="Action.getRoot().getByName(
+						str(
+							getXml().xpath('//DhcpRequest//MsgType')[0].getAttributeNS(None, 'fullName')
+							)
+						).getInternalValue() == '3'" />
+			
+		</State>
+		
+		<State name="Advertise">
+			<Action type="slurp" valueXpath="//DhcpRequest//XID" setXpath="//DhcpAdvertise//XID"/>
+			
+			<Action type="output" name="DhcpAdvertise">
+				<DataModel ref="DhcpPacket"/>
+				<Data name="DataSet">
+					<Field name="MsgType" value="2"/>
+					<Field	name="Option[0].OptionChoice.ClientIdentifier.Duid.DuidChoice.EnterpriseNumber"
+						value=""/>
+					
+					<Field name="Option[1].OptionChoice.ServerIdentifier.Option" value="2"/>
+					<Field name="Option[1].OptionChoice.ServerIdentifier.Duid.DuidChoice.EnterpriseNumber.Identifier"
+					value="Peachy Keen!"/>
+					<!-- <Field name="Option[2].OptionChoice.StatusCode" value="" /> -->
+					<Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaAddress" value="" />
+				</Data>
+			</Action>
+			
+			<Action type="changeState" ref="GetReceive"/>
+		</State>
+		
+		<State name="Reply">
+			<Action type="slurp" valueXpath="//DhcpRequest//XID" setXpath="//DhcpReply//XID"/>
+			
+			<Action type="output" name="DhcpReply">
+				<DataModel ref="DhcpPacket"/>
+				<Data name="DataSet">
+					<Field name="MsgType" value="7"/>
+					<Field	name="Option[0].OptionChoice.ClientIdentifier.Duid.DuidChoice.EnterpriseNumber"
+						value=""/>
+					
+					<Field name="Option[1].OptionChoice.ServerIdentifier.Option" value="2"/>
+					<Field name="Option[1].OptionChoice.ServerIdentifier.Duid.DuidChoice.EnterpriseNumber.Identifier"
+						value="Peachy Keen!"/>
+					<Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaAddress" value="" />
+					<Field name="Option[3].OptionChoice.StatusCode" value="" />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Import from="amt6" import="*"/>
+		
+		<Monitor class="AmtSoapMonitor">
+			<Param name="url" value="http://192.168.1.3:16992/EventManagerService"/>
+			<Param name="authurl" value="http://192.168.1.3:16992"/>
+			<Param name="user" value="admin" />
+			<Param name="password" value="Admin!98" />
+		</Monitor>
+		<!--
+		<Monitor class="network.UdpMonitor">
+			<Param name="host" value="0.0.0.0" />
+			<Param name="port" value="6666" />
+		</Monitor>
+		-->
+	</Agent>
+	
+	<Test name="UdpResp" description="DHCP Reply Fuzzer">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="DHCPTransaction"/>
+		
+		<Publisher class="AmtUdp6Listener" name="Listen">
+			<Param name="host" value="FE80::560C:F059:41AB:DE86"/>
+			<Param name="port" value="547"/>
+		</Publisher>
+	</Test>
+
+	<Run name="DefaultRun">
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs-dhcpv6"/>
+		</Logger>
+		
+		<Test ref="UdpResp"/>
+	</Run>
+</Peach>

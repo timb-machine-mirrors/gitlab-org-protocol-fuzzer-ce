@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach>
+	
+	<Include ns="default" src="file:defaults.xml"/>
+	
+	<PythonPath path="."/>
+	<Import from="jsfuzz" import="*"/>
+	
+	<DataModel name="StringParam">
+		<String value="abcdefg123456" />
+	</DataModel>
+	
+	<DataModel name="NumberParam">
+		<String value="1">
+			<Hint name="NumericalString" value="true" />
+		</String>
+	</DataModel>
+	
+	<DataModel name="ImmutableString" mutable="false">
+		<String name="Value" value="replace me" mutable="false" />
+	</DataModel>
+	
+	<StateModel name="State" initialState="start">
+		<State name="start">
+			<Action type="connect" />
+			
+			<Action name="T" type="call" method="FuzzJavascript">
+				<Param name="Excludable" type="in">
+					<DataModel ref="ImmutableString"/>
+					<Data name="Data">
+						<Field name="Value" value=""/>
+					</Data>
+				</Param>
+				<Param name="P" type="in">
+					<DataModel ref=""/>
+				</Param>
+			</Action>
+			
+			<Action type="close"/>
+			<Action type="call" method="ScoobySnacks" />
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Monitor class="debugger.WindowsDebugEngine">
+			<Param name="CommandLine" value="&quot;C:\Program Files\Adobe\Acrobat 9.0\Acrobat\Acrobat.exe&quot; testcase.pdf" />
+			<Param name="StartOnCall" value="ScoobySnacks" />
+		</Monitor>
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="Acrobat.exe"/>
+		</Monitor>
+	</Agent>
+	
+	<Test name="AcroApiFuzz">
+		
+		<Agent ref="LocalAgent" />
+		<StateModel ref="State"/>
+		<Exclude xpath="//Excludable" />
+		
+		<Publisher class="JsFuzzPublisher">
+			<Param name="fileName" value="fuzzer_test_case.js"/>
+			<Param name="windowName" value="Adobe Acrobat Pro Extended"/>
+			<Param name="debugger" value="true" />
+			<Param name="waitTime" value="3"/>
+		</Publisher>
+		
+	</Test>
+
+	<Run name="DefaultRun">
+		<Test ref="AcroApiFuzz"/>
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs" />
+		</Logger>
+	</Run>
+	
+</Peach>
+<!-- end -->

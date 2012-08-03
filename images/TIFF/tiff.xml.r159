@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd" author="Deja vu Security" version="1">
+
+
+  <!-- Import defaults for Peach instance -->
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <Import from="TIFFAnalyzer" import="*" />
+
+  <!-- little endian -->
+  
+  <DataModel name="ImageFileDirectoryLittle">
+    <Placement before="TailPlace" />
+    
+    <Number name="EntryCount" size="16" signed="false">
+      <Relation type="count" of="IFDEntry"/>
+    </Number>
+   
+    <Block name="IFDEntry" minOccurs="1" maxOccurs="65535">
+      <Relation type="count" from="EntryCount" />
+      
+      <!-- Tag 0-1 bytes -->
+      <Number name="Tag" size="16" signed="false" />
+      
+      <!-- Type 2-3 bytes -->
+      <Choice name="TypeChoice">
+        <Number name="BYTE" size="16" token="true" value="1"/>
+        <!-- 1b -->
+        <Number name="ASCII" size="16" token="true" value="2"/>
+        <!-- can be multiple strings, null term. -->
+        <Number name="SHORT" size="16" token="true" value="3"/>
+        <!-- 2b -->
+        <Number name="LONG" size="16" token="true" value="4"/>
+        <!-- 4b -->
+        <Number name="RATIONAL" size="16" token="true" value="5"/>
+        <!-- 8b Two LONGs: the first represents the numerator of a fraction; the second, the denominator. -->
+        <Number name="SBYTE" size="16" token="true" value="6"/>
+        <!-- 1b signed -->
+        <Number name="UNDEF" size="16" token="true" value="7"/>
+        <!-- 1b -->
+        <Number name="SSHORT" size="16" token="true" value="8"/>
+        <!-- 2b signed -->
+        <Number name="SLONG" size="16" token="true" value="9"/>
+        <!-- 4b signed -->
+        <Number name="SRATIONAL" size="16" token="true" value="10"/>
+        <!-- 8b Two SLONG’s: the first represents the numerator of a fraction, the second the denominator-->
+        <Number name="FLOAT" size="16" token="true" value="11"/>
+        <!-- 4b-->
+        <Number name="DOUBLE" size="16" token="true" value="12"/>
+        <!-- 8b -->
+        <Number name="Unknown" size="16" />
+      </Choice>
+     
+      
+      
+
+      <Choice name="ValueChoice">
+
+        <!-- BYTE / UNDEF -->
+        <Block name="ByteType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('BYTE') or self.find('TypeChoice').has_key('UNDEF')" />
+          
+          <Choice name="ArrayPointerChoice" >
+
+            <!-- ByteArray -->
+            <Block name="ByteArray">
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="ArrayUnwrap" />
+              </Number>
+              <Blob name="CountSizeCalc" length="0" constraint="int(self.find('ValueCount').getInternalValue()) &lt;= 4" />
+              <Block name="ArrayUnwrap" minOccurs="1" maxOccurs="4">
+                <Relation type="count" from="ValueCount"/>
+                <Number name="ByteValue" size="8" signed="false" />
+              </Block>
+              <Blob name="Pad" lengthType="calc" length="4 - int(self.find('ValueCount').getInternalValue())" />
+            </Block> 
+            <!-- End ByteArray -->
+
+            <!-- BytePointer -->
+            <Block name="BytePointer">
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="ByteValue" />
+              </Number>
+              <Number name="Pointer" size="32" signed="false">
+                <Relation type="offset" of="NormalByteArray" />
+              </Number>
+              <Block name="NormalByteArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="NormalByteArrayUnwrap">
+                  <Number name="ByteValue" size="8" signed="false" minOccurs="1" maxOccurs="65535">
+                    <Relation type="count" from="ValueCount" />
+                  </Number>
+                </Block>
+              </Block>
+            </Block> 
+            <!-- End BytePointer -->
+          </Choice>
+        </Block>
+        <!-- END BYTE / UNDEF -->
+
+        <!-- SBYTE -->
+        <Block name="SByteType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('SBYTE')" />
+          
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SByteArray">
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="ArrayUnwrap" />
+              </Number>
+
+              <Blob name="Hack2" length="0" constraint="int(self.find('ValueCount').getInternalValue()) &lt;= 4" />
+              <Block name="ArrayUnwrap" minOccurs="1" maxOccurs="4">
+                <Relation type="count" from="ValueCount"/>
+                <Number name="SByteValue" size="8" signed="true" />
+              </Block>
+              <Blob name="Pad" lengthType="calc" length="4 - int(self.find('ValueCount').getInternalValue())" />
+            </Block>
+            <!-- End SByteArray-->
+
+            <!-- SBytePointer-->
+            <Block name="SBytePointer">
+
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="SByteValue" />
+              </Number>
+
+              <Number name="Pointer" size="32" signed="false">
+                <Relation type="offset" of="NormalSByteArray" />
+              </Number>
+              <Block name="NormalSByteArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="NormalSByteArrayUnwrap">
+                  <Number name="SByteValue" size="8" signed="true" minOccurs="1" maxOccurs="65535">
+                    <Relation type="count" from="ValueCount" />
+                  </Number>
+                </Block>
+              </Block>
+            </Block>
+            <!-- End SByte Pointer-->
+            
+          </Choice>
+        </Block>
+        <!-- END SBYTE -->
+        
+        <!-- ASCII -->
+        <Block name="StringType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('ASCII')" />
+
+          <Number name="ValueCount" size="32" signed="false" />
+          
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="StringArray">
+              <Blob name="Hack2" length="0" constraint="int(self.find('ValueCount').getInternalValue()) &lt;= 4" />
+              <String name="StringData" length="4" padCharacter="0"/>
+            </Block>
+
+            <Block name="StringPointer">
+              <Number name="StringPointerValue" size="32" signed="false">
+                <Relation type="offset" of="PointedStringData" />
+              </Number>
+              <String name="PointedStringData" lengthType="calc" length="int(self.find('ValueCount').getInternalValue())">
+                <Relation type="offset" from="StringPointerValue" />
+                <Placement after="TailPlace" />
+              </String>
+            </Block>
+          </Choice>
+        </Block>
+        <!-- END ASCII -->
+
+        <!-- SHORT -->
+        <Block name="ShortType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('SHORT')" />
+
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SingleShort">
+
+              <!-- Regular short -->
+              <Choice name="ShortImageChoice">
+                <Number name="ImageCount" size="32" signed="false" value="1" token="true" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="count" of="ImageData" />
+                </Number>
+                <Number name="ValueCount" size="32" signed="false" value="1" token="true" />
+              </Choice>
+              
+              <Choice name="ShortStripChoice">
+                <Number name="StripeSize" size="16" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 279">
+                  <Relation type="size" of="ImageData"/>
+                </Number>
+                <Number name="ImageOffset" size="16" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="offset" of="ImageData"/>
+                </Number>
+                <Number name="ShortVal" size="16" signed="false" />
+              </Choice>
+              
+              <Number name="ShortPad" size="16" signed="false" mutable="false" />
+            </Block>
+
+            <Block name="TwoShort">
+
+              <Choice name="TwoShortImageChoice">
+                <Number name="ImageCount" size="32" signed="false" value="2" token="true" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="count" of="ImageData" />
+                </Number>
+                <Number name="ValueCount" size="32" signed="false" value="2" token="true"/>
+              </Choice>
+              
+              <Number name="ShortVal" size="16" signed="false" occurs="2"/>
+            </Block>
+
+            <Block name="ShortPointer">
+
+              <Choice name="ShortPointerChoice">
+                <Number name="ImageCount" size="32" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="count" of="ShortValue" />
+                  <Relation type="count" of="ImageData" />
+                </Number>
+                
+                <Number name="ValueCount" size="32" signed="false">
+                  <Relation type="count" of="ShortValue" />
+                </Number>
+              </Choice>
+
+
+              <Number name="Pointer" size="32" signed="false">
+                <Relation type="offset" of="ShortArray" />
+              </Number>
+              
+              <Block name="ShortArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                
+                <Block name="ShortArrayUnwrap">
+                 <Choice name="ShortArrayShortChoice">
+                   
+                   <Number name="ShortValue" size="16" signed="false" minOccurs="1" maxOccurs="65535" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                      <Relation type="count" from="ImageCount" />
+                    </Number>
+                   
+                   <Number name="ShortValue" size="16" signed="false" minOccurs="1" maxOccurs="65535">
+                      <Relation type="count" from="ValueCount" />
+                    </Number>
+                   
+                 </Choice>
+                  
+                </Block>
+              </Block>
+            </Block>
+          </Choice>
+          
+        </Block>
+
+        <!-- SSHORT -->
+        <Block name="SShortType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('SSHORT')" />
+
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SingleSShort">
+              <Number name="ValueCount" size="32" signed="false" value="1" token="true"/>
+              <Number name="SShortVal" size="16" signed="true" />
+              <Number name="SShortPad" size="16" signed="false" mutable="false" />
+            </Block>
+
+            <Block name="TwoSShort">
+              
+              <Number name="ValueCount" size="32" signed="false" value="2" token="true"/>
+              <Number name="SShortVal1" size="16" signed="true" occurs="2"/>
+              <Number name="SShortVal2" size="16" signed="true" occurs="2"/>
+            </Block>
+
+            <Block name="SShortPointer">
+
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="SShortValue" />
+              </Number>
+
+              <Number name="Pointer" size="32" signed="false">
+                <Relation type="offset" of="SShortArray" />
+              </Number>
+              <Block name="SShortArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="SShortArrayUnwrap">
+                  <Number name="SShortValue" size="16" signed="true" minOccurs="1" maxOccurs="65535">
+                    <Relation type="count" from="ValueCount" />
+                  </Number>
+                </Block>
+              </Block>
+            </Block>
+          </Choice>
+        </Block>
+
+
+        <!-- LONG -->
+        <Block name="LongType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('LONG')" />
+
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SingleLong">
+
+              <Choice name="SingleLongChoice">
+                <Number name="ImageCount" size="32" signed="false" value="1" token="true" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="count" of="ImageData" />
+                </Number>
+                <Number name="ValueCount" size="32" signed="false" value="1" token="true"/>
+              </Choice>
+              
+              <Choice name="SingleLongChoice2">
+                <Number name="StripeSize" size="32" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 279">
+                  <Relation type="size" of="ImageData"/>
+                </Number>
+                
+                <Number name="ImageOffset" size="32" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="offset" of="ImageData"/>
+                </Number>
+                
+                <Number name="LongVal" size="32" signed="false" />
+              </Choice>
+              
+            </Block>
+
+            <Block name="LongPointer">
+
+              <Choice name="LongPointerChoice">
+                
+                <Number name="ImageCount" size="32" signed="false" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                  <Relation type="count" of="ImageData" />
+                </Number>
+                
+                <Number name="ValueCount" size="32" signed="false">
+                  <Relation type="count" of="LongValue" />
+                </Number>
+                
+              </Choice>
+
+              <Number name="Pointer" size="32" signed="false">
+                <Relation type="offset" of="LongArray" />
+              </Number>
+              
+              <Block name="LongArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="LongArrayUnwrap">
+
+                  <Choice name="LongArrayChoice">
+                    <Blob name="pointerBlob" constraint="int(self.find('Tag').getInternalValue()) == 273" analyzer="TIFFAnalyzer" lengthType="calc" length="int((self.find('ImageCount').getInternalValue())) * 4">
+                    </Blob>
+                    <Number name="LongValue" size="32" signed="false" minOccurs="1" maxOccurs="65535" constraint="int(self.find('Tag').getInternalValue()) == 273">
+                      <Relation type="count" from="ImageCount" />
+                    </Number>
+                    <Number name="LongValue" size="32" signed="false" minOccurs="1" maxOccurs="65535">
+                      <Relation type="count" from="ValueCount" />
+                    </Number>
+                  </Choice>
+
+                </Block>
+              </Block>
+            </Block>
+          </Choice>
+        </Block>
+
+        <!-- SLONG -->
+        <Block name="SLongType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('SLONG')" />
+
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SingleSLong">
+
+              <Number name="ValueCount" size="32" signed="false" value="1" token="true"/>
+              <Number name="SLongVal" size="32" signed="false" />
+            </Block>
+
+            <Block name="SLongPointer">
+
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="SLongValue" />
+              </Number>
+
+              <Number name="Pointer" size="32" signed="true">
+                <Relation type="offset" of="SLongArray" />
+              </Number>
+              <Block name="SLongArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="SLongArrayUnwrap">
+
+                  <Number name="SLongValue" size="32" signed="true" minOccurs="1" maxOccurs="65535">
+                    <Relation type="count" from="ValueCount" />
+                  </Number>
+
+                </Block>
+              </Block>
+            </Block>
+          </Choice>
+        </Block>
+
+        <!-- RATIONAL -->
+        <Block name="RationalType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('RATIONAL')" />
+
+          <Number name="ValueCount" size="32" signed="false">
+            <Relation type="count" of="RationalArrayUnwrap" />
+          </Number>
+
+          <Block name="RationalPointer">
+            <Number name="Pointer" size="32" signed="false">
+              <Relation type="offset" of="RationalArray" />
+            </Number>
+            <Block name="RationalArray">
+              <Relation type="offset" from="Pointer" />
+              <Placement after="TailPlace" />
+              <Block name="RationalArrayUnwrap" minOccurs="1" maxOccurs="65535">
+                <Relation type="count" from="ValueCount" />
+                <Number name="Num" size="32" signed="false" />
+                <Number name="Den" size="32" signed="false" />
+              </Block>
+            </Block>
+          </Block>
+        </Block>
+
+        <!-- SRATIONAL -->
+        <Block name="SRationalType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('SRATIONAL')"/>
+
+          <Number name="ValueCount" size="32" signed="false">
+            <Relation type="count" of="SRationalArrayUnwrap" />
+          </Number>
+
+
+          <Block name="SRationalPointer">
+            <Number name="Pointer" size="32" signed="false">
+              <Relation type="offset" of="SRationalArray" />
+            </Number>
+            <Block name="SRationalArray">
+              <Relation type="offset" from="Pointer" />
+              <Placement after="TailPlace" />
+              <Block name="SRationalArrayUnwrap" minOccurs="1" maxOccurs="65535">
+                <Relation type="count" from="ValueCount" />
+                <Number name="SNum" size="32" signed="true" />
+                <Number name="SDen" size="32" signed="true" />
+              </Block>
+            </Block>
+          </Block>
+        </Block>
+
+
+        <!-- FLOAT -->
+        <Block name="FloatType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('FLOAT')" />
+
+          <Choice name="ArrayPointerChoice">
+
+            <Block name="SingleFloat">
+              <Number name="ValueCount" size="32" signed="false" value="1" token="true"/>
+              <Number name="SLongVal" size="32" signed="false" />
+            </Block>
+
+            <Block name="FloatPointer">
+
+              <Number name="ValueCount" size="32" signed="false">
+                <Relation type="count" of="FloatValue" />
+              </Number>
+
+              <Number name="Pointer" size="32" signed="true">
+                <Relation type="offset" of="FloatArray" />
+              </Number>
+              <Block name="FloatArray">
+                <Relation type="offset" from="Pointer" />
+                <Placement after="TailPlace" />
+                <Block name="FloatArrayUnwrap">
+
+                  <Number name="FloatValue" size="32" signed="true" minOccurs="1" maxOccurs="65535">
+                    <Relation type="count" from="ValueCount" />
+                  </Number>
+
+                </Block>
+              </Block>
+            </Block>
+          </Choice>
+        </Block>
+
+
+
+        <!-- DOUBLE -->
+        <Block name="DoubleType">
+          <Blob name="Hack" length="0" constraint="self.find('TypeChoice').has_key('DOUBLE')" />
+
+          <Number name="ValueCount" size="32" signed="false">
+            <Relation type="count" of="DoubleValue" />
+          </Number>
+
+
+          <Block name="DoublePointer">
+            <Number name="Pointer" size="32" signed="true">
+              <Relation type="offset" of="DoubleArray" />
+            </Number>
+            <Block name="DoubleArray">
+              <Relation type="offset" from="Pointer" />
+              <Placement after="TailPlace" />
+              <Block name="DoubleArrayUnwrap">
+                <Number name="DoubleValue" size="64" signed="true" minOccurs="1" maxOccurs="65535">
+                  <Relation type="count" from="ValueCount" />
+                </Number>
+
+              </Block>
+            </Block>
+          </Block>
+        </Block>
+
+        <Block name="Unknown">
+          <Number name="ValueOffset" size="32" signed="false" />
+        </Block>
+
+      </Choice>
+      
+    </Block>
+
+    <Choice name="ListChoice">
+      <Number name="EndofList" value="0" size="32" signed="false" token="true"/>
+
+      <Block name="NextItem" minOccurs="1" maxOccurs="1">
+        <Number name="NextPointer" size="32" signed="false" endian="little">
+          <Relation type="offset" of="NextImageFileDirectoryLittle" />
+        </Number>
+
+        <Block name="NextImageFileDirectoryLittle" ref="ImageFileDirectoryLittle" minOccurs="1" maxOccurs="1">
+          <Relation type="offset" from="NextPointer" />
+        </Block>
+      </Block>
+    </Choice>
+    
+  </DataModel>
+
+
+  <!-- Main Little Endian TIFF Model -->
+  <DataModel name="LittleEndianTIFF">
+    
+    <Number name="Magic" value="42" token="true" mutable="false" size="16"/>
+
+    <Number name="IFDOffset" size="32" endian="little">
+      <Relation type="offset" of="IFD" />
+    </Number>
+
+    <Block name="IFD" ref="ImageFileDirectoryLittle">
+      <Relation type="offset" from="IFDOffset" />
+    </Block>    
+  </DataModel>
+  
+  <!-- End Little Endian Section -->
+  
+  
+  
+  
+  <!-- begin big endian -->
+
+  <DataModel name="ImageFileDirectoryBig">
+   <Placement before="TailPlace" />
+    <Number name="EntryCount" size="16" signed="false" endian="big">
+      <Relation type="count" of="IFDEntry"/>
+    </Number>
+    
+    <Block name="IFDEntry" minOccurs="1" maxOccurs="65535">
+      <Relation type="count" from="EntryCount" />
+      <Number name="Tag" size="16" signed="false" endian="big" />
+      <Choice name="TypeChoice">
+        <Number name="BYTE" size="16" endian="big" token="true" value="1"/>
+        <!-- 1b -->
+        <Number name="ASCII" size="16" endian="big" token="true" value="2"/>
+        <!-- can be multiple strings, null term. -->
+        <Number name="SHORT" size="16" endian="big" token="true" value="3"/>
+        <!-- 2b -->
+        <Number name="LONG" size="16" endian="big" token="true" value="4"/>
+        <!-- 4b -->
+        <Number name="RATIONAL" size="16" endian="big" token="true" value="5"/>
+        <!-- 8b Two LONGs: the first represents the numerator of a fraction; the second, the denominator. -->
+        <Number name="SBYTE" size="16" endian="big" token="true" value="6"/>
+        <!-- 1b signed -->
+        <Number name="UNDEF" size="16" endian="big" token="true" value="7"/>
+        <!-- 1b -->
+        <Number name="SSHORT" size="16" endian="big" token="true" value="8"/>
+        <!-- 2b signed -->
+        <Number name="SLONG" size="16" endian="big" token="true" value="9"/>
+        <!-- 4b signed -->
+        <Number name="SRATIONAL" size="16" endian="big" token="true" value="10"/>
+        <!-- 8b Two SLONG’s: the first represents the numerator of a fraction, the second the denominator-->
+        <Number name="FLOAT" size="16" endian="big" token="true" value="11"/>
+        <!-- 4b-->
+        <Number name="DOUBLE" size="16" endian="big" token="true" value="12"/>
+        <!-- 8b -->
+        <Number name="Unknown" endian="big" size="16" />
+      </Choice>
+    </Block>
+    
+    <!-- TODO Finish big endian -->
+
+     <Choice name="ListChoice">
+      <Number name="EndofList" value="00" endian="big" valueType="hex" size="32" signed="false" token="true"/>
+      <Block name="NextItem">
+        <Number name="NextPointer" value="00" endian="big" valueType="hex" size="32" signed="false" token="true">
+          <Relation type="offset" of="NextImageFileDirectoryBig" />
+        </Number>
+        <Block name="NextImageFileDirectoryBig" ref="ImageFileDirectoryBig">
+          <Relation type="offset" from="NextPointer" />
+        </Block>
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <DataModel name="BigEndianTIFF">
+    <Number name="Magic" value="42" endian="big" token="true" mutable="false" size="16" />
+    
+    <Number name="IFDOffset" size="32" endian="big">
+      <Relation type="offset" of="IFD" />
+    </Number>
+    
+   <Block name="IFD" ref="ImageFileDirectoryBig">
+      <Relation type="offset" from="IFDOffset" />
+   </Block> 
+    
+   
+  </DataModel>
+  <!-- end big endian -->
+
+  <!-- MAIN TIFF DATA MODEL -->
+  <DataModel name="TIFF">
+    <Blob name="TheEndain" length="2" />
+    
+    <Choice name="EndianessChoice">
+      <Block name="TheLittleEndianTIFF" ref="LittleEndianTIFF" constraint="self.find('TheEndian').getInternalValue() == 'II'"/>
+      <Block name="TheBigEndianTIFF" ref="BigEndianTIFF" constraint="self.find('TheEndian').getInternalValue() == 'MM'"/>
+    </Choice>
+
+    <Blob name="ImageData" minOccurs="1" maxOccurs="65535">
+      <Relation type="count"  from="ImageCount" />
+      <Relation type="offset" from="ImageOffset"/>
+      <Relation type="size"   from="StripeSize" />
+    </Blob>
+    <Block name="TailPlace" />
+  </DataModel>
+
+  <!-- STATE MODEL SECTION -->
+  <StateModel name="StateModel" initialState="Initial">
+    <State name="Initial">
+
+      <Action name="WriteFileFromSample" type="output" publisher="writer">
+        <DataModel name="Tiff" ref="TIFF" />
+        <Data name="data" fileName=".\samples\dscf0013.tif" />
+      </Action>
+
+      <Action name="CloseFile"  type="close" publisher="writer" />
+      <Action name="Launch" type="call" method="FuzzMe" publisher="launch" />
+    </State>
+  </StateModel>
+
+
+  <!-- ***************
+       AGENT SECTION  
+      *************** -->
+
+    <Agent name="Agent">
+    
+      <Monitor class="debugger.WindowsDebugEngine">
+        <Param name="CommandLine" value="mspaint.exe fuzzed.tif"/>
+        <Param name="StartOnCall" value="FuzzMe"/>
+      </Monitor>
+    
+      <Monitor class="process.PageHeap">
+        <Param name="Executable" value="mspaint.exe"/>
+      </Monitor>
+    </Agent> 
+
+  <!-- LINUX 
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="debugger.UnixDebugger">
+        <Param name="Command" value="/bin/target" />
+        <Param name="Params" value="fuzzed.tif" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent> 
+    -->
+
+  <!-- OSX
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="osx.CrashWrangler">
+        <Param name="Command" value="/Applications/Target/TargetName" />
+        <Param name="Arguments" value="fuzzed.tif" />
+        <Param name="ExecHandler" value="./exc_handler" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent>
+     -->
+
+
+  <!-- **************
+        TEST SECTION  
+       ************** -->
+  <Test name="Test">
+
+    <Agent ref="Agent"/>
+    <StateModel ref="StateModel" />
+
+    <Publisher name="writer" class="file.FileWriter">
+      <Param name="Filename" value="fuzzed.tif" />
+    </Publisher>
+
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <Publisher name="launch" class="process.DebuggerLauncher"/>
+
+    <!-- GUI Launcher: WINDOWS ONLY -->
+    <!--
+     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+      <Param name="WindowName" value="GUI Window Name" /> 
+     </Publisher> 
+     -->
+
+  </Test>
+
+  <!-- **************
+        RUN SECTION  
+       ************** -->
+  <Run name="DefaultRun" description="Default Run">
+    <Test ref="Test" />
+    <Logger class="logger.Filesystem">
+      <Param name="path" value=".\logs\"/>
+    </Logger>
+  </Run>
+
+</Peach>

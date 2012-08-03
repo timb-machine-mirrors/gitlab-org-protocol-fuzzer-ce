@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+
+	<Include ns="default" src="file:defaults.xml"/>
+	<Import from="math" import="sqrt"/>
+	
+	<PythonPath path="."/>
+	<Import from="ImageGIF" import="*"/>
+	
+
+	<DataModel name="DataSubBlock">
+		<Number name="BlockSize" size="8" signed="false">
+			<Relation type="size" of="Data"/>
+		</Number>
+		<Blob name="Data">
+			<Relation type="size" from="BlockSize"/>
+		</Blob>
+	</DataModel>
+
+	<DataModel name="BlockTerminator" ref="DataSubBlock">
+		<Number name="BlockSize" size="8" signed="false" value="0" token="true">
+			<Relation type="size" of="Data"/>
+		</Number>
+	</DataModel>
+
+	<DataModel name="BlockSet">
+		<Block name="DataSubBlock" minOccurs="1" maxOccurs="255" ref="DataSubBlock">
+			<Number name="BlockSize" size="8" signed="false" constraint="value>0">
+				<Relation type="size" of="Data"/>
+			</Number>
+		</Block>
+		<Block name="BlockSetTerminator" ref="BlockTerminator"/>
+	</DataModel>
+
+
+	<DataModel name="ExtensionBase">
+		<Blob name="ExtensionIntroducer" valueType="hex" value="21" token="true"/>
+		<Blob name="Label" valueType="hex" length="1"/>
+		<Number name="BlockSize" size="8" signed="false">
+			<Relation type="size" of="Data"/>
+		</Number>
+
+		<Blob name="Data">
+			<Relation type="size" from="BlockSize"/>
+		</Blob>
+
+		<Block name="Terminator" ref="BlockTerminator"/>
+
+	</DataModel>
+
+	<DataModel name="GraphicControlExtension" ref="ExtensionBase" minOccurs="0" maxOccurs="3000">
+		<Blob name="Label" valueType="hex" value="F9" token="true"/>
+
+		<Block name="Data">
+
+			<Flags size="8">
+				<Flag name="Reserved" position="5" size="3"/>
+				<Flag name="DisposalMethod" position="2" size="3"/>
+				<Flag name="UserInputFlag" position="1" size="1"/>
+				<Flag name="TransparentColorFlag" position="0" size="1"/>
+			</Flags>
+
+			<Number name="DelayTime" size="16" signed="false"/>
+
+			<Number name="TransparentColorIndex" size="8" signed="false">
+				<!--Relation type="when" when="self.find('TransparentColorFlag').getInternalValue() == 1"/-->
+			</Number>
+
+		</Block>
+
+	</DataModel>
+
+	<DataModel name="CommentExtension" ref="ExtensionBase" minOccurs="0" maxOccurs="3000">
+		<Blob name="Label" valueType="hex" value="FE" token="true"/>
+		<Block name="BlockSize"/>
+		<Block name="Data">
+			<Block ref="BlockSet"/>
+		</Block>
+		<Block name="Terminator"/>
+	</DataModel>
+
+	<DataModel name="PlainTextExtension" ref="ExtensionBase" minOccurs="0" maxOccurs="3000">
+		<Blob name="Label" valueType="hex" value="01" token="true"/>
+
+		<Block name="Data">
+			<Relation type="size" from="BlockSize"/>
+			<Number name="TextGridLeftPosition" size="16" signed="false"/>
+			<Number name="TextGridTopPosition" size="16" signed="false"/>
+			<Number name="TextGridWidth" size="16" signed="false"/>
+			<Number name="TextGridHeight" size="16" signed="false"/>
+			<Number name="CharacterCellWidth" size="8" signed="false"/>
+			<Number name="CharacterCellHeight" size="8" signed="false"/>
+			<Number name="TextForegroundColorIndex" size="8" signed="false"/>
+			<Number name="TextBackgroundColorIndex" size="8" signed="false"/>
+		</Block>
+
+		<Block name="Terminator">
+			<Block name="BlockSet" ref="BlockSet"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="ApplicationExtension" ref="ExtensionBase" minOccurs="0" maxOccurs="3000">
+		<Blob name="Label" valueType="hex" value="FF" token="true"/>
+
+		<Block name="Data">
+			<Relation type="size" from="BlockSize"/>
+			<String name="ApplicationIdentifier" length="8"/>
+			<Blob name="ApplicationAuthenticationCode" length="3"/>
+		</Block>
+
+		<Block name="Terminator">
+			<Block name="BlockSet" ref="BlockSet"/>
+		</Block>
+
+	</DataModel>
+
+
+
+	<DataModel name="LogicalScreenDescriptor" occurs="1">
+		<Number name="LogicalScreenWidth" size="16" signed="false"/>
+		<Number name="LogicalScreenHeight" size="16" signed="false"/>
+
+		<Flags name="PackedFields" size="8">
+			<Flag name="GlobalColorTableFlag" position="7" size="1"/>
+			<Flag name="ColorResolution" position="4" size="3"/>
+			<Flag name="SortFlag" position="3" size="1"/>
+			<Flag name="SizeofGlobalColorTable" position="0" size="3">
+				<Relation type="count" of="ColorTripples" expressionGet="pow(2,count+1)"
+					expressionSet="int(sqrt(count)-1)"/>
+			</Flag>
+		</Flags>
+
+		<Number name="BackgroundColorIndex" size="8"/>
+		<Number name="PixelAspectRatio" size="8"/>
+	</DataModel>
+
+	<DataModel name="ImageDescriptor" minOccurs="0" maxOccurs="3000">
+		<Number name="Seperator" token="true" valueType="hex" value="2C" size="8"/>
+		<Number name="ImageLeftPosition" signed="false" size="16"/>
+		<Number name="ImageTopPosition" signed="false" size="16"/>
+		<Number name="ImageWidth" signed="false" size="16"/>
+		<Number name="ImageHeight" signed="false" size="16"/>
+
+		<Flags name="PackedFields" size="8" endian="little">
+			<Flag name="LocalColorTableFlag" position="1" size="1"/>
+			<Flag name="InterlaceFlag" position="6" size="1"/>
+			<Flag name="SortFlag" position="5" size="1"/>
+			<Flag name="Reserved" position="3" size="2"/>
+			<Flag name="SizeofLocalColorTable" position="0" size="3">
+				<Relation type="count" of="ColorTripples" expressionGet="pow(2,count+1)"
+					expressionSet="int(sqrt(count)-1) if (self.find('LocalColorTableFlag').getInternalValue() == 1) else 0"
+				/>
+			</Flag>
+		</Flags>
+	</DataModel>
+	<DataModel name="TableBasedImage">
+		<Block name="TheImageDescriptor" ref="ImageDescriptor"/>
+		<Block name="LocalColorTable">
+			<Relation type="when" when="self.find('LocalColorTableFlag').getInternalValue() == 1"/>
+			<Block name="ColorTripples" maxOccurs="256">
+				<Relation type="count" from="SizeofLocalColorTable"/>
+				<Number name="R" size="8" signed="false"/>
+				<Number name="G" size="8" signed="false"/>
+				<Number name="B" size="8" signed="false"/>
+			</Block>
+		</Block>
+		<Block name="TableBasedImageData">
+			<Number name="LZWMinimumCodeSize" size="8" signed="false"/>
+			<Block ref="BlockSet"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="GIF">
+		<Block name="Header">
+			<String name="Signature" token="true" value="GIF" mutable="false"/>
+			<Choice>
+				<String name="87a" token="true" length="3" value="87a" mutable="false"/>
+				<String name="89a" token="true" length="3" value="89a" mutable="false"/>
+			</Choice>
+		</Block>
+		<Block name="LogicalScreen">
+			<Block name="TheLogicalScreenDescriptor" ref="LogicalScreenDescriptor"/>
+			<Block name="GlobalColorTable" minOccurs="0" maxOccurs="1">
+				<Block name="ColorTripples" maxOccurs="256">
+					<Relation type="count" from="SizeofGlobalColorTable"/>
+					<Number name="R" size="8" signed="false"/>
+					<Number name="G" size="8" signed="false"/>
+					<Number name="B" size="8" signed="false"/>
+				</Block>
+			</Block>
+		</Block>
+		<Block name="Data" minOccurs="0" maxOccurs="3000">
+			<Choice>
+				<Block name="TheGraphicsBlock">
+					<Block name="TheGraphicControlExtension" ref="GraphicControlExtension"
+						minOccurs="0" maxOccurs="1"/>
+					<Block name="GraphicRenderingBlock">
+						<Choice>
+							<Block name="TheTableBasedImage" ref="TableBasedImage"/>
+							<Block name="ThePlainTextExtension" ref="PlainTextExtension"/>
+						</Choice>
+					</Block>
+				</Block>
+				<Block name="TheSpecialPurposeBlock">
+					<Choice>
+						<Block name="TheApplicationExtension" ref="ApplicationExtension"/>
+						<Block name="TheCommentExtension" ref="CommentExtension"/>
+					</Choice>
+				</Block>
+			</Choice>
+		</Block>
+		<Block name="Trailer">
+			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1" token="true"/>
+		</Block>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="GIF"/>
+				<Data name="data" fileName="samples"/>
+			</Action>
+
+			<Action type="close"/>
+
+			<Action type="call" method="ScoobySnacks"/>
+		</State>
+
+	</StateModel>
+	
+	<Agent name="LocalAgent">
+		<Monitor class="debugger.WindowsDebugEngine">
+			<Param name="CommandLine" value="&quot;C:\Program Files\Adobe\Reader 9.0\Reader\AcroRd32.exe&quot; fuzzed.pdf" />
+			<Param name="StartOnCall" value="ScoobySnacks" />
+		</Monitor>
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="AcroRd32.exe"/>
+		</Monitor>
+	</Agent>
+	
+	<Test name="TheTest">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+		
+		<Publisher class="ImageGIFPublisher">
+			<Param name="fileName" value="fuzzed.gif"/>
+			<Param name="Window" value="Acrobat" />
+			<Param name="debugger" value="true"/>
+		</Publisher>
+	</Test>
+	
+	<Run name="DefaultRun">
+		<Test ref="TheTest"/>
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+	</Run>
+</Peach>

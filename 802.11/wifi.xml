@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml"/>
+
+  <Import from="wifi" import="*"/>
+	
+	<Defaults>
+		<Number size="16" signed="false" endian="little"/>
+		<Flags endian="little" size="16" />
+	</Defaults>
+	
+	<DataModel name="IE">
+		<Number name="ElementId" size="8" value="0" />
+		<Number name="Length" size="8">
+			<Relation type="size" of="Body" />
+		</Number>
+		<Block name="Body">
+			<Relation type="size" from="Length"/>
+		</Block>
+	</DataModel>
+	
+
+	<DataModel name="ManagementFrame">
+		<Block name="Header">
+			<Flags name="FrameConstrolField" size="16" endian="little">
+				<Flag name="ProtocolVersion" position="0" size="2" value="0" />
+				<Flag name="Type" position="2" size="2" value="0" />
+				<Flag name="Subtype" position="4" size="4" value="0" />
+				
+				<Flag name="ToDS" position="8" size="1" value="0" />
+				<Flag name="FromDS" position="9" size="1" value="0" />
+				<Flag name="MoreFragments" position="10" size="1" value="0" />
+				<Flag name="Retry" position="11" size="1" value="0" />
+				<Flag name="PowerManagement" position="12" size="1" value="0" />
+				<Flag name="MoreData" position="13" size="1" value="0" />
+				<Flag name="WEP" position="14" size="1" value="0" />
+				<Flag name="Order" position="15" size="1" value="0" />
+			</Flags>
+			<Number name="Duration" size="16" value="0" />
+			<!-- Destination Addr -->
+			<Blob name="Address1" length="6" valueType="hex" value="ff ff ff ff ff ff" />
+			<!-- Source Addr -->
+			<Blob name="Address2" length="6" valueType="hex" value="ca ce ca ce ca ce" />
+			<!-- BSS Addr -->
+			<Blob name="Address3" length="6" valueType="hex" value="ca ce ca ce ca ce" />
+      <Number name="FragmentNumber" size="8" value="0" />
+      <Number name="SequenceNumber" size="8">
+        <Fixup class="AMTSequenceIncrementFixup"></Fixup>
+      </Number>
+		</Block>
+		
+		<Block name="Body" />
+
+    <!-- it appears that the card appends crc for us
+    <Number name="CRC" size="32">
+			<Fixup class="checksums.Crc32DualFixup">
+				<Param name="ref1" value="Header"/>
+				<Param name="ref2" value="Body"/>
+			</Fixup>
+		</Number> 
+    -->
+	</DataModel>
+	
+	<DataModel name="Beacon" ref="ManagementFrame">
+		
+		<Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="8" />
+		
+		<Block name="Body">
+			<Number name="Timestamp" size="64" valueType="hex" value="02 D6 AF C6 61 4C"/>
+			<Number name="BeaconInterval" size="16" valueType="hex" value="64"/>
+			<Flags name="CapabilityInformation" size="16" endian="little">
+				<Flag name="ESS"			position="0" size="1" value="1" />
+				<Flag name="IBSS"			position="1" size="1" value="0" />
+				<Flag name="CFPollable"		position="2" size="1" value="0" />
+				<Flag name="CFPollRequest"	position="3" size="1" value="0" />
+				<Flag name="Privacy"		position="4" size="1" value="1" />
+				<Flag name="ShortPreamble"	position="5" size="1" value="0" />
+				<Flag name="PBCC"			position="6" size="1" value="0" />
+				<Flag name="ChannelAgility"	position="7" size="1" value="0" />
+				<Flag name="SpectrumMgmt"	position="8" size="1" value="0" />
+				<Flag name="QoS"			position="9" size="1" value="0" />
+				<Flag name="ShortSlotTime"	position="10" size="1" value="1" />
+				<Flag name="APSD"			position="11" size="1" value="0" />
+				<Flag name="Reserved"		position="12" size="1" value="0" />
+				<Flag name="DSSSOFDM"		position="13" size="1" value="0" />
+				<Flag name="DelayedBlockAck"	position="14" size="1" value="0" />
+				<Flag name="ImmediateBlockAck"	position="15" size="1" value="0" />
+			</Flags>
+			
+			<Block name="IE_SSID" ref="IE">
+				<Number name="ElementId" size="8" value="0" />
+				<Block name="Body">
+					<Relation type="size" from="Length" />
+          
+					<String name="SSID" value="Peachy" />
+				</Block>
+			</Block>
+			
+			<Block name="IE_SupportedRates" ref="IE">
+				<Number name="ElementId" size="8" value="1" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Blob name="Rates" valueType="hex" value="82 84 8b 96 12 24 48 6c"/>
+				</Block>
+			</Block>
+			
+			<Block name="IE_DSParameter" ref="IE">
+				<Number name="ElementId" size="8" value="3" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+          
+					<Number name="Channel" size="8" value="11"/>
+				</Block>
+			</Block>
+			
+			<Block name="IE_TrafficIndicationMap" ref="IE">
+				<Number name="ElementId" size="8" value="5" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="DTIMCount" size="8" value="0"/>
+					<Number name="DTIMPeriod" size="8" value="1"/>
+					<Blob name="BitmapControl" length="2"/>
+				</Block>
+			</Block>
+			
+			<Block name="IE_ERPInfo42" ref="IE">
+				<Number name="ElementId" size="8" value="42" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="ErpInfo" size="8" value="6"/>
+				</Block>
+			</Block>
+			
+			<Block name="IE_ERPInfo47" ref="IE">
+				<Number name="ElementId" size="8" value="47" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="ErpInfo" size="8" value="6"/>
+				</Block>
+			</Block>
+
+      <Block name="IE_ExtendedSupportedRates" ref="IE">
+        <Number name="ElementId" size="8" value="50" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+
+          <Blob name="Rates" valueType="hex" value="0c 12 18 24 30 48 60 6c"/>
+        </Block>
+      </Block>
+
+      <Block name="MicrosoftWPA" ref="IE">
+        <Number name="ElementId" size="8" value="221" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+
+          <Blob name="WPAInfo" valueType="hex" value="0050f20101000050f20201000050f20201000050f2020000"/>
+        </Block>
+      </Block>
+
+      <!--
+			<Block name="IE_RSN" ref="IE">
+				<Number name="ElementId" size="8" value="48" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="RSN_IE_Version" size="16" value="1"/>
+					<Number name="MulticastCipherSuite" size="32" valueType="hex" value="02 ac 0f 00"/>
+					<Number name="NumUnicastCipherSuites" size="16" value="2"/>
+					<Number name="UnicastCipherSuite1" size="32" valueType="hex" value="04 ac 0f 00"/>
+					<Number name="UnicastCipherSuite2" size="32" valueType="hex" value="02 ac 0f 00"/>
+					<Number name="NumAuthKeyMgmtSuites" size="16" value="1"/>
+					<Number name="AuthKeyMgmtSuite1" size="32" valueType="hex" value="02 ac 0f 00"/>
+					<Number name="Capabilities" size="16" value="0"/>
+				</Block>
+			</Block>
+			-->
+			
+			
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ProbeRequest" ref="ManagementFrame">
+		<Flag name="Header.FrameConstrolField.Type" position="2" size="2" value="0" token="true" />
+		<Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="4" token="true" />		
+	</DataModel>
+
+  <DataModel name="ProbeResponse" ref="Beacon">
+    <Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="5" />
+
+    <!-- Destination Addr - TODO CHANGE ME!! -->
+    <Blob name="Header.Address1" length="6" valueType="hex" value="00 24 d7 12 7b d8"/>
+  </DataModel>
+  
+	<DataModel name="ProbeResponseOld" ref="ManagementFrame">
+		<Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="5" />
+		<Number name="Header.Duration" size="16" value="314" />
+		
+		<!-- Destination Addr - TODO CHANGE ME!! -->
+		<Blob name="Header.Address1" length="6" valueType="hex" value="00 24 d7 12 7b d8"/>
+		
+		<Block name="Body">
+			<Blob name="Timestamp" length="8" valueType="hex" value="cd ae c4 32 0a 02 00 00" />
+			<Number name="BeaconInterval" size="16" valueType="hex" value="64" />
+			
+			<Flags name="CapabilityInformation" size="16" endian="little">
+				<Flag name="ESS"			position="0" size="1" value="1" />
+				<Flag name="IBSS"			position="1" size="1" value="0" />
+				<Flag name="CFPollable"		position="2" size="1" value="0" />
+				<Flag name="CFPollRequest"	position="3" size="1" value="0" />
+				<Flag name="Privacy"		position="4" size="1" value="1" />
+				<Flag name="ShortPreamble"	position="5" size="1" value="1" />
+				<Flag name="PBCC"			position="6" size="1" value="0" />
+				<Flag name="ChannelAgility"	position="7" size="1" value="0" />
+				<Flag name="SpectrumMgmt"	position="8" size="1" value="0" />
+				<Flag name="QoS"			position="9" size="1" value="0" />
+				<Flag name="ShortSlotTime"	position="10" size="1" value="1" />
+				<Flag name="APSD"			position="11" size="1" value="0" />
+				<Flag name="Reserved"		position="12" size="1" value="0" />
+				<Flag name="DSSSOFDM"		position="13" size="1" value="0" />
+				<Flag name="DelayedBlockAck"	position="14" size="1" value="0" />
+				<Flag name="ImmediateBlockAck"	position="15" size="1" value="0" />
+			</Flags>
+
+			<Block name="IE_SSID" ref="IE">
+				<Number name="ElementId" size="8" value="0" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<String name="SSID" value="Peachy" />
+				</Block>
+			</Block>
+			
+			<Block name="IE_SupportedRates" ref="IE">
+				<Number name="ElementId" size="8" value="1" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Blob name="Rates" valueType="hex" value="82848b960c121824"/>
+				</Block>
+			</Block>
+
+      <Block name="IE_DSParameter" ref="IE">
+				<Number name="ElementId" size="8" value="3" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="Channel" size="8" value="11"/>
+				</Block>
+			</Block>
+      
+      <Block name="IE_CountryInformation" ref="IE">
+        <Number name="ElementId" size="8" value="7" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+          <Blob name="CountryInfo" valueType="hex" value="555320010b1e" />
+        </Block>
+      </Block>
+
+      <Block name="IE_ERPInfo42" ref="IE">
+        <Number name="ElementId" size="8" value="42" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+
+          <Number name="ErpInfo" size="8" value="0"/>
+        </Block>
+      </Block>
+
+      <Block name="IE_ExtendedSupportedRates" ref="IE">
+        <Number name="ElementId" size="8" value="50" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+
+          <Blob name="Rates" valueType="hex" value="30 48 60 6c"/>
+        </Block>
+      </Block>
+
+      <Block name="IE_TrafficeIndicationMap" ref="IE">
+				<Number name="ElementId" size="8" value="5" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="DTIMCount" size="8" value="2"/>
+					<Number name="DTIMPeriod" size="8" value="3"/>
+					<Blob name="BitmapControl" length="2"/>
+				</Block>
+			</Block>
+
+      <Block name="IE_RSN" ref="IE">
+        <Number name="ElementId" size="8" value="48" />
+        <Block name="Body">
+          <Relation type="size" from="Length"/>
+
+          <Number name="RSN_IE_Version" size="16" value="1"/>
+          <Number name="MulticastCipherSuite" size="32" valueType="hex" value="00 0f ac 04"/>
+          <Number name="NumUnicastCipherSuites" size="16" value="1"/>
+          <Number name="UnicastCipherSuite1" size="32" valueType="hex" value="00 0f ac 04"/>
+          <Number name="NumAuthKeyMgmtSuites" size="16" value="1"/>
+          <Number name="AuthKeyMgmtSuite1" size="32" valueType="hex" value="00 0f ac 02"/>
+          <Number name="Capabilities" size="16" value="0"/>
+        </Block>
+      </Block>
+      
+      <!--
+			<Block name="IE_ERPInfo47" ref="IE">
+				<Number name="ElementId" size="8" value="47" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Number name="ErpInfo" size="8" value="7"/>
+				</Block>
+			</Block>
+			
+			-->
+			
+		</Block>
+	</DataModel>
+
+  <DataModel name="AuthenticationResponse" ref="ManagementFrame">
+    <Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="11" />
+    <Number name="Header.Duration" size="16" value="314" />
+
+    <!-- Destination Addr - TODO CHANGE ME!! -->
+    <Blob name="Header.Address1" length="6" valueType="hex" value="00 24 d7 12 7b d8"/>
+
+    <Block name="Body">
+      <Number name="AlgorithmNumber" size="16" value="0" />
+      <Number name="TransactionSequenceNumber" size="16" value="2" />
+      <Number name="Status" size="16" value="0" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="AssociationRequest" ref="ManagementFrame">
+		<Flag name="Header.FrameConstrolField.Type" position="2" size="2" value="0" token="true" />
+		<Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="0" token="true" />		
+	</DataModel>
+	
+	<DataModel name="AssociationResponse" ref="ManagementFrame">
+		<Flag name="Header.FrameConstrolField.Subtype" position="4" size="4" value="1" />
+		<Number name="Header.Duration" size="16" value="314" />
+		
+		<!-- Destination Addr - TODO CHANGE ME!! -->
+		<Blob name="Header.Address1" length="6" valueType="hex" value="00 24 d7 12 7b d8" />
+		
+		<Block name="Body">
+			<Flags name="CapabilityInformation" size="16">
+				<Flag name="ESS"			position="0" size="1" value="1" />
+				<Flag name="IBSS"			position="1" size="1" value="0" />
+				<Flag name="CFPollable"		position="2" size="1" value="0" />
+				<Flag name="CFPollRequest"	position="3" size="1" value="0" />
+				<Flag name="Privacy"		position="4" size="1" value="1" />
+				<Flag name="ShortPreamble"	position="5" size="1" value="0" />
+				<Flag name="PBCC"			position="6" size="1" value="0" />
+				<Flag name="ChannelAgility"	position="7" size="1" value="0" />
+				<Flag name="SpectrumMgmt"	position="8" size="1" value="0" />
+				<Flag name="QoS"			position="9" size="1" value="0" />
+				<Flag name="ShortSlotTime"	position="10" size="1" value="1" />
+				<Flag name="APSD"			position="11" size="1" value="0" />
+				<Flag name="Reserved"		position="12" size="1" value="0" />
+				<Flag name="DSSSOFDM"		position="13" size="1" value="0" />
+				<Flag name="DelayedBlockAck"	position="14" size="1" value="0" />
+				<Flag name="ImmediateBlockAck"	position="15" size="1" value="0" />
+			</Flags>
+			
+			<Number name="StatusCode" size="16" value="0"/>
+			<Number name="AssociationId" size="16" value="2"/>
+			
+			<Block name="IE_SupportedRates">
+				<Number name="ElementId" size="8" valueType="hex" value="1" />
+				<Number name="Length" size="8">
+					<Relation type="size" of="Body" />
+				</Number>
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Blob name="Rates" valueType="hex" value="82 84 8b 96 12 24 48 6c"/>
+				</Block>
+			</Block>
+			
+			<Block name="IE_ExtendedSupportedRates" ref="IE">
+				<Number name="ElementId" size="8" value="50" />
+				<Block name="Body">
+					<Relation type="size" from="Length"/>
+					
+					<Blob name="Rates" valueType="hex" value="0c 12 18 24 30 48 60 6c"/>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
+
+  <DataModel name="emptyModel">
+    <Blob />
+  </DataModel>
+  
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="call" method="beacon">
+				<Param name="data" type="in">
+					<DataModel ref="Beacon"/>
+				</Param>
+			</Action>
+
+      <Action type="call" method="probe">
+        <Param name="data" type="in">
+          <DataModel ref="ProbeResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="authentication">
+        <Param name="data" type="in">
+          <DataModel ref="AuthenticationResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="association">
+				<Param name="data" type="in">
+					<DataModel ref="AssociationResponse"/>
+				</Param>
+			</Action>
+
+      <Action type="input">
+				<DataModel ref="emptyModel"/>
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Test name="TheTest">
+		<StateModel ref="TheState"/>
+		<Publisher class="AmtWifi">
+			<!-- not kwargs! -->
+			<Param name="channel" value="11"/>
+			<Param name="mac" value="ca ce ca ce ca ce" valueType="hex" />
+			<Param name="device" value="\\\\.\\airpcap00" />
+			<Param name="target_mac" value="00:24:d7:12:7b:d8" />
+		</Publisher>
+	</Test>
+	
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		<!--		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+		-->
+		
+		<Test ref="TheTest"/>
+	</Run>
+	
+</Peach>
+<!-- end -->

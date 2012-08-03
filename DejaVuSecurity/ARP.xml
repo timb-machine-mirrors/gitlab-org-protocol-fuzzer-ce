@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="ARP">
+    <Number name="HTYPE" size="16"/>
+    <Number name="PTYPE" size="16"/>
+    <Number name="HLEN" size="8"/>
+    <Number name="PLEN" size="8"/>
+    <Number name="OPER" size="16"/>
+    <Blob name="SHA" length="6"/>
+    <Blob name="SPA" length="4"/>
+    <Blob name="THA" length="6"/>
+    <Blob name="TPA" length="4"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="ARP"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <Publisher class="raw.Raw">
+      <Param name="interface" value="0.0.0.0"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->

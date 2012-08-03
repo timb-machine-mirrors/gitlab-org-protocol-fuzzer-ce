@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!--
+		ICMPv6 Router Advertisement Fuzzer
+		
+		This fuzzer targets the basic ICMPv6 protocol of AMT 6.1.
+		
+		Peach Version: 2.3.8
+		
+		Author:
+			Michael Eddington (mike@dejavusecurity.com)
+			Eric Rachner (eric@dejavusecurity.com)
+		
+	-->
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<Import from="ipv6" import="*"/>
+	<!-- filename is ipv6.py -->
+
+	<Defaults>
+		<Number size="8" signed="false" endian="big"/>
+	</Defaults>
+
+	<!-- ======================================================================================================================= -->
+
+	<DataModel name="IPv6Address">
+		<!--
+		TODO: maybe rethink the default value here?
+		-->
+		<Blob name="AddressValue" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96"/>
+	</DataModel>
+
+
+	<!--
+	TODO: define pad1 & padN option types, then define a datamodel for crazy made-up
+	option types
+	-->
+
+	<DataModel name="OptionsTLV">
+		<Flags name="OptionType" size="8" endian="big">
+			<Flag name="DefaultAction" size="2" position="0" value="0"/>
+			<!-- when this is 0, we have a pad1 option; when 1, it is padN -->
+			<Flag name="OptionDataFixed" size="1" position="2" value="0"/>
+			<Flag name="OptionIDSuffix" size="5" position="3" value="1"/>
+		</Flags>
+		<!--
+		  these options fields are used by hob-by-hop & dest options extension headers.
+		  all extension headers must be a multiple of 8 bytes in size; the elements within
+		  an extension header must be aligned on their natural size; i.e. a 2-byte element
+		  is 2-byte aligned, etc.  this implies that valid options fields won't have weird
+		  lengths like 6 or any odd number other than 1 or anything larger than 8, which is
+		  kind of a weird constraint.
+		  
+		        WTF:
+		  * we must make sure an OptionsTLV field's overall length is appropriate for
+		  its beginning alignment.
+		  * we must also make sure that the last OptionsTLV field is padded to an 8-byte
+		  boundary.
+		  
+		  actually all of this seems wrong.  temporarily just doing a dummy option that's
+		  6 bytes long and calling it good
+		  -->
+		<Number name="OptionDataLen" size="8" value="4"/>
+		<Blob name="Dummy" value="frop"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_HopByHop">
+		<Number name="NextHeader" size="8" value="58">
+			<!-- WTF: how to fix this up? -->
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_HopByHop"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<Number name="HeaderLength" signed="false" size="8">
+			<Relation type="size" of="IPv6Header_HopByHop" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<Block ref="OptionsTLV" minOccurs="1" name="OptionsTLV"/>
+		<!-- WTF: somehow we have to specify that the size of the optionsTLV blocks must be padded to 8-byte boundaries -->
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_Routing">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_Routing"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<!--
+    the HeaderLength number is constrained to ensure that no odd values are generated
+    (hosts are supposed to discard these per rfc. not that that guarantees they will, i know..)
+    -->
+		<Number name="HeaderLength" signed="false" size="8" constraint="(value+1)&amp;1">
+			<Relation type="size" of="IPv6Header_Routing" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<!--
+    as of now, only a type 0 routing header is defined by IETF, so this section will
+    specify a type 0 header
+    -->
+		<Number size="8" name="RoutingType" value="0"/>
+		<!--
+    per rfc, hosts are supposed to discard packets where SegmentsLeft > the # of IPv6 addrs in the
+    header.  it might be worth considering a constraint on SegmentsLeft for that reason
+    -->
+		<Number size="8" name="SegmentsLeft" signed="false"/>
+		<!--
+    at this point we are 4 bytes into the routing header.  as with any other type of optional header,
+    the total length of the header must be divisible by 8.  the type-sepecific data section which follows
+    must therefore be of a length divisible by 8, plus 4.  this reserved field takes care of the plus 4.    
+    -->
+		<Blob valueType="hex" length="4" name="Reserved" value="00 00 00 00"/>
+		<Block ref="IPv6Address" minOccurs="1"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_Fragment">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_Fragment"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Number size="8" name="Reserved" value="0"/>
+		<Flags name="FragmentHeaderFlags" size="16" endian="big">
+			<Flag name="FragmentOffset" size="13" position="0" value="0"/>
+			<Flag name="Reserved" size="2" position="13" value="0"/>
+			<Flag name="More" size="1" position="15" value="0"/>
+		</Flags>
+		<Number size="32" endian="big" name="Identification"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_DestOptions">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_DestOptions"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<Number name="HeaderLength" signed="false" size="8">
+			<Relation type="size" of="IPv6Header_DestOptions" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<Blob valueType="hex" name="dummy" value="01 04 de ad be ef"/>
+	</DataModel>
+
+	<DataModel name="Icmpv6_RouterSolicitation">
+		<Number name="Type" size="8" value="133" token="true"/>
+		<Number name="Code" size="8" value="0"/>
+		<Number name="Checksum" signed="false" size="16" endian="little">
+			<Fixup class="Icmpv6ChecksumFixup">
+				<Param name="ref" value="Icmpv6_RouterAdvertisement"/>
+			</Fixup>
+		</Number>
+		
+		<Number size="32" name="Reserved" />
+		
+		<Choice name="Options" minOccurs="0" maxOccurs="1000">
+			
+			<Block name="SourceAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="1" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="SourceAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" value="AAAAAA"/>
+			</Block>
+			<Block name="TargetAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="2" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="TargetAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" value="AAAAAA"/>
+			</Block>
+			<Block name="PrefixInformation">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="3" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="PrefixInformation" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Number name="PrefixLength" size="8" value="8"/>
+					<Flags name="Flags" size="8">
+						<Flag name="OnLink" position="0" size="1" value="1"/>
+						<Flag name="AutonomousAddress" position="1" size="1" value="1"/>
+					</Flags>
+					
+					<Number name="ValidLifetime" size="32" value="10000"/>
+					<Number name="PreferredLifetime" size="32" value="10000"/>
+					<Number size="32" value="0"/>
+					<Blob name="Prefix" length="16" valueType="hex" value="fe80610a7b1056091eae"/>
+				</Block>
+			</Block>
+			<Block name="RedirectedHeader">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="4" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="RedirectedHeader" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="6" />
+					<Blob name="IpHeaderData" value="AAAAAAAA" />
+				</Block>
+			</Block>
+			<Block name="MTU">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="5" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="MTU" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					
+					<Blob length="2" />
+					<Number name="MTU" size="32" value="2000" />
+				</Block>
+			</Block>
+			
+		</Choice>
+	</DataModel>
+
+	<DataModel name="Icmpv6_RouterAdvertisement">
+		<Number name="Type" size="8" value="134" token="true"/>
+		<Number name="Code" size="8" value="0"/>
+		<Number name="Checksum" signed="false" size="16" endian="little">
+			<Fixup class="Icmpv6ChecksumFixup">
+				<Param name="ref" value="Icmpv6_RouterAdvertisement"/>
+			</Fixup>
+		</Number>
+
+		<Number size="8" name="CurHopLimit" value="1" />
+		
+		<Flags size="8" name="AutoconfigFlags" endian="big">
+			<Flag name="ManagedAddressConfiguration" position="0" size="1" value="0"/>
+			<Flag name="OtherStatefullConfiguration" position="1" size="1" value="0"/>
+		</Flags>
+		
+		<Number size="16" name="RouterLifetime" value="100"/>
+		<Number size="32" name="ReachableTime" value="10000"/>
+		<Number size="32" name="RetransTimer" value="5000"/>
+		
+		<Choice name="Options" minOccurs="0" maxOccurs="1000">
+			
+			<Block name="SourceAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="1" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="SourceAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" value="AAAAAA"/>
+			</Block>
+			<Block name="TargetAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="2" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="TargetAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" value="AAAAAA"/>
+			</Block>
+			<Block name="PrefixInformation">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="3" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="PrefixInformation" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Number name="PrefixLength" size="8" value="8"/>
+					<Flags name="Flags" size="8" endian="big">
+						<Flag name="OnLink" position="0" size="1" value="1"/>
+						<Flag name="AutonomousAddress" position="1" size="1" value="1"/>
+					</Flags>
+					
+					<Number name="ValidLifetime" size="32" value="10000"/>
+					<Number name="PreferredLifetime" size="32" value="10000"/>
+					<Number size="32" value="0"/>
+					<Blob name="Prefix" length="16" valueType="hex" value="fe80610a7b1056091eae"/>
+				</Block>
+			</Block>
+			<Block name="RedirectedHeader">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="4" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="RedirectedHeader" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="6" />
+					<Blob name="IpHeaderData" value="AAAAAAAA" />
+				</Block>
+			</Block>
+			<Block name="MTU">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="5" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="MTU" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="2" />
+					<Number name="MTU" size="32" value="2000" />
+				</Block>
+			</Block>
+			
+		</Choice>
+	</DataModel>
+
+
+	<DataModel name="IPv6MainDataModel">
+		<Flags name="Header" size="32" endian="big">
+			<Flag name="Version" size="4" position="0" value="6"/>
+			<Flag name="TrafficClass" size="8" position="4" value="0"/>
+			<Flag name="FlowLabel" size="20" position="12" value="0"/>
+		</Flags>
+		<Number name="PayloadLength" size="16">
+			<Relation type="size" of="Payload"/>
+		</Number>
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6MainDataModel"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Number name="HopLimit" size="8" value="10"/>
+		<!--
+			discontent virtual
+			fe80::20c:29ff:fe50:af71
+			fe 80 00 00 00 00 00 00 02 0c 29 ff fe 50 af 71
+			
+			vmware gw
+			fe80::31f6:9fa4:e243:4a44
+			fe 80 00 00 00 00 00 00 31 f6 9f a4 e2 43 4a 44
+			
+			malcontent wireless
+			fe80::5883:210d:2008:d60b
+			fe 80 00 00 00 00 00 00 58 83 21 0d 20 08 d6 0b
+			
+			mike laptop
+			fe80::610a:7b10:5609:1eae
+			fe 80 00 00 00 00 00 00 61 0a 7b 10 56 09 1e ae 
+			
+			target
+			FE80::E009:3A58:8AD4:3696
+			fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96
+			
+			10.0.1.222
+			FE80::3705:97C0:DBD5:A76F
+			fe 80 00 00 00 00 00 00 37 05 97 C0 DB D5 A76F
+			
+			10.0.1.42
+			fe80::225:9cff:fe2f:c34b
+			fe 80 00 00 00 00 00 00 02 25 9c ff fe 2f c3 4b
+		-->
+		<Blob name="SourceAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 02 25 9c ff fe 2f c3 4b"/>
+		<Blob name="DestinationAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 37 05 97 C0 DB D5 A76F"/>
+		<Block name="Payload">
+			<Relation type="size" from="PayloadLength"/>
+
+			<Choice name="Headers" minOccurs="0" maxOccurs="10000">
+				<Block name="Icmpv6_RouterAdvertisement" ref="Icmpv6_RouterAdvertisement" />
+				<Block name="Icmpv6_RouterSolicitation" ref="Icmpv6_RouterSolicitation" />
+			</Choice>
+			
+			<Blob name="Icmpv6_EchoRequest" />
+		</Block>
+	</DataModel>
+
+	<!-- ======================================================================================================================= -->
+
+	<StateModel name="TheState" initialState="Initial">
+
+		<State name="Initial">
+			<!--
+			<Action type="input">
+				<DataModel ref="IPv6MainDataModel"/>
+			</Action>
+			-->
+			<Action type="output">
+				<DataModel ref="IPv6MainDataModel"/>
+				<Data>
+					<Field name="Payload.Headers[0].Icmpv6_RouterAdvertisement.Options[0].PrefixInformation" value=""/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="RemoteAmtAgent" location="http://127.0.0.1:9002">
+		<Import from="amt6" import="*"/>
+
+		<Monitor class="AmtSoapMonitor">
+			<Param name="url" value="http://10.0.1.42:16992/EventManagerService"/>
+			<Param name="authurl" value="http://10.0.1.42:16992"/>
+			<Param name="user" value="admin"/>
+			<Param name="password" value="Admin!98"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="TheTest">
+
+		<Agent ref="RemoteAmtAgent"/>
+		<StateModel ref="TheState"/>
+
+		<Publisher class="raw.RawIp6">
+			<Param name="destination" value="FE80::3705:97C0:DBD5:A76F"/>
+		</Publisher>
+
+	</Test>
+
+	<Run name="DefaultRun">
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs-icmpv6-router"/>
+		</Logger>
+
+		<Test ref="TheTest"/>
+
+	</Run>
+
+</Peach>
+<!-- end -->

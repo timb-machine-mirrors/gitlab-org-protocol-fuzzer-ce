@@ -1,0 +1,6 @@
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\bin\Debug\FaxPdfMaker.exe
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\bin\Debug\FaxPdfMaker.pdb
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\bin\Debug\itextsharp.dll
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\obj\Debug\ResolveAssemblyReference.cache
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\obj\Debug\FaxPdfMaker.exe
+C:\audits\adobe\CCITTFaxDecode\FaxPdfMaker\obj\Debug\FaxPdfMaker.pdb

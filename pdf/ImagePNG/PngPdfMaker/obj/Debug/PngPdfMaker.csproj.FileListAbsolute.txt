@@ -1,0 +1,6 @@
+C:\audits\adobe\ImagePNG\PngPdfMaker\bin\Debug\PngPdfMaker.exe
+C:\audits\adobe\ImagePNG\PngPdfMaker\bin\Debug\PngPdfMaker.pdb
+C:\audits\adobe\ImagePNG\PngPdfMaker\bin\Debug\itextsharp.dll
+C:\audits\adobe\ImagePNG\PngPdfMaker\obj\Debug\ResolveAssemblyReference.cache
+C:\audits\adobe\ImagePNG\PngPdfMaker\obj\Debug\PngPdfMaker.exe
+C:\audits\adobe\ImagePNG\PngPdfMaker\obj\Debug\PngPdfMaker.pdb

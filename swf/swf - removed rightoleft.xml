@@ -1,0 +1,2542 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+
+	<!-- Copyright (c) Adobe Systems Inc. -->
+	<!-- Michael Eddington -->
+	<!-- 11/04/2009 -->
+
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<!-- Custom extensions needed for SWF -->
+	<PythonPath path="."/>
+	<Import from="swf" import="*"/>
+
+	<Defaults>
+		<Number size="8" signed="false" endian="little"/>
+		<Flags size="8" endian="big" />
+	</Defaults>
+
+	<DataModel name="RECT">
+		<Custom class="Rect"/>
+	</DataModel>
+
+	<DataModel name="MATRIX">
+		<Custom name="CustomMatrix" class="Matrix"/>
+	</DataModel>
+
+	<DataModel name="ASSETS">
+		<Number name="Tag" size="16" endian="little"/>
+		<String name="Name" nullTerminated="true"/>
+	</DataModel>
+
+	<DataModel name="OFFSETANDNAME">
+		<Custom name="Offset" class="EncodedU32"/>
+		<String name="Name" nullTerminated="true"/>
+	</DataModel>
+
+	<DataModel name="SOUNDENVELOPE">
+		<Number name="Pos44" size="32" endian="little"/>
+		<Number name="LeftLevel" size="16" endian="little"/>
+		<Number name="RightLevel" size="16" endian="little"/>
+	</DataModel>
+
+	<DataModel name="SOUNDINFO">
+		<Flags size="8" endian="big">
+			<Flag name="Reserved" position="0" size="2"/>
+			<Flag name="SyncStop" position="2" size="1"/>
+			<Flag name="SyncNoMultiple" position="3" size="1"/>
+			<Flag name="HasEnvelope" position="4" size="1"/>
+			<Flag name="HasLoops" position="5" size="1"/>
+			<Flag name="HasOutPoint" position="6" size="1"/>
+			<Flag name="HasInPoint" position="7" size="1"/>
+		</Flags>
+
+		<Number name="InPoint" size="32" endian="little">
+			<Relation type="when" when="int(self.find('HasInPoint').getInternalValue()) == 1"/>
+		</Number>
+
+		<Number name="OutPoint" size="32" endian="little">
+			<Relation type="when" when="int(self.find('HasOutPoint').getInternalValue()) == 1"/>
+		</Number>
+
+		<Number name="LoopCount" size="16" endian="little">
+			<Relation type="when" when="int(self.find('HasLoops').getInternalValue()) == 1"/>
+		</Number>
+
+		<Block>
+			<Relation type="when" when="int(self.find('HasEnvelope').getInternalValue()) == 1"/>
+			<Number name="EnvPoints" size="32" endian="little">
+				<Relation type="count" of="EnvelopeRecords"/>
+			</Number>
+			<Block name="EnvelopeRecords" ref="SOUNDENVELOPE" minOccurs="1" maxOccurs="10000000">
+				<Relation type="count" from="EnvPoints"/>
+			</Block>
+		</Block>
+
+	</DataModel>
+
+	<DataModel name="KERNINGRECORD">
+		<Block>
+			<Relation type="when"
+				when="int(self.find('FontFlagsWideCodes').getInternalValue()) == 1"/>
+			<Number name="FontKerningCode1" size="16" endian="little"/>
+			<Number name="FontKerningCode2" size="16" endian="little"/>
+		</Block>
+		<Block>
+			<Relation type="when"
+				when="int(self.find('FontFlagsWideCodes').getInternalValue()) == 0"/>
+			<Number name="FontKerningCode1" size="8"/>
+			<Number name="FontKerningCode2" size="8"/>
+		</Block>
+
+		<Number name="FontKerningAdjustment" size="16" signed="true"/>
+	</DataModel>
+
+	<DataModel name="LANGCODE">
+		<Number name="LanguageCode" size="8"/>
+	</DataModel>
+
+	<DataModel name="RGB">
+		<Number name="Red" size="8"/>
+		<Number name="Green" size="8"/>
+		<Number name="Blue" size="8"/>
+	</DataModel>
+
+	<DataModel name="RGBA" ref="RGB">
+		<Number name="Alpha" size="8"/>
+	</DataModel>
+
+	<DataModel name="ARGB">
+		<Number name="Alpha" size="8"/>
+		<Number name="Red" size="8"/>
+		<Number name="Green" size="8"/>
+		<Number name="Blue" size="8"/>
+	</DataModel>
+
+	<DataModel name="FIXED">
+		<Number size="16"/>
+		<Number size="16"/>
+	</DataModel>
+
+	<DataModel name="FIXED8">
+		<Number size="8"/>
+		<Number size="8"/>
+	</DataModel>
+
+	<DataModel name="CXFORMWITHALPHA">
+		<Custom name="CustomCXFORMWITHALPHA" class="CXFORMWITHALPHA" />
+	</DataModel>
+
+	<DataModel name="CXFORM">
+		<Custom class="CXFORM"/>
+	</DataModel>
+
+
+	<DataModel name="MORPHGRADRECORD">
+		<Number name="StartRatio" size="8"/>
+		<Block name="StartColor" ref="RGBA"/>
+		<Number name="EndRatio" size="8"/>
+		<Block name="EndColor" ref="RGBA"/>
+	</DataModel>
+
+	<DataModel name="MORPHGRADIENT">
+		<Number name="NumGradients" size="8">
+			<Relation type="count" of="GradientRecords"/>
+		</Number>
+		<Block name="GradientRecords" ref="MORPHGRADRECORD" maxOccurs="1000">
+			<Relation type="count" from="NumGradients"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="MORPHFILLSTYLE">
+		<Choice>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex" value="00" token="true"/>
+				<Block name="Color1" ref="RGB"/>
+				<Block name="Color2" ref="RGBA"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex"
+					constraint="int(value) == 0x10 or int(value) == 0x12"/>
+				<Block name="StartGradientMatrix" ref="MATRIX"/>
+				<Block name="EndGradientMatrix" ref="MATRIX"/>
+				<Block name="Gradient" ref="MORPHGRADIENT"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8"
+					constraint="int(value) in [0x40, 0x41, 0x42, 0x43]"/>
+				<Block name="StartBitmapMatrix" ref="MATRIX"/>
+				<Block name="EndBitmapMatrix" ref="MATRIX"/>
+			</Block>
+			<Number name="Default" size="8"/>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="MORPHLINESTYLE">
+		<Number name="StartWidth" size="16" endian="little"/>
+		<Number name="EndWidth" size="16" endian="little"/>
+		<Block name="StartColor" ref="RGBA"/>
+		<Block name="EndColor" ref="RGBA"/>
+	</DataModel>
+
+	<DataModel name="MORPHLINESTYLE2">
+		<Number name="StartWidth" size="16" endian="little"/>
+		<Number name="EndWidth" size="16" endian="little"/>
+
+		<Flags size="8" endian="big">
+			<Flag name="StartCapStyle" position="0" size="2"/>
+			<Flag name="JoinStyle" position="2" size="3"/>
+			<Flag name="HasFillFlag" position="4" size="1"/>
+			<Flag name="NoHScaleFlag" position="5" size="1"/>
+			<Flag name="NoVScaleFlag" position="6" size="1"/>
+			<Flag name="PixelHintingFlag" position="7" size="1"/>
+		</Flags>
+		<Flags size="8">
+			<Flag name="NoClose" position="0" size="1"/>
+			<Flag name="EndCapStyle" position="1" size="2"/>
+		</Flags>
+
+		<Number name="MiterLimitFactor" size="16" endian="little">
+			<Relation type="when" when="int(self.find('JoinStyle').getInternalValue()) == 1"/>
+		</Number>
+
+		<Block>
+			<Relation type="when" when="int(self.find('HasFillFlag').getInternalValue()) == 0"/>
+			<Block name="StartColor" ref="RGBA"/>
+			<Block name="EndColor" ref="RGBA"/>
+		</Block>
+		<Block name="FillType" ref="MORPHFILLSTYLE">
+			<Relation type="when" when="int(self.find('HasFillFlag').getInternalValue()) == 1"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="MORPHLINESTYLES">
+		<Choice>
+			<Block>
+				<Number size="8" valueType="hex" value="ff" token="true"/>
+				<Number name="LineStyleCount" size="16" endian="little">
+					<Relation type="count" of="LineStyle"/>
+				</Number>
+				<Block name="LineStyle" maxOccurs="100000">
+					<Relation type="count" from="LineStyleCount"/>
+
+					<Block name="MORPHLINESTYLE" ref="MORPHLINESTYLE">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) == 46"/>
+					</Block>
+					<Block name="MORPHLINESTYLE2" ref="MORPHLINESTYLE2">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) == 84"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block>
+				<Number name="LineStyleCount" size="8" endian="little">
+					<Relation type="count" of="LineStyle"/>
+				</Number>
+				<Block name="LineStyle" maxOccurs="100000">
+					<Relation type="count" from="LineStyleCount"/>
+
+					<Block name="MORPHLINESTYLE" ref="MORPHLINESTYLE">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) == 46"/>
+					</Block>
+					<Block name="MORPHLINESTYLE2" ref="MORPHLINESTYLE2">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) == 84"/>
+					</Block>
+				</Block>
+			</Block>
+		</Choice>
+
+
+	</DataModel>
+
+	<DataModel name="COLORMATRIXFILTER">
+		<Blob name="Matrix" length="80"/>
+	</DataModel>
+
+	<DataModel name="CONVOLUTIONFILTER">
+		<Number name="MatrixX" size="8"/>
+		<Number name="MatrixY" size="8"/>
+		<Number name="Divisor" size="32" endian="little"/>
+		<Number name="Bias" size="32" endian="little"/>
+		<Number name="Matrix" size="32" endian="little" minOccurs="1" maxOccurs="100000"/>
+		<Block name="DefaultColor" ref="RGBA"/>
+		<Flags size="8">
+			<Flag name="Reserved" size="6" position="0"/>
+			<Flag name="Clamp" size="1" position="6"/>
+			<Flag name="PreserveAlpha" size="1" position="7"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="BLURFILTER">
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Flags size="8">
+			<Flag name="Passes" position="0" size="5"/>
+			<Flag name="Reserved" position="5" size="3"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="DROPSHADOWFILTER">
+		<Block name="DropShadowColor" ref="RGBA"/>
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Block name="Angle" ref="FIXED"/>
+		<Block name="Distance" ref="FIXED"/>
+		<Block name="Strength" ref="FIXED8"/>
+		<Flags size="8">
+			<Flag name="InnerShadow" position="0" size="1"/>
+			<Flag name="Knockout" position="1" size="1"/>
+			<Flag name="CompositeSource" position="2" size="1"/>
+			<Flag name="Passes" position="3" size="5"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="GLOWFILTER">
+		<Block name="GlowColor" ref="RGBA"/>
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Block name="Strength" ref="FIXED8"/>
+		<Flags size="8">
+			<Flag name="InnerShadow" position="0" size="1"/>
+			<Flag name="Knockout" position="1" size="1"/>
+			<Flag name="CompositeSource" position="2" size="1"/>
+			<Flag name="Passes" position="3" size="5"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="BEVELFILTER">
+		<Block name="ShadowColor" ref="RGBA"/>
+		<Block name="HighlightColor" ref="RGBA"/>
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Block name="Angle" ref="FIXED"/>
+		<Block name="Distance" ref="FIXED"/>
+		<Block name="Strength" ref="FIXED8"/>
+		<Flags size="8">
+			<Flag name="InnerShadow" position="0" size="1"/>
+			<Flag name="Knockout" position="1" size="1"/>
+			<Flag name="CompositeSource" position="2" size="1"/>
+			<Flag name="OnTop" position="3" size="1"/>
+			<Flag name="Passes" position="4" size="4"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="GRADIENTGLOWFILTER">
+		<Number name="NumColors" size="16" endian="little">
+			<Relation type="count" of="GradientColors"/>
+			<Relation type="count" of="GradientRatio"/>
+		</Number>
+
+		<Block name="GradientColors" ref="RGBA" minOccurs="1" maxOccurs="10000">
+			<Relation type="count" from="NumColors"/>
+		</Block>
+		<Number name="GradientRatio" size="8" minOccurs="1" maxOccurs="10000">
+			<Relation type="count" from="NumColors"/>
+		</Number>
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Block name="Angle" ref="FIXED"/>
+		<Block name="Distance" ref="FIXED"/>
+		<Block name="Strength" ref="FIXED8"/>
+		<Flags size="8">
+			<Flag name="InnerShadow" position="0" size="1"/>
+			<Flag name="Knockout" position="1" size="1"/>
+			<Flag name="CompositeSource" position="2" size="1"/>
+			<Flag name="OnTop" position="3" size="1"/>
+			<Flag name="Passes" position="4" size="4"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="GRADIENTBEVELFILTER">
+		<Number name="NumColors" size="16" endian="little">
+			<Relation type="count" of="GradientColors"/>
+			<Relation type="count" of="GradientRatio"/>
+		</Number>
+
+		<Block name="GradientColors" ref="RGBA" minOccurs="1" maxOccurs="10000">
+			<Relation type="count" from="NumColors"/>
+		</Block>
+		<Number name="GradientRatio" size="8" minOccurs="1" maxOccurs="10000">
+			<Relation type="count" from="NumColors"/>
+		</Number>
+		<Block name="BlurX" ref="FIXED"/>
+		<Block name="BlurY" ref="FIXED"/>
+		<Block name="Angle" ref="FIXED"/>
+		<Block name="Distance" ref="FIXED"/>
+		<Block name="Strength" ref="FIXED8"/>
+		<Flags size="8">
+			<Flag name="InnerShadow" position="0" size="1"/>
+			<Flag name="Knockout" position="1" size="1"/>
+			<Flag name="CompositeSource" position="2" size="1"/>
+			<Flag name="OnTop" position="3" size="1"/>
+			<Flag name="Passes" position="4" size="4"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="FILTER">
+		<Choice>
+			<Block name="DropShadowFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="0" token="true"/>
+				<Block name="DropShadowFilter" ref="DROPSHADOWFILTER"/>
+			</Block>
+			<Block name="BlurFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="1" token="true"/>
+				<Block name="BlurFilter" ref="BLURFILTER"/>
+			</Block>
+			<Block name="GlowFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="2" token="true"/>
+				<Block name="GlowFilter" ref="GLOWFILTER"/>
+			</Block>
+			<Block name="BevelFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="3" token="true"/>
+				<Block name="BevelFilter" ref="BEVELFILTER"/>
+			</Block>
+			<Block name="GradientGlowFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="4" token="true"/>
+				<Block name="GradientGlowFilter" ref="GRADIENTGLOWFILTER"/>
+			</Block>
+			<Block name="ConvolutionFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="5" token="true"/>
+				<Block name="ConvolutionFilter" ref="CONVOLUTIONFILTER"/>
+			</Block>
+			<Block name="ColorMatrixFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="6" token="true"/>
+				<Block name="ColorMatrixFilter" ref="COLORMATRIXFILTER"/>
+			</Block>
+			<Block name="GradientBevelFilterBlock">
+				<Number name="FilterId" size="16" endian="little" value="7" token="true"/>
+				<Block name="GradientBevelFilter" ref="GRADIENTBEVELFILTER"/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="GRADRECORD">
+		<Number name="Ratio" size="8"/>
+		<Block name="Color1" ref="RGB">
+			<Relation type="when" when="int(self.find('TagType').getInternalValue()) in [2, 22]"/>
+		</Block>
+		<Block name="Color2" ref="RGBA">
+			<Relation type="when" when="int(self.find('TagType').getInternalValue()) not in [2, 22]"
+			/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="GRADIENT">
+		<Flags size="8">
+			<Flag name="SpreadMode" position="0" size="2"/>
+			<Flag name="InterpolationMode" position="2" size="2"/>
+			<Flag name="NumGradients" position="4" size="4">
+				<Relation type="count" of="GradientRecord"/>
+			</Flag>
+		</Flags>
+		<Block name="GradientRecord" ref="GRADRECORD" minOccurs="1" maxOccurs="10000">
+			<Relation type="count" from="NumGradients"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="FOCALGRADIENT" ref="GRADIENT">
+		<Block name="FocalPoint" ref="FIXED8"/>
+	</DataModel>
+
+	<DataModel name="FILTERLIST">
+		<Number name="NumberOfFilters" size="8">
+			<Relation type="count" of="Filter"/>
+		</Number>
+		<Block name="Filter" ref="FILTER" minOccurs="1" maxOccurs="256">
+			<Relation type="count" from="NumberOfFilters"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="CLIPEVENTFLAGS">
+		<Flags size="16">
+			<Flag name="ClipEventKeyUp" position="0" size="1"/>
+			<Flag name="ClipEventKeyDown" position="1" size="1"/>
+			<Flag name="ClipEventMouseUp" position="2" size="1"/>
+			<Flag name="ClipEventMouseDown" position="3" size="1"/>
+			<Flag name="ClipEventMouseMove" position="4" size="1"/>
+			<Flag name="ClipEventUnload" position="5" size="1"/>
+			<Flag name="ClipEventEnterFrame" position="6" size="1"/>
+			<Flag name="ClipEventLoad" position="7" size="1"/>
+			<Flag name="ClipEventDragOver" position="8" size="1"/>
+			<Flag name="ClipEventRollOut" position="9" size="1"/>
+			<Flag name="ClipEventRollOver" position="10" size="1"/>
+			<Flag name="ClipEventReleaseOutside" position="11" size="1"/>
+			<Flag name="ClipEventRelease" position="12" size="1"/>
+			<Flag name="ClipEventPress" position="13" size="1"/>
+			<Flag name="ClipEventInitialize" position="14" size="1"/>
+			<Flag name="ClipEventData" position="15" size="1"/>
+		</Flags>
+		<Flags size="16">
+			<Relation type="when" when="int(self.find('Header.version').getInternalValue()) >= 6"/>
+
+			<Flag name="Reserved1" position="0" size="5"/>
+			<Flag name="ClipEventConstruct" position="5" size="1"/>
+			<Flag name="ClipEventKeyPress" position="6" size="1"/>
+			<Flag name="ClipEventDragout" position="7" size="1"/>
+			<Flag name="Reserved2" position="8" size="8"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="LINESTYLE">
+		<Number name="Width" size="16"/>
+		<Block name="Color1" ref="RGB">
+			<Relation type="when" when="int(self.find('TagType').getInternalValue()) in [2, 22]"/>
+		</Block>
+		<Block name="Color2" ref="RGBA">
+			<Relation type="when" when="int(self.find('TagType').getInternalValue()) not in [2, 22]"
+			/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="FILLSTYLE">
+		<Choice>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex" value="00" token="true"/>
+				<Block name="Color1" ref="RGB">
+					<Relation type="when"
+						when="int(self.find('TagType').getInternalValue()) in [2, 22]"/>
+				</Block>
+				<Block name="Color2" ref="RGBA">
+					<Relation type="when"
+						when="int(self.find('TagType').getInternalValue()) not in [2, 22]"/>
+				</Block>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex"
+					constraint="int(value) == 0x10 or int(value) == 0x12"/>
+				<Block name="GraientMatrix" ref="MATRIX"/>
+				<Block name="Gradient" ref="GRADIENT"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex" value="13" token="true"/>
+				<Block name="Gradient" ref="FOCALGRADIENT"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8"
+					constraint="int(value) in [0x40, 0x41, 0x42, 0x43]"/>
+				<Number name="BitmapId" size="16" endian="little"/>
+				<Block name="BitmapMatrix" ref="MATRIX"/>
+			</Block>
+			<Number name="Default" size="8"/>
+		</Choice>
+	</DataModel>
+
+
+	<DataModel name="LINESTYLE2">
+		<Number name="Width" size="16"/>
+		<Flags size="8">
+			<Flag name="StartCapStyle" position="0" size="2"/>
+			<Flag name="JoinStyle" position="2" size="2"/>
+			<Flag name="HasFillFlag" position="4" size="1"/>
+			<Flag name="NoHScaleFlag" position="5" size="1"/>
+			<Flag name="NoVScaleFlag" position="6" size="1"/>
+			<Flag name="PixelHintingFlag" position="7" size="1"/>
+		</Flags>
+		<Flags size="8">
+			<Flag name="Reserved" position="0" size="5"/>
+			<Flag name="NoClose" position="5" size="1"/>
+			<Flag name="EndCapStyle" position="6" size="2"/>
+		</Flags>
+		<Number name="MiterLImitFactor" size="16" endian="little">
+			<Relation type="when" when="int(self.find('JoinStyle').getInternalValue()) == 2"/>
+		</Number>
+		<Block name="FillType" ref="FILLSTYLE">
+			<Relation type="when" when="int(self.find('HasFillFlag').getInternalValue()) == 1"/>
+		</Block>
+		<Block name="Color" ref="RGBA">
+			<Relation type="when" when="int(self.find('HasFillFlag').getInternalValue()) == 0"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="LINESTYLEARRAY">
+		<Choice>
+			<Block>
+				<Number size="8" valueType="hex" value="ff" token="true"/>
+				<Number name="LineStyleCount" size="16" endian="little">
+					<Relation type="count" of="Style"/>
+				</Number>
+				<Block name="Style" minOccurs="1" maxOccurs="10000">
+					<Relation type="count" from="LineStyleCount"/>
+					<Block name="LineStyle1" ref="LINESTYLE">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) in [2, 22, 32]"/>
+					</Block>
+					<Block name="LineStyle2" ref="LINESTYLE2">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) in [83]"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block>
+				<Number name="LineStyleCount" size="8">
+					<Relation type="count" of="Style"/>
+				</Number>
+				<Block name="Style" minOccurs="1" maxOccurs="10000">
+					<Relation type="count" from="LineStyleCount"/>
+
+					<Block name="LineStyle1" ref="LINESTYLE">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) in [2, 22, 32]"/>
+					</Block>
+					<Block name="LineStyle2" ref="LINESTYLE2">
+						<Relation type="when"
+							when="int(self.find('TagType').getInternalValue()) in [83]"/>
+					</Block>
+				</Block>
+			</Block>
+		</Choice>
+
+	</DataModel>
+
+	<DataModel name="FILLSTYLEARRAY">
+		<Choice>
+			<Block>
+				<Number name="FillStyleCount" size="8" valueType="hex" value="FF" token="true"/>
+				<Number name="FillStyleCountExtended" size="16" endian="little">
+					<Relation type="count" of="FillStyle"/>
+				</Number>
+				<Block name="FillStyle" ref="FILLSTYLE" minOccurs="1" maxOccurs="10000">
+					<Relation type="count" from="FillStyleCountExtended"/>
+				</Block>
+			</Block>
+			<Block>
+				<Number name="FillStyleCount" size="8">
+					<Relation type="count" of="FillStyle"/>
+				</Number>
+				<Block name="FillStyle" ref="FILLSTYLE" minOccurs="1" maxOccurs="10000">
+					<Relation type="count" from="FillStyleCount"/>
+				</Block>
+			</Block>
+		</Choice>
+
+	</DataModel>
+
+	<DataModel name="SHAPERECORD">
+		<Custom class="SHAPERECORD"/>
+	</DataModel>
+
+	<DataModel name="SHAPE">
+		<Flags size="8">
+			<Flag name="NumFillBits" position="0" size="4"/>
+			<Flag name="NumLineBits" position="4" size="4"/>
+		</Flags>
+
+		<Custom name="ShapeRecordArray" class="SHAPERECORDARRAY"/>
+	</DataModel>
+
+	<DataModel name="SHAPEWITHSTYLE">
+		<Block name="FillStyles" ref="FILLSTYLEARRAY"/>
+		<Block name="LineStyles" ref="LINESTYLEARRAY"/>
+		<Flags size="8">
+			<Flag name="NumFillBits" size="4" position="0"/>
+			<Flag name="NumLineBits" size="4" position="4"/>
+		</Flags>
+		<Custom name="ShapeRecordArray" class="SHAPERECORDARRAY"/>
+	</DataModel>
+
+	<DataModel name="TYPECONST">
+		<Choice>
+			<Block name="String">
+				<Number name="type" size="8" value="0" token="true"/>
+				<String name="value" nullTerminated="true"/>
+			</Block>
+			<Block name="Float">
+				<Number name="type" size="8" value="1" token="true"/>
+				<Number name="value" size="32"/>
+			</Block>
+			<Block name="RegisterNumber">
+				<Number name="type" size="8" value="4" token="true"/>
+				<Number name="value" size="8"/>
+			</Block>
+			<Block name="Boolean">
+				<Number name="type" size="8" value="5" token="true"/>
+				<Number name="value" size="8"/>
+			</Block>
+			<Block name="Doubt">
+				<Number name="type" size="8" value="6" token="true"/>
+				<Number name="value" size="64"/>
+			</Block>
+			<Block name="Integer">
+				<Number name="type" size="8" value="7" token="true"/>
+				<Number name="value" size="32" signed="true"/>
+			</Block>
+			<Block name="Constant8">
+				<Number name="type" size="8" value="8" token="true"/>
+				<Number name="value" size="8" signed="true"/>
+			</Block>
+			<Block name="Constant16">
+				<Number name="type" size="8" value="9" token="true"/>
+				<Number name="value" size="16" signed="true"/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="BUTTONRECORD">
+		<Flags size="8">
+			<Flag name="ButtonReserved" position="0" size="2"/>
+			<Flag name="ButtonHasBlendMode" position="2" size="1"/>
+			<Flag name="ButtonHasFilterList" position="3" size="1"/>
+			<Flag name="ButtonStateHitTest" position="4" size="1"/>
+			<Flag name="ButtonStateDown" position="5" size="1"/>
+			<Flag name="ButtonStateOver" position="6" size="1"/>
+			<Flag name="ButtonStateUp" position="7" size="1"/>
+		</Flags>
+		<Number name="CharacterID" size="16" endian="little"/>
+		<Number name="PlaceDepth" size="16" endian="little"/>
+		<Block name="PlaceMatrix" ref="MATRIX"/>
+
+		<Block>
+			<Relation type="when" when="int(self.find('TagType').getInternalValue()) == 34"/>
+
+			<Block name="ColorTransform" ref="CXFORMWITHALPHA"/>
+
+			<Block name="FilterList" ref="FILTERLIST">
+				<Relation type="when"
+					when="int(self.find('ButtonHasFilterList').getInternalValue()) == 1"/>
+			</Block>
+
+			<Number name="BlendMode" size="8">
+				<Relation type="when"
+					when="int(self.find('ButtonHasBlendMode').getInternalValue()) == 1"/>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BUTTONRECORDEND">
+		<Flags size="8">
+			<Flag name="ButtonReserved" position="0" size="2" value="0" token="true"/>
+			<Flag name="ButtonHasBlendMode" position="2" size="1" value="0" token="true"/>
+			<Flag name="ButtonHasFilterList" position="3" size="1" value="0" token="true"/>
+			<Flag name="ButtonStateHitTest" position="4" size="1" value="0" token="true"/>
+			<Flag name="ButtonStateDown" position="5" size="1" value="0" token="true"/>
+			<Flag name="ButtonStateOver" position="6" size="1" value="0" token="true"/>
+			<Flag name="ButtonStateUp" position="7" size="1" value="0" token="true"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="REGISTERPARAM">
+		<Number name="Register" size="8"/>
+		<String name="ParamName" nullTerminated="true"/>
+	</DataModel>
+
+	<DataModel name="ACTIONRECORD">
+		<Choice name="ActionCodeChoice">
+			<Block name="ActionGotoFrame">
+				<Number name="ActionCode" size="8" endian="little" value="129" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="Frame" size="16" endian="little"/>
+			</Block>
+			<Block name="ActionGetUrl">
+				<Number name="ActionCode" size="8" endian="little" value="203" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<String name="UrlString" nullTerminated="true"/>
+				<String name="TargetString" nullTerminated="true"/>
+			</Block>
+			<Block name="ActionWaitForFrame">
+				<Number name="ActionCode" size="8" endian="little" value="138" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="Frame" size="16" endian="little"/>
+				<Number name="SkipCount" size="8" endian="little"/>
+			</Block>
+			<Block name="ActionSetTarget">
+				<Number name="ActionCode" size="8" endian="little" value="139" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<String name="TargetName" nullTerminated="true"/>
+			</Block>
+			<Block name="ActionGotoLabel">
+				<Number name="ActionCode" size="8" endian="little" value="140" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<String name="Label" nullTerminated="true"/>
+			</Block>
+			<Block name="ActionPush">
+				<Number name="ActionCode" size="8" endian="little" value="150" token="true"/>
+				<Number name="Length" size="16" endian="little">
+					<Relation type="size" of="data"/>
+				</Number>
+				<Block name="data">
+					<Relation type="size" from="Length"/>
+					<Block name="TypeConst" ref="TYPECONST" minOccurs="1" maxOccurs="10000"/>
+				</Block>
+			</Block>
+			<Block name="ActionJump">
+				<Number name="ActionCode" size="8" endian="little" value="153" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="BranchOffset" size="16" endian="little" signed="true"/>
+			</Block>
+			<Block name="ActionIf">
+				<Number name="ActionCode" size="8" endian="little" value="157" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="BranchOffset" size="16" endian="little" signed="true"/>
+			</Block>
+			<Block name="ActionGetURL2">
+				<Number name="ActionCode" size="8" endian="little" value="154" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Flags name="Vars" size="8">
+					<Flag name="SendVarsMethod" position="0" size="2"/>
+					<Flag name="Reserved" position="2" size="4"/>
+					<Flag name="LoadTargetFlag" position="6" size="1"/>
+					<Flag name="LoadVariablesFlag" position="7" size="1"/>
+				</Flags>
+			</Block>
+			<Block name="ActionGotoFrame2">
+				<Number name="ActionCode" size="8" endian="little" value="158" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Choice name="SceneBiasChoice">
+					<Block name="SceneBias1">
+						<Flags name="Vars" size="8">
+							<Flag name="Reserved" position="0" size="6"/>
+							<Flag name="SceneBiasFlag" position="6" size="1" value="1" token="true"/>
+							<Flag name="PlayFlag" position="7" size="1"/>
+						</Flags>
+						<Number name="SceneBias" size="16" endian="little"/>
+					</Block>
+					<Flags name="Vars" size="8">
+						<Flag name="Reserved" position="0" size="6"/>
+						<Flag name="SceneBiasFlag" position="6" size="1"/>
+						<Flag name="PlayFlag" position="7" size="1"/>
+					</Flags>
+				</Choice>
+			</Block>
+			<Block name="ActionWaitForFrame2">
+				<Number name="ActionCode" size="8" endian="little" value="141" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="SkipCount" size="8" endian="little"/>
+			</Block>
+			<Block name="ActionConstantPool">
+				<Number name="ActionCode" size="8" endian="little" value="136" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="Count" size="16" endian="little">
+					<Relation type="count" of="Constant"/>
+				</Number>
+				<String name="Constant" nullTerminated="true" maxOccurs="10000">
+					<Relation type="count" from="Count"/>
+				</String>
+			</Block>
+			<Block name="ActionDefineFunction">
+				<Number name="ActionCode" size="8" endian="little" value="155" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<String name="FunctionName" nullTerminated="true"/>
+				<Number name="NumParams" size="16" endian="little">
+					<Relation type="count" of="Param"/>
+				</Number>
+				<String name="Param" nullTerminated="true" minOccurs="0" maxOccurs="10000">
+					<Relation type="count" from="NumParams"/>
+				</String>
+				<Number name="codeSize" size="16" endian="little"/>
+			</Block>
+			<Block name="ActionWidth">
+				<Number name="ActionCode" size="8" endian="little" value="148" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="Size" size="16" endian="little"/>
+			</Block>
+			<Block name="ActionStoreRegister">
+				<Number name="ActionCode" size="8" endian="little" value="135" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<Number name="RegisterNumber" size="8" endian="little"/>
+			</Block>
+			<Block name="ActionDefineFunction2">
+				<Number name="ActionCode" size="8" endian="little" value="142" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+				<String name="FunctionName" nullTerminated="true"/>
+				<Number name="NumParams" size="16" endian="little">
+					<Relation type="count" of="Param"/>
+				</Number>
+				<Number name="RegisterCount" size="8"/>
+				<Flags name="BitFlags" size="16" endian="big">
+					<Flag name="PreloadParentFlag" position="0" size="1"/>
+					<Flag name="PreloadRootFlag" position="1" size="1"/>
+					<Flag name="SuppressSuperFlag" position="2" size="1"/>
+					<Flag name="PreloadSuperFlag" position="3" size="1"/>
+					<Flag name="SuppressArgumentsFlag" position="4" size="1"/>
+					<Flag name="PreloadArgumentsFlag" position="5" size="1"/>
+					<Flag name="SuppressThisFlag" position="6" size="1"/>
+					<Flag name="PreloadThisFlag" position="7" size="1"/>
+					<Flag name="Reserved" position="8" size="7"/>
+					<Flag name="PreloadGlobalFlag" position="15" size="1"/>
+				</Flags>
+				<Block name="Param" ref="REGISTERPARAM" minOccurs="0" maxOccurs="10000">
+					<Relation type="count" from="NumParams"/>
+				</Block>
+				<Number name="codeSize" size="16" endian="little"/>
+			</Block>
+			<Block name="ActionTry">
+				<Number name="ActionCode" size="8" endian="little" value="143" token="true"/>
+				<Number name="Length" size="16" endian="little"/>
+
+				<Choice name="CatchNameOrRegister">
+					<Block name="CatchNameBlock">
+						<Flags name="Flags" size="8">
+							<Flag name="Reserved" position="0" size="5"/>
+							<Flag name="CatchInRegisterFlag" position="5" size="1" value="0"
+								token="true"/>
+							<Flag name="FinallyBlockFlag" position="6" size="1"/>
+							<Flag name="CatchBlockFlag" position="7" size="1"/>
+						</Flags>
+						<String name="CatchName" nullTerminated="true"/>
+					</Block>
+					<Block name="CatchNameBlock">
+						<Flags name="Flags" size="8">
+							<Flag name="Reserved" position="0" size="5"/>
+							<Flag name="CatchInRegisterFlag" position="5" size="1"/>
+							<Flag name="FinallyBlockFlag" position="6" size="1"/>
+							<Flag name="CatchBlockFlag" position="7" size="1"/>
+						</Flags>
+						<Number name="CatchRegister" size="8"/>
+					</Block>
+				</Choice>
+
+				<Number name="TrySize" size="16" endian="little">
+					<Relation type="size" of="TryBody"/>
+				</Number>
+				<Number name="CatchSize" size="16" endian="little">
+					<Relation type="size" of="CatchBody"/>
+				</Number>
+				<Number name="FinallySize" size="16" endian="little">
+					<Relation type="size" of="FinallyBody"/>
+				</Number>
+
+				<Blob name="TryBody">
+					<Relation type="size" from="TrySize"/>
+				</Blob>
+				<Blob name="CatchBody">
+					<Relation type="size" from="CatchSize"/>
+				</Blob>
+				<Blob name="FinallyBody">
+					<Relation type="size" from="FinallySize"/>
+				</Blob>
+
+			</Block>
+
+			<Block name="DefaultOver0x80">
+				<Number name="ActionCode" size="8" endian="little" constraint="int(value) >= 0x80"/>
+				<Number name="Length" size="16" endian="little">
+					<Relation type="size" of="data"/>
+				</Number>
+				<Blob name="data" analyzer="binary.Binary">
+					<Relation type="size" from="Length"/>
+				</Blob>
+			</Block>
+
+			<Block name="Default">
+				<Number name="ActionCode" size="8" endian="little"/>
+				<!-- <Blob analyzer="binary.Binary" /> -->
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="CLIPACTIONRECORD">
+		<Block name="EventFlags" ref="CLIPEVENTFLAGS"/>
+
+		<Number name="ActionRecordSize" size="32" endian="little">
+			<Relation type="size" of="Actions"/>
+		</Number>
+
+		<Number name="KeyCode" size="8">
+			<Relation type="when"
+				when="int(self.find('Header.version').getInternalValue())>5 and int(self.find('ClipEventKeyPress').getInternalValue()) == 1"
+			/>
+		</Number>
+
+		<Block name="Actions">
+			<Relation type="size" from="ActionRecordSize"/>
+
+			<Block name="Action" ref="ACTIONRECORD" minOccurs="1" maxOccurs="100000"/>
+		</Block>
+
+	</DataModel>
+
+	<DataModel name="CLIPACTIONS">
+		<Number name="Reserved" size="16" endian="little"/>
+		<Block name="AllEventFlags" ref="CLIPEVENTFLAGS"/>
+
+		<Block name="ClipActionRecord" ref="CLIPACTIONRECORD" minOccurs="1" maxOccurs="10000"/>
+
+		<Number name="ClipActionEndFlag1" size="32" endian="little">
+			<Relation type="when" when="int(self.find('Header.version').getInternalValue())>5"/>
+		</Number>
+		<Number name="ClipActionEndFlag2" size="16" endian="little">
+			<Relation type="when"
+				when="int(self.find('Header.version').getInternalValue())&lt;=5"/>
+		</Number>
+	</DataModel>
+
+	<DataModel name="Tag">
+		<Choice name="TagLengthChoice">
+			<Block name="NumLength">
+				<Flags name="Flags" size="16" padding="true">
+					<Flag name="TagType" position="0" size="10"/>
+					<Flag position="10" size="6" value="63" token="true"/>
+				</Flags>
+				<Number name="TagLength1" size="32" endian="little">
+					<Relation type="size" of="data"/>
+				</Number>
+			</Block>
+			<Flags name="FlagsLength" size="16" padding="true">
+				<Flag name="TagType" position="0" size="10"/>
+				<Flag name="TagLength1" position="10" size="6">
+					<Relation type="size" of="data"/>
+				</Flag>
+			</Flags>
+		</Choice>
+
+		<Blob name="data" analyzer="binary.Binary">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+		</Blob>
+	</DataModel>
+
+	<DataModel name="TagDoInitAction" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="59"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="59"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="SpriteId" size="16" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDoAction" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="12"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="12"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Block name="ActionRecord" ref="ACTIONRECORD" maxOccurs="10000"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDoABC" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="82"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="82"
+			token="true"/>
+
+		<Blob name="data" analyzer="binary.Binary">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+		</Blob>
+	</DataModel>
+
+	<DataModel name="TagPlaceObject" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="4"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="4"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Number name="Depth" size="16" endian="little"/>
+			<Block name="Matrix" ref="MATRIX"/>
+			<Blob name="ColorTransform"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagPlaceObject2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="26"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="26"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+
+			<Flags name="Flags" size="8" endian="big">
+				<Flag name="PlaceFlagHasClipActions" position="0" size="1"/>
+				<Flag name="PlaceFlagHasClipDepth" position="1" size="1"/>
+				<Flag name="PlaceFlagHasName" position="2" size="1"/>
+				<Flag name="PlaceFlagHasRatio" position="3" size="1"/>
+				<Flag name="PlaceFlagHasColorTransform" position="4" size="1"/>
+				<Flag name="PlaceFlagHasMatrix" position="5" size="1"/>
+				<Flag name="PlaceFlagHasCharacter" position="6" size="1"/>
+				<Flag name="PlaceFlagMove" position="7" size="1"/>
+			</Flags>
+
+			<Number name="Depth" size="16" endian="little"/>
+
+			<Block name="ClipActions" ref="CLIPACTIONS">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasClipActions').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="ClipDepth" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasClipDepth').getInternalValue()) == 1"/>
+			</Number>
+			<Number name="CharacterId" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasCharacter').getInternalValue()) == 1"/>
+			</Number>
+			<String name="Name" nullTerminated="true">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasName').getInternalValue()) == 1"/>
+			</String>
+			<Block name="Matrix" ref="MATRIX">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasMatrix').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="Ratio" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasRatio').getInternalValue()) == 1"/>
+			</Number>
+			<Block name="ColorTransform" ref="CXFORMWITHALPHA">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasColorTransform').getInternalValue()) == 1"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagPlaceObject3" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="70"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="70"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Flags name="Flags" size="8">
+				<Flag name="PlaceFlagHasClipActions" position="0" size="1"/>
+				<Flag name="PlaceFlagHasClipDepth" position="1" size="1"/>
+				<Flag name="PlaceFlagHasName" position="2" size="1"/>
+				<Flag name="PlaceFlagHasRatio" position="3" size="1"/>
+				<Flag name="PlaceFlagHasColorTransform" position="4" size="1"/>
+				<Flag name="PlaceFlagHasMatrix" position="5" size="1"/>
+				<Flag name="PlaceFlagHasCharacter" position="6" size="1"/>
+				<Flag name="PlaceFlagMove" position="7" size="1"/>
+			</Flags>
+			<Flags name="Flags2" size="8">
+				<Flag name="Reserved" position="0" size="3"/>
+				<Flag name="PlaceFlagHasImage" position="3" size="1"/>
+				<Flag name="PlaceFlagHasClassName" position="4" size="1"/>
+				<Flag name="PlaceFlagHasCacheAsBitmap" position="5" size="1"/>
+				<Flag name="PlaceFlagHasBlendMode" position="6" size="1"/>
+				<Flag name="PlaceFlagHasFilterList" position="7" size="1"/>
+			</Flags>
+			<Number name="Depth" size="16" endian="little"/>
+
+			<String name="ClassName" nullTerminated="true">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasClassName').getInternalValue()) == 1 || (int(self.find('PlaceFlagHasImage').getInternalValue()) == 1 and int(self.find('PlaceFlagHasCharacter').getInternalValue()) == 1) "
+				/>
+			</String>
+
+			<Block name="SurfaceFilterList" ref="FILTERLIST">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasFilterList').getInternalValue()) == 1"/>
+			</Block>
+
+			<Number name="BlendMode" size="8">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasBlendMode').getInternalValue()) == 1"/>
+			</Number>
+
+			<Block name="ClipActions" ref="CLIPACTIONS">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasClipActions').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="ClipDepth" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasClipDepth').getInternalValue()) == 1"/>
+			</Number>
+			<Number name="CharacterId" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasCharacter').getInternalValue()) == 1"/>
+			</Number>
+			<String name="Name" nullTerminated="true">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasName').getInternalValue()) == 1"/>
+			</String>
+			<Block name="Matrix" ref="MATRIX">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasMatrix').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="Ratio" size="16" endian="little">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasRatio').getInternalValue()) == 1"/>
+			</Number>
+			<Block name="ColorTransform" ref="CXFORMWITHALPHA">
+				<Relation type="when"
+					when="int(self.find('PlaceFlagHasColorTransform').getInternalValue()) == 1"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagRemoveObject" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="5"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="5"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Number name="Depth" size="16" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagRemoveObject2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="28"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="28"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="Depth" size="16" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSetBackgroundColor" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="9"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="9"
+			token="true"/>
+
+		<Block name="data" ref="RGB">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagFrameLabel" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="43"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="43"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<String name="Name" nullTerminated="true"/>
+			<Number name="Depth" size="8" endian="little">
+				<Relation type="when"
+					when="int(self.find('Header.version').getInternalValue())>=6 and (int(self.find('TagLength').getInternalValue()) - len(self.find('Name').getValue()))>0"
+				/>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagProtect" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="24"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="24"
+			token="true"/>
+	</DataModel>
+
+	<DataModel name="TagEnd" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="0"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="0"
+			token="true"/>
+	</DataModel>
+
+	<DataModel name="TagExportAssets" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="56"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="56"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="Count" size="16" endian="little">
+				<Relation type="count" of="Asset"/>
+			</Number>
+			<Block name="Asset" ref="ASSETS" minOccurs="1" maxOccurs="10000">
+				<Relation type="count" from="Count"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagImportAssets" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="57"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="57"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<String name="URL" nullTerminated="true"/>
+			<Number name="Count" size="16" endian="little">
+				<Relation type="count" of="Asset"/>
+			</Number>
+			<Block name="Asset" ref="ASSETS" minOccurs="1" maxOccurs="10000">
+				<Relation type="count" from="Count"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagEnableDebugger" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="58"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="58"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<String name="Password" nullTerminated="true"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagEnableDebugger2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="64"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="64"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="Reserved" size="16" endian="little"/>
+			<String name="Password" nullTerminated="true"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagScriptLimits" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="65"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="65"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="MaxRecursionDepth" size="16" endian="little"/>
+			<Number name="ScriptTimeoutSeconds" size="16" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSetTabIndex" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="66"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="66"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="Depth" size="16" endian="little"/>
+			<Number name="TabIndex" size="16" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagFileAttributes" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="69"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="69"
+			token="true"/>
+
+		<Flags name="data" size="32">
+			<Flag name="Reserved" position="0" size="3"/>
+			<Flag name="HasMetadata" position="3" size="1"/>
+			<Flag name="ActionScript3" position="4" size="1"/>
+			<Flag name="Reserved2" position="5" size="2"/>
+			<Flag name="UseNetwork" position="7" size="1"/>
+			<Flag name="Reserved3" position="8" size="24"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="TagImportAssets2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="71"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="71"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<String name="URL" nullTerminated="true"/>
+			<Number name="Reserved1" size="8" endian="little"/>
+			<Number name="Reserved2" size="8" endian="little"/>
+			<Number name="Count" size="16" endian="little">
+				<Relation type="count" of="Asset"/>
+			</Number>
+			<Block name="Asset" ref="ASSETS" minOccurs="1" maxOccurs="10000">
+				<Relation type="count" from="Count"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSymbolClass" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="76"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="76"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="NumSymbols" size="16" endian="little">
+				<Relation type="count" of="Symbol"/>
+			</Number>
+			<Block name="Symbol" ref="ASSETS" minOccurs="1" maxOccurs="10000"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagMetadata" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="77"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="77"
+			token="true"/>
+
+		<String name="data" nullTerminated="true"/>
+	</DataModel>
+
+	<DataModel name="TagDefinedScalingGrid" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="78"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="78"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Block name="Splitter" ref="RECT"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineSceneAndFrameLabelData" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="86"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="86"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Custom class="EncodedU32"/>
+			<Blob name="SceneAndFrameData" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineShape" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="2"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="2"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ShapeId" size="16" endian="little"/>
+			<Block name="ShapeBounds" ref="RECT"/>
+			<Block name="Shapes" ref="SHAPEWITHSTYLE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineShape2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="22"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="22"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ShapeId" size="16" endian="little"/>
+			<Block name="ShapeBounds" ref="RECT"/>
+			<Block name="Shapes" ref="SHAPEWITHSTYLE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineShape3" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="32"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="32"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ShapeId" size="16" endian="little"/>
+			<Block name="ShapeBounds" ref="RECT"/>
+			<Block name="Shapes" ref="SHAPEWITHSTYLE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineShape4" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="83"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="83"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ShapeId" size="16" endian="little"/>
+			<Block name="ShapeBounds" ref="RECT"/>
+			<Block name="EdgeBounds" ref="RECT"/>
+			<Flags size="8">
+				<Flag name="Reserved" position="0" size="6"/>
+				<Flag name="UsesNonScalingStrokes" position="6" size="1"/>
+				<Flag name="UsesScalingStrokes" position="7" size="1"/>
+			</Flags>
+			<Block name="Shapes" ref="SHAPEWITHSTYLE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineBits" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="6"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="6"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Blob name="JPEGData" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagJPEGTables" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="8"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="8"
+			token="true"/>
+	</DataModel>
+
+	<DataModel name="TagDefineBitsJPEG2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="21"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="21"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Blob name="JPEGData" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineBitsJPEG3" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="35"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="35"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Number name="AlphaDataOffset" size="32" endian="little">
+				<Relation type="size" of="JPEGData"/>
+			</Number>
+			<Blob name="JPEGData" analyzer="binary.Binary"/>
+			<Blob name="BitmapAlphaData" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineBitsLossless" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="20"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="20"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Number name="BitmapFormat" size="8" endian="little"/>
+			<Number name="BitmapWidth" size="16" endian="little"/>
+			<Number name="BitmapHeight" size="16" endian="little"/>
+			<Number name="BitmapColorTableSize" size="8" endian="little"/>
+			<Blob name="ZlibBitmapData"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineBitsLossless2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="36"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="36"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Number name="BitmapFormat" size="8" endian="little"/>
+			<Number name="BitmapWidth" size="16" endian="little"/>
+			<Number name="BitmapHeight" size="8" endian="little"/>
+			<Number name="BitmapColorTableSize" size="16" endian="little"/>
+			<Blob name="ZlibBitmapData"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="MORPHFILLSTYLE">
+		<Choice>
+			<Block>
+				<Number name="FillStyleType" size="8" valueType="hex" value="00" token="true"/>
+				<Block name="StartColor" ref="RGBA"/>
+				<Block name="EndColor" ref="RGBA"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8" constraint="int(value) in [0x10, 0x12]"/>
+				<Block name="StartGradientMatrix" ref="MATRIX"/>
+				<Block name="EndGradientMatrix" ref="MATRIX"/>
+				<Block name="Gradient" ref="MORPHGRADIENT"/>
+			</Block>
+			<Block>
+				<Number name="FillStyleType" size="8"
+					constraint="int(value) in [0x40, 0x41, 0x42, 0x43]"/>
+				<Block name="StartBitmapMatrix" ref="MATRIX"/>
+				<Block name="EndBitmapMatrix" ref="MATRIX"/>
+			</Block>
+			<Number name="FillStyleType" size="8"/>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="MORPHFILLSTYLEARRAY">
+		<Choice>
+			<Block>
+				<Number size="8" value="ff" valueType="hex" token="true"/>
+				<Number name="FillStyleCount" size="16" endian="little">
+					<Relation type="count" of="FillStyle"/>
+				</Number>
+			</Block>
+			<Number name="FillStyleCount" size="8">
+				<Relation type="count" of="FillStyle"/>
+			</Number>
+		</Choice>
+
+		<Block name="FillStyle" ref="MORPHFILLSTYLE" minOccurs="1" maxOccurs="100000">
+			<Relation type="count" from="FillStyleCount"/>
+		</Block>
+
+	</DataModel>
+
+	<DataModel name="TagDefineMorphShape" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="46"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="46"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Block name="SmartBounds" ref="RECT"/>
+			<Block name="EndBounds" ref="RECT"/>
+			<Number name="Offset" size="32" endian="little"/>
+			<Block name="MorphFillStyles" ref="MORPHFILLSTYLEARRAY"/>
+			<Block name="MorphLineStyles" ref="MORPHLINESTYLES"/>
+			<Block name="StartEdges" ref="SHAPE"/>
+			<Block name="EndEdges" ref="SHAPE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineMorphShape2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="84"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="84"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterId" size="16" endian="little"/>
+			<Block name="SmartBounds" ref="RECT"/>
+			<Block name="EndBounds" ref="RECT"/>
+			<Block name="StartEdgeBounds" ref="RECT"/>
+			<Block name="EndEdgeBounds" ref="RECT"/>
+			<Flags size="8">
+				<Flag name="Reserved" position="0" size="6"/>
+				<Flag name="UsesNonScalingStrokes" position="6" size="1"/>
+				<Flag name="UsesScalingStrokes" position="7" size="1"/>
+			</Flags>
+			<Number name="Offset" size="32" endian="little"/>
+			<Block name="MorphFillStyles" ref="MORPHFILLSTYLEARRAY"/>
+			<Block name="MorphLineStyles" ref="MORPHLINESTYLES"/>
+			<Block name="StartEdges" ref="SHAPE"/>
+			<Block name="EndEdges" ref="SHAPE"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFont" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="10"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="10"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FontID" size="16" endian="little"/>
+			<Blob name="Data" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFontInfo" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="13"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="13"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FontID" size="16" endian="little"/>
+			<Number name="FontNameLen" size="8" endian="little">
+				<Relation type="size" of="FontName"/>
+			</Number>
+			<String name="FontName">
+				<Relation type="size" from="FontNameLen"/>
+			</String>
+			<Flags size="8">
+				<Flag name="FontFlagsReserved" position="0" size="2"/>
+				<Flag name="FontFlagsSmallText" position="2" size="1"/>
+				<Flag name="FontFlagsShiftJIS" position="3" size="1"/>
+				<Flag name="FontFlagsANSI" position="4" size="1"/>
+				<Flag name="FontFlagsBold" position="5" size="1"/>
+				<Flag name="FontFlagsWideCodes" position="6" size="1"/>
+			</Flags>
+			<Blob name="CodeTable" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFontInfo2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="13"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="13"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FontID" size="16" endian="little"/>
+			<Number name="FontNameLen" size="8" endian="little">
+				<Relation type="size" of="FontName"/>
+			</Number>
+			<String name="FontName">
+				<Relation type="size" from="FontNameLen"/>
+			</String>
+			<Flags size="8">
+				<Flag name="FontFlagsReserved" position="0" size="2"/>
+				<Flag name="FontFlagsSmallText" position="2" size="1"/>
+				<Flag name="FontFlagsShiftJIS" position="3" size="1"/>
+				<Flag name="FontFlagsANSI" position="4" size="1"/>
+				<Flag name="FontFlagsBold" position="5" size="1"/>
+				<Flag name="FontFlagsWideCodes" position="6" size="1"/>
+			</Flags>
+			<Block name="LanguageCode" ref="LANGCODE"/>
+			<Blob name="CodeTable" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFont2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="48"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="48"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FontID" size="16" endian="little"/>
+			<Flags size="8">
+				<Flag name="FontFlagsHasLayout" position="0" size="1"/>
+				<Flag name="FontFlagsShiftJIS" position="1" size="1"/>
+				<Flag name="FontFlagsSmallText" position="2" size="1"/>
+				<Flag name="FontFlagsANSI" position="3" size="1"/>
+				<Flag name="FontFlagsWideOffsets" position="4" size="1"/>
+				<Flag name="FontFlagsWideCodes" position="5" size="1"/>
+				<Flag name="FontFlagsItalic" position="6" size="1"/>
+				<Flag name="FontFlagsBold" position="7" size="1"/>
+			</Flags>
+			<Block name="LanguageCode" ref="LANGCODE"/>
+			<Number name="FontNameLen" size="8" endian="little">
+				<Relation type="size" of="FontName"/>
+			</Number>
+			<String name="FontName">
+				<Relation type="size" from="FontNameLen"/>
+			</String>
+			<Number name="NumGlyphs" size="16" endian="little">
+				<Relation type="count" of="OffsetTable1"/>
+				<Relation type="count" of="OffsetTable2"/>
+				<Relation type="count" of="GlyphShapeTable"/>
+				<Relation type="count" of="CodeTable1"/>
+				<Relation type="count" of="CodeTable2"/>
+				<Relation type="count" of="FontAdvanceTable"/>
+				<Relation type="count" of="FontBoundsTable"/>
+			</Number>
+
+			<Block name="IfFontFlagsWideOffsets1">
+				<Relation type="when"
+					when="int(self.find('FontFlagsWideOffsets').getInternalValue()) == 1"/>
+
+				<Number name="OffsetTable1" size="32" maxOccurs="10000" endian="little">
+					<Relation type="count" from="NumGlyphs"/>
+				</Number>
+				<Number name="CodeTableOffset" size="32" endian="little"/>
+			</Block>
+			<Block name="IfFontFlagsWideOffsets0">
+				<Relation type="when"
+					when="int(self.find('FontFlagsWideOffsets').getInternalValue()) == 0"/>
+
+				<Number name="OffsetTable2" size="16" maxOccurs="10000" endian="little">
+					<Relation type="count" from="NumGlyphs"/>
+				</Number>
+				<Number name="CodeTableOffset" size="16" endian="little"/>
+			</Block>
+
+			<Block name="GlyphShapeTable" ref="SHAPE" maxOccurs="10000">
+				<Relation type="count" from="NumGlyphs"/>
+			</Block>
+
+			<Block name="IfFontFontFlagsWideCodes1">
+				<Relation type="when"
+					when="int(self.find('FontFlagsWideCodes').getInternalValue()) == 1"/>
+
+				<Number name="CodeTable1" size="16" maxOccurs="10000" endian="little">
+					<Relation type="count" from="NumGlyphs"/>
+				</Number>
+			</Block>
+			<Block name="IfFontFontFlagsWideCodes0">
+				<Relation type="when"
+					when="int(self.find('FontFlagsWideCodes').getInternalValue()) == 0"/>
+
+				<Number name="CodeTable2" size="8" maxOccurs="10000" endian="little">
+					<Relation type="count" from="NumGlyphs"/>
+				</Number>
+			</Block>
+
+			<Block name="IfFontFlagsHasLayout1">
+				<Relation type="when"
+					when="int(self.find('FontFlagsHasLayout').getInternalValue()) == 1"/>
+
+				<Number name="FontAscent" size="16" signed="true" endian="little"/>
+				<Number name="FontDescent" size="16" signed="true" endian="little"/>
+				<Number name="FontLeading" size="16" signed="true" endian="little"/>
+				<Number name="FontAdvanceTable" size="16" signed="true" endian="little"
+					maxOccurs="10000">
+					<Relation type="count" from="NumGlyphs"/>
+				</Number>
+
+				<Block name="FontBoundsTable" ref="RECT" maxOccurs="10000">
+					<Relation type="count" from="NumGlyphs"/>
+				</Block>
+
+				<Number name="KerningCount" size="16" endian="little">
+					<Relation type="count" of="FontKerningTable"/>
+				</Number>
+				<Block name="FontKerningTable" ref="KERNINGRECORD"/>
+			</Block>
+
+			<Blob name="CodeTable" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFontAlignZone" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="73"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="73"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FonstID" size="16" endian="little"/>
+			<Flags size="8">
+				<Flag name="CMSTableHint" position="0" size="2"/>
+				<Flag name="Reserved" position="2" size="6"/>
+			</Flags>
+			<Blob name="ZoneTable" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineFontName" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="88"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="88"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="FontID" size="16" endian="little"/>
+			<String name="FontName" nullTerminated="true"/>
+			<String name="FontCopyright" nullTerminated="true"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineText" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="11"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="11"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterID" size="16" endian="little"/>
+			<Block name="TextBounds" ref="RECT"/>
+			<Block name="TextMatrix" ref="MATRIX"/>
+			<Number name="GlyphBits" size="8"/>
+			<Number name="AdvancedBits" size="8"/>
+			<Blob name="TextRecords" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineText" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="33"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="33"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterID" size="16" endian="little"/>
+			<Block name="TextBounds" ref="RECT"/>
+			<Block name="TextMatrix" ref="MATRIX"/>
+			<Number name="GlyphBits" size="8"/>
+			<Number name="AdvancedBits" size="8"/>
+			<Blob name="TextRecords" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineEditText" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="37"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="37"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterID" size="16" endian="little"/>
+			<Block name="Bounds" ref="RECT"/>
+			<Flags size="8">
+				<Flag name="HasText" position="0" size="1"/>
+				<Flag name="WordWrap" position="1" size="1"/>
+				<Flag name="Multiline" position="2" size="1"/>
+				<Flag name="Password" position="3" size="1"/>
+				<Flag name="ReadOnly" position="4" size="1"/>
+				<Flag name="HasTextColor" position="5" size="1"/>
+				<Flag name="HasMaxLength" position="6" size="1"/>
+				<Flag name="HasFont" position="7" size="1"/>
+			</Flags>
+			<Flags size="8">
+				<Flag name="HasFontClass" position="0" size="1"/>
+				<Flag name="AutoSize" position="1" size="1"/>
+				<Flag name="HasLayout" position="2" size="1"/>
+				<Flag name="NoSelect" position="3" size="1"/>
+				<Flag name="Border" position="4" size="1"/>
+				<Flag name="WasStatic" position="5" size="1"/>
+				<Flag name="HTML" position="6" size="1"/>
+				<Flag name="UseOutlines" position="7" size="1"/>
+			</Flags>
+
+			<Number name="FontID" size="16" endian="little">
+				<Relation type="when" when="int(self.find('HasFont').getInternalValue()) == 1"/>
+			</Number>
+			<String name="FontClass" nullTerminated="true">
+				<Relation type="when" when="int(self.find('HasFontClass').getInternalValue()) == 1"
+				/>
+			</String>
+			<Number name="FontHeight" size="16" endian="little">
+				<Relation type="when" when="int(self.find('HasFont').getInternalValue()) == 1"/>
+			</Number>
+			<Block name="TextColor" ref="RGBA">
+				<Relation type="when" when="int(self.find('HasTextColor').getInternalValue()) == 1"
+				/>
+			</Block>
+			<Number name="MaxLength" size="16" endian="little">
+				<Relation type="when" when="int(self.find('HasMaxLength').getInternalValue()) == 1"
+				/>
+			</Number>
+			<Block>
+				<Relation type="when" when="int(self.find('HasLayout').getInternalValue()) == 1"/>
+
+				<Number name="Align" size="8" endian="little"/>
+				<Number name="LeftMargin" size="16" endian="little"/>
+				<Number name="RightMargin" size="16" endian="little"/>
+				<Number name="Indent" size="16" endian="little"/>
+				<Number name="Leading" size="16" endian="little"/>
+			</Block>
+
+			<String name="VariableName" nullTerminated="true"/>
+
+			<String name="InitialText" nullTerminated="true">
+				<Relation type="when" when="int(self.find('HasText').getInternalValue()) == 1"/>
+			</String>
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagCSMTextSettings" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="74"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="74"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="TextID" size="16" endian="little"/>
+			<Flags size="8">
+				<Flag name="UseFlashType" position="0" size="2"/>
+				<Flag name="GridFit" position="2" size="3"/>
+				<Flag name="Reserved" position="5" size="3"/>
+			</Flags>
+			<Number name="Thickness" size="32" endian="little"/>
+			<Number name="Sharpness" size="32" endian="little"/>
+			<Number name="Reserved2" size="8"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineSound" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="14"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="14"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="SoundId" size="16" endian="little"/>
+			<Flags size="8">
+				<Flag name="SoundFormat" position="0" size="4"/>
+				<Flag name="SoundRate" position="4" size="2"/>
+				<Flag name="SoundSize" position="6" size="1"/>
+				<Flag name="SoundType" position="7" size="1"/>
+			</Flags>
+			<Number name="SoundSampleCount" size="32" endian="little"/>
+			<Blob analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagStartSound" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="15"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="15"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="SoundId" size="16" endian="little"/>
+			<Block name="SoundInfo" ref="SOUNDINFO"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagStartSound2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="89"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="89"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<String name="SoundClass" nullTerminated="true"/>
+			<Block name="SoundInfo" ref="SOUNDINFO"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSoundStreamHead" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="18"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="18"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Flags size="8">
+				<Flag name="Reserved" position="0" size="4"/>
+				<Flag name="PlaybackSoundRate" position="4" size="2"/>
+				<Flag name="PlaybackSoundSize" position="6" size="1"/>
+				<Flag name="PlaybackSoundType" position="7" size="1"/>
+			</Flags>
+			<Flags size="8">
+				<Flag name="StreamSoundCompression" position="0" size="4"/>
+				<Flag name="StreamSoundRate" position="4" size="2"/>
+				<Flag name="StreamSoundSize" position="6" size="1"/>
+				<Flag name="StreamSoundType" position="7" size="1"/>
+			</Flags>
+			<Number name="StreamSoundSampleCount" size="16" endian="little"/>
+			<Number name="LatencySeek" size="16" signed="true" endian="little">
+				<Relation type="when"
+					when="int(self.find('StreamSoundCompression').getInternalValue()) == 2"/>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSoundStreamHead2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="45"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="45"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Flags size="8">
+				<Flag name="Reserved" position="0" size="4"/>
+				<Flag name="PlaybackSoundRate" position="4" size="2"/>
+				<Flag name="PlaybackSoundSize" position="6" size="1"/>
+				<Flag name="PlaybackSoundType" position="7" size="1"/>
+			</Flags>
+			<Flags size="8">
+				<Flag name="StreamSoundCompression" position="0" size="4"/>
+				<Flag name="StreamSoundRate" position="4" size="2"/>
+				<Flag name="StreamSoundSize" position="6" size="1"/>
+				<Flag name="StreamSoundType" position="7" size="1"/>
+			</Flags>
+			<Number name="StreamSoundSampleCount" size="16" endian="little"/>
+			<Number name="LatencySeek" size="16" signed="true" endian="little">
+				<Relation type="when"
+					when="int(self.find('StreamSoundCompression').getInternalValue()) == 2"/>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagSoundStreamBlock" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="19"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="19"
+			token="true"/>
+	</DataModel>
+
+	<DataModel name="TagDefineButton" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="7"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="7"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ButtonId" size="16" endian="little"/>
+			<Block name="Character" ref="BUTTONRECORD" maxOccurs="10000"/>
+			<Block name="CharacterEND" ref="BUTTONRECORDEND"/>
+			<Block name="Action" ref="ACTIONRECORD" minOccurs="1" maxOccurs="100000"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineButton2" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="34"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="34"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ButtonId" size="16" endian="little"/>
+			<Flags size="8">
+				<Flag name="ReservedFlags" position="0" size="7"/>
+				<Flag name="TrackAsMenu" position="7" size="1"/>
+			</Flags>
+			<Number name="ActionOffset" size="16" endian="little"/>
+			<Blob name="TODO" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineButtonSound" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="17"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="17"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="ButtonId" size="16" endian="little"/>
+			<Number name="ButtonSoundChar0" size="16" endian="little"/>
+			<Block name="ButtonSoundInfo0" ref="SOUNDINFO">
+				<Relation type="when"
+					when="int(self.find('ButtonSoundChar0').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="ButtonSoundChar1" size="16" endian="little"/>
+			<Block name="ButtonSoundInfo1" ref="SOUNDINFO">
+				<Relation type="when"
+					when="int(self.find('ButtonSoundChar1').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="ButtonSoundChar2" size="16" endian="little"/>
+			<Block name="ButtonSoundInfo2" ref="SOUNDINFO">
+				<Relation type="when"
+					when="int(self.find('ButtonSoundChar2').getInternalValue()) == 1"/>
+			</Block>
+			<Number name="ButtonSoundChar3" size="16" endian="little"/>
+			<Block name="ButtonSoundInfo3" ref="SOUNDINFO">
+				<Relation type="when"
+					when="int(self.find('ButtonSoundChar3').getInternalValue()) == 1"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineButtonSound" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="39"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="39"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="SpriteID" size="16" endian="little"/>
+			<Number name="FrameCount" size="16" endian="little"/>
+			<Blob name="Data"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineVideoStream" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="60"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="60"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="CharacterID" size="16" endian="little"/>
+			<Number name="NumFrames" size="16" endian="little"/>
+			<Number name="Width" size="16" endian="little"/>
+			<Number name="Height" size="16" endian="little"/>
+
+			<Flags size="8">
+				<Flag name="VideoFlagsReserved" position="0" size="4"/>
+				<Flag name="VideoFlagsDeblocking" position="4" size="3"/>
+				<Flag name="VideoFlagsSmoothing" position="7" size="1"/>
+			</Flags>
+
+			<Number name="CodecID" size="8" endian="little"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineVideoFrame" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="61"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="61"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="StreamID" size="16" endian="little"/>
+			<Number name="FrameNum" size="16" endian="little"/>
+			<Blob analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TagDefineBinaryData" ref="Tag">
+		<Flag name="TagLengthChoice.NumLength.Flags.TagType" position="0" size="10" value="87"
+			token="true"/>
+		<Flag name="TagLengthChoice.FlagsLength.TagType" position="0" size="10" value="87"
+			token="true"/>
+
+		<Block name="data">
+			<Relation type="size" from="TagLength1"/>
+			<!-- <Relation type="size" from="TagLength2"/> -->
+
+			<Number name="Tag" size="16" endian="little"/>
+			<Number name="Reserved" size="32" endian="little"/>
+			<Blob analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="FWS">
+		<Relation type="size" from="filelength"/>
+		<Block name="Header">
+			<String name="magic" value="FWS" token="true" mutable="false"/>
+			<Number name="version" size="8"/>
+			<Number name="filelength" size="32" endian="little">
+				<Relation type="size" of="FWS"/>
+			</Number>
+			<Custom name="Rect" class="Rect" />
+			<Number name="FrameRate" size="16" endian="big"/>
+			<Number name="FrameCount" size="16" endian="little"/>
+		</Block>
+		
+		<Choice name="Tags" maxOccurs="10">
+			<!-- <Choice name="Tags" maxOccurs="10"> -->
+			<!-- <Choice name="Tags"> -->
+			<Block name="TagDoInitAction" ref="TagDoInitAction"/>
+			<Block name="TagDoAction" ref="TagDoAction"/>
+			<Block name="TagDoABC" ref="TagDoABC"/>
+			<Block name="TagPlaceObject" ref="TagPlaceObject"/>
+			<Block name="TagPlaceObject2" ref="TagPlaceObject2"/>
+			<Block name="TagPlaceObject3" ref="TagPlaceObject3"/>
+			<Block name="TagRemoveObject" ref="TagRemoveObject"/>
+			<Block name="TagRemoveObject2" ref="TagRemoveObject2"/>
+			<Block name="TagSetBackgroundColor" ref="TagSetBackgroundColor"/>
+			<Block name="TagFrameLabel" ref="TagFrameLabel"/>
+			<Block name="TagProtect" ref="TagProtect"/>
+			<Block name="TagEnd" ref="TagEnd"/>
+			<Block name="TagExportAssets" ref="TagExportAssets"/>
+			<Block name="TagImportAssets" ref="TagImportAssets"/>
+			<Block name="TagEnableDebugger" ref="TagEnableDebugger"/>
+			<Block name="TagEnableDebugger2" ref="TagEnableDebugger2"/>
+			<Block name="TagScriptLimits" ref="TagScriptLimits"/>
+			<Block name="TagSetTabIndex" ref="TagSetTabIndex"/>
+			<Block name="TagFileAttributes" ref="TagFileAttributes"/>
+			<Block name="TagImportAssets2" ref="TagImportAssets2"/>
+			<Block name="TagSymbolClass" ref="TagSymbolClass"/>
+			<Block name="TagMetadata" ref="TagMetadata"/>
+			<Block name="TagDefinedScalingGrid" ref="TagDefinedScalingGrid"/>
+			<Block name="TagDefineSceneAndFrameLabelData" ref="TagDefineSceneAndFrameLabelData"/>
+			<Block name="TagDefineShape" ref="TagDefineShape"/>
+			<Block name="TagDefineShape2" ref="TagDefineShape2"/>
+			<Block name="TagDefineShape3" ref="TagDefineShape3"/>
+			<Block name="TagDefineShape4" ref="TagDefineShape4"/>
+			<Block name="TagDefineBits" ref="TagDefineBits"/>
+			<Block name="TagJPEGTables" ref="TagJPEGTables"/>
+			<Block name="TagDefineBitsJPEG2" ref="TagDefineBitsJPEG2"/>
+			<Block name="TagDefineBitsJPEG3" ref="TagDefineBitsJPEG3"/>
+			<Block name="TagDefineBitsLossless" ref="TagDefineBitsLossless"/>
+			<Block name="TagDefineBitsLossless2" ref="TagDefineBitsLossless2"/>
+			<Block name="TagDefineMorphShape" ref="TagDefineMorphShape"/>
+			<Block name="TagDefineMorphShape2" ref="TagDefineMorphShape2"/>
+			<Block name="TagDefineFont" ref="TagDefineFont"/>
+			<Block name="TagDefineFontInfo" ref="TagDefineFontInfo"/>
+			<Block name="TagDefineFontInfo2" ref="TagDefineFontInfo2"/>
+			<Block name="TagDefineFont2" ref="TagDefineFont2"/>
+			<Block name="TagDefineFontAlignZone" ref="TagDefineFontAlignZone"/>
+			<Block name="TagDefineFontName" ref="TagDefineFontName"/>
+			<Block name="TagDefineText" ref="TagDefineText"/>
+			<Block name="TagDefineText" ref="TagDefineText"/>
+			<Block name="TagDefineEditText" ref="TagDefineEditText"/>
+			<Block name="TagCSMTextSettings" ref="TagCSMTextSettings"/>
+			<Block name="TagDefineSound" ref="TagDefineSound"/>
+			<Block name="TagStartSound" ref="TagStartSound"/>
+			<Block name="TagStartSound2" ref="TagStartSound2"/>
+			<Block name="TagSoundStreamHead" ref="TagSoundStreamHead"/>
+			<Block name="TagSoundStreamHead2" ref="TagSoundStreamHead2"/>
+			<Block name="TagSoundStreamBlock" ref="TagSoundStreamBlock"/>
+			<Block name="TagDefineButton" ref="TagDefineButton"/>
+			<Block name="TagDefineButton2" ref="TagDefineButton2"/>
+			<Block name="TagDefineButtonSound" ref="TagDefineButtonSound"/>
+			<Block name="TagDefineButtonSound" ref="TagDefineButtonSound"/>
+			<Block name="TagDefineVideoStream" ref="TagDefineVideoStream"/>
+			<Block name="TagDefineVideoFrame" ref="TagDefineVideoFrame"/>
+			<Block name="TagDefineBinaryData" ref="TagDefineBinaryData"/>
+			
+			<!-- Default catch-all -->
+			<Block name="Tag" ref="Tag"/>
+		</Choice>
+	</DataModel>
+	
+	<DataModel name="CWS">
+		<Relation type="size" from="filelength"/>
+		<Block name="Header">
+			<String name="magic" value="CWS" token="true" mutable="false"/>
+			<Number name="version" size="8"/>
+			<Number name="filelength" size="32" endian="little">
+				<Relation type="size" of="CWS"/>
+			</Number>
+		</Block>
+		
+		<Block name="CompressedFile">
+			<Transformer class="compress.GzipCompress"/>
+			
+			<Custom name="Rect" class="Rect" />
+			<Number name="FrameRate" size="16" endian="big"/>
+			<Number name="FrameCount" size="16" endian="little"/>
+			
+			<Choice name="Tags" maxOccurs="10000">
+				<!-- <Choice name="Tags" maxOccurs="10"> -->
+				<!-- <Choice name="Tags"> -->
+				<Block name="TagDoInitAction" ref="TagDoInitAction"/>
+				<Block name="TagDoAction" ref="TagDoAction"/>
+				<Block name="TagDoABC" ref="TagDoABC"/>
+				<Block name="TagPlaceObject" ref="TagPlaceObject"/>
+				<Block name="TagPlaceObject2" ref="TagPlaceObject2"/>
+				<Block name="TagPlaceObject3" ref="TagPlaceObject3"/>
+				<Block name="TagRemoveObject" ref="TagRemoveObject"/>
+				<Block name="TagRemoveObject2" ref="TagRemoveObject2"/>
+				<Block name="TagSetBackgroundColor" ref="TagSetBackgroundColor"/>
+				<Block name="TagFrameLabel" ref="TagFrameLabel"/>
+				<Block name="TagProtect" ref="TagProtect"/>
+				<Block name="TagEnd" ref="TagEnd"/>
+				<Block name="TagExportAssets" ref="TagExportAssets"/>
+				<Block name="TagImportAssets" ref="TagImportAssets"/>
+				<Block name="TagEnableDebugger" ref="TagEnableDebugger"/>
+				<Block name="TagEnableDebugger2" ref="TagEnableDebugger2"/>
+				<Block name="TagScriptLimits" ref="TagScriptLimits"/>
+				<Block name="TagSetTabIndex" ref="TagSetTabIndex"/>
+				<Block name="TagFileAttributes" ref="TagFileAttributes"/>
+				<Block name="TagImportAssets2" ref="TagImportAssets2"/>
+				<Block name="TagSymbolClass" ref="TagSymbolClass"/>
+				<Block name="TagMetadata" ref="TagMetadata"/>
+				<Block name="TagDefinedScalingGrid" ref="TagDefinedScalingGrid"/>
+				<Block name="TagDefineSceneAndFrameLabelData" ref="TagDefineSceneAndFrameLabelData"/>
+				<Block name="TagDefineShape" ref="TagDefineShape"/>
+				<Block name="TagDefineShape2" ref="TagDefineShape2"/>
+				<Block name="TagDefineShape3" ref="TagDefineShape3"/>
+				<Block name="TagDefineShape4" ref="TagDefineShape4"/>
+				<Block name="TagDefineBits" ref="TagDefineBits"/>
+				<Block name="TagJPEGTables" ref="TagJPEGTables"/>
+				<Block name="TagDefineBitsJPEG2" ref="TagDefineBitsJPEG2"/>
+				<Block name="TagDefineBitsJPEG3" ref="TagDefineBitsJPEG3"/>
+				<Block name="TagDefineBitsLossless" ref="TagDefineBitsLossless"/>
+				<Block name="TagDefineBitsLossless2" ref="TagDefineBitsLossless2"/>
+				<Block name="TagDefineMorphShape" ref="TagDefineMorphShape"/>
+				<Block name="TagDefineMorphShape2" ref="TagDefineMorphShape2"/>
+				<Block name="TagDefineFont" ref="TagDefineFont"/>
+				<Block name="TagDefineFontInfo" ref="TagDefineFontInfo"/>
+				<Block name="TagDefineFontInfo2" ref="TagDefineFontInfo2"/>
+				<Block name="TagDefineFont2" ref="TagDefineFont2"/>
+				<Block name="TagDefineFontAlignZone" ref="TagDefineFontAlignZone"/>
+				<Block name="TagDefineFontName" ref="TagDefineFontName"/>
+				<Block name="TagDefineText" ref="TagDefineText"/>
+				<Block name="TagDefineText" ref="TagDefineText"/>
+				<Block name="TagDefineEditText" ref="TagDefineEditText"/>
+				<Block name="TagCSMTextSettings" ref="TagCSMTextSettings"/>
+				<Block name="TagDefineSound" ref="TagDefineSound"/>
+				<Block name="TagStartSound" ref="TagStartSound"/>
+				<Block name="TagStartSound2" ref="TagStartSound2"/>
+				<Block name="TagSoundStreamHead" ref="TagSoundStreamHead"/>
+				<Block name="TagSoundStreamHead2" ref="TagSoundStreamHead2"/>
+				<Block name="TagSoundStreamBlock" ref="TagSoundStreamBlock"/>
+				<Block name="TagDefineButton" ref="TagDefineButton"/>
+				<Block name="TagDefineButton2" ref="TagDefineButton2"/>
+				<Block name="TagDefineButtonSound" ref="TagDefineButtonSound"/>
+				<Block name="TagDefineButtonSound" ref="TagDefineButtonSound"/>
+				<Block name="TagDefineVideoStream" ref="TagDefineVideoStream"/>
+				<Block name="TagDefineVideoFrame" ref="TagDefineVideoFrame"/>
+				<Block name="TagDefineBinaryData" ref="TagDefineBinaryData"/>
+				
+				<!-- Default catch-all -->
+				<Block name="Tag" ref="Tag"/>
+			</Choice>
+		</Block>
+		
+	</DataModel>
+	
+	<DataModel name="SWF">
+		<Choice name="FWSorCWS">
+			<Block name="CWS" ref="CWS" />
+			<Block name="FWS" ref="FWS" />
+		</Choice>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel name="SWF" ref="SWF"/>
+				<Data fileName="samples\8ball.swf"/>
+			</Action>
+			<Action type="close"/>
+			
+			<Action type="call" method="ScoobySnacks" />
+		</State>
+	</StateModel>
+
+	<Agent name="LocalAgent">
+		<Monitor class="debugger.WindowsDebugEngine">
+
+			<!-- The command line to run.  Notice the filename provided matched up 
+				to what is provided below in the Publisher configuration -->
+			<Param name="CommandLine" value="FlashPlayer.exe fuzzed.swf"/>
+
+			<!-- This parameter will cause the debugger to wait for an action-call in
+				the state model with a method="notepad.exe" before running
+				program.  -->
+			<Param name="StartOnCall" value="ScoobySnacks"/>
+
+		</Monitor>
+
+		<!-- Enable heap debugging on our process as well. -->
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="FlashPlayer.exe"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="TheTest">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+
+		<Publisher class="file.FileWriterLauncherGui">
+			<Param name="filename" value="fuzzed.swf"/>
+			<Param name="window" value="Adobe Flash Player 10" />
+			<Param name="debugger" value="true" />
+			<!-- <Param name="waittime" value="3" />-->
+		</Publisher>
+	</Test>
+
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+
+		<Test ref="TheTest"/>
+
+	</Run>
+
+</Peach>
+<!-- end -->

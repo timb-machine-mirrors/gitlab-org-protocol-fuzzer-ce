@@ -1,0 +1,937 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+
+	<Include ns="default" src="file:defaults.xml"/>
+	
+	<PythonPath path="."/>
+	<Import from="JPXDecode" import="*"/>
+	
+	<DataModel name="Box">
+		<Choice name="BoxLengthChoice">
+			<!-- Unknown is a special case, lets remove it for now -->
+			<!-- <Number name="LengthUnknown" size="32" signed="false" endian="big" value="0"
+				isStatic="true"/> -->
+			<Number name="LengthBig" size="32" signed="false" endian="big" value="1" isStatic="true"/>
+			<Number name="LengthNormal" size="32" signed="false" endian="big" constraint="value > 1">
+				<Relation type="size" of="Data" expressionGet="size - 8" expressionSet="size + 8"/>
+			</Number>
+		</Choice>
+
+		<Blob name="Type" length="4"/>
+
+		<Number name="LengthExtended" size="64" signed="false" endian="big">
+			<Relation type="when"
+				when="(self.find('LengthBig') != None) and (self.find('LengthBig').getInternalValue() == '1')"/>
+			<Relation type="size" of="Data" expressionGet="size - 16" expressionSet="size + 16"/>
+		</Number>
+
+		<!-- analyzer="binary.Binary"-->
+		<Blob name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</Blob>
+
+	</DataModel>
+
+	<!-- Begin JP2 -->
+
+	<DataModel name="BoxJP2Signature" ref="Box">
+		<Blob name="Type" length="4" value="6A 50 20 20" valueType="hex" isStatic="true"/>
+		<Blob name="Data" value="0D 0A 87 0A" valueType="hex" isStatic="true">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</Blob>
+	</DataModel>
+
+	<DataModel name="BoxXML" ref="Box">
+		<Blob name="Type" length="4" value="78 6D 6C 20" valueType="hex" isStatic="true"/>
+		<!-- analyzer="xml.XmlAnalyzer" -->
+		<String name="Data" analyzer="xml.XmlAnalyzer">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</String>
+	</DataModel>
+
+
+	<DataModel name="BoxFileType" ref="Box">
+		<Blob name="Type" length="4" value="66 74 79 70" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<String name="BR" length="4" nullTerminated="false"/>
+			<Number name="MinV" size="32" signed="false" endian="big"/>
+			<String name="CLi" length="4" nullTerminated="false" minOccurs="1" maxOccurs="3000"/>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxImageHeader" ref="Box">
+		<Blob name="Type" length="4" value="69 68 64 72" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="Height" endian="big" size="32" signed="false"/>
+			<Number name="Width" endian="big" size="32" signed="false"/>
+			<Number name="NC" endian="big" size="16" signed="false"/>
+			<Number name="BPC" endian="big" size="8" signed="true"/>
+			<Number name="C" endian="big" size="8" signed="false"/>
+			<Number name="UnkC" endian="big" size="8" signed="false"/>
+			<Number name="IPR" endian="big" size="8" signed="false"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxBitsPerComponent" ref="Box">
+		<Blob name="Type" length="4" value="62 70 63 63" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="BPCi" endian="big" size="8" signed="true" minOccurs="1" maxOccurs="3000"/>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxColorSpecification" ref="Box">
+		<Blob name="Type" length="4" value="63 6F 6C 72" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="METH" endian="big" signed="false" size="8"/>
+			<Number name="PREC" endian="big" signed="true" size="8"/>
+			<Number name="APPROX" endian="big" signed="false" size="8"/>
+
+			<Choice name="METHDAT">
+
+				<Block name="MethodEnum">
+					<Number name="EnumCS" endian="big" signed="false" size="32"
+						constraint="self.find('METH').getInternalValue() == '1'"/>
+					<Block name="EP">
+						<Choice name="EPChoice">
+
+							<Block name="EPCIELab">
+								<Number name="RL" endian="big" size="32" signed="false"
+									constraint="self.find('EnumCS').getInternalValue() == '14'"/>
+								<Number name="OL" endian="big" size="32" signed="false"/>
+								<Number name="RA" endian="big" size="32" signed="false"/>
+								<Number name="OA" endian="big" size="32" signed="false"/>
+								<Number name="RB" endian="big" size="32" signed="false"/>
+								<Number name="OB" endian="big" size="32" signed="false"/>
+								<Number name="IL" endian="big" size="32"/>
+							</Block>
+
+
+							<Block name="EPCIEJab">
+								<Number name="RJ" endian="big" size="32" signed="false"
+									constraint="self.find('EnumCS').getInternalValue() == '19'"/>
+								<Number name="OJ" endian="big" size="32" signed="false"/>
+								<Number name="RA" endian="big" size="32" signed="false"/>
+								<Number name="OA" endian="big" size="32" signed="false"/>
+								<Number name="RB" endian="big" size="32" signed="false"/>
+								<Number name="OB" endian="big" size="32" signed="false"/>
+							</Block>
+
+							<Blob name="EPUnknown"/>
+
+						</Choice>
+					</Block>
+
+				</Block>
+
+				<Block name="MethodRestrictedIIC">
+					<Blob name="PROFILE" constraint="self.find('METH').getInternalValue() == '2'"/>
+				</Block>
+
+				<Block name="MethodAnyIIC">
+					<Blob name="PROFILE" constraint="self.find('METH').getInternalValue() == '3'"/>
+				</Block>
+
+				<Block name="MethodVendorColor">
+					<Blob name="VCLR" length="16"
+						constraint="self.find('METH').getInternalValue() == '4'"/>
+					<Blob name="VP"/>
+				</Block>
+
+				<Blob name="MethodUnknown"/>
+
+			</Choice>
+
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxPallete" ref="Box">
+		<Blob name="Type" length="4" value="70 63 6C 72" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="NE" endian="big" size="16" signed="false">
+				<Relation type="count" of="Cji"/>
+			</Number>
+			<Number name="NPC" endian="big" size="8" signed="false">
+				<Relation type="count" of="Bi"/>
+				<Relation type="count" of="Ci"/>
+			</Number>
+			<Number name="Bi" endian="big" size="8" signed="true" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NPC"/>
+			</Number>
+
+			<Block name="Ci" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NPC"/>
+				<Number name="Cji" endian="big" size="8" signed="false" minOccurs="0"
+					maxOccurs="3000">
+					<Relation type="count" from="NE"/>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxComponentMapping" ref="Box">
+		<Blob name="Type" length="4" value="63 6D 61 70" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="ComponentMappingRepeater" minOccurs="1" maxOccurs="3000">
+				<Number name="CMPi" endian="big" signed="false" size="16"/>
+				<Number name="MTYPi" endian="big" signed="false" size="8"/>
+				<Number name="PCOLi" endian="big" signed="false" size="8"/>
+			</Block>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxChannelDeffinition" ref="Box">
+		<Blob name="Type" length="4" value="63 64 65 66" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="N" endian="big" signed="false" size="16"/>
+			<Block name="ChannelDeffinitionRepeater" minOccurs="1" maxOccurs="3000">
+				<Number name="Cni" endian="big" signed="false" size="16"/>
+				<Number name="Typi" endian="big" signed="false" size="16"/>
+				<Number name="Asoci" endian="big" signed="false" size="16"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCaptureResolution" ref="Box">
+		<Blob name="Type" length="4" value="63 64 65 66" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="VRcN" endian="big" signed="false" size="16"/>
+			<Number name="VRcD" endian="big" signed="false" size="16"/>
+			<Number name="HRcN" endian="big" signed="false" size="16"/>
+			<Number name="HRcD" endian="big" signed="false" size="16"/>
+			<Number name="VRcE" endian="big" signed="true" size="8"/>
+			<Number name="HRcE" endian="big" signed="true" size="8"/>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxResolution" ref="Box">
+		<Blob name="Type" length="4" value="72 65 73 20" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="TheBoxCaptureResolution" ref="BoxCaptureResolution" minOccurs="0"
+				maxOccurs="1"/>
+			<Block name="TheBoxDefaultDisplayResolution" ref="BoxCaptureResolution" minOccurs="0"
+				maxOccurs="1"/>
+		</Block>
+	</DataModel>
+
+	<!-- This element can actually have an unknown size which should then be the rest of the file.
+		as such we are splitting this in two two data models, one for everything and one for
+		just some things. -->
+	<DataModel name="BoxContiguousCodestreamSized" ref="Box">
+		<!-- Unknown length was removed -->
+		<Choice name="BoxLengthChoice">
+			<Number name="LengthBig" size="32" signed="false" endian="big" value="1" isStatic="true"/>
+			<Number name="LengthNormal" size="32" signed="false" endian="big" constraint="value > 1">
+				<Relation type="size" of="Data" expressionGet="size - 8" expressionSet="size + 8"/>
+			</Number>
+		</Choice>
+		<Blob name="Type" length="4" value="6A 70 32 63" valueType="hex" isStatic="true"/>
+	</DataModel>
+	
+	<DataModel name="BoxContiguousCodestreamUnsized" ref="Box">
+		<!-- Only unknown length -->
+		<Choice name="BoxLengthChoice">
+			<Number name="LengthUnknown" size="32" signed="false" endian="big" value="0"
+				isStatic="true"/>
+		</Choice>
+		<Blob name="Type" length="4" value="6A 70 32 63" valueType="hex" isStatic="true"/>
+	</DataModel>
+	
+	<DataModel name="BoxIntellectualProperty" ref="Box">
+		<Blob name="Type" length="4" value="6a 70 32 69" valueType="hex" isStatic="true"/>
+		<!--undefined by spec-->
+	</DataModel>
+
+	<DataModel name="BoxUUID" ref="Box">
+		<Blob name="Type" length="4" value="63 64 65 66" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="Length"/>
+			<Blob name="UUID" length="16"/>
+			<Blob name="UUIDSpecificData"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxUUIDList" ref="Box">
+		<Blob name="Type" length="4" value="75 63 73 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="NU" endian="big" size="16" signed="false">
+				<Relation type="count" of="UUIDi"/>
+			</Number>
+			<Blob name="UUIDi" length="16">
+				<Relation type="count" from="NU"/>
+			</Blob>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxURL" ref="Box">
+		<Blob name="Type" length="4" value="75 72 6C 20" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="VERS" endian="big" signed="false" size="8"/>
+			<Number name="Flags" endian="big" signed="false" size="24"/>
+			<String name="LOC" nullTerminated="true" type="utf8"/>
+		</Block>
+	</DataModel>
+	<DataModel name="BoxUUIDInfo" ref="Box">
+		<Blob name="Type" length="4" value="75 69  6E 66" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Block name="TheBoxUUIDList" ref="BoxUUIDList" minOccurs="0"/>
+			<Block name="TheBoxURL" ref="BoxURL" minOccurs="0"/>
+		</Block>
+	</DataModel>
+
+	<!-- End JP2 -->
+
+
+	<!-- Begin JPX -->
+
+	<DataModel name="BoxReaderRequirements" ref="Box">
+		<Blob name="Type" length="4" value="72 72 65 71" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="ML" endian="big" signed="false" size="8"
+				constraint="value == 1 or value == 2 or value == 4 or value == 8">
+				<Relation type="size" of="FUAM"/>
+				<Relation type="size" of="DCM"/>
+			</Number>
+			<Blob name="FUAM">
+				<Relation type="size" from="ML"/>
+			</Blob>
+			<Blob name="DCM">
+				<Relation type="size" from="ML"/>
+			</Blob>
+			<Number name="NSF" endian="big" size="16" signed="false">
+				<Relation type="count" of="ArrayUnwrap1"/>
+			</Number>
+			<Block name="ArrayUnwrap1" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NSF"/>
+				<Number name="SFi" endian="big" size="16" signed="false"
+					constraint="value &gt;= 1 and value &lt;= 66"/>
+				<Blob name="SMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
+			</Block>
+			<Number name="NVF" endian="big" size="16" signed="false">
+				<Relation type="count" of="ArrayUnwrap2"/>
+			</Number>
+			<Block name="ArrayUnwrap2" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NVF"/>
+
+				<Blob name="VFi" length="16"/>
+				<Blob name="VMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
+
+			</Block>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxDataReference" ref="Box">
+		<Blob name="Type" length="4" value="64 74 62 6C" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="NDR" endian="big" size="16" signed="false">
+				<Relation type="count" of="DRi"/>
+			</Number>
+
+			<Block name="DRi" ref="BoxURL" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NDR"/>
+			</Block>
+
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxFragmentList" ref="Box">
+		<Blob name="Type" length="4" value="66 6C 73 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="NF" endian="big" size="16" signed="false">
+				<Relation type="count" of="OLD"/>
+			</Number>
+
+			<Block name="OLD" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="NF"/>
+				<Number name="OFFi" size="64" endian="big" signed="false"/>
+				<Number name="LENi" size="32" endian="big" signed="false"/>
+				<Number name="DRi" size="16" endian="big" signed="false"/>
+			</Block>
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxFragmentTable" ref="Box">
+		<Blob name="Type" length="4" value="66 74 62 6C" valueType="hex" isStatic="true"/>
+
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Block name="TheBoxFragmentList" ref="BoxFragmentList"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCrossReference" ref="Box">
+		<Blob name="Type" length="4" value="63 72 65 66" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Blob name="Rtyp" length="4"/>
+			<Block name="Flist" ref="BoxFragmentList"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxOpacity" ref="Box">
+		<Blob name="Type" length="4" value="6F 70 63 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="Otyp" endian="big" size="8" signed="false"/>
+
+			<Block name="NeedCroma">
+				<Relation type="when" when="self.find('Otyp').getInternalValue() != '2'"/>
+				<Number name="NCH" endian="big" size="8" signed="false"/>
+				<Blob name="CVi"/>
+			</Block>
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCodestreamRegistration" ref="Box">
+		<Blob name="Type" length="4" value="63 72 65 67" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Choice name="XYChoice">
+				<Block name="Edge">
+
+					<Number name="XS" endian="big" size="16" signed="false" isStatic="true"
+						value="0"/>
+					<Number name="YS" endian="big" size="16" signed="false">
+						<Relation type="count" of="YSUnwrap"/>
+					</Number>
+					<Block name="YSUnwrap">
+						<Relation type="count" from="YS"/>
+						<Number name="CDNi" endian="big" size="16" signed="false"/>
+						<Number name="XRi" endian="big" size="8" signed="false"/>
+						<Number name="YRi" endian="big" size="8" signed="false"/>
+						<Number name="XOi" endian="big" size="8" signed="false"/>
+						<Number name="YOi" endian="big" size="8" signed="false"/>
+					</Block>
+
+				</Block>
+
+				<Block name="Normal">
+
+					<Number name="XS" endian="big" size="16" signed="false">
+						<Relation type="count" of="XSUnwrap"/>
+					</Number>
+					<Number name="YS" endian="big" size="16" signed="false">
+						<Relation type="count" of="YSUnwrap"/>
+					</Number>
+					<Block name="XSUnwrap">
+						<Relation type="count" from="XS"/>
+						<Block name="YSUnwrap">
+							<Relation type="count" from="YS"/>
+							<Number name="CDNi" endian="big" size="16" signed="false"/>
+							<Number name="XRi" endian="big" size="8" signed="false"/>
+							<Number name="YRi" endian="big" size="8" signed="false"/>
+							<Number name="XOi" endian="big" size="8" signed="false"/>
+							<Number name="YOi" endian="big" size="8" signed="false"/>
+						</Block>
+					</Block>
+
+
+				</Block>
+			</Choice>
+
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCompositionOptions" ref="Box">
+		<Blob name="Type" length="4" value="72 72 65 71" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="Length"/>
+			<Number name="HEIGHT" size="32" endian="big" signed="false"/>
+			<Number name="WIDTH" size="32" endian="big" signed="false"/>
+			<Number name="Loop" size="8" endian="big" signed="false"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxInstructionSet" ref="Box">
+		<Blob name="Type" length="4" value="69 6E 73 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="Length"/>
+
+			<Flags name="Ityp" endian="big" size="16">
+				<Flag name="bXOYO" position="0" size="1"/>
+				<Flag name="bWH" position="1" size="1"/>
+				<Flag name="bLNP" position="2" size="1"/>
+				<Flag name="bCROP" position="4" size="1"/>
+
+			</Flags>
+
+			<Number name="REPT" endian="big" size="16" signed="false"/>
+			<Number name="TICK" endian="big" size="32" signed="false"/>
+
+			<Block name="INSTi" minOccurs="0" maxOccurs="3000">
+
+				<Number name="XO" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bXOYO').getInternalValue() == 1"/>
+				</Number>
+				<Number name="YO" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bXOYO').getInternalValue() == 1"/>
+				</Number>
+				<Number name="WIDTH" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bWH').getInternalValue() == 1"/>
+				</Number>
+				<Number name="HEIGHT" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bWH').getInternalValue() == 1"/>
+				</Number>
+				<Number name="PERSIST_LIFE" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bLNP').getInternalValue() == 1"/>
+				</Number>
+				<Number name="NEXT_USE" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bLNP').getInternalValue() == 1"/>
+				</Number>
+				<Number name="XC" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+				</Number>
+				<Number name="YC" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+				</Number>
+				<Number name="WC" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+				</Number>
+				<Number name="HC" endian="big" size="32" signed="false">
+					<Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+				</Number>
+
+			</Block>
+
+
+
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxNumberList" ref="Box">
+		<Blob name="Type" length="4" value="6E 6C 73 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Number name="ANi" endian="big" signed="false" size="32" minOccurs="1" maxOccurs="3000"/>
+
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxLabel" ref="Box">
+		<Blob name="Type" length="4" value="6C 62 6C 20" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<String name="S" nullTerminated="false"/>
+
+		</Block>
+	</DataModel>
+
+
+
+	<DataModel name="BoxBinaryFilter" ref="Box">
+		<Blob name="Type" length="4" value="62 66 69 6C" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Choice name="UUIDChoice">
+				<Block name="Gzip">
+					<Blob name="UUID" length="16"
+						value="EC 34 0B 04 74 C5 11 D4 A7 29 87 9E A3 54 8F 0E" valueType="hex"/>
+					<Block name="Data">
+						<Transformer class="compress.GzipCompress"/>
+						<Block name="TheBox" ref="Box" minOccurs="0" maxOccurs="3000"/>
+					</Block>
+				</Block>
+				<Block name="UnknownFilter">
+					<Blob name="UUID" length="16" value="" valueType="hex"/>
+					<Blob name="Data" analyzer="binary.Binary"/>
+				</Block>
+			</Choice>
+
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxGraphicsTechnologyStandardOutput" ref="Box">
+		<Blob name="Type" length="4" value="67 74 73 6F" valueType="hex" isStatic="true"/>
+		<Blob name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</Blob>
+	</DataModel>
+
+
+	<DataModel name="BoxROIDescription" ref="Box">
+		<Blob name="Type" length="4" value="67 74 73 6F" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="Nroi" endian="big" size="8" signed="false">
+				<Relation type="count" of="ROI"/>
+			</Number>
+			<Block name="ROI" minOccurs="0" maxOccurs="3000">
+				<Relation type="count" from="Nroi"/>
+
+				<Number name="Ri" endian="big" size="8" signed="false"/>
+				<Number name="Rtypi" endian="big" size="8" signed="false"/>
+				<Number name="Rlcxi" endian="big" size="32" signed="false"/>
+				<Number name="Rlcxi" endian="big" size="32" signed="false"/>
+				<Number name="Rlcyi" endian="big" size="32" signed="false"/>
+				<Number name="Rwdti" endian="big" size="32" signed="false"/>
+				<Number name="Rhthi" endian="big" size="32" signed="false"/>
+
+			</Block>
+		</Block>
+	</DataModel>
+
+
+	<!-- NO WHERE NEAR SUPPORTED -->
+	<DataModel name="BoxDigitalSignature" ref="Box">
+		<Blob name="Type" length="4" value="63 68 63 6B" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Number name="Styp" endian="big" size="8" signed="false"/>
+			<Number name="Ptyp" endian="big" size="8" signed="false"/>
+			<Number name="OFFSET" endian="big" size="64" signed="false">
+				<Hint name="OffsetHint" value="offset"/>
+				<Relation type="when" when="self.find('Ptyp').getInternalValue() != '1'"/>
+			</Number>
+			<Number name="LENGTH" endian="big" size="64" signed="false">
+				<Relation type="when" when="self.find('Ptyp').getInternalValue() != '1'"/>
+			</Number>
+			<Blob name="Data" analyzer="binary.Binary"/>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxMPEG-7Binary" ref="Box">
+		<Blob name="Type" length="4" value="6D 70 37 62" valueType="hex" isStatic="true"/>
+		<Blob name="Data" analyzer="binary.Binary">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</Blob>
+	</DataModel>
+
+
+	<DataModel name="BoxFree" ref="Box">
+		<Blob name="Type" length="4" value="66 72 65 65" valueType="hex" isStatic="true"/>
+		<Blob name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+		</Blob>
+	</DataModel>
+
+	<!-- End JPX -->
+
+	<DataModel name="BoxCatchAll">
+		<Choice>
+			<!-- begin JP2 -->
+			<Block name="TheBoxJP2Signature" ref="BoxJP2Signature"/>
+			<Block name="TheBoxXML" ref="BoxXML"/>
+			<Block name="TheBoxFileType" ref="BoxFileType"/>
+			<Block name="TheBoxImageHeader" ref="BoxImageHeader"/>
+			<Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent"/>
+			<Block name="TheBoxColorSpecification" ref="BoxColorSpecification"/>
+			<Block name="TheBoxPallete" ref="BoxPallete"/>
+			<Block name="TheBoxComponentMapping" ref="BoxComponentMapping"/>
+			<Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition"/>
+			<Block name="TheBoxCaptureResolution" ref="BoxCaptureResolution"/>
+			<Block name="TheBoxIntellectualProperty" ref="BoxIntellectualProperty"/>
+			<Block name="TheBoxUUID" ref="BoxUUID"/>
+			<Block name="TheBoxUUIDList" ref="BoxUUIDList"/>
+			<Block name="TheBoxURL" ref="BoxURL"/>
+			<Block name="TheBoxUUIDInfo" ref="BoxUUIDInfo"/>
+			<!-- End of JP2 -->
+
+
+			<!-- Begin JPX -->
+			<Block name="TheBoxReaderRequirements" ref="BoxReaderRequirements"/>
+			<Block name="TheBoxDataReference" ref="BoxDataReference"/>
+			<Block name="TheBoxFragmentList" ref="BoxFragmentList"/>
+			<Block name="TheBoxFragmentTable" ref="BoxFragmentTable"/>
+			<Block name="TheBoxCrossReference" ref="BoxCrossReference"/>
+			<Block name="TheBoxOpacity" ref="BoxOpacity"/>
+			<Block name="TheBoxCodestreamRegistration" ref="BoxCodestreamRegistration"/>
+			<Block name="TheBoxCompositionOptions" ref="BoxCompositionOptions"/>
+			<Block name="TheBoxInstructionSet" ref="BoxInstructionSet"/>
+			<Block name="TheBoxNumberList" ref="BoxNumberList"/>
+			<Block name="TheBoxLabel" ref="BoxLabel"/>
+			<Block name="TheBoxBinaryFilter" ref="BoxBinaryFilter"/>
+			<Block name="TheBoxGraphicsTechnologyStandardOutput"
+				ref="BoxGraphicsTechnologyStandardOutput"/>
+			<Block name="TheBoxROIDescription" ref="BoxROIDescription"/>
+			<Block name="TheBoxDigitalSignature" ref="BoxDigitalSignature"/>
+			<Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary"/>
+			<Block name="TheBoxFree" ref="BoxFree"/>
+
+			<!-- End JPX -->
+			
+			<Block name="TheBoxContiguousCodestream" ref="BoxContiguousCodestreamSized"/>
+			
+			<Block name="Undefined" ref="Box"/>
+
+		</Choice>
+	</DataModel>
+
+	<!-- super boxes -->
+
+	<DataModel name="BoxMediaData" ref="Box">
+		<Blob name="Type" length="4" value="6D 64 61 74" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+
+			<Choice minOccurs="1" maxOccurs="3000">
+				<Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary"/>
+				<Block name="UnknownMediaBox" ref="BoxCatchAll"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxDesiredReproduction" ref="Box">
+		<Blob name="Type" length="4" value="64 72 65 70" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Choice name="BoxChoice" minOccurs="1" maxOccurs="3000">
+				<Block name="GTS" ref="BoxGraphicsTechnologyStandardOutput"/>
+				<Block name="UnknownDesiredReproduction" ref="BoxCatchAll"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxAssociation" ref="Box">
+		<Blob name="Type" length="4" value="61 73 6F 63" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="BF" ref="Box"/>
+			<Block name="Bi" ref="Box" minOccurs="1" maxOccurs="3000"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxColorGroup" ref="Box">
+		<Blob name="Type" length="4" value="63 67 72 70" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="TheBoxColorSpecification" ref="BoxColorSpecification" minOccurs="1"
+				maxOccurs="3000"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCodestreamHeader" ref="Box">
+		<Blob name="Type" length="4" value="6A 70 63 68" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="TheBoxLabel" ref="BoxLabel"/>
+			<Block name="TheBoxImageHeader" ref="BoxImageHeader"/>
+			<Choice name="CodestreamHeaderUnwrap" minOccurs="4" maxOccurs="3000">
+				<Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent"/>
+				<Block name="TheBoxPallete" ref="BoxPallete"/>
+				<Block name="TheBoxComponentMapping" ref="BoxComponentMapping"/>
+				<Block name="TheBoxROIDescription" ref="BoxROIDescription"/>
+
+				<Block name="UnknownCodestreamHeaderBox" ref="BoxCatchAll"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxCompositingLayerHeader" ref="Box">
+		<Blob name="Type" length="4" value="6A 70 6C 68" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="TheBoxLabel" ref="BoxLabel"/>
+			<Choice name="CompositingLayerHeaderUnwrap" minOccurs="5" maxOccurs="3000">
+				<Block name="TheBoxColorGroup" ref="BoxColorGroup"/>
+				<Block name="TheBoxOpacity" ref="BoxOpacity"/>
+				<Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition"/>
+				<Block name="TheBoxCodestreamRegistration" ref="BoxCodestreamRegistration"/>
+				<Block name="TheBoxResolution" ref="BoxResolution"/>
+
+				<Block name="UnknownCompositingLayerHeaderBox" ref="BoxCatchAll"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BoxComposition" ref="Box">
+		<Blob name="Type" length="4" value="63 6F 6D 70" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="LengthNormal"/>
+			<Relation type="size" from="LengthExtended"/>
+			<Block name="TheBoxCompositionOptions" ref="BoxCompositionOptions"/>
+			<Block name="TheBoxInstructionSet" ref="BoxInstructionSet" minOccurs="0"
+				maxOccurs="3000"/>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="BoxJP2Header" ref="Box">
+		<Blob name="Type" length="4" value="6A 70 32 68" valueType="hex" isStatic="true"/>
+		<Block name="Data">
+			<Relation type="size" from="BoxJP2Header.BoxLengthChoice.LengthNormal"/>
+			<Relation type="size" from="BoxJP2Header.LengthExtended"/>
+
+			<Block name="TheBoxImageHeader" ref="BoxImageHeader"/>
+
+			<Choice name="BoxJP2HeaderChoice" minOccurs="1" maxOccurs="3000">
+				<Block name="TheBoxLabel" ref="BoxLabel"/>
+				<Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent"/>
+				<Block name="TheBoxColorSpecification" ref="BoxColorSpecification"/>
+				<Block name="TheBoxPallete" ref="BoxPallete"/>
+				<Block name="TheBoxComponentMapping" ref="BoxComponentMapping"/>
+				<Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition"/>
+				<Block name="TheBoxResolution" ref="BoxResolution"/>
+				<Block name="TheBoxXML" ref="BoxXML"/>
+				<Block name="TheBoxImageHeaderBoxUnknown" ref="BoxCatchAll"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+<!--
+  
+  <DataModel name="" ref="Box">
+    <Blob name="Type" length="4" value="" valueType="hex" isStatic="true"/>
+    <Blob name="Data">
+      <Relation type="size" from="Length"/>
+    </Blob>
+  </DataModel>
+
+-->
+
+	<DataModel name="JPEG2000">
+		<Block name="TheBoxJP2Signature" ref="BoxJP2Signature"/>
+		<Block name="TheBoxFileType" ref="BoxFileType"/>
+
+		<Choice name="JPEGChoice" minOccurs="1" maxOccurs="3000">
+
+			<Block name="TheBoxReaderRequirements" ref="BoxReaderRequirements"/>
+			<Block name="BoxJP2Header" ref="BoxJP2Header"/>
+			<Block name="TheBoxCodestreamHeader" ref="BoxCodestreamHeader"/>
+			<Block name="TheBoxCompositingLayerHeader" ref="BoxCompositingLayerHeader"/>
+			<Block name="TheBoxDataReference" ref="BoxDataReference"/>
+			<Block name="TheBoxFragmentTable" ref="BoxFragmentTable"/>
+
+			<Block name="TheBoxContiguousCodestreamArrayUnwrap">
+				<Block name="TheBoxContiguousCodestream" ref="BoxContiguousCodestreamSized" minOccurs="1"
+					maxOccurs="3000"/>
+			</Block>
+
+			<Block name="TheBoxMediaData" ref="BoxMediaData"/>
+			<Block name="TheBoxCompostion" ref="BoxComposition"/>
+			<Block name="TheBoxDesiredReproduction" ref="BoxDesiredReproduction"/>
+			<Block name="TheBoxROIDescription" ref="BoxROIDescription"/>
+			<Block name="TheBoxCrossReference" ref="BoxCrossReference"/>
+			<Block name="TheBoxAssociation" ref="BoxAssociation"/>
+			<Block name="TheBoxBinaryFilter" ref="BoxBinaryFilter"/>
+			<Block name="TheBoxDigitalSignature" ref="BoxDigitalSignature"/>
+			<Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary"/>
+			<Block name="TheBoxFree" ref="BoxFree"/>
+			<Block name="TheBoxXML" ref="BoxXML"/>
+			<Block name="TheBoxUUID" ref="BoxUUID"/>
+			<Block name="TheBoxIntellectualProperty" ref="BoxIntellectualProperty"/>
+			<Block name="TheBoxUUIDInfo" ref="BoxUUIDInfo"/>
+			<Block name="TheBoxUnknown" ref="BoxCatchAll"/>
+
+		</Choice>
+
+		<Choice name="MayNotHaveThis">
+			<Block name="TheBoxContiguousCodestream" ref="BoxContiguousCodestreamUnsized" />
+			<Block name="NOP" />
+		</Choice>
+		
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="JPEG2000"/>
+				<!-- This will load files from samples every 5000 iterations -->
+				<Data name="data" fileName="samples"/>
+			</Action>
+
+			<Action type="close"/>
+			<Action type="call" method="ScoobySnacks"/>
+		</State>
+	</StateModel>
+
+	<Agent name="LocalAgent">
+		<Monitor class="debugger.WindowsDebugEngine">
+			<Param name="CommandLine" value="&quot;C:\Program Files (x86)\Adobe\Acrobat 9.0\Acrobat\Acrobat.exe&quot; fuzzed.pdf" />
+			<Param name="StartOnCall" value="ScoobySnacks" />
+		</Monitor>
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="Acrobat.exe"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="TheTest">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+
+		<Publisher class="JPXDecodePublisher">
+			<Param name="fileName" value="fuzzed.jp2"/>
+			<Param name="Window" value="Acrobat" />
+			<Param name="debugger" value="true"/>
+		</Publisher>
+	</Test>
+
+	<Run name="DefaultRun">
+		<Test ref="TheTest"/>
+
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+	</Run>
+</Peach>

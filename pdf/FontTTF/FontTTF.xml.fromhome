@@ -1,0 +1,3673 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd" author="Michael Eddington">
+
+	<!-- 
+		
+		OpenType Font (TTF) definition.
+		
+		Currently supported tables:
+		
+		dsig		X
+		gdef		X
+		gpos		X
+		gsub		X
+		ltsh		X
+		os/2		X
+		vdmx		X
+		cmap        X
+		cvt 		X
+		fpgm		X
+		gasp		X
+		glyf        X
+		hdmx		X
+		head		X
+		hhea		X
+		hmtx		Skipped
+		loca		X
+		maxp		X
+		name		X
+		post		X
+		prep		X
+		vorg		X
+		pclt		X
+		
+		Notes:
+		
+		There are tons of relative-offsets to sub-tables.  The placement of these tables in this definition
+		may not match what is normally done.  This is especially true with the common tables were placemnt
+		is made in the common table definition when in actuallity the placement may go with the consumer.
+		Additional research is needed to verify exact placement.  So far the placement done in this definition
+		does not seem to negatively affect the TTF file.
+		
+		Author:
+		
+		Michael Eddington
+		
+	-->
+
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<PythonPath path="."/>
+	<Import from="FontTTF" import="*"/>
+
+	<Defaults>
+		<Number size="32" signed="false" endian="big"/>
+	</Defaults>
+
+	<!-- ********************************************************************************** -->
+	<!-- ********************************************************************************** -->
+	<!-- ****************** Common structs ************************************************** -->
+	<!-- ********************************************************************************** -->
+	<!-- ********************************************************************************** -->
+	
+	<DataModel name="ClassDefinitionTable">
+		<Choice name="Format">
+			<Block name="Case1">
+				<Number name="ClassFormat" size="16" value="1" token="true"/>
+				<Number name="StartGlyph" size="16"/>
+				<Number name="GlyphCount" size="16">
+					<Relation type="count" of="ClassValueArray"/>
+				</Number>
+				<Number name="ClassValueArray" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="GlyphCount"/>
+				</Number>
+			</Block>
+
+			<Block name="Case2">
+				<Number name="ClassFormat" size="16" value="2" token="true"/>
+				<Number name="ClassRangeCount" size="16">
+					<Relation type="count" of="ClassRangeRecord"/>
+				</Number>
+				<Block name="ClassRangeRecord" minOccurs="0" maxOccurs="1024">
+					<Relation type="count" from="ClassRangeCount"/>
+					
+					<Number name="start" size="16"/>
+					<Number name="end" size="16"/>
+					<Number name="class" size="16"/>
+				</Block>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="CoverageTable">
+		<Choice name="Format">
+			<Block name="Case1">
+				<Number name="CoverageFormat" size="16" value="1"
+					token="true"/>
+				<Number name="GlyphCount" size="16">
+					<Relation type="count" of="GlyphArray"/>
+				</Number>
+				<Number name="GlyphArray" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="GlyphCount"/>
+				</Number>
+			</Block>
+
+			<Block name="Case2">
+				<Number name="CoverageFormat" size="16" value="2"
+					token="true"/>
+				<Number name="RangeCount" size="16">
+					<Relation type="count" of="RangeRecordTable"/>
+				</Number>
+				<Block name="RangeRecordTable" minOccurs="0" maxOccurs="1024">
+					<Relation type="count" from="RangeCount"/>
+					
+					<Number name="start" size="16"/>
+					<Number name="end" size="16"/>
+					<Number name="StartCoverageIndex" size="16"/>
+				</Block>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="DeviceTable">
+		<Choice name="Format">
+			<Block name="Case1">
+				<Number name="startSize" size="16">
+					<Relation type="count" of="DeltaValue"
+						expressionGet="(int(self.find('endSize').getInternalValue()) - count)/8"
+						expressionSet="int(self.find('endSize').getInternalValue()) - (count*8)"/>
+				</Number>
+				<Number name="endSize" size="16"/>
+				<Number name="DeltaFormat" size="16" value="1" token="true"/>
+				<Number name="DeltaValue" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="startSize" />
+				</Number>
+			</Block>
+
+			<Block name="Case2">
+				<Number name="startSize" size="16">
+					<Relation type="count" of="DeltaValue"
+						expressionGet="(int(self.find('endSize').getInternalValue()) - count)/4"
+						expressionSet="int(self.find('endSize').getInternalValue()) - (count*4)"/>
+				</Number>
+				<Number name="endSize" size="16"/>
+				<Number name="DeltaFormat" size="16" value="2" token="true"/>
+				<Number name="DeltaValue" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="startSize" />
+				</Number>
+			</Block>
+
+			<Block name="Case3">
+				<Number name="startSize" size="16">
+					<Relation type="count" of="DeltaValue"
+						expressionGet="(int(self.find('endSize').getInternalValue()) - count)/2"
+						expressionSet="int(self.find('endSize').getInternalValue()) + (count*2)"/>
+				</Number>
+				<Number name="endSize" size="16"/>
+				<Number name="DeltaFormat" size="16" value="3" token="true"/>
+				<Number name="DeltaValue" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="startSize" />
+				</Number>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="ScriptTable">
+		<Number name="DefaultLangSys" size="16">
+			<Relation type="offset" of="DefaultLangSysTable" relative="true" relativeTo="ScriptTable"/>
+		</Number>
+		<Number name="LangSysCount" size="16">
+			<Relation type="count" of="LangSysRecordTable"/>
+		</Number>
+
+		<Block name="LangSysRecordTable" minOccurs="0" maxOccurs="1024">
+			<Relation type="count" from="LangSysCount" />
+			
+			<Number name="LangSysTag" size="32"/>
+			<Number name="LangSys" size="16">
+				<Relation type="offset" of="LangSysTable" relative="true" relativeTo="ScriptTable"/>
+			</Number>
+
+			<Block name="LangSysTable">
+				<Relation type="offset" from="LangSys" />
+				<Placement before="ScriptTablePlacement"/>
+
+				<Number name="LookupOrder" size="16" value="0" token="true"/>
+				<Number name="ReqFeatureIndex" size="16"/>
+				<Number name="FeatureCount" size="16">
+					<Relation type="count" of="FeatureIndex"/>
+				</Number>
+				<Number name="FeatureIndex" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="FeatureCount"/>
+				</Number>
+			</Block>
+		</Block>
+
+		<Block name="DefaultLangSysTable">
+			<Relation type="when" when="self.find('DefaultLangSys').getInternalValue() != '0'"/>
+			<Relation type="offset" from="DefaultLangSys" />
+			<Placement before="ScriptTablePlacement"/>
+
+			<Number name="LookupOrder" size="16"/>
+			<!-- This is an offset to....somelace.... -->
+			<Number name="ReqFeatureIndex" size="16"/>
+			<Number name="FeatureCount" size="16">
+				<Relation type="count" of="FeatureIndex"/>
+			</Number>
+			<Number name="FeatureIndex" size="16" minOccurs="0"
+				maxOccurs="1024">
+				<Relation type="count" from="FeatureCount"/>
+			</Number>
+		</Block>
+
+		<Blob name="ScriptTablePlacement" length="0" value="" mutable="false"/>
+	</DataModel>
+
+	<DataModel name="ScriptListTable">
+		<Block name="ScriptListTableFTELL"/>
+		<Number name="ScriptCount" size="16">
+			<Relation type="count" of="ScriptRecordTable"/>
+		</Number>
+
+		<Block name="ScriptRecordTable" minOccurs="0" maxOccurs="1024">
+			<Number name="ScriptTag" size="32"/>
+			<Number name="Script" size="16">
+				<Relation type="offset" of="ScriptTable" relative="true" relativeTo="ScriptListTableFTELL"/>
+			</Number>
+
+			<Block name="ScriptTable" ref="ScriptTable">
+				<Relation type="offset" from="Script" />
+				<Placement before="ScriptListTablePlacement"/>
+			</Block>
+		</Block>
+
+		<Blob name="ScriptListTablePlacement" length="0" value="" mutable="false"/>
+	</DataModel>
+
+	<DataModel name="FeatureListTable">
+		<Block name="FeatureListTableFTELL"/>
+		<Number name="FeatureCount" size="16">
+			<Relation type="count" of="FeatureRecordTable"/>
+		</Number>
+
+		<Block name="FeatureRecordTable" minOccurs="0" maxOccurs="1024">
+			<Relation type="count" from="FeatureCount"/>
+			
+			<Blob name="FeatureTag" length="4"/>
+			
+			<Number name="Feature" size="16">
+				<Relation type="offset" of="FeatureTable" relative="true" relativeTo="FeatureListTableFTELL"/>
+			</Number>
+
+			<Block name="FeatureTable">
+				<Relation type="offset" from="Feature" />
+				<Placement before="FeatureListTablePlacement"/>
+
+				<Number name="FeatureParams" size="16" value="0" token="true"/>
+				<!-- This is an offset to....somelace.... -->
+				<Number name="LookupCount" size="16">
+					<Relation type="count" of="LookupListIndex"/>
+				</Number>
+				<Number name="LookupListIndex" size="16" minOccurs="0"
+					maxOccurs="1024">
+					<Relation type="count" from="LookupCount"/>
+				</Number>
+			</Block>
+		</Block>
+
+		<Blob name="FeatureListTablePlacement" length="0" value="" mutable="false"/>
+	</DataModel>
+
+	<!-- NOTE: The consumer of this DataModel must have a DataElement called "ValueRecordFormat" that
+		will indicate the format of this data modle. -->
+	<DataModel name="ValueTable">
+		<Number name="XPlacement" size="16">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x1"/>
+		</Number>
+		<Number name="YPlacement" size="16">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x2"/>
+		</Number>
+		<Number name="XAdvance" size="16">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x4"/>
+		</Number>
+		<Number name="YAdvance" size="16">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x8"/>
+		</Number>
+		<Block name="XPlaDevice">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x10"/>
+			<Number name="XPlaDevice" size="16">
+				<Relation type="offset" of="xPlaDevice" relative="true"/>
+			</Number>
+			<Block name="xPlaDevice" ref="DeviceTable">
+				<Relation type="when" when="self.find('XPlaDevice').getInternalValue != '0'"/>
+				<Relation type="offset" from="XPlaDevice" />
+				<Placement before="ValueTablePlacement"/>
+			</Block>
+		</Block>
+		<Block name="YPlaDevice">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x20"/>
+			<Number name="YPlaDevice" size="16">
+				<Relation type="offset" of="yPlaDevice" relative="true"/>
+			</Number>
+			<Block name="yPlaDevice" ref="DeviceTable">
+				<Relation type="when" when="self.find('YPlaDevice').getInternalValue != '0'"/>
+				<Relation type="offset" from="YPlaDevice" />
+				<Placement before="ValueTablePlacement"/>
+			</Block>
+		</Block>
+		<Block name="XAdvDevice">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x40"/>
+			<Number name="XAdvDevice" size="16">
+				<Relation type="offset" of="xAdvDevice" relative="true"/>
+			</Number>
+			<Block name="xAdvDevice" ref="DeviceTable">
+				<Relation type="when" when="self.find('XAdvDevice').getInternalValue != '0'"/>
+				<Relation type="offset" from="XAdvDevice" />
+				<Placement before="ValueTablePlacement"/>
+			</Block>
+		</Block>
+		<Block name="YAdvDevice">
+			<Relation type="when"
+				when="int(self.find('ValueRecordFormat').getInternalValue()) &amp; 0x80"/>
+			<Number name="YAdvDevice" size="16">
+				<Relation type="offset" of="yAdvDevice" relative="true"/>
+			</Number>
+			<Block name="yAdvDevice" ref="DeviceTable">
+				<Relation type="when" when="self.find('YAdvDevice').getInternalValue != '0'"/>
+				<Relation type="offset" from="YAdvDevice" />
+				<Placement before="ValueTablePlacement"/>
+			</Block>
+		</Block>
+
+		<Blob name="ValueTablePlacement" length="0" value="" mutable="false"/>
+	</DataModel>
+
+	<DataModel name="AnchorTable">
+		<Choice name="Format">
+			<Block name="Case1">
+				<Number name="AnchorFormat" size="16" value="1" token="true"/>
+
+				<Number name="XCoordinate" size="16"/>
+				<Number name="YCoordinate" size="16"/>
+			</Block>
+			<Block name="Case2">
+				<Number name="AnchorFormat" size="16" value="2" token="true"/>
+
+				<Number name="XCoordinate" size="16"/>
+				<Number name="YCoordinate" size="16"/>
+				<Number name="AnchorPoint" size="16"/>
+			</Block>
+			<Block name="Case3">
+				<Number name="AnchorFormat" size="16" value="3" token="true"/>
+
+				<Number name="XCoordinate" size="16"/>
+				<Number name="YCoordinate" size="16"/>
+				<Number name="XDeviceTable" size="16">
+					<Relation type="offset" of="xDeviceTable" relative="true" relativeTo="Case3" />
+				</Number>
+				<Number name="YDeviceTable" size="16">
+					<Relation type="offset" of="yDeviceTable" relative="true" relativeTo="Case3"/>
+				</Number>
+
+				<Block name="xDeviceTable" ref="DeviceTable">
+					<Relation type="when" when="self.find('XDeviceTable').getInternalValue() != '0'"/>
+					<Relation type="offset" from="XDeviceTable" />
+				</Block>
+				<Block name="yDeviceTable" ref="DeviceTable">
+					<Relation type="when" when="self.find('YDeviceTable').getInternalValue() != '0'"/>
+					<Relation type="offset" from="YDeviceTable" />
+				</Block>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="MarkArrayTable">
+		<Block name="MarkArrayTableFTELL" />
+		<Number name="MarkCount" size="16">
+			<Relation type="count" of="MarkRecord"/>
+		</Number>
+
+		<Block name="MarkRecord" minOccurs="0" maxOccurs="1024">
+			<Relation type="count" from="MarkCount"/>
+			
+			<Number name="Class" size="16"/>
+			<Number name="MarkAnchorOffset" size="16">
+				<Relation type="offset" of="markAnchor" relative="true" relativeTo="MarkArrayTableFTELL"/>
+			</Number>
+
+			<Block name="markAnchor" ref="AnchorTable">
+				<Relation type="offset" from="MarkAnchorOffset"/>
+				<Placement before="MarkArrayTablePlacement"/>
+			</Block>
+		</Block>
+
+		<Block name="MarkArrayTablePlacement"/>
+	</DataModel>
+
+	<!-- ********************************************************************************** -->
+	<!-- ********************************************************************************** -->
+	<!-- ****************** OpenType ******************************************************* -->
+	<!-- ********************************************************************************** -->
+	<!-- ********************************************************************************** -->
+	
+	<DataModel name="TPaddedTable">
+		<Relation type="offset" from="PaddedTableOffset"/>
+		<Placement before="TablePlacement"/>
+
+		<Blob name="Table">
+			<Relation type="size" from="TableLength"/>
+		</Blob>
+
+		<Blob name="Pad" value="" length="0">
+			<Fixup class="TablePadFixup">
+				<Param name="ref" value="Table"/>
+			</Fixup>
+		</Blob>
+	</DataModel>
+
+	<DataModel name="TableDefinition">
+		<String name="tag" length="4" value="A"/>
+
+		<!-- I guess we should update this checksum at some point :) -->
+		<Number name="checkSum" size="32"/>
+
+		<Number name="PaddedTableOffset" size="32">
+			<Relation type="offset" of="PaddedTable"/>
+		</Number>
+		<Number name="TableLength" size="32">
+			<Relation type="size" of="Table"/>
+		</Number>
+
+		<Block name="PaddedTable" ref="TPaddedTable"/>
+	</DataModel>
+
+	<DataModel name="OpenTypeFont">
+		<Block name="OffsetTable">
+			<Number name="Version" size="32"/>
+
+			<Number name="numTables" size="16">
+				<Relation type="count" of="Tables"/>
+			</Number>
+			<Number name="searchRange" size="16"/>
+			<Number name="entrySelector" size="16"/>
+			<Number name="rangeShift" size="16"/>
+
+		</Block>
+
+		<Choice name="Tables" maxOccurs="10000">
+			<Relation type="count" from="numTables"/>
+			
+			<Block name="name" ref="TableDefinition">
+				<String name="tag" value="name" token="true"/>
+
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="format" size="16"/>
+						<Number name="count" size="16">
+							<Relation type="count" of="NameRecord"/>
+						</Number>
+						<Number name="stringOffset" size="16">
+							<Relation type="offset" of="StringPlacement" relative="true" relativeTo="Table"/>
+						</Number>
+
+						<Choice name="NameRecord" maxOccurs="10000">
+							<Relation type="count" from="count"/>
+							
+							<Block name="ascii">
+								<Number name="platformID" size="16"/>
+								<Number name="encodingID" size="16" value="0"
+									token="true"/>
+								<Number name="languageID" size="16"/>
+								<Number name="nameID" size="16"/>
+								<Number name="length" size="16">
+									<Relation type="size" of="Value"/>
+								</Number>
+								<Number name="RecordOffset" size="16">
+									<Relation type="offset" of="Value"
+										expressionGet="(offset + int(self.find('stringOffset').getInternalValue()) + self.find('Table').possiblePos) - self.find('OpenTypeFont').possiblePos"
+										expressionSet="offset - (int(self.find('stringOffset').getInternalValue()) + self.find('Table').possiblePos)"
+									/>
+								</Number>
+
+								<String name="Value">
+									<Relation type="size" from="length"/>
+									<Relation type="offset" from="RecordOffset"/>
+									<Placement before="StringPlacement2"/>
+								</String>
+							</Block>
+							<Block name="unicode">
+								<Number name="platformID" size="16"/>
+								<Number name="encodingID" size="16" value="1"
+									token="true"/>
+								<Number name="languageID" size="16"/>
+								<Number name="nameID" size="16"/>
+								<Number name="length" size="16">
+									<Relation type="size" of="Value" expressionGet="size/2"/>
+								</Number>
+								<Number name="RecordOffset" size="16">
+									<Relation type="offset" of="Value"
+										expressionGet="(offset + 1 + int(self.find('stringOffset').getInternalValue()) + self.find('Table').possiblePos) - self.find('OpenTypeFont').possiblePos"
+										expressionSet="offset - (1 + int(self.find('stringOffset').getInternalValue()) + self.find('Table').possiblePos)"
+									/>
+								</Number>
+
+								<String name="Value" type="wchar">
+									<Relation type="size" from="length"/>
+									<Relation type="offset" from="RecordOffset"/>
+									<Placement before="StringPlacement2"/>
+								</String>
+							</Block>
+						</Choice>
+
+						<Blob name="StringPlacement" length="0" value="">
+							<Relation type="offset" of="stringOffset" />
+						</Blob>
+						<Blob name="StringPlacement2" length="0" value=""/>
+
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="os2" ref="TableDefinition">
+				<String name="tag" value="OS/2" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="xAvgCharWidth" size="16" signed="true"/>
+						<Number name="usWeightClass" size="16"/>
+						<Number name="usWidthClass" size="16"/>
+						<Number name="fsType" size="16"/>
+						<Number name="ySubscriptXSize" size="16" signed="true"/>
+						<Number name="ySubscriptYSize" size="16" signed="true"/>
+						<Number name="ySubscriptXOffset" size="16" signed="true"/>
+						<Number name="ySubscriptYOffset" size="16" signed="true"/>
+						<Number name="ySuperscriptXSize" size="16" signed="true"/>
+						<Number name="ySuperscriptYSize" size="16" signed="true"/>
+						<Number name="ySuperscriptXOffset" size="16" signed="true"/>
+						<Number name="ySuperscriptYOffset" size="16" signed="true"/>
+						<Number name="yStrikeoutSize" size="16" signed="true"/>
+						<Number name="yStrikeoutPosition" size="16" signed="true"/>
+						<Number name="sFamilyClass" size="16" signed="true"/>
+						<Blob name="panose" length="10" value="A"/>
+						<Number name="ulUnicodeRange1" size="32"/>
+						<Number name="ulUnicodeRange2" size="32"/>
+						<Number name="ulUnicodeRange3" size="32"/>
+						<Number name="ulUnicodeRange4" size="32"/>
+						<String name="achVendID" length="4" value="A"/>
+						<Number name="fsSelection" size="16"/>
+						<Number name="usFirstCharIndex" size="16"/>
+						<Number name="usLastCharIndex" size="16"/>
+						<Number name="sTypoAscender" size="16" signed="true"/>
+						<Number name="sTypoDescender" size="16" signed="true"/>
+						<Number name="sTypoLineGap" size="16" signed="true"/>
+						<Number name="usWinAscent" size="16"/>
+						<Number name="usWinDescent" size="16"/>
+						<Number name="ulCodePageRange1" size="32"/>
+						<Number name="ulCodePageRange2" size="32"/>
+						<Number name="sxHeight" size="16" signed="true"/>
+						<Number name="sCapHeight" size="16" signed="true"/>
+						<Number name="usDefaultChar" size="16"/>
+						<Number name="usBreakChar" size="16"/>
+						<Number name="usMaxContext" size="16"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="head" ref="TableDefinition">
+				<String name="tag" value="head" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="TableVersionNumber" size="32"/>
+						<Number name="fontRevision" size="32"/>
+						<Number name="checkSumAdjustment" size="32"/>
+						<Number name="magicNumber" size="32"/>
+						<Number name="flags" size="16"/>
+						<Number name="unitsPerEm" size="16"/>
+						<Number name="created" size="64"/>
+						<Number name="modified" size="64"/>
+						<Number name="xMin" size="16" signed="true"/>
+						<Number name="yMin" size="16" signed="true"/>
+						<Number name="xMax" size="16" signed="true"/>
+						<Number name="yMax" size="16" signed="true"/>
+						<Number name="macStyle" size="16"/>
+						<Number name="lowestRecPPEM" size="16"/>
+						<Number name="fontDirectionHint" size="16" signed="true"/>
+						<Number name="indexToLocFormat" size="16" signed="true"/>
+						<Number name="glyphDataFormat" size="16" signed="true"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="hhea" ref="TableDefinition">
+				<String name="tag" value="hhea" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="TableVersionNumber" size="32"/>
+						<Number name="Ascender" size="16"/>
+						<Number name="Descender" size="16"/>
+						<Number name="LineGap" size="16"/>
+						<Number name="advanceWidthMax" size="16"/>
+						<Number name="minLeftSideBearing" size="16"/>
+						<Number name="minRightSideBearing" size="16"/>
+						<Number name="xMaxExtent" size="16"/>
+						<Number name="caretSlopeRise" size="16" signed="true"/>
+						<Number name="caretSlopeRun" size="16" signed="true"/>
+						<Number name="caretOffset" size="16" signed="true"/>
+						<Number name="reserved1" size="16" signed="true"/>
+						<Number name="reserved2" size="16" signed="true"/>
+						<Number name="reserved3" size="16" signed="true"/>
+						<Number name="reserved4" size="16" signed="true"/>
+						<Number name="metricDataFormat" size="16" signed="true"/>
+						<Number name="numberOfHMetrics" size="16"/>
+					</Block>
+				</Block>
+
+			</Block>
+
+			<Block name="maxp" ref="TableDefinition">
+				<String name="tag" value="maxp" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Choice name="Version">
+							<Block name="Version5">
+								<Number name="TableVersionNumber" size="32"
+									valueType="hex" value="00005000" token="true"/>
+								<Number name="numGlyphs" size="16"/>
+							</Block>
+							<Block name="VersionOther">
+								<Number name="TableVersionNumber" size="32"/>
+								<Number name="numGlyphs" size="16"/>
+								<Number name="maxPoints" size="16"/>
+								<Number name="maxContours" size="16"/>
+								<Number name="maxCompositePoints" size="16"/>
+								<Number name="maxCompositeContours" size="16"/>
+								<Number name="maxZones" size="16"/>
+								<Number name="maxTwilightPoints" size="16"/>
+								<Number name="maxStorage" size="16"/>
+								<Number name="maxFunctionDefs" size="16"/>
+								<Number name="maxInstructionDefs" size="16"/>
+								<Number name="maxStackElements" size="16"/>
+								<Number name="maxSizeOfInstructions" size="16"/>
+								<Number name="maxComponentElements" size="16"/>
+								<Number name="maxComponentDepth" size="16"/>
+							</Block>
+						</Choice>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="DSIG" ref="TableDefinition">
+				<String name="tag" value="DSIG" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="ulVersion" size="32"/>
+						<Number name="usNumSigs" size="16">
+							<Relation type="count" of="Sigs"/>
+						</Number>
+						<Number name="usFlag" size="16"/>
+
+						<Block name="Sigs" minOccurs="0" maxOccurs="1024">
+							<Relation type="count" from="usNumSigs"/>
+							
+							<Number name="ulFormat" size="32"/>
+							<Number name="ulLength" size="32">
+								<Relation type="size" of="SignatureBlock"/>
+							</Number>
+							<Number name="ulOffset" size="32">
+								<Relation type="offset" of="SignatureBlock" relative="true" relativeTo="Table"/>
+							</Number>
+
+							<Block name="SignatureBlock">
+								<Relation type="size" from="ulLength"/>
+								<Relation type="offset" from="ulOffset" />
+								<Placement before="SignatureBlockPlacement"/>
+
+								<Number name="usReserved1" size="16"/>
+								<Number name="usReserved2" size="16"/>
+								<Number name="cbSignature" size="32">
+									<Relation type="size" of="bSignature"/>
+								</Number>
+								<Blob name="bSignature">
+									<Relation type="size" from="cbSignature"/>
+								</Blob>
+							</Block>
+						</Block>
+
+						<Block name="SignatureBlockPlacement"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="GDEF" ref="TableDefinition">
+				<String name="tag" value="GDEF" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="Version" size="32"/>
+						<Number name="GlyphClassDef" size="16">
+							<Relation type="offset" of="GlyphClassDefTable" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="AttachList" size="16">
+							<Relation type="offset" of="AttachListStuff" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="LigCaretList" size="16">
+							<Relation type="offset" of="LigCaretListStuff" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="MarkAttachClassDef" size="16">
+							<Relation type="offset" of="MarkAttachClassTable" relative="true" relativeTo="Table"/>
+						</Number>
+
+						<Block name="GlyphClassDefTable" ref="ClassDefinitionTable">
+							<Relation type="when" when="self.find('GlyphClassDef').getInternalValue() != '0'"/>
+							<Relation type="offset" from="GlyphClassDef" />
+							<Placement before="GdefPlacement"/>
+						</Block>
+
+						<Block name="AttachListStuff">
+							<Relation type="when" when="self.find('AttachList').getInternalValue() != '0'"/>
+							<Relation type="offset" from="AttachList" />
+							<Placement before="GdefPlacement"/>
+
+							<Number name="CoverageAttachListStuff" size="16">
+								<Relation type="offset" of="CoverageTable" relative="true"
+									relativeTo="AttachListStuff"/>
+							</Number>
+							<Number name="GlyphCount" size="16">
+								<Relation type="count" of="AttachPointStuff"/>
+							</Number>
+
+							<Block name="AttachPointStuff" minOccurs="0" maxOccurs="1024">
+								<Relation type="count" from="GlyphCount"/>
+								
+								<Number name="AttachPoint" size="16">
+									<Relation type="offset" of="AttachPointTable" relative="true"
+										relativeTo="AttachListStuff"/>
+								</Number>
+
+								<Block name="AttachPointTable">
+									<Relation type="offset" from="AttachPoint" />
+									<Placement before="GdefPlacement"/>
+
+									<Number name="AttachPoint" size="16">
+										<Relation type="offset" of="PointIndex" relativeTo="AttachListStuff"/>
+									</Number>
+									
+									<Number name="PointCount" size="16">
+										<Relation type="count" of="PointIndex"/>
+									</Number>
+									
+									<Block name="PointIndexStuff">
+										<Relation type="offset" from="AttachPoint" />
+										
+										<Number name="PointIndex" size="16" minOccurs="0"
+											maxOccurs="1024">
+											<Relation type="count" from="PointCount"/>											
+										</Number>
+									</Block>
+									
+								</Block>
+							</Block>
+
+							<Block name="CoverageTable" ref="CoverageTable">
+								<Relation type="offset" from="CoverageAttachListStuff" />
+								<Placement before="GdefPlacement"/>
+							</Block>
+						</Block>
+
+						<Block name="LigCaretListStuff">
+							<Relation type="when" when="self.find('LigCaretList').getInternalValue() != '0'"/>
+							<Relation type="offset" from="LigCaretList" />
+							<Placement before="GdefPlacement"/>
+
+							<Number name="CoverageLigCaretListStuff" size="16">
+								<Relation type="offset" of="CoverageTable" relative="true"
+									relativeTo="LigCaretListStuff"/>
+							</Number>
+							<Number name="LigGlyphCount" size="16">
+								<Relation type="count" of="LogGlyphStuff"/>
+							</Number>
+
+							<Block name="LogGlyphStuff" minOccurs="0" maxOccurs="1024">
+								<Relation type="count" from="LigGlyphCount"/>
+								
+								<Number name="LogGlyph" size="16">
+									<Relation type="offset" of="LigGlyphTable" relative="true"
+										relativeTo="LigCaretListStuff"/>
+								</Number>
+
+								<Block name="LigGlyphTable">
+									<Relation type="offset" from="LogGlyph" />
+									<Placement before="GdefPlacement"/>
+									
+									<Number name="CaretCount" size="16">
+										<Relation type="count" of="CaretValueStuff"/>
+									</Number>
+
+									<Block name="CaretValueStuff" minOccurs="0" maxOccurs="1024">
+										<Relation type="count" from="CaretCount"/>
+										
+										<Number name="CaretValue" size="16">
+											<Relation type="offset" of="CaretValueTable" relative="true"
+												relativeTo="LigGlyphTable"/>
+										</Number>
+
+										<Block name="CaretValueTable">
+											<Relation type="offset" from="CaretValue" />
+											<Placement before="GdefPlacement"/>
+
+											<Choice name="Format">
+												<Block name="Case1">
+													<Number size="16" value="1" token="true"/>
+													<Number name="Coordinate" size="16"/>
+												</Block>
+												<Block name="Case2">
+													<Number size="16" value="2" token="true"/>
+													<Number name="CaretValuePoint" size="16"/>
+												</Block>
+												<Block name="Case3">
+													<Number size="16" value="3" token="true"/>
+													<Number name="Coordinate" size="16"/>
+													<Number name="DeviceTableOffset" size="16">
+														<Relation type="offset" of="deviceTable" relative="true"
+															relativeTo="CaretValueTable"/>
+													</Number>
+													<Block name="deviceTable" ref="DeviceTable">
+														<Relation type="offset" from="DeviceTableOffset" />
+														<Placement before="GdefPlacement"/>
+													</Block>
+												</Block>
+											</Choice>
+										</Block>
+									</Block>
+								</Block>
+							</Block>
+
+							<Block name="CoverageTable" ref="CoverageTable">
+								<Relation type="offset" from="CoverageLigCaretListStuff" />
+								<Placement before="GdefPlacement"/>
+							</Block>
+						</Block>
+
+						<Block name="MarkAttachClassTable" ref="ClassDefinitionTable">
+							<Relation type="when" when="self.find('MarkAttachClassDef').getInternalValue() != '0'"/>
+							<Relation type="offset" from="MarkAttachClassDef" />
+							<Placement before="GdefPlacement"/>
+						</Block>
+
+						<Blob name="GdefPlacement" length="0" value="" mutable="false"/>
+					</Block>
+				</Block>
+			</Block>
+			
+			<Block name="GPOS" ref="TableDefinition">
+				<String name="tag" value="GPOS" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="Version" size="32"/>
+						<Number name="ScriptList" size="16">
+							<Relation type="offset" of="TheScriptListTable" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="FeatureList" size="16">
+							<Relation type="offset" of="TheFeatureListTable" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="LookupList" size="16">
+							<Relation type="offset" of="LookupListTable" relative="true" relativeTo="Table"/>
+						</Number>
+
+						<Block name="TheScriptListTable" ref="ScriptListTable">
+							<Relation type="offset" from="ScriptList" />
+							<Placement before="GposPlacement"/>
+						</Block>
+
+						<Block name="TheFeatureListTable" ref="FeatureListTable">
+							<Relation type="offset" from="FeatureList" />
+							<Placement before="GposPlacement"/>
+						</Block>
+
+						<Block name="LookupListTable">
+							<Relation type="offset" from="LookupList" />
+							<Placement before="GposPlacement"/>
+
+							<Number name="LookupCount" size="16">
+								<Relation type="count" of="Lookup"/>
+							</Number>
+
+							<Block name="Lookup" minOccurs="0" maxOccurs="1024">
+								<Relation type="count" from="LookupCount"/>
+								
+								<Number name="LookupOffset" size="16">
+									<Relation type="offset" of="LookupTable" relative="true"
+										relativeTo="LookupListTable"/>
+								</Number>
+
+								<Block name="LookupTable">
+									<Relation type="offset" from="LookupOffset" />
+									<Placement before="GposPlacement"/>
+									
+									<Choice name="LookupFormat">
+										<Block name="Case1">
+											<Number name="LookupType" size="16" value="1" token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="PosFormat" size="16"
+																value="1" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ValueRecordFormat" size="16"/>
+															<Block name="Value" ref="ValueTable"/>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+														<Block name="Case2">
+															<Number name="PosFormat" size="16"
+																value="2" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ValueRecordFormat" size="16"/>
+															<Number name="ValueCount" size="16">
+																<Relation type="count" of="Value"/>
+															</Number>
+															<Block name="Value" ref="ValueTable" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ValueCount"/>
+															</Block>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<Block name="Case2">
+											<Number name="LookupType" size="16" value="2"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="PosFormat" size="16"
+																value="1" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ValueFormat1" size="16"/>
+															<Number name="ValueFormat2" size="16"/>
+															<Number name="PairSetCount" size="16">
+																<Relation type="count" of="PairSet"/>
+															</Number>
+
+															<Block name="PairSet" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="PairSetCount"/>
+																
+																<Number name="PairSetOffset" size="16">
+																	<Relation type="offset" of="PairSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+
+																<Block name="PairSetTable">
+																	<Relation type="offset" from="PairSetOffset" />
+																	
+																	<Number name="PairValueCount" size="16" signed="false"
+																		endian="big">
+																		<Relation type="count" of="PairValueRecord"/>
+																	</Number>
+																	<Block name="PairValueRecord" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="PairValueCount"/>
+																		
+																		<Block name="Value1Table">
+																			<Number name="XPlacement" size="16" signed="false"
+																				endian="big">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x1"
+																				/>
+																			</Number>
+																			<Number name="YPlacement" size="16" signed="false"
+																				endian="big">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x2"
+																				/>
+																			</Number>
+																			<Number name="XAdvance" size="16">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x4"
+																				/>
+																			</Number>
+																			<Number name="YAdvance" size="16">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x8"
+																				/>
+																			</Number>
+																			<Block name="XPlaDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x10"/>
+																				
+																				<Number name="XPlaDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="xPlaDevice" relative="true"/>
+																				</Number>
+																				<Block name="xPlaDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('XPlaDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="XPlaDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="YPlaDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x20"/>
+																				<Number name="YPlaDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="yPlaDevice" relative="true"/>
+																				</Number>
+																				<Block name="yPlaDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('YPlaDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="YPlaDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="XAdvDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x40"/>
+																				<Number name="XAdvDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="xAdvDevice" relative="true"/>
+																				</Number>
+																				<Block name="xAdvDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('XAdvDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="XAdvDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="YAdvDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x80"/>
+																				<Number name="YAdvDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="yAdvDevice" relative="true"/>
+																				</Number>
+																				<Block name="yAdvDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('YAdvDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="YAdvDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+
+																			<Block name="ValueTablePlacement"/>
+																		</Block>
+
+
+																		<Block name="Value2Table">
+																			<Number name="XPlacement" size="16" signed="false"
+																				endian="big">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x1"
+																				/>
+																			</Number>
+																			<Number name="YPlacement" size="16" signed="false"
+																				endian="big">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x2"
+																				/>
+																			</Number>
+																			<Number name="XAdvance" size="16">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x4"
+																				/>
+																			</Number>
+																			<Number name="YAdvance" size="16">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x8"
+																				/>
+																			</Number>
+																			<Block name="XPlaDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x10"/>
+																				<Number name="XPlaDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="xPlaDevice" relative="true"/>
+																				</Number>
+																				<Block name="xPlaDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('XPlaDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="XPlaDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="YPlaDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x20"/>
+																				<Number name="YPlaDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="yPlaDevice" relative="true"/>
+																				</Number>
+																				<Block name="yPlaDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('YPlaDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="YPlaDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="XAdvDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x40"/>
+																				<Number name="XAdvDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="xAdvDevice" relative="true"/>
+																				</Number>
+																				<Block name="xAdvDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('XAdvDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="XAdvDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+																			<Block name="YAdvDevice">
+																				<Relation type="when"
+																					when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x80"/>
+																				<Number name="YAdvDevice" size="16" signed="false"
+																					endian="big">
+																					<Relation type="offset" of="yAdvDevice" relative="true"/>
+																				</Number>
+																				<Block name="yAdvDevice" ref="DeviceTable">
+																					<Relation type="when"
+																					when="self.find('YAdvDevice').getInternalValue != '0'"/>
+																					<Relation type="offset" from="YAdvDevice" />
+																					<Placement before="ValueTablePlacement"/>
+																				</Block>
+																			</Block>
+
+																			<Block name="ValueTablePlacement"/>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+
+														<Block name="Case2">
+															<Number name="PosFormat" size="16"
+																value="2" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ValueFormat1" size="16"/>
+															<Number name="ValueFormat2" size="16"/>
+															<Number name="ClassDef1" size="16">
+																<Relation type="offset" of="ClassTableDef1" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ClassDef2" size="16">
+																<Relation type="offset" of="ClassTableDef2" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="Class1Count" size="16">
+																<Relation type="count" of="Class1Record"/>
+															</Number>
+															<Number name="Class2Count" size="16">
+																<Relation type="count" of="Class2Record"/>
+															</Number>
+
+															<Block name="Class1Record" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="Class1Count"/>
+																
+																<Block name="Class2Record" minOccurs="0" maxOccurs="1024">
+																	<Relation type="count" from="Class2Count"/>
+																	
+																	<Block name="ValueTable1">
+																		<Number name="XPlacement" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x1"
+																			/>
+																		</Number>
+																		<Number name="YPlacement" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x2"
+																			/>
+																		</Number>
+																		<Number name="XAdvance" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x4"
+																			/>
+																		</Number>
+																		<Number name="YAdvance" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x8"
+																			/>
+																		</Number>
+																		<Block name="XPlaDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x10"/>
+																			<Number name="XPlaDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="xPlaDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="xPlaDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('XPlaDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="XPlaDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="YPlaDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x20"/>
+																			<Number name="YPlaDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="yPlaDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="yPlaDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('YPlaDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="YPlaDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="XAdvDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x40"/>
+																			<Number name="XAdvDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="xAdvDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="xAdvDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('XAdvDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="XAdvDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="YAdvDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat1').getInternalValue()) &amp; 0x80"/>
+																			<Number name="YAdvDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="yAdvDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="yAdvDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('YAdvDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="YAdvDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+
+																		<Block name="ValueTablePlacement"/>
+																	</Block>
+
+																	<Block name="ValueTable2">
+																		<Number name="XPlacement" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x1"
+																			/>
+																		</Number>
+																		<Number name="YPlacement" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x2"
+																			/>
+																		</Number>
+																		<Number name="XAdvance" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x4"
+																			/>
+																		</Number>
+																		<Number name="YAdvance" size="16">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x8"
+																			/>
+																		</Number>
+																		<Block name="XPlaDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x10"/>
+																			<Number name="XPlaDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="xPlaDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="xPlaDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('XPlaDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="XPlaDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="YPlaDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x20"/>
+																			<Number name="YPlaDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="yPlaDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="yPlaDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('YPlaDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="YPlaDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="XAdvDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x40"/>
+																			<Number name="XAdvDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="xAdvDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="xAdvDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('XAdvDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="XAdvDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+																		<Block name="YAdvDevice">
+																			<Relation type="when"
+																				when="int(self.find('ValueFormat2').getInternalValue()) &amp; 0x80"/>
+																			<Number name="YAdvDevice" size="16" signed="false"
+																				endian="big">
+																				<Relation type="offset" of="yAdvDevice" relative="true"
+																					relativeTo="SubTable"/>
+																			</Number>
+																			<Block name="yAdvDevice" ref="DeviceTable">
+																				<Relation type="when"
+																				when="self.find('YAdvDevice').getInternalValue != '0'"/>
+																				<Relation type="offset" from="YAdvDevice" />
+																				<Placement before="ValueTablePlacement"/>
+																			</Block>
+																		</Block>
+
+																		<Block name="ValueTablePlacement"/>
+																	</Block>
+																</Block>
+															</Block>
+
+															<Block name="ClassTableDef1" ref="ClassDefinitionTable">
+																<Relation type="offset" from="ClassDef1" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="ClassTableDef2" ref="ClassDefinitionTable">
+																<Relation type="offset" from="ClassDef2" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+
+														</Block>
+
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<Block name="Case3">
+											<Number name="LookupType" size="16" value="3"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+
+													<Number name="PosFormat" size="16" value="1" token="true"/>
+													<Number name="Coverage" size="16">
+														<Relation type="offset" of="CoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="EntryExitCount" size="16">
+														<Relation type="count" of="EntryExitRecord"/>
+													</Number>
+
+													<Block name="EntryExitRecord" minOccurs="0" maxOccurs="1024">
+														<Relation type="count" from="EntryExitCount"/>
+														
+														<Number name="EntryAnchor" size="16">
+															<Relation type="offset" of="entryAnchor" relative="true"
+																relativeTo="SubTable"/>
+														</Number>
+														<Number name="ExitAnchor" size="16">
+															<Relation type="offset" of="exitAnchor" relative="true"
+																relativeTo="SubTable"/>
+														</Number>
+
+														<Block name="entryAnchor" ref="AnchorTable">
+															<Relation type="when"
+															when="self.find('EntryAnchor').getInternalValue() != '0'"/>
+															<Relation type="offset" from="EntryAnchor" />
+															<Placement before="GposPlacement"/>
+														</Block>
+														<Block name="exitAnchor" ref="AnchorTable">
+															<Relation type="when"
+															when="self.find('ExitAnchor').getInternalValue() != '0'"/>
+															<Relation type="offset" from="ExitAnchor" />
+															<Placement before="GposPlacement"/>
+														</Block>
+													</Block>
+
+													<Block name="CoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="Coverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<Block name="Case4">
+											<Number name="LookupType" size="16" value="4"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffsetCase4" size="16">
+													<Relation type="offset" of="SubTableCase4" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTableCase4">
+													<Relation type="offset" from="SubTableOffsetCase4" />
+													<Placement before="GposPlacement"/>
+													
+													<Number name="PosFormat" size="16" value="1" token="true"/>
+													<Number name="MarkCoverage" size="16">
+														<Relation type="offset" of="MarkCoverageTable" relative="true"
+															relativeTo="SubTableCase4"/>
+													</Number>
+													<Number name="BaseCoverage" size="16">
+														<Relation type="offset" of="BaseCoverageTable" relative="true"
+															relativeTo="SubTableCase4"/>
+													</Number>
+													<Number name="ClassCount" size="16">
+														<Relation type="count" of="Stuffs"/>
+													</Number>
+													<Number name="MarkArray" size="16">
+														<Relation type="offset" of="MarkArrayTable4" relative="true"
+															relativeTo="SubTableCase4"/>
+													</Number>
+													<Number name="BaseArray" size="16">
+														<Relation type="offset" of="BaseArrayTable" relative="true"
+															relativeTo="SubTableCase4"/>
+													</Number>
+
+													<Block name="BaseArrayTable">
+														<Relation type="offset" from="BaseArray" />
+														<Placement before="GposPlacement"/>
+														
+														<Number name="BaseCount" size="16">
+															<Relation type="count" of="BaseRecord"/>
+														</Number>
+														
+														<Block name="BaseRecord" minOccurs="0" maxOccurs="1024">
+															<Relation type="count" from="BaseCount"/>
+															
+															<Block name="Stuffs" maxOccurs="1024">
+																<Relation type="count" from="ClassCount"/>
+																
+																<Number name="BaseAnchorOffset" size="16">
+																	<Relation type="offset" of="BaseAnchor" relative="true"
+																		relativeTo="BaseArrayTable"/>
+																</Number>
+																<Block name="BaseAnchor" ref="AnchorTable">
+																	<Relation type="offset" from="BaseAnchorOffset" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+														</Block>
+													</Block>
+													
+													<Block name="MarkCoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="MarkCoverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="BaseCoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="BaseCoverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="MarkArrayTable4" ref="MarkArrayTable">
+														<Relation type="offset" from="MarkArray" />
+														<Placement before="GposPlacement"/>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<Block name="Case5">
+											<Number name="LookupType" size="16" value="5"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+													
+													<Number name="PosFormat" size="16"/>
+
+													<Number name="MarkCoverage" size="16">
+														<Relation type="offset" of="MarkCoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="LigatureCoverage" size="16">
+														<Relation type="offset" of="LigatureCoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="ClassCount" size="16">
+														<Relation type="count" of="ClassCountStuff"/>
+													</Number>
+													<Number name="MarkArray" size="16">
+														<Relation type="offset" of="MarkArrayTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="LigatureArray" size="16">
+														<Relation type="offset" of="LigatureArrayTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+
+													<Block name="MarkCoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="MarkCoverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="LigatureCoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="LigatureCoverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="MarkArrayTable" ref="MarkArrayTable">
+														<Relation type="offset" from="MarkArray" />
+														<Placement before="GposPlacement"/>
+													</Block>
+
+													<Block name="LigatureArrayTable">
+														<Relation type="offset" from="LigatureArray" />
+														<Placement before="GposPlacement"/>
+
+														<Number name="LigatureCount" size="16">
+															<Relation type="count" of="Stuffs"/>
+														</Number>
+
+														<Block name="Stuffs" minOccurs="0" maxOccurs="1024">
+															<Relation type="count" from="LigatureCount"/>
+															
+															<Number name="LogatureAttach" size="16">
+																<Relation type="offset" of="LigatureAttachTable" relative="true"
+																	relativeTo="LigatureArrayTable"/>
+															</Number>
+															<Block name="LigatureAttachTable">
+																<Relation type="offset" from="LogatureAttach" />
+																<Placement before="GposPlacement"/>
+
+																<Number name="ComponentCount" size="16">
+																	<Relation type="count" of="ComponentRecord"/>
+																</Number>
+																<Block name="ComponentRecord" minOccurs="0" maxOccurs="1024">
+																	<Relation type="count" from="ComponentCount"/>
+																	
+																	<Block name="ClassCountStuff" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="ClassCount"/>
+																		
+																		<Number name="LigatureAnchor" size="16" signed="false"
+																			endian="big">
+																			<Relation type="offset" of="LigatureAnchorTable"
+																				relative="true" relativeTo="LigatureAttachTable"/>
+																		</Number>
+																		<Block name="LigatureAnchorTable" ref="AnchorTable">
+																			<Relation type="offset" from="LigatureAnchor" />
+																			<Placement before="GposPlacement"/>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+														</Block>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<Block name="Case6">
+											<Number name="LookupType" size="16" value="6"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+
+													<Number name="PosFormat" size="16"/>
+
+													<Number name="Mark1Coverage" size="16">
+														<Relation type="offset" of="Mark1CoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="Mark2Coverage" size="16">
+														<Relation type="offset" of="Mark2CoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="ClassCountMark2RecordStuff" size="16">
+														<Relation type="count" of="Mark2RecordStuff"/>
+													</Number>
+													<Number name="Mark1Array" size="16">
+														<Relation type="offset" of="Mark1ArrayTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													<Number name="Mark2Array" size="16">
+														<Relation type="offset" of="Mark2ArrayTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+
+													<Block name="Mark1ArrayTable" ref="MarkArrayTable">
+														<Relation type="offset" from="Mark1Array" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="Mark2ArrayTable">
+														<Relation type="offset" from="Mark2Array" />
+														<Placement before="GposPlacement"/>
+
+														<Number name="Mark2Count" size="16">
+															<Relation type="count" of="Mark2Record"/>
+														</Number>
+														<Block name="Mark2Record" minOccurs="0" maxOccurs="1024">
+															<Relation type="count" from="Mark2Count"/>
+															
+															<Block name="Mark2RecordStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ClassCountMark2RecordStuff"/>
+																
+																<Number name="Mark2Anchor" size="16">
+																	<Relation type="offset" of="Mark2AnchorTable" relative="true"
+																		relativeTo="Mark2ArrayTable"/>
+																</Number>
+																<Block name="Mark2AnchorTable" ref="AnchorTable">
+																	<Relation type="offset" from="Mark2Anchor" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+														</Block>
+													</Block>
+
+													<Block name="Mark1CoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="Mark1Coverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+													<Block name="Mark2CoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="Mark2Coverage" />
+														<Placement before="GposPlacement"/>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<Block name="Case7">
+											<Number name="LookupType" size="16" value="7"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+													
+													<Choice name="Format">
+														<Block name="Case1">
+															<Number name="PosFormat" size="16"
+																value="1" token="true"/>
+
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="PosRuleSetCount" size="16">
+																<Relation type="count" of="PosRuleSetStuff"/>
+															</Number>
+
+															<Block name="PosRuleSetStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="PosRuleSetCount"/>
+																<Placement before="GposPlacement"/> <!-- This placement wrong? -->
+
+																<Number name="PosRuleSet" size="16">
+																	<Relation type="offset" of="PosRuleSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+
+																<Block name="PosRuleSetTable">
+																	<Relation type="offset" from="PosRuleSet" />
+																	<!-- PLACEMENT HERE???? -->
+																		
+																	<Number name="PosRuleCount" size="16">
+																		<Relation type="count" of="PosRuleStuff"/>
+																	</Number>
+
+																	<Block name="PosRuleStuff" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="PosRuleCount"/>
+																		
+																		<Number name="PosRule" size="16">
+																			<Relation type="offset" of="PosRuleTable" relative="true"
+																				relativeTo="PosRuleSetTable"/>
+																		</Number>
+
+																		<Block name="PosRuleTable">
+																			<Relation type="offset" from="PosRule" />
+																			<Placement before="GposPlacement"/>
+
+																			<Number name="GlyphCount" size="16" signed="false"
+																				endian="big">
+																				<Relation type="count" of="Input" expressionGet="count - 1"
+																					expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="PosCount" size="16">
+																				<Relation type="count" of="PosLookupTable"/>
+																			</Number>
+																			<Number name="Input" size="16" maxOccurs="1024">
+																				<Relation type="count" from="GlyphCount" />
+																			</Number>
+
+																			<Block name="PosLookupTable" maxOccurs="1024">
+																				<Relation type="count" from="PosCount"/>
+																				
+																				<Number size="16"/>
+																				<Number size="16"/>
+																			</Block>
+																		</Block>
+
+																	</Block>
+																</Block>
+
+															</Block>
+
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+
+														<Block name="Case2">
+															<Number name="PosFormat" size="16"
+																value="2" token="true"/>
+
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ClassDef" size="16">
+																<Relation type="offset" of="ClassDefTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="PosClassSetCnt" size="16">
+																<Relation type="count" of="PosClassSetStuff"/>
+															</Number>
+
+															<Block name="PosClassSetStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="PosClassSetCnt"/>
+																
+																<Number name="PosClassSet" size="16">
+																	<Relation type="offset" of="PosClassSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+
+																<Block name="PosClassSetTable">
+																	<Relation type="offset" from="PosClassSet" />
+																	<!-- Missing placement??? -->
+																		
+																	<Number name="PosClassRuleCnt" size="16" signed="false"
+																		endian="big">
+																		<Relation type="count" of="PosClassRule"/>
+																	</Number>
+																	<Block name="PosClassRule" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="PosClassRuleCnt"/>
+																		
+																		<Number name="GlyphCount" size="16">
+																			<Relation type="count" of="Class" expressionGet="count - 1"
+																				expressionSet="count + 1"/>
+																		</Number>
+																		<Number name="PosCount" size="16">
+																			<Relation type="count" of="PosLookupTable"/>
+																		</Number>
+																		<Number name="Class" size="16" maxOccurs="1024">
+																			<Relation type="count" from="GlyphCount" />
+																		</Number>
+																		<Block name="PosLookupTable" maxOccurs="1024">
+																			<Relation type="count" from="PosCount"/>
+																			
+																			<Number size="16"/>
+																			<Number size="16"/>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="ClassDefTable" ref="ClassDefinitionTable">
+																<Relation type="offset" from="ClassDef" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+
+														<Block name="Case3">
+															<Number name="PosFormat" size="16"
+																value="3" token="true"/>
+
+															<Number name="GlyphCount" size="16">
+																<Relation type="count" of="CoverageStuff"/>
+															</Number>
+															<Number name="PosCount" size="16">
+																<Relation type="count" of="PosLookupTable"/>
+															</Number>
+															<Block name="CoverageStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="GlyphCount"/>
+																
+																<Number name="Coverage" size="16">
+																	<Relation type="offset" of="CoverageTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																<Block name="CoverageTable" ref="CoverageTable">
+																	<Relation type="offset" from="Coverage" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+
+															<Block name="PosLookupTable" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="PosLookupTable"/>
+																
+																<Number size="16"/>
+																<Number size="16"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<Block name="Case8">
+											<Number name="LookupType" size="16" value="8"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GposPlacement"/>
+
+													<Choice name="Format">
+														<Block name="Case1">
+															<Number name="PosFormat" size="16"
+																value="1" token="true"/>
+
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ChainPosRuleSetCount" size="16" signed="false"
+																endian="big">
+																<Relation type="count" of="ChainPosRuleSetStuff"/>
+															</Number>
+
+															<Block name="ChainPosRuleSetStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ChainPosRuleSetCount"/>
+																
+																<Number name="ChainPosRuleSet" size="16">
+																	<Relation type="offset" of="ChainPosRuleSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																<Block name="ChainPosRuleSetTable">
+																	<Relation type="offset" from="ChainPosRuleSet" />
+																	<Placement before="GposPlacement"/>
+
+																	<Number name="ChainPosRuleCount" size="16" signed="false"
+																		endian="big">
+																		<Relation type="count" of="ChainPosRuleStuff"/>
+																	</Number>
+																	<Block name="ChainPosRuleStuff" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="ChainPosRuleCount"/>
+																		
+																		<Number name="ChainPosRule" size="16" signed="false"
+																			endian="big">
+																			<Relation type="offset" of="ChainPosRuleTable" relative="true"
+																				relativeTo="ChainPosRuleSetTable"/>
+																		</Number>
+																		<Block name="ChainPosRuleTable">
+																			<Relation type="offset" from="ChainPosRule" />
+																			<Placement before="GposPlacement"/>
+
+																			<Number name="BacktrackGlyphCount" size="16">
+																				<Relation type="count" of="Backtrack"/>
+																			</Number>
+																			<Number name="Backtrack" size="16" maxOccurs="1024">
+																				<Relation type="count" from="BacktrackGlyphCount"/>
+																			</Number>
+																			<Number name="InputGlyphCount" size="16" >
+																				<Relation type="count" of="Input" expressionGet="count - 1"
+																					expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="Input" size="16" minOccurs="1024">
+																				<Relation type="count" from="InputGlyphCount" />
+																			</Number>
+																			<Number name="LookaheadGlyphCount" size="16" signed="false"
+																				endian="big">
+																				<Relation type="count" of="LookAhead"/>
+																			</Number>
+																			<Number name="LookAhead" size="16" minOccurs="1024">
+																				<Relation type="count" from="LookaheadGlyphCount"/>
+																			</Number>
+																			<Number name="PosCount" size="16">
+																				<Relation type="count" of="PosLookupTable"/>
+																			</Number>
+
+																			<Block name="PosLookupTable" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="PosCount"/>
+																				
+																				<Number size="16"/>
+																				<Number size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case2">
+															<Number name="PosFormat" size="16"
+																value="2" token="true"/>
+
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="BacktrackClassDef" size="16">
+																<Relation type="offset" of="backtrackClassDef" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="InputClassDef" size="16">
+																<Relation type="offset" of="inputClassDef" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="LookaheadClassDef" size="16">
+																<Relation type="offset" of="lookaheadClassDef" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="ChainPosClassSetCnt" size="16" signed="false"
+																endian="big">
+																<Relation type="count" of="ChainPosClassSetStuff"/>
+															</Number>
+
+															<Block name="ChainPosClassSetStuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ChainPosClassSetCnt"/>
+																
+																<Number name="ChainPosClassSet" size="16" signed="false"
+																	endian="big">
+																	<Relation type="offset" of="ChainPosClassSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+
+																<Block name="ChainPosClassSetTable">
+																	<Relation type="offset" from="ChainPosClassSet" />
+																	<Placement before="GposPlacement"/>
+
+																	<Number name="ChainPosClassRuleCnt" size="16" signed="false"
+																		endian="big">
+																		<Relation type="count" of="ChainPosClassRuleStuff"/>
+																	</Number>
+																	<Block name="ChainPosClassRuleStuff" minOccurs="0"
+																		maxOccurs="1024">
+																		<Relation type="count" from="ChainPosClassRuleCnt"/>
+																		
+																		<Number name="ChainPosClassRule" size="16" signed="false"
+																			endian="big">
+																			<Relation type="offset" of="ChainPosClassRuleTable"
+																				relative="true" relativeTo="ChainPosClassSetTable"/>
+																		</Number>
+
+																		<Block name="ChainPosClassRuleTable">
+																			<Relation type="offset" from="ChainPosClassRule" />
+																			<Placement before="GposPlacement"/>
+
+																			<Number name="BacktrackGlyphCount" size="16" signed="false"
+																				endian="big">
+																				<Relation type="count" of="Backtrack"/>
+																			</Number>
+																			<Number name="Backtrack" size="16" maxOccurs="1024">
+																				<Relation type="count" from="BacktrackGlyphCount"/>
+																			</Number>
+																			<Number name="InputGlyphCount" size="16" signed="false"
+																				endian="big">
+																				<Relation type="count" of="Input" expressionGet="count - 1"
+																					expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="Input" size="16">
+																				<Relation type="count" from="InputGlyphCount"/>
+																			</Number>
+																			<Number name="LookaheadGlyphCount" size="16" signed="false"
+																				endian="big">
+																				<Relation type="count" of="LookAhead"/>
+																			</Number>
+																			<Number name="LookAhead" size="16" maxOccurs="1024">
+																				<Relation type="count" from="LookaheadGlyphCount"/>
+																			</Number>
+																			<Number name="PosCount" size="16">
+																				<Relation type="count" of="PosLookupTable"/>
+																			</Number>
+
+																			<Block name="PosLookupTable" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="PosCount"/>
+																				
+																				<Number size="16"/>
+																				<Number size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+
+															<Block name="backtrackClassDef" ref="ClassDefinitionTable">
+																<Relation type="offset" from="BacktrackClassDef" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="inputClassDef" ref="ClassDefinitionTable">
+																<Relation type="offset" from="InputClassDef" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="lookaheadClassDef" ref="ClassDefinitionTable">
+																<Relation type="offset" from="LookaheadClassDef" />
+																<Placement before="GposPlacement"/>
+															</Block>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GposPlacement"/>
+															</Block>
+														</Block>
+														
+														
+														
+														<Block name="Case3">
+															<Number name="PosFormat" size="16"
+																value="3" token="true"/>
+
+															<Number name="BacktrackGlyphCount" size="16" signed="false"
+																endian="big">
+																<Relation type="count" of="Coverage1Stuff"/>
+															</Number>
+															<Block name="Coverage1Stuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="BacktrackGlyphCount"/>
+																
+																<Number name="Coverage1" size="16">
+																	<Relation type="offset" of="coverage1" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																<Block name="coverage1" ref="CoverageTable">
+																	<Relation type="offset" from="Coverage1" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+
+															<Number name="InputGlyphCount" size="16">
+																<Relation type="count" of="Coverage2Stuff"/>
+															</Number>
+															<Block name="Coverage2Stuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="InputGlyphCount"/>
+																
+																<Number name="Coverage2" size="16">
+																	<Relation type="offset" of="coverage2" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																<Block name="coverage2" ref="CoverageTable">
+																	<Relation type="offset" from="Coverage2" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+
+															<Number name="LookaheadGlyphCount" size="16" signed="false"
+																endian="big">
+																<Relation type="count" of="Coverage3Stuff"/>
+															</Number>
+															<Block name="Coverage3Stuff" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="LookaheadGlyphCount"/>
+																
+																<Number name="Coverage3" size="16">
+																	<Relation type="offset" of="coverage3" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																<Block name="coverage3" ref="CoverageTable">
+																	<Relation type="offset" from="Coverage3" />
+																	<Placement before="GposPlacement"/>
+																</Block>
+															</Block>
+
+															<Number name="PosCount" size="16">
+																<Relation type="count" of="PosLookupTable"/>
+															</Number>
+
+															<Block name="PosLookupTable" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="PosCount"/>
+																
+																<Number size="16"/>
+																<Number size="16"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+									</Choice>
+								</Block>
+							</Block>
+						</Block>
+
+						<Block name="GposPlacement"/>
+					</Block>
+				</Block>
+			</Block>
+			
+			<Block name="GSUB" ref="TableDefinition">
+				<String name="tag" value="GSUB" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="Version" size="32"/>
+						<Number name="ScriptList" size="16">
+							<Relation type="offset" of="TheScriptListTable" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="FeatureList" size="16">
+							<Relation type="offset" of="TheFeatureListTable" relative="true" relativeTo="Table"/>
+						</Number>
+						<Number name="LookupList" size="16">
+							<Relation type="offset" of="LookupListTable" relative="true" relativeTo="Table"/>
+						</Number>
+
+						<Block name="TheScriptListTable" ref="ScriptListTable">
+							<Relation type="offset" from="ScriptList" />
+							<Placement before="GsubPlacement"/>
+						</Block>
+
+						<Block name="TheFeatureListTable" ref="FeatureListTable">
+							<Relation type="offset" from="FeatureList" />
+							<Placement before="GsubPlacement"/>
+						</Block>
+
+						<Block name="LookupListTable">
+							<Relation type="offset" from="LookupList" />
+							<Placement before="GsubPlacement"/>
+
+							<Number name="LookupCount" size="16">
+								<Relation type="count" of="Lookup"/>
+							</Number>
+
+							<Block name="Lookup" minOccurs="0" maxOccurs="1024">
+								<Relation type="count" from="LookupCount"/>
+								
+								<Number name="LookupOffset" size="16">
+									<Relation type="offset" of="LookupTable" relative="true"
+										relativeTo="LookupListTable"/>
+								</Number>
+
+								<Block name="LookupTable">
+									<Relation type="offset" from="LookupOffset" />
+									<Placement before="GsubPlacement"/>
+									
+									<Choice name="LookupFormat">
+										<!-- Single Subsitution Subtable -->
+										<Block name="Case1">
+											<Number name="LookupType" size="16" value="1" token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="SubstFormat" size="16"
+																value="1" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="DeltaGlyphID" size="16"/>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case2">
+															<Number name="SubstFormat" size="16"
+																value="2" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="GlyphCount" size="16">
+																<Relation type="count" of="Substitute"/>
+															</Number>
+															<Number name="Substitute" size="16" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="GlyphCount"/>
+															</Number>
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<!-- Multiple Subsitution subtable -->				
+										<Block name="Case2">
+											<Number name="LookupType" size="16" value="2"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="SubstFormat" size="16"
+																value="1" token="true"/>
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="SequenceCount" size="16">
+																<Relation type="count" of="Sequence"/>
+															</Number>
+
+															<Block name="Sequence" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="SequenceCount"/>
+																
+																<Number name="SequenceOffset" size="16">
+																	<Relation type="offset" of="SequenceTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+
+																<Block name="SequenceTable">
+																	<Relation type="offset" from="SequenceOffset" />
+																	
+																	<Number name="GlyphCount" size="16">
+																		<Relation type="count" of="Substitute"/>
+																	</Number>
+																	
+																	<Number size="16" name="Substitute" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="GlyphCount"/>
+																	</Number>
+																</Block>
+															</Block>
+
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<!-- Alternate Subsitution subtable -->
+										<Block name="Case3">
+											<Number name="LookupType" size="16" value="3"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+
+													<Number name="SubstFormat" size="16" value="1" token="true"/>
+													<Number name="Coverage" size="16">
+														<Relation type="offset" of="CoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													
+													<Number name="AlternateSetCount" size="16">
+														<Relation type="count" of="AlternateSet"/>
+													</Number>
+
+													<Block name="AlternateSet" minOccurs="0" maxOccurs="1024">
+														<Relation type="count" from="AlternateSetCount"/>
+														
+														<Number name="AlternateSetOffset" size="16">
+															<Relation type="offset" of="AlternateSetTable" relative="true"
+																relativeTo="SubTable"/>
+														</Number>
+														
+														<Block name="AlternateSetTable">
+															<Relation type="offset" from="AlternateSetOffset" />
+															<Placement before="GsubPlacement"/>
+															
+															<Number name="GlyphCount" size="16">
+																<Relation type="count" of="Alternate"/>
+															</Number>
+															<Number name="Alternate" size="16" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="GlyphCount"/>
+															</Number>
+														</Block>
+														
+													</Block>
+
+													<Block name="CoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="Coverage" />
+														<Placement before="GsubPlacement"/>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+										<!-- Ligature Subsitution subtable -->
+										<Block name="Case4">
+											<Number name="LookupType" size="16" value="4"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffsetCase4" size="16">
+													<Relation type="offset" of="SubTableCase4" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTableCase4">
+													<Relation type="offset" from="SubTableOffsetCase4" />
+													<Placement before="GsubPlacement"/>
+													
+													<Number name="SubstFormat" size="16" value="1" token="true"/>
+													<Number name="Coverage" size="16">
+														<Relation type="offset" of="CoverageTable" relative="true"
+															relativeTo="SubTable"/>
+													</Number>
+													
+													<Number name="LigSetCount" size="16">
+														<Relation type="count" of="LigatureSet"/>
+													</Number>
+													
+													<Block name="LigatureSet" minOccurs="0" maxOccurs="1024">
+														<Relation type="count" from="LigSetCount"/>
+														
+														<Number name="LigatureSetOffset" size="16">
+															<Relation type="offset" of="LigatureSetTable" relative="true"
+																relativeTo="SubTable"/>
+														</Number>
+														
+														<Block name="LigatureSetTable">
+															<Relation type="offset" from="LigatureSetOffset" />
+															<Placement before="GsubPlacement"/>
+															
+															<Number name="LigatureCount" size="16">
+																<Relation type="count" of="Ligature"/>
+															</Number>
+															<Block name="Ligature" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="LigatureCount"/>
+																
+																<Number name="LigatureOffset" size="16">
+																	<Relation type="offset" of="LigatureTable" relative="true"
+																		relativeTo="LigatureSetTable"/>
+																</Number>
+																
+																<Block name="LigatureTable">
+																	<Relation type="offset" from="LigatureOffset" />
+																	<Placement before="GsubPlacement"/>
+																	
+																	<Number name="LigGlyph" size="16"></Number>
+																	<Number name="CompCount" size="16">
+																		<Relation type="count" of="Component" expressionGet="count - 1" expressionSet="count + 1"/>
+																	</Number>
+																	<Number name="Component" size="16" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="CompCount"/>
+																	</Number>
+																</Block>
+															</Block>
+														</Block>
+													</Block>
+													
+													<Block name="CoverageTable" ref="CoverageTable">
+														<Relation type="offset" from="Coverage" />
+														<Placement before="GsubPlacement"/>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+
+
+										<!-- Contextual Substitution Subtable -->
+										<Block name="Case5">
+											<Number name="LookupType" size="16" value="5"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+													
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="SubstFormat" size="16"
+																value="1" token="true"/>
+															
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="SubRuleSetCount" size="16">
+																<Relation type="count" of="SubRuleSet"/>
+															</Number>
+															
+															<Block name="SubRuleSet" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="SubRuleSetCount"/>
+																
+																<Number name="SubRuleSetOffset" size="16">
+																	<Relation type="offset" of="SequenceTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="SubRuleSetTable">
+																	<Relation type="offset" from="SubRuleSetOffset" />
+																	<Placement before="GsubPlacement"/>
+																	
+																	<Number name="SubRuleCount" size="16">
+																		<Relation type="count" of="SubRule"/>
+																	</Number>
+																	
+																	<Block name="SubRule" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="SubRuleCount"/>
+																		
+																		<Number name="SubRuleOffset" size="16">
+																			<Relation type="offset" of="SubRuleTable" relative="true"
+																				relativeTo="SubRuleSetTable"/>
+																		</Number>
+																		
+																		<Block name="SubRuleTable">
+																			<Relation type="offset" from="SubRuleOffset" />
+																			<Placement before="GsubPlacement"/>
+																			
+																			<Number name="GlyphCount" size="16" >
+																				<Relation type="count" of="Input" expressionGet="count - 1" expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="SubstCount" size="16">
+																				<Relation type="count" of="SubstLookupRecord"/>
+																			</Number>
+																			<Number name="Input" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="GlyphCount"/>
+																			</Number>
+																			
+																			<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="SubstCount"/>
+																				
+																				<Number name="SequenceIndex" size="16"/>
+																				<Number name="LookupListIndex" size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case2">
+															<Number name="SubstFormat" size="16"
+																value="2" token="true"/>
+															
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="ClassDef" size="16">
+																<Relation type="offset" of="ClassDefTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="SubClassSetCnt" size="16">
+																<Relation type="count" of="SubClassSet"/>
+															</Number>
+															
+															<Block name="SubClassSet" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="SubClassSetCnt"/>
+																
+																<Number name="SubClassSetOffset" size="16">
+																	<Relation type="offset" of="SubClassSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="SubClassSetTable">
+																	<Relation type="offset" from="SubClassSetOffset" />
+																	<Placement before="GsubPlacement"/>
+																	
+																	<Number name="SubClassRuleCnt" size="16">
+																		<Relation type="count" of="SubClassRule"/>
+																	</Number>
+																	
+																	<Block name="SubClassRule" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="SubClassRuleCnt"/>
+																		
+																		<Number name="SubClassRuleOffset" size="16">
+																			<Relation type="offset" of="SubClassRuleTable" relative="true"
+																				relativeTo="SubClassSetTable"/>
+																		</Number>
+																		
+																		<Block name="SubClassRuleTable">
+																			<Relation type="offset" from="SubClassRuleOffset" />
+																			<Placement before="GsubPlacement"/>
+																			
+																			<Number name="GlyphCount" size="16" >
+																				<Relation type="count" of="Input" expressionGet="count - 1" expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="SubstCount" size="16">
+																				<Relation type="count" of="SubstLookupRecord"/>
+																			</Number>
+																			<Number name="Class" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="GlyphCount"/>
+																			</Number>
+																			
+																			<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="SubstCount"/>
+																				
+																				<Number name="SequenceIndex" size="16"/>
+																				<Number name="LookupListIndex" size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+															<Block name="ClassDefTable" ref="ClassDefinitionTable">
+																<Relation type="offset" from="ClassDef" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case3">
+															<Number name="SubstFormat" size="16" value="3" token="true"/>
+															
+															<Number name="GlyphCount" size="16">
+																<Relation type="count" of="Coverage" />
+															</Number>
+															<Number name="SubstCount" size="16">
+																<Relation type="count" of="SubstLookupRecord"/>
+															</Number>
+															
+															<Block name="Coverage">
+																<Relation type="count" from="GlyphCount" />
+																
+																<Number name="CoverageOffset" size="16">
+																	<Relation type="offset" of="CoverageTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="CoverageTable" ref="CoverageTable">
+																	<Relation type="offset" from="Coverage" />
+																	<Placement before="GsubPlacement"/>
+																</Block>
+															</Block>
+															
+															<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="SubstCount"/>
+																
+																<Number name="SequenceIndex" size="16"/>
+																<Number name="LookupListIndex" size="16"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<!-- Chaining contextual suibsitution -->
+										<Block name="Case6">
+											<Number name="LookupType" size="16" value="6"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+
+													<Choice name="SubTableFormat">
+														<Block name="Case1">
+															<Number name="SubstFormat" size="16"
+																value="1" token="true"/>
+															
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="ChainSubRuleSetCount" size="16">
+																<Relation type="count" of="ChainSubRuleSet"/>
+															</Number>
+															
+															<Block name="ChainSubRuleSet" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ChainSubRuleSetCount"/>
+																
+																<Number name="ChainSubRuleSetOffset" size="16">
+																	<Relation type="offset" of="ChainSubRuleSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="ChainSubRuleSetTable">
+																	<Relation type="offset" from="ChainSubRuleSetOffset" />
+																	<Placement before="GsubPlacement"/>
+																	
+																	<Number name="ChainSubRuleCount" size="16">
+																		<Relation type="count" of="ChainSubRule"/>
+																	</Number>
+																	
+																	<Block name="ChainSubRule" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="ChainSubRuleCount"/>
+																		
+																		<Number name="ChainSubRuleOffset" size="16">
+																			<Relation type="offset" of="ChainSubRuleTable" relative="true"
+																				relativeTo="ChainSubRuleSetTable"/>
+																		</Number>
+																		
+																		<Block name="ChainSubRuleTable">
+																			<Relation type="offset" from="ChainSubRuleOffset" />
+																			<Placement before="GsubPlacement"/>
+																			
+																			<Number name="BacktrackGlyphCount" size="16">
+																				<Relation type="count" of="Backtrack"/>
+																			</Number>
+																			<Number name="Backtrack" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="BacktrackGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="InputGlyphCount" size="16" >
+																				<Relation type="count" of="Input" expressionGet="count - 1" expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="Input" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="InputGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="LookaheadGlyphCount" size="16" >
+																				<Relation type="count" of="LookAhead"/>
+																			</Number>
+																			<Number name="LookAhead" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="LookaheadGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="SubstCount" size="16">
+																				<Relation type="count" of="SubstLookupRecord"/>
+																			</Number>
+																			
+																			<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="SubstCount"/>
+																				
+																				<Number name="SequenceIndex" size="16"/>
+																				<Number name="LookupListIndex" size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case2">
+															<Number name="SubstFormat" size="16"
+																value="2" token="true"/>
+															
+															<Number name="Coverage" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="BacktrackClassDef" size="16">
+																<Relation type="offset" of="BacktrackClassDefTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="InputClassDef" size="16">
+																<Relation type="offset" of="InputClassDefTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															<Number name="LookaheadClassDef" size="16">
+																<Relation type="offset" of="LookaheadClassDefTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Number name="ChainSubClassSetCnt" size="16">
+																<Relation type="count" of="ChainSubClassSet"/>
+															</Number>
+															
+															<Block name="ChainSubClassSet" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="ChainSubClassSetCnt"/>
+																
+																<Number name="ChainSubClassSetOffset" size="16">
+																	<Relation type="offset" of="ChainSubClassSetTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="ChainSubClassSetTable">
+																	<Relation type="offset" from="ChainSubClassSetOffset" />
+																	<Placement before="GsubPlacement"/>
+																	
+																	<Number name="ChainSubClassRuleCnt" size="16">
+																		<Relation type="count" of="ChainSubClassRule"/>
+																	</Number>
+																	
+																	<Block name="ChainSubClassRule" minOccurs="0" maxOccurs="1024">
+																		<Relation type="count" from="ChainSubClassRuleCnt"/>
+																		
+																		<Number name="ChainSubClassRuleOffset" size="16">
+																			<Relation type="offset" of="ChainSubClassRuleTable" relative="true"
+																				relativeTo="ChainSubClassSetTable"/>
+																		</Number>
+																		
+																		<Block name="ChainSubClassRuleTable">
+																			<Relation type="offset" from="ChainSubClassRuleOffset" />
+																			<Placement before="GsubPlacement"/>
+																			
+																			<Number name="BacktrackGlyphCount" size="16">
+																				<Relation type="count" of="Backtrack"/>
+																			</Number>
+																			<Number name="Backtrack" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="BacktrackGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="InputGlyphCount" size="16" >
+																				<Relation type="count" of="Input" expressionGet="count - 1" expressionSet="count + 1"/>
+																			</Number>
+																			<Number name="Input" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="InputGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="LookaheadGlyphCount" size="16" >
+																				<Relation type="count" of="LookAhead"/>
+																			</Number>
+																			<Number name="LookAhead" size="16" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="LookaheadGlyphCount"/>
+																			</Number>
+																			
+																			<Number name="SubstCount" size="16">
+																				<Relation type="count" of="SubstLookupRecord"/>
+																			</Number>
+																			
+																			<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																				<Relation type="count" from="SubstCount"/>
+																				
+																				<Number name="SequenceIndex" size="16"/>
+																				<Number name="LookupListIndex" size="16"/>
+																			</Block>
+																		</Block>
+																	</Block>
+																</Block>
+															</Block>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+															<Block name="BacktrackClassDefTable" ref="ClassDefinitionTable">
+																<Relation type="offset" from="BacktrackClassDef" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+															<Block name="InputClassDefTable" ref="ClassDefinitionTable">
+																<Relation type="offset" from="InputClassDef" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+															<Block name="LookaheadClassDefTable" ref="ClassDefinitionTable">
+																<Relation type="offset" from="LookaheadClassDef" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Block name="Case3">
+															<Number name="SubstFormat" size="16" value="3" token="true"/>
+															
+															<Number name="BacktrackGlyphCount" size="16">
+																<Relation type="count" of="BacktrackGlyphCoverage"/>
+															</Number>
+															<Block name="BacktrackGlyphCoverage" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="BacktrackGlyphCount" />
+																
+																<Number name="CoverageOffset" size="16">
+																	<Relation type="offset" of="CoverageTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="CoverageTable" ref="CoverageTable">
+																	<Relation type="offset" from="CoverageOffset" />
+																	<Placement before="GsubPlacement"/>
+																</Block>
+															</Block>
+															
+															<Number name="InputGlyphCount" size="16" >
+																<Relation type="count" of="InputGlyphCoverage"/>
+															</Number>
+															<Block name="InputGlyphCoverage" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="InputGlyphCount" />
+																
+																<Number name="CoverageOffset" size="16">
+																	<Relation type="offset" of="CoverageTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="CoverageTable" ref="CoverageTable">
+																	<Relation type="offset" from="CoverageOffset" />
+																	<Placement before="GsubPlacement"/>
+																</Block>
+															</Block>
+															
+															<Number name="LookaheadGlyphCount" size="16" >
+																<Relation type="count" of="LookaheadGlyphCoverage"/>
+															</Number>
+															<Block name="LookaheadGlyphCoverage" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="LookaheadGlyphCount" />
+																
+																<Number name="CoverageOffset" size="16">
+																	<Relation type="offset" of="CoverageTable" relative="true"
+																		relativeTo="SubTable"/>
+																</Number>
+																
+																<Block name="CoverageTable" ref="CoverageTable">
+																	<Relation type="offset" from="CoverageOffset" />
+																	<Placement before="GsubPlacement"/>
+																</Block>
+															</Block>
+															
+															<Number name="SubstCount" size="16">
+																<Relation type="count" of="SubstLookupRecord"/>
+															</Number>
+															
+															<Block name="SubstLookupRecord" minOccurs="0" maxOccurs="1024">
+																<Relation type="count" from="SubstCount"/>
+																
+																<Number name="SequenceIndex" size="16"/>
+																<Number name="LookupListIndex" size="16"/>
+															</Block>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+										</Block>
+
+										<!-- Extension Substitution -->
+										<!-- No supported yet -->
+										<!--
+										<Block name="Case7">
+											<Number name="LookupType" size="16" value="7"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+													
+													<Block name="Case1">
+														<Number name="SubstFormat" size="16"
+															value="1" token="true"/>
+
+														<Number name="ExtensionLookupType" size="16" />
+														<Number name="ExtensionOffset" size="16">
+															<Relation type="offset" of="ExtensionTable" relative="true"
+																relativeTo="SubTable"/>
+														</Number>
+
+														<Block name="ExtensionTable" ref="ExtensionLookupType">
+															<Relation type="offset" from="ExtensionOffset" />
+															<Placement before="GsubPlacement"/>
+														</Block>
+													</Block>
+												</Block>
+											</Block>
+										</Block> -->
+
+										<Block name="Case8">
+											<Number name="LookupType" size="16" value="8"
+												token="true"/>
+											<Number name="LookupFlag" size="16"/>
+											<Number name="SubTableCount" size="16">
+												<Relation type="count" of="SubTableStuff"/>
+											</Number>
+											<Block name="SubTableStuff" minOccurs="0" maxOccurs="1024">
+												<Relation type="count" from="SubTableCount"/>
+												
+												<Number name="SubTableOffset" size="16">
+													<Relation type="offset" of="SubTable" relative="true"
+														relativeTo="LookupTable"/>
+												</Number>
+
+												<Block name="SubTable">
+													<Relation type="offset" from="SubTableOffset" />
+													<Placement before="GsubPlacement"/>
+
+													<Block name="Case1">
+														<Number name="SubstFormat" size="16"
+															value="1" token="true"/>
+
+														<Number name="BacktrackGlyphCount" size="16">
+															<Relation type="count" of="BacktrackGlyphCoverage"/>
+														</Number>
+														<Block name="BacktrackGlyphCoverage">
+															<Relation type="count" from="BacktrackGlyphCount" />
+															
+															<Number name="CoverageOffset" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Number name="LookaheadGlyphCount" size="16" >
+															<Relation type="count" of="LookaheadGlyphCoverage"/>
+														</Number>
+														<Block name="LookaheadGlyphCoverage">
+															<Relation type="count" from="LookaheadGlyphCount" />
+															
+															<Number name="CoverageOffset" size="16">
+																<Relation type="offset" of="CoverageTable" relative="true"
+																	relativeTo="SubTable"/>
+															</Number>
+															
+															<Block name="CoverageTable" ref="CoverageTable">
+																<Relation type="offset" from="Coverage" />
+																<Placement before="GsubPlacement"/>
+															</Block>
+														</Block>
+														
+														<Number name="GlyphCount" size="16">
+															<Relation type="count" of="Substitute"/>
+														</Number>
+														
+														<Number name="Substitute" size="16" minOccurs="0" maxOccurs="1024">
+															<Relation type="count" from="GlyphCount"/>
+														</Number>
+													</Block>
+												</Block>
+											</Block>
+										</Block>
+									</Choice>
+								</Block>
+							</Block>
+						</Block>
+
+						<Block name="GsubPlacement"/>
+					</Block>
+				</Block>
+			</Block>
+
+
+			<Block name="post" ref="TableDefinition">
+				<String name="tag" value="post" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Choice name="ByVersion">
+							<Block name="Version20000">
+								<Number name="Version" size="32" value="00020000"
+									valueType="hex" token="true"/>
+								<Number name="italicAngle" size="32"/>
+								<Number name="underlinePosition" size="16" signed="true"/>
+								<Number name="underlineThickness" size="16" signed="true"/>
+								<Number name="isFixedPitch" size="32"/>
+								<Number name="minMemType42" size="32"/>
+								<Number name="maxMemType42" size="32"/>
+								<Number name="minMemType1" size="32"/>
+								<Number name="maxMemType1" size="32"/>
+								<Number name="numberOfGlyphs" size="16">
+									<Relation type="count" of="glyphNameIndex"/>
+								</Number>
+								<Number name="glyphNameIndex" size="16" minOccurs="0"
+									maxOccurs="1024">
+									<Relation type="count" from="numberOfGlyphs"/>
+								</Number>
+								<Blob name="names"/>
+							</Block>
+							
+							<Block name="Version25000">
+								<Number name="Version" size="32" value="00025000"
+									valueType="hex" token="true"/>
+								<Number name="italicAngle" size="32"/>
+								<Number name="underlinePosition" size="16" signed="true"/>
+								<Number name="underlineThickness" size="16" signed="true"/>
+								<Number name="isFixedPitch" size="32"/>
+								<Number name="minMemType42" size="32"/>
+								<Number name="maxMemType42" size="32"/>
+								<Number name="minMemType1" size="32"/>
+								<Number name="maxMemType1" size="32"/>
+								<Number name="numberOfGlyphs" size="16">
+									<Relation type="count" of="offset"/>
+								</Number>
+								<Blob name="offset" minOccurs="0" maxOccurs="1024">
+									<Relation type="count" from="numberOfGlyphs"/>
+								</Blob>
+							</Block>
+
+							<Block name="Other">
+								<Number name="Version" size="32"/>
+								<Number name="italicAngle" size="32"/>
+								<Number name="underlinePosition" size="16" signed="true"/>
+								<Number name="underlineThickness" size="16" signed="true"/>
+								<Number name="isFixedPitch" size="32"/>
+								<Number name="minMemType42" size="32"/>
+								<Number name="maxMemType42" size="32"/>
+								<Number name="minMemType1" size="32"/>
+								<Number name="maxMemType1" size="32"/>
+							</Block>
+						</Choice>
+					</Block>
+				</Block>
+			</Block>
+
+
+			<Block name="cvt" ref="TableDefinition">
+				<String name="tag" value="cvt " token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable"/>
+			</Block>
+			
+			<Block name="prep" ref="TableDefinition">
+				<String name="tag" value="prep" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable"/>
+			</Block>
+			
+			<Block name="cmap" ref="TableDefinition">
+				<String name="tag" length="4" value="cmap" token="true"/>
+				
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="numTables" size="16">
+							<Relation type="count" of="EncodingRecord"/>
+						</Number>
+						
+						<Block name="EncodingRecord" maxOccurs="10000">
+							<Relation type="count" from="numTables"/>
+							
+							<Number name="platformID" size="16"/>
+							<Number name="encodingID" size="16"/>
+							<Number name="EncodingTableOffset" size="32">
+								<Relation type="offset" of="EncodingTable" relative="true" relativeTo="Table"/>
+							</Number>
+							
+							<Block name="EncodingTable">
+								<Relation type="offset" from="EncodingTableOffset"/>
+								<Placement before="CmapPlacement" />
+								
+								<Choice name="Formats">
+									<Block name="Format0">
+										<Number name="format" size="16" value="0" token="true"/>
+										<Number name="glyphIdArrayLength" size="16">
+											<Relation type="size" of="glyphIdArray" 
+												expressionGet="size - 6" expressionSet="size + 6"/>
+										</Number>
+										<Number name="language" size="16"/>
+										<Blob name="glyphIdArray" length="256">
+											<Relation type="size" from="glyphIdArrayLength"/>
+										</Blob>
+									</Block>
+									
+									<Block name="Format2">
+										<Number name="format" size="16" value="2" token="true"/>
+										<Number name="DataLength" size="16">
+											<Relation type="size" of="Data" 
+												expressionGet="size - 6" expressionSet="size + 6"/>
+										</Number>
+										<Number name="language" size="16"/>
+										<!--
+											<Number name="subHeaderKeys" size="16" maxOccurs="256"/>
+											<Block name="subHeader">
+											<Number name="firstCode" size="16"/>
+											<Number name="entryCount" size="16"/>
+											<Number name="idDelta" size="16" signed="true"/>
+											<Number name="idRangeOffset" size="16"/>
+											</Block>
+										-->
+										<Blob name="Data">
+											<Relation type="size" from="DataLength"/>
+										</Blob>
+									</Block>
+									
+									<Block name="Format4">
+										<Relation type="size" from="Format4Length"/>
+										
+										<Number name="format" size="16" value="4" token="true"/>
+										<Number name="Format4Length" size="16">
+											<Relation type="size" of="Format4"/>
+										</Number>
+										<Number name="language" size="16"/>
+										<Number name="segCountX2" size="16">
+											<Relation type="count" of="endCount" 
+												expressionGet="count/2" expressionSet="count * 2"/>
+											<Relation type="count" of="startCount" 
+												expressionGet="count/2" expressionSet="count * 2"/>
+											<Relation type="count" of="idDelta" 
+												expressionGet="count/2" expressionSet="count * 2"/>
+											<Relation type="count" of="idRangeOffset" 
+												expressionGet="count/2" expressionSet="count * 2"/>
+										</Number>
+										<Number name="searchRange" size="16"/>
+										<Number name="entrySelector" size="16"/>
+										<Number name="rangeShift" size="16"/>
+										<Number name="endCount" size="16" maxOccurs="100000">
+											<Relation type="count" from="segCountX2"/>
+										</Number>
+										<Number name="reservedPad" size="16"/>
+										<Number name="startCount" size="16" maxOccurs="100000">
+											<Relation type="count" from="segCountX2"/>
+										</Number>
+										<Number name="idDelta" size="16" maxOccurs="100000">
+											<Relation type="count" from="segCountX2"/>
+										</Number>
+										<Number name="idRangeOffset" size="16" maxOccurs="100000">
+											<Relation type="count" from="segCountX2"/>
+										</Number>
+										
+										<Blob name="glyphIdArray"/>
+									</Block>
+									
+									<Block name="Format6">
+										<Relation type="size" from="Format6length"/>
+										
+										<Number name="format" size="16" value="4" token="true"/>
+										<Number name="Format6length" size="16">
+											<Relation type="size" of="Format6"/>
+										</Number>
+										<Number name="language" size="16"/>
+										<Number name="firstCode" size="16"/>
+										<Number name="entryCount" size="16">
+											<Relation type="count" of="glyphIdArray " /> 
+										</Number>
+										<Number name="glyphIdArray " size="16" maxOccurs="100000">
+											<Relation type="count" from="entryCount"/>
+										</Number>
+									</Block>
+									
+									<Block name="Format8">
+										<Relation type="size" from="Format8length"/>
+										
+										<Number name="format" size="16" value="8" token="true"/>
+										<Number name="reserved" size="16"/>
+										<Number name="Format8length" size="32">
+											<Relation type="size" of="Format8"/>
+										</Number>
+										<Number name="language" size="32"/>
+										<Blob name="is32" length="8192"/>
+										<Number name="nGroups" size="32">
+											<Relation type="count" of="Group"/>
+										</Number>
+										
+										<Block name="Group" maxOccurs="100000">
+											<Relation type="count" from="nGroups"/>
+											
+											<Number name="startCharCode" size="32"/>
+											<Number name="endCharCode" size="32"/>
+											<Number name="startGlyphID" size="32"/>
+										</Block>
+									</Block>
+									
+									<Block name="Format10">
+										<Relation type="size" from="Format10length"/>
+										
+										<Number name="format" size="16" value="10" token="true"/>
+										<Number name="reserved" size="16"/>
+										<Number name="Format10length" size="32">
+											<Relation type="size" of="Format10"/>
+										</Number>
+										<Number name="language" size="32"/>
+										<Number name="startCharCode" size="32"/>
+										<Number name="numChars" size="32">
+											<Relation type="count" of="glyphs"/>
+										</Number>
+										<Number name="glyphs" size="16" maxOccurs="100000">
+											<Relation type="count" from="numChars"/>
+										</Number>
+									</Block>
+									
+									<Block name="Format12">
+										<Relation type="size" from="Format12length"/>
+										
+										<Number name="format" size="16" value="12" token="true"/>
+										<Number name="reserved" size="16"/>
+										<Number name="Format12length" size="32">
+											<Relation type="size" of="Format12"/>
+										</Number>
+										<Number name="language" size="32"/>
+										<Number name="nGroups" size="32">
+											<Relation type="count" of="Group"/>
+										</Number>
+										
+										<Block name="Group" maxOccurs="100000">
+											<Relation type="count" from="nGroups"/>
+											
+											<Number name="startCharCode" size="32"/>
+											<Number name="endCharCode" size="32"/>
+											<Number name="startGlyphID" size="32"/>
+										</Block>
+									</Block>
+								</Choice>
+							</Block>
+
+							<Block name="CmapPlacement" />
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			
+			
+			<Block name="fpgm" ref="TableDefinition">
+				<String name="tag" value="fpgm" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable"/>
+			</Block>
+			
+			<Block name="loca" ref="TableDefinition">
+				<String name="tag" value="loca" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable"/>
+			</Block>
+			
+			<Block name="hmtx" ref="TableDefinition">
+				<String name="tag" value="hmtx" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable"/>
+			</Block>			
+			
+			<Block name="vorg" ref="TableDefinition">
+				<String name="tag" value="vorg" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="majorVersion" size="16"/>
+						<Number name="minorVersion" size="16"/>
+						<Number name="defaultVertOriginY" size="16"/>
+						<Number name="numVertOriginYMetrics" size="16">
+							<Relation type="count" of="VertOriginYMetrics"/>
+						</Number>
+
+						<Block name="VertOriginYMetrics" minOccurs="0" maxOccurs="1024">
+							<Relation type="count" from="numVertOriginYMetrics"/>
+							
+							<Number name="glyphIndex" size="16"/>
+							<Number name="vertOriginY" size="16"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="gasp" ref="TableDefinition">
+				<String name="tag" value="gasp" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="numRanges" size="16">
+							<Relation type="count" of="GaspRange"/>
+						</Number>
+
+						<Block name="GaspRange">
+							<Relation type="count" from="numRanges"/>
+							
+							<Number name="rangeMaxPPEM" size="16"/>
+							<Number name="rangeGaspBehavior" size="16"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="hdmx" ref="TableDefinition">
+				<String name="tag" value="hdmx" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="numRecords" size="16">
+							<Relation type="count" of="DeviceRecord"/>
+						</Number>
+						<Number name="sizeDeviceRecord" size="32">
+							<Relation type="size" of="data"/>
+						</Number>
+
+						<Block name="DeviceRecord" maxOccurs="1024">
+							<Relation type="count" from="numRecords"/>
+							
+							<Blob name="data">
+								<Relation type="size" from="sizeDeviceRecord"/>
+							</Blob>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="LTSH" ref="TableDefinition">
+				<String name="tag" value="LTSH" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="numGlyphs" size="16">
+							<Relation type="size" of="yPels"/>
+						</Number>
+
+						<Blob name="yPels">
+							<Relation type="size" from="numGlyphs"/>
+						</Blob>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="pclt" ref="TableDefinition">
+				<String name="tag" value="pclt" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="Version" size="32"/>
+						<Number name="FontNumber" size="32"/>
+						<Number name="Pitch" size="16"/>
+						<Number name="xHeight" size="16"/>
+						<Number name="Style" size="16"/>
+						<Number name="TypeFamily" size="16"/>
+						<Number name="CapHeight" size="16"/>
+						<Number name="SymbolSet" size="16"/>
+
+						<Blob name="Typeface" length="16"/>
+						<Blob name="CharacterComplement" length="8"/>
+						<Blob name="FileName" length="6"/>
+						<Blob name="StrokeWeight" length="1"/>
+						<Blob name="WidthType" length="1"/>
+						<Blob name="SerifStyle" length="1"/>
+						<Blob name="Reserved" length="1"/>
+					</Block>
+				</Block>
+			</Block>
+
+			<Block name="VDMX" ref="TableDefinition">
+				<String name="tag" value="VDMX" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Number name="version" size="16"/>
+						<Number name="numRecs" size="16">
+							<Relation type="count" of="GroupStuff"/>
+						</Number>
+						<Number name="numRatios" size="16">
+							<Relation type="count" of="Ratio"/>
+						</Number>
+						
+						<Block name="Ratio" minOccurs="0" maxOccurs="1024">
+							<Relation type="count" from="numRatios"/>
+							
+							<Number name="bCharSet" size="8"/>
+							<Number name="xRatio" size="8"/>
+							<Number name="yStartRatio" size="8"/>
+							<Number name="yEndRatio" size="8"/>
+						</Block>
+						
+						<Block name="GroupStuff" minOccurs="0" maxOccurs="1024">
+							<Relation type="count" from="numRecs"/>
+							
+							<Number name="GroupsOffset" size="16">
+								<Relation type="offset" of="Groups" relative="true" relativeTo="Table"/>
+							</Number>
+							
+							<Block name="Groups">
+								<Relation type="offset" from="GroupsOffset" />
+								
+								<Number name="recs" size="16">
+									<Relation type="count" of="entry"/>
+								</Number>
+								<Number name="startsz" size="8"/>
+								<Number name="endsz" size="8"/>
+								
+								<Block name="entry" minOccurs="0" maxOccurs="1024">
+									<Relation type="count" from="recs"/>
+									
+									<Number name="yPelHeight" size="16"/>
+									<Number name="yMax" size="16"/>
+									<Number name="yMin" size="16"/>
+								</Block>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			
+			<Block name="glyf" ref="TableDefinition">
+				<String name="tag" value="glyf" token="true"/>
+				<Block name="PaddedTable" ref="TPaddedTable">
+					<Block name="Table">
+						<Relation type="size" from="TableLength"/>
+						
+						<Choice name="TypeOfGlyph">
+							<Block name="Composite">
+								<Number name="numberOfContours" size="16" signed="true" value="-1" token="true" />
+								<Number name="xMin" size="16" signed="true" />
+								<Number name="yMin" size="16" signed="true" />
+								<Number name="xMax" size="16" signed="true" />
+								<Number name="yMax" size="16" signed="true" />
+								
+								<Custom class="CompositeGlyph"/>
+							</Block>
+							
+							<Block name="Simple">
+								<Number name="numberOfContours" size="16" signed="true" constraint="int(value) >= 0" />
+								<Number name="xMin" size="16" signed="true" />
+								<Number name="yMin" size="16" signed="true" />
+								<Number name="xMax" size="16" signed="true" />
+								<Number name="yMax" size="16" signed="true" />
+								
+								<Number name="endPtsOfContours" size="16" />
+								<Number name="instructionLength" size="16">
+									<Relation type="size" of="instructions"/>
+									<Relation type="size" of="flags"/>
+								</Number>
+								<Blob name="instructions">
+									<Relation type="size" from="instructionLength"/>
+								</Blob>
+								<Blob name="flags">
+									<Relation type="size" from="instructionLength"/>
+								</Blob>
+								
+								<Blob name="RestOfData" />
+							</Block>
+						</Choice>
+					</Block>
+				</Block>
+			</Block>
+			
+			<!-- <Block name="UnknownTable" ref="TableDefinition"/> -->
+		</Choice>
+
+		<Block name="TablePlacement"/>
+
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="OpenTypeFont"/>
+				<Data name="data" fileName="sample.ttf"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="TheTest">
+		<StateModel ref="TheState"/>
+		<Publisher class="file.FileWriter">
+			<Param name="fileName" value="fuzzed.ttf"/>
+		</Publisher>
+	</Test>
+
+	<Run name="DefaultRun">
+		<Test ref="TheTest"/>
+	</Run>
+
+</Peach>
+<!-- end -->

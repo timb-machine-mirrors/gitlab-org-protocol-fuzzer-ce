@@ -1,0 +1,20 @@
+Peach Fuzzer Run
+=================
+
+Command line: c:\Peach\\peach.py -1 --new tiff.xml 
+Date of run: Thu Dec 29 17:08:31 2011
+SEED: 1325207311.07
+Pit File: tiff.xml
+Run name: DefaultRun
+
+Thu Dec 29 17:08:32 2011: 
+Thu Dec 29 17:08:32 2011: Test starting: Test
+Thu Dec 29 17:08:32 2011: 
+Thu Dec 29 17:08:32 2011: On test variation # 1
+Thu Dec 29 17:08:36 2011: 
+Thu Dec 29 17:08:36 2011: Test completed: Test
+Thu Dec 29 17:08:36 2011: 
+
+
+== Run completed ==
+Thu Dec 29 17:08:36 2011

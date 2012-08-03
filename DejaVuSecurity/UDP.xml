@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="UDPHeader">
+    <Relation type="size" from="Length"/>
+    <Number name="SrcPort" size="16"/>
+    <Number name="DestPort" size="16"/>
+    <Number name="Length" size="16">
+      <Relation type="size" of="UDPHeader"/>
+    </Number>
+    <Number name="Checksum" size="16"/>
+    <Blob name="Data"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="UDPHeader"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <Publisher class="raw.Raw">
+      <Param name="interface" value="0.0.0.0"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->

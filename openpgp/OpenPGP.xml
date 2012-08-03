@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /Peach/peach.xsd" author="Mikhail Davidov"
+	version="1">
+
+	<Import from="CRC24Fixup" import="*"/>
+	<Import from="Radix64Transformer" import="*"/>
+
+	<Import from="math" import="log"/>
+
+	<Include ns="default" src="file:defaults.xml"/>
+
+
+	<DataModel name="Packet">
+		<Choice name="PacketTagType">
+			<Flags name="PacketTagOld" size="8">
+				<Flag name="FlagBit" value="1" size="1" position="7" isStatic="true"/>
+				<Flag name="IsNewPacket" value="0" size="1" position="6" isStatic="true"/>
+				<Flag name="LengthType" size="2" position="0"/>
+				<Flag name="ContentTag" size="4" position="2"/>
+			</Flags>
+			<Flags name="PacketTagNew" size="8">
+				<Flag name="FlagBit" value="1" size="1" position="7" isStatic="true"/>
+				<Flag name="IsNewPacket" value="1" size="1" position="6" isStatic="true"/>
+				<Flag name="ContentTag" size="5" position="0"/>
+			</Flags>
+		</Choice>
+
+		<Choice name="WhichIsNewPacket">
+			<Block name="OldType">
+				<Blob name="hack0" length="0"
+					constraint="int(self.find('IsNewPacket').getInternalValue()) == 0"/>
+				<Choice name="WhichLengthType">
+					<Block name="Flag0">
+						<Number name="PacketSize" size="8" signed="false"
+							constraint="int(self.find('LengthType').getInternalValue()) == 0">
+							<Relation type="size" of="PacketData"/>
+						</Number>
+					</Block>
+					<Block name="Flag1">
+						<Number name="PacketSize" size="16" signed="false"
+							constraint="int(self.find('LengthType').getInternalValue()) == 1">
+							<Relation type="size" of="PacketData"/>
+						</Number>
+					</Block>
+					<Block name="Flag2">
+						<Number name="PacketSize" size="32" signed="false"
+							constraint="int(self.find('LengthType').getInternalValue()) == 2">
+							<Relation type="size" of="PacketData"/>
+						</Number>
+					</Block>
+					<Block name="Flag3">
+						<Blob name="UnknownLength"/>
+					</Block>
+				</Choice>
+			</Block>
+
+			<Block name="NewType">
+				<Choice name="WhichLength">
+					<Block name="1OctetLength">
+						<Number name="PacketSize" size="8" signed="false">
+							<Relation type="size" of="PacketData"/>
+						</Number>
+						<Blob name="hack0" length="0"
+							constraint="int(self.find('PacketSize').getInternalValue()) &lt; 192"/>
+					</Block>
+					<Block name="5OctetLength">
+						<Number name="Octet1" value="255" size="8" isStatic="true"/>
+						<!-- Might need to add a constraint also? -->
+						<Number name="PacketSize" size="32" signed="false">
+							<Relation type="size" of="PacketData"/>
+						</Number>
+					</Block>
+					<Block name="2OctetLength">
+						<Number name="PacketSize" size="16" signed="false">
+							<!-- bodyLen = ((1st_octet - 192) << 8) + (2nd_octet) + 192 -->
+							<Relation type="size" of="PacketData" expressionGet="size - 48960"
+								expressionSet="int(size) + 48960"/>
+						</Number>
+					</Block>
+					<Block name="PartialLength">
+						<Number name="PacketSize" size="8" signed="false">
+							<Relation type="size" of="PacketData"
+								expressionGet="1 &lt;&lt; (size &amp; 0x1F)"
+								expressionSet="((log(int(size))/log(2)) if (size != 0) else 0)  + 224"/>
+						</Number>
+						<Blob name="hack0" length="0"
+							constraint="int(self.find('PacketSize').getInternalValue()) &gt;= 224"/>
+						<!-- TODO: Support actual partial body lengths when peach can handle recursive data models. -->
+					</Block>
+				</Choice>
+			</Block>
+		</Choice>
+
+		<Blob name="PacketData">
+			<Relation type="size" from="PacketSize"/>
+		</Blob>
+	</DataModel>
+
+
+	<!--
+    <DataModel name="PacketPublic-Key Encrypted Session Key" ref="Packet">
+        <Flag name="PacketTagType.PacketTagOld.ContentTag" size="4" position="2" value="1"/>
+        <Flag name="PacketTagType.PacketTagNew.ContentTag" size="4" position="2" value="1"/>
+    </DataModel>
+-->
+
+	<DataModel name="AsciiArmored">
+		<Block name="HeaderLine">
+			<String isStatic="true" value="-----BEGIN "/>
+			<String name="HeaderLine"/>
+			<String isStatic="true" value="-----\n"/>
+		</Block>
+		<Block name="ArmorHeaders" minOccurs="0" maxOccurs="300000">
+			<String name="Key"/>
+			<String value=": " isStatic="true"/>
+			<String name="Value"/>
+		</Block>
+		<String value="\n" isStatic="true"/>
+		<!--<Block name="ArmoredData">
+            <
+             TODO: convert to own transformer and limit lines to 76 chars -
+             >
+            <Transformer class="encode.Base64Encode" />
+            <Block name="ArmorEncodedPacket" ref="Packet" minOccurs="1" maxOccurs="30000" />
+        </Block>
+        <Block name="ArmoredCRC">
+            <String value="=" isStatic="true" />
+            <Number name="crc" signed="true" size="24">
+                <Fixup class="CRC24Fixup">
+                    <Param name="ref" value="ArmoredData" />
+                </Fixup>
+                <Transformer class="encode.Base64Encode" />
+            </Number>
+        </Block> -->
+		<Block name="ArmoredData">
+			<Transformer class="Radix64Transformer"/>
+			<Block name="ArmorEncodedPacket" ref="Packet" minOccurs="1" maxOccurs="30000"/>
+		</Block>
+		<Block name="ArmorTail">
+			<String isStatic="true" value="-----END "/>
+			<String name="HeaderLine"/>
+			<Choice>
+				<String isStatic="true" value="-----\n"/>
+				<String isStatic="true" value="-----"/>
+			</Choice>
+		</Block>
+	</DataModel>
+
+	<DataModel name="OpenPGP">
+		<Choice>
+			<Block name="Armored">
+				<Block ref="AsciiArmored" minOccurs="1" maxOccurs="30000"/>
+			</Block>
+			<Block name="Raw">
+				<Block ref="Packet" minOccurs="1" maxOccurs="30000"/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+
+
+
+
+
+
+
+	<DataModel name="Param">
+		<String name="Value" isStatic="true"/>
+	</DataModel>
+	<!-- TODO: Create state model -->
+	<StateModel name="TheState" initialState="Initial">
+
+		<State name="Initial">
+
+			<!-- Write out our wave file -->
+			<Action type="output">
+				<DataModel ref="OpenPGP"/>
+				<!-- This is our sample file to read in -->
+				<Data name="data" fileName="sample.pgp"/>
+			</Action>
+
+			<Action type="close"/>
+
+			<!-- Launch the target process -->
+			<Action type="call" method="ScoobySnack"/>
+		</State>
+
+	</StateModel>
+
+
+	<Agent name="LocalAgent">
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="mplayer.exe"/>
+		</Monitor>
+		<Monitor class="debugger.WindowsDebugEngine">
+			<Param name="CommandLine" value="..\MPlayer-1.0rc2\mplayer.exe fuzzed.pgp"/>
+
+			<!--Param name="SymbolsPath" value="SRV*c:\symbols" /-->
+
+			<Param name="StartOnCall" value="ScoobySnack"/>
+		</Monitor>
+	</Agent>
+
+
+
+	<Test name="TheTest">
+		<!-- Don't fuzz the actual wave data -->
+		<!-- <Exclude xpath="//ChunkData/Data"/> -->
+
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+
+		<Publisher class="file.FileWriterLauncher">
+			<Param name="fileName" value="fuzzed.pgp"/>
+			<Param name="debugger" value="true"/>
+		</Publisher>
+	</Test>
+
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+
+		<Test ref="TheTest"/>
+
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+	</Run>
+
+
+</Peach>

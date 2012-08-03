@@ -1,0 +1,7 @@
+C:\audits\adobe\JPXDecode\JpxPdfMaker\bin\Release\JpxPdfMaker.exe
+C:\audits\adobe\JPXDecode\JpxPdfMaker\bin\Release\JpxPdfMaker.pdb
+C:\audits\adobe\JPXDecode\JpxPdfMaker\bin\Release\itextsharp.dll
+C:\audits\adobe\JPXDecode\JpxPdfMaker\obj\Release\ResolveAssemblyReference.cache
+C:\audits\adobe\JPXDecode\JpxPdfMaker\obj\Release\JpxPdfMaker.exe
+C:\audits\adobe\JPXDecode\JpxPdfMaker\obj\Release\JpxPdfMaker.pdb
+C:\audits\adobe\JPXDecode\JpxPdfMaker\bin\Release\itextsharp.xml

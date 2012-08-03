@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!--
+		Dynamic DNS Fuzzer
+		
+		Peach Version: 2.3.8
+		
+		Author:
+			Michael Eddington (mike@dejavusecurity.com)
+		
+	-->
+	
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<Import from="ddns" import="*"/>
+
+	<Defaults>
+		<Number size="16" signed="false" endian="network"/>
+	</Defaults>
+
+	<DataModel name="DnsLabel">
+		<Choice name="LabelChoice">
+
+			<!-- This is currently incorrect.  Realy a pointer must start with two 1 bits and
+				a label starts with two 0 bits. -->
+
+			<Block name="Pointer">
+				<Number name="Marker" size="8" valueType="hex" value="c0" token="true"/>
+				<Number name="Offset" size="8"/>
+			</Block>
+
+			<Block name="Domain">
+				<Block name="DomainArray" minOccurs="1" maxOccurs="512">
+					<Number name="NameLength" size="8" constraint="value > 0">
+						<Relation type="size" of="Name"/>
+					</Number>
+					<String name="Name"/>
+				</Block>
+
+				<Choice>
+					<Number name="EndOfArray" size="8" value="0" token="true"/>
+					<Block name="Compressed">
+						<Number name="Marker" size="8" valueType="hex" value="c0" token="true"/>
+						<Number name="Offset" size="8"/>
+					</Block>
+				</Choice>
+			</Block>
+
+			<Block name="CompressionBomb">
+				<Number name="OffsetFlag" size="8" value="192" token="true"/>
+				<Number name="Offset" size="8">
+					<Relation type="offset" of="OffsetFlag"/>
+				</Number>
+			</Block>
+
+			<Block name="CompressionOutOfBoundsAttempt">
+				<Number name="OffsetFlag" size="8" value="192" token="true"/>
+				<Number name="Offset" size="8" value="255" token="true"/>
+			</Block>
+
+		</Choice>
+	</DataModel>
+
+	<DataModel name="DnsRecord">
+		<Choice name="RecordChoice">
+
+			<Block name="SOA">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="6" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+			</Block>
+
+			<Block name="NS">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="2" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+			</Block>
+
+			<Block name="A">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+			</Block>
+
+			<Block name="ANY">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Number name="Class" size="16"/>
+				<Number name="TTL" size="32"/>
+				<Number name="DataLength" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Blob name="Data"/>
+			</Block>
+
+			<Block name="TSIG">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" valueType="hex" value="fa" token="true"/>
+				<Number name="Class" size="16"/>
+				<Number name="TTL" size="32"/>
+				<Number name="DataLength" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Blob name="Data"/>
+			</Block>
+
+
+			<Block name="SOARR">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="6" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+				<Number name="TTL" size="32" value="10000" token="true"/>
+				<Number name="RDLENGTH" size="16" value="1" token="true">
+					<Relation type="size" of="RDATA"/>
+				</Number>
+
+				<Block name="RDATA">
+					<Block name="MNAME" ref="DnsLabel"/>
+					<Block name="RNAME" ref="DnsLabel"/>
+					<Number name="Serial" size="32" value="10000" token="true"/>
+					<Number name="Refresh" size="32" value="10000" token="true"/>
+					<Number name="Retry" size="32" value="10000" token="true"/>
+					<Number name="Expire" size="32" value="10000" token="true"/>
+					<Number name="Minimum" size="32" value="1" token="true"/>
+				</Block>
+			</Block>
+
+			<Block name="NSRR">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="2" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+				<Number name="TTL" size="32" value="10000" token="true"/>
+				<Number name="RDLENGTH" size="16" value="1" token="true">
+					<Relation type="size" of="RDATA"/>
+				</Number>
+
+				<Block name="RDATA">
+					<Block name="NSDNAME" ref="DnsLabel"/>
+				</Block>
+			</Block>
+
+			<Block name="ARR">
+				<Block name="Label" ref="DnsLabel"/>
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Number name="Class" size="16" value="1" token="true"/>
+				<Number name="TTL" size="32" value="10000" token="true"/>
+				<Number name="RDLENGTH" size="16" value="1" token="true">
+					<Relation type="size" of="RDATA"/>
+				</Number>
+
+				<!-- 10.0.1.42 -->
+				<Blob name="RDATA" length="4" valueType="hex" value="0A 00 01 2a"/>
+			</Block>
+
+			<!-- 
+      <Block name="WKS">
+        <Number name="Address" size="32" />
+        <Number name="Protocol" size="16" /> 
+      <Blob name="Bitmap" valueType="hex" value="1"/>
+      </Block>
+      
+      <Block name="CNAME" ref="DnsLabel">
+      </Block>
+      -->
+
+		</Choice>
+	</DataModel>
+
+	<DataModel name="UdpFakeDnsPacket">
+
+		<Number name="TransactionID" size="16"/>
+		<Blob/>
+		<Number name="Type" size="16"/>
+		<Number name="Class" size="16"/>
+
+	</DataModel>
+
+
+	<DataModel name="UdpDnsPacket">
+
+		<Number name="TransactionID" size="16"/>
+
+		<!-- 0010 1000 0000 0000 -->
+		<Flags name="Flags" size="16" endian="big">
+			<Flag name="QR" position="0" size="1" value="1"/>
+			<Flag name="Opcode" position="1" size="4" value="0"/>
+			<Flag name="A" position="5" size="1" value="1"/>
+			<Flag name="Truncated" position="6" size="1" value="0"/>
+			<Flag name="RD" position="7" size="1" value="1"/>
+			<Flag name="RA" position="8" size="1" value="1"/>
+			<Flag name="Z" position="9" size="1" value="0"/>
+			<Flag name="AA" position="10" size="1" value="0"/>
+			<Flag name="NA" position="11" size="1" value="0"/>
+			<Flag name="RC" position="12" size="4" value="0"/>
+		</Flags>
+
+		<Number name="QDCOUNT" size="16" value="0">
+			<Relation type="count" of="Questions"/>
+		</Number>
+
+		<Number name="ANCOUNT" size="16" value="0">
+			<Relation type="count" of="Answers"/>
+		</Number>
+
+		<Number name="NSCOUNT" size="16" value="0">
+			<Relation type="count" of="Authority"/>
+		</Number>
+
+		<Number name="ARCOUNT" size="16" value="0">
+			<Relation type="count" of="Additional"/>
+		</Number>
+
+		<Block name="Questions" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Answers" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Authority" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Additional" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+	</DataModel>
+
+	<DataModel name="UdpDnsUpdatePacket">
+
+		<Number name="TransactionID" size="16"/>
+
+		<!-- 0010 1000 0000 0000 -->
+		<Flags name="Flags" size="16" endian="big">
+			<Flag name="QR" position="0" size="1" value="1"/>
+			<Flag name="Opcode" position="1" size="4" value="5"/>
+			<Flag name="Z" position="2" size="7" value="0"/>
+			<Flag name="RCode" position="12" size="4" value="0"/>
+		</Flags>
+
+		<Number name="QDCOUNT" size="16" value="0">
+			<Relation type="count" of="Zone"/>
+		</Number>
+
+		<Number name="ANCOUNT" size="16" value="0">
+			<Relation type="count" of="Prerequisite"/>
+		</Number>
+
+		<Number name="NSCOUNT" size="16" value="0">
+			<Relation type="count" of="Update"/>
+		</Number>
+
+		<Number name="ARCOUNT" size="16" value="0">
+			<Relation type="count" of="AdditionalData"/>
+		</Number>
+
+		<Block name="Zone" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Prerequisite" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Update" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="AdditionalData" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+	</DataModel>
+
+	<DataModel name="TcpDnsUpdatePacket">
+
+		<Number name="Length" size="16">
+			<Relation type="size" of="TcpDnsUpdatePacket"/>
+		</Number>
+
+		<Number name="TransactionID" size="16"/>
+
+		<!-- 0010 1000 0000 0000 -->
+		<Flags name="Flags" size="16" endian="big">
+			<Flag name="QR" position="0" size="1" value="1"/>
+			<Flag name="Opcode" position="1" size="4" value="5"/>
+			<Flag name="Z" position="2" size="7" value="0"/>
+			<Flag name="RCode" position="12" size="4" value="0"/>
+		</Flags>
+
+		<Number name="QDCOUNT" size="16" value="0">
+			<Relation type="count" of="Zone"/>
+		</Number>
+
+		<Number name="ANCOUNT" size="16" value="0">
+			<Relation type="count" of="Prerequisite"/>
+		</Number>
+
+		<Number name="NSCOUNT" size="16" value="0">
+			<Relation type="count" of="Update"/>
+		</Number>
+
+		<Number name="ARCOUNT" size="16" value="0">
+			<Relation type="count" of="AdditionalData"/>
+		</Number>
+
+		<Block name="Zone" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Prerequisite" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="Update" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+		<Block name="AdditionalData" ref="DnsRecord" minOccurs="0" maxOccurs="65535"/>
+	</DataModel>
+
+	<StateModel name="UdpTransaction" initialState="Accept">
+
+		<State name="Accept">
+			<Action type="accept"/>
+			<Action type="changeState" ref="RecvRequest"/>
+		</State>
+
+		<State name="RecvRequest">
+			<Action type="input" name="Query">
+				<DataModel ref="UdpFakeDnsPacket"/>
+			</Action>
+
+			<!-- SOA Query -->
+			<Action type="changeState" ref="ResponseSOA"
+				when="Action.getRoot().getByName(
+				str(
+				getXml().xpath('//Query//Type')[0].getAttributeNS(None, 'fullName')
+				)
+				).getInternalValue() == '6'"/>
+
+			<!-- NS Query -->
+			<Action type="changeState" ref="ResponseNS"
+				when="Action.getRoot().getByName(
+				str(
+				getXml().xpath('//Query//Type')[0].getAttributeNS(None, 'fullName')
+				)
+				).getInternalValue() == '2'"/>
+
+			<!-- A Query -->
+			<Action type="changeState" ref="ResponseA"
+				when="Action.getRoot().getByName(
+				str(
+				getXml().xpath('//Query//Type')[0].getAttributeNS(None, 'fullName')
+				)
+				).getInternalValue() == '1'"/>
+
+			<!-- AAAA Query -->
+			<Action type="changeState" ref="ResponseAAAA"
+				when="Action.getRoot().getByName(
+				str(
+				getXml().xpath('//Query//Type')[0].getAttributeNS(None, 'fullName')
+				)
+				).getInternalValue() == '28'"/>
+
+			<!-- Otherwise must be Update -->
+			<Action type="changeState" ref="ResponseUpdate"/>
+
+		</State>
+
+		<State name="ResponseSOA">
+			<Action type="slurp" valueXpath="//Query//TransactionID"
+				setXpath="//SoaAnswer//TransactionID"/>
+
+			<Action type="output" name="SoaAnswer">
+				<DataModel ref="UdpDnsPacket"/>
+				<Data name="DataSet">
+					<Field	name="Questions[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field	name="Questions[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field name="Questions[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field name="Answers[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field name="Answers[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field name="Answers[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field name="Answers[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field name="Answers[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field name="Answers[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Answers[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+					<Field
+						name="Answers[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="ns"/>
+					<Field
+						name="Answers[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Answers[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Answers[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+
+
+					<Field
+						name="Authority[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Authority[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Authority[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field
+						name="Authority[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Authority[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Authority[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Authority[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+				</Data>
+			</Action>
+
+			<Action type="changeState" ref="RecvRequest"/>
+		</State>
+
+		<State name="ResponseNS">
+			<Action type="slurp" valueXpath="//Query//TransactionID"
+				setXpath="//SoaAnswer//TransactionID"/>
+
+			<Action type="output" name="SoaAnswer">
+				<DataModel ref="UdpDnsPacket"/>
+				<Data name="DataSet">
+					<Field
+						name="Questions[0].RecordChoice.NS.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Questions[0].RecordChoice.NS.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Questions[0].RecordChoice.NS.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field
+						name="Answers[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Answers[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Answers[0].RecordChoice.NSRR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field
+						name="Answers[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Answers[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Answers[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Answers[0].RecordChoice.NSRR.RDATA.NSDNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+
+
+					<Field name="Authority[-1]" value=""/>
+
+
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Additional[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+				</Data>
+			</Action>
+
+			<Action type="changeState" ref="RecvRequest"/>
+		</State>
+
+		<State name="ResponseA">
+			<Action type="slurp" valueXpath="//Query//TransactionID"
+				setXpath="//AAnswer//TransactionID"/>
+
+			<Action type="output" name="AAnswer">
+				<DataModel ref="UdpDnsPacket"/>
+				<Data name="DataSet">
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+
+					<Field
+						name="Answers[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Answers[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Answers[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Answers[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+					<Field name="Authority[-1]" value=""/>
+					<Field name="Additional[-1]" value=""/>
+				</Data>
+			</Action>
+
+			<Action type="changeState" ref="RecvRequest"/>
+		</State>
+
+		<State name="ResponseAAAA">
+			<Action type="slurp" valueXpath="//Query//TransactionID"
+				setXpath="//AAAAAnswer//TransactionID"/>
+
+			<Action type="output" name="AAAAAnswer">
+				<DataModel ref="UdpDnsPacket"/>
+				<Data name="DataSet">
+					<Field name="Questions[0].RecordChoice.A.Type" value="28"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Questions[0].RecordChoice.A.Label.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+
+					<Field
+						name="Authority[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="root"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.MNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[0].Name"
+						value="ns"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Authority[0].RecordChoice.SOARR.RDATA.RNAME.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+
+
+					<!-- <Field name="Questions[-1]" value="" /> -->
+					<Field name="Answers[-1]" value=""/>
+					<!-- <Field name="Authority[-1]" value="" /> -->
+					<Field name="Additional[-1]" value=""/>
+				</Data>
+
+			</Action>
+
+			<Action type="changeState" ref="RecvRequest"/>
+		</State>
+
+		<State name="ResponseUpdate">
+			<Action type="slurp" valueXpath="//Query//TransactionID"
+				setXpath="//SoaAnswer//TransactionID"/>
+
+			<Action type="output" name="SoaAnswer">
+				<DataModel ref="UdpDnsUpdatePacket"/>
+				<Data name="DataSet">
+					<Field
+						name="Zone[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="fuzzer"/>
+					<Field
+						name="Zone[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="peachy"/>
+					<Field
+						name="Zone[0].RecordChoice.SOA.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="com"/>
+
+
+					<Field
+						name="Update[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[0].Name"
+						value="peachy_1"/>
+					<Field
+						name="Update[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[1].Name"
+						value="fuzzer"/>
+					<Field
+						name="Update[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[2].Name"
+						value="peachy"/>
+					<Field
+						name="Update[0].RecordChoice.ARR.Label.LabelChoice.Domain.DomainArray[3].Name"
+						value="com"/>
+					<Field name="Update[0].RecordChoice.ARR.RDATA" valueType="hex"
+						value="0A 00 01 de"/>
+
+					<Field name="Prerequisite[-1]" value=""/>
+					<Field name="AdditionalData[-1]" value=""/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Import from="amt6" import="*"/>
+		
+		<Monitor class="AmtSoapMonitor">
+			<Param name="url" value="http://192.168.1.3:16992/EventManagerService"/>
+			<Param name="authurl" value="http://192.168.1.3:16992"/>
+			<Param name="user" value="admin" />
+			<Param name="password" value="Admin!98" />
+		</Monitor>
+		<!--
+			<Monitor class="network.UdpMonitor">
+			<Param name="host" value="0.0.0.0" />
+			<Param name="port" value="6666" />
+			</Monitor>
+		-->
+	</Agent>
+	
+	<Test name="UdpResp">
+		<Agent ref="LocalAgent" />
+		<StateModel ref="UdpTransaction"/>
+		<Publisher class="AmtDdnsUdpListener">
+			<Param name="target" value="192.168.1.3"/>
+			<Param name="port" value="53"/>
+			<Param name="user" value="admin"/>
+			<Param name="pass" value="Admin!98"/>
+		</Publisher>
+	</Test>
+
+	<Run name="DefaultRun">
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs-ddns"/>
+		</Logger>	
+		
+		<Test ref="UdpResp"/>
+	</Run>
+
+</Peach>

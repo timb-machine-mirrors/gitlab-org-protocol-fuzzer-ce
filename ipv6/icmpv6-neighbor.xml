@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!--
+		ICMPv6 Neighbor Advertisement Fuzzer
+		
+		This fuzzer targets the basic ICMPv6 protocol of AMT 6.1.
+		
+		Peach Version: 2.3.8
+		
+		Author:
+			Michael Eddington (mike@dejavusecurity.com)
+			Eric Rachner (eric@dejavusecurity.com)
+		
+	-->
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<Import from="ipv6" import="*"/>
+
+	<Defaults>
+		<Number size="8" signed="false" endian="big"/>
+	</Defaults>
+
+	<!-- ======================================================================================================================= -->
+
+	<DataModel name="IPv6Address">
+		<!--
+		TODO: maybe rethink the default value here?
+		-->
+		<Blob name="AddressValue" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96"/>
+	</DataModel>
+
+	<DataModel name="Icmpv6_NeighborSolicitation">
+		<Number name="Type" size="8" value="135" token="true"/>
+		<Number name="Code" size="8" value="0"/>
+		<Number name="Checksum" signed="false" size="16" endian="little">
+			<Fixup class="Icmpv6ChecksumFixup">
+				<Param name="ref" value="Icmpv6_NeighborSolicitation"/>
+			</Fixup>
+		</Number>
+
+		<Number size="32" />
+		<Blob name="TargetAddress" length="16" valueType="hex" value="fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f" />
+
+		<Choice name="Options" minOccurs="0" maxOccurs="1000">
+			
+			<Block name="SourceAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="1" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="SourceAddress" expressionGet="(size*8)"
+						expressionSet="(size/8)"/>
+				</Number>
+				<Blob name="Data" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+			
+			<Block name="TargetAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="2" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="TargetAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+			<Block name="PrefixInformation">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="3" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="PrefixInformation" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Number name="PrefixLength" size="8" value="8"/>
+					<Flags name="Flags" size="8">
+						<Flag name="OnLink" position="0" size="1" value="1"/>
+						<Flag name="AutonomousAddress" position="1" size="1" value="1"/>
+					</Flags>
+					
+					<Number name="ValidLifetime" size="32" value="10000"/>
+					<Number name="PreferredLifetime" size="32" value="10000"/>
+					<Number size="32" value="0"/>
+					<Blob name="Prefix" length="16" valueType="hex" value="fe80610a7b1056091eae"/>
+				</Block>
+			</Block>
+			<Block name="RedirectedHeader">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="4" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="RedirectedHeader" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="6" />
+					<Blob name="IpHeaderData" value="AAAAAAAA" />
+				</Block>
+			</Block>
+			<Block name="MTU">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="5" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="MTU" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					
+					<Blob length="2" />
+					<Number name="MTU" size="32" value="2000" />
+				</Block>
+			</Block>
+			
+		</Choice>
+	</DataModel>
+
+	<DataModel name="Icmpv6_NeighborAdvertisement">
+		<Number name="Type" size="8" value="136" token="true"/>
+		<Number name="Code" size="8" value="0"/>
+		<Number name="Checksum" signed="false" size="16" endian="little">
+			<Fixup class="Icmpv6ChecksumFixup">
+				<Param name="ref" value="Icmpv6_NeighborAdvertisement"/>
+			</Fixup>
+		</Number>
+		
+		<Flags size="32" name="Flags" endian="big">
+			<Flag name="RouterFlag" position="0" size="1" value="0"/>
+			<Flag name="SolicitedFlag" position="1" size="1" value="1"/>
+			<Flag name="OverrideFlag" position="2" size="1" value="1"/>
+		</Flags>
+		
+		<Blob length="16" name="TargetAddress" valueType="hex" value="fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f"/>
+		
+		<Choice name="Options" minOccurs="0" maxOccurs="1000">
+			
+			<Block name="SourceAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="1" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="SourceAddress" expressionGet="(size*8)"
+						expressionSet="(size/8)"/>
+				</Number>
+				<Blob name="Data" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+			<Block name="TargetAddress">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="2" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="TargetAddress" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Blob name="Data" valueType="hex" value="00 1a a0 95 df 6f"/>
+			</Block>
+			<Block name="PrefixInformation">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="3" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="PrefixInformation" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Number name="PrefixLength" size="8" value="8"/>
+					<Flags name="Flags" size="8">
+						<Flag name="OnLink" position="0" size="1" value="1"/>
+						<Flag name="AutonomousAddress" position="1" size="1" value="1"/>
+					</Flags>
+					
+					<Number name="ValidLifetime" size="32" value="10000"/>
+					<Number name="PreferredLifetime" size="32" value="10000"/>
+					<Number size="32" value="0"/>
+					<Blob name="Prefix" length="16" valueType="hex" value="fe80610a7b1056091eae"/>
+				</Block>
+			</Block>
+			<Block name="RedirectedHeader">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="4" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="RedirectedHeader" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="6" />
+					<Blob name="IpHeaderData" value="AAAAAAAA" />
+				</Block>
+			</Block>
+			<Block name="MTU">
+				<Relation type="size" from="Length"/>
+				
+				<Number name="Type" size="8" value="5" token="true"/>
+				<Number name="Length" size="8" value="1">
+					<Relation type="size" of="MTU" expressionGet="(size*8)+1"
+						expressionSet="(size/8)-1"/>
+				</Number>
+				<Block name="Data">
+					<Blob length="2" />
+					<Number name="MTU" size="32" value="2000" />
+				</Block>
+			</Block>
+			
+		</Choice>
+	</DataModel>
+
+
+	<DataModel name="IPv6MainDataModel">
+		<Flags name="Header" size="32" endian="big">
+			<Flag name="Version" size="4" position="0" value="6"/>
+			<Flag name="TrafficClass" size="8" position="4" value="0"/>
+			<Flag name="FlowLabel" size="20" position="12" value="0"/>
+		</Flags>
+		<Number name="PayloadLength" size="16">
+			<Relation type="size" of="Payload"/>
+		</Number>
+		<Number name="NextHeader" size="8" value="58">
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Number name="HopLimit" size="8" value="10"/>
+		<!--
+			discontent virtual
+			fe80::20c:29ff:fe50:af71
+			fe 80 00 00 00 00 00 00 02 0c 29 ff fe 50 af 71
+			
+			vmware gw
+			fe80::31f6:9fa4:e243:4a44
+			fe 80 00 00 00 00 00 00 31 f6 9f a4 e2 43 4a 44
+			
+			malcontent wireless
+			fe80::5883:210d:2008:d60b
+			fe 80 00 00 00 00 00 00 58 83 21 0d 20 08 d6 0b
+			
+			mike laptop
+			fe80::610a:7b10:5609:1eae
+			fe 80 00 00 00 00 00 00 61 0a 7b 10 56 09 1e ae 
+			
+			target
+			FE80::E009:3A58:8AD4:3696
+			fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96
+			
+			10.0.1.222
+			FE80::3705:97C0:DBD5:A76F
+			fe 80 00 00 00 00 00 00 37 05 97 C0 DB D5 A76F
+			
+			10.0.1.42
+			fe80::225:9cff:fe2f:c34b
+			fe 80 00 00 00 00 00 00 02 25 9c ff fe 2f c3 4b
+			
+			scanner
+			fe80::21a:a0ff:fe95:df6f
+			fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f
+		-->
+		<Blob name="SourceAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f"/>
+		<Blob name="DestinationAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 02 25 9c ff fe 2f c3 4b"/>
+		<Block name="Payload">
+			<Relation type="size" from="PayloadLength"/>
+
+			<Choice name="Headers">
+				<Block name="Icmpv6_NeighborSolicitation" ref="Icmpv6_NeighborSolicitation"/>
+				<Block name="Icmpv6_NeighborAdvertisement" ref="Icmpv6_NeighborAdvertisement" />
+			</Choice>
+
+			<Blob name="Icmpv6_EchoRequest"/>
+
+		</Block>
+	</DataModel>
+
+	<!-- ======================================================================================================================= -->
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel name="IPv6MainDataModel" ref="IPv6MainDataModel"/>
+				<Data>
+					<!-- <Field name="Payload.Headers.Icmpv6_NeighborSolicitation.Options.SourceAddress" value="58"/> -->
+					<Field name="Payload.Headers.Icmpv6_NeighborAdvertisement.Options.SourceAddress" value="58"/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="RemoteAmtAgent" location="http://127.0.0.1:9002">
+		<Import from="amt6" import="*"/>
+
+		<Monitor class="AmtSoapMonitor">
+			<Param name="url" value="http://10.0.1.222:16992/EventManagerService"/>
+			<Param name="authurl" value="http://10.0.1.222:16992"/>
+			<Param name="user" value="admin"/>
+			<Param name="password" value="Admin!98"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="TheTest">
+
+		<!-- <Agent ref="RemoteAmtAgent"/> -->
+		<StateModel ref="TheState"/>
+
+		<Publisher class="raw.RawIp6">
+			<Param name="destination" value="FE80::3705:97C0:DBD5:A76F"/>
+		</Publisher>
+
+	</Test>
+
+	<Run name="DefaultRun">
+		<!--
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs-icmpv6-neighbor"/>
+		</Logger>
+		-->
+
+		<Test ref="TheTest"/>
+
+	</Run>
+
+</Peach>
+<!-- end -->

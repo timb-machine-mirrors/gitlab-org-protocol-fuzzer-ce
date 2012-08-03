@@ -1,0 +1,10 @@
+Video Design
+============
+
+ * AVI
+ * MOV
+ * MPEG
+ * ??
+ * DIVX
+ * WMV
+ 

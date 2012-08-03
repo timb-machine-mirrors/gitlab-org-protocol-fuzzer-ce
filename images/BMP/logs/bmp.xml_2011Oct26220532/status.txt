@@ -1,0 +1,13 @@
+Peach Fuzzer Run
+=================
+
+Command line: c:\Peach\\peach.py --new -1 bmp.xml 
+Date of run: Wed Oct 26 15:05:32 2011
+SEED: 1319666731.58
+Pit File: bmp.xml
+Run name: DefaultRun
+
+Wed Oct 26 15:05:33 2011: 
+Wed Oct 26 15:05:33 2011: Test starting: TheTest
+Wed Oct 26 15:05:33 2011: 
+Wed Oct 26 15:05:33 2011: On test variation # 1

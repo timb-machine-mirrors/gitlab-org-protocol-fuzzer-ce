@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml" />
+	<Include ns="pt" src="file:PeachTypes.xml" />
+	
+	<DataModel name="Param">
+		<String name="Value" isStatic="true" />
+	</DataModel>
+	
+	<!-- Defines the common wave chunk -->
+	<DataModel name="Chunk">
+		<String name="ID" length="4" padCharacter=" " />
+		<Number name="Size" size="32" signed="false">
+			<Relation type="size" of="Data"/>
+		</Number>
+		<Blob name="Data"/>
+		<Blob lengthType="calc" length="int((int(self.parent['Size'].getInternalValue()) % 2 == 0) and '0' or '1')" />
+	</DataModel>
+	
+	<!-- Defines the format of a WAV file -->
+	<DataModel name="AVI">
+		<!-- wave header -->
+		<Block name="AviHeader" ref="Chunk">
+			<String name="ID" value="RIFF" isStatic="true" />
+			<Block name="Data">
+				<String name="Type" value="AVI " isStatic="true"/>
+				
+				<Choice name="ChunkChoice" maxOccurs="30000">
+					<Block name="ChunkList" ref="Chunk">
+						<String name="ID" value="LIST" isStatic="true"/>
+						<Block name="Data">
+							<Choice name="TypeChoice" maxOccurs="30000">
+								<Block name="Info">
+									<String name="Type" value="INFO" isStatic="true"/>
+									<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+										<String name="Data" nullTerminated="true" />
+									</Block>
+								</Block>
+								
+								<Block name="ChunkList" ref="Chunk">
+									<String name="ID" value="LIST" isStatic="true"/>
+									<Block name="Data">
+										<Choice name="TypeChoice" maxOccurs="30000">
+											<Block name="Info">
+												<String name="Type" value="INFO" isStatic="true"/>
+												<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+													<String name="Data" nullTerminated="true" />
+												</Block>
+											</Block>
+											
+											<Block name="ChunkList" ref="Chunk">
+												<String name="ID" value="LIST" isStatic="true"/>
+												<Block name="Data">
+													<Choice name="TypeChoice" maxOccurs="30000">
+														<Block name="Info">
+															<String name="Type" value="INFO" isStatic="true"/>
+															<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																<String name="Data" nullTerminated="true" />
+															</Block>
+														</Block>
+														
+														<Block name="ChunkList" ref="Chunk">
+															<String name="ID" value="LIST" isStatic="true"/>
+															<Block name="Data">
+																<Choice name="TypeChoice" maxOccurs="30000">
+																	<Block name="Info">
+																		<String name="Type" value="INFO" isStatic="true"/>
+																		<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																			<String name="Data" nullTerminated="true" />
+																		</Block>
+																	</Block>
+																	
+																	<Block name="ChunkList" ref="Chunk">
+																		<String name="ID" value="LIST" isStatic="true"/>
+																		<Block name="Data">
+																			<Choice name="TypeChoice" maxOccurs="30000">
+																				<Block name="Info">
+																					<String name="Type" value="INFO" isStatic="true"/>
+																					<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																						<String name="Data" nullTerminated="true" />
+																					</Block>
+																				</Block>
+																				
+																				
+																				<Block name="ChunkList" ref="Chunk">
+																					<String name="ID" value="LIST" isStatic="true"/>
+																					<Block name="Data">
+																						<Choice name="TypeChoice" maxOccurs="30000">
+																							<Block name="Info">
+																								<String name="Type" value="INFO" isStatic="true"/>
+																								<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																									<String name="Data" nullTerminated="true" />
+																								</Block>
+																							</Block>
+																							
+																							<Block name="ChunkList" ref="Chunk">
+																								<String name="ID" value="LIST" isStatic="true"/>
+																								<Block name="Data">
+																									<Choice name="TypeChoice" maxOccurs="30000">
+																										<Block name="Info">
+																											<String name="Type" value="INFO" isStatic="true"/>
+																											<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																												<String name="Data" nullTerminated="true" />
+																											</Block>
+																										</Block>
+																										
+																										
+																										<Block name="ChunkList" ref="Chunk">
+																											<String name="ID" value="LIST" isStatic="true"/>
+																											<Block name="Data">
+																												<Choice name="TypeChoice" maxOccurs="30000">
+																													<Block name="Info">
+																														<String name="Type" value="INFO" isStatic="true"/>
+																														<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																															<String name="Data" nullTerminated="true" />
+																														</Block>
+																													</Block>
+																													<Block name="Unknown">
+																														<String name="Type" length="4"/>
+																														<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																													</Block>
+																												</Choice>
+																											</Block>
+																										</Block>
+																										
+																										
+																										<Block name="Unknown">
+																											<String name="Type" length="4"/>
+																											<Choice maxOccurs="10000">
+																												<Block name="ChunkList" ref="Chunk">
+																													<String name="ID" value="LIST" isStatic="true"/>
+																													<Block name="Data">
+																														<Choice name="TypeChoice" maxOccurs="30000">
+																															<Block name="Info">
+																																<String name="Type" value="INFO" isStatic="true"/>
+																																<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																																	<String name="Data" nullTerminated="true" />
+																																</Block>
+																															</Block>
+																															<Block name="Unknown">
+																																<String name="Type" length="4"/>
+																																<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																															</Block>
+																														</Choice>
+																													</Block>
+																												</Block>
+																												<Block name="SubChunk" ref="Chunk"/>
+																											</Choice>
+																										</Block>
+																									</Choice>
+																								</Block>
+																							</Block>
+																							
+																							
+																							
+																							<Block name="Unknown">
+																								<String name="Type" length="4"/>
+																								<Choice maxOccurs="10000">
+																									<Block name="ChunkList" ref="Chunk">
+																										<String name="ID" value="LIST" isStatic="true"/>
+																										<Block name="Data">
+																											<Choice name="TypeChoice" maxOccurs="30000">
+																												<Block name="Info">
+																													<String name="Type" value="INFO" isStatic="true"/>
+																													<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																														<String name="Data" nullTerminated="true" />
+																													</Block>
+																												</Block>
+																												<Block name="Unknown">
+																													<String name="Type" length="4"/>
+																													<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																												</Block>
+																											</Choice>
+																										</Block>
+																									</Block>
+																									<Block name="SubChunk" ref="Chunk"/>
+																								</Choice>
+																							</Block>
+																						</Choice>
+																					</Block>
+																				</Block>
+																				
+																				
+																				<Block name="Unknown">
+																					<String name="Type" length="4"/>
+																					<Choice maxOccurs="10000">
+																						<Block name="ChunkList" ref="Chunk">
+																							<String name="ID" value="LIST" isStatic="true"/>
+																							<Block name="Data">
+																								<Choice name="TypeChoice" maxOccurs="30000">
+																									<Block name="Info">
+																										<String name="Type" value="INFO" isStatic="true"/>
+																										<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																											<String name="Data" nullTerminated="true" />
+																										</Block>
+																									</Block>
+																									<Block name="Unknown">
+																										<String name="Type" length="4"/>
+																										<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																									</Block>
+																								</Choice>
+																							</Block>
+																						</Block>
+																						<Block name="SubChunk" ref="Chunk"/>
+																					</Choice>
+																				</Block>
+																			</Choice>
+																		</Block>
+																	</Block>
+																	
+																	
+																	<Block name="Unknown">
+																		<String name="Type" length="4"/>
+																		<Choice maxOccurs="10000">
+																			<Block name="ChunkList" ref="Chunk">
+																				<String name="ID" value="LIST" isStatic="true"/>
+																				<Block name="Data">
+																					<Choice name="TypeChoice" maxOccurs="30000">
+																						<Block name="Info">
+																							<String name="Type" value="INFO" isStatic="true"/>
+																							<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																								<String name="Data" nullTerminated="true" />
+																							</Block>
+																						</Block>
+																						<Block name="Unknown">
+																							<String name="Type" length="4"/>
+																							<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																						</Block>
+																					</Choice>
+																				</Block>
+																			</Block>
+																			<Block name="SubChunk" ref="Chunk"/>
+																		</Choice>
+																	</Block>
+																</Choice>
+															</Block>
+														</Block>
+														
+														
+														<Block name="Unknown">
+															<String name="Type" length="4"/>
+															<Choice maxOccurs="10000">
+																<Block name="ChunkList" ref="Chunk">
+																	<String name="ID" value="LIST" isStatic="true"/>
+																	<Block name="Data">
+																		<Choice name="TypeChoice" maxOccurs="30000">
+																			<Block name="Info">
+																				<String name="Type" value="INFO" isStatic="true"/>
+																				<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																					<String name="Data" nullTerminated="true" />
+																				</Block>
+																			</Block>
+																			<Block name="Unknown">
+																				<String name="Type" length="4"/>
+																				<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																			</Block>
+																		</Choice>
+																	</Block>
+																</Block>
+																<Block name="SubChunk" ref="Chunk"/>
+															</Choice>
+														</Block>
+													</Choice>
+												</Block>
+											</Block>
+											
+											
+											<Block name="Unknown">
+												<String name="Type" length="4"/>
+												<Choice maxOccurs="10000">
+													<Block name="ChunkList" ref="Chunk">
+														<String name="ID" value="LIST" isStatic="true"/>
+														<Block name="Data">
+															<Choice name="TypeChoice" maxOccurs="30000">
+																<Block name="Info">
+																	<String name="Type" value="INFO" isStatic="true"/>
+																	<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+																		<String name="Data" nullTerminated="true" />
+																	</Block>
+																</Block>
+																<Block name="Unknown">
+																	<String name="Type" length="4"/>
+																	<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+																</Block>
+															</Choice>
+														</Block>
+													</Block>
+													<Block name="SubChunk" ref="Chunk"/>
+												</Choice>
+											</Block>
+										</Choice>
+									</Block>
+								</Block>
+								
+								
+								<Block name="Unknown">
+									<String name="Type" length="4"/>
+									<Choice maxOccurs="10000">
+										<Block name="ChunkList" ref="Chunk">
+											<String name="ID" value="LIST" isStatic="true"/>
+											<Block name="Data">
+												<Choice name="TypeChoice" maxOccurs="30000">
+													<Block name="Info">
+														<String name="Type" value="INFO" isStatic="true"/>
+														<Block name="SubChunk" ref="Chunk" maxOccurs="10000">
+															<String name="Data" nullTerminated="true" />
+														</Block>
+													</Block>
+													<Block name="Unknown">
+														<String name="Type" length="4"/>
+														<Block name="SubChunk" ref="Chunk" maxOccurs="10000"/>
+													</Block>
+												</Choice>
+											</Block>
+										</Block>
+										<Block name="SubChunk" ref="Chunk"/>
+									</Choice>
+								</Block>
+							</Choice>
+						</Block>
+					</Block>
+					
+					<Block name="Unknown" ref="Chunk"/>
+				</Choice>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<!-- This is our simple wave state model -->
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			
+			<!-- Write out our wave file -->
+			<Action type="output">
+				<DataModel ref="AVI"/>
+				<!-- This is our sample file to read in -->
+				<Data name="data" fileName="sample2.avi"/>
+			</Action>
+			
+			<Action type="close"/>
+			
+			<!-- Launch the target process -->
+			<Action type="call" method="MPlayer-1.0rc2\\mplayer.exe">
+				<Param name="wav file" type="in">
+					<DataModel ref="Param"/>
+					<Data name="filename">
+						<!-- Name of fuzzed output file -->
+						<Field name="Value" value="fuzzed.avi"/>
+					</Data>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="mplayer.exe" />
+		</Monitor>
+		<Monitor class="debugger.WindowsAppVerifier">
+			<Param name="Application" value="mplayer.exe" />
+		</Monitor>
+		<!-- <Monitor class="test.TestStopOnFirst" /> -->
+	</Agent>
+	
+	<Test name="TheTest">
+		<!-- Don't fuzz the actual wave data -->
+		<!-- <Exclude xpath="//ChunkData/Data"/> -->
+		
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+		
+		<Publisher class="file.FileWriterLauncher">
+			<Param name="fileName" value="fuzzed.avi"/>
+		</Publisher>
+	</Test>
+	
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		
+		<Test ref="TheTest" />
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs" />
+		</Logger>
+	</Run>
+	
+</Peach>
+<!-- end -->

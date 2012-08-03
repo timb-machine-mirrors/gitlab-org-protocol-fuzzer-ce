@@ -1,0 +1,90 @@
+//--------------------------------------
+//--- 010 Editor v3.0.5 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+typedef enum <ubyte>
+{
+       Reserved = 0,
+       PublicKeyEncryptedSessionKeyPacket,
+       SignaturePacket,
+       SymmetricKeyEncryptedSessionKeyPacket,
+       OnePassSignaturePacket,
+       SecretKeyPacket,
+       PublicKeyPacket,
+       SecretSubkeyPacket,
+       CompressedDataPacket,
+       SymmetricallyEncryptedDataPacket,
+       MarkerPacket,
+       LiteralDataPacket,
+       TrustPacket,
+       UserIdPacket,
+       PublicSubkeyPacket,
+       Private60 = 60,
+       Private61,
+       Private62,
+       Private63
+} PacketTagTypes;
+
+typedef struct
+{
+    ushort  length;
+    ubyte   data[(length+7)/8];
+} MPI;
+
+typedef struct
+{
+    ubyte    alwaysOne : 1;
+    ubyte    newPacketFormat : 1;
+
+    if(newPacketFormat == 0)
+    {
+        // Old packet type
+        ubyte    contentTag : 4;
+        ubyte    lengthType : 2;
+
+        switch(lengthType)
+        {
+        case 0:
+            byte length;
+            break;
+        case 1:
+            ushort length;
+            break;
+        case 2:
+            uint length;
+            break;
+        case 3:
+            local uint length = FileSize() - 1;
+            break;
+        }
+    }
+    else
+    {
+        byte    contentTag : 6;
+        // Not supporting new format!!!
+    }
+
+} PacketHeader;
+
+typedef struct
+{
+    ubyte   version;
+    ubyte   length;
+    ubyte   signatureType;
+    uint    creationTime;
+    ubyte   keyId[8];
+    ubyte   publicKeyAlgorithm;
+    ubyte   hashAlgorithm;
+    ushort  leftSignedHashValue;
+    MPI     num1;
+    MPI     num2;
+} Tag2SignaturePacket;
+
+
+PacketHeader header;
+Tag2SignaturePacket sig;

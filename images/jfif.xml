@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!--  Copyright (c) Eddington and Frantz; All rights reserved -->
+	
+	<Include ns="default" src="file:defaults.xml" />
+	<Include ns="pt" src="file:PeachTypes.xml" />
+	
+	<DataModel name="JFIFImage">
+		
+		<Choice name="AppSegments" maxOccurs="10000">
+			
+			<!-- JFIF Segment -->
+			<Block name="JFIF">
+				<Blob name="APP0" valueType="hex" value="FFE0" isStatic="true"/>
+				<Number name="Length" size="16" signed="false">
+					<Relation type="size" of="Segment" expressionGet="size - 2" expressionSet="size + 2"/>
+				</Number>
+				<Block name="Segment">
+					<Relation type="size" from="Length"/>
+					
+					<Blob name="Identifier" length="5" valueType="hex" value="4a46494600" isStatic="true"/>
+					<Blob name="Version" length="2" valueType="hex" value="0102"/>
+					<Number name="DensityUnits" size="8" value="0" signed="false"/>
+					<Number name="XDensity" size="16" signed="false" value="800"/>
+					<Number name="YDensity" size="16" signed="false" value="600"/>
+					<Number name="ThumbnailWidth" size="8" signed="false" value="16"/>
+					<Number name="ThumbnailHeight" size="8" signed="false" value="16"/>
+					<Blob name="ThumbnailData"/>
+				</Block>
+			</Block>
+			
+			<!-- JFIF Extension (JFXX) Segment -->
+			<Block name="JFXX">
+				<Blob name="APP0" valueType="hex" value="FFE0" isStatic="true" />
+				<Number name="Length" size="16" signed="false">
+					<Relation type="size" of="Segment" expressionGet="size - 2" expressionSet="size + 2"/>
+				</Number>
+				<Block name="Segment">
+					<Blob name="Identifier" valueType="hex" value="4A46585800" isStatic="true" />
+					
+					<Choice name="Extension">
+						<Block name="ThumbnailJpeg">
+							<Number name="ExtensionCode" size="8" signed="false" valueType="hex" value="10" isStatic="true"/>
+							<Blob name="ThumbnailData" />
+						</Block>
+						
+						<Block name="ThumbnailSinglePixel">
+							<Number name="ExtensionCode" size="8" signed="false" valueType="hex" value="11" isStatic="true"/>
+							<Number name="ThumbnailWidth" size="8" signed="false" value="16"/>
+							<Number name="ThumbnailHeight" size="8" signed="false" value="16"/>
+							<Blob name="Pallette" length="768"/>
+							<Blob name="ThumbnailData" />
+						</Block>
+						
+						<Block name="ThumbnailThreePixel">
+							<Number name="ExtensionCode" size="8" signed="false" valueType="hex" value="13" isStatic="true"/>
+							<Number name="ThumbnailWidth" size="8" signed="false" value="16"/>
+							<Number name="ThumbnailHeight" size="8" signed="false" value="16"/>
+							<Blob name="ThumbnailData" />
+						</Block>
+					</Choice>
+				</Block>
+			</Block>
+			
+			<!-- Unknown APP0 Segment -->
+			<Block name="Unknown">
+				<Blob name="APP0" valueType="hex" value="FFE0" isStatic="true"/>
+				<Number name="Length" size="16" signed="false">
+					<Relation type="size" of="Segment" expressionGet="size - 2" expressionSet="size + 2"/>
+				</Number>
+				<Blob name="Segment"/>
+			</Block>
+			
+		</Choice>
+		
+		<Blob name="ImageData" />
+		
+	</DataModel>
+	
+	<DataModel name="param">
+		<String name="value" />
+	</DataModel>
+	
+	<StateModel name="TheState" initialState="Initial">
+		
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="JFIFImage"/>
+				<Data name="sample" fileName="sample.jpg" />
+			</Action>
+			
+			<Action type="close" />
+			
+			<Action name="Launch" type="call" method="notepad.exe">
+				<Param type="in" name="filename">
+					<DataModel ref="param"/>
+					<Data name="filename">
+						<Field name="value" value="fuzzed.jpg"/>
+					</Data>
+				</Param>
+				<!--
+				<Param type="in" name="otherParam">
+					<DataModel ref="param"/>
+					<Data name="other">
+						<Field name="value" value="-v"/>
+					</Data>
+				</Param>
+				-->
+			</Action>
+		</State>
+		
+	</StateModel>
+	
+	<!-- TODO: Configure agent/monitors
+	<Agent name="LocalAgent" location="http://127.0.0.1:9000">
+		<Monitor class="test.TestStopOnFirst" />
+	</Agent>
+	-->
+	
+	<Test name="TheTest">
+		
+		<Exclude xpath="//Launch"/>
+		
+		<!-- <Agent ref="LocalAgent"/> -->
+		<StateModel ref="TheState"/>
+		
+		<!-- TODO: Complete publisher -->
+		<Publisher class="file.FileWriterLauncher">
+			<Param name="filename" value="fuzzed.jpg"/>
+		</Publisher>
+	</Test>
+	
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+		
+		<Test ref="TheTest" />
+		
+	</Run>
+	
+</Peach>
+<!-- end -->

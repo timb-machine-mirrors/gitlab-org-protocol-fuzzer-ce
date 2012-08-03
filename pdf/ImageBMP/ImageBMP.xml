@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml"/>
+	
+	<PythonPath path="."/>
+	<Import from="ImageBMP" import="*"/>
+	
+
+	<DataModel name="CIEXYZTRIPLE">
+		<Block name="CIEXYZ" occurs="3">
+			<Block name="FXPT2DOT30" occurs="3">
+				<Number name="Point" size="32"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BMPHeader">
+		<String name="Magic" length="2"/>
+		<Number name="BmpSize" size="32">
+			<Relation type="size" of="BMP"/>
+		</Number>
+		<Blob name="Reserved" length="4"/>
+		<Number name="DataOffset" size="32">
+			<Relation type="offset" of="TheBitmapData"/>
+		</Number>
+	</DataModel>
+
+	<DataModel name="BitmapInfo">
+		<Choice name="FormatChoice">
+			<Block name="BITMAPV5HEADER">
+				<Number name="Size" size="32" value="124" token="true">
+					<Relation type="size" of="BITMAPV5HEADER"/>
+				</Number>
+				<Number name="bV5Width" size="32"/>
+				<Number name="bV5Height" size="32"/>
+				<Number name="bV5Planes" size="16"/>
+				<Number name="bV5BitCount" size="16"/>
+				<Number name="bV5Compression" size="32"/>
+				<Number name="bV5SizeImage" size="32"/>
+				<Number name="bV5XPelsPerMeter" size="32"/>
+				<Number name="bV5YPelsPerMeter" size="32"/>
+				<Number name="bV5ClrUsed" size="32"/>
+				<Number name="bV5ClrImportant" size="32"/>
+				<Number name="bV5RedMask" size="32"/>
+				<Number name="bV5GreenMask" size="32"/>
+				<Number name="bV5BlueMask" size="32"/>
+				<Number name="bV5AlphaMask" size="32"/>
+				<Number name="bV5CSType" size="32"/>
+				<Block name="bV5Endpoints" ref="CIEXYZTRIPLE"/>
+				<Number name="bV5GammaRed" size="32"/>
+				<Number name="bV5GammaGreen" size="32"/>
+				<Number name="bV5GammaBlue" size="32"/>
+				<Number name="bV5Intent" size="32"/>
+				<Number name="bV5ProfileData" size="32"/>
+				<Number name="bV5ProfileSize" size="32"/>
+				<Number name="bV5Reserved" size="32"/>
+				<Number name="bV4GammaBlue" size="32"/>
+				<Number name="bV4GammaBlue" size="32"/>
+			</Block>
+			<Block name="BITMAPV4HEADER">
+				<Number name="Size" size="32" value="108" token="true">
+					<Relation type="size" of="BITMAPV4HEADER"/>
+				</Number>
+				<Number name="bV4Width" size="32"/>
+				<Number name="bV4Height" size="32"/>
+				<Number name="bV4Planes" size="16"/>
+				<Number name="bV4BitCount" size="16"/>
+				<Number name="bV4V4Compression" size="32"/>
+				<Number name="bV4SizeImage" size="32"/>
+				<Number name="bV4XPelsPerMeter" size="32"/>
+				<Number name="bV4YPelsPerMeter" size="32"/>
+				<Number name="bV4ClrUsed" size="32"/>
+				<Number name="bV4ClrImportant" size="32"/>
+				<Number name="bV4RedMask" size="32"/>
+				<Number name="bV4GreenMask" size="32"/>
+				<Number name="bV4BlueMask" size="32"/>
+				<Number name="bV4AlphaMask" size="32"/>
+				<Number name="bV4CSType" size="32"/>
+				<Number name="bV4YPelsPerMeter" size="32"/>
+				<Block name="bV4Endpoints" ref="CIEXYZTRIPLE"/>
+				<Number name="bV4GammaRed" size="32"/>
+				<Number name="bV4GammaGreen" size="32"/>
+				<Number name="bV4GammaBlue" size="32"/>
+			</Block>
+			<Block name="BITMAPINFOHEADER">
+				<Number name="Size" size="32" value="40" token="true">
+					<Relation type="size" of="BITMAPINFOHEADER"/>
+				</Number>
+				<Number name="biWidth" size="32"/>
+				<Number name="biHeight" size="32"/>
+				<Number name="biPlanes" size="16"/>
+				<Number name="biBitCount" size="16"/>
+				<Number name="biCompression" size="32"/>
+				<Number name="biSizeImage" size="32"/>
+				<Number name="biXPelsPerMeter" size="32"/>
+				<Number name="biYPelsPerMeter" size="32"/>
+				<Number name="biClrUsed" size="32"/>
+				<Number name="biClrImportant" size="32"/>
+			</Block>
+			<Block name="BITMAPCOREHEADER">
+				<Number name="Size" size="32" value="12" token="true">
+					<Relation type="size" of="TheBitmapInfo"/>
+				</Number>
+				<Number name="bcWidth" size="16"/>
+				<Number name="bcHeight" size="16"/>
+				<Number name="bcPlanes" size="16"/>
+				<Number name="bcBitCount" size="16"/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="BMP">
+		<Relation type="size" from="BmpSize"/>
+		<Block name="TheHeader" ref="BMPHeader"/>
+		<Block name="TheBitmapInfo" ref="BitmapInfo"/>
+		<Blob name="TheColorPallete" lengthType="calc"
+			length="int(self.find('DataOffset').getInternalValue()) - self.possiblePos"/>
+		<Blob name="TheBitmapData">
+			<Relation type="offset" from="DataOffset"/>
+		</Blob>
+	</DataModel>
+
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="BMP"/>
+				<Data name="data" fileName="samples"/>
+			</Action>
+			<Action type="close"/>
+			
+			<Action type="call" method="ScoobySnacks"/>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent">
+		<Monitor class="debugger.WindowsDebugEngine">
+			<Param name="CommandLine" value="&quot;C:\Program Files\Adobe\Reader 9.0\Reader\AcroRd32.exe&quot; fuzzed.pdf" />
+			<Param name="StartOnCall" value="ScoobySnacks" />
+		</Monitor>
+		<Monitor class="process.PageHeap">
+			<Param name="Executable" value="AcroRd32.exe"/>
+		</Monitor>
+	</Agent>
+	
+	<Test name="TheTest">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="TheState"/>
+		
+		<Publisher class="ImageBMPPublisher">
+			<Param name="fileName" value="fuzzed.bmp"/>
+			<Param name="Window" value="Acrobat" />
+			<Param name="debugger" value="true"/>
+		</Publisher>
+	</Test>
+	
+	<Run name="DefaultRun">
+		<Test ref="TheTest"/>
+		
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+	</Run>
+</Peach>

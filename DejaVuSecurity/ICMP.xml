@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="ICMPHeader">
+    <Number name="Type" size="8"/>
+    <Number name="Code" size="8"/>
+    <Number name="Checksum" size="16"/>
+    <Blob name="Remainder" length="4"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="ICMPHeader"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <Publisher class="raw.Raw">
+      <Param name="interface" value="0.0.0.0"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->

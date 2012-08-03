@@ -1,0 +1,50 @@
+
+BigEndian();
+
+typedef struct
+{
+    UINT32  LBox;
+    ubyte   TBox[4];
+    
+    if(LBox == 1)
+    {
+        UINT64  XLBox;
+        ubyte   DBox[XLBox - 16];
+    }
+    else if(LBox > 1)
+    {
+        ubyte   DBox[LBox - 8];
+    }
+    else
+    {
+        // Suck up everything!
+        ubyte   DBox[FileSize() - FTell()];
+    }
+} SubBox;
+
+typedef struct
+{
+    UINT32  LBox;
+    ubyte   TBox[4];
+    
+    if(LBox == 1)
+    {
+        UINT64  XLBox;
+        ubyte   DBox[XLBox - 16];
+    }
+    else if(LBox > 1)
+    {
+        ubyte   DBox[LBox - 8];
+    }
+    else
+    {
+        // Suck up everything!
+        ubyte   DBox[FileSize() - FTell()];
+    }
+} Box;
+
+while(FEof() == 0)
+{
+    Box boxen <optimize=false>;
+}
+

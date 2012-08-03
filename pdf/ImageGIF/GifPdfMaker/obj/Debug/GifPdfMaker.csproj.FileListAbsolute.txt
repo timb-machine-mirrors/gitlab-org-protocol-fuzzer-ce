@@ -1,0 +1,6 @@
+C:\audits\adobe\ImageGIF\GifPdfMaker\obj\Debug\ResolveAssemblyReference.cache
+C:\audits\adobe\ImageGIF\GifPdfMaker\bin\Debug\GifPdfMaker.exe
+C:\audits\adobe\ImageGIF\GifPdfMaker\bin\Debug\GifPdfMaker.pdb
+C:\audits\adobe\ImageGIF\GifPdfMaker\bin\Debug\itextsharp.dll
+C:\audits\adobe\ImageGIF\GifPdfMaker\obj\Debug\GifPdfMaker.exe
+C:\audits\adobe\ImageGIF\GifPdfMaker\obj\Debug\GifPdfMaker.pdb

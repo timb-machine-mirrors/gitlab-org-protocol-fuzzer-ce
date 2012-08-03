@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="IPv4">
+    <Relation type="size" from="TotalLength"/>
+    <Block name="Header">
+      <Relation type="size" from="HeaderLength"/>
+      <Flags size="16" endian="big">
+        <Flag name="Version" position="0" size="4" valueType="hex" value="04"/>
+        <Flag name="HeaderLength" position="4" size="4" valueType="hex">
+          <Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+        </Flag>
+        <Flag name="DSCP" position="8" size="6" valueType="hex" value="00"/>
+        <Flag name="ECN" position="14" size="2" valueType="hex" value="00"/>
+      </Flags>
+      <Number name="TotalLength" size="16" endian="big" valueType="hex">
+        <Relation type="size" of="IPv4"/>
+      </Number>
+      <Number name="Identification" size="16" endian="big" value="0"/>
+      <Flags name="Flags" size="16" endian="big">
+        <Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
+        <Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
+        <Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
+        <Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00"/>
+      </Flags>
+      <Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
+      <Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
+      <Number name="Checksum" size="16" endian="big">
+        <Fixup class="checksums.IcmpChecksumFixup">
+          <Param name="ref" value="Header"/>
+        </Fixup>
+      </Number>
+      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="00"/><!--C0 A8 20 80-->
+      <Number name="DestIP" size="32" endian="big" valueType="hex" value="FF 00 01 15"/><!--0A 00 01 15-->
+      <Blob name="Options"/>
+    </Block>
+    <Blob name="Data" valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="IPv4"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <!--<Publisher class="file.FileWriter">
+      <Param name="fileName" value="out.txt"/>
+    </Publisher>-->
+    <Publisher class="raw.RawIp">
+      <!--<Param name="interface" value="192.168.32.128"/>-->
+      <Param name="interface" value="10.0.1.21"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->

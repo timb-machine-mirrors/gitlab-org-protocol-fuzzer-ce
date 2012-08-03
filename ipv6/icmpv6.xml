@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+
+	<!--
+		ICMPv6 Profile Fuzzer
+		
+		This fuzzer targets the basic ICMPv6 protocol of AMT 6.1.
+		
+		Peach Version: 2.3.8
+		
+		Author:
+			Michael Eddington (mike@dejavusecurity.com)
+			Eric Rachner (eric@dejavusecurity.com)
+		
+	-->
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml"/>
+
+	<Import from="ipv6" import="*"/>
+	<!-- filename is ipv6.py -->
+
+	<Defaults>
+		<Number size="8" signed="false" endian="big"/>
+	</Defaults>
+
+	<!-- ======================================================================================================================= -->
+
+	<DataModel name="IPv6Address">
+		<!--
+    TODO: maybe rethink the default value here?
+    -->
+		<Blob name="AddressValue" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96"/>
+	</DataModel>
+
+
+	<!--
+  TODO: define pad1 & padN option types, then define a datamodel for crazy made-up
+  option types
+  -->
+
+
+	<DataModel name="OptionsTLV">
+		<Flags name="OptionType" size="8" endian="big">
+			<Flag name="DefaultAction" size="2" position="0" value="0"/>
+			<!-- when this is 0, we have a pad1 option; when 1, it is padN -->
+			<Flag name="OptionDataFixed" size="1" position="2" value="0"/>
+			<Flag name="OptionIDSuffix" size="5" position="3" value="1"/>
+		</Flags>
+		<!--
+      these options fields are used by hob-by-hop & dest options extension headers.
+      all extension headers must be a multiple of 8 bytes in size; the elements within
+      an extension header must be aligned on their natural size; i.e. a 2-byte element
+      is 2-byte aligned, etc.  this implies that valid options fields won't have weird
+      lengths like 6 or any odd number other than 1 or anything larger than 8, which is
+      kind of a weird constraint.
+      
+            WTF:
+      * we must make sure an OptionsTLV field's overall length is appropriate for
+      its beginning alignment.
+      * we must also make sure that the last OptionsTLV field is padded to an 8-byte
+      boundary.
+      
+      actually all of this seems wrong.  temporarily just doing a dummy option that's
+      6 bytes long and calling it good
+      -->
+		<Number name="OptionDataLen" size="8" value="4"/>
+		<Blob name="Dummy" value="frop"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_HopByHop">
+		<Number name="NextHeader" size="8" value="58">
+			<!-- WTF: how to fix this up? -->
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_HopByHop"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<Number name="HeaderLength" signed="false" size="8">
+			<Relation type="size" of="IPv6Header_HopByHop" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<Block ref="OptionsTLV" minOccurs="1" name="OptionsTLV"/>
+		<!-- WTF: somehow we have to specify that the size of the optionsTLV blocks must be padded to 8-byte boundaries -->
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_Routing">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_Routing"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<!--
+    the HeaderLength number is constrained to ensure that no odd values are generated
+    (hosts are supposed to discard these per rfc. not that that guarantees they will, i know..)
+    -->
+		<Number name="HeaderLength" signed="false" size="8" constraint="(value+1)&amp;1">
+			<Relation type="size" of="IPv6Header_Routing" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<!--
+    as of now, only a type 0 routing header is defined by IETF, so this section will
+    specify a type 0 header
+    -->
+		<Number size="8" name="RoutingType" value="0"/>
+		<!--
+    per rfc, hosts are supposed to discard packets where SegmentsLeft > the # of IPv6 addrs in the
+    header.  it might be worth considering a constraint on SegmentsLeft for that reason
+    -->
+		<Number size="8" name="SegmentsLeft" signed="false"/>
+		<!--
+    at this point we are 4 bytes into the routing header.  as with any other type of optional header,
+    the total length of the header must be divisible by 8.  the type-sepecific data section which follows
+    must therefore be of a length divisible by 8, plus 4.  this reserved field takes care of the plus 4.    
+    -->
+		<Blob valueType="hex" length="4" name="Reserved" value="00 00 00 00"/>
+		<Block ref="IPv6Address"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_Fragment">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_Fragment"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Number size="8" name="Reserved" value="0"/>
+		<Flags name="FragmentHeaderFlags" size="16" endian="big">
+			<Flag name="FragmentOffset" size="13" position="0" value="0"/>
+			<Flag name="Reserved" size="2" position="13" value="0"/>
+			<Flag name="More" size="1" position="15" value="0"/>
+		</Flags>
+		<Number size="32" endian="big" name="Identification"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6Header_DestOptions">
+		<Number name="NextHeader" size="8" value="58">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6Header_DestOptions"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Relation type="size" from="HeaderLength"/>
+		<Number name="HeaderLength" signed="false" size="8">
+			<Relation type="size" of="IPv6Header_DestOptions" expressionGet="(size*8)+1"
+				expressionSet="(size/8)-1"/>
+		</Number>
+		<Blob valueType="hex" name="dummy" value="01 04 de ad be ef"/>
+	</DataModel>
+
+
+	<DataModel name="Icmpv6_EchoRequest">
+		<Number name="Type" size="8" value="128"/>
+		<Number name="Code" size="8" value="0"/>
+		<Number name="Checksum" signed="false" size="16" endian="little">
+			<Fixup class="Icmpv6ChecksumFixup">
+				<Param name="ref" value="Icmpv6_EchoRequest"/>
+			</Fixup>
+		</Number>
+		<Number size="16" name="ID"/>
+		<Number size="16" name="Sequence"/>
+		<Blob valueType="hex" name="Data" value="de ad be ef de ad be ef"/>
+	</DataModel>
+
+
+	<DataModel name="IPv6MainDataModel">
+		<Flags name="Header" size="32" endian="big">
+			<Flag name="Version" size="4" position="0" value="6"/>
+			<Flag name="TrafficClass" size="8" position="4" value="0"/>
+			<Flag name="FlowLabel" size="20" position="12" value="0"/>
+		</Flags>
+		<Number name="PayloadLength" size="16">
+			<Relation type="size" of="Payload"/>
+		</Number>
+		<Number name="NextHeader" size="8" value="43">
+			<Fixup class="IPv6NextHeaderFixup">
+				<Param name="ref" value="IPv6MainDataModel"/>
+			</Fixup>
+			<Hint name="ValidValues" value="0;43;44;58;59;60"/>
+		</Number>
+		<Number name="HopLimit" size="8" value="10"/>
+		<!--
+        discontent virtual
+        fe80::20c:29ff:fe50:af71
+        fe 80 00 00 00 00 00 00 02 0c 29 ff fe 50 af 71
+
+        vmware gw
+        fe80::31f6:9fa4:e243:4a44
+        fe 80 00 00 00 00 00 00 31 f6 9f a4 e2 43 4a 44
+        
+        malcontent wireless
+        fe80::5883:210d:2008:d60b
+        fe 80 00 00 00 00 00 00 58 83 21 0d 20 08 d6 0b
+        
+        mike laptop
+        fe80::610a:7b10:5609:1eae
+        fe 80 00 00 00 00 00 00 61 0a 7b 10 56 09 1e ae 
+        
+        target
+        FE80::E009:3A58:8AD4:3696
+        fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96
+    -->
+		<Blob name="SourceAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 02 0c 29 ff fe 50 af 71"/>
+		<Blob name="DestinationAddress" length="16" valueType="hex"
+			value="fe 80 00 00 00 00 00 00 e0 09 3a 58 8a d4 36 96"/>
+		<Block name="Payload">
+			<Relation type="size" from="PayloadLength"/>
+
+			<Choice name="Headers" minOccurs="0" maxOccurs="10000">
+				<Block name="IPv6Header_HopByHop" ref="IPv6Header_HopByHop"/>
+				<Block name="IPv6Header_DestOptions" ref="IPv6Header_DestOptions"/>
+				<Block name="IPv6Header_Routing" ref="IPv6Header_Routing"/>
+				<Block name="IPv6Header_Fragment" ref="IPv6Header_Fragment"/>
+			</Choice>
+
+			<Block name="Icmpv6_EchoRequest" ref="Icmpv6_EchoRequest"/>
+
+			<!--
+      WTF: how are we gonna deal with the relationship between "next header" descriptors and the headers that follow?
+      addtional headers block minoccurs = 0 
+      -->
+		</Block>
+	</DataModel>
+
+	<!-- ======================================================================================================================= -->
+
+	<!-- TODO: Create state model -->
+	<StateModel name="TheState" initialState="Initial">
+
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="IPv6MainDataModel"/>
+				<Data name="DefaultIPv6PacketData">
+					<Field name="NextHeader" value="0"/>
+					<Field name="Payload.Headers[0].IPv6Header_HopByHop.NextHeader" value="58"/>
+					<Field name="Payload.Headers[1].IPv6Header_Routing.NextHeader" value="58"/>
+					<Field name="Payload.Headers[2].IPv6Header_DestOptions.NextHeader" value="58"/>
+					<!--
+          fragment stuff isn't baked yet, remote target won't respond if we can't send it a valid fragmented packet...
+          <Field name="Payload.Headers[1].IPv6Header_Fragment.NextHeader" value="58" />
+          -->
+				</Data>
+
+				<!-- <Data fileName="sample.png" /> -->
+			</Action>
+
+		</State>
+
+	</StateModel>
+
+	<Agent name="RemoteAmtAgent" location="http://127.0.0.1:9002">
+		<Import from="amt6" import="*"/>
+
+		<Monitor class="AmtSoapMonitor">
+			<Param name="url" value="http://10.0.1.222:16992/EventManagerService"/>
+			<Param name="authurl" value="http://10.0.1.222:16992"/>
+			<Param name="user" value="admin"/>
+			<Param name="password" value="Admin!98"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="TheTest">
+
+		<Agent ref="RemoteAmtAgent"/>
+		<!-- restore when ready to run for real
+    -->
+
+		<StateModel ref="TheState"/>
+
+		<!-- TODO: Configure a publisher -->
+		<Publisher class="raw.Raw6">
+			<Param name="destination" value="FE80::E009:3A58:8AD4:3696"/>
+		</Publisher>
+
+	</Test>
+
+	<!-- Configure a single run -->
+	<Run name="DefaultRun">
+
+		<!-- TODO: Change log path if needed -->
+		<Logger class="logger.Filesystem">
+			<Param name="path" value="logs"/>
+		</Logger>
+
+		<Test ref="TheTest"/>
+
+	</Run>
+
+</Peach>
+<!-- end -->

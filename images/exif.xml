@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd">
+	
+	<!-- 
+	
+	Copyright (c) Eddington and Frantz
+	
+	This is a Peach definition for the Extensible Metadata Platform (exif) which is used to store
+	metadata in variouse image formats such as JPEG and TIFF.  This definition is used by other
+	Peach definitions and it not itself a runnable fuzzer.
+	
+	This definition is based on the Exif 2.2 Standard 
+	(http://www.kodak.com/global/plugins/acrobat/en/service/digCam/exifStandard2.pdf)
+	
+	Version: $Id$
+	
+	Change log:
+	
+	2009-01-11:  Initial revision
+	
+	-->
+	
+	<!-- Import defaults for Peach instance -->
+	<Include ns="default" src="file:defaults.xml" />
+	<Include ns="pt" src="file:PeachTypes.xml" />
+	
+	<DataModel name="Exif">
+	</DataModel>
+	
+	<DataModel name="JpegApp1Body">
+		<!-- Exif Identifier code -->
+		<!-- Tiff header -->
+		<!-- 0th IFD -->
+		<!-- 0th IFD Value -->
+		<!-- 1st IFD -->
+		<!-- 1st IFD Value -->
+		<!-- 1st IFD Image Data
+			* SOI
+			* DQT
+			* DHT
+			* SOF
+			* SOS
+			* Compressed Data
+			* EOT
+		-->
+	</DataModel>
+	
+	<DataModel name="IfdTemplate">
+		<Number name="Tag" size="16" signed="false"/>
+		<Number name="Type" size="16" signed="false" isStatic="true" value="1" />
+		<Number name="Count" size="32" signed="false">
+			<Relation type="count" of="Value"/>
+		</Number>
+		<Number name="ValueOffset" size="32" signed="false">
+			<Relation type="offset" of="Value" relative="true" relativeTo="TiffHeader"/>
+		</Number>
+		
+		<Number name="Value" size="8" signed="false">
+			<Relation type="offset" from="ValueOffset"/>
+			<Relation type="count" from="Count"/>
+		</Number>
+	</DataModel>
+	
+	<DataModel name="IFD">
+		<Choice name="TypeChoice">
+			
+			<Block name="TypeByte" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="1" />
+				
+				<Number name="Value" size="8" signed="false" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</Number>
+			</Block>
+			
+			<Block name="TypeAscii" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="2" />
+				<Number name="Count" size="32" signed="false">
+					<Relation type="size" of="Value"/>
+				</Number>
+				
+				<String name="Value" nullTerminated="true">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="size" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</String>
+			</Block>
+			
+			<Block name="TypeShort" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="3" />
+				
+				<Number name="Value" size="16" signed="false" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</Number>
+			</Block>
+			
+			<Block name="TypeLong" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="4" />
+				
+				<Number name="Value" size="32" signed="false" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</Number>
+			</Block>
+			
+			<Block name="TypeRational" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="5" />
+				
+				<Block name="Value" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+					
+					<Number name="R1" size="32" signed="false"/>
+					<Number name="R2" size="32" signed="false"/>
+				</Block>
+			</Block>
+			
+			<Block name="TypeUndefinied" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="7" />
+				<Number name="Count" size="32" signed="false">
+					<Relation type="size" of="Value"/>
+				</Number>
+				
+				<Blob name="Value">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="size" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</Blob>
+			</Block>
+			
+			<Block name="TypeSlong" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="9" />
+				
+				<Number name="Value" size="8" signed="true" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+				</Number>
+			</Block>
+			
+			<Block name="TypeSRational" ref="IfdTemplate">
+				<Number name="Type" size="16" signed="false" isStatic="true" value="5" />
+				
+				<Block name="Value" minOccurs="0" maxOccurs="10000">
+					<Relation type="offset" from="ValueOffset"/>
+					<Relation type="count" from="Count"/>
+					<Placement before="ValuePlacement"/>
+					
+					<Number name="R1" size="32" signed="true"/>
+					<Number name="R2" size="32" signed="true"/>
+				</Block>
+			</Block>
+			
+		</Choice>
+		
+		<Block name="ValuePlacement" />
+	</DataModel>
+</Peach>
+<!-- end -->

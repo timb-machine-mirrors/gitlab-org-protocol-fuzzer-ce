@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach peach.xsd" version="1.0"
+	author="Adam Cecchetti">
+  <Include ns="default" src="file:defaults.xml" />
+  <Include ns="pt" src="file:PeachTypes.xml" />
+
+
+  <DataModel name="StreamInfoMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="0"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <Number name="MinBlockSize" size="16" value="16"/>
+      <Number name="MaxBlocSize" size="16" value="65535"/>
+      <Number name="MinFrameSize" size="24" value="16"/>
+      <Number name="MaxFrameSize" size="24" value="65535"/>
+      <Flags name="" size="32" >
+        <Flag name="SampleRate" position="0" size="20"/>
+        <Flag name="ChannelNumber" position="20" size="3"/>
+        <Flag name="Streams" position="23" size="5"/>
+        <Flag name="Samples" position ="28" size="4"/>
+      </Flags>
+      <Number name="samples" size="32"  />
+      <Blob name="MD5Sum">
+        <Fixup class="md5"/>    
+      </Blob>
+    </Block>    
+  </DataModel>
+  
+  <DataModel name="PaddingMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="1"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <Blob minOccurs="0" maxOccurs="1024" valueType="string" value="A"/>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="ApplicationMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="2"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <Choice>
+      <Blob name="FlacFile (ATCH)"  isStatic="true" valueType="hex" value="41 54 43 48" />
+      <Blob name="GoldWave (Cues)"  isStatic="true" valueType="hex" value="43 75 65 73" />
+      <Blob name="Cue Spli (Fica)"  isStatic="true" valueType="hex" value="46 69 63 61" />
+      <Blob name="flac tol (Ftol)"  isStatic="true" valueType="hex" value="46 74 6F 6C" />
+      <Blob name="MOTB Met (MOTB)"  isStatic="true" valueType="hex" value="4D 4F 54 42" />
+      <Blob name="MP3 Stre (MPSE)"  isStatic="true" valueType="hex" value="4D 50 53 45" /> 
+      <Blob name="MusicML  (MuML)"  isStatic="true" valueType="hex" value="4D 75 4D 4C" />
+      <Blob name="SD Riff  (Riff)"  isStatic="true" valueType="hex" value="52 49 46 46" />
+      <Blob name="SF Flac  (SFFL)"  isStatic="true" valueType="hex" value="53 46 46 4C" /> 
+      <Blob name="Sony Cr  (SONY)"  isStatic="true" valueType="hex" value="53 4F 4E 59" />
+      <Blob name="flac sqz (SQEZ)"  isStatic="true" valueType="hex" value="53 51 45 5A" />
+      <Blob name="twisted  (TtWv)"  isStatic="true" valueType="hex" value="54 74 57 76" />
+      <Blob name="Flac aif (aiff)"  isStatic="true" valueType="hex" value="61 69 66 66" />
+      <Blob name="flac img (imag)"  isStatic="true" valueType="hex" value="69 6D 61 67" />
+      <Blob name="Parseabl (peem)"  isStatic="true" valueType="hex" value="70 65 65 6D" />
+      <Blob name="QFLAC St (qfst)"  isStatic="true" valueType="hex" value="71 66 73 74" />
+      <Blob name="FLAC Rif (riff)"  isStatic="true" valueType="hex" value="72 69 66 66" />
+      <Blob name="TagTuner (tune)"  isStatic="true" valueType="hex" value="74 75 6E 65" />
+      <Blob name="XBAT     (xbat)"  isStatic="true" valueType="hex" value="78 62 61 74" />
+      <Blob name="xmcd     (xmcd)"  isStatic="true" valueType="hex" value="78 6D 63 64" />
+    </Choice>
+    <Blob value="Type"/>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="SeekTableMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="3"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <Block name="SeekPoint" minOccurs="1" maxOccurs="1024">
+        <Number name="SampleNumber" size="64"/>
+        <Number name="Offset" size="64" />
+        <Number name="NumberofSamples" size="16"/>
+       </Block>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="VorbisCommentMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="4"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      
+    </Block>
+  </DataModel>
+
+
+  <DataModel name="CuesheetTrackIndexModel">
+    <Number name="offset" size="64" />
+    <Number name="index Point" size="8" value="0"/>
+    <Number name="padding" size="24" value="0" isStatic="true" />
+  </DataModel>
+
+  <DataModel name="CuesheetTrackModel">
+    <Number name="TrackoffSet" size="64"/>
+    <Number name="Track Number" size="8"/>
+    <String name="TracISCR" length="12" value=""  />
+    <Flags size="8" name="AudioSettings">
+      <Flag name="Track Type" position="0" size="1"/>
+      <Flag name="PreEmphasisFlag" position="1" size="1"/>
+    </Flags>
+    <Blob isStatic="true" value="00 00 00 00 00 00 00 00 00 00 00 00 00"/>
+    <Block minOccurs="1" maxOccurs="1024" ref="CuesheetTrackIndexModel"/> 
+  </DataModel>
+  
+  <DataModel name="CuesheetMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="5"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <String name="Media Catalog Number" length="128" padCharacter="\0" nullTerminated="true" />
+      <Number name="LeadInSampleNumber" size="64"/>
+      <Number name="Compact Disc" size="8" endian="big"/>
+      <String name="Reserved" length="258" isStatic="true" padCharacter="\0" />
+      <Number name="MaxNumTracks" size="8"/>
+      <Block name="cuesheets" ref="CueSheetTrackIndexModel" minOccurs="1" maxOccurs="1"/>
+    </Block>   
+  </DataModel>
+  
+  <DataModel name="PictureMetaDataModel">
+    <Number name="Type" size="8" isStatic="true" value="6"/>
+    <Number name="Length" size="24" signed="false">
+      <Relation type="size" of="Data"/>
+    </Number>
+    <Block name="Data">
+      <Choice name="PictureType">
+        <Number name="Other   "  size="32" value="0"  isStatic="true" />
+        <Number name="PNG ICON"  size="32" value="1"  isStatic="true" />
+        <Number name="OtherICON" size="32" value="2"  isStatic="true" />
+        <Number name="Cover fnt" size="32" value="3"  isStatic="true" />
+        <Number name="Cover bck" size="32" value="4"  isStatic="true" />
+        <Number name="Leaflet  " size="32" value="5"  isStatic="true" />
+        <Number name="Media    " size="32" value="6"  isStatic="true" />
+        <Number name="Lead arti" size="32" value="7"  isStatic="true" />
+        <Number name="Artist   " size="32" value="8"  isStatic="true" />
+        <Number name="Contuctor" size="32" value="9"  isStatic="true" />      
+        <Number name="Band/Orch" size="32" value="10" isStatic="true" />      
+        <Number name="Composer " size="32" value="11" isStatic="true" />      
+        <Number name="Lyricst  " size="32" value="12" isStatic="true" />
+        <Number name="Recording" size="32" value="13" isStatic="true" />
+        <Number name="During re" size="32" value="14" isStatic="true" />      
+        <Number name="During pe" size="32" value="15" isStatic="true" />      
+        <Number name="Movie/vid" size="32" value="16" isStatic="true" />      
+        <Number name="colorfish" size="32" value="17" isStatic="true" />
+        <Number name="Illustrat" size="32" value="18" isStatic="true" />
+        <Number name="Band/arti" size="32" value="19" isStatic="true" />      
+        <Number name="Publisher" size="32" value="20" isStatic="true" />      
+       </Choice>
+      <Number name="MimeLength" size="32">
+        <Relation type="size" of="MimeType"/> 
+      </Number>
+      <String name="MimeType"/>
+      <Number name="DescLength" size="32">
+        <Relation type="size" of="Description"/>
+      </Number>
+      <String name="Description"/>
+      <Number name="PixWidth" size="32"/>
+      <Number name="PixHeight" size="32"/>
+      <Number name="ColorDepth" size="32"/>
+      <Number name="IndexedColor" size="32"/>
+      <Number name="PictureLength" size="32"/>
+      <Blob name="PictureData" />
+    </Block> 
+  </DataModel>
+
+  <DataModel name="FrameHeaderModel">
+    
+  </DataModel>
+  
+  <DataModel name="SubFrameModel">
+    
+  </DataModel>
+
+  <DataModel name="SubFrameHeaderModel">
+    
+  </DataModel>
+
+  <DataModel name="SubFrameConstantModel">
+    
+  </DataModel>
+
+  <DataModel name="SubFrameFixedModel">
+    
+  </DataModel>
+
+  <DataModel name="SubFrameLPCModel">
+    
+  </DataModel>
+  <DataModel name="SubFrameVerbatimModel">
+    
+  </DataModel>
+
+  <DataModel name="ResidualModel">
+    
+  </DataModel>
+
+  <DataModel name="ResidualCodingMethodPartitionedRice">
+    
+  </DataModel>
+
+  <DataModel name="RicePartitionModel">
+    
+  </DataModel>
+
+  <DataModel name="ResidualCodingMethodPartitionedRice2Model">
+    
+  </DataModel>
+
+  <DataModel name="Rice2Partition">
+    
+  </DataModel>
+  
+  <DataModel name="FramePaddingModel">
+    
+  </DataModel>
+
+  <DataModel name="FrameFooterModel">
+    <Number size="16" name="CRC">
+      <Fixup class="checksums.IcmpChecksumFixup"/>
+    </Number>
+    
+  </DataModel>
+  
+  <DataModel name="FrameModel">
+    <Block name="FrameData" >
+     <Block name="FrameHeader" ref="FrameHeaderModel"/>
+      <Block name="SubFrame" ref="SubFrameModel"/>
+      <Block name="Padding" ref="FramePaddingModel"/>
+    </Block>
+    <Block name="FooterCRC" ref="FrameFooterModel"/>
+  </DataModel>
+  
+  <DataModel name="MetaDataBlockChoiceModel">
+    <Choice>
+      <Block name="StreamInfo" ref="StreamInfoMetaDataModel"/>
+      <Block name="Padding" ref="PaddingMetaDataModel"/>
+      <Block name="Application" ref="ApplicationMetaDataModel"/>
+      <Block name="SeekTable" ref="SeekTableMetaDataModel"/>
+      <Block name="VorbisComment" ref="VorbisCommentMetaDataModel"/>
+      <Block name="Cuesheet" ref="CuesheetMetaDataModel"/>
+      <Block name="Picture" ref="PictureMetaDataModel"/>
+    </Choice>
+  </DataModel> 
+  
+  <DataModel name="FlacStream">
+    <Blob name="header" valueType="hex" isStatic="true" value="66 4C 61 43"/>
+    <Block name="MetadataStreamInfo" minOccurs="1" maxOccurs="1" ref="StreamInfoModel"/>
+    <Block name="MetaDataBlocks" minOccurs="0" maxOccurs="1024" ref="MetaDataBlockChoiceModel"/>
+    <Block name="Frame" minOccurs="0" maxOccurs="1024" ref="FrameModel"/>
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial">
+    <State name="Initial">
+      <Action name="SendValue1" type="output">
+        <DataModel ref="FlacStream" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="LocalAgent" location="http://127.0.0.1:9000">
+    <Monitor class="debugger.WindowsAppVerifier">
+      <Param name="Application" value="TODO.exe" />
+      <Param name="Stops" value="Heaps:10" />
+    </Monitor>
+    <Monitor class="process.Process">
+      <Param name="Command" value="TODO"/>
+      <Param name="FaultOnEarlyExit" value="false"/>
+    </Monitor>
+    <Monitor class="process.PageHeap">
+      <Param name="Executable" value="TODO.exe"/>
+    </Monitor>
+  </Agent>
+
+  <Test name="TheTest">
+    <Agent ref="LocalAgent" />
+
+    <StateModel ref="State"/>
+    <Publisher class="File.fileWriter">
+      <Param name="fileName" value="fuzzed.flac" /> 
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest" />
+    <Logger class="logger.Filesystem">
+      <Param name="path" value="c:\peach\logtest" />
+    </Logger>
+  </Run>
+
+</Peach>
+<!-- end -->
+

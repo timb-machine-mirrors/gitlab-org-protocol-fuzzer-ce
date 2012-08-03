@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="TCPHeader">
+    <Relation type="size" from="DataOffset"/>
+    <Number name="SrcPort" size="16" endian="big"/>
+    <Number name="DestPort" size="16" endian="big"/>
+    <Number name="SequenceNumber" size="32" endian="big"/>
+    <Number name="AcknowledgmentNumber" size="32" endian="big"/>
+    <Flags name="DataOffset" size="4" endian="big">
+      <Relation type="size" of="TCPHeader" expressionGet="size * 4" expressionSet="size / 4"/>
+    </Flags>
+    <Flags name="ControlBits" size="12" endian="big">
+      <Flag name="Reserved" position="0" size ="3"/>
+      <Flag name="NS" position="3" size="1"/>
+      <Flag name="CWR" position="4" size="1"/>
+      <Flag name="ECE" position="5" size="1"/>
+      <Flag name="URG" position="6" size="1"/>
+      <Flag name="ACK" position="7" size="1"/>
+      <Flag name="PSH" position="8" size="1"/>
+      <Flag name="RST" position="9" size="1"/>
+      <Flag name="SYN" position="10" size="1"/>
+      <Flag name="FIN" position="11" size="1"/>
+    </Flags>
+    <Number name="WindowSize" size="16" endian="big"/>
+    <Number name="CheckSum" size="16" endian="big"/>
+    <Number name="UrgentPointer" size="16" endian="big"/>
+    <Blob name="OptionsAndPadding"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="TCPHeader"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <Publisher class="raw.Raw">
+      <Param name="interface" value="0.0.0.0"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->

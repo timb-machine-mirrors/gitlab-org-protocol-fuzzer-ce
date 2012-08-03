@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach C:\Users\StaBByWork\Desktop\Peach3.0\Peach.Core\peach.xsd">
+
+  <Include ns="default" src="file:defaults.xml"/>
+
+  <DataModel name="EthernetFrame">
+    <Blob name="MACDest" valueType="hex" length="6" value="00 50 56 F1 C1 53"/>
+    <Blob name="MACSrc" valueType="hex" length="6" value="00 0C 29 A3 9C B8"/>
+    <Block name="802_1Q_Tag">
+      <Blob name="TPID" valueType="hex" length="2" value="81 00"/>
+      <Flags size="16" endian="big">
+        <Flag name="Priority" position="0" size="3" valueType="hex" value="00"/>
+        <Flag name="CFI" position="3" size="1" valueType="hex" value="00"/>
+        <Flag name="VID" position="4" size="12" valueType="hex" value="20"/>
+      </Flags>
+    </Block>
+    <Blob name="Ethertype" valueType="hex" length="2" value="08 00"/>
+    <Blob name="Payload" valueType="hex" value="4510007c693e40004006D05Bc0a82080FFa820010016cb4dadfa98d5ed1474d050180566d6210000d0e6de52f745c5e34863db444c430df7ec5c3ac3fdabdd60534ec014a20077204e9874700e680b0bb540be3b7e8b5c6585d19e754c4e156188fc0f84488723993f5bae78f47c0466184544efc579a5f9fdec2242"/>
+    <Number name="CRC" size="32" endian="big">
+      <Fixup class="checksums.Crc32Fixup">
+        <Param name="ref" value="EthernetFrame"/>
+      </Fixup>
+    </Number>
+    <Blob name="Interframe" valueType="hex" length="12"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="EthernetFrame"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="TheTest">
+    <StateModel ref="TheState"/>
+    <Publisher class="raw.RawEther">
+      <Param name="interface" value="eth0"/>
+    </Publisher>
+  </Test>
+
+  <Run name="DefaultRun">
+    <Test ref="TheTest"/>
+  </Run>
+
+</Peach>
+<!-- end -->
