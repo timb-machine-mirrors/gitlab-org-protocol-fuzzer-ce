@@ -19,34 +19,21 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test
 {
+	[SetUpFixture]
 	class TestBase
 	{
 		[SetUp]
 		public void Initialize()
 		{
-			// Step 1. Create configuration object 
-			LoggingConfiguration config = new LoggingConfiguration();
-
-			// Step 2. Create targets and add them to the configuration 
 			ColoredConsoleTarget consoleTarget = new ColoredConsoleTarget();
+			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+
+			LoggingConfiguration config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			FileTarget fileTarget = new FileTarget();
-			config.AddTarget("file", fileTarget);
+			LoggingRule rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
+			config.LoggingRules.Add(rule);
 
-			// Step 3. Set target properties 
-			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-			fileTarget.FileName = "c:\\peach3.txt";
-			fileTarget.Layout = "${message}";
-
-			// Step 4. Define rules
-			LoggingRule rule1 = new LoggingRule("*", LogLevel.Debug, consoleTarget);
-			config.LoggingRules.Add(rule1);
-
-			LoggingRule rule2 = new LoggingRule("*", LogLevel.Debug, fileTarget);
-			config.LoggingRules.Add(rule2);
-
-			// Step 5. Activate the configuration
 			LogManager.Configuration = config;
 		}
 	}
