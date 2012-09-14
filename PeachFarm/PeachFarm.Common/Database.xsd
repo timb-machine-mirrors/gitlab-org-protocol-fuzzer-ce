@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Database"
+    targetNamespace="http://phed.org/2012/PeachFarm"
+    elementFormDefault="qualified"
+    xmlns="http://phed.org/2012/PeachFarm"
+    xmlns:mstns="http://phed.org/2012/PeachFarm"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="Run" type="Run" />
+
+  <xs:complexType name="Run">
+    <xs:sequence>
+      <xs:element name="LogFiles" maxOccurs="1" minOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LogFile" type="LogFile" maxOccurs="unbounded" minOccurs="0" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="RunName" type="xs:string" use="required" />
+    <xs:attribute name="ComputerName" type="xs:string" use="required" />
+    <xs:attribute name="CommandLine" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="LogFile">
+    <xs:attribute name="FileName" />
+  </xs:complexType>
+</xs:schema>
