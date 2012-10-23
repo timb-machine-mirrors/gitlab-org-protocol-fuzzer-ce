@@ -28,52 +28,45 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.IO;
 
-namespace Peach.Core
+using NUnit.Framework;
+using NUnit.Framework.Constraints;
+
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
+using Peach.Core.IO;
+
+namespace Peach.Core.Test.Analyzers
 {
-	/// <summary>
-	/// Unrecoverable error.  Causes Peach to exit with an error
-	/// message, but no stack trace.
-	/// </summary>
-	public class PeachException : ApplicationException
-	{
-		public PeachException(string message, params object[] args)
-			: base(string.Format(message, args))
-		{
-		}
-	}
-
-	/// <summary>
-	/// Thrown to cause the Peach Engine to re-run
-	/// the same test iteration.
-	/// </summary>
-	public class RedoIterationException : ApplicationException
-	{
-	}
-
-	/// <summary>
-	/// Thrown to stop current iteration and move to next.
-	/// </summary>
-	public class SoftException : ApplicationException
-	{
-        public SoftException()
-            : base()
+    [TestFixture]
+    class XmlAnalyzerTests
+    {
+        [Test]
+        public void BasicTest()
         {
-        }
+            string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+                "	<DataModel name=\"TheDataModel\">" +
+                "       <String value=\"&lt;Root&gt;&lt;Element1 attrib1=&quot;Attrib1Value&quot; /&gt;&lt;/Root&gt;\"> "+
+			    "           <Analyzer class=\"Xml\" /> " +
+		        "       </String>"+
+                "	</DataModel>" +
+                "</Peach>";
 
-        public SoftException(Exception innerException) : base("SoftExeption", innerException)
-        {
-        }
-	}
+            PitParser parser = new PitParser();
+            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-	/// <summary>
-	/// Similar to SoftException but used by state model
-	/// path code.
-	/// </summary>
-	public class PathException : ApplicationException
-	{
-	}
+            Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Dom.XmlElement);
+
+            var elem1 = dom.dataModels["TheDataModel"][0] as Dom.XmlElement;
+
+            Assert.AreEqual("Root", elem1.elementName);
+        }
+    }
 }
 
 // end
