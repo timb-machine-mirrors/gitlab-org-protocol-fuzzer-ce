@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-using Peach.Core.Language.DotNet;
+using Peach.Enterprise.Language.DotNet;
 
 namespace PeachAssemblyFuzzer
 {
