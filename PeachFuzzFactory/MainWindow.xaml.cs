@@ -70,8 +70,9 @@ namespace PeachFuzzFactory
 		{
 			try
       {
-        #region PitEditor
-        pitEditor.OpenPitFile(fileName);
+        #region Pit Editor
+        pitEditor.LoadPitFile(fileName);
+
         #endregion
 
         #region Xml Editor
@@ -82,6 +83,8 @@ namespace PeachFuzzFactory
 				using(Stream fin = File.OpenRead(fileName))
 				{
 					dom = parser.asParser(new Dictionary<string, object>(), fin);
+
+
 				}
 
 				XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
@@ -257,7 +260,7 @@ namespace PeachFuzzFactory
       {
         try
         {
-          pitEditor.SavePitFile(sfd.OpenFile());
+          pitEditor.SavePitFile(sfd.FileName);
         }
         catch (Exception ex)
         {
