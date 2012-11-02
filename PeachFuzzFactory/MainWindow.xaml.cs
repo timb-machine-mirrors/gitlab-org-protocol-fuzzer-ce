@@ -25,6 +25,7 @@ using ActiproSoftware.Windows.Controls.PropertyGrid;
 using ActiproSoftware.Windows.Controls.SyntaxEditor.EditActions;
 using ActiproSoftware.Text.Languages.Xml;
 using ActiproSoftware.Text.Languages.Xml.Implementation;
+using Microsoft.Win32;
 
 namespace PeachFuzzFactory
 {
@@ -68,14 +69,19 @@ namespace PeachFuzzFactory
 		protected void LoadFile(string fileName)
 		{
 			try
-			{
-				this.tempPitFileName = fileName;
+      {
+        #region PitEditor
+        pitEditor.OpenPitFile(fileName);
+        #endregion
+
+        #region Xml Editor
+        this.tempPitFileName = fileName;
 				PitParser parser = new PitParser();
 				Dom dom;
 				
 				using(Stream fin = File.OpenRead(fileName))
 				{
-					dom = parser.asParser(new Dictionary<string, string>(), fin);
+					dom = parser.asParser(new Dictionary<string, object>(), fin);
 				}
 
 				XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
@@ -96,6 +102,8 @@ namespace PeachFuzzFactory
 					DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
 
 				Title = string.Format(windowTitle, fileName);
+
+        #endregion
 			}
 			catch (Exception ex)
 			{
@@ -120,7 +128,7 @@ namespace PeachFuzzFactory
 				using (Stream fin = File.OpenRead(tempPitFileName))
 				{
 					parser = new PitParser();
-					dom = parser.asParser(new Dictionary<string, string>(), fin);
+					dom = parser.asParser(new Dictionary<string, object>(), fin);
 				}
 
 				string dataModelName = crackerSelectedDataModel.name;
@@ -241,7 +249,22 @@ namespace PeachFuzzFactory
 
 		private void ButtonSavePit_Click(object sender, RoutedEventArgs e)
 		{
-			MessageBox.Show("Not implemented yet.");
+      SaveFileDialog sfd = new SaveFileDialog();
+      sfd.Filter = "Pit Files (*.xml)|*.xml";
+      sfd.DefaultExt = "xml";
+
+      if (sfd.ShowDialog() == true)
+      {
+        try
+        {
+          pitEditor.SavePitFile(sfd.OpenFile());
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show("Could not save file. Reason: " + ex.Message);
+        }
+      }
+			//MessageBox.Show("Not implemented yet.");
 		}
 
 		private void ButtonSavePitAs_Click(object sender, RoutedEventArgs e)
