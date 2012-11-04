@@ -19,10 +19,10 @@ namespace PeachFarm.Controller
     {
       if (Environment.UserInteractive)
       {
-        Console.WriteLine();
-        Console.WriteLine("] Peach Farm - Controller");
-        Console.WriteLine("] Copyright (c) Deja vu Security\n");
-        Console.WriteLine();
+        System.Console.WriteLine();
+        System.Console.WriteLine("] Peach Farm - Controller");
+        System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
+        System.Console.WriteLine();
 
         PeachFarmServer server = null;
         try
@@ -30,8 +30,8 @@ namespace PeachFarm.Controller
           server = new PeachFarmServer();
           if (server.IsOpen)
           {
-            Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
-            Console.ReadLine();
+            System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
+            System.Console.ReadLine();
           }
           server.Close();
         }

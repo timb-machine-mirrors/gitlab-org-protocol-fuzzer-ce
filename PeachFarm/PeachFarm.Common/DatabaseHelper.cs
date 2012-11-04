@@ -50,7 +50,10 @@ namespace PeachFarm.Common
 
       foreach (Run run in cursor)
       {
-        if ((commandLineSearch.Length == 0) || (run.CommandLine.IndexOf(commandLineSearch) >= 0))
+        // Peach 2
+        //if ((commandLineSearch.Length == 0) || (run.CommandLine.IndexOf(commandLineSearch) >= 0))
+
+        if ((commandLineSearch.Length == 0) || (run.PitFilePath.IndexOf(commandLineSearch) >= 0))
         {
           foreach (LogFile file in run.LogFiles)
           {

@@ -12,8 +12,9 @@
     <xs:all>
       <!--
       <xs:element name="PitXml" type="xs:string" />
-      -->
       <xs:element name="CommandLine" type="xs:string" maxOccurs="1" minOccurs="1" />
+      -->
+      <xs:element name="PitFilePath" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
     <xs:attribute name="ClientCount" type="xs:int" use="required" />
     <xs:attribute name="IPAddress" type="xs:string" use="required" />
@@ -51,7 +52,10 @@
   <xs:element name="Heartbeat" type="Heartbeat" />
   <xs:complexType name="Heartbeat">
     <xs:all>
+      <!--
       <xs:element name="CommandLine" type="xs:string" maxOccurs="1" minOccurs="1" />
+      -->
+      <xs:element name="PitFilePath" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
     <xs:attribute name="ComputerName" type="xs:string" use="required" />

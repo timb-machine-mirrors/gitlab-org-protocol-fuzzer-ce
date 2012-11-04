@@ -31,7 +31,7 @@ namespace PeachFarm.Common.Messages
 
     private string computerNameField;
 
-    private string commandLineField;
+    private string pitFilePathField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -81,15 +81,15 @@ namespace PeachFarm.Common.Messages
     }
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public string CommandLine
+    public string PitFilePath
     {
       get
       {
-        return this.commandLineField;
+        return this.pitFilePathField;
       }
       set
       {
-        this.commandLineField = value;
+        this.pitFilePathField = value;
       }
     }
 
@@ -497,7 +497,7 @@ namespace PeachFarm.Common.Messages
   public partial class StartPeachRequest
   {
 
-    private string commandLineField;
+    private string pitFilePathField;
 
     private int clientCountField;
 
@@ -509,15 +509,15 @@ namespace PeachFarm.Common.Messages
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
-    public string CommandLine
+    public string PitFilePath
     {
       get
       {
-        return this.commandLineField;
+        return this.pitFilePathField;
       }
       set
       {
-        this.commandLineField = value;
+        this.pitFilePathField = value;
       }
     }
 
@@ -1208,7 +1208,7 @@ namespace PeachFarm.Common.Messages
   public partial class Heartbeat
   {
 
-    private string commandLineField;
+    private string pitFilePathField;
 
     private string errorMessageField;
 
@@ -1222,15 +1222,15 @@ namespace PeachFarm.Common.Messages
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
-    public string CommandLine
+    public string PitFilePath
     {
       get
       {
-        return this.commandLineField;
+        return this.pitFilePathField;
       }
       set
       {
-        this.commandLineField = value;
+        this.pitFilePathField = value;
       }
     }
 

@@ -19,8 +19,11 @@
       </xs:element>
     </xs:sequence>
     <xs:attribute name="RunName" type="xs:string" use="required" />
-    <xs:attribute name="ComputerName" type="xs:string" use="required" />
+    <xs:attribute name="ComputerName" type="xs:string" use="required" /> 
+    <!--
     <xs:attribute name="CommandLine" type="xs:string" use="required" />
+    -->
+    <xs:attribute name="PitFilePath" type="xs:string" use="required" />
   </xs:complexType>
 
   <xs:complexType name="LogFile">
