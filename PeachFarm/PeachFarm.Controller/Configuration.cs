@@ -6,7 +6,7 @@ using System.Configuration;
 
 namespace PeachFarm.Controller.Configuration
 {
-  public class ServerSection : ConfigurationSection
+  public class ControllerSection : ConfigurationSection
   {
     [ConfigurationProperty(Constants.Output)]
     public Output Output
@@ -15,11 +15,11 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.Output] = value; }
     }
 
-    [ConfigurationProperty(Constants.ServerHost)]
-    public ServerHost ServerHost
+    [ConfigurationProperty(Constants.Controller)]
+    public Controller ServerHost
     {
-      get { return (ServerHost)this[Constants.ServerHost]; }
-      set { this[Constants.ServerHost] = value; }
+      get { return (Controller)this[Constants.Controller]; }
+      set { this[Constants.Controller] = value; }
     }
 
     [ConfigurationProperty(Constants.MongoDb)]
@@ -88,7 +88,7 @@ namespace PeachFarm.Controller.Configuration
     }
   }
 
-  public class ServerHost : ConfigurationElement
+  public class Controller : ConfigurationElement
   {
     [ConfigurationProperty(Constants.IpAddress)]
     public string IpAddress
@@ -112,7 +112,7 @@ namespace PeachFarm.Controller.Configuration
     public const string Output = "Output";
     public const string OutputType = "type";
 
-    public const string ServerHost = "ServerHost";
+    public const string Controller = "Controller";
     public const string IpAddress = "ipAddress";
   }
 

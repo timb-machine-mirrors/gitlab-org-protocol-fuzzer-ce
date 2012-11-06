@@ -7,14 +7,14 @@ namespace PeachFarm.Common
 {
   public static class QueueNames
   {
-    public static string EXCHANGE_CONTROLLER = "";
-    public static string QUEUE_CONTROLLER = "peachfarm.controller.{0}";
+    public static readonly string EXCHANGE_CONTROLLER = "";
+    public static readonly string QUEUE_CONTROLLER = "peachfarm.controller.{0}";
 
-    public static string EXCHANGE_ADMIN = "";
-    public static string QUEUE_ADMIN = "peachfarm.controller.{0}";
+    public static readonly string EXCHANGE_ADMIN = "";
+    public static readonly string QUEUE_ADMIN = "peachfarm.admin.{0}";
 
-    public static string EXCHANGETYPE_NODE = "fanout";
-    public static string EXCHANGE_NODE = "peachfarm.node";
-    public static string QUEUE_NODE = "peachfarm.node.{0}";
+    public static readonly string EXCHANGETYPE_NODE = "fanout";
+    public static readonly string EXCHANGE_NODE = "peachfarm.node";
+    public static readonly string QUEUE_NODE = "peachfarm.node.{0}";
   }
 }

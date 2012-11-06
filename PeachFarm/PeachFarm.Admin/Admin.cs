@@ -239,8 +239,8 @@ namespace PeachFarm.Admin
       IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
       string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
-      serverQueueName = String.Format("peach.server.{0}", ServerHostName);
-      adminQueueName = String.Format("peach.admin.{0}", ipAddress);
+      serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
+      adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
 
       //server queue
       modelSend.QueueDeclare(serverQueueName, true, false, false, null);
