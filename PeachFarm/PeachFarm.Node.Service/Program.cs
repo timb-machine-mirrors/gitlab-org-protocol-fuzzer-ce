@@ -23,7 +23,7 @@ namespace PeachFarm.Node.Service
       System.Console.WriteLine();
 
       #region initializing and starting node
-      peachFarmNode = new PeachFarmNode(args[0]);
+      peachFarmNode = new PeachFarmNode();
       peachFarmNode.StatusChanged += new EventHandler<StatusChangedEventArgs>(peachFarmNode_StatusChanged);
       peachFarmNode.StartNode();
       #endregion

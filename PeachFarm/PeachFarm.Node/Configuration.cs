@@ -25,6 +25,7 @@ namespace PeachFarm.Node.Configuration
 
   public class Output : ConfigurationElement
   {
+    [ConfigurationProperty(Constants.OutputType)]
     public OutputType OutputType
     {
       get { return (OutputType)this[Constants.OutputType]; }
