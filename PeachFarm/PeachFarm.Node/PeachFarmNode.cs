@@ -606,8 +606,19 @@ namespace PeachFarm.Node
       #endregion
 
       #region Peach 3
+      //Provider=SQLNCLI10.1;
+      string sqlconn = "Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=PeachFarmReporting;Data Source=dejaapps;";
+      DataAccess.EntitiesModel dataAccess = new DataAccess.EntitiesModel(sqlconn);
+      DataAccess.Job job = new DataAccess.Job();
+      job.StartDate = DateTime.Now;
+      job.Status = "JobStarting";
+      job.LastStatusDate = job.StartDate;
+      dataAccess.Add(job);
+      dataAccess.SaveChanges();
+
       Dictionary<string, Peach.Core.Variant> args = new Dictionary<string,Peach.Core.Variant>();
-      args.Add("SqlConnectionString", new Peach.Core.Variant("Provider=SQLNCLI10.1;Integrated Security=SSPI;Persist Security Info=False;User ID=\"\";Initial Catalog=PeachFarmReporting;Data Source=dejaapps;Initial File Name=\"\";Server SPN=\"\""));
+      args.Add("SqlConnectionString", new Peach.Core.Variant(sqlconn));
+      args.Add("JobID", new Peach.Core.Variant(job.Id));
       PeachFarmReportingLogger logger = new PeachFarmReportingLogger(args);
 
       peach = new Peach.Core.Engine(logger);
@@ -636,6 +647,8 @@ namespace PeachFarm.Node
       Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
       config.pitFile = filename;
       config.debug = false;
+      config.runName = "TODO";
+
 
       peach.startFuzzing(dom, config);
     }
