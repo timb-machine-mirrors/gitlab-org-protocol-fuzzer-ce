@@ -72,41 +72,41 @@ namespace PeachFuzzFactory
       {
         #region Pit Editor
         pitEditor.LoadPitFile(fileName);
-
+		PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
         #endregion
 
-        #region Xml Editor
-        this.tempPitFileName = fileName;
-				PitParser parser = new PitParser();
-				Dom dom;
+		//#region Xml Editor
+		//this.tempPitFileName = fileName;
+		//        PitParser parser = new PitParser();
+		//        Dom dom;
 				
-				using(Stream fin = File.OpenRead(fileName))
-				{
-					dom = parser.asParser(new Dictionary<string, object>(), fin);
+		//        using(Stream fin = File.OpenRead(fileName))
+		//        {
+		//            dom = parser.asParser(new Dictionary<string, object>(), fin);
 
 
-				}
+		//        }
 
-				XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
-				using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
-				{
-					schemaResolver.LoadSchemaFromStream(stream);
-				}
+		//        XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+		//        using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
+		//        {
+		//            schemaResolver.LoadSchemaFromStream(stream);
+		//        }
 
-				xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
-				xmlEditor.Document.LoadFile(fileName);
+		//        xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+		//        xmlEditor.Document.LoadFile(fileName);
 
-				var models = new List<DesignModel>();
-				models.Add(new DesignPeachModel(dom));
-				DesignerTreeView.ItemsSource = models;
+		//        var models = new List<DesignModel>();
+		//        models.Add(new DesignPeachModel(dom));
+		//        //DesignerTreeView.ItemsSource = models;
 
-				DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
-				if (dom.dataModels.Count > 0)
-					DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
+		//        DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
+		//        if (dom.dataModels.Count > 0)
+		//            DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
 
-				Title = string.Format(windowTitle, fileName);
+		//        Title = string.Format(windowTitle, fileName);
 
-        #endregion
+		//#endregion
 			}
 			catch (Exception ex)
 			{
@@ -189,29 +189,29 @@ namespace PeachFuzzFactory
 			crackMap[element] = new CrackModel(element, (int)data.TellBytes(), 0);
 		}
 
-		private void DesignerTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-		{
-			DesignPropertyGrid.Items.Clear();
+		//private void DesignerTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+		//{
+		//    DesignPropertyGrid.Items.Clear();
 
-			if (!(DesignerTreeView.SelectedItem is DesignDataElementModel))
-				return;
+		//    if (!(DesignerTreeView.SelectedItem is DesignDataElementModel))
+		//        return;
 
-			DesignDataElementModel model = (DesignDataElementModel)DesignerTreeView.SelectedItem;
-			foreach (Attribute attribute in model.DataElement.GetType().GetCustomAttributes(true))
-			{
-				if (attribute is ParameterAttribute)
-				{
-					var item = new PropertyGridPropertyItem();
-					item.Name = ((ParameterAttribute)attribute).name;
-					item.ValueName = ((ParameterAttribute)attribute).name;
-					item.Value = GetValue(model.DataElement, ((ParameterAttribute)attribute).name);
-					item.Description = ((ParameterAttribute)attribute).description;
-					item.ValueType = ((ParameterAttribute)attribute).type;
+		//    DesignDataElementModel model = (DesignDataElementModel)DesignerTreeView.SelectedItem;
+		//    foreach (Attribute attribute in model.DataElement.GetType().GetCustomAttributes(true))
+		//    {
+		//        if (attribute is ParameterAttribute)
+		//        {
+		//            var item = new PropertyGridPropertyItem();
+		//            item.Name = ((ParameterAttribute)attribute).name;
+		//            item.ValueName = ((ParameterAttribute)attribute).name;
+		//            item.Value = GetValue(model.DataElement, ((ParameterAttribute)attribute).name);
+		//            item.Description = ((ParameterAttribute)attribute).description;
+		//            item.ValueType = ((ParameterAttribute)attribute).type;
 
-					DesignPropertyGrid.Items.Add(item);
-				}
-			}
-		}
+		//            DesignPropertyGrid.Items.Add(item);
+		//        }
+		//    }
+		//}
 
 		private string GetValue(DataElement elem, string property)
 		{
@@ -371,6 +371,11 @@ namespace PeachFuzzFactory
 				crackerSelectedDataModel = e.AddedItems[0] as DataModel;
 			else
 				crackerSelectedDataModel = null;
+		}
+
+		private void TabbedMdiContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			// When we switch from designer to editor, save and load.  Ditto in reverse.  And with hex editor.
 		}
 	}
 }
