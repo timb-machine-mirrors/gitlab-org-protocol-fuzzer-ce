@@ -91,33 +91,33 @@
 		<docking:DockSite Grid.Row="1">
 			<docking:SplitContainer>
 
-				<docking:SplitContainer Orientation="Vertical">
+			<!--	<docking:SplitContainer Orientation="Vertical">
 					<docking:ToolWindowContainer>
 						<docking:ToolWindow Title="Design">
 							<TreeView x:Name="DesignerTreeView" SelectedItemChanged="DesignerTreeView_SelectedItemChanged">
 							</TreeView>
 						</docking:ToolWindow>
-				</docking:ToolWindowContainer>
+					</docking:ToolWindowContainer>
 					<docking:ToolWindowContainer>
 						<docking:ToolWindow Title="Properties">
 							<propgrid:PropertyGrid x:Name="DesignPropertyGrid"/>
 						</docking:ToolWindow>
 					</docking:ToolWindowContainer>
-					</docking:SplitContainer>
+				</docking:SplitContainer>-->
 
-						<docking:Workspace>
+				<docking:Workspace>
 					<docking:TabbedMdiHost>
-						<docking:TabbedMdiContainer>
-              <docking:DocumentWindow Title="Pit Editor">
-                <Grid>
-                  <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="10*"/>
-                  </Grid.RowDefinitions>
+						<docking:TabbedMdiContainer SelectionChanged="TabbedMdiContainer_SelectionChanged">
+							<docking:DocumentWindow x:Name="PitEditorTab" Title="Pit Editor">
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto"/>
+										<RowDefinition Height="10*"/>
+									</Grid.RowDefinitions>
 
-                  <pitmaker:PitMakerControl x:Name="pitEditor" Grid.Row="1"/>
-                </Grid>
-              </docking:DocumentWindow>
+									<pitmaker:PitMakerControl x:Name="pitEditor" Grid.Row="1"/>
+								</Grid>
+							</docking:DocumentWindow>
 							<docking:DocumentWindow Title="Xml Editor">
 								<Grid>
 									<Grid.RowDefinitions>
@@ -275,7 +275,7 @@
 																		</ToolTip>
 																	</ComboBox.ToolTip>
 																</ComboBox>
-																
+
 																<Button x:Name="ButtonCrackBinRefresh" Click="ButtonCrackBinRefresh_Click">
 																	<Image Source="/Icons/reload.png"/>
 																	<Button.ToolTip>
@@ -331,8 +331,6 @@
 						</docking:TabbedMdiContainer>
 					</docking:TabbedMdiHost>
 				</docking:Workspace>
-				<docking:ToolWindowContainer>
-				</docking:ToolWindowContainer>
 			</docking:SplitContainer>
 		</docking:DockSite>
 	</Grid>
