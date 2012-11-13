@@ -47,6 +47,7 @@ namespace PeachFuzzFactory
 			InitializeComponent();
 
 			this.Title = "Peach FuzzFactory v3 DEV";
+			tempPitFileName = System.IO.Path.GetTempFileName();
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -70,7 +71,6 @@ namespace PeachFuzzFactory
 			try
 			{
 				pitFileName = fileName;
-				tempPitFileName = System.IO.Path.GetTempFileName();
 
 				#region Pit Editor
 				pitEditor.LoadPitFile(fileName);
