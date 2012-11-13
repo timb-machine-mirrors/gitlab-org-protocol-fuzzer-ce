@@ -48,14 +48,17 @@ namespace PeachFuzzFactory
 
 			this.Title = "Peach FuzzFactory v3 DEV";
 			tempPitFileName = System.IO.Path.GetTempFileName();
-
-			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			LoadFile(System.IO.Path.Combine(path, "template.xml"));
 		}
 
 		protected void LoadBinaryFile(string fileName)
 		{
 			this.binaryFileName = fileName;
+			//byte[] buff;
+			//using (Stream sin = File.OpenRead(fileName))
+			//{
+			//    buff = new byte[sin.Length];
+			//    sin.Read(buff, 0, buff.Length);
+			//}
 
 			DynamicFileByteProvider dynamicFileByteProvider;
 			dynamicFileByteProvider = new DynamicFileByteProvider(File.OpenRead(fileName));
@@ -73,6 +76,39 @@ namespace PeachFuzzFactory
 				pitEditor.LoadPitFile(fileName);
 				PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
 				#endregion
+
+				//#region Xml Editor
+				//this.tempPitFileName = fileName;
+				//        PitParser parser = new PitParser();
+				//        Dom dom;
+
+				//        using(Stream fin = File.OpenRead(fileName))
+				//        {
+				//            dom = parser.asParser(new Dictionary<string, object>(), fin);
+
+
+				//        }
+
+				//        XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+				//        using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
+				//        {
+				//            schemaResolver.LoadSchemaFromStream(stream);
+				//        }
+
+				//        xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+				//        xmlEditor.Document.LoadFile(fileName);
+
+				//        var models = new List<DesignModel>();
+				//        models.Add(new DesignPeachModel(dom));
+				//        //DesignerTreeView.ItemsSource = models;
+
+				//        DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
+				//        if (dom.dataModels.Count > 0)
+				//            DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
+
+				//        Title = string.Format(windowTitle, fileName);
+
+				//#endregion
 			}
 			catch (Exception ex)
 			{
@@ -199,8 +235,7 @@ namespace PeachFuzzFactory
 
 		private void ButtonNewPit_Click(object sender, RoutedEventArgs e)
 		{
-			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			LoadFile(System.IO.Path.Combine(path, "template.xml"));
+			MessageBox.Show("Not implemented yet.");
 		}
 
 		private void ButtonPitOpen_Click(object sender, RoutedEventArgs e)
@@ -228,8 +263,6 @@ namespace PeachFuzzFactory
 				try
 				{
 					pitEditor.SavePitFile(sfd.FileName);
-					pitFileName = sfd.FileName;
-					PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
 				}
 				catch (Exception ex)
 				{
@@ -375,12 +408,6 @@ namespace PeachFuzzFactory
 
 				toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
 			}
-		}
-
-		private void Window_Unloaded(object sender, RoutedEventArgs e)
-		{
-			// Remove temp file
-			System.IO.File.Delete(tempPitFileName);
 		}
 	}
 }
