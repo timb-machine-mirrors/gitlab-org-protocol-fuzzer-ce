@@ -9,7 +9,7 @@
 		xmlns:controls="clr-namespace:PeachFuzzFactory.Controls"
 		xmlns:editor="http://schemas.actiprosoftware.com/winfx/xaml/syntaxeditor"
     xmlns:pitmaker="clr-namespace:PitMaker;assembly=PitMakerControl"
-        Title="MainWindow" Height="650" Width="1100" Icon="/Icons/peach20x20.ico">
+        Title="MainWindow" Height="650" Width="1100" Icon="/Icons/peach20x20.ico" Unloaded="Window_Unloaded">
 	<Grid>
 
 		<Grid.Resources>
