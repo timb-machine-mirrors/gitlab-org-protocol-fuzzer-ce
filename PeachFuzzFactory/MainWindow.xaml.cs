@@ -48,6 +48,9 @@ namespace PeachFuzzFactory
 
 			this.Title = "Peach FuzzFactory v3 DEV";
 			tempPitFileName = System.IO.Path.GetTempFileName();
+
+			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			LoadFile(System.IO.Path.Combine(path, "template.xml"));
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -235,7 +238,8 @@ namespace PeachFuzzFactory
 
 		private void ButtonNewPit_Click(object sender, RoutedEventArgs e)
 		{
-			MessageBox.Show("Not implemented yet.");
+			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			LoadFile(System.IO.Path.Combine(path, "template.xml"));
 		}
 
 		private void ButtonPitOpen_Click(object sender, RoutedEventArgs e)
@@ -359,7 +363,7 @@ namespace PeachFuzzFactory
 
 		private void ButtonXmlIndentLess_Click(object sender, RoutedEventArgs e)
 		{
-			// TODO
+			xmlEditor.ActiveView.ExecuteEditAction(new IndentAction());
 		}
 
 		private void ButtonCrackBinRefresh_Click(object sender, RoutedEventArgs e)
@@ -388,6 +392,9 @@ namespace PeachFuzzFactory
 			if (toWindow == null || fromWindow == null || tabbed == null)
 				return;
 
+			if (fromWindow.Title.StartsWith("Hex"))
+				return;
+
 			if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
 			{
 				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
@@ -407,6 +414,43 @@ namespace PeachFuzzFactory
 				xmlEditor.Document.LoadFile(tempPitFileName);
 
 				toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
+			}
+			else if (toWindow.Title.StartsWith("Hex"))
+			{
+				if (fromWindow.Title.StartsWith("Xml"))
+				{
+					xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
+					pitEditor.LoadPitFile(tempPitFileName);
+				}
+				else if (fromWindow.Title.StartsWith("Pit"))
+				{
+					pitEditor.SavePitFile(tempPitFileName, false);
+					xmlEditor.Document.LoadFile(tempPitFileName);
+				}
+				else
+					return;
+
+				try
+				{
+					PitParser parser = new PitParser();
+					Dom dom;
+
+					using (Stream fin = File.OpenRead(tempPitFileName))
+					{
+						dom = parser.asParser(new Dictionary<string, object>(), fin);
+					}
+
+					var models = new List<DesignModel>();
+					models.Add(new DesignPeachModel(dom));
+
+					DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
+					if (dom.dataModels.Count > 0)
+						DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(ex.ToString());
+				}
 			}
 		}
 	}
