@@ -25,6 +25,7 @@ using ActiproSoftware.Windows.Controls.PropertyGrid;
 using ActiproSoftware.Windows.Controls.SyntaxEditor.EditActions;
 using ActiproSoftware.Text.Languages.Xml;
 using ActiproSoftware.Text.Languages.Xml.Implementation;
+using ActiproSoftware.Windows.Controls.Docking;
 using Microsoft.Win32;
 
 namespace PeachFuzzFactory
@@ -37,6 +38,7 @@ namespace PeachFuzzFactory
 		Dictionary<DataElement, CrackModel> crackMap = new Dictionary<DataElement, CrackModel>();
 		protected string binaryFileName = null;
 		protected string tempPitFileName = null;
+		protected string pitFileName = null;
 		protected DataModel crackerSelectedDataModel = null;
 		protected string windowTitle = "Peach FuzzFactory v3 DEV - {0}";
 
@@ -45,9 +47,6 @@ namespace PeachFuzzFactory
 			InitializeComponent();
 
 			this.Title = "Peach FuzzFactory v3 DEV";
-
-			//binaryFileName = @"4-Key.png";
-			//tempPitFileName = @"test.xml";
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -69,44 +68,47 @@ namespace PeachFuzzFactory
 		protected void LoadFile(string fileName)
 		{
 			try
-      {
-        #region Pit Editor
-        pitEditor.LoadPitFile(fileName);
-		PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
-        #endregion
+			{
+				pitFileName = fileName;
+				tempPitFileName = System.IO.Path.GetTempFileName();
 
-		//#region Xml Editor
-		//this.tempPitFileName = fileName;
-		//        PitParser parser = new PitParser();
-		//        Dom dom;
-				
-		//        using(Stream fin = File.OpenRead(fileName))
-		//        {
-		//            dom = parser.asParser(new Dictionary<string, object>(), fin);
+				#region Pit Editor
+				pitEditor.LoadPitFile(fileName);
+				PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
+				#endregion
+
+				//#region Xml Editor
+				//this.tempPitFileName = fileName;
+				//        PitParser parser = new PitParser();
+				//        Dom dom;
+
+				//        using(Stream fin = File.OpenRead(fileName))
+				//        {
+				//            dom = parser.asParser(new Dictionary<string, object>(), fin);
 
 
-		//        }
+				//        }
 
-		//        XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
-		//        using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
-		//        {
-		//            schemaResolver.LoadSchemaFromStream(stream);
-		//        }
+				//        XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+				//        using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
+				//        {
+				//            schemaResolver.LoadSchemaFromStream(stream);
+				//        }
 
-		//        xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
-		//        xmlEditor.Document.LoadFile(fileName);
+				//        xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+				//        xmlEditor.Document.LoadFile(fileName);
 
-		//        var models = new List<DesignModel>();
-		//        models.Add(new DesignPeachModel(dom));
-		//        //DesignerTreeView.ItemsSource = models;
+				//        var models = new List<DesignModel>();
+				//        models.Add(new DesignPeachModel(dom));
+				//        //DesignerTreeView.ItemsSource = models;
 
-		//        DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
-		//        if (dom.dataModels.Count > 0)
-		//            DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
+				//        DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
+				//        if (dom.dataModels.Count > 0)
+				//            DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
 
-		//        Title = string.Format(windowTitle, fileName);
+				//        Title = string.Format(windowTitle, fileName);
 
-		//#endregion
+				//#endregion
 			}
 			catch (Exception ex)
 			{
@@ -174,7 +176,7 @@ namespace PeachFuzzFactory
 		void cracker_ExitHandleNodeEvent(DataElement element, BitStream data)
 		{
 			var currentModel = crackMap[element];
-			currentModel.Length = (int) ((BitStream)currentModel.DataElement.Value).LengthBytes;
+			currentModel.Length = (int)((BitStream)currentModel.DataElement.Value).LengthBytes;
 
 			if (element.parent != null && crackMap.ContainsKey(element.parent))
 				crackMap[element.parent].Children.Add(currentModel);
@@ -227,7 +229,7 @@ namespace PeachFuzzFactory
 			if (e.AddedItems.Count == 0)
 				return;
 
-			CrackModel model = (CrackModel) ((PeachFuzzFactory.Controls.TreeNode)e.AddedItems[0]).Tag;
+			CrackModel model = (CrackModel)((PeachFuzzFactory.Controls.TreeNode)e.AddedItems[0]).Tag;
 			TheHexBox.Select(model.Position, model.Length);
 		}
 
@@ -252,21 +254,21 @@ namespace PeachFuzzFactory
 
 		private void ButtonSavePit_Click(object sender, RoutedEventArgs e)
 		{
-      SaveFileDialog sfd = new SaveFileDialog();
-      sfd.Filter = "Pit Files (*.xml)|*.xml";
-      sfd.DefaultExt = "xml";
+			SaveFileDialog sfd = new SaveFileDialog();
+			sfd.Filter = "Pit Files (*.xml)|*.xml";
+			sfd.DefaultExt = "xml";
 
-      if (sfd.ShowDialog() == true)
-      {
-        try
-        {
-          pitEditor.SavePitFile(sfd.FileName);
-        }
-        catch (Exception ex)
-        {
-          MessageBox.Show("Could not save file. Reason: " + ex.Message);
-        }
-      }
+			if (sfd.ShowDialog() == true)
+			{
+				try
+				{
+					pitEditor.SavePitFile(sfd.FileName);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Could not save file. Reason: " + ex.Message);
+				}
+			}
 			//MessageBox.Show("Not implemented yet.");
 		}
 
@@ -375,7 +377,56 @@ namespace PeachFuzzFactory
 
 		private void TabbedMdiContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+			if (e.AddedItems.Count != 1 || e.RemovedItems.Count != 1)
+				return;
+
 			// When we switch from designer to editor, save and load.  Ditto in reverse.  And with hex editor.
+			if (pitFileName != null)
+			{
+				var toWindow = e.AddedItems[0] as DocumentWindow;
+				var fromWindow = e.RemovedItems[0] as DocumentWindow;
+				TabbedMdiContainer tabbed = e.Source as TabbedMdiContainer;
+
+				if (toWindow == null || fromWindow == null || tabbed == null)
+					return;
+
+				if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
+				{
+					xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
+					pitEditor.LoadPitFile(tempPitFileName);
+				}
+				else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
+				{
+					pitEditor.SavePitFile(tempPitFileName, false);
+
+					XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+					using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
+					{
+						schemaResolver.LoadSchemaFromStream(stream);
+					}
+
+					xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+					xmlEditor.Document.LoadFile(tempPitFileName);
+
+					toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
+				}
+			}
+			else
+			{
+				var toWindow = e.AddedItems[0] as DocumentWindow;
+				var fromWindow = e.RemovedItems[0] as DocumentWindow;
+				TabbedMdiContainer tabbed = e.Source as TabbedMdiContainer;
+
+				if (toWindow == null || fromWindow == null || tabbed == null)
+					return;
+
+				if (fromWindow == PitEditorTab)
+				{
+					MessageBox.Show("Load a file before switching tabs");
+
+					tabbed.SelectedItem = fromWindow;
+				}
+			}
 		}
 	}
 }
