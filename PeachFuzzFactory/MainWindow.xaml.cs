@@ -381,51 +381,32 @@ namespace PeachFuzzFactory
 				return;
 
 			// When we switch from designer to editor, save and load.  Ditto in reverse.  And with hex editor.
-			if (pitFileName != null)
+			var toWindow = e.AddedItems[0] as DocumentWindow;
+			var fromWindow = e.RemovedItems[0] as DocumentWindow;
+			TabbedMdiContainer tabbed = e.Source as TabbedMdiContainer;
+
+			if (toWindow == null || fromWindow == null || tabbed == null)
+				return;
+
+			if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
 			{
-				var toWindow = e.AddedItems[0] as DocumentWindow;
-				var fromWindow = e.RemovedItems[0] as DocumentWindow;
-				TabbedMdiContainer tabbed = e.Source as TabbedMdiContainer;
-
-				if (toWindow == null || fromWindow == null || tabbed == null)
-					return;
-
-				if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
-				{
-					xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
-					pitEditor.LoadPitFile(tempPitFileName);
-				}
-				else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
-				{
-					pitEditor.SavePitFile(tempPitFileName, false);
-
-					XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
-					using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
-					{
-						schemaResolver.LoadSchemaFromStream(stream);
-					}
-
-					xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
-					xmlEditor.Document.LoadFile(tempPitFileName);
-
-					toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
-				}
+				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
+				pitEditor.LoadPitFile(tempPitFileName);
 			}
-			else
+			else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
 			{
-				var toWindow = e.AddedItems[0] as DocumentWindow;
-				var fromWindow = e.RemovedItems[0] as DocumentWindow;
-				TabbedMdiContainer tabbed = e.Source as TabbedMdiContainer;
+				pitEditor.SavePitFile(tempPitFileName, false);
 
-				if (toWindow == null || fromWindow == null || tabbed == null)
-					return;
-
-				if (fromWindow == PitEditorTab)
+				XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+				using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
 				{
-					MessageBox.Show("Load a file before switching tabs");
-
-					tabbed.SelectedItem = fromWindow;
+					schemaResolver.LoadSchemaFromStream(stream);
 				}
+
+				xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+				xmlEditor.Document.LoadFile(tempPitFileName);
+
+				toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
 			}
 		}
 	}
