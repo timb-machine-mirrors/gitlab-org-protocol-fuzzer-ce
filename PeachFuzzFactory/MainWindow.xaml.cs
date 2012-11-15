@@ -49,8 +49,9 @@ namespace PeachFuzzFactory
 			this.Title = "Peach FuzzFactory v3 DEV";
 			tempPitFileName = System.IO.Path.GetTempFileName();
 
-			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			LoadFile(System.IO.Path.Combine(path, "template.xml"));
+			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+      var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -238,8 +239,9 @@ namespace PeachFuzzFactory
 
 		private void ButtonNewPit_Click(object sender, RoutedEventArgs e)
 		{
-			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			LoadFile(System.IO.Path.Combine(path, "template.xml"));
+			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+      var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
 		}
 
 		private void ButtonPitOpen_Click(object sender, RoutedEventArgs e)
