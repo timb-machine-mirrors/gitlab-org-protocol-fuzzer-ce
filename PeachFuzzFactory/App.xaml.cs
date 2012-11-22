@@ -19,7 +19,7 @@ namespace PeachFuzzFactory
 
     void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
-      if (e.Exception is ApplicationException)
+      if ((e.Exception is ApplicationException) || (e.Exception is Peach.Core.PeachException))
       {
         MessageBox.Show(e.Exception.Message);
       }

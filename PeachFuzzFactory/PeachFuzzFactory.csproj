@@ -232,7 +232,7 @@
     <Reference Include="ActiproSoftware.Wizard.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
     <Reference Include="Be.Windows.Forms.HexBox, Version=1.4.6.13072, Culture=neutral, PublicKeyToken=e0e5adf0ebc99863, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\3rdParty\Be.HexEditor.148\bin\Be.Windows.Forms.HexBox.dll</HintPath>
+      <HintPath>..\..\..\Program Files (x86)\Be\Be.HexEditor\Be.Windows.Forms.HexBox.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -412,13 +412,17 @@
     <Resource Include="Icons\format-indent-more.png" />
     <Resource Include="Icons\node-array.png" />
     <Resource Include="Icons\reload.png" />
+    <Content Include="template.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="test.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Peach\Peach.Core\Peach.Core.csproj">
+    <ProjectReference Include="..\..\peach\Peach.Core\Peach.Core.csproj">
       <Project>{63C7C70D-0CBF-40EC-A11E-079B2E943D47}</Project>
       <Name>Peach.Core</Name>
     </ProjectReference>

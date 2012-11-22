@@ -449,7 +449,15 @@ namespace PeachFuzzFactory
 					if (dom.dataModels.Count > 0)
 						DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
 				}
-				catch (Exception ex)
+        catch (Peach.Core.PeachException pex)
+        {
+          MessageBox.Show(pex.Message);
+        }
+        catch (ApplicationException aex)
+        {
+          MessageBox.Show(aex.Message);
+        }
+        catch (Exception ex)
 				{
 					MessageBox.Show(ex.ToString());
 				}
