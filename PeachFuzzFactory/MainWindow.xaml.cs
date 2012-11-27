@@ -76,10 +76,12 @@ namespace PeachFuzzFactory
 			{
 				pitFileName = fileName;
 
-				#region Pit Editor
-				pitEditor.LoadPitFile(fileName);
-				PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
-				#endregion
+        #region Pit Editor
+        PitEditorTab.IsSelected = true;
+        pitEditor.LoadPitFile(fileName);
+        PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
+        XmlEditorTab.Title = "Xml Editor (" + System.IO.Path.GetFileName(fileName) + ")";
+        #endregion
 
 				//#region Xml Editor
 				//this.tempPitFileName = fileName;
@@ -116,7 +118,7 @@ namespace PeachFuzzFactory
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("Error loading file: " + ex.ToString());
+				MessageBox.Show(ex.Message);
 			}
 		}
 
@@ -400,20 +402,14 @@ namespace PeachFuzzFactory
 			if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
 			{
 				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
-				pitEditor.LoadPitFile(tempPitFileName);
-			}
+        pitEditor.LoadPitFile(tempPitFileName);
+        PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
+      }
 			else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
 			{
 				pitEditor.SavePitFile(tempPitFileName, false);
 
-				XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
-				using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
-				{
-					schemaResolver.LoadSchemaFromStream(stream);
-				}
-
-				xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
-				xmlEditor.Document.LoadFile(tempPitFileName);
+        LoadToXmlEditor(tempPitFileName);
 
 				toWindow.Title = "Xml Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
 			}
@@ -463,5 +459,17 @@ namespace PeachFuzzFactory
 				}
 			}
 		}
+
+    private void LoadToXmlEditor(string pitFileName)
+    {
+      XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
+      using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
+      {
+        schemaResolver.LoadSchemaFromStream(stream);
+      }
+
+      xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
+      xmlEditor.Document.LoadFile(pitFileName);
+    }
 	}
 }

@@ -118,7 +118,7 @@
 									<pitmaker:PitMakerControl x:Name="pitEditor" Grid.Row="1"/>
 								</Grid>
 							</docking:DocumentWindow>
-							<docking:DocumentWindow Title="Xml Editor" CanClose="False">
+							<docking:DocumentWindow Title="Xml Editor" x:Name="XmlEditorTab" CanClose="False">
 								<Grid>
 									<Grid.RowDefinitions>
 										<RowDefinition Height="Auto"/>
@@ -234,7 +234,7 @@
 									</editor:SyntaxEditor>
 								</Grid>
 							</docking:DocumentWindow>
-							<docking:DocumentWindow Title="Hex Editor" CanClose="False">
+							<docking:DocumentWindow Title="Hex Editor" x:Name="HexEditorTab" CanClose="False">
 								<docking:DockSite Grid.Row="1">
 									<docking:SplitContainer Orientation="Vertical">
 
