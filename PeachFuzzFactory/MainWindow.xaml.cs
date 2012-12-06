@@ -15,11 +15,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Be.Windows.Forms;
 using PeachFuzzFactory.Models;
-using Peach.Core.Dom;
-using Peach.Core;
-using Peach.Core.Cracker;
-using Peach.Core.IO;
-using Peach.Core.Analyzers;
+//using Peach.Core.Dom;
+//using Peach.Core;
+//using Peach.Core.Cracker;
+//using Peach.Core.IO;
+//using Peach.Core.Analyzers;
 using System.Reflection;
 using ActiproSoftware.Windows.Controls.PropertyGrid;
 using ActiproSoftware.Windows.Controls.SyntaxEditor.EditActions;
@@ -27,6 +27,12 @@ using ActiproSoftware.Text.Languages.Xml;
 using ActiproSoftware.Text.Languages.Xml.Implementation;
 using ActiproSoftware.Windows.Controls.Docking;
 using Microsoft.Win32;
+using System.Deployment.Application;
+using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Core.Cracker;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
 namespace PeachFuzzFactory
 {
@@ -46,12 +52,21 @@ namespace PeachFuzzFactory
 		{
 			InitializeComponent();
 
-			this.Title = "Peach FuzzFactory v3 DEV";
+      //this.Title = "Peach FuzzFactory v3 v3 DEV";
+
+      string title = "Peach FuzzFactory v{0}- Copyright (c) Deja vu Security";
+      string version = "(Dev Build)";
+      if (ApplicationDeployment.IsNetworkDeployed)
+        version = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
+
+      this.Title = System.String.Format(title, version);
+
 			tempPitFileName = System.IO.Path.GetTempFileName();
 
 			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-      var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
+      //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      //LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
+      LoadResourceFile("PeachFuzzFactory.template.xml");
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -70,6 +85,25 @@ namespace PeachFuzzFactory
 			TheHexBox.ByteProvider = dynamicFileByteProvider;
 		}
 
+    protected void LoadResourceFile(string fileName)
+    {
+      try
+      {
+        pitFileName = fileName;
+
+        #region Pit Editor
+        PitEditorTab.IsSelected = true;
+        pitEditor.LoadPitFile(Assembly.GetExecutingAssembly().GetManifestResourceStream(fileName));
+        PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
+        XmlEditorTab.Title = "Xml Editor (" + System.IO.Path.GetFileName(fileName) + ")";
+        #endregion
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message);
+      }
+    }
+
 		protected void LoadFile(string fileName)
 		{
 			try
@@ -83,7 +117,7 @@ namespace PeachFuzzFactory
         XmlEditorTab.Title = "Xml Editor (" + System.IO.Path.GetFileName(fileName) + ")";
         #endregion
 
-				//#region Xml Editor
+				#region Xml Editor
 				//this.tempPitFileName = fileName;
 				//        PitParser parser = new PitParser();
 				//        Dom dom;
@@ -114,7 +148,7 @@ namespace PeachFuzzFactory
 
 				//        Title = string.Format(windowTitle, fileName);
 
-				//#endregion
+				#endregion
 			}
 			catch (Exception ex)
 			{
@@ -242,8 +276,11 @@ namespace PeachFuzzFactory
 		private void ButtonNewPit_Click(object sender, RoutedEventArgs e)
 		{
 			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-      var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
+      //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      //LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
+
+      LoadResourceFile("PeachFuzzFactory.template.xml");
+
 		}
 
 		private void ButtonPitOpen_Click(object sender, RoutedEventArgs e)
