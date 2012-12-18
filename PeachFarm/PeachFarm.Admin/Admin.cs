@@ -10,6 +10,7 @@ using RabbitMQ.Client;
 using PeachFarm.Common;
 using PeachFarm.Common.Messages;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PeachFarm.Admin
 {
@@ -17,13 +18,17 @@ namespace PeachFarm.Admin
   {
     private UTF8Encoding encoding = new UTF8Encoding();
 
-
-    public Admin(string serverHostName)
+    public Admin(string serverHostName, int timeoutSeconds = 0)
     {
       ServerHostName = serverHostName;
+      TimeoutSeconds = timeoutSeconds;
     }
 
     public string ServerHostName { get; private set; }
+
+    public int TimeoutSeconds { get; private set; }
+
+    public bool IsListening { get; private set; }
 
     public void StartAdmin()
     {
@@ -31,9 +36,9 @@ namespace PeachFarm.Admin
       {
         OpenConnection(ServerHostName);
       }
-      catch
+      catch(Exception ex)
       {
-        throw new ApplicationException(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", ServerHostName));
+        ProcessError("ListComputers", new ApplicationException(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", ServerHostName), ex));
       }
 
       InitializeQueues();
@@ -103,6 +108,12 @@ namespace PeachFarm.Admin
         Result = result;
       }
 
+      public ListComputersCompletedEventArgs(Exception exception)
+        : base(exception, false, null)
+      {
+        
+      }
+
       public ListComputersResponse Result { get; private set; }
     }
 
@@ -114,6 +125,12 @@ namespace PeachFarm.Admin
     {
       if (ListComputersCompleted != null)
         ListComputersCompleted(this, new ListComputersCompletedEventArgs(result));
+    }
+
+    private void RaiseListComputersCompleted(Exception exception)
+    {
+      if (ListComputersCompleted != null)
+        ListComputersCompleted(this, new ListComputersCompletedEventArgs(exception));
     }
     #endregion
 
@@ -191,28 +208,6 @@ namespace PeachFarm.Admin
     }
     #endregion
 
-    #region Receives
-    private void ListComputersReply(ListComputersResponse response)
-    {
-      RaiseListComputersCompleted(response);
-    }
-
-    private void ListErrorsReply(ListErrorsResponse response)
-    {
-      RaiseListErrorsCompleted(response);
-    }
-
-    private void StartPeachReply(StartPeachResponse response)
-    {
-      RaiseStartPeachCompleted(response);
-    }
-
-    private void StopPeachReply(StopPeachResponse response)
-    {
-      RaiseStopPeachCompleted(response);
-    }
-    #endregion
-
     #region MQ functions
 
     private string serverQueueName;
@@ -265,12 +260,28 @@ namespace PeachFarm.Admin
       adminListener = new BackgroundWorker();
       adminListener.WorkerSupportsCancellation = true;
       adminListener.DoWork += Listen;
+      adminListener.RunWorkerCompleted += new RunWorkerCompletedEventHandler(adminListener_RunWorkerCompleted);
       adminListener.RunWorkerAsync();
+    }
+
+    void adminListener_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    {
+      IsListening = false;
+      if (e.Cancelled)
+      {
+
+      }
+      else if(e.Error != null)
+      {
+        
+      }
+
     }
 
     private void Listen(object sender, DoWorkEventArgs e)
     {
       BasicGetResult result = null;
+      int count = 0;
 
       while (!e.Cancel)
       {
@@ -281,10 +292,13 @@ namespace PeachFarm.Admin
 
           result = modelReceive.BasicGet(adminQueueName, false);
         }
-        catch
+        catch(Exception ex)
         {
           result = null;
           Console.WriteLine("Could not communicate with RabbitMQ");
+          e.Cancel = true;
+          ProcessError("ListComputers", new ApplicationException("Could not communicate with RabbitMQ", ex));
+          return;
         }
 
         if (result != null)
@@ -295,19 +309,31 @@ namespace PeachFarm.Admin
           {
             ProcessAction(action, body);
             modelReceive.BasicAck(result.DeliveryTag, false);
-            StopListeners();
-            CloseConnection();
-            System.Environment.Exit(1);
+            e.Cancel = true;
+            StopAdmin();
           }
           catch (Exception ex)
           {
             Console.WriteLine(ex.Message);
+            e.Cancel = true;
+            ProcessError(action, new ApplicationException("Could not process message", ex));
+            return;
           }
         }
         else
         {
           Thread.Sleep(1000);
+          if (TimeoutSeconds > 0)
+          {
+            count++;
+            if (count == TimeoutSeconds)
+            {
+              e.Cancel = true;
+              ProcessError("ListComputers", new ApplicationException("No response received before timeout."));
+            }
+          }
         }
+
       }
     }
 
@@ -333,20 +359,43 @@ namespace PeachFarm.Admin
       switch (action)
       {
         case "StartPeach":
-          StartPeachReply(StartPeachResponse.Deserialize(body));
+          RaiseStartPeachCompleted(StartPeachResponse.Deserialize(body));
           break;
         case "StopPeach":
-          StopPeachReply(StopPeachResponse.Deserialize(body));
+          RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
           break;
         case "ResumePeach":
           break;
         case "Heartbeat":
           break;
         case "ListComputers":
-          ListComputersReply(ListComputersResponse.Deserialize(body));
+          RaiseListComputersCompleted(ListComputersResponse.Deserialize(body));
           break;
         case "ListErrors":
-          ListErrorsReply(ListErrorsResponse.Deserialize(body));
+          RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
+          break;
+      }
+    }
+
+    private void ProcessError(string action, Exception exception)
+    {
+      switch (action)
+      {
+        case "StartPeach":
+          //StartPeachReply(StartPeachResponse.Deserialize(body));
+          break;
+        case "StopPeach":
+          //StopPeachReply(StopPeachResponse.Deserialize(body));
+          break;
+        case "ResumePeach":
+          break;
+        case "Heartbeat":
+          break;
+        case "ListComputers":
+          RaiseListComputersCompleted(exception);
+          break;
+        case "ListErrors":
+          //ListErrorsReply(ListErrorsResponse.Deserialize(body));
           break;
       }
     }

@@ -17,7 +17,7 @@ namespace PeachFarm.Common.Messages
   using System.Collections.Generic;
 
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -25,45 +25,26 @@ namespace PeachFarm.Common.Messages
   public partial class Run
   {
 
-    private List<LogFile> logFilesField;
-
-    private string runNameField;
+    private string testNameField;
 
     private string computerNameField;
 
     private string pitFilePathField;
 
+    private System.Guid jobIDField;
+
     private static System.Xml.Serialization.XmlSerializer serializer;
 
-    public Run()
-    {
-      this.logFilesField = new List<LogFile>();
-    }
-
-    [System.Xml.Serialization.XmlArrayAttribute(Order = 0)]
-    [System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-    public List<LogFile> LogFiles
-    {
-      get
-      {
-        return this.logFilesField;
-      }
-      set
-      {
-        this.logFilesField = value;
-      }
-    }
-
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public string RunName
+    public string TestName
     {
       get
       {
-        return this.runNameField;
+        return this.testNameField;
       }
       set
       {
-        this.runNameField = value;
+        this.testNameField = value;
       }
     }
 
@@ -90,6 +71,19 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.pitFilePathField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public System.Guid JobID
+    {
+      get
+      {
+        return this.jobIDField;
+      }
+      set
+      {
+        this.jobIDField = value;
       }
     }
 
@@ -279,27 +273,163 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
-  public partial class LogFile
+  [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm", IsNullable = false)]
+  public partial class Fault
   {
 
-    private string fileNameField;
+    private string descriptionField;
+
+    private string detectionSourceField;
+
+    private string exploitabilityField;
+
+    private string folderNameField;
+
+    private int iterationField;
+
+    private string majorHashField;
+
+    private string minorHashField;
+
+    private string titleField;
+
+    private FaultType faultTypeField;
+
+    private System.Guid jobIDField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
-    [System.Xml.Serialization.XmlAttributeAttribute()]
-    public string FileName
+    [System.Xml.Serialization.XmlElementAttribute(Order = 0)]
+    public string Description
     {
       get
       {
-        return this.fileNameField;
+        return this.descriptionField;
       }
       set
       {
-        this.fileNameField = value;
+        this.descriptionField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 1)]
+    public string DetectionSource
+    {
+      get
+      {
+        return this.detectionSourceField;
+      }
+      set
+      {
+        this.detectionSourceField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 2)]
+    public string Exploitability
+    {
+      get
+      {
+        return this.exploitabilityField;
+      }
+      set
+      {
+        this.exploitabilityField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 3)]
+    public string FolderName
+    {
+      get
+      {
+        return this.folderNameField;
+      }
+      set
+      {
+        this.folderNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 4)]
+    public int Iteration
+    {
+      get
+      {
+        return this.iterationField;
+      }
+      set
+      {
+        this.iterationField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 5)]
+    public string MajorHash
+    {
+      get
+      {
+        return this.majorHashField;
+      }
+      set
+      {
+        this.majorHashField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 6)]
+    public string MinorHash
+    {
+      get
+      {
+        return this.minorHashField;
+      }
+      set
+      {
+        this.minorHashField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlElementAttribute(Order = 7)]
+    public string Title
+    {
+      get
+      {
+        return this.titleField;
+      }
+      set
+      {
+        this.titleField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public FaultType FaultType
+    {
+      get
+      {
+        return this.faultTypeField;
+      }
+      set
+      {
+        this.faultTypeField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public System.Guid JobID
+    {
+      get
+      {
+        return this.jobIDField;
+      }
+      set
+      {
+        this.jobIDField = value;
       }
     }
 
@@ -309,7 +439,7 @@ namespace PeachFarm.Common.Messages
       {
         if ((serializer == null))
         {
-          serializer = new System.Xml.Serialization.XmlSerializer(typeof(LogFile));
+          serializer = new System.Xml.Serialization.XmlSerializer(typeof(Fault));
         }
         return serializer;
       }
@@ -317,7 +447,7 @@ namespace PeachFarm.Common.Messages
 
     #region Serialize/Deserialize
     /// <summary>
-    /// Serializes current LogFile object into an XML document
+    /// Serializes current Fault object into an XML document
     /// </summary>
     /// <returns>string XML value</returns>
     public virtual string Serialize()
@@ -346,16 +476,16 @@ namespace PeachFarm.Common.Messages
     }
 
     /// <summary>
-    /// Deserializes workflow markup into an LogFile object
+    /// Deserializes workflow markup into an Fault object
     /// </summary>
     /// <param name="xml">string workflow markup to deserialize</param>
-    /// <param name="obj">Output LogFile object</param>
+    /// <param name="obj">Output Fault object</param>
     /// <param name="exception">output Exception value if deserialize failed</param>
     /// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-    public static bool Deserialize(string xml, out LogFile obj, out System.Exception exception)
+    public static bool Deserialize(string xml, out Fault obj, out System.Exception exception)
     {
       exception = null;
-      obj = default(LogFile);
+      obj = default(Fault);
       try
       {
         obj = Deserialize(xml);
@@ -368,19 +498,19 @@ namespace PeachFarm.Common.Messages
       }
     }
 
-    public static bool Deserialize(string xml, out LogFile obj)
+    public static bool Deserialize(string xml, out Fault obj)
     {
       System.Exception exception = null;
       return Deserialize(xml, out obj, out exception);
     }
 
-    public static LogFile Deserialize(string xml)
+    public static Fault Deserialize(string xml)
     {
       System.IO.StringReader stringReader = null;
       try
       {
         stringReader = new System.IO.StringReader(xml);
-        return ((LogFile)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+        return ((Fault)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
       }
       finally
       {
@@ -392,7 +522,7 @@ namespace PeachFarm.Common.Messages
     }
 
     /// <summary>
-    /// Serializes current LogFile object into file
+    /// Serializes current Fault object into file
     /// </summary>
     /// <param name="fileName">full path of outupt xml file</param>
     /// <param name="exception">output Exception value if failed</param>
@@ -433,16 +563,16 @@ namespace PeachFarm.Common.Messages
     }
 
     /// <summary>
-    /// Deserializes xml markup from file into an LogFile object
+    /// Deserializes xml markup from file into an Fault object
     /// </summary>
     /// <param name="fileName">string xml file to load and deserialize</param>
-    /// <param name="obj">Output LogFile object</param>
+    /// <param name="obj">Output Fault object</param>
     /// <param name="exception">output Exception value if deserialize failed</param>
     /// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-    public static bool LoadFromFile(string fileName, out LogFile obj, out System.Exception exception)
+    public static bool LoadFromFile(string fileName, out Fault obj, out System.Exception exception)
     {
       exception = null;
-      obj = default(LogFile);
+      obj = default(Fault);
       try
       {
         obj = LoadFromFile(fileName);
@@ -455,13 +585,13 @@ namespace PeachFarm.Common.Messages
       }
     }
 
-    public static bool LoadFromFile(string fileName, out LogFile obj)
+    public static bool LoadFromFile(string fileName, out Fault obj)
     {
       System.Exception exception = null;
       return LoadFromFile(fileName, out obj, out exception);
     }
 
-    public static LogFile LoadFromFile(string fileName)
+    public static Fault LoadFromFile(string fileName)
     {
       System.IO.FileStream file = null;
       System.IO.StreamReader sr = null;
@@ -489,7 +619,23 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
+  [System.SerializableAttribute()]
+  [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
+  public enum FaultType
+  {
+
+    /// <remarks/>
+    Unknown,
+
+    /// <remarks/>
+    Fault,
+
+    /// <remarks/>
+    Data,
+  }
+
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -759,7 +905,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -990,7 +1136,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -1200,7 +1346,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -1484,7 +1630,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
   public enum Status
@@ -1506,7 +1652,7 @@ namespace PeachFarm.Common.Messages
     Error,
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -1702,7 +1848,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -1918,7 +2064,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -2114,7 +2260,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -2330,7 +2476,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]
@@ -2561,7 +2707,7 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.233")]
+  [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.17929")]
   [System.SerializableAttribute()]
   [System.ComponentModel.DesignerCategoryAttribute("code")]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm")]

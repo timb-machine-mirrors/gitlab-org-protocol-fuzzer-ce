@@ -70,6 +70,8 @@ namespace PeachFarm.Common.Messages
 
       foreach (Run run in runs)
       {
+        #region Peach 2
+        /*
         if (run._id == null)
         {
           foreach (LogFile file in run.LogFiles)
@@ -97,6 +99,8 @@ namespace PeachFarm.Common.Messages
             }
           }
         }
+        //*/
+        #endregion
 
         collection.Save(run);
       }
@@ -107,6 +111,50 @@ namespace PeachFarm.Common.Messages
       return runs;
     }
 
+    public static List<Fault> DatabaseInsert(this List<Fault> faults, string connectionString)
+    {
+      MongoServer server = MongoServer.Create(connectionString);
+      MongoDatabase db = server.GetDatabase("PeachFarm");
+
+      MongoCollection<Fault> collection = null;
+
+      if (db.CollectionExists("faults"))
+      {
+        collection = db.GetCollection<Fault>("faults");
+      }
+      else
+      {
+        db.CreateCollection("faults");
+        collection = db.GetCollection<Fault>("fault");
+        collection.EnsureIndex(new string[] { "RunID" });
+      }
+
+      foreach (Fault fault in faults)
+      {
+        collection.Save(fault);
+      }
+
+
+      server.Disconnect();
+
+      return faults;
+    }
+
+    public static Run Find(this List<Run> runs, string name)
+    {
+      var results = (from run in runs where run.TestName == name select run);
+      if (results.Count() == 0)
+      {
+        return null;
+      }
+      else
+      {
+        return results.First();
+      }
+    }
+
+    #region Peach 2
+    /*
     private static string GetMD5HashFromFile(string fileName)
     {
       FileStream file = new FileStream(fileName, FileMode.Open);
@@ -136,19 +184,6 @@ namespace PeachFarm.Common.Messages
       }
     }
 
-    public static Run Find(this List<Run> runs, string name)
-    {
-      var results = (from run in runs where run.RunName == name select run);
-      if (results.Count() == 0)
-      {
-        return null;
-      }
-      else
-      {
-        return results.First();
-      }
-    }
-
     public static LogFile Find(this List<LogFile> logFiles, string name)
     {
       var results = (from logFile in logFiles where logFile.FileName == name select logFile);
@@ -161,10 +196,57 @@ namespace PeachFarm.Common.Messages
         return results.First();
       }
     }
+    //*/
+    #endregion
+  }
+
+  public partial class Fault
+  {
+    public Fault(BsonObjectId runid)
+    {
+      this.runid = runid;
+    }
+
+    [XmlIgnore]
+    public BsonObjectId _id { get; set; }
+
+    [XmlAttribute]
+    [BsonIgnore]
+    public string ID
+    {
+      get
+      {
+        if ((_id == null) || (_id == BsonObjectId.Empty))
+          return String.Empty;
+        else
+          return _id.AsString;
+      }
+    }
+
+
+    [XmlIgnore]
+    public BsonObjectId runid { get; set; }
+
+    [XmlAttribute]
+    [BsonIgnore]
+    public string RunID
+    {
+      get
+      {
+        if ((runid == null) || (runid == BsonObjectId.Empty))
+          return String.Empty;
+        else
+          return _id.AsString;
+      }
+    }
   }
 
   public partial class Run
   {
+    public Run()
+    {
+      this.JobID = Guid.NewGuid();
+    }
 
     [XmlIgnore]
     public BsonObjectId _id { get; set; }
@@ -181,8 +263,27 @@ namespace PeachFarm.Common.Messages
           return _id.AsString; 
       }
     }
+
+    public List<Fault> GetFaults(string connectionString)
+    {
+      MongoServer server = MongoServer.Create(connectionString);
+      MongoDatabase db = server.GetDatabase("PeachFarm");
+
+      if (db.CollectionExists("faults") == false)
+      {
+        throw new ApplicationException("Database does not exist.");
+      }
+
+      MongoCollection<Fault> faults = db.GetCollection<Fault>("faults");
+
+      var query = Query.EQ("RunID", this._id);
+      MongoCursor<Fault> cursor = faults.Find(query);
+      return cursor.ToList();
+    }
   }
 
+  #region Peach 2
+  /*
   public partial class LogFile
   {
     //[BsonIgnore]
@@ -196,4 +297,6 @@ namespace PeachFarm.Common.Messages
     [XmlIgnore]
     public BsonObjectId FileReference { get; set; }
   }
+  //*/
+  #endregion
 }

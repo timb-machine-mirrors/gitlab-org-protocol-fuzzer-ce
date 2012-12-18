@@ -27,6 +27,8 @@ namespace PeachFarm.Common
       return result;
     }
 
+    #region Peach 2
+    /*
     public static void GetFilesFromDatabase(string connectionString, string destinationPath, string commandLineSearch = "")
     {
       if(Directory.Exists(destinationPath) == false)
@@ -68,5 +70,10 @@ namespace PeachFarm.Common
         }
       }
     }
+
+    //*/
+    #endregion
   }
+
+
 }
