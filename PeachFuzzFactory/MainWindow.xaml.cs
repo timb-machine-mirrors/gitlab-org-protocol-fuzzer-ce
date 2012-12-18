@@ -51,22 +51,22 @@ namespace PeachFuzzFactory
 		public MainWindow()
 		{
 			InitializeComponent();
-
+      //*
       //this.Title = "Peach FuzzFactory v3 v3 DEV";
+        string title = "Peach FuzzFactory v{0}- Copyright (c) Deja vu Security";
+        string version = "(Dev Build)";
+        if (ApplicationDeployment.IsNetworkDeployed)
+          version = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
 
-      string title = "Peach FuzzFactory v{0}- Copyright (c) Deja vu Security";
-      string version = "(Dev Build)";
-      if (ApplicationDeployment.IsNetworkDeployed)
-        version = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
+        this.Title = System.String.Format(title, version);
 
-      this.Title = System.String.Format(title, version);
+        tempPitFileName = System.IO.Path.GetTempFileName();
 
-			tempPitFileName = System.IO.Path.GetTempFileName();
-
-			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-      //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      //LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
-      LoadResourceFile("PeachFuzzFactory.template.xml");
+        var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        LoadFile(System.IO.Path.Combine(path, "template.xml"));
+        //LoadResourceFile("PeachFuzzFactory.template.xml");
+      //*/
 		}
 
 		protected void LoadBinaryFile(string fileName)
@@ -87,8 +87,8 @@ namespace PeachFuzzFactory
 
     protected void LoadResourceFile(string fileName)
     {
-      try
-      {
+      //try
+      //{
         pitFileName = fileName;
 
         #region Pit Editor
@@ -97,17 +97,17 @@ namespace PeachFuzzFactory
         PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
         XmlEditorTab.Title = "Xml Editor (" + System.IO.Path.GetFileName(fileName) + ")";
         #endregion
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message);
-      }
+      //}
+      //catch (Exception ex)
+      //{
+      //  MessageBox.Show(ex.Message);
+      //}
     }
 
 		protected void LoadFile(string fileName)
 		{
-			try
-			{
+      try
+      {
 				pitFileName = fileName;
 
         #region Pit Editor
@@ -149,11 +149,11 @@ namespace PeachFuzzFactory
 				//        Title = string.Format(windowTitle, fileName);
 
 				#endregion
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message);
+      }
 		}
 
 		protected void HandleCracking()
@@ -275,11 +275,18 @@ namespace PeachFuzzFactory
 
 		private void ButtonNewPit_Click(object sender, RoutedEventArgs e)
 		{
-			//var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+      if (pitEditor.IsDirty)
+      {
+        if (MessageBox.Show("You have unsaved changes. Save now?", "Fuzz Factory", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+        {
+          SavePit();
+        }
+      }
+			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
       //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      //LoadFile(System.IO.Path.Combine(path, "FuzzFactory\\template.xml"));
+      LoadFile(System.IO.Path.Combine(path, "template.xml"));
 
-      LoadResourceFile("PeachFuzzFactory.template.xml");
+      //LoadResourceFile("PeachFuzzFactory.template.xml");
 
 		}
 
@@ -299,22 +306,7 @@ namespace PeachFuzzFactory
 
 		private void ButtonSavePit_Click(object sender, RoutedEventArgs e)
 		{
-			SaveFileDialog sfd = new SaveFileDialog();
-			sfd.Filter = "Pit Files (*.xml)|*.xml";
-			sfd.DefaultExt = "xml";
-
-			if (sfd.ShowDialog() == true)
-			{
-				try
-				{
-					pitEditor.SavePitFile(sfd.FileName);
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show("Could not save file. Reason: " + ex.Message);
-				}
-			}
-			//MessageBox.Show("Not implemented yet.");
+      SavePit();
 		}
 
 		private void ButtonSavePitAs_Click(object sender, RoutedEventArgs e)
@@ -440,6 +432,8 @@ namespace PeachFuzzFactory
 			{
 				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
         pitEditor.LoadPitFile(tempPitFileName);
+        pitEditor.IsDirty = true;
+
         PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
       }
 			else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
@@ -507,6 +501,25 @@ namespace PeachFuzzFactory
 
       xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
       xmlEditor.Document.LoadFile(pitFileName);
+    }
+
+    private void SavePit()
+    {
+      SaveFileDialog sfd = new SaveFileDialog();
+      sfd.Filter = "Pit Files (*.xml)|*.xml";
+      sfd.DefaultExt = "xml";
+
+      if (sfd.ShowDialog() == true)
+      {
+        try
+        {
+          pitEditor.SavePitFile(sfd.FileName);
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show("Could not save file. Reason: " + ex.Message);
+        }
+      }
     }
 	}
 }

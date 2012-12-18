@@ -276,6 +276,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\Be\Be.HexEditor\Be.Windows.Forms.HexBox.dll</HintPath>
     </Reference>
+    <Reference Include="Peach.Core, Version=3.0.90.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Builds\Peach\latest\Peach.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -456,16 +460,13 @@
     <Resource Include="Icons\reload.png" />
     <EmbeddedResource Include="template.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="test.xml">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\peach\Peach.Core\Peach.Core.csproj">
-      <Project>{63C7C70D-0CBF-40EC-A11E-079B2E943D47}</Project>
-      <Name>Peach.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PitMaker\PitMaker\PitMaker.csproj">
       <Project>{51049453-0FD7-4F37-BD46-35B80C99E555}</Project>
       <Name>PitMaker</Name>
