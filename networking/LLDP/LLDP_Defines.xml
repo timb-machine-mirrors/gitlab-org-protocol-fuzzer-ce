@@ -1,0 +1,8 @@
+<PitDefines>
+  <Platform>
+    <Define key="SourceMAC" value="000c29e2c065"/>
+    <Define key="Hostname" value="foobar"/>
+    <Define key="Interface" value="eth0"/>
+    <Define key="LoggerPath"  value="./logs/lldp/"/> 
+  </Platform>
+</PitDefines>

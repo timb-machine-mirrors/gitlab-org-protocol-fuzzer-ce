@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Defines>
+    <!-- Publisher Config -->
+    <Define key="MultiHost" value="224.0.0.5"   />
+    <Define key="MultiNeig" value="224.0.0.6"   />
+    <Define key="Interface" value="10.0.1.63"/>
+    
+    <!-- Raw IP Header Config -->
+    <Define key="SrcIP"  value="0A 00 01 3F" />
+    <Define key="DestIP" value="E0 00 00 05" />
+
+    <!-- OSPF Header Config -->
+    <Define key="OSPFSourceRouter" value="0A 00 01 3F"/>
+    
+    <!-- OSPF Hello Message Config -->
+    <Define key="HelloInterval"   value="00 03"/>
+    <Define key="OSPFRouterID"    value="0A 00 01 3F" />
+    <Define key="BackUpRouterID"  value="0A 00 01 0F"/>
+    <Define key="OSPFAreaID"      value="00 00 00 01" />
+
+    <Define key="OSPFNeighbor"  value="0A 00 01 1C"/>
+    <Define key="OSPFNeighbor2" value="0A 00 01 1D"/>
+
+    <Define key="LoggerPath" value="./logs/ospfv2/"/>
+            
+  </Defines>
+</PitDefines>
