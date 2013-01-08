@@ -5,10 +5,14 @@
     xmlns="http://phed.org/2012/PeachFarm"
     xmlns:mstns="http://phed.org/2012/PeachFarm"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:ms="http://microsoft.com/wsdl/types/"
 >
+  <xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="Guid.xsd" />
+  
   <xs:element name="Run" type="Run" />
 
   <xs:complexType name="Run">
+    <!-- Peach 2
     <xs:sequence>
       <xs:element name="LogFiles" maxOccurs="1" minOccurs="1">
         <xs:complexType>
@@ -18,15 +22,64 @@
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="RunName" type="xs:string" use="required" />
+    <xs:sequence>
+      <xs:element name="Faults" maxOccurs="1" minOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Fault" type="Fault" maxOccurs="unbounded" minOccurs="0" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    -->
+    <xs:attribute name="TestName" type="xs:string" use="required" />
     <xs:attribute name="ComputerName" type="xs:string" use="required" /> 
     <!--
     <xs:attribute name="CommandLine" type="xs:string" use="required" />
     -->
     <xs:attribute name="PitFilePath" type="xs:string" use="required" />
+    <xs:attribute name="JobID" type="ms:guid" use="required" />
   </xs:complexType>
 
+  <xs:element name="Fault" type="Fault" />
+  <!--
+        fault.Description = f.description;
+        fault.DetectionSource = f.detectionSource;
+        fault.Exploitability = f.exploitability;
+        fault.FolderName = f.folderName;
+        fault.Iteration = f.iteration;
+        fault.MajorHash = f.majorHash;
+        fault.MinorHash = f.minorHash;
+        fault.Title = f.title;
+        fault.FaultType = f.type.ToString();
+        -->
+  <xs:complexType name="Fault">
+    <xs:sequence>
+      <xs:element name="Description" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="DetectionSource" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Exploitability" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="FolderName" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Iteration" type="xs:int" maxOccurs="1" minOccurs="1" />
+      <xs:element name="MajorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="MinorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Title" type="xs:string" maxOccurs="1" minOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="FaultType" type="FaultType" use="required" />
+    <xs:attribute name="JobID" type="ms:guid" use="required" />
+  </xs:complexType>
+
+  <xs:simpleType name="FaultType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Unknown" />
+      <xs:enumeration value="Fault" />
+      <xs:enumeration value="Data" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  
+  <!-- Peach 2
   <xs:complexType name="LogFile">
     <xs:attribute name="FileName" />
   </xs:complexType>
+  -->
 </xs:schema>

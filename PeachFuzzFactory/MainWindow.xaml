@@ -58,7 +58,7 @@
 						</ToolTip>
 					</Button.ToolTip>
 				</Button>
-				<Button x:Name="ButtonSavePitAs" Click="ButtonSavePitAs_Click">
+				<Button x:Name="ButtonSavePitAs" Click="ButtonSavePitAs_Click" Visibility="Collapsed">
 					<Image Source="/Icons/document-save-as.png"/>
 					<Button.ToolTip>
 						<ToolTip>
@@ -67,7 +67,7 @@
 					</Button.ToolTip>
 				</Button>
 			</ToolBar>
-			<ToolBar>
+			<ToolBar Visibility="Collapsed">
 				<Button x:Name="ButtonShowCracking" Click="ButtonShowCracking_Click">
 					<Image Source="/Icons/document-print-preview.png"/>
 					<Button.ToolTip>
@@ -108,7 +108,7 @@
 				<docking:Workspace>
 					<docking:TabbedMdiHost>
 						<docking:TabbedMdiContainer SelectionChanged="TabbedMdiContainer_SelectionChanged">
-							<docking:DocumentWindow x:Name="PitEditorTab" Title="Pit Editor">
+							<docking:DocumentWindow x:Name="PitEditorTab" Title="Pit Editor" CanClose="False">
 								<Grid>
 									<Grid.RowDefinitions>
 										<RowDefinition Height="Auto"/>
@@ -118,7 +118,7 @@
 									<pitmaker:PitMakerControl x:Name="pitEditor" Grid.Row="1"/>
 								</Grid>
 							</docking:DocumentWindow>
-							<docking:DocumentWindow Title="Xml Editor">
+							<docking:DocumentWindow Title="Xml Editor" x:Name="XmlEditorTab" CanClose="False">
 								<Grid>
 									<Grid.RowDefinitions>
 										<RowDefinition Height="Auto"/>
@@ -234,7 +234,7 @@
 									</editor:SyntaxEditor>
 								</Grid>
 							</docking:DocumentWindow>
-							<docking:DocumentWindow Title="Hex Editor">
+							<docking:DocumentWindow Title="Hex Editor" x:Name="HexEditorTab" CanClose="False">
 								<docking:DockSite Grid.Row="1">
 									<docking:SplitContainer Orientation="Vertical">
 

@@ -113,6 +113,8 @@ namespace PeachFarm.Admin.Console
           admin.ListErrorsAsync();
         }
 
+        #region Peach 2
+        /*
         if (logs)
         {
           string connectionString = extra[0];
@@ -128,11 +130,13 @@ namespace PeachFarm.Admin.Console
             GetFiles(connectionString, destinationPath);
           }
         }
+        //*/
+        #endregion
 
         System.Console.WriteLine("waiting for result...");
         System.Console.ReadLine();
 
-        admin.StopAdmin();
+        Environment.Exit(0);
       }
       catch (SyntaxException)
       {
@@ -208,6 +212,8 @@ namespace PeachFarm.Admin.Console
     }
     #endregion
 
+    #region Peach 2
+    /*
     private static void GetFiles(string connectionString, string destinationPath, string commandLineSearch = "")
     {
       if (Directory.Exists(destinationPath) == false)
@@ -235,10 +241,18 @@ namespace PeachFarm.Admin.Console
 
       System.Console.WriteLine("done writing files");
     }
+    //*/
+    #endregion
 
     #region PrintHelp
     static void PrintHelp()
     {
+      //  pf_admin.exe -logs destinationpath
+      //  pf_admin.exe -logs destinationpath commandLineSearch
+      //  commandLine - Peach command line to execute
+      //  logs   - Pull down logs for all runs or specific runs
+      //  destinationpath   - Path to save logs to locally
+      //  commandLineSearch - Full or partial command line to match
 
       System.Console.WriteLine(@"
 
@@ -248,14 +262,12 @@ namespace PeachFarm.Admin.Console
 Syntax Guide
 ------------
 
-Syntax: pf_admin.exe -start -n clientCount commandLine logPath
-        pf_admin.exe -start --ip ipAddress commandLine logPath
+Syntax: pf_admin.exe -start -n clientCount pitFilePath
+        pf_admin.exe -start --ip ipAddress pitFilePath
         pf_admin.exe -stop
-        pf_admin.exe -stop commandLine
+        pf_admin.exe -stop pitFilePath
         pf_admin.exe -list
         pf_admin.exe -errors
-        pf_admin.exe -logs destinationpath
-        pf_admin.exe -logs destinationpath commandLineSearch
 
 Optional Arguments:
  
@@ -266,20 +278,15 @@ Commands:
 
  start   - Start one or more instances of Peach.
    clientCount - Number of instances to start
-   commandLine - Peach command line to execute
-   logPath     - Folder containing logs to save
+   pitFilePath - Full path to Pit File
    ipAddress   - Address of specific node to launch on
 
  stop   - Stop some or all instances of Peach
-   commandLine - Full or partial command line to match
+   pitFilePath - Full path to Pit File
 
  list   - List all nodes in our cluster with status
 
  errors - List any logged node errors
-
- logs   - Pull down logs for all runs or specific runs
-   destinationpath   - Path to save logs to locally
-   commandLineSearch - Full or partial command line to match
 
 Command Line Search
 -------------------

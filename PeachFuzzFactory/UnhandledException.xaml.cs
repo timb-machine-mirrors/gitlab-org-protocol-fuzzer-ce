@@ -14,15 +14,30 @@ namespace PeachFuzzFactory
       InitializeComponent();
       StringBuilder message = new StringBuilder();
 
-      message.Append(ex.Message);
+
+      txtMessage.Text = WriteAll(ex, "", message);
+
+    }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+      //Application.Current.Shutdown();
+    }
+
+    public string WriteAll(Exception ex, string prefix, StringBuilder concat)
+    {
+      concat.AppendLine(prefix + ex.Message);
+
+
+//#if DEBUG
+//      concat.AppendLine(ex.StackTrace);
+//#endif
+
       if (ex.InnerException != null)
       {
-        message.Append(Environment.NewLine);
-        message.Append(Environment.NewLine);
-        message.Append(ex.InnerException.Message);
+        concat.Append(WriteAll(ex.InnerException, prefix + "--", concat));
       }
-
-      txtMessage.Text = message.ToString();
+      return concat.ToString();
     }
   }
 }

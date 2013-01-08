@@ -16,20 +16,24 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <PublishUrl>publish\</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>\\nas\projects\FuzzFactory\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <TargetCulture>en-US</TargetCulture>
+    <ProductName>Peach Fuzz Factory</ProductName>
+    <PublisherName>Deja Vu Security</PublisherName>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ApplicationVersion>3.0.108.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -214,28 +218,71 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>FCFBED3459ADB9BD240B50F6D5150A23CFA0ED31</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>PeachFuzzFactory_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Accessibility">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+    <Reference Include="ActiproSoftware.Docking.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ActiproSoftware.Docking.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Navigation.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.PropertyGrid.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Shared.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.SyntaxEditor.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Text.Addons.DotNet.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Text.Addons.Xml.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Text.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Views.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
-    <Reference Include="ActiproSoftware.Wizard.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL" />
+    <Reference Include="ActiproSoftware.Navigation.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.PropertyGrid.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Shared.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Text.Addons.DotNet.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Text.Addons.Xml.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Text.LLParser.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files (x86)\Actipro Software\WPF-Controls\v12.2.0570\Assemblies\ActiproSoftware.Text.LLParser.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Text.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Views.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActiproSoftware.Wizard.Wpf, Version=12.2.570.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Be.Windows.Forms.HexBox, Version=1.4.6.13072, Culture=neutral, PublicKeyToken=e0e5adf0ebc99863, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\3rdParty\Be.HexEditor.148\bin\Be.Windows.Forms.HexBox.dll</HintPath>
+      <HintPath>..\..\..\Program Files (x86)\Be\Be.HexEditor\Be.Windows.Forms.HexBox.dll</HintPath>
+    </Reference>
+    <Reference Include="Peach.Core, Version=3.0.90.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Builds\Peach\latest\Peach.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -317,6 +364,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </None>
+    <None Include="PeachFuzzFactory_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -396,9 +444,7 @@
     <SplashScreen Include="Icons\fuzzfactory.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="4-Key.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="4-Key.png" />
     <Resource Include="Icons\edit-copy.png" />
     <Resource Include="Icons\edit-cut.png" />
     <Resource Include="Icons\edit-delete.png" />
@@ -418,18 +464,148 @@
     </None>
     <Content Include="test.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Include="test.xml">
       <SubType>Designer</SubType>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Peach\Peach.Core\Peach.Core.csproj">
-      <Project>{63C7C70D-0CBF-40EC-A11E-079B2E943D47}</Project>
-      <Name>Peach.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PitMaker\PitMaker\PitMaker.csproj">
       <Project>{51049453-0FD7-4F37-BD46-35B80C99E555}</Project>
       <Name>PitMaker</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="ActiproSoftware.Docking.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Navigation.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.PropertyGrid.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Shared.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.SyntaxEditor.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Text.Addons.DotNet.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Text.Addons.Xml.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Text.LLParser.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Text.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Views.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="ActiproSoftware.Wizard.Wpf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
