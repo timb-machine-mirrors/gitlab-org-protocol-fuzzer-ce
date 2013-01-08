@@ -30,8 +30,8 @@
     <TargetCulture>en-US</TargetCulture>
     <ProductName>Peach Fuzz Factory</ProductName>
     <PublisherName>Deja Vu Security</PublisherName>
-    <ApplicationRevision>3</ApplicationRevision>
-    <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>3.0.108.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
