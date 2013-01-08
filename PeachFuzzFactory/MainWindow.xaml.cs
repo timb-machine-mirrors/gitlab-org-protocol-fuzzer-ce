@@ -74,44 +74,8 @@ namespace PeachFuzzFactory
 			try
 			{
 				pitFileName = fileName;
-
-				#region Pit Editor
 				pitEditor.LoadPitFile(fileName);
 				PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(fileName) + ")";
-				#endregion
-
-				//#region Xml Editor
-				//this.tempPitFileName = fileName;
-				//        PitParser parser = new PitParser();
-				//        Dom dom;
-
-				//        using(Stream fin = File.OpenRead(fileName))
-				//        {
-				//            dom = parser.asParser(new Dictionary<string, object>(), fin);
-
-
-				//        }
-
-				//        XmlSchemaResolver schemaResolver = new XmlSchemaResolver();
-				//        using (Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("Peach.Core.peach.xsd"))
-				//        {
-				//            schemaResolver.LoadSchemaFromStream(stream);
-				//        }
-
-				//        xmlEditor.Document.Language.RegisterXmlSchemaResolver(schemaResolver);
-				//        xmlEditor.Document.LoadFile(fileName);
-
-				//        var models = new List<DesignModel>();
-				//        models.Add(new DesignPeachModel(dom));
-				//        //DesignerTreeView.ItemsSource = models;
-
-				//        DesignHexDataModelsCombo.ItemsSource = dom.dataModels.Values;
-				//        if (dom.dataModels.Count > 0)
-				//            DesignHexDataModelsCombo.SelectedIndex = dom.dataModels.Count - 1;
-
-				//        Title = string.Format(windowTitle, fileName);
-
-				//#endregion
 			}
 			catch (Exception ex)
 			{
@@ -193,30 +157,6 @@ namespace PeachFuzzFactory
 		{
 			crackMap[element] = new CrackModel(element, (int)data.TellBytes(), 0);
 		}
-
-		//private void DesignerTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-		//{
-		//    DesignPropertyGrid.Items.Clear();
-
-		//    if (!(DesignerTreeView.SelectedItem is DesignDataElementModel))
-		//        return;
-
-		//    DesignDataElementModel model = (DesignDataElementModel)DesignerTreeView.SelectedItem;
-		//    foreach (Attribute attribute in model.DataElement.GetType().GetCustomAttributes(true))
-		//    {
-		//        if (attribute is ParameterAttribute)
-		//        {
-		//            var item = new PropertyGridPropertyItem();
-		//            item.Name = ((ParameterAttribute)attribute).name;
-		//            item.ValueName = ((ParameterAttribute)attribute).name;
-		//            item.Value = GetValue(model.DataElement, ((ParameterAttribute)attribute).name);
-		//            item.Description = ((ParameterAttribute)attribute).description;
-		//            item.ValueType = ((ParameterAttribute)attribute).type;
-
-		//            DesignPropertyGrid.Items.Add(item);
-		//        }
-		//    }
-		//}
 
 		private string GetValue(DataElement elem, string property)
 		{
@@ -328,12 +268,12 @@ namespace PeachFuzzFactory
 
 		private void ButtonXmlDelete_Click(object sender, RoutedEventArgs e)
 		{
-			// TODO
+			//xmlEditor.ActiveView.DeleteSelectedText();
 		}
 
 		private void ButtonXmlFind_Click(object sender, RoutedEventArgs e)
 		{
-			//xmlEditor
+			//xmlEditor.ActiveView.Find
 		}
 
 		private void ButtonXmlFindAndReplace_Click(object sender, RoutedEventArgs e)
@@ -395,12 +335,12 @@ namespace PeachFuzzFactory
 			if (fromWindow.Title.StartsWith("Hex"))
 				return;
 
-			if (toWindow == PitEditorTab && fromWindow.Title.StartsWith("Xml Editor"))
+			if (toWindow.Title.StartsWith("Pit") && fromWindow.Title.StartsWith("Xml Editor"))
 			{
 				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
 				pitEditor.LoadPitFile(tempPitFileName);
 			}
-			else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
+			else if (fromWindow.Title.StartsWith("Pit") && toWindow.Title.StartsWith("Xml Editor"))
 			{
 				pitEditor.SavePitFile(tempPitFileName, false);
 
@@ -455,3 +395,5 @@ namespace PeachFuzzFactory
 		}
 	}
 }
+
+// end
