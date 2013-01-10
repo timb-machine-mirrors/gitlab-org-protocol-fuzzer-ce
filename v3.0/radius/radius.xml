@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2012/Peach ../peach.xsd">
+	
+	<Defaults>
+		<Number size="8" endian="network" signed="false" />
+	</Defaults>
+	
+	<DataModel name="AuthPacket">
+		<Choice>
+			<!-- value=1 is start -->
+			<Number  value="1" size="8" />
+			<Number  value="2" size="8" />
+			<Number  value="3" size="8" />
+			<Number  value="4" size="8" />
+			<Number  value="5" size="8" />
+			<Number  value="11" size="8" />
+			<Number  value="12" size="8" />
+			<Number  value="13" size="8" />
+			<Number  value="255" size="8" />
+		</Choice>
+	    <Number name="packetIdentifier" value="1" size="8" /> 
+	    <Number name="length" size="16" >
+			<Relation type="size" of="AuthPacket" />
+	    </Number>
+		<!--Value must have 16 characters in it-->
+	    <String name="authenticator" length="16" value="1111111348605961" />
+		
+	    <!--User Name Setup-->
+	    <Number name="type1" value="1" size="8"/>
+	    <Number name="valLength1" size="8" >
+		  <Relation type="size" of="value1" expressionGet="size" expressionSet="size+2"/>
+	    </Number>
+	    <!--User Name-->
+	    <String name="value1" value="steve1" />
+	    
+	    <!-- Password Setup -->	
+	    <Number name="type2" value="2" size="8"/>
+	    <Number name="valLength2" size="8" >
+	    	<Relation type="size" of="value2" expressionGet="size" expressionSet="size+2"/>
+	    </Number>
+	    <!-- Password Encryption -->
+	    <Blob name="value2" valueType="hex">
+			<Fixup class="RadiusFixup">
+				<Param name="ref" value="authenticator" />
+				<Param name="secret" value="testing123" />
+				<Param name="password" value="testing" />
+			</Fixup>
+	    </Blob>
+		
+		<!--CHAP-Password
+			<Number value="3" size="8"/>
+			<Number value="19" size="8" />
+			<Number size="8" />
+			<String length="16" />			
+		-->
+		
+		<!-- Generic Attribute Template
+		<Number value="Replace with Proper Code" size="8"/>
+	    <Number size="8" >
+		  <Relation type="size" of="extra1" expressionGet="size" expressionSet="size+2"/>
+	    </Number>
+	    <String name="extra1" value="Replace With Proper Value" />
+		-->
+		<Block>
+			<Number value="11" size="8" />
+			<Number size="8" >
+				<Relation type="size" of="val11" expressionGet="size" expressionSet="size+2"/>
+			</Number>
+			<String name="val11"/>
+		</Block>
+		<!--UnComment When Peach Random Generation works
+		<Choice minOccurs="0" maxOccurs="3">
+			<Block>
+				<Choice>
+					<Block>
+						<Number value="14" size="8" />
+						<Number value="6" size="8" />
+						<Blob length="4" />
+					</Block>
+					<Block>
+						<Number value="5" size="8" />
+						<Number value="6" size="8" />
+						<Number size="32" value="1"/>
+					</Block>
+					<Block>
+						<Number value="11" size="8" />
+						<Number size="8" >
+							<Relation type="size" of="val11" expressionGet="size" expressionSet="size+2"/>
+						</Number>
+						<String name="val11"/>
+					</Block>
+					<Block>
+						<Number value="26" size="8" />
+						<Number size="8" >
+							<Relation type="size" of="val26" expressionGet="size" expressionSet="size+2"/>
+						</Number>
+						<Number size="32" />
+						<String name="val26" />
+					</Block>
+					<Block>
+						<Number value="36" size="8" />
+						<Number value="34" size="8" />
+						<String length="32" />
+					</Block>
+					<Block>
+						<Number value="60" size="8" />
+						<Number size="8" >
+							<Relation type="size" of="val60" expressionGet="size" expressionSet="size+2"/>
+						</Number>
+						<String name="val60" />
+					</Block>
+				</Choice>
+			</Block>
+			<Block>
+				<Number size="8"/>
+				<Number size="8" >
+					<Relation type="size" of="fallThrough" expressionGet="size" expressionSet="size+2"/>
+				</Number>
+				<Blob name="fallThrough" />
+			</Block>
+		</Choice>-->
+		
+	</DataModel>
+	
+	<DataModel name="AcctPacket">
+	    <Number name="code" value="4" size="8" />
+	    <Number name="packetIdentifier" value="1" size="8"/> 
+	    <Number name="length" size="16" >
+			<Relation type="size" of="AcctPacket" />
+	    </Number>
+	    <Blob name="authenticator" length="16" mutable="false">
+			<Fixup class="RadiusAcctFixup">
+				<Param name="ref" value="AcctPacket" />
+				<Param name="secret" value="testing123"/>
+			</Fixup>
+		</Blob>
+		
+	    <Number value="1" size="8"/>
+	    <Number name="valLength1" size="8" >
+		  <Relation type="size" of="value1" expressionGet="size" expressionSet="size+2"/>
+	    </Number>
+	    <!--User Name-->
+	    <String name="value1" value="steve1" />
+	    <Block>
+			<Number value="40" size="8" />
+			<Number value="6" size="8" />
+			<Number value="1" size="32" /> 
+			<Number value="44" size="8"/>
+			<Number size="8" >
+				<Relation type="size" of="value2" expressionGet="size" expressionSet="size+2"/>
+			</Number>
+			<String name="value2" value="4223" />
+		</Block>
+		<!-- UnComment When Peach Random Generation Works
+		<Choice minOccurs="1" >
+			<Block>
+				<Number value="40" size="8" />
+				<Number value="6" size="8" />
+				<Choice>
+					<Number value="1" size="32" /> 
+				</Choice>
+				<Number value="44" size="8"/>
+				<Number size="8" >
+					<Relation type="size" of="value2" expressionGet="size" expressionSet="size+2"/>
+				</Number>
+				<String name="value2" value="4223" />
+			</Block>
+			<Block>
+				<Number value="40" size="8" />
+				<Number value="6" size="8" />
+				<Number value="1" size="32" /> 
+			<Block>
+				<Number value="44" size="8" />
+				<Number  size="8" >
+					<Relation type="size" of="val44" expressionGet="size" expressionSet="size+2"/>
+				</Number>
+				<String name="val44"/>
+			</Block>
+		</Choice>
+		-->
+		
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="udpAuth">
+				<DataModel ref="AuthPacket" />
+            </Action>
+			<Action type="changeState" ref="Accounting" />
+		</State>
+		
+		<State name="Accounting">
+			<Action type="output" publisher="udpAccounting">
+				<DataModel ref="AcctPacket" />
+            </Action>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent">
+	    <Monitor name="Network" class="PcapMonitor">
+			<Param name="filter" value="udp"/>
+			<Param name="Device" value="Local Area Connection" />
+	    </Monitor>
+		
+		<!--Linux Monitors-->
+		<!--<Monitor class="LinuxCrashMonitor" />
+		<Monitor class="Process" >
+			<Param name="Executable" value="freeradius" />
+			<Param name="FaultOnEarlyExit" value="true" />
+			<Param name="Arguments" value="-fs" />
+		</Monitor>-->
+		<!--End Linux-->
+		
+	</Agent>
+
+	<Test name="Default">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="TheStateModel"/>
+
+	    <Publisher class="Udp" name="udpAuth">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="1812" />
+	    </Publisher>
+		
+		<Publisher class="Udp" name="udpAccounting">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="1813" />
+	    </Publisher>
+		
+		<!--Optional Configuration -->
+		<Strategy class="Random" />
+		<!--<Strategy class="Sequential" />-->
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs" />
+	    </Logger>
+	</Test>
+</Peach>
+<!-- end -->

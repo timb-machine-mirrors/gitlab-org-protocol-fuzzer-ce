@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2012/Peach ../peach.xsd">
+
+	<Defaults>
+		<Number size="8" endian="little" signed="false" />
+	</Defaults>
+	
+	<DataModel name="ICO">
+		<Block name="IconDirHeader">
+			<Number name="reserve" size="16" />
+			<Number name="type" size="16" />
+			<Number name="length" size="16">
+				<Relation type="count" of="IconDirEntry" />
+			</Number>
+		</Block>
+		<Block name="IconDirEntry" minOccurs="1">
+			<!-- Value between 0-255. 0 means 256 -->
+			<Number name="width" size="8"  />
+			<!-- Value between 0-255. 0 means 256 -->
+			<Number name="height" size="8"  />
+			<Number name="palette" size="8" />
+			<Number name="reserved" size="8" />
+			<Number name="planes" size="16" />
+			<Number name="bitsPerPixel" size="16"  />
+			<Number name="size" size="32">
+				<Relation type="size" of="raw" />
+			</Number>
+			<!-- Offset of 'raw' from the end of the IconDirEntry-->
+			<Number name="offset" size="32">
+				<Relation type="offset" of="raw" />
+			</Number>
+			
+			<Blob name="raw">
+				<Placement before="PlaceImagesHere" />
+			</Blob>
+		</Block>
+
+		<Block name="PlaceImagesHere" />
+		
+	</DataModel>
+
+	<StateModel name="State" initialState="Initial">
+		<State name="Initial">
+			
+			<!-- Write out our ico file -->
+			<Action type="output">
+				<DataModel ref="ICO" />
+				<!-- This is our sample file to read in -->
+				<Data fileName="ico-samples/sample.ico" />
+			</Action>
+		
+			<Action type="close" />
+			
+			<!-- Launch the target process -->
+			<Action type="call" method="LaunchPaint" publisher="Peach.Agent"/>
+		</State>
+
+	</StateModel>
+
+	<Agent name="LocalAgent">
+		<Monitor class="WindowsDebugger">
+			<!-- The target application and fuzzed ico -->
+			<Param name="CommandLine" value="mspaint.exe fuzzed.ico" />
+			<Param name="StartOnCall" value="LaunchPaint" />
+		</Monitor>
+
+		<Monitor class="PageHeap">
+			<Param name="Executable" value="mspaint.exe"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="Default">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="State"/>
+
+		<Publisher class="File">
+			<Param name="FileName" value="fuzzed.ico"/>
+		</Publisher>
+		
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+		<Logger class="File">
+			<Param name="Path" value="logs" />
+		</Logger>
+	</Test>
+</Peach>
+<!-- end -->
