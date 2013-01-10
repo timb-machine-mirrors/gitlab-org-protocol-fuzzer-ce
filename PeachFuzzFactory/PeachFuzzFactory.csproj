@@ -464,10 +464,7 @@
     </None>
     <Content Include="test.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <None Include="test.xml">
-      <SubType>Designer</SubType>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PitMaker\PitMaker\PitMaker.csproj">
