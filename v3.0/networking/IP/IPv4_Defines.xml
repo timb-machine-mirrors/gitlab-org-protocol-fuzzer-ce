@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Platform>
+    <Define key="Target" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="logs/ipv4/"/>
+	<Define key="Interface" value="127.0.0.1"/>
+  </Platform>
+</PitDefines>
