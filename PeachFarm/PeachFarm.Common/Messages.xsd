@@ -5,21 +5,22 @@
     xmlns="http://phed.org/2012/PeachFarm"
     xmlns:mstns="http://phed.org/2012/PeachFarm"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:ms="http://microsoft.com/wsdl/types/"
 >
-  <xs:include schemaLocation="Database.xsd" />
+  
+  <xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="Guid.xsd" />
+
   <xs:element name="StartPeachRequest" type="StartPeachRequest" />
   <xs:complexType name="StartPeachRequest">
     <xs:all>
-      <!--
-      <xs:element name="PitXml" type="xs:string" />
-      <xs:element name="CommandLine" type="xs:string" maxOccurs="1" minOccurs="1" />
-      -->
-      <xs:element name="PitFilePath" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Pit" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
     <xs:attribute name="ClientCount" type="xs:int" use="required" />
     <xs:attribute name="IPAddress" type="xs:string" use="required" />
-    <xs:attribute name="LogPath" type="xs:string" use="required" />
     <xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
+    <xs:attribute name="SqlConnectionString" type="xs:string" default="" />
+    <xs:attribute name="SqlReportingEnabled" type="xs:boolean" default="false" />
+    <xs:attribute name="JobID" type="ms:guid" use="required" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
@@ -28,12 +29,13 @@
       <xs:element name="Message" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
     <xs:attribute name="Success" type="xs:boolean" default="true" />
+    <xs:attribute name="JobID" type="ms:guid" use="required" />
   </xs:complexType>
   
   <xs:element name="StopPeachRequest" type="StopPeachRequest" />
   <xs:complexType name="StopPeachRequest">
     <xs:all>
-      <xs:element name="CommandLineSearch" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="JobID" type="ms:guid" maxOccurs="1" minOccurs="1" />
     </xs:all>
   </xs:complexType>
 
@@ -45,23 +47,16 @@
     <xs:attribute name="Success" type="xs:boolean" default="true" />
   </xs:complexType>
 
-  <xs:complexType name="Computer">
-    <xs:attribute name="ComputerName" />
-  </xs:complexType>
-
   <xs:element name="Heartbeat" type="Heartbeat" />
   <xs:complexType name="Heartbeat">
     <xs:all>
-      <!--
-      <xs:element name="CommandLine" type="xs:string" maxOccurs="1" minOccurs="1" />
-      -->
-      <xs:element name="PitFilePath" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
     <xs:attribute name="ComputerName" type="xs:string" use="required" />
     <xs:attribute name="Stamp" type="xs:dateTime" use="required" />
     <xs:attribute name="Status" type="Status" use="required" />
     <xs:attribute name="QueueName" type="xs:string" use="required" />
+    <xs:attribute name="JobID" type="xs:string" default="" />
   </xs:complexType>
 
   <xs:simpleType name="Status">

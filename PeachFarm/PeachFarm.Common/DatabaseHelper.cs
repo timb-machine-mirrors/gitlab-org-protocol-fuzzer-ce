@@ -7,7 +7,7 @@ using PeachFarm.Common.Messages;
 using System.IO;
 using MongoDB.Driver.Builders;
 
-namespace PeachFarm.Common
+namespace PeachFarm.Common.Mongo
 {
   public class DatabaseHelper
   {
@@ -25,6 +25,22 @@ namespace PeachFarm.Common
         result = false;
       }
       return result;
+    }
+
+    public static Job GetJob(Guid jobGuid, string connectionString)
+    {
+      MongoServer server = MongoServer.Create(connectionString);
+      MongoDatabase db = server.GetDatabase("PeachFarm");
+
+      if (db.CollectionExists("jobs") == false)
+      {
+        throw new ApplicationException("Database does not exist.");
+      }
+
+      MongoCollection<Job> jobs = db.GetCollection<Job>("jobs");
+
+      var query = Query.EQ("JobID", jobGuid);
+      return jobs.FindOne(query);
     }
 
     #region Peach 2

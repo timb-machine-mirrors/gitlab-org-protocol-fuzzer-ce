@@ -11,6 +11,9 @@ using PeachFarm.Common;
 using PeachFarm.Common.Messages;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.IO;
+using System.Xml;
 
 namespace PeachFarm.Admin
 {
@@ -161,13 +164,11 @@ namespace PeachFarm.Admin
 
     #region Sends
     //private void StartPeach(string commandLine, int clientCount, string logPath)
-    public void StartPeachAsync(string pitFilePath, int clientCount, string logPath)
+    public void StartPeachAsync(string pitFilePath, int clientCount)
     {
       StartPeachRequest request = new StartPeachRequest();
       request.ClientCount = clientCount;
-      //request.CommandLine = commandLine;
-      request.PitFilePath = pitFilePath;
-      request.LogPath = logPath;
+      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
       request.IPAddress = String.Empty;
       PublishToServer(request.Serialize(), "StartPeach");
 
@@ -175,23 +176,21 @@ namespace PeachFarm.Admin
     }
 
     //private void StartPeach(string commandLine, string ipAddress, string logPath)
-    public void StartPeachAsync(string pitFilePath, string ipAddress, string logPath)
+    public void StartPeachAsync(string pitFilePath, string ipAddress)
     {
       StartPeachRequest request = new StartPeachRequest();
-      //request.CommandLine = commandLine;
-      request.PitFilePath = pitFilePath;
+      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
       request.ClientCount = 1;
       request.IPAddress = ipAddress;
-      request.LogPath = logPath;
       PublishToServer(request.Serialize(), "StartPeach");
       Console.WriteLine("waiting for result...");
       Console.ReadLine();
     }
 
-    public void StopPeachAsync(string commandLine = "")
+    public void StopPeachAsync(string jobGuid)
     {
       StopPeachRequest request = new StopPeachRequest();
-      request.CommandLineSearch = commandLine;
+      request.JobID = Guid.Parse(jobGuid);
       PublishToServer(request.Serialize(), "StopPeach");
     }
 
@@ -402,5 +401,16 @@ namespace PeachFarm.Admin
 
     #endregion
 
+    private string GetPitXml(string pitFilePath)
+    {
+      XDocument doc = XDocument.Load(pitFilePath);
+      StringBuilder sb = new StringBuilder();
+      XmlWriterSettings settings = new XmlWriterSettings();
+      settings.ConformanceLevel = ConformanceLevel.Fragment;
+      settings.OmitXmlDeclaration = true;
+      XmlWriter writer = XmlWriter.Create(sb, settings);
+      doc.Save(writer);
+      return sb.ToString();
+    }
   }
 }

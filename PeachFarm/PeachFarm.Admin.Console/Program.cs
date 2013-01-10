@@ -55,7 +55,7 @@ namespace PeachFarm.Admin.Console
         if (!stop && !start && !list && !errors && !logs)
           throw new SyntaxException();
 
-        if (start && extra.Count != 2)
+        if (start && extra.Count != 1)
           throw new SyntaxException();
 
         Admin admin = new Admin(hostName);
@@ -79,15 +79,15 @@ namespace PeachFarm.Admin.Console
         if (start)
         {
           string commandLine = extra[0];
-          string logPath = extra[1];
+          //string logPath = extra[1];
 
           if (launchCount > 0)
           {
-            admin.StartPeachAsync(commandLine, launchCount, logPath);
+            admin.StartPeachAsync(commandLine, launchCount);
           }
           else
           {
-            admin.StartPeachAsync(commandLine, ip, logPath);
+            admin.StartPeachAsync(commandLine, ip);
           }
         }
 
