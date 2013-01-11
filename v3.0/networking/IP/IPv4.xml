@@ -24,7 +24,7 @@
         <Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
       </Flags>
       <Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
-      <Number name="Protocol" size="8" endian="big" valueType="hex" value="05"/>
+      <Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
       <Number name="Checksum" size="16" endian="big">
         <Fixup class="checksums.IcmpChecksumFixup">
           <Param name="ref" value="Header"/>
