@@ -583,6 +583,7 @@ namespace PeachFarm.Common.Messages
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
+    [System.Xml.Serialization.XmlAttributeAttribute()]
     public System.Guid JobID
     {
       get
@@ -799,14 +800,9 @@ namespace PeachFarm.Common.Messages
 
     private string queueNameField;
 
-    private string jobIDField;
+    private System.Guid jobIDField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
-
-    public Heartbeat()
-    {
-      this.jobIDField = "";
-    }
 
     public string ErrorMessage
     {
@@ -873,8 +869,7 @@ namespace PeachFarm.Common.Messages
     }
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    [System.ComponentModel.DefaultValueAttribute("")]
-    public string JobID
+    public System.Guid JobID
     {
       get
       {

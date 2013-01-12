@@ -29,6 +29,7 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.MongoDb] = value; }
     }
 
+    [ConfigurationProperty(Constants.SqlReporting)]
     public SqlReportingElement SqlReporting
     {
       get { return (SqlReportingElement)this[Constants.SqlReporting]; }

@@ -179,7 +179,7 @@ namespace PeachFarm.Admin
     public void StartPeachAsync(string pitFilePath, string ipAddress)
     {
       StartPeachRequest request = new StartPeachRequest();
-      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+      request.Pit = GetPitXml(pitFilePath);
       request.ClientCount = 1;
       request.IPAddress = ipAddress;
       PublishToServer(request.Serialize(), "StartPeach");
@@ -191,6 +191,13 @@ namespace PeachFarm.Admin
     {
       StopPeachRequest request = new StopPeachRequest();
       request.JobID = Guid.Parse(jobGuid);
+      PublishToServer(request.Serialize(), "StopPeach");
+    }
+
+    public void StopPeachAsync()
+    {
+      StopPeachRequest request = new StopPeachRequest();
+      request.JobID = Guid.Empty;
       PublishToServer(request.Serialize(), "StopPeach");
     }
 
@@ -404,13 +411,7 @@ namespace PeachFarm.Admin
     private string GetPitXml(string pitFilePath)
     {
       XDocument doc = XDocument.Load(pitFilePath);
-      StringBuilder sb = new StringBuilder();
-      XmlWriterSettings settings = new XmlWriterSettings();
-      settings.ConformanceLevel = ConformanceLevel.Fragment;
-      settings.OmitXmlDeclaration = true;
-      XmlWriter writer = XmlWriter.Create(sb, settings);
-      doc.Save(writer);
-      return sb.ToString();
+      return doc.ToString();
     }
   }
 }

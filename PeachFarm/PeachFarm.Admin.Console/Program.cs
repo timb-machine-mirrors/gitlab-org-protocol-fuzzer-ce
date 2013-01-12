@@ -113,26 +113,6 @@ namespace PeachFarm.Admin.Console
           admin.ListErrorsAsync();
         }
 
-        #region Peach 2
-        /*
-        if (logs)
-        {
-          string connectionString = extra[0];
-          string destinationPath = extra[1];
-
-          if (extra.Count >= 2)
-          {
-            string commandLineSearch = extra[2];
-            GetFiles(connectionString, destinationPath, commandLineSearch);
-          }
-          else
-          {
-            GetFiles(connectionString, destinationPath);
-          }
-        }
-        //*/
-        #endregion
-
         System.Console.WriteLine("waiting for result...");
         System.Console.ReadLine();
 
@@ -190,7 +170,14 @@ namespace PeachFarm.Admin.Console
       {
         foreach (Heartbeat heartbeat in e.Result.Computers)
         {
-          System.Console.WriteLine(String.Format("{0}\t{1}\t{2}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp));
+          if (heartbeat.Status == Status.Running)
+          {
+            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}:{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+          }
+          else
+          {
+            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp));
+          }
         }
 
 
@@ -212,37 +199,6 @@ namespace PeachFarm.Admin.Console
     }
     #endregion
 
-    #region Peach 2
-    /*
-    private static void GetFiles(string connectionString, string destinationPath, string commandLineSearch = "")
-    {
-      if (Directory.Exists(destinationPath) == false)
-      {
-        try
-        {
-          Directory.CreateDirectory(destinationPath);
-        }
-        catch (Exception ex)
-        {
-          System.Console.WriteLine(String.Format("Could not create folder at {0}, exiting now.\n{1}", destinationPath, ex.Message));
-          return;
-        }
-      }
-
-      try
-      {
-        DatabaseHelper.GetFilesFromDatabase(connectionString, destinationPath, commandLineSearch);
-      }
-      catch
-      {
-        System.Console.WriteLine(String.Format("Could not connect to MongoDB at {0}, exiting now.", connectionString));
-        return;
-      }
-
-      System.Console.WriteLine("done writing files");
-    }
-    //*/
-    #endregion
 
     #region PrintHelp
     static void PrintHelp()
@@ -265,7 +221,7 @@ Syntax Guide
 Syntax: pf_admin.exe -start -n clientCount pitFilePath
         pf_admin.exe -start --ip ipAddress pitFilePath
         pf_admin.exe -stop
-        pf_admin.exe -stop pitFilePath
+        pf_admin.exe -stop jobID
         pf_admin.exe -list
         pf_admin.exe -errors
 
@@ -282,7 +238,7 @@ Commands:
    ipAddress   - Address of specific node to launch on
 
  stop   - Stop some or all instances of Peach
-   pitFilePath - Full path to Pit File
+   jobID - Job ID
 
  list   - List all nodes in our cluster with status
 

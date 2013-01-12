@@ -48,21 +48,4 @@ namespace PeachFarm.Common.Messages
     #endregion
   }
 
-  #region Peach 2
-  /*
-  public partial class LogFile
-  {
-    //[BsonIgnore]
-    //[XmlElement(Order = 1)]
-    //public byte[] Data { get; set; }
-
-    [BsonIgnore]
-    [XmlElement(Order = 1)]
-    public string LocalFileName { get; set; }
-
-    [XmlIgnore]
-    public BsonObjectId FileReference { get; set; }
-  }
-  //*/
-  #endregion
 }

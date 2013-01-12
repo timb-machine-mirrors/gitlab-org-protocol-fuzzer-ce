@@ -324,10 +324,12 @@ namespace PeachFarm.Node
     {
       if (clientState.Status == Status.Running)
       {
-        if (clientState.RunContext != null)
+        if (clientState.RunContext.continueFuzzing)
         {
           clientState.RunContext.continueFuzzing = false;
         }
+        clientState.RunContext = null;
+
 
         clientState.Status = Status.Alive;
         RaiseStatusChanged();
@@ -338,12 +340,20 @@ namespace PeachFarm.Node
 
     private void StopPeach(string errorMessage)
     {
+      if(String.IsNullOrEmpty(errorMessage))
+      {
+        StopPeach();
+        return;
+      }
+
       if (clientState.Status == Status.Running)
       {
-        if (clientState.RunContext != null)
+        if (clientState.RunContext.continueFuzzing)
         {
           clientState.RunContext.continueFuzzing = false;
         }
+        clientState.RunContext = null;
+
 
         SendHeartbeat(CreateHeartbeat(errorMessage));
 
@@ -425,26 +435,28 @@ namespace PeachFarm.Node
       foreach (var test in dom.tests.Values)
       {
         //TODO
-        //test.loggers = loggers;
+        test.loggers = loggers;
       }
 
       Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
       //config.pitFile = clientState.PitFilePath;
       config.debug = false;
-      config.runName = clientState.JobID.ToString();
+      //config.runName = clientState.JobID.ToString();
 
+      clientState.Status = Common.Messages.Status.Running;
+      RaiseStatusChanged();
 
       peach.startFuzzing(dom, config);
     }
 
     void peach_TestFinished(Peach.Core.RunContext context)
     {
-      StopPeach(null);
+      StopPeach();
     }
 
     void peach_TestError(Peach.Core.RunContext context, Exception e)
     {
-      StopPeach(null);
+      StopPeach(e.Message);
     }
 
     #endregion
@@ -455,7 +467,7 @@ namespace PeachFarm.Node
       heartbeat.ComputerName = clientState.IPAddress;
       if (clientState.Status == Common.Messages.Status.Running)
       {
-        heartbeat.JobID = clientState.JobID.ToString();
+        heartbeat.JobID = clientState.JobID;
       }
       heartbeat.QueueName = clientQueueName;
       heartbeat.Stamp = DateTime.Now;
