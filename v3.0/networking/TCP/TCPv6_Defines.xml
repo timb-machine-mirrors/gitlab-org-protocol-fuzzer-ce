@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Platform>
+    <Define key="TcpHost" value="::1"/>
+    <Define key="LoggerPath" value="logs/tcpV6/"/>
+	<Define key="Interface" value="::1"/>
+  </Platform>
+</PitDefines>
