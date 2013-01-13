@@ -4,26 +4,28 @@
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
 
   <DataModel name="IPv6Address">
-	<Blob name="AddressValue" length="16" valueType="hex" endian="big"
-		value="fe 80 00 00 00 00 00 00 20 0c 29 ff fe ef 2a 1b"/>
+	<Blob name="AddressValue" size="16" valueType="hex" endian="big"
+		value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>
   </DataModel>
 	   
   <DataModel name="IPv6">
     <Block name="Header">
-      <Flags size="16" endian="big">
+      <Flags size="32" endian="big">
         <Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
 		<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
         <Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
-		<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="00"/>
+		<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
       </Flags>
       <Number name="PayloadLength" size="16" endian="big" valueType="hex">
         <Relation type="size" of="Payload"/>
       </Number>
-	  <Number name="NextHeader" size="8" endian="big" value="255"/>
+	  <Number name="NextHeader" size="8" endian="big" value="58"/>
 	  <Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
-      <Blob name="SrcIP" size="32" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 20 0c 29 ff fe ef 2a 1b"/>
-      <Blob name="DestIP" size="32" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 20 0c 29 ff fe ef 2a 1b"/>
-	</Block>
+<!--      <Blob name="SrcIP" size="16" endian="big" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>-->
+	  <Blob name="SrcIP" size="16" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 80 7e 65 c1 cc 32 14 ff"/>
+<!--      <Blob name="DestIP" size="16" endian="big" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
+      <Blob name="DestIP" size="16" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 02 0c 29 ff fe ef 2a 1b"/>
+    </Block>
 	<Block name="ExtensionHeaders">
 	  <!--TODO-->
 	</Block>
@@ -43,7 +45,7 @@
     <!--<Publisher class="file.FileWriter">
       <Param name="fileName" value="out.txt"/>
     </Publisher>-->
-    <Publisher class="RawIPv6">
+    <Publisher class="RawIPv6"><!--todo-->
       <Param name="Host" value="##Target##"/>
       <Param name="Interface" value="##Interface##"/>
 	  <Param name="Protocol" value="255"/>
