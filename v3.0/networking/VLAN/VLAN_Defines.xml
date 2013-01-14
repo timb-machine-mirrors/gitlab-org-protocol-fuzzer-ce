@@ -6,6 +6,6 @@
     <Define key="TargetIP"  value="1066670"/>
     <Define key="Interface" value="eth0"/>
     <Define key="LoggerPath"  value="./logs/arp/"/> 
-	<Define key="TestType" value="VLAN"/>
+	<Define key="TestType" value="VLANDoubleFrame"/>
   </Platform>
 </PitDefines>
