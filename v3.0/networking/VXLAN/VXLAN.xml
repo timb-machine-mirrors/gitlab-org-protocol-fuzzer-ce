@@ -25,7 +25,7 @@
 			<Blob name="Protocol" valueType="hex" value="11" />
 			<Blob name="Checksum" length="2" />
 			<Blob name="SrcIP" valueType="hex" value="##OuterSourceIP##" />
-			<Blob name="DstIP" valueType="hex" value="##OuterDestIP##" />
+			<Blob name="DstIP" valueType="hex" value="##OuterTargetIP##" />
 		</Block>
 		<Block name="OuterUDP">
 			<Blob name="OuterIPDest" value="##InnterTargetIP##" />
