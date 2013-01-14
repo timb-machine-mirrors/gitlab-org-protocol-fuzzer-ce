@@ -25,10 +25,20 @@
 	<Relation type="size" of="TPA"/> 
 			</Number>
 			<Number name="OPER" size="16" value="1" endian="big"/>
-			<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="SPA" valueType="hex" value="##SourceIP##"/>
-			<Blob name="THA" valueType="hex" value="##DestMAC##"/>
-			<Blob name="TPA" valueType="hex" value="##TargetIP##"/>
+			<Blob name="SHA"  length="6" valueType="hex" value="##SourceMAC##"/>
+			<Block name="SPA">
+				<Number name="SPA1"  size="8"  value="##SourceIP_PT1##"/>
+				<Number name="SPA2"  size="8"  value="##SourceIP_PT2##"/>
+				<Number name="SPA3"  size="8"  value="##SourceIP_PT3##"/>
+				<Number name="SPA4"  size="8"  value="##SourceIP_PT4##"/>
+			</Block>
+			<Blob name="THA"  length="6" valueType="hex" value="##DestMAC##"/>
+			<Block name="TPA">
+				<Number name="TPA1"  size="8"  value="##TargetIP_PT1##"/>
+				<Number name="TPA2"  size="8"  value="##TargetIP_PT2##"/>
+				<Number name="TPA3"  size="8"  value="##TargetIP_PT3##"/>
+				<Number name="TPA4"  size="8"  value="##TargetIP_PT4##"/>
+			</Block>
 		</Block>
 		<Blob name="Trailer"/>
 	</DataModel>
@@ -47,7 +57,7 @@
 		<StateModel ref="TheState"/>
 		<Publisher class="RawEther">
 			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_IP"/>
+			<Param name="Protocol" value="ETH_P_ARP"/>
 		</Publisher>
     
     <Logger class="logger.Filesystem" >

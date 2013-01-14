@@ -2,6 +2,6 @@
 <PitDefines>
   <Platform>
     <Define key="LoggerPath" value="logs/udp/"/>
-	<Define key="Interface" value="Local Area Connection"/>
+	<Define key="Interface" value="eth0"/>
   </Platform>
 </PitDefines>
