@@ -6,16 +6,16 @@
     <Number name="SrcPort" size="16" endian="network"/>
     <Number name="DestPort" size="16" endian="network"/>
     <Number name="Length" size="16" endian="network">
-      <Relation type="size" of="UDPHeader" endian="network"/>
+      <Relation type="size" of="UDPv6Header" endian="network"/>
     </Number>
     <Number name="Checksum" size="16" >
 		<Fixup class="UDPChecksumFixup">
-			<Param name="ref" value="UDPHeader" />
+			<Param name="ref" value="UDPv6Header" />
 			<Param name="src" value="##Interface##" />
 			<Param name="dst" value="##UdpHost##" />
 		</Fixup>
 	</Number>
-    <Blob name="Data" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaea"/>
+    <Blob name="Data" value="Hello"/>
   </DataModel>
 
   <StateModel name="TheState" initialState="Initial">
