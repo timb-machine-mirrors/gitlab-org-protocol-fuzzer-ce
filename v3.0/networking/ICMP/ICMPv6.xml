@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
+
+  <DataModel name="ICMPHeader">
+    <Number name="Type" size="8" valueType="hex" value="80"/>
+    <Number name="Code" size="8"/>
+    <Number name="Checksum"  endian="big" size="16">
+		<Fixup class="IcmpV6ChecksumFixup">
+			<Param name="ref" value="ICMPHeader" />
+			<Param name="src" value="##Interface##" />
+			<Param name="dest" value="##IcmpHost##" />
+		</Fixup>
+	</Number>
+	<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+	<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="ICMPHeader"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="RawV6">
+		<Param name="Host" value="##IcmpHost##"/>
+		<Param name="Interface" value="##Interface##"/>
+		<Param name="Protocol" value="58"/>
+    </Publisher>
+	
+	<Logger class="logger.Filesystem" >
+		<Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+</Peach>
+<!-- end -->
