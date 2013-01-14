@@ -66,26 +66,14 @@
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-        <DataModel ref="VLAN"/>
+        <DataModel ref="##TestType##"/>
 			</Action>
 		</State>
 	</StateModel>
+	
 
   <!-- Default test for fuzzing VLAN -->
 	<Test name="Default">
-		<StateModel ref="TheState"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
-		</Publisher>
-    
-		<Logger class="logger.Filesystem" >
-			<Param name="Path" value="##LoggerPath##" />
-		</Logger>
-	</Test>
-	
-	<!-- Test for fuzzing VLAN with double frame-->
-	<Test name="DoubleFrame">
 		<StateModel ref="TheState"/>
 		<Publisher class="RawEther">
 			<Param name="Interface" value="##Interface##"/>
