@@ -8,7 +8,7 @@
 
   
     
-  <!-- Main data mdoe to send an ARP request -->
+  <!-- Used as the "Inner" Data -->
 	<DataModel name="VLAN">
 		<Block name="EtherHeader">
 			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
@@ -45,40 +45,40 @@
 			</Flags>
 			<Blob name="EtherType" valueType="hex" value="0800" />
 		</Block>
-	<Block name="IP">		
-		<Block name="OuterIPHeader">
-			<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
-			<Number name="TotalLength" size="16">
-				<Relation type="size" of="IP"/>
-			</Number>
-			<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
-			<Blob name="Protocol" valueType="hex" value="11" />
-			<Number name="CRC" size="16" endian="little">
-				<Fixup class="checksums.IcmpChecksumFixup">
-					<Param name="ref" value="OuterIPHeader"/>
-				</Fixup>
-			</Number>
-			<Blob name="SrcIP" valueType="hex" length="4" value="##OuterSourceIP##" endian="little"/>
-			<Blob name="DstIP" valueType="hex" length="4" value="##OuterTargetIP##" endian="little"/>
-		</Block>
+		<Block name="IP">		
+			<Block name="OuterIPHeader">
+				<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
+				<Number name="TotalLength" size="16">
+					<Relation type="size" of="IP"/>
+				</Number>
+				<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
+				<Blob name="Protocol" valueType="hex" value="11" />
+				<Number name="CRC" size="16" endian="little">
+					<Fixup class="checksums.IcmpChecksumFixup">
+						<Param name="ref" value="OuterIPHeader"/>
+					</Fixup>
+				</Number>
+				<Blob name="SrcIP" valueType="hex" length="4" value="##OuterSourceIP##" endian="little"/>
+				<Blob name="DstIP" valueType="hex" length="4" value="##OuterTargetIP##" endian="little"/>
+			</Block>
 
-		<Block name="OuterUDP">
-			<Number name="SrcPort"  size="16" endian="network"/>
-			<Number name="DestPort" size="16" endian="network"/>
-			<Number name="Length"   size="16" endian="network" value="8"/>
-			<Blob   name="Checksum" length="2" valueType="hex" value="0" />
-		</Block>
+			<Block name="OuterUDP">
+				<Number name="SrcPort"  size="16" endian="network"/>
+				<Number name="DestPort" size="16" endian="network"/>
+				<Number name="Length"   size="16" endian="network" value="8"/>
+				<Blob   name="Checksum" length="2" valueType="hex" value="0" />
+			</Block>
 
-		<Block name="VXLANHeader">
-			<Flags size="8">
-				<Flag position="2" value="1" size="1" />
-			</Flags>
-			<Number name="LargeReserve" size="24" />
-			<Number name="VNI" 	    size="24" />
-			<Number name="SmallReserve" size="8" />
+			<Block name="VXLANHeader">
+				<Flags size="8">
+					<Flag position="2" value="1" size="1" />
+				</Flags>
+				<Number name="LargeReserve" size="24" />
+				<Number name="VNI" 	    size="24" />
+				<Number name="SmallReserve" size="8" />
+			</Block>
+			<Block name="VLAN" ref="VLAN" />
 		</Block>
-		<Block name="VLAN" ref="VLAN" />
-	</Block>
 	</DataModel>
 
   <!-- StateModel for All VLAN requests  -->
