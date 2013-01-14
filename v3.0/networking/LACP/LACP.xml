@@ -6,7 +6,6 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 
-  <!-- Main data mdoe to send an ARP request -->
 	<DataModel name="LACP">
 		<Block name="EtherHeader">
 			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
@@ -56,7 +55,7 @@
 		</Block>
 	</DataModel>
 	
-  <!-- StateModel for All VLAN requests  -->
+  <!-- StateModel for All LACP requests  -->
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
@@ -66,7 +65,7 @@
 	</StateModel>
 	
 
-  <!-- Default test for fuzzing VLAN -->
+  <!-- Default test for fuzzing LACP -->
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="RawEther">
