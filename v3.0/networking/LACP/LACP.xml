@@ -25,7 +25,7 @@
 				<Blob name="Sys" valueType="hex" value="##SourceMAC##"/>
 				<Blob name="Key" valueType="hex" value="8000"/>
 				<Blob name="PortPriority" valueType="hex" value="0000"/>
-				<Blob name="Port" valueType="hex" value="0012"/>
+				<Blob name="Port" valueType="hex" value="##ActorPort##"/>
 				<Blob name="State" valueType="hex"  value="47"/>
 				<Blob name="Reserved" valueType="hex" value="000000"/>
 			</Block>
@@ -38,7 +38,7 @@
 				<Blob name="Sys" valueType="hex" value="##DestMAC##"/>
 				<Blob name="Key" valueType="hex" value="0000"/>
 				<Blob name="PortPriority" valueType="hex" value="0000"/>
-				<Blob name="Port" valueType="hex" value="0000"/>
+				<Blob name="Port" valueType="hex" value="##PartnerPort##"/>
 				<Blob name="State" valueType="hex"  value="3b"/>
 				<Blob name="Reserved" valueType="hex" value="000000"/>
 			</Block>
@@ -54,69 +54,13 @@
 			<Number name="TermLength" size="8" value="0" />
 			<Blob name="Reserved" valueType="hex" length="50"/>
 		</Block>
-		
-		
-		
-		
-		
-		
-		
-		
-		<Block name="VLAN_TCI">
-			<Flags size="16">
-				<Flag name="Priority"  position="0" size="3"/> 
-				<Flag name="CFI"  position="3" size="1" value="0"/> 
-				<Flag name="VID"  position="4" size="12"/> 
-			</Flags>
-		</Block>
-		<Block name="Payload">
-			<Blob name="Type" valueType="hex" value="0800" />
-			<Blob name="Payload" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
-			<Number name="CRC" size="32" endian="big">
-				<Fixup class="checksums.Crc32Fixup">
-					<Param name="ref" value="VLAN"/>
-				</Fixup>
-			</Number>
-		</Block>
 	</DataModel>
 	
-	<DataModel name="VLANDoubleFrame">
-		<Block name="EtherHeader">
-			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
-			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="Type" token="true" valueType="hex" value="9100"/>
-		</Block>
-		<Block name="VLAN_TCI1">
-			<Flags size="16">
-				<Flag name="Priority"  position="0" size="3"/> 
-				<Flag name="CFI"  position="3" size="1" value="0"/> 
-				<Flag name="VID"  position="4" size="12"/> 
-			</Flags>
-		</Block>
-		<Block name="VLAN_TCI2">
-			<Blob name="Type" token="true" valueType="hex" value="8100"/>
-			<Flags size="16">
-				<Flag name="Priority"  position="0" size="3"/> 
-				<Flag name="CFI"  position="3" size="1" value="0"/> 
-				<Flag name="VID"  position="4" size="12"/> 
-			</Flags>
-		</Block>
-		<Block name="Payload">
-			<Blob name="Type" valueType="hex" value="0800" />
-			<Blob name="Payload" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
-			<Number name="CRC" size="32" endian="big">
-				<Fixup class="checksums.Crc32Fixup">
-					<Param name="ref" value="VLANDoubleFrame"/>
-				</Fixup>
-			</Number>
-		</Block>
-	</DataModel>
-
   <!-- StateModel for All VLAN requests  -->
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-        <DataModel ref="##TestType##"/>
+        <DataModel ref="LACP"/>
 			</Action>
 		</State>
 	</StateModel>
@@ -127,7 +71,7 @@
 		<StateModel ref="TheState"/>
 		<Publisher class="RawEther">
 			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
+			<Param name="Protocol" value="ETH_P_SLOW"/>
 		</Publisher>
     
 		<Logger class="logger.Filesystem" >
