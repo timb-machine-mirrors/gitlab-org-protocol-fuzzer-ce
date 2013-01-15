@@ -6,7 +6,7 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 
-  <!-- Main data mdoe to send an ARP request -->
+  <!-- Main data mdoe to send an VLAN -->
 	<DataModel name="VLAN">
 		<Block name="EtherHeader">
 			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
