@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Platform>
+    <Define key="LoggerPath" value="logs/dhcpV6/"/>
+	<Define key="LocalAddress" value="::1"/>
+	<Define key="LocalPort" value="546"/>
+	<Define key="TargetAddress" value="::1"/>
+	<Define key="TargetPort" value="547"/>
+  </Platform>
+</PitDefines>
