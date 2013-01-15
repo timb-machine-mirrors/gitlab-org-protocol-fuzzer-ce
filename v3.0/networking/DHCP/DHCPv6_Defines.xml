@@ -2,9 +2,9 @@
 <PitDefines>
   <Platform>
     <Define key="LoggerPath" value="logs/dhcpV6/"/>
-	<Define key="LocalAddress" value="::1"/>
+	<Define key="LocalAddress" value="fe80::807e:65c1:cc32:14ff"/>
 	<Define key="LocalPort" value="546"/>
-	<Define key="TargetAddress" value="::1"/>
+	<Define key="TargetAddress" value="fe80::20c:29ff:fe65:c6c5"/>
 	<Define key="TargetPort" value="547"/>
   </Platform>
 </PitDefines>
