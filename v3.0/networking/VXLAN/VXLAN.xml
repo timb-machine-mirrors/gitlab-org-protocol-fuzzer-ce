@@ -8,7 +8,7 @@
 
   
     
-  <!-- Used as the "Inner" Data -->
+  <!-- Used as the "Inner" Data for VXLAN Data Model -->
 	<DataModel name="VLAN">
 		<Block name="EtherHeader">
 			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
@@ -65,7 +65,9 @@
 			<Block name="OuterUDP">
 				<Number name="SrcPort"  size="16" endian="network"/>
 				<Number name="DestPort" size="16" endian="network"/>
-				<Number name="Length"   size="16" endian="network" value="8"/>
+				<Number name="Length"   size="16" endian="network">
+					<Relation type="size" of="OuterUDP"/>
+				</Number>
 				<Blob   name="Checksum" length="2" valueType="hex" value="0" />
 			</Block>
 
@@ -81,7 +83,7 @@
 		</Block>
 	</DataModel>
 
-  <!-- StateModel for All VLAN requests  -->
+  <!-- StateModel for VXLAN  -->
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
@@ -90,7 +92,7 @@
 		</State>
 	</StateModel>
 
-  <!-- Default test for fuzzing VLAN -->
+  <!-- Default test for fuzzing VXLAN -->
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="RawEther">
