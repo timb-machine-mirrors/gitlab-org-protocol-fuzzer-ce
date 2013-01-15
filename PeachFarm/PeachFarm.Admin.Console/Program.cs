@@ -40,8 +40,8 @@ namespace PeachFarm.Admin.Console
 						{ "start", v => start = true },
 						{ "stop", v => stop = true },
 						{ "list", v => list = true},
-						{ "errors", v => errors = true },
-						{ "logs", v => logs = true},
+//						{ "errors", v => errors = true },
+//						{ "logs", v => logs = true},
 
 						// Command parameters
 						{ "h|host=", v => hostName = v},
@@ -194,7 +194,7 @@ namespace PeachFarm.Admin.Console
       }
       else
       {
-        System.Console.WriteLine("Response: No clients online");
+        System.Console.WriteLine("Response: No nodes online");
       }
     }
     #endregion
