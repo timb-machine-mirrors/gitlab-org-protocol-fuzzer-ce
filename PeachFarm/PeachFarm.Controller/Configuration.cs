@@ -29,6 +29,13 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.MongoDb] = value; }
     }
 
+    [ConfigurationProperty(Constants.SqlReporting)]
+    public SqlReportingElement SqlReporting
+    {
+      get { return (SqlReportingElement)this[Constants.SqlReporting]; }
+      set { this[Constants.SqlReporting] = value; }
+    }
+
     [ConfigurationProperty(Constants.RabbitMq)]
     public RabbitMqElement RabbitMq
     {
@@ -78,6 +85,23 @@ namespace PeachFarm.Controller.Configuration
     }
   }
 
+  public class SqlReportingElement : ConfigurationElement
+  {
+    [ConfigurationProperty(Constants.ConnectionString)]
+    public string ConnectionString
+    {
+      get { return (string)this[Constants.ConnectionString]; }
+      set { this[Constants.ConnectionString] = value; }
+    }
+
+    [ConfigurationProperty(Constants.SqlReportingEnabled)]
+    public bool IsEnabled
+    {
+      get { return (bool)this[Constants.SqlReportingEnabled]; }
+      set { this[Constants.SqlReportingEnabled] = value; }
+    }
+  }
+
   public class Output : ConfigurationElement
   {
     [ConfigurationProperty(Constants.OutputType)]
@@ -102,6 +126,9 @@ namespace PeachFarm.Controller.Configuration
   {
     public const string MongoDb = "MongoDb";
     public const string ConnectionString = "connectionString";
+
+    public const string SqlReporting = "SqlReporting";
+    public const string SqlReportingEnabled = "isEnabled";
 
     public const string RabbitMq = "RabbitMq";
     public const string HostName = "hostName";

@@ -25,7 +25,7 @@ namespace PeachFarm.Node
     //private Timer fileSyncTimer;
     private Timer heartbeat;
 
-    private NodeState clientState = new NodeState();
+    private NodeState clientState;
 
     private Peach.Core.Engine peach;
 
@@ -46,13 +46,7 @@ namespace PeachFarm.Node
       #endregion
       
       #region command line arguments
-      clientState.RabbitHostName = controllerIPAddress;
-      clientState.ServerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, controllerIPAddress);
-      #endregion
-
-      #region get ip address, used for client name
-      IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-      clientState.IPAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+      clientState = new NodeState(controllerIPAddress, String.Format(QueueNames.QUEUE_CONTROLLER, controllerIPAddress));
       #endregion
     }
 
@@ -88,7 +82,7 @@ namespace PeachFarm.Node
       #region stop the currently running peach job
       if (clientState.Status == Status.Running)
       {
-        StopPeach(new StopPeachRequest());
+        StopPeach();
       }
       #endregion
 
@@ -150,13 +144,8 @@ namespace PeachFarm.Node
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
       if ((clientState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
-      { 
-        Heartbeat error = new Heartbeat();
-        //error.CommandLine = clientState.CommandLine;
-        error.PitFilePath = clientState.PitFilePath;
-        error.ComputerName = clientState.IPAddress;
-        error.Stamp = DateTime.Now;
-        error.QueueName = clientQueueName;
+      {
+        Heartbeat error = CreateHeartbeat();
         error.Status = Status.Error;
         error.ErrorMessage = "Unknown error";
 
@@ -178,87 +167,6 @@ namespace PeachFarm.Node
         }
       }
     }
-    #endregion
-
-    #region Log file functions - Peach 2
-    /*
-    private void ProcessLogFiles(object state)
-    {
-      string[] runfolders = Directory.GetDirectories(clientState.LogPath);
-      for (int r = 0; r < runfolders.Length; r++)
-      {
-        string runfoldername = runfolders[r].Split(Path.DirectorySeparatorChar).Last();
-
-        Run run = clientState.Runs.Find(runfoldername);
-
-        if (run == null)
-        {
-          if (clientState.Runs == null)
-          {
-            clientState.Runs = new List<Run>();
-          }
-
-          run = new Run() { ComputerName = clientState.IPAddress };
-          //run.CommandLine = clientState.CommandLine;
-          run.PitFilePath = clientState.PitFilePath;
-          run.RunName = runfoldername;
-          run.ComputerName = clientState.IPAddress;
-          clientState.Runs.Add(run);
-        }
-
-        string[] filenames = Directory.GetFiles(runfolders[r], "*.txt", SearchOption.AllDirectories);
-        for (int f = 0; f < filenames.Length; f++)
-        {
-          string fileName = Path.Combine(run.ComputerName, filenames[f].Substring(clientState.LogPath.Length + 1));
-          LogFile file = run.LogFiles.Find(fileName);
-          if (file == null)
-          {
-            file = new LogFile();
-            file.FileName = fileName;
-            file.LocalFileName = filenames[f];
-            run.LogFiles.Add(file);
-          }
-
-          //try
-          //{
-          //  using (StreamReader reader = new StreamReader(filenames[f]))
-          //  {
-          //    file.Data = encoding.GetBytes(reader.ReadToEnd());
-          //  }
-          //  run.LogFiles.Add(file);
-          //}
-          //catch
-          //{
-          //  // if the file can't be opened, do nothing and move on to the next
-          //}
-        }
-      }
-
-      if (clientState.Runs.Count > 0)
-      {
-        //StopPeachResponse response = new StopPeachResponse();
-        //response.Runs = runs;
-        //PublishToServer(response.Serialize(), "ProcessRuns");
-
-        clientState.Runs = clientState.Runs.DatabaseInsert(clientState.MongoDbConnectionString);
-      }
-
-    }
-
-    private static void DeleteSubFolders(string path)
-    {
-      string[] folders = Directory.GetDirectories(path);
-      for (int f = 0; f < folders.Length; f++)
-      try
-      {
-        Directory.Delete(folders[f], true);
-      }
-      catch (Exception)
-      {
-        throw new ApplicationException(String.Format("Could not delete folders {0}", folders[f]));
-      }
-    }
-    //*/
     #endregion
 
     #region MQ functions
@@ -306,6 +214,7 @@ namespace PeachFarm.Node
       listener.RunWorkerAsync();
     }
 
+
     private void Listen(object sender, DoWorkEventArgs e)
     {
      
@@ -335,13 +244,7 @@ namespace PeachFarm.Node
             }
             catch(Exception ex)
             {
-              Heartbeat heartbeat = new Heartbeat();
-              //heartbeat.CommandLine = clientState.CommandLine;
-              heartbeat.PitFilePath = clientState.PitFilePath;
-              heartbeat.ComputerName = clientState.IPAddress;
-              heartbeat.ErrorMessage = String.Format("{0}\n\n{1}", result.Body, ex.Message);
-              heartbeat.QueueName = clientQueueName;
-              heartbeat.Status = Status.Error;
+              Heartbeat heartbeat = CreateHeartbeat(String.Format("{0}\n\n{1}", result.Body, ex.Message));
               SendHeartbeat(heartbeat);
             }
             finally
@@ -387,26 +290,13 @@ namespace PeachFarm.Node
           StartPeach(StartPeachRequest.Deserialize(body));
           break;
         case "StopPeach":
-          StopPeach(StopPeachRequest.Deserialize(body));
+          StopPeach();
           break;
       }
     }
     #endregion
 
     #region Sends
-
-    private void SendErrorHeartbeat(string message)
-    {
-      Heartbeat heartbeat = new Heartbeat();
-      heartbeat.ComputerName = clientState.IPAddress;
-      heartbeat.Stamp = DateTime.Now;
-      heartbeat.Status = Status.Error;
-      heartbeat.QueueName = clientQueueName;
-      heartbeat.ErrorMessage = message;
-      //heartbeat.CommandLine = clientState.CommandLine;
-      heartbeat.PitFilePath = clientState.PitFilePath;
-      SendHeartbeat(heartbeat);
-    }
 
     private void SendHeartbeat(object state)
     {
@@ -417,17 +307,7 @@ namespace PeachFarm.Node
       }
       else
       {
-        heartbeat = new Heartbeat();
-        heartbeat.ComputerName = clientState.IPAddress;
-        heartbeat.Stamp = DateTime.Now;
-        heartbeat.Status = clientState.Status;
-        heartbeat.QueueName = clientQueueName;
-
-        if (heartbeat.Status == Status.Running)
-        {
-          //heartbeat.CommandLine = clientState.CommandLine;
-          heartbeat.PitFilePath = clientState.PitFilePath;
-        }
+        heartbeat = CreateHeartbeat();
       }
 
       if (modelSend.IsOpen == false)
@@ -440,58 +320,46 @@ namespace PeachFarm.Node
 
     #region Receives
 
-    private void StopPeach(StopPeachRequest stopPeachRequest)
+    private void StopPeach()
     {
       if (clientState.Status == Status.Running)
       {
-        #region Peach 2
-        /*
-        if (clientState.PeachProcess != null)
-        {
-          clientState.PeachProcess.Exited -= peachProcess_Exited;
-
-          try
-          {
-            clientState.PeachProcess.KillPlusChildren();
-          }
-          catch (Exception ex)
-          {
-            SendErrorHeartbeat(String.Format("Exception while trying to kill Peach:\n{0}", ex.Message));
-          }
-        }
-        
-        fileSyncTimer.Dispose();
-        fileSyncTimer = null;
-
-        try
-        {
-          ProcessLogFiles(clientState);
-        }
-        catch (Exception ex)
-        {
-          SendErrorHeartbeat(String.Format("Exception while processing log files:\n{0}", ex.Message));
-        }
-
-        clientState.Runs.Clear();
-        DeleteSubFolders(clientState.LogPath);
-
-
-        //*/
-        #endregion
-
-        #region Peach 3
-        if (clientState.RunContext != null)
+        if (clientState.RunContext.continueFuzzing)
         {
           clientState.RunContext.continueFuzzing = false;
         }
-        #endregion
+        clientState.RunContext = null;
+
 
         clientState.Status = Status.Alive;
         RaiseStatusChanged();
 
         SendHeartbeat(null);
       }
+    }
 
+    private void StopPeach(string errorMessage)
+    {
+      if(String.IsNullOrEmpty(errorMessage))
+      {
+        StopPeach();
+        return;
+      }
+
+      if (clientState.Status == Status.Running)
+      {
+        if (clientState.RunContext.continueFuzzing)
+        {
+          clientState.RunContext.continueFuzzing = false;
+        }
+        clientState.RunContext = null;
+
+
+        SendHeartbeat(CreateHeartbeat(errorMessage));
+
+        clientState.Status = Status.Error;
+        RaiseStatusChanged();
+      }
     }
 
     private void StartPeach(StartPeachRequest startPeachRequest)
@@ -499,137 +367,37 @@ namespace PeachFarm.Node
       if (clientState.Status == Status.Running)
         return;
 
-      #region Mongo
-      /*
-      if (DatabaseHelper.TestConnection(startPeachRequest.MongoDbConnectionString) == false)
+      string pit = startPeachRequest.Pit;
+      if (pit.StartsWith("<!"))
       {
-        string message = String.Format("MongoDB connection test failed: {0}", startPeachRequest.MongoDbConnectionString);
-        SendErrorHeartbeat(message);
-        throw new ApplicationException(message);
-      }
-      //*/
-      #endregion
-
-      if (Directory.Exists(startPeachRequest.LogPath) == false)
-      {
-        string message = String.Format("Log Path directory does not exist:\n{0}", startPeachRequest.LogPath);
-        SendErrorHeartbeat(message);
-        throw new ApplicationException(message);
+        pit = pit.Substring("<![CDATA[".Length);
+        pit = pit.Substring(0, pit.Length - 2);
       }
 
-      #region pit file stuff
-      //string pitfilename = String.Empty;
+      clientState.PitFilePath = Path.GetTempFileName();
+      using (FileStream stream = new FileStream(clientState.PitFilePath, FileMode.Create))
+      {
+        StreamWriter writer = new StreamWriter(stream);
+        writer.Write(pit);
+        writer.Flush();
+        writer.Close();
+        stream.Close();
+      }
 
-      //if (Path.IsPathRooted(args[1]))
-      //{
-      //  pitfilename = args[1];
-      //}
-      //else
-      //{
-      //  pitfilename = Path.Combine(Path.GetDirectoryName(args[0]), args[1]);
-      //}
-
-      //string pitxml = String.Empty;
-      //using (StreamReader reader = new StreamReader(pitfilename))
-      //{
-      //  pitxml = reader.ReadToEnd();
-      //}
-      //pitStuff = new PitStuff(pitxml);
-
-      //pitStuff = new PitStuff(startPeachRequest.PitXml);
-
-      //string tempFileName = Path.Combine(Path.GetTempPath(), String.Format("{0}_{1}.xml", pitStuff.RunName, DateTime.Now.ToString("yyyyMMdd_hhmm")));
-      //StreamWriter writer = new StreamWriter(tempFileName);
-      //writer.Write(startPeachRequest.PitXml);
-      //writer.Close();
-      //Debug.WriteLine(String.Format("TempFileName: {0}", tempFileName));
-      #endregion
-
-      //TODO comment out log file collection, Peach 2 only
-
-
-      clientState.LogPath = startPeachRequest.LogPath;
       clientState.MongoDbConnectionString = startPeachRequest.MongoDbConnectionString;
-
-      #region Peach 2
-      /*
-      DeleteSubFolders(clientState.LogPath);
-
-      string filename = String.Empty;
-      string arguments = String.Empty;
-      int endindex = -1;
-      if (startPeachRequest.CommandLine[0].Equals('\''))
-      {
-        endindex = startPeachRequest.CommandLine.IndexOf('\'', 1);
-      }
-      else
-      {
-        endindex = startPeachRequest.CommandLine.IndexOf(' ', 1);
-      }
-      
-      filename = startPeachRequest.CommandLine.Substring(1, endindex - 1);
-      if (File.Exists(filename) == false)
-      {
-        string message = String.Format("Command line executable does not exist:\n{0}", filename);
-        SendErrorHeartbeat(message);
-        throw new ApplicationException(message);
-      }
+      clientState.SqlConnectionString = startPeachRequest.SqlConnectionString;
+      clientState.JobID = startPeachRequest.JobID;
 
 
-      arguments = startPeachRequest.CommandLine.Substring(filename.Length + 2);
 
-      fileSyncTimer = new Timer(ProcessLogFiles, clientState, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(60));
-
-      ProcessStartInfo startInfo = new ProcessStartInfo(filename, arguments);
-      startInfo.CreateNoWindow = true;
-      try
-      {
-        clientState.PeachProcess = new Process();
-        clientState.PeachProcess.EnableRaisingEvents = true;
-        clientState.PeachProcess.StartInfo = startInfo;
-        clientState.PeachProcess.Exited += new EventHandler(peachProcess_Exited);
-        clientState.PeachProcess.Start();
-        clientState.Status = Status.Running;
-        RaiseStatusChanged();
-
-        clientState.CommandLine = startPeachRequest.CommandLine;
-      }
-      catch (Exception ex)
-      {
-        throw ex;
-      }
-      finally
-      {
-        //File.Delete(tempFileName);
-      }
-      //*/
-      #endregion
-
-      #region Peach 3
-      //Provider=SQLNCLI10.1;
-      string sqlconn = "Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=PeachFarmReporting;Data Source=dejaapps;";
-      DataAccess.EntitiesModel dataAccess = new DataAccess.EntitiesModel(sqlconn);
-      DataAccess.Job job = new DataAccess.Job();
-      job.StartDate = DateTime.Now;
-      job.Status = "JobStarting";
-      job.LastStatusDate = job.StartDate;
-      dataAccess.Add(job);
-      dataAccess.SaveChanges();
-
-      Dictionary<string, Peach.Core.Variant> args = new Dictionary<string,Peach.Core.Variant>();
-      args.Add("SqlConnectionString", new Peach.Core.Variant(sqlconn));
-      args.Add("JobID", new Peach.Core.Variant(job.Id));
-      PeachFarmReportingLogger logger = new PeachFarmReportingLogger(args);
-
-      peach = new Peach.Core.Engine(logger);
+      peach = new Peach.Core.Engine(null);
       peach.TestStarting += new Peach.Core.Engine.TestStartingEventHandler(peach_TestStarting);
       peach.TestError += new Peach.Core.Engine.TestErrorEventHandler(peach_TestError);
       peach.TestFinished += new Peach.Core.Engine.TestFinishedEventHandler(peach_TestFinished);
 
       BackgroundWorker peachWorker = new BackgroundWorker();
       peachWorker.DoWork += new DoWorkEventHandler(peachWorker_DoWork);
-      peachWorker.RunWorkerAsync(startPeachRequest.PitFilePath);
-      #endregion
+      peachWorker.RunWorkerAsync();
     }
 
     void peach_TestStarting(Peach.Core.RunContext context)
@@ -639,61 +407,135 @@ namespace PeachFarm.Node
 
     void peachWorker_DoWork(object sender, DoWorkEventArgs e)
     {
-      string filename = (string)e.Argument;
-
       Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
-      Peach.Core.Dom.Dom dom = pitParser.asParser(null, filename);
+
+     
+      Peach.Core.Dom.Dom dom = pitParser.asParser(null, clientState.PitFilePath);
+
+      List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
+      if(String.IsNullOrEmpty(clientState.SqlConnectionString) == false)
+      {
+        Dictionary<string, Peach.Core.Variant> sqlargs = new Dictionary<string, Peach.Core.Variant>();
+        sqlargs.Add("SqlConnectionString", new Peach.Core.Variant(clientState.SqlConnectionString));
+        sqlargs.Add("JobID", new Peach.Core.Variant(clientState.JobID.ToString()));
+
+        loggers.Add(new Loggers.SqlLogger(sqlargs));
+      }
+
+      if(String.IsNullOrEmpty(clientState.MongoDbConnectionString) == false)
+      {
+        Dictionary<string, Peach.Core.Variant> mongoargs = new Dictionary<string, Peach.Core.Variant>();
+        mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(clientState.MongoDbConnectionString));
+        mongoargs.Add("JobID", new Peach.Core.Variant(clientState.JobID.ToString()));
+
+        loggers.Add(new Loggers.MongoLogger(mongoargs));
+      }
+
+
+      foreach (var test in dom.tests.Values)
+      {
+        //TODO
+        test.loggers = loggers;
+      }
 
       Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
-      config.pitFile = filename;
+      //config.pitFile = clientState.PitFilePath;
       config.debug = false;
-      config.runName = "TODO";
+      //config.runName = clientState.JobID.ToString();
 
+      clientState.Status = Common.Messages.Status.Running;
+      RaiseStatusChanged();
 
       peach.startFuzzing(dom, config);
     }
 
     void peach_TestFinished(Peach.Core.RunContext context)
     {
-      StopPeach(null);
+      StopPeach();
     }
 
     void peach_TestError(Peach.Core.RunContext context, Exception e)
     {
-      StopPeach(null);
+      StopPeach(e.Message);
     }
 
     #endregion
 
-    #region Peach 2 process handlers
-    /*
-    private void peachProcess_Exited(object sender, EventArgs e)
+    private Heartbeat CreateHeartbeat()
     {
-      StopPeach(null);
+      Heartbeat heartbeat = new Heartbeat();
+      heartbeat.ComputerName = clientState.IPAddress;
+      if (clientState.Status == Common.Messages.Status.Running)
+      {
+        heartbeat.JobID = clientState.JobID;
+      }
+      heartbeat.QueueName = clientQueueName;
+      heartbeat.Stamp = DateTime.Now;
+      heartbeat.Status = clientState.Status;
+      return heartbeat;
     }
-    //*/
-    #endregion
+
+    private Heartbeat CreateHeartbeat(string errorMessage)
+    {
+      Heartbeat heartbeat = CreateHeartbeat();
+      heartbeat.Status = Common.Messages.Status.Error;
+      heartbeat.ErrorMessage = errorMessage;
+      return heartbeat;
+    }
   }
 
   internal class NodeState
   {
-    public NodeState()
+    public NodeState(string rabbitHostName, string serverQueueName)
     {
-      Runs = new List<Run>();
       Status = Common.Messages.Status.Alive;
+
+      RabbitHostName = rabbitHostName;
+      ServerQueueName = serverQueueName;
+
+      #region get ip address, used for client name
+      IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+      IPAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+      #endregion
+
     }
 
-    internal Status Status { get;  set; }
-    internal string LogPath { get;  set; }
-    internal string MongoDbConnectionString { get;  set; }
-    //internal string CommandLine { get;  set; }
+    private Status statusField;
+
+    internal Status Status
+    {
+      get
+      {
+        return statusField;
+      }
+      set
+      {
+        if (statusField != value)
+        {
+          statusField = value;
+          switch (value)
+          {
+            case Status.Alive:
+              MongoDbConnectionString = String.Empty;
+              SqlConnectionString = String.Empty;
+              PitFilePath = String.Empty;
+              JobID = Guid.Empty;
+              RunContext = null;
+              break;
+          }
+        }
+      }
+    }
+
+    internal string IPAddress { get; private set; }
+    internal string ServerQueueName { get; private set; }
+    internal string RabbitHostName { get; private set; }
+    
+    internal string MongoDbConnectionString { get; set; }
+    internal string SqlConnectionString { get; set; }
     internal string PitFilePath { get; set; }
-    internal string IPAddress { get;  set; }
-    //internal Process PeachProcess { get;  set; }
     internal Peach.Core.RunContext RunContext { get; set; }
-    internal string RabbitHostName { get;  set; }
-    internal string ServerQueueName { get;  set; }
-    internal List<Run> Runs { get; set; }
+    internal Guid JobID { get; set; }
   }
 
   internal class PitStuff
@@ -734,3 +576,4 @@ namespace PeachFarm.Node
     public Status Status { get; private set; }
   }
 }
+
