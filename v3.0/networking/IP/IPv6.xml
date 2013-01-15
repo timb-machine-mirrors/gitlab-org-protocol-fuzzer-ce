@@ -21,15 +21,13 @@
       </Number>
 	  <Number name="NextHeader" size="8" endian="big" value="58"/>
 	  <Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
-<!--      <Blob name="SrcIP" size="16" endian="big" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>-->
 	  <Blob name="SrcIP" size="16" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 80 7e 65 c1 cc 32 14 ff"/>
-<!--      <Blob name="DestIP" size="16" endian="big" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
       <Blob name="DestIP" size="16" endian="big" valueType="hex" value="fe 80 00 00 00 00 00 00 02 0c 29 ff fe ef 2a 1b"/>
     </Block>
 	<Block name="ExtensionHeaders">
 	  <!--TODO-->
 	</Block>
-    <Blob name="Payload" valueType="hex" value="08006d080a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+    <Blob name="Payload" valueType="hex" value="800000000a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
   </DataModel>
 
   <StateModel name="TheState" initialState="Initial">
@@ -48,7 +46,7 @@
     <Publisher class="RawIPv6"><!--todo-->
       <Param name="Host" value="##Target##"/>
       <Param name="Interface" value="##Interface##"/>
-	  <Param name="Protocol" value="255"/>
+	  <Param name="Protocol" value="58"/>
     </Publisher>
 	
 	<Logger class="logger.Filesystem" >
