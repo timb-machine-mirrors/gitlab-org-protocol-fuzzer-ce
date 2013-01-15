@@ -3,6 +3,8 @@
 			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
 
+   <!--NOTE: ONLY WORKS ON WINDOWS-->
+	   
   <DataModel name="IPv6Address">
 	<Blob name="AddressValue" size="16" valueType="hex" endian="big"
 		value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>
@@ -43,7 +45,7 @@
     <!--<Publisher class="file.FileWriter">
       <Param name="fileName" value="out.txt"/>
     </Publisher>-->
-    <Publisher class="RawIPv6"><!--todo-->
+    <Publisher class="RawIPv6">
       <Param name="Host" value="##Target##"/>
       <Param name="Interface" value="##Interface##"/>
 	  <Param name="Protocol" value="58"/>
