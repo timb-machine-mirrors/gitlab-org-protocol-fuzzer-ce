@@ -2,7 +2,10 @@
 <PitDefines>
   <Platform>
     <Define key="Target" value="fe80::20c:29ff:feef:2a1b"/>
+    <Define key="Source" value="fe80::20c:29ff:feef:2a1b"/>
     <Define key="LoggerPath" value="logs/IPv6/"/>
-	<Define key="Interface" value="fe80::807e:65c1:cc32:14ff"/>
+    <Define key="Interface" value="eth0"/>
+    <Define key="SourceMAC" value="000c29ef2a1b" />
+    <Define key="DestinationMAC" value="000c29ef2a1b" />
   </Platform>
 </PitDefines>
