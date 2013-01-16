@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <Platform>
-    <Define key="IcmpHost" value="::1"/>
+    <Define key="Target" value="::1"/>
     <Define key="LoggerPath" value="logs/ICMPv6/"/>
-	<Define key="Interface" value="::1"/>
+    <Define key="Source" value="::1"/>
   </Platform>
 </PitDefines>
