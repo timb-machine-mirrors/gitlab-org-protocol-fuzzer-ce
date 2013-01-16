@@ -340,26 +340,28 @@ namespace PeachFarm.Node
 
     private void StopPeach(string errorMessage)
     {
-      if(String.IsNullOrEmpty(errorMessage))
+      if (String.IsNullOrEmpty(errorMessage))
       {
         StopPeach();
         return;
       }
-
-      if (clientState.Status == Status.Running)
+      else
       {
-        if (clientState.RunContext.continueFuzzing)
+        if (clientState.Status == Status.Running)
         {
-          clientState.RunContext.continueFuzzing = false;
+          if (clientState.RunContext.continueFuzzing)
+          {
+            clientState.RunContext.continueFuzzing = false;
+          }
+          clientState.RunContext = null;
         }
-        clientState.RunContext = null;
-
 
         SendHeartbeat(CreateHeartbeat(errorMessage));
-
-        clientState.Status = Status.Error;
-        RaiseStatusChanged();
       }
+
+      clientState.Status = Status.Alive;
+      RaiseStatusChanged();
+      SendHeartbeat(null);
     }
 
     private void StartPeach(StartPeachRequest startPeachRequest)
@@ -409,7 +411,6 @@ namespace PeachFarm.Node
     {
       Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
 
-     
       Peach.Core.Dom.Dom dom = pitParser.asParser(null, clientState.PitFilePath);
 
       List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
@@ -439,14 +440,27 @@ namespace PeachFarm.Node
       }
 
       Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
-      //config.pitFile = clientState.PitFilePath;
+      config.pitFile = clientState.PitFilePath;
       config.debug = false;
       //config.runName = clientState.JobID.ToString();
 
       clientState.Status = Common.Messages.Status.Running;
       RaiseStatusChanged();
 
-      peach.startFuzzing(dom, config);
+
+
+      try
+      {
+        peach.startFuzzing(dom, config);
+      }
+      catch (Peach.Core.PeachException ex)
+      {
+        StopPeach("PeachException: " + ex.Message);
+      }
+      catch (Exception ex)
+      {
+        StopPeach(ex.Message);
+      }
     }
 
     void peach_TestFinished(Peach.Core.RunContext context)
@@ -482,6 +496,8 @@ namespace PeachFarm.Node
       heartbeat.ErrorMessage = errorMessage;
       return heartbeat;
     }
+
+
   }
 
   internal class NodeState

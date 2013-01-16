@@ -13,39 +13,5 @@ using System.Security.Cryptography;
 
 namespace PeachFarm.Common.Messages
 {
-   
-  public partial class StartPeachRequest
-  {
-    #region pit file support
-    /*  
-    public static StartPeachRequest CreateStartPeachRequest(string pitFileName)
-    {
-      StreamReader reader = null;
-      string pitFileText;
-      try
-      {
-        reader = new StreamReader(pitFileName);
-        pitFileText = reader.ReadToEnd();
-      }
-      catch
-      {
-        throw;
-      }
-      finally
-      {
-        if(reader != null)
-        {
-          reader.Close();
-        }
-      }
-
-      StartPeachRequest request = new StartPeachRequest();
-      request.PitXml = pitFileText;
-
-      return request;
-    }
-    //*/
-    #endregion
-  }
 
 }
