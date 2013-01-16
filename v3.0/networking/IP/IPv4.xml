@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
@@ -30,8 +30,8 @@
           <Param name="ref" value="Header"/>
         </Fixup>
       </Number>
-      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 01"/><!--Immutable for testing-->
-      <Number name="DestIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 80"/><!--Immutable for testings=-->
+      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 01"/>
+      <Number name="DestIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 80"/>
       <Blob name="Options"/>
     </Block>
     <Blob name="Data" valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
@@ -52,12 +52,12 @@
     </Publisher>-->
     <Publisher class="RawIPv4">
       <Param name="Host" value="##Target##"/>
-      <Param name="Interface" value="##Interface##"/>
-	  <Param name="Protocol" value="255"/>
+      <Param name="Interface" value="##Source##"/>
+      <Param name="Protocol" value="255"/>
     </Publisher>
 	
-	<Logger class="logger.Filesystem" >
-		<Param name="Path" value="##LoggerPath##" />
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
     </Logger>
 	
   </Test>

@@ -3,6 +3,6 @@
   <Platform>
     <Define key="Target" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/ipv4/"/>
-	<Define key="Interface" value="127.0.0.1"/>
+    <Define key="Source" value="127.0.0.1"/>
   </Platform>
 </PitDefines>
