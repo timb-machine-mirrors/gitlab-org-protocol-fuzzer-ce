@@ -10,7 +10,7 @@
 		<Fixup class="IcmpV6ChecksumFixup">
 			<Param name="ref" value="ICMPHeader" />
 			<Param name="src" value="##Interface##" />
-			<Param name="dest" value="##IcmpHost##" />
+			<Param name="dst" value="##IcmpHost##" />
 		</Fixup>
 	</Number>
 	<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
