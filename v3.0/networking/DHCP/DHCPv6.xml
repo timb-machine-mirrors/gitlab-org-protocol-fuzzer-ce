@@ -29,7 +29,7 @@
           <Number name="DuidType" size="16" valueType="hex" value="00 03"/>
           <Number name="HWType" size="16" valueType="hex" value="00 01"/>
           <Blob name="Time" valueType="hex" value="deadbeef" />
-          <Blob name="Address" valueType="hex" value="##DestinationMAC##" />
+          <Blob name="Address" valueType="hex" value="##TargetMAC##" />
         </Block>
       </Block>
 			
