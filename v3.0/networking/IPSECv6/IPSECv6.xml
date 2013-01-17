@@ -5,24 +5,85 @@
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+	  
 
-	<!--Data model for IPSECv6 SP w/ ESP -->
-	<DataModel name="IPSECv6">
-		<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
-		<Number name="Sequence" size="32" value="1" endian="network"/>
+<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<DataModel name="IPSECv6TunnelData">
 		<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8"/>
-		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
-		<Number name="PadLength" size="16" endian="network" >
+		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="32" />
+		<Number name="PadLength" size="16" endian="network">
 			<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
 		</Number>
-		<Blob name="NextHeader" valueType="hex" length="1" value="3a"/>
-		<Blob name="ICV" valueType="hex"/>
+		<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+	</DataModel>
+	
+	<!--IPv6 Header used for Tunneling-->
+	<DataModel name="IPv6Header">
+		<Block name="Header">
+			<Flags size="32" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+			</Flags>
+			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="NextHeader" size="8" endian="big" value="50"/>
+			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
+			<Blob name="SrcIP" value="##SourceIP##" endian="network">
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="DestIP" value="##TargetIP##" endian="network">
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+		</Block>
+		<Block name="Payload" ref="IPSECv6TunnelData"/>
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Transport-->
+	<DataModel name="IPSECv6Transport">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8">
+				<!--NEED TO ENCRYPT PAYLOAD-->
+			</Blob>
+			<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
+			<Number name="PadLength" size="16" endian="network">
+				<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
+			</Number>
+			<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<Fixup class="SHA1Fixup">
+			<!--<Fixup class="SHA256Fixup">-->
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		</Blob>
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<DataModel name="IPSECv6Tunnel">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Block ref="IPv6Header">
+				<Transformer class="Sha1"/>
+			</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<Fixup class="SHA1Fixup">
+			<!--<Fixup class="SHA256Fixup">-->
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		</Blob>
 	</DataModel>
 	
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-				<DataModel ref="IPSECv6"/>
+				<DataModel ref="##Mode##"/>
 			</Action>
 		</State>
 	</StateModel>
@@ -32,8 +93,8 @@
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="RawV6">
-			<Param name="Host" value="##Host##"/>
-			<Param name="Interface" value="##Interface##"/>
+			<Param name="Host" value="##TargetIP##"/>
+			<Param name="Interface" value="##SourceIP##"/>
 			<Param name="Protocol" value="50"/>
 		</Publisher>
     
