@@ -19,6 +19,7 @@
 	
 	<!--IPv6 Header used for Tunneling-->
 	<DataModel name="IPv6Header">
+		<Blob length="16"/>
 		<Block name="Header">
 			<Flags size="32" endian="big">
 				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
@@ -69,7 +70,10 @@
 			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
 			<Number name="Sequence" size="32" value="1" endian="network"/>
 			<Block ref="IPv6Header">
-				<Transformer class="Sha1"/>
+				<Transformer class="AES128">
+					<!--<Param name="Key" value="c89de1a4237def182afec153"/> --><!--3Des example key-->
+					<Param name="Key" value="c89de1a4237def18"/> <!--AES128 Key-->
+				</Transformer>
 			</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
