@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
@@ -32,10 +32,10 @@
 			</Number>
 			<Number name="NextHeader" size="8" endian="big" value="50"/>
 			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
-			<Blob name="SrcIP" value="##SourceIP##" endian="network">
+			<Blob name="SrcIP" value="##SourceIP##" >
 				<Transformer class="Ipv6StringToOctet"/>
 			</Blob>
-			<Blob name="DestIP" value="##TargetIP##" endian="network">
+			<Blob name="DestIP" value="##TargetIP##" >
 				<Transformer class="Ipv6StringToOctet"/>
 			</Blob>
 		</Block>
@@ -65,7 +65,7 @@
 			<Fixup class="SHA1Fixup">
 			<!--<Fixup class="SHA256Fixup">-->
 				<Param name="ref" value="ESPHeader"/>
-			</Fixup>-->
+			</Fixup>
 		</Blob>
 	</DataModel>
 
