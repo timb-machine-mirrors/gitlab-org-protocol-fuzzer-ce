@@ -5,6 +5,6 @@
     <Define key="LoggerPath"  value="./logs/arp/"/> 
 	<Define key="SourceMAC" value="000c29ef2a1b" />
     <Define key="DestinationMAC" value="000c29ef2a1b" />
-	<Define key="Mode" value="IPSECv6Tunnel"/> <!--Valid values: (IPSECv6Tunnel) (IPSECv6Transport) -->
+	<Define key="Mode" value="IPSECv6Transport"/> <!--Valid values: (IPSECv6Tunnel) (IPSECv6Transport) -->
   </Platform>
 </PitDefines>

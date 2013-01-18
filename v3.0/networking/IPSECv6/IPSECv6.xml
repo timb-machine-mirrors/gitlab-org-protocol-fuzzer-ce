@@ -11,7 +11,7 @@
 	<DataModel name="IPSECv6TunnelData">
 		<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8"/>
 		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="32" />
-		<Number name="PadLength" size="16" endian="network">
+		<Number name="PadLength" size="8" endian="network">
 			<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
 		</Number>
 		<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
@@ -48,10 +48,15 @@
 			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
 			<Number name="Sequence" size="32" value="1" endian="network"/>
 			<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8">
-				<!--NEED TO ENCRYPT PAYLOAD-->
+				<Transformer class="AES128">
+					<!--<Param name="Key" value="c89de1a4237def182afec153"/>--><!--3Des example key-->
+					<!--<Param name="IV" value="password"/>--><!--3Des IV -->
+					<Param name="Key" value="c89de1a4237def18"/> <!--AES128 Key-->
+					<Param name="IV" value="passwordpassword"/> <!--AES128 IV -->
+				</Transformer>
 			</Blob>
 			<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
-			<Number name="PadLength" size="16" endian="network">
+			<Number name="PadLength" size="8" endian="network">
 				<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
 			</Number>
 			<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
@@ -60,7 +65,7 @@
 			<Fixup class="SHA1Fixup">
 			<!--<Fixup class="SHA256Fixup">-->
 				<Param name="ref" value="ESPHeader"/>
-			</Fixup>
+			</Fixup>-->
 		</Blob>
 	</DataModel>
 
@@ -70,9 +75,10 @@
 			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
 			<Number name="Sequence" size="32" value="1" endian="network"/>
 			<Block ref="IPv6Header">
-				<Transformer class="AES128">
-					<!--<Param name="Key" value="c89de1a4237def182afec153"/> --><!--3Des example key-->
-					<Param name="Key" value="c89de1a4237def18"/> <!--AES128 Key-->
+				<Transformer class="ThreeDES">
+					<Param name="Key" value="c89de1a4237def182afec153"/><!--3Des example key-->
+					<!--<Param name="Key" value="c89de1a4237def18"/>--> <!--AES128 Key-->
+					<Param name="IV" value="password"/>
 				</Transformer>
 			</Block>
 		</Block>
