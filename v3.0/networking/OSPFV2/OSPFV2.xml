@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Open Shortest Path First Version 2 PIT" version="0.0.2">
@@ -204,9 +204,13 @@
         </Fixup>
       </Number>
 
-      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="##SrcIP##"/>
+			<Blob name="SrcIP" value="##SrcIP##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
+      <Blob name="DestIP" value="##DestIP##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
 
-      <Number name="DestIP" size="32" endian="big" valueType="hex" value="##DestIP##"/>
 
     </Block>
     
@@ -219,10 +223,12 @@
       <Number name="OSPFPacketLength" size="16" endian="big" valueType="hex" value="00 00" >
         <Relation type="size" of="OSPFMessage"/>
       </Number>
-
-      <Number name="OSPFRouterID" size="32" endian="big" valueType="hex" value="##OSPFSourceRouter##"/>
+			
+			<Blob name="OSPFRouterID" value="##OSPFSourceRouter##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
           
-      <Number name="OSPFAreaID"   size="32" endian="big" valueType="hex" value="##OSPFAreaID##" />
+      <Number name="OSPFAreaID" size="32" endian="big" valueType="hex" value="##OSPFAreaID##" />
 
       <Number name="OSPFChecksum" size="16"> 
         <Fixup class="IcmpChecksumFixup">
@@ -266,7 +272,9 @@
     <Number name="OSPFMessage.OSPFData.BackupDesignatedRouterID" size="32" endian="big" valueType="hex" value="##BackUpRouterID##"/>
     
     <Block name="OSPFMessage.OSPFData.ActiveNeighbors" >
-      <Number name="neighbor" size="32" value="##OSPFNeighbor##" valueType="hex" />
+			<Blob name="neighbor" value="##OSPFNeighbor##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
     </Block>
   </DataModel>
  
