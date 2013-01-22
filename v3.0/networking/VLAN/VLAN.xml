@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
@@ -22,7 +22,7 @@
 		</Block>
 		<Block name="Payload">
 			<Blob name="Type" valueType="hex" value="0800" />
-			<Blob name="Payload" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
+			<Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
 			<Number name="CRC" size="32" endian="big">
 				<Fixup class="checksums.Crc32Fixup">
 					<Param name="ref" value="VLAN"/>
