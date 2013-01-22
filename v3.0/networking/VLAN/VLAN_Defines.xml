@@ -5,7 +5,7 @@
     <Define key="DestMAC"   value="000000000000"/>
     <Define key="TargetIP"  value="1066670"/>
     <Define key="Interface" value="eth0"/>
-    <Define key="LoggerPath"  value="./logs/arp/"/> 
+    <Define key="LoggerPath"  value="./logs/vlan/"/> 
 	<Define key="TestType" value="VLANDoubleFrame"/>
   </Platform>
 </PitDefines>
