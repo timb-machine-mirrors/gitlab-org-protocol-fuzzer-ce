@@ -11,20 +11,13 @@
   <!-- Used as the "Inner" Data for VXLAN Data Model -->
 	<DataModel name="VLAN">
 		<Block name="EtherHeader">
-			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
-			<Blob name="Src" valueType="hex" value="##InnerSourceMAC##"/>
-			<Blob name="Type" token="true" valueType="hex" value="8100"/>
-		</Block>
-		<Block name="VLAN_TCI">
-			<Flags size="16">
-				<Flag name="Priority"  position="0" size="3"/> 
-				<Flag name="CFI"  position="3" size="1" value="0"/> 
-				<Flag name="VID"  position="4" size="12"/> 
-			</Flags>
+			<Blob name="Dest" valueType="hex" value="000000000000"/>
+			<Blob name="Src" valueType="hex" value="000000000000"/>
 		</Block>
 		<Block name="Payload">
 			<Blob name="Type" valueType="hex" value="0800" />
-			<Blob name="Payload" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
+			<!--Valid IPv4 Header + UDP Packet. Not currently fuzzing this value-->
+			<Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
 			<Number name="CRC" size="32" endian="big">
 				<Fixup class="checksums.Crc32Fixup">
 					<Param name="ref" value="VLAN"/>
@@ -37,18 +30,12 @@
 		<Block name="OuterEtherHeader">
 			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
 			<Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
-			<Blob name="Type" valueType="hex" value="8100"/>
-			<Flags size="16">
-				<Flag name="Priority"  position="0" size="3"/> 
-				<Flag name="CFI"  position="3" size="1" value="0"/> 
-				<Flag name="VID"  position="4" size="12"/> 
-			</Flags>
-			<Blob name="EtherType" valueType="hex" value="0800" />
+			<Blob name="Type" valueType="hex" value="0800"/>
 		</Block>
 		<Block name="IP">		
 			<Block name="OuterIPHeader">
 				<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
-				<Number name="TotalLength" size="16">
+				<Number name="TotalLength" size="16" endian="big">
 					<Relation type="size" of="IP"/>
 				</Number>
 				<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
@@ -58,28 +45,28 @@
 						<Param name="ref" value="OuterIPHeader"/>
 					</Fixup>
 				</Number>
-				<Blob name="SrcIP" valueType="hex" length="4" value="##OuterSourceIP##" endian="little"/>
-				<Blob name="DstIP" valueType="hex" length="4" value="##OuterTargetIP##" endian="little"/>
+				<Blob name="SrcIP" valueType="hex" length="4" value="##OuterSourceIP##"/>
+				<Blob name="DstIP" valueType="hex" length="4" value="##OuterTargetIP##"/>
 			</Block>
 
 			<Block name="OuterUDP">
-				<Number name="SrcPort"  size="16" endian="network"/>
-				<Number name="DestPort" size="16" endian="network"/>
-				<Number name="Length"   size="16" endian="network">
+				<Number name="SrcPort"  size="16" endian="big" value="9029"/>
+				<Number name="DestPort" size="16" endian="big" value="9029"/>
+				<Number name="Length"   size="16" endian="big">
 					<Relation type="size" of="OuterUDP"/>
 				</Number>
 				<Blob   name="Checksum" length="2" valueType="hex" value="0" />
+			
+				<Block name="VXLANHeader">
+					<Flags size="8" endian="big" >
+						<Flag position="4" value="1" size="1"/>
+					</Flags>
+					<Number name="LargeReserve" size="24" endian="big"/>
+					<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
+					<Number name="SmallReserve" size="8" endian="big"/>
+				</Block>
+				<Block name="VLAN" ref="VLAN" />
 			</Block>
-
-			<Block name="VXLANHeader">
-				<Flags size="8">
-					<Flag position="2" value="1" size="1" />
-				</Flags>
-				<Number name="LargeReserve" size="24" />
-				<Number name="VNI" 	    size="24" />
-				<Number name="SmallReserve" size="8" />
-			</Block>
-			<Block name="VLAN" ref="VLAN" />
 		</Block>
 	</DataModel>
 
