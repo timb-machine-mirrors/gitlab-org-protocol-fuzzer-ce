@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       author="Deja Vu Security, LLC" description="Internet Group Message Protocol PIT" version="0.0.2">
+
+	<DataModel name="IGMPHeader">
+		<Blob name="Type" length="1" valueType="hex" value="11" />
+		<Number name="Code" size="8" endian="big" />
+		<Number name="Checksum" endian="big" size="16">
+			<Fixup class="IcmpChecksumFixup">
+				<Param name="ref" value="IGMPHeader" />
+			</Fixup>
+		</Number>
+		<Blob name="GroupAddress" length="4" />
+		<Flags size="8" endian="big">
+			<Flag name="Resv" size="4" position="0"/>
+			<Flag name="Suppress" size="1" position="4"/>
+			<Flag name="QRV" size="3" position="5"/>
+		</Flags>
+		<Number name="QQIC" size="8" endian="big"/>
+		<Number name="NumSources" size="16" endian="big"/>
+		<Block name="SourceAddresses">
+			<Blob />
+		</Block>
+	</DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="IGMPHeader"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="RawV4">
+      <Param name="Host" value="##Target##"/>
+      <Param name="Interface" value="##Source##"/>
+      <Param name="Protocol" value="2"/>
+    </Publisher>
+	
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+</Peach>
+<!-- end -->
