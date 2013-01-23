@@ -1,0 +1,11 @@
+<PitDefines>
+  <Platform>
+    <Define key="SourceMAC" value="000c29e2c065"/>
+    <Define key="SourceIP"  value="106661"/>
+    <Define key="DestMAC"   value="000000000000"/>
+    <Define key="TargetIP"  value="1066670"/>
+    <Define key="Interface" value="eth0"/>
+    <Define key="LoggerPath"  value="./logs/arp/"/> 
+	<Define key="TestType" value="VLANDoubleFrame"/>
+  </Platform>
+</PitDefines>

@@ -1,0 +1,14 @@
+<PitDefines>
+  <Platform>
+    <Define key="InnerSourceMAC" value="000c29e2c065"/> <!--10.6.66.1 in Hex-->
+    <Define key="InnerSourceIP" value="0a064201"/>
+    <Define key="InnerDestMAC"   value="000000000000"/>
+	<Define key="InnterTargetIP" value="0a064246"/> <!--10.6.66.70 in Hex-->
+	<Define key="OuterSourceMAC" value="000c29e2c065"/> <!--10.6.66.1 in Hex-->
+    <Define key="OuterSourceIP" value="0a064201" />
+    <Define key="OuterDestMAC"   value="000000000000"/>
+	<Define key="OuterTargetIP" value="0a064246"/> <!--10.6.66.70 in Hex-->
+    <Define key="Interface" value="eth0"/>
+    <Define key="LoggerPath"  value="./logs/arp/"/> 
+  </Platform>
+</PitDefines>

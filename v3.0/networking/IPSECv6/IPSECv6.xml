@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
+
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+  <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+
+	<!--Data model for IPSECv6 SP w/ ESP -->
+	<DataModel name="IPSECv6">
+		<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+		<Number name="Sequence" size="32" value="1" endian="network"/>
+		<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8"/>
+		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
+		<Number name="PadLength" size="16" endian="network" >
+			<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
+		</Number>
+		<Blob name="NextHeader" valueType="hex" length="1" value="3a"/>
+		<Blob name="ICV" valueType="hex"/>
+	</DataModel>
+	
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="IPSECv6"/>
+			</Action>
+		</State>
+	</StateModel>
+	
+
+  <!-- Default test for fuzzing IPSECv6 ESP-->
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="RawV6">
+			<Param name="Host" value="##Host##"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="50"/>
+		</Publisher>
+    
+		<Logger class="logger.Filesystem" >
+			<Param name="Path" value="##LoggerPath##" />
+		</Logger>
+	</Test>
+</Peach>

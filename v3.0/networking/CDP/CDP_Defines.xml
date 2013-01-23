@@ -1,10 +1,18 @@
 <PitDefines>
-  <Platform>
+  <All>
     <Define key="SourceMAC" value="000c29e2c065"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="SourceIP" value="192.168.1.1"/>
     <Define key="TargetIP" value="192.168.1.70"/>
     <Define key="Interface" value="eth0"/>
+  </All>
+	<Linux platform="linux">
     <Define key="LoggerPath" value="./logs/cdp/"/>
-  </Platform>
+	</Linux>
+	<OSX platform="osx">
+    <Define key="LoggerPath" value="./logs/cdp/"/>
+	</OSX>
+	<Windows platform="windows">
+    <Define key="LoggerPath" value="logs\\cdp\\"/>
+	</Windows>
 </PitDefines>

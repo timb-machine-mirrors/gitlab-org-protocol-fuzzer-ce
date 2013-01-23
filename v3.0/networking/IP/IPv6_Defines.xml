@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Platform>
+    <Define key="Target" value="::1"/>
+    <Define key="Source" value="::1"/>
+    <Define key="LoggerPath" value="logs/IPv6/"/>
+    <Define key="Interface" value="lo"/>
+    <Define key="SourceMAC" value="000c29ef2a1b" />
+    <Define key="DestinationMAC" value="000c29ef2a1b" />
+  </Platform>
+</PitDefines>

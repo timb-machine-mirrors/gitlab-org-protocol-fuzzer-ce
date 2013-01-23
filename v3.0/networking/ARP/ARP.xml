@@ -26,9 +26,13 @@
 			</Number>
 			<Number name="OPER" size="16" value="1" endian="big"/>
 			<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="SPA" valueType="hex" value="##SourceIP##"/>
+			<Blob name="SPA" value="##SourceIP##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
 			<Blob name="THA" valueType="hex" value="##DestMAC##"/>
-			<Blob name="TPA" valueType="hex" value="##TargetIP##"/>
+			<Blob name="TPA" value="##TargetIP##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
 		</Block>
 		<Blob name="Trailer"/>
 	</DataModel>
