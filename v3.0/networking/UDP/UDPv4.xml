@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
        author="Deja Vu Security, LLC" description="User Datagram Protocol PIT" version="0.0.2">
   <DataModel name="UDPHeader">
     <Number name="SrcPort" size="16" endian="network"/>
     <Number name="DestPort" size="16" endian="network"/>
     <Number name="Length" size="16" endian="network">
-      <Relation type="size" of="UDPHeader" endian="network"/>
+      <Relation type="size" of="UDPHeader" />
     </Number>
     <Number name="Checksum" size="16" >
       <Fixup class="UDPChecksumFixup">

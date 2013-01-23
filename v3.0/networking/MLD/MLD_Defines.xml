@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <Platform>
+    <Define key="Target" value="fe80::20c:29ff:fe1b:e7f8"/>
+    <Define key="LoggerPath" value="logs/MLD/"/>
+    <Define key="Source" value="fe80::613a:8384:f4b:330c"/>
+  </Platform>
+</PitDefines>

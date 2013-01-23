@@ -1,28 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd"  
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+	  
 
-	<!--Data model for IPSECv6 SP w/ ESP -->
-	<DataModel name="IPSECv6">
-		<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
-		<Number name="Sequence" size="32" value="1" endian="network"/>
+<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<DataModel name="IPSECv6TunnelData">
 		<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8"/>
-		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
-		<Number name="PadLength" size="16" endian="network" >
+		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="32" />
+		<Number name="PadLength" size="8" endian="network">
 			<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
 		</Number>
-		<Blob name="NextHeader" valueType="hex" length="1" value="3a"/>
-		<Blob name="ICV" valueType="hex"/>
+		<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+	</DataModel>
+	
+	<!--IPv6 Header used for Tunneling-->
+	<DataModel name="IPv6Header">
+		<Blob length="16"/>
+		<Block name="Header">
+			<Flags size="32" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+			</Flags>
+			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="NextHeader" size="8" endian="big" value="50"/>
+			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
+			<Blob name="SrcIP" value="##SourceIP##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="DestIP" value="##TargetIP##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+		</Block>
+		<Block name="Payload" ref="IPSECv6TunnelData"/>
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Transport-->
+	<DataModel name="IPSECv6Transport">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Block name="EncryptedValues">
+				<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8"/>
+				<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
+				<Number name="PadLength" size="8" endian="network">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
+				</Number>
+				<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+				<Transformer class="AES128">
+					<!--<Param name="Key" value="c89de1a4237def182afec153"/>--><!--3Des example key-->
+					<!--<Param name="IV" value="password"/>--><!--3Des IV -->
+					<Param name="Key" value="c89de1a4237def18"/> <!--AES128 Key-->
+					<Param name="IV" value="passwordpassword"/> <!--AES128 IV -->
+				</Transformer>
+			</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<Fixup class="SHA1Fixup">
+			<!--<Fixup class="SHA256Fixup">-->
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		</Blob>
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<DataModel name="IPSECv6Tunnel">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Block ref="IPv6Header">
+				<Transformer class="ThreeDES">
+					<Param name="Key" value="c89de1a4237def182afec153"/><!--3Des example key-->
+					<!--<Param name="Key" value="c89de1a4237def18"/>--> <!--AES128 Key-->
+					<Param name="IV" value="password"/>
+				</Transformer>
+			</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<Fixup class="SHA1Fixup">
+			<!--<Fixup class="SHA256Fixup">-->
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		</Blob>
 	</DataModel>
 	
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-				<DataModel ref="IPSECv6"/>
+				<DataModel ref="##Mode##"/>
 			</Action>
 		</State>
 	</StateModel>
@@ -32,8 +104,8 @@
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="RawV6">
-			<Param name="Host" value="##Host##"/>
-			<Param name="Interface" value="##Interface##"/>
+			<Param name="Host" value="##TargetIP##"/>
+			<Param name="Interface" value="##SourceIP##"/>
 			<Param name="Protocol" value="50"/>
 		</Publisher>
     

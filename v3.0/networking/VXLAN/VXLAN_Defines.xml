@@ -9,6 +9,6 @@
     <Define key="OuterDestMAC"   value="000000000000"/>
 	<Define key="OuterTargetIP" value="0a064246"/> <!--10.6.66.70 in Hex-->
     <Define key="Interface" value="eth0"/>
-    <Define key="LoggerPath"  value="./logs/arp/"/> 
+    <Define key="LoggerPath"  value="./logs/vxlan/"/> 
   </Platform>
 </PitDefines>
