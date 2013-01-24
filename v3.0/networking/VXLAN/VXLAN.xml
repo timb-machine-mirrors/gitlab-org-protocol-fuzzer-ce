@@ -45,8 +45,12 @@
 						<Param name="ref" value="OuterIPHeader"/>
 					</Fixup>
 				</Number>
-				<Blob name="SrcIP" valueType="hex" length="4" value="##OuterSourceIP##"/>
-				<Blob name="DstIP" valueType="hex" length="4" value="##OuterTargetIP##"/>
+				<String name="SrcIP" value="##OuterSourceIP##">
+					<Transformer class="Ipv4StringToNetworkOctet"/>
+				</String>
+				<String name="DstIP" value="##OuterTargetIP##">
+					<Transformer class="Ipv4StringToNetworkOctet"/>
+				</String>
 			</Block>
 
 			<Block name="OuterUDP">
