@@ -1,10 +1,29 @@
 <PitDefines>
-  <Platform>
-    <Define key="TargetIP"  value="fe80::20c:29ff:fe1b:e7f8"/>
-    <Define key="SourceIP" value="fe80::613a:8384:f4b:330c"/>
-    <Define key="LoggerPath"  value="./logs/ipsecv6/"/> 
-	<Define key="SourceMAC" value="000c29ef2a1b" />
-    <Define key="DestinationMAC" value="000c29ef2a1b" />
-	<Define key="Mode" value="IPSECv6Transport"/> <!--Valid values: (IPSECv6Tunnel) (IPSECv6Transport) -->
-  </Platform>
+	<All>
+		<Define key="RemoteAgent" value="10.0.1.40"/>
+		<Define key="TargetIPv6"  value="fe80::20c:29ff:fe1b:e7f8"/>
+		<Define key="SourceIPv6" value="fe80::613a:8384:f4b:330c"/>
+		<Define key="LoggerPath"  value="./logs/ipsecv6/"/> 
+		<Define key="SourceMAC" value="000c29ef2a1b" />
+		<Define key="TargetMAC" value="000c29ef2a1b" />
+		<Define key="Mode" value="IPSECv6Transport"/> <!--Valid values: (IPSECv6Tunnel) (IPSECv6Transport) -->
+	</All>
+		
+	<Linux platform="linux">
+		<Define key="Interface" value="eth0"/>
+		<Define key="tsharkInterface" value="eth0"/>
+		<Define key="tsharkBin" value="/usr/bin/tshark"/>
+	</Linux>
+	<OSX platform="osx">
+		<Define key="Interface" value="em0"/>
+		<Define key="tsharkInterface" value="em0"/>
+		<Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+	</OSX>
+	<Windows platform="windows">
+		<!-- This can't run on windows anyway because it uses the RawEther publisher. -->
+		<!-- Platform independance is added as an example. -->
+		<Define key="Interface" value="Local Area Connection"/>
+		<Define key="tsharkInterface" value="2"/>
+		<Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+	</Windows>
 </PitDefines>
