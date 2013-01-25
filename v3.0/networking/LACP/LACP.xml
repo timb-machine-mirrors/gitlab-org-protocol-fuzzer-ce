@@ -34,7 +34,7 @@
 					<Relation type="size" of="Partner"/>
 				</Number>
 				<Blob name="SysPriority" valueType="hex" value="0000"/>
-				<Blob name="Sys" valueType="hex" value="##DestMAC##"/>
+				<Blob name="Sys" valueType="hex" value="##TargetMAC##"/>
 				<Blob name="Key" valueType="hex" value="0000"/>
 				<Blob name="PortPriority" valueType="hex" value="0000"/>
 				<Blob name="Port" valueType="hex" value="##PartnerPort##"/>

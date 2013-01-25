@@ -58,7 +58,7 @@
 						<Number name="AddressValueLength" size="8">
 							<Relation type="size" of="AddressTlvValue"/>
 						</Number>
-						<String name="AddressTlvValue" value="##SourceIP##">
+						<String name="AddressTlvValue" value="##SourceIPv4##">
 							<Transformer class="Ipv4StringToNetworkOctet"/>
 						</String>
 					</Block>

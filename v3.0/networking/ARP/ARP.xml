@@ -45,16 +45,15 @@
 			<Param name="FaultOnEarlyExit" value="true" />
 		</Monitor>
 		<Monitor class="Pcap">
-			<Param name="Device" value="eth0" />
+			<Param name="Device" value="##Interface##" />
 		</Monitor>
 	</Agent>
 
 	<Agent name="LocalAgent">
 		<Monitor class="Pcap">
-		 <Param name="Device" value="eth0" />
+		 <Param name="Device" value="##Interface##" />
 		</Monitor>
 	</Agent>
-		
 
   <!-- StateModel for All ARP requests  -->
 	<StateModel name="TheState" initialState="Initial">

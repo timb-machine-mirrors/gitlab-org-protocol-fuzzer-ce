@@ -2,11 +2,11 @@
   <Platform>
     <!-- <Define key="InnerSourceMAC" value="000c29e2c065"/> -->
     <!-- <Define key="InnerSourceIP" value="0a064201"/> -->  <!--10.6.66.1 in Hex-->
-    <!-- <Define key="InnerDestMAC"   value="000000000000"/> -->
+    <!-- <Define key="InnerTargetMAC"   value="000000000000"/> -->
 		<!-- <Define key="InnterTargetIP" value="0a064246"/> --> <!--10.6.66.70 in Hex-->
 		<Define key="OuterSourceMAC" value="5254005335d3"/> 
     <Define key="OuterSourceIP" value="10.6.66.51" />
-    <Define key="OuterDestMAC"   value="000000000000"/>
+    <Define key="OuterTargetMAC"   value="000000000000"/>
 		<Define key="OuterTargetIP" value="10.6.66.52"/> 
     <Define key="Interface" value="eth0"/>
     <Define key="LoggerPath"  value="./logs/vxlan/"/> 
