@@ -1,7 +1,7 @@
 <PitDefines>
   <Platform>
     <Define key="SourceMAC" value="5254005335d3"/>
-    <Define key="DestMAC"   value="000000000000"/>
+    <Define key="TargetMAC"   value="000000000000"/>
     <Define key="Interface" value="eth0"/>
     <Define key="LoggerPath"  value="./logs/arp/"/> 
     <Define key="ActorPort" value="0012"/>

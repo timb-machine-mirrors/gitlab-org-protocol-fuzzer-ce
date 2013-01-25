@@ -120,8 +120,28 @@
 		</State>
 	</StateModel>
 
+	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+    <Monitor class="Process">
+			<Param name="Executable" value="##tsharkBin##" />
+			<Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="RestartOnEachTest" value="true" />
+			<Param name="FaultOnEarlyExit" value="true" />
+		</Monitor>
+		<Monitor class="Pcap">
+			<Param name="Device" value="##Interface##" />
+		</Monitor>
+	</Agent>
+
+	<Agent name="LocalAgent">
+		<Monitor class="Pcap">
+		 <Param name="Device" value="##Interface##" />
+		</Monitor>
+	</Agent>
+
    <!-- Default test case uses Raw Publisher define interface in defines file-->
 	<Test name="Default">
+		<Agent ref="RemoteAgent"/>
+		<Agent ref="LocalAgent"/>
 		<Strategy class="Sequential"/>
 		<StateModel ref="CdpStateModel"/>
 		<Publisher class="RawEther" name="RawHandler">
