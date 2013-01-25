@@ -2,9 +2,9 @@
 <PitDefines>
 	<All>
 		<Define key="RemoteAgent" value="10.0.1.40"/>
-		<Define key="TargetIPv4" value="::1"/>
+		<Define key="TargetIPv6" value="::1"/>
 		<Define key="LoggerPath" value="logs/udpV6/"/>
-		<Define key="SourceIPv4" value="::1"/>
+		<Define key="SourceIPv6" value="::1"/>
 	</All>
 	
 	<Linux platform="linux">
