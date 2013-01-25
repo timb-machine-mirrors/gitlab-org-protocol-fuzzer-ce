@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
-       author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
+       author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
@@ -45,10 +45,10 @@
 						<Param name="ref" value="OuterIPHeader"/>
 					</Fixup>
 				</Number>
-				<String name="SrcIP" value="##OuterSourceIP##">
+				<String name="SrcIP" value="##OuterSourceIPv4##">
 					<Transformer class="Ipv4StringToNetworkOctet"/>
 				</String>
-				<String name="DstIP" value="##OuterTargetIP##">
+				<String name="DstIP" value="##OuterTargetIPv4##">
 					<Transformer class="Ipv4StringToNetworkOctet"/>
 				</String>
 			</Block>
@@ -74,6 +74,18 @@
 		</Block>
 	</DataModel>
 
+	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+		<Monitor class="Process">
+			<Param name="Executable" value="##tsharkBin##" />
+			<Param name="Arguments" value="-i ##tsharkInterface##" />
+			<Param name="RestartOnEachTest" value="true" />
+			<Param name="FaultOnEarlyExit" value="true" />
+		</Monitor>
+		<Monitor class="Pcap">
+			<Param name="Device" value="##Interface##" />
+		</Monitor>
+	</Agent>
+	
   <!-- StateModel for VXLAN  -->
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">

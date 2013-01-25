@@ -1,14 +1,32 @@
 <PitDefines>
-  <Platform>
-    <!-- <Define key="InnerSourceMAC" value="000c29e2c065"/> -->
-    <!-- <Define key="InnerSourceIP" value="0a064201"/> -->  <!--10.6.66.1 in Hex-->
-    <!-- <Define key="InnerDestMAC"   value="000000000000"/> -->
-		<!-- <Define key="InnterTargetIP" value="0a064246"/> --> <!--10.6.66.70 in Hex-->
+	<All>
+		<Define key="RemoteAgent" value="10.0.1.40"/>
+		<!-- <Define key="InnerSourceMAC" value="10.6.66.1"/> -->
+		<!-- <Define key="InnerSourceIP" value="0a064201"/> -->
+		<!-- <Define key="InnerDestMAC"   value="000000000000"/> -->
+		<!-- <Define key="InnterTargetIP" value="10.6.66.70"/> -->
 		<Define key="OuterSourceMAC" value="5254005335d3"/> 
-    <Define key="OuterSourceIP" value="10.6.66.51" />
-    <Define key="OuterDestMAC"   value="000000000000"/>
-		<Define key="OuterTargetIP" value="10.6.66.52"/> 
-    <Define key="Interface" value="eth0"/>
-    <Define key="LoggerPath"  value="./logs/vxlan/"/> 
-  </Platform>
+		<Define key="OuterSourceIPv4" value="10.6.66.51" />
+		<Define key="OuterTargetMAC"   value="000000000000"/>
+		<Define key="OuterTargetIPv4" value="10.6.66.52"/> 
+		<Define key="LoggerPath"  value="./logs/vxlan/"/> 
+	</All>
+	
+	<Linux platform="linux">
+		<Define key="Interface" value="eth0"/>
+		<Define key="tsharkInterface" value="eth0"/>
+		<Define key="tsharkBin" value="/usr/bin/tshark"/>
+	</Linux>
+	<OSX platform="osx">
+		<Define key="Interface" value="em0"/>
+		<Define key="tsharkInterface" value="em0"/>
+		<Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+	</OSX>
+	<Windows platform="windows">
+		<!-- This can't run on windows anyway because it uses the RawEther publisher. -->
+		<!-- Platform independance is added as an example. -->
+		<Define key="Interface" value="Local Area Connection"/>
+		<Define key="tsharkInterface" value="2"/>
+		<Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+	</Windows>
 </PitDefines>
