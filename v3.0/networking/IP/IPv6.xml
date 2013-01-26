@@ -16,10 +16,10 @@
       </Number>
       <Number name="NextHeader" size="8" endian="big" value="58"/>
       <Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
-      <Blob name="SrcIP" length="16" valueType="hex" value="##SourceIPv6##">
+      <Blob name="SrcIP" value="##SourceIPv6##">
 		<Transformer class="Ipv6StringToOctet"/>
 	  </Blob>
-      <Blob name="DestIP" length="16" valueType="hex" value="##TargetIPv6##">
+      <Blob name="DestIP" value="##TargetIPv6##">
 		<Transformer class="Ipv6StringToOctet"/>
 	  </Blob>
     </Block>
