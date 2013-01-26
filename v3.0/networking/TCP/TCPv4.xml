@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-<<<<<<< HEAD
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
-=======
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
->>>>>>> d8576d1230e890ef53578017a86e4f2cb51dde2c
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Transport Control Protocol PIT" version="0.0.2">
 
   <DataModel name="TCP">

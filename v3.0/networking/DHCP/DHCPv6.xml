@@ -105,10 +105,10 @@
     <StateModel ref="TheState"/>
     
     <Publisher class="Udp">
-      <Param name="Host" value="##Target##"/>
+      <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Interface" value="##Source##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
     </Publisher>
 
     <!--<Strategy class="Random"/>-->		
