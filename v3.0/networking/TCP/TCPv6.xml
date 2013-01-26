@@ -30,8 +30,8 @@
       <Number name="CheckSum" size="16" endian="big">
         <Fixup class="TCPChecksumFixup">
           <Param name="ref" value="TCPv6" />
-          <Param name="src" value="##Source##" />
-          <Param name="dst" value="##Target##" />
+          <Param name="src" value="##SourceIPv6##" />
+          <Param name="dst" value="##TargetIPv6##" />
         </Fixup>
       </Number>
       <Number name="UrgentPointer" size="16" endian="big"/>
