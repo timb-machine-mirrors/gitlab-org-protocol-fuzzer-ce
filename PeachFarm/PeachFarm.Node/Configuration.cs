@@ -82,6 +82,17 @@ namespace PeachFarm.Node.Configuration
     {
       get { return (Tag)BaseGet(name); }
     }
+
+    public override string ToString()
+    {
+      StringBuilder sb = new StringBuilder();
+      foreach (Tag tag in this)
+      {
+        sb.Append(tag.Name + ",");
+      }
+      sb.Remove(sb.Length - 1, 1);
+      return sb.ToString();
+    }
   }
 
   public class Tag : ConfigurationElement

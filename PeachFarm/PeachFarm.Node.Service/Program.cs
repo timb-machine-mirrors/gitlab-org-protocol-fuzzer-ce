@@ -17,26 +17,26 @@ namespace PeachFarm.Node.Service
     {
       if (Environment.UserInteractive)
       {
-      System.Console.WriteLine();
-      System.Console.WriteLine("] Peach Farm - Node");
-      System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
-      System.Console.WriteLine();
+        System.Console.WriteLine();
+        System.Console.WriteLine("] Peach Farm - Node");
+        System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
+        System.Console.WriteLine();
 
-      #region initializing and starting node
-      peachFarmNode = new PeachFarmNode();
-      peachFarmNode.StatusChanged += new EventHandler<StatusChangedEventArgs>(peachFarmNode_StatusChanged);
-      peachFarmNode.StartNode();
-      #endregion
+        #region initializing and starting node
+        peachFarmNode = new PeachFarmNode();
+        peachFarmNode.StatusChanged += new EventHandler<StatusChangedEventArgs>(peachFarmNode_StatusChanged);
+        peachFarmNode.StartNode();
+        #endregion
 
-      #region press enter to close gracefully
-      System.Console.WriteLine("Peach Farm Node connected to " + peachFarmNode.ServerQueue + " successfully. Listening. Press Enter to exit gracefully.");
-      System.Console.ReadLine();
-      #endregion
+        #region press enter to close gracefully
+        System.Console.WriteLine("Peach Farm Node connected to " + peachFarmNode.ServerQueue + " successfully. Listening. Press Enter to exit gracefully.");
+        System.Console.ReadLine();
+        #endregion
 
-      #region stopping node
-      peachFarmNode.StopNode();
-      #endregion
-    }
+        #region stopping node
+        peachFarmNode.StopNode();
+        #endregion
+      }
       else
       {
         ServiceBase[] ServicesToRun;

@@ -25,28 +25,38 @@ namespace PeachFarm.Node
     //private Timer fileSyncTimer;
     private Timer heartbeat;
 
-    private NodeState clientState;
+    private NodeState nodeState;
 
     private Peach.Core.Engine peach;
 
     private Configuration.NodeSection config;
 
+    private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
+
     public PeachFarmNode(string controllerIPAddress = "")
     {
       config = (Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
+
 
       if (string.IsNullOrEmpty(controllerIPAddress))
       {
         controllerIPAddress = config.Controller.IpAddress;
       }
 
+
+
       #region trap unhandled exceptions and Ctrl-C
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
       AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
       #endregion
       
-      #region command line arguments
-      clientState = new NodeState(controllerIPAddress, String.Format(QueueNames.QUEUE_CONTROLLER, controllerIPAddress));
+      #region node state
+      nodeState = new NodeState(controllerIPAddress, String.Format(QueueNames.QUEUE_CONTROLLER, controllerIPAddress));
+
+      if ((config.Tags != null) && (config.Tags.Count > 0))
+      {
+        nodeState.Tags = config.Tags.ToString();
+      }
       #endregion
     }
 
@@ -56,11 +66,11 @@ namespace PeachFarm.Node
       #region set up RabbitMQ connection and start listening for messages
       try
       {
-        OpenConnection(clientState.RabbitHostName);
+        OpenConnection(nodeState.RabbitHostName);
       }
       catch
       {
-        throw new ApplicationException(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", clientState.RabbitHostName));
+        nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", nodeState.RabbitHostName));
       }
       RegisterQueues();
       StartListener();
@@ -80,14 +90,14 @@ namespace PeachFarm.Node
       #endregion
 
       #region stop the currently running peach job
-      if (clientState.Status == Status.Running)
+      if (nodeState.Status == Status.Running)
       {
         StopPeach();
       }
       #endregion
 
       #region send a stopping message to controller
-      clientState.Status = Status.Stopping;
+      nodeState.Status = Status.Stopping;
       RaiseStatusChanged();
 
       SendHeartbeat(null);
@@ -102,12 +112,12 @@ namespace PeachFarm.Node
 
     public Status Status
     {
-      get { return clientState.Status; }
+      get { return nodeState.Status; }
     }
 
     public string ServerQueue
     {
-      get { return clientState.ServerQueueName; }
+      get { return nodeState.ServerQueueName; }
     }
 
     public Configuration.NodeSection Configuration
@@ -121,7 +131,7 @@ namespace PeachFarm.Node
     {
       if (StatusChanged != null)
       {
-        StatusChanged(this, new StatusChangedEventArgs(this.clientState.Status));
+        StatusChanged(this, new StatusChangedEventArgs(this.nodeState.Status));
       }
     }
     
@@ -129,9 +139,9 @@ namespace PeachFarm.Node
 
     private void CurrentDomain_ProcessExit(object sender, EventArgs e)
     {
-      if ((clientState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
+      if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
       {
-        clientState.Status = Status.Stopping;
+        nodeState.Status = Status.Stopping;
         RaiseStatusChanged();
 
         SendHeartbeat(null);
@@ -143,7 +153,7 @@ namespace PeachFarm.Node
 
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-      if ((clientState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
+      if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
       {
         Heartbeat error = CreateHeartbeat();
         error.Status = Status.Error;
@@ -157,7 +167,7 @@ namespace PeachFarm.Node
 
         if (e.IsTerminating)
         {
-          clientState.Status = Status.Stopping;
+          nodeState.Status = Status.Stopping;
           RaiseStatusChanged();
 
           SendHeartbeat(null);
@@ -193,7 +203,7 @@ namespace PeachFarm.Node
     {
 
       //client queue
-      clientQueueName = String.Format(QueueNames.QUEUE_NODE, clientState.IPAddress);
+      clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
       modelSend.ExchangeDeclare(QueueNames.EXCHANGE_NODE, QueueNames.EXCHANGETYPE_NODE);
       modelSend.QueueDeclare(clientQueueName, false, false, false, null);
       modelSend.QueueBind(clientQueueName, QueueNames.EXCHANGE_NODE, "");
@@ -220,7 +230,7 @@ namespace PeachFarm.Node
      
       while (!e.Cancel)
       {
-        if ((clientState.Status == Status.Alive) || (clientState.Status == Status.Running))
+        if ((nodeState.Status == Status.Alive) || (nodeState.Status == Status.Running))
         {
           BasicGetResult result = null;
           try
@@ -229,8 +239,10 @@ namespace PeachFarm.Node
           }
           catch
           {
-            throw new ApplicationException("Can't communicate with RabbitMQ server, press Enter to quit.");
+            nlog.Fatal("Can't communicate with RabbitMQ server");
+            return;
           }
+
           if (result != null)
           {
             string body = encoding.GetString(result.Body);
@@ -277,9 +289,9 @@ namespace PeachFarm.Node
 
     private void PublishToServer(string message, string action)
     {
-      Debug.WriteLine(message);
-      Debug.WriteLine("----------------------------------");
-      modelSend.PublishToQueue(clientState.ServerQueueName, message, action);
+      //Debug.WriteLine(message);
+      //Debug.WriteLine("----------------------------------");
+      modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
     }
 
     private void ProcessAction(string action, string body)
@@ -290,7 +302,7 @@ namespace PeachFarm.Node
           StartPeach(StartPeachRequest.Deserialize(body));
           break;
         case "StopPeach":
-          StopPeach();
+          StopPeach(StopPeachRequest.Deserialize(body));
           break;
       }
     }
@@ -322,16 +334,34 @@ namespace PeachFarm.Node
 
     private void StopPeach()
     {
-      if (clientState.Status == Status.Running)
+      if (nodeState.Status == Status.Running)
       {
-        if (clientState.RunContext.continueFuzzing)
+        if (nodeState.RunContext.continueFuzzing)
         {
-          clientState.RunContext.continueFuzzing = false;
+          nodeState.RunContext.continueFuzzing = false;
         }
-        clientState.RunContext = null;
+        nodeState.RunContext = null;
 
 
-        clientState.Status = Status.Alive;
+        nodeState.Status = Status.Alive;
+        RaiseStatusChanged();
+
+        SendHeartbeat(null);
+      }
+    }
+
+    private void StopPeach(StopPeachRequest request)
+    {
+      if ((nodeState.Status == Status.Running) && (request.JobID == nodeState.JobID))
+      {
+        if (nodeState.RunContext.continueFuzzing)
+        {
+          nodeState.RunContext.continueFuzzing = false;
+        }
+        nodeState.RunContext = null;
+
+
+        nodeState.Status = Status.Alive;
         RaiseStatusChanged();
 
         SendHeartbeat(null);
@@ -347,37 +377,37 @@ namespace PeachFarm.Node
       }
       else
       {
-        if (clientState.Status == Status.Running)
+        if (nodeState.Status == Status.Running)
         {
-          if (clientState.RunContext.continueFuzzing)
+          if (nodeState.RunContext.continueFuzzing)
           {
-            clientState.RunContext.continueFuzzing = false;
+            nodeState.RunContext.continueFuzzing = false;
           }
-          clientState.RunContext = null;
+          nodeState.RunContext = null;
         }
 
         SendHeartbeat(CreateHeartbeat(errorMessage));
       }
 
-      clientState.Status = Status.Alive;
+      nodeState.Status = Status.Alive;
       RaiseStatusChanged();
       SendHeartbeat(null);
     }
 
-    private void StartPeach(StartPeachRequest startPeachRequest)
+    private void StartPeach(StartPeachRequest request)
     {
-      if (clientState.Status == Status.Running)
+      if (nodeState.Status == Status.Running)
         return;
 
-      string pit = startPeachRequest.Pit;
+      string pit = request.Pit;
       if (pit.StartsWith("<!"))
       {
         pit = pit.Substring("<![CDATA[".Length);
         pit = pit.Substring(0, pit.Length - 2);
       }
 
-      clientState.PitFilePath = Path.GetTempFileName();
-      using (FileStream stream = new FileStream(clientState.PitFilePath, FileMode.Create))
+      nodeState.PitFilePath = Path.GetTempFileName();
+      using (FileStream stream = new FileStream(nodeState.PitFilePath, FileMode.Create))
       {
         StreamWriter writer = new StreamWriter(stream);
         writer.Write(pit);
@@ -386,9 +416,11 @@ namespace PeachFarm.Node
         stream.Close();
       }
 
-      clientState.MongoDbConnectionString = startPeachRequest.MongoDbConnectionString;
-      clientState.SqlConnectionString = startPeachRequest.SqlConnectionString;
-      clientState.JobID = startPeachRequest.JobID;
+      nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
+      nodeState.SqlConnectionString = request.SqlConnectionString;
+      nodeState.JobID = request.JobID;
+      nodeState.PitFileName = request.PitFileName;
+      nodeState.UserName = request.UserName;
 
 
 
@@ -404,30 +436,26 @@ namespace PeachFarm.Node
 
     void peach_TestStarting(Peach.Core.RunContext context)
     {
-      clientState.RunContext = context;
+      nlog.Info("Test Starting: " + nodeState.JobID.ToString());
+      nodeState.RunContext = context;
     }
 
     void peachWorker_DoWork(object sender, DoWorkEventArgs e)
     {
       Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
 
-      Peach.Core.Dom.Dom dom = pitParser.asParser(null, clientState.PitFilePath);
+      Peach.Core.Dom.Dom dom = pitParser.asParser(null, nodeState.PitFilePath);
 
       List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
-      if(String.IsNullOrEmpty(clientState.SqlConnectionString) == false)
-      {
-        Dictionary<string, Peach.Core.Variant> sqlargs = new Dictionary<string, Peach.Core.Variant>();
-        sqlargs.Add("SqlConnectionString", new Peach.Core.Variant(clientState.SqlConnectionString));
-        sqlargs.Add("JobID", new Peach.Core.Variant(clientState.JobID.ToString()));
 
-        loggers.Add(new Loggers.SqlLogger(sqlargs));
-      }
 
-      if(String.IsNullOrEmpty(clientState.MongoDbConnectionString) == false)
+      if(String.IsNullOrEmpty(nodeState.MongoDbConnectionString) == false)
       {
         Dictionary<string, Peach.Core.Variant> mongoargs = new Dictionary<string, Peach.Core.Variant>();
-        mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(clientState.MongoDbConnectionString));
-        mongoargs.Add("JobID", new Peach.Core.Variant(clientState.JobID.ToString()));
+        mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(nodeState.MongoDbConnectionString));
+        mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.JobID.ToString()));
+        mongoargs.Add("UserName", new Peach.Core.Variant(nodeState.UserName));
+        mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.PitFileName));
 
         loggers.Add(new Loggers.MongoLogger(mongoargs));
       }
@@ -440,11 +468,11 @@ namespace PeachFarm.Node
       }
 
       Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
-      config.pitFile = clientState.PitFilePath;
+      config.pitFile = nodeState.PitFilePath;
       config.debug = false;
       //config.runName = clientState.JobID.ToString();
 
-      clientState.Status = Common.Messages.Status.Running;
+      nodeState.Status = Common.Messages.Status.Running;
       RaiseStatusChanged();
 
 
@@ -453,23 +481,27 @@ namespace PeachFarm.Node
       {
         peach.startFuzzing(dom, config);
       }
-      catch (Peach.Core.PeachException ex)
+      catch (Peach.Core.PeachException pex)
       {
-        StopPeach("PeachException: " + ex.Message);
+        StopPeach("PeachException: " + pex.Message);
+        nlog.Error("PeachException: " + pex.Message);
       }
       catch (Exception ex)
       {
         StopPeach(ex.Message);
+        nlog.Error("PeachException: " + ex.Message);
       }
     }
 
     void peach_TestFinished(Peach.Core.RunContext context)
     {
+      nlog.Info("Test Finished: " + nodeState.JobID.ToString());
       StopPeach();
     }
 
     void peach_TestError(Peach.Core.RunContext context, Exception e)
     {
+      nlog.Error(String.Format("Test Error: {0}\n{1}", nodeState.JobID.ToString(), e.Message));
       StopPeach(e.Message);
     }
 
@@ -478,14 +510,17 @@ namespace PeachFarm.Node
     private Heartbeat CreateHeartbeat()
     {
       Heartbeat heartbeat = new Heartbeat();
-      heartbeat.ComputerName = clientState.IPAddress;
-      if (clientState.Status == Common.Messages.Status.Running)
+      heartbeat.ComputerName = nodeState.IPAddress;
+      if (nodeState.Status == Common.Messages.Status.Running)
       {
-        heartbeat.JobID = clientState.JobID;
+        heartbeat.JobID = nodeState.JobID;
+        heartbeat.UserName = nodeState.UserName;
+        heartbeat.PitFileName = nodeState.PitFileName;
       }
+      heartbeat.Tags = nodeState.Tags;
       heartbeat.QueueName = clientQueueName;
       heartbeat.Stamp = DateTime.Now;
-      heartbeat.Status = clientState.Status;
+      heartbeat.Status = nodeState.Status;
       return heartbeat;
     }
 
@@ -535,7 +570,10 @@ namespace PeachFarm.Node
               MongoDbConnectionString = String.Empty;
               SqlConnectionString = String.Empty;
               PitFilePath = String.Empty;
-              JobID = Guid.Empty;
+              //JobID = Guid.Empty;
+              JobID = String.Empty;
+              UserName = "";
+              PitFileName = String.Empty;
               RunContext = null;
               break;
           }
@@ -549,36 +587,14 @@ namespace PeachFarm.Node
     
     internal string MongoDbConnectionString { get; set; }
     internal string SqlConnectionString { get; set; }
+
     internal string PitFilePath { get; set; }
+    internal string PitFileName { get; set; }
     internal Peach.Core.RunContext RunContext { get; set; }
-    internal Guid JobID { get; set; }
-  }
-
-  internal class PitStuff
-  {
-
-    internal PitStuff(string xml)
-    {
-
-      StringReader reader = new StringReader(xml);
-      XPathNavigator nav = new XPathDocument(reader).CreateNavigator();
-
-      XmlNamespaceManager ns = new XmlNamespaceManager(nav.NameTable);
-      ns.AddNamespace("p", "http://phed.org/2008/Peach");
-      try
-      {
-        RunName = nav.SelectSingleNode("/p:Peach/p:Run/@name", ns).Value;
-        LogPath = nav.SelectSingleNode("/p:Peach/p:Run/p:Logger[@class='logger.Filesystem']/p:Param[@name='path']/@value", ns).Value;
-      }
-      catch(Exception ex)
-      {
-        throw ex;
-      }
-
-    }
-
-    internal string RunName { get; set; }
-    internal string LogPath { get; set; }
+    //internal Guid JobID { get; set; }
+    internal string JobID { get; set; }
+    internal string UserName { get; set; }
+    internal string Tags { get; set; }
   }
 
   public class StatusChangedEventArgs : EventArgs

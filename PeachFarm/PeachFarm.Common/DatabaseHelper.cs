@@ -27,7 +27,8 @@ namespace PeachFarm.Common.Mongo
       return result;
     }
 
-    public static Job GetJob(Guid jobGuid, string connectionString)
+    //public static Job GetJob(Guid jobGuid, string connectionString)
+    public static Job GetJob(string jobGuid, string connectionString)
     {
       MongoServer server = MongoServer.Create(connectionString);
       MongoDatabase db = server.GetDatabase("PeachFarm");

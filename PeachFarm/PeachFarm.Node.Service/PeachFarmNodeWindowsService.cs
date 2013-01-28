@@ -40,9 +40,12 @@ namespace PeachFarm.Node.Service
 
     protected override void OnStart(string[] args)
     {
+      base.OnStart(args);
+
       try
       {
         node = new PeachFarmNode();
+        node.StatusChanged += new EventHandler<StatusChangedEventArgs>(node_StatusChanged);
         node.StartNode();
         logger.Info("Peach Farm Node Started.");
       }
@@ -58,12 +61,19 @@ namespace PeachFarm.Node.Service
       }
     }
 
+    void node_StatusChanged(object sender, StatusChangedEventArgs e)
+    {
+      logger.Info("Status Changed: " + e.Status.ToString());
+    }
+
     protected override void OnStop()
     {
+      base.OnStop();
+
       if (node != null)
       {
         node.StopNode();
-        logger.Info("Peach Farm Controller Stopped.");
+        logger.Info("Peach Farm Node Stopped.");
       }
     }
   }

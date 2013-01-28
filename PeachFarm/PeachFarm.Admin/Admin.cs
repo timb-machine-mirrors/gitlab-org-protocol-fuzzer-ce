@@ -27,12 +27,15 @@ namespace PeachFarm.Admin
       TimeoutSeconds = timeoutSeconds;
     }
 
+    #region Properties
     public string ServerHostName { get; private set; }
 
     public int TimeoutSeconds { get; private set; }
 
     public bool IsListening { get; private set; }
+    #endregion
 
+    #region Methods
     public void StartAdmin()
     {
       try
@@ -41,7 +44,7 @@ namespace PeachFarm.Admin
       }
       catch(Exception ex)
       {
-        ProcessError("ListComputers", new ApplicationException(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", ServerHostName), ex));
+        RaiseAdminException(ex);
       }
 
       InitializeQueues();
@@ -53,6 +56,7 @@ namespace PeachFarm.Admin
       StopListeners();
       CloseConnection();
     }
+    #endregion
 
     #region AsyncCompletes
 
@@ -110,13 +114,6 @@ namespace PeachFarm.Admin
       {
         Result = result;
       }
-
-      public ListComputersCompletedEventArgs(Exception exception)
-        : base(exception, false, null)
-      {
-        
-      }
-
       public ListComputersResponse Result { get; private set; }
     }
 
@@ -128,12 +125,6 @@ namespace PeachFarm.Admin
     {
       if (ListComputersCompleted != null)
         ListComputersCompleted(this, new ListComputersCompletedEventArgs(result));
-    }
-
-    private void RaiseListComputersCompleted(Exception exception)
-    {
-      if (ListComputersCompleted != null)
-        ListComputersCompleted(this, new ListComputersCompletedEventArgs(exception));
     }
     #endregion
 
@@ -162,44 +153,108 @@ namespace PeachFarm.Admin
 
     #endregion
 
+    #region AdminException
+    public class ExceptionEventArgs : EventArgs
+    {
+      public ExceptionEventArgs(Exception ex)
+      {
+        this.Exception = ex;
+      }
+
+      public Exception Exception { get; private set; }
+    }
+
+    public event EventHandler<ExceptionEventArgs> AdminException;
+
+    private void RaiseAdminException(Exception ex)
+    {
+      if (AdminException != null)
+      {
+        AdminException(this, new ExceptionEventArgs(ex));
+      }
+    }
+    #endregion
+
+
     #region Sends
-    //private void StartPeach(string commandLine, int clientCount, string logPath)
+
+    #region StartPeach
     public void StartPeachAsync(string pitFilePath, int clientCount)
     {
       StartPeachRequest request = new StartPeachRequest();
       request.ClientCount = clientCount;
+      request.Tags = String.Empty;
       request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
       request.IPAddress = String.Empty;
+      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
 
       
     }
 
-    //private void StartPeach(string commandLine, string ipAddress, string logPath)
-    public void StartPeachAsync(string pitFilePath, string ipAddress)
+    public void StartPeachAsync(string pitFilePath, int clientCount, string tagsString)
+    {
+      StartPeachRequest request = new StartPeachRequest();
+      request.ClientCount = clientCount;
+      request.Tags = tagsString;
+      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+      request.IPAddress = String.Empty;
+      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+      PublishToServer(request.Serialize(), "StartPeach");
+
+
+    }
+
+    public void StartPeachAsync(string pitFilePath, IPAddress ipAddress)
     {
       StartPeachRequest request = new StartPeachRequest();
       request.Pit = GetPitXml(pitFilePath);
       request.ClientCount = 1;
-      request.IPAddress = ipAddress;
+      request.IPAddress = ipAddress.ToString();
+      request.Tags = String.Empty;
+      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
       Console.WriteLine("waiting for result...");
       Console.ReadLine();
     }
 
+    public void StartPeachAsync(string pitFilePath, string tagsString)
+    {
+      StartPeachRequest request = new StartPeachRequest();
+      request.Pit = GetPitXml(pitFilePath);
+      request.ClientCount = 0;
+      request.IPAddress = String.Empty;
+      request.Tags = tagsString;
+      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+      PublishToServer(request.Serialize(), "StartPeach");
+      Console.WriteLine("waiting for result...");
+      Console.ReadLine();
+    }
+    #endregion
+
+    #region StopPeachAsync
     public void StopPeachAsync(string jobGuid)
     {
       StopPeachRequest request = new StopPeachRequest();
-      request.JobID = Guid.Parse(jobGuid);
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+      request.JobID = jobGuid;
       PublishToServer(request.Serialize(), "StopPeach");
     }
 
+    /*
     public void StopPeachAsync()
     {
       StopPeachRequest request = new StopPeachRequest();
-      request.JobID = Guid.Empty;
+      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+      request.JobID = String.Empty;
       PublishToServer(request.Serialize(), "StopPeach");
     }
+    //*/
+    #endregion
 
     public void ListComputersAsync()
     {
@@ -288,7 +343,6 @@ namespace PeachFarm.Admin
     {
       BasicGetResult result = null;
       int count = 0;
-
       while (!e.Cancel)
       {
         try
@@ -300,10 +354,7 @@ namespace PeachFarm.Admin
         }
         catch(Exception ex)
         {
-          result = null;
-          Console.WriteLine("Could not communicate with RabbitMQ");
-          e.Cancel = true;
-          ProcessError("ListComputers", new ApplicationException("Could not communicate with RabbitMQ", ex));
+          RaiseAdminException(new ApplicationException("Could not communicate with RabbitMQ", ex));
           return;
         }
 
@@ -320,9 +371,7 @@ namespace PeachFarm.Admin
           }
           catch (Exception ex)
           {
-            Console.WriteLine(ex.Message);
-            e.Cancel = true;
-            ProcessError(action, new ApplicationException("Could not process message", ex));
+            RaiseAdminException(ex);
             return;
           }
         }
@@ -334,8 +383,8 @@ namespace PeachFarm.Admin
             count++;
             if (count == TimeoutSeconds)
             {
-              e.Cancel = true;
-              ProcessError("ListComputers", new ApplicationException("No response received before timeout."));
+              RaiseAdminException(new ApplicationException("No response received before timeout."));
+              return;
             }
           }
         }
@@ -370,38 +419,15 @@ namespace PeachFarm.Admin
         case "StopPeach":
           RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
           break;
-        case "ResumePeach":
-          break;
-        case "Heartbeat":
-          break;
         case "ListComputers":
           RaiseListComputersCompleted(ListComputersResponse.Deserialize(body));
           break;
         case "ListErrors":
           RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
           break;
-      }
-    }
-
-    private void ProcessError(string action, Exception exception)
-    {
-      switch (action)
-      {
-        case "StartPeach":
-          //StartPeachReply(StartPeachResponse.Deserialize(body));
-          break;
-        case "StopPeach":
-          //StopPeachReply(StopPeachResponse.Deserialize(body));
-          break;
-        case "ResumePeach":
-          break;
-        case "Heartbeat":
-          break;
-        case "ListComputers":
-          RaiseListComputersCompleted(exception);
-          break;
-        case "ListErrors":
-          //ListErrorsReply(ListErrorsResponse.Deserialize(body));
+        default:
+          string message = String.Format("Could not process message\nAction: {0}\nBody:\n{1}", action, body);
+          RaiseAdminException(new ApplicationException(message));
           break;
       }
     }
