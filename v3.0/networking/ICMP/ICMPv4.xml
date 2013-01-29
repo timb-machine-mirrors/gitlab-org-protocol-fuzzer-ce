@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
 
   <DataModel name="ICMPHeader">
@@ -15,17 +15,17 @@
     <Blob name="Data" valueType="hex" value="61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 75 76 77 61 62 63 64 65 66 67 68 69"/>
   </DataModel>
 
-    <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="RestartOnEachTest" value="true" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="RestartOnEachTest" value="true" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
   
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
@@ -42,7 +42,7 @@
       <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Protocol" value="1"/>
     </Publisher>
-	
+    
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>
