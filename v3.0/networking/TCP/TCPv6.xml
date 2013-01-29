@@ -61,8 +61,8 @@
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+    <Agent ref="RemoteAgent"/>
     <Publisher class="RawV6">
-      <Agent ref="RemoteAgent"/>
       <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="6"/>
