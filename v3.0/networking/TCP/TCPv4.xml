@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Transport Control Protocol PIT" version="0.0.2">
 
   <DataModel name="TCP">
@@ -40,17 +40,17 @@
     <Blob name="Data"/>
   </DataModel>
 
-    <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="RestartOnEachTest" value="true" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="RestartOnEachTest" value="true" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
   
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
