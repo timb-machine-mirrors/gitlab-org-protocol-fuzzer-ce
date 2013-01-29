@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
   <DataModel name="Options">
     <Number name="CIdentifier" endian="network" size="16" />
@@ -9,7 +9,7 @@
     </Number>
     <Block name="CValue" />
   </DataModel>
-	
+  
   <DataModel name="DHCPv6">
     <Number name="type" size="8" value="1" />
     <Number name="TranID" size="24" valueType="hex" value="00 46 09" />
@@ -32,7 +32,7 @@
           <Blob name="Address" valueType="hex" value="##TargetMAC##" />
         </Block>
       </Block>
-			
+      
       <Block name ="IAfNtA" ref="Options">
         <Number name="CIdentifier" size="16" endian="network" token="true" value="3"/>
         <Block name="CValue">
@@ -56,7 +56,7 @@
       
     </Choice>
   </DataModel>
-	
+  
   <DataModel name="DHCPv6standard">
     <Number name="type" size="8" value="1" />
     <Number name="TranID" size="24" valueType="hex" value="00 46 09" />
