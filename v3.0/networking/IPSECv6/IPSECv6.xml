@@ -123,6 +123,7 @@
 
   <!-- Default test for fuzzing IPSECv6 ESP-->
   <Test name="Default">
+    <Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>
