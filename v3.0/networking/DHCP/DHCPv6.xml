@@ -109,6 +109,7 @@
   </Agent>
   
   <Test name="Default">
+    <Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="Udp">
       <Param name="Host" value="##TargetIPv6##"/>
