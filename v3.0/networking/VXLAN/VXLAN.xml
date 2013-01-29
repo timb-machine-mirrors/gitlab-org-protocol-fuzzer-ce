@@ -78,7 +78,6 @@
     <Monitor class="Process">
       <Param name="Executable" value="##tsharkBin##" />
       <Param name="Arguments" value="-i ##tsharkInterface##" />
-      <Param name="RestartOnEachTest" value="true" />
       <Param name="FaultOnEarlyExit" value="true" />
     </Monitor>
     <Monitor class="Pcap">
