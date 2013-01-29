@@ -1,110 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 
   
-    
+  
   <!-- Used as the "Inner" Data for VXLAN Data Model -->
-	<DataModel name="VLAN">
-		<Block name="EtherHeader">
-			<Blob name="Dest" valueType="hex" value="000000000000"/>
-			<Blob name="Src" valueType="hex" value="000000000000"/>
-		</Block>
-		<Block name="Payload">
-			<Blob name="Type" valueType="hex" value="0800" />
-			<!--Valid IPv4 Header + UDP Packet. Not currently fuzzing this value-->
-			<Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
-			<Number name="CRC" size="32" endian="big">
-				<Fixup class="checksums.Crc32Fixup">
-					<Param name="ref" value="VLAN"/>
-				</Fixup>
-			</Number>
-		</Block>
-	</DataModel>
-	
-	<DataModel name="VXLAN">
-		<Block name="OuterEtherHeader">
-			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
-			<Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
-			<Blob name="Type" valueType="hex" value="0800"/>
-		</Block>
-		<Block name="IP">		
-			<Block name="OuterIPHeader">
-				<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
-				<Number name="TotalLength" size="16" endian="big">
-					<Relation type="size" of="IP"/>
-				</Number>
-				<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
-				<Blob name="Protocol" valueType="hex" value="11" />
-				<Number name="CRC" size="16" endian="little">
-					<Fixup class="checksums.IcmpChecksumFixup">
-						<Param name="ref" value="OuterIPHeader"/>
-					</Fixup>
-				</Number>
-				<String name="SrcIP" value="##OuterSourceIPv4##">
-					<Transformer class="Ipv4StringToNetworkOctet"/>
-				</String>
-				<String name="DstIP" value="##OuterTargetIPv4##">
-					<Transformer class="Ipv4StringToNetworkOctet"/>
-				</String>
-			</Block>
+  <DataModel name="VLAN">
+    <Block name="EtherHeader">
+      <Blob name="Dest" valueType="hex" value="000000000000"/>
+      <Blob name="Src" valueType="hex" value="000000000000"/>
+    </Block>
+    <Block name="Payload">
+      <Blob name="Type" valueType="hex" value="0800" />
+      <!--Valid IPv4 Header + UDP Packet. Not currently fuzzing this value-->
+      <Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
+      <Number name="CRC" size="32" endian="big">
+	<Fixup class="checksums.Crc32Fixup">
+	  <Param name="ref" value="VLAN"/>
+	</Fixup>
+      </Number>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="VXLAN">
+    <Block name="OuterEtherHeader">
+      <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
+      <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
+      <Blob name="Type" valueType="hex" value="0800"/>
+    </Block>
+    <Block name="IP">		
+      <Block name="OuterIPHeader">
+	<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
+	<Number name="TotalLength" size="16" endian="big">
+	  <Relation type="size" of="IP"/>
+	</Number>
+	<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
+	<Blob name="Protocol" valueType="hex" value="11" />
+	<Number name="CRC" size="16" endian="little">
+	  <Fixup class="checksums.IcmpChecksumFixup">
+	    <Param name="ref" value="OuterIPHeader"/>
+	  </Fixup>
+	</Number>
+	<String name="SrcIP" value="##OuterSourceIPv4##">
+	  <Transformer class="Ipv4StringToNetworkOctet"/>
+	</String>
+	<String name="DstIP" value="##OuterTargetIPv4##">
+	  <Transformer class="Ipv4StringToNetworkOctet"/>
+	</String>
+      </Block>
 
-			<Block name="OuterUDP">
-				<Number name="SrcPort"  size="16" endian="big" value="9029"/>
-				<Number name="DestPort" size="16" endian="big" value="9029"/>
-				<Number name="Length"   size="16" endian="big">
-					<Relation type="size" of="OuterUDP"/>
-				</Number>
-				<Blob   name="Checksum" length="2" valueType="hex" value="0" />
-			
-				<Block name="VXLANHeader">
-					<Flags size="8" endian="big" >
-						<Flag position="4" value="1" size="1"/>
-					</Flags>
-					<Number name="LargeReserve" size="24" endian="big"/>
-					<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
-					<Number name="SmallReserve" size="8" endian="big"/>
-				</Block>
-				<Block name="VLAN" ref="VLAN" />
-			</Block>
-		</Block>
-	</DataModel>
-
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="RestartOnEachTest" value="true" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
+      <Block name="OuterUDP">
+	<Number name="SrcPort"  size="16" endian="big" value="9029"/>
+	<Number name="DestPort" size="16" endian="big" value="9029"/>
+	<Number name="Length"   size="16" endian="big">
+	  <Relation type="size" of="OuterUDP"/>
+	</Number>
+	<Blob   name="Checksum" length="2" valueType="hex" value="0" />
 	
+	<Block name="VXLANHeader">
+	  <Flags size="8" endian="big" >
+	    <Flag position="4" value="1" size="1"/>
+	  </Flags>
+	  <Number name="LargeReserve" size="24" endian="big"/>
+	  <Number name="VNI" 	    size="24" value="7639335" endian="big"/>
+	  <Number name="SmallReserve" size="8" endian="big"/>
+	</Block>
+	<Block name="VLAN" ref="VLAN" />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="RestartOnEachTest" value="true" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
   <!-- StateModel for VXLAN  -->
-	<StateModel name="TheState" initialState="Initial">
-		<State name="Initial">
-			<Action type="output">
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
         <DataModel ref="VXLAN"/>
-			</Action>
-		</State>
-	</StateModel>
+      </Action>
+    </State>
+  </StateModel>
 
   <!-- Default test for fuzzing VXLAN -->
-	<Test name="Default">
-		<StateModel ref="TheState"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
-		</Publisher>
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="RawEther">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_8021Q"/>
+    </Publisher>
     
     <Logger class="logger.Filesystem" >
-		<Param name="Path" value="##LoggerPath##" />
+      <Param name="Path" value="##LoggerPath##" />
     </Logger>
-	</Test>
+  </Test>
 </Peach>
