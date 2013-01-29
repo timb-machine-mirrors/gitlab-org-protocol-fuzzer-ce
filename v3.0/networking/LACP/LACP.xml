@@ -75,7 +75,6 @@
       <Param name="Device" value="##Interface##" />
     </Monitor>
   </Agent>
-  
 
   <!-- Default test for fuzzing LACP -->
   <Test name="Default">

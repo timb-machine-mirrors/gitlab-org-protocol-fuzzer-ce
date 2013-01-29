@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
        author="Deja Vu Security, LLC" description="Multicast Listener Discovery PIT" version="0.0.2">
 
-	<!-- Part of ICMPv6 -->   
-	   
-	<DataModel name="MLDHeader">
-		<Number name="Type" size="8" value="130" endian="big"/>
-		<Number name="Code" size="8" endian="big" />
-		<Number name="Checksum"  endian="big" size="16">
-			<Fixup class="IcmpV6ChecksumFixup">
-				<Param name="ref" value="MLDHeader" />
-				<Param name="src" value="##SourceIPv6##" />
-				<Param name="dst" value="##TargetIPv6##" />
-			</Fixup>
-		</Number>
-		<Number name="MaxRespCode" size="16" endian="big"/>
-		<Number name="Reserved" size="16" endian="big"/>
-		<Blob name="MulticastAddress" length="16" />
-		<Flags size="8" endian="big">
-			<Flag name="Resv" size="4" position="0"/>
-			<Flag name="Suppress" size="1" position="4"/>
-			<Flag name="QRV" size="3" position="5"/>
-		</Flags>
-		<Number name="QQIC" size="8"/>
-		<Number name="NumSources" size="16" />
-		<Block name="SourceAddresses">
-			<Blob />
-		</Block>
-	</DataModel>
+  <!-- Part of ICMPv6 -->   
+  
+  <DataModel name="MLDHeader">
+    <Number name="Type" size="8" value="130" endian="big"/>
+    <Number name="Code" size="8" endian="big" />
+    <Number name="Checksum"  endian="big" size="16">
+      <Fixup class="IcmpV6ChecksumFixup">
+	<Param name="ref" value="MLDHeader" />
+	<Param name="src" value="##SourceIPv6##" />
+	<Param name="dst" value="##TargetIPv6##" />
+      </Fixup>
+    </Number>
+    <Number name="MaxRespCode" size="16" endian="big"/>
+    <Number name="Reserved" size="16" endian="big"/>
+    <Blob name="MulticastAddress" length="16" />
+    <Flags size="8" endian="big">
+      <Flag name="Resv" size="4" position="0"/>
+      <Flag name="Suppress" size="1" position="4"/>
+      <Flag name="QRV" size="3" position="5"/>
+    </Flags>
+    <Number name="QQIC" size="8"/>
+    <Number name="NumSources" size="16" />
+    <Block name="SourceAddresses">
+      <Blob />
+    </Block>
+  </DataModel>
 
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="RestartOnEachTest" value="true" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
-	
-	<StateModel name="TheState" initialState="Initial">
-		<State name="Initial">
-			<Action type="output">
-				<DataModel ref="MLDHeader"/>
-			</Action>
-		</State>
-	</StateModel>
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="RestartOnEachTest" value="true" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+	<DataModel ref="MLDHeader"/>
+      </Action>
+    </State>
+  </StateModel>
 
   <Test name="Default">
     <StateModel ref="TheState"/>
@@ -57,7 +57,7 @@
       <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="58"/>
     </Publisher>
-	
+    
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>
