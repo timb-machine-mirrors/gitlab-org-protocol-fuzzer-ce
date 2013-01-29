@@ -36,6 +36,7 @@
   </StateModel>
 
   <Test name="Default">
+    <Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="RawV4">
       <Param name="Host" value="##TargetIPv4##"/>
