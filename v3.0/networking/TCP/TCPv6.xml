@@ -63,8 +63,8 @@
   <Test name="Default">
     <StateModel ref="TheState"/>
     <Publisher class="RawV6">
-      <Param name="Host" value="##SourceIPv6##"/>
-      <Param name="Interface" value="##TargetIPv6##"/>
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="6"/>
     </Publisher>
 
