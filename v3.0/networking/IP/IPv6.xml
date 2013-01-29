@@ -58,6 +58,7 @@
   </StateModel>
 
   <Test name="Default">
+    <Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="RawEther">
       <Param name="Interface" value="##Interface##"/>
