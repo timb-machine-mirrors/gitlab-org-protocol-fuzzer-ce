@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
 	<All>
-		<Define key="RemoteAgent" value="10.0.1.40"/>
+		<Define key="RemoteAgentIP" value="10.0.1.40"/>
 		<Define key="TargetIPv6" value="fe80::20c:29ff:fe1b:e7f8"/>
 		<Define key="LoggerPath" value="logs/IGMPv6/"/>
 		<Define key="SourceIPv6" value="fe80::613a:8384:f4b:330c"/>

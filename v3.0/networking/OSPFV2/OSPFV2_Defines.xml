@@ -4,7 +4,7 @@
     <!-- Publisher Config -->
     <Define key="MultiHost" value="224.0.0.5" />
     <Define key="MultiNeig" value="224.0.0.6" />
-    <Define key="RemoteAgent" value="10.0.1.40"/>
+    <Define key="RemoteAgentIP" value="10.0.1.40"/>
     
     <!-- Raw IP Header Config -->
     <Define key="SourceIPv4"  value="10.0.1.63" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
 	<All>
-		<Define key="RemoteAgent" value="10.0.1.40"/>
+		<Define key="RemoteAgentIP" value="10.0.1.40"/>
 		<Define key="TargetIPv4" value="127.0.0.1"/>
 		<Define key="LoggerPath" value="logs/udp/"/>
 		<Define key="SourceIPv4" value="127.0.0.1"/>

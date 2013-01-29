@@ -1,7 +1,7 @@
 <PitDefines>
   <All>
     <Define key="SourceMAC" value="000c29e2c065"/>
-    <Define key="RemoteAgent" value="10.0.1.40"/>
+    <Define key="RemoteAgentIP" value="10.0.1.40"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="SourceIPv4" value="192.168.1.1"/>
     <Define key="LoggerPath" value="logs/cdp/"/>
