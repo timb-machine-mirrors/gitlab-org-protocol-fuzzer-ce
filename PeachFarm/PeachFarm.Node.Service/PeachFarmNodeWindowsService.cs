@@ -28,11 +28,6 @@ namespace PeachFarm.Node.Service
       if (e.ExceptionObject is Exception)
       {
         logger.Fatal("Unknown/Unhandled Exception\n{0}", ((Exception)e.ExceptionObject).Message);
-
-        if (node.Configuration.Output.OutputType == Configuration.OutputType.Console)
-        {
-          System.Console.WriteLine(String.Format("Unknown/Unhandled Exception\n{0}", ((Exception)e.ExceptionObject).Message));
-        }
       }
 
       Stop();

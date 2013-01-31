@@ -18,8 +18,6 @@
     <xs:attribute name="ClientCount" type="xs:int" use="required" />
     <xs:attribute name="IPAddress" type="xs:string" use="required" />
     <xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
-    <xs:attribute name="SqlConnectionString" type="xs:string" default="" />
-    <xs:attribute name="SqlReportingEnabled" type="xs:boolean" default="false" />
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />

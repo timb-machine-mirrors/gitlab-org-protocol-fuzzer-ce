@@ -33,10 +33,6 @@ namespace PeachFarm.Common.Messages
 
     private string mongoDbConnectionStringField;
 
-    private string sqlConnectionStringField;
-
-    private bool sqlReportingEnabledField;
-
     private string jobIDField;
 
     private string pitFileNameField;
@@ -46,12 +42,6 @@ namespace PeachFarm.Common.Messages
     private string tagsField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
-
-    public StartPeachRequest()
-    {
-      this.sqlConnectionStringField = "";
-      this.sqlReportingEnabledField = false;
-    }
 
     public string Pit
     {
@@ -101,34 +91,6 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.mongoDbConnectionStringField = value;
-      }
-    }
-
-    [System.Xml.Serialization.XmlAttributeAttribute()]
-    [System.ComponentModel.DefaultValueAttribute("")]
-    public string SqlConnectionString
-    {
-      get
-      {
-        return this.sqlConnectionStringField;
-      }
-      set
-      {
-        this.sqlConnectionStringField = value;
-      }
-    }
-
-    [System.Xml.Serialization.XmlAttributeAttribute()]
-    [System.ComponentModel.DefaultValueAttribute(false)]
-    public bool SqlReportingEnabled
-    {
-      get
-      {
-        return this.sqlReportingEnabledField;
-      }
-      set
-      {
-        this.sqlReportingEnabledField = value;
       }
     }
 

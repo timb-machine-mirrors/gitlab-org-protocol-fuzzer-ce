@@ -417,7 +417,6 @@ namespace PeachFarm.Node
       }
 
       nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
-      nodeState.SqlConnectionString = request.SqlConnectionString;
       nodeState.JobID = request.JobID;
       nodeState.PitFileName = request.PitFileName;
       nodeState.UserName = request.UserName;
@@ -568,7 +567,6 @@ namespace PeachFarm.Node
           {
             case Status.Alive:
               MongoDbConnectionString = String.Empty;
-              SqlConnectionString = String.Empty;
               PitFilePath = String.Empty;
               //JobID = Guid.Empty;
               JobID = String.Empty;
@@ -586,7 +584,6 @@ namespace PeachFarm.Node
     internal string RabbitHostName { get; private set; }
     
     internal string MongoDbConnectionString { get; set; }
-    internal string SqlConnectionString { get; set; }
 
     internal string PitFilePath { get; set; }
     internal string PitFileName { get; set; }
