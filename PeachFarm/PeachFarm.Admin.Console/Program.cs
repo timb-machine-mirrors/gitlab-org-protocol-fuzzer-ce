@@ -26,12 +26,13 @@ namespace PeachFarm.Admin.Console
         bool stop = false;
         bool list = false;
         bool errors = false;
-        bool logs = false;
-        string hostName = "localhost";
 
-        int launchCount = -1;
+        string tagsString = String.Empty;
+        string hostName = "localhost";
+        int launchCount = 0;
         string ip = null;
 
+        #region Parse & Validate Console Input
         var p = new OptionSet()
 					{
 						{ "?|help", v => syntax() },
@@ -40,59 +41,73 @@ namespace PeachFarm.Admin.Console
 						{ "start", v => start = true },
 						{ "stop", v => stop = true },
 						{ "list", v => list = true},
-//						{ "errors", v => errors = true },
-//						{ "logs", v => logs = true},
+						{ "errors", v => errors = true },
 
 						// Command parameters
 						{ "h|host=", v => hostName = v},
 						{ "n|count=", v => launchCount = int.Parse(v)},
-						{ "i|ip=", v => ip = v}
-
+						{ "i|ip=", v => ip = v},
+            { "t|tags=", v => tagsString = v}
 					};
 
         List<string> extra = p.Parse(args);
 
-        if (!stop && !start && !list && !errors && !logs)
-          throw new SyntaxException();
+        if (!stop && !start && !list && !errors)
+          Program.syntax();
 
         if (start && extra.Count != 1)
-          throw new SyntaxException();
+          Program.syntax();
 
+        if (stop && extra.Count != 1)
+          Program.syntax();
+
+        #endregion
+
+        #region Set up Admin listener
         Admin admin = new Admin(hostName);
-        try
-        {
-          admin.StartAdmin();
-        }
-        catch (ApplicationException aex)
-        {
-          System.Console.WriteLine(aex.Message);
-          return;
-        }
+        admin.StartAdmin();
 
         admin.ListComputersCompleted += admin_ListComputersCompleted;
         admin.ListErrorsCompleted += admin_ListErrorsCompleted;
         admin.StartPeachCompleted += admin_StartPeachCompleted;
         admin.StopPeachCompleted += admin_StopPeachCompleted;
+        admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
+        #endregion
 
-        List<string> computerNames = new List<string>();
-
+        #region Start
         if (start)
         {
-          string commandLine = extra[0];
+          string pitFilePath = extra[0];
           //string logPath = extra[1];
 
           if (launchCount > 0)
           {
-            admin.StartPeachAsync(commandLine, launchCount);
+            if (String.IsNullOrEmpty(tagsString))
+            {
+              admin.StartPeachAsync(pitFilePath, launchCount);
+            }
+            else
+            {
+              admin.StartPeachAsync(pitFilePath, launchCount, tagsString);
+            }
+          }
+          else if (String.IsNullOrEmpty(tagsString) == false)
+          {
+            admin.StartPeachAsync(pitFilePath, tagsString);
           }
           else
           {
-            admin.StartPeachAsync(commandLine, ip);
+            admin.StartPeachAsync(pitFilePath, System.Net.IPAddress.Parse(ip));
           }
         }
+        #endregion
 
+        #region Stop
         if (stop)
         {
+          admin.StopPeachAsync(extra[0]);
+
+          /*
           if (extra.Count > 0)
           {
             admin.StopPeachAsync(extra[0]);
@@ -101,27 +116,38 @@ namespace PeachFarm.Admin.Console
           {
             admin.StopPeachAsync();
           }
+          //*/
         }
+        #endregion
 
+        #region List
         if (list)
         {
           admin.ListComputersAsync();
         }
+        #endregion
 
+        #region Errors
         if (errors)
         {
           admin.ListErrorsAsync();
         }
+        #endregion
 
         System.Console.WriteLine("waiting for result...");
         System.Console.ReadLine();
 
-        Environment.Exit(0);
       }
       catch (SyntaxException)
       {
         PrintHelp();
       }
+      catch (Exception ex)
+      {
+        System.Console.WriteLine(ex.Message);
+      }
+
+      Environment.Exit(0);
     }
 
     #region Peach Farm Admin message completion handlers
@@ -141,7 +167,7 @@ namespace PeachFarm.Admin.Console
     {
       if (e.Result.Success)
       {
-        System.Console.WriteLine("Start Peach Success\n");
+        System.Console.WriteLine(String.Format("Start Peach Success\nUser Name: {0}\nPit File: {1}\nJob ID: {2}", e.Result.UserName, e.Result.PitFileName, e.Result.JobID));
       }
       else
       {
@@ -197,6 +223,12 @@ namespace PeachFarm.Admin.Console
         System.Console.WriteLine("Response: No nodes online");
       }
     }
+
+    static void admin_AdminException(object sender, Admin.ExceptionEventArgs e)
+    {
+      System.Console.WriteLine(e.Exception.ToString());
+    }
+
     #endregion
 
 
@@ -209,6 +241,7 @@ namespace PeachFarm.Admin.Console
       //  logs   - Pull down logs for all runs or specific runs
       //  destinationpath   - Path to save logs to locally
       //  commandLineSearch - Full or partial command line to match
+      //         pf_admin.exe -stop
 
       System.Console.WriteLine(@"
 
@@ -220,7 +253,7 @@ Syntax Guide
 
 Syntax: pf_admin.exe -start -n clientCount pitFilePath
         pf_admin.exe -start --ip ipAddress pitFilePath
-        pf_admin.exe -stop
+        pf_admin.exe -start -t tags pitFilePath
         pf_admin.exe -stop jobID
         pf_admin.exe -list
         pf_admin.exe -errors
@@ -234,10 +267,12 @@ Commands:
 
  start   - Start one or more instances of Peach.
    clientCount - Number of instances to start
-   pitFilePath - Full path to Pit File
    ipAddress   - Address of specific node to launch on
+   tags        - Comma delimited list of tags to match nodes with
 
- stop   - Stop some or all instances of Peach
+   pitFilePath - Full path to Pit File
+
+ stop   - Stop some instances of Peach
    jobID - Job ID
 
  list   - List all nodes in our cluster with status

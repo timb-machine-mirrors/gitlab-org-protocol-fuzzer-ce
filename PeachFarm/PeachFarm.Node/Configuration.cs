@@ -15,28 +15,11 @@ namespace PeachFarm.Node.Configuration
       set { this[Constants.Controller] = value; }
     }
 
-    [ConfigurationProperty(Constants.Output)]
-    public Output Output
-    {
-      get { return (Output)this[Constants.Output]; }
-      set { this[Constants.Output] = value; }
-    }
-
     [ConfigurationProperty(Constants.Tags)]
     public TagsCollection Tags
     {
       get { return (TagsCollection)this[Constants.Tags]; }
       set { this[Constants.Tags] = value; }
-    }
-  }
-
-  public class Output : ConfigurationElement
-  {
-    [ConfigurationProperty(Constants.OutputType)]
-    public OutputType OutputType
-    {
-      get { return (OutputType)this[Constants.OutputType]; }
-      set { this[Constants.OutputType] = value; }
     }
   }
 
@@ -82,6 +65,17 @@ namespace PeachFarm.Node.Configuration
     {
       get { return (Tag)BaseGet(name); }
     }
+
+    public override string ToString()
+    {
+      StringBuilder sb = new StringBuilder();
+      foreach (Tag tag in this)
+      {
+        sb.Append(tag.Name + ",");
+      }
+      sb.Remove(sb.Length - 1, 1);
+      return sb.ToString();
+    }
   }
 
   public class Tag : ConfigurationElement
@@ -99,18 +93,8 @@ namespace PeachFarm.Node.Configuration
     public const string Controller = "Controller";
     public const string IPAddress = "ipAddress";
 
-    public const string Output = "Output";
-    public const string OutputType = "type";
-
     public const string Tags = "Tags";
     public const string Tag = "Tag";
     public const string Name = "name";
-  }
-
-  public enum OutputType
-  {
-    Silent,
-    Console,
-    NLog
   }
 }

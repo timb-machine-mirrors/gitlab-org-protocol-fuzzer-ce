@@ -18,51 +18,39 @@ namespace PeachFarm.Common.Mongo
   public partial class Job
   {
 
-    private string testNameField;
+    private string userNameField;
 
-    private string computerNameField;
+    private string pitFileNameField;
 
-    private string pitFilePathField;
+    private string jobIDField;
 
-    private System.Guid jobIDField;
+    private System.DateTime startDateField;
 
-    public string TestName
+    public string UserName
     {
       get
       {
-        return this.testNameField;
+        return this.userNameField;
       }
       set
       {
-        this.testNameField = value;
+        this.userNameField = value;
       }
     }
 
-    public string ComputerName
+    public string PitFileName
     {
       get
       {
-        return this.computerNameField;
+        return this.pitFileNameField;
       }
       set
       {
-        this.computerNameField = value;
+        this.pitFileNameField = value;
       }
     }
 
-    public string PitFilePath
-    {
-      get
-      {
-        return this.pitFilePathField;
-      }
-      set
-      {
-        this.pitFilePathField = value;
-      }
-    }
-
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -71,6 +59,18 @@ namespace PeachFarm.Common.Mongo
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    public System.DateTime StartDate
+    {
+      get
+      {
+        return this.startDateField;
+      }
+      set
+      {
+        this.startDateField = value;
       }
     }
   }
@@ -100,7 +100,11 @@ namespace PeachFarm.Common.Mongo
 
     private string faultTypeField;
 
-    private System.Guid jobIDField;
+    private string jobIDField;
+
+    private string nodeNameField;
+
+    private string testNameField;
 
     public bool ControlIteration
     {
@@ -234,7 +238,7 @@ namespace PeachFarm.Common.Mongo
       }
     }
 
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -243,6 +247,30 @@ namespace PeachFarm.Common.Mongo
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    public string NodeName
+    {
+      get
+      {
+        return this.nodeNameField;
+      }
+      set
+      {
+        this.nodeNameField = value;
+      }
+    }
+
+    public string TestName
+    {
+      get
+      {
+        return this.testNameField;
+      }
+      set
+      {
+        this.testNameField = value;
       }
     }
   }
@@ -254,7 +282,7 @@ namespace PeachFarm.Common.Mongo
 
     private byte[] dataField;
 
-    private System.Guid jobIDField;
+    private string jobIDField;
 
     public string Key
     {
@@ -280,7 +308,7 @@ namespace PeachFarm.Common.Mongo
       }
     }
 
-    public System.Guid JobID
+    public string JobID
     {
       get
       {

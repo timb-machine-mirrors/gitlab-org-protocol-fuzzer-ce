@@ -33,19 +33,15 @@ namespace PeachFarm.Common.Messages
 
     private string mongoDbConnectionStringField;
 
-    private string sqlConnectionStringField;
+    private string jobIDField;
 
-    private bool sqlReportingEnabledField;
+    private string pitFileNameField;
 
-    private System.Guid jobIDField;
+    private string userNameField;
+
+    private string tagsField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
-
-    public StartPeachRequest()
-    {
-      this.sqlConnectionStringField = "";
-      this.sqlReportingEnabledField = false;
-    }
 
     public string Pit
     {
@@ -99,35 +95,7 @@ namespace PeachFarm.Common.Messages
     }
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    [System.ComponentModel.DefaultValueAttribute("")]
-    public string SqlConnectionString
-    {
-      get
-      {
-        return this.sqlConnectionStringField;
-      }
-      set
-      {
-        this.sqlConnectionStringField = value;
-      }
-    }
-
-    [System.Xml.Serialization.XmlAttributeAttribute()]
-    [System.ComponentModel.DefaultValueAttribute(false)]
-    public bool SqlReportingEnabled
-    {
-      get
-      {
-        return this.sqlReportingEnabledField;
-      }
-      set
-      {
-        this.sqlReportingEnabledField = value;
-      }
-    }
-
-    [System.Xml.Serialization.XmlAttributeAttribute()]
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -136,6 +104,45 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string PitFileName
+    {
+      get
+      {
+        return this.pitFileNameField;
+      }
+      set
+      {
+        this.pitFileNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string UserName
+    {
+      get
+      {
+        return this.userNameField;
+      }
+      set
+      {
+        this.userNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string Tags
+    {
+      get
+      {
+        return this.tagsField;
+      }
+      set
+      {
+        this.tagsField = value;
       }
     }
 
@@ -337,7 +344,11 @@ namespace PeachFarm.Common.Messages
 
     private bool successField;
 
-    private System.Guid jobIDField;
+    private string jobIDField;
+
+    private string pitFileNameField;
+
+    private string userNameField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -373,7 +384,7 @@ namespace PeachFarm.Common.Messages
     }
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -382,6 +393,32 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string PitFileName
+    {
+      get
+      {
+        return this.pitFileNameField;
+      }
+      set
+      {
+        this.pitFileNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string UserName
+    {
+      get
+      {
+        return this.userNameField;
+      }
+      set
+      {
+        this.userNameField = value;
       }
     }
 
@@ -579,12 +616,16 @@ namespace PeachFarm.Common.Messages
   public partial class StopPeachRequest
   {
 
-    private System.Guid jobIDField;
+    private string jobIDField;
+
+    private string pitFileNameField;
+
+    private string userNameField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -593,6 +634,32 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string PitFileName
+    {
+      get
+      {
+        return this.pitFileNameField;
+      }
+      set
+      {
+        this.pitFileNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string UserName
+    {
+      get
+      {
+        return this.userNameField;
+      }
+      set
+      {
+        this.userNameField = value;
       }
     }
 
@@ -800,7 +867,13 @@ namespace PeachFarm.Common.Messages
 
     private string queueNameField;
 
-    private System.Guid jobIDField;
+    private string jobIDField;
+
+    private string pitFileNameField;
+
+    private string userNameField;
+
+    private string tagsField;
 
     private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -869,7 +942,7 @@ namespace PeachFarm.Common.Messages
     }
 
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public System.Guid JobID
+    public string JobID
     {
       get
       {
@@ -878,6 +951,45 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.jobIDField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string PitFileName
+    {
+      get
+      {
+        return this.pitFileNameField;
+      }
+      set
+      {
+        this.pitFileNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string UserName
+    {
+      get
+      {
+        return this.userNameField;
+      }
+      set
+      {
+        this.userNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string Tags
+    {
+      get
+      {
+        return this.tagsField;
+      }
+      set
+      {
+        this.tagsField = value;
       }
     }
 
@@ -1925,6 +2037,12 @@ namespace PeachFarm.Common.Messages
 
     private bool successField;
 
+    private string jobIDField;
+
+    private string pitFileNameField;
+
+    private string userNameField;
+
     private static System.Xml.Serialization.XmlSerializer serializer;
 
     public StopPeachResponse()
@@ -1955,6 +2073,45 @@ namespace PeachFarm.Common.Messages
       set
       {
         this.successField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string JobID
+    {
+      get
+      {
+        return this.jobIDField;
+      }
+      set
+      {
+        this.jobIDField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string PitFileName
+    {
+      get
+      {
+        return this.pitFileNameField;
+      }
+      set
+      {
+        this.pitFileNameField = value;
+      }
+    }
+
+    [System.Xml.Serialization.XmlAttributeAttribute()]
+    public string UserName
+    {
+      get
+      {
+        return this.userNameField;
+      }
+      set
+      {
+        this.userNameField = value;
       }
     }
 
