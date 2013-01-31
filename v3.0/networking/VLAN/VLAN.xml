@@ -93,6 +93,7 @@
       <Param name="Protocol" value="ETH_P_8021Q"/>
     </Publisher>
     
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

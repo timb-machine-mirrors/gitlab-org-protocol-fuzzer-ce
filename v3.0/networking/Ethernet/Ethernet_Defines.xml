@@ -2,6 +2,7 @@
 <PitDefines>
   <Platform>
     <Define key="LoggerPath" value="logs/udp/"/>
-	<Define key="Interface" value="eth0"/>
+    <Define key="Interface" value="eth0"/>
+    <Define key="Strategy"  value="Sequential"/>
   </Platform>
 </PitDefines>

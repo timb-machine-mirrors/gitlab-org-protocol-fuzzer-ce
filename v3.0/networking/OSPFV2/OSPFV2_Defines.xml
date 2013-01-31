@@ -24,6 +24,7 @@
 				 <Define key="OSPFNeighbor2" value="10.0.1.29"/> -->
 
     <Define key="LoggerPath" value="./logs/ospfv2/"/>
+    <Define key="Strategy"  value="Sequential"/>
   </Defines>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>

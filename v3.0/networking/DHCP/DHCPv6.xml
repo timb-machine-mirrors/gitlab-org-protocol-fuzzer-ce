@@ -117,7 +117,7 @@
       <Param name="Interface" value="##SourceIPv6##"/>
     </Publisher>
 
-    <!--<Strategy class="Random"/>-->		
+    <Strategy class="##Strategy##"/>
     <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
