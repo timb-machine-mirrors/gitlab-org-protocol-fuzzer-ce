@@ -125,7 +125,6 @@
   <StateModel name="CdpStateModel" initialState="Initial">
     <State name="Initial">
       <Action name="SendPacket" type="output" publisher="RawHandler">
-				<!-- <Action name="ViewPacket" type="output" publisher="hexHandler"> -->
 				<DataModel ref="CDP" />
       </Action>
     </State>
@@ -158,9 +157,6 @@
       <Param name="Interface" value="##Interface##"/>
       <Param name="Protocol" value="ETH_P_IP"/>
     </Publisher>
-    
-    <!--Publisher class="ConsoleHex" name="HexHandler"/-->
-    
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger> 
