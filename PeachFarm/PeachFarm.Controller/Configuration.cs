@@ -8,13 +8,6 @@ namespace PeachFarm.Controller.Configuration
 {
   public class ControllerSection : ConfigurationSection
   {
-    [ConfigurationProperty(Constants.Output)]
-    public Output Output
-    {
-      get { return (Output)this[Constants.Output]; }
-      set { this[Constants.Output] = value; }
-    }
-
     [ConfigurationProperty(Constants.Controller)]
     public Controller ServerHost
     {
@@ -27,13 +20,6 @@ namespace PeachFarm.Controller.Configuration
     {
       get { return (MongoDbElement)this[Constants.MongoDb]; }
       set { this[Constants.MongoDb] = value; }
-    }
-
-    [ConfigurationProperty(Constants.SqlReporting)]
-    public SqlReportingElement SqlReporting
-    {
-      get { return (SqlReportingElement)this[Constants.SqlReporting]; }
-      set { this[Constants.SqlReporting] = value; }
     }
 
     [ConfigurationProperty(Constants.RabbitMq)]
@@ -85,33 +71,6 @@ namespace PeachFarm.Controller.Configuration
     }
   }
 
-  public class SqlReportingElement : ConfigurationElement
-  {
-    [ConfigurationProperty(Constants.ConnectionString)]
-    public string ConnectionString
-    {
-      get { return (string)this[Constants.ConnectionString]; }
-      set { this[Constants.ConnectionString] = value; }
-    }
-
-    [ConfigurationProperty(Constants.SqlReportingEnabled)]
-    public bool IsEnabled
-    {
-      get { return (bool)this[Constants.SqlReportingEnabled]; }
-      set { this[Constants.SqlReportingEnabled] = value; }
-    }
-  }
-
-  public class Output : ConfigurationElement
-  {
-    [ConfigurationProperty(Constants.OutputType)]
-    public OutputType OutputType
-    {
-      get{return (OutputType)this[Constants.OutputType];}
-      set { this[Constants.OutputType] = value; }
-    }
-  }
-
   public class Controller : ConfigurationElement
   {
     [ConfigurationProperty(Constants.IpAddress)]
@@ -127,25 +86,13 @@ namespace PeachFarm.Controller.Configuration
     public const string MongoDb = "MongoDb";
     public const string ConnectionString = "connectionString";
 
-    public const string SqlReporting = "SqlReporting";
-    public const string SqlReportingEnabled = "isEnabled";
-
     public const string RabbitMq = "RabbitMq";
     public const string HostName = "hostName";
     public const string Port = "port";
     public const string UserName = "userName";
     public const string Password = "password";
 
-    public const string Output = "Output";
-    public const string OutputType = "type";
-
     public const string Controller = "Controller";
     public const string IpAddress = "ipAddress";
-  }
-
-  public enum OutputType
-  {
-    Silent,
-    Console
   }
 }

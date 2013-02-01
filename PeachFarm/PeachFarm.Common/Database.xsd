@@ -12,10 +12,13 @@
   <xs:element name="Job" type="Job" />
 
   <xs:complexType name="Job">
-    <xs:attribute name="TestName" type="xs:string" use="required" />
-    <xs:attribute name="ComputerName" type="xs:string" use="required" /> 
-    <xs:attribute name="PitFilePath" type="xs:string" use="required" />
+    <xs:attribute name="UserName" type="xs:string" use="required" />
+    <xs:attribute name="PitFileName" type="xs:string" use="required" />
+    <xs:attribute name="JobID" type="xs:string" use="required" />
+    <xs:attribute name="StartDate" type="xs:dateTime" use="required" />
+    <!--
     <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
+    -->
   </xs:complexType>
 
   <xs:element name="Fault" type="Fault" />
@@ -34,7 +37,12 @@
       <xs:element name="Title" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:sequence>
     <xs:attribute name="FaultType" type="xs:string" use="required" />
+    <xs:attribute name="JobID" type="xs:string" use="required" />
+    <xs:attribute name="NodeName" type="xs:string" use="required" />
+    <xs:attribute name="TestName" type="xs:string" use="required" />
+    <!--
     <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
+    -->
   </xs:complexType>
 
   <xs:element name="FaultData">
@@ -43,17 +51,10 @@
         <xs:element name="Key" type="xs:string" maxOccurs="1" minOccurs="1" />
         <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
       </xs:sequence>
+      <xs:attribute name="JobID" type="xs:string" use="required" />
+      <!--
       <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
+      -->
     </xs:complexType>
   </xs:element>
-
-  <!--
-  <xs:simpleType name="FaultType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Unknown" />
-      <xs:enumeration value="Fault" />
-      <xs:enumeration value="Data" />
-    </xs:restriction>
-  </xs:simpleType>
-  -->
 </xs:schema>
