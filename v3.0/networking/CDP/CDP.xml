@@ -32,13 +32,15 @@
       <Block name="CdpPayload">
 				<Number name="Version" size="8" value="2"/>
 				<Number name="Ttl" size="8" value="120"/>
-				<Number name="Checksum" size="16" valueType="hex" value="ba23">
-					<Fixup class="IcmpChecksumFixup"> 
-						<!-- This checksum, according to Cisco documentation, is a
-								 standard IP checksum
-								 (http://www.faqs.org/rfcs/rfc1071.html). Wireshark
-								 may incorrectly parse this, but it is correct. -->
-						<Param name="ref" value="LogicalLinkControl" />
+				<Number name="Checksum" size="16" valueType="hex" value="0000" endian="big" mutable="false"> 
+					<!-- This checksum, according to Cisco documentation, is a
+					     standard IP checksum
+					     (http://www.faqs.org/rfcs/rfc1071.html). The
+					     documentation is incorrect. For odd bytes lengths
+					     padding is incorrect. -->
+					<Fixup class="ScriptFixup">
+						<Param name="class" value="cdp.CiscoCDPChecksum"/>
+						<Param name="ref" value="CdpPayload" />
 					</Fixup>
 				</Number>
 
