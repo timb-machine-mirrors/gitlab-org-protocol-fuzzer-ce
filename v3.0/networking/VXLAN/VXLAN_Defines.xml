@@ -1,12 +1,16 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="SourceMAC" value="5254005335d3"/>
-    <Define key="SourceIPv4"  value="10.6.66.51"/>
-    <Define key="TargetMAC"   value="000000000000"/>
-    <Define key="TargetIPv4"  value="10.6.66.52"/>
-    <Define key="LoggerPath"  value="logs/arp/"/> 
-    <Define key="Strategy"  value="Sequential"/> 
+    <!-- <Define key="InnerSourceMAC" value="10.6.66.1"/> -->
+    <!-- <Define key="InnerSourceIP" value="0a064201"/> -->
+    <!-- <Define key="InnerDestMAC"   value="000000000000"/> -->
+    <!-- <Define key="InnterTargetIP" value="10.6.66.70"/> -->
+    <Define key="OuterSourceMAC" value="5254005335d3"/> 
+    <Define key="OuterSourceIPv4" value="10.6.66.51" />
+    <Define key="OuterTargetMAC"   value="000000000000"/>
+    <Define key="OuterTargetIPv4" value="10.6.66.52"/> 
+    <Define key="LoggerPath"  value="logs/vxlan/"/> 
+    <Define key="Strategy"  value="Sequential"/>
   </All>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
+
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+  <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+	
+	<!--IPv6 Header used for Tunneling-->
+	<DataModel name="IPv6Header">
+		<Block name="Header">
+			<Blob length="16"/>
+					<Flags size="32" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+			</Flags>
+			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="NextHeader" size="8" endian="big" value="50"/>
+			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
+			<Blob name="SrcIP" value="##SourceIPv6##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="DestIP" value="##TargetIPv6##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+			<Padding name="Pad" aligned="true" alignment="128" >
+				<Fixup class="FillValue">
+					<Param name="ref" value="Pad"/>
+					<Param name="start" value="1"/>
+					<Param name="stop" value="15"/>
+				</Fixup>
+			</Padding>
+			<Number name="PadLength" size="8" endian="big">
+				<Relation type="size" of="Pad"/>
+			</Number>
+			<Blob name="NextHeader2" valueType="hex" length="1" value="11"/>
+		</Block>
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Transport-->
+	<DataModel name="IPSECv6Transport">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="00 00 02 01" />
+			<Number name="Sequence" size="32" value="1" endian="big"/>
+				<Blob valueType="hex" name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/>
+				<Block name="EncryptedValues">
+					<!-- Payload is a valid ICMP (Ping) Packet that is non-mutable because it is out of scope -->
+					<Block name="GetPaddingSize">
+					<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+					<Padding name="Pad" aligned="true" alignment="128" >
+						<Fixup class="FillValue">
+							<Param name="ref" value="Pad"/>
+							<Param name="start" value="1"/>
+							<Param name="stop" value="15"/>
+						</Fixup>
+					</Padding>
+					<Number name="PadLength" size="8" endian="big">
+						<Relation type="size" of="Pad"/>
+					</Number>
+					<Blob name="NextHeader" valueType="hex" length="1" value="01"/>
+				</Block>
+					<Transformer class="Aes128">											
+						<Param name="Key" value="000000000000000000000000000000000000000000000000"/>
+						<Param name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV -->
+						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
+					</Transformer>
+				</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+		<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
+			<Fixup class="SHA1Fixup">
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		-->
+		</Blob>
+		
+	</DataModel>
+
+	<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<DataModel name="IPSECv6Tunnel">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="ad3436b6" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Blob valueType="hex" name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
+				<Block ref="IPv6Header">
+					<Transformer class="Aes128">
+						<Param name="Key" value="7465737470617373776f7264646f6e65"/>
+						<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/> <!--AES128 IV -->
+						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
+					</Transformer>
+				</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
+			<Fixup class="SHA1Fixup">
+				<Param name="ref" value="ESPHeader"/>
+			</Fixup>
+		-->
+		</Blob>
+	</DataModel>
+	
+	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+		<Monitor class="Process">
+			<Param name="Executable" value="##tsharkBin##" />
+			<Param name="Arguments" value="-i ##tsharkInterface##" />
+			<Param name="RestartOnEachTest" value="true" />
+			<Param name="FaultOnEarlyExit" value="true" />
+		</Monitor>
+		<Monitor class="Pcap">
+			<Param name="Device" value="##Interface##" />
+		</Monitor>
+	</Agent>
+
+
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+	<DataModel ref="##Mode##"/>
+      </Action>
+    </State>
+  </StateModel>
+  
+
+  <!-- Default test for fuzzing IPSECv6 ESP-->
+  <Test name="Default">
+    <Agent ref="RemoteAgent"/>
+    <StateModel ref="TheState"/>
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="50"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+</Peach>

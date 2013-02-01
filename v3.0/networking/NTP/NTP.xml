@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Network Time Protocol PIT" version="0.0.2">
+  
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+  
+  <!-- Network Time Protocol: Listpeers data model... -->
+  <DataModel name="NtpqLpeers">
+    <Block name="NtpFlags">
+      <Flags name="NtpFlags" size="8">
+	<Flag name="NtpFlagsLindicator" position="0" size="2" />
+	<Flag name="NtpFlagsVersion" position="2" size="3" />
+	<Flag name="NtpFlagsMode" position="5" size="3" />
+      </Flags>
+    </Block>
+
+    <Block name="NtpctrlFlags2">
+      <Flags name="NtpctrlFlags2" size="8">
+	<Flag name="NtpctrlFlags2Response" position="0" size="1" />
+	<Flag name="NtpctrlFlags2Error" position="1" size="1" />
+	<Flag name="NtpctrlFlags2More" position="2" size="1" />
+	<Flag name="NtpctrlFlags2Opcode" position="3" size="5" />
+      </Flags>
+    </Block>
+
+    <!-- Sequence: 69 -->
+    <Number name="NtpctrlSequence" size="16" valueType="hex" value="0045" signed="true" endian="big" />
+    <!-- Status: 0 -->
+    <Number name="NtpctrlStatus" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- AssociationID: 0 -->
+    <Number name="NtpctrlAssocid" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- Offset: 0 -->
+    <Number name="NtpctrlOffset" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- Count: 0 -->
+    <Number name="NtpctrlCount" size="16" valueType="hex" value="0000" signed="false" />
+
+  </DataModel>
+
+  <!-- Network Time Protocol: Readlist data model... -->
+  <DataModel name="NtpqReadlist">
+    <Block name="NtpFlags">
+      <Flags name="NtpFlags" size="8">
+	<!-- 00.. .... = Leap Indicator: no warning (0) -->
+	<Flag name="NtpFlagsLi" position="0" size="2" />
+	<!-- ..01 0... = Version number: NTP Version 2 (2) -->
+	<Flag name="NtpFlagsVn" position="2" size="3" />
+	<!-- .... .110 = Mode: reserved for NTP control message (6) -->
+	<Flag name="NtpFlagsMode" position="5" size="3" />
+      </Flags>
+    </Block>
+
+    <Block name="NtpctrlFlags2">
+      <Flags name="NtpctrlFlags2" size="8">
+	<!-- 0... .... = Response bit: Request (0) -->
+	<Flag name="NtpctrlFlags2R" position="0" size="1" />
+	<!-- .0.. .... = Error bit: 0 -->
+	<Flag name="NtpctrlFlags2Error" position="1" size="1" />
+	<!-- ..0. .... = More bit: 0 -->
+	<Flag name="NtpctrlFlags2More" position="2" size="1" />
+	<!-- ...0 0010 = Opcode: READVAR (2) -->
+	<Flag name="NtpctrlFlags2Opcode" position="3" size="5" />
+      </Flags>
+    </Block>
+    
+    <!-- Sequence: 90 -->
+    <Number name="NtpctrlSequence" size="16" valueType="hex" value="005a" signed="true" endian="big" />
+    <!-- Status: 0 -->
+    <Number name="NtpctrlStatus" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- AssociationID: 0 -->
+    <Number name="NtpctrlAssocid" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- Offset: 0 -->
+    <Number name="NtpctrlOffset" size="16" valueType="hex" value="0000" signed="false" />
+    <!-- Count: 0 -->
+    <Number name="NtpctrlCount" size="16" valueType="hex" value="0000" signed="false" />
+
+  </DataModel>
+
+  <!-- Network Time Protocol: Monlist data model... -->
+  <DataModel name="NtpdcMonlist">
+    <Block name="NtpFlags">
+      <Flags name="NtpFlags" size="8">
+	<!-- 0... .... = Response bit: Request (0) -->
+	<Flag name="NtpprivFlagsR" position="0" size="1" />
+	<!-- .0.. .... = More bit: 0 -->
+	<Flag name="NtpprivFlagsMore" position="1" size="1" />
+	<!-- ..01 0... = Version number: NTP Version 2 (2) -->
+	<Flag name="NtpFlagsVn" position="2" size="3" />
+	<!-- .... .111 = Mode: reserved for private use (7) -->
+	<Flag name="NtpFlagsMode" position="5" size="3" />
+      </Flags>
+    </Block>
+
+    <Block name="NtpprivAuthSeq">
+      <Flags name="NtpprivAuthSeq" size="8">
+	<!-- 0... .... = Auth bit: 0 -->
+	<Flag name="NtpprivAuth" position="0" size="1" />
+	<!-- .000 0000 = Sequence number: 0 -->
+	<Flag name="NtpprivSeq" position="1" size="7" />
+      </Flags>
+    </Block>
+
+    <!-- Implementation: XNTPD (3) -->
+    <Number name="NtpprivImpl" size="8" valueType="hex" value="03" signed="false" />
+    <!-- Request code: MONGETLIST_1 (42) -->
+    <Number name="NtpprivReqcode" size="8" valueType="hex" value="2a" signed="false" />
+  </DataModel>
+  
+  <!-- DONE: Create state model -->
+  <StateModel name="ClientToServer" initialState="Initial">
+    <State name="Initial">
+      <!-- generate ntp lpeers request packet -->
+      <Action name="NtpSendLpeersPacket" type="output" publisher="UdpHandler">
+	<DataModel ref="NtpqLpeers" />
+      </Action>
+
+      <!-- generate ntp readlist request packet -->
+      <Action name="NtpSendReadlistPacket" type="output" publisher="UdpHandler">
+	<DataModel ref="NtpqReadlist" />
+      </Action>
+
+      <!-- generate ntp monlist command packet -->
+      <Action name="NtpSendMonlistPacket" type="output" publisher="UdpHandler">
+	<DataModel ref="NtpdcMonlist" />
+      </Action>
+
+      <!-- close udp socket -->
+      <Action type="close" publisher="UdpHandler" />
+    </State>
+  </StateModel>
+
+
+  <!-- Agent Configuration to monitor for crashes -->
+  <Agent name="TheAgent">
+  </Agent> 
+  
+  <!-- Complete default test case. -->
+  <Test name="Default">
+    
+    <StateModel ref="ClientToServer"/>
+    
+    <Agent ref="TheAgent" />
+    
+    <Publisher class="Udp" name="UdpHandler">
+      <Param name="SrcPort" value="##NtpSrcPort##" />
+      <Param name="Host" value="##NtpHost##" />
+      <Param name="Port" value="##NtpPort##" />
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+    
+  </Test>
+  
+</Peach>

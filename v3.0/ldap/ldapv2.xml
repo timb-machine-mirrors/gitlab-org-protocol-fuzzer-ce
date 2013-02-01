@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach>
+	
+	<Defaults>
+		<Number size="8" endian="network" signed="false" />
+	</Defaults>
+	
+	<DataModel name="LdapHeader"> <!--Done-->
+		<Blob valueType="hex" value="30" />
+		<Number size="8" name="LengthOfPacket" />
+		<Number size="8" value="2" />
+		<Number size="8" name="LengthOfMessageId">
+			<Relation type="size" of="MessageId" />
+		</Number>
+		<Blob valueType="hex" value="01" name="MessageId" />
+	</DataModel>
+	
+	<DataModel name="Bind"> <!--Done-->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket" >
+				<Relation type="size" of="Bind" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="BindSequence" >
+			<Blob valueType="hex" value="60" />
+			<Number size="8" name="SizeOfBind">
+				<Relation type="size" of="BindSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Number size="8" value="2" /> <!--Num-->
+			<Number size="8" name="SizeOfVersion"> <!--Length-->
+				<Relation type="size" of="Version"/>
+			</Number>
+			<Blob valueType="hex" value="03" name="Version"/> <!--data-->
+			<Number size="8" value="4" />	<!--string-->
+			<Number size="8" name="SizeOfName">
+				<Relation type="size" of="Name"/>
+			</Number>
+			<!-- Used for Simple auth binding (No User or Password)-->
+			<!--
+			<Block>
+				<String name="Name" length="0" />
+				<Blob valueType="hex" value="80" />
+				<Number size="8" value="0"  name="Simple" />
+			</Block>
+			-->
+			<!-- Used for user Auth Binding-->
+			<Block>				
+				<String name="Name" value="cn=admin,dc=example,dc=com" /> <!--Set Creds Here!-->
+				<Blob valueType="hex" value="80" />
+				<Number size="8" name="SizeOfPassword">
+					<Relation type="size" of="Password"/>
+				</Number>
+				<String name="Password" value="password"/>		<!--Set Password Here!-->
+			</Block>
+			
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Unbind"> <!--Done-->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Unbind" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Blob valueType="hex" value="42" />
+		<Blob valueType="hex" value="00" />
+	</DataModel>
+	
+	<DataModel name="Search"> <!--Done-->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Search" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="SearchSequence">
+			<Blob valueType="hex" value="63" />
+			<Number size="8" name="SizeOfSearch">
+				<Relation type="size" of="SearchSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Number size="8" value="4" />
+			<Number size="8" name="SizeOfBaseObject">
+				<Relation type="size" of="BaseObject"/>
+			</Number>
+			<Block name="BaseObject" >
+				<!--Enter query here -->
+				<String value="dc" />
+				<String value="=" token="true"/>
+				<String value="example" />
+				<String value="," token="true"/>
+				<String value="dc" />
+				<String value="=" token="true"/>
+				<String value="com" />
+			</Block>
+			<Blob valueType="hex" value="0a" />
+			<Number size="8" name="SizeOfTreeDepth">
+				<Relation type="size" of="TreeDepth"/>
+			</Number>
+			<!--Value of 2 means entire subtree -->
+			<Blob valueType="hex" value="02" name="TreeDepth"/>
+			<Blob valueType="hex" value="0a" />
+			<Number size="8" name="SizeOfDeref">
+				<Relation type="size" of="Deref" />
+			</Number>
+			<Blob valueType="hex" value="00" name="Deref"/>		<!--00 == neverDerefAliases. 01 ==DerefAliases-->
+			<Number size="8" value="2" />
+			<Number size="8" name="SizeOfSizeLimit">
+				<Relation type="size" of="SizeLimit" />
+			</Number>
+			<Blob valueType="hex" value="00" name="SizeLimit" /> <!--00 == Infinite Size-->
+			<Number size="8" value="2" />
+			<Number size="8" name="SizeOfTimeLimit">
+				<Relation type="size" of="TimeLimit" />
+			</Number>
+			<Blob valueType="hex" value="00" name="TimeLimit" /> <!--00 == Infinite Time-->
+			<Number size="8" value="1" />
+			<Number size="8" name="SizeOfBool">
+				<Relation type="size" of="Bool" />
+			</Number>
+			<Blob valueType="hex" value="00" name="Bool" />
+			<Blob valueType="hex" value="87" />
+			<Number size="8" name="SizeOfFilters">
+				<Relation type="size" of="Filters" />
+			</Number>
+			<Block name="Filters">
+				<String value="objectClass" />
+				<String value="=" token="true"/>
+				<String value="*" />
+			</Block>
+			<Blob valueType="hex" value="30" />
+			<Number size="8" name="SizeOfAttributeBlock">
+				<Relation type="size" of="AttributeBlock" />
+			</Number>
+			<Block name="AttributeBlock">
+				<Number size="8" value="4" />
+				<Number size="8" name="SizeOfAttributes">
+					<Relation type="size" of="Attributes" />
+				</Number>
+				<Block name="Attributes">
+					<String value="allusers" />
+					<String value="=" token="true"/>
+					<String value="*" />
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Add"> <!--Done-->
+		<!--Not referencing Header due to the extra hex value of 81 in add header-->
+		<Blob valueType="hex" value="30" />
+		<Blob valueType="hex" value="81" />
+		<Number size="8" name="LengthOfPacket">
+			<Relation type="size" of="Add" expressionGet="size" expressionSet="size-3"/>
+		</Number>
+		<Number size="8" value="2" />
+		<Number size="8" name="LengthOfMessageId">
+			<Relation type="size" of="MessageId" />
+		</Number>
+		<Blob valueType="hex" value="01" name="MessageId" />
+		<Block name="AddSequence">
+			<Blob valueType="hex" value="68" />
+			<Number size="8" name="SizeOfAdd">
+				<Relation type="size" of="AddSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Blob valueType="hex" value="04" />
+			<Number size="8" name="SizeOfQuery">
+				<Relation type="size" of="Query" />
+			</Number>
+			<Block name="Query">
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+			<Block name="Attributes">
+				<Blob valueType="hex" value="30" />
+				<Number size="8" name="SizeOfAdd">
+					<Relation type="size" of="Attributes" expressionGet="size" expressionSet="size-2"/>
+				</Number>
+				<Block name="Attributes1">
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttributes1">
+						<Relation type="size" of="Attributes1" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfAttr1">
+						<Relation type="size" of="Attr1" />
+					</Number>
+					<String name="Attr1" value="objectClass" />
+					
+					<Block name="Attributes2">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfAttributes2">
+							<Relation type="size" of="Attributes2" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfAttr2">
+							<Relation type="size" of="Attr2" />
+						</Number>
+						<String name="Attr2" value="dcObject" />
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfAttr3">
+							<Relation type="size" of="Attr3" />
+						</Number>
+						<String name="Attr3" value="organization" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList">
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList" >
+						<Relation type="size" of="AttrList" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfListItemType">
+						<Relation type="size" of="ListItemType" />
+					</Number>
+					<Blob valueType="hex" name="ListItemType" value="6f" />
+					<Block name="Attr">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfListAttr">
+							<Relation type="size" of="Attr" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfListItem1">
+							<Relation type="size" of="ListItem1"/>
+						</Number>
+						<String name="ListItem1" value="example.com" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList2" >
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList2">
+						<Relation type="size" of="AttrList2" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfItem1">
+						<Relation type="size" of="Item1" />
+					</Number>
+					<String name="Item1" value="dc" />
+					<Block name="vals">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfItem2">
+							<Relation type="size" of="vals" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8">
+							<Relation type="size" of="Item2" />
+						</Number>
+						<String name="Item2" value="example" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList3" >
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList3">
+						<Relation type="size" of="AttrList3" expressionGet="size" expressionSet="size-2" />
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfItem1">
+						<Relation type="size" of="Item1" />
+					</Number>
+					<String value="description" name="Item1"/>
+					<Block name="vals">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfItem2">
+							<Relation type="size" of="vals" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8">
+							<Relation type="size" of="Item2" />
+						</Number>
+						<String name="Item2" value="Tree root" />
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Compare"> <!--Done-->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Compare" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="CompareSequence">
+			<Blob valueType="hex" value="6e" />
+			<Number size="8" name="SizeOfCompareSequence">
+				<Relation type="size" of="CompareSequence" expressionGet="size" expressionSet="size-2" />
+			</Number>
+			<Blob valueType="hex" value="04" />
+			<Number size="8" name="SizeOfEntry">
+				<Relation type="size" of="Entry" />
+			</Number>
+			<Block name="Entry">
+				<String value="cn" />
+				<String value="=" token="true" />
+				<String value="admin" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+			<Block name="ava">
+				<Blob valueType="hex" value="30" />
+				<Number size="8" name="SizeOfAva">
+					<Relation type="size" of="ava" expressionGet="size" expressionSet="size-2" />
+				</Number>
+				<Blob valueType="hex" value="04" />
+				<Number size="8" name="SizeOfEntry1">
+					<Relation type="size" of="Entry1" />
+				</Number>
+				<String name="Entry1" value="cn" />
+				<Blob valueType="hex" value="04" />
+				<Number size="8" name="SizeOfEntry2">
+					<Relation type="size" of="Entry2" />
+				</Number>
+				<String name="Entry2" value="aw" />
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Delete"> <!-- Delete -->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Delete" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="DeleteSequence">
+			<Blob valueType="hex" value="4a" />
+			<Number size="8" name="SizeOfEntry">
+				<Relation type="size" of="Entry" />
+			</Number>
+			<Block name="Entry">
+				<String value="cn" />
+				<String value="=" token="true" />
+				<String value="Delete Me" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ExtendOp">
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="ExtendOp" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="ExtendOpSequence">
+			<Blob valueType="hex" value="77" />
+			<Number size="8" name="SizeOfExtendOpReq">
+				<Relation type="size" of="ExtendOpReq" />
+			</Number>
+			<Block name="ExtendOpReq">
+				<Blob valueType ="hex" value="80"/>
+				<Number size="8" name="SizeOfEntry">
+					<Relation type="size" of="Entry" />
+				</Number>
+				<Block name="Entry">
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="3" />
+					<String value="." token="true" />
+					<String value="6" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="4" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="4203" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="11" />
+					<String value="." token="true" />
+					<String value="3" />
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<StateModel name="Search" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Bind" />
+            </Action>
+			<Action type="changeState" ref="ldap" />
+		</State>
+		<State name="ldap">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Search" />
+			</Action>
+			<Action type="changeState" ref="ubind" />
+		</State>
+		<State name="ubind">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Unbind" />
+			</Action>
+		</State>
+	</StateModel>
+	
+	<StateModel name="Add" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Bind" />
+            </Action>
+			<Action type="changeState" ref="ldap" />
+		</State>
+		<State name="ldap">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Add" />
+			</Action>
+			<Action type="changeState" ref="ubind" />
+		</State>
+		<State name="ubind">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Unbind" />
+			</Action>
+		</State>
+	</StateModel>
+	
+	<StateModel name="Compare" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Bind" />
+            </Action>
+			<Action type="changeState" ref="ldap" />
+		</State>
+		<State name="ldap">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Compare" />
+			</Action>
+			<Action type="changeState" ref="ubind" />
+		</State>
+		<State name="ubind">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Unbind" />
+			</Action>
+		</State>
+	</StateModel>
+	
+	<StateModel name="Delete" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Bind" />
+            </Action>
+			<Action type="changeState" ref="ldap" />
+		</State>
+		<State name="ldap">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Delete" />
+			</Action>
+			<Action type="changeState" ref="ubind" />
+		</State>
+		<State name="ubind">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Unbind" />
+			</Action>
+		</State>
+	</StateModel>
+	
+	<StateModel name="ExtendOp" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Bind" />
+            </Action>
+			<Action type="changeState" ref="ldap" />
+		</State>
+		<State name="ldap">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="ExtendOp" />
+			</Action>
+			<Action type="changeState" ref="ubind" />
+		</State>
+		<State name="ubind">
+			<Action type="output" publisher="tcp">
+				<DataModel ref="Unbind" />
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Agent name="LocalAgent">
+	    <Monitor name="Network" class="PcapMonitor">
+			<Param name="filter" value="tcp"/>
+			<Param name="Device" value="Local Area Connection" />
+	    </Monitor>
+	</Agent>
+
+	<Test name="Default">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="Search"/>
+
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+	    <Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="389" />
+	    </Publisher>
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs/Search" />
+	    </Logger>
+	</Test>
+	
+	<Test name="Add">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="Add"/>
+
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+	    <Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="389" />
+	    </Publisher>
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs/Add" />
+	    </Logger>
+	</Test>
+	
+	<Test name="Compare">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="Compare"/>
+
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+	    <Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="389" />
+	    </Publisher>
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs/Compare" />
+	    </Logger>
+	</Test>
+	
+	<Test name="Delete">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="Delete"/>
+
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+	    <Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="389" />
+	    </Publisher>
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs/Delete" />
+	    </Logger>
+	</Test>
+	
+	<Test name="ExtendOp">
+	    <Agent ref="LocalAgent" />
+	    <StateModel ref="ExtendOp"/>
+
+		<!-- OPTIONAL: Configure a strategy -->
+		<!--<Strategy class="Sequencial"/>-->
+		<!--<Strategy class="Random"/>-->
+		
+	    <Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="192.168.146.130" />
+			<Param name="Port" value="389" />
+	    </Publisher>
+		
+	    <Logger class="Filesystem">
+			<Param name="Path" value="Logs/ExtendOp" />
+	    </Logger>
+	</Test>
+</Peach>
+<!-- end -->

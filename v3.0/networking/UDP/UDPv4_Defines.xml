@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <Defines>
-    <!-- Publisher Config -->
-    <Define key="MultiHost" value="224.0.0.5" />
-    <Define key="MultiNeig" value="224.0.0.6" />
+  <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    
-    <!-- Raw IP Header Config -->
-    <Define key="SourceIPv4"  value="10.0.1.63" />
-    <Define key="TargetIPv4" value="224.0.0.5" />
-
-    <!-- OSPF Header Config -->
-    <Define key="OSPFSourceRouter" value="10.0.1.63"/>
-    
-    <!-- OSPF Hello Message Config -->
-    <Define key="HelloInterval"   value="00 03"/>
-    <Define key="OSPFRouterID"    value="0A 00 01 3F" />
-    <Define key="BackUpRouterID"  value="0A 00 01 0F"/>
-    <Define key="OSPFAreaID"      value="00 00 00 01" />
-
-    <Define key="OSPFNeighbor"  value="10.0.1.28"/>
-		<!-- The following value is not used. Why is it here? Commented out.
-				 <Define key="OSPFNeighbor2" value="10.0.1.29"/> -->
-
-    <Define key="LoggerPath" value="./logs/ospfv2/"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="logs/udp/"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="Strategy"  value="Sequential"/>
-  </Defines>
+  </All>
+  
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>

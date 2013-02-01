@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Cisco Discovery Protocol PIT" version="0.0.2">
+  
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+  
+  <!-- Requires Linux Peach for Raw publishing --> 
+  
+  <!-- Cisco Discovery Protocol Main DataModel -->
+
+	<PythonPath import="pits/v3.0/networking/CDP"/>
+	<Import import="cdp"/>
+
+
+  <DataModel name="CDP">
+    <Block name="EtherHeader" mutable="false">
+      <Blob name="Dest" valueType="hex" value="01000ccccccc" mutable="false"/> <!-- CDP Multicast -->
+      <Blob name="Src" valueType="hex" value="##SourceMAC##" mutable="false"/>
+      <Number name="PayloadSize" token="true" size="16" endian="big" mutable="false">
+				<Relation type="size" of="Payload"/>
+      </Number>
+    </Block>
+    <Block name="Payload">
+      <Block name="LogicalLinkControl" mutable="false">
+				<Blob name="DSAP" token="true" valueType="hex" value="aa" mutable="false"/>
+				<Blob name="SSAP" token="true" valueType="hex" value="aa" mutable="false"/>
+				<Blob name="ControlField" token="true" valueType="hex" value="03" mutable="false"/>
+				<Blob name="OU" valueType="hex" value="00000c" mutable="false"/>
+				<Blob name="PID" valueType="hex" value="2000" mutable="false"/>
+      </Block>
+      <Block name="CdpPayload">
+				<Number name="Version" size="8" value="2"/>
+				<Number name="Ttl" size="8" value="120"/>
+				<Number name="Checksum" size="16" valueType="hex" value="0000" endian="big" mutable="false"> 
+					<!-- This checksum, according to Cisco documentation, is a
+					     standard IP checksum
+					     (http://www.faqs.org/rfcs/rfc1071.html). The
+					     documentation is incorrect. For odd bytes lengths
+					     padding is incorrect. -->
+					<Fixup class="ScriptFixup">
+						<Param name="class" value="cdp.CiscoCDPChecksum"/>
+						<Param name="ref" value="CdpPayload" />
+					</Fixup>
+				</Number>
+
+				<Block name="DeviceIdTlv" >
+					<Number name="DeviceIdTlvType" size="16" endian="big" value="1"/>
+					<Number name="DeviceIdTlvLength" size="16" endian="big">
+						<Relation type="size" of="DeviceIdTlv"/>
+					</Number>
+					<Blob name="DeviceIdTlvValue" value="##Hostname##"/>
+				</Block>
+
+				<Block name="AddressTlv" >
+					<Number name="AddressTlvType" size="16" endian="big" value="2"/>
+					<Number name="AddressTlvLength" size="16" endian="big">
+						<Relation type="size" of="AddressTlv"/>
+					</Number>
+					<Number name="AddressCount" size="32" endian="big">
+						<Relation type="count" of="AddressTlvValueBlock"/>
+					</Number>
+					<Block name="AddressTlvValueBlock">
+						<Number name="AddressProtoType" value="1" size="8"/>
+						<Number name="AddressProtoLength" size="8">
+							<Relation type="size" of="AddressProto"/>
+						</Number>
+						<Number name="AddressProto" size="16"/>
+						<Number name="AddressValueLength" size="8">
+							<Relation type="size" of="AddressTlvValue"/>
+						</Number>
+						<String name="AddressTlvValue" value="##SourceIPv4##">
+							<Transformer class="Ipv4StringToNetworkOctet"/>
+						</String>
+					</Block>
+				</Block>
+
+				<Block name="PortTlv" >
+					<Number name="PortTlvType" size="16" endian="big" value="3"/>
+					<Number name="PortTlvLength" size="16" endian="big">
+						<Relation type="size" of="PortTlv"/>
+					</Number>
+					<Blob name="PortTlvValue" value="##Interface##"/>
+				</Block>
+
+				<Block name="CapabilitesTlv" >
+					<Number name="CapabilitesTlvType" size="16" endian="big" value="4"/>
+					<Number name="CapabilitesTlvLength" size="16" endian="big">
+						<Relation type="size" of="CapabilitesTlv"/>
+					</Number>
+					<Blob name="CapabilitesTlvValue" valueType="hex" value="00000018" length="4"/>
+				</Block>
+
+				<Block name="SoftwareVersionTlv" >
+					<Number name="SoftwareVersionTlvType" size="16" endian="big" value="5"/>
+					<Number name="SoftwareVersionTlvLength" size="16" endian="big">
+						<Relation type="size" of="SoftwareVersionTlv"/>
+					</Number>
+					<Blob name="SoftwareVersionTlvValue" value="test" />
+				</Block>
+
+				<Block name="PlatformTlv" >
+					<Number name="PlatformTlvType" size="16" endian="big" value="6"/>
+					<Number name="PlatformTlvLength" size="16" endian="big">
+						<Relation type="size" of="PlatformTlv"/>
+					</Number>
+					<Blob name="PlatformTlvValue" value="linux" />
+				</Block>
+
+
+				<Block name="ArbitraryTlv" minOccurs="0" maxOccurs="50">
+					<Number name="ArbitraryTlvType" size="16" endian="big"/>
+					<Number name="ArbitraryTlvLength" size="16" endian="big">
+						<Relation type="size" of="ArbitraryTlv"/>
+					</Number>
+					<Blob name="ArbitraryTlvValue"/>
+				</Block>
+
+        <Block name="CapabilitesTlv" >
+          <Number name="CapabilitesTlvType" size="16" endian="big" value="4"/>
+          <Number name="CapabilitesTlvLength" size="16" endian="big">
+            <Relation type="size" of="CapabilitesTlv"/>
+          </Number>
+          <Blob name="CapabilitesTlvValue" valueType="hex" value="00000018" length="4"/>
+        </Block>
+        
+        <Block name="SoftwareVersionTlv" >
+          <Number name="SoftwareVersionTlvType" size="16" endian="big" value="5"/>
+          <Number name="SoftwareVersionTlvLength" size="16" endian="big">
+            <Relation type="size" of="SoftwareVersionTlv"/>
+          </Number>
+          <Blob name="SoftwareVersionTlvValue" value="test" />
+        </Block>
+        
+        <Block name="PlatformTlv" >
+          <Number name="PlatformTlvType" size="16" endian="big" value="6"/>
+          <Number name="PlatformTlvLength" size="16" endian="big">
+            <Relation type="size" of="PlatformTlv"/>
+          </Number>
+          <Blob name="PlatformTlvValue" value="linux" />
+        </Block>
+        
+        
+        <Block name="ArbitraryTlv" minOccurs="0" maxOccurs="50">
+          <Number name="ArbitraryTlvType" size="16" endian="big"/>
+          <Number name="ArbitraryTlvLength" size="16" endian="big">
+            <Relation type="size" of="ArbitraryTlv"/>
+          </Number>
+          <Blob name="ArbitraryTlvValue"/>
+        </Block>
+        
+      </Block>
+    </Block>
+    
+  </DataModel>
+  
+  <!-- Simple state model output CDP packets -->
+  <StateModel name="CdpStateModel" initialState="Initial">
+    <State name="Initial">
+      <Action name="SendPacket" type="output" publisher="RawHandler">
+				<DataModel ref="CDP" />
+      </Action>
+    </State>
+  </StateModel>
+  
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
+  <!-- Default test case uses Raw Publisher define interface in defines file-->
+  <Test name="Default">
+    <Agent ref="RemoteAgent"/>
+    <Agent ref="LocalAgent"/>
+    <Strategy class="Sequential"/>
+    <StateModel ref="CdpStateModel"/>
+    <Publisher class="RawEther" name="RawHandler">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_IP"/>
+    </Publisher>
+    <Strategy class="##Strategy##"/>    
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger> 
+  </Test>
+</Peach>

@@ -1,13 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="SourceMAC" value="5254005335d3"/>
-    <Define key="SourceIPv4"  value="10.6.66.51"/>
-    <Define key="TargetMAC"   value="000000000000"/>
-    <Define key="TargetIPv4"  value="10.6.66.52"/>
-    <Define key="LoggerPath"  value="logs/arp/"/> 
-    <Define key="Strategy"  value="Sequential"/> 
-  </All>
+  <Platform>
+    <Define key="LoggerPath" value="logs/dhcpV6/"/>
+    <Define key="Source" value="fe80::807e:65c1:cc32:14ff"/>
+    <Define key="SourcePort" value="546"/>
+    <Define key="Target" value="fe80::20c:29ff:fe65:c6c5"/>    
+    <Define key="TargetPort" value="547"/>
+    <Define key="SourceMAC" value="001122334455"/>
+    <Define key="TargetMAC" value="010203040506"/>
+    <Define key="Strategy"  value="Sequential"/>
+  </Platform>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>

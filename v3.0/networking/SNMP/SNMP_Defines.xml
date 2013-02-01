@@ -6,5 +6,6 @@
     <Define key="SnmpHost"    value="localhost"/>
     <Define key="CommString"  value="public"/>
     <Define key="LoggerPath"  value="./logs/snmp/"/>
+    <Define key="Strategy"  value="Sequential"/>
   </Platform>
 </PitDefines>

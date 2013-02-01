@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Link Layer Discovery Protocol PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+
+  <!-- Requires Linux Peach 3 and RawEther publisher -->
+
+  <!-- Link Layer Discovery Protocol Main DataModel -->
+  <DataModel name="LLDP">
+    <Block name="EtherHeader">
+      <Blob name="Dest" valueType="hex" value="0180c200000e"/> <!-- LLDP multicast address --> 
+      <Blob name="Src" valueType="hex" value="##SourceMAC##"/>
+      <Blob name="Type" valueType="hex" value="88cc"/>
+    </Block>
+
+    <Block name="LLDPPayload">
+      <Block name="ChasisTlv">
+	<Block name="ChasisTlvHeader">
+	  <Number name="ChasisTlvType" size="7" endian="big" value="1"/>
+	  <Number name="ChasisTlvSize" size="9" endian="big" value="7">
+	    <Relation type="size" of="ChasisId"/>
+	  </Number>
+	</Block>
+	<Block name="ChasisId">
+	  <Number name="ChasisIdSubtype" size="8" value="04" valueType="hex" endian="big"/>
+	  <Blob name="ChasisIdValue" value="##SourceMAC##" valueType="hex"/>
+	</Block>
+      </Block>
+
+
+      <Block name="PortTlv">
+	<Block name="PortTlvHeader">
+	  <Number name="PortTlvType" size="7" endian="big" value="2"/>
+	  <Number name="PortTlvSize" size="9" endian="big" value="7">
+	    <Relation type="size" of="PortId"/>
+	  </Number>
+	</Block>
+	<Block name="PortId">
+	  <Number name="PortIdSubtype" size="8" value="03" valueType="hex"	endian="big"/>
+	  <Blob name="PortIdValue" value="##SourceMAC##" valueType="hex"/>
+	</Block>
+      </Block>
+
+
+      <Block name="TtlTlv">
+	<Block name="TtlTlvHeader">
+	  <Number name="TtlTlvType" size="7" endian="big" value="3"/>
+	  <Number name="TtlTlvSize" size="9" endian="big" value="2">
+	    <Relation type="size" of="TtlValue"/>
+	  </Number>
+	</Block>
+	<Number name="TtlValue" size="16" value="120" endian="big"/>
+      </Block>
+
+      <Block name="OptionalTlv">
+	<Block name="OptionalTlvHeader">
+	  <Number name="OptionalTlvType" size="7" endian="big" value="5"/>
+	  <Number name="OptionalTlvSize" size="9" endian="big" value="6">
+	    <Relation type="size" of="OptionalValue"/>
+	  </Number>
+	</Block>
+	<Blob name="OptionalValue" value="##Hostname##"/>
+      </Block>
+
+      <Block name="CapabilitesTlv">
+	<Block name="CapabilitesTlvHeader">
+	  <Number name="CapabilitesTlvType" size="7" endian="big" value="7"/>
+	  <Number name="CapabilitesTlvSize" size="9" endian="big" value="4">
+	    <Relation type="size" of="CapabilitiesValue"/>
+	  </Number>
+	</Block>
+	<Block name="CapabilitiesValue">
+	  <Blob name="CapabilitiesAvalible" value="ffff" valueType="hex"/>
+	  <Blob name="CapabilitiesEnabled" value="ffff" valueType="hex"/>
+	</Block>
+      </Block>
+
+      <Blob name="EndOfLLDPDU" value="00 00" valueType="hex"/>
+    </Block>
+
+  </DataModel>
+
+  <!-- LLDP Simple State Model -->
+  <StateModel name="TheStateModel" initialState="Initial">
+    <State name="Initial">
+      <Action name="LldpSendPacket" type="output" publisher="RawHandler">
+        <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
+	<DataModel ref="LLDP" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+
+  <!-- Default test for LLDP -->
+  <Test name="Default">
+    <Strategy class="Sequential"/>
+    <StateModel ref="TheStateModel"/>
+    <Agent ref="RemoteAgent"/>
+    <Agent ref="LocalAgent"/>
+    <Publisher class="RawEther" name="RawHandler">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_IP"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+</Peach>

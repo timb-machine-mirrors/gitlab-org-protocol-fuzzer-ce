@@ -4,5 +4,6 @@
     <Define key="NtpPort"    value="123"/>
     <Define key="NtpHost"    value="localhost"/>
     <Define key="LoggerPath" value="./logs/ntp/"/>
+    <Define key="Strategy"  value="Sequential"/>
   </Platform>
 </PitDefines>

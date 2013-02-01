@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+       author="Deja Vu Security, LLC" description="Internet Protocol Version 4 PIT" version="0.0.2">
+
+  <DataModel name="IPv4">
+    <Block name="Header">
+      <Flags size="16" endian="big">
+        <Flag name="Version" position="0" size="4" valueType="hex" value="04"/>
+        <Flag name="HeaderLength" position="4" size="4" valueType="hex">
+          <Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+        </Flag>
+        <Flag name="DSCP" position="8" size="6" valueType="hex" value="00"/>
+        <Flag name="ECN" position="14" size="2" valueType="hex" value="00"/>
+      </Flags>
+      <Number name="TotalLength" size="16" endian="big" valueType="hex">
+        <Relation type="size" of="IPv4"/>
+      </Number>
+      <Number name="Identification" size="16" endian="big" value="0"/>
+      <Flags name="Flags" size="16" endian="big">
+        <Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
+        <Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
+        <Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
+        <Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
+      </Flags>
+      <Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
+      <Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
+      <Number name="Checksum" size="16" endian="big">
+        <Fixup class="checksums.IcmpChecksumFixup">
+          <Param name="ref" value="Header"/>
+        </Fixup>
+      </Number>
+      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 01"/>
+      <Number name="DestIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 80"/>
+      <Blob name="Options"/>
+    </Block>
+    <Blob name="Data" valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+  </DataModel>
+
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+  
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="IPv4"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <Agent ref="RemoteAgent"/>
+    <StateModel ref="TheState"/>
+    <Publisher class="RawIPv4">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Protocol" value="255"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+    
+  </Test>
+  
+</Peach>
+<!-- end -->

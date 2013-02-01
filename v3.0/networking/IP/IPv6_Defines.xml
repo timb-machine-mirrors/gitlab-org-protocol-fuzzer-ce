@@ -1,16 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="SourceMAC" value="5254005335d3"/>
-    <Define key="SourceIPv4"  value="10.6.66.51"/>
-    <Define key="TargetMAC"   value="000000000000"/>
-    <Define key="TargetIPv4"  value="10.6.66.52"/>
-    <Define key="LoggerPath"  value="logs/arp/"/> 
-    <Define key="Strategy"  value="Sequential"/> 
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="SourceIPv6" value="::1"/>
+    <Define key="LoggerPath" value="logs/IPv6/"/>
+    <Define key="SourceMAC" value="000c29ef2a1b" />
+    <Define key="TargetMAC" value="000c29ef2a1b" />
+    <Define key="Strategy"  value="Sequential"/>
   </All>
+  
   <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
-    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="Interface" value="lo"/>
+    <Define key="tsharkInterface" value="lo"/>
     <Define key="tsharkBin" value="/usr/bin/tshark"/>
   </Linux>
   <OSX platform="osx">
