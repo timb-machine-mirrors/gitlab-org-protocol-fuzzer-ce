@@ -10,12 +10,20 @@
 <!--Data model for IPSECv6 w/ ESP Tunnel-->
 	<DataModel name="IPSECv6TunnelData">
 		<!-- Payload is a valid UDP Packet that is non-mutable because it is out of scope -->
-		<Blob name="Payload" valueType="hex" value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8" mutable="false"/>
-		<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="32" />
-		<Number name="PadLength" size="8" endian="network">
-			<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
-		</Number>
-		<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+		<Block name="PaddingLengths">
+			<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+			<Padding name="Pad" aligned="true" alignment="128" >
+				<Fixup class="FillValue">
+					<Param name="ref" value="Pad"/>
+					<Param name="start" value="1"/>
+					<Param name="stop" value="15"/>
+				</Fixup>
+			</Padding>
+			<Number name="PadLength" size="8" endian="big">
+				<Relation type="size" of="Pad"/>
+			</Number>
+			<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
+		</Block>
 	</DataModel>
 	
 	<!--IPv6 Header used for Tunneling-->
@@ -46,45 +54,55 @@
 	<!--Data model for IPSECv6 w/ ESP Transport-->
 	<DataModel name="IPSECv6Transport">
 		<Block name="ESPHeader">
-			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
-			<Number name="Sequence" size="32" value="1" endian="network"/>
-			<Block name="EncryptedValues">
-				<!-- Payload is a valid UDP Packet that is non-mutable because it is out of scope -->
-				<Blob name="Payload"  value="87000ab500000000fe80000000000000613a83840f4b330c0101000c291be7f8" mutable="false"/>
-				<Padding name="Pad"  aligned="true" alignedTo="Payload" alignment="8" />
-				<Number name="PadLength" size="8" endian="network">
-					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(8 - size % 8) % 8"/><!--Gets the size of the padding-->
-				</Number>
-				<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
-				<Transformer class="Aes128">
-					<!--<Param name="Key" value="ae1234567890aeaffeda214354647586"/>--><!--3Des c89de1a4237def182afec153example key-->
-					<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--><!--3Des IV -->
-					<Param name="Key" value="ae1234567890aeaffeda214354647586ae1234567890aeaffeda214354647586"/> <!--AES128 Key-->
-					<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/> <!--AES128 IV -->
-				</Transformer>
-			</Block>
+			<Blob name="SPI" valueType="hex" length="4" value="00 00 02 01" />
+			<Number name="Sequence" size="32" value="1" endian="big"/>
+				<Blob valueType="hex" name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/>
+				<Block name="EncryptedValues">
+					<!-- Payload is a valid ICMP (Ping) Packet that is non-mutable because it is out of scope -->
+					<Block name="GetPaddingSize">
+					<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+					<Padding name="Pad" aligned="true" alignment="128" >
+						<Fixup class="FillValue">
+							<Param name="ref" value="Pad"/>
+							<Param name="start" value="1"/>
+							<Param name="stop" value="15"/>
+						</Fixup>
+					</Padding>
+					<Number name="PadLength" size="8" endian="big">
+						<Relation type="size" of="Pad"/>
+					</Number>
+					<Blob name="NextHeader" valueType="hex" length="1" value="01"/>
+				</Block>
+					<Transformer class="Aes128">											
+						<Param name="Key" value="000000000000000000000000000000000000000000000000"/>
+						<Param name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV -->
+						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
+					</Transformer>
+				</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
+		<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
 			<Fixup class="SHA1Fixup">
-			<!--<Fixup class="SHA256Fixup">-->
 				<Param name="ref" value="ESPHeader"/>
 			</Fixup>
+		-->
 		</Blob>
+		
 	</DataModel>
 
 	<!--Data model for IPSECv6 w/ ESP Tunnel-->
 	<DataModel name="IPSECv6Tunnel">
 		<Block name="ESPHeader">
-			<Blob name="SPI" valueType="hex" length="4" value="0000000a" />
+			<Blob name="SPI" valueType="hex" length="4" value="ad3436b6" />
 			<Number name="Sequence" size="32" value="1" endian="network"/>
-			<Block ref="IPv6Header">
-				<Transformer class="TripleDes">
-					<Param name="Key" value="ae1234567890aeaffeda214354647586"/><!--3Des example key-->
-					<Param name="IV" value="aeaeaeaeaeaeaeae"/>
-					<!--<Param name="Key" value="ae1234567890aeaffeda214354647586ae1234567890aeaffeda214354647586"/>--> <!--AES128 Key-->
-					<!--<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>--> <!--AES128 IV -->
-				</Transformer>
-			</Block>
+			<Blob valueType="hex" name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
+				<Block ref="IPv6Header">
+					<Transformer class="Aes128">
+						<Param name="Key" value="7465737470617373776f7264646f6e65"/>
+						<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/> <!--AES128 IV -->
+						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
+					</Transformer>
+				</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
 			<Fixup class="SHA1Fixup">
@@ -124,11 +142,12 @@
   <!-- Default test for fuzzing IPSECv6 ESP-->
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+		
 		<Publisher class="RawV6">
-			<Param name="Host" value="##TargetIPv6##"/>
-			<Param name="Interface" value="##SourceIPv6##"/>
-			<Param name="Protocol" value="50"/>
-		</Publisher>
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="50"/>
+    </Publisher>
     
 		<Logger class="logger.Filesystem" >
 			<Param name="Path" value="##LoggerPath##" />
