@@ -8,6 +8,11 @@
   <!-- Requires Linux Peach for Raw publishing --> 
   
   <!-- Cisco Discovery Protocol Main DataModel -->
+
+	<PythonPath import="pits/v3.0/networking/CDP"/>
+	<Import import="cdp"/>
+
+
   <DataModel name="CDP">
     <Block name="EtherHeader">
       <Blob name="Dest" valueType="hex" value="01000ccccccc"/> <!-- CDP Multicast -->
