@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
        author="Deja Vu Security, LLC" description="User Datagram Protocol Version 6 PIT" version="0.0.2">
   <DataModel name="UDPv6Header">
     <Number name="SrcPort" size="16" endian="network"/>
@@ -18,17 +18,16 @@
     <Blob name="Data" value="Hello"/>
   </DataModel>
 
-    <Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="RestartOnEachTest" value="true" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
   
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
@@ -39,13 +38,15 @@
   </StateModel>
 
   <Test name="Default">
+    <Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="17"/>
     </Publisher>
-	
+    
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

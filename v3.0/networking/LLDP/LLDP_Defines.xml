@@ -1,18 +1,19 @@
 <PitDefines>
-	<All>
-		<Define key="RemoteAgent" value="10.0.1.40"/>
+  <All>
+    <Define key="RemoteAgentIP" value="10.0.1.40"/>
     <Define key="SourceMAC" value="000c29e2c065"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="LoggerPath"  value="logs/lldp/"/> 
-	</All>
-	<Linux platform="linux">
+    <Define key="Strategy"  value="Sequential"/>
+  </All>
+  <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
-		<Define key="tsharkInterface" value="eth0"/>
-		<Define key="tsharkBin" value="/usr/bin/tshark"/>
-	</Linux>
-	<OSX platform="osx">
+    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  </Linux>
+  <OSX platform="osx">
     <Define key="Interface" value="em0"/>
-		<Define key="tsharkInterface" value="em0"/>
-		<Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
-	</OSX>
+    <Define key="tsharkInterface" value="em0"/>
+    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  </OSX>
 </PitDefines>
