@@ -549,6 +549,7 @@
       <Param name="Protocol" value="89" />
     </Publisher>
 
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger> 

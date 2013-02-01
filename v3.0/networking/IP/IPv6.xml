@@ -63,6 +63,8 @@
       <Param name="Interface" value="##Interface##"/>
       <Param name="Protocol" value="ETH_P_IPV6"/>
     </Publisher>
+
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

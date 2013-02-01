@@ -84,6 +84,7 @@
       <Param name="Protocol" value="ETH_P_SLOW"/>
     </Publisher>
     
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

@@ -5,6 +5,7 @@
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/tcp/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="Strategy"  value="Sequential"/>
   </All>
   
   <Linux platform="linux">

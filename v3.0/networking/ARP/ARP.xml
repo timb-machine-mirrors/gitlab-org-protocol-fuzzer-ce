@@ -73,6 +73,7 @@
       <Param name="Protocol" value="ETH_P_ARP"/>
     </Publisher>
     
+    <Strategy class="##Strategy##"/>
     <Logger class="logger.Filesystem" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

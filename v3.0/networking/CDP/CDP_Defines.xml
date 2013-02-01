@@ -5,6 +5,7 @@
     <Define key="Hostname" value="foobar"/>
     <Define key="SourceIPv4" value="192.168.1.1"/>
     <Define key="LoggerPath" value="logs/cdp/"/>
+    <Define key="Strategy"  value="Sequential"/>
   </All>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
