@@ -5,31 +5,12 @@
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
-  
-<!--Data model for IPSECv6 w/ ESP Tunnel-->
-	<DataModel name="IPSECv6TunnelData">
-		<!-- Payload is a valid UDP Packet that is non-mutable because it is out of scope -->
-		<Block name="PaddingLengths">
-			<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
-			<Padding name="Pad" aligned="true" alignment="128" >
-				<Fixup class="FillValue">
-					<Param name="ref" value="Pad"/>
-					<Param name="start" value="1"/>
-					<Param name="stop" value="15"/>
-				</Fixup>
-			</Padding>
-			<Number name="PadLength" size="8" endian="big">
-				<Relation type="size" of="Pad"/>
-			</Number>
-			<Blob name="NextHeader" valueType="hex" length="1" value="11"/>
-		</Block>
-	</DataModel>
 	
 	<!--IPv6 Header used for Tunneling-->
 	<DataModel name="IPv6Header">
-		<Blob length="16"/>
 		<Block name="Header">
-			<Flags size="32" endian="big">
+			<Blob length="16"/>
+					<Flags size="32" endian="big">
 				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
 				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
 				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
@@ -46,8 +27,19 @@
 			<Blob name="DestIP" value="##TargetIPv6##" >
 				<Transformer class="Ipv6StringToOctet"/>
 			</Blob>
+			<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+			<Padding name="Pad" aligned="true" alignment="128" >
+				<Fixup class="FillValue">
+					<Param name="ref" value="Pad"/>
+					<Param name="start" value="1"/>
+					<Param name="stop" value="15"/>
+				</Fixup>
+			</Padding>
+			<Number name="PadLength" size="8" endian="big">
+				<Relation type="size" of="Pad"/>
+			</Number>
+			<Blob name="NextHeader2" valueType="hex" length="1" value="11"/>
 		</Block>
-		<Block name="Payload" ref="IPSECv6TunnelData"/>
 	</DataModel>
 
 	<!--Data model for IPSECv6 w/ ESP Transport-->
@@ -104,10 +96,11 @@
 				</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
+			<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
 			<Fixup class="SHA1Fixup">
-			<!--<Fixup class="SHA256Fixup">-->
 				<Param name="ref" value="ESPHeader"/>
 			</Fixup>
+		-->
 		</Blob>
 	</DataModel>
 	
