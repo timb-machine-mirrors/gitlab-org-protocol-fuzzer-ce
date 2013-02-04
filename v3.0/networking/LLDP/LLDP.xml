@@ -8,10 +8,10 @@
 
   <!-- Link Layer Discovery Protocol Main DataModel -->
   <DataModel name="LLDP">
-    <Block name="EtherHeader">
-      <Blob name="Dest" valueType="hex" value="0180c200000e"/> <!-- LLDP multicast address --> 
-      <Blob name="Src" valueType="hex" value="##SourceMAC##"/>
-      <Blob name="Type" valueType="hex" value="88cc"/>
+    <Block name="EtherHeader" mutable="false">
+      <Blob name="Dest" valueType="hex" value="0180c200000e" mutable="false"/> <!-- LLDP multicast address --> 
+      <Blob name="Src" valueType="hex" value="##SourceMAC##" mutable="false"/>
+      <Blob name="Type" valueType="hex" value="88cc" mutable="false"/>
     </Block>
 
     <Block name="LLDPPayload">
