@@ -24,6 +24,25 @@
     <Blob name="Interframe" valueType="hex" length="12"/>
   </DataModel>
 
+	<Agent name="RemoteAgent" location="tcp://##RemoteAgent##:9001">
+		<Monitor class="Process">
+			<Param name="Executable" value="##tsharkBin##" />
+			<Param name="Arguments" value="-i ##tsharkInterface##" />
+			<Param name="RestartOnEachTest" value="true" />
+			<Param name="FaultOnEarlyExit" value="true" />
+		</Monitor>
+		<Monitor class="Pcap">
+			<Param name="Device" value="##Interface##" />
+		</Monitor>
+	</Agent>
+
+
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+	
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
@@ -33,6 +52,7 @@
   </StateModel>
 
   <Test name="Default">
+	<Agent ref="RemoteAgent"/>
     <StateModel ref="TheState"/>
     <Publisher class="RawEther">
       <Param name="Interface" value="##Interface##"/>
