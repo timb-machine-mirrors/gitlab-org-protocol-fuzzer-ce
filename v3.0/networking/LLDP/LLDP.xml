@@ -14,7 +14,7 @@
       <Blob name="Type" valueType="hex" value="88cc" mutable="false"/>
     </Block>
 
-    <Block name="LLDPPayload">
+    <Block name="LLDPPayload" minOccurs="1">
       <Block name="ChasisTlv">
 				<Block name="ChasisTlvHeader">
 					<Number name="ChasisTlvType" size="7" endian="big" value="1"/>
@@ -29,7 +29,7 @@
       </Block>
 
 
-      <Block name="PortTlv">
+      <Block name="PortTlv" minOccurs="1">
 				<Block name="PortTlvHeader">
 					<Number name="PortTlvType" size="7" endian="big" value="2"/>
 					<Number name="PortTlvSize" size="9" endian="big" value="7">
@@ -43,7 +43,7 @@
       </Block>
 
 
-      <Block name="TtlTlv">
+      <Block name="TtlTlv" minOccurs="1">
 				<Block name="TtlTlvHeader">
 					<Number name="TtlTlvType" size="7" endian="big" value="3"/>
 					<Number name="TtlTlvSize" size="9" endian="big" value="2">
@@ -53,14 +53,36 @@
 				<Number name="TtlValue" size="16" value="120" endian="big"/>
       </Block>
 
-      <Block name="OptionalTlv">
-				<Block name="OptionalTlvHeader">
-					<Number name="OptionalTlvType" size="7" endian="big" value="5"/>
-					<Number name="OptionalTlvSize" size="9" endian="big" value="6">
-						<Relation type="size" of="OptionalValue"/>
+
+      <Block name="PortDescripTlv">
+				<Block name="PortDescripTlvHeader">
+					<Number name="PortDescripTlvType" size="7" endian="big" value="4"/>
+					<Number name="PortDescripTlvSize" size="9" endian="big" value="10">
+						<Relation type="size" of="PortDescripValue"/>
 					</Number>
 				</Block>
-				<Blob name="OptionalValue" value="##Hostname##"/>
+				<Blob name="PortDescripValue" value="Summit300-48-Port 1001" />
+      </Block>
+
+
+      <Block name="SystemNameTlv">
+				<Block name="SystemNameTlvHeader">
+					<Number name="SystemNameTlvType" size="7" endian="big" value="5"/>
+					<Number name="SystemNameTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="SystemNameValue"/>
+					</Number>
+				</Block>
+				<Blob name="SystemNameValue" value="##Hostname##"/>
+      </Block>
+
+      <Block name="SystemDescripTlv">
+				<Block name="SystemDescripTlvHeader">
+					<Number name="SystemDescripTlvType" size="7" endian="big" value="6"/>
+					<Number name="SystemDescripTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="SystemDescripValue"/>
+					</Number>
+				</Block>
+				<Blob name="SystemDescripValue" value="Summit300-48 - Version 7.4e.1 (Build 5) by Release_Master 05/27/05 04:53:11"/>
       </Block>
 
       <Block name="CapabilitesTlv">
@@ -76,7 +98,37 @@
 				</Block>
       </Block>
 
-      <Blob name="EndOfLLDPDU" value="00 00" valueType="hex"/>
+      <Block name="ManagementAddressTlv">
+				<Block name="ManagementAddressTlvHeader">
+					<Number name="ManagementAddressTlvType" size="7" endian="big" value="5"/>
+					<Number name="ManagementAddressTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="ManagementAddressValue"/>
+					</Number>
+				</Block>
+				<Block name="ManagementAddress">
+					<Number name="ManagementAddressSubtype" size="8" value="06" valueType="hex" endian="big"/>
+					<Blob name="ManagementAddressValue" value="##SourceMAC##" valueType="hex"/>
+					<Number name="InterfaceSubtype" size="8" value="02" valueType="hex" endian="big"/>
+					<Number name="InterfaceNumber" size="16" value="1001" />
+					<Number name="OIDLength" size="8" value="00" />
+				</Block>
+      </Block>
+
+      <Block name="OrganizationSpecificTlv">
+				<Block name="OrganizationSpecificTlvHeader">
+					<Number name="OrganizationSpecificTlvType" size="7" endian="big" value="127"/>
+					<Number name="OrganizationSpecificTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="OrganizationSpecificValue"/>
+					</Number>
+				</Block>
+				<Block name="OrganizationSpecificValue">
+					<Blob name="OrganizationUniqueCode" value="0000" valueType="hex" />
+					<!-- this is the beginning of LLDP-MED, and it could have it's pit -->
+				</Block>
+      </Block>
+
+
+      <Blob name="EndOfLLDPDU" value="00 00" valueType="hex" minOccurs="1" />
     </Block>
 
   </DataModel>
