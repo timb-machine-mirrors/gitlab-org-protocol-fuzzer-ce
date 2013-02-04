@@ -115,39 +115,6 @@
 					</Number>
 					<Blob name="ArbitraryTlvValue"/>
 				</Block>
-
-        <Block name="CapabilitesTlv" >
-          <Number name="CapabilitesTlvType" size="16" endian="big" value="4"/>
-          <Number name="CapabilitesTlvLength" size="16" endian="big">
-            <Relation type="size" of="CapabilitesTlv"/>
-          </Number>
-          <Blob name="CapabilitesTlvValue" valueType="hex" value="00000018" length="4"/>
-        </Block>
-        
-        <Block name="SoftwareVersionTlv" >
-          <Number name="SoftwareVersionTlvType" size="16" endian="big" value="5"/>
-          <Number name="SoftwareVersionTlvLength" size="16" endian="big">
-            <Relation type="size" of="SoftwareVersionTlv"/>
-          </Number>
-          <Blob name="SoftwareVersionTlvValue" value="test" />
-        </Block>
-        
-        <Block name="PlatformTlv" >
-          <Number name="PlatformTlvType" size="16" endian="big" value="6"/>
-          <Number name="PlatformTlvLength" size="16" endian="big">
-            <Relation type="size" of="PlatformTlv"/>
-          </Number>
-          <Blob name="PlatformTlvValue" value="linux" />
-        </Block>
-        
-        
-        <Block name="ArbitraryTlv" minOccurs="0" maxOccurs="50">
-          <Number name="ArbitraryTlvType" size="16" endian="big"/>
-          <Number name="ArbitraryTlvLength" size="16" endian="big">
-            <Relation type="size" of="ArbitraryTlv"/>
-          </Number>
-          <Blob name="ArbitraryTlvValue"/>
-        </Block>
         
       </Block>
     </Block>
