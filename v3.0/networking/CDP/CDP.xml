@@ -9,7 +9,7 @@
   
   <!-- Cisco Discovery Protocol Main DataModel -->
 
-	<PythonPath import="pits/v3.0/networking/CDP"/>
+	<PythonPath path="pits/v3.0/networking/CDP"/>
 	<Import import="cdp"/>
 
 
