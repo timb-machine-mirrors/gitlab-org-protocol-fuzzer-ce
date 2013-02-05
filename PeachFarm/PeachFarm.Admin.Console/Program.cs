@@ -198,11 +198,11 @@ namespace PeachFarm.Admin.Console
         {
           if (heartbeat.Status == Status.Running)
           {
-            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}:{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
           }
           else
           {
-            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp));
+            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
           }
         }
 

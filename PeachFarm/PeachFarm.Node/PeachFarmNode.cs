@@ -58,6 +58,8 @@ namespace PeachFarm.Node
         nodeState.Tags = config.Tags.ToString();
       }
       #endregion
+
+      Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
     }
 
     public void StartNode()
