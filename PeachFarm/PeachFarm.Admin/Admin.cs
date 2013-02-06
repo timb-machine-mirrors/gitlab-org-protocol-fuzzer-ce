@@ -179,53 +179,30 @@ namespace PeachFarm.Admin
     #region Sends
 
     #region StartPeach
-    public void StartPeachAsync(string pitFilePath, int clientCount)
-    {
-      StartPeachRequest request = new StartPeachRequest();
-      request.ClientCount = clientCount;
-      request.Tags = String.Empty;
-      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
-      request.IPAddress = String.Empty;
-      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
-      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-      PublishToServer(request.Serialize(), "StartPeach");
-    }
 
-    public void StartPeachAsync(string pitFilePath, int clientCount, string tagsString)
-    {
-      StartPeachRequest request = new StartPeachRequest();
-      request.ClientCount = clientCount;
-      request.Tags = tagsString;
-      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
-      request.IPAddress = String.Empty;
-      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
-      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-      PublishToServer(request.Serialize(), "StartPeach");
-    }
+	public void StartPeachAsync(string pitFilePath, int clientCount, string tagsString, string ip)
+	{
+		StartPeachRequest request = new StartPeachRequest();
+		request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+		if (String.IsNullOrEmpty(ip) == false)
+		{
+			request.IPAddress = System.Net.IPAddress.Parse(ip).ToString();
+			request.ClientCount = 1;
+			request.Tags = String.Empty;
+		}
+		else
+		{
+			request.IPAddress = String.Empty;
+			request.ClientCount = clientCount;
+			request.Tags = tagsString;
+		}
+		request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+		request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+		PublishToServer(request.Serialize(), "StartPeach");
+		Console.WriteLine("waiting for result...");
+		Console.ReadLine();
+	}
 
-    public void StartPeachAsync(string pitFilePath, IPAddress ipAddress)
-    {
-      StartPeachRequest request = new StartPeachRequest();
-      request.Pit = GetPitXml(pitFilePath);
-      request.ClientCount = 1;
-      request.IPAddress = ipAddress.ToString();
-      request.Tags = String.Empty;
-      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
-      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-      PublishToServer(request.Serialize(), "StartPeach");
-    }
-
-    public void StartPeachAsync(string pitFilePath, string tagsString)
-    {
-      StartPeachRequest request = new StartPeachRequest();
-      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
-      request.ClientCount = 0;
-      request.IPAddress = String.Empty;
-      request.Tags = tagsString;
-      request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
-      request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-      PublishToServer(request.Serialize(), "StartPeach");
-    }
     #endregion
 
     #region StopPeachAsync
