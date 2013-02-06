@@ -28,9 +28,9 @@ namespace PeachFarm.Admin.Console
         bool errors = false;
 
         string tagsString = String.Empty;
-        string hostName = "localhost";
+        string hostName = String.Empty;
         int launchCount = 0;
-        string ip = null;
+        string ip = String.Empty;
 
         #region Parse & Validate Console Input
         var p = new OptionSet()
@@ -52,7 +52,7 @@ namespace PeachFarm.Admin.Console
 
         List<string> extra = p.Parse(args);
 
-        if (!stop && !start && !list && !errors)
+        if (String.IsNullOrEmpty(hostName) || (!stop && !start && !list && !errors))
           Program.syntax();
 
         if (start && extra.Count != 1)
@@ -75,31 +75,12 @@ namespace PeachFarm.Admin.Console
         #endregion
 
         #region Start
-        if (start)
-        {
-          string pitFilePath = extra[0];
-          //string logPath = extra[1];
-
-          if (launchCount > 0)
-          {
-            if (String.IsNullOrEmpty(tagsString))
-            {
-              admin.StartPeachAsync(pitFilePath, launchCount);
-            }
-            else
-            {
-              admin.StartPeachAsync(pitFilePath, launchCount, tagsString);
-            }
-          }
-          else if (String.IsNullOrEmpty(tagsString) == false)
-          {
-            admin.StartPeachAsync(pitFilePath, tagsString);
-          }
-          else
-          {
-            admin.StartPeachAsync(pitFilePath, System.Net.IPAddress.Parse(ip));
-          }
-        }
+		if (start)
+		{
+			string pitFilePath = extra[0];
+			//string logPath = extra[1];
+			admin.StartPeachAsync(pitFilePath, launchCount, tagsString, ip);
+		}
         #endregion
 
         #region Stop
