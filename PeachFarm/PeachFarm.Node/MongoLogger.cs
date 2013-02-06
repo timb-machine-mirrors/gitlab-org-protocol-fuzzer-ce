@@ -75,11 +75,14 @@ namespace PeachFarm.Loggers
           List<FaultData> mongoFaultData = GetMongoFaultData(peachFault, mongoFault);
           mongoFaultData.DatabaseInsert(MongoConnectionString);
 
+
           System.Console.WriteLine("******** MONGO: WRITING FAULT ************");
 
           #endregion
         }
 
+        List<OutputData> mongoOutputData = GetMongoOutputData(stateModel, JobID, currentIteration);
+        mongoOutputData.DatabaseInsert(MongoConnectionString);
       }
       catch(Exception ex)
       {
@@ -115,12 +118,13 @@ namespace PeachFarm.Loggers
 
     protected override void Engine_TestFinished(Peach.Core.RunContext context)
     {
+      
     }
 
     private Common.Mongo.Fault GetMongoFault(Peach.Core.Fault fault, Peach.Core.RunContext context)
     {
       Common.Mongo.Fault mongoFault = new Common.Mongo.Fault();
-
+      
       mongoFault.ControlIteration = fault.controlIteration;
       mongoFault.ControlRecordingIteration = fault.controlRecordingIteration;
       mongoFault.Description = fault.description;
@@ -140,6 +144,38 @@ namespace PeachFarm.Loggers
       return mongoFault;
     }
 
+    private List<Common.Mongo.OutputData> GetMongoOutputData(Peach.Core.Dom.StateModel stateModel, string jobID, uint iteration)
+    {
+      List<Common.Mongo.OutputData> outputData = new List<OutputData>();
+      foreach (Peach.Core.Dom.Action action in stateModel.dataActions)
+      {
+        if (action.dataModel != null)
+        {
+          OutputData outputDatum = new OutputData(jobID, iteration);
+          outputDatum.ActionName = action.name;
+          outputDatum.ActionType = action.type.ToString();
+          outputDatum.Parameter = 0;
+          outputDatum.Data = action.dataModel.Value.Value;
+          outputData.Add(outputDatum);
+        }
+        else if (action.parameters.Count > 0)
+        {
+          int pcnt = 0;
+          foreach (Peach.Core.Dom.ActionParameter param in action.parameters)
+          {
+            pcnt++;
+            OutputData outputDatum = new OutputData(jobID, iteration);
+            outputDatum.ActionName = action.name;
+            outputDatum.ActionType = action.type.ToString();
+            outputDatum.Parameter = pcnt;
+            outputDatum.Data = param.dataModel.Value.Value;
+            outputData.Add(outputDatum);
+          }
+        }
+      }
+      return outputData;
+    }
+
     private List<Common.Mongo.FaultData> GetMongoFaultData(Peach.Core.Fault fault, PeachFarm.Common.Mongo.Fault mongoFault)
     {
       List<Common.Mongo.FaultData> mongoFaultData = new List<Common.Mongo.FaultData>(fault.collectedData.Count);
@@ -151,6 +187,5 @@ namespace PeachFarm.Loggers
 
       return mongoFaultData;
     }
-
   }
 }

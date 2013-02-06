@@ -57,4 +57,17 @@
       -->
     </xs:complexType>
   </xs:element>
+
+  <xs:element name="OutputData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Iteration" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
+        <xs:element name="ActionName" type="xs:string" maxOccurs="1" minOccurs="1" />
+        <xs:element name="ActionType" type="xs:string" maxOccurs="1" minOccurs="1" />
+        <xs:element name="Parameter" type="xs:int" maxOccurs="1" minOccurs="1" />
+        <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+      </xs:sequence>
+      <xs:attribute name="JobID" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

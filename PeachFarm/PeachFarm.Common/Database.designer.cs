@@ -320,4 +320,92 @@ namespace PeachFarm.Common.Mongo
       }
     }
   }
+
+  public partial class OutputData
+  {
+
+    private uint iterationField;
+
+    private string actionNameField;
+
+    private string actionTypeField;
+
+    private int parameterField;
+
+    private byte[] dataField;
+
+    private string jobIDField;
+
+    public uint Iteration
+    {
+      get
+      {
+        return this.iterationField;
+      }
+      set
+      {
+        this.iterationField = value;
+      }
+    }
+
+    public string ActionName
+    {
+      get
+      {
+        return this.actionNameField;
+      }
+      set
+      {
+        this.actionNameField = value;
+      }
+    }
+
+    public string ActionType
+    {
+      get
+      {
+        return this.actionTypeField;
+      }
+      set
+      {
+        this.actionTypeField = value;
+      }
+    }
+
+    public int Parameter
+    {
+      get
+      {
+        return this.parameterField;
+      }
+      set
+      {
+        this.parameterField = value;
+      }
+    }
+
+    public byte[] Data
+    {
+      get
+      {
+        return this.dataField;
+      }
+      set
+      {
+        this.dataField = value;
+      }
+    }
+
+    public string JobID
+    {
+      get
+      {
+        return this.jobIDField;
+      }
+      set
+      {
+        this.jobIDField = value;
+      }
+    }
+  }
 }

@@ -52,6 +52,9 @@ namespace PeachFarm.Admin.Console
 
         List<string> extra = p.Parse(args);
 
+        if (String.IsNullOrEmpty(hostName))
+          Program.syntax();
+
         if (!stop && !start && !list && !errors)
           Program.syntax();
 
@@ -251,43 +254,49 @@ namespace PeachFarm.Admin.Console
 Syntax Guide
 ------------
 
-Syntax: pf_admin.exe -start -n clientCount pitFilePath
-        pf_admin.exe -start --ip ipAddress pitFilePath
-        pf_admin.exe -start -t tags pitFilePath
-        pf_admin.exe -stop jobID
+Syntax: 
+      Start Peach on the first <clientCount> number of Alive Nodes:
+        pf_admin.exe -h host -start -n clientCount pitFilePath
+      
+      Start Peach on the first <clientCount> number of Alive Nodes with matching <tags>:
+        pf_admin.exe -h host -start -n clientCount -t tags pitFilePath
+
+      Start Peach on a single specific Node:
+        pf_admin.exe -h host -start --ip ipAddress pitFilePath
+
+      Start Peach on all Alive nodes matching <tags>:
+        pf_admin.exe -h host -start -t tags pitFilePath
+    
+      Stop Peach on Nodes matching <jobID>:
+        pf_admin.exe -h host -stop jobID
+      
+      Get list of all Nodes:
         pf_admin.exe -list
+
+      Get list of errors reported by Nodes:
         pf_admin.exe -errors
 
-Optional Arguments:
+Required Arguments:
  
- -h host - Provide the IP or hostname of the controller.  Defaults to
-           localhost (127.0.0.1).
+ -h host - Provide the IP address of the Controller. 
+            127.0.0.1, localhost, or other host names are not valid.
 
 Commands:
 
  start   - Start one or more instances of Peach.
    clientCount - Number of instances to start
-   ipAddress   - Address of specific node to launch on
    tags        - Comma delimited list of tags to match nodes with
+
+   ipAddress   - Address of specific node to launch on
 
    pitFilePath - Full path to Pit File
 
  stop   - Stop some instances of Peach
    jobID - Job ID
 
- list   - List all nodes in our cluster with status
+ list   - List all nodes in the farm with status
 
  errors - List any logged node errors
-
-Command Line Search
--------------------
-
- Anytime a Peach instance is started a command line is provided.  This
- command line can be loosly considered the job name.  When running other
- commands we can specify part or all of that command line to match on. 
- As such we can operate on the entire 'job' instead of just single 
- nodes in our cluster.
-
 
 ");
     }

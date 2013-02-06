@@ -43,8 +43,6 @@ namespace PeachFarm.Node
         controllerIPAddress = config.Controller.IpAddress;
       }
 
-
-
       #region trap unhandled exceptions and Ctrl-C
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
       AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
@@ -61,6 +59,8 @@ namespace PeachFarm.Node
 
       Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
     }
+
+    public bool IsOpen { get; private set; }
 
     public void StartNode()
     {
@@ -83,10 +83,13 @@ namespace PeachFarm.Node
       heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
       #endregion
 
+      IsOpen = true;
     }
 
     public void StopNode()
     {
+      IsOpen = false;
+
       #region stop heartbeat
       heartbeat.Dispose();
       #endregion
@@ -375,7 +378,6 @@ namespace PeachFarm.Node
       if (String.IsNullOrEmpty(errorMessage))
       {
         StopPeach();
-        return;
       }
       else
       {
@@ -389,11 +391,13 @@ namespace PeachFarm.Node
         }
 
         SendHeartbeat(CreateHeartbeat(errorMessage));
+        nlog.Error(errorMessage);
+
+        nodeState.Status = Status.Alive;
+        RaiseStatusChanged();
+        SendHeartbeat(null);
       }
 
-      nodeState.Status = Status.Alive;
-      RaiseStatusChanged();
-      SendHeartbeat(null);
     }
 
     private void StartPeach(StartPeachRequest request)
@@ -445,7 +449,17 @@ namespace PeachFarm.Node
     {
       Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
 
-      Peach.Core.Dom.Dom dom = pitParser.asParser(null, nodeState.PitFilePath);
+      Peach.Core.Dom.Dom dom = null;
+      try
+      {
+        dom = pitParser.asParser(null, nodeState.PitFilePath);
+      }
+      catch (Peach.Core.PeachException ex)
+      {
+        string message = "Peach Exception on Pit parse:\n" + ex.ToString();
+        StopPeach(message);
+        return;
+      }
 
       List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
 
@@ -484,13 +498,11 @@ namespace PeachFarm.Node
       }
       catch (Peach.Core.PeachException pex)
       {
-        StopPeach("PeachException: " + pex.Message);
-        nlog.Error("PeachException: " + pex.Message);
+        StopPeach("PeachException: " + pex.ToString());
       }
       catch (Exception ex)
       {
         StopPeach(ex.Message);
-        nlog.Error("PeachException: " + ex.Message);
       }
     }
 
@@ -502,8 +514,8 @@ namespace PeachFarm.Node
 
     void peach_TestError(Peach.Core.RunContext context, Exception e)
     {
-      nlog.Error(String.Format("Test Error: {0}\n{1}", nodeState.JobID.ToString(), e.Message));
-      StopPeach(e.Message);
+      string message = String.Format("Test Error: {0}\n{1}", nodeState.JobID.ToString(), e.Message);
+      StopPeach(message);
     }
 
     #endregion

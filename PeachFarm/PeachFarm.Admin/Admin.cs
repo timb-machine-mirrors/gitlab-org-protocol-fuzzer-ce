@@ -189,8 +189,6 @@ namespace PeachFarm.Admin
       request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
       request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
-
-      
     }
 
     public void StartPeachAsync(string pitFilePath, int clientCount, string tagsString)
@@ -203,8 +201,6 @@ namespace PeachFarm.Admin
       request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
       request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
-
-
     }
 
     public void StartPeachAsync(string pitFilePath, IPAddress ipAddress)
@@ -217,22 +213,18 @@ namespace PeachFarm.Admin
       request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
       request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
-      Console.WriteLine("waiting for result...");
-      Console.ReadLine();
     }
 
     public void StartPeachAsync(string pitFilePath, string tagsString)
     {
       StartPeachRequest request = new StartPeachRequest();
-      request.Pit = GetPitXml(pitFilePath);
+      request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
       request.ClientCount = 0;
       request.IPAddress = String.Empty;
       request.Tags = tagsString;
       request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
       request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
       PublishToServer(request.Serialize(), "StartPeach");
-      Console.WriteLine("waiting for result...");
-      Console.ReadLine();
     }
     #endregion
 
