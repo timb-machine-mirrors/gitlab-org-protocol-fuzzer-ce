@@ -43,7 +43,7 @@ namespace PeachFarm.Common.Mongo
       else
       {
         db.CreateCollection(collectionname);
-        collection = db.GetCollection<Job>("jobs");
+        collection = db.GetCollection<Job>(collectionname);
         //collection.CreateIndex(new string[] { "JobID", "TestName", "ComputerName" });
       }
 
