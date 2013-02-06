@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach D:/peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Simple Network Management Protocol PIT" version="0.0.2">
 
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
@@ -8,79 +8,164 @@
   <!--
       Simple Network Management Protocol v2c
       
-      manager to agent...
       getRequest		- done
       getNextRequest	- done
       getBulkRequest	- done
   -->
+
+<DataModel name="SNMPHeaderV2">
   
+  <Blob name="SnmpType" value="30" valueType="hex" />
+  <Number name="SnmpLen" size="8" >
+    <Relation of="SnmpAll" type="size" />
+  </Number>
+  
+  <Block name="SnmpAll">
+    <Relation from="SnmpLen" type="size"/>
+   
+  <Number name="VersionType" value="2" size="8" />
+    
+  <Number name="VersionLength" value="1" size="8">
+    <Relation of="Version" type="size"/>
+  </Number>
+    
+    <Number name="Version" size="8" value="1">
+      <Relation from="VersionLength" type="size"/>
+    </Number>
+  
+	<Blob name="CommStringType" value="04" valueType="hex"/>  
+  
+	<Number name="CommStringLen" size="8"> 
+		<Relation type="size" of="SnmpCommunity"/> 
+	</Number>
+  
+	<String name="SnmpCommunity" value="##CommString##" nullTerminated="false"> 
+		<Relation type="size" from="CommStringLen"/> 
+	</String>
+  
+	<Blob name="RequestType"/>
+
+    <Block name="PDU">
+
+      <Number size="8" name="PDUSize">
+        <Relation of="PDUData" type="size"/>
+      </Number>
+
+      <Block name="PDUData"/>
+        <Relation type="size" from="PDUSize"/>
+      </Block>
+ </Block>
+</DataModel>
+
   <!-- Simple Network Management Protocol: GetRequest data model... -->
-  <DataModel name="SnmpGet">
-    <Blob name="SnmpVersionPad" valueType="hex" value="00000000" />
-    <Number name="SnmpVersion" size="8" valueType="hex" value="01" signed="false" />
+  <DataModel name="SnmpGet" ref="SNMPHeaderV2">
+   
+    <Blob name="SnmpAll.RequestType" valueType="hex" value="a0" />
     
-    <Blob name="SnmpCommunityPad" valueType="hex" value="0000" />
-    
-    <!-- community: public -->
-    <String name="SnmpCommunity" value="##CommString##"/> 
-    
-    <Block name="SnmpData">
-      <!-- Found some extra bits... -->
-      <Blob name="SnmpData" valueType="hex" value="a01a" />
+    <Block name="SnmpAll.PDU.PDUData">
+      <Relation type="size" from="SnmpAll.PDU.PDUSize"/>
+      
       <Block name="SnmpGetRequest">
-        <Blob name="SnmpRequestIdPad" valueType="hex" value="0000" />
         
-        <!-- request-id: 30463 -->
-        <Number name="SnmpRequestId" size="16" valueType="hex" value="76ff" signed="true" endian="big" />
-        <Blob name="SnmpErrorStatusPad" valueType="hex" value="0000" />
-        <Number name="SnmpErrorStatus" size="8" valueType="hex" value="00" signed="false" />
-        <Blob name="SnmpErrorIndexPad" valueType="hex" value="0000" />
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02" />
         
-        <!-- error-index: 0 -->
+        <Number size="8" name="RequestIDLen" valueType="hex" value="04">
+          <Relation of="RequestId" type="size"/>
+        </Number>
+
+        <Number name="RequestId" size="32" valueType="hex" value="72 a0 20 a6">
+          <Relation from="RequestIDLen" type="size"/>
+        </Number>
+
+        <Blob name="SnmpErrorStatusType" valueType="hex" value="02"/>
+        
+        <Number size="8" name="SnmpErrorStatusLen" valueType="hex" value="01">
+          <Relation of="SnmpErrorStatus" type="size"/>
+        </Number>
+
+        <Number name="SnmpErrorStatus" size="8" valueType="hex" value="00" signed="false">
+          <Relation from="SnmpErrorStatusLen" type="size"/>
+        </Number>
+        
+        <Blob name="SnmpErrorIndexTypeLen" valueType="hex" value="02 01" />
         <Number name="SnmpErrorIndex" size="8" valueType="hex" value="00" signed="false" />
-        <Blob name="SnmpVariableBindingsPad" valueType="hex" value="0000" />
+
+        <Blob name="VariableBindingsType" valueType="hex" value="30"/>
         
-        <Block name="SnmpVariableBindings">
+        <Number name="VariableBindingsSize" valueType="hex" size="8">
+          <Relation of="VariableBindings" type="size"/> 
+        </Number> 
+        
+        <Block name="VariableBindings">
+          <Relation from="VariableBindingsSize" type="size"/>
           <Block name="SnmpBinding" >
-            <Blob name="SnmpVariable" valueType="hex" value="300c0608" />
+            <Blob name="SnmpVariable" valueType="hex" value="30" />
+            <Number name="SnmpVariableLen" size="8">
+              <Relation of="SnmpName" type="size" />
+            </Number>
             <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
-            <Blob name="SnmpName" valueType="hex" value="2b06010201010400" />
+            <Blob name="SnmpName" valueType="hex" value="06 08 2b 06 01 02 01 01 04 00 05 00">
+              <Relation from="SnmpVariableLen" type="size"  />
+            </Blob> 
           </Block>
         </Block>
       </Block>
     </Block>
+    
   </DataModel>
   
-  <!-- Simple Network Management Protocol: GetNextRequest data model... -->	
-  <DataModel name="SnmpNext">
-    <Blob name="SnmpVersionPad" valueType="hex" value="00000000" />
+  <!-- Simple Network Management Protocol: GetNextRequest data model... -->
+  <DataModel name="SnmpNext" ref="SNMPHeaderV2">
+     <Blob name="SnmpAll.RequestType" valueType="hex" value="a1" />
     
-    <!-- version: v2c (1) -->
-    <Number name="SnmpVersion" size="8" valueType="hex" value="01" signed="false" />
-    <Blob name="SnmpCommunityPad" valueType="hex" value="0000" />
-    <!-- community: public -->
-    <String name="SnmpCommunity" value="##CommString##" />
-    
-    <Block name="SnmpData">
-      <Blob name="SnmpData" valueType="hex" value="a11b" />
-      <Block name="SnmpGetNextRequest">
-        <Blob name="SnmpRequestIdPad" valueType="hex" value="0000" />
-        <!-- request-id: 8688 -->
-        <Number name="SnmpRequestId" size="16" valueType="hex" value="21f0" signed="true" endian="big" />
-        <Blob name="SnmpErrorStatusPad" valueType="hex" value="0000" />
+    <Block name="SnmpAll.PDU.PDUData">
+      <Relation type="size" from="SnmpAll.PDU.PDUSize"/>
+      
+      <Block name="SnmpGetRequest">
         
-        <!-- error-status: noError (0) -->
-        <Number name="SnmpErrorStatus" size="8" valueType="hex" value="00" signed="false" />
-        <Blob name="SnmpErrorIndexPad" valueType="hex" value="0000" />
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02" />
         
-        <!-- error-index: 0 -->
+        <Number size="8" name="RequestIDLen" valueType="hex" value="04">
+          <Relation of="RequestId" type="size"/>
+        </Number>
+
+        <Number name="RequestId" size="32" valueType="hex" value="72 a0 20 a6">
+          <Relation from="RequestIDLen" type="size"/>
+        </Number>
+
+        <Blob name="SnmpErrorStatusType" valueType="hex" value="02"/>
+        
+        <Number size="8" name="SnmpErrorStatusLen" valueType="hex" value="01">
+          <Relation of="SnmpErrorStatus" type="size"/>
+        </Number>
+
+        <Number name="SnmpErrorStatus" size="8" valueType="hex" value="00" signed="false">
+          <Relation from="SnmpErrorStatusLen" type="size"/>
+        </Number>
+        
+        <Blob name="SnmpErrorIndexTypeLen" valueType="hex" value="02 01" />
         <Number name="SnmpErrorIndex" size="8" valueType="hex" value="00" signed="false" />
-        <Blob name="SnmpVariableBindingsPad" valueType="hex" value="0000" />
-        <Block name="SnmpVariableBindings">
+
+        <Blob name="VariableBindingsType" valueType="hex" value="30"/>
+        
+        <Number name="VariableBindingsSize" valueType="hex" size="8">
+          <Relation of="VariableBindings" type="size"/> 
+        </Number> 
+        
+        <Block name="VariableBindings">
+          <Relation from="VariableBindingsSize" type="size"/>
           <Block name="SnmpBinding" >
-            <Blob name="SnmpVariable"  valueType="hex" value="300d0609" />
-            <!-- Object Name: 1.3.6.1.2.1.25.1.7.0 (iso.3.6.1.2.1.25.1.7.0) -->
-            <Blob name="SnmpName" valueType="hex" value="2b0601020119010700" />
+            
+            <Blob name="SnmpVariable" valueType="hex" value="30" />
+            
+            <Number name="SnmpVariableLen" size="8">
+              <Relation of="SnmpName" type="size" />
+            </Number>
+            
+            <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
+            <Blob name="SnmpName" valueType="hex" value="06 09 2b 06 01 02 01 19 01 07 00 05 00">
+              <Relation from="SnmpVariableLen" type="size"  />
+            </Blob> 
           </Block>
         </Block>
       </Block>
@@ -88,39 +173,53 @@
   </DataModel>
   
   <!-- Simple Network Management Protocol: GetBulkRequest data model... -->
-  <DataModel name="SnmpBulk">
-    <Blob name="SnmpVersionPad" valueType="hex" value="00000000" />
+  <DataModel name="SnmpBulk" ref="SNMPHeaderV2">
+
+     <Blob name="SnmpAll.RequestType" valueType="hex" value="a5" />
     
-    <!-- version: v2c (1) -->
-    <Number name="SnmpVersion" size="8" valueType="hex" value="01" signed="false" />
-    <Blob name="SnmpCommunityPad" valueType="hex" value="0000" />
+    <Block name="SnmpAll.PDU.PDUData">
+      <Relation type="size" from="SnmpAll.PDU.PDUSize"/>
     
-    <!-- community: public -->
-    <String name="SnmpCommunity" value="##CommString##" />
-    
-    <Block name="SnmpData">
-      <Blob name="SnmpData" valueType="hex" value="a51c" />
       <Block name="SnmpGetBulkRequest">
-        <Blob name="SnmpRequestIdPad" valueType="hex" value="0000" />
-        <!-- request-id: 28174 -->
-        <Number name="SnmpRequestId" size="16" valueType="hex" value="6e0e" signed="true" endian="big" />
-        <Blob name="SnmpNonRepeatersPad" valueType="hex" value="0000" />
-        <Number name="SnmpNonRepeaters" size="8" valueType="hex" value="00" signed="false" />
-        <Blob name="SnmpMaxRepetitionsPad" valueType="hex" value="0000" />
-        <!-- max-repetitions: 10 -->
-        <Number name="SnmpMaxRepetitions" size="8" valueType="hex" value="0a" signed="false" />
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02" />
+        
+        <Number size="8" name="RequestIDLen" valueType="hex" value="04">
+          <Relation of="RequestId" type="size"/>
+        </Number>
+
+        <Number name="RequestId" size="32" valueType="hex" value="72 a0 20 a6">
+          <Relation from="RequestIDLen" type="size"/>
+        </Number>
+        
+        <Blob name="NonRepeatersPad" valueType="hex" value="02 01" />
+        <Number name="NonRepeaters" size="8" value="0" />
+        
+        <Blob name="MaxRepetitionsTypeLen" valueType="hex" value="02 01" />
+        <Number name="MaxRepetitions" size="8" valueType="hex" value="0a" signed="false" />
+        
         <Blob name="SnmpVariableBindingsPad" valueType="hex" value="0000" />
         
-        <Block name="SnmpVariableBindings">
+        <Block name="VariableBindings">
+          <Relation from="VariableBindingsSize" type="size"/>
           <Block name="SnmpBinding" >
-            <Blob name="SnmpVariable"  valueType="hex" value="300e060a" />
-            <!-- Object Name: 1.3.6.1.2.1.1.9.1.4.6 (iso.3.6.1.2.1.1.9.1.4.6) -->
-            <Blob name="SnmpName" valueType="hex" value="2b060102010109010406" />
+            
+            <Blob name="SnmpVariable" valueType="hex" value="30" />
+            
+            <Number name="SnmpVariableLen" size="8">
+              <Relation of="SnmpName" type="size" />
+            </Number>
+            
+            <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
+            <Blob name="SnmpName" valueType="hex" value="06 09 2b 06 01 02 01 19 01 07 00 05 00">
+              <Relation from="SnmpVariableLen" type="size"  />
+            </Blob> 
           </Block>
         </Block>
       </Block>
     </Block>
   </DataModel>
+
+
         
   <!-- Agent conifuration to monitor for crashes -->
   <Agent name="TheAgent">
@@ -143,9 +242,6 @@
       <Action name="SnmpGetBulkRequest" type="output" publisher="UdpHandler">
         <DataModel ref="SnmpBulk" />
       </Action>
-      
-      <!-- close udp socket -->
-      <Action type="close" publisher="UdpHandler" />
     </State>
   </StateModel>
   
