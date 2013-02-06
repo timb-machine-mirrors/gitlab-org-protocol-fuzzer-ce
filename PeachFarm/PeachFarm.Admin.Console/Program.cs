@@ -8,32 +8,32 @@ using PeachFarm.Common.Messages;
 
 namespace PeachFarm.Admin.Console
 {
-  class Program
-  {
+	class Program
+	{
 
-    static void syntax() { throw new SyntaxException(); }
+		static void syntax() { throw new SyntaxException(); }
 
-    static void Main(string[] args)
-    {
-      try
-      {
-        System.Console.WriteLine();
-        System.Console.WriteLine("] Peach Farm - Admin Client");
-        System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
-        System.Console.WriteLine();
+		static void Main(string[] args)
+		{
+			try
+			{
+				System.Console.WriteLine();
+				System.Console.WriteLine("] Peach Farm - Admin Client");
+				System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
+				System.Console.WriteLine();
 
-        bool start = false;
-        bool stop = false;
-        bool list = false;
-        bool errors = false;
+				bool start = false;
+				bool stop = false;
+				bool list = false;
+				bool errors = false;
 
-        string tagsString = String.Empty;
-        string hostName = String.Empty;
-        int launchCount = 0;
-        string ip = String.Empty;
+				string tagsString = String.Empty;
+				string hostName = String.Empty;
+				int launchCount = 0;
+				string ip = String.Empty;
 
-        #region Parse & Validate Console Input
-        var p = new OptionSet()
+				#region Parse & Validate Console Input
+				var p = new OptionSet()
 					{
 						{ "?|help", v => syntax() },
 					
@@ -47,187 +47,198 @@ namespace PeachFarm.Admin.Console
 						{ "h|host=", v => hostName = v},
 						{ "n|count=", v => launchCount = int.Parse(v)},
 						{ "i|ip=", v => ip = v},
-            { "t|tags=", v => tagsString = v}
+						{ "t|tags=", v => tagsString = v}
 					};
 
-        List<string> extra = p.Parse(args);
+				List<string> extra = p.Parse(args);
 
-        if (String.IsNullOrEmpty(hostName))
-          Program.syntax();
+				if (String.IsNullOrEmpty(hostName))
+					Program.syntax();
 
-        if (!stop && !start && !list && !errors)
-          Program.syntax();
+				if (!stop && !start && !list && !errors)
+					Program.syntax();
 
-        if (start && extra.Count != 1)
-          Program.syntax();
+				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
+					Program.syntax();
 
-        if (stop && extra.Count != 1)
-          Program.syntax();
+				if (start && extra.Count != 1)
+					Program.syntax();
 
-        #endregion
+				if (stop && extra.Count != 1)
+					Program.syntax();
 
-        #region Set up Admin listener
-        Admin admin = new Admin(hostName);
-        admin.StartAdmin();
+				#endregion
 
-        admin.ListComputersCompleted += admin_ListComputersCompleted;
-        admin.ListErrorsCompleted += admin_ListErrorsCompleted;
-        admin.StartPeachCompleted += admin_StartPeachCompleted;
-        admin.StopPeachCompleted += admin_StopPeachCompleted;
-        admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
-        #endregion
+				#region Set up Admin listener
+				Admin admin = new Admin(hostName);
+				admin.StartAdmin();
 
-        #region Start
-		    if (start)
-		    {
-			    string pitFilePath = extra[0];
-			    //string logPath = extra[1];
-			    admin.StartPeachAsync(pitFilePath, launchCount, tagsString, ip);
-		    }
-        #endregion
+				admin.ListComputersCompleted += admin_ListComputersCompleted;
+				admin.ListErrorsCompleted += admin_ListErrorsCompleted;
+				admin.StartPeachCompleted += admin_StartPeachCompleted;
+				admin.StopPeachCompleted += admin_StopPeachCompleted;
+				admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
+				#endregion
 
-        #region Stop
-        if (stop)
-        {
-          admin.StopPeachAsync(extra[0]);
+				#region Start
+				if (start)
+				{
+					string pitFilePath = extra[0];
+					//string logPath = extra[1];
+					admin.StartPeachAsync(pitFilePath, launchCount, tagsString, ip);
+				}
+				#endregion
 
-          /*
-          if (extra.Count > 0)
-          {
-            admin.StopPeachAsync(extra[0]);
-          }
-          else
-          {
-            admin.StopPeachAsync();
-          }
-          //*/
-        }
-        #endregion
+				#region Stop
+				if (stop)
+				{
+					admin.StopPeachAsync(extra[0]);
 
-        #region List
-        if (list)
-        {
-          admin.ListComputersAsync();
-        }
-        #endregion
+					/*
+					if (extra.Count > 0)
+					{
+						admin.StopPeachAsync(extra[0]);
+					}
+					else
+					{
+						admin.StopPeachAsync();
+					}
+					//*/
+				}
+				#endregion
 
-        #region Errors
-        if (errors)
-        {
-          admin.ListErrorsAsync();
-        }
-        #endregion
+				#region List
+				if (list)
+				{
+					admin.ListComputersAsync();
+				}
+				#endregion
 
-        System.Console.WriteLine("waiting for result...");
-        System.Console.ReadLine();
+				#region Errors
+				if (errors)
+				{
+					if (extra.Count > 0)
+					{
+						string jobID = extra[0];
+						admin.ListErrorsAsync(jobID);
+					}
+					else
+					{
+						admin.ListErrorsAsync();
+					}
+				}
+				#endregion
 
-      }
-      catch (SyntaxException)
-      {
-        PrintHelp();
-      }
-      catch (Exception ex)
-      {
-        System.Console.WriteLine(ex.Message);
-      }
+				System.Console.WriteLine("waiting for result...");
+				System.Console.ReadLine();
 
-      Environment.Exit(0);
-    }
+			}
+			catch (SyntaxException)
+			{
+				PrintHelp();
+			}
+			catch (Exception ex)
+			{
+				System.Console.WriteLine(ex.Message);
+			}
 
-    #region Peach Farm Admin message completion handlers
-    static void admin_StopPeachCompleted(object sender, Admin.StopPeachCompletedEventArgs e)
-    {
-      if (e.Result.Success)
-      {
-        System.Console.WriteLine("Stop Peach Success\n");
-      }
-      else
-      {
-        System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.Message));
-      }
-    }
+			Environment.Exit(0);
+		}
 
-    static void admin_StartPeachCompleted(object sender, Admin.StartPeachCompletedEventArgs e)
-    {
-      if (e.Result.Success)
-      {
-        System.Console.WriteLine(String.Format("Start Peach Success\nUser Name: {0}\nPit File: {1}\nJob ID: {2}", e.Result.UserName, e.Result.PitFileName, e.Result.JobID));
-      }
-      else
-      {
-        System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.Message));
-      }
-    }
+		#region Peach Farm Admin message completion handlers
+		static void admin_StopPeachCompleted(object sender, Admin.StopPeachCompletedEventArgs e)
+		{
+			if (e.Result.Success)
+			{
+				System.Console.WriteLine("Stop Peach Success\n");
+			}
+			else
+			{
+				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.Message));
+			}
+		}
 
-    static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
-    {
-      if (e.Result.Computers.Count > 0)
-      {
-        foreach (Heartbeat heartbeat in e.Result.Computers)
-        {
-          System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.ErrorMessage));
-        }
-      }
-      else
-      {
-        System.Console.WriteLine("Response: No errors recorded.");
-      }
-    }
+		static void admin_StartPeachCompleted(object sender, Admin.StartPeachCompletedEventArgs e)
+		{
+			if (e.Result.Success)
+			{
+				System.Console.WriteLine(String.Format("Start Peach Success\nUser Name: {0}\nPit File: {1}\nJob ID: {2}", e.Result.UserName, e.Result.PitFileName, e.Result.JobID));
+			}
+			else
+			{
+				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.Message));
+			}
+		}
 
-    static void admin_ListComputersCompleted(object sender, Admin.ListComputersCompletedEventArgs e)
-    {
-      if (e.Result.Computers.Count > 0)
-      {
-        foreach (Heartbeat heartbeat in e.Result.Computers)
-        {
-          if (heartbeat.Status == Status.Running)
-          {
-            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
-          }
-          else
-          {
-            System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
-          }
-        }
+		static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
+		{
+			if (e.Result.Computers.Count > 0)
+			{
+				foreach (Heartbeat heartbeat in e.Result.Computers)
+				{
+					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.ErrorMessage));
+				}
+			}
+			else
+			{
+				System.Console.WriteLine("Response: No errors recorded.");
+			}
+		}
 
-
-        System.Console.WriteLine();
-
-        var statusgroup = from c in e.Result.Computers where c.Status == Status.Alive select c;
-        System.Console.WriteLine(String.Format("Waiting for work: {0}", statusgroup.Count()));
-
-        statusgroup = from c in e.Result.Computers where c.Status == Status.Running select c;
-        System.Console.WriteLine(String.Format("Running: {0}", statusgroup.Count()));
-
-        statusgroup = from c in e.Result.Computers where c.Status == Status.Late select c;
-        System.Console.WriteLine(String.Format("Late: {0}", statusgroup.Count()));
-      }
-      else
-      {
-        System.Console.WriteLine("Response: No nodes online");
-      }
-    }
-
-    static void admin_AdminException(object sender, Admin.ExceptionEventArgs e)
-    {
-      System.Console.WriteLine(e.Exception.ToString());
-    }
-
-    #endregion
+		static void admin_ListComputersCompleted(object sender, Admin.ListComputersCompletedEventArgs e)
+		{
+			if (e.Result.Computers.Count > 0)
+			{
+				foreach (Heartbeat heartbeat in e.Result.Computers)
+				{
+					if (heartbeat.Status == Status.Running)
+					{
+						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+					}
+					else
+					{
+						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
+					}
+				}
 
 
-    #region PrintHelp
-    static void PrintHelp()
-    {
-      //  pf_admin.exe -logs destinationpath
-      //  pf_admin.exe -logs destinationpath commandLineSearch
-      //  commandLine - Peach command line to execute
-      //  logs   - Pull down logs for all runs or specific runs
-      //  destinationpath   - Path to save logs to locally
-      //  commandLineSearch - Full or partial command line to match
-      //         pf_admin.exe -stop
+				System.Console.WriteLine();
 
-      System.Console.WriteLine(@"
+				var statusgroup = from c in e.Result.Computers where c.Status == Status.Alive select c;
+				System.Console.WriteLine(String.Format("Waiting for work: {0}", statusgroup.Count()));
+
+				statusgroup = from c in e.Result.Computers where c.Status == Status.Running select c;
+				System.Console.WriteLine(String.Format("Running: {0}", statusgroup.Count()));
+
+				statusgroup = from c in e.Result.Computers where c.Status == Status.Late select c;
+				System.Console.WriteLine(String.Format("Late: {0}", statusgroup.Count()));
+			}
+			else
+			{
+				System.Console.WriteLine("Response: No nodes online");
+			}
+		}
+
+		static void admin_AdminException(object sender, Admin.ExceptionEventArgs e)
+		{
+			System.Console.WriteLine(e.Exception.ToString());
+		}
+
+		#endregion
+
+
+		#region PrintHelp
+		static void PrintHelp()
+		{
+			//  pf_admin.exe -logs destinationpath
+			//  pf_admin.exe -logs destinationpath commandLineSearch
+			//  commandLine - Peach command line to execute
+			//  logs   - Pull down logs for all runs or specific runs
+			//  destinationpath   - Path to save logs to locally
+			//  commandLineSearch - Full or partial command line to match
+			//         pf_admin.exe -stop
+
+			System.Console.WriteLine(@"
 
  pf_admin.exe is the admin interface for Peach Farm.  All Peach Farm
  functions can be controlled via this tool.
@@ -257,6 +268,9 @@ Syntax:
       Get list of errors reported by Nodes:
         pf_admin.exe -errors
 
+      Get list of errors reported by Nodes for Job <jobID>
+        pf_admin.exe -errors jobID
+
 Required Arguments:
  
  -h host - Provide the IP address of the Controller. 
@@ -278,14 +292,15 @@ Commands:
  list   - List all nodes in the farm with status
 
  errors - List any logged node errors
+   jobID - Job ID
 
 ");
-    }
-    #endregion
+		}
+		#endregion
 
-  }
+	}
 
-  public class SyntaxException : Exception
-  {
-  }
+	public class SyntaxException : Exception
+	{
+	}
 }
