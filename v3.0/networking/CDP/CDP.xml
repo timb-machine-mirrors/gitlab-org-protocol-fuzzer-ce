@@ -9,10 +9,6 @@
   
   <!-- Cisco Discovery Protocol Main DataModel -->
 
-	<PythonPath path="pits/v3.0/networking/CDP"/>
-	<Import import="cdp"/>
-
-
   <DataModel name="CDP">
     <Block name="EtherHeader" mutable="false">
       <Blob name="Dest" valueType="hex" value="01000ccccccc" mutable="false"/> <!-- CDP Multicast -->
@@ -38,8 +34,7 @@
 					     (http://www.faqs.org/rfcs/rfc1071.html). The
 					     documentation is incorrect. For odd bytes lengths
 					     padding is incorrect. -->
-					<Fixup class="ScriptFixup">
-						<Param name="class" value="cdp.CiscoCDPChecksum"/>
+					<Fixup class="CiscoFixup">
 						<Param name="ref" value="CdpPayload" />
 					</Fixup>
 				</Number>
@@ -60,7 +55,7 @@
 					<Number name="AddressCount" size="32" endian="big">
 						<Relation type="count" of="AddressTlvValueBlock"/>
 					</Number>
-					<Block name="AddressTlvValueBlock">
+					<Block name="AddressTlvValueBlock" minOccurs="1">
 						<Number name="AddressProtoType" value="1" size="8"/>
 						<Number name="AddressProtoLength" size="8">
 							<Relation type="size" of="AddressProto"/>
