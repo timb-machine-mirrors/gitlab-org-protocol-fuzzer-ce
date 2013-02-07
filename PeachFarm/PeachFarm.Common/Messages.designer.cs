@@ -27,6 +27,8 @@ namespace PeachFarm.Common.Messages
 
 		private string pitField;
 
+		private string definesField;
+
 		private int clientCountField;
 
 		private string iPAddressField;
@@ -52,6 +54,18 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.pitField = value;
+			}
+		}
+
+		public string Defines
+		{
+			get
+			{
+				return this.definesField;
+			}
+			set
+			{
+				this.definesField = value;
 			}
 		}
 

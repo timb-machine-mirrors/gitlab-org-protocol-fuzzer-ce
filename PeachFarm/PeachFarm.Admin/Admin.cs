@@ -180,10 +180,16 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, int clientCount, string tagsString, string ip)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
 		{
 			StartPeachRequest request = new StartPeachRequest();
 			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+
+			if (String.IsNullOrEmpty(definesFilePath) == false)
+			{
+				request.Defines = String.Format("<![CDATA[{0}]]", File.ReadAllText(definesFilePath));
+			}
+
 			if (String.IsNullOrEmpty(ip) == false)
 			{
 				request.IPAddress = System.Net.IPAddress.Parse(ip).ToString();
@@ -199,8 +205,6 @@ namespace PeachFarm.Admin
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 			PublishToServer(request.Serialize(), "StartPeach");
-			Console.WriteLine("waiting for result...");
-			Console.ReadLine();
 		}
 
 		#endregion

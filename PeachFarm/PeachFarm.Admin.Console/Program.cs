@@ -61,7 +61,7 @@ namespace PeachFarm.Admin.Console
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
 					Program.syntax();
 
-				if (start && extra.Count != 1)
+				if (start && extra.Count < 1)
 					Program.syntax();
 
 				if (stop && extra.Count != 1)
@@ -84,8 +84,12 @@ namespace PeachFarm.Admin.Console
 				if (start)
 				{
 					string pitFilePath = extra[0];
-					//string logPath = extra[1];
-					admin.StartPeachAsync(pitFilePath, launchCount, tagsString, ip);
+
+					string definesFilePath = String.Empty;
+					if (extra.Count >= 2)
+						definesFilePath = extra[1];
+
+					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip);
 				}
 				#endregion
 
@@ -248,16 +252,16 @@ Syntax Guide
 
 Syntax: 
       Start Peach on the first <clientCount> number of Alive Nodes:
-        pf_admin.exe -h host -start -n clientCount pitFilePath
+        pf_admin.exe -h host -start -n clientCount pitFilePath <definesFilePath>
       
       Start Peach on the first <clientCount> number of Alive Nodes with matching <tags>:
-        pf_admin.exe -h host -start -n clientCount -t tags pitFilePath
+        pf_admin.exe -h host -start -n clientCount -t tags pitFilePath <definesFilePath>
 
       Start Peach on a single specific Node:
-        pf_admin.exe -h host -start --ip ipAddress pitFilePath
+        pf_admin.exe -h host -start --ip ipAddress pitFilePath <definesFilePath>
 
       Start Peach on all Alive nodes matching <tags>:
-        pf_admin.exe -h host -start -t tags pitFilePath
+        pf_admin.exe -h host -start -t tags pitFilePath <definesFilePath>
     
       Stop Peach on Nodes matching <jobID>:
         pf_admin.exe -h host -stop jobID
@@ -285,6 +289,7 @@ Commands:
    ipAddress   - Address of specific node to launch on
 
    pitFilePath - Full path to Pit File
+   definesFilePath - Full path to Defines File (optional)
 
  stop   - Stop some instances of Peach
    jobID - Job ID

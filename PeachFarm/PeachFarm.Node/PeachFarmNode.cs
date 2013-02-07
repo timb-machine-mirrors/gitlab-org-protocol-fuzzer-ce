@@ -405,21 +405,11 @@ namespace PeachFarm.Node
 			if (nodeState.Status == Status.Running)
 				return;
 
-			string pit = request.Pit;
-			if (pit.StartsWith("<!"))
+			nodeState.PitFilePath = WriteTextToTempFile(request.Pit);
+			
+			if(String.IsNullOrEmpty(request.Defines) == false)
 			{
-				pit = pit.Substring("<![CDATA[".Length);
-				pit = pit.Substring(0, pit.Length - 2);
-			}
-
-			nodeState.PitFilePath = Path.GetTempFileName();
-			using (FileStream stream = new FileStream(nodeState.PitFilePath, FileMode.Create))
-			{
-				StreamWriter writer = new StreamWriter(stream);
-				writer.Write(pit);
-				writer.Flush();
-				writer.Close();
-				stream.Close();
+				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines);
 			}
 
 			nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
@@ -452,7 +442,16 @@ namespace PeachFarm.Node
 			Peach.Core.Dom.Dom dom = null;
 			try
 			{
-				dom = pitParser.asParser(null, nodeState.PitFilePath);
+				if (String.IsNullOrEmpty(nodeState.DefinesFilePath))
+				{
+					dom = pitParser.asParser(null, nodeState.PitFilePath);
+				}
+				else
+				{
+					Dictionary<string, object> parserArgs = new Dictionary<string, object>();
+					parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = ProcessDefines(nodeState.DefinesFilePath);
+					dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
+				}
 			}
 			catch (Peach.Core.PeachException ex)
 			{
@@ -545,7 +544,113 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
+		private string WriteTextToTempFile(string text)
+		{
+			if (text.StartsWith("<!"))
+			{
+				text = text.Substring("<![CDATA[".Length);
+				text = text.Substring(0, text.Length - 2);
+			}
 
+			string temppath = Path.GetTempFileName();
+			using (FileStream stream = new FileStream(temppath, FileMode.Create))
+			{
+				StreamWriter writer = new StreamWriter(stream);
+				writer.Write(text);
+				writer.Flush();
+				writer.Close();
+				stream.Close();
+			}
+			return temppath;
+		}
+
+		#region functions copied from Peach
+		private Dictionary<string, string> ProcessDefines(string definedValuesFile)
+		{
+			Dictionary<string, string> DefinedValues = new Dictionary<string,string>();
+
+			if (definedValuesFile != null)
+			{
+				if (!File.Exists(definedValuesFile))
+					throw new Peach.Core.PeachException("Error, defined values file \"" + definedValuesFile + "\" does not exist.");
+
+				XmlDocument xmlDoc = new XmlDocument();
+				xmlDoc.Load(definedValuesFile);
+
+				var root = xmlDoc.FirstChild;
+				if (root.Name != "PitDefines")
+				{
+					root = xmlDoc.FirstChild.NextSibling;
+					if (root.Name != "PitDefines")
+						throw new Peach.Core.PeachException("Error, definition file root element must be PitDefines.");
+				}
+
+				foreach (XmlNode node in root.ChildNodes)
+				{
+					if (hasXmlAttribute(node, "platform"))
+					{
+						switch (getXmlAttribute(node, "platform").ToLower())
+						{
+							case "osx":
+								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.OSX)
+									continue;
+								break;
+							case "linux":
+								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
+									continue;
+								break;
+							case "windows":
+								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Windows)
+									continue;
+								break;
+							default:
+								throw new Peach.Core.PeachException("Error, unknown platform name \"" + getXmlAttribute(node, "platform") + "\" in definition file.");
+						}
+					}
+
+					foreach (XmlNode defNode in node.ChildNodes)
+					{
+						if (defNode is XmlComment)
+							continue;
+
+						if (!hasXmlAttribute(defNode, "key") || !hasXmlAttribute(defNode, "value"))
+							throw new Peach.Core.PeachException("Error, Define elements in definition file must have both key and value attributes.");
+
+						// Allow command line to override values in XML file.
+						if (!DefinedValues.ContainsKey(getXmlAttribute(defNode, "key")))
+						{
+							DefinedValues[getXmlAttribute(defNode, "key")] =
+								getXmlAttribute(defNode, "value");
+						}
+					}
+				}
+			}
+
+			return DefinedValues;
+		}
+
+		private bool hasXmlAttribute(XmlNode node, string name)
+		{
+			if (node.Attributes == null)
+				return false;
+
+			object o = node.Attributes.GetNamedItem(name);
+			return o != null;
+		}
+
+		private string getXmlAttribute(XmlNode node, string name)
+		{
+			System.Xml.XmlAttribute attr = node.Attributes.GetNamedItem(name) as System.Xml.XmlAttribute;
+			if (attr != null)
+			{
+				return attr.InnerText;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		#endregion
 	}
 
 	internal class NodeState
@@ -582,6 +687,7 @@ namespace PeachFarm.Node
 						case Status.Alive:
 							MongoDbConnectionString = String.Empty;
 							PitFilePath = String.Empty;
+							DefinesFilePath = String.Empty;
 							//JobID = Guid.Empty;
 							JobID = String.Empty;
 							UserName = "";
@@ -600,6 +706,8 @@ namespace PeachFarm.Node
 		internal string MongoDbConnectionString { get; set; }
 
 		internal string PitFilePath { get; set; }
+		internal string DefinesFilePath { get; set; }
+
 		internal string PitFileName { get; set; }
 		internal Peach.Core.RunContext RunContext { get; set; }
 		//internal Guid JobID { get; set; }
