@@ -50,7 +50,7 @@
 			<Number name="NextHeader" size="8" value="59"/>
 			<Number name="PayloadLength" value="0" size="8"> 
 				<Relation type="size" of="HopByHopContents" 
-									expressionSet="((((((size-8)/8) > 0) and (size-8)/8)) or 0) + int(bool(size % 8))"
+									expressionSet="((size-8)/8) + int(bool(size % 8))"
 									expressionGet="((size+1)*8)"
 									/> <!-- this is length in 8-octet units -->
 			</Number>
