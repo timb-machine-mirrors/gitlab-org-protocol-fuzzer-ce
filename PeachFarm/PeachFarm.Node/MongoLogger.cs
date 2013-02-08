@@ -58,37 +58,15 @@ namespace PeachFarm.Loggers
 
 		protected override void Engine_Fault(Peach.Core.RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Peach.Core.Fault[] faultData)
 		{
-			try
-			{
-				List<Common.Mongo.Fault> mongoFaults = new List<Common.Mongo.Fault>();
+			Iteration iteration = new Iteration();
+			iteration.IterationNumber = currentIteration;
+			iteration.JobID = JobID;
+			iteration.NodeName = IPAddress;
 
-				System.Console.WriteLine("******** Peach: Engine_Fault ************");
+			iteration.StateModel = GetMongoActions(stateModel);
+			iteration.Faults = GetMongoFaults(faultData, context);
 
-
-				foreach (Peach.Core.Fault peachFault in faultData)
-				{
-					#region MongoDB
-					PeachFarm.Common.Mongo.Fault mongoFault = GetMongoFault(peachFault, context);
-					mongoFault = mongoFault.DatabaseInsert(MongoConnectionString);
-
-
-					List<FaultData> mongoFaultData = GetMongoFaultData(peachFault, mongoFault);
-					mongoFaultData.DatabaseInsert(MongoConnectionString);
-
-
-					System.Console.WriteLine("******** MONGO: WRITING FAULT ************");
-
-					#endregion
-				}
-
-				List<OutputData> mongoOutputData = GetMongoOutputData(stateModel, JobID, currentIteration);
-				mongoOutputData.DatabaseInsert(MongoConnectionString);
-			}
-			catch (Exception ex)
-			{
-				nlog.FatalException("Mongo failed to write", ex);
-				//System.Console.WriteLine("******** MONGO: FAILED FAULT ************");
-			}
+			iteration.DatabaseInsert(MongoConnectionString);
 		}
 
 		protected override void Engine_TestStarting(Peach.Core.RunContext context)
@@ -121,42 +99,49 @@ namespace PeachFarm.Loggers
 
 		}
 
-		private Common.Mongo.Fault GetMongoFault(Peach.Core.Fault fault, Peach.Core.RunContext context)
+		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.RunContext context)
 		{
-			Common.Mongo.Fault mongoFault = new Common.Mongo.Fault();
+			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
+			
+			foreach(Peach.Core.Fault pf in peachFaults)
+			{
+				Common.Mongo.Fault mongoFault = new Common.Mongo.Fault();
 
-			mongoFault.ControlIteration = fault.controlIteration;
-			mongoFault.ControlRecordingIteration = fault.controlRecordingIteration;
-			mongoFault.Description = fault.description;
-			mongoFault.DetectionSource = fault.detectionSource;
-			mongoFault.Exploitability = fault.exploitability;
-			mongoFault.FaultType = fault.type.ToString();
-			mongoFault.FolderName = fault.folderName;
-			mongoFault.Iteration = fault.iteration;
-			mongoFault.MajorHash = fault.majorHash;
-			mongoFault.MinorHash = fault.minorHash;
-			mongoFault.Title = fault.title;
-			mongoFault.JobID = JobID;
-			mongoFault.NodeName = IPAddress;
-			mongoFault.TestName = context.test.name;
+				mongoFault.ControlIteration = pf.controlIteration;
+				mongoFault.ControlRecordingIteration = pf.controlRecordingIteration;
+				mongoFault.Description = pf.description;
+				mongoFault.DetectionSource = pf.detectionSource;
+				mongoFault.Exploitability = pf.exploitability;
+				mongoFault.FaultType = pf.type.ToString();
+				mongoFault.FolderName = pf.folderName;
+				mongoFault.Iteration = pf.iteration;
+				mongoFault.MajorHash = pf.majorHash;
+				mongoFault.MinorHash = pf.minorHash;
+				mongoFault.Title = pf.title;
 
+				mongoFault.TestName = context.test.name;
+				mongoFault.SeedNumber = context.config.randomSeed;
 
-			return mongoFault;
+				mongoFault.CollectedData = GetMongoCollectedData(pf);
+
+				mongoFaults.Add(mongoFault);
+			}
+			return mongoFaults;
 		}
 
-		private List<Common.Mongo.OutputData> GetMongoOutputData(Peach.Core.Dom.StateModel stateModel, string jobID, uint iteration)
+		private List<Common.Mongo.Action> GetMongoActions(Peach.Core.Dom.StateModel stateModel)
 		{
-			List<Common.Mongo.OutputData> outputData = new List<OutputData>();
+			List<Common.Mongo.Action> mongoActions = new List<PeachFarm.Common.Mongo.Action>();
 			foreach (Peach.Core.Dom.Action action in stateModel.dataActions)
 			{
 				if (action.dataModel != null)
 				{
-					OutputData outputDatum = new OutputData(jobID, iteration);
-					outputDatum.ActionName = action.name;
-					outputDatum.ActionType = action.type.ToString();
-					outputDatum.Parameter = 0;
-					outputDatum.Data = action.dataModel.Value.Value;
-					outputData.Add(outputDatum);
+					PeachFarm.Common.Mongo.Action mongoAction = new PeachFarm.Common.Mongo.Action();
+					mongoAction.ActionName = action.name;
+					mongoAction.ActionType = action.type.ToString();
+					mongoAction.Parameter = 0;
+					mongoAction.Data = action.dataModel.Value.Value;
+					mongoActions.Add(mongoAction);
 				}
 				else if (action.parameters.Count > 0)
 				{
@@ -164,28 +149,31 @@ namespace PeachFarm.Loggers
 					foreach (Peach.Core.Dom.ActionParameter param in action.parameters)
 					{
 						pcnt++;
-						OutputData outputDatum = new OutputData(jobID, iteration);
-						outputDatum.ActionName = action.name;
-						outputDatum.ActionType = action.type.ToString();
-						outputDatum.Parameter = pcnt;
-						outputDatum.Data = param.dataModel.Value.Value;
-						outputData.Add(outputDatum);
+						PeachFarm.Common.Mongo.Action mongoAction = new PeachFarm.Common.Mongo.Action();
+						mongoAction.ActionName = action.name;
+						mongoAction.ActionType = action.type.ToString();
+						mongoAction.Parameter = pcnt;
+						mongoAction.Data = param.dataModel.Value.Value;
+						mongoActions.Add(mongoAction);
 					}
 				}
 			}
-			return outputData;
+			return mongoActions;
 		}
 
-		private List<Common.Mongo.FaultData> GetMongoFaultData(Peach.Core.Fault fault, PeachFarm.Common.Mongo.Fault mongoFault)
+		private List<Common.Mongo.CollectedData> GetMongoCollectedData(Peach.Core.Fault fault)
 		{
-			List<Common.Mongo.FaultData> mongoFaultData = new List<Common.Mongo.FaultData>(fault.collectedData.Count);
+			List<Common.Mongo.CollectedData> cds = new List<Common.Mongo.CollectedData>(fault.collectedData.Count);
 
 			foreach (var pair in fault.collectedData)
 			{
-				mongoFaultData.Add(new Common.Mongo.FaultData(mongoFault.JobID, mongoFault._id, pair.Key, pair.Value));
+				Common.Mongo.CollectedData cd = new Common.Mongo.CollectedData();
+				cd.Key = pair.Key;
+				cd.Data = pair.Value;
+				cds.Add(cd);
 			}
 
-			return mongoFaultData;
+			return cds;
 		}
 	}
 }

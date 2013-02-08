@@ -21,7 +21,14 @@ namespace PeachFarm.Node.Configuration
       get { return (TagsCollection)this[Constants.Tags]; }
       set { this[Constants.Tags] = value; }
     }
-  }
+
+		[ConfigurationProperty(Constants.RabbitMq)]
+		public RabbitMqElement RabbitMq
+		{
+			get { return (RabbitMqElement)this[Constants.RabbitMq]; }
+			set { this[Constants.RabbitMq] = value; }
+		}
+	}
 
   public class Controller : ConfigurationElement
   {
@@ -32,6 +39,37 @@ namespace PeachFarm.Node.Configuration
       set { this[Constants.IPAddress] = value; }
     }
   }
+
+	public class RabbitMqElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.HostName)]
+		public string HostName
+		{
+			get { return (string)this[Constants.HostName]; }
+			set { this[Constants.HostName] = value; }
+		}
+
+		[ConfigurationProperty(Constants.Port)]
+		public int Port
+		{
+			get { return (int)this[Constants.Port]; }
+			set { this[Constants.Port] = value; }
+		}
+
+		[ConfigurationProperty(Constants.UserName)]
+		public string UserName
+		{
+			get { return (string)this[Constants.UserName]; }
+			set { this[Constants.UserName] = value; }
+		}
+
+		[ConfigurationProperty(Constants.Password)]
+		public string Password
+		{
+			get { return (string)this[Constants.Password]; }
+			set { this[Constants.Password] = value; }
+		}
+	}
 
   public class TagsCollection : ConfigurationElementCollection
   {
@@ -92,6 +130,13 @@ namespace PeachFarm.Node.Configuration
   {
     public const string Controller = "Controller";
     public const string IPAddress = "ipAddress";
+
+		public const string RabbitMq = "RabbitMq";
+		public const string HostName = "hostName";
+		public const string Port = "port";
+		public const string UserName = "userName";
+		public const string Password = "password";
+
 
     public const string Tags = "Tags";
     public const string Tag = "Tag";

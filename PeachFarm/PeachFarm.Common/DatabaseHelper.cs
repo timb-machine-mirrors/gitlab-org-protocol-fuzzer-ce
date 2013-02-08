@@ -18,6 +18,7 @@ namespace PeachFarm.Common.Mongo
 			{
 				MongoServer server = MongoServer.Create(connectionString);
 				server.Connect();
+				CreateCollections(server);
 				server.Disconnect();
 			}
 			catch
@@ -27,35 +28,69 @@ namespace PeachFarm.Common.Mongo
 			return result;
 		}
 
-		//public static Job GetJob(Guid jobGuid, string connectionString)
-		public static Job GetJob(string jobGuid, string connectionString)
+		public static void CreateCollections(MongoServer server)
+		{
+			CreateJobsCollection(server);
+			CreateIterationsCollection(server);
+		}
+
+		public static void CreateJobsCollection(MongoServer server)
 		{
 			string collectionname = MongoNames.Jobs;
-			MongoServer server = MongoServer.Create(connectionString);
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 
 			MongoCollection<Job> collection;
-
-			if (db.CollectionExists(collectionname))
-			{
-				collection = db.GetCollection<Job>(collectionname);
-			}
-			else
+			if (!db.CollectionExists(collectionname))
 			{
 				db.CreateCollection(collectionname);
 				collection = db.GetCollection<Job>(collectionname);
-				//collection.CreateIndex(new string[] { "JobID", "TestName", "ComputerName" });
+				collection.CreateIndex(new string[] { "JobID" });
 			}
 
+		}
 
-			if (db.CollectionExists(collectionname) == false)
+		public static void CreateIterationsCollection(MongoServer server)
+		{
+			string collectionname = MongoNames.Iterations;
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			MongoCollection<Job> collection;
+			if (!db.CollectionExists(collectionname))
 			{
-				throw new ApplicationException("Database does not exist.");
+				db.CreateCollection(collectionname);
+				collection = db.GetCollection<Job>(collectionname);
+				collection.CreateIndex(new string[] { "JobID" });
+				collection.CreateIndex(new string[] { "NodeName" });
+				collection.CreateIndex(new string[] { "IterationNumber" });
 			}
+		}
 
+		public static void CreateErrorsCollection(MongoServer server)
+		{
+			string collectionname = MongoNames.PeachFarmErrors;
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 
+			MongoCollection<Job> collection;
+			if (!db.CollectionExists(collectionname))
+			{
+				db.CreateCollection(collectionname);
+				collection = db.GetCollection<Job>(collectionname);
+				collection.CreateIndex(new string[] { "JobID" });
+				collection.CreateIndex(new string[] { "NodeName" });
+			}
+		}
+		//public static Job GetJob(Guid jobGuid, string connectionString)
+		public static Job GetJob(string jobGuid, string connectionString)
+		{
+			MongoCollection<Job> collection = GetJobsCollection(connectionString);
 			var query = Query.EQ("JobID", jobGuid);
 			return collection.FindOne(query);
+		}
+
+		public static List<Job> GetAllJobs(string connectionString)
+		{
+			MongoCollection<Job> collection = GetJobsCollection(connectionString);
+			return collection.FindAll().ToList();
 		}
 
 		public static List<Messages.Heartbeat> GetErrors(string connectionString)
@@ -114,16 +149,41 @@ namespace PeachFarm.Common.Mongo
 			var query = Query.EQ("JobID", jobID);
 			return collection.Find(query).ToList();
 		}
+
+		private static MongoCollection<Job> GetJobsCollection(string connectionString)
+		{
+			string collectionname = MongoNames.Jobs;
+			MongoServer server = MongoServer.Create(connectionString);
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			
+			MongoCollection<Job> collection;
+
+			if (db.CollectionExists(collectionname))
+			{
+				collection = db.GetCollection<Job>(collectionname);
+			}
+			else
+			{
+				db.CreateCollection(collectionname);
+				collection = db.GetCollection<Job>(collectionname);
+				collection.CreateIndex(new string[] { "JobID"});
+			}
+
+			if (db.CollectionExists(collectionname) == false)
+			{
+				throw new ApplicationException("Database does not exist.");
+			}
+
+			return collection;
+		}
 	}
 
 	public static class MongoNames
 	{
 		public const string Database = "PeachFarm";
 		public const string Jobs = "jobs";
-		public const string Faults = "faults";
-		public const string OutputData = "faultGeneratingData";
-		public const string FaultData = "faultInfo";
-		public const string PeachFarmErrors = "peachFarmErrors";
+		public const string Iterations = "job.iterations";
+		public const string PeachFarmErrors = "peachFarm.errors";
 
 	}
 }

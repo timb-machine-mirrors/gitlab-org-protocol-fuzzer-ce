@@ -35,4 +35,17 @@ namespace PeachFarm.Common.Messages
 			this.UserName = request.UserName;
 		}
 	}
+
+	public partial class Job
+	{
+		public Job() { }
+
+		public Job(Mongo.Job mongoJob)
+		{
+			this.JobID = mongoJob.JobID;
+			this.PitFileName = mongoJob.PitFileName;
+			this.StartDate = mongoJob.StartDate;
+			this.UserName = mongoJob.UserName;
+		}
+	}
 }

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="Database"
-    targetNamespace="http://phed.org/2012/PeachFarm"
+    targetNamespace="http://phed.org/2012/PeachFarm/Database"
     elementFormDefault="qualified"
-    xmlns="http://phed.org/2012/PeachFarm"
-    xmlns:mstns="http://phed.org/2012/PeachFarm"
+    xmlns="http://phed.org/2012/PeachFarm/Database"
+    xmlns:mstns="http://phed.org/2012/PeachFarm/Database"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:ms="http://microsoft.com/wsdl/types/"
 >
@@ -16,12 +16,30 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="StartDate" type="xs:dateTime" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
-  <xs:element name="Fault" type="Fault" />
+	<xs:element name="Iteration" type="Iteration" />
+	<xs:complexType name="Iteration">
+		<xs:sequence>
+			<xs:element name="IterationNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="StateModel" maxOccurs="1" minOccurs="1" >
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Action" type="Action" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Faults">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Fault" type="Fault" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+    <xs:attribute name="JobID" type="xs:string" use="required" />
+    <xs:attribute name="NodeName" type="xs:string" use="required" />
+	</xs:complexType>
 
   <xs:complexType name="Fault">
     <xs:sequence>
@@ -35,39 +53,33 @@
       <xs:element name="MajorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="MinorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="Title" type="xs:string" maxOccurs="1" minOccurs="1" />
-    </xs:sequence>
-    <xs:attribute name="FaultType" type="xs:string" use="required" />
-    <xs:attribute name="JobID" type="xs:string" use="required" />
-    <xs:attribute name="NodeName" type="xs:string" use="required" />
-    <xs:attribute name="TestName" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
+			<xs:element name="FaultType" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="TestName" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SeedNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Stamp" type="xs:dateTime" maxOccurs="1" minOccurs="1" />
+			<xs:element name="CollectedData" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="CollectedData" type="CollectedData" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
   </xs:complexType>
 
-  <xs:element name="FaultData">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="Key" type="xs:string" maxOccurs="1" minOccurs="1" />
-        <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
-      </xs:sequence>
-      <xs:attribute name="JobID" type="xs:string" use="required" />
-      <!--
-      <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-      -->
-    </xs:complexType>
-  </xs:element>
+  <xs:complexType name="CollectedData">
+    <xs:sequence>
+			<xs:element name="Key" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+    </xs:sequence>
+	</xs:complexType>
 
-  <xs:element name="OutputData">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="Iteration" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
-        <xs:element name="ActionName" type="xs:string" maxOccurs="1" minOccurs="1" />
-        <xs:element name="ActionType" type="xs:string" maxOccurs="1" minOccurs="1" />
-        <xs:element name="Parameter" type="xs:int" maxOccurs="1" minOccurs="1" />
-        <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
-      </xs:sequence>
-      <xs:attribute name="JobID" type="xs:string" use="required" />
-    </xs:complexType>
-  </xs:element>
+  <xs:complexType name="Action">
+    <xs:sequence>
+      <xs:element name="ActionName" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="ActionType" type="xs:string" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Parameter" type="xs:int" maxOccurs="1" minOccurs="1" />
+      <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+    </xs:sequence>
+	</xs:complexType>
 </xs:schema>
