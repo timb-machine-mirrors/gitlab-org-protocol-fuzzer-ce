@@ -60,13 +60,9 @@
 				<!-- <Number name="test2" value="0" size="8" endian="big" minOccurs="1"/> -->
 
 				<!-- size relation with padding -->
-				<!-- <Block ref="TLV" minOccurs="0" maxOccurs="255"> -->
-				<!-- 	<Number name="Type" value="1"/> -->
-				<!-- 	<Block name="Value"> -->
-				<!-- 		<Number name="Type" value="1" size="16" endian="big"/> -->
-				<!-- 		<Blob valueType="hex" value="00"/> -->
-				<!-- 	</Block> -->
-				<!-- </Block> -->
+				<Block name="InternalTLV" ref="TLV" minOccurs="0" maxOccurs="255">
+					<Number name="Type" value="0"/>
+				</Block>
 				<Block name="Padding" minOccurs="1">
 					<Number name="Type" size="8" value="1"/>
 					<Number name="Length" size="8" value="0">
@@ -77,7 +73,36 @@
 			<Padding name="PaddingValue" aligned="true" alignment="64" alignedTo="HopByHopContents"/>
 		</Block>
 	</DataModel>
-	
+
+	<DataModel name="JumboFrame">
+		<Block name="JumboHopByHop">
+			<Block name="JumboHopByHopContents">
+				<Number name="NextHeader" size="8" value="59"/>
+				<Number name="PayloadLength" value="255" size="8"> 
+					<Relation type="size" of="JumboHopByHopContents"
+										expressionSet="((size-8)/8) + int(bool(size % 8))"
+										expressionGet="((size+1)*8)" /><!-- this is length in 8-octet units -->
+				</Number>
+				<Block name="InternalTLV" ref="TLV" minOccurs="1" maxOccurs="255">
+					<Number name="Type" size="8" value="c2" valueType="hex"/>
+					<Number name="Length" size="8" value="0">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Block name="Value">
+						<Number name="SizeOfFrame" size="32">
+							<Relation type="size" of="PacketPayload"/>
+						</Number>
+					</Block>
+				</Block>
+			</Block>
+			<Padding name="PaddingValue" aligned="true" alignment="64" alignedTo="JumboHopByHop"/>
+		</Block>
+		<Block minOccurs="500" maxOccurs="16777216">
+			<Blob name="PacketPayload" 
+						value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+		</Block>
+	</DataModel>
+
 	<DataModel name="Fragment">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
 		<Number name="Reserved" size="8" endian="big"/>
@@ -130,8 +155,19 @@
 			<Number name="Header.NextHeader" value="0"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="HopByHop">
-			</Block>
+			<Block ref="HopByHop"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6JumbogramPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex"/>  
+			<!-- wireshark doesn't parse this ^ if 0, RFC says should be 0 -->
+			<Number name="Header.NextHeader" value="0"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="JumboFrame"/>
 		</Block>
 	</DataModel>
 	
