@@ -314,7 +314,7 @@
 		<State name="Initial">
       <Action name="WriteFileFromSample" type="output" publisher="writer">
         <DataModel name="PngModel" ref="Png" />
-        <Data name="Data" fileName="SeedFile.png" />
+        <Data name="Data" fileName="##Seed##" />
       </Action>
       
       <Action name="CloseFile"  type="close" publisher="writer" />
@@ -327,15 +327,22 @@
        AGENT SECTION  
       *************** --> 
  
-    <Agent name="TheAgent">
+    <Agent name="LinuxAgent">
       <Monitor class="LinuxCrashMonitor"/>
 	  <Monitor class="Process">
-        <Param name="Executable" value="feh"/>
+        <Param name="Executable" value="##Target##"/>
         <Param name="StartOnCall" value="FuzzMe"/>
         <Param name="Arguments" value="fuzzed.png"/>
       </Monitor>
     </Agent>
-   
+	
+	<Agent name="WinAgent">
+      <Monitor class="WindowsDebugger">
+        <Param name="CommandLine" value="##Target## fuzzed.png"/>
+        <Param name="StartOnCall" value="FuzzMe"/>
+        <Param name="CpuKill" value="true"/>
+      </Monitor>
+    </Agent>
 
   
   <!-- **************
@@ -343,20 +350,20 @@
        ************** --> 
 	<Test name="Default">
     
-    <Agent ref="TheAgent"/>
+    <Agent ref="##Agent##"/>
 		<StateModel ref="TheStateModel" />
     
     <Publisher name="writer" class="File">
       <Param name="FileName" value="fuzzed.png" />
     </Publisher>
 
-    <Strategy class="Random"/>
+    <Strategy class="##Strategy##"/>
      
     <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
     <!--Publisher name="launch" class=""> </Publisher>-->
     
     <Logger class="logger.Filesystem">
-      <Param name="Path" value=".\logs\"/>
+      <Param name="Path" value="##LoggerPath##"/>
     </Logger>
     
     <!-- GUI Launcher: WINDOWS ONLY --> 
