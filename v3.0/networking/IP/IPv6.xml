@@ -46,27 +46,35 @@
 	</DataModel>
 
 	<DataModel name="HopByHop">
-		<Number name="NextHeader" size="8" value="59"/>
-		<Number name="PayloadLength" value="0" size="8"> 
-			<Relation type="size" of="TLVs" expressionGet="(size/8)-1" /> <!-- this is length in 8-octet units -->
-		</Number>
-		<!-- look at this more -->
-		<Block name="TLVs">
-			<!-- size relation with padding -->
-			<Block ref="TLV" minOccurs="0" maxOccurs="255">
-				<Number name="Type" value="1"/>
-				<Block name="Value">
-					<Number name="Type" value="1" size="16" endian="big"/>
-					<Blob valueType="hex" value="00"/>
+		<Block name="HopByHopContents">
+			<Number name="NextHeader" size="8" value="59"/>
+			<Number name="PayloadLength" value="0" size="8"> 
+				<Relation type="size" of="HopByHopContents" 
+									expressionSet="((((((size-8)/8) > 0) and (size-8)/8)) or 0) + int(bool(size % 8))"
+									expressionGet="((size+1)*8)"
+									/> <!-- this is length in 8-octet units -->
+			</Number>
+			<!-- look at this more -->
+			<Block name="TLVs">
+				<Number name="test" value="0" size="8" endian="big" minOccurs="8"/>
+				<!-- <Number name="test2" value="0" size="8" endian="big" minOccurs="1"/> -->
+
+				<!-- size relation with padding -->
+				<!-- <Block ref="TLV" minOccurs="0" maxOccurs="255"> -->
+				<!-- 	<Number name="Type" value="1"/> -->
+				<!-- 	<Block name="Value"> -->
+				<!-- 		<Number name="Type" value="1" size="16" endian="big"/> -->
+				<!-- 		<Blob valueType="hex" value="00"/> -->
+				<!-- 	</Block> -->
+				<!-- </Block> -->
+				<Block name="Padding" minOccurs="1">
+					<Number name="Type" size="8" value="1"/>
+					<Number name="Length" size="8" value="0">
+						<Relation type="size" of="PaddingValue"/>
+					</Number>
 				</Block>
 			</Block>
-			<Block name="Padding" minOccurs="1">				
-				<Number name="Type" value="1"/>
-				<Number name="Length" value="0">
-					<Relation type="size" of="Value"/>
-				</Number>
-				<Padding name="Value" aligned="true" alignment="64" alignedTo="TLVs"/>
-			</Block> 
+			<Padding name="PaddingValue" aligned="true" alignment="64" alignedTo="HopByHopContents"/>
 		</Block>
 	</DataModel>
 
@@ -78,9 +86,6 @@
 			<Number name="Header.NextHeader" value="59"/>
 			<Number name="Header.PayloadLength" value="0" size="16"/>
 		</Block>
-    <Block minOccurs="0" maxOccurs="3" name="ExtensionHeaders">
-      <!--TODO-->
-    </Block>
 	</DataModel>
 
 	<DataModel name="IPv6ICMPPacket">
