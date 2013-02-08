@@ -81,7 +81,7 @@
 	<DataModel name="Fragment">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
 		<Number name="Reserved" size="8" endian="big"/>
-		<Flags name="Flags" endian="big">
+		<Flags name="Flags" size="16" endian="big">
 			<Flag name="Offset" size="13" position="0"/>
 			<Flag name="Res" size="2" position="13"/>
 			<Flag name="Mflag" size="1" position="15"/>
@@ -92,14 +92,10 @@
 	<DataModel name="Mobile">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
 		<Number name="HeaderLen" size="8" endian="big">
-			<Relation type="size" of="Mobile"/>
 		</Number>
 		<Number name="MH" size="8" endian="big"/>
 		<Number name="Reserved" size="8" endian="big"/>
 		<Number name="Checksum" size="16" endian="big">
-			<Fixup class="">
-				<!--TODO-->
-			</Fixup>
 		</Number>
 	</DataModel>
 
@@ -149,7 +145,7 @@
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
-				<Flags name="Flags" endian="big">
+				<Flags name="Flags" size="16" endian="big">
 					<Flag name="Offset" size="13" position="0" value="0"/>
 					<Flag name="Res" size="2" position="13"/>
 					<Flag name="Mflag" size="1" position="15" value="1"/>
@@ -170,7 +166,7 @@
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
-				<Flags name="Flags" endian="big">
+				<Flags name="Flags" size="16" endian="big">
 					<Flag name="Offset" size="13" position="0" value="12"/>
 					<Flag name="Res" size="2" position="13"/>
 					<Flag name="Mflag" size="1" position="15" value="1"/>
@@ -191,7 +187,7 @@
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
-				<Flags name="Flags" endian="big">
+				<Flags name="Flags" size="16" endian="big">
 					<Flag name="Offset" size="13" position="0" value="24"/>
 					<Flag name="Res" size="2" position="13"/>
 					<Flag name="Mflag" size="1" position="15" value="0"/>
@@ -202,104 +198,298 @@
 		</Block>			
 	</DataModel>
 
-	<DataModel name="IPv6MobileBRR">
+	<DataModel name="IPv6MobileBRRPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
 			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 0-->
+				<Relation type="size" of="Payload"/>
 			</Number>
 			<Number name="Header.NextHeader" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+				</Number>
 				<Number name="MH" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileBRRPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
 			</Block>
 			<Number name="Reserved" size="16"/>
 			<Block name="MobilityOptions">
-				<!--TODO TLV-Encoded optional options-->
 			</Block>
+			<Padding aligned="true" alignment="64"/>
 		</Block>			
 	</DataModel>
 	
-	<DataModel name="IPv6MobileHoTI">
+	<DataModel name="IPv6MobileHoTIPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
 			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 1-->
+				<Relation type="size" of="Payload"/>
 			</Number>
 			<Number name="Header.NextHeader" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+				</Number>
 				<Number name="MH" size="8" endian="big" value="1"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileHoTIPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
 			</Block>
 			<Number name="Reserved" size="16"/>
-			<Number name="HomeInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Number name="HomeInitCookie" size="64"/>
 			<Block name="MobilityOptions">
-				<!--TODO TLV-Encoded optional options-->
 			</Block>
+			<Padding aligned="true" alignment="64"/>
 		</Block>			
 	</DataModel>
 	
-	<DataModel name="IPv6MobileCoTI">
+	<DataModel name="IPv6MobileCoTIPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
 			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 1-->
+				<Relation type="size" of="Payload"/>
 			</Number>
 			<Number name="Header.NextHeader" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+				</Number>
 				<Number name="MH" size="8" endian="big" value="2"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileCoTIPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
 			</Block>
 			<Number name="Reserved" size="16"/>
-			<Number name="CareInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Number name="CareInitCookie" size="64"/>
 			<Block name="MobilityOptions">
-				<!--TODO TLV-Encoded optional options-->
 			</Block>
+			<Padding aligned="true" alignment="64"/>
 		</Block>			
 	</DataModel>
 	
-	<DataModel name="IPv6MobileHoT">
+	<DataModel name="IPv6MobileHoTPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
 			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 2-->
+				<Relation type="size" of="Payload"/>
 			</Number>
 			<Number name="Header.NextHeader" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+				</Number>
 				<Number name="MH" size="8" endian="big" value="3"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileHoTPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
 			</Block>
 			<Number name="HomeNonceIndex" size="16"/>
-			<Number name="HomeInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
-			<Number name="HomeKeygenToken" size="64"/> <!--LOOK INTO Token-->
+			<Number name="HomeInitCookie" size="64"/>
+			<Number name="HomeKeygenToken" size="64"/>
 			<Block name="MobilityOptions">
-				<!--TODO TLV-Encoded optional options-->
 			</Block>
+			<Padding aligned="true" alignment="64"/>
 		</Block>			
 	</DataModel>
 	
-	<DataModel name="IPv6MobileCoT">
+	<DataModel name="IPv6MobileCoTPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
 			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 2-->
+				<Relation type="size" of="Payload"/>
 			</Number>
 			<Number name="Header.NextHeader" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
-				<Number name="MH" size="8" endian="big" value="3"/>
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="4"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileCoTPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
 			</Block>
 			<Number name="CareNonceIndex" size="16"/>
-			<Number name="CareInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
-			<Number name="CareKeygenToken" size="64"/> <!--LOOK INTO Token-->
+			<Number name="CareInitCookie" size="64"/>
+			<Number name="CareKeygenToken" size="64"/>
+			<Block name="MobilityOptions">
+			</Block>
+			<Padding aligned="true" alignment="64"/>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBUPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="5"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileBUPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Number name="Sequence" size="16" signed="false"/>
+			<Flags size="16" endian="big">
+				<Flag name="A" size="1" position="0"/>
+				<Flag name="H" size="1" position="1"/>
+				<Flag name="L" size="1" position="2"/>
+				<Flag name="K" size="1" position="3"/>
+				<Flag name="Reserved" size="12" position="4"/>
+			</Flags>
+			<Number name="Lifetime" size="16" signed="false"/>
+			<Block name="MobilityOptions">
+				<Block name="NonceIndices" ref="TLV">
+					<Number name="Type" size="8" endian="big" value="4"/>
+					<Number name="Length" size="8" endian="big" value="4"/>
+					<Block name="Value">
+						<Number name="HomeNonceIndex" size="16"/>
+						<Number name="CareNonceIndex" size="16"/>
+					</Block>
+				</Block>
+				<Block name="AltCareofAddress" ref="TLV">
+					<Number name="Type" size="8" endian="big" value="3"/>
+					<Number name="Length" size="8" endian="big" value="16"/>
+					<Block name="Value">
+						<Blob name="AltCareAddress" length="16"/>
+					</Block>
+				</Block>
+				<Block name="BindingAuthData" ref="TLV">
+					<Number name="Type" size="8" endian="big" value="5"/>
+					<Number name="Length" size="8" endian="big">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Block name="Value">
+						<Blob name="Authenticator" length="12" valueType="hex"/> <!--NEEDS FIXUP-->
+					</Block>
+				</Block>
+			</Block>
+			<Padding aligned="true" alignment="64"/>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBAPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="6"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileBAPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Number name="Status" size="8" signed="false"/>
+			<Flags size="8" endian="big">
+				<Flag name="K" size="1" position="0"/>
+				<Flag name="Reserved" size="7" position="1"/>
+			</Flags>
+			<Number name="Sequnce" size="16" signed="false"/>
+			<Number name="Lifetime" size="16" signed="false"/>
+			<Block name="MobilityOptions">
+				<Block name="BindingRefreshAdvice" ref="TLV">
+					<Number name="Type" size="8" endian="big" value="2"/>
+					<Number name="Length" size="8" endian="big" value="2"/>
+					<Block name="Value">
+						<Number name="RefreshInterval" size="16" endian="big"/> 
+					</Block>
+				</Block>
+				<Block name="BindingAuthData" ref="TLV">
+					<Number name="Type" size="8" endian="big" value="5"/>
+					<Number name="Length" size="8" endian="big">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Block name="Value">
+						<Blob name="Authenticator" length="12" valueType="hex"/><!--CHECK IF FIXUP IS NEEDED-->
+					</Block>
+				</Block>
+			</Block>
+			<Padding aligned="true" alignment="64"/>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBEPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="7"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="IPv6MobileBEPacket"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Number name="Status" size="8" signed="false"/>
+			<Number name="Reserved" size="8"/>
+			<Blob name="HomeAddress" length="16"/>
 			<Block name="MobilityOptions">
 				<!--TODO TLV-Encoded optional options-->
 			</Block>
+			<Padding aligned="true" alignment="64"/>
 		</Block>			
 	</DataModel>
 
@@ -335,6 +525,30 @@
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6FragmentPacket3"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBRRPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBUPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBAPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBEPacket"/>
 			</Action>
     </State>
   </StateModel>
