@@ -69,6 +69,31 @@
 			</Block> 
 		</Block>
 	</DataModel>
+	
+	<DataModel name="Fragment">
+		<Number name="NextHeader" size="8" value="59" endian="big"/>
+		<Number name="Reserved" size="8" endian="big"/>
+		<Flags name="Flags" endian="big">
+			<Flag name="Offset" size="13" position="0"/>
+			<Flag name="Res" size="2" position="13"/>
+			<Flag name="Mflag" size="1" position="15"/>
+		</Flags>
+		<Number name="Identification" size="32" endian="big"/>
+	</DataModel>
+	
+	<DataModel name="Mobile">
+		<Number name="NextHeader" size="8" value="59" endian="big"/>
+		<Number name="HeaderLen" size="8" endian="big">
+			<Relation type="size" of="Mobile"/>
+		</Number>
+		<Number name="MH" size="8" endian="big"/>
+		<Number name="Reserved" size="8" endian="big"/>
+		<Number name="Checksum" size="16" endian="big">
+			<Fixup class="">
+				<!--TODO-->
+			</Fixup>
+		</Number>
+	</DataModel>
 
 
 	<!-- #################### Packet Definitions #################### -->	
@@ -108,7 +133,170 @@
 			</Block>
 		</Block>
 	</DataModel>
+	
+	<DataModel name="IPv6FragmentPacket1">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="44"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Fragment">
+				<Flags name="Flags" endian="big">
+					<Flag name="Offset" size="13" position="0" value="0"/>
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="1"/>
+				</Flags>
+				<Number name="Identification" size="32" endian="big" value="374625"/>
+			</Block>
+			<Blob name="Data" size="96"/>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6FragmentPacket2">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="44"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Fragment">
+				<Flags name="Flags" endian="big">
+					<Flag name="Offset" size="13" position="0" value="12"/>
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="1"/>
+				</Flags>
+				<Number name="Identification" size="32" endian="big" value="374625"/>
+			</Block>
+			<Blob name="Data" size="96"/>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6FragmentPacket3">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="44"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Fragment">
+				<Flags name="Flags" endian="big">
+					<Flag name="Offset" size="13" position="0" value="24"/>
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="0"/>
+				</Flags>
+				<Number name="Identification" size="32" endian="big" value="374625"/>
+			</Block>
+			<Blob name="Data" size="96"/>
+		</Block>			
+	</DataModel>
 
+	<DataModel name="IPv6MobileBRR">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 0-->
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="MH" size="8" endian="big" value="0"/>
+			</Block>
+			<Number name="Reserved" size="16"/>
+			<Block name="MobilityOptions">
+				<!--TODO TLV-Encoded optional options-->
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTI">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 1-->
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="MH" size="8" endian="big" value="1"/>
+			</Block>
+			<Number name="Reserved" size="16"/>
+			<Number name="HomeInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Block name="MobilityOptions">
+				<!--TODO TLV-Encoded optional options-->
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoTI">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 1-->
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="MH" size="8" endian="big" value="2"/>
+			</Block>
+			<Number name="Reserved" size="16"/>
+			<Number name="CareInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Block name="MobilityOptions">
+				<!--TODO TLV-Encoded optional options-->
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoT">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 2-->
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="MH" size="8" endian="big" value="3"/>
+			</Block>
+			<Number name="HomeNonceIndex" size="16"/>
+			<Number name="HomeInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Number name="HomeKeygenToken" size="64"/> <!--LOOK INTO Token-->
+			<Block name="MobilityOptions">
+				<!--TODO TLV-Encoded optional options-->
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoT">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/> <!--THIS IS THE WEIRD PADDING IF NO OPTIONS SET 2-->
+			</Number>
+			<Number name="Header.NextHeader" value="135"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Mobile">
+				<Number name="MH" size="8" endian="big" value="3"/>
+			</Block>
+			<Number name="CareNonceIndex" size="16"/>
+			<Number name="CareInitCookie" size="64"/> <!--LOOK INTO COOKIE-->
+			<Number name="CareKeygenToken" size="64"/> <!--LOOK INTO Token-->
+			<Block name="MobilityOptions">
+				<!--TODO TLV-Encoded optional options-->
+			</Block>
+		</Block>			
+	</DataModel>
 
   <!-- #################### Agents #################### -->
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
@@ -134,6 +322,15 @@
       <Action type="output">
 				<DataModel ref="IPv6HopByHopPacket"/>
       </Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket1"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket2"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket3"/>
+			</Action>
     </State>
   </StateModel>
 
