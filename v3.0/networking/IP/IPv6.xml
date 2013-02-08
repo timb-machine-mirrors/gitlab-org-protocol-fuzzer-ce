@@ -41,7 +41,9 @@
 
 	<DataModel name="TLV">
 		<Number name="Type" size="8" endian="big"/>
-		<Number name="Length" size="8"/>
+		<Number name="Length" size="8">
+			<Relation type="size" of="Value"/>
+		</Number>
 		<Block name="Value"/>
 	</DataModel>
 
@@ -124,7 +126,50 @@
 		</Number>
 	</DataModel>
 
+	<DataModel name="MobileRoutingType2Header">
+		<Number name="NextHeader" size="8" endian="big"/>
+		<Number name="HdrExtLen" size="8" endian="big" signed="false" value="2"/>
+		<Number name="RoutingType" size="8" endian="big" signed="false" value="2"/>
+		<Number name="SegmentsLeft" size="8" endian="big" signed="false" value="1"/>
+		<Number name="Reserved" size="32" endian="big"/>
+		<Blob name="HomeAddress" valueType="hex" length="16"/>
+	</DataModel>
+	
+	<DataModel name="MobileICMP">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Code" size="8" endian="big"/>
+		<Number name="Checksum" size="16" endian="big">
+		</Number>
+		<Number name="Identifier" size="16" endian="big"/>
+		<Block name="Reserved"/>
+	</DataModel>
 
+	<DataModel name="MobileICMPRouterAdvertisement">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Code" size="8" endian="big"/>
+		<Number name="Checksum" size="16" endian="big"/>
+		<Number name="CurrHopLimit" size="8" endian="big"/>
+		<Flags name="Flags" size="8" endian="big">
+			<Flag name="M" size="1" position="0"/>
+			<Flag name="O" size="1" position="1"/>
+			<Flag name="H" size="1" position="2"/>
+			<Flag name="Reserved" size="5" position="3"/>
+		</Flags>
+		<Number name="RouterLifetime" size="16" endian="big"/>
+		<Number name="ReachableTime" size="32" endian="big"/>
+		<Number name="RetransTimer" size="32" endian="big"/>
+		<Block name="Options"/>
+	</DataModel>
+	
+	<!-- #################### Things to ADD #################### -->	
+	<!-- ADD THIS TO THE DESTINATION OPTIONS HEADER FROM http://tools.ietf.org/html/rfc6275 section 6.3-->
+					<Block name="HomeAddressOption">
+					<Number size="8" value="201" endian="big"/>
+					<Number size="8" value="16" endian="big"/>
+					<Blob length="16" valueType="hex"/>
+				</Block>-->
+	
+	
 	<!-- #################### Packet Definitions #################### -->	
 	<DataModel name="IPv6EmptyPacket">
 		<Block ref="IPv6Ethernet"/>
@@ -144,7 +189,6 @@
 		</Block>
     <Blob name="Payload" valueType="hex" value="800014350a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 	</DataModel>
-
 
 	<DataModel name="IPv6HopByHopPacket">
 		<Block ref="IPv6Ethernet"/>
@@ -419,7 +463,6 @@
 			<Block name="MobilityOptions">
 				<Block name="NonceIndices" ref="TLV">
 					<Number name="Type" size="8" endian="big" value="4"/>
-					<Number name="Length" size="8" endian="big" value="4"/>
 					<Block name="Value">
 						<Number name="HomeNonceIndex" size="16"/>
 						<Number name="CareNonceIndex" size="16"/>
@@ -427,16 +470,12 @@
 				</Block>
 				<Block name="AltCareofAddress" ref="TLV">
 					<Number name="Type" size="8" endian="big" value="3"/>
-					<Number name="Length" size="8" endian="big" value="16"/>
 					<Block name="Value">
 						<Blob name="AltCareAddress" length="16"/>
 					</Block>
 				</Block>
 				<Block name="BindingAuthData" ref="TLV">
 					<Number name="Type" size="8" endian="big" value="5"/>
-					<Number name="Length" size="8" endian="big">
-						<Relation type="size" of="Value"/>
-					</Number>
 					<Block name="Value">
 						<Blob name="Authenticator" length="12" valueType="hex"/> <!--NEEDS FIXUP-->
 					</Block>
@@ -523,10 +562,194 @@
 			<Number name="Reserved" size="8"/>
 			<Blob name="HomeAddress" length="16"/>
 			<Block name="MobilityOptions">
-				<!--TODO TLV-Encoded optional options-->
 			</Block>
 			<Padding aligned="true" alignment="64"/>
 		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileRoutingType2HeaderPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="Header.NextHeader" value="43"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileRoutingType2Header">
+					<Number name="NextHeader" size="8" endian="big" value="59"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="58"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileICMP">
+				<Number name="Type" size="8" endian="big" value="144"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+				<Block name="Reserved">
+					<Number size="16" endian="big"/>
+				</Block>
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="58"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileICMP">
+				<Number name="Type" size="8" endian="big" value="145"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+				<Block name="Reserved">
+					<Number size="16" endian="big"/>
+				</Block>
+			</Block>
+			<Block name="HomeAgentAddresses">
+				<Blob name="Address1" length="16" valueType="hex"/>
+				<Blob name="Address2" length="16" valueType="hex"/>
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileICMPPrefixSolicitationPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="58"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileICMP">
+				<Number name="Type" size="8" endian="big" value="146"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+				<Block name="Reserved">
+					<Number size="16" endian="big"/>
+				</Block>
+			</Block>
+		</Block>			
+	</DataModel>
+	
+	<DataModel name="IPv6MobileICMPPrefixAdvertisementPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="58"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileICMP">
+				<Number name="Type" size="8" endian="big" value="147"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+				<Block name="Reserved">
+					<Flags size="16">
+						<Flag name="M" size="1" position="0"/>
+						<Flag name="O" size="1" position="1"/>
+						<Flag name="Reserved" size="14" position="2"/>
+					</Flags>
+				</Block>
+				<Block name="Options">
+				</Block>
+			</Block>
+		</Block>			
+	</DataModel>
+
+	<!--Mobile IPv6 adds the "H" flag to Router Advertisement-->
+	<!--Mobile IPv6  extends the Prefix Information Option-->
+	<!--Mobile IPv6 adds the Advertisement Interval Option-->
+	<!-- See http://tools.ietf.org/html/rfc6275#section-7.1 -->
+	<DataModel name="IPv6MobileICMPRouterAdvertismentPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="58"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="MobileICMPRouterAdvertisement">
+				<Number name="Type" size="8" endian="big" value="134"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+				<Flags name="Flags" size="8">
+					<Flag name="M" size="1" position="0"/>
+					<Flag name="O" size="1" position="1"/>
+					<Flag name="H" size="1" position="2"/>
+					<Flag name="Reserved" size="5" position="3"/>
+				</Flags>
+				<Block name="Options">
+					<Block name="PrefixInformation">
+						<Number name="Type" size="8" endian="big" value="3"/>
+						<Number name="Length" size="8" endian="big" value="4"/>
+						<Number name="PrefixLength" size="8" endian="big"/>
+						<Flags size="8" endian="big">
+							<Flag name="L" size="1" position="0"/>
+							<Flag name="A" size="1" position="1"/>
+							<Flag name="R" size="1" position="2"/>
+							<Flag name="Reserved" size="5" position="3"/>
+						</Flags>
+						<Number name="ValidLifeTime" size="32" endian="big" signed="false"/>
+						<Number name="PreferredLifetime" size="32" endian="big" signed="false"/>
+						<Number name="Reserved2" size="32" endian="big"/>
+						<Blob name="Prefix" length="16" valueType="hex"/>
+					</Block>
+					<Block name="AdvertisementInterval">
+						<Number name="Type" size="8" endian="big" value="7"/>
+						<Number name="Length" size="8" endian="big" value="1"/>
+						<Number name="Reserved" size="16" endian="big"/>
+						<Number name="AdvertisementInterval" size="32" endian="big"/>
+					</Block>
+				</Block>
+			</Block>	
+		</Block>
 	</DataModel>
 
   <!-- #################### Agents #################### -->
@@ -585,6 +808,24 @@
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6MobileBEPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileRoutingType2HeaderPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileICMPPrefixSolicitationPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileICMPPrefixAdvertisementPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileICMPRouterAdvertismentPacket"/>
 			</Action>
     </State>
   </StateModel>
