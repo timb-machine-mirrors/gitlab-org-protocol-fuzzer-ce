@@ -9,7 +9,7 @@
       <Relation type="size" of="UDPv6Header" />
     </Number>
     <Number name="Checksum" size="16" >
-      <Fixup class="UDPChecksumFixup">
+      <Fixup class="UDPChecksumFixup" endian="network">
         <Param name="ref" value="UDPv6Header" />
         <Param name="src" value="##SourceIPv6##" />
         <Param name="dst" value="##TargetIPv6##" />
