@@ -4,7 +4,7 @@
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol Version 6 PIT" version="0.0.2">
 
   <DataModel name="ICMPHeader">
-    <Number name="Type" size="8"  value="130" endian="network"/>
+    <Number name="Type" size="8"  value="128" endian="network"/>
     <Number name="Code" size="8"/>
     <Number name="Checksum"  endian="big" size="16">
       <Fixup class="IcmpV6ChecksumFixup">
