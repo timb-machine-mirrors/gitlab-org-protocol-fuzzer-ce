@@ -10,6 +10,29 @@
   
   <!-- IPv6 DataModels -->
 
+	<!-- #################### Helper Templates #################### -->	
+  <DataModel name="ICMPHeader">
+    <Number name="Type" size="8"  value="128" endian="network"/>
+    <Number name="Code" size="8"/>
+    <Number name="Checksum"  endian="big" size="16">
+      <Fixup class="IcmpV6ChecksumFixup">
+        <Param name="ref" value="ICMPHeader" />
+        <Param name="src" value="##SourceIPv6##" />
+        <Param name="dst" value="##TargetIPv6##" />
+      </Fixup>
+    </Number>
+    <Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+    <Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+  </DataModel>
+
+	<DataModel name="TLV">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Length" size="8"/>
+		<Block name="Value"/>
+	</DataModel>
+
+
 	<!-- #################### Header Templates #################### -->	
   <DataModel name="IPv6Ethernet">
     <Block name="EtherHeader">
@@ -39,12 +62,6 @@
     </Block>
   </DataModel>
 
-	<DataModel name="TLV">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Length" size="8"/>
-		<Block name="Value"/>
-	</DataModel>
-
 	<DataModel name="HopByHop">
 		<Block name="HopByHopContents">
 			<Number name="NextHeader" size="8" value="59"/>
@@ -56,9 +73,6 @@
 			</Number>
 			<!-- look at this more -->
 			<Block name="TLVs">
-				<Number name="test" value="0" size="8" endian="big" minOccurs="8"/>
-				<!-- <Number name="test2" value="0" size="8" endian="big" minOccurs="1"/> -->
-
 				<!-- size relation with padding -->
 				<Block name="InternalTLV" ref="TLV" minOccurs="0" maxOccurs="255">
 					<Number name="Type" value="0"/>
@@ -77,7 +91,7 @@
 	<DataModel name="JumboFrame">
 		<Block name="JumboHopByHop">
 			<Block name="JumboHopByHopContents">
-				<Number name="NextHeader" size="8" value="59"/>
+				<Number name="NextHeader" size="8" value="58"/>
 				<Number name="PayloadLength" value="255" size="8"> 
 					<Relation type="size" of="JumboHopByHopContents"
 										expressionSet="((size-8)/8) + int(bool(size % 8))"
@@ -97,9 +111,17 @@
 			</Block>
 			<Padding name="PaddingValue" aligned="true" alignment="64" alignedTo="JumboHopByHop"/>
 		</Block>
-		<Block minOccurs="500" maxOccurs="16777216">
-			<Blob name="PacketPayload" 
-						value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+		<Block name="PacketPayload"  ref="ICMPHeader">
+			<Number name="Checksum"  endian="big" size="16">
+				<Fixup class="IcmpV6ChecksumFixup">
+					<Param name="ref" value="PacketPayload" />
+					<Param name="src" value="##SourceIPv6##" />
+					<Param name="dst" value="##TargetIPv6##" />
+				</Fixup>
+			</Number>
+			<Block name="Data" minOccurs="1024" maxOccurs="16777216">
+				<Blob value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+			</Block>
 		</Block>
 	</DataModel>
 
@@ -166,8 +188,9 @@
 	<DataModel name="IPv6JumbogramPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex"/>  
-			<!-- wireshark doesn't parse this ^ if 0, RFC says should be 0 -->
+			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex"/> -->
+			<Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"/>
+			<!-- wireshark doesn't parse this ^ if 0, RFC says should be 0 for payloads over 65535 -->
 			<Number name="Header.NextHeader" value="0"/>
 		</Block>
 		<Block name="Payload">
