@@ -220,8 +220,11 @@ namespace PeachFarm.Node
 
 		private void DeregisterQueues()
 		{
-			modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
-			modelSend.QueueDelete(clientQueueName);
+			if (modelSend.IsOpen)
+			{
+				modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
+				modelSend.QueueDelete(clientQueueName);
+			}
 		}
 
 		private void StartListener()
@@ -443,10 +446,17 @@ namespace PeachFarm.Node
 			}
 
 
+			#region initialize Peach Engine
 			peach = new Peach.Core.Engine(null);
+
+			#region context settings
+			//peach.context.reproducingMaxBacksearch = 0;	// tell Peach to not replay iterations
+			#endregion
+
 			peach.TestStarting += new Peach.Core.Engine.TestStartingEventHandler(peach_TestStarting);
 			peach.TestError += new Peach.Core.Engine.TestErrorEventHandler(peach_TestError);
 			peach.TestFinished += new Peach.Core.Engine.TestFinishedEventHandler(peach_TestFinished);
+			#endregion
 
 			BackgroundWorker peachWorker = new BackgroundWorker();
 			peachWorker.DoWork += new DoWorkEventHandler(peachWorker_DoWork);

@@ -62,16 +62,19 @@ namespace PeachFarm.Loggers
 			iteration.IterationNumber = currentIteration;
 			iteration.JobID = JobID;
 			iteration.NodeName = IPAddress;
+			iteration.TestName = context.test.name;
+			iteration.SeedNumber = context.config.randomSeed;
+			iteration.Stamp = DateTime.Now;
 
 			iteration.StateModel = GetMongoActions(stateModel);
-			iteration.Faults = GetMongoFaults(faultData, context);
-
+			iteration.Faults = GetMongoFaults(faultData);
 			iteration.DatabaseInsert(MongoConnectionString);
 		}
 
 		protected override void Engine_TestStarting(Peach.Core.RunContext context)
 		{
 			System.Console.WriteLine("******** PEACH: START TEST ************");
+			
 
 			#region MongoDatabase
 			mongoJob = DatabaseHelper.GetJob(JobID, MongoConnectionString);
@@ -99,7 +102,7 @@ namespace PeachFarm.Loggers
 
 		}
 
-		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.RunContext context)
+		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults)
 		{
 			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
 			
@@ -119,8 +122,6 @@ namespace PeachFarm.Loggers
 				mongoFault.MinorHash = pf.minorHash;
 				mongoFault.Title = pf.title;
 
-				mongoFault.TestName = context.test.name;
-				mongoFault.SeedNumber = context.config.randomSeed;
 
 				mongoFault.CollectedData = GetMongoCollectedData(pf);
 

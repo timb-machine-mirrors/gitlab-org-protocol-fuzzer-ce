@@ -39,8 +39,7 @@ namespace PeachFarm.Controller
 			if (Common.Mongo.DatabaseHelper.TestConnection(config.MongoDb.ConnectionString) == false)
 			{
 				string error = String.Format("No connection can be made to MongoDB at:\n{0}", config.MongoDb.ConnectionString);
-				logger.Fatal(error);
-				return;
+				throw new ApplicationException(error);
 			}
 
 			try
@@ -50,13 +49,13 @@ namespace PeachFarm.Controller
 			catch (Exception ex)
 			{
 				string error = String.Format("Could not open connection to RabbitMQ server at {0}, exiting now. Exception:\n{1}", config.RabbitMq.HostName, ex.Message);
-				logger.Fatal(error);
+				throw new ApplicationException(error);
 			}
 
 			InitializeQueues();
 			StartListener();
 
-			Timer statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(1));
+			Timer statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(5));
 
 			IsOpen = true;
 		}
@@ -84,22 +83,21 @@ namespace PeachFarm.Controller
 					logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Client Expired", pair.Value.Stamp);
 					remove.Add(pair.Key);
 
-					if (tags.ContainsKey(pair.Key))
-					{
-						tags.Remove(pair.Key);
-					}
-
 				}
-				if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+				else
 				{
-					pair.Value.Status = Status.Late;
-					logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+					if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+					{
+						pair.Value.Status = Status.Late;
+						logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+					}
 				}
 			}
 
 			foreach (string computer in remove)
 			{
 				nodes.Remove(computer);
+				tags.Remove(computer);
 			}
 		}
 

@@ -5,11 +5,9 @@
     xmlns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:mstns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:ms="http://microsoft.com/wsdl/types/"
 		xmlns:db="http://phed.org/2012/PeachFarm/Database"
 >
   
-  <xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="Guid.xsd" />
 	<xs:import namespace="http://phed.org/2012/PeachFarm/Database" schemaLocation="Database.xsd" />
 
 	<xs:element name="StartPeachRequest" type="StartPeachRequest" />
@@ -25,9 +23,6 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
@@ -39,9 +34,6 @@
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
   
   <xs:element name="StopPeachRequest" type="StopPeachRequest" />
@@ -49,9 +41,6 @@
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:element name="StopPeachResponse" type="StartPeachResponse" />
@@ -78,9 +67,6 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:simpleType name="Status">

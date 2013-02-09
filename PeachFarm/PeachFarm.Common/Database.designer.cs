@@ -80,6 +80,12 @@ namespace PeachFarm.Common.Mongo
 
 		private uint iterationNumberField;
 
+		private string testNameField;
+
+		private uint seedNumberField;
+
+		private System.DateTime stampField;
+
 		private List<Action> stateModelField;
 
 		private List<Fault> faultsField;
@@ -106,7 +112,43 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 1)]
+		public string TestName
+		{
+			get
+			{
+				return this.testNameField;
+			}
+			set
+			{
+				this.testNameField = value;
+			}
+		}
+
+		public uint SeedNumber
+		{
+			get
+			{
+				return this.seedNumberField;
+			}
+			set
+			{
+				this.seedNumberField = value;
+			}
+		}
+
+		public System.DateTime Stamp
+		{
+			get
+			{
+				return this.stampField;
+			}
+			set
+			{
+				this.stampField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 4)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<Action> StateModel
 		{
@@ -120,7 +162,7 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 2)]
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 5)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<Fault> Faults
 		{
@@ -243,12 +285,6 @@ namespace PeachFarm.Common.Mongo
 		private string titleField;
 
 		private string faultTypeField;
-
-		private string testNameField;
-
-		private uint seedNumberField;
-
-		private System.DateTime stampField;
 
 		private List<CollectedData> collectedDataField;
 
@@ -389,43 +425,7 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		public string TestName
-		{
-			get
-			{
-				return this.testNameField;
-			}
-			set
-			{
-				this.testNameField = value;
-			}
-		}
-
-		public uint SeedNumber
-		{
-			get
-			{
-				return this.seedNumberField;
-			}
-			set
-			{
-				this.seedNumberField = value;
-			}
-		}
-
-		public System.DateTime Stamp
-		{
-			get
-			{
-				return this.stampField;
-			}
-			set
-			{
-				this.stampField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 14)]
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 11)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<CollectedData> CollectedData
 		{

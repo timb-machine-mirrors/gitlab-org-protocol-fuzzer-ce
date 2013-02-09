@@ -22,6 +22,9 @@
 	<xs:complexType name="Iteration">
 		<xs:sequence>
 			<xs:element name="IterationNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="TestName" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="SeedNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Stamp" type="xs:dateTime" maxOccurs="1" minOccurs="1" />
 			<xs:element name="StateModel" maxOccurs="1" minOccurs="1" >
 				<xs:complexType>
 					<xs:sequence>
@@ -54,9 +57,6 @@
       <xs:element name="MinorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="Title" type="xs:string" maxOccurs="1" minOccurs="1" />
 			<xs:element name="FaultType" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="TestName" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="SeedNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Stamp" type="xs:dateTime" maxOccurs="1" minOccurs="1" />
 			<xs:element name="CollectedData" maxOccurs="1" minOccurs="1">
 				<xs:complexType>
 					<xs:sequence>

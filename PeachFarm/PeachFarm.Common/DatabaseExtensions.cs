@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver.Builders;
+using System.Diagnostics;
 
 namespace PeachFarm.Common.Mongo
 {
@@ -14,119 +15,61 @@ namespace PeachFarm.Common.Mongo
 	{
 		public static List<Job> DatabaseInsert(this List<Job> jobs, string connectionString)
 		{
-			string collectionname = MongoNames.Jobs;
-			MongoServer server = MongoServer.Create(connectionString);
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection = null;
-
-			if (db.CollectionExists(collectionname))
-			{
-				collection = db.GetCollection<Job>(collectionname);
-			}
-			else
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				//collection.CreateIndex(new string[] { "JobID", "TestName", "ComputerName" });
-			}
+			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 
 			foreach (Job job in jobs)
 			{
 				collection.Insert(job);
 			}
 
-
-			server.Disconnect();
+			collection.Database.Server.Disconnect();
 
 			return jobs;
 		}
 
 		public static Job DatabaseInsert(this Job job, string connectionString)
 		{
-			string collectionname = MongoNames.Jobs;
-			MongoServer server = MongoServer.Create(connectionString);
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection = null;
-
-			if (db.CollectionExists(collectionname))
-			{
-				collection = db.GetCollection<Job>(collectionname);
-			}
-			else
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				//collection.CreateIndex(new string[] { "JobID", "TestName", "ComputerName" });
-			}
+			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 
 			collection.Insert(job);
-			server.Disconnect();
+			collection.Database.Server.Disconnect();
 
 			return job;
 		}
 
 		public static Iteration DatabaseInsert(this Iteration iteration, string connectionString)
 		{
-			string collectionname = MongoNames.Iterations;
-			MongoServer server = MongoServer.Create(connectionString);
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Iteration> collection = null;
-
-			if (db.CollectionExists(collectionname))
-			{
-				collection = db.GetCollection<Iteration>(collectionname);
-			}
-			else
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Iteration>(collectionname);
-				//collection.CreateIndex(new string[] { "JobID" });
-			}
+			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 
 			collection.Insert(iteration);
 
-			server.Disconnect();
+			collection.Database.Server.Disconnect();
+
+			Debug.WriteLine("******* WRITING ITERATION TO DATABASE ******");
 
 			return iteration;
 		}
 
 		public static Messages.Heartbeat DatabaseInsert(this Messages.Heartbeat heartbeat, string connectionString)
 		{
-			string collectionName = MongoNames.PeachFarmErrors;
-			MongoServer server = MongoServer.Create(connectionString);
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Messages.Heartbeat> collection = null;
-
-			if (db.CollectionExists(collectionName))
-			{
-				collection = db.GetCollection<Messages.Heartbeat>(collectionName);
-			}
-			else
-			{
-				db.CreateCollection(collectionName);
-				collection = db.GetCollection<Messages.Heartbeat>(collectionName);
-				//collection.CreateIndex(new string[] { "JobID" });
-			}
-
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
 			collection.Insert(heartbeat);
 
 
-			server.Disconnect();
+			collection.Database.Server.Disconnect();
 
 			return heartbeat;
 		}
 
 		public static List<Iteration> GetIterations(this Job job, string connectionString)
 		{
-			return new List<Iteration>();
+			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
+			var query = Query.EQ("JobID", job.JobID);
+			return collection.Find(query).ToList();
 		}
 	}
 
-	public partial class Fault
+	public partial class Iteration
 	{
 
 		[XmlIgnore]
@@ -148,13 +91,6 @@ namespace PeachFarm.Common.Mongo
 
 	public partial class Job
 	{
-		/*
-		public Job()
-		{
-			this.JobID = Guid.NewGuid();
-		}
-		//*/
-
 		[XmlIgnore]
 		public BsonObjectId _id { get; set; }
 
