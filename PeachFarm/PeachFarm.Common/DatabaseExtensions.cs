@@ -61,11 +61,11 @@ namespace PeachFarm.Common.Mongo
 			return heartbeat;
 		}
 
-		public static List<Iteration> GetIterations(this Job job, string connectionString)
+		public static MongoCursor<Iteration> GetIterationsCursor(this Job job, string connectionString)
 		{
 			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
-			return collection.Find(query).ToList();
+			return collection.Find(query);
 		}
 	}
 
