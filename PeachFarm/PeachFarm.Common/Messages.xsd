@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="Messages"
-    targetNamespace="http://phed.org/2012/PeachFarm"
+    targetNamespace="http://phed.org/2012/PeachFarm/Messages"
     elementFormDefault="qualified"
-    xmlns="http://phed.org/2012/PeachFarm"
-    xmlns:mstns="http://phed.org/2012/PeachFarm"
+    xmlns="http://phed.org/2012/PeachFarm/Messages"
+    xmlns:mstns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:ms="http://microsoft.com/wsdl/types/"
+		xmlns:db="http://phed.org/2012/PeachFarm/Database"
 >
   
-  <xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="Guid.xsd" />
+	<xs:import namespace="http://phed.org/2012/PeachFarm/Database" schemaLocation="Database.xsd" />
 
-  <xs:element name="StartPeachRequest" type="StartPeachRequest" />
+	<xs:element name="StartPeachRequest" type="StartPeachRequest" />
   <xs:complexType name="StartPeachRequest">
     <xs:all>
       <xs:element name="Pit" type="xs:string" maxOccurs="1" minOccurs="1" />
@@ -23,9 +23,6 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
@@ -37,9 +34,6 @@
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
   
   <xs:element name="StopPeachRequest" type="StopPeachRequest" />
@@ -47,9 +41,6 @@
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:element name="StopPeachResponse" type="StartPeachResponse" />
@@ -68,7 +59,7 @@
     <xs:all>
       <xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:all>
-    <xs:attribute name="ComputerName" type="xs:string" use="required" />
+    <xs:attribute name="NodeName" type="xs:string" use="required" />
     <xs:attribute name="Stamp" type="xs:dateTime" use="required" />
     <xs:attribute name="Status" type="Status" use="required" />
     <xs:attribute name="QueueName" type="xs:string" use="required" />
@@ -76,9 +67,6 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
-    <!--
-    <xs:attribute name="JobID" type="ms:guid" default="{00000000-0000-0000-0000-000000000000}" />
-    -->
   </xs:complexType>
 
   <xs:simpleType name="Status">
@@ -91,13 +79,13 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:element name="ListComputersRequest" type="ListComputersRequest" />
-	<xs:complexType name="ListComputersRequest" />
+  <xs:element name="ListNodesRequest" type="ListNodesRequest" />
+	<xs:complexType name="ListNodesRequest" />
 
-  <xs:element name="ListComputersResponse" type="ListComputersResponse" />
-  <xs:complexType name="ListComputersResponse">
+  <xs:element name="ListNodesResponse" type="ListNodesResponse" />
+  <xs:complexType name="ListNodesResponse">
     <xs:all>
-      <xs:element name="Computers" maxOccurs="1" minOccurs="1">
+      <xs:element name="Nodes" maxOccurs="1" minOccurs="1">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
@@ -115,7 +103,7 @@
   <xs:element name="ListErrorsResponse" type="ListErrorsResponse" />
   <xs:complexType name="ListErrorsResponse">
     <xs:all>
-      <xs:element name="Computers" maxOccurs="1" minOccurs="1">
+      <xs:element name="Nodes" maxOccurs="1" minOccurs="1">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
@@ -124,5 +112,26 @@
       </xs:element>
     </xs:all>
   </xs:complexType>
+
+	<xs:element name="JobInfoRequest" type="JobInfoRequest" />
+	<xs:complexType name="JobInfoRequest">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:element name="JobInfoResponse" type="JobInfoResponse" />
+	<xs:complexType name="JobInfoResponse">
+		<xs:all>
+			<xs:element name="Message" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Job" type="db:Job" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+	</xs:complexType>
 
 </xs:schema>

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
 using System.Xml;
+using System.Configuration;
 
 namespace PeachFarm.Admin
 {
@@ -21,9 +22,19 @@ namespace PeachFarm.Admin
 	{
 		private UTF8Encoding encoding = new UTF8Encoding();
 
-		public Admin(string serverHostName, int timeoutSeconds = 0)
+		PeachFarm.Admin.Configuration.AdminSection config;
+
+		public Admin(string serverHostName = "", int timeoutSeconds = 0)
 		{
-			ServerHostName = serverHostName;
+			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
+			if (String.IsNullOrEmpty(serverHostName))
+			{
+				ServerHostName = config.Controller.IpAddress;
+			}
+			else
+			{
+				ServerHostName = serverHostName;
+			}
 			TimeoutSeconds = timeoutSeconds;
 		}
 
@@ -40,15 +51,15 @@ namespace PeachFarm.Admin
 		{
 			try
 			{
-				OpenConnection(ServerHostName);
+				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+				InitializeQueues();
+				StartListeners();
 			}
 			catch (Exception ex)
 			{
-				RaiseAdminException(ex);
+				RaiseAdminException(new ApplicationException("Could not open a connection to RabbitMQ host " + ServerHostName));
 			}
 
-			InitializeQueues();
-			StartListeners();
 		}
 
 		public void StopAdmin()
@@ -106,25 +117,25 @@ namespace PeachFarm.Admin
 		}
 		#endregion
 
-		#region ListComputersCompleted
-		public class ListComputersCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
+		#region ListNodesCompleted
+		public class ListNodesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
 		{
-			public ListComputersCompletedEventArgs(ListComputersResponse result)
+			public ListNodesCompletedEventArgs(ListNodesResponse result)
 				: base(null, false, null)
 			{
 				Result = result;
 			}
-			public ListComputersResponse Result { get; private set; }
+			public ListNodesResponse Result { get; private set; }
 		}
 
-		public delegate void ListComputersCompletedEventHandler(object sender, ListComputersCompletedEventArgs e);
+		public delegate void ListNodesCompletedEventHandler(object sender, ListNodesCompletedEventArgs e);
 
-		public event ListComputersCompletedEventHandler ListComputersCompleted;
+		public event ListNodesCompletedEventHandler ListNodesCompleted;
 
-		private void RaiseListComputersCompleted(ListComputersResponse result)
+		private void RaiseListNodesCompleted(ListNodesResponse result)
 		{
-			if (ListComputersCompleted != null)
-				ListComputersCompleted(this, new ListComputersCompletedEventArgs(result));
+			if (ListNodesCompleted != null)
+				ListNodesCompleted(this, new ListNodesCompletedEventArgs(result));
 		}
 		#endregion
 
@@ -151,6 +162,28 @@ namespace PeachFarm.Admin
 		}
 		#endregion
 
+		#region JobInfoCompleted
+		public class JobInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
+		{
+			public JobInfoCompletedEventArgs(JobInfoResponse result)
+				: base(null, false, null)
+			{
+				Result = result;
+			}
+
+			public JobInfoResponse Result { get; private set; }
+		}
+
+		public delegate void JobInfoCompletedEventHandler(object sender, JobInfoCompletedEventArgs e);
+
+		public event JobInfoCompletedEventHandler JobInfoCompleted;
+
+		private void RaiseJobInfoCompleted(JobInfoResponse result)
+		{
+			if (JobInfoCompleted != null)
+				JobInfoCompleted(this, new JobInfoCompletedEventArgs(result));
+		}
+		#endregion
 		#endregion
 
 		#region AdminException
@@ -229,10 +262,10 @@ namespace PeachFarm.Admin
 		//*/
 		#endregion
 
-		public void ListComputersAsync()
+		public void ListNodesAsync()
 		{
-			ListComputersRequest request = new ListComputersRequest();
-			PublishToServer(request.Serialize(), "ListComputers");
+			ListNodesRequest request = new ListNodesRequest();
+			PublishToServer(request.Serialize(), "ListNodes");
 		}
 
 		public void ListErrorsAsync(string jobID = "")
@@ -240,6 +273,13 @@ namespace PeachFarm.Admin
 			ListErrorsRequest request = new ListErrorsRequest();
 			request.JobID = jobID;
 			PublishToServer(request.Serialize(), "ListErrors");
+		}
+
+		public void JobInfoAsync(string jobID)
+		{
+			JobInfoRequest request = new JobInfoRequest();
+			request.JobID = jobID;
+			PublishToServer(request.Serialize(), "JobInfo");
 		}
 		#endregion
 
@@ -254,10 +294,13 @@ namespace PeachFarm.Admin
 
 		private BackgroundWorker adminListener = new BackgroundWorker();
 
-		private void OpenConnection(string hostName)
+		private void OpenConnection(string hostName, int port = -1, string userName = "guest", string password = "guest")
 		{
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.HostName = hostName;
+			factory.Port = port;
+			factory.UserName = userName;
+			factory.Password = password;
 			connection = factory.CreateConnection();
 			modelSend = connection.CreateModel();
 			modelReceive = connection.CreateModel();
@@ -393,11 +436,14 @@ namespace PeachFarm.Admin
 				case "StopPeach":
 					RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
 					break;
-				case "ListComputers":
-					RaiseListComputersCompleted(ListComputersResponse.Deserialize(body));
+				case "ListNodes":
+					RaiseListNodesCompleted(ListNodesResponse.Deserialize(body));
 					break;
 				case "ListErrors":
 					RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
+					break;
+				case "JobInfo":
+					RaiseJobInfoCompleted(JobInfoResponse.Deserialize(body));
 					break;
 				default:
 					string message = String.Format("Could not process message\nAction: {0}\nBody:\n{1}", action, body);

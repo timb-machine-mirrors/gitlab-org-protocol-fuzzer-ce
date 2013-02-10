@@ -33,15 +33,10 @@ namespace PeachFarm.Node
 
 		private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
 
-		public PeachFarmNode(string controllerIPAddress = "")
+		public PeachFarmNode()
 		{
 			config = (Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
 
-
-			if (string.IsNullOrEmpty(controllerIPAddress))
-			{
-				controllerIPAddress = config.Controller.IpAddress;
-			}
 
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
@@ -49,7 +44,7 @@ namespace PeachFarm.Node
 			#endregion
 
 			#region node state
-			nodeState = new NodeState(controllerIPAddress, String.Format(QueueNames.QUEUE_CONTROLLER, controllerIPAddress));
+			nodeState = new NodeState(String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress));
 
 			if ((config.Tags != null) && (config.Tags.Count > 0))
 			{
@@ -68,22 +63,27 @@ namespace PeachFarm.Node
 			#region set up RabbitMQ connection and start listening for messages
 			try
 			{
-				OpenConnection(nodeState.RabbitHostName);
+				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+				RegisterQueues();
+				StartListener();
+				heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
+				IsOpen = true;
 			}
 			catch
 			{
-				nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", nodeState.RabbitHostName));
+				if (heartbeat != null)
+				{
+					heartbeat.Dispose();
+					heartbeat = null;
+				}
+				StopListeners();
+				nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", config.RabbitMq.HostName));
+				return;
 			}
-			RegisterQueues();
-			StartListener();
 
 			#endregion
 
-			#region start heartbeat
-			heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
-			#endregion
 
-			IsOpen = true;
 		}
 
 		public void StopNode()
@@ -194,10 +194,13 @@ namespace PeachFarm.Node
 
 		private static BackgroundWorker listener = new BackgroundWorker();
 
-		private static void OpenConnection(string hostName)
+		private static void OpenConnection(string hostName, int port = -1, string userName = "guest", string password = "guest")
 		{
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.HostName = hostName;
+			factory.Port = port;
+			factory.UserName = userName;
+			factory.Password = password;
 			connection = factory.CreateConnection();
 			modelSend = connection.CreateModel();
 			modelReceive = connection.CreateModel();
@@ -217,8 +220,11 @@ namespace PeachFarm.Node
 
 		private void DeregisterQueues()
 		{
-			modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
-			modelSend.QueueDelete(clientQueueName);
+			if (modelSend.IsOpen)
+			{
+				modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
+				modelSend.QueueDelete(clientQueueName);
+			}
 		}
 
 		private void StartListener()
@@ -252,8 +258,8 @@ namespace PeachFarm.Node
 					{
 						string body = encoding.GetString(result.Body);
 						string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
-						Debug.WriteLine(String.Format("Action: {0}", action));
-						//Debug.WriteLine(String.Format("Body:\n'{0}'", body));
+						nlog.Debug(String.Format("Action: {0}", action));
+						nlog.Trace(String.Format("Body:\n'{0}'", body));
 						try
 						{
 							ProcessAction(action, body);
@@ -267,7 +273,7 @@ namespace PeachFarm.Node
 						finally
 						{
 						}
-						Debug.WriteLine(String.Format("Done '{0}'", action));
+						nlog.Debug(String.Format("Done '{0}'", action));
 					}
 				}
 
@@ -277,7 +283,8 @@ namespace PeachFarm.Node
 
 		private void StopListeners()
 		{
-			listener.CancelAsync();
+			if(listener.IsBusy)
+				listener.CancelAsync();
 		}
 
 		private void CloseConnection()
@@ -294,8 +301,6 @@ namespace PeachFarm.Node
 
 		private void PublishToServer(string message, string action)
 		{
-			//Debug.WriteLine(message);
-			//Debug.WriteLine("----------------------------------");
 			modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
 		}
 
@@ -308,6 +313,11 @@ namespace PeachFarm.Node
 					break;
 				case "StopPeach":
 					StopPeach(StopPeachRequest.Deserialize(body));
+					break;
+				default:
+					string message = String.Format("Received unknown action {0}", action);
+					nlog.Error(message);
+					SendHeartbeat(CreateHeartbeat(message));
 					break;
 			}
 		}
@@ -327,10 +337,18 @@ namespace PeachFarm.Node
 				heartbeat = CreateHeartbeat();
 			}
 
-			if (modelSend.IsOpen == false)
-				modelSend = connection.CreateModel();
 
-			PublishToServer(heartbeat.Serialize(), "Heartbeat");
+			try
+			{
+				if (modelSend.IsOpen == false)
+					modelSend = connection.CreateModel();
+
+				PublishToServer(heartbeat.Serialize(), "Heartbeat");
+			}
+			catch(Exception ex)
+			{
+
+			}
 		}
 
 		#endregion
@@ -381,13 +399,16 @@ namespace PeachFarm.Node
 			}
 			else
 			{
-				if (nodeState.Status == Status.Running)
+				if (nodeState.RunContext != null)
 				{
-					if (nodeState.RunContext.continueFuzzing)
+					if (nodeState.Status == Status.Running)
 					{
-						nodeState.RunContext.continueFuzzing = false;
+						if (nodeState.RunContext.continueFuzzing)
+						{
+							nodeState.RunContext.continueFuzzing = false;
+						}
+						nodeState.RunContext = null;
 					}
-					nodeState.RunContext = null;
 				}
 
 				SendHeartbeat(CreateHeartbeat(errorMessage));
@@ -403,7 +424,19 @@ namespace PeachFarm.Node
 		private void StartPeach(StartPeachRequest request)
 		{
 			if (nodeState.Status == Status.Running)
+			{
+				SendHeartbeat(CreateHeartbeat(String.Format("Node {0} is already running Job {1}", nodeState.IPAddress, nodeState.JobID)));
 				return;
+			}
+
+			nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
+			nodeState.JobID = request.JobID;
+			nodeState.PitFileName = request.PitFileName;
+			nodeState.UserName = request.UserName;
+
+			nodeState.Status = Common.Messages.Status.Running;
+			SendHeartbeat(CreateHeartbeat());
+			RaiseStatusChanged();
 
 			nodeState.PitFilePath = WriteTextToTempFile(request.Pit);
 			
@@ -412,17 +445,18 @@ namespace PeachFarm.Node
 				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines);
 			}
 
-			nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
-			nodeState.JobID = request.JobID;
-			nodeState.PitFileName = request.PitFileName;
-			nodeState.UserName = request.UserName;
 
-
-
+			#region initialize Peach Engine
 			peach = new Peach.Core.Engine(null);
+
+			#region context settings
+			//peach.context.reproducingMaxBacksearch = 0;	// tell Peach to not replay iterations
+			#endregion
+
 			peach.TestStarting += new Peach.Core.Engine.TestStartingEventHandler(peach_TestStarting);
 			peach.TestError += new Peach.Core.Engine.TestErrorEventHandler(peach_TestError);
 			peach.TestFinished += new Peach.Core.Engine.TestFinishedEventHandler(peach_TestFinished);
+			#endregion
 
 			BackgroundWorker peachWorker = new BackgroundWorker();
 			peachWorker.DoWork += new DoWorkEventHandler(peachWorker_DoWork);
@@ -486,11 +520,6 @@ namespace PeachFarm.Node
 			config.debug = false;
 			//config.runName = clientState.JobID.ToString();
 
-			nodeState.Status = Common.Messages.Status.Running;
-			RaiseStatusChanged();
-
-
-
 			try
 			{
 				peach.startFuzzing(dom, config);
@@ -522,7 +551,7 @@ namespace PeachFarm.Node
 		private Heartbeat CreateHeartbeat()
 		{
 			Heartbeat heartbeat = new Heartbeat();
-			heartbeat.ComputerName = nodeState.IPAddress;
+			heartbeat.NodeName = nodeState.IPAddress;
 			if (nodeState.Status == Common.Messages.Status.Running)
 			{
 				heartbeat.JobID = nodeState.JobID;
@@ -655,11 +684,10 @@ namespace PeachFarm.Node
 
 	internal class NodeState
 	{
-		public NodeState(string rabbitHostName, string serverQueueName)
+		public NodeState(string serverQueueName)
 		{
 			Status = Common.Messages.Status.Alive;
 
-			RabbitHostName = rabbitHostName;
 			ServerQueueName = serverQueueName;
 
 			#region get ip address, used for client name
@@ -701,7 +729,6 @@ namespace PeachFarm.Node
 
 		internal string IPAddress { get; private set; }
 		internal string ServerQueueName { get; private set; }
-		internal string RabbitHostName { get; private set; }
 
 		internal string MongoDbConnectionString { get; set; }
 

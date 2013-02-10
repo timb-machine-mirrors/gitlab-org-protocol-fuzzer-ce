@@ -6,406 +6,469 @@
 // ------------------------------------------------------------------------------
 namespace PeachFarm.Common.Mongo
 {
-  using System;
-  using System.Diagnostics;
-  using System.Xml.Serialization;
-  using System.Collections;
-  using System.Xml.Schema;
-  using System.ComponentModel;
-  using System.Collections.Generic;
+	using System;
+	using System.Diagnostics;
+	using System.Xml.Serialization;
+	using System.Collections;
+	using System.Xml.Schema;
+	using System.ComponentModel;
+	using System.Collections.Generic;
 
 
-  public partial class Job
-  {
+	public partial class Job
+	{
 
-    private string userNameField;
+		private string userNameField;
 
-    private string pitFileNameField;
+		private string pitFileNameField;
 
-    private string jobIDField;
+		private string jobIDField;
 
-    private System.DateTime startDateField;
+		private System.DateTime startDateField;
 
-    public string UserName
-    {
-      get
-      {
-        return this.userNameField;
-      }
-      set
-      {
-        this.userNameField = value;
-      }
-    }
+		public string UserName
+		{
+			get
+			{
+				return this.userNameField;
+			}
+			set
+			{
+				this.userNameField = value;
+			}
+		}
 
-    public string PitFileName
-    {
-      get
-      {
-        return this.pitFileNameField;
-      }
-      set
-      {
-        this.pitFileNameField = value;
-      }
-    }
+		public string PitFileName
+		{
+			get
+			{
+				return this.pitFileNameField;
+			}
+			set
+			{
+				this.pitFileNameField = value;
+			}
+		}
 
-    public string JobID
-    {
-      get
-      {
-        return this.jobIDField;
-      }
-      set
-      {
-        this.jobIDField = value;
-      }
-    }
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
 
-    public System.DateTime StartDate
-    {
-      get
-      {
-        return this.startDateField;
-      }
-      set
-      {
-        this.startDateField = value;
-      }
-    }
-  }
+		public System.DateTime StartDate
+		{
+			get
+			{
+				return this.startDateField;
+			}
+			set
+			{
+				this.startDateField = value;
+			}
+		}
+	}
 
-  public partial class Fault
-  {
+	public partial class Iteration
+	{
 
-    private bool controlIterationField;
+		private uint iterationNumberField;
 
-    private bool controlRecordingIterationField;
+		private string testNameField;
 
-    private string descriptionField;
+		private uint seedNumberField;
 
-    private string detectionSourceField;
+		private System.DateTime stampField;
 
-    private string exploitabilityField;
+		private List<Action> stateModelField;
 
-    private string folderNameField;
+		private List<Fault> faultsField;
 
-    private uint iterationField;
+		private string jobIDField;
 
-    private string majorHashField;
+		private string nodeNameField;
 
-    private string minorHashField;
+		public Iteration()
+		{
+			this.faultsField = new List<Fault>();
+			this.stateModelField = new List<Action>();
+		}
 
-    private string titleField;
+		public uint IterationNumber
+		{
+			get
+			{
+				return this.iterationNumberField;
+			}
+			set
+			{
+				this.iterationNumberField = value;
+			}
+		}
 
-    private string faultTypeField;
+		public string TestName
+		{
+			get
+			{
+				return this.testNameField;
+			}
+			set
+			{
+				this.testNameField = value;
+			}
+		}
 
-    private string jobIDField;
+		public uint SeedNumber
+		{
+			get
+			{
+				return this.seedNumberField;
+			}
+			set
+			{
+				this.seedNumberField = value;
+			}
+		}
 
-    private string nodeNameField;
+		public System.DateTime Stamp
+		{
+			get
+			{
+				return this.stampField;
+			}
+			set
+			{
+				this.stampField = value;
+			}
+		}
 
-    private string testNameField;
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 4)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<Action> StateModel
+		{
+			get
+			{
+				return this.stateModelField;
+			}
+			set
+			{
+				this.stateModelField = value;
+			}
+		}
 
-    public bool ControlIteration
-    {
-      get
-      {
-        return this.controlIterationField;
-      }
-      set
-      {
-        this.controlIterationField = value;
-      }
-    }
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 5)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<Fault> Faults
+		{
+			get
+			{
+				return this.faultsField;
+			}
+			set
+			{
+				this.faultsField = value;
+			}
+		}
 
-    public bool ControlRecordingIteration
-    {
-      get
-      {
-        return this.controlRecordingIterationField;
-      }
-      set
-      {
-        this.controlRecordingIterationField = value;
-      }
-    }
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
 
-    public string Description
-    {
-      get
-      {
-        return this.descriptionField;
-      }
-      set
-      {
-        this.descriptionField = value;
-      }
-    }
+		public string NodeName
+		{
+			get
+			{
+				return this.nodeNameField;
+			}
+			set
+			{
+				this.nodeNameField = value;
+			}
+		}
+	}
 
-    public string DetectionSource
-    {
-      get
-      {
-        return this.detectionSourceField;
-      }
-      set
-      {
-        this.detectionSourceField = value;
-      }
-    }
+	public partial class Action
+	{
 
-    public string Exploitability
-    {
-      get
-      {
-        return this.exploitabilityField;
-      }
-      set
-      {
-        this.exploitabilityField = value;
-      }
-    }
+		private string actionNameField;
 
-    public string FolderName
-    {
-      get
-      {
-        return this.folderNameField;
-      }
-      set
-      {
-        this.folderNameField = value;
-      }
-    }
+		private string actionTypeField;
 
-    public uint Iteration
-    {
-      get
-      {
-        return this.iterationField;
-      }
-      set
-      {
-        this.iterationField = value;
-      }
-    }
+		private int parameterField;
 
-    public string MajorHash
-    {
-      get
-      {
-        return this.majorHashField;
-      }
-      set
-      {
-        this.majorHashField = value;
-      }
-    }
+		private byte[] dataField;
 
-    public string MinorHash
-    {
-      get
-      {
-        return this.minorHashField;
-      }
-      set
-      {
-        this.minorHashField = value;
-      }
-    }
+		public string ActionName
+		{
+			get
+			{
+				return this.actionNameField;
+			}
+			set
+			{
+				this.actionNameField = value;
+			}
+		}
 
-    public string Title
-    {
-      get
-      {
-        return this.titleField;
-      }
-      set
-      {
-        this.titleField = value;
-      }
-    }
+		public string ActionType
+		{
+			get
+			{
+				return this.actionTypeField;
+			}
+			set
+			{
+				this.actionTypeField = value;
+			}
+		}
 
-    public string FaultType
-    {
-      get
-      {
-        return this.faultTypeField;
-      }
-      set
-      {
-        this.faultTypeField = value;
-      }
-    }
+		public int Parameter
+		{
+			get
+			{
+				return this.parameterField;
+			}
+			set
+			{
+				this.parameterField = value;
+			}
+		}
 
-    public string JobID
-    {
-      get
-      {
-        return this.jobIDField;
-      }
-      set
-      {
-        this.jobIDField = value;
-      }
-    }
+		public byte[] Data
+		{
+			get
+			{
+				return this.dataField;
+			}
+			set
+			{
+				this.dataField = value;
+			}
+		}
+	}
 
-    public string NodeName
-    {
-      get
-      {
-        return this.nodeNameField;
-      }
-      set
-      {
-        this.nodeNameField = value;
-      }
-    }
+	public partial class Fault
+	{
 
-    public string TestName
-    {
-      get
-      {
-        return this.testNameField;
-      }
-      set
-      {
-        this.testNameField = value;
-      }
-    }
-  }
+		private bool controlIterationField;
 
-  public partial class FaultData
-  {
+		private bool controlRecordingIterationField;
 
-    private string keyField;
+		private string descriptionField;
 
-    private byte[] dataField;
+		private string detectionSourceField;
 
-    private string jobIDField;
+		private string exploitabilityField;
 
-    public string Key
-    {
-      get
-      {
-        return this.keyField;
-      }
-      set
-      {
-        this.keyField = value;
-      }
-    }
+		private string folderNameField;
 
-    public byte[] Data
-    {
-      get
-      {
-        return this.dataField;
-      }
-      set
-      {
-        this.dataField = value;
-      }
-    }
+		private uint iterationField;
 
-    public string JobID
-    {
-      get
-      {
-        return this.jobIDField;
-      }
-      set
-      {
-        this.jobIDField = value;
-      }
-    }
-  }
+		private string majorHashField;
 
-  public partial class OutputData
-  {
+		private string minorHashField;
 
-    private uint iterationField;
+		private string titleField;
 
-    private string actionNameField;
+		private string faultTypeField;
 
-    private string actionTypeField;
+		private List<CollectedData> collectedDataField;
 
-    private int parameterField;
+		public Fault()
+		{
+			this.collectedDataField = new List<CollectedData>();
+		}
 
-    private byte[] dataField;
+		public bool ControlIteration
+		{
+			get
+			{
+				return this.controlIterationField;
+			}
+			set
+			{
+				this.controlIterationField = value;
+			}
+		}
 
-    private string jobIDField;
+		public bool ControlRecordingIteration
+		{
+			get
+			{
+				return this.controlRecordingIterationField;
+			}
+			set
+			{
+				this.controlRecordingIterationField = value;
+			}
+		}
 
-    public uint Iteration
-    {
-      get
-      {
-        return this.iterationField;
-      }
-      set
-      {
-        this.iterationField = value;
-      }
-    }
+		public string Description
+		{
+			get
+			{
+				return this.descriptionField;
+			}
+			set
+			{
+				this.descriptionField = value;
+			}
+		}
 
-    public string ActionName
-    {
-      get
-      {
-        return this.actionNameField;
-      }
-      set
-      {
-        this.actionNameField = value;
-      }
-    }
+		public string DetectionSource
+		{
+			get
+			{
+				return this.detectionSourceField;
+			}
+			set
+			{
+				this.detectionSourceField = value;
+			}
+		}
 
-    public string ActionType
-    {
-      get
-      {
-        return this.actionTypeField;
-      }
-      set
-      {
-        this.actionTypeField = value;
-      }
-    }
+		public string Exploitability
+		{
+			get
+			{
+				return this.exploitabilityField;
+			}
+			set
+			{
+				this.exploitabilityField = value;
+			}
+		}
 
-    public int Parameter
-    {
-      get
-      {
-        return this.parameterField;
-      }
-      set
-      {
-        this.parameterField = value;
-      }
-    }
+		public string FolderName
+		{
+			get
+			{
+				return this.folderNameField;
+			}
+			set
+			{
+				this.folderNameField = value;
+			}
+		}
 
-    public byte[] Data
-    {
-      get
-      {
-        return this.dataField;
-      }
-      set
-      {
-        this.dataField = value;
-      }
-    }
+		public uint Iteration
+		{
+			get
+			{
+				return this.iterationField;
+			}
+			set
+			{
+				this.iterationField = value;
+			}
+		}
 
-    public string JobID
-    {
-      get
-      {
-        return this.jobIDField;
-      }
-      set
-      {
-        this.jobIDField = value;
-      }
-    }
-  }
+		public string MajorHash
+		{
+			get
+			{
+				return this.majorHashField;
+			}
+			set
+			{
+				this.majorHashField = value;
+			}
+		}
+
+		public string MinorHash
+		{
+			get
+			{
+				return this.minorHashField;
+			}
+			set
+			{
+				this.minorHashField = value;
+			}
+		}
+
+		public string Title
+		{
+			get
+			{
+				return this.titleField;
+			}
+			set
+			{
+				this.titleField = value;
+			}
+		}
+
+		public string FaultType
+		{
+			get
+			{
+				return this.faultTypeField;
+			}
+			set
+			{
+				this.faultTypeField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 11)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<CollectedData> CollectedData
+		{
+			get
+			{
+				return this.collectedDataField;
+			}
+			set
+			{
+				this.collectedDataField = value;
+			}
+		}
+	}
+
+	public partial class CollectedData
+	{
+
+		private string keyField;
+
+		private byte[] dataField;
+
+		public string Key
+		{
+			get
+			{
+				return this.keyField;
+			}
+			set
+			{
+				this.keyField = value;
+			}
+		}
+
+		public byte[] Data
+		{
+			get
+			{
+				return this.dataField;
+			}
+			set
+			{
+				this.dataField = value;
+			}
+		}
+	}
 }

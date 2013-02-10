@@ -10,6 +10,7 @@ namespace PeachFarm.Admin.Console
 {
 	class Program
 	{
+		private static Admin admin = null;
 
 		static void syntax() { throw new SyntaxException(); }
 
@@ -26,9 +27,9 @@ namespace PeachFarm.Admin.Console
 				bool stop = false;
 				bool list = false;
 				bool errors = false;
+				bool jobInfo = false;
 
 				string tagsString = String.Empty;
-				string hostName = String.Empty;
 				int launchCount = 0;
 				string ip = String.Empty;
 
@@ -42,9 +43,9 @@ namespace PeachFarm.Admin.Console
 						{ "stop", v => stop = true },
 						{ "list", v => list = true},
 						{ "errors", v => errors = true },
+						{ "info", var => jobInfo = true },
 
 						// Command parameters
-						{ "h|host=", v => hostName = v},
 						{ "n|count=", v => launchCount = int.Parse(v)},
 						{ "i|ip=", v => ip = v},
 						{ "t|tags=", v => tagsString = v}
@@ -52,10 +53,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (String.IsNullOrEmpty(hostName))
-					Program.syntax();
-
-				if (!stop && !start && !list && !errors)
+				if (!stop && !start && !list && !errors && !jobInfo)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -67,16 +65,21 @@ namespace PeachFarm.Admin.Console
 				if (stop && extra.Count != 1)
 					Program.syntax();
 
+				if (jobInfo && extra.Count != 1)
+					Program.syntax();
+
 				#endregion
 
 				#region Set up Admin listener
-				Admin admin = new Admin(hostName);
+
+				admin = new Admin();
 				admin.StartAdmin();
 
-				admin.ListComputersCompleted += admin_ListComputersCompleted;
+				admin.ListNodesCompleted += admin_ListNodesCompleted;
 				admin.ListErrorsCompleted += admin_ListErrorsCompleted;
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
 				admin.StopPeachCompleted += admin_StopPeachCompleted;
+				admin.JobInfoCompleted += admin_JobInfoCompleted;
 				admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
 				#endregion
 
@@ -114,7 +117,7 @@ namespace PeachFarm.Admin.Console
 				#region List
 				if (list)
 				{
-					admin.ListComputersAsync();
+					admin.ListNodesAsync();
 				}
 				#endregion
 
@@ -133,6 +136,14 @@ namespace PeachFarm.Admin.Console
 				}
 				#endregion
 
+				#region Job Info
+				if (jobInfo)
+				{
+					string jobID = extra[0];
+					admin.JobInfoAsync(jobID);
+				}
+				#endregion
+
 				System.Console.WriteLine("waiting for result...");
 				System.Console.ReadLine();
 
@@ -143,7 +154,7 @@ namespace PeachFarm.Admin.Console
 			}
 			catch (Exception ex)
 			{
-				System.Console.WriteLine(ex.Message);
+				System.Console.WriteLine("Error communicating with host: " + admin.ServerHostName);
 			}
 
 			Environment.Exit(0);
@@ -176,11 +187,11 @@ namespace PeachFarm.Admin.Console
 
 		static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
 		{
-			if (e.Result.Computers.Count > 0)
+			if (e.Result.Nodes.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Computers)
+				foreach (Heartbeat heartbeat in e.Result.Nodes)
 				{
-					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.ErrorMessage));
+					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.ErrorMessage));
 				}
 			}
 			else
@@ -189,37 +200,53 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_ListComputersCompleted(object sender, Admin.ListComputersCompletedEventArgs e)
+		static void admin_ListNodesCompleted(object sender, Admin.ListNodesCompletedEventArgs e)
 		{
-			if (e.Result.Computers.Count > 0)
+			if (e.Result.Nodes.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Computers)
+				foreach (Heartbeat heartbeat in e.Result.Nodes)
 				{
 					if (heartbeat.Status == Status.Running)
 					{
-						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
 					}
 					else
 					{
-						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.ComputerName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
+						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
 					}
 				}
 
 
 				System.Console.WriteLine();
 
-				var statusgroup = from c in e.Result.Computers where c.Status == Status.Alive select c;
+				var statusgroup = from c in e.Result.Nodes where c.Status == Status.Alive select c;
 				System.Console.WriteLine(String.Format("Waiting for work: {0}", statusgroup.Count()));
 
-				statusgroup = from c in e.Result.Computers where c.Status == Status.Running select c;
+				statusgroup = from c in e.Result.Nodes where c.Status == Status.Running select c;
 				System.Console.WriteLine(String.Format("Running: {0}", statusgroup.Count()));
 
-				statusgroup = from c in e.Result.Computers where c.Status == Status.Late select c;
+				statusgroup = from c in e.Result.Nodes where c.Status == Status.Late select c;
 				System.Console.WriteLine(String.Format("Late: {0}", statusgroup.Count()));
 			}
 			else
 			{
 				System.Console.WriteLine("Response: No nodes online");
+			}
+		}
+
+		static void admin_JobInfoCompleted(object sender, Admin.JobInfoCompletedEventArgs e)
+		{
+			string output = String.Format("JobID:\t\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
+				e.Result.Job.JobID,
+				e.Result.Job.UserName,
+				e.Result.Job.PitFileName,
+				e.Result.Job.StartDate);
+
+			System.Console.WriteLine(output);
+
+			foreach (Heartbeat heartbeat in e.Result.Nodes)
+			{
+				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
 			}
 		}
 
@@ -252,19 +279,19 @@ Syntax Guide
 
 Syntax: 
       Start Peach on the first <clientCount> number of Alive Nodes:
-        pf_admin.exe -h host -start -n clientCount pitFilePath <definesFilePath>
+        pf_admin.exe -start -n clientCount pitFilePath <definesFilePath>
       
       Start Peach on the first <clientCount> number of Alive Nodes with matching <tags>:
-        pf_admin.exe -h host -start -n clientCount -t tags pitFilePath <definesFilePath>
+        pf_admin.exe -start -n clientCount -t tags pitFilePath <definesFilePath>
 
       Start Peach on a single specific Node:
-        pf_admin.exe -h host -start --ip ipAddress pitFilePath <definesFilePath>
+        pf_admin.exe -start --ip ipAddress pitFilePath <definesFilePath>
 
       Start Peach on all Alive nodes matching <tags>:
-        pf_admin.exe -h host -start -t tags pitFilePath <definesFilePath>
+        pf_admin.exe -start -t tags pitFilePath <definesFilePath>
     
       Stop Peach on Nodes matching <jobID>:
-        pf_admin.exe -h host -stop jobID
+        pf_admin.exe -stop jobID
       
       Get list of all Nodes:
         pf_admin.exe -list
@@ -275,10 +302,9 @@ Syntax:
       Get list of errors reported by Nodes for Job <jobID>
         pf_admin.exe -errors jobID
 
-Required Arguments:
- 
- -h host - Provide the IP address of the Controller. 
-            127.0.0.1, localhost, or other host names are not valid.
+      Get information for a Job and a list of Running Nodes
+        pf_admin.exe -info jobID
+
 
 Commands:
 
@@ -297,6 +323,9 @@ Commands:
  list   - List all nodes in the farm with status
 
  errors - List any logged node errors
+   jobID - Job ID
+
+ info - Get information for a Job and a list of Running Nodes
    jobID - Job ID
 
 ");

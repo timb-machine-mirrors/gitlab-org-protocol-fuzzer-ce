@@ -8,13 +8,14 @@ namespace PeachFarm.Controller.Configuration
 {
   public class ControllerSection : ConfigurationSection
   {
+		/*
     [ConfigurationProperty(Constants.Controller)]
     public Controller ServerHost
     {
       get { return (Controller)this[Constants.Controller]; }
       set { this[Constants.Controller] = value; }
     }
-
+		//*/
     [ConfigurationProperty(Constants.MongoDb)]
     public MongoDbElement MongoDb
     {
