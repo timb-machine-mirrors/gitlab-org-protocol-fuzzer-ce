@@ -274,6 +274,20 @@
 		</Block>
 	</DataModel>
 
+	<DataModel name="IPv6DestinationPacket">
+		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="Header.NextHeader" value="60"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="HopByHop"/>
+		</Block>
+	</DataModel>
+
 	<DataModel name="IPv6JumbogramPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
@@ -852,6 +866,9 @@
       </Action>
       <Action type="output">
 				<DataModel ref="IPv6HopByHopPacket"/>
+      </Action>
+			<Action type="output">
+				<DataModel ref="IPv6DestinationPacket"/>
       </Action>
 			<Action type="output">
 				<DataModel ref="IPv6FragmentPacket1"/>
