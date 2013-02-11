@@ -12,6 +12,7 @@
 
 	<!-- #################### Helper Templates #################### -->	
   <DataModel name="ICMPHeader">
+		<!-- This is included to help Jumbogram testing -->
     <Number name="Type" size="8"  value="128" endian="network"/>
     <Number name="Code" size="8"/>
     <Number name="Checksum"  endian="big" size="16">
@@ -51,7 +52,6 @@
 		<Block name="Value"/>
 	</DataModel>
 
-
 	<!-- #################### Header Templates #################### -->	
   <DataModel name="IPv6Ethernet">
     <Block name="EtherHeader">
@@ -87,10 +87,8 @@
 			<Number name="PayloadLength" value="0" size="8"> 
 				<Relation type="size" of="HopByHopContents" 
 									expressionSet="((size-8)/8) + int(bool(size % 8))"
-									expressionGet="((size+1)*8)"
-									/> <!-- this is length in 8-octet units -->
+									expressionGet="((size+1)*8)" /> 
 			</Number>
-			<!-- look at this more -->
 			<Block name="TLVs">
 				<!-- size relation with padding -->
 				<Block name="InternalTLV" ref="TLV" minOccurs="0" maxOccurs="255">
