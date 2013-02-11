@@ -105,6 +105,19 @@
 		</Block>
 	</DataModel>
 
+	<DataModel name="Destination">
+		<Block ref="HopByHop">
+			<Block name="HopByHopContents.TLVs.InternalTLV">
+				<Block ref="TLV" name="HomeAddressOption">
+					<Number name="Type" size="8" endian="big" value="201"/>
+					<Block name="Value">
+						<Blob length="16" valueType="hex"/>
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
 	<DataModel name="JumboFrame">
 		<Block name="JumboHopByHop">
 			<Block name="JumboHopByHopContents">
@@ -162,13 +175,13 @@
 		<Number name="Identification" size="32" endian="big"/>
 	</DataModel>
 
-	<DataModel name="DestinationOptions">
-		<Number name="NextHeader" size="8" endian="big" value="59"/>
-		<Number name="HdrExtLen" size="8" endian="big" signed="false">
-			<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/>
-		</Number>
-		<Block name="Options"/>
-	</DataModel>
+	<!-- <DataModel name="DestinationOptions"> -->
+	<!--		<Number name="NextHeader" size="8" endian="big" value="59"/> -->
+	<!--		<Number name="HdrExtLen" size="8" endian="big" signed="false"> -->
+	<!--			<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/> -->
+	<!--		</Number> -->
+	<!--		<Block name="Options"/> -->
+	<!-- </DataModel> -->
 
 	<DataModel name="Mobile">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
@@ -283,7 +296,7 @@
 			<Number name="Header.NextHeader" value="60"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="HopByHop"/>
+			<Block ref="Destination"/>
 		</Block>
 	</DataModel>
 
@@ -362,29 +375,6 @@
 				<Number name="Identification" size="32" endian="big" value="374625"/>
 			</Block>
 			<Blob name="Data" size="96"/>
-		</Block>
-	</DataModel>
-
-	<DataModel name="IPv6DestinationOptionsPacket">
-		<Block ref="IPv6Ethernet"/>
-		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
-				<Relation type="size" of="Payload"/>
-			</Number>
-			<Number name="Header.NextHeader" value="60"/>
-		</Block>
-		<Block name="Payload">
-			<Block ref="DestinationOptions">
-				<Block name="Options">
-					<Block ref="TLV" name="HomeAddressOption">
-						<Number name="Type" size="8" endian="big" value="201"/>
-						<Block name="Value">
-							<Blob length="16" valueType="hex"/>
-						</Block>
-					</Block>
-				</Block>
-			</Block>
-			<Padding aligned="true" alignment="64"/>
 		</Block>
 	</DataModel>
 
@@ -900,9 +890,6 @@
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6FragmentPacket3"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6DestinationOptionsPacket"/>
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6MobileBRRPacket"/>
