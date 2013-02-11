@@ -1,0 +1,100 @@
+:toc!:
+
+== PNG Portable Network Graphics  
+
+Pit Revision : 1.0 
+
+The included Peach Pit file png_3_0.xml covers the PNG file specification 1.0 and parts of the 1.2 specification. Peach uses this pit to perform automated negative testing of the PNG file format.   
+
+=== Compatibility 
+
+This pit is compatible with
+
+ * Peach Fuzzer 3.0
+ * Peach Enterprise 3.0
+ * Peach Farm 1.0
+
+=== Defines 
+
+The PNG_Defines.xml file is used to configure the pit file for each environment and target. 
+
+The following keys are used. 
+
+*Seed* 
+
+ Defines which png file should be the base for mutation. 
+
+[source,xml]
+----
+    <Define key="Seed" value="SeedFile.png"/>
+----
+
+*Agent*	
+
+ Defines what OS the host is running so that the pit can select the correct Debugger.
+ 
+[source,xml]
+----	
+    <Define key="Agent" value="WinAgent"/>
+----
+	
+*Target* 
+
+ Defines which application is being fuzzed. 	
+	
+[source,xml]
+----
+    <Define key="Target" value="C:\\windows\\system32\\mspaint.exe"/>
+----
+
+*LoggerPath* 
+
+The path to create the logs from the fuzzing run in. 
+
+[source,xml]
+----
+    <Define key="LoggerPath" value="./logs/png/"/>
+----
+
+*Strategy* 
+
+The type of fuzzing to perform. Sequential and Random are valid. Default is Sequential. 
+
+[source,xml]
+----
+    <Define key="Strategy" value="Sequential"/>
+----
+ 
+=== Fuzzing Scenarios
+
+This pit can be used to generate test case PNG files, these files are then consumed by the fuzzing target. Examples of possible targets include. 
+
+  * Web Browsers
+  * Image libraries
+  * Image tools and manipulations
+  * Rendering Engines 
+ 
+=== Coverage 
+
+This PIT is capable of intelligently fuzzing the following chunk types. It is capable of intelligently fuzzing the PNG signature, chunk count, and various chunk types. The PNG base specification chunks are supported. Additional Chunk types are covered with a default catch all and are fuzzed in a non-intelligent manner.
+
+ * IHDR - Image Header
+ * PLTE - Pallet
+ * oFFs - Image Offset
+ * IDAT - Image Data
+ * pHYs - Physical Pixel Dimensions
+ * IEND - Image Trailer
+ * tRNS - Transparency
+ * cHRM - Primary chromaticies and white point
+ * gAMA - Image Gamma
+ * iCCP - Embedded ICC Profile
+ * sBIT - Significant Bits
+ * sRGB - Standard RGB Color Space
+ * tEXt - Textual Data
+ * zTXt - Compressed Textual Data
+ * iTXt - International Textual Data
+ * bKGD - Background Color
+ * sPLT - Suggested Pallet
+ * hIST - Pallet Histogram
+ * tIME - Image Last-Modification Time
+ * cpIp - Picture It Private
