@@ -26,6 +26,23 @@
     <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
   </DataModel>
 
+  <DataModel name="UDPv6Header">
+		<!-- This is included to help Jumbogram testing -->
+    <Number name="SrcPort" size="16" endian="network"/>
+    <Number name="DestPort" size="16" endian="network"/>
+    <Number name="Length" size="16" endian="network">
+      <Relation type="size" of="UDPv6Header" />
+    </Number>
+    <Number name="Checksum" size="16" endian="network">
+      <Fixup class="UDPChecksumFixup">
+        <Param name="ref" value="UDPv6Header" />
+        <Param name="src" value="##SourceIPv6##" />
+        <Param name="dst" value="##TargetIPv6##" />
+      </Fixup>
+    </Number>
+    <Blob name="Data" value="Hello"/>
+  </DataModel>
+
 	<DataModel name="TLV">
 		<Number name="Type" size="8" endian="big"/>
 		<Number name="Length" size="8">
@@ -93,7 +110,7 @@
 	<DataModel name="JumboFrame">
 		<Block name="JumboHopByHop">
 			<Block name="JumboHopByHopContents">
-				<Number name="NextHeader" size="8" value="58"/>
+				<Number name="NextHeader" size="8" value="17"/>
 				<Number name="PayloadLength" value="255" size="8"> 
 					<Relation type="size" of="JumboHopByHopContents"
 										expressionSet="((size-8)/8) + int(bool(size % 8))"
@@ -113,16 +130,25 @@
 			</Block>
 			<Padding name="PaddingValue" aligned="true" alignment="64" alignedTo="JumboHopByHop"/>
 		</Block>
-		<Block name="PacketPayload"  ref="ICMPHeader">
-			<Number name="Checksum"  endian="big" size="16">
-				<Fixup class="IcmpV6ChecksumFixup">
+		<!-- We're doing a UDP payload so this can be tested  -->
+		<Block name="PacketPayload"  ref="UDPv6Header">
+			<Number name="SrcPort" size="16" endian="network" value="52161"/>
+			<Number name="DestPort" size="16" endian="network" value="9999"/>
+			<Number name="Length" size="16" endian="network" value="65527">
+				<Relation type="size" of="PacketPayload" />
+			</Number>
+			<Number name="Checksum" size="16" endian="network">
+				<Fixup class="UDPChecksumFixup">
 					<Param name="ref" value="PacketPayload" />
 					<Param name="src" value="##SourceIPv6##" />
 					<Param name="dst" value="##TargetIPv6##" />
 				</Fixup>
 			</Number>
-			<Block name="Data" minOccurs="1024" maxOccurs="16777216">
-				<Blob value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+			<Block name="Data" >
+				<Block minOccurs="511" maxOccurs="16777216">
+					<Blob value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+				</Block>
+				<Blob value="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 			</Block>
 		</Block>
 	</DataModel>
@@ -212,6 +238,31 @@
     <Blob name="Payload" valueType="hex" value="800014350a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 	</DataModel>
 
+	<DataModel name="IPv6UDPTestPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="Header.NextHeader" value="17"/>
+		</Block>
+    <Block name="Payload" ref="UDPv6Header">
+			<Number name="SrcPort" size="16" endian="network" value="53526"/>
+			<Number name="DestPort" size="16" endian="network" value="9999"/>
+			<Number name="Length" size="16" endian="network">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="Checksum" size="16" endian="network">
+				<Fixup class="UDPChecksumFixup">
+					<Param name="ref" value="Payload" />
+					<Param name="src" value="##SourceIPv6##" />
+					<Param name="dst" value="##TargetIPv6##" />
+				</Fixup>
+			</Number>
+			<Blob name="Data" value="foobarbaz\n"/>
+		</Block>
+	</DataModel>
+
 	<DataModel name="IPv6HopByHopPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
@@ -228,8 +279,10 @@
 	<DataModel name="IPv6JumbogramPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
-			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex"/> -->
-			<Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"/>
+			<Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex">
+			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"> -->
+				<!-- <Relation type="size" of="Payload"/> -->
+			</Number>
 			<!-- wireshark doesn't parse this ^ if 0, RFC says should be 0 for payloads over 65535 -->
 			<Number name="Header.NextHeader" value="0"/>
 		</Block>
