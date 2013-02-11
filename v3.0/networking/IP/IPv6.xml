@@ -311,10 +311,11 @@
 		<Block name="Payload">
 			<Block ref="DestinationOptions">
 				<Block name="Options">
-					<Block name="HomeAddressOption">
-						<Number size="8" value="201" endian="big"/>
-						<Number size="8" value="16" endian="big"/>
-						<Blob length="16" valueType="hex"/>
+					<Block ref="TLV" name="HomeAddressOption">
+						<Number name="Type" size="8" endian="big" value="201"/>
+						<Block name="Value">
+							<Blob length="16" valueType="hex"/>
+						</Block>
 					</Block>
 				</Block>
 			</Block>
