@@ -138,6 +138,14 @@
 		<Number name="Identification" size="32" endian="big"/>
 	</DataModel>
 	
+	<DataModel name="DestinationOptions">
+		<Number name="NextHeader" size="8" endian="big" value="59"/>
+		<Number name="HdrExtLen" size="8" endian="big" signed="false">
+			<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/>
+		</Number>
+		<Block name="Options"/>
+	</DataModel>
+	
 	<DataModel name="Mobile">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
 		<Number name="HeaderLen" size="8" endian="big">
@@ -182,15 +190,6 @@
 		<Number name="RetransTimer" size="32" endian="big"/>
 		<Block name="Options"/>
 	</DataModel>
-	
-	<!-- #################### Things to ADD #################### -->	
-	<!-- ADD THIS TO THE DESTINATION OPTIONS HEADER FROM http://tools.ietf.org/html/rfc6275 section 6.3 
-					<Block name="HomeAddressOption">
-					<Number size="8" value="201" endian="big"/>
-					<Number size="8" value="16" endian="big"/>
-					<Blob length="16" valueType="hex"/>
-				</Block>-->
-	
 	
 	<!-- #################### Packet Definitions #################### -->	
 	<DataModel name="IPv6EmptyPacket">
@@ -301,6 +300,28 @@
 		</Block>			
 	</DataModel>
 
+	<DataModel name="IPv6DestinationOptionsPacket">
+		<Block ref="IPv6Ethernet"/>
+		<Block ref="IPv6Header">
+			<Number name="Header.PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="Header.NextHeader" value="60"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="DestinationOptions">
+				<Block name="Options">
+					<Block name="HomeAddressOption">
+						<Number size="8" value="201" endian="big"/>
+						<Number size="8" value="16" endian="big"/>
+						<Blob length="16" valueType="hex"/>
+					</Block>
+				</Block>
+			</Block>
+			<Padding aligned="true" alignment="64"/>
+		</Block>
+	</DataModel>
+	
 	<DataModel name="IPv6MobileBRRPacket">
 		<Block ref="IPv6Ethernet"/>
 		<Block ref="IPv6Header">
@@ -810,6 +831,9 @@
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6FragmentPacket3"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6DestinationOptionsPacket"/>
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6MobileBRRPacket"/>
