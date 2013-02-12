@@ -52,7 +52,7 @@ namespace PeachFarm.Controller
 				throw new ApplicationException(error);
 			}
 
-			InitializeQueues();
+			RegisterQueues();
 			StartListener();
 
 			Timer statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(5));
@@ -79,10 +79,11 @@ namespace PeachFarm.Controller
 			{
 				if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
 				{
-					modelSend.QueueDelete(pair.Value.QueueName);
 					logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Client Expired", pair.Value.Stamp);
 					remove.Add(pair.Key);
-
+					pair.Value.ErrorMessage = "Client Expired";
+					pair.Value.Stamp = DateTime.Now;
+					pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
 				}
 				else
 				{
@@ -107,6 +108,7 @@ namespace PeachFarm.Controller
 
 		private IConnection connection;
 		private IModel modelSend;
+		private IModel modelReceive;
 
 		private BackgroundWorker listener;
 
@@ -150,11 +152,10 @@ namespace PeachFarm.Controller
 			}
 			connection = factory.CreateConnection();
 			modelSend = connection.CreateModel();
-
-
+			modelReceive = connection.CreateModel();
 		}
 
-		private void InitializeQueues()
+		private void RegisterQueues()
 		{
 			//server queue
 			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
@@ -166,13 +167,11 @@ namespace PeachFarm.Controller
 			listener = new BackgroundWorker();
 			listener.WorkerSupportsCancellation = true;
 			listener.DoWork += Listen;
-			listener.RunWorkerAsync(connection.CreateModel());
+			listener.RunWorkerAsync();
 		}
 
 		private void Listen(object sender, DoWorkEventArgs e)
 		{
-			IModel modelReceive = (IModel)e.Argument;
-
 			while (!e.Cancel)
 			{
 				BasicGetResult result = null;
@@ -184,6 +183,7 @@ namespace PeachFarm.Controller
 				{
 					logger.Error("Could not communicate with RabbitMQ server. Exception:\n{0}", ex.Message);
 					Thread.Sleep(4000);
+					ReopenConnection();
 				}
 
 				if (result != null)
@@ -213,6 +213,68 @@ namespace PeachFarm.Controller
 					Thread.Sleep(1000);
 				}
 			}
+		}
+
+		private bool ReopenConnection()
+		{
+			bool success = true;
+
+			lock (connection)
+			{
+				if (connection.IsOpen == true)
+				{
+					try
+					{
+						CloseConnection();
+					}
+					catch { }
+				}
+
+				if (connection.IsOpen == false)
+				{
+					try
+					{
+						OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+					}
+					catch
+					{
+						logger.Error("Cannot reopen connection to RabbitMQ: " + config.RabbitMq.HostName);
+						return false;
+					}
+				}
+
+				if (modelReceive.IsOpen == false || modelSend.IsOpen == false)
+				{
+					try
+					{
+						if (modelReceive.IsOpen == false)
+						{
+							modelReceive = connection.CreateModel();
+						}
+
+						if (modelSend.IsOpen == false)
+						{
+							modelSend = connection.CreateModel();
+						}
+					}
+					catch
+					{
+						return false;
+					}
+				}
+
+			}
+
+			try
+			{
+				RegisterQueues();
+			}
+			catch
+			{
+				return false;
+			}
+
+			return success;
 		}
 
 		public void Close()

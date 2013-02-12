@@ -248,10 +248,13 @@ namespace PeachFarm.Node
 					{
 						result = modelReceive.BasicGet(clientQueueName, false);
 					}
-					catch
+					catch(Exception ex)
 					{
 						nlog.Fatal("Can't communicate with RabbitMQ server");
-						return;
+						Debug.WriteLine(String.Format("{0}: {1}", ex.GetType().Name, ex.Message));
+
+						ReopenConnection();
+
 					}
 
 					if (result != null)
@@ -301,7 +304,83 @@ namespace PeachFarm.Node
 
 		private void PublishToServer(string message, string action)
 		{
-			modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
+			bool error = false;
+			try
+			{
+				modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
+			}
+			catch
+			{
+				error = true;
+				nlog.Error("Failed to communicate with RabbitMQ: " + action);
+			}
+
+			if (error)
+			{
+				ReopenConnection();
+			}
+		}
+
+		private bool ReopenConnection()
+		{
+			bool success = true;
+
+			lock (connection)
+			{
+				if (connection.IsOpen == true)
+				{
+					try
+					{
+						CloseConnection();
+					}
+					catch { }
+				}
+
+				if (connection.IsOpen == false)
+				{
+					try
+					{
+						OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+					}
+					catch
+					{
+						nlog.Error("Cannot reopen connection to RabbitMQ: " + config.RabbitMq.HostName);
+						return false;
+					}
+				}
+
+				if (modelReceive.IsOpen == false || modelSend.IsOpen == false)
+				{
+					try
+					{
+						if (modelReceive.IsOpen == false)
+						{
+							modelReceive = connection.CreateModel();
+						}
+
+						if (modelSend.IsOpen == false)
+						{
+							modelSend = connection.CreateModel();
+						}
+					}
+					catch
+					{
+						return false;
+					}
+				}
+
+			}
+
+			try
+			{
+				RegisterQueues();
+			}
+			catch
+			{
+				return false;
+			}
+
+			return success;
 		}
 
 		private void ProcessAction(string action, string body)

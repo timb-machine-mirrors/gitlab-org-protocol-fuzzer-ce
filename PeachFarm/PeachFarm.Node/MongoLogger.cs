@@ -102,6 +102,11 @@ namespace PeachFarm.Loggers
 
 		}
 
+		protected override void Engine_IterationStarting(Peach.Core.RunContext context, uint currentIteration, uint? totalIterations)
+		{
+			
+		}
+
 		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults)
 		{
 			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
