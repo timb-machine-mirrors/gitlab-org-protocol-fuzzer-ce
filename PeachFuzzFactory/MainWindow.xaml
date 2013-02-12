@@ -8,6 +8,7 @@
 		xmlns:models="clr-namespace:PeachFuzzFactory.Models"
 		xmlns:controls="clr-namespace:PeachFuzzFactory.Controls"
 		xmlns:editor="http://schemas.actiprosoftware.com/winfx/xaml/syntaxeditor"
+    xmlns:pitmaker="clr-namespace:PitMaker;assembly=PitMakerControl"
         Title="MainWindow" Height="650" Width="1100" Icon="/Icons/peach20x20.ico">
 	<Grid>
 
@@ -57,7 +58,7 @@
 						</ToolTip>
 					</Button.ToolTip>
 				</Button>
-				<Button x:Name="ButtonSavePitAs" Click="ButtonSavePitAs_Click">
+				<Button x:Name="ButtonSavePitAs" Click="ButtonSavePitAs_Click" Visibility="Collapsed">
 					<Image Source="/Icons/document-save-as.png"/>
 					<Button.ToolTip>
 						<ToolTip>
@@ -66,7 +67,7 @@
 					</Button.ToolTip>
 				</Button>
 			</ToolBar>
-			<ToolBar>
+			<ToolBar Visibility="Collapsed">
 				<Button x:Name="ButtonShowCracking" Click="ButtonShowCracking_Click">
 					<Image Source="/Icons/document-print-preview.png"/>
 					<Button.ToolTip>
@@ -90,24 +91,34 @@
 		<docking:DockSite Grid.Row="1">
 			<docking:SplitContainer>
 
-				<docking:SplitContainer Orientation="Vertical">
+			<!--	<docking:SplitContainer Orientation="Vertical">
 					<docking:ToolWindowContainer>
 						<docking:ToolWindow Title="Design">
 							<TreeView x:Name="DesignerTreeView" SelectedItemChanged="DesignerTreeView_SelectedItemChanged">
 							</TreeView>
 						</docking:ToolWindow>
-				</docking:ToolWindowContainer>
+					</docking:ToolWindowContainer>
 					<docking:ToolWindowContainer>
 						<docking:ToolWindow Title="Properties">
 							<propgrid:PropertyGrid x:Name="DesignPropertyGrid"/>
 						</docking:ToolWindow>
 					</docking:ToolWindowContainer>
-					</docking:SplitContainer>
+				</docking:SplitContainer>-->
 
-						<docking:Workspace>
+				<docking:Workspace>
 					<docking:TabbedMdiHost>
-						<docking:TabbedMdiContainer>
-							<docking:DocumentWindow Title="Xml Editor">
+						<docking:TabbedMdiContainer SelectionChanged="TabbedMdiContainer_SelectionChanged">
+							<docking:DocumentWindow x:Name="PitEditorTab" Title="Pit Editor" CanClose="False">
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto"/>
+										<RowDefinition Height="10*"/>
+									</Grid.RowDefinitions>
+
+									<pitmaker:PitMakerControl x:Name="pitEditor" Grid.Row="1"/>
+								</Grid>
+							</docking:DocumentWindow>
+							<docking:DocumentWindow Title="Xml Editor" x:Name="XmlEditorTab" CanClose="False">
 								<Grid>
 									<Grid.RowDefinitions>
 										<RowDefinition Height="Auto"/>
@@ -223,7 +234,7 @@
 									</editor:SyntaxEditor>
 								</Grid>
 							</docking:DocumentWindow>
-							<docking:DocumentWindow Title="Hex Editor">
+							<docking:DocumentWindow Title="Hex Editor" x:Name="HexEditorTab" CanClose="False">
 								<docking:DockSite Grid.Row="1">
 									<docking:SplitContainer Orientation="Vertical">
 
@@ -264,7 +275,7 @@
 																		</ToolTip>
 																	</ComboBox.ToolTip>
 																</ComboBox>
-																
+
 																<Button x:Name="ButtonCrackBinRefresh" Click="ButtonCrackBinRefresh_Click">
 																	<Image Source="/Icons/reload.png"/>
 																	<Button.ToolTip>
@@ -320,8 +331,6 @@
 						</docking:TabbedMdiContainer>
 					</docking:TabbedMdiHost>
 				</docking:Workspace>
-				<docking:ToolWindowContainer>
-				</docking:ToolWindowContainer>
 			</docking:SplitContainer>
 		</docking:DockSite>
 	</Grid>
