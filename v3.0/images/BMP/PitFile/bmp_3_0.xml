@@ -129,8 +129,10 @@
 			</Block>
 		</Choice>
   	</Block>
-    <Blob name="TheColorPallete" lengthCalc="self.parent" />
-		<Blob name="TheBitmapData" />
+	<Block name="TheColorPallete" lengthCalc="int(self.parent.find('BMPHeader.DataOffset').InternalValue) - int(self.parent.find('BitmapInfo.Size').InternalValue) - 14">
+		<Blob />
+	</Block>
+	<Blob name="TheBitmapData" />
   </DataModel>
 
 
