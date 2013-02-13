@@ -152,9 +152,13 @@ namespace PeachFarm.Admin.Console
 			{
 				PrintHelp();
 			}
-			catch (Exception ex)
+			catch (ApplicationException aex)
 			{
-				System.Console.WriteLine("Error communicating with host: " + admin.ServerHostName);
+				System.Console.WriteLine(aex.Message);
+			}
+			catch (Exception)
+			{
+				PrintHelp();
 			}
 
 			Environment.Exit(0);

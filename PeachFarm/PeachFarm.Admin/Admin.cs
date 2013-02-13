@@ -57,7 +57,7 @@ namespace PeachFarm.Admin
 			}
 			catch (Exception ex)
 			{
-				RaiseAdminException(new ApplicationException("Could not open a connection to RabbitMQ host " + ServerHostName));
+				throw new ApplicationException("Could not open a connection to RabbitMQ host " + ServerHostName);
 			}
 
 		}
