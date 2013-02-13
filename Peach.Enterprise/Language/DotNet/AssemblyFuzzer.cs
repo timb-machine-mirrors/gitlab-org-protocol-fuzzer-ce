@@ -32,7 +32,7 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
-using Peach.Core.Language.DotNet.Generators;
+using Peach.Enterprise.Language.DotNet.Generators;
 
 namespace Peach.Enterprise.Language.DotNet
 {
