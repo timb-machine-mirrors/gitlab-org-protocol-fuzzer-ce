@@ -5,6 +5,7 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'Peach.Core.dll',
+	'Peach.Enterprise.dll',
 ]
 
 bld(
