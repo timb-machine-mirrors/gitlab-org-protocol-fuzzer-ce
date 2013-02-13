@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://phed.org/2008/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://phed.org/2008/Peach /peach/peach.xsd" 
+	author="Deja vu Security" version="1">
+
+  <!-- INCLUDES SECTION -->
+	<Include ns="default" src="file:defaults.xml"/>
+
+  <!-- DATAMODEL SECTION -->
+	<DataModel name="CIEXYZTRIPLE">
+		<Block name="CIEXYZ1">
+			<Block name="FXPT2DOT301">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT302">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT303">
+				<Number name="Point" size="32" />
+			</Block>
+		</Block>
+		<Block name="CIEXYZ2">
+			<Block name="FXPT2DOT301">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT302">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT303">
+				<Number name="Point" size="32" />
+			</Block>
+		</Block>
+		<Block name="CIEXYZ3">
+			<Block name="FXPT2DOT301">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT302">
+				<Number name="Point" size="32" />
+			</Block>
+			<Block name="FXPT2DOT303">
+				<Number name="Point" size="32" />
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="BMPHeader">
+		<Choice name="Magic">
+			<String name="BM" value="BM" token="true" />
+			<String name="BA" value="BA" token="true" />
+			<String name="CI" value="CI" token="true" />
+			<String name="CP" value="CP" token="true" />
+			<String name="IC" value="IC" token="true" />
+			<String name="PT" value="PT" token="true" />
+		</Choice>
+		
+		<Number name="Size" size="32">
+			<Relation type="size" of="BMP" />
+		</Number>
+		
+		<Blob name="Reserved" length="4" />
+		
+		<Number name="DataOffset" size="32">
+			<Relation type="offset" of="TheBitmapData" />
+		</Number>
+	</DataModel>
+
+	<DataModel name="BitmapInfo">
+		<Number name="Size" size="32">
+			<Relation type="size" of="FormatChoice" expressionGet="size - 4" expressionSet="size + 4"/>
+		</Number>
+
+		<Choice name="FormatChoice">
+			<Relation type="size" from="Size"/>
+			
+			<Block name="BITMAPV5HEADER">
+				<Number name="bV5Width" size="32"/>
+				<Number name="bV5Height" size="32"/>
+				<Number name="bV5Planes" size="16"/>
+				<Number name="bV5BitCount" size="16"/>
+				<Number name="bV5Compression" size="32"/>
+				<Number name="bV5SizeImage" size="32"/>
+				<Number name="bV5XPelsPerMeter" size="32"/>
+				<Number name="bV5YPelsPerMeter" size="32"/>
+				<Number name="bV5ClrUsed" size="32"/>
+				<Number name="bV5ClrImportant" size="32"/>
+				<Number name="bV5RedMask" size="32"/>
+				<Number name="bV5GreenMask" size="32"/>
+				<Number name="bV5BlueMask" size="32"/>
+				<Number name="bV5AlphaMask" size="32"/>
+				<Number name="bV5CSType" size="32"/>
+				<Block name="bV5Endpoints" ref="CIEXYZTRIPLE"/>
+				<Number name="bV5GammaRed" size="32"/>
+				<Number name="bV5GammaGreen" size="32"/>
+				<Number name="bV5GammaBlue" size="32"/>
+				<Number name="bV5Intent" size="32"/>
+				<Number name="bV5ProfileData" size="32"/>
+				<Number name="bV5ProfileSize" size="32"/>
+				<Number name="bV5Reserved" size="32"/>
+			</Block>
+			<Block name="BITMAPV4HEADER"> 
+				<Number name="bV4Width" size="32"/>   
+				<Number name="bV4Height" size="32"/>   
+				<Number name="bV4Planes" size="16" /> 
+				<Number name="bV4BitCount" size="16" />
+				<Number name="bV4V4Compression" size="32"/>
+				<Number name="bV4SizeImage" size="32"/>
+				<Number name="bV4XPelsPerMeter" size="32"/>
+				<Number name="bV4YPelsPerMeter" size="32"/>
+				<Number name="bV4ClrUsed" size="32"/>
+				<Number name="bV4ClrImportant" size="32"/>
+				<Number name="bV4RedMask" size="32"/>
+				<Number name="bV4GreenMask" size="32"/>
+				<Number name="bV4BlueMask" size="32"/>
+				<Number name="bV4AlphaMask" size="32"/>
+				<Number name="bV4CSType" size="32"/>
+				<Block name="bV4Endpoints" ref="CIEXYZTRIPLE" />
+				<Number name="bV4GammaRed" size="32"/>
+				<Number name="bV4GammaGreen" size="32"/>
+				<Number name="bV4GammaBlue" size="32"/>
+			</Block>
+			<Block name="BITMAPINFOHEADER"> 
+				<Number name="biWidth" size="32"/>
+				<Number name="biHeight" size="32"/>
+				<Number name="biPlanes" size="16" />
+				<Number name="biBitCount" size="16" />
+				<Number name="biCompression" size="32" />
+				<Number name="biSizeImage" size="32" />
+				<Number name="biXPelsPerMeter" size="32"/>
+				<Number name="biYPelsPerMeter" size="32"/>
+				<Number name="biClrUsed" size="32" />
+				<Number name="biClrImportant" size="32" />
+			</Block>
+			<Block name="BITMAPCOREHEADER"> 
+				<Number name="bcWidth" size="16"/>
+				<Number name="bcHeight" size="16"/>
+				<Number name="bcPlanes" size="16"/>
+				<Number name="bcBitCount" size="16"/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<DataModel name="BMP" >
+		<Relation type="size" from="TheHeader.Size" />
+		
+		<Block name="TheHeader" ref="BMPHeader" />
+		<Block name="TheBitmapInfo" ref="BitmapInfo" />
+		<Blob name="TheColorPallete" lengthType="calc" length="int(self.find('TheHeader.DataOffset').getInternalValue()) - int(self.find('TheBitmapInfo.Size').getInternalValue()) - 14" />
+		<Blob name="TheBitmapData">
+			<Relation type="offset" from="TheHeader.DataOffset" />
+		</Blob>
+	</DataModel>
+
+
+  <!-- STATE MODEL SECTION -->
+  <StateModel name="StateModel" initialState="Initial">
+    <State name="Initial">
+
+      <Action name="WriteFileFromSample" type="output" publisher="writer">
+        <DataModel name="Bmp" ref="BMP" />
+        <Data name="data" fileName="SeedFile.bmp" />
+      </Action>
+
+      <Action name="CloseFile"  type="close" publisher="writer" />
+      <Action name="Launch" type="call" method="FuzzMe" publisher="launch" />
+    </State>
+  </StateModel>
+
+
+  <!-- ***************
+       AGENT SECTION  
+      *************** -->
+
+  <!-- WINDOWS  
+    <Agent name="Agent">
+    
+      <Monitor class="debugger.WindowsDebugEngine">
+        <Param name="CommandLine" value="C:\\path\\to\\target.exe fuzzed.bmp"/>
+        <Param name="StartOnCall" value="FuzzMe"/>
+      </Monitor>
+    
+      <Monitor class="process.PageHeap">
+        <Param name="Executable" value="target.exe"/>
+      </Monitor>
+    </Agent>
+   -->
+
+  <!-- LINUX 
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="debugger.UnixDebugger">
+        <Param name="Command" value="/bin/target" />
+        <Param name="Params" value="fuzzed.bmp" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent> 
+    -->
+
+  <!-- OSX
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="osx.CrashWrangler">
+        <Param name="Command" value="/Applications/Target/TargetName" />
+        <Param name="Arguments" value="fuzzed.bmp" />
+        <Param name="ExecHandler" value="./exc_handler" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent>
+     -->
+
+
+  <!-- **************
+        TEST SECTION  
+       ************** -->
+  <Test name="Test">
+
+    <Agent ref="Agent"/>
+    <StateModel ref="StateModel" />
+
+    <Publisher name="writer" class="file.FileWriter">
+      <Param name="Filename" value="fuzzed.bmp" />
+    </Publisher>
+
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <Publisher name="launch" class="process.DebuggerLauncher"/>
+
+    <!-- GUI Launcher: WINDOWS ONLY -->
+    <!--
+     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+      <Param name="WindowName" value="GUI Window Name" /> 
+     </Publisher> 
+     -->
+
+  </Test>
+
+  <!-- **************
+        RUN SECTION  
+       ************** -->
+  <Run name="DefaultRun" description="Default Run">
+    <Test ref="Test" />
+    <Logger class="logger.Filesystem">
+      <Param name="path" value=".\logs\"/>
+    </Logger>
+  </Run>
+
+</Peach>
