@@ -29,6 +29,27 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 ~$*
 
+# User-specific files
+*.user
+
+# Build results
+# Ignore top level directories and one level deep
+# This allows debug/release folders to not be ignored in 3rdParty
+/[Dd]ebug/
+/*/[Dd]ebug/
+/[Rr]elease/
+/*/[Rr]elease/
+/x64/
+/*/x64/
+
+# Visual C++ cache files
+/ipch/
+/*.aps
+/*.ncb
+/*.opensdf
+/*.sdf
+/*.suo
+
 # python generated files
 *.pyc
 
