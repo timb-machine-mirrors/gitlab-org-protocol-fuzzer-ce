@@ -130,7 +130,7 @@
 		</Choice>
   	</Block>
 	<Block name="TheColorPallete" lengthCalc="int(self.parent.find('BMPHeader.DataOffset').InternalValue) - int(self.parent.find('BitmapInfo.Size').InternalValue) - 14">
-		<Blob />
+		<Blob /> <!--TODO: This will not work and must be replaced by a relation, it also screws up the blob below in cracking. -->
 	</Block>
 	<Blob name="TheBitmapData" />
   </DataModel>
