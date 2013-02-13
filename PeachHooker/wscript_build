@@ -13,7 +13,8 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='PeachHooker.exe',
+	name = 'PeachHooker.exe',
+	keyfile = 'PeachHooker.snk',
 )
 
 
