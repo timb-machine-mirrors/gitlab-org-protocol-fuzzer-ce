@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+deps = [
+	'NLog.dll',
+	'System.dll',
+	'System.Core.dll',
+	'System.Configuration.dll',
+	'PeachFarm.Common.dll',
+	'RabbitMQ.Client.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name='PeachFarm.Controller.dll',
+)

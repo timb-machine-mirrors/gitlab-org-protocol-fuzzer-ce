@@ -4,12 +4,12 @@ deps = [
 	'EasyHook.dll',
 	'System.dll',
 	'System.Core.dll',
-	'Peach.Core.dll',
 ]
 
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='PeachHooker.Network.dll',
+	name = 'PeachHooker.Network.dll',
+	keyfile = 'PeachHooker.Network.snk',
 )

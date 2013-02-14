@@ -31,7 +31,7 @@ using System.Collections;
 using System.Text;
 using System.Diagnostics;
 using Peach;
-using Peach.Core.Language.DotNet;
+using Peach.Enterprise.Language.DotNet;
 
 namespace Peach.Enterprise.Language.DotNet.Generators
 {
