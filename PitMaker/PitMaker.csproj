@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{51049453-0FD7-4F37-BD46-35B80C99E555}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PitMaker</RootNamespace>
+    <AssemblyName>PitMakerControl</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <Utf8Output>true</Utf8Output>
+    <ExpressionBlendVersion>4.0.20901.0</ExpressionBlendVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\PitMakerControl.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\PitMakerControl.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Practices.Prism">
+      <HintPath>..\..\3rdParty\Prism4.1\Microsoft.Practices.Prism.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>..\..\3rdParty\Prism4.1\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Telerik.Windows.Controls, Version=2012.3.1017.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.Windows.Controls.Data, Version=2012.3.1017.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.Windows.Controls.Input, Version=2012.3.1017.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.Windows.Controls.Navigation, Version=2012.3.1017.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.Windows.Data, Version=2012.3.1017.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CreateTypeCommand.cs" />
+    <Compile Include="DocumentProperties.xaml.cs">
+      <DependentUpon>DocumentProperties.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Enumerations.cs" />
+    <Compile Include="ExceptionExtensions.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Models\Action.cs" />
+    <Compile Include="Models\Agent.cs" />
+    <Compile Include="Models\Analyzer.cs" />
+    <Compile Include="Models\Data.cs" />
+    <Compile Include="Models\DataElementContainer.cs" />
+    <Compile Include="Models\DataElement.cs" />
+    <Compile Include="Models\DataModel.cs" />
+    <Compile Include="Models\Defaults.cs" />
+    <Compile Include="Models\Fixup.cs" />
+    <Compile Include="Models\Hint.cs" />
+    <Compile Include="Models\Import.cs" />
+    <Compile Include="Models\Include.cs" />
+    <Compile Include="Models\Logger.cs" />
+    <Compile Include="Models\Monitor.cs" />
+    <Compile Include="Models\Node.cs" />
+    <Compile Include="Models\Param.cs" />
+    <Compile Include="Models\PeachPitDocument.cs" />
+    <Compile Include="Models\Placement.cs" />
+    <Compile Include="Models\Publisher.cs" />
+    <Compile Include="Models\Python.cs" />
+    <Compile Include="Models\PythonPath.cs" />
+    <Compile Include="Models\Reference.cs" />
+    <Compile Include="Models\Relation.cs" />
+    <Compile Include="Models\Require.cs" />
+    <Compile Include="Models\Result.cs" />
+    <Compile Include="Models\Ruby.cs" />
+    <Compile Include="Models\RubyPath.cs" />
+    <Compile Include="Models\State.cs" />
+    <Compile Include="Models\StateModel.cs" />
+    <Compile Include="Models\Strategy.cs" />
+    <Compile Include="Models\Test.cs" />
+    <Compile Include="Models\Transformer.cs" />
+    <Compile Include="PitMakerControl.xaml.cs">
+      <DependentUpon>PitMakerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyChangedEventArgsEx.cs" />
+    <Compile Include="PropertyGridDataTemplateSelector.cs" />
+    <Compile Include="TypeExtensions.cs" />
+    <Compile Include="ViewModels\ActionViewModel.cs" />
+    <Compile Include="ViewModels\Associations.cs" />
+    <Compile Include="ViewModels\AgentViewModel.cs" />
+    <Compile Include="ViewModels\AnalyzerViewModel.cs" />
+    <Compile Include="ViewModels\DataElementContainerViewModel.cs" />
+    <Compile Include="ViewModels\DataElementViewModel.cs" />
+    <Compile Include="ViewModels\DefaultViewModel.cs" />
+    <Compile Include="ViewModels\FixupViewModel.cs" />
+    <Compile Include="ViewModels\HintViewModel.cs" />
+    <Compile Include="ViewModels\ImportViewModel.cs" />
+    <Compile Include="ViewModels\LoggerViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\MonitorViewModel.cs" />
+    <Compile Include="ViewModels\PlacementViewModel.cs" />
+    <Compile Include="ViewModels\PublisherViewModel.cs" />
+    <Compile Include="ViewModels\ReferenceViewModel.cs" />
+    <Compile Include="ViewModels\RelationViewModel.cs" />
+    <Compile Include="ViewModels\RequireViewModel.cs" />
+    <Compile Include="ViewModels\RubyPathViewModel.cs" />
+    <Compile Include="ViewModels\RubyViewModel.cs" />
+    <Compile Include="ViewModels\StateViewModel.cs" />
+    <Compile Include="ViewModels\StrategyViewModel.cs" />
+    <Compile Include="ViewModels\TestIncludeExcludeViewModel.cs" />
+    <Compile Include="ViewModels\TestViewModel.cs" />
+    <Compile Include="ViewModels\PythonPathViewModel.cs" />
+    <Compile Include="ViewModels\PythonViewModel.cs" />
+    <Compile Include="ViewModels\IncludeViewModel.cs" />
+    <Compile Include="ViewModels\DataModelViewModel.cs" />
+    <Compile Include="ViewModels\DataViewModel.cs" />
+    <Compile Include="ViewModels\PeachViewModel.cs" />
+    <Compile Include="ViewModels\StateModelViewModel.cs" />
+    <Compile Include="ViewModels\TransformerViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Page Include="DocumentProperties.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PitMakerControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\peach.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\node-action.png" />
+    <Resource Include="Images\node-agent.png" />
+    <Resource Include="Images\node-blob.png" />
+    <Resource Include="Images\node-block.png" />
+    <Resource Include="Images\node-choice.png" />
+    <Resource Include="Images\node-data.png" />
+    <Resource Include="Images\node-error.png" />
+    <Resource Include="Images\node-flags.png" />
+    <Resource Include="Images\node-generator.png" />
+    <Resource Include="Images\node-import.png" />
+    <Resource Include="Images\node-monitor.png" />
+    <Resource Include="Images\node-mutator.png" />
+    <Resource Include="Images\node-mutators.png" />
+    <Resource Include="Images\node-namespace.png" />
+    <Resource Include="Images\node-number.png" />
+    <Resource Include="Images\node-peach.png" />
+    <Resource Include="Images\node-pythonpath.png" />
+    <Resource Include="Images\node-relation.png" />
+    <Resource Include="Images\node-run.png" />
+    <Resource Include="Images\node-sequence.png" />
+    <Resource Include="Images\node-state.png" />
+    <Resource Include="Images\node-statemachine.png" />
+    <Resource Include="Images\node-string.png" />
+    <Resource Include="Images\node-template.png" />
+    <Resource Include="Images\node-test.png" />
+    <Resource Include="Images\node-transform.png" />
+    <Resource Include="Images\node-unknown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\node-logger.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Peach\Peach.Core\Peach.Core.csproj">
+      <Project>{63C7C70D-0CBF-40EC-A11E-079B2E943D47}</Project>
+      <Name>Peach.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
