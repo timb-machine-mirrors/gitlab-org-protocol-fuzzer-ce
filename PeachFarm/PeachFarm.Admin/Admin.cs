@@ -52,6 +52,7 @@ namespace PeachFarm.Admin
 			try
 			{
 				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+				IsListening = true;
 				InitializeQueues();
 				StartListeners();
 			}
@@ -66,6 +67,7 @@ namespace PeachFarm.Admin
 		{
 			StopListeners();
 			CloseConnection();
+			IsListening = false;
 		}
 		#endregion
 
@@ -184,6 +186,29 @@ namespace PeachFarm.Admin
 				JobInfoCompleted(this, new JobInfoCompletedEventArgs(result));
 		}
 		#endregion
+
+		#region MonitorCompleted
+		public class MonitorCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
+		{
+			public MonitorCompletedEventArgs(MonitorResponse result)
+				: base(null, false, null)
+			{
+				Result = result;
+			}
+
+			public MonitorResponse Result { get; private set; }
+		}
+
+		public delegate void MonitorCompletedEventHandler(object sender, MonitorCompletedEventArgs e);
+
+		public event MonitorCompletedEventHandler MonitorCompleted;
+
+		private void RaiseMonitorCompleted(MonitorResponse result)
+		{
+			if (MonitorCompleted != null)
+				MonitorCompleted(this, new MonitorCompletedEventArgs(result));
+		}
+		#endregion
 		#endregion
 
 		#region AdminException
@@ -207,7 +232,6 @@ namespace PeachFarm.Admin
 			}
 		}
 		#endregion
-
 
 		#region Sends
 
@@ -281,6 +305,11 @@ namespace PeachFarm.Admin
 			request.JobID = jobID;
 			PublishToServer(request.Serialize(), "JobInfo");
 		}
+
+		public void MonitorAsync()
+		{
+			PublishToServer(new MonitorRequest().Serialize(), "Monitor");
+		}
 		#endregion
 
 		#region MQ functions
@@ -344,7 +373,6 @@ namespace PeachFarm.Admin
 
 		void adminListener_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			IsListening = false;
 			if (e.Cancelled)
 			{
 
@@ -444,6 +472,9 @@ namespace PeachFarm.Admin
 					break;
 				case "JobInfo":
 					RaiseJobInfoCompleted(JobInfoResponse.Deserialize(body));
+					break;
+				case "Monitor":
+					RaiseMonitorCompleted(MonitorResponse.Deserialize(body));
 					break;
 				default:
 					string message = String.Format("Could not process message\nAction: {0}\nBody:\n{1}", action, body);

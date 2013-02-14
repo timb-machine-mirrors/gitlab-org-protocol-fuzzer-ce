@@ -376,6 +376,9 @@ namespace PeachFarm.Controller
 				case "JobInfo":
 					JobInfo(JobInfoRequest.Deserialize(body), replyQueue);
 					break;
+				case "Monitor":
+					Monitor(MonitorRequest.Deserialize(body), replyQueue);
+					break;
 				default:
 					logger.Error(String.Format("Received unknown action {0}", action));
 					break;
@@ -592,6 +595,16 @@ namespace PeachFarm.Controller
 			ReplyToAdmin(response.Serialize(), "JobInfo", replyQueue);
 		}
 
+		private void Monitor(MonitorRequest request, string replyQueue)
+		{
+			MonitorResponse response = new MonitorResponse();
+
+			response.Nodes = nodes.Values.ToList();
+			response.Jobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString).ToMessagesJobs();
+			response.Errors = response.Nodes.GetErrors(config.MongoDb.ConnectionString);
+
+			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);
+		}
 		#endregion
 
 		private string CreateJobID()

@@ -13,6 +13,19 @@ using System.Security.Cryptography;
 
 namespace PeachFarm.Common.Messages
 {
+	public static class ExtensionMethods
+	{
+		public static List<Mongo.Job> ToMongoJobs(this List<Messages.Job> jobs)
+		{
+			List<Mongo.Job> mongoJobs = new List<Mongo.Job>();
+			foreach (Messages.Job job in jobs)
+			{
+				mongoJobs.Add(new Mongo.Job(job));
+			}
+			return mongoJobs;
+		}
+
+	}
 	public partial class StartPeachResponse
 	{
 
