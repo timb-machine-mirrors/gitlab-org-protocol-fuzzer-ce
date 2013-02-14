@@ -7,6 +7,8 @@ deps = [
 	'System.Configuration.dll',
 	'PeachFarm.Common.dll',
 	'RabbitMQ.Client.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(

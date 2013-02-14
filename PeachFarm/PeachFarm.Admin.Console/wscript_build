@@ -9,6 +9,8 @@ deps = [
 	'RabbitMQ.Client.dll',
 	'PeachFarm.Common.dll',
 	'PeachFarm.Admin.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(
