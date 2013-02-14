@@ -5,7 +5,7 @@
 
   <!-- DEFAULTS SECTION -->
 	<Defaults>
-		<Number size="8" endian="network" signed="false" />
+		<Number endian="network" signed="false" />
 	</Defaults>
 
   <!-- DATA MODEL SECTION -->
