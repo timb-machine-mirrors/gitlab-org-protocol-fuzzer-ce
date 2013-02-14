@@ -335,7 +335,7 @@
       <Project>{63C7C70D-0CBF-40EC-A11E-079B2E943D47}</Project>
       <Name>Peach.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PitMaker\PitMaker\PitMaker.csproj">
+    <ProjectReference Include="..\PitMaker\PitMaker.csproj">
       <Project>{51049453-0FD7-4F37-BD46-35B80C99E555}</Project>
       <Name>PitMaker</Name>
     </ProjectReference>
