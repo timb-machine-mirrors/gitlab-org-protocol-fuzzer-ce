@@ -67,7 +67,34 @@ namespace PeachFarm.Common.Mongo
 			var query = Query.EQ("JobID", job.JobID);
 			return collection.Find(query);
 		}
+
+		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
+		{
+			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
+			var jobids = (from PeachFarm.Common.Messages.Heartbeat h in nodes where !String.IsNullOrEmpty(h.JobID) select BsonValue.Create(h.JobID)).Distinct();
+			var query = Query.In("JobID", jobids);
+			return collection.Find(query).OrderBy(k => k.StartDate).ToList();
+		}
+
+		public static List<Messages.Job> ToMessagesJobs(this List<Mongo.Job> mongoJobs)
+		{
+			List<Messages.Job> jobs = new List<Messages.Job>();
+			foreach (Mongo.Job mongoJob in mongoJobs)
+			{
+				jobs.Add(new Messages.Job(mongoJob));
+			}
+			return jobs;
+		}
+
+		public static List<Messages.Heartbeat> GetErrors(this List<Messages.Heartbeat> nodes, string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			var nodenames = (from PeachFarm.Common.Messages.Heartbeat h in nodes select BsonValue.Create(h.NodeName)).Distinct();
+			var query = Query.In("NodeName", nodenames);
+			return collection.Find(query).OrderBy(k => k.NodeName).OrderBy(k => k.JobID).ToList();
+		}
 	}
+	
 
 	public partial class Iteration
 	{
@@ -91,6 +118,16 @@ namespace PeachFarm.Common.Mongo
 
 	public partial class Job
 	{
+		public Job() { }
+
+		public Job(Messages.Job mJob)
+		{
+			this.JobID = mJob.JobID;
+			this.PitFileName = mJob.PitFileName;
+			this.StartDate = mJob.StartDate;
+			this.UserName = mJob.UserName;
+		}
+
 		[XmlIgnore]
 		public BsonObjectId _id { get; set; }
 
@@ -106,6 +143,7 @@ namespace PeachFarm.Common.Mongo
 					return _id.AsString;
 			}
 		}
+
 	}
 
 }

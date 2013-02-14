@@ -134,4 +134,33 @@
 		<xs:attribute name="Success" type="xs:boolean" default="true" />
 	</xs:complexType>
 
+	<xs:element name="MonitorRequest" type="MonitorRequest" />
+	<xs:complexType name="MonitorRequest" />
+
+	<xs:element name="MonitorResponse" type="MonitorResponse" />
+	<xs:complexType name="MonitorResponse">
+		<xs:all>
+			<xs:element name="Jobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="db:Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Errors" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
 </xs:schema>
