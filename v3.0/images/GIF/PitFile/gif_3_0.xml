@@ -9,16 +9,16 @@
 	<!-- Data Sub Block  -->
 	<DataModel name="DataSubBlock">
 		<Number name="BlockSize" size="8" signed="false">
-			<Relation type="size" of="Data"/>
+			<Relation type="size" of="dataDefault" />
 		</Number>
-		<Block name="Data">
+		<!--Block name="Data"-->
 			<Blob name="dataDefault" /><!--FIXME, does not crack correctly-->
-		</Block>
+		<!--/Block-->
 	</DataModel>
 
   <!-- Block Terminator -->
 	<DataModel name="BlockTerminator">
-		<Blob value='0' length='1'/>
+		<Blob valueType="hex" value='0' length='1' token="true"/>
 	</DataModel>
 
 
@@ -27,7 +27,7 @@
 		<Blob name="ExtensionIntroducer" valueType="hex" length="1" value="21" token="true"/>
 		<Blob name="Label" valueType="hex" length="1"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock" />
-		<Block name="DataSubBlock" minOccurs="0" maxOccurs="10000" ref="DataSubBlock" />
+		<Block name="DataSubBlock" minOccurs="0" maxOccurs="10" ref="DataSubBlock" /><!--TODO INCREASE-->
 		<Block name="Terminator" ref="BlockTerminator"/>
 	</DataModel>
 
@@ -35,7 +35,7 @@
 	<DataModel name="GraphicControlExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="F9" length="1" token="true"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock">
-			<Block name="Data">
+			<!--Block name="Data">
 				<Choice>
 					<Block>
 						<Flags name="GraphicControlExtFlags" size="8">
@@ -59,7 +59,7 @@
 						<Number name="DelayTime" size="16" signed="false"/>
 					</Block>
 				</Choice>
-			</Block>
+			</Block-->
 		</Block>
 	</DataModel>
 
@@ -72,7 +72,7 @@
 	<DataModel name="PlainTextExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="01" token="true"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock">
-			<Block name="Data">
+			<!--Block name="Data">
 				<Number name="TextGridLeftPosition" size="16" signed="false"/>
 				<Number name="TextGridTopPosition" size="16" signed="false"/>
 				<Number name="TextGridWidth" size="16" signed="false"/>
@@ -81,7 +81,7 @@
 				<Number name="CharacterCellHeight" size="8" signed="false"/>
 				<Number name="TextForegroundColorIndex" size="8" signed="false"/>
 				<Number name="TextBackgroundColorIndex" size="8" signed="false"/>
-			</Block>
+			</Block-->
 		</Block>
 	</DataModel>
 
@@ -89,10 +89,10 @@
 	<DataModel name="ApplicationExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="FF" token="true"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock">
-			<Block name="Data">
-				<String name="ApplicationIdentifier" length="8"/>
+			<!--Block name="Data">
+				<String name="ApplicationIdentifier" />
 				<Blob name="ApplicationAuthenticationCode" length="3"/>
-			</Block>
+			</Block-->
 		</Block>
 	</DataModel>
 
@@ -142,7 +142,7 @@
     
 		<Block name="TableBasedImageData">
 			<Number name="LZWMinimumCodeSize" size="8" signed="false"/>
-			<Block name="DataSubBlock" minOccurs="1" maxOccurs="10000" ref="DataSubBlock" />
+			<Block name="DataSubBlock" minOccurs="1" maxOccurs="10" ref="DataSubBlock" /><!--TODO INCREASE-->
 			<Block name="Terminator" ref="BlockTerminator"/>
 		</Block>
 	</DataModel>
