@@ -21,7 +21,7 @@ namespace PitMaker.ViewModels
         }
         catch
         {
-          throw new Peach.Core.PeachException("Logger class '{0}' can not be found in loaded assemblies.", model.LoggerClass);
+          throw new Peach.Core.PeachException("Logger class '" + model.LoggerClass + "' can not be found in loaded assemblies.");
         }
       }
     }

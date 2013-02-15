@@ -21,7 +21,7 @@ namespace PitMaker.ViewModels
         }
         catch
         {
-          throw new Peach.Core.PeachException("Publisher class '{0}' can not be found in loaded assemblies.", model.PublisherClass);
+          throw new Peach.Core.PeachException("Publisher class '" + model.PublisherClass + "' can not be found in loaded assemblies.");
         }
       }
     }

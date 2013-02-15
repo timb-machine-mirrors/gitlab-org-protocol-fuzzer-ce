@@ -17,7 +17,7 @@ namespace PitMaker.ViewModels
         model.PeachType = (from Type t in this.AnalyzerTypes where t.Name == model.AnalyzerClass select t).FirstOrDefault();
         if (model.PeachType == null)
         {
-          throw new Peach.Core.PeachException("Analyzer class '{0}' can not be found in loaded assemblies.", model.AnalyzerClass);
+          throw new Peach.Core.PeachException("Analyzer class '" + model.AnalyzerClass + "' can not be found in loaded assemblies.");
         }
       }
     }

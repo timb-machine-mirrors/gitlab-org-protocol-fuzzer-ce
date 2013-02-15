@@ -21,7 +21,7 @@ namespace PitMaker.ViewModels
         }
         catch
         {
-          throw new Peach.Core.PeachException("Montor class '{0}' can not be found in loaded assemblies.", model.MonitorClass);
+          throw new Peach.Core.PeachException("Montor class '" + model.MonitorClass + "' can not be found in loaded assemblies.");
         }
       }
     }

@@ -19,7 +19,7 @@ namespace PitMaker.ViewModels
         model.PeachType = (from Type t in this.FixupTypes where t.Name == model.FixupClass select t).FirstOrDefault();
         if (model.PeachType == null)
         {
-          throw new Peach.Core.PeachException("Fixup class '{0}' can not be found in loaded assemblies.", model.FixupClass);
+          throw new Peach.Core.PeachException("Fixup class '" + model.FixupClass + "' can not be found in loaded assemblies.");
         }
       }
     }

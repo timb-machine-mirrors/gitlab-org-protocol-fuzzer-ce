@@ -18,7 +18,7 @@ namespace PitMaker.ViewModels
         model.PeachType = (from Type t in this.StrategyTypes where t.Name == model.StrategyClass select t as Type).First();
         if (model.PeachType == null)
         {
-          throw new Peach.Core.PeachException("Strategy class '{0}' can not be found in loaded assemblies.", model.StrategyClass);
+          throw new Peach.Core.PeachException("Strategy class '" + model.StrategyClass + "' can not be found in loaded assemblies.");
         }
       }
     }

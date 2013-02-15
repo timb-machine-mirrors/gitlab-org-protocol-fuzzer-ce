@@ -166,7 +166,7 @@ namespace PitMaker.ViewModels
         }
         else
         {
-          throw new Peach.Core.PeachException("Tests can contain only one Strategy.", new object[]{});
+          throw new Peach.Core.PeachException("Tests can contain only one Strategy.");
         }
         return;
       }

@@ -18,7 +18,7 @@ namespace PitMaker.ViewModels
         model.PeachType = (from Type t in this.TransformerTypes where t.Name == model.TransformerClass select t).FirstOrDefault();
         if (model.PeachType == null)
         {
-          throw new Peach.Core.PeachException("Transformer class '{0}' can not be found in loaded assemblies.", model.TransformerClass);
+          throw new Peach.Core.PeachException("Transformer class '" + model.TransformerClass + "' can not be found in loaded assemblies.");
         }
       }
 
