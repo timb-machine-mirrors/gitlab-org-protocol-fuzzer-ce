@@ -369,18 +369,12 @@ namespace PeachFuzzFactory
 			if (toWindow.Title.StartsWith("Pit") && fromWindow.Title.StartsWith("Xml Editor"))
 			{
 				xmlEditor.Document.SaveFile(tempPitFileName, ActiproSoftware.Text.LineTerminator.CarriageReturnNewline);
-<<<<<<< HEAD
-				pitEditor.LoadPitFile(tempPitFileName);
-			}
-			else if (fromWindow.Title.StartsWith("Pit") && toWindow.Title.StartsWith("Xml Editor"))
-=======
         pitEditor.LoadPitFile(tempPitFileName);
         pitEditor.IsDirty = true;
 
         PitEditorTab.Title = "Pit Editor (" + System.IO.Path.GetFileName(pitFileName) + ")";
       }
 			else if (fromWindow == PitEditorTab && toWindow.Title.StartsWith("Xml Editor"))
->>>>>>> 0415ef78061e4c0b98749d003f7f17eee11d7c63
 			{
 				pitEditor.SavePitFile(tempPitFileName, false);
 
