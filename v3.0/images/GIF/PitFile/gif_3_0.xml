@@ -8,7 +8,7 @@
 	<!-- DATA MODEL SECTION -->
 	<!-- Data Sub Block  -->
 	<DataModel name="DataSubBlock">
-		<Number name="BlockSize" size="8" signed="false">
+		<Number name="BlockSize" size="8" signed="false" constraint="str(element.DefaultValue) != '0'">
 			<Relation type="size" of="dataDefault" />
 		</Number>
 		<!--Block name="Data"-->
@@ -27,8 +27,7 @@
 		<Blob name="ExtensionIntroducer" valueType="hex" length="1" value="21" token="true"/>
 		<Blob name="Label" valueType="hex" length="1"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock" />
-		<!--Block name="DataSubBlock" minOccurs="0" maxOccurs="1" ref="DataSubBlock" /--><!--FIXME off by 1 issue?-->
-		<Block name="DataSubBlock" minOccurs="0" maxOccurs="2" ref="DataSubBlock" /><!--TODO INCREASE-->
+		<Block name="SecondSubBlock" minOccurs="0" ref="DataSubBlock" />
 		<Block name="Terminator" ref="BlockTerminator"/>
 	</DataModel>
 
@@ -102,7 +101,7 @@
 
   <!-- Table Based Image -->
 	<DataModel name="TableBasedImage">
-		<Block name="TheImageDescriptor" minOccurs="0" maxOccurs="3000">
+		<Block name="TheImageDescriptor" minOccurs="0">
 			<Blob name="Seperator" token="true" valueType="hex" value="2C" length="1"/>
 			<Number name="ImageLeftPosition" signed="false" size="16"/>
 			<Number name="ImageTopPosition" signed="false" size="16"/>
@@ -143,7 +142,7 @@
     
 		<Block name="TableBasedImageData">
 			<Number name="LZWMinimumCodeSize" size="8" signed="false"/>
-			<Block name="DataSubBlock" minOccurs="1" maxOccurs="10" ref="DataSubBlock" /><!--TODO INCREASE-->
+			<Block name="DataSubBlock" minOccurs="1" ref="DataSubBlock" />
 			<Block name="Terminator" ref="BlockTerminator"/>
 		</Block>
 	</DataModel>
@@ -183,8 +182,7 @@
 			</Block>
 		</Block>
 
-		<!--<Blob name="EveryThingElse"/>-->
-		<Block name="Data" minOccurs="0" maxOccurs="3000">
+		<Block name="EveryThingElse" minOccurs="0">
 			<Choice name="DataChoice">
 				<Block name="TheGraphicsBlock">
 					<Block name="TheApplicationExtension" ref="ApplicationExtension" minOccurs="0"/>
@@ -206,7 +204,7 @@
 		</Block>
 		
 		<Block name="Trailer">
-			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1" token="true"/>
+			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1"/>
 		</Block>
 	</DataModel>
 
