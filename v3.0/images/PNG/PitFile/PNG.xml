@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	   xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd" 
 	   version="1.0" author="Deja vu Security" description="PNG Graphics File">
 
   <!-- DEFAULTS SECTION -->
 	<Defaults>
-		<Number size="8" endian="network" signed="false" />
+		<Number endian="network" signed="false" />
 	</Defaults>
 
   <!-- DATA MODEL SECTION -->
@@ -333,6 +333,7 @@
         <Param name="Executable" value="##Target##"/>
         <Param name="StartOnCall" value="FuzzMe"/>
         <Param name="Arguments" value="fuzzed.png"/>
+		<Param name="CpuKill" value="true"/>
       </Monitor>
     </Agent>
 	
