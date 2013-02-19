@@ -17,15 +17,16 @@ namespace PeachFarm.Controller
 {
 	public class PeachFarmServer
 	{
-		private Dictionary<string, Heartbeat> nodes = new Dictionary<string, Heartbeat>();
-		private Dictionary<string, List<string>> tags = new Dictionary<string, List<string>>();
+		private static Dictionary<string, Heartbeat> nodes = new Dictionary<string, Heartbeat>();
+		private static Dictionary<string, List<string>> tags = new Dictionary<string, List<string>>();
 		//private List<Heartbeat> errors = new List<Heartbeat>();
 		private UTF8Encoding encoding = new UTF8Encoding();
-		private string ipaddress;
+		private static string ipaddress;
 		private Configuration.ControllerSection config;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
+		private static Timer statusCheck = null;
 		public PeachFarmServer()
 		{
 			// Startup as application
@@ -55,7 +56,10 @@ namespace PeachFarm.Controller
 			RegisterQueues();
 			StartListener();
 
-			Timer statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(5));
+			if (statusCheck == null)
+			{
+				statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(1));
+			}
 
 			IsOpen = true;
 		}
@@ -74,31 +78,34 @@ namespace PeachFarm.Controller
 
 		private void StatusCheck(object state)
 		{
-			List<string> remove = new List<string>();
-			foreach (KeyValuePair<string, Heartbeat> pair in nodes)
+			List<Heartbeat> remove = new List<Heartbeat>();
+			lock (nodes)
 			{
-				if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
+				foreach (KeyValuePair<string, Heartbeat> pair in nodes)
 				{
-					logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Client Expired", pair.Value.Stamp);
-					remove.Add(pair.Key);
-					pair.Value.ErrorMessage = "Client Expired";
-					pair.Value.Stamp = DateTime.Now;
-					pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
-				}
-				else
-				{
-					if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+					Debug.WriteLine(String.Format("Status Check:{0} {1}", pair.Value.Stamp.ToString(), DateTime.Now.ToString()));
+					if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
 					{
-						pair.Value.Status = Status.Late;
-						logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+						logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Node Expired", pair.Value.Stamp);
+						remove.Add(pair.Value);
+						pair.Value.ErrorMessage = "Node Expired";
+						pair.Value.Stamp = DateTime.Now;
+						pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
+					}
+					else
+					{
+						if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+						{
+							pair.Value.Status = Status.Late;
+							logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+						}
 					}
 				}
 			}
 
-			foreach (string computer in remove)
+			foreach (Heartbeat node in remove)
 			{
-				nodes.Remove(computer);
-				tags.Remove(computer);
+				RemoveNode(node);
 			}
 		}
 
@@ -512,37 +519,17 @@ namespace PeachFarm.Controller
 		{
 			if (nodes.ContainsKey(heartbeat.NodeName) == false)
 			{
-				nodes.Add(heartbeat.NodeName, heartbeat);
-				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
-				if (String.IsNullOrEmpty(heartbeat.Tags) == false)
-				{
-					tags[heartbeat.NodeName] = heartbeat.Tags.Split(',').ToList();
-				}
+				AddNode(heartbeat);
 			}
 			else
 			{
 				if (heartbeat.Status == Status.Stopping)
 				{
-					nodes.Remove(heartbeat.NodeName);
-
-					if (tags.ContainsKey(heartbeat.NodeName))
-					{
-						tags.Remove(heartbeat.NodeName);
-					}
-
-
-					logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+					RemoveNode(heartbeat);
 				}
 				else
 				{
-					if (heartbeat.Status == Status.Running)
-					{
-
-					}
-
-					nodes[heartbeat.NodeName] = heartbeat;
-					logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+					UpdateNode(heartbeat);
 				}
 			}
 
@@ -615,6 +602,50 @@ namespace PeachFarm.Controller
 				var rndBytes = new byte[6];
 				rng.GetBytes(rndBytes);
 				return BitConverter.ToString(rndBytes).Replace("-", "");
+			}
+		}
+
+		private void AddNode(Heartbeat heartbeat)
+		{
+			lock (nodes)
+			{
+				nodes.Add(heartbeat.NodeName, heartbeat);
+				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
+				if (String.IsNullOrEmpty(heartbeat.Tags) == false)
+				{
+					tags[heartbeat.NodeName] = heartbeat.Tags.Split(',').ToList();
+				}
+
+			}
+		}
+
+		private void UpdateNode(Heartbeat heartbeat)
+		{
+			if (nodes.ContainsKey(heartbeat.NodeName) == false)
+			{
+				AddNode(heartbeat);
+			}
+
+			nodes[heartbeat.NodeName] = heartbeat;
+			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
+		}
+
+		private void RemoveNode(Heartbeat heartbeat)
+		{
+			lock (nodes)
+			{
+				nodes.Remove(heartbeat.NodeName);
+
+				if (tags.ContainsKey(heartbeat.NodeName))
+				{
+					tags.Remove(heartbeat.NodeName);
+				}
+
+
+				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
 			}
 		}
 	}

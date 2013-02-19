@@ -195,7 +195,7 @@ namespace PeachFarm.Admin.Console
 			{
 				foreach (Heartbeat heartbeat in e.Result.Nodes)
 				{
-					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.ErrorMessage));
+					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.ErrorMessage));
 				}
 			}
 			else
@@ -212,7 +212,7 @@ namespace PeachFarm.Admin.Console
 				{
 					if (heartbeat.Status == Status.Running)
 					{
-						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
 					}
 					else
 					{
@@ -250,7 +250,7 @@ namespace PeachFarm.Admin.Console
 
 			foreach (Heartbeat heartbeat in e.Result.Nodes)
 			{
-				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.JobID));
+				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
 			}
 		}
 
