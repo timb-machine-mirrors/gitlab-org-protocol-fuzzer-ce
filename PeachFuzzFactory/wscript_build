@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Data.dll',
+	'System.Deployment.dll',
+	'System.Drawing.dll',
+	'System.Windows.Forms.dll',
+	'System.Xml.dll',
+	'System.Xml.Linq.dll',
+	'System.Xaml.dll',
+	'WindowsBase.dll',
+	'PresentationCore.dll',
+	'PresentationFramework.dll',
+	'UIAutomationProvider.dll',
+	'WindowsFormsIntegration.dll',
+	'ActiproSoftware.Docking.Wpf.dll',
+	'ActiproSoftware.Navigation.Wpf.dll',
+	'ActiproSoftware.PropertyGrid.Wpf.dll',
+	'ActiproSoftware.Shared.Wpf.dll',
+	'ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll',
+	'ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf.dll',
+	'ActiproSoftware.SyntaxEditor.Wpf.dll',
+	'ActiproSoftware.Text.Addons.DotNet.Wpf.dll',
+	'ActiproSoftware.Text.Addons.Xml.Wpf.dll',
+	'ActiproSoftware.Text.LLParser.Wpf.dll',
+	'ActiproSoftware.Text.Wpf.dll',
+	'ActiproSoftware.Views.Wpf.dll',
+	'ActiproSoftware.Wizard.Wpf.dll',
+	'Peach.Core.dll',
+	'PitMakerControl.dll',
+	'Be.Windows.Forms.HexBox.dll',
+]
+
+bld(
+	features = 'msbuild',
+	use = deps,
+	csdoc = False,
+	source = bld.path.ant_glob('**/*.cs **/*.resx **/*.xaml', excl=['obj/*']),
+	resource = bld.path.ant_glob('icons/*'),
+	name = 'PeachFuzzFactory.exe',
+	main = 'App.xaml',
+	icon = 'peach20x20.ico',
+	bintype = 'winexe',
+)
+
