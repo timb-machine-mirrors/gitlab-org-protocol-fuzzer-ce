@@ -26,7 +26,7 @@
 			<Number name="size" size="32">
 				<Relation type="size" of="raw" />
 			</Number>
-			<!-- Offset of 'raw' from the end of the IconDirEntry-->
+			<!-- Offset of the current IconDirEntry's 'raw' calculated from the beginning of the DataModel-->
 			<Number name="offset" size="32">
 				<Relation type="offset" of="raw" />
 			</Number>
