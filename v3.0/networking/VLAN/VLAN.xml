@@ -15,18 +15,18 @@
     </Block>
     <Block name="VLAN_TCI">
       <Flags size="16" endian="big">
-	<Flag name="Priority"  position="0" size="3"/> 
-	<Flag name="CFI"  position="3" size="1" value="0"/> 
-	<Flag name="VID"  position="4" size="12" value="1"/> 
+				<Flag name="Priority"  position="0" size="3"/> 
+				<Flag name="CFI"  position="3" size="1" value="0"/> 
+				<Flag name="VID"  position="4" size="12" value="1"/> 
       </Flags>
     </Block>
     <Block name="Payload">
       <Blob name="Type" valueType="hex" value="0800" />
       <Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
       <Number name="CRC" size="32" endian="big">
-	<Fixup class="checksums.Crc32Fixup">
-	  <Param name="ref" value="VLAN"/>
-	</Fixup>
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="VLAN"/>
+				</Fixup>
       </Number>
     </Block>
   </DataModel>
@@ -39,26 +39,26 @@
     </Block>
     <Block name="VLAN_TCI1">
       <Flags size="16" endian="big">
-	<Flag name="Priority"  position="0" size="3"/> 
-	<Flag name="CFI"  position="3" size="1" value="0"/> 
-	<Flag name="VID"  position="4" size="12" value="1"/> 
+				<Flag name="Priority"  position="0" size="3"/> 
+				<Flag name="CFI"  position="3" size="1" value="0"/> 
+				<Flag name="VID"  position="4" size="12" value="1"/> 
       </Flags>
     </Block>
     <Block name="VLAN_TCI2">
       <Blob name="Type" token="true" valueType="hex" value="8100"/>
       <Flags size="16" endian="big">
-	<Flag name="Priority"  position="0" size="3"/> 
-	<Flag name="CFI"  position="3" size="1" value="0"/> 
-	<Flag name="VID"  position="4" size="12" value="2"/> 
+				<Flag name="Priority"  position="0" size="3"/> 
+				<Flag name="CFI"  position="3" size="1" value="0"/> 
+				<Flag name="VID"  position="4" size="12" value="2"/> 
       </Flags>
     </Block>
     <Block name="Payload">
       <Blob name="Type" valueType="hex" value="0800" />
       <Blob name="Payload" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
       <Number name="CRC" size="32" endian="big">
-	<Fixup class="checksums.Crc32Fixup">
-	  <Param name="ref" value="VLANDoubleFrame"/>
-	</Fixup>
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="VLANDoubleFrame"/>
+				</Fixup>
       </Number>
     </Block>
   </DataModel>
