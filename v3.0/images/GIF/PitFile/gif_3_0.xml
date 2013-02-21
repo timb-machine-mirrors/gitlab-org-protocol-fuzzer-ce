@@ -9,11 +9,11 @@
 	<!-- Data Sub Block  -->
 	<DataModel name="DataSubBlock">
 		<Number name="BlockSize" size="8" signed="false" constraint="str(element.DefaultValue) != '0'">
-			<Relation type="size" of="dataDefault" />
+			<Relation type="size" of="Data" />
 		</Number>
-		<!--Block name="Data"-->
-			<Blob name="dataDefault" /><!--FIXME, does not crack correctly-->
-		<!--/Block-->
+		<Block name="Data">
+			<Blob name="dataDefault" />
+		</Block>
 	</DataModel>
 
   <!-- Block Terminator -->
@@ -27,16 +27,16 @@
 		<Blob name="ExtensionIntroducer" valueType="hex" length="1" value="21" token="true"/>
 		<Blob name="Label" valueType="hex" length="1"/>
 		<Block name="FirstSubBlock" ref="DataSubBlock" />
-		<Block name="SecondSubBlock" minOccurs="0" ref="DataSubBlock" />
+		<Block name="AdditionalSubBlocks" minOccurs="0" ref="DataSubBlock" />
 		<Block name="Terminator" ref="BlockTerminator"/>
 	</DataModel>
 
   <!-- Graphic Control Extension -->
 	<DataModel name="GraphicControlExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="F9" length="1" token="true"/>
-		<!--Block name="FirstSubBlock" ref="DataSubBlock">
+		<Block name="FirstSubBlock" ref="DataSubBlock">
 			<Block name="Data">
-				<Choice>
+				<!--<Choice>
 					<Block>
 						<Flags name="GraphicControlExtFlags" size="8">
 							<Flag name="Reserved" position="5" size="3"/>
@@ -45,22 +45,24 @@
 							<Flag name="TransparentColorFlag" position="0" size="1" value="1" token="true"/>
 						</Flags>
 						<Number name="DelayTime" size="16" signed="false"/>
-						<Block name="TransparantColorIndex" constraint="self.find('TransparentColorFlag').getInternalValue() == 1">
+						<Block name="TransparantColorIndex" constraint="str(element.parent.find('TransparentColorFlag').DefaultValue) == '1'">
 							<Number name="TransparentColorIndex" size="8" signed="false" />
 						</Block>
-					</Block>
+					</Block>-->
 					<Block>
 						<Flags name="GraphicControlExtFlags" size="8">
 							<Flag name="Reserved" position="5" size="3"/>
 							<Flag name="DisposalMethod" position="2" size="3"/>
 							<Flag name="UserInputFlag" position="1" size="1"/>
-							<Flag name="TransparentColorFlag" position="0" size="1" value="0" token="true"/>
+							<Flag name="TransparentColorFlag" position="0" size="1" value="0"/>
 						</Flags>
 						<Number name="DelayTime" size="16" signed="false"/>
+						<!--TODO check if this is still included when TransparentColorFlag is 0 -->
+						<Number name="TransparentColorIndex" size="8" signed="false" /> 
 					</Block>
-				</Choice>
+				<!--</Choice>-->
 			</Block>
-		</Block-->
+		</Block>
 	</DataModel>
 
   <!-- Comment Extension -->
@@ -71,7 +73,7 @@
   <!-- Plain Text Extension -->
 	<DataModel name="PlainTextExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="01" token="true"/>
-		<!--Block name="FirstSubBlock" ref="DataSubBlock">
+		<Block name="FirstSubBlock" ref="DataSubBlock">
 			<Block name="Data">
 				<Number name="TextGridLeftPosition" size="16" signed="false"/>
 				<Number name="TextGridTopPosition" size="16" signed="false"/>
@@ -82,18 +84,18 @@
 				<Number name="TextForegroundColorIndex" size="8" signed="false"/>
 				<Number name="TextBackgroundColorIndex" size="8" signed="false"/>
 			</Block>
-		</Block-->
+		</Block>
 	</DataModel>
 
   <!-- Application Extension -->
 	<DataModel name="ApplicationExtension" ref="ExtensionBase">
 		<Blob name="Label" valueType="hex" value="FF" token="true"/>
-		<!--Block name="FirstSubBlock" ref="DataSubBlock">
+		<Block name="FirstSubBlock" ref="DataSubBlock">
 			<Block name="Data">
 				<String name="ApplicationIdentifier" length="8"/>
 				<Blob name="ApplicationAuthenticationCode" length="3"/>
 			</Block>
-		</Block-->
+		</Block>
 	</DataModel>
 
 
@@ -204,7 +206,7 @@
 		</Block>
 		
 		<Block name="Trailer">
-			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1"/>
+			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1" /> <!--TODO check why this can't be token-->
 		</Block>
 	</DataModel>
 
@@ -283,6 +285,7 @@
       <Param name="WindowName" value="GUI Window Name" /> 
      </Publisher> 
      -->
+	 <Strategy class="Random" />
   <Logger class="logger.Filesystem">
       <Param name="Path" value="logs/GIF/"/>
     </Logger>
