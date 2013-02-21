@@ -34,8 +34,16 @@
       <Number name="DestIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 80"/>
       <Blob name="Options"/>
     </Block>
-    <Blob name="Data" valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+		<Block name="Data"/>
   </DataModel>
+	
+	<DataModel name="IPv4Packet">
+		<Block name="IPv4" ref="IPv4">
+			<Block name="Data">
+				<Blob name="Data" valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+			</Block>
+		</Block>
+ </DataModel>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -51,13 +59,13 @@
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-        <DataModel ref="IPv4"/>
+        <DataModel ref="IPv4Packet"/>
       </Action>
     </State>
   </StateModel>
 
   <Test name="Default">
-    <Agent ref="RemoteAgent"/>
+    <!--<Agent ref="RemoteAgent"/>-->
     <StateModel ref="TheState"/>
     <Publisher class="RawIPv4">
       <Param name="Host" value="##TargetIPv4##"/>
