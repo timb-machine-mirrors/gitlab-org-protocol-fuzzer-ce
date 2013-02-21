@@ -60,8 +60,10 @@
 	<Block name="BitmapInfo">
 		<Number name="Size" size="32">
 			<Relation type="size" of="FormatChoice" expressionGet="size - 4" expressionSet="size + 4"/>
+			<!--Relation type="size" of="TheColorPallete" 
+			  expressionGet="int(self.parent.find('BMPHeader.DataOffset').InternalValue) - size - 14" 
+			  expressionSet="int(self.parent.find('BMPHeader.DataOffset').InternalValue) + size + 14" /-->
 		</Number>
-
 		<Choice name="FormatChoice">
 			<Block name="BITMAPV5HEADER">
 				<Number name="bV5Width" size="32"/>
@@ -129,9 +131,9 @@
 			</Block>
 		</Choice>
   	</Block>
-	<Block name="TheColorPallete" lengthCalc="int(self.parent.find('BMPHeader.DataOffset').InternalValue) - int(self.parent.find('BitmapInfo.Size').InternalValue) - 14">
-		<Blob /> <!--TODO: This will not work and must be replaced by a relation, it also screws up the blob below in cracking. -->
-	</Block>
+	<Blob name="TheColorPallete">
+		<!--lengthCalc="int(self.parent.find('BMPHeader.DataOffset').InternalValue) - int(self.parent.find('BitmapInfo.Size').InternalValue) - 14"-->
+	</Blob>
 	<Blob name="TheBitmapData" />
   </DataModel>
 
