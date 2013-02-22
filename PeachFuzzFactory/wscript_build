@@ -37,7 +37,7 @@ bld(
 	features = 'msbuild',
 	use = deps,
 	csdoc = False,
-	source = bld.path.ant_glob('**/*.cs **/*.resx **/*.xaml', excl=['obj/*']),
+	source = bld.path.ant_glob('**/*.cs **/*.resx **/*.xaml licenses.licx template.xml', excl=['obj/*']),
 	resource = bld.path.ant_glob('icons/*'),
 	name = 'PeachFuzzFactory.exe',
 	main = 'App.xaml',
