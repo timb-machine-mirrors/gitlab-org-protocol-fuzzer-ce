@@ -10,8 +10,8 @@
 		<Define key="Strategy" value="Random"/>
 		<Define key="TargetIPv4" value="192.168.2.11"/>
 		<Define key="SourceIPv4" value="192.168.2.13"/>
-		<Define key="TargetIPv6" value="::0"/>
-		<Define key="SourceIPv6" value="::0"/>
+		<Define key="TargetIPv6" value="::1"/>
+		<Define key="SourceIPv6" value="::1"/>
 	</All>
 		
 	<Linux platform="linux">

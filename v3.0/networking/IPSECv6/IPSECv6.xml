@@ -959,9 +959,9 @@
 			<Action type="output">
 				<DataModel ref="IPv6HopByHopIPSECv6##Mode##"/>
       </Action>
-			<Action type="output">
+			<!--<Action type="output">
 				<DataModel ref="IPv6JumbogramIPSECv6##Mode##"/>
-      </Action>
+      </Action>-->
 			<Action type="output">
 				<DataModel ref="IPv6Fragment1IPSECv6##Mode##"/>
       </Action>
@@ -984,7 +984,7 @@
 				<DataModel ref="IPv6MobileCoTIIPSECv6##Mode##"/>
       </Action>
 			<Action type="output">
-				<DataModel ref="IPv6MobileHoTIPSECv6T##Mode##"/>
+				<DataModel ref="IPv6MobileHoTIPSECv6##Mode##"/>
       </Action>
 			<Action type="output">
 				<DataModel ref="IPv6MobileCoTIPSECv6##Mode##"/>
