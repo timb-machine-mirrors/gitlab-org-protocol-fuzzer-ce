@@ -93,6 +93,18 @@ namespace PeachFarm.Common.Mongo
 			var query = Query.In("NodeName", nodenames);
 			return collection.Find(query).OrderBy(k => k.NodeName).OrderBy(k => k.JobID).ToList();
 		}
+
+		public static MongoDB.Bson.ObjectId ToMongoID(this string input)
+		{
+			try
+			{
+				return new ObjectId(input);
+			}
+			catch
+			{
+				return MongoDB.Bson.ObjectId.Empty;
+			}
+		}
 	}
 	
 
@@ -140,7 +152,7 @@ namespace PeachFarm.Common.Mongo
 				if ((_id == null) || (_id == BsonObjectId.Empty))
 					return String.Empty;
 				else
-					return _id.AsString;
+					return _id.ToString();
 			}
 		}
 
@@ -164,7 +176,7 @@ namespace PeachFarm.Common.Messages
 				if ((_id == null) || (_id == BsonObjectId.Empty))
 					return String.Empty;
 				else
-					return _id.AsString;
+					return _id.ToString();
 			}
 		}
 	}
