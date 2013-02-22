@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.DirectoryServices.AccountManagement.dll',
+	'System.Xml.dll',
+	'System.Xml.Linq.dll',
+	'System.Xaml.dll',
+	'WindowsBase.dll',
+	'PresentationCore.dll',
+	'PresentationFramework.dll.dll',
+	'Microsoft.Practices.Prism.dll',
+	'Microsoft.Practices.ServiceLocation.dll',
+	'Telerik.Windows.Controls.dll',
+	'Telerik.Windows.Controls.Data.dll',
+	'Telerik.Windows.Controls.Input.dll',
+	'Telerik.Windows.Controls.Navigation.dll',
+	'Telerik.Windows.Data.dll',
+	'Peach.Core.dll',
+]
+
+bld(
+	features = 'msbuild',
+	use = deps,
+	csdoc = False,
+	source = bld.path.ant_glob('**/*.cs **/*.resx **/*.xaml', excl=['obj/*']),
+	resource = bld.path.ant_glob('Images/*'),
+	name = 'PitMakerControl.dll',
+	namespace = 'PitMaker',
+)
+

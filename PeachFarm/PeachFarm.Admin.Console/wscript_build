@@ -17,5 +17,6 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'PeachFarm.Admin.Console.exe',
+	namespace = 'PeachFarm.Admin.Console',
+	name = 'pf_admin.exe',
 )

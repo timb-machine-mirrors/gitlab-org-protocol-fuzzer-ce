@@ -64,8 +64,8 @@ namespace PeachFuzzFactory
 
         var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        LoadFile(System.IO.Path.Combine(path, "template.xml"));
-        //LoadResourceFile("PeachFuzzFactory.template.xml");
+        //LoadFile(System.IO.Path.Combine(path, "template.xml"));
+        LoadResourceFile("PeachFuzzFactory.template.xml");
       //*/
 		}
 
@@ -222,9 +222,9 @@ namespace PeachFuzzFactory
       }
 			var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
       //var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      LoadFile(System.IO.Path.Combine(path, "template.xml"));
+      //LoadFile(System.IO.Path.Combine(path, "template.xml"));
 
-      //LoadResourceFile("PeachFuzzFactory.template.xml");
+      LoadResourceFile("PeachFuzzFactory.template.xml");
 
 		}
 

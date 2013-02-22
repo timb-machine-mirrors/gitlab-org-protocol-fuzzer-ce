@@ -307,10 +307,10 @@
     <Resource Include="Icons\format-indent-more.png" />
     <Resource Include="Icons\node-array.png" />
     <Resource Include="Icons\reload.png" />
-    <None Include="template.xml">
+    <EmbeddedResource Include="template.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
     <Content Include="test.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
