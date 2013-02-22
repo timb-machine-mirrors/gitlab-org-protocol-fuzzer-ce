@@ -175,13 +175,13 @@
 		<Number name="Identification" size="32" endian="big"/>
 	</DataModel>
 
-	<!-- <DataModel name="DestinationOptions"> -->
-	<!--		<Number name="NextHeader" size="8" endian="big" value="59"/> -->
-	<!--		<Number name="HdrExtLen" size="8" endian="big" signed="false"> -->
-	<!--			<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/> -->
-	<!--		</Number> -->
-	<!--		<Block name="Options"/> -->
-	<!-- </DataModel> -->
+	<DataModel name="DestinationOptions">
+			<Number name="NextHeader" size="8" endian="big" value="59"/>
+			<Number name="HdrExtLen" size="8" endian="big" signed="false">
+				<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/>
+			</Number>
+			<Block name="Options"/>
+	</DataModel>
 
 	<DataModel name="Mobile">
 		<Number name="NextHeader" size="8" value="59" endian="big"/>
