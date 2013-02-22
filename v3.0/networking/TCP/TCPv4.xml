@@ -27,18 +27,27 @@
         <Flag name="FIN" position="11" size="1"/>
       </Flags>
       <Number name="WindowSize" size="16" endian="big"/>
-      <Number name="CheckSum" size="16" endian="big">
+      <Number name="CheckSum" size="16" endian="big"/>
+      <Number name="UrgentPointer" size="16" endian="big"/>
+      <Blob name="OptionsAndPadding"/>
+    </Block>
+    <Block name="TCPData"/>
+  </DataModel>
+	
+	<DataModel name="TCPPacket">
+		<Block name="TCP" ref="TCP">
+			<Number name="TCPHeader.CheckSum" size="16" endian="big">
         <Fixup class="TCPChecksumFixup">
           <Param name="ref" value="TCP" />
           <Param name="src" value="##SourceIPv4##" />
           <Param name="dst" value="##TargetIPv4##" />
         </Fixup>
       </Number>
-      <Number name="UrgentPointer" size="16" endian="big"/>
-      <Blob name="OptionsAndPadding"/>
-    </Block>
-    <Blob name="Data"/>
-  </DataModel>
+			<Block name="TCPData">
+				<Blob value="Hello"/>
+			</Block>
+		</Block>
+	</DataModel>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -54,7 +63,7 @@
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-        <DataModel ref="TCP"/>
+        <DataModel ref="TCPPacket"/>
       </Action>
     </State>
   </StateModel>
