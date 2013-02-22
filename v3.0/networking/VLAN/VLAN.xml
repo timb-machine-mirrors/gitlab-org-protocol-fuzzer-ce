@@ -56,7 +56,7 @@
 				<Blob name="Type" valueType="hex" value="86dd" />
 				<Block  name="PayloadIPv6Header" ref="IPv6:IPv6Header"/>
 				<Block name="IPv6Header" ref="IPv6:IPv6Header">
-					<Number name="Header.NextHeader" value="59"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="59"/>
 					<Number name="Header.PayloadLength" value="0" size="16"/>
 				</Block>
 				<Number name="CRC" size="32" endian="big">
@@ -76,7 +76,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 		  		<Number name="Type" size="8"  value="128" endian="network"/>
@@ -109,7 +109,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="0"/>
 				</Block>
 				<Block name="Payload" ref="IPv6:HopByHop"/>
 				<Number name="CRC" size="32" endian="big">
@@ -129,7 +129,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="0"/>
 				</Block>
 				<Block name="Payload" ref="IPv6:JumboFrame"/>
 				<Number name="CRC" size="32" endian="big">
@@ -142,7 +142,6 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment1InVlan">
-		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -150,7 +149,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="44"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -161,7 +160,7 @@
 						</Flags>
 						<Number name="Identification" size="32" endian="big" value="374625"/>
 					</Block>
-					<Blob name="Data" size="96"/>
+					<Blob name="Data" length="12"/>
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
@@ -173,7 +172,6 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment2InVlan">
-		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -181,7 +179,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="44"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -192,7 +190,7 @@
 						</Flags>
 						<Number name="Identification" size="32" endian="big" value="374625"/>
 					</Block>
-					<Blob name="Data" size="96"/>
+					<Blob name="Data" length="12"/>
 				</Block>	
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
@@ -204,7 +202,6 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment3InVlan">
-		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -212,7 +209,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="44"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -223,7 +220,7 @@
 						</Flags>
 						<Number name="Identification" size="32" endian="big" value="374625"/>
 					</Block>
-					<Blob name="Data" size="96"/>
+					<Blob name="Data" length="12"/>
 				</Block>		
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
@@ -235,7 +232,6 @@
 	</DataModel>
 	
 	<DataModel name="IPv6DestinationOptionsInVlan">
-		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -243,7 +239,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="59"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="59"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:DestinationOptions">
@@ -275,7 +271,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -312,7 +308,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -351,7 +347,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -389,7 +385,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -428,7 +424,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -467,7 +463,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -532,7 +528,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -592,7 +588,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="135"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="135"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Mobile">
@@ -631,7 +627,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="43"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="43"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileRoutingType2Header">
@@ -655,7 +651,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileICMP">
@@ -690,7 +686,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileICMP">
@@ -729,7 +725,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileICMP">
@@ -764,7 +760,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileICMP">
@@ -806,7 +802,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="58"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="58"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:MobileICMPRouterAdvertisement">
@@ -921,7 +917,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="06"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="06"/>
 				</Block>
 				<Block name="Payload">
 					<Block name="TCP" ref="TCP:TCP">
@@ -986,7 +982,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="17"/>
+					<Number name="Header.NextHeader" size="8" endian="big" value="17"/>
 				</Block>
 				<Block name="Payload">
 					<Block name="UDPHeader" ref="UDP:UDPHeader">
