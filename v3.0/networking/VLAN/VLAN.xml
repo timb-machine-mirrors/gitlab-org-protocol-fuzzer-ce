@@ -40,13 +40,13 @@
 			</Block>
 		</Block>
 		<Block name="VlanPayload">
-			<Blob name="Type" valueType="hex" value="0800" />
+		<!--	<Blob name="Type" valueType="hex" value="0800" />
 			<Blob name="PayloadContent" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
 			<Number name="CRC" size="32" endian="big">
 				<Fixup class="checksums.Crc32Fixup">
 					<Param name="ref" value="VLAN"/>
 				</Fixup>
-			</Number>
+			</Number>-->
 		</Block>
 	</DataModel>
 
