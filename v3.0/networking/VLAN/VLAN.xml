@@ -129,6 +129,7 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment1InVlan">
+		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -159,6 +160,7 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment2InVlan">
+		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -189,6 +191,7 @@
 	</DataModel>
 	
 	<DataModel name="IPv6Fragment3InVlan">
+		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
@@ -219,6 +222,7 @@
 	</DataModel>
 	
 	<DataModel name="IPv6DestinationOptionsInVlan">
+		<!-- This may be brken -->
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
