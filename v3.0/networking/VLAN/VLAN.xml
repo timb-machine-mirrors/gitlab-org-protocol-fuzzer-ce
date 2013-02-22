@@ -78,7 +78,20 @@
 					</Number>
 					<Number name="Header.NextHeader" value="58"/>
 				</Block>
-				<Blob name="Payload" valueType="hex" value="800014350a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+				<Block name="Payload">
+		  		<Number name="Type" size="8"  value="128" endian="network"/>
+          <Number name="Code" size="8"/>
+          <Number name="Checksum"  endian="big" size="16">
+            <Fixup class="IcmpV6ChecksumFixup">
+              <Param name="ref" value="Payload" />
+              <Param name="src" value="##SourceIPv6##" />
+              <Param name="dst" value="##TargetIPv6##" />
+            </Fixup>
+          </Number>
+          <Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+          <Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+          <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
 						<Param name="ref" value="IPv6ICMPInVlan"/>
@@ -137,7 +150,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -168,7 +181,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -199,7 +212,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" value="44"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:Fragment">
@@ -230,7 +243,7 @@
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="0"/>
+					<Number name="Header.NextHeader" value="59"/>
 				</Block>
 				<Block name="Payload">
 					<Block ref="IPv6:DestinationOptions">
@@ -782,7 +795,8 @@
 				</Number>
 			</Block>
 		</Block>
-	</DataModel>
+	</DataModel>	
+	
 	
 	<DataModel name="IPv6ICMPRouterAdvertismentInVlan">
 		<Block ref="VLAN">
@@ -845,27 +859,6 @@
 		</Block>
 	</DataModel>
 	
-	<DataModel name="IPv4InVlan">
-		<Block ref="VLAN">
-			<Block name="VlanPayload">
-				<Blob name="Type" valueType="hex" value="0800" />
-				<!-- This takes the normal payload and overrides it with this payload -->
-				<Block name="PayloadContent">
-				  <Block name="IPv4" ref="IPv4:IPv4">
-						<Block name="Payload">
-							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
-						</Block>
-					</Block>
-				</Block>
-				<Number name="CRC" size="32" endian="big">
-					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv4InVlan"/>
-					</Fixup>
-				</Number>
-			</Block>
-		</Block>
-	</DataModel>
-	
 	<DataModel name="IPv4TCPv4InVlan">
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
@@ -890,17 +883,39 @@
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv4TCPInVlan"/>
+						<Param name="ref" value="IPv4TCPv4InVlan"/>
 					</Fixup>
 				</Number>
 			</Block>
 		</Block>
 	</DataModel>
 	
-	<DataModel name="IPv6TCPv6InVlan">
+	<DataModel name="IPv4InVlan">
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="0800" />
+				<!-- This takes the normal payload and overrides it with this payload -->
+				<Block name="PayloadContent">
+				  <Block name="IPv4" ref="IPv4:IPv4">
+						<Block name="Payload">
+							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv4InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	
+	<DataModel name="IPv6TCPv6InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
 				<!-- This takes the normal payload and overrides it with this payload -->
 				<Block name="PayloadContent" ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
@@ -925,7 +940,7 @@
 			</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv4TCPInVlan"/>
+						<Param name="ref" value="IPv6TCPv6InVlan"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -937,10 +952,10 @@
 				<Blob name="Type" valueType="hex" value="0800" />
 				<!-- This takes the normal payload and overrides it with this payload -->
 				<Block name="PayloadContent" ref="IPv4:IPv4">
-					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="17"/>
+					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="Payload">
 						<Block name="UDPHeader" ref="UDP:UDPHeader">
-							<Number name="CheckSum" size="16" endian="big">
+							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
 									<Param name="src" value="##SourceIPv4##" />
@@ -955,7 +970,7 @@
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv4TCPInVlan"/>
+						<Param name="ref" value="IPv4UDPv4InVlan"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -965,18 +980,18 @@
 	<DataModel name="IPv6UDPv6InVlan">
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
-				<Blob name="Type" valueType="hex" value="0800" />
+				<Blob name="Type" valueType="hex" value="86dd" />
 				<!-- This takes the normal payload and overrides it with this payload -->
 				<Block name="PayloadContent" ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
 					</Number>
-					<Number name="Header.NextHeader" value="06"/>
+					<Number name="Header.NextHeader" value="17"/>
 				</Block>
 				<Block name="Payload">
 					<Block name="UDPHeader" ref="UDP:UDPHeader">
-						<Number name="CheckSum" size="16" endian="big">
-							<Fixup class="UDPChecksumFixup" endian="network">
+						<Number name="Checksum" size="16" endian="big">
+							<Fixup class="UDPChecksumFixup"> 
 								<Param name="ref" value="UDPHeader" />
 								<Param name="src" value="##SourceIPv6##" />
 								<Param name="dst" value="##TargetIPv6##" />
@@ -990,7 +1005,7 @@
 			</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv4TCPInVlan"/>
+						<Param name="ref" value="IPv6UDPv6InVlan"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -1019,9 +1034,9 @@
 			<Action type="output">
 				<DataModel ref="IPv6HopByHopInVlan"/>
 			</Action>
-			<Action type="output">
+			<!--<Action type="output">
 				<DataModel ref="IPv6JumbogramInVlan"/>
-			</Action>
+			</Action>-->
 			<Action type="output">
 				<DataModel ref="IPv6Fragment1InVlan"/>
 			</Action>
@@ -1078,6 +1093,9 @@
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv4InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv4TCPv4InVlan"/>
 			</Action>
 			<Action type="output">
 				<DataModel ref="IPv6TCPv6InVlan"/>
