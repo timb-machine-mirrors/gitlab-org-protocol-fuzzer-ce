@@ -846,7 +846,13 @@
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="0800" />
 				<!-- This takes the normal payload and overrides it with this payload -->
-				<Block name="PayloadContent" ref="IPv4:IPv4Packet"/>
+				<Block name="PayloadContent">
+				  <Block name="IPv4" ref="IPv4:IPv4">
+						<Block name="Payload">
+							<Blob value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+						</Block>
+					</Block>
+				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
 						<Param name="ref" value="IPv4InVlan"/>
@@ -873,7 +879,7 @@
 								</Fixup>
 							</Number>
 							<Block name="TCPData">
-								<Blob value="Hello">
+								<Blob value="Hello"/>
 							</Block>
 						</Block>
 					</Block>
@@ -908,7 +914,7 @@
 							</Fixup>
 						</Number>
 						<Block name="TCPData">
-							<Blob value="Hello">
+							<Blob value="Hello"/>
 						</Block>
 					</Block>
 				</Block>
@@ -919,7 +925,6 @@
 					</Fixup>
 				</Number>
 			</Block>
-		</Block>
 	</DataModel>
 	
 	<DataModel name="IPv4UDPv4InVlan">
@@ -939,7 +944,7 @@
 								</Fixup>
 							</Number>
 							<Block name="UDPData">
-								<Blob value="Hello">
+								<Blob value="Hello"/>
 							</Block>
 						</Block>
 					</Block>
@@ -974,7 +979,7 @@
 							</Fixup>
 						</Number>
 						<Block name="UDPData">
-							<Blob value="Hello">
+							<Blob value="Hello"/>
 						</Block>
 					</Block>
 				</Block>
@@ -985,7 +990,6 @@
 					</Fixup>
 				</Number>
 			</Block>
-		</Block>
 	</DataModel>
 
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
