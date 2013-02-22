@@ -1011,8 +1011,83 @@
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-				<DataModel ref="##TestType##"/>
+				<DataModel ref="IPv6EmptyPacketInVlan"/>
 			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6HopByHopInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6JumbogramInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6Fragment1InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6Fragment2InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6Fragment3InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6DestinationOptionsInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBRRInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTIInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTIInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBUInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBAInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBEInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6RoutingType2HeaderInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPHomeAgentAddressDiscoveryRequestInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPHomeAgentAddressDiscoveryReplyInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPPrefixSolicitationInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPPrefixAdvertisementInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6ICMPRouterAdvertismentInVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv4InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6TCPv6InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv4UDPv4InVlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6UDPv6InVlan"/>
+			</Action>			
 		</State>
 	</StateModel>
 
