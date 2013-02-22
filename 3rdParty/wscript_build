@@ -8,6 +8,7 @@ bld.read_csshlib('Telerik.OpenAccess.dll',                  paths=['OpenAccess O
 bld.read_csshlib('Telerik.OpenAccess.35.Extensions.dll',    paths=['OpenAccess ORM/bin'])
 bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
 bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
+bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
 
 bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
