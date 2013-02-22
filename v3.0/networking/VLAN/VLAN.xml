@@ -51,17 +51,17 @@
 	</DataModel>
 
 	<DataModel name="IPv6EmptyPacketInVlan">
-		<Block ref="VLAN">
+		<Block name="ThisVLAN" ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="86dd" />
 				<Block  name="PayloadIPv6Header" ref="IPv6:IPv6Header"/>
-				<Block ref="IPv6:IPv6Header">
+				<Block name="IPv6Header" ref="IPv6:IPv6Header">
 					<Number name="Header.NextHeader" value="59"/>
 					<Number name="Header.PayloadLength" value="0" size="16"/>
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv6ICMPInVlan"/>
+						<Param name="ref" value="IPv6EmptyPacketInVlan"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -231,7 +231,7 @@
 				<Block name="Payload">
 					<Block ref="IPv6:DestinationOptions">
 						<Block name="Options">
-							<Block ref="TLV" name="HomeAddressOption">
+							<Block ref="IPv6:TLV" name="HomeAddressOption">
 								<Number name="Type" size="8" endian="big" value="201"/>
 								<Block name="Value">
 									<Blob length="16" valueType="hex"/>
@@ -476,20 +476,20 @@
 					</Flags>
 					<Number name="Lifetime" size="16" signed="false"/>
 					<Block name="MobilityOptions">
-						<Block name="NonceIndices" ref="TLV">
+						<Block name="NonceIndices" ref="IPv6:TLV">
 							<Number name="Type" size="8" endian="big" value="4"/>
 							<Block name="Value">
 								<Number name="HomeNonceIndex" size="16"/>
 								<Number name="CareNonceIndex" size="16"/>
 							</Block>
 						</Block>
-						<Block name="AltCareofAddress" ref="TLV">
+						<Block name="AltCareofAddress" ref="IPv6:TLV">
 							<Number name="Type" size="8" endian="big" value="3"/>
 							<Block name="Value">
 								<Blob name="AltCareAddress" length="16"/>
 							</Block>
 						</Block>
-						<Block name="BindingAuthData" ref="TLV">
+						<Block name="BindingAuthData" ref="IPv6:TLV">
 							<Number name="Type" size="8" endian="big" value="5"/>
 							<Block name="Value">
 								<Blob name="Authenticator" length="12" valueType="hex"/>
@@ -539,14 +539,14 @@
 					<Number name="Sequnce" size="16" signed="false"/>
 					<Number name="Lifetime" size="16" signed="false"/>
 					<Block name="MobilityOptions">
-						<Block name="BindingRefreshAdvice" ref="TLV">
+						<Block name="BindingRefreshAdvice" ref="IPv6:TLV">
 							<Number name="Type" size="8" endian="big" value="2"/>
 							<Number name="Length" size="8" endian="big" value="2"/>
 							<Block name="Value">
 								<Number name="RefreshInterval" size="16" endian="big"/> 
 							</Block>
 						</Block>
-						<Block name="BindingAuthData" ref="TLV">
+						<Block name="BindingAuthData" ref="IPv6:TLV">
 							<Number name="Type" size="8" endian="big" value="5"/>
 							<Number name="Length" size="8" endian="big">
 								<Relation type="size" of="Value"/>
