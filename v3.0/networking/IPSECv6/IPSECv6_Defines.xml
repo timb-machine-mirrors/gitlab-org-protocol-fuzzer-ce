@@ -12,6 +12,8 @@
 		<Define key="SourceIPv4" value="192.168.2.13"/>
 		<Define key="TargetIPv6" value="::1"/>
 		<Define key="SourceIPv6" value="::1"/>
+		<Define key="CryptoKey" value="41414141414141414141414141414141"/>
+		<Define key="AuthKey" value=""/>
 	</All>
 		
 	<Linux platform="linux">

@@ -73,7 +73,8 @@
 						<Blob name="NextHeader" valueType="hex" length="1" value="01"/>
 					</Block>
 					<Transformer class="Aes128">											
-						<Param name="Key" value="000000000000000000000000000000000000000000000000"/>
+						<!-- <Param name="Key" value="000000000000000000000000000000000000000000000000"/> -->
+						<Param name="Key" value="##CryptoKey##"/>
 						<Param name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV -->
 						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
 					</Transformer>
@@ -917,7 +918,8 @@
 			<Blob valueType="hex" name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
 				<Block ref="IPv6Header">
 					<Transformer class="Aes128">
-						<Param name="Key" value="7465737470617373776f7264646f6e65"/>
+						<!-- <Param name="Key" value="7465737470617373776f7264646f6e65"/> -->
+						<Param name="Key" value="##CryptoKey##"/>
 						<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/> <!--AES128 IV -->
 						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
 					</Transformer>

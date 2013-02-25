@@ -1,15 +1,19 @@
 <PitDefines>
-  <Platform>
-    <Define key="Interface" value="eth1"/>
-    <Define key="LoggerPath"  value="./logs/vlan/"/> 
+  <All>
+    <!-- <Define key="Interface" value="eth1"/> -->
+    <Define key="Interface" value="lo"/>
+    <Define key="LoggerPath"  value="logs/vlan/"/> 
     <Define key="SourceMAC" value="6805ca0589fe" />
-    <Define key="TargetMAC" value="ffffffffffff"/>
+    <Define key="TargetMAC" value="000000000000"/>
 		<Define key="TestType" value="IPv4UDPv4InVlan"/>
 		<Define key="DestMAC" value="f0def113b69d" /> 
-		<Define key="Strategy" value="Random"/>
-		<Define key="TargetIPv4" value="192.168.2.11"/>
-		<Define key="SourceIPv4" value="192.168.2.13"/>
+    <Define key="Strategy"  value="Sequential"/>
+		<!-- <Define key="Strategy" value="Random"/> -->
+    <!-- <Define key="TargetIPv4" value="192.168.2.11"/> -->
+    <!-- <Define key="SourceIPv4" value="192.168.2.13"/> -->
+		<Define key="TargetIPv4" value="127.0.0.1"/>
+		<Define key="SourceIPv4" value="127.0.0.1"/>
 		<Define key="TargetIPv6" value="::0"/>
 		<Define key="SourceIPv6" value="::0"/>
-	</Platform>
+  </All>
 </PitDefines>
