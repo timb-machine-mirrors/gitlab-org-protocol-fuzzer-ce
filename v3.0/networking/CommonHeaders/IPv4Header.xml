@@ -4,42 +4,43 @@
 			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2012 -->
 	
-	<!--###Make sure to set (override) the TotalLength size relation to the entire packet (IPv4Header+Payload)###-->
-	
 	<DataModel name="IPv4Header">
-		<Flags size="16" endian="big">
-			<Flag name="Version" position="0" size="4" valueType="hex" value="04"/>
-			<Flag name="HeaderLength" position="4" size="4" valueType="hex">
-				<Relation type="size" of="IPv4Header" expressionGet="size * 4" expressionSet="size / 4"/>
-			</Flag>
-			<Flag name="DSCP" position="8" size="6" valueType="hex" value="00"/>
-			<Flag name="ECN" position="14" size="2" valueType="hex" value="00"/>
-		</Flags>
-		<Number name="TotalLength" size="16" endian="big" valueType="hex">
-			<!--###Should be set to the entire packet (IPv4Header + Payload)###-->
-			<Relation type="size" of="IPv4Header"/> 
-		</Number>
-		<Number name="Identification" size="16" endian="big" value="0"/>
-		<Flags name="Flags" size="16" endian="big">
-			<Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
-			<Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
-			<Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
-			<Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
-		</Flags>
-		<Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
-		<Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
-		<Number name="Checksum" size="16" endian="big">
-			<Fixup class="checksums.IcmpChecksumFixup">
-				<Param name="ref" value="IPv4Header"/>
-			</Fixup>
-		</Number>
-		<Number name="SrcIP" size="32" endian="big" valueType="hex" value="##SourceIPv4##">
-			<Transformer class="Ipv4StringToOctet" />
-		</Number>
-		<Number name="DestIP" size="32" endian="big" valueType="hex" value="##TargetIPv4##">
-			<Transformer class="Ipv4StringToOctet" />
-		</Number>
-		<Blob name="Options"/>
+		<Block name="Header">
+			<Flags size="16" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="04"/>
+				<Flag name="HeaderLength" position="4" size="4" valueType="hex">
+					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+				</Flag>
+				<Flag name="DSCP" position="8" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="14" size="2" valueType="hex" value="00"/>
+			</Flags>
+			<Number name="TotalLength" size="16" endian="big" valueType="hex">
+				<!--###Should be set to the entire packet (IPv4Header + Payload)###-->
+				<Relation type="size" of="IPv4Header"/> 
+			</Number>
+			<Number name="Identification" size="16" endian="big" value="0"/>
+			<Flags name="Flags" size="16" endian="big">
+				<Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
+				<Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
+				<Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
+				<Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
+			</Flags>
+			<Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
+			<Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
+			<Number name="Checksum" size="16" endian="big">
+				<Fixup class="checksums.IcmpChecksumFixup">
+					<Param name="ref" value="IPv4Header"/>
+				</Fixup>
+			</Number>
+			<Blob name="SrcIP" value="##SourceIPv4##">
+				<Transformer class="Ipv4StringToOctet" />
+			</Blob>
+			<Blob name="DestIP" value="##TargetIPv4##">
+				<Transformer class="Ipv4StringToOctet" />
+			</Blob>
+			<Blob name="Options"/>
+		</Block>
+		<Block name="IPv4Payload"/>
 	</DataModel>
 </Peach>
 <!-- end -->

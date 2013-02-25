@@ -7,7 +7,7 @@
 	<!--###Override Checksum field with:
 			<Number name="Checksum" size="16" endian="big">
         <Fixup class="UDPChecksumFixup">
-          <Param name="ref" value="TCP" />  This should be the entire UDPHeader + Data
+          <Param name="ref" value="UDPHeader" />  This should be the entire UDPHeader + Data
           <Param name="src" value="##SourceIPv4(6)##" />
           <Param name="dst" value="##TargetIPv4(6)##" />
         </Fixup>
@@ -18,10 +18,10 @@
     <Number name="SrcPort" size="16" endian="network"/>
     <Number name="DestPort" size="16" endian="network"/>
     <Number name="Length" size="16" endian="network">
-			<!--###Should be set to the entire packet (UDPHeader + Payload)###-->
       <Relation type="size" of="UDPHeader" />
     </Number>
     <Number name="Checksum" size="16" endian="big"/>
+		<Block name="UdpPayload"/>
   </DataModel>
 </Peach>
 <!-- end -->
