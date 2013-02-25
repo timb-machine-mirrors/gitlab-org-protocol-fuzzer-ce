@@ -22,7 +22,7 @@
 				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
 			</Flags>
 			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
-				<Relation type="size" of="VlanPayload"/>
+				<Relation type="size" of="IpSecPayload"/>
 			</Number>
 			<Number name="NextHeader" size="8" endian="big" value="50"/>
 			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
@@ -32,10 +32,10 @@
 			<Blob name="DestIP" value="##TargetIPv6##" >
 				<Transformer class="Ipv6StringToOctet"/>
 			</Blob>
-			<Block name="VlanPayload">
+			<Block name="IpSecPayload">
 				<Blob valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
 			</Block>
-			<Padding name="Pad" aligned="true" alignment="128" >
+			<Padding name="Pad" alignment="128" >
 				<Fixup class="FillValue">
 					<Param name="ref" value="Pad"/>
 					<Param name="start" value="1"/>
@@ -54,13 +54,13 @@
 		<Block name="ESPHeader">
 			<Blob name="SPI" valueType="hex" length="4" value="00 00 02 01" />
 			<Number name="Sequence" size="32" value="1" endian="big"/>
-				<Blob valueType="hex" name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/>
+				<Blob valueType="hex" name="IV" value="##IV##"/>
 				<Block name="EncryptedValues">
 					<Block name="GetPaddingSize">
-						<Block name="VlanPayload">
+						<Block name="IpSecPayload">
 							<!--<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>-->
 						</Block>
-						<Padding name="Pad" aligned="true" alignment="128" >
+						<Padding name="Pad" alignment="128" >
 							<Fixup class="FillValue">
 								<Param name="ref" value="Pad"/>
 								<Param name="start" value="1"/>
@@ -73,25 +73,23 @@
 						<Blob name="NextHeader" valueType="hex" length="1" value="01"/>
 					</Block>
 					<Transformer class="Aes128">											
-						<!-- <Param name="Key" value="000000000000000000000000000000000000000000000000"/> -->
 						<Param name="Key" value="##CryptoKey##"/>
-						<Param name="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV -->
-						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
+						<Param name="IV" value="##IV##"/>
 					</Transformer>
 				</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
-		<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
-			<Fixup class="SHA1Fixup">
+			<Fixup class="HMAC">
 				<Param name="ref" value="ESPHeader"/>
+				<Param name="Key" value="##AuthKey##"/>
+				<Param name="Hash" value="HMACSHA1"/>
 			</Fixup>
-		-->
 		</Blob>
 	</DataModel>
 
 	<DataModel name="IPv6EmptyPacketIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block  name="PayloadIPv6Header" ref="IPv6:IPv6Header"/>
 				<Block name="IPv6Header" ref="IPv6:IPv6Header">
 					<Number name="Header.NextHeader" size="8" endian="big" value="59"/>
@@ -104,7 +102,7 @@
 
 	<DataModel name="IPv6ICMPIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -132,7 +130,7 @@
 	
 	<DataModel name="IPv6HopByHopIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -147,7 +145,7 @@
 	
 	<DataModel name="IPv6JumbogramIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -163,7 +161,7 @@
 	<DataModel name="IPv6Fragment1IPSECv6Transport">
 		<!-- This may be brken -->
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -189,7 +187,7 @@
 	<DataModel name="IPv6Fragment2IPSECv6Transport">
 		<!-- This may be brken -->
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -215,7 +213,7 @@
 	<DataModel name="IPv6Fragment3IPSECv6Transport">
 		<!-- This may be brken -->
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
@@ -241,7 +239,7 @@
 	
 	<DataModel name="IPv6DestinationOptionsIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -259,7 +257,7 @@
 							</Block>
 						</Block>
 					</Block>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="59"/>
@@ -268,7 +266,7 @@
 	
 	<DataModel name="IPv6MobileBRRIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -291,7 +289,7 @@
 					</Block>
 					<Number name="Reserved" size="16"/>
 					<Block name="MobilityOptions"/>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -300,7 +298,7 @@
 	
 	<DataModel name="IPv6MobileHoTIIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -325,7 +323,7 @@
 					<Number name="HomeInitCookie" size="64"/>
 					<Block name="MobilityOptions">
 					</Block>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -334,7 +332,7 @@
 	
 	<DataModel name="IPv6MobileCoTIIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -358,7 +356,7 @@
 					<Number name="Reserved" size="16"/>
 					<Number name="CareInitCookie" size="64"/>
 					<Block name="MobilityOptions"/>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -367,7 +365,7 @@
 	
 	<DataModel name="IPv6MobileHoTIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -392,7 +390,7 @@
 					<Number name="HomeInitCookie" size="64"/>
 					<Number name="HomeKeygenToken" size="64"/>
 					<Block name="MobilityOptions"/>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -401,7 +399,7 @@
 	
 	<DataModel name="IPv6MobileCoTIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -426,7 +424,7 @@
 					<Number name="CareInitCookie" size="64"/>
 					<Number name="CareKeygenToken" size="64"/>
 					<Block name="MobilityOptions"/>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -435,7 +433,7 @@
 	
 	<DataModel name="IPv6MobileBUIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -486,7 +484,7 @@
 							</Block>
 						</Block>
 					</Block>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -495,7 +493,7 @@
 
 	<DataModel name="IPv6MobileBAIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -541,7 +539,7 @@
 							</Block>
 						</Block>
 					</Block>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -550,7 +548,7 @@
 	
 	<DataModel name="IPv6MobileBEIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -575,7 +573,7 @@
 					<Number name="Reserved" size="8"/>
 					<Blob name="HomeAddress" length="16"/>
 					<Block name="MobilityOptions"/>
-					<Padding aligned="true" alignment="64"/>
+					<Padding  alignment="64"/>
 				</Block>	
 			</Block>
 			<Blob name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" value="135"/>
@@ -584,7 +582,7 @@
 	
 	<DataModel name="IPv6RoutingType2HeaderIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -603,7 +601,7 @@
 	
 	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryRequestIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -633,7 +631,7 @@
 	
 	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryReplyIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -667,7 +665,7 @@
 	
 	<DataModel name="IPv6ICMPPrefixSolicitationIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -697,7 +695,7 @@
 	
 	<DataModel name="IPv6ICMPPrefixAdvertisementIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -734,7 +732,7 @@
 	
 	<DataModel name="IPv6ICMPRouterAdvertismentIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -790,7 +788,7 @@
 	
 	<DataModel name="IPv4TCPv4IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
 					<Block name="Payload">
@@ -815,7 +813,7 @@
 	
 	<DataModel name="IPv4IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent">
 				  <Block name="IPv4" ref="IPv4:IPv4">
 						<Block name="Payload">
@@ -831,7 +829,7 @@
 	
 	<DataModel name="IPv6TCPv6IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent" ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -859,7 +857,7 @@
 	
 	<DataModel name="IPv4UDPv4IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="Payload">
@@ -884,7 +882,7 @@
 	
 	<DataModel name="IPv6UDPv6IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
-			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.VlanPayload">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent" ref="IPv6:IPv6Header">
 					<Number name="Header.PayloadLength" size="16" endian="big">
 						<Relation type="size" of="Payload" />
@@ -915,21 +913,22 @@
 		<Block name="ESPHeader">
 			<Blob name="SPI" valueType="hex" length="4" value="ad3436b6" />
 			<Number name="Sequence" size="32" value="1" endian="network"/>
-			<Blob valueType="hex" name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
+			<Blob valueType="hex" name="IV" value="##IV##"/>
 				<Block ref="IPv6Header">
 					<Transformer class="Aes128">
 						<!-- <Param name="Key" value="7465737470617373776f7264646f6e65"/> -->
 						<Param name="Key" value="##CryptoKey##"/>
-						<Param name="IV" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/> <!--AES128 IV -->
+						<Param name="IV" value="##IV##"/> <!--AES128 IV -->
 						<!--<Param name="IV" value="aeaeaeaeaeaeaeae"/>--> <!--3Des IV -->
 					</Transformer>
 				</Block>
 		</Block>
 		<Blob name="ICV" valueType="hex">
-			<!--UnComment for SHA or change to 			<Fixup class="SHA256Fixup">
-			<Fixup class="SHA1Fixup">
+			<Fixup class="HMAC">
 				<Param name="ref" value="ESPHeader"/>
-			</Fixup>-->
+				<Param name="Key" value="##AuthKey##"/>
+				<Param name="Hash" value="HMACSHA1"/>
+			</Fixup>
 		</Blob>
 	</DataModel>
 	
