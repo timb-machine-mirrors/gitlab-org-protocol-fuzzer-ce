@@ -59,7 +59,6 @@
 				<Block name="EncryptedValues">
 					<Block name="GetPaddingSize">
 						<Block name="IpSecPayload"/>
-						<!--	<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>-->
 						<Padding name="Pad" alignment="128" >
 							<Fixup class="FillValue">
 								<Param name="ref" value="Pad"/>
@@ -906,26 +905,879 @@
 		</Block>
 	</DataModel>
 	
-	<!--Data model for IPSECv6 w/ ESP Tunnel-->
-	<DataModel name="IPSECv6Tunnel">
-		<Block name="ESPHeader">
-			<Blob name="SPI" valueType="hex" length="4" value="ad3436b6" />
-			<Number name="Sequence" size="32" value="1" endian="network"/>
-			<Blob valueType="hex" name="IV" value="##IV##"/>
-				<Block ref="IPv6Header">
-					<Transformer class="Aes128">
-						<Param name="Key" value="##CryptoKey##"/>
-						<Param name="IV" value="##IV##"/> <!--AES128 IV -->
-					</Transformer>
+	<!--################TUNNEL##############-->
+	
+	<DataModel name="IPv6EmptyPacketIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block name="IPv6Header" ref="IPv6:IPv6Header">
+							<Number name="NextHeader" size="8" endian="big" value="59"/>
+							<Number name="PayloadLength" value="0" size="16"/>
+						</Block>
+					</Block>
 				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
-		<Blob name="ICV" valueType="hex">
-			<Fixup class="HMAC">
-				<Param name="ref" value="ESPHeader"/>
-				<Param name="Key" value="##AuthKey##"/>
-				<Param name="Hash" value="HMACSHA1"/>
-			</Fixup>
-		</Blob>
+	</DataModel>
+
+	<DataModel name="IPv6ICMPIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="58"/>
+							<Block name="IPv6Payload">
+								<Number name="Type" size="8"  value="128" endian="big"/>
+								<Number name="Code" size="8"/>
+								<Number name="Checksum" size="16" endian="big">
+									<Fixup class="IcmpV6ChecksumFixup">
+										<Param name="ref" value="IPv6Payload" />
+										<Param name="src" value="##SourceIPv6##" />
+										<Param name="dst" value="##TargetIPv6##" />
+									</Fixup>
+								</Number>
+								<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+								<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+								<Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6HopByHopIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="0"/>
+							<Block name="IPv6Payload" ref="IPv6:HopByHop"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6JumbogramIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="0"/>
+							<Block name="IPv6Payload" ref="IPv6:JumboFrame"/>
+						</Block>	
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment1IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="44"/>
+							<Block name="IPv6Payload">
+								<Block ref="IPv6:Fragment">
+									<Flags name="Flags" size="16" endian="big">
+										<Flag name="Offset" size="13" position="0" value="0"/>
+										<Flag name="Res" size="2" position="13"/>
+										<Flag name="Mflag" size="1" position="15" value="1"/>
+									</Flags>
+									<Number name="Identification" size="32" endian="big" value="374625"/>
+								</Block>
+								<Blob name="Data" length="12"/>
+							</Block>
+						</Block>	
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment2IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="44"/>
+							<Block name="IPv6Payload">
+								<Block ref="IPv6:Fragment">
+									<Flags name="Flags" size="16" endian="big">
+										<Flag name="Offset" size="13" position="0" value="12"/>
+										<Flag name="Res" size="2" position="13"/>
+										<Flag name="Mflag" size="1" position="15" value="1"/>
+									</Flags>
+									<Number name="Identification" size="32" endian="big" value="374625"/>
+								</Block>
+								<Blob name="Data" length="12"/>
+							</Block>
+						</Block>	
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment3IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="44"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="24"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="0"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
+					</Block>
+				</Block>	
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6DestinationOptionsIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="60"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:DestinationOptions">
+							<Block name="Options">
+								<Block ref="IPv6:TLV" name="HomeAddressOption">
+									<Number name="Type" size="8" endian="big" value="201"/>
+									<Number name="Length" size="8">
+										<Relation type="size" of="Value"/>
+									</Number>
+									<Block name="Value">
+										<Blob length="16" valueType="hex"/>
+									</Block>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>				
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBRRIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBRRIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTIIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="1"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileHoTIIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Number name="HomeInitCookie" size="64"/>
+						<Block name="MobilityOptions">
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoTIIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="2"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileCoTIIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Number name="CareInitCookie" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="3"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileHoTIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="HomeNonceIndex" size="16"/>
+						<Number name="HomeInitCookie" size="64"/>
+						<Number name="HomeKeygenToken" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoTIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="4"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileCoTIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="CareNonceIndex" size="16"/>
+						<Number name="CareInitCookie" size="64"/>
+						<Number name="CareKeygenToken" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBUIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="5"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBUIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Sequence" size="16" signed="false"/>
+						<Flags size="16" endian="big">
+							<Flag name="A" size="1" position="0"/>
+							<Flag name="H" size="1" position="1"/>
+							<Flag name="L" size="1" position="2"/>
+							<Flag name="K" size="1" position="3"/>
+							<Flag name="Reserved" size="12" position="4"/>
+						</Flags>
+						<Number name="Lifetime" size="16" signed="false"/>
+						<Block name="MobilityOptions">
+							<Block name="NonceIndices" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="4"/>
+								<Block name="Value">
+									<Number name="HomeNonceIndex" size="16"/>
+									<Number name="CareNonceIndex" size="16"/>
+								</Block>
+							</Block>
+							<Block name="AltCareofAddress" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="3"/>
+								<Block name="Value">
+									<Blob name="AltCareAddress" length="16"/>
+								</Block>
+							</Block>
+							<Block name="BindingAuthData" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="5"/>
+								<Block name="Value">
+									<Blob name="Authenticator" length="12" valueType="hex"/>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>					
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileBAIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="6"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBAIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Status" size="8" signed="false"/>
+						<Flags size="8" endian="big">
+							<Flag name="K" size="1" position="0"/>
+							<Flag name="Reserved" size="7" position="1"/>
+						</Flags>
+						<Number name="Sequnce" size="16" signed="false"/>
+						<Number name="Lifetime" size="16" signed="false"/>
+						<Block name="MobilityOptions">
+							<Block name="BindingRefreshAdvice" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="2"/>
+								<Number name="Length" size="8" endian="big" value="2"/>
+								<Block name="Value">
+									<Number name="RefreshInterval" size="16" endian="big"/> 
+								</Block>
+							</Block>
+							<Block name="BindingAuthData" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="5"/>
+								<Number name="Length" size="8" endian="big">
+									<Relation type="size" of="Value"/>
+								</Number>
+								<Block name="Value">
+									<Blob name="Authenticator" length="12" valueType="hex"/>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBEIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="7"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBEIPSECv6Tunnel"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Status" size="8" signed="false"/>
+						<Number name="Reserved" size="8"/>
+						<Blob name="HomeAddress" length="16"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>				
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6RoutingType2HeaderIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="43"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileRoutingType2Header">
+							<Number name="NextHeader" size="8" endian="big" value="59"/>
+						</Block>	
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryRequestIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="144"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>	
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryReplyIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="145"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>
+						</Block>
+						<Block name="HomeAgentAddresses">
+							<Blob name="Address1" length="16" valueType="hex"/>
+							<Blob name="Address2" length="16" valueType="hex"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPPrefixSolicitationIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="146"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>				
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPPrefixAdvertisementIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="147"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Flags size="16">
+									<Flag name="M" size="1" position="0"/>
+									<Flag name="O" size="1" position="1"/>
+									<Flag name="Reserved" size="14" position="2"/>
+								</Flags>
+							</Block>
+							<Block name="Options">
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>	
+	
+	<DataModel name="IPv6ICMPRouterAdvertismentIPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileICMPRouterAdvertisement">
+							<Number name="Type" size="8" endian="big" value="134"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Flags name="Flags" size="8">
+								<Flag name="M" size="1" position="0"/>
+								<Flag name="O" size="1" position="1"/>
+								<Flag name="H" size="1" position="2"/>
+								<Flag name="Reserved" size="5" position="3"/>
+							</Flags>
+							<Block name="Options">
+								<Block name="PrefixInformation">
+									<Number name="Type" size="8" endian="big" value="3"/>
+									<Number name="Length" size="8" endian="big" value="4"/>
+									<Number name="PrefixLength" size="8" endian="big"/>
+									<Flags size="8" endian="big">
+										<Flag name="L" size="1" position="0"/>
+										<Flag name="A" size="1" position="1"/>
+										<Flag name="R" size="1" position="2"/>
+										<Flag name="Reserved" size="5" position="3"/>
+									</Flags>
+									<Number name="ValidLifeTime" size="32" endian="big" signed="false"/>
+									<Number name="PreferredLifetime" size="32" endian="big" signed="false"/>
+									<Number name="Reserved2" size="32" endian="big"/>
+									<Blob name="Prefix" length="16" valueType="hex"/>
+								</Block>
+								<Block name="AdvertisementInterval">
+									<Number name="Type" size="8" endian="big" value="7"/>
+									<Number name="Length" size="8" endian="big" value="1"/>
+									<Number name="Reserved" size="16" endian="big"/>
+									<Number name="AdvertisementInterval" size="32" endian="big"/>
+								</Block>
+							</Block>
+						</Block>
+					</Block>
+				</Block>				
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4TCPv4IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block name="PayloadContent" ref="IPv4:IPv4Header">
+					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
+					<Block name="IPv4Payload">
+						<Block name="TCP" ref="TCP:TCPHeader">
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="TCPChecksumFixup">
+									<Param name="ref" value="TCP" />
+									<Param name="src" value="##SourceIPv4##" />
+									<Param name="dst" value="##TargetIPv4##" />
+								</Fixup>
+							</Number>
+							<Block name="TcpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="04"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block name="PayloadContent">
+				  <Block name="IPv4" ref="IPv4:IPv4Header">
+						<Block name="IPv4Payload">
+							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="04"/>
+		</Block>
+	</DataModel>
+	
+	
+	<DataModel name="IPv6TCPv6IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block name="PayloadContent" ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="06"/>
+					<Block name="IPv6Payload">
+						<Block name="TCP" ref="TCP:TCPHeader">
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="TCPChecksumFixup">
+									<Param name="ref" value="TCP" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
+								</Fixup>
+							</Number>
+							<Block name="TcpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4UDPv4IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block name="PayloadContent" ref="IPv4:IPv4Header">
+					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
+					<Block name="IPv4Payload">
+						<Block name="UDPHeader" ref="UDP:UDPHeader">
+							<Number name="Header.Checksum" size="16" endian="big">
+								<Fixup class="UDPChecksumFixup">
+									<Param name="ref" value="UDPHeader" />
+									<Param name="src" value="##SourceIPv4##" />
+									<Param name="dst" value="##TargetIPv4##" />
+								</Fixup>
+							</Number>
+							<Block name="UdpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="4"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6UDPv6IPSECv6Tunnel">
+		<Block ref="IPSECv6Transport">
+			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="41"/>
+					<Block name="IPv6Payload">
+						<Block name="PayloadContent" ref="IPv6:IPv6Header">
+							<Number name="PayloadLength" size="16" endian="big">
+								<Relation type="size" of="IPv6Payload" />
+							</Number>
+							<Number name="NextHeader" size="8" endian="big" value="17"/>
+							<Block name="IPv6Payload">
+								<Block name="UDPHeader" ref="UDP:UDPHeader">
+									<Number name="Header.Checksum" size="16" endian="big">
+										<Fixup class="UDPChecksumFixup"> 
+											<Param name="ref" value="UDPHeader" />
+											<Param name="src" value="##SourceIPv6##" />
+											<Param name="dst" value="##TargetIPv6##" />
+										</Fixup>
+									</Number>
+									<Block name="UdpPayload">
+										<Blob value="Hello"/>
+									</Block>
+								</Block>
+							</Block>
+						</Block>	
+					</Block>
+			</Block>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+		</Block>
 	</DataModel>
 	
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
