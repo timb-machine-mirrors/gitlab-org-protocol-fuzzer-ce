@@ -1090,7 +1090,7 @@
 							<Number name="MH" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileBRRIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileBRRIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1122,7 +1122,7 @@
 							<Number name="MH" size="8" endian="big" value="1"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileHoTIIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileHoTIIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1156,7 +1156,7 @@
 							<Number name="MH" size="8" endian="big" value="2"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileCoTIIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileCoTIIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1189,7 +1189,7 @@
 							<Number name="MH" size="8" endian="big" value="3"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileHoTIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileHoTIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1223,7 +1223,7 @@
 							<Number name="MH" size="8" endian="big" value="4"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileCoTIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileCoTIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1257,7 +1257,7 @@
 							<Number name="MH" size="8" endian="big" value="5"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileBUIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileBUIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1317,7 +1317,7 @@
 							<Number name="MH" size="8" endian="big" value="6"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileBAIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileBAIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
@@ -1372,7 +1372,7 @@
 							<Number name="MH" size="8" endian="big" value="7"/>
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
-									<Param name="ref" value="IPv6MobileBEIPSECv6Transport"/>
+									<Param name="ref" value="IPv6MobileBEIPSECv6Tunnel"/>
 									<Param name="src" value="##SourceIPv6##"/>
 									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
