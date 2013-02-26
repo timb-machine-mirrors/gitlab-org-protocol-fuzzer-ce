@@ -76,7 +76,7 @@
           <Number name="Code" size="8"/>
           <Number name="Checksum"  endian="big" size="16">
             <Fixup class="IcmpV6ChecksumFixup">
-              <Param name="ref" value="Payload" />
+              <Param name="ref" value="IPv6Payload" />
               <Param name="src" value="##SourceIPv6##" />
               <Param name="dst" value="##TargetIPv6##" />
             </Fixup>
@@ -140,7 +140,7 @@
 				<Blob name="Type" valueType="hex" value="86dd" />
 				<Block ref="IPv6:IPv6Header">
 					<Number name="PayloadLength" size="16" endian="big">
-						<Relation type="size" of="Payload" />
+						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="44"/>
 				</Block>
