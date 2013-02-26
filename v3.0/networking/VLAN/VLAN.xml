@@ -910,7 +910,7 @@
 				</Block>
 				<Block name="IPv6Payload">
 					<Block name="TCP" ref="TCP:TCPHeader">
-						<Number name="TCPHeader.Checksum" size="16" endian="big">
+						<Number name="Checksum" size="16" endian="big">
 							<Fixup class="TCPChecksumFixup">
 								<Param name="ref" value="TCP" />
 								<Param name="src" value="##SourceIPv6##" />
