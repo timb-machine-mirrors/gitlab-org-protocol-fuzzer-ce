@@ -256,7 +256,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="60"/>
 		</Block>
 	</DataModel>
 	
