@@ -83,6 +83,7 @@
 				<Param name="ref" value="ESPHeader"/>
 				<Param name="Key" value="##AuthKey##"/>
 				<Param name="Hash" value="HMACSHA1"/>
+				<Param name="Length" value="12"/>
 			</Fixup>
 		</Blob>
 	</DataModel>
@@ -95,7 +96,7 @@
 					<Number name="PayloadLength" value="0" size="16"/>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="59"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 
@@ -123,7 +124,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="58"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -153,7 +154,7 @@
 					<Block name="IPv6Payload" ref="IPv6:JumboFrame"/>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="0"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -178,7 +179,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="44"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -203,7 +204,7 @@
 					</Block>
 				</Block>					
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="44"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -228,7 +229,7 @@
 					</Block>
 				</Block>	
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="44"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -255,7 +256,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="59"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -287,7 +288,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -321,7 +322,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -354,7 +355,7 @@
 					</Block>	
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -388,7 +389,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -422,7 +423,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -482,7 +483,7 @@
 					</Block>
 				</Block>					
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 
@@ -537,7 +538,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -571,7 +572,7 @@
 					</Block>	
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -590,7 +591,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="43"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -620,7 +621,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="58"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -654,7 +655,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="58"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -684,7 +685,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="135"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -720,7 +721,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="58"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>	
 	
@@ -776,7 +777,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="58"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -801,7 +802,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="06"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="04"/>
 		</Block>
 	</DataModel>
 	
@@ -816,7 +817,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="01"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="04"/>
 		</Block>
 	</DataModel>
 	
@@ -845,7 +846,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="06"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -856,7 +857,7 @@
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
 						<Block name="UDPHeader" ref="UDP:UDPHeader">
-							<Number name="Checksum" size="16" endian="big">
+							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
 									<Param name="src" value="##SourceIPv4##" />
@@ -870,7 +871,7 @@
 					</Block>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="17"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="4"/>
 		</Block>
 	</DataModel>
 	
@@ -884,7 +885,7 @@
 					<Number name="NextHeader" size="8" endian="big" value="17"/>
 					<Block name="IPv6Payload">
 						<Block name="UDPHeader" ref="UDP:UDPHeader">
-							<Number name="Checksum" size="16" endian="big">
+							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup"> 
 									<Param name="ref" value="UDPHeader" />
 									<Param name="src" value="##SourceIPv6##" />
@@ -898,7 +899,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="17"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
