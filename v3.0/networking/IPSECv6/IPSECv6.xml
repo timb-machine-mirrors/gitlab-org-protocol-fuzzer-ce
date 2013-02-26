@@ -10,6 +10,45 @@
 	
 	<Include ns="TCP" src="file:##Path##/CommonHeaders/TCPHeader.xml"/>
 	<Include ns="UDP" src="file:##Path##/CommonHeaders/UDPHeader.xml"/>
+	
+	
+	<!--IPv6 Header used for Tunneling-->
+	<DataModel name="IPv6Header">
+		<Block name="Header">
+			<Blob length="16"/>
+					<Flags size="32" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+			</Flags>
+			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
+				<Relation type="size" of="IpSecPayload"/>
+			</Number>
+			<Number name="NextHeader" size="8" endian="big" value="50"/>
+			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
+			<Blob name="SrcIP" value="##SourceIPv6##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="DestIP" value="##TargetIPv6##" >
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Block name="IpSecPayload">
+				<Blob valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
+			</Block>
+			<Padding name="Pad" alignment="128" >
+				<Fixup class="FillValue">
+					<Param name="ref" value="Pad"/>
+					<Param name="start" value="1"/>
+					<Param name="stop" value="15"/>
+				</Fixup>
+			</Padding>
+			<Number name="PadLength" size="8" endian="big">
+				<Relation type="size" of="Pad"/>
+			</Number>
+			<Blob name="NextHeader2" valueType="hex" length="1" value="11"/>
+		</Block>
+	</DataModel>
 
 	<!--Data model for IPSECv6 w/ ESP Tunnel-->
 	<DataModel name="IPSECv6Tunnel">
@@ -20,7 +59,8 @@
 				<Block name="EncryptedValues">
 					<Block name="GetPaddingSize">
 						<Block name="IpSecPayload"/>
-						<Padding name="Pad" alignment="128">
+						<!--	<Blob name="Payload" valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>-->
+						<Padding name="Pad" alignment="128" >
 							<Fixup class="FillValue">
 								<Param name="ref" value="Pad"/>
 								<Param name="start" value="1"/>
@@ -99,7 +139,7 @@
 					<Block name="IPv6Payload" ref="IPv6:HopByHop"/>
 				</Block>
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="0"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
@@ -863,8 +903,27 @@
 		</Block>
 	</DataModel>
 	
-	<!--####ESP Tunnel Header####-->
-	
+	<!--Data model for IPSECv6 w/ ESP Tunnel-->
+	<!--<DataModel name="IPSECv6Tunnel">
+		<Block name="ESPHeader">
+			<Blob name="SPI" valueType="hex" length="4" value="ad3436b6" />
+			<Number name="Sequence" size="32" value="1" endian="network"/>
+			<Blob valueType="hex" name="IV" value="##IV##"/>
+				<Block ref="IPv6Header">
+					<Transformer class="Aes128">
+						<Param name="Key" value="##CryptoKey##"/>
+						<Param name="IV" value="##IV##"/>
+					</Transformer>
+				</Block>
+		</Block>
+		<Blob name="ICV" valueType="hex">
+			<Fixup class="HMAC">
+				<Param name="ref" value="ESPHeader"/>
+				<Param name="Key" value="##AuthKey##"/>
+				<Param name="Hash" value="HMACSHA1"/>
+			</Fixup>
+		</Blob>
+	</DataModel>-->
 	
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
