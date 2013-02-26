@@ -240,12 +240,15 @@
 					<Number name="PayloadLength" size="16" endian="big">
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
-					<Number name="NextHeader" size="8" endian="big" value="59"/>
+					<Number name="NextHeader" size="8" endian="big" value="60"/>
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:DestinationOptions">
 							<Block name="Options">
 								<Block ref="IPv6:TLV" name="HomeAddressOption">
 									<Number name="Type" size="8" endian="big" value="201"/>
+									<Number name="Length" size="8">
+										<Relation type="size" of="Value"/>
+									</Number>
 									<Block name="Value">
 										<Blob length="16" valueType="hex"/>
 									</Block>
@@ -256,7 +259,7 @@
 					</Block>
 				</Block>				
 			</Block>
-			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="60"/>
+			<Number name="ESPHeader.EncryptedValues.GetPaddingSize.NextHeader" size="8" endian="big" value="41"/>
 		</Block>
 	</DataModel>
 	
