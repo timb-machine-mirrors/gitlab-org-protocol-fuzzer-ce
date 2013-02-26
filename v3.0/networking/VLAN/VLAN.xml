@@ -70,20 +70,20 @@
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
-				</Block>
-				<Block name="IPv6Payload">
-		  		<Number name="Type" size="8"  value="128" endian="network"/>
-          <Number name="Code" size="8"/>
-          <Number name="Checksum"  endian="big" size="16">
-            <Fixup class="IcmpV6ChecksumFixup">
-              <Param name="ref" value="IPv6Payload" />
-              <Param name="src" value="##SourceIPv6##" />
-              <Param name="dst" value="##TargetIPv6##" />
-            </Fixup>
-          </Number>
-          <Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
-          <Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
-          <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+					<Block name="IPv6Payload">
+						<Number name="Type" size="8"  value="128" endian="network"/>
+						<Number name="Code" size="8"/>
+						<Number name="Checksum"  endian="big" size="16">
+							<Fixup class="IcmpV6ChecksumFixup">
+								<Param name="ref" value="IPv6Payload" />
+								<Param name="src" value="##SourceIPv6##" />
+								<Param name="dst" value="##TargetIPv6##" />
+							</Fixup>
+						</Number>
+						<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+						<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+						<Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+					</Block>
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
@@ -103,13 +103,13 @@
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="0"/>
+					<Block name="IPv6Payload" ref="IPv6:HopByHop"/>
+					<Number name="CRC" size="32" endian="big">
+						<Fixup class="checksums.Crc32Fixup">
+							<Param name="ref" value="IPv6HopByHopInVlan"/>
+						</Fixup>
+					</Number>
 				</Block>
-				<Block name="IPv6Payload" ref="IPv6:HopByHop"/>
-				<Number name="CRC" size="32" endian="big">
-					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv6HopByHopInVlan"/>
-					</Fixup>
-				</Number>
 			</Block>
 		</Block>
 	</DataModel>
@@ -123,13 +123,13 @@
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="0"/>
+					<Block name="IPv6Payload" ref="IPv6:JumboFrame"/>
+					<Number name="CRC" size="32" endian="big">
+						<Fixup class="checksums.Crc32Fixup">
+							<Param name="ref" value="IPv6JumbogramInVlan"/>
+						</Fixup>
+					</Number>
 				</Block>
-				<Block name="IPv6Payload" ref="IPv6:JumboFrame"/>
-				<Number name="CRC" size="32" endian="big">
-					<Fixup class="checksums.Crc32Fixup">
-						<Param name="ref" value="IPv6JumbogramInVlan"/>
-					</Fixup>
-				</Number>
 			</Block>
 		</Block>
 	</DataModel>
@@ -143,17 +143,17 @@
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="44"/>
-				</Block>
-				<Block name="IPv6Payload">
-					<Block ref="IPv6:Fragment">
-						<Flags name="Flags" size="16" endian="big">
-							<Flag name="Offset" size="13" position="0" value="0"/>
-							<Flag name="Res" size="2" position="13"/>
-							<Flag name="Mflag" size="1" position="15" value="1"/>
-						</Flags>
-						<Number name="Identification" size="32" endian="big" value="374625"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="0"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="1"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
 					</Block>
-					<Blob name="Data" length="12"/>
 				</Block>
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
@@ -173,18 +173,18 @@
 						<Relation type="size" of="IPv6Payload" />
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="44"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="12"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="1"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
+					</Block>	
 				</Block>
-				<Block name="IPv6Payload">
-					<Block ref="IPv6:Fragment">
-						<Flags name="Flags" size="16" endian="big">
-							<Flag name="Offset" size="13" position="0" value="12"/>
-							<Flag name="Res" size="2" position="13"/>
-							<Flag name="Mflag" size="1" position="15" value="1"/>
-						</Flags>
-						<Number name="Identification" size="32" endian="big" value="374625"/>
-					</Block>
-					<Blob name="Data" length="12"/>
-				</Block>	
 				<Number name="CRC" size="32" endian="big">
 					<Fixup class="checksums.Crc32Fixup">
 						<Param name="ref" value="IPv6Fragment2InVlan"/>
