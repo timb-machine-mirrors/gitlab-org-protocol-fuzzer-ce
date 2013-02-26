@@ -15,5 +15,6 @@
 		<Define key="SourceIPv4" value="127.0.0.1"/>
 		<Define key="TargetIPv6" value="::0"/>
 		<Define key="SourceIPv6" value="::0"/>
+		<Define key="Path" value=".."/>
   </All>
 </PitDefines>

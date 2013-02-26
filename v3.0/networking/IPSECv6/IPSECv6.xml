@@ -10,45 +10,6 @@
 	
 	<Include ns="TCP" src="file:##Path##/CommonHeaders/TCPHeader.xml"/>
 	<Include ns="UDP" src="file:##Path##/CommonHeaders/UDPHeader.xml"/>
-	
-	
-	<!--IPv6 Header used for Tunneling-->
-	<DataModel name="IPv6Header">
-		<Block name="Header">
-			<Blob length="16"/>
-					<Flags size="32" endian="big">
-				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
-				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
-				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
-				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
-			</Flags>
-			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
-				<Relation type="size" of="IpSecPayload"/>
-			</Number>
-			<Number name="NextHeader" size="8" endian="big" value="50"/>
-			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/> 
-			<Blob name="SrcIP" value="##SourceIPv6##" >
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-			<Blob name="DestIP" value="##TargetIPv6##" >
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-			<Block name="IpSecPayload">
-				<Blob valueType="hex" value="08004d510001000a6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869" mutable="false"/>
-			</Block>
-			<Padding name="Pad" alignment="128" >
-				<Fixup class="FillValue">
-					<Param name="ref" value="Pad"/>
-					<Param name="start" value="1"/>
-					<Param name="stop" value="15"/>
-				</Fixup>
-			</Padding>
-			<Number name="PadLength" size="8" endian="big">
-				<Relation type="size" of="Pad"/>
-			</Number>
-			<Blob name="NextHeader2" valueType="hex" length="1" value="11"/>
-		</Block>
-	</DataModel>
 
 	<!--Data model for IPSECv6 w/ ESP Transport-->
 	<DataModel name="IPSECv6Transport">
@@ -305,7 +266,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="1"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -339,7 +300,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="2"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -372,7 +333,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="3"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -406,7 +367,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="4"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -440,7 +401,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="5"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -500,7 +461,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="6"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -555,7 +516,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:Mobile">
 							<Number name="HeaderLen" size="8" endian="big">
-								<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 							</Number>
 							<Number name="MH" size="8" endian="big" value="7"/>
 							<Number name="Checksum" size="16" endian="big">
