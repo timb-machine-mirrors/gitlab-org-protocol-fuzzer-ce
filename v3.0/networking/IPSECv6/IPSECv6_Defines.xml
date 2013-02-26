@@ -4,14 +4,17 @@
 		<Define key="RemoteAgentIP" value="192.168.128.130"/>
     <Define key="LoggerPath"  value="./logs/ipsec/"/> 
     <Define key="SourceMAC" value="6805ca0589fe" />
-    <Define key="TargetMAC" value="ffffffffffff"/>
+    <!-- <Define key="TargetMAC" value="ffffffffffff"/> -->
+    <Define key="TargetMAC" value="000000000000"/>
 		<Define key="Mode" value="Transport"/>
 		<Define key="DestMAC" value="f0def113b69d" /> 
 		<Define key="Strategy" value="Random"/>
 		<Define key="TargetIPv4" value="192.168.2.11"/>
 		<Define key="SourceIPv4" value="192.168.2.13"/>
-		<Define key="TargetIPv6" value="fe80::8ca4:99d:7715:3de9"/>
-		<Define key="SourceIPv6" value="fe80::20c:29ff:fe1b:e7f8"/>
+		<Define key="TargetIPv6" value="::1"/>
+		<Define key="SourceIPv6" value="::1"/>
+		<!-- <Define key="TargetIPv6" value="fe80::20c:29ff:feb5:b9d9"/> -->
+		<!-- <Define key="SourceIPv6" value="fe80::cc0:53a1:fe8e:667b"/> -->
 		<Define key="CryptoKey" value="41414141414141414141414141414141"/>
 		<Define key="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV sample baae9ef59ff1ee56211769bd91da50ed--> <!--3Des IV sample aeaeaeaeaeaeaeae"/>-->
 		<Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
