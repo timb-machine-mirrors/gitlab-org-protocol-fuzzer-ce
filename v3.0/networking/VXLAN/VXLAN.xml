@@ -906,6 +906,17 @@
 	<!-- 		</Block> -->
 	<!-- 	</Block> -->
 	<!-- </DataModel> -->
+
+	<DataModel name="IPv6UDPInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="17"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDP:UDPHeader"/>
+		</Block>
+	</DataModel>
 	
 	<!-- <DataModel name="IPv6UDPv6InVxlan"> -->
 	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
