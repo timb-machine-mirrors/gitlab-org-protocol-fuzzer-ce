@@ -72,8 +72,24 @@
       </Block>
     </Block>
   </DataModel>
-	
 
+	<!-- VXLAN Empty IPv4 Frame -->
+	<DataModel name="IPv4EmptyPacketInVxlan">
+		<Block name="VXLAN"  ref="VXLAN">
+			<Blob name="OuterIP.IPv4Payload.UdpPayload.VXHeader.EtherHeader.Type" valueType="hex" value="0800"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload">
+				<Block name="InnerIP" ref="IPv4:IPv4Header">
+					<Number name="Protocol" size="8" endian="big" value="4"/>
+					<Number name="PayloadLength" value="0" size="16"/>
+					<Block name="IPv4Payload">
+					</Block>
+				</Block>
+			</Block>
+		-->
+		</Block>
+	</DataModel>
+  
+	<!-- VXLAN Empty IPv6 Frame -->
 	<DataModel name="IPv6EmptyPacketInVxlan">
 		<Block name="VXLAN"  ref="VXLAN">
 			<Blob name="OuterIP.IPv4Payload.UdpPayload.VXHeader.EtherHeader.Type" valueType="hex" value="86dd"/>
@@ -552,30 +568,18 @@
 	<!-- 		</Block> -->
 	<!-- 	</Block> -->
 	<!-- </DataModel> -->
-	
-	<!-- <DataModel name="IPv6RoutingType2HeaderInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="43"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:MobileRoutingType2Header"> -->
-	<!-- 					<Number name="NextHeader" size="8" endian="big" value="59"/> -->
-	<!-- 				</Block>	 -->
-	<!-- 			</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6RoutingType2HeaderInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+
+	<!-- VXLAN IPv6 Frame + Mobile Routing Type 2 Header -->
+	<DataModel name="IPv6RoutingType2HeaderInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="43"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:MobileRoutingType2Header"/>
+		</Block>
+	</DataModel>
 	
 	<!-- <DataModel name="IPv6ICMPHomeAgentAddressDiscoveryRequestInVxlan"> -->
 	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
@@ -789,124 +793,43 @@
 	<!-- 	</Block> -->
 	<!-- </DataModel> -->
 	
-	<!-- <DataModel name="IPv4TCPv4InVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="0800" /> -->
-				<!-- This takes the normal payload and overrides it with this payload -->
-	<!-- 			<Block name="PayloadContent" ref="IPv4:IPv4Header"> -->
-	<!-- 				<Number name="Protocol" size="8" endian="big" valueType="hex" value="06"/> -->
-	<!-- 				<Block name="Payload"> -->
-	<!-- 					<Block name="TCP" ref="TCP:TCPHeader"> -->
-	<!-- 						<Number name="TCPCheckSum" size="16" endian="big"> -->
-	<!-- 							<Fixup class="TCPChecksumFixup"> -->
-	<!-- 								<Param name="ref" value="TCP" /> -->
-	<!-- 								<Param name="src" value="##SourceIPv4##" /> -->
-	<!-- 								<Param name="dst" value="##TargetIPv4##" /> -->
-	<!-- 							</Fixup> -->
-	<!-- 						</Number> -->
-	<!-- 						<Block name="TCPData"> -->
-	<!-- 							<Blob value="Hello"/> -->
-	<!-- 						</Block> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 			</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv4TCPv4InVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<!-- VXLAN IPv4 Frame + TCP Payload -->
+	<DataModel name="IPv4TCPInVxlan">
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength"
+						size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv4Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Protocol" size="8" endian="big" value="6"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/>
+		</Block>
+	</DataModel>
 	
-	<!-- <DataModel name="IPv4InVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="0800" /> -->
-				<!-- This takes the normal payload and overrides it with this payload -->
-	<!-- 			<Block name="PayloadContent"> -->
-	<!-- 			  <Block name="IPv4" ref="IPv4:IPv4Header"> -->
-	<!-- 					<Block name="Payload"> -->
-	<!-- 						<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 			</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv4InVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<!-- VXLAN IPv6 Frame + TCP Payload -->
+	<DataModel name="IPv6TCPInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="6"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="TCP:TCPHeader"/>
+		</Block>
+	</DataModel>
 	
-	
-	<!-- <DataModel name="IPv6TCPv6InVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-				<!-- This takes the normal payload and overrides it with this payload -->
-	<!-- 			<Block name="PayloadContent" ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="06"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block name="TCP" ref="TCP:TCPHeader"> -->
-	<!-- 					<Number name="CheckSum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="TCPChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="TCP" /> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##" /> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##" /> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 					<Block name="TCPData"> -->
-	<!-- 						<Blob value="Hello"/> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 			</Block> -->
-	<!-- 		</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6TCPv6InVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- </DataModel> -->
-	
-	<!-- <DataModel name="IPv4UDPv4InVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="0800" /> -->
-				<!-- This takes the normal payload and overrides it with this payload -->
-	<!-- 			<Block name="PayloadContent" ref="IPv4:IPv4Header"> -->
-	<!-- 				<Number name="Protocol" size="8" endian="big" valueType="hex" value="11"/> -->
-	<!-- 				<Block name="Payload"> -->
-	<!-- 					<Block name="UDPHeader" ref="UDP:UDPHeader"> -->
-	<!-- 						<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 							<Fixup class="UDPChecksumFixup"> -->
-	<!-- 								<Param name="ref" value="UDPHeader" /> -->
-	<!-- 								<Param name="src" value="##SourceIPv4##" /> -->
-	<!-- 								<Param name="dst" value="##TargetIPv4##" /> -->
-	<!-- 							</Fixup> -->
-	<!-- 						</Number> -->
-	<!-- 						<Block name="UDPData"> -->
-	<!-- 							<Blob value="Hello"/> -->
-	<!-- 						</Block> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 			</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv4UDPv4InVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<!-- VXLAN IPv4 Frame + UDP Payload -->
+	<DataModel name="IPv4UDPInVxlan">
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength"
+						size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv4Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Protocol" size="8" endian="big" value="17"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDP:UDPHeader"/>
+		</Block>
+	</DataModel>
 
+	<!-- VXLAN IPv6 Frame + UDP Payload -->
 	<DataModel name="IPv6UDPInVxlan">
 		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
 			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
@@ -917,40 +840,6 @@
 			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDP:UDPHeader"/>
 		</Block>
 	</DataModel>
-	
-	<!-- <DataModel name="IPv6UDPv6InVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-				<!-- This takes the IPv4 payload and overrides it with this payload -->
-				<!-- <Blob name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload.InnerEtherHeader.Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block name="InnerIP" ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="17"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block name="UDPHeader" ref="UDP:UDPHeader"> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="UDPChecksumFixup">  -->
-	<!-- 							<Param name="ref" value="UDPHeader" /> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##" /> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##" /> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 					<Block name="UDPData"> -->
-	<!-- 						<Blob value="Hello"/> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 			</Block> -->
-	<!-- 		</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6UDPv6InVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- </DataModel> -->
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
