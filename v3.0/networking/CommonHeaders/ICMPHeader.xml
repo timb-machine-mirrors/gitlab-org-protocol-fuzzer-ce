@@ -21,10 +21,10 @@
 
   <DataModel name="ICMPv6Header">
 		<Block name="Content">
-			<Number name="Type" size="8"  value="128" endian="network"/>
+			<Number name="Type" size="8"/>
 			<Number name="Code" size="8"/>
 			<Number name="Checksum"  endian="big" size="16">
-				<Fixup class="IcmpV6ChecksumFixup">
+				<Fixup class="IcmpChecksumFixup">
 					<Param name="ref" value="Content" />
 					<Param name="src" value="##SourceIPv6##" />
 					<Param name="dst" value="##TargetIPv6##" />

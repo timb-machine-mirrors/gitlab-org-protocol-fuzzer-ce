@@ -17,7 +17,6 @@
 	<Include ns="VLAN" src="file:##Path##/CommonHeaders/VLANHeader.xml"/>
 
 
-
   <DataModel name="VXLANHeader">
 		<Flags size="8" endian="big" >
 			<Flag position="4" value="1" size="1"/>
@@ -73,13 +72,15 @@
     </Block>
   </DataModel>
 
+
 	<!-- VXLAN Empty IPv4 Frame -->
 	<DataModel name="IPv4EmptyPacketInVxlan">
-		<Block name="VXLAN"  ref="VXLAN">
+		<Block name="VXLAN" ref="VXLAN">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="1"/>
 			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload"/>
 		</Block>
 	</DataModel>
+
   
 	<!-- VXLAN Empty IPv6 Frame -->
 	<DataModel name="IPv6EmptyPacketInVxlan">
@@ -788,7 +789,6 @@
 	
 	<!-- VXLAN IPv4 Frame + TCP Payload -->
 	<DataModel name="IPv4TCPInVxlan">
-		<!-- works -->
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/>
 			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/>
@@ -809,7 +809,6 @@
 	
 	<!-- VXLAN IPv4 Frame + UDP Payload -->
 	<DataModel name="IPv4UDPInVxlan">
-		<!-- is ICMP -->
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="17"/>
 			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDP:UDPHeader"/>
