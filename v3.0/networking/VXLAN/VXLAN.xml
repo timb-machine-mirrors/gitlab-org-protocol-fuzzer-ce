@@ -76,10 +76,7 @@
 	<!-- VXLAN Empty IPv4 Frame -->
 	<DataModel name="IPv4EmptyPacketInVxlan">
 		<Block name="VXLAN"  ref="VXLAN">
-			<!-- <Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.TotalLength"> -->
-			<!-- 	<Relation type="size" of="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" /> -->
-			<!-- </Number> -->
-			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="1"/>
 			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload"/>
 		</Block>
 	</DataModel>
@@ -790,17 +787,13 @@
 	<!-- </DataModel> -->
 	
 	<!-- VXLAN IPv4 Frame + TCP Payload -->
-	<!-- <DataModel name="IPv4TCPInVxlan"> -->
+	<DataModel name="IPv4TCPInVxlan">
 		<!-- works -->
-	<!-- 	<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan"> -->
-			<!-- <Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.TotalLength" -->
-			<!-- 			size="16" endian="big" value="65535"> -->
-			<!-- 	<Relation type="size" of="IPv4Payload" /> -->
-			<!-- </Number> -->
-	<!-- 		<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/>
+		</Block>
+	</DataModel>
 	
 	<!-- VXLAN IPv6 Frame + TCP Payload -->
 	<DataModel name="IPv6TCPInVxlan">
@@ -815,17 +808,13 @@
 	</DataModel>
 	
 	<!-- VXLAN IPv4 Frame + UDP Payload -->
-	<!-- <DataModel name="IPv4UDPInVxlan"> -->
+	<DataModel name="IPv4UDPInVxlan">
 		<!-- is ICMP -->
-	<!-- 	<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan"> -->
-	<!-- 		<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" -->
-	<!-- 					size="16" endian="big" value="65535"> -->
-	<!-- 			<Relation type="size" of="IPv4Payload" /> -->
-	<!-- 		</Number> -->
-	<!-- 		<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Protocol" size="8" endian="big" value="17"/> -->
-	<!-- 		<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDP:UDPHeader"/> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="17"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDP:UDPHeader"/>
+		</Block>
+	</DataModel>
 
 	<!-- VXLAN IPv6 Frame + UDP Payload -->
 	<DataModel name="IPv6UDPInVxlan">
