@@ -37,7 +37,6 @@ namespace PeachFarm.Node
 		{
 			config = (Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
 
-
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
@@ -55,65 +54,8 @@ namespace PeachFarm.Node
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
 		}
 
+		#region Properties
 		public bool IsOpen { get; private set; }
-
-		public void StartNode()
-		{
-
-			#region set up RabbitMQ connection and start listening for messages
-			try
-			{
-				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-				RegisterQueues();
-				StartListener();
-				heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
-				IsOpen = true;
-			}
-			catch
-			{
-				if (heartbeat != null)
-				{
-					heartbeat.Dispose();
-					heartbeat = null;
-				}
-				StopListeners();
-				nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.", config.RabbitMq.HostName));
-				return;
-			}
-
-			#endregion
-
-
-		}
-
-		public void StopNode()
-		{
-			IsOpen = false;
-
-			#region stop heartbeat
-			heartbeat.Dispose();
-			#endregion
-
-			#region stop the currently running peach job
-			if (nodeState.Status == Status.Running)
-			{
-				StopPeach();
-			}
-			#endregion
-
-			#region send a stopping message to controller
-			nodeState.Status = Status.Stopping;
-			RaiseStatusChanged();
-
-			SendHeartbeat(null);
-			#endregion
-
-			#region deregister from RabbitMQ
-			DeregisterQueues();
-			StopListeners();
-			CloseConnection();
-			#endregion
-		}
 
 		public Status Status
 		{
@@ -129,16 +71,93 @@ namespace PeachFarm.Node
 		{
 			get { return config; }
 		}
+		#endregion
 
+		#region Events
 		public event EventHandler<StatusChangedEventArgs> StatusChanged;
 
-		private void RaiseStatusChanged()
+		private void ChangeStatus(Status newStatus)
 		{
-			if (StatusChanged != null)
+			if (this.nodeState.Status != newStatus)
 			{
-				StatusChanged(this, new StatusChangedEventArgs(this.nodeState.Status));
+				this.nodeState.Status = newStatus;
+				if (StatusChanged != null)
+				{
+					StatusChanged(this, new StatusChangedEventArgs(this.nodeState.Status));
+				} 
+				SendHeartbeat(null);
 			}
 		}
+		#endregion
+
+		#region Public Methods
+		public void StartNode()
+		{
+
+			#region set up RabbitMQ connection and start listening for messages
+			try
+			{
+				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+				RegisterQueues();
+				StartListener();
+				heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
+				IsOpen = true;
+			}
+			catch(RabbitMqException rex)
+			{
+				if (heartbeat != null)
+				{
+					heartbeat.Dispose();
+					heartbeat = null;
+				}
+				StopListeners();
+				nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.\nException:\n{1}", config.RabbitMq.HostName, rex.InnerException.ToString()));
+			}
+			catch(Exception ex)
+			{
+				nlog.Fatal(String.Format("Unknown exception while starting Peach Farm Node:\n{0}", ex.Message));
+				return;
+			}
+
+			#endregion
+
+
+		}
+
+		public void StopNode()
+		{
+			IsOpen = false;
+
+			try
+			{
+				#region stop heartbeat
+				heartbeat.Dispose();
+				#endregion
+
+				#region stop the currently running peach job
+				if (nodeState.Status == Status.Running)
+				{
+					StopPeach();
+				}
+				#endregion
+
+				#region send a stopping message to controller
+				ChangeStatus(Status.Stopping);
+				#endregion
+
+				#region deregister from RabbitMQ
+				DeregisterQueues();
+				StopListeners();
+				CloseConnection();
+				#endregion
+
+			}
+			catch (Exception ex)
+			{
+				nlog.Error(String.Format("Error while shutting down node, continuing shutdown.\nException:\n{0}", ex.ToString()));
+			}
+		}
+		#endregion
 
 		#region Termination handlers
 
@@ -146,45 +165,46 @@ namespace PeachFarm.Node
 		{
 			if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
 			{
-				nodeState.Status = Status.Stopping;
-				RaiseStatusChanged();
+				ChangeStatus(Status.Stopping);
 
-				SendHeartbeat(null);
-				DeregisterQueues();
-				StopListeners();
-				CloseConnection();
+				try
+				{
+					DeregisterQueues();
+					StopListeners();
+					CloseConnection();
+				}
+				catch (RabbitMqException) { }
 			}
 		}
 
 		private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
-			if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
+			if (e.ExceptionObject is RabbitMqException)
 			{
-				Heartbeat error = CreateHeartbeat();
-				error.Status = Status.Error;
-				error.ErrorMessage = "Unknown error";
-
-				if (e.ExceptionObject is Exception)
-				{
-					error.ErrorMessage = ((Exception)e.ExceptionObject).Message;
-				}
+				nlog.Fatal("Unhandled RabbitMq Exception, please file a bug.\nException:\n{0}", ((RabbitMqException)e.ExceptionObject).InnerException.ToString());
+			}
+			else if (e.ExceptionObject is Exception)
+			{
+				Heartbeat error = CreateHeartbeat(String.Format("Peach Farm Node unhandled exception:\n{0}", ((Exception)e.ExceptionObject).Message));
 				SendHeartbeat(error);
+			}
 
-				if (e.IsTerminating)
+			if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen) && e.IsTerminating)
+			{
+				ChangeStatus(Status.Stopping);
+
+				try
 				{
-					nodeState.Status = Status.Stopping;
-					RaiseStatusChanged();
-
-					SendHeartbeat(null);
 					DeregisterQueues();
 					StopListeners();
 					CloseConnection();
 				}
+				catch (RabbitMqException) { }
 			}
 		}
 		#endregion
 
-		#region MQ functions
+		#region Node communication functions
 
 		private static string clientQueueName;
 
@@ -201,9 +221,17 @@ namespace PeachFarm.Node
 			factory.Port = port;
 			factory.UserName = userName;
 			factory.Password = password;
-			connection = factory.CreateConnection();
-			modelSend = connection.CreateModel();
-			modelReceive = connection.CreateModel();
+
+			try
+			{
+				connection = factory.CreateConnection();
+				modelSend = connection.CreateModel();
+				modelReceive = connection.CreateModel();
+			}
+			catch(Exception ex)
+			{
+				throw new RabbitMqException(ex);
+			}
 
 		}
 
@@ -212,18 +240,33 @@ namespace PeachFarm.Node
 
 			//client queue
 			clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
-			modelSend.ExchangeDeclare(QueueNames.EXCHANGE_NODE, QueueNames.EXCHANGETYPE_NODE);
-			modelSend.QueueDeclare(clientQueueName, false, false, false, null);
-			modelSend.QueueBind(clientQueueName, QueueNames.EXCHANGE_NODE, "");
-			modelSend.QueuePurge(clientQueueName);
+
+			try
+			{
+				modelSend.ExchangeDeclare(QueueNames.EXCHANGE_NODE, QueueNames.EXCHANGETYPE_NODE);
+				modelSend.QueueDeclare(clientQueueName, false, false, false, null);
+				modelSend.QueueBind(clientQueueName, QueueNames.EXCHANGE_NODE, "");
+				modelSend.QueuePurge(clientQueueName);
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex);
+			}
 		}
 
 		private void DeregisterQueues()
 		{
 			if (modelSend.IsOpen)
 			{
-				modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
-				modelSend.QueueDelete(clientQueueName);
+				try
+				{
+					modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
+					modelSend.QueueDelete(clientQueueName);
+				}
+				catch (Exception ex)
+				{
+					throw new RabbitMqException(ex);
+				}
 			}
 		}
 
@@ -234,8 +277,6 @@ namespace PeachFarm.Node
 			listener.DoWork += Listen;
 			listener.RunWorkerAsync();
 		}
-
-
 		private void Listen(object sender, DoWorkEventArgs e)
 		{
 
@@ -246,15 +287,11 @@ namespace PeachFarm.Node
 					BasicGetResult result = null;
 					try
 					{
-						result = modelReceive.BasicGet(clientQueueName, false);
+						result = GetFromNodeQueue();
 					}
-					catch(Exception ex)
+					catch(RabbitMqException)
 					{
-						nlog.Fatal("Can't communicate with RabbitMQ server");
-						Debug.WriteLine(String.Format("{0}: {1}", ex.GetType().Name, ex.Message));
-
-						ReopenConnection();
-
+						nlog.Error("Can't communicate with RabbitMQ server, will retry.");
 					}
 
 					if (result != null)
@@ -266,17 +303,20 @@ namespace PeachFarm.Node
 						try
 						{
 							ProcessAction(action, body);
-							modelSend.BasicAck(result.DeliveryTag, false);
 						}
 						catch (Exception ex)
 						{
 							Heartbeat heartbeat = CreateHeartbeat(String.Format("{0}\n\n{1}", result.Body, ex.Message));
 							SendHeartbeat(heartbeat);
 						}
-						finally
+
+						try
 						{
+							AckMessage(result.DeliveryTag);
 						}
-						nlog.Debug(String.Format("Done '{0}'", action));
+						catch { }
+
+						nlog.Debug(String.Format("Done processing message '{0}'", action));
 					}
 				}
 
@@ -300,25 +340,6 @@ namespace PeachFarm.Node
 
 			if (connection.IsOpen)
 				connection.Close();
-		}
-
-		private void PublishToServer(string message, string action)
-		{
-			bool error = false;
-			try
-			{
-				modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
-			}
-			catch
-			{
-				error = true;
-				nlog.Error("Failed to communicate with RabbitMQ: " + action);
-			}
-
-			if (error)
-			{
-				ReopenConnection();
-			}
 		}
 
 		private bool ReopenConnection()
@@ -382,6 +403,102 @@ namespace PeachFarm.Node
 
 			return success;
 		}
+		#endregion
+
+		#region Rabbit MQ Functions
+		private void PublishToServer(string message, string action)
+		{
+			bool open = true;
+
+			try
+			{
+				if (modelSend.IsOpen == false)
+				{
+					open = ReopenConnection();
+				}
+
+				if (open)
+				{
+					modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
+				}
+				else
+				{
+					throw new RabbitMqException(null);
+				}
+			}
+			catch(Exception ex)
+			{
+				throw new RabbitMqException(ex);
+			}
+		}
+
+		private BasicGetResult GetFromNodeQueue()
+		{
+			bool open = true;
+			try
+			{
+				if ((connection == null) || (connection.IsOpen == false))
+				{
+					open = ReopenConnection();
+				}
+
+				if (open)
+				{
+					return modelReceive.BasicGet(clientQueueName, false);
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex);
+			}
+		}
+
+		private void AckMessage(ulong deliveryTag)
+		{
+			try
+			{
+				modelSend.BasicAck(deliveryTag, false);
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex);
+			}
+		}
+
+		#endregion
+
+		#region Sends
+		private void SendHeartbeat(object state)
+		{
+			Heartbeat heartbeat = null;
+			if ((state != null) && (state is Heartbeat))
+			{
+				heartbeat = (Heartbeat)state;
+			}
+			else
+			{
+				heartbeat = CreateHeartbeat();
+			}
+
+			try
+			{
+				PublishToServer(heartbeat.Serialize(), "Heartbeat");
+			}
+			catch
+			{
+				if (heartbeat.Status == Common.Messages.Status.Error)
+				{
+					nlog.Error(String.Format("Could not send error message to RabbitMQ.\nException:\n{0}", heartbeat.ErrorMessage));
+				}
+			}
+		}
+		#endregion
+
+		#region Message Handlers
 
 		private void ProcessAction(string action, string body)
 		{
@@ -400,39 +517,6 @@ namespace PeachFarm.Node
 					break;
 			}
 		}
-		#endregion
-
-		#region Sends
-
-		private void SendHeartbeat(object state)
-		{
-			Heartbeat heartbeat = null;
-			if ((state != null) && (state is Heartbeat))
-			{
-				heartbeat = (Heartbeat)state;
-			}
-			else
-			{
-				heartbeat = CreateHeartbeat();
-			}
-
-
-			try
-			{
-				if (modelSend.IsOpen == false)
-					modelSend = connection.CreateModel();
-
-				PublishToServer(heartbeat.Serialize(), "Heartbeat");
-			}
-			catch(Exception ex)
-			{
-
-			}
-		}
-
-		#endregion
-
-		#region Receives
 
 		private void StopPeach()
 		{
@@ -445,10 +529,7 @@ namespace PeachFarm.Node
 				nodeState.RunContext = null;
 
 
-				nodeState.Status = Status.Alive;
-				RaiseStatusChanged();
-
-				SendHeartbeat(null);
+				ChangeStatus(Status.Alive);
 			}
 		}
 
@@ -462,11 +543,7 @@ namespace PeachFarm.Node
 				}
 				nodeState.RunContext = null;
 
-
-				nodeState.Status = Status.Alive;
-				RaiseStatusChanged();
-
-				SendHeartbeat(null);
+				ChangeStatus(Status.Alive);
 			}
 		}
 
@@ -493,9 +570,7 @@ namespace PeachFarm.Node
 				SendHeartbeat(CreateHeartbeat(errorMessage));
 				nlog.Error(errorMessage);
 
-				nodeState.Status = Status.Alive;
-				RaiseStatusChanged();
-				SendHeartbeat(null);
+				ChangeStatus(Status.Alive);
 			}
 
 		}
@@ -512,10 +587,10 @@ namespace PeachFarm.Node
 			nodeState.JobID = request.JobID;
 			nodeState.PitFileName = request.PitFileName;
 			nodeState.UserName = request.UserName;
+			nodeState.Seed = request.Seed;
 
-			nodeState.Status = Common.Messages.Status.Running;
-			SendHeartbeat(CreateHeartbeat());
-			RaiseStatusChanged();
+			ChangeStatus(Status.Running);
+
 
 			nodeState.PitFilePath = WriteTextToTempFile(request.Pit);
 			
@@ -542,12 +617,9 @@ namespace PeachFarm.Node
 			peachWorker.RunWorkerAsync();
 		}
 
-		void peach_TestStarting(Peach.Core.RunContext context)
-		{
-			nlog.Info("Test Starting: " + nodeState.JobID.ToString());
-			nodeState.RunContext = context;
-		}
+		#endregion
 
+		#region Peach Background Worker
 		void peachWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
@@ -597,6 +669,10 @@ namespace PeachFarm.Node
 			Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
 			config.pitFile = nodeState.PitFilePath;
 			config.debug = false;
+			if (nodeState.Seed > 0)
+			{
+				config.randomSeed = nodeState.Seed;
+			}
 			//config.runName = clientState.JobID.ToString();
 
 			try
@@ -612,6 +688,14 @@ namespace PeachFarm.Node
 				StopPeach("Unknown Exception from Peach:\n" + ex.Message);
 			}
 		}
+		#endregion
+
+		#region Peach Event Handlers
+		void peach_TestStarting(Peach.Core.RunContext context)
+		{
+			nlog.Info("Test Starting: " + nodeState.JobID.ToString());
+			nodeState.RunContext = context;
+		}
 
 		void peach_TestFinished(Peach.Core.RunContext context)
 		{
@@ -624,7 +708,6 @@ namespace PeachFarm.Node
 			string message = String.Format("Test Error: {0}\n{1}", nodeState.JobID.ToString(), e.Message);
 			StopPeach(message);
 		}
-
 		#endregion
 
 		private Heartbeat CreateHeartbeat()
@@ -814,6 +897,8 @@ namespace PeachFarm.Node
 		internal string PitFilePath { get; set; }
 		internal string DefinesFilePath { get; set; }
 
+		internal uint Seed { get; set; }
+
 		internal string PitFileName { get; set; }
 		internal Peach.Core.RunContext RunContext { get; set; }
 		//internal Guid JobID { get; set; }
@@ -831,5 +916,13 @@ namespace PeachFarm.Node
 		}
 
 		public Status Status { get; private set; }
+	}
+
+	public class RabbitMqException : Exception 
+	{
+		public RabbitMqException(Exception innerException, string message = "Peach Farm Node encountered a RabbitMq Exception.")
+			:base(message, innerException)
+		{
+		}
 	}
 }
