@@ -29,6 +29,8 @@ namespace PeachFarm.Common.Messages
 
 		private string definesField;
 
+		private uint seedField;
+
 		private int clientCountField;
 
 		private string iPAddressField;
@@ -66,6 +68,19 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.definesField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public uint Seed
+		{
+			get
+			{
+				return this.seedField;
+			}
+			set
+			{
+				this.seedField = value;
 			}
 		}
 

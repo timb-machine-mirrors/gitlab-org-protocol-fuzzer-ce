@@ -448,7 +448,7 @@ namespace PeachFarm.Controller
 				{
 					DeclareJobExchange(request.JobID, new List<string>() { nodes[request.IPAddress].QueueName });
 
-					//modelSend.PublishToQueue(computers[request.IPAddress].QueueName, request.Serialize(), action);
+					//modelSend.PublishToQueue(nodes[request.IPAddress].QueueName, request.Serialize(), action);
 					PublishToJob(request.JobID, request.Serialize(), action);
 					ReplyToAdmin(response.Serialize(), action, replyQueue);
 				}
@@ -495,13 +495,13 @@ namespace PeachFarm.Controller
 					DeclareJobExchange(request.JobID, jobQueues);
 
 
-					//for (int q = 0; q < request.ClientCount; q++)
-					//{
-					//  //modelSend.PublishToQueue(aliveQueues[q], request.Serialize(), action);
-					//  modelSend.QueueBind(aliveQueues[q], String.Format(QueueNames.EXCHANGE_JOB, uid), uid);
-					//}
+					foreach(string jobQueue in jobQueues)
+					{
+						request.Seed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+						modelSend.PublishToQueue(jobQueue, request.Serialize(), action);
+					}
 
-					PublishToJob(request.JobID, request.Serialize(), action);
+					//PublishToJob(request.JobID, request.Serialize(), action);
 
 					ReplyToAdmin(response.Serialize(), action, replyQueue);
 				}
