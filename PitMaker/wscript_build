@@ -20,7 +20,7 @@ deps = [
 ]
 
 bld(
-	features = 'msbuild',
+	features = 'msbuild ignore',
 	use = deps,
 	csdoc = False,
 	source = bld.path.ant_glob('**/*.cs **/*.resx **/*.xaml', excl=['obj/*']),
