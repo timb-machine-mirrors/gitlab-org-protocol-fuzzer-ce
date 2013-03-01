@@ -174,229 +174,94 @@
 	</DataModel>
 
 	
-	<!-- <DataModel name="IPv6DestinationOptionsInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="59"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:DestinationOptions"> -->
-	<!-- 					<Block name="Options"> -->
-	<!-- 						<Block ref="IPv6:TLV" name="HomeAddressOption"> -->
-	<!-- 							<Number name="Type" size="8" endian="big" value="201"/> -->
-	<!-- 							<Block name="Value"> -->
-	<!-- 								<Blob length="16" valueType="hex"/> -->
-	<!-- 							</Block> -->
-	<!-- 						</Block> -->
-	<!-- 					</Block> -->
-	<!-- 				</Block> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6DestinationOptionsInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<DataModel name="IPv6DestinationOptionsInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength"
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="60"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:DestinationOptions">
+				<Block name="Options">
+					<Block ref="IPv6:TLV" name="HomeAddressOption">
+						<Number name="Type" size="8" endian="big" value="201"/>
+						<Number name="Length" size="8">
+							<Relation type="size" of="Value"/>
+						</Number>
+						<Block name="Value">
+							<Blob length="16" value="the other castle"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
 	
-	<!-- <DataModel name="IPv6MobileBRRInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:Mobile"> -->
-	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
-	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/> -->
-	<!-- 					</Number> -->
-	<!-- 					<Number name="MH" size="8" endian="big" value="0"/> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="IPv6MobileBRRInVxlan"/> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 				</Block> -->
-	<!-- 				<Number name="Reserved" size="16"/> -->
-	<!-- 				<Block name="MobilityOptions"/> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block>	 -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6MobileBRRInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<DataModel name="IPv6MobileInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="135"/>
+			<Block name="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="VXLAN.OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="0"/>
+				<Number name="MHChecksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="VXLAN"/>
+						<!-- Make sure this is referencing the correct place -->
+					</Fixup>
+					<Block name="MobilityOptions"/>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileBRRInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan"/>
+	</DataModel>
+
+	<DataModel name="IPv6MobileHoTIInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="1"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileCoTInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="2"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MobilityOptions">
+					<Number name="CareNonceIndex" size="16"/>
+					<Number name="CareInitCookie" size="64"/>
+					<Number name="CareKeygenToken" size="64"/>
+			</Block>
+		</Block>
+	</DataModel>
 	
-	<!-- <DataModel name="IPv6MobileHoTIInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:Mobile"> -->
-	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
-	<!-- 						<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/> -->
-	<!-- 					</Number> -->
-	<!-- 					<Number name="MH" size="8" endian="big" value="1"/> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="IPv6MobileHoTIInVxlan"/> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 				</Block> -->
-	<!-- 				<Number name="Reserved" size="16"/> -->
-	<!-- 				<Number name="HomeInitCookie" size="64"/> -->
-	<!-- 				<Block name="MobilityOptions"> -->
-	<!-- 				</Block> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block>	 -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6MobileHoTIInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<DataModel name="IPv6MobileHoTInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="3"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MobilityOptions">
+				<Number name="HomeNonceIndex" size="16"/>
+				<Number name="HomeInitCookie" size="64"/>
+				<Number name="HomeKeygenToken" size="64"/>
+				<Block name="MobilityOptions"/>
+				<Padding aligned="true" alignment="64"/>
+			</Block>
+		</Block>
+	</DataModel>
 	
-	<!-- <DataModel name="IPv6MobileCoTIInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:Mobile"> -->
-	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
-	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/> -->
-	<!-- 					</Number> -->
-	<!-- 					<Number name="MH" size="8" endian="big" value="2"/> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="IPv6MobileCoTIInVxlan"/> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 				</Block> -->
-	<!-- 				<Number name="Reserved" size="16"/> -->
-	<!-- 				<Number name="CareInitCookie" size="64"/> -->
-	<!-- 				<Block name="MobilityOptions"/> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block>	 -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6MobileCoTIInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
 	
-	<!-- <DataModel name="IPv6MobileHoTInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:Mobile"> -->
-	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
-	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/> -->
-	<!-- 					</Number> -->
-	<!-- 					<Number name="MH" size="8" endian="big" value="3"/> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="IPv6MobileHoTInVxlan"/> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 				</Block> -->
-	<!-- 				<Number name="HomeNonceIndex" size="16"/> -->
-	<!-- 				<Number name="HomeInitCookie" size="64"/> -->
-	<!-- 				<Number name="HomeKeygenToken" size="64"/> -->
-	<!-- 				<Block name="MobilityOptions"/> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block>	 -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6MobileHoTInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
 	
-	<!-- <DataModel name="IPv6MobileCoTInVxlan"> -->
-	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
-	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
-	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
-	<!-- 			<Block ref="IPv6:IPv6Header"> -->
-	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
-	<!-- 					<Relation type="size" of="Payload" /> -->
-	<!-- 				</Number> -->
-	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
-	<!-- 			</Block> -->
-	<!-- 			<Block name="Payload"> -->
-	<!-- 				<Block ref="IPv6:Mobile"> -->
-	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
-	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/> -->
-	<!-- 					</Number> -->
-	<!-- 					<Number name="MH" size="8" endian="big" value="4"/> -->
-	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
-	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
-	<!-- 							<Param name="ref" value="IPv6MobileCoTInVxlan"/> -->
-	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
-	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
-	<!-- 						</Fixup> -->
-	<!-- 					</Number> -->
-	<!-- 				</Block> -->
-	<!-- 				<Number name="CareNonceIndex" size="16"/> -->
-	<!-- 				<Number name="CareInitCookie" size="64"/> -->
-	<!-- 				<Number name="CareKeygenToken" size="64"/> -->
-	<!-- 				<Block name="MobilityOptions"/> -->
-	<!-- 				<Padding aligned="true" alignment="64"/> -->
-	<!-- 			</Block>	 -->
-	<!-- 			<Number name="CRC" size="32" endian="big"> -->
-	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
-	<!-- 					<Param name="ref" value="IPv6MobileCoTInVxlan"/> -->
-	<!-- 				</Fixup> -->
-	<!-- 			</Number> -->
-	<!-- 		</Block> -->
-	<!-- 	</Block> -->
-	<!-- </DataModel> -->
+	<DataModel name="IPv6MobileCoTInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileCoTInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="4"/>
+		</Block>
+	</DataModel>
 	
 	<!-- <DataModel name="IPv6MobileBUInVxlan"> -->
 	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
