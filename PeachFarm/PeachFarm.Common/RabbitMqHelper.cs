@@ -62,13 +62,12 @@ namespace PeachFarm.Common
 			listenQueue = String.Empty;
 		}
 
-		public void AckMessage(ulong deliveryTag)
+		private void AckMessage(ulong deliveryTag)
 		{
 			try
 			{
 				if (sender.IsOpen == false)
 					ReopenConnection();
-				Debug.WriteLine("ACK: " + deliveryTag.ToString());
 				receiver.BasicAck(deliveryTag, false);
 			}
 			catch (Exception ex)
@@ -77,7 +76,7 @@ namespace PeachFarm.Common
 			}
 		}
 
-		public void PublishToQueue(string queue, string body, string action)
+		public void PublishToQueue(string queue, string body, string action, string replyQueue = "")
 		{
 			bool open = true;
 
@@ -91,7 +90,7 @@ namespace PeachFarm.Common
 				if (open)
 				{
 					sender.QueueDeclare(queue, true, false, false, null);
-					sender.PublishToQueue(queue, body, action);
+					sender.PublishToQueue(queue, body, action, replyQueue);
 				}
 				else
 				{
@@ -314,21 +313,15 @@ namespace PeachFarm.Common
 	{
 		private static UTF8Encoding encoding = new UTF8Encoding();
 
-		public static void PublishToQueue(this IModel model, string queue, string message, string action)
+		public static void PublishToQueue(this IModel model, string queue, string message, string action, string replyQueue = "")
 		{
 			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
 			properties.Headers = new Dictionary<string, string>();
 			properties.Headers.Add("Action", action);
-			model.BasicPublish("", queue, properties, encoding.GetBytes(message));
-		}
-
-		public static void PublishToQueue(this IModel model, string queue, string message, string action, string replyQueue)
-		{
-
-			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
-			properties.Headers = new Dictionary<string, string>();
-			properties.Headers.Add("Action", action);
-			properties.Headers.Add("ReplyQueue", replyQueue);
+			if (String.IsNullOrEmpty(replyQueue) == false)
+			{
+				properties.Headers.Add("ReplyQueue", replyQueue);
+			}
 			model.BasicPublish("", queue, properties, encoding.GetBytes(message));
 		}
 

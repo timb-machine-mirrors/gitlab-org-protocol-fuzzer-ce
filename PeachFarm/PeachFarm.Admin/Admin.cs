@@ -302,7 +302,7 @@ namespace PeachFarm.Admin
 		#region MQ functions
 		private void PublishToServer(string message, string action)
 		{
-			rabbit.Sender.PublishToQueue(serverQueueName, message, action, adminQueueName);
+			rabbit.PublishToQueue(serverQueueName, message, action, adminQueueName);
 		}
 
 		private void ProcessAction(string action, string body)
