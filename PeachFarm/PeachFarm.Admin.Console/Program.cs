@@ -73,8 +73,7 @@ namespace PeachFarm.Admin.Console
 				#region Set up Admin listener
 
 				admin = new Admin();
-				admin.StartAdmin();
-
+				
 				admin.ListNodesCompleted += admin_ListNodesCompleted;
 				admin.ListErrorsCompleted += admin_ListErrorsCompleted;
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
@@ -147,6 +146,11 @@ namespace PeachFarm.Admin.Console
 				System.Console.WriteLine("waiting for result...");
 				System.Console.ReadLine();
 
+				if (admin.IsListening)
+				{
+					admin.Close();
+					admin = null;
+				}
 			}
 			catch (SyntaxException)
 			{

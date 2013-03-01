@@ -24,6 +24,11 @@ namespace PeachFarm.Admin
 
 		PeachFarm.Admin.Configuration.AdminSection config;
 
+		private string serverQueueName;
+		private string adminQueueName;
+
+		RabbitMqHelper rabbit = null;
+
 		public Admin(string serverHostName = "", int timeoutSeconds = 0)
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
@@ -36,6 +41,28 @@ namespace PeachFarm.Admin
 				ServerHostName = serverHostName;
 			}
 			TimeoutSeconds = timeoutSeconds;
+
+			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+
+			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
+			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
+			
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+			rabbit.StartListener(adminQueueName);
+			this.IsListening = true;
+		}
+
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			ProcessAction(e.Action, e.Body);
+		}
+
+		public void Close()
+		{
+			rabbit.StopListener();
+			this.IsListening = false;
 		}
 
 		#region Properties
@@ -47,6 +74,8 @@ namespace PeachFarm.Admin
 		#endregion
 
 		#region Methods
+
+		/*
 		public void StartAdmin()
 		{
 			try
@@ -69,6 +98,7 @@ namespace PeachFarm.Admin
 			CloseConnection();
 			IsListening = false;
 		}
+		//*/
 		#endregion
 
 		#region AsyncCompletes
@@ -313,7 +343,7 @@ namespace PeachFarm.Admin
 		#endregion
 
 		#region MQ functions
-
+		/*
 		private string serverQueueName;
 		private string adminQueueName;
 
@@ -448,10 +478,10 @@ namespace PeachFarm.Admin
 			modelSend.Close();
 			connection.Close();
 		}
-
+		//*/
 		private void PublishToServer(string message, string action)
 		{
-			modelSend.PublishToQueue(serverQueueName, message, action, adminQueueName);
+			rabbit.Sender.PublishToQueue(serverQueueName, message, action, adminQueueName);
 		}
 
 		private void ProcessAction(string action, string body)
