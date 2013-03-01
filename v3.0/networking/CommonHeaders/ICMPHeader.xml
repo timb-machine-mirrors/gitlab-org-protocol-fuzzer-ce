@@ -24,7 +24,7 @@
 			<Number name="Type" size="8"/>
 			<Number name="Code" size="8"/>
 			<Number name="Checksum"  endian="big" size="16">
-				<Fixup class="IcmpChecksumFixup">
+				<Fixup class="IcmpV6ChecksumFixup">
 					<Param name="ref" value="Content" />
 					<Param name="src" value="##SourceIPv6##" />
 					<Param name="dst" value="##TargetIPv6##" />
