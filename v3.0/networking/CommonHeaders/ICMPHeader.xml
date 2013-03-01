@@ -18,7 +18,6 @@
 		</Block>
   </DataModel>
 
-
   <DataModel name="ICMPv6Header">
 		<Block name="Content">
 			<Number name="Type" size="8"/>
@@ -35,5 +34,147 @@
 			<Blob name="Data" value="Hello Peach World"/>
 		</Block>
   </DataModel>
+
+  <DataModel name="MobileICMP">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Code" size="8" endian="big"/>
+		<Number name="Checksum" size="16" endian="big">
+		</Number>
+		<Number name="Identifier" size="16" endian="big"/>
+		<Block name="Reserved"/>
+  </DataModel>
+  
+  <DataModel name="MobileICMPHomeAgentAddressDiscoveryRequest">
+		<Block name="Payload">
+			<Block ref="ICMPv6Header">
+				<Number name="Type" size="8" endian="big" value="144"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Block name="Reserved">
+				<Number size="16" endian="big"/>
+			</Block>
+		</Block>
+  </DataModel>
+
+  <DataModel name="MobileICMPHomeAgentAddressDiscoveryReply">
+ 		<Block name="Payload">
+			<Block ref="ICMPv6Header">
+				<Number name="Type" size="8" endian="big" value="145"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Block name="Reserved">
+				<Number size="16" endian="big"/>
+			</Block>
+			<Block name="HomeAgentAddresses">
+				<Blob name="Address1" length="16" valueType="hex"/>
+				<Blob name="Address2" length="16" valueType="hex"/>
+			</Block>
+		</Block>
+  </DataModel>
+
+  <DataModel name="MobileICMPPrefixSolicitation">
+		<Block name="Payload">
+			<Block ref="ICMPv6Header">
+				<Number name="Type" size="8" endian="big" value="146"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Block name="Reserved">
+				<Number size="16" endian="big"/>
+			</Block>
+		</Block>
+  </DataModel>
+
+  <DataModel name="MobileICMPPrefixAdvertisement">
+		<Block name="Payload">
+			<Block ref="ICMPv6Header">
+				<Number name="Type" size="8" endian="big" value="147"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Block name="Reserved">
+				<Flags size="16">
+					<Flag name="M" size="1" position="0"/>
+					<Flag name="O" size="1" position="1"/>
+					<Flag name="Reserved" size="14" position="2"/>
+				</Flags>
+			</Block>
+			<Block name="Options">
+			</Block>
+		</Block>
+  </DataModel>
+  
+	<DataModel name="MobileICMPRouterAdvertisement">
+		<Block name="Payload">
+			<Block ref="ICMPv6Header">
+				<Number name="Type" size="8" endian="big" value="134"/>
+				<Number name="Code" size="8" endian="big" value="0"/>
+				<Number name="Checksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="Payload"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
+					</Fixup>
+				</Number>
+			</Block>
+			<Block name="Reserved">
+				<Flags name="Flags" size="8">
+					<Flag name="M" size="1" position="0"/>
+					<Flag name="O" size="1" position="1"/>
+					<Flag name="H" size="1" position="2"/>
+					<Flag name="Reserved" size="5" position="3"/>
+				</Flags>
+			</Block>
+			<Block name="Options">
+				<Block name="PrefixInformation">
+					<Number name="Type" size="8" endian="big" value="3"/>
+					<Number name="Length" size="8" endian="big" value="4"/>
+					<Number name="PrefixLength" size="8" endian="big"/>
+					<Flags size="8" endian="big">
+						<Flag name="L" size="1" position="0"/>
+						<Flag name="A" size="1" position="1"/>
+						<Flag name="R" size="1" position="2"/>
+						<Flag name="Reserved" size="5" position="3"/>
+					</Flags>
+					<Number name="ValidLifeTime" size="32" endian="big" signed="false"/>
+					<Number name="PreferredLifetime" size="32" endian="big" signed="false"/>
+					<Number name="Reserved2" size="32" endian="big"/>
+					<Blob name="Prefix" length="16" valueType="hex"/>
+				</Block>
+				<Block name="AdvertisementInterval">
+					<Number name="Type" size="8" endian="big" value="7"/>
+					<Number name="Length" size="8" endian="big" value="1"/>
+					<Number name="Reserved" size="16" endian="big"/>
+					<Number name="AdvertisementInterval" size="32" endian="big"/>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
 
 </Peach>
