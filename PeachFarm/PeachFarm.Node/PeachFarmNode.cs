@@ -33,6 +33,9 @@ namespace PeachFarm.Node
 
 		private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
 
+		private RabbitMqHelper rabbit;
+
+		string clientQueueName;
 		public PeachFarmNode()
 		{
 			config = (Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
@@ -52,8 +55,28 @@ namespace PeachFarm.Node
 			#endregion
 
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+			clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
+			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+			rabbit.StartListener(clientQueueName);
+			heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
+			IsOpen = true;
 		}
 
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			try
+			{
+				if (nodeState.Status != Common.Messages.Status.Stopping)
+					ProcessAction(e.Action, e.Body);
+			}
+			catch (Exception ex)
+			{
+
+			}
+
+		}
 		#region Properties
 		public bool IsOpen { get; private set; }
 
@@ -91,9 +114,9 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Public Methods
+		/*
 		public void StartNode()
 		{
-
 			#region set up RabbitMQ connection and start listening for messages
 			try
 			{
@@ -123,8 +146,8 @@ namespace PeachFarm.Node
 
 
 		}
-
-		public void StopNode()
+		//*/
+		public void Close()
 		{
 			IsOpen = false;
 
@@ -146,9 +169,11 @@ namespace PeachFarm.Node
 				#endregion
 
 				#region deregister from RabbitMQ
-				DeregisterQueues();
-				StopListeners();
-				CloseConnection();
+				//DeregisterQueues();
+				//StopListeners();
+				//CloseConnection();
+
+				rabbit.StopListener();
 				#endregion
 
 			}
@@ -157,16 +182,18 @@ namespace PeachFarm.Node
 				nlog.Error(String.Format("Error while shutting down node, continuing shutdown.\nException:\n{0}", ex.ToString()));
 			}
 		}
+		//*/
 		#endregion
 
 		#region Termination handlers
 
 		private void CurrentDomain_ProcessExit(object sender, EventArgs e)
 		{
-			if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen))
+			if ((nodeState.Status != Status.Stopping))// && (connection != null) && (connection.IsOpen))
 			{
 				ChangeStatus(Status.Stopping);
 
+				/*
 				try
 				{
 					DeregisterQueues();
@@ -174,6 +201,7 @@ namespace PeachFarm.Node
 					CloseConnection();
 				}
 				catch (RabbitMqException) { }
+				//*/
 			}
 		}
 
@@ -189,15 +217,18 @@ namespace PeachFarm.Node
 				SendHeartbeat(error);
 			}
 
-			if ((nodeState.Status != Status.Stopping) && (connection != null) && (connection.IsOpen) && e.IsTerminating)
+			if ((nodeState.Status != Status.Stopping))// && (connection != null) && (connection.IsOpen) && e.IsTerminating)
 			{
 				ChangeStatus(Status.Stopping);
 
 				try
 				{
+					rabbit.StopListener();
+					/*
 					DeregisterQueues();
 					StopListeners();
 					CloseConnection();
+					//*/
 				}
 				catch (RabbitMqException) { }
 			}
@@ -205,7 +236,7 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Node communication functions
-
+		/*
 		private static string clientQueueName;
 
 		private static IConnection connection;
@@ -277,6 +308,7 @@ namespace PeachFarm.Node
 			listener.DoWork += Listen;
 			listener.RunWorkerAsync();
 		}
+
 		private void Listen(object sender, DoWorkEventArgs e)
 		{
 
@@ -403,9 +435,11 @@ namespace PeachFarm.Node
 
 			return success;
 		}
+		//*/
 		#endregion
 
 		#region Rabbit MQ Functions
+		/*
 		private void PublishToServer(string message, string action)
 		{
 			bool open = true;
@@ -468,7 +502,12 @@ namespace PeachFarm.Node
 				throw new RabbitMqException(ex);
 			}
 		}
+		//*/
 
+		private void PublishToServer(string body, string action)
+		{
+			rabbit.PublishToQueue(ServerQueue, body, action);
+		}
 		#endregion
 
 		#region Sends
