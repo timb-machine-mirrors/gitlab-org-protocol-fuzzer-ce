@@ -29,7 +29,7 @@ namespace PeachFarm.Admin
 
 		RabbitMqHelper rabbit = null;
 
-		public Admin(string serverHostName = "", int timeoutSeconds = 0)
+		public Admin(string serverHostName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
 			if (String.IsNullOrEmpty(serverHostName))
@@ -40,7 +40,6 @@ namespace PeachFarm.Admin
 			{
 				ServerHostName = serverHostName;
 			}
-			TimeoutSeconds = timeoutSeconds;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
@@ -57,48 +56,16 @@ namespace PeachFarm.Admin
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
 		{
 			ProcessAction(e.Action, e.Body);
-		}
-
-		public void Close()
-		{
 			rabbit.StopListener();
 			this.IsListening = false;
 		}
 
+
+
 		#region Properties
 		public string ServerHostName { get; private set; }
 
-		public int TimeoutSeconds { get; private set; }
-
 		public bool IsListening { get; private set; }
-		#endregion
-
-		#region Methods
-
-		/*
-		public void StartAdmin()
-		{
-			try
-			{
-				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-				IsListening = true;
-				InitializeQueues();
-				StartListeners();
-			}
-			catch (Exception ex)
-			{
-				throw new ApplicationException("Could not open a connection to RabbitMQ host " + ServerHostName);
-			}
-
-		}
-
-		public void StopAdmin()
-		{
-			StopListeners();
-			CloseConnection();
-			IsListening = false;
-		}
-		//*/
 		#endregion
 
 		#region AsyncCompletes
@@ -304,16 +271,6 @@ namespace PeachFarm.Admin
 			request.JobID = jobGuid;
 			PublishToServer(request.Serialize(), "StopPeach");
 		}
-
-		/*
-		public void StopPeachAsync()
-		{
-			StopPeachRequest request = new StopPeachRequest();
-			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-			request.JobID = String.Empty;
-			PublishToServer(request.Serialize(), "StopPeach");
-		}
-		//*/
 		#endregion
 
 		public void ListNodesAsync()
@@ -343,142 +300,6 @@ namespace PeachFarm.Admin
 		#endregion
 
 		#region MQ functions
-		/*
-		private string serverQueueName;
-		private string adminQueueName;
-
-		private IConnection connection;
-		private IModel modelSend;
-		private IModel modelReceive;
-
-		private BackgroundWorker adminListener = new BackgroundWorker();
-
-		private void OpenConnection(string hostName, int port = -1, string userName = "guest", string password = "guest")
-		{
-			ConnectionFactory factory = new ConnectionFactory();
-			factory.HostName = hostName;
-			factory.Port = port;
-			factory.UserName = userName;
-			factory.Password = password;
-			connection = factory.CreateConnection();
-			modelSend = connection.CreateModel();
-			modelReceive = connection.CreateModel();
-
-		}
-
-		private void InitializeQueues()
-		{
-			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
-
-			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
-			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
-
-			//server queue
-			modelSend.QueueDeclare(serverQueueName, true, false, false, null);
-
-			//admin queue
-			modelReceive.QueueDeclare(adminQueueName, true, false, false, null);
-
-			if (modelReceive.IsOpen == false)
-				modelReceive = connection.CreateModel();
-
-			// flush admin queue
-			BasicGetResult result = modelReceive.BasicGet(adminQueueName, false);
-			while (result != null)
-			{
-				result = modelReceive.BasicGet(adminQueueName, false);
-			}
-		}
-
-		private void StartListeners()
-		{
-
-			adminListener = new BackgroundWorker();
-			adminListener.WorkerSupportsCancellation = true;
-			adminListener.DoWork += Listen;
-			adminListener.RunWorkerCompleted += new RunWorkerCompletedEventHandler(adminListener_RunWorkerCompleted);
-			adminListener.RunWorkerAsync();
-		}
-
-		void adminListener_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-		{
-			if (e.Cancelled)
-			{
-
-			}
-			else if (e.Error != null)
-			{
-
-			}
-
-		}
-
-		private void Listen(object sender, DoWorkEventArgs e)
-		{
-			BasicGetResult result = null;
-			int count = 0;
-			while (!e.Cancel)
-			{
-				try
-				{
-					if (modelReceive.IsOpen == false)
-						modelReceive = connection.CreateModel();
-
-					result = modelReceive.BasicGet(adminQueueName, false);
-				}
-				catch (Exception ex)
-				{
-					RaiseAdminException(new ApplicationException("Could not communicate with RabbitMQ", ex));
-					return;
-				}
-
-				if (result != null)
-				{
-					string body = encoding.GetString(result.Body);
-					string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
-					try
-					{
-						ProcessAction(action, body);
-						modelReceive.BasicAck(result.DeliveryTag, false);
-						e.Cancel = true;
-						StopAdmin();
-					}
-					catch (Exception ex)
-					{
-						RaiseAdminException(ex);
-						return;
-					}
-				}
-				else
-				{
-					Thread.Sleep(1000);
-					if (TimeoutSeconds > 0)
-					{
-						count++;
-						if (count == TimeoutSeconds)
-						{
-							RaiseAdminException(new ApplicationException("No response received before timeout."));
-							return;
-						}
-					}
-				}
-
-			}
-		}
-
-		private void StopListeners()
-		{
-			adminListener.CancelAsync();
-
-		}
-
-		private void CloseConnection()
-		{
-			modelSend.Close();
-			connection.Close();
-		}
-		//*/
 		private void PublishToServer(string message, string action)
 		{
 			rabbit.Sender.PublishToQueue(serverQueueName, message, action, adminQueueName);

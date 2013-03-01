@@ -145,12 +145,6 @@ namespace PeachFarm.Admin.Console
 
 				System.Console.WriteLine("waiting for result...");
 				System.Console.ReadLine();
-
-				if (admin.IsListening)
-				{
-					admin.Close();
-					admin = null;
-				}
 			}
 			catch (SyntaxException)
 			{

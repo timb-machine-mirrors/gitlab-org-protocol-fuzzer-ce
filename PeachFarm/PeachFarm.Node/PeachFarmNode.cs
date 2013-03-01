@@ -114,39 +114,6 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Public Methods
-		/*
-		public void StartNode()
-		{
-			#region set up RabbitMQ connection and start listening for messages
-			try
-			{
-				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-				RegisterQueues();
-				StartListener();
-				heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
-				IsOpen = true;
-			}
-			catch(RabbitMqException rex)
-			{
-				if (heartbeat != null)
-				{
-					heartbeat.Dispose();
-					heartbeat = null;
-				}
-				StopListeners();
-				nlog.Fatal(String.Format("Could not open connection to RabbitMQ server at {0}, exiting now.\nException:\n{1}", config.RabbitMq.HostName, rex.InnerException.ToString()));
-			}
-			catch(Exception ex)
-			{
-				nlog.Fatal(String.Format("Unknown exception while starting Peach Farm Node:\n{0}", ex.Message));
-				return;
-			}
-
-			#endregion
-
-
-		}
-		//*/
 		public void Close()
 		{
 			IsOpen = false;
@@ -182,7 +149,6 @@ namespace PeachFarm.Node
 				nlog.Error(String.Format("Error while shutting down node, continuing shutdown.\nException:\n{0}", ex.ToString()));
 			}
 		}
-		//*/
 		#endregion
 
 		#region Termination handlers
@@ -192,16 +158,6 @@ namespace PeachFarm.Node
 			if ((nodeState.Status != Status.Stopping))// && (connection != null) && (connection.IsOpen))
 			{
 				ChangeStatus(Status.Stopping);
-
-				/*
-				try
-				{
-					DeregisterQueues();
-					StopListeners();
-					CloseConnection();
-				}
-				catch (RabbitMqException) { }
-				//*/
 			}
 		}
 
@@ -224,11 +180,6 @@ namespace PeachFarm.Node
 				try
 				{
 					rabbit.StopListener();
-					/*
-					DeregisterQueues();
-					StopListeners();
-					CloseConnection();
-					//*/
 				}
 				catch (RabbitMqException) { }
 			}
@@ -236,274 +187,9 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Node communication functions
-		/*
-		private static string clientQueueName;
-
-		private static IConnection connection;
-		private static IModel modelSend;
-		private static IModel modelReceive;
-
-		private static BackgroundWorker listener = new BackgroundWorker();
-
-		private static void OpenConnection(string hostName, int port = -1, string userName = "guest", string password = "guest")
-		{
-			ConnectionFactory factory = new ConnectionFactory();
-			factory.HostName = hostName;
-			factory.Port = port;
-			factory.UserName = userName;
-			factory.Password = password;
-
-			try
-			{
-				connection = factory.CreateConnection();
-				modelSend = connection.CreateModel();
-				modelReceive = connection.CreateModel();
-			}
-			catch(Exception ex)
-			{
-				throw new RabbitMqException(ex);
-			}
-
-		}
-
-		private void RegisterQueues()
-		{
-
-			//client queue
-			clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
-
-			try
-			{
-				modelSend.ExchangeDeclare(QueueNames.EXCHANGE_NODE, QueueNames.EXCHANGETYPE_NODE);
-				modelSend.QueueDeclare(clientQueueName, false, false, false, null);
-				modelSend.QueueBind(clientQueueName, QueueNames.EXCHANGE_NODE, "");
-				modelSend.QueuePurge(clientQueueName);
-			}
-			catch (Exception ex)
-			{
-				throw new RabbitMqException(ex);
-			}
-		}
-
-		private void DeregisterQueues()
-		{
-			if (modelSend.IsOpen)
-			{
-				try
-				{
-					modelSend.QueueUnbind(clientQueueName, QueueNames.EXCHANGE_NODE, "", null);
-					modelSend.QueueDelete(clientQueueName);
-				}
-				catch (Exception ex)
-				{
-					throw new RabbitMqException(ex);
-				}
-			}
-		}
-
-		private void StartListener()
-		{
-			listener = new BackgroundWorker();
-			listener.WorkerSupportsCancellation = true;
-			listener.DoWork += Listen;
-			listener.RunWorkerAsync();
-		}
-
-		private void Listen(object sender, DoWorkEventArgs e)
-		{
-
-			while (!e.Cancel)
-			{
-				if ((nodeState.Status == Status.Alive) || (nodeState.Status == Status.Running))
-				{
-					BasicGetResult result = null;
-					try
-					{
-						result = GetFromNodeQueue();
-					}
-					catch(RabbitMqException)
-					{
-						nlog.Error("Can't communicate with RabbitMQ server, will retry.");
-					}
-
-					if (result != null)
-					{
-						string body = encoding.GetString(result.Body);
-						string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
-						nlog.Debug(String.Format("Action: {0}", action));
-						nlog.Trace(String.Format("Body:\n'{0}'", body));
-						try
-						{
-							ProcessAction(action, body);
-						}
-						catch (Exception ex)
-						{
-							Heartbeat heartbeat = CreateHeartbeat(String.Format("{0}\n\n{1}", result.Body, ex.Message));
-							SendHeartbeat(heartbeat);
-						}
-
-						try
-						{
-							AckMessage(result.DeliveryTag);
-						}
-						catch { }
-
-						nlog.Debug(String.Format("Done processing message '{0}'", action));
-					}
-				}
-
-				Thread.Sleep(1000);
-			}
-		}
-
-		private void StopListeners()
-		{
-			if(listener.IsBusy)
-				listener.CancelAsync();
-		}
-
-		private void CloseConnection()
-		{
-			if (modelSend.IsOpen)
-				modelSend.Close();
-
-			if (modelReceive.IsOpen)
-				modelReceive.Close();
-
-			if (connection.IsOpen)
-				connection.Close();
-		}
-
-		private bool ReopenConnection()
-		{
-			bool success = true;
-
-			lock (connection)
-			{
-				if (connection.IsOpen == true)
-				{
-					try
-					{
-						CloseConnection();
-					}
-					catch { }
-				}
-
-				if (connection.IsOpen == false)
-				{
-					try
-					{
-						OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-					}
-					catch
-					{
-						nlog.Error("Cannot reopen connection to RabbitMQ: " + config.RabbitMq.HostName);
-						return false;
-					}
-				}
-
-				if (modelReceive.IsOpen == false || modelSend.IsOpen == false)
-				{
-					try
-					{
-						if (modelReceive.IsOpen == false)
-						{
-							modelReceive = connection.CreateModel();
-						}
-
-						if (modelSend.IsOpen == false)
-						{
-							modelSend = connection.CreateModel();
-						}
-					}
-					catch
-					{
-						return false;
-					}
-				}
-
-			}
-
-			try
-			{
-				RegisterQueues();
-			}
-			catch
-			{
-				return false;
-			}
-
-			return success;
-		}
-		//*/
 		#endregion
 
 		#region Rabbit MQ Functions
-		/*
-		private void PublishToServer(string message, string action)
-		{
-			bool open = true;
-
-			try
-			{
-				if (modelSend.IsOpen == false)
-				{
-					open = ReopenConnection();
-				}
-
-				if (open)
-				{
-					modelSend.PublishToQueue(nodeState.ServerQueueName, message, action);
-				}
-				else
-				{
-					throw new RabbitMqException(null);
-				}
-			}
-			catch(Exception ex)
-			{
-				throw new RabbitMqException(ex);
-			}
-		}
-
-		private BasicGetResult GetFromNodeQueue()
-		{
-			bool open = true;
-			try
-			{
-				if ((connection == null) || (connection.IsOpen == false))
-				{
-					open = ReopenConnection();
-				}
-
-				if (open)
-				{
-					return modelReceive.BasicGet(clientQueueName, false);
-				}
-				else
-				{
-					return null;
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new RabbitMqException(ex);
-			}
-		}
-
-		private void AckMessage(ulong deliveryTag)
-		{
-			try
-			{
-				modelSend.BasicAck(deliveryTag, false);
-			}
-			catch (Exception ex)
-			{
-				throw new RabbitMqException(ex);
-			}
-		}
-		//*/
-
 		private void PublishToServer(string body, string action)
 		{
 			rabbit.PublishToQueue(ServerQueue, body, action);
