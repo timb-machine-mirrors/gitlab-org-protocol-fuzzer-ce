@@ -257,17 +257,6 @@ namespace PeachFarm.Controller
 				request.JobID = CreateJobID();
 			}
 
-			#region Create Job record in Mongo
-
-			PeachFarm.Common.Mongo.Job mongoJob = new PeachFarm.Common.Mongo.Job();
-			mongoJob.JobID = request.JobID;
-			mongoJob.UserName = request.UserName;
-			mongoJob.PitFileName = request.PitFileName;
-			mongoJob.StartDate = DateTime.Now;
-			mongoJob = mongoJob.DatabaseInsert(request.MongoDbConnectionString);
-
-			#endregion
-
 			StartPeachResponse response = new StartPeachResponse(request);
 
 
@@ -277,8 +266,12 @@ namespace PeachFarm.Controller
 				{
 					DeclareJobExchange(request.JobID, new List<string>() { nodes[request.IPAddress].QueueName });
 
+					CommitJobToMongo(request);
+
 					//modelSend.PublishToQueue(nodes[request.IPAddress].QueueName, request.Serialize(), action);
 					PublishToJob(request.JobID, request.Serialize(), action);
+
+
 					ReplyToAdmin(response.Serialize(), action, replyQueue);
 				}
 				else
@@ -323,6 +316,7 @@ namespace PeachFarm.Controller
 
 					DeclareJobExchange(request.JobID, jobQueues);
 
+					CommitJobToMongo(request);
 
 					foreach(string jobQueue in jobQueues)
 					{
@@ -432,6 +426,21 @@ namespace PeachFarm.Controller
 				rng.GetBytes(rndBytes);
 				return BitConverter.ToString(rndBytes).Replace("-", "");
 			}
+		}
+
+		private void CommitJobToMongo(StartPeachRequest request)
+		{
+
+			#region Create Job record in Mongo
+
+			PeachFarm.Common.Mongo.Job mongoJob = new PeachFarm.Common.Mongo.Job();
+			mongoJob.JobID = request.JobID;
+			mongoJob.UserName = request.UserName;
+			mongoJob.PitFileName = request.PitFileName;
+			mongoJob.StartDate = DateTime.Now;
+			mongoJob = mongoJob.DatabaseInsert(request.MongoDbConnectionString);
+
+			#endregion
 		}
 
 		private void AddNode(Heartbeat heartbeat)
