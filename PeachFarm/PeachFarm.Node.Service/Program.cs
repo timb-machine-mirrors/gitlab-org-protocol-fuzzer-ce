@@ -25,7 +25,6 @@ namespace PeachFarm.Node.Service
         #region initializing and starting node
         peachFarmNode = new PeachFarmNode();
         peachFarmNode.StatusChanged += new EventHandler<StatusChangedEventArgs>(peachFarmNode_StatusChanged);
-        peachFarmNode.StartNode();
         #endregion
 
         #region press enter to close gracefully
@@ -34,7 +33,7 @@ namespace PeachFarm.Node.Service
         #endregion
 
         #region stopping node
-        peachFarmNode.StopNode();
+        peachFarmNode.Close();
         #endregion
       }
       else

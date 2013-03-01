@@ -156,6 +156,9 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
+		[XmlIgnore]
+		[BsonIgnore]
+		public List<Iteration> Iterations { get; set; }
 	}
 
 }

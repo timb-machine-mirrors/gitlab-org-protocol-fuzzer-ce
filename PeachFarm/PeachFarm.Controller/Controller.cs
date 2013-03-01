@@ -27,6 +27,11 @@ namespace PeachFarm.Controller
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private static Timer statusCheck = null;
+
+		RabbitMqHelper rabbit = null;
+
+		private string serverQueueName;
+
 		public PeachFarmServer()
 		{
 			// Startup as application
@@ -43,6 +48,7 @@ namespace PeachFarm.Controller
 				throw new ApplicationException(error);
 			}
 
+			/*
 			try
 			{
 				OpenConnection(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
@@ -55,6 +61,20 @@ namespace PeachFarm.Controller
 
 			RegisterQueues();
 			StartListener();
+			//*/
+
+			try
+			{
+				rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+				serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+				rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+				rabbit.StartListener(serverQueueName);
+			}
+			catch (Exception ex)
+			{
+				string error = String.Format("Could not open connection to RabbitMQ server at {0}, exiting now. Exception:\n{1}", config.RabbitMq.HostName, ex.Message);
+				throw new ApplicationException(error, ex);
+			}
 
 			if (statusCheck == null)
 			{
@@ -62,6 +82,18 @@ namespace PeachFarm.Controller
 			}
 
 			IsOpen = true;
+		}
+
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			try
+			{
+				ProcessAction(e.Action, e.Body, e.ReplyQueue);
+			}
+			catch (Exception ex)
+			{
+				ReplyToAdmin(ex.Message, "StartPeach", e.ReplyQueue);
+			}
 		}
 
 		#region Properties
@@ -75,6 +107,13 @@ namespace PeachFarm.Controller
 			}
 		}
 		#endregion
+
+		public void Close()
+		{
+			IsOpen = false;
+			rabbit.StopListener();
+
+		}
 
 		private void StatusCheck(object state)
 		{
@@ -110,7 +149,7 @@ namespace PeachFarm.Controller
 		}
 
 		#region MQ functions
-
+		/*
 		private string serverQueueName;
 
 		private IConnection connection;
@@ -284,13 +323,7 @@ namespace PeachFarm.Controller
 			return success;
 		}
 
-		public void Close()
-		{
-			IsOpen = false;
 
-			StopListener();
-			CloseConnection();
-		}
 
 		private void StopListener()
 		{
@@ -305,10 +338,10 @@ namespace PeachFarm.Controller
 			if (connection.IsOpen)
 				connection.Close();
 		}
-
+		//*/
 		private void PublishToClients(string body, string action)
 		{
-			modelSend.PublishToExchange(QueueNames.EXCHANGE_NODE, body, action);
+			rabbit.PublishToExchange(QueueNames.EXCHANGE_NODE, body, action);
 			logger.Trace("Sent Action to Clients: {0}\nBody:\n{1}", action, body);
 		}
 
@@ -319,7 +352,8 @@ namespace PeachFarm.Controller
 
 			try
 			{
-				modelSend.ExchangeDeclarePassive(exchangename);
+				//modelSend.ExchangeDeclarePassive(exchangename);
+				rabbit.Sender.ExchangeDeclarePassive(exchangename);
 				result = true;
 			}
 			catch
@@ -329,7 +363,7 @@ namespace PeachFarm.Controller
 
 			if (result)
 			{
-				modelSend.PublishToExchange(exchangename, body, action);
+				rabbit.PublishToExchange(exchangename, body, action);
 				logger.Trace("Sent Action to Job {0}: {1}\nBody:\n{2}", jobID, action, body);
 			}
 			return result;
@@ -338,23 +372,23 @@ namespace PeachFarm.Controller
 		private void DeclareJobExchange(string jobID, List<string> queueNames)
 		{
 			string exchangeName = String.Format(QueueNames.EXCHANGE_JOB, jobID);
-			modelSend.ExchangeDeclare(exchangeName, "fanout", true);
+			rabbit.Sender.ExchangeDeclare(exchangeName, "fanout", true);
 
 			foreach (string queueName in queueNames)
 			{
-				modelSend.QueueBind(queueName, exchangeName, jobID);
+				rabbit.Sender.QueueBind(queueName, exchangeName, jobID);
 			}
 		}
 
 		private void DeleteJobExchange(string jobID)
 		{
 			string exchangeName = String.Format(QueueNames.EXCHANGE_JOB, jobID);
-			modelSend.ExchangeDelete(exchangeName, true);
+			rabbit.Sender.ExchangeDelete(exchangeName, true);
 		}
 
 		private void ReplyToAdmin(string body, string action, string replyQueue)
 		{
-			modelSend.PublishToQueue(replyQueue, body, action);
+			rabbit.PublishToQueue(replyQueue, body, action);
 			logger.Trace("Sent Action to Admin: {0}\nBody:\n{1}", action, body);
 		}
 
@@ -387,8 +421,8 @@ namespace PeachFarm.Controller
 					Monitor(MonitorRequest.Deserialize(body), replyQueue);
 					break;
 				default:
-					logger.Error(String.Format("Received unknown action {0}", action));
-					break;
+					string error = String.Format("Received unknown action {0}", action);
+					throw new ApplicationException(error);
 			}
 		}
 
@@ -498,7 +532,7 @@ namespace PeachFarm.Controller
 					foreach(string jobQueue in jobQueues)
 					{
 						request.Seed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-						modelSend.PublishToQueue(jobQueue, request.Serialize(), action);
+						rabbit.PublishToQueue(jobQueue, request.Serialize(), action);
 					}
 
 					//PublishToJob(request.JobID, request.Serialize(), action);

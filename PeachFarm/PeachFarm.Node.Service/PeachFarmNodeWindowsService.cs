@@ -41,7 +41,6 @@ namespace PeachFarm.Node.Service
       {
         node = new PeachFarmNode();
         node.StatusChanged += new EventHandler<StatusChangedEventArgs>(node_StatusChanged);
-        node.StartNode();
         logger.Info("Peach Farm Node Started.");
       }
       catch (ApplicationException aex)
@@ -67,7 +66,7 @@ namespace PeachFarm.Node.Service
 
       if (node != null)
       {
-        node.StopNode();
+        node.Close();
         logger.Info("Peach Farm Node Stopped.");
       }
     }
