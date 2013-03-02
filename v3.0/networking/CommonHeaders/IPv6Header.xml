@@ -2,7 +2,8 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
 			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+			 
+	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
 
 	<!--###Be sure to override the NextHeader Value##-->
 	<DataModel name="TLV">
@@ -142,8 +143,9 @@
 		</Number>
 		<Number name="MH" size="8" endian="big"/>
 		<Number name="Reserved" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big">
+		<Number name="MHChecksum" size="16" endian="big">
 		</Number>
+		<Block name="MobilityOptions"/>
 	</DataModel>
 
 	<DataModel name="MobileRoutingType2Header">
@@ -153,32 +155,6 @@
 		<Number name="SegmentsLeft" size="8" endian="big" signed="false" value="1"/>
 		<Number name="Reserved" size="32" endian="big"/>
 		<Blob name="HomeAddress" valueType="hex" length="16"/>
-	</DataModel>
-
-	<DataModel name="MobileICMP">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Code" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big">
-		</Number>
-		<Number name="Identifier" size="16" endian="big"/>
-		<Block name="Reserved"/>
-	</DataModel>
-
-	<DataModel name="MobileICMPRouterAdvertisement">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Code" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big"/>
-		<Number name="CurrHopLimit" size="8" endian="big"/>
-		<Flags name="Flags" size="8" endian="big">
-			<Flag name="M" size="1" position="0"/>
-			<Flag name="O" size="1" position="1"/>
-			<Flag name="H" size="1" position="2"/>
-			<Flag name="Reserved" size="5" position="3"/>
-		</Flags>
-		<Number name="RouterLifetime" size="16" endian="big"/>
-		<Number name="ReachableTime" size="32" endian="big"/>
-		<Number name="RetransTimer" size="32" endian="big"/>
-		<Block name="Options"/>
 	</DataModel>
 	
 </Peach>
