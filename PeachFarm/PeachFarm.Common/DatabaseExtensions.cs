@@ -8,6 +8,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver.Builders;
 using System.Diagnostics;
+using System.IO;
 
 namespace PeachFarm.Common.Mongo
 {
@@ -41,6 +42,8 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 
+			iteration = UpdateDataPaths(iteration, connectionString);
+
 			collection.Insert(iteration);
 
 			collection.Database.Server.Disconnect();
@@ -48,6 +51,87 @@ namespace PeachFarm.Common.Mongo
 			Debug.WriteLine("******* WRITING ITERATION TO DATABASE ******");
 
 			return iteration;
+		}
+
+		private static Iteration UpdateDataPaths(Iteration iteration, string connectionString)
+		{
+			string jobFolder = String.Empty;
+			string nodeFolder = String.Empty;
+			string testFolder = String.Empty;
+			string faultsFolder = String.Empty;
+			string statusFile = String.Empty;
+			string faultFolder = String.Empty;
+			string iterationFolder = String.Empty;
+			string actionFile = String.Empty;
+			string collectedDataFile = String.Empty;
+
+			Job job = DatabaseHelper.GetJob(iteration.JobID, connectionString);
+
+			jobFolder = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
+			nodeFolder = Path.Combine(jobFolder, "Node_" + iteration.NodeName);
+			testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.PitFileName, iteration.TestName, FormatDate(iteration.Stamp)));
+			faultsFolder = Path.Combine(testFolder, "Faults");
+			iterationFolder = Path.Combine(faultsFolder, "{0}", iteration.IterationNumber.ToString());
+
+			#region action files
+			int cnt = 0;
+			foreach (PeachFarm.Common.Mongo.Action action in iteration.StateModel)
+			{
+				cnt++;
+				if (action.Parameter == 0)
+				{
+					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
+									cnt, action.ActionType.ToString(), action.ActionName));
+
+				}
+				else
+				{
+					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
+									cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
+				}
+
+				action.DataPath = actionFile;
+			}
+			#endregion
+
+			foreach (Fault fault in iteration.Faults)
+			{
+
+				#region set faultFolder
+				if (fault.FolderName != null)
+				{
+					faultFolder = fault.FolderName;
+				}
+				else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
+				{
+					faultFolder = "Unknown";
+				}
+				else
+				{
+					faultFolder = String.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash);
+				}
+				#endregion
+
+				string thisiterationfolder = String.Format(iterationFolder, faultFolder);
+
+
+				#region write collected data files
+				foreach (CollectedData cd in fault.CollectedData)
+				{
+					collectedDataFile = System.IO.Path.Combine(thisiterationfolder,
+						fault.DetectionSource + "_" + cd.Key);
+
+					cd.DataPath = collectedDataFile;
+				}
+				#endregion
+			}
+
+			return iteration;
+		}
+
+		private static string FormatDate(DateTime dateTime)
+		{
+			return String.Format("{0:yyyyMMddhhmmss}", dateTime);
 		}
 
 		public static Messages.Heartbeat DatabaseInsert(this Messages.Heartbeat heartbeat, string connectionString)

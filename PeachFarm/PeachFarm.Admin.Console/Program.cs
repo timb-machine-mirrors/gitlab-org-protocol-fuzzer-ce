@@ -73,7 +73,7 @@ namespace PeachFarm.Admin.Console
 				#region Set up Admin listener
 
 				admin = new Admin();
-				
+
 				admin.ListNodesCompleted += admin_ListNodesCompleted;
 				admin.ListErrorsCompleted += admin_ListErrorsCompleted;
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
@@ -146,18 +146,19 @@ namespace PeachFarm.Admin.Console
 				System.Console.WriteLine("waiting for result...");
 				System.Console.ReadLine();
 			}
+			catch (RabbitMqException rex)
+			{
+				System.Console.WriteLine("Could not communicate with RabbitMQ server at " + rex.RabbitMqHost);
+			}
 			catch (SyntaxException)
 			{
 				PrintHelp();
 			}
-			catch (ApplicationException aex)
+			catch (Exception ex)
 			{
-				System.Console.WriteLine(aex.Message);
+				System.Console.WriteLine(ex.Message);
 			}
-			catch (Exception)
-			{
-				PrintHelp();
-			}
+
 
 			Environment.Exit(0);
 		}

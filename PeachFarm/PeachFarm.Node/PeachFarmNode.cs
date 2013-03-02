@@ -55,11 +55,12 @@ namespace PeachFarm.Node
 			#endregion
 
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+			clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-			clientQueueName = String.Format(QueueNames.QUEUE_NODE, nodeState.IPAddress);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(clientQueueName);
+
 			heartbeat = new Timer(new TimerCallback(SendHeartbeat), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
 			IsOpen = true;
 		}
@@ -641,13 +642,5 @@ namespace PeachFarm.Node
 		}
 
 		public Status Status { get; private set; }
-	}
-
-	public class RabbitMqException : Exception 
-	{
-		public RabbitMqException(Exception innerException, string message = "Peach Farm Node encountered a RabbitMq Exception.")
-			:base(message, innerException)
-		{
-		}
 	}
 }

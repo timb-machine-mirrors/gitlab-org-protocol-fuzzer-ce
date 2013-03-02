@@ -48,18 +48,10 @@ namespace PeachFarm.Controller
 				throw new ApplicationException(error);
 			}
 
-			try
-			{
-				rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
-				serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
-				rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-				rabbit.StartListener(serverQueueName);
-			}
-			catch (Exception ex)
-			{
-				string error = String.Format("Could not open connection to RabbitMQ server at {0}, exiting now. Exception:\n{1}", config.RabbitMq.HostName, ex.Message);
-				throw new ApplicationException(error, ex);
-			}
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+			rabbit.StartListener(serverQueueName);
 
 			if (statusCheck == null)
 			{

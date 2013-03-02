@@ -212,6 +212,8 @@ namespace PeachFarm.Common.Mongo
 
 		private byte[] dataField;
 
+		private string dataPathField;
+
 		public string ActionName
 		{
 			get
@@ -257,6 +259,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.dataField = value;
+			}
+		}
+
+		public string DataPath
+		{
+			get
+			{
+				return this.dataPathField;
+			}
+			set
+			{
+				this.dataPathField = value;
 			}
 		}
 	}
@@ -447,6 +461,8 @@ namespace PeachFarm.Common.Mongo
 
 		private byte[] dataField;
 
+		private string dataPathField;
+
 		public string Key
 		{
 			get
@@ -468,6 +484,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.dataField = value;
+			}
+		}
+
+		public string DataPath
+		{
+			get
+			{
+				return this.dataPathField;
+			}
+			set
+			{
+				this.dataPathField = value;
 			}
 		}
 	}

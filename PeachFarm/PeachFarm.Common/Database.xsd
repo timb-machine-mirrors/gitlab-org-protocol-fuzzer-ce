@@ -71,6 +71,7 @@
     <xs:sequence>
 			<xs:element name="Key" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+			<xs:element name="DataPath" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:sequence>
 	</xs:complexType>
 
@@ -80,6 +81,7 @@
       <xs:element name="ActionType" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="Parameter" type="xs:int" maxOccurs="1" minOccurs="1" />
       <xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+			<xs:element name="DataPath" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:sequence>
 	</xs:complexType>
 </xs:schema>

@@ -72,7 +72,7 @@ namespace PeachFarm.Common
 			}
 			catch (Exception ex)
 			{
-				throw new RabbitMqException(ex);
+				throw new RabbitMqException(ex, hostName);
 			}
 		}
 
@@ -94,12 +94,12 @@ namespace PeachFarm.Common
 				}
 				else
 				{
-					throw new RabbitMqException(null);
+					throw new RabbitMqException(null, hostName);
 				}
 			}
 			catch (Exception ex)
 			{
-				throw new RabbitMqException(ex);
+				throw new RabbitMqException(ex, hostName);
 			}
 		}
 
@@ -128,12 +128,12 @@ namespace PeachFarm.Common
 				}
 				else
 				{
-					throw new RabbitMqException(null);
+					throw new RabbitMqException(null, hostName);
 				}
 			}
 			catch (Exception ex)
 			{
-				throw new RabbitMqException(ex);
+				throw new RabbitMqException(ex, hostName);
 			}
 		}
 
@@ -208,7 +208,7 @@ namespace PeachFarm.Common
 			}
 			catch (Exception ex)
 			{
-				throw new RabbitMqException(ex);
+				throw new RabbitMqException(ex, hostName);
 			}
 
 		}
@@ -295,7 +295,7 @@ namespace PeachFarm.Common
 			}
 			catch (Exception ex)
 			{
-				throw new RabbitMqException(ex);
+				throw new RabbitMqException(ex, hostName);
 			}
 		}
 
@@ -303,10 +303,13 @@ namespace PeachFarm.Common
 
 	public class RabbitMqException : Exception
 	{
-		public RabbitMqException(Exception innerException, string message = "Peach Farm Node encountered a RabbitMq Exception.")
+		public RabbitMqException(Exception innerException, string host = "", string message = "Peach Farm Node encountered a RabbitMq Exception.")
 			: base(message, innerException)
 		{
+			this.RabbitMqHost = host;
 		}
+
+		public string RabbitMqHost { get; private set; }
 	}
 
 	public static class RabbitMqExtensions
