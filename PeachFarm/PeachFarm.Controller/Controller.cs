@@ -134,43 +134,26 @@ namespace PeachFarm.Controller
 
 		private bool PublishToJob(string jobID, string body, string action)
 		{
-			bool result;
+			bool result = false;
 			string exchangename = String.Format(QueueNames.EXCHANGE_JOB, jobID);
 
-			try
-			{
-				//modelSend.ExchangeDeclarePassive(exchangename);
-				rabbit.Sender.ExchangeDeclarePassive(exchangename);
-				result = true;
-			}
-			catch
-			{
-				result = false;
-			}
+			rabbit.PublishToExchange(exchangename, body, action);
+			logger.Trace("Sent Action to Job {0}: {1}\nBody:\n{2}", jobID, action, body);
+			result = true;
 
-			if (result)
-			{
-				rabbit.PublishToExchange(exchangename, body, action);
-				logger.Trace("Sent Action to Job {0}: {1}\nBody:\n{2}", jobID, action, body);
-			}
 			return result;
 		}
 
 		private void DeclareJobExchange(string jobID, List<string> queueNames)
 		{
 			string exchangeName = String.Format(QueueNames.EXCHANGE_JOB, jobID);
-			rabbit.Sender.ExchangeDeclare(exchangeName, "fanout", true);
-
-			foreach (string queueName in queueNames)
-			{
-				rabbit.Sender.QueueBind(queueName, exchangeName, jobID);
-			}
+			rabbit.DeclareExchange(exchangeName, queueNames, jobID);
 		}
 
 		private void DeleteJobExchange(string jobID)
 		{
 			string exchangeName = String.Format(QueueNames.EXCHANGE_JOB, jobID);
-			rabbit.Sender.ExchangeDelete(exchangeName, true);
+			rabbit.DeleteExchange(exchangeName);
 		}
 
 		private void ReplyToAdmin(string body, string action, string replyQueue)

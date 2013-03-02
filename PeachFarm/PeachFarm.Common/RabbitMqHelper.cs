@@ -39,11 +39,6 @@ namespace PeachFarm.Common
 			OpenConnection();
 		}
 
-		public IModel Sender
-		{
-			get { return sender; }
-		}
-
 		public void StartListener(string queue, double interval = 1000)
 		{
 			listenQueue = queue;
@@ -103,7 +98,7 @@ namespace PeachFarm.Common
 			}
 		}
 
-		public void PublishToExchange(string exchange, string body, string action, List<string> queues = null)
+		public void DeclareExchange(string exchange, List<string> queues, string routingKey = "")
 		{
 			bool open = true;
 
@@ -116,14 +111,62 @@ namespace PeachFarm.Common
 
 				if (open)
 				{
-					if (queues != null)
+					sender.ExchangeDeclare(exchange, "fanout", true);
+					foreach (var q in queues)
 					{
-						sender.ExchangeDeclare(exchange, "fanout", true);
-						foreach (var q in queues)
-						{
-							sender.QueueBind(q, exchange, exchange);
-						}
+						sender.QueueBind(q, exchange, routingKey);
 					}
+				}
+				else
+				{
+					throw new RabbitMqException(null, hostName);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
+		public void DeleteExchange(string exchange)
+		{
+			bool open = true;
+
+			try
+			{
+				if (sender.IsOpen == false)
+				{
+					open = ReopenConnection();
+				}
+
+				if (open)
+				{
+					sender.ExchangeDelete(exchange, true);
+				}
+				else
+				{
+					throw new RabbitMqException(null, hostName);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
+		public void PublishToExchange(string exchange, string body, string action)
+		{
+			bool open = true;
+
+			try
+			{
+				if (sender.IsOpen == false)
+				{
+					open = ReopenConnection();
+				}
+
+				if (open)
+				{
 					sender.PublishToExchange(exchange, body, action);
 				}
 				else
