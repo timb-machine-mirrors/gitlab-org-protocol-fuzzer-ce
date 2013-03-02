@@ -279,7 +279,7 @@ namespace PeachFarm.Controller
 				var aliveQueues = new List<string>();
 				if (String.IsNullOrEmpty(request.Tags))
 				{
-					var matches = (from Heartbeat h in nodes.Values where h.Status == Status.Alive select h.QueueName as string);
+					var matches = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h.QueueName as string);
 					aliveQueues.AddRange(matches);
 				}
 				else
