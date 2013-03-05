@@ -8,6 +8,13 @@ using System.ComponentModel;
 
 namespace PitMaker.Models
 {
+  public enum ByteOrder
+  {
+    little,
+    big,
+    network
+  }
+
   [System.SerializableAttribute()]
   [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
   [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
@@ -108,10 +115,10 @@ namespace PitMaker.Models
 
     #region Endian Property
 
-    private Peach.Core.Dom.ByteOrder endianField;
+    private ByteOrder endianField;
 
     [XmlAttribute("endian")]
-    public Peach.Core.Dom.ByteOrder Endian
+    public ByteOrder Endian
     {
       get
       {
@@ -270,10 +277,10 @@ namespace PitMaker.Models
 
     #region Endian Property
 
-    private Peach.Core.Dom.ByteOrder endianField;
+    private ByteOrder endianField;
 
     [XmlAttribute("endian")]
-    public Peach.Core.Dom.ByteOrder Endian
+    public ByteOrder Endian
     {
       get
       {
