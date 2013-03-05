@@ -18,8 +18,7 @@ namespace PeachFarm.Controller
 	public class PeachFarmServer
 	{
 		private static Dictionary<string, Heartbeat> nodes = new Dictionary<string, Heartbeat>();
-		private static Dictionary<string, List<string>> tags = new Dictionary<string, List<string>>();
-		//private List<Heartbeat> errors = new List<Heartbeat>();
+
 		private UTF8Encoding encoding = new UTF8Encoding();
 		private static string ipaddress;
 		private Configuration.ControllerSection config;
@@ -259,35 +258,29 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
-				var aliveQueues = new List<string>();
-				if (String.IsNullOrEmpty(request.Tags))
-				{
-					var matches = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h.QueueName as string);
-					aliveQueues.AddRange(matches);
-				}
-				else
+				var jobNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+
+				if (String.IsNullOrEmpty(request.Tags) == false)
 				{
 					var ts = request.Tags.Split(',').ToList();
-					foreach (string computerName in nodes.Keys)
+					foreach (Heartbeat node in jobNodes)
 					{
-						var matches = tags[computerName].Intersect(ts);
-						if ((matches.Count() == ts.Count) && (nodes[computerName].Status == Status.Alive))
+						var matches = node.Tags.Split(',').Intersect(ts).ToList();
+						if (matches.Count != ts.Count)
 						{
-							aliveQueues.Add(nodes[computerName].QueueName);
+							jobNodes.Remove(node);
 						}
 					}
 				}
 
-
-
-				if ((aliveQueues.Count > 0) && (aliveQueues.Count >= request.ClientCount))
+				if ((jobNodes.Count > 0) && (jobNodes.Count >= request.ClientCount))
 				{
 					if (request.ClientCount <= 0)
 					{
-						request.ClientCount = aliveQueues.Count;
+						request.ClientCount = jobNodes.Count;
 					}
 
-					var jobQueues = aliveQueues.Take(request.ClientCount).ToList();
+					var jobQueues = (from Heartbeat h in jobNodes.Take(request.ClientCount) select h.QueueName).ToList();
 
 					DeclareJobExchange(request.JobID, jobQueues);
 
@@ -307,7 +300,7 @@ namespace PeachFarm.Controller
 				{
 					response.JobID = String.Empty;
 					response.Success = false;
-					response.Message = String.Format("Not enough Alive nodes available, current available: {0}\n", aliveQueues.Count);
+					response.Message = String.Format("Not enough Alive nodes available, current available: {0}\n", jobNodes.Count);
 					ReplyToAdmin(response.Serialize(), action, replyQueue);
 				}
 			}
@@ -425,12 +418,6 @@ namespace PeachFarm.Controller
 			{
 				nodes.Add(heartbeat.NodeName, heartbeat);
 				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
-				if (String.IsNullOrEmpty(heartbeat.Tags) == false)
-				{
-					tags[heartbeat.NodeName] = heartbeat.Tags.Split(',').ToList();
-				}
-
 			}
 		}
 
@@ -451,12 +438,6 @@ namespace PeachFarm.Controller
 			lock (nodes)
 			{
 				nodes.Remove(heartbeat.NodeName);
-
-				if (tags.ContainsKey(heartbeat.NodeName))
-				{
-					tags.Remove(heartbeat.NodeName);
-				}
-
 
 				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
