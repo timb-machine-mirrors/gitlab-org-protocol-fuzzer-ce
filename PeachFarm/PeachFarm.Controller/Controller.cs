@@ -300,7 +300,14 @@ namespace PeachFarm.Controller
 				{
 					response.JobID = String.Empty;
 					response.Success = false;
-					response.Message = String.Format("Not enough Alive nodes available, current available: {0}\n", jobNodes.Count);
+					if (String.IsNullOrEmpty(request.Tags))
+					{
+						response.Message = String.Format("Not enough Alive nodes available, current available: {0}\n", jobNodes.Count);
+					}
+					else
+					{
+						response.Message = String.Format("Not enough Alive nodes matching tags ({0}), current available: {1}\n", request.Tags, jobNodes.Count);
+					}
 					ReplyToAdmin(response.Serialize(), action, replyQueue);
 				}
 			}
