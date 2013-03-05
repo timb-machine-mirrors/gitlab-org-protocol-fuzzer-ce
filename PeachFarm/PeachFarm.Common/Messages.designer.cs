@@ -3007,6 +3007,8 @@ namespace PeachFarm.Common.Messages
 
 		private List<Heartbeat> errorsField;
 
+		private string mongoDbConnectionStringField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		public MonitorResponse()
@@ -3052,6 +3054,19 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.errorsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public string MongoDbConnectionString
+		{
+			get
+			{
+				return this.mongoDbConnectionStringField;
+			}
+			set
+			{
+				this.mongoDbConnectionStringField = value;
 			}
 		}
 

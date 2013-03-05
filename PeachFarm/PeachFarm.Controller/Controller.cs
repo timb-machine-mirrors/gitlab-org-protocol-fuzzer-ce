@@ -383,6 +383,7 @@ namespace PeachFarm.Controller
 		private void Monitor(MonitorRequest request, string replyQueue)
 		{
 			MonitorResponse response = new MonitorResponse();
+			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
 			response.Nodes = nodes.Values.ToList();
 			response.Jobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString).ToMessagesJobs();

@@ -163,5 +163,6 @@
 				</xs:complexType>
 			</xs:element>
 		</xs:all>
+		<xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
 	</xs:complexType>
 </xs:schema>
