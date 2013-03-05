@@ -8,15 +8,24 @@
     <Number name="Length" size="16" endian="network">
       <Relation type="size" of="UDPHeader" />
     </Number>
-    <Number name="Checksum" size="16" >
-      <Fixup class="UDPChecksumFixup">
-        <Param name="ref" value="UDPHeader" />
-        <Param name="src" value="##SourceIPv4##" />
-        <Param name="dst" value="##TargetIPv4##" />
-      </Fixup>
-    </Number>
-    <Blob name="Data" value="Hello"/>
+    <Number name="Checksum" size="16"/>
+		<Block name="UDPData"/>
   </DataModel>
+	
+	<DataModel name="UDPPacket">
+		<Block name="UDPHeader" ref="UDPHeader">
+			<Number name="Checksum" size="16" >
+				<Fixup class="UDPChecksumFixup">
+					<Param name="ref" value="UDPHeader" />
+					<Param name="src" value="##SourceIPv4##" />
+					<Param name="dst" value="##TargetIPv4##" />
+				</Fixup>
+			</Number>
+			<Block name="UDPData">
+				<Blob name="Data" value="Hello"/>
+			</Block>
+		</Block>
+	</DataModel>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">

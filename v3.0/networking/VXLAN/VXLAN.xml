@@ -3,76 +3,588 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT" version="0.0.2">
 
-  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+  <!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+	<Include ns="Ethernet" src="file:##Path##/CommonHeaders/EthernetHeader.xml"/>
 
-  
-  
-  <!-- Used as the "Inner" Data for VXLAN Data Model -->
-  <DataModel name="VLAN">
-    <Block name="EtherHeader">
-      <Blob name="Dest" valueType="hex" value="000000000000"/>
-      <Blob name="Src" valueType="hex" value="000000000000"/>
-    </Block>
-    <Block name="Payload">
-      <Blob name="Type" valueType="hex" value="0800" />
-      <!--Valid IPv4 Header + UDP Packet. Not currently fuzzing this value-->
-      <Blob name="Payload" mutable="false" valueType="hex" value="450000211d9e0000801106ef0a0001220a00011e00000000000dc5c248656c6c6f"/>
-      <Number name="CRC" size="32" endian="big">
-	<Fixup class="checksums.Crc32Fixup">
-	  <Param name="ref" value="VLAN"/>
-	</Fixup>
-      </Number>
-    </Block>
-  </DataModel>
-  
+	<Include ns="IPv4" src="file:##Path##/CommonHeaders/IPv4Header.xml"/>
+	<Include ns="IPv6" src="file:##Path##/CommonHeaders/IPv6Header.xml"/>
+
+	<Include ns="TCP" src="file:##Path##/CommonHeaders/TCPHeader.xml"/>
+	<Include ns="UDP" src="file:##Path##/CommonHeaders/UDPHeader.xml"/>
+	<Include ns="ICMP" src="file:##Path##/CommonHeaders/ICMPHeader.xml"/>
+
+	<Include ns="VLAN" src="file:##Path##/CommonHeaders/VLANHeader.xml"/>
+
+
+  <DataModel name="VXLANHeader">
+		<Flags size="8" endian="big" >
+			<Flag position="4" value="1" size="1"/>
+		</Flags>
+		<Number name="LargeReserve" size="24" endian="big"/>
+		<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
+		<Number name="SmallReserve" size="8" endian="big"/>
+		<Block name="EtherHeader" ref="Ethernet:EthernetHeader">
+			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
+			<Blob name="Dest" valueType="hex" value="##TargetMAC##"/>
+			<Blob name="Type" valueType="hex" value="0800"/>
+		</Block>
+		<Block name="VXLANPayload"/>
+	</DataModel>
+
+
   <DataModel name="VXLAN">
-    <Block name="OuterEtherHeader">
+    <Block name="OuterEtherHeader" ref="Ethernet:EthernetHeader"> 
       <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
       <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
       <Blob name="Type" valueType="hex" value="0800"/>
     </Block>
-    <Block name="IP">		
-      <Block name="OuterIPHeader">
-	<Blob name="HeaderDataPt1" valueType="hex" value="4500"/>
-	<Number name="TotalLength" size="16" endian="big">
-	  <Relation type="size" of="IP"/>
-	</Number>
-	<Blob name="HeaderDataPt2" valueType="hex" value="1d9e000080"/>
-	<Blob name="Protocol" valueType="hex" value="11" />
-	<Number name="CRC" size="16" endian="little">
-	  <Fixup class="checksums.IcmpChecksumFixup">
-	    <Param name="ref" value="OuterIPHeader"/>
-	  </Fixup>
-	</Number>
-	<String name="SrcIP" value="##OuterSourceIPv4##">
-	  <Transformer class="Ipv4StringToNetworkOctet"/>
-	</String>
-	<String name="DstIP" value="##OuterTargetIPv4##">
-	  <Transformer class="Ipv4StringToNetworkOctet"/>
-	</String>
-      </Block>
-
-      <Block name="OuterUDP">
-	<Number name="SrcPort"  size="16" endian="big" value="9029"/>
-	<Number name="DestPort" size="16" endian="big" value="9029"/>
-	<Number name="Length"   size="16" endian="big">
-	  <Relation type="size" of="OuterUDP"/>
-	</Number>
-	<Blob   name="Checksum" length="2" valueType="hex" value="0" />
-	
-	<Block name="VXLANHeader">
-	  <Flags size="8" endian="big" >
-	    <Flag position="4" value="1" size="1"/>
-	  </Flags>
-	  <Number name="LargeReserve" size="24" endian="big"/>
-	  <Number name="VNI" 	    size="24" value="7639335" endian="big"/>
-	  <Number name="SmallReserve" size="8" endian="big"/>
-	</Block>
-	<Block name="VLAN" ref="VLAN" />
+    <Block name="OuterIP" ref="IPv4:IPv4Header">
+			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
+			<Blob name="Header.SrcIP" value="##OuterSourceIPv4##">
+				<Transformer class="Ipv4StringToOctet" />
+			</Blob>
+			<Blob name="Header.DestIP" value="##OuterTargetIPv4##">
+				<Transformer class="Ipv4StringToOctet" />
+			</Blob>
+      <Block name="IPv4Payload" ref="UDP:UDPHeader">
+				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
+				<Number name="Header.DestPort" size="16" endian="big" value="9029"/>
+				<Number name="Header.Checksum" size="16" endian="big"/> <!-- VXLAN has no inner CRC -->
+				<Block name="UdpPayload">
+					<Block name="VXHeader" ref="VXLANHeader">
+						<Blob name="EtherHeader.Type" valueType="hex" value="0800"/>
+						<Block name="VXLANPayload">
+							<Block name="InnerIP" ref="IPv4:IPv4Header">
+								<Number name="Header.Protocol" size="8" endian="big" value="17"/>
+								<Block name="IPv4Payload" ref="UDP:UDPHeader">
+									<Number name="Header.SrcPort" size="16" endian="network" value="1234"/>
+									<Number name="Header.DestPort" size="16" endian="network" value="1234"/>
+									<Block name="UdpPayload">
+										<Blob value="AAAAAA"/>
+									</Block>
+								</Block>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
       </Block>
     </Block>
   </DataModel>
+
+
+	<!-- VXLAN Empty IPv4 Frame -->
+	<DataModel name="IPv4EmptyPacketInVxlan">
+		<Block name="VXLAN" ref="VXLAN">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="1"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload"/>
+		</Block>
+	</DataModel>
+
+  
+	<!-- VXLAN Empty IPv6 Frame -->
+	<DataModel name="IPv6EmptyPacketInVxlan">
+		<Block name="VXLAN"  ref="VXLAN">
+			<Blob name="OuterIP.IPv4Payload.UdpPayload.VXHeader.EtherHeader.Type" valueType="hex" value="86dd"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload">
+				<Block name="InnerIP" ref="IPv6:IPv6Header">
+					<Number name="NextHeader" size="8" endian="big" value="59"/>
+					<Number name="PayloadLength" value="0" size="16"/>
+					<Block name="IPv6Payload">
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="IPv6ICMPInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:ICMPv6Header"/>
+		</Block>
+	</DataModel>
+	
+
+	<DataModel name="IPv6HopByHopInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="0"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:HopByHop"/>
+		</Block>
+	</DataModel>
+
+
+	<!-- Will have to deal with this later -->
+	<!-- <DataModel name="IPv6JumbogramInVxlan"> -->
+	<!-- 	<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan"> -->
+	<!-- 		<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength"  -->
+	<!-- 						size="16" endian="big" value="0"/> -->
+	<!-- 		<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="0"/> -->
+	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:JumboFrame"/> -->
+	<!-- 	</Block> -->
+	<!-- </DataModel> -->
+
+
+	<DataModel name="IPv6Fragment1InVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="44"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:Fragment">
+				<Flags name="Flags" size="16" endian="big">
+					<Flag name="Offset" size="13" position="0" value="0"/>
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="1"/>
+				</Flags>
+				<Number name="Identification" size="32" endian="big" value="374625"/>
+				<Blob name="Data" length="12"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6Fragment2InVxlan">
+		<Block name="VXLAN"  ref="IPv6Fragment1InVxlan">
+			<Flags name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.Flags" size="16" endian="big">
+					<Flag name="Offset" size="13" position="0" value="12"/> <!-- This is relative to the last frag... -->
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="1"/>
+			</Flags>
+		</Block>
+	</DataModel>
+
+
+	<DataModel name="IPv6Fragment3InVxlan">
+		<Block name="VXLAN"  ref="IPv6Fragment1InVxlan">
+			<Flags name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.Flags" size="16" endian="big">
+					<Flag name="Offset" size="13" position="0" value="24"/> <!-- This is relative to the last frag... -->
+					<Flag name="Res" size="2" position="13"/>
+					<Flag name="Mflag" size="1" position="15" value="0"/>
+			</Flags>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6DestinationOptionsInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength"
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="60"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:DestinationOptions">
+				<Block name="Options">
+					<Block ref="IPv6:TLV" name="HomeAddressOption">
+						<Number name="Type" size="8" endian="big" value="201"/>
+						<Number name="Length" size="8">
+							<Relation type="size" of="Value"/>
+						</Number>
+						<Block name="Value">
+							<Blob length="16" value="the other castle"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="135"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:Mobile">
+				<Number name="HeaderLen" size="8" endian="big">
+					<Relation type="size" of="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+				</Number>
+				<Number name="MH" size="8" endian="big" value="0"/>
+				<Number name="MHChecksum" size="16" endian="big">
+					<Fixup class="IcmpV6ChecksumFixup">
+						<Param name="ref" value="VXLAN"/>
+						<Param name="src" value="##SourceIPv6##" />
+						<Param name="dst" value="##TargetIPv6##" />
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileBRRInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan"/>
+	</DataModel>
+
+	<DataModel name="IPv6MobileHoTIInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="1"/>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileCoTInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="2"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MobilityOptions">
+					<Number name="CareNonceIndex" size="16"/>
+					<Number name="CareInitCookie" size="64"/>
+					<Number name="CareKeygenToken" size="64"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTInVxlan">
+		<Block name="VXLAN"  ref="IPv6MobileInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="3"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MobilityOptions">
+				<Number name="HomeNonceIndex" size="16"/>
+				<Number name="HomeInitCookie" size="64"/>
+				<Number name="HomeKeygenToken" size="64"/>
+				<Block name="MobilityOptions"/>
+				<Padding aligned="true" alignment="64"/>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<!-- <DataModel name="IPv6MobileCoTInVxlan"> -->
+	
+	<!-- 	<Block name="CoTI"  ref="IPv6MobileCoTInVxlan "> -->
+	<!-- 		<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="4"/> -->
+	<!-- 	</Block> -->
+	<!-- </DataModel> -->
+	
+	<DataModel name="IPv6MobileBUInVxlan">
+		<!-- in progress -->
+
+		<!-- <Block name="VXLAN"  ref="IPv6MobileInVxlan"> -->
+		<!-- 	<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MH" size="8" endian="big" value="5"/> -->
+		<!-- 	<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload.MobilityOptions"> -->
+		<!-- 		<Number name="Sequence" size="16" signed="false"/> -->
+		<!-- 			<Flags size="16" endian="big"> -->
+		<!-- 				<Flag name="A" size="1" position="0"/> -->
+		<!-- 				<Flag name="H" size="1" position="1"/> -->
+		<!-- 				<Flag name="L" size="1" position="2"/> -->
+		<!-- 				<Flag name="K" size="1" position="3"/> -->
+		<!-- 				<Flag name="Reserved" size="12" position="4"/> -->
+		<!-- 			</Flags> -->
+		<!-- 			<Number name="Lifetime" size="16" signed="false"/> -->
+		<!-- 			<Block name="MobilityOptions"> -->
+		<!-- 				<Block name="NonceIndices" ref="IPv6:TLV"> -->
+		<!-- 					<Number name="Type" size="8" endian="big" value="4"/> -->
+		<!-- 					<Block name="Value"> -->
+		<!-- 						<Number name="HomeNonceIndex" size="16"/> -->
+		<!-- 						<Number name="CareNonceIndex" size="16"/> -->
+		<!-- 					</Block> -->
+		<!-- 				</Block> -->
+		<!-- 				<Block name="AltCareofAddress" ref="IPv6:TLV"> -->
+		<!-- 					<Number name="Type" size="8" endian="big" value="3"/> -->
+		<!-- 					<Block name="Value"> -->
+		<!-- 						<Blob name="AltCareAddress" length="16"/> -->
+		<!-- 					</Block> -->
+		<!-- 				</Block> -->
+		<!-- 				<Block name="BindingAuthData" ref="IPv6:TLV"> -->
+		<!-- 					<Number name="Type" size="8" endian="big" value="5"/> -->
+		<!-- 					<Block name="Value"> -->
+		<!-- 						<Blob name="Authenticator" length="12" valueType="hex"/> -->
+		<!-- 					</Block> -->
+
+		<!-- 		<Padding aligned="true" alignment="64"/> -->
+		<!-- 	</Block> -->
+		<!-- </Block> -->
+
+
+
+
+	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
+	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
+	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
+	<!-- 			<Block ref="IPv6:IPv6Header"> -->
+	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
+	<!-- 					<Relation type="size" of="Payload" /> -->
+	<!-- 				</Number> -->
+	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
+	<!-- 			</Block> -->
+	<!-- 			<Block name="Payload"> -->
+	<!-- 				<Block ref="IPv6:Mobile"> -->
+	<!-- 				</Block> -->
+
+	<!-- 				<Number name="Sequence" size="16" signed="false"/> -->
+	<!-- 				<Flags size="16" endian="big"> -->
+	<!-- 					<Flag name="A" size="1" position="0"/> -->
+	<!-- 					<Flag name="H" size="1" position="1"/> -->
+	<!-- 					<Flag name="L" size="1" position="2"/> -->
+	<!-- 					<Flag name="K" size="1" position="3"/> -->
+	<!-- 					<Flag name="Reserved" size="12" position="4"/> -->
+	<!-- 				</Flags> -->
+	<!-- 				<Number name="Lifetime" size="16" signed="false"/> -->
+	<!-- 				<Block name="MobilityOptions"> -->
+	<!-- 					<Block name="NonceIndices" ref="IPv6:TLV"> -->
+	<!-- 						<Number name="Type" size="8" endian="big" value="4"/> -->
+	<!-- 						<Block name="Value"> -->
+	<!-- 							<Number name="HomeNonceIndex" size="16"/> -->
+	<!-- 							<Number name="CareNonceIndex" size="16"/> -->
+	<!-- 						</Block> -->
+	<!-- 					</Block> -->
+	<!-- 					<Block name="AltCareofAddress" ref="IPv6:TLV"> -->
+	<!-- 						<Number name="Type" size="8" endian="big" value="3"/> -->
+	<!-- 						<Block name="Value"> -->
+	<!-- 							<Blob name="AltCareAddress" length="16"/> -->
+	<!-- 						</Block> -->
+	<!-- 					</Block> -->
+	<!-- 					<Block name="BindingAuthData" ref="IPv6:TLV"> -->
+	<!-- 						<Number name="Type" size="8" endian="big" value="5"/> -->
+	<!-- 						<Block name="Value"> -->
+	<!-- 							<Blob name="Authenticator" length="12" valueType="hex"/> -->
+	<!-- 						</Block> -->
+
+	<!-- 			</Block>	 -->
+
+	</DataModel>
+
+	<!-- <DataModel name="IPv6MobileBAInVxlan"> -->
+	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
+	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
+	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
+	<!-- 			<Block ref="IPv6:IPv6Header"> -->
+	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
+	<!-- 					<Relation type="size" of="Payload" /> -->
+	<!-- 				</Number> -->
+	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
+	<!-- 			</Block> -->
+	<!-- 			<Block name="Payload"> -->
+	<!-- 				<Block ref="IPv6:Mobile"> -->
+	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
+	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/> -->
+	<!-- 					</Number> -->
+	<!-- 					<Number name="MH" size="8" endian="big" value="6"/> -->
+	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
+	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
+	<!-- 							<Param name="ref" value="IPv6MobileBAInVxlan"/> -->
+	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
+	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
+	<!-- 						</Fixup> -->
+	<!-- 					</Number> -->
+	<!-- 				</Block> -->
+	<!-- 				<Number name="Status" size="8" signed="false"/> -->
+	<!-- 				<Flags size="8" endian="big"> -->
+	<!-- 					<Flag name="K" size="1" position="0"/> -->
+	<!-- 					<Flag name="Reserved" size="7" position="1"/> -->
+	<!-- 				</Flags> -->
+	<!-- 				<Number name="Sequnce" size="16" signed="false"/> -->
+	<!-- 				<Number name="Lifetime" size="16" signed="false"/> -->
+	<!-- 				<Block name="MobilityOptions"> -->
+	<!-- 					<Block name="BindingRefreshAdvice" ref="IPv6:TLV"> -->
+	<!-- 						<Number name="Type" size="8" endian="big" value="2"/> -->
+	<!-- 						<Number name="Length" size="8" endian="big" value="2"/> -->
+	<!-- 						<Block name="Value"> -->
+	<!-- 							<Number name="RefreshInterval" size="16" endian="big"/>  -->
+	<!-- 						</Block> -->
+	<!-- 					</Block> -->
+	<!-- 					<Block name="BindingAuthData" ref="IPv6:TLV"> -->
+	<!-- 						<Number name="Type" size="8" endian="big" value="5"/> -->
+	<!-- 						<Number name="Length" size="8" endian="big"> -->
+	<!-- 							<Relation type="size" of="Value"/> -->
+	<!-- 						</Number> -->
+	<!-- 						<Block name="Value"> -->
+	<!-- 							<Blob name="Authenticator" length="12" valueType="hex"/> -->
+	<!-- 						</Block> -->
+	<!-- 					</Block> -->
+	<!-- 				</Block> -->
+	<!-- 				<Padding aligned="true" alignment="64"/> -->
+	<!-- 			</Block>	 -->
+	<!-- 			<Number name="CRC" size="32" endian="big"> -->
+	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
+	<!-- 					<Param name="ref" value="IPv6MobileBAInVxlan"/> -->
+	<!-- 				</Fixup> -->
+	<!-- 			</Number> -->
+	<!-- 		</Block> -->
+	<!-- 	</Block> -->
+	<!-- </DataModel> -->
+	
+	<!-- <DataModel name="IPv6MobileBEInVxlan"> -->
+	<!-- 	<Block name="VXLAN"  ref="VXLAN"> -->
+	<!-- 		<Block name="OuterIP.IPv4Payload.UdpPayload.VXLANPayload"> -->
+	<!-- 			<Blob name="Type" valueType="hex" value="86dd" /> -->
+	<!-- 			<Block ref="IPv6:IPv6Header"> -->
+	<!-- 				<Number name="PayloadLength" size="16" endian="big"> -->
+	<!-- 					<Relation type="size" of="Payload" /> -->
+	<!-- 				</Number> -->
+	<!-- 				<Number name="NextHeader" size="8" endian="big" value="135"/> -->
+	<!-- 			</Block> -->
+	<!-- 			<Block name="Payload"> -->
+	<!-- 				<Block ref="IPv6:Mobile"> -->
+	<!-- 					<Number name="HeaderLen" size="8" endian="big"> -->
+	<!-- 						<Relation type="size" of="Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/> -->
+	<!-- 					</Number> -->
+	<!-- 					<Number name="MH" size="8" endian="big" value="7"/> -->
+	<!-- 					<Number name="Checksum" size="16" endian="big"> -->
+	<!-- 						<Fixup class="IcmpV6ChecksumFixup"> -->
+	<!-- 							<Param name="ref" value="IPv6MobileBEInVxlan"/> -->
+	<!-- 							<Param name="src" value="##SourceIPv6##"/> -->
+	<!-- 							<Param name="dst" value="##TargetIPv6##"/> -->
+	<!-- 						</Fixup> -->
+	<!-- 					</Number> -->
+	<!-- 				</Block> -->
+	<!-- 				<Number name="Status" size="8" signed="false"/> -->
+	<!-- 				<Number name="Reserved" size="8"/> -->
+	<!-- 				<Blob name="HomeAddress" length="16"/> -->
+	<!-- 				<Block name="MobilityOptions"/> -->
+	<!-- 				<Padding aligned="true" alignment="64"/> -->
+	<!-- 			</Block>	 -->
+	<!-- 			<Number name="CRC" size="32" endian="big"> -->
+	<!-- 				<Fixup class="checksums.Crc32Fixup"> -->
+	<!-- 					<Param name="ref" value="IPv6MobileBEInVxlan"/> -->
+	<!-- 				</Fixup> -->
+	<!-- 			</Number> -->
+	<!-- 		</Block> -->
+	<!-- 	</Block> -->
+	<!-- </DataModel> -->
+
+	<!-- VXLAN IPv6 Frame + Mobile Routing Type 2 Header -->
+	<DataModel name="IPv6RoutingType2HeaderInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<!-- test me -->
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="43"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="IPv6:MobileRoutingType2Header"/>
+		</Block>
+	</DataModel>
+
+
+	<!-- VXLAN IPv6 Frame + ICMP HomeAgent Address Discovery Request -->
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryRequestInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:MobileICMPHomeAgentAddressDiscoveryRequest"/>
+			<Number name="CRC" size="32" endian="big">
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="IPv6ICMPHomeAgentAddressDiscoveryRequestInVxlan"/>
+				</Fixup>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<!-- VXLAN IPv6 Frame + ICMP HomeAgent Address Discovery Reply -->
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryReplyInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:MobileICMPHomeAgentAddressDiscoveryReply"/>
+			<Number name="CRC" size="32" endian="big">
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="IPv6ICMPHomeAgentAddressDiscoveryReplyInVxlan"/>
+				</Fixup>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<!-- VXLAN IPv6 Frame + ICMP Mobile Prefix Solicitation -->
+	<DataModel name="IPv6ICMPPrefixSolicitationInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:MobileICMPPrefixSolicitation"/>
+			<Number name="CRC" size="32" endian="big">
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="IPv6ICMPPrefixSolicitationInVxlan"/>
+				</Fixup>
+			</Number>
+		</Block>
+	</DataModel>
+
+	<!-- VXLAN IPv6 Frame + ICMP Mobile Prefix Advertisement -->
+	<DataModel name="IPv6ICMPPrefixAdvertisementInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:MobileICMPPrefixAdvertisement"/>
+			<Number name="CRC" size="32" endian="big">
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="IPv6ICMPPrefixAdvertisementInVxlan"/>
+				</Fixup>
+			</Number>
+		</Block>
+	</DataModel>
+	
+	<!-- VXLAN IPv6 Frame + ICMP Mobile Router Advertisement -->
+	<DataModel name="IPv6ICMPRouterAdvertismentInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:MobileICMPRouterAdvertisement"/>
+			<Number name="CRC" size="32" endian="big">
+				<Fixup class="checksums.Crc32Fixup">
+					<Param name="ref" value="IPv6ICMPRouterAdvertismentInVxlan"/>
+				</Fixup>
+			</Number>
+		</Block>
+	</DataModel>
+	
+	<!-- VXLAN IPv4 Frame + TCP Payload -->
+	<DataModel name="IPv4TCPInVxlan">
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/>
+		</Block>
+	</DataModel>
+	
+	<!-- VXLAN IPv6 Frame + TCP Payload -->
+	<DataModel name="IPv6TCPInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="6"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="TCP:TCPHeader"/>
+		</Block>
+	</DataModel>
+	
+	<!-- VXLAN IPv4 Frame + UDP Payload -->
+	<DataModel name="IPv4UDPInVxlan">
+		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="17"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDP:UDPHeader"/>
+		</Block>
+	</DataModel>
+
+	<!-- VXLAN IPv6 Frame + UDP Payload -->
+	<DataModel name="IPv6UDPInVxlan">
+		<Block name="VXLAN"  ref="IPv6EmptyPacketInVxlan">
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.PayloadLength" 
+							size="16" endian="big" value="65535">
+				<Relation type="size" of="IPv6Payload" />
+			</Number>
+			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="17"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDP:UDPHeader"/>
+		</Block>
+	</DataModel>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -89,14 +601,14 @@
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-        <DataModel ref="VXLAN"/>
+        <DataModel ref="##Test##"/>
       </Action>
     </State>
   </StateModel>
 
   <!-- Default test for fuzzing VXLAN -->
   <Test name="Default">
-    <Agent ref="RemoteAgent"/>
+    <!-- <Agent ref="RemoteAgent"/> -->
     <StateModel ref="TheState"/>
     <Publisher class="RawEther">
       <Param name="Interface" value="##Interface##"/>
