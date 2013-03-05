@@ -68,7 +68,10 @@ namespace PeachFarm.Controller
 			}
 			catch (Exception ex)
 			{
-				ReplyToAdmin(ex.Message, "StartPeach", e.ReplyQueue);
+				StartPeachResponse response = new StartPeachResponse();
+				response.Success = false;
+				response.Message = ex.Message;
+				ReplyToAdmin(response.ToString(), "StartPeach", e.ReplyQueue);
 			}
 		}
 
@@ -258,17 +261,22 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
-				var jobNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+				var jobNodes = new List<Heartbeat>();
 
-				if (String.IsNullOrEmpty(request.Tags) == false)
+				if (String.IsNullOrEmpty(request.Tags))
 				{
+					jobNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+				}
+				else
+				{
+					var aliveNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 					var ts = request.Tags.Split(',').ToList();
-					foreach (Heartbeat node in jobNodes)
+					foreach (Heartbeat node in aliveNodes)
 					{
 						var matches = node.Tags.Split(',').Intersect(ts).ToList();
-						if (matches.Count != ts.Count)
+						if (matches.Count == ts.Count)
 						{
-							jobNodes.Remove(node);
+							jobNodes.Add(node);
 						}
 					}
 				}
