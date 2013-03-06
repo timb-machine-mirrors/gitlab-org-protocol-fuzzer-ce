@@ -325,7 +325,10 @@ namespace PeachFarm.Controller
 		{
 			if (nodes.ContainsKey(heartbeat.NodeName) == false)
 			{
-				AddNode(heartbeat);
+				if (heartbeat.Status != Status.Stopping)
+				{
+					AddNode(heartbeat);
+				}
 			}
 			else
 			{
