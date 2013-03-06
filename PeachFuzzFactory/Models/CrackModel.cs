@@ -13,11 +13,11 @@ namespace PeachFuzzFactory.Models
 	{
 		public static CrackModel Root = null;
 
-		public CrackModel(DataElement element, int position, int length)
+		public CrackModel(DataElement element, long startBits, long stopBits)
 		{
 			DataElement = element;
-			Position = position;
-			Length = length;
+			StartBits = startBits;
+			StopBits = stopBits;
 			Error = false;
 		}
 
@@ -43,16 +43,26 @@ namespace PeachFuzzFactory.Models
 			set;
 		}
 
-		public int Position
+		public long StartBits
 		{
 			get;
 			set;
 		}
 
-		public int Length
+		public long StopBits
 		{
 			get;
 			set;
+		}
+
+		public int Position
+		{
+			get { return (int)(StartBits / 8); }
+		}
+
+		public int Length
+		{
+			get { return StopBits == 0 ? 0 : (int)((StopBits - StartBits + 7) / 8); }
 		}
 
 		public bool Error
@@ -65,30 +75,7 @@ namespace PeachFuzzFactory.Models
 		{
 			get
 			{
-				if (DataElement is DataElementContainer)
-					return "";
-
-				string ret;
-
-				try
-				{
-					ret = (string)this.DataElement.InternalValue;
-				}
-				catch
-				{
-					ret = ASCIIEncoding.ASCII.GetString((byte[])this.DataElement.InternalValue);
-				}
-
-				for (int i = 0; i < ret.Length; i++)
-				{
-					if (ret[i].CompareTo(' ') < 0)
-						ret = ret.Replace(ret[i], '.');
-
-					if (ret[i].CompareTo('~') > 0)
-						ret = ret.Replace(ret[i], '.');
-				}
-
-				return ret.Length > 20 ? ret.Substring(0, 20) : ret;
+				return DataElement.DefaultValue == null ? "" : DataElement.DefaultValue.ToString();
 			}
 		}
 

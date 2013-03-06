@@ -175,10 +175,10 @@ namespace PeachFuzzFactory
 			}
 		}
 
-		void cracker_ExitHandleNodeEvent(DataElement element, BitStream data)
+		void cracker_ExitHandleNodeEvent(DataElement element, long position)
 		{
 			var currentModel = crackMap[element];
-			currentModel.Length = (int)((BitStream)currentModel.DataElement.Value).LengthBytes;
+			currentModel.StopBits = position;
 
 			if (element.parent != null && crackMap.ContainsKey(element.parent))
 				crackMap[element.parent].Children.Add(currentModel);
@@ -188,9 +188,9 @@ namespace PeachFuzzFactory
 			}
 		}
 
-		void cracker_EnterHandleNodeEvent(DataElement element, BitStream data)
+		void cracker_EnterHandleNodeEvent(DataElement element, long position)
 		{
-			crackMap[element] = new CrackModel(element, (int)data.TellBytes(), 0);
+			crackMap[element] = new CrackModel(element, position, 0);
 		}
 
 		private string GetValue(DataElement elem, string property)
