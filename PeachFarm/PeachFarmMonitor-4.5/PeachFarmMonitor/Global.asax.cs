@@ -4,15 +4,19 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
+using PeachFarm.Admin;
+using PeachFarm.Admin.Configuration;
 
 namespace PeachFarmMonitor
 {
   public class Global : System.Web.HttpApplication
   {
-
     protected void Application_Start(object sender, EventArgs e)
     {
+    }
 
+    void admin_MonitorCompleted(object sender, Admin.MonitorCompletedEventArgs e)
+    {
     }
 
     protected void Session_Start(object sender, EventArgs e)
