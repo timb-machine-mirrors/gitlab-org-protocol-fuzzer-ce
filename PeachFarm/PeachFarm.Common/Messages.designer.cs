@@ -3001,7 +3001,9 @@ namespace PeachFarm.Common.Messages
 	public partial class MonitorResponse
 	{
 
-		private List<Job> jobsField;
+		private List<Job> activeJobsField;
+
+		private List<Job> inactiveJobsField;
 
 		private List<Heartbeat> nodesField;
 
@@ -3015,19 +3017,33 @@ namespace PeachFarm.Common.Messages
 		{
 			this.errorsField = new List<Heartbeat>();
 			this.nodesField = new List<Heartbeat>();
-			this.jobsField = new List<Job>();
+			this.inactiveJobsField = new List<Job>();
+			this.activeJobsField = new List<Job>();
 		}
 
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Job> Jobs
+		public List<Job> ActiveJobs
 		{
 			get
 			{
-				return this.jobsField;
+				return this.activeJobsField;
 			}
 			set
 			{
-				this.jobsField = value;
+				this.activeJobsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<Job> InactiveJobs
+		{
+			get
+			{
+				return this.inactiveJobsField;
+			}
+			set
+			{
+				this.inactiveJobsField = value;
 			}
 		}
 

@@ -394,7 +394,9 @@ namespace PeachFarm.Controller
 			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
 			response.Nodes = nodes.Values.ToList();
-			response.Jobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString).ToMessagesJobs();
+			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
+			response.InactiveJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString).Except(activeJobs).ToList().ToMessagesJobs();
+			response.ActiveJobs = activeJobs.ToMessagesJobs();
 			response.Errors = response.Nodes.GetErrors(config.MongoDb.ConnectionString);
 
 			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);

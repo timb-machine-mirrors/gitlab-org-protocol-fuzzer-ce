@@ -141,7 +141,14 @@
 	<xs:element name="MonitorResponse" type="MonitorResponse" />
 	<xs:complexType name="MonitorResponse">
 		<xs:all>
-			<xs:element name="Jobs" maxOccurs="1" minOccurs="1">
+			<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="db:Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="Job" type="db:Job" maxOccurs="unbounded" minOccurs="1" />
