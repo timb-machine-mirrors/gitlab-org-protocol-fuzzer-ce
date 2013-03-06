@@ -323,20 +323,13 @@ namespace PeachFarm.Controller
 
 		private void HeartbeatReceived(Heartbeat heartbeat)
 		{
-			if (nodes.ContainsKey(heartbeat.NodeName) == false)
+			if (heartbeat.Status == Status.Stopping)
 			{
-				AddNode(heartbeat);
+				RemoveNode(heartbeat);
 			}
 			else
 			{
-				if (heartbeat.Status == Status.Stopping)
-				{
-					RemoveNode(heartbeat);
-				}
-				else
-				{
-					UpdateNode(heartbeat);
-				}
+				UpdateNode(heartbeat);
 			}
 
 			if (heartbeat.Status == Status.Error)
@@ -429,35 +422,34 @@ namespace PeachFarm.Controller
 			#endregion
 		}
 
-		private void AddNode(Heartbeat heartbeat)
-		{
-			lock (nodes)
-			{
-				nodes.Add(heartbeat.NodeName, heartbeat);
-				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-			}
-		}
-
 		private void UpdateNode(Heartbeat heartbeat)
 		{
 			if (nodes.ContainsKey(heartbeat.NodeName) == false)
 			{
-				AddNode(heartbeat);
+				nodes.Add(heartbeat.NodeName, heartbeat);
+				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 			}
 
 			nodes[heartbeat.NodeName] = heartbeat;
 			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
+			if (heartbeat.Status == Status.Running)
+			{
+				rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
+			}
 		}
 
 		private void RemoveNode(Heartbeat heartbeat)
 		{
-			lock (nodes)
+			if (nodes.ContainsKey(heartbeat.NodeName))
 			{
-				nodes.Remove(heartbeat.NodeName);
+				lock (nodes)
+				{
+					nodes.Remove(heartbeat.NodeName);
 
-				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+					logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
+				}
 			}
 		}
 	}

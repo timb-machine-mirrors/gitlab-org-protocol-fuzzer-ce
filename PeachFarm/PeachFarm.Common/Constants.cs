@@ -12,6 +12,7 @@ namespace PeachFarm.Common
 
     public static readonly string EXCHANGE_ADMIN = "";
     public static readonly string QUEUE_ADMIN = "peachfarm.admin.{0}";
+		public static readonly string QUEUE_MONITOR = "peachfarm.monitor.{0}";
 
     public static readonly string EXCHANGETYPE_NODE = "fanout";
     public static readonly string EXCHANGE_NODE = "peachfarm.node";
