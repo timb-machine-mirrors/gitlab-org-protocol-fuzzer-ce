@@ -29,23 +29,23 @@ namespace PeachFarm.Admin
 
 		RabbitMqHelper rabbit = null;
 
-		public Admin(string serverHostName = "")
+		public Admin(string adminQueueOverride = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
-			if (String.IsNullOrEmpty(serverHostName))
-			{
-				ServerHostName = config.Controller.IpAddress;
-			}
-			else
-			{
-				ServerHostName = serverHostName;
-			}
+			ServerHostName = config.Controller.IpAddress;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
-			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
+			if (String.IsNullOrEmpty(adminQueueOverride))
+			{
+				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
+			}
+			else
+			{
+				adminQueueName = adminQueueOverride;
+			}
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);

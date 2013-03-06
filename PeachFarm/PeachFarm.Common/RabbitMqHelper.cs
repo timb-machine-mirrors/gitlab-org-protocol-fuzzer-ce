@@ -128,6 +128,32 @@ namespace PeachFarm.Common
 			}
 		}
 
+		public void BindQueueToExchange(string exchange, string queue, string routingKey = "")
+		{
+			bool open = true;
+
+			try
+			{
+				if (sender.IsOpen == false)
+				{
+					open = ReopenConnection();
+				}
+
+				if (open)
+				{
+					sender.QueueBind(queue, exchange, routingKey);
+				}
+				else
+				{
+					throw new RabbitMqException(null, hostName);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
 		public void DeleteExchange(string exchange)
 		{
 			bool open = true;
