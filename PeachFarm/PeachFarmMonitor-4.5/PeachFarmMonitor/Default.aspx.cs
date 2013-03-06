@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using PeachFarm.Admin.Configuration;
+using PeachFarm.Common;
 using PeachFarm.Common.Messages;
 using PeachFarmMonitor.Configuration;
 
@@ -21,11 +22,19 @@ namespace PeachFarmMonitor
     private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
+
+    private static string ipAddress;
+
     public Home()
     {
       adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-      
+
+      if (String.IsNullOrEmpty(ipAddress))
+      {
+        IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+        ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+      }
       //PeachFarmMonitor.Reports.Report.GetJobDetailReport("94FE2D0A0625", "mongodb://10.0.1.104/?safe=true");
     }
 
@@ -38,7 +47,7 @@ namespace PeachFarmMonitor
     private Task<MonitorResponse> MonitorAsync()
     {
       TaskCompletionSource<MonitorResponse> tcs = new TaskCompletionSource<MonitorResponse>();
-      admin = new PeachFarm.Admin.Admin();
+      admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, ipAddress));
       admin.MonitorCompleted += (s, e) =>
         {
           if (e.Error != null)
