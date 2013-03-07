@@ -160,7 +160,7 @@ namespace PeachFarm.Common.Mongo
 			return collection.Find(query).OrderBy(k => k.StartDate).ToList();
 		}
 
-		public static List<Messages.Job> ToMessagesJobs(this List<Mongo.Job> mongoJobs)
+		public static List<Messages.Job> ToMessagesJobs(this IEnumerable<Mongo.Job> mongoJobs)
 		{
 			List<Messages.Job> jobs = new List<Messages.Job>();
 			foreach (Mongo.Job mongoJob in mongoJobs)
@@ -267,4 +267,18 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 	}
+
+	public class JobComparer : EqualityComparer<Mongo.Job>
+	{
+		public override bool Equals(Common.Mongo.Job x, Common.Mongo.Job y)
+		{
+			return x.JobID == y.JobID;
+		}
+
+		public override int GetHashCode(Mongo.Job obj)
+		{
+			return obj.JobID.GetHashCode();
+		}
+	}
+
 }

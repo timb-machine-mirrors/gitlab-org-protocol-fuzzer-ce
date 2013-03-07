@@ -388,8 +388,9 @@ namespace PeachFarm.Controller
 
 			response.Nodes = nodes.Values.ToList();
 			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
-			response.InactiveJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString).Except(activeJobs).ToList().ToMessagesJobs();
+			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
 			response.ActiveJobs = activeJobs.ToMessagesJobs();
+			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
 			response.Errors = response.Nodes.GetErrors(config.MongoDb.ConnectionString);
 
 			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);
@@ -428,15 +429,21 @@ namespace PeachFarm.Controller
 			{
 				nodes.Add(heartbeat.NodeName, heartbeat);
 				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
+				if (heartbeat.Status == Status.Running)
+				{
+					try
+					{
+						rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
+					}
+					catch { }
+				}
 			}
 
 			nodes[heartbeat.NodeName] = heartbeat;
 			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
-			if (heartbeat.Status == Status.Running)
-			{
-				rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
-			}
+
 		}
 
 		private void RemoveNode(Heartbeat heartbeat)
