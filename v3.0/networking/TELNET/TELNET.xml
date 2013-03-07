@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Telnet Command Protocol PIT" version="0.0.2">
+
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  
+  <!--
+      Telnet Command Protocol
+  -->
+  
+  <!-- TELNET simple data model -->
+  <DataModel name="Telnet">
+	<Block name="optCode" minOccurs="0" maxOccurs="-1">
+	  <Blob name="iac" valueType="hex" value="ff" token="true"/>
+	  <Blob name="command" length="2"/>
+	  <Blob name="option" />
+	</Block>
+	<Blob name="data"/>
+  </DataModel>
+
+  <!-- TELNET simple connect model -->
+  <DataModel name="TelnetConnect">
+	<Block name="optCode_DoSuppressGoAhead">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fd"/>
+	  <Blob name="option" valueType="hex" value="03" />
+	</Block>
+	<Block name="optCode_WillTerminalType">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="18" />
+	</Block>
+	<Block name="optCode_WillNegotiateWindowSize">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="1f" />
+	</Block>
+	<Block name="optCode_WillTerminalSpeed">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="20" />
+	</Block>
+	<Block name="optCode_WillRemoteFlowControl">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="21" />
+	</Block>
+	<Block name="optCode_WillLinemode">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="22" />
+	</Block>
+	<Block name="optCode_WillNewEnvironmentOption">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fb"/>
+	  <Blob name="option" valueType="hex" value="27" />
+	</Block>
+	<Block name="optCode_DoStatus">
+	  <Blob name="iac" valueType="hex" value="ff"/>
+	  <Blob name="command" valueType="hex" value="fd"/>
+	  <Blob name="option" valueType="hex" value="05" />
+	</Block>
+  </DataModel>
+  
+  <!-- Agent conifuration to monitor for crashes -->
+  <Agent name="TheAgent">
+  </Agent> 
+  
+  <!-- TELNET simple state model -->
+  <StateModel name="AgentToHost" initialState="Initial">
+    <State name="Initial">
+      <!-- generate DO command -->
+      <Action name="TelnetConnect" type="output" publisher="TcpHandler">
+        <DataModel ref="TelnetConnect" />
+      </Action>      
+    </State>
+  </StateModel>
+  
+  <!-- Default test case -->
+  <Test name="Default">
+    
+    <StateModel ref="AgentToHost"/>
+    
+    <Agent ref="TheAgent" />
+    
+    <Publisher class="Tcp" name="TcpHandler">
+      <Param name="SrcPort" value="##TelnetSrcPort##" />
+      <Param name="Host" value="##TelnetHost##" />
+      <Param name="Port" value="##TelnetPort##" />
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+    
+  </Test>
+  
+</Peach>
