@@ -18,24 +18,15 @@ namespace PeachFarmMonitor
   public partial class Home : System.Web.UI.Page
   {
     private static PeachFarm.Admin.Admin admin = null;
-    private static object mylock = new object();
-    private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
 
-    private static string ipAddress;
-
+    private string guid;
     public Home()
     {
       adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-
-      if (String.IsNullOrEmpty(ipAddress))
-      {
-        IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-        ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
-      }
-      //PeachFarmMonitor.Reports.Report.GetJobDetailReport("94FE2D0A0625", "mongodb://10.0.1.104/?safe=true");
+      guid = Guid.NewGuid().ToString();
     }
 
     protected void Page_Load(object sender, EventArgs e)
@@ -47,7 +38,7 @@ namespace PeachFarmMonitor
     private Task<MonitorResponse> MonitorAsync()
     {
       TaskCompletionSource<MonitorResponse> tcs = new TaskCompletionSource<MonitorResponse>();
-      admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, ipAddress));
+      admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
       admin.MonitorCompleted += (s, e) =>
         {
           if (e.Error != null)
