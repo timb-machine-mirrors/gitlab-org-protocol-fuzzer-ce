@@ -8,59 +8,220 @@
   <!--
       Telnet Command Protocol
   -->
-  
-  <!-- TELNET simple data model -->
-  <DataModel name="Telnet">
-	<Block name="optCode" minOccurs="0" maxOccurs="-1">
-	  <Blob name="iac" valueType="hex" value="ff" token="true"/>
-	  <Blob name="command" length="2"/>
-	  <Blob name="option" />
-	</Block>
-	<Blob name="data"/>
-  </DataModel>
 
-  <!-- TELNET simple connect model -->
-  <DataModel name="TelnetConnect">
-	<Block name="optCode_DoSuppressGoAhead">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fd"/>
-	  <Blob name="option" valueType="hex" value="03" />
-	</Block>
-	<Block name="optCode_WillTerminalType">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="18" />
-	</Block>
-	<Block name="optCode_WillNegotiateWindowSize">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="1f" />
-	</Block>
-	<Block name="optCode_WillTerminalSpeed">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="20" />
-	</Block>
-	<Block name="optCode_WillRemoteFlowControl">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="21" />
-	</Block>
-	<Block name="optCode_WillLinemode">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="22" />
-	</Block>
-	<Block name="optCode_WillNewEnvironmentOption">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fb"/>
-	  <Blob name="option" valueType="hex" value="27" />
-	</Block>
-	<Block name="optCode_DoStatus">
-	  <Blob name="iac" valueType="hex" value="ff"/>
-	  <Blob name="command" valueType="hex" value="fd"/>
-	  <Blob name="option" valueType="hex" value="05" />
-	</Block>
+  <!-- Telnet OptCode Block -->
+  <DataModel name="optCode">
+    <Number name="iac" valueType="hex" value="ff" token="true"/>
+	<Blob name="command" length="2"/>
+	<Blob name="option" length="2"/>
+	<Blob name="data"/>
+  </Datamodel>
+
+  <!-- Telnet Option ID Choice -->
+  <DataModel name="Options">
+    <Choice> 
+		<!-- Binary Xmit - Allows transmission of binary data. -->
+		<Number name="BinXmit" valueType="hex" value="00" token="true"/>
+		<!-- Echo Date - Causes server to echo back all keystrokes. -->
+		<Number name="Echo" valueType="hex" value="01" token="true"/>
+		<!-- Reconnect - Reconnects to another TELNET host. -->
+		<Number name="Reconnect" valueType="hex" value="02" token="true"/>
+		<!-- Suppress Go Ahead! - Disables Go Ahead! command. -->
+		<Number name="SuppressGA" valueType="hex" value="03" token="true"/>
+		<!-- Message Size - Conveys approximate message size. -->
+		<Number name="MessageSize" valueType="hex" value="04" token="true"/>
+		<!-- Option Status - Lists status of options. -->
+		<Number name="OptStat" valueType="hex" value="05" token="true"/>
+		<!-- Timing Mark - Marks a data stream position for reference. -->
+		<Number name="TimingMark" valueType="hex" value="06" token="true"/>
+		<!-- R/C XmtEcho - Allows remote control of terminal printers. -->
+		<Number name="RCEcho" valueType="hex" value="07" token="true"/>
+		<!-- Line Width - Sets output line width. -->
+		<Number name="LineWidth" valueType="hex" value="08" token="true"/>
+		<!-- Page Length - Sets page length in lines. -->
+		<Number name="PageLen" valueType="hex" value="09" token="true"/>
+		<!-- CR Use - Determines handling of carriage returns. -->
+		<Number name="CRUse" valueType="hex" value="0a" token="true"/>
+		<!-- Horizontal Tabs - Sets horizontal tabs. -->
+		<Number name="HorizTab" valueType="hex" value="0b" token="true"/>
+		<!-- Horizontal Tab Use - Determines handling of horizontal tabs. -->
+		<Number name="HorizTabUse" valueType="hex" value="0c" token="true"/>
+		<!-- Form Feed Use - Determines handling of form feeds. -->
+		<Number name="FFUse" valueType="hex" value="0d" token="true"/>
+		<!-- Vertical Tabs - Sets vertical tabs. -->
+		<Number name="VerTabs" valueType="hex" value="0e" token="true"/>
+		<!-- Vertical Tab Use - Determines handling of vertical tabs. -->
+		<Number name="VerTabUse" valueType="hex" value="0f" token="true"/>
+		<!-- Line Feed Use - Determines handling of line feeds. -->
+		<Number name="LFUse" valueType="hex" value="10" token="true"/>
+		<!-- Extended ASCII - Defines extended ASCII characters. -->
+		<Number name="ExtASCII" valueType="hex" value="11" token="true"/>
+		<!-- Logout - Allows for forced log-off. -->
+		<Number name="Logout" valueType="hex" value="12" token="true"/>
+		<!-- Byte Macro - Defines byte macros. -->
+		<Number name="ByteMacro" valueType="hex" value="13" token="true"/>
+		<!-- Data Terminal - Allows subcommands for Data Entry to be sent. -->
+		<Number name="DataTerm" valueType="hex" value="14" token="true"/>
+		<!-- SUPDUP - Allows use of SUPDUP display protocol. -->
+		<Number name="SUPDUP" valueType="hex" value="15" token="true"/>
+		<!-- SUPDUP Output - Allows sending of SUPDUP output. -->
+		<Number name="SUPDUPOut" valueType="hex" value="16" token="true"/>
+		<!-- Send Locale - Allows terminal location to be sent. -->
+		<Number name="SendLocale" valueType="hex" value="17" token="true"/>
+		<!-- Terminal Type - Allows exchange of terminal type information. -->
+		<Number name="TermType" valueType="hex" value="18" token="true"/>
+		<!-- End Record - Allows use of the End of record code (0xEF). -->
+		<Number name="EndRecord" valueType="hex" value="19" token="true"/>
+		<!-- TACACS ID - User ID exchange used to avoid more than 1 log-in. -->
+		<Number name="TACACSID" valueType="hex" value="1a" token="true"/>
+		<!-- Output Mark - Allows banner markings to be sent on output. -->
+		<Number name="OutputMark" valueType="hex" value="1b" token="true"/>
+		<!-- Terminal ID -A numeric ID used to identify terminals. -->
+		<Number name="TermID" valueType="hex" value="1c" token="true"/>
+		<!-- 3270 Regime - Allows emulation of 3270 family terminals. -->
+		<Number name="3270" valueType="hex" value="1d" token="true"/>
+		<!-- X.3 PAD - Allows use of X.3 protocol emulation. -->
+		<Number name="X3" valueType="hex" value="1e" token="true"/>
+		<!-- Window Size  - Extended options list. -->
+		<Number name="WinSize" valueType="hex" value="1f" token="true"/>
+		<!-- Terminal Speed - Conveys baud rate information. -->
+		<Number name="TermSpeed" valueType="hex" value="20" token="true"/>
+		<!-- Remote Flow - Provides flow control (XON, XOFF). -->
+		<Number name="RemoteFlow" valueType="hex" value="21" token="true"/>
+		<!-- Linemode - Provides linemode bulk character transactions. -->
+		<Number name="Linemode" valueType="hex" value="22" token="true"/>
+		<!-- Extended - Extended options list. -->
+		<Number name="Ext" valueType="hex" value="ff" token="true"/>
+		
+		<!-- Generic catch-all for custom/unknown options. -->
+		<Blob name="Unknown" length="2"/>
+	</Choice>
+  </Datamodel>
+  
+  <!-- Telnet Command Choice -->
+  <DataModel name="Commands">
+    <Choice>
+		<!-- Stop Use - Demand to stop using specified option. -->
+		<Block name="Stop" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="fe" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Start Use - Request to start using specified option. -->
+		<Block name="Start" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="fd" token="true"/>
+		  <Block name="option(s)" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Won't Use - Reject the proposed option. -->
+		<Block name="Wont" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="fc" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Will Use - Agreement to use the specified option. -->
+		<Block name="Will" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="fb" token="true"/>
+		  <Block name="option(s)" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- SubNegotiate - Begin option subnegotiation. -->
+		<Block name="SubNeg" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="fa" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Go ahead! - End of input for half-duplex connections. -->
+		<Block name="GoAhead" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f9" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Erase line - Request that operator erase the previous line. -->
+		<Block name="EraseLine" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f8" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Erase Char - Request that operator erase the previous character. -->
+		<Block name="EraseChar" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f7" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- You there? - Request acknowledgment. -->
+		<Block name="YouThere" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f6" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Abort Output - Cancel output from current process. -->
+		<Block name="AbortOutput" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f5" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		  </Block>
+		<!-- Interrupt Process - Interrupt current process. -->
+		<Block name="IntProc" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f4" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Break - Operator pressed the Break key or the Attention key. -->
+		<Block name="Break" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f3" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Data Mark - End of urgent data stream. -->
+		<Block name="IntProc" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f2" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>       
+		<!-- No Operation - No operation command. -->
+		<Block name="NoOp" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f1" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>		
+		<!-- End subNeg - End of option subnegotiation command. -->
+		<Block name="EndSubNeg" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="command" valueType="hex" value="f0" token="true"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />
+		</Block>
+		<!-- Generic catch-all for custom/unknown optcodes. --->
+		<Block name="Unknown" ref="optCode" >
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Blob name="command" length="2"/>
+		  <Block name="optionIds" ref="Options" minOccurs="0" maxOccurs="-1">
+		  <Blob name="data" />		  
+		</Block>
+	</Choice>
+  </DataModel>
+	   
+  <!-- Telnet full data model -->
+  <DataModel name="Telnet">
+	<!-- Iterate Over OptCodes-->
+	<Block name="optCodes" ref="Commands" minOccurs="0" maxOccurs="-1"/>
+	<!-- All content not proceeded with an i.a.c. flag is collected as raw data. -->
+	<Blob name="data"/>
   </DataModel>
   
   <!-- Agent conifuration to monitor for crashes -->
@@ -71,8 +232,8 @@
   <StateModel name="AgentToHost" initialState="Initial">
     <State name="Initial">
       <!-- generate DO command -->
-      <Action name="TelnetConnect" type="output" publisher="TcpHandler">
-        <DataModel ref="TelnetConnect" />
+      <Action name="Telnet" type="output" publisher="TcpHandler">
+        <DataModel ref="Telnet" />
       </Action>      
     </State>
   </StateModel>
