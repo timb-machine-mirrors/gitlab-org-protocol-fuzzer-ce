@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
+	<Define key="Username" value="root">
+	<Define key="Password" value="toor">
+
     <Define key="TelnetSrcPort" value="23"/>
     <Define key="TelnetPort"    value="23"/>
     <Define key="TelnetHost"    value="localhost"/>
