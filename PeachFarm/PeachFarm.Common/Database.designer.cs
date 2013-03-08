@@ -86,8 +86,6 @@ namespace PeachFarm.Common.Mongo
 
 		private System.DateTime stampField;
 
-		private List<Action> stateModelField;
-
 		private List<Fault> faultsField;
 
 		private string jobIDField;
@@ -97,7 +95,6 @@ namespace PeachFarm.Common.Mongo
 		public Iteration()
 		{
 			this.faultsField = new List<Fault>();
-			this.stateModelField = new List<Action>();
 		}
 
 		public uint IterationNumber
@@ -150,20 +147,6 @@ namespace PeachFarm.Common.Mongo
 
 		[System.Xml.Serialization.XmlArrayAttribute(Order = 4)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Action> StateModel
-		{
-			get
-			{
-				return this.stateModelField;
-			}
-			set
-			{
-				this.stateModelField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 5)]
-		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<Fault> Faults
 		{
 			get
@@ -201,80 +184,6 @@ namespace PeachFarm.Common.Mongo
 		}
 	}
 
-	public partial class Action
-	{
-
-		private string actionNameField;
-
-		private string actionTypeField;
-
-		private int parameterField;
-
-		private byte[] dataField;
-
-		private string dataPathField;
-
-		public string ActionName
-		{
-			get
-			{
-				return this.actionNameField;
-			}
-			set
-			{
-				this.actionNameField = value;
-			}
-		}
-
-		public string ActionType
-		{
-			get
-			{
-				return this.actionTypeField;
-			}
-			set
-			{
-				this.actionTypeField = value;
-			}
-		}
-
-		public int Parameter
-		{
-			get
-			{
-				return this.parameterField;
-			}
-			set
-			{
-				this.parameterField = value;
-			}
-		}
-
-		public byte[] Data
-		{
-			get
-			{
-				return this.dataField;
-			}
-			set
-			{
-				this.dataField = value;
-			}
-		}
-
-		public string DataPath
-		{
-			get
-			{
-				return this.dataPathField;
-			}
-			set
-			{
-				this.dataPathField = value;
-			}
-		}
-	}
-
 	public partial class Fault
 	{
 
@@ -300,11 +209,14 @@ namespace PeachFarm.Common.Mongo
 
 		private string faultTypeField;
 
+		private List<Action> stateModelField;
+
 		private List<CollectedData> collectedDataField;
 
 		public Fault()
 		{
 			this.collectedDataField = new List<CollectedData>();
+			this.stateModelField = new List<Action>();
 		}
 
 		public bool ControlIteration
@@ -441,6 +353,20 @@ namespace PeachFarm.Common.Mongo
 
 		[System.Xml.Serialization.XmlArrayAttribute(Order = 11)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<Action> StateModel
+		{
+			get
+			{
+				return this.stateModelField;
+			}
+			set
+			{
+				this.stateModelField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 12)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<CollectedData> CollectedData
 		{
 			get
@@ -450,6 +376,80 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.collectedDataField = value;
+			}
+		}
+	}
+
+	public partial class Action
+	{
+
+		private string actionNameField;
+
+		private string actionTypeField;
+
+		private int parameterField;
+
+		private byte[] dataField;
+
+		private string dataPathField;
+
+		public string ActionName
+		{
+			get
+			{
+				return this.actionNameField;
+			}
+			set
+			{
+				this.actionNameField = value;
+			}
+		}
+
+		public string ActionType
+		{
+			get
+			{
+				return this.actionTypeField;
+			}
+			set
+			{
+				this.actionTypeField = value;
+			}
+		}
+
+		public int Parameter
+		{
+			get
+			{
+				return this.parameterField;
+			}
+			set
+			{
+				this.parameterField = value;
+			}
+		}
+
+		public byte[] Data
+		{
+			get
+			{
+				return this.dataField;
+			}
+			set
+			{
+				this.dataField = value;
+			}
+		}
+
+		public string DataPath
+		{
+			get
+			{
+				return this.dataPathField;
+			}
+			set
+			{
+				this.dataPathField = value;
 			}
 		}
 	}

@@ -66,8 +66,7 @@ namespace PeachFarm.Loggers
 			iteration.SeedNumber = context.config.randomSeed;
 			iteration.Stamp = DateTime.Now;
 
-			iteration.StateModel = GetMongoActions(stateModel);
-			iteration.Faults = GetMongoFaults(faultData);
+			iteration.Faults = GetMongoFaults(faultData, stateModel);
 			iteration.DatabaseInsert(MongoConnectionString);
 		}
 
@@ -107,10 +106,12 @@ namespace PeachFarm.Loggers
 			
 		}
 
-		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults)
+		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.Dom.StateModel stateModel)
 		{
 			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
-			
+
+			List<Common.Mongo.Action> mongoActions = GetMongoActions(stateModel);
+
 			foreach(Peach.Core.Fault pf in peachFaults)
 			{
 				Common.Mongo.Fault mongoFault = new Common.Mongo.Fault();
@@ -127,7 +128,7 @@ namespace PeachFarm.Loggers
 				mongoFault.MinorHash = pf.minorHash;
 				mongoFault.Title = pf.title;
 
-
+				mongoFault.StateModel = mongoActions;
 				mongoFault.CollectedData = GetMongoCollectedData(pf);
 
 				mongoFaults.Add(mongoFault);

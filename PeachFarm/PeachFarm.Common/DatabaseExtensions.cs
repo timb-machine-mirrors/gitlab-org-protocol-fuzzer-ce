@@ -69,56 +69,54 @@ namespace PeachFarm.Common.Mongo
 
 			jobFolder = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
 			nodeFolder = Path.Combine(jobFolder, "Node_" + iteration.NodeName);
-			testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.PitFileName, iteration.TestName, FormatDate(iteration.Stamp)));
+			testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.PitFileName, iteration.TestName, FormatDate(job.StartDate)));
 			faultsFolder = Path.Combine(testFolder, "Faults");
-			iterationFolder = Path.Combine(faultsFolder, "{0}", iteration.IterationNumber.ToString());
-
-			#region action files
-			int cnt = 0;
-			foreach (PeachFarm.Common.Mongo.Action action in iteration.StateModel)
-			{
-				cnt++;
-				if (action.Parameter == 0)
-				{
-					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
-									cnt, action.ActionType.ToString(), action.ActionName));
-
-				}
-				else
-				{
-					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
-									cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
-				}
-
-				action.DataPath = actionFile;
-			}
-			#endregion
 
 			foreach (Fault fault in iteration.Faults)
 			{
-
 				#region set faultFolder
 				if (fault.FolderName != null)
 				{
-					faultFolder = fault.FolderName;
+					faultFolder = Path.Combine(faultsFolder, fault.FolderName);
 				}
 				else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
 				{
-					faultFolder = "Unknown";
+					faultFolder = Path.Combine(faultsFolder, "Unknown");
 				}
 				else
 				{
-					faultFolder = String.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash);
+					faultFolder = Path.Combine(faultsFolder, String.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash));
 				}
 				#endregion
 
-				string thisiterationfolder = String.Format(iterationFolder, faultFolder);
+				iterationFolder = Path.Combine(faultFolder, iteration.IterationNumber.ToString());
+
+				#region action files
+				int cnt = 0;
+				foreach (PeachFarm.Common.Mongo.Action action in fault.StateModel)
+				{
+					cnt++;
+					if (action.Parameter == 0)
+					{
+						actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
+										cnt, action.ActionType.ToString(), action.ActionName));
+
+					}
+					else
+					{
+						actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
+										cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
+					}
+
+					action.DataPath = actionFile;
+				}
+				#endregion
 
 
 				#region write collected data files
 				foreach (CollectedData cd in fault.CollectedData)
 				{
-					collectedDataFile = System.IO.Path.Combine(thisiterationfolder,
+					collectedDataFile = System.IO.Path.Combine(iterationFolder,
 						fault.DetectionSource + "_" + cd.Key);
 
 					cd.DataPath = collectedDataFile;
