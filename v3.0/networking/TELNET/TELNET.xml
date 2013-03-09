@@ -234,10 +234,10 @@
         <DataModel ref="Telnet" />
       </Action>
 	  
-      <!-- If return != "Login:" Prompt, Keep Waiting -->
-      <Action type="changeState" ref="WaitLogin"/>
       <!-- If return = "Login:" Prompt, Send Username -->
-      <Action type="changeState" ref="TelnetSendUsername"/>	  
+      <Action name="LoginCaseTrue" type="changeState" ref="TelnetSendUsername" when="'login:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 1"/>	  
+      <!-- If return != "Login:" Prompt, Keep Waiting -->
+      <Action name="LoginCaseFalse" type="changeState" ref="WaitLogin" when="'login:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 0"/>
 
 	</State>
 	<!-- Telnet Send Username Value -->
@@ -255,10 +255,10 @@
         <DataModel ref="Telnet" />
       </Action>
 	  
-      <!-- If return != "Password:" Prompt, Keep Waiting -->
-      <Action type="changeState" ref="WaitPassword"/>
       <!-- If return = "Password:" Prompt, Send Password -->
-      <Action type="changeState" ref="TelnetSendPassword"/>	  	  
+      <Action name="PasswordCaseTrue" type="changeState" ref="TelnetSendPassword" when="'password:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 1"/>	  	  
+      <!-- If return != "Password:" Prompt, Keep Waiting -->
+      <Action name="PasswordCaseFalse" type="changeState" ref="WaitPassword" when="'password:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 0"/>
 	  
     </State>
 	<!-- Telnet Send Password Value -->
@@ -276,11 +276,11 @@
         <DataModel ref="Telnet" />
       </Action>
 	  
-      <!-- If return != "*:~$" Prompt, Keep Waiting -->
-      <Action type="changeState" ref="WaitCommand"/>
-      <!-- If return = "*:~$" Prompt, Send Command -->
-      <Action type="changeState" ref="TelnetSendCommand"/>
-
+      <!-- If return = "Password:" Prompt, Send Password -->
+      <Action name="CommandCaseTrue" type="changeState" ref="TelnetSendCommand" when="':~$' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 1"/>	  	  
+      <!-- If return != "Password:" Prompt, Keep Waiting -->
+      <Action name="CommandCaseFalse" type="changeState" ref="WaitCommand" when="':~$' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 0"/>
+	  
 	</State>
 	<!-- Telnet Send Command Value -->
 	<State name="TelnetSendCommand">	  
@@ -290,12 +290,6 @@
     </State>	
 
   </StateModel>
-
-
-
-      <!-- Example:
-      <Action name="HelloCheck" type="changeState" ref="NextPacket" when="int(StateModel.states['NextPacket'].actions[0].dataModel['Type'].InternalValue) == 1"/>
-      -->
 	
   <!-- Default test case -->
   <Test name="Default">
