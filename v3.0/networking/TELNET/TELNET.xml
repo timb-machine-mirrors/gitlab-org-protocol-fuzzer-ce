@@ -13,9 +13,9 @@
   <DataModel name="Commands">
     <Choice>
 		<!-- Stop Use - Demand to stop using specified option. -->
-		<Number name="Stop" valueType="hex" value="fe" token="true"/>
+		<Number name="Dont" valueType="hex" value="fe" token="true"/>
 		<!-- Start Use - Request to start using specified option. -->
-		<Number name="Start" valueType="hex" value="fd" token="true"/>
+		<Number name="Do" valueType="hex" value="fd" token="true"/>
 		<!-- Won't Use - Reject the proposed option. -->
 		<Number name="Wont" valueType="hex" value="fc" token="true"/>
 		<!-- Will Use - Agreement to use the specified option. -->
@@ -120,6 +120,8 @@
 		<Number name="RemoteFlow" valueType="hex" value="21" token="true"/>
 		<!-- Linemode - Provides linemode bulk character transactions. -->
 		<Number name="Linemode" valueType="hex" value="22" token="true"/>
+		<!-- Location - ... -->
+		<Number name="Location" valueType="hex" value="23" token="true"/>		
 		<!-- Extended - Extended options list. -->
 		<Number name="Ext" valueType="hex" value="ff" token="true"/>
 		<!-- Generic catch-all for custom/unknown options. -->
@@ -143,72 +145,171 @@
 	<Blob name="data"/>
   </DataModel>
 
-  <!-- Telnet start connect model -->
+  <!-- Telnet Negotiate Connect Model -->
   <DataModel name="TelnetConnect">
+	<Block name="TelnetNegotiateMessage" ref="Telnet">
+	  <Block name="optCodes">
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Do" valueType="hex" value="fd" token="true"/>
+		  <Number name="SuppressGA" valueType="hex" value="03" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Will" valueType="hex" value="fb" token="true"/>
+		  <Number name="RemoteFlow" valueType="hex" value="21" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Will" valueType="hex" value="fb" token="true"/>
+		  <Number name="Linemode" valueType="hex" value="22" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Do" valueType="hex" value="fd" token="true"/>
+		  <Number name="OptStat" valueType="hex" value="05" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Wont" valueType="hex" value="fc" token="true"/>
+		  <Number name="Location" valueType="hex" value="23" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Wont" valueType="hex" value="fc" token="true"/>
+		  <Number name="Echo" valueType="hex" value="01" token="true"/>
+		</Block>
+		<Block name="optCode">
+		  <Number name="iac" valueType="hex" value="ff" token="true"/>
+		  <Number name="Do" valueType="hex" value="fd" token="true"/>
+		  <Number name="Echo" valueType="hex" value="01" token="true"/>
+		</Block>
+	  </Block>
+	</Block>
   </DataModel>
 
-  <!-- Telnet login model -->
-  <DataModel name="TelnetLogin">
+  <!-- Telnet Username Model -->
+  <DataModel name="TelnetUsername">
+	<Block name="TelnetUsernameMessage" ref="Telnet">
+	  <String name="data" value="##Username##" token="true">
+	  <Blob name="return" valueType="hex" value="0d" token="true">
+	</Block>
   </DataModel>
 
-  <!-- Telnet send command model -->
-  <DataModel name="TelnetSendCommand">
+  <!-- Telnet Password Model -->
+  <DataModel name="TelnetPassword">
+	<Block name="TelnetPasswordMessage" ref="Telnet">
+	  <String name="data" value="##Password##" token="true">
+	  <Blob name="return" valueType="hex" value="0d" token="true">
+	</Block>
   </DataModel>
   
+  <!-- Telnet Send Command Model -->
+  <DataModel name="TelnetCommand">
+	<Block name="TelnetCommandMessage" ref="Telnet">
+	  <String name="data" value="##Command##" token="true">
+	  <Blob name="return" valueType="hex" value="0d" token="true">
+	</Block>
+  </DataModel>
+   
   <!-- Agent conifuration to monitor for crashes -->
   <Agent name="TheAgent">
   </Agent> 
 	
-  <!-- TELNET simple state model -->
-  <StateModel name="AgentToHost" initialState="Initial">
+  <!-- Telnet Simple State Model -->
+  <StateModel name="AgentToHost" initialState="TelnetNegotiate">
 	<State name="Initial">
-
-	  <!-- Telnet Negotiate Connection
-      <Action name="TelnetNegotiate" type="output" publisher="TcpHandler">
+	</State>
+	<!-- Telnet Start/Negotiate Session -->
+	<State name="TelnetSendNegotiate">	  
+      <Action name="TelnetSend" type="output" publisher="TcpHandler">
         <DataModel ref="TelnetConnect" />
       </Action>
-	   -->
-	  <!-- Telnet Login as Test User
-      <Action name="TelnetLogin" type="output" publisher="TcpHandler">
-        <DataModel ref="TelnetLogin" />
-      </Action>
-	  -->
-	  <!-- Telnet Send Command
-      <Action name="TelnetSendCommand" type="output" publisher="TcpHandler">
-        <DataModel ref="TelnetSendCommand" />
-      </Action>
-	  -->
-	  <!-- Telnet Get Returned Data
-      <Action name="TelnetGetResult" type="input" publisher="TcpHandler">
+      <!-- Wait for "Login:" Prompt -->
+      <Action type="changeState" ref="WaitLogin"/>
+    </State>
+	<!-- Telnet Listen Until Prompt Login -->
+	<State name="WaitLogin">	  
+      <Action name="TelnetListen" type="input" publisher="TcpHandler">
         <DataModel ref="Telnet" />
       </Action>
-	  -->
-	  <!-- Telnet Show Results
-      <Action name="TelnetShowResult" type="output" publisher="Console">
-        <DataModel ref="Telnet" />
-      </Action>
-	  -->
+	  
+      <!-- If return != "Login:" Prompt, Keep Waiting -->
+      <Action type="changeState" ref="WaitLogin"/>
+      <!-- If return = "Login:" Prompt, Send Username -->
+      <Action type="changeState" ref="TelnetSendUsername"/>	  
+
 	</State>
+	<!-- Telnet Send Username Value -->
+	<State name="TelnetSendUsername">	  
+      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+        <DataModel ref="TelnetUsername" />
+      </Action>
+	  
+      <!-- Wait for "Password:" Prompt -->
+      <Action type="changeState" ref="WaitPassword"/>
+    </State>
+	<!-- Telnet Listen Until Prompt Password -->
+	<State name="WaitPassword">	  
+      <Action name="TelnetListen" type="input" publisher="TcpHandler">
+        <DataModel ref="Telnet" />
+      </Action>
+	  
+      <!-- If return != "Password:" Prompt, Keep Waiting -->
+      <Action type="changeState" ref="WaitPassword"/>
+      <!-- If return = "Password:" Prompt, Send Password -->
+      <Action type="changeState" ref="TelnetSendPassword"/>	  	  
+	  
+    </State>
+	<!-- Telnet Send Password Value -->
+	<State name="TelnetSendPassword">	  
+      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+        <DataModel ref="TelnetPassword" />
+      </Action>
+	  
+      <!-- Wait for ":~$" Prompt -->
+      <Action type="changeState" ref="WaitCommand"/>
+    </State>
+	<!-- Telnet Listen Until Prompt Command -->
+	<State name="WaitCommand">	  
+      <Action name="TelnetListen" type="input" publisher="TcpHandler">
+        <DataModel ref="Telnet" />
+      </Action>
+	  
+      <!-- If return != "*:~$" Prompt, Keep Waiting -->
+      <Action type="changeState" ref="WaitCommand"/>
+      <!-- If return = "*:~$" Prompt, Send Command -->
+      <Action type="changeState" ref="TelnetSendCommand"/>
+
+	</State>
+	<!-- Telnet Send Command Value -->
+	<State name="TelnetSendCommand">	  
+      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+        <DataModel ref="TelnetCommand" />
+      </Action>
+    </State>	
+
   </StateModel>
+
+
+
+      <!-- Example:
+      <Action name="HelloCheck" type="changeState" ref="NextPacket" when="int(StateModel.states['NextPacket'].actions[0].dataModel['Type'].InternalValue) == 1"/>
+      -->
 	
-	<!-- Default test case -->
-	<Test name="Default">
-		
-		<StateModel ref="AgentToHost"/>
-		
-		<Agent ref="TheAgent" />
-		
-		<Publisher class="Tcp" name="TcpHandler">
-			<Param name="SrcPort" value="##TelnetSrcPort##" />
-			<Param name="Host" value="##TelnetHost##" />
-			<Param name="Port" value="##TelnetPort##" />
-		</Publisher>
-		
-		<Strategy class="##Strategy##"/>
-		<Logger class="logger.Filesystem" >
-			<Param name="Path" value="##LoggerPath##" />
-		</Logger>
-		
-	</Test>
-	
+  <!-- Default test case -->
+  <Test name="Default">
+	<StateModel ref="AgentToHost"/>
+	<Agent ref="TheAgent" />
+	<Publisher class="Tcp" name="TcpHandler">
+	  <Param name="SrcPort" value="##TelnetSrcPort##" />
+	  <Param name="Host" value="##TelnetHost##" />
+	  <Param name="Port" value="##TelnetPort##" />
+	</Publisher>
+	<Strategy class="##Strategy##"/>
+	<Logger class="logger.Filesystem" >
+	  <Param name="Path" value="##LoggerPath##" />
+	</Logger>	
+  </Test>
+  
 </Peach>

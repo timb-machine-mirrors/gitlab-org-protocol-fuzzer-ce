@@ -2,7 +2,8 @@
 <PitDefines>
   <All>
 	<Define key="Username" value="root">
-	<Define key="Password" value="toor">
+	<Define key="Password" value="asdf">
+	<Define key="Command" value="ls">
 
     <Define key="TelnetSrcPort" value="23"/>
     <Define key="TelnetPort"    value="23"/>
