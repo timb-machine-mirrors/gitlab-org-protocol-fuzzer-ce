@@ -116,7 +116,7 @@
   <!--      ACCT <SP> <account information> <CRLF> -->
 	<DataModel name="ACCT" ref="RequestTemplate">
 		<String name="Command" value="ACCT" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      REIN <CRLF> -->
@@ -132,7 +132,7 @@
   <!--      PORT <SP> <Host-port> <CRLF> -->
 	<DataModel name="PORT" ref="RequestTemplate">
 		<String name="Command" value="PORT" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      PASV <CRLF> -->
@@ -143,37 +143,37 @@
   <!--      TYPE <SP> <type code> <CRLF> -->
 	<DataModel name="TYPE" ref="RequestTemplate">
 		<String name="Command" value="TYPE" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      STRU <SP> <structure code> <CRLF> -->
 	<DataModel name="STRU" ref="RequestTemplate">
 		<String name="Command" value="STRU" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      MODE <SP> <mode code> <CRLF> -->
 	<DataModel name="MODE" ref="RequestTemplate">
 		<String name="Command" value="MODE" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      RETR <SP> <pathname> <CRLF> -->
 	<DataModel name="RETR" ref="RequestTemplate">
 		<String name="Command" value="RETR" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      STOR <SP> <pathname> <CRLF> -->
 	<DataModel name="STOR" ref="RequestTemplate">
 		<String name="Command" value="STOR" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      APPE <SP> <pathname> <CRLF> -->
 	<DataModel name="APPE" ref="RequestTemplate">
 		<String name="Command" value="APPE" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      MLFL [<SP> <ident>] <CRLF> -->
@@ -209,32 +209,32 @@
   <!--      MRCP <SP> <ident> <CRLF> -->
 	<DataModel name="MRCP" ref="RequestTemplate">
 		<String name="Command" value="MRCP" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      ALLO <SP> <decimal integer> -->
   <!--          [<SP> R <SP> <decimal integer>] <CRLF> -->
 	<DataModel name="ALLO" ref="RequestTemplate">
 		<String name="Command" value="ALLO" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      REST <SP> <marker> <CRLF> -->
 	<DataModel name="REST" ref="RequestTemplate">
 		<String name="Command" value="REST" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      RNFR <SP> <pathname> <CRLF> -->
 	<DataModel name="RNFR" ref="RequestTemplate">
 		<String name="Command" value="RNFR" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      RNTO <SP> <pathname> <CRLF> -->
 	<DataModel name="RNTO" ref="RequestTemplate">
 		<String name="Command" value="RNTO" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      ABOR <CRLF> -->
@@ -245,13 +245,13 @@
   <!--      DELE <SP> <pathname> <CRLF> -->
 	<DataModel name="DELE" ref="RequestTemplate">
 		<String name="Command" value="DELE" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      CWD <SP> <pathname> <CRLF> -->
 	<DataModel name="CWD" ref="RequestTemplate">
 		<String name="Command" value="CWD" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      LIST [<SP> <pathname>] <CRLF> -->
@@ -267,7 +267,7 @@
   <!--      SITE <SP> <string> <CRLF> -->
 	<DataModel name="SITE" ref="RequestTemplate">
 		<String name="Command" value="SITE" token="true"/>
-		<Block name="ArgBlock" ref="ArgBlock" minOccurs="1"/>
+		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="1"/>
 	</DataModel>
 
   <!--      STAT [<SP> <pathname>] <CRLF> -->
@@ -303,11 +303,17 @@
   <!--      RMD - Remove Directory -->
 	<DataModel name="RMD" ref="RequestTemplate">
 		<String name="Command" value="RMD" token="true"/>
+		<Block name="ReqArgBlock" ref="ArgBlock">
+			<String name="Argument" value="foobarbaz"/>
+		</Block>
 	</DataModel>
 
   <!--      MKD - Make Directory -->
 	<DataModel name="MKD" ref="RequestTemplate">
 		<String name="Command" value="MKD" token="true"/>
+		<Block name="ReqArgBlock" ref="ArgBlock">
+			<String name="Argument" value="foobarbaz"/>
+		</Block>
 	</DataModel>
 
   <!--      PWD - Print Directory -->
@@ -414,12 +420,6 @@
 				<DataModel ref="Request" />
 			</Action>
 		</State>
-
-		<!-- <State name="Quit"> -->
-		<!-- 	<Action type="input" publisher="TcpHandler"> -->
-		<!-- 		<DataModel ref="ServerQuit" /> -->
-		<!-- 	</Action> -->
-		<!-- </State> -->
 
 	</StateModel>
 
