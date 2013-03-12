@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
 	<Defaults>
-		<Number size="8" endian="little" signed="false" />
+		<Number endian="little" signed="false" />
 	</Defaults>
 	
 	<DataModel name="ICO">
