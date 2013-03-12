@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-	<Define key="Username" value="root">
-	<Define key="Password" value="asdf">
-	<Define key="Command" value="ls">
-
-    <Define key="TelnetSrcPort" value="23"/>
-    <Define key="TelnetPort"    value="23"/>
-    <Define key="TelnetHost"    value="localhost"/>
-    <Define key="LoggerPath"  value="./logs/telnet/"/>
-    <Define key="Strategy"  value="Sequential"/>
+	<Define key="Username" value="peach"/>
+	<Define key="Password" value="peach"/>
+	<Define key="Command" value="ls"/>
+  <Define key="TargetPort"    value="23"/>
+  <!-- <Define key="TargetHost"    value="localhost"/> -->
+  <Define key="TargetHost"    value="10.6.66.51"/>
+  <Define key="LoggerPath"  value="./logs/telnet/"/>
+  <Define key="Strategy"  value="Sequential"/>
   </All>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
