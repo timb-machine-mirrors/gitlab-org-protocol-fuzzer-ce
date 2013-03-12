@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
+	<Define key="UserPrompt" value="login:"/>
 	<Define key="Username" value="peach"/>
+
+	<Define key="PassPrompt" value="password:"/>
 	<Define key="Password" value="peach"/>
+
+	<Define key="CmdPrompt" value=":~$"/>
 	<Define key="Command" value="ls"/>
-  <Define key="TargetPort"    value="23"/>
-  <!-- <Define key="TargetHost"    value="localhost"/> -->
-  <Define key="TargetHost"    value="10.6.66.51"/>
-  <Define key="LoggerPath"  value="./logs/telnet/"/>
-  <Define key="Strategy"  value="Sequential"/>
+	
+    <Define key="TargetPort"    value="23"/>
+    <!-- <Define key="TargetHost"    value="localhost"/> -->
+    <Define key="TargetHost"    value="10.6.66.51"/>
+    <Define key="LoggerPath"  value="./logs/telnet/"/>
+    <Define key="Strategy"  value="Sequential"/>
   </All>
+  
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>

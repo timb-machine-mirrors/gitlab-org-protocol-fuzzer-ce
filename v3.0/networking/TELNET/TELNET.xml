@@ -227,6 +227,12 @@
 		</Block>
   </DataModel>
 
+  <!-- Telnet Listen "Login:" Model -->
+  <DataModel name="TelnetLoginPrompt">
+	<Blob name="data"/>
+	<String name="target" value="##UserPrompt##" token="true"/>
+  </DataModel>
+  
   <!-- Telnet Username Model -->
   <DataModel name="TelnetUsername">
 	<Block name="TelnetUsernameMessage" ref="Telnet">
@@ -235,12 +241,24 @@
 	</Block>
   </DataModel>
 
+  <!-- Telnet Listen "Password:" Model -->
+  <DataModel name="TelnetPassPrompt">
+	<Blob name="data"/>
+	<String name="target" value="##PassPrompt##" token="true"/>
+  </DataModel>
+  
   <!-- Telnet Password Model -->
   <DataModel name="TelnetPassword">
 	<Block name="TelnetPasswordMessage" ref="Telnet">
 	  <String name="data" value="##Password##" token="true"/>
 	  <Blob name="return" valueType="hex" value="0d" token="true"/>
 	</Block>
+  </DataModel>
+
+  <!-- Telnet Listen ":~$" Model -->
+  <DataModel name="TelnetCmdPrompt">
+	<Blob name="data"/>
+	<String name="target" value="##CmdPrompt##" token="true"/>
   </DataModel>
   
   <!-- Telnet Send Command Model -->
@@ -256,79 +274,45 @@
   </Agent> 
 	
   <!-- Telnet Simple State Model -->
-  <StateModel name="AgentToHost" initialState="TelnetSendNegotiate">
+  <StateModel name="AgentToHost" initialState="Initial">
 	<State name="Initial">
-	</State>
-	<!-- Telnet Start/Negotiate Session -->
-	<State name="TelnetSendNegotiate">	  
-      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+	
+	  <!-- Telnet Start/Negotiate Session -->
+      <Action name="TelnetSendNegotiate" type="output" publisher="TcpHandler">
         <DataModel ref="TelnetConnect" />
       </Action>
-      <!-- Wait for "Login:" Prompt -->
-      <Action type="changeState" ref="WaitLogin"/>
-    </State>
-	<!-- Telnet Listen Until Prompt Login -->
-	<State name="WaitLogin">	  
-      <Action name="TelnetListen" type="input" publisher="TcpHandler">
-        <DataModel ref="Telnet" />
-      </Action>
 	  
-      <!-- If return = "Login:" Prompt, Send Username -->
-      <Action name="LoginCaseTrue" type="changeState" ref="TelnetSendUsername" when="'login:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue.ToString()"/>
-			<!-- <Action name="LoginCaseTrue" type="changeState" ref="TelnetSendUsername" when="code.InteractiveConsole(locals=globals()).interact()"/>	   -->
-      <!-- If return != "Login:" Prompt, Keep Waiting -->
-      <Action name="LoginCaseFalse" type="changeState" ref="WaitLogin" when="'login:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue.ToString()"/>
+      <!-- Wait for "Login:" Prompt -->
+	  <Action name="TelnetListenLogin" type="input" publisher="TcpHandler">
+	    <DataModel ref="TelnetLoginPrompt" />
+	  </Action>
 
-	</State>
-	<!-- Telnet Send Username Value -->
-	<State name="TelnetSendUsername">	  
-      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+	  <!-- Telnet Send Username Value -->
+      <Action name="TelnetSendUsername" type="output" publisher="TcpHandler">
         <DataModel ref="TelnetUsername" />
       </Action>
-	  
+
       <!-- Wait for "Password:" Prompt -->
-      <Action type="changeState" ref="WaitPassword"/>
-    </State>
-	<!-- Telnet Listen Until Prompt Password -->
-	<State name="WaitPassword">	  
-      <Action name="TelnetListen" type="input" publisher="TcpHandler">
-        <DataModel ref="Telnet" />
-      </Action>
+	  <Action name="TelnetListenPass" type="input" publisher="TcpHandler">
+	    <DataModel ref="TelnetPassPrompt" />
+	  </Action>
 	  
-      <!-- If return = "Password:" Prompt, Send Password -->
-      <Action name="PasswordCaseTrue" type="changeState" ref="TelnetSendPassword" when="'password:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 1"/>	  	  
-      <!-- If return != "Password:" Prompt, Keep Waiting -->
-      <Action name="PasswordCaseFalse" type="changeState" ref="WaitPassword" when="'password:' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 0"/>
-	  
-    </State>
-	<!-- Telnet Send Password Value -->
-	<State name="TelnetSendPassword">	  
-      <Action name="TelnetSend" type="output" publisher="TcpHandler">
+	  <!-- Telnet Send Password Value -->
+      <Action name="TelnetSendPassword" type="output" publisher="TcpHandler">
         <DataModel ref="TelnetPassword" />
       </Action>
-	  
+
       <!-- Wait for ":~$" Prompt -->
-      <Action type="changeState" ref="WaitCommand"/>
-    </State>
-	<!-- Telnet Listen Until Prompt Command -->
-	<State name="WaitCommand">	  
-      <Action name="TelnetListen" type="input" publisher="TcpHandler">
-        <DataModel ref="Telnet" />
-      </Action>
-	  
-      <!-- If return = "Password:" Prompt, Send Password -->
-      <Action name="CommandCaseTrue" type="changeState" ref="TelnetSendCommand" when="':~$' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 1"/>	  	  
-      <!-- If return != "Password:" Prompt, Keep Waiting -->
-      <Action name="CommandCaseFalse" type="changeState" ref="WaitCommand" when="':~$' in StateModel.states['WaitLogin'].actions[0].dataModel['data'].InternalValue == 0"/>
-	  
-	</State>
-	<!-- Telnet Send Command Value -->
-	<State name="TelnetSendCommand">	  
+	  <Action name="TelnetListenCmd" type="input" publisher="TcpHandler">
+	    <DataModel ref="TelnetCmdPrompt" />
+	  </Action>
+
+	  <!-- Telnet Send Command Value -->
       <Action name="TelnetSend" type="output" publisher="TcpHandler">
         <DataModel ref="TelnetCommand" />
       </Action>
-    </State>	
 
+	</State>
   </StateModel>
 	
   <!-- Default test case -->
