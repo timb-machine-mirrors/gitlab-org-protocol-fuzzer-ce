@@ -96,35 +96,41 @@ namespace PeachFarm.Controller
 
 		private void StatusCheck(object state)
 		{
+			//Catching all exceptions because StatusCheck is called often
+
 			List<Heartbeat> remove = new List<Heartbeat>();
-			lock (nodes)
+			try
 			{
-				foreach (KeyValuePair<string, Heartbeat> pair in nodes)
+				lock (nodes)
 				{
-					Debug.WriteLine(String.Format("Status Check:{0} {1}", pair.Value.Stamp.ToString(), DateTime.Now.ToString()));
-					if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
+					foreach (KeyValuePair<string, Heartbeat> pair in nodes)
 					{
-						logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Node Expired", pair.Value.Stamp);
-						remove.Add(pair.Value);
-						pair.Value.ErrorMessage = "Node Expired";
-						pair.Value.Stamp = DateTime.Now;
-						pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
-					}
-					else
-					{
-						if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+						Debug.WriteLine(String.Format("Status Check:{0} {1}", pair.Value.Stamp.ToString(), DateTime.Now.ToString()));
+						if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
 						{
-							pair.Value.Status = Status.Late;
-							logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+							logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Node Expired", pair.Value.Stamp);
+							remove.Add(pair.Value);
+							pair.Value.ErrorMessage = "Node Expired";
+							pair.Value.Stamp = DateTime.Now;
+							pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
+						}
+						else
+						{
+							if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
+							{
+								pair.Value.Status = Status.Late;
+								logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
+							}
 						}
 					}
 				}
-			}
 
-			foreach (Heartbeat node in remove)
-			{
-				RemoveNode(node);
+				foreach (Heartbeat node in remove)
+				{
+					RemoveNode(node);
+				}
 			}
+			catch { }
 		}
 
 		#region MQ functions
@@ -425,24 +431,26 @@ namespace PeachFarm.Controller
 
 		private void UpdateNode(Heartbeat heartbeat)
 		{
-			if (nodes.ContainsKey(heartbeat.NodeName) == false)
-			{
-				nodes.Add(heartbeat.NodeName, heartbeat);
-				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
-				if (heartbeat.Status == Status.Running)
+				if (nodes.ContainsKey(heartbeat.NodeName) == false)
 				{
-					try
+					lock (nodes)
 					{
-						rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
+						nodes.Add(heartbeat.NodeName, heartbeat);
 					}
-					catch { }
+					logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
+					if (heartbeat.Status == Status.Running)
+					{
+						try
+						{
+							rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
+						}
+						catch { }
+					}
 				}
-			}
 
-			nodes[heartbeat.NodeName] = heartbeat;
-			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
+				nodes[heartbeat.NodeName] = heartbeat;
+				logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
 		}
 
@@ -453,10 +461,10 @@ namespace PeachFarm.Controller
 				lock (nodes)
 				{
 					nodes.Remove(heartbeat.NodeName);
-
-					logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
 				}
+
+				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
 			}
 		}
 	}
