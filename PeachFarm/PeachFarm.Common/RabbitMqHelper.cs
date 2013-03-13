@@ -12,9 +12,9 @@ namespace PeachFarm.Common
 	{
 		private UTF8Encoding encoding = new UTF8Encoding();
 
-		private IConnection connection;
-		private IModel receiver;
-		private IModel sender;
+		private static IConnection connection;
+		private static IModel receiver;
+		private static IModel sender;
 
 		private string hostName;
 		int port;
@@ -39,11 +39,16 @@ namespace PeachFarm.Common
 			OpenConnection();
 		}
 
+		#region Public Methods
+
 		public void StartListener(string queue, double interval = 1000)
 		{
 			listenQueue = queue;
-			sender.QueueDeclare(queue, true, false, false, null);
-			sender.QueuePurge(queue);
+			lock (sender)
+			{
+				sender.QueueDeclare(queue, true, false, false, null);
+				sender.QueuePurge(queue);
+			}
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
 			listenTimer.Start();
@@ -53,22 +58,11 @@ namespace PeachFarm.Common
 		{
 			listenTimer.Stop();
 			listenTimer = null;
-			sender.QueueDelete(listenQueue);
+			lock (sender)
+			{
+				sender.QueueDelete(listenQueue);
+			}
 			listenQueue = String.Empty;
-		}
-
-		private void AckMessage(ulong deliveryTag)
-		{
-			try
-			{
-				if (sender.IsOpen == false)
-					ReopenConnection();
-				receiver.BasicAck(deliveryTag, false);
-			}
-			catch (Exception ex)
-			{
-				throw new RabbitMqException(ex, hostName);
-			}
 		}
 
 		public void PublishToQueue(string queue, string body, string action, string replyQueue = "")
@@ -77,19 +71,22 @@ namespace PeachFarm.Common
 
 			try
 			{
-				if (sender.IsOpen == false)
+				lock (sender)
 				{
-					open = ReopenConnection();
-				}
+					if (sender.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
 
-				if (open)
-				{
-					sender.QueueDeclare(queue, true, false, false, null);
-					sender.PublishToQueue(queue, body, action, replyQueue);
-				}
-				else
-				{
-					throw new RabbitMqException(null, hostName);
+					if (open)
+					{
+						sender.QueueDeclare(queue, true, false, false, null);
+						sender.PublishToQueue(queue, body, action, replyQueue);
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -104,22 +101,25 @@ namespace PeachFarm.Common
 
 			try
 			{
-				if (sender.IsOpen == false)
+				lock (sender)
 				{
-					open = ReopenConnection();
-				}
-
-				if (open)
-				{
-					sender.ExchangeDeclare(exchange, "fanout", true);
-					foreach (var q in queues)
+					if (sender.IsOpen == false)
 					{
-						sender.QueueBind(q, exchange, routingKey);
+						open = ReopenConnection();
 					}
-				}
-				else
-				{
-					throw new RabbitMqException(null, hostName);
+
+					if (open)
+					{
+						sender.ExchangeDeclare(exchange, "fanout", true);
+						foreach (var q in queues)
+						{
+							sender.QueueBind(q, exchange, routingKey);
+						}
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -134,18 +134,21 @@ namespace PeachFarm.Common
 
 			try
 			{
-				if (sender.IsOpen == false)
+				lock (sender)
 				{
-					open = ReopenConnection();
-				}
+					if (sender.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
 
-				if (open)
-				{
-					sender.QueueBind(queue, exchange, routingKey);
-				}
-				else
-				{
-					throw new RabbitMqException(null, hostName);
+					if (open)
+					{
+						sender.QueueBind(queue, exchange, routingKey);
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -160,18 +163,21 @@ namespace PeachFarm.Common
 
 			try
 			{
-				if (sender.IsOpen == false)
+				lock (sender)
 				{
-					open = ReopenConnection();
-				}
+					if (sender.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
 
-				if (open)
-				{
-					sender.ExchangeDelete(exchange, true);
-				}
-				else
-				{
-					throw new RabbitMqException(null, hostName);
+					if (open)
+					{
+						sender.ExchangeDelete(exchange, true);
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -186,18 +192,21 @@ namespace PeachFarm.Common
 
 			try
 			{
-				if (sender.IsOpen == false)
+				lock (sender)
 				{
-					open = ReopenConnection();
-				}
+					if (sender.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
 
-				if (open)
-				{
-					sender.PublishToExchange(exchange, body, action);
-				}
-				else
-				{
-					throw new RabbitMqException(null, hostName);
+					if (open)
+					{
+						sender.PublishToExchange(exchange, body, action);
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -205,6 +214,8 @@ namespace PeachFarm.Common
 				throw new RabbitMqException(ex, hostName);
 			}
 		}
+
+		#endregion
 
 		#region MessageReceived
 		public event EventHandler<MessageReceivedEventArgs> MessageReceived;
@@ -231,6 +242,8 @@ namespace PeachFarm.Common
 			public string Body { get; private set; }
 		}
 		#endregion
+
+		#region private functions
 
 		private void Listen(object sender, System.Timers.ElapsedEventArgs e)
 		{
@@ -373,6 +386,21 @@ namespace PeachFarm.Common
 			}
 		}
 
+		private void AckMessage(ulong deliveryTag)
+		{
+			try
+			{
+				if (receiver.IsOpen == false)
+					ReopenConnection();
+				receiver.BasicAck(deliveryTag, false);
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
+		#endregion
 	}
 
 	public class RabbitMqException : Exception

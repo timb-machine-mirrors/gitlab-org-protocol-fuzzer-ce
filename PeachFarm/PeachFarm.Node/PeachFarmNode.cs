@@ -181,16 +181,18 @@ namespace PeachFarm.Node
 			{
 				heartbeat = CreateHeartbeat();
 			}
-
+			nlog.Trace("HEARTBEAT: {0}", heartbeat.Stamp);
 			try
 			{
 				PublishToServer(heartbeat.Serialize(), "Heartbeat");
 			}
-			catch
+			catch(RabbitMqException rex)
 			{
+				nlog.Error(String.Format("Could not send heartbeat to RabbitMQ {0}.\nException:\n{1}", heartbeat.Stamp.ToString(), rex.ToString()));
+
 				if (heartbeat.Status == Common.Messages.Status.Error)
 				{
-					nlog.Error(String.Format("Could not send error message to RabbitMQ.\nException:\n{0}", heartbeat.ErrorMessage));
+					nlog.Error(String.Format("Could not send error message to RabbitMQ.\n{0}", heartbeat.ErrorMessage));
 				}
 			}
 		}
