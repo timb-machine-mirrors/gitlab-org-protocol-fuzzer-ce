@@ -245,36 +245,48 @@ namespace PeachFarm.Common
 
 		#region private functions
 
-		private void Listen(object sender, System.Timers.ElapsedEventArgs e)
+		private void Listen(object source, System.Timers.ElapsedEventArgs e)
 		{
+			bool open = true;
 			BasicGetResult result = null;
 			do
 			{
 				result = null;
 
-				try
+				if (receiver.IsOpen == false)
 				{
-					result = GetFromListenQueue();
-				}
-				catch (RabbitMqException rex)
-				{
-					Debug.WriteLine(rex.InnerException.ToString());
-				}
-
-				if (result != null)
-				{
-					AckMessage(result.DeliveryTag);
-
-					string body = encoding.GetString(result.Body);
-					string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
-					string replyQueue = String.Empty;
-					if (result.BasicProperties.Headers.Contains("ReplyQueue"))
+					open = ReopenConnection();
+					if (open)
 					{
-						replyQueue = encoding.GetString((byte[])result.BasicProperties.Headers["ReplyQueue"]);
+						receiver.QueueDeclare(listenQueue, true, false, false, null);
+					}
+				}
+
+				if (open)
+				{
+					try
+					{
+						result = GetFromListenQueue();
+					}
+					catch (RabbitMqException rex)
+					{
+						Debug.WriteLine(rex.InnerException.ToString());
 					}
 
-					OnMessageReceived(action, body, replyQueue);
+					if (result != null)
+					{
+						AckMessage(result.DeliveryTag);
 
+						string body = encoding.GetString(result.Body);
+						string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
+						string replyQueue = String.Empty;
+						if (result.BasicProperties.Headers.Contains("ReplyQueue"))
+						{
+							replyQueue = encoding.GetString((byte[])result.BasicProperties.Headers["ReplyQueue"]);
+						}
+
+						OnMessageReceived(action, body, replyQueue);
+					}
 				}
 			} while (result != null);
 		}
