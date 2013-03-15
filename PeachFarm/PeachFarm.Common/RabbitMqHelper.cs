@@ -21,8 +21,8 @@ namespace PeachFarm.Common
 		string userName;
 		string password;
 
-		private System.Timers.Timer listenTimer;
-		private string listenQueue;
+		private static System.Timers.Timer listenTimer;
+		private static string listenQueue;
 
 		public RabbitMqHelper(string hostName, int port = -1, string userName = "guest", string password = "guest")
 		{
@@ -39,15 +39,24 @@ namespace PeachFarm.Common
 			OpenConnection();
 		}
 
+		public bool IsListening { get; private set; }
+
 		#region Public Methods
 
 		public void StartListener(string queue, double interval = 1000)
 		{
+			if (String.IsNullOrEmpty(queue))
+			{
+				throw new ApplicationException("queue parameter cannot be empty");
+			}
+			
+			IsListening = true;
+
 			listenQueue = queue;
 			lock (sender)
 			{
-				sender.QueueDeclare(queue, true, false, false, null);
-				sender.QueuePurge(queue);
+				sender.QueueDeclare(listenQueue, true, false, false, null);
+				sender.QueuePurge(listenQueue);
 			}
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
@@ -56,6 +65,8 @@ namespace PeachFarm.Common
 
 		public void StopListener()
 		{
+			IsListening = false;
+
 			listenTimer.Stop();
 			listenTimer = null;
 			lock (sender)
@@ -247,26 +258,16 @@ namespace PeachFarm.Common
 
 		private void Listen(object source, System.Timers.ElapsedEventArgs e)
 		{
-			bool open = true;
-			BasicGetResult result = null;
-			do
+			if (IsListening)
 			{
-				result = null;
-
-				if (receiver.IsOpen == false)
+				BasicGetResult result = null;
+				do
 				{
-					open = ReopenConnection();
-					if (open)
-					{
-						receiver.QueueDeclare(listenQueue, true, false, false, null);
-					}
-				}
+					result = null;
 
-				if (open)
-				{
 					try
 					{
-						result = GetFromListenQueue();
+						result = GetFromQueue(listenQueue);
 					}
 					catch (RabbitMqException rex)
 					{
@@ -287,8 +288,8 @@ namespace PeachFarm.Common
 
 						OnMessageReceived(action, body, replyQueue);
 					}
-				}
-			} while (result != null);
+				} while (result != null);
+			}
 		}
 
 		private void OpenConnection()
@@ -373,19 +374,28 @@ namespace PeachFarm.Common
 				connection.Close();
 		}
 
-		private BasicGetResult GetFromListenQueue()
+		private BasicGetResult GetFromQueue(string queue)
 		{
+			if (String.IsNullOrEmpty(queue))
+			{
+				return null;
+			}
+
 			bool open = true;
 			try
 			{
 				if ((connection == null) || (connection.IsOpen == false))
 				{
 					open = ReopenConnection();
+					if (open)
+					{
+						receiver.QueueDeclare(queue, true, false, false, null);
+					}
 				}
 
 				if (open)
 				{
-					return receiver.BasicGet(listenQueue, false);
+					return receiver.BasicGet(queue, false);
 				}
 				else
 				{
