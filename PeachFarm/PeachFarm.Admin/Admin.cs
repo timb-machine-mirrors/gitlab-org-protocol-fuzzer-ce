@@ -5,8 +5,6 @@ using System.Text;
 using System.ComponentModel;
 using System.Net;
 
-using RabbitMQ.Client;
-
 using PeachFarm.Common;
 using PeachFarm.Common.Messages;
 using System.Threading;

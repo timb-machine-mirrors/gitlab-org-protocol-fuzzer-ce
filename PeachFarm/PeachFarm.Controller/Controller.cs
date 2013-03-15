@@ -6,7 +6,6 @@ using PeachFarm.Common.Messages;
 using System.Net;
 using PeachFarm.Common;
 using System.Threading;
-using RabbitMQ.Client;
 using System.ComponentModel;
 using NLog;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ using PeachFarm.Common.Mongo;
  
 namespace PeachFarm.Controller
 {
-	public class PeachFarmServer
+	public class PeachFarmController
 	{
 		private static Dictionary<string, Heartbeat> nodes = new Dictionary<string, Heartbeat>();
 
@@ -31,7 +30,7 @@ namespace PeachFarm.Controller
 
 		private string serverQueueName;
 
-		public PeachFarmServer()
+		public PeachFarmController()
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());

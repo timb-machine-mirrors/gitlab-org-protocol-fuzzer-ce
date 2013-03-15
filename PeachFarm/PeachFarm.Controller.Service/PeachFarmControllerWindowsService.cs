@@ -14,7 +14,7 @@ namespace PeachFarm.Controller
   partial class PeachFarmControllerWindowsService : ServiceBase
   {
 
-    private static PeachFarmServer server = null;
+    private static PeachFarmController server = null;
 
     private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -38,7 +38,7 @@ namespace PeachFarm.Controller
     {
       try
       {
-        server = new PeachFarmServer();
+        server = new PeachFarmController();
         logger.Info("Peach Farm Controller Started.");
       }
       catch (ApplicationException aex)

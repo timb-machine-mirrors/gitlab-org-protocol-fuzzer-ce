@@ -9,11 +9,8 @@ using System.IO;
 using System.Xml;
 using System.Xml.XPath;
 
-using RabbitMQ.Client;
-
 using PeachFarm.Common;
 using PeachFarm.Common.Messages;
-using System.Runtime.InteropServices;
 using System.Net;
 using PeachFarm.Node.Configuration;
 

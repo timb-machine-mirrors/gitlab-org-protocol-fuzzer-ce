@@ -24,10 +24,10 @@ namespace PeachFarm.Controller
         System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
         System.Console.WriteLine();
 
-        PeachFarmServer server = null;
+        PeachFarmController server = null;
         try
         {
-          server = new PeachFarmServer();
+          server = new PeachFarmController();
           if (server.IsOpen)
           {
             System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
