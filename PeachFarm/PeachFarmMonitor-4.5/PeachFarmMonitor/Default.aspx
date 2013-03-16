@@ -21,12 +21,15 @@
 	  }
     #title
     {
+      background: rgb(37, 160, 218);
+      color: white;
       position:absolute;
       top:0;
       left:0;
       right:0;
       height:30px;
       font-size:x-large;
+      font-family: 'Segoe UI', Arial;
     }
     .error
     {
@@ -55,10 +58,17 @@
     {
       text-align: right;
     }
-    #jobsnodeserrors
+    #tabstrip
     {
       position: absolute;
       top:30px;
+      left:0;
+      right:0;
+    }
+    #toplevel
+    {
+      position: absolute;
+      top:58px;
       bottom:0;
       left:0;
       right:0;
@@ -70,7 +80,33 @@
       margin:2px;
       background-color:gainsboro;
     }
+    .hidden
+    {
+      display: none;
+    }
+    #loadingLabel
+    {
+      position:absolute;
+      right:0;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
   </style>
+  <script type="text/javascript">
+    function switchnodesview(source, args) {
+      var text = args.get_item().get_text();
+      var iconview = document.getElementById("lstNodes");
+      var listview = document.getElementById("gridNodes");
+      if (text == "Icon") {
+        listview.className = "hidden";
+        iconview.className = "";
+      }
+      else {
+        iconview.className = "hidden";
+        listview.className = "";
+      }
+    }
+  </script>
 </head>
 <body>
   <form id="Form1" runat="server">
@@ -79,10 +115,9 @@
       <AjaxSettings>
         <telerik:AjaxSetting AjaxControlID="monitorTimer">
           <UpdatedControls>
-            <telerik:AjaxUpdatedControl ControlID="lstNodes"/>
-            <telerik:AjaxUpdatedControl ControlID="lstErrors"/>
-            <telerik:AjaxUpdatedControl ControlID="lstJobs"/>
-            <telerik:AjaxUpdatedControl ControlID="lstInactiveJobs"/>
+            <telerik:AjaxUpdatedControl ControlID="nodesGrid"/>
+            <telerik:AjaxUpdatedControl ControlID="jobsGrid"/>
+            <telerik:AjaxUpdatedControl ControlID="errorsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="titlePanel" />
           </UpdatedControls>
         </telerik:AjaxSetting>
@@ -92,194 +127,60 @@
       <asp:Panel ID="titlePanel" runat="server">
         Peach Farm Monitor:
         <asp:Label ID="lblHost" runat="server" />
-        <asp:Label Text="LOADING" ID="loadingLabel" runat="server" ForeColor="Green" />
+        <asp:Label Text="LOADING" ID="loadingLabel" runat="server" BackColor="Green" />
       </asp:Panel>
     </div>
-    <div id="jobsnodeserrors">
-      <telerik:RadSplitter ID="RadSplitter1" Orientation="Horizontal" runat="server" Height="100%" Width="100%" Skin="Metro">
-        <telerik:RadPane ID="RadPane3" runat="server">
-          <telerik:RadSplitter ID="RadSplitter2" runat="server">
-            <telerik:RadPane ID="RadPane1" runat="server" Width="220">
-              <telerik:RadSplitter ID="RadSplitter3" runat="server" Orientation="Horizontal">
-                <telerik:RadPane runat="server">
-                  <telerik:RadListView ID="lstJobs" runat="server" ItemPlaceholderID="jobHolder">
-                    <LayoutTemplate>
-                      <fieldset id="lstJobs" style="color: black;">
-                        <legend>Jobs</legend>
-                        <asp:Panel ID="jobHolder" runat="server" />
-                      </fieldset>
-                    </LayoutTemplate>
-                    <ItemTemplate>
-                      <table class="job">
-                        <tr>
-                          <td class="fieldLabel">Job ID:</td>
-                          <td><%# Eval("JobID") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">Pit:</td>
-                          <td><%# Eval("PitFileName") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">User:</td>
-                          <td><%# Eval("UserName") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">Start:</td>
-                          <td><%# ((DateTime) Eval("StartDate")).ToLocalTime() %></td>
-                        </tr>
-                        <tr>
-                          <td style="text-align:center" colspan="2">
-                            <a href="ReportViewer.aspx?jobid=<%# Eval("JobID") %>" target="_blank">
-                              View Report
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </ItemTemplate>
-                  </telerik:RadListView>
-                </telerik:RadPane>
-                <telerik:RadSplitBar ID="RadSplitBar2" runat="server" />
-                <telerik:RadPane ID="RadPane5" runat="server">
-                  <telerik:RadListView ID="lstInactiveJobs" runat="server" ItemPlaceholderID="inactiveJobHolder">
-                    <LayoutTemplate>
-                      <fieldset id="lstInactiveJobs" style="color: black;">
-                        <legend>Inactive Jobs</legend>
-                        <asp:Panel ID="inactiveJobHolder" runat="server" />
-                      </fieldset>
-                    </LayoutTemplate>
-                    <ItemTemplate>
-                      <table class="job">
-                        <tr>
-                          <td class="fieldLabel">Job ID:</td>
-                          <td><%# Eval("JobID") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">Pit:</td>
-                          <td><%# Eval("PitFileName") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">User:</td>
-                          <td><%# Eval("UserName") %></td>
-                        </tr>
-                        <tr>
-                          <td class="fieldLabel">Start:</td>
-                          <td><%# ((DateTime) Eval("StartDate")).ToLocalTime() %></td>
-                        </tr>
-                        <tr>
-                          <td style="text-align:center" colspan="2">
-                            <a href="ReportViewer.aspx?jobid=<%# Eval("JobID") %>" target="_blank">
-                              View Report
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </ItemTemplate>
-                  </telerik:RadListView>
-                </telerik:RadPane>
-              </telerik:RadSplitter>
-            </telerik:RadPane>
-            <telerik:RadPane ID="RadPane2" runat="server" Width="50%">
-              <telerik:RadListView ID="lstNodes" runat="server" ItemPlaceholderID="nodeHolder">
-                <LayoutTemplate>
-                  <fieldset id="lstNodes" style="color: black">
-                    <legend>Nodes</legend>
-                    <asp:Panel ID="nodeHolder" runat="server" ScrollBars="Vertical" />
-                  </fieldset>
-                </LayoutTemplate>
-                <ItemTemplate>
-                  <table class="node <%# Eval("Status").ToString() %>">
-                    <tr>
-                      <td class="fieldLabel">Name:</td>
-                      <td><%# Eval("NodeName") %></td>
-                    </tr>
-                    <tr>
-                      <td class="fieldLabel">Stamp:</td>
-                      <td><%# Eval("Stamp") %></td>
-                    </tr>
-                    <tr>
-                      <td class="fieldLabel">Tags:</td>
-                      <td><%# Eval("Tags") %></td>
-                    </tr>
-                    <tr>
-                      <td class="fieldLabel">Status:</td>
-                      <td><%# Eval("Status") %></td>
-                    </tr>
-                    <tr>
-                      <td style="height:1px;background-color:gray" colspan="2"/>
-                    </tr>
-                    <tr>
-                      <td class="fieldLabel">Job ID:</td>
-                      <td><%# Eval("JobID") %></td>
-                    </tr>
-                    <tr>
-                      <td class="fieldLabel">Pit:</td>
-                      <td><%# Eval("PitFileName") %></td>
-                    </tr>
-                  </table>
-                </ItemTemplate>
-              </telerik:RadListView>
-            </telerik:RadPane>
-          </telerik:RadSplitter>
-        </telerik:RadPane>
-        <telerik:RadSplitBar ID="RadSplitBar1" runat="server" />
-        <telerik:RadPane ID="RadPane4" runat="server" Height="50">
-          <telerik:RadListView ID="lstErrors" runat="server" ItemPlaceholderID="errorHolder">
-            <LayoutTemplate>
-              <fieldset id="lstErrors">
-                <legend>Errors Log</legend>
-                <asp:Panel ID="errorHolder" runat="server"/>
-              </fieldset>
-            </LayoutTemplate>
-            <AlternatingItemTemplate>
-              <table class="error alt">
-                <tr>
-                  <td>
-                    Name: <%# Eval("NodeName") %>
-                  </td>
-                  <td>
-                    Stamp: <%# ((DateTime) Eval("Stamp")).ToLocalTime() %>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    Job ID: <%# Eval("JobID") %>
-                  </td>
-                  <td>
-                    Pit: <%# Eval("PitFileName") %>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="2" style="white-space:normal;column-span:all;padding:5px"><%# Eval("ErrorMessage") %></td>
-                </tr>
-              </table>
-            </AlternatingItemTemplate>
-            <ItemTemplate>
-              <table class="error">
-                <tr>
-                  <td>
-                    Name: <%# Eval("NodeName") %>
-                  </td>
-                  <td>
-                    Stamp: <%# ((DateTime) Eval("Stamp")).ToLocalTime() %>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    Job ID: <%# Eval("JobID") %>
-                  </td>
-                  <td>
-                    Pit: <%# Eval("PitFileName") %>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="2" style="white-space:normal;column-span:all;margin:5px"><%# Eval("ErrorMessage") %></td>
-                </tr>
-              </table>
-            </ItemTemplate>
-          </telerik:RadListView>
-        </telerik:RadPane>
-      </telerik:RadSplitter>
-    </div>
+    <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" Skin="Metro">
+      <Tabs>
+        <telerik:RadTab Text="Nodes"></telerik:RadTab>
+        <telerik:RadTab Text="Jobs"></telerik:RadTab>
+        <telerik:RadTab Text="Errors" Selected="True"></telerik:RadTab>
+      </Tabs>
+    </telerik:RadTabStrip>
+    <telerik:RadMultiPage ID="toplevel" runat="server" SelectedIndex="0">
+      <telerik:RadPageView ID="nodesPage" runat="server">
+        <telerik:RadGrid ID="nodesGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" Skin="Metro" OnItemDataBound="nodesGrid_ItemDataBound">
+          <MasterTableView>
+            <Columns>
+              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
+              <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
+              <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
+              <telerik:GridBoundColumn DataField="Tags" HeaderText="Tags" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+            </Columns>
+          </MasterTableView>
+        </telerik:RadGrid>
+      </telerik:RadPageView>
+      <telerik:RadPageView ID="jobsPage" runat="server">
+        <telerik:RadGrid ID="jobsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="true" Skin="Metro" OnItemDataBound="jobsGrid_ItemDataBound">
+          <MasterTableView>
+            <Columns>
+              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+              <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
+              <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
+            </Columns>
+          </MasterTableView>
+        </telerik:RadGrid>
+      </telerik:RadPageView>
+      <telerik:RadPageView ID="errorsPage" runat="server">
+        <telerik:RadGrid ID="errorsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" Skin="Metro" OnItemDataBound="errorsGrid_ItemDataBound">
+          <MasterTableView>
+            <Columns>
+              <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
+              <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+            </Columns>
+            <DetailItemTemplate>
+              <asp:Label ID="ErrorMessage" runat="server" />
+            </DetailItemTemplate>
+          </MasterTableView>
+        </telerik:RadGrid>
+      </telerik:RadPageView>
+    </telerik:RadMultiPage>
     <asp:Panel ID="Panel1" runat="server">
       <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick">
       </asp:Timer>

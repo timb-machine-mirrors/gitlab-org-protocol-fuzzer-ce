@@ -76,130 +76,76 @@ namespace PeachFarmMonitor {
         protected global::System.Web.UI.WebControls.Label loadingLabel;
         
         /// <summary>
-        /// RadSplitter1 control.
+        /// tabstrip control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadSplitter RadSplitter1;
+        protected global::Telerik.Web.UI.RadTabStrip tabstrip;
         
         /// <summary>
-        /// RadPane3 control.
+        /// toplevel control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadPane RadPane3;
+        protected global::Telerik.Web.UI.RadMultiPage toplevel;
         
         /// <summary>
-        /// RadSplitter2 control.
+        /// nodesPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadSplitter RadSplitter2;
+        protected global::Telerik.Web.UI.RadPageView nodesPage;
         
         /// <summary>
-        /// RadPane1 control.
+        /// nodesGrid control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadPane RadPane1;
+        protected global::Telerik.Web.UI.RadGrid nodesGrid;
         
         /// <summary>
-        /// RadSplitter3 control.
+        /// jobsPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadSplitter RadSplitter3;
+        protected global::Telerik.Web.UI.RadPageView jobsPage;
         
         /// <summary>
-        /// lstJobs control.
+        /// jobsGrid control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadListView lstJobs;
+        protected global::Telerik.Web.UI.RadGrid jobsGrid;
         
         /// <summary>
-        /// RadSplitBar2 control.
+        /// errorsPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadSplitBar RadSplitBar2;
+        protected global::Telerik.Web.UI.RadPageView errorsPage;
         
         /// <summary>
-        /// RadPane5 control.
+        /// errorsGrid control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadPane RadPane5;
-        
-        /// <summary>
-        /// lstInactiveJobs control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadListView lstInactiveJobs;
-        
-        /// <summary>
-        /// RadPane2 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadPane RadPane2;
-        
-        /// <summary>
-        /// lstNodes control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadListView lstNodes;
-        
-        /// <summary>
-        /// RadSplitBar1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadSplitBar RadSplitBar1;
-        
-        /// <summary>
-        /// RadPane4 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadPane RadPane4;
-        
-        /// <summary>
-        /// lstErrors control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadListView lstErrors;
+        protected global::Telerik.Web.UI.RadGrid errorsGrid;
         
         /// <summary>
         /// Panel1 control.
