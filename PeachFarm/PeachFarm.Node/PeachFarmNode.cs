@@ -334,7 +334,7 @@ namespace PeachFarm.Node
 				config.randomSeed = nodeState.Seed;
 			}
 			//config.runName = clientState.JobID.ToString();
-
+			nlog.Debug("Node starting Peach with seed {0}", config.randomSeed.ToString());
 			try
 			{
 				peach.startFuzzing(dom, config);

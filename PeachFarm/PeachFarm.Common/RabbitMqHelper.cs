@@ -427,7 +427,7 @@ namespace PeachFarm.Common
 
 	public class RabbitMqException : Exception
 	{
-		public RabbitMqException(Exception innerException, string host = "", string message = "Peach Farm Node encountered a RabbitMq Exception.")
+		public RabbitMqException(Exception innerException, string host = "", string message = "Peach Farm encountered a RabbitMq Exception.")
 			: base(message, innerException)
 		{
 			this.RabbitMqHost = host;
