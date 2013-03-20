@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
-       author="Deja Vu Security, LLC" description="Cisco Discovery Protocol PIT" version="0.0.2">
+       author="Deja Vu Security, LLC" description="Cisco Discovery Protocol PIT DataModels" version="0.0.2">
   
-  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
-  
-  <!-- Requires Linux Peach for Raw publishing --> 
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
   
   <!-- Cisco Discovery Protocol Main DataModel -->
 
@@ -102,7 +101,6 @@
 					<Blob name="PlatformTlvValue" value="linux" />
 				</Block>
 
-
 				<Block name="ArbitraryTlv" minOccurs="0" maxOccurs="50">
 					<Number name="ArbitraryTlvType" size="16" endian="big"/>
 					<Number name="ArbitraryTlvLength" size="16" endian="big">
@@ -110,51 +108,8 @@
 					</Number>
 					<Blob name="ArbitraryTlvValue"/>
 				</Block>
-        
       </Block>
     </Block>
-    
   </DataModel>
-  
-  <!-- Simple state model output CDP packets -->
-  <StateModel name="CdpStateModel" initialState="Initial">
-    <State name="Initial">
-      <Action name="SendPacket" type="output" publisher="RawHandler">
-				<DataModel ref="CDP" />
-      </Action>
-    </State>
-  </StateModel>
-  
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##" />
-      <Param name="Arguments" value="-i ##tsharkInterface##" />
-      <Param name="FaultOnEarlyExit" value="true" />
-    </Monitor>
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
-    </Monitor>
-  </Agent>
-  
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
-    </Monitor>
-  </Agent>
-  
-  <!-- Default test case uses Raw Publisher define interface in defines file-->
-  <Test name="Default">
-    <Agent ref="RemoteAgent"/>
-    <Agent ref="LocalAgent"/>
-    <Strategy class="Sequential"/>
-    <StateModel ref="CdpStateModel"/>
-    <Publisher class="RawEther" name="RawHandler">
-      <Param name="Interface" value="##Interface##"/>
-      <Param name="Protocol" value="ETH_P_IP"/>
-    </Publisher>
-    <Strategy class="##Strategy##"/>    
-    <Logger class="logger.Filesystem" >
-      <Param name="Path" value="##LoggerPath##" />
-    </Logger> 
-  </Test>
+	
 </Peach>
