@@ -4,6 +4,7 @@
 		<Define key="RemoteAgent" value="10.0.1.40"/>
 		<Define key="LoggerPath"  value="./logs/ethernet/"/> 
 		<Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
 	</All>
 		
 	<Linux platform="linux">
