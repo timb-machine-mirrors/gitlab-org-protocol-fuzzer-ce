@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Dynamic Host Configuration Protocol v6 PIT DataModels" version="0.0.2">
+			 
+			<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+			 
+	<DataModel name="Options">
+    <Number name="CIdentifier" size="16" endian="big"/>
+    <Number name="CLength" size="16" endian="big">
+      <Relation type="size" of="CValue"/>
+    </Number>
+    <Block name="CValue"/>
+  </DataModel>
+  
+  <DataModel name="DHCPv6">
+    <Number name="type" size="8" value="1" />
+    <Number name="TranID" size="24" value="0x004609" />
+    <Choice minOccurs="0" maxOccurs="5">
+      <Block name="ClientID" ref="Options" >
+        <Number name="CIdentifier" size="16" endian="big" token="true" value="1"/>
+        <Block name="CValue">
+          <Number name="DuidType" size="16" value="0x0001"/>
+          <Number name="HWType" size="16"  value="0x0001"/>
+          <Blob name="Address" valueType="hex" value="##SourceMAC##"/>
+        </Block>
+      </Block>
+      
+      <Block name="ServerID" ref="Options" >
+        <Number name="CIdentifier" size="16" endian="big" token="true" value="2"/>
+        <Block name="CValue">
+          <Number name="DuidType" size="16" value="0x0003"/>
+          <Number name="HWType" size="16" value="0x0001"/>
+          <Blob name="Time" valueType="hex" value="deadbeef" />
+          <Blob name="Address" valueType="hex" value="##TargetMAC##"/>
+        </Block>
+      </Block>
+      
+      <Block name ="IAfNtA" ref="Options">
+        <Number name="CIdentifier" size="16" endian="big" token="true" value="3"/>
+        <Block name="CValue">
+          <Blob valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00"/>
+        </Block>
+      </Block>
+      
+      <Block name ="ElapsedTime" ref="Options">
+        <Number name="CIdentifier" size="16" endian="big" token="true" value="8"/>
+        <Block name="CValue">
+          <Blob valueType="hex" value="00 00"/>
+        </Block>
+      </Block>
+      
+      <Block name ="OptionRequest" ref="Options">
+        <Number name="CIdentifier" size="16" endian="big" token="true" value="6"/>
+        <Block name="CValue">
+          <Blob valueType="hex" value="00 03"/>
+        </Block>
+      </Block>
+    </Choice>
+  </DataModel>
+  
+  <DataModel name="DHCPv6standard">
+    <Number name="type" size="8" value="1"/>
+    <Number name="TranID" size="24" value="0x004609"/>
+    <Block name="ClientID" ref="Options">
+      <Number name="CIdentifier" size="16" endian="big" value="1"/>
+      <Block name="CValue">
+        <Number name="DuidType" size="16" value="0x0003"/>
+        <Number name="HWType" size="16" value="0x0001"/>
+        <Blob name="Address" valueType="hex" value="##SourceMAC##"/>
+      </Block>
+    </Block>
+		
+    <Block name ="IAfNtA" ref="Options">
+      <Number name="CIdentifier" size="16" endian="big" value="3"/>
+      <Block name="CValue">
+        <Blob valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00"/>
+      </Block>
+    </Block>
+		
+    <Block name ="ElapsedTime" ref="Options">
+      <Number name="CIdentifier" size="16" endian="big" value="8"/>
+      <Block name="CValue">
+        <Blob valueType="hex" value="00 00"/>
+      </Block>
+    </Block>
+		
+    <Block name ="OptionRequest" ref="Options">
+      <Number name="CIdentifier" size="16" endian="big" value="6"/>
+      <Block name="CValue">
+        <Blob valueType="hex" value="00 03"/>
+      </Block>
+    </Block>
+  </DataModel>
+</Peach>
+<!-- end -->

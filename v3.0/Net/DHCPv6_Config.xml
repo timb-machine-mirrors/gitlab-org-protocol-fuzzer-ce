@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <Platform>
+  <All>
     <Define key="LoggerPath" value="logs/dhcpV6/"/>
     <Define key="Source" value="fe80::807e:65c1:cc32:14ff"/>
     <Define key="SourcePort" value="546"/>
@@ -9,7 +9,8 @@
     <Define key="SourceMAC" value="001122334455"/>
     <Define key="TargetMAC" value="010203040506"/>
     <Define key="Strategy"  value="Sequential"/>
-  </Platform>
+		<Define key="Path" value="."/>
+  </All>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>
