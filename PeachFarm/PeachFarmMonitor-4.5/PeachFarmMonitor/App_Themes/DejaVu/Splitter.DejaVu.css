@@ -1,0 +1,83 @@
+.RadSplitter_DejaVu {
+  font-size: 12px;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  /* Borders */
+  /* When ShowContentDuringLoad="false" */
+  /* RadSlidingPane tab */
+  /* RadSplitBar/RadSlidingPane resize elements */
+  /* RadSlidingPane tab */
+  /* RadSlidingPane header elements */
+  /* RadSlidingPane buttons */
+  /* RadSplitBar buttons */
+  /* RadSlidingPane buttons */
+  /* RadSlidingPane title text */ }
+  .RadSplitter_DejaVu,
+  .RadSplitter_DejaVu .rspPaneTabContainer,
+  .RadSplitter_DejaVu .rspPane,
+  .RadSplitter_DejaVu .rspResizeBar,
+  .RadSplitter_DejaVu .rspSlideContainerResize,
+  .RadSplitter_DejaVu .rspPaneHorizontal,
+  .RadSplitter_DejaVu .rspResizeBarHorizontal,
+  .RadSplitter_DejaVu .rspSlideContainerResizeHorizontal {
+    border-color: #cdcdcd; }
+  .RadSplitter_DejaVu .rspLoading {
+    background-image: url('Common/loading.gif'); }
+  .RadSplitter_DejaVu .rspResizeBarOver,
+  .RadSplitter_DejaVu .rspSlideContainerResizeOver {
+    border-right-color: #25a0da; }
+  .RadSplitter_DejaVu .rspResizeBarOverHorizontal,
+  .RadSplitter_DejaVu .rspSlideContainerResizeOverHorizontal {
+    border-bottom-color: #25a0da; }
+  .RadSplitter_DejaVu .rspPaneTabContainer,
+  .RadSplitter_DejaVu .rspSlideHeader,
+  .RadSplitter_DejaVu .rspSlideTitleContainer {
+    background-color: #25a0da; }
+  .RadSplitter_DejaVu .rspResizeBar,
+  .RadSplitter_DejaVu .rspSlideContainerResize,
+  .RadSplitter_DejaVu .rspResizeBarHorizontal,
+  .RadSplitter_DejaVu .rspSlideContainerResizeHorizontal {
+    background-color: #e8e8e8; }
+  .RadSplitter_DejaVu .rspSlideTitleContainer,
+  .RadSplitter_DejaVu .rspSlideHeaderIconWrapper {
+    background-color: white; }
+  .RadSplitter_DejaVu .rspResizeBarOver,
+  .RadSplitter_DejaVu .rspSlideContainerResizeOver,
+  .RadSplitter_DejaVu .rspResizeBarOverHorizontal,
+  .RadSplitter_DejaVu .rspSlideContainerResizeOverHorizontal {
+    background-color: #25a0da; }
+  .RadSplitter_DejaVu td.rspTop .rspPaneTabContainer,
+  .RadSplitter_DejaVu td.rspBottom .rspPaneTabContainer {
+    border-width: 1px; }
+  .RadSplitter_DejaVu .rspPaneTabContainer {
+    border-color: #25a0da; }
+  .RadSplitter_DejaVu .rspPaneTabContainerExpanded,
+  .RadSplitter_DejaVu .rspPaneTabContainerDocked {
+    background-color: white;
+    border-color: #cdcdcd; }
+  .RadSplitter_DejaVu .rspSlideTitleContainer,
+  .RadSplitter_DejaVu .rspSlideHeaderIconWrapper {
+    border-bottom: 1px solid #cdcdcd; }
+  .RadSplitter_DejaVu .rspSlideHeaderDockIcon,
+  .RadSplitter_DejaVu .rspSlideHeaderUndockIcon,
+  .RadSplitter_DejaVu .rspSlideHeaderCollapseIcon,
+  .RadSplitter_DejaVu .rspCollapseBarExpand,
+  .RadSplitter_DejaVu .rspCollapseBarCollapse,
+  .RadSplitter_DejaVu .rspCollapseBarHorizontalExpand,
+  .RadSplitter_DejaVu .rspCollapseBarHorizontalCollapse {
+    background-image: url('Splitter/ExpandCollapseBarsCommands.gif'); }
+  .RadSplitter_DejaVu .rspCollapseBarCollapseOver,
+  .RadSplitter_DejaVu .rspCollapseBarExpandOver,
+  .RadSplitter_DejaVu .rspCollapseBarHorizontalExpandOver,
+  .RadSplitter_DejaVu .rspCollapseBarHorizontalCollapseOver,
+  .RadSplitter_DejaVu .rspTabsContainer {
+    background-color: #25a0da; }
+  .RadSplitter_DejaVu td.rspSlideTitle,
+  .RadSplitter_DejaVu span.rspPaneTabText {
+    font: normal 14px "Segoe UI", Arial, Sans-serif;
+    color: white; }
+  .RadSplitter_DejaVu td.rspSlideTitle,
+  .RadSplitter_DejaVu .rspPaneTabContainerExpanded .rspPaneTabText {
+    color: black; }
+  .RadSplitter_DejaVu .rspPaneTabContainerDocked .rspPaneTabText {
+    color: #767676; }
+

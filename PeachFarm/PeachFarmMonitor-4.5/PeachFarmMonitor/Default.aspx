@@ -1,10 +1,12 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="PeachFarmMonitor.Home" Async="true" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="PeachFarmMonitor.Home" Async="true" Theme="DejaVu" %>
 <%@ Register Assembly="Telerik.Web.UI" Namespace="Telerik.Web.UI" TagPrefix="telerik" %>
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
   <title>Peach Farm Monitor</title>
+  <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server" />
   <style type="text/css">
 	  html,body {
 	    height: 100%;
@@ -21,7 +23,7 @@
 	  }
     #title
     {
-      background: rgb(37, 160, 218);
+      background: #333333;
       color: white;
       position:absolute;
       top:0;
@@ -113,9 +115,9 @@
     <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
     <telerik:RadAjaxManager ID="RadAjaxManager1" OnAjaxRequest="RadAjaxManager1_AjaxRequest" runat="server">
       <AjaxSettings>
-        <telerik:AjaxSetting AjaxControlID="monitorTimer">
+        <telerik:AjaxSetting AjaxControlID="monitorTimer" EventName="Tick">
           <UpdatedControls>
-            <telerik:AjaxUpdatedControl ControlID="nodesGrid"/>
+        		<telerik:AjaxUpdatedControl ControlID="nodesGrid"/>
             <telerik:AjaxUpdatedControl ControlID="jobsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="errorsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="titlePanel" />
@@ -125,12 +127,12 @@
     </telerik:RadAjaxManager>
     <div id="title">
       <asp:Panel ID="titlePanel" runat="server">
-        Peach Farm Monitor:
+        <span style="padding-left: 4px">Peach Farm Monitor:</span>
         <asp:Label ID="lblHost" runat="server" />
         <asp:Label Text="LOADING" ID="loadingLabel" runat="server" BackColor="Green" />
       </asp:Panel>
     </div>
-    <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" Skin="Metro">
+    <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" EnableEmbeddedSkins="false" Skin="DejaVu">
       <Tabs>
         <telerik:RadTab Text="Nodes"></telerik:RadTab>
         <telerik:RadTab Text="Jobs"></telerik:RadTab>
@@ -139,7 +141,7 @@
     </telerik:RadTabStrip>
     <telerik:RadMultiPage ID="toplevel" runat="server" SelectedIndex="0">
       <telerik:RadPageView ID="nodesPage" runat="server">
-        <telerik:RadGrid ID="nodesGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" Skin="Metro" OnItemDataBound="nodesGrid_ItemDataBound">
+        <telerik:RadGrid ID="nodesGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" OnItemDataBound="nodesGrid_ItemDataBound">
           <MasterTableView>
             <Columns>
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
@@ -153,20 +155,21 @@
         </telerik:RadGrid>
       </telerik:RadPageView>
       <telerik:RadPageView ID="jobsPage" runat="server">
-        <telerik:RadGrid ID="jobsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="true" Skin="Metro" OnItemDataBound="jobsGrid_ItemDataBound">
+        <telerik:RadGrid ID="jobsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="true" OnItemDataBound="jobsGrid_ItemDataBound">
           <MasterTableView>
             <Columns>
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
-              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridHyperLinkColumn DataTextField="JobID" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" HeaderText="Job ID" />
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
+              <telerik:GridBoundColumn DataField="FaultCount" HeaderText="Faults" />
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
       </telerik:RadPageView>
       <telerik:RadPageView ID="errorsPage" runat="server">
-        <telerik:RadGrid ID="errorsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" Skin="Metro" OnItemDataBound="errorsGrid_ItemDataBound">
+        <telerik:RadGrid ID="errorsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" OnItemDataBound="errorsGrid_ItemDataBound">
           <MasterTableView>
             <Columns>
               <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />

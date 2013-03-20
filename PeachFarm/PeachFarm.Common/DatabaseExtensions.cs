@@ -150,6 +150,13 @@ namespace PeachFarm.Common.Mongo
 			return collection.Find(query);
 		}
 
+		public static long GetFaultCount(this Job job, string connectionString)
+		{
+			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
+			var query = Query.EQ("JobID", job.JobID);
+			return collection.Count(query);
+		}
+
 		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
 		{
 			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);

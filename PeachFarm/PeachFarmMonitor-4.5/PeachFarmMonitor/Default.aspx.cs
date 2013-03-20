@@ -10,7 +10,8 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using PeachFarm.Admin.Configuration;
 using PeachFarm.Common;
-using PeachFarm.Common.Messages;
+using PeachFarm.Common.Mongo;
+using Messages = PeachFarm.Common.Messages;
 using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.ViewModels;
 using Telerik.Web.UI;
@@ -37,9 +38,9 @@ namespace PeachFarmMonitor
     }
 
     #region Monitor
-    private Task<MonitorResponse> MonitorAsync()
+    private Task<Messages.MonitorResponse> MonitorAsync()
     {
-      TaskCompletionSource<MonitorResponse> tcs = new TaskCompletionSource<MonitorResponse>();
+      TaskCompletionSource<Messages.MonitorResponse> tcs = new TaskCompletionSource<Messages.MonitorResponse>();
       admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
       admin.MonitorCompleted += (s, e) =>
         {
@@ -59,11 +60,17 @@ namespace PeachFarmMonitor
     {
       try
       {
-        MonitorResponse response = await MonitorAsync();
+        Messages.MonitorResponse response = await MonitorAsync();
 
         List<JobViewModel> alljobs = new List<JobViewModel>();
-        alljobs.AddRange(from Job j in response.ActiveJobs select new JobViewModel(j));
-        alljobs.AddRange(from Job j in response.InactiveJobs select new JobViewModel(j));
+        alljobs.AddRange(from Messages.Job j in response.ActiveJobs select new JobViewModel(j, JobStatus.Running));
+        alljobs.AddRange(from Messages.Job j in response.InactiveJobs select new JobViewModel(j));
+
+        foreach (var j in alljobs)
+        {
+          j.FaultCount = ((Job)j).GetFaultCount(monitorconfig.MongoDb.ConnectionString);
+        }
+
         jobsGrid.DataSource = alljobs;
         jobsGrid.DataBind();
 
@@ -124,7 +131,7 @@ namespace PeachFarmMonitor
       
       if (item != null)
       {
-        Heartbeat heartbeat = item.DataItem as Heartbeat;
+        PeachFarm.Common.Messages.Heartbeat heartbeat = item.DataItem as PeachFarm.Common.Messages.Heartbeat;
         Label label = item.DetailTemplateItemDataCell.FindControl("ErrorMessage") as Label;
         if (label != null)
         {
@@ -139,16 +146,16 @@ namespace PeachFarmMonitor
 
       if (item != null)
       {
-        Heartbeat heartbeat = item.DataItem as Heartbeat;
+        Messages.Heartbeat heartbeat = item.DataItem as Messages.Heartbeat;
         switch (heartbeat.Status)
         {
-          case Status.Alive:
+          case Messages.Status.Alive:
             item.Style.Add("background-color", "lightblue");
             break;
-          case Status.Running:
+          case Messages.Status.Running:
             item.Style.Add("background-color", "lightgreen");
             break;
-          case Status.Late:
+          case Messages.Status.Late:
             item.Style.Add("background-color", "lightyellow");
             break;
         }
@@ -170,5 +177,71 @@ namespace PeachFarmMonitor
         }
       }
     }
+
+    //protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
+    //{
+    //  GridDataItem item = e.Item as GridDataItem;
+    //  switch (e.CommandName)
+    //  {
+    //    case "GetJobDetail":
+    //      GetJobDetail(((LinkButton)e.CommandSource).Text);
+    //      break;
+    //  }
+    //}
+
+    //private void GetJobDetail(string jobID)
+    //{
+    //  PeachFarm.Common.Mongo.Job job = PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);
+    //  string tabname = String.Format("{0}-{1}", job.JobID, job.PitFileName);
+    //  RadTab newtab = new RadTab(tabname);
+    //  tabstrip.Tabs.Add(newtab);
+
+    //  RadPageView newpage = new RadPageView();
+    //  newpage.ID = tabname;
+      
+
+    //  toplevel.PageViews.Add(newpage);
+    //  newpage.Selected = true;
+    //}
+
+    //protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
+    //{
+    //  switch (e.Tab.Text)
+    //  {
+    //    case "Nodes":
+    //      nodesPage.Selected = true;
+    //      break;
+    //    case "Jobs":
+    //      jobsPage.Selected = true;
+    //      break;
+    //    case "Errors":
+    //      errorsPage.Selected = true;
+    //      break;
+    //    default:
+    //      if (e.Tab.Text.IndexOf('-') == 12)
+    //      {
+    //        //string jobID = e.Tab.Text.Substring(0, 12);
+    //        //RadPageView pageView = (RadPageView)Page.FindControl(jobID + "_detail");
+
+    //        RadPageView pageView = (RadPageView)Page.FindControl(e.Tab.Text);
+    //        pageView.Selected = true;
+    //      }
+    //      break;
+    //  }
+    //}
+
+    //protected void toplevel_PageViewCreated(object sender, RadMultiPageEventArgs e)
+    //{
+    //  if (e.PageView.ID.IndexOf('-') == 12)
+    //  {
+    //    string jobID = e.PageView.ID.Substring(0, 12);
+
+    //    Job job = Reports.Report.GetJobDetailReport(jobID, monitorconfig.MongoDb.ConnectionString).First();
+    //    JobDetail jobDetail = (JobDetail)Page.LoadControl(typeof(JobDetail), new object[] { job });
+    //    jobDetail.ID = jobID + "_detail";
+
+    //    e.PageView.Controls.Add(jobDetail);
+    //  }
+    //}
   }
 }

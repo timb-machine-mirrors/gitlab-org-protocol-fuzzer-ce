@@ -1,0 +1,176 @@
+.RadTabStrip_DejaVu {
+  color: black;
+  font: 12px "Segoe UI", Arial, Helvetica, sans-serif;
+  line-height: 26px; }
+  .RadTabStrip_DejaVu .rtsGhostTab {
+    border-color: #767676;
+    color: black;
+    background-color: #f9f9f9; }
+
+/** Tabstrip container */
+.RadTabStripTop_DejaVu .rtsLevel1 {
+  background-color: #333333; }
+
+/** Tabs holder */
+.RadTabStrip_DejaVu .rtsUL {
+  background-color: #ffffff; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsUL {
+  background-color: #333333; }
+
+.RadTabStripTop_DejaVu .rtsLevel1 .rtsUL {
+  padding: 5px;
+  padding-bottom: 0; }
+
+.RadTabStripBottom_DejaVu .rtsLevel1 .rtsUL {
+  padding: 5px;
+  padding-top: 0; }
+
+
+/** rtsLI */
+.RadTabStrip_DejaVu .rtsLI {
+  color: #767676;
+  font: 12px/22px "Segoe UI", Arial, sans-serif; }
+
+/* old color #ffffff */
+/* orange f57e20 */
+.RadTabStrip_DejaVu .rtsLevel1 .rtsLI {
+  color: #ffffff; }
+
+.RadTabStripTop_DejaVu .rtsUL .rtsLI,
+.RadTabStripBottom_DejaVu .rtsUL .rtsLI {
+  padding: 0 0 0 1px; }
+
+.RadTabStripTop_DejaVu .rtsUL .rtsFirst,
+.RadTabStripBottom_DejaVu .rtsUL .rtsFirst {
+  padding: 0 0 0 1px; }
+
+/** rtsLink */
+.RadTabStrip_DejaVu .rtsLink {
+  padding: 0 15px;
+  color: #767676;
+  font: 14px/22px "Segoe UI", Arial, sans-serif;
+  text-transform: lowercase; }
+
+.RadTabStrip_DejaVu .rtsLink:hover {
+  color: #000000; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsLink {
+  color: #f57e20;
+  border: 1px solid #333333; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsLink:hover {
+  border-color: #ffffff; }
+
+.RadTabStripTop_DejaVu .rtsLevel1 .rtsLink {
+  border-bottom: 0; }
+
+.RadTabStripBottom_DejaVu .rtsLevel1 .rtsLink {
+  border-top: 0; }
+
+.RadTabStripRight_DejaVu .rtsLevel1 .rtsLink {
+  border-left: 0; }
+
+.RadTabStripLeft_DejaVu .rtsLevel1 .rtsLink {
+  border-right: 0; }
+
+/** rtsSelected */
+.RadTabStrip_DejaVu .rtsSelected {
+  color: #000000;
+  background-color: #e5e5e5; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsSelected {
+  border-color: #ffffff;
+  color: #767676;
+  background-color: #ffffff; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsSelected:hover {
+  color: #000000; }
+
+/** rtsDisabled */
+.RadTabStrip_DejaVu .rtsDisabled,
+.RadTabStrip_DejaVu .rtsDisabled:hover {
+  color: #cccccc; }
+
+.RadTabStrip_DejaVu .rtsLevel1 .rtsDisabled,
+.RadTabStrip_DejaVu .rtsLevel1 .rtsDisabled:hover {
+  border-color: #333333;
+  color: #91cae8; }
+
+/** rtsText */
+.RadTabStrip_DejaVu .rtsLevel .rtsOut,
+.RadTabStrip_DejaVu .rtsLevel .rtsIn,
+.RadTabStrip_DejaVu .rtsLevel .rtsTxt {
+  padding: 0; }
+
+/** rtsSeparator */
+/** Scrolling arrows */
+.RadTabStrip_DejaVu .rtsNextArrow,
+.RadTabStrip_DejaVu .rtsPrevArrow,
+.RadTabStrip_DejaVu .rtsPrevArrowDisabled,
+.RadTabStrip_DejaVu .rtsNextArrowDisabled {
+  background-image: url('TabStrip/TabStripStates.png'); }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsNextArrow {
+  background-position: -18px 0; }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsPrevArrow {
+  background-position: 0 0; }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsNextArrow:hover {
+  background-position: -54px 0; }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsPrevArrow:hover {
+  background-position: -36px 0; }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsPrevArrowDisabled,
+.RadTabStrip_DejaVu .rtsLevel .rtsPrevArrowDisabled:hover {
+  background-position: -72px 0; }
+
+.RadTabStrip_DejaVu .rtsLevel .rtsNextArrowDisabled,
+.RadTabStrip_DejaVu .rtsLevel .rtsNextArrowDisabled:hover {
+  background-position: -90px 0; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsNextArrow,
+.RadTabStripRight_DejaVu .rtsLevel .rtsNextArrow {
+  background-position: -18px -20px; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsPrevArrow,
+.RadTabStripRight_DejaVu .rtsLevel .rtsPrevArrow {
+  background-position: 0 -20px; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsNextArrow:hover,
+.RadTabStripRight_DejaVu .rtsLevel .rtsNextArrow:hover {
+  background-position: -54px -20px; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsPrevArrow:hover,
+.RadTabStripRight_DejaVu .rtsLevel .rtsPrevArrow:hover {
+  background-position: -36px -20px; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsPrevArrowDisabled,
+.RadTabStripLeft_DejaVu .rtsLevel .rtsPrevArrowDisabled:hover,
+.RadTabStripRight_DejaVu .rtsLevel .rtsPrevArrowDisabled,
+.RadTabStripRight_DejaVu .rtsLevel .rtsPrevArrowDisabled:hover {
+  background-position: -72px -20px; }
+
+.RadTabStripLeft_DejaVu .rtsLevel .rtsNextArrowDisabled,
+.RadTabStripLeft_DejaVu .rtsLevel .rtsNextArrowDisabled:hover,
+.RadTabStripRight_DejaVu .rtsLevel .rtsNextArrowDisabled,
+.RadTabStripRight_DejaVu .rtsLevel .rtsNextArrowDisabled:hover {
+  background-position: -90px -20px; }
+
+/** DropClues */
+.rtsDropClue_DejaVu {
+  background-image: url('../Common/TabStrip/rtsDropClueSprite.png'); }
+
+.rtsDropClueTop_DejaVu {
+  background-position: -10px -20px; }
+
+.rtsDropClueRight_DejaVu {
+  background-position: -10px -30px; }
+
+.rtsDropClueBottom_DejaVu {
+  background-position: -10px 0; }
+
+.rtsDropClueLeft_DejaVu {
+  background-position: -10px -10px; }
