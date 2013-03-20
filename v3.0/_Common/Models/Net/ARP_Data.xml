@@ -13,6 +13,9 @@
     </Block>
     <Block name="ARPPayload">
       <Number name="HTYPE" size="16" value="01" endian="big" signed="true"/>
+			<!--Set PTYPE to a choice which is filled out with a DataObject based on what type of Address it is
+					Also changed teh defines from IPv4 to a more generic one.
+			-->
       <Number name="PTYPE" size="16" valueType="hex" value="0800" endian="big" signed="true"/>
       <Number name="HLEN" size="8" >
 				<Relation type="size" of="SHA"/>	
