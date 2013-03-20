@@ -5,6 +5,7 @@ using System.Text;
 using RabbitMQ.Client;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net.Security;
 
 namespace PeachFarm.Common
 {
@@ -20,11 +21,12 @@ namespace PeachFarm.Common
 		int port;
 		string userName;
 		string password;
+		bool ssl;
 
 		private static System.Timers.Timer listenTimer;
 		private static string listenQueue;
 
-		public RabbitMqHelper(string hostName, int port = -1, string userName = "guest", string password = "guest")
+		public RabbitMqHelper(string hostName, int port = -1, string userName = "guest", string password = "guest", bool ssl = false)
 		{
 			if (String.IsNullOrEmpty(hostName))
 			{
@@ -35,6 +37,7 @@ namespace PeachFarm.Common
 			this.port = port;
 			this.userName = userName;
 			this.password = password;
+			this.ssl = ssl;
 
 			OpenConnection();
 		}
@@ -299,6 +302,8 @@ namespace PeachFarm.Common
 			factory.Port = port;
 			factory.UserName = userName;
 			factory.Password = password;
+			factory.Ssl.Enabled = ssl;
+			factory.Ssl.AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateNotAvailable | SslPolicyErrors.RemoteCertificateChainErrors | SslPolicyErrors.RemoteCertificateNameMismatch;
 
 			try
 			{

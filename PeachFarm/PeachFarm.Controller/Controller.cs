@@ -46,7 +46,7 @@ namespace PeachFarm.Controller
 				throw new ApplicationException(error);
 			}
 
-			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password);
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(serverQueueName);

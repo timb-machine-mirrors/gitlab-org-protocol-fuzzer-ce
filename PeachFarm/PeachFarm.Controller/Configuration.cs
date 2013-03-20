@@ -70,7 +70,14 @@ namespace PeachFarm.Controller.Configuration
       get { return (string)this[Constants.Password]; }
       set { this[Constants.Password] = value; }
     }
-  }
+
+		[ConfigurationProperty(Constants.SSL)]
+		public bool SSL
+		{
+			get { return (bool)this[Constants.SSL]; }
+			set { this[Constants.SSL] = value; }
+		}
+	}
 
   public class Controller : ConfigurationElement
   {
@@ -92,6 +99,7 @@ namespace PeachFarm.Controller.Configuration
     public const string Port = "port";
     public const string UserName = "userName";
     public const string Password = "password";
+		public const string SSL = "useSSL";
 
     public const string Controller = "Controller";
     public const string IpAddress = "ipAddress";

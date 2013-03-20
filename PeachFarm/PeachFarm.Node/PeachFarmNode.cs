@@ -42,7 +42,7 @@ namespace PeachFarm.Node
 
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
 
-			rabbit = new RabbitMqHelper(nodeState.RabbitMq.HostName, nodeState.RabbitMq.Port, nodeState.RabbitMq.UserName, nodeState.RabbitMq.Password);
+			rabbit = new RabbitMqHelper(nodeState.RabbitMq.HostName, nodeState.RabbitMq.Port, nodeState.RabbitMq.UserName, nodeState.RabbitMq.Password, nodeState.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(nodeState.ClientQueueName);
 
@@ -334,7 +334,6 @@ namespace PeachFarm.Node
 				config.randomSeed = nodeState.Seed;
 			}
 			//config.runName = clientState.JobID.ToString();
-			nlog.Debug("Node starting Peach with seed {0}", config.randomSeed.ToString());
 			try
 			{
 				peach.startFuzzing(dom, config);
@@ -353,7 +352,7 @@ namespace PeachFarm.Node
 		#region Peach Event Handlers
 		void peach_TestStarting(Peach.Core.RunContext context)
 		{
-			nlog.Info("Test Starting: " + nodeState.JobID.ToString());
+			nlog.Info("Test Starting: {0} | Seed: {0}", nodeState.JobID, context.config.randomSeed.ToString());
 			nodeState.RunContext = context;
 		}
 
