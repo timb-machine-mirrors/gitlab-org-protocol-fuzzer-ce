@@ -6,8 +6,8 @@
     <Define key="LoggerPath" value="logs/IGMP/"/>
     <Define key="SourceIPv4" value="192.168.146.1"/>
     <Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
   </All>
-  
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>
