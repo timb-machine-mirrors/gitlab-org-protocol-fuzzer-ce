@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
+
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/ARP_Data.xml"/>
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="DataModels:ARP"/>
+      </Action>
+    </State>
+  </StateModel>
+	
+</Peach>
