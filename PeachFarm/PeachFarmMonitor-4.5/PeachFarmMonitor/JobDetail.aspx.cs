@@ -53,6 +53,7 @@ namespace PeachFarmMonitor
         {
           lblJobID.Text = jobid;
           downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
+          viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
           Page.Title = "Job Detail: " + jobid;
 
           iterationsGrid.DataSource = Job.Iterations;

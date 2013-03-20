@@ -53,7 +53,9 @@
     </div>
     <div id="content">
       <div id="morestuff">
-        <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" />
+        [&nbsp;
+        <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|&nbsp;
+        <asp:HyperLink ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
       </div>
       <telerik:RadGrid 
         ID="iterationsGrid" runat="server" 
