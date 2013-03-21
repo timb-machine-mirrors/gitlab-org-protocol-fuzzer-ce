@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Open Shortest Path First Version 2 PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!-- Requires Peach 3 Linux for RawIP selected protocol fuzzing -->
+  
+  <Include ns="States" src="file:##Path##/_Common/Models/Net/OSPFV2_State.xml"/>
+
+  <!-- EXCLUDES -->
+  <!-- Exclude ref="OSPFHello"/>
+       <Exclude ref="OSPFHello2Way"/ -->
+
+  <!-- AGENT Config --> 
+  <Agent name="TheAgent">
+  </Agent>
+
+  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+    <Monitor class="Process">
+      <Param name="Executable" value="##tsharkBin##" />
+      <Param name="Arguments" value="-i ##tsharkInterface##" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+		
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="States:HelloStateModel"/>
+		
+    <!-- <Agent ref="TheAgent" /> -->
+    <Agent ref="RemoteAgent" />
+
+    <!--Publisher name="RawOSPF" class="Console"/-->
+    <Publisher class="RawIPv4" name="RawOSPF">
+      <Param name="Host" value="##MultiHost##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Protocol" value="89" />
+    </Publisher>
+
+		<Strategy class="##Strategy##"/>
+		
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="./logs/OSPFHello" />
+    </Logger>
+  </Test>
+
+  <!-- hello packet --> 
+  <Test name="Hello">
+    <StateModel ref="States:HelloStateModel"/>
+		
+    <Agent ref="TheAgent" />
+
+    <!--Publisher name="RawOSPF" class="Console"/-->
+    <Publisher class="RawIPv4" name="RawOSPF">
+      <Param name="Host" value="##MultiHost##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Protocol" value="89" />
+    </Publisher>
+
+		<Strategy class="##Strategy##"/>
+		
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="./logs/OSPFHello" />
+    </Logger>
+  </Test>
+
+
+  <!-- DD MODEL Test  --> 
+  <Test name="DD" >
+    <StateModel ref="States:DDStateModel"/>
+		
+    <Agent ref="TheAgent" />
+
+    <Publisher class="RawIPv4" name="RawOSPF">
+      <Param name="Host" value="##MultiHost##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Protocol" value="89" />
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+		
+    <Logger class="logger.Filesystem" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger> 
+  </Test> 
+</Peach>
+
