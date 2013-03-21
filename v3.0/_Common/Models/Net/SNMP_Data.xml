@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Simple Network Management Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<DataModel name="SNMPHeaderV2">
+		<Blob name="SnmpType" valueType="hex" value="30"/>
+		<Number name="SnmpLen" size="8">
+			<Relation type="size" of="SnmpAll"/>
+		</Number>
+		<Block name="SnmpAll">
+			<Number name="VersionType" size="8" value="2"/>
+			<Number name="VersionLength" size="8" value="1">
+				<Relation type="size" of="Version"/>
+			</Number>
+			<Number name="Version" size="8" value="1"/>
+			<Blob name="CommStringType" valueType="hex" value="04"/>  
+			<Number name="CommStringLen" size="8"> 
+				<Relation type="size" of="SnmpCommunity"/> 
+			</Number>
+			<String name="SnmpCommunity" nullTerminated="false" value="##CommString##"/>
+			<Blob name="RequestType"/>
+			<Block name="PDU">
+				<Number size="8" name="PDUSize">
+					<Relation type="size" of="PDUData"/>
+				</Number>
+				<Block name="PDUData"/>
+			 </Block>
+		</Block>
+	</DataModel>
+
+  <!-- Simple Network Management Protocol: GetRequest data model... -->
+  <DataModel name="SnmpGet" ref="SNMPHeaderV2">
+    <Blob name="SnmpAll.RequestType" valueType="hex" value="a0"/>
+    <Block name="SnmpAll.PDU.PDUData">
+      <Block name="SnmpGetRequest">
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02"/>
+        <Number size="8" name="RequestIDLen" value="0x04">
+          <Relation type="size" of="RequestId"/>
+        </Number>
+        <Number name="RequestId" size="32" value="0x72a020a6"/>
+        <Blob name="SnmpErrorStatusType" valueType="hex" value="02"/>
+        <Number size="8" name="SnmpErrorStatusLen" value="0x01">
+          <Relation type="size" of="SnmpErrorStatus"/>
+        </Number>
+        <Number name="SnmpErrorStatus" size="8" signed="false"/>
+        <Blob name="SnmpErrorIndexTypeLen" valueType="hex" value="02 01"/>
+        <Number name="SnmpErrorIndex" size="8" signed="false" value="0x00"/>
+        <Blob name="VariableBindingsType"  valueType="hex" value="30"/>
+        <Number name="VariableBindingsSize" size="8">
+          <Relation type="size" of="VariableBindings"/> 
+        </Number> 
+        <Block name="VariableBindings">
+          <Block name="SnmpBinding" >
+            <Blob name="SnmpVariable" valueType="hex" value="30"/>
+            <Number name="SnmpVariableLen" size="8">
+              <Relation type="size" of="SnmpName"/>
+            </Number>
+            <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
+            <Blob name="SnmpName" valueType="hex" value="06 08 2b 06 01 02 01 01 04 00 05 00"/>
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <!-- Simple Network Management Protocol: GetNextRequest data model... -->
+  <DataModel name="SnmpNext" ref="SNMPHeaderV2">
+    <Blob name="SnmpAll.RequestType" valueType="hex" value="a1"/>
+    <Block name="SnmpAll.PDU.PDUData">
+      <Block name="SnmpGetRequest">
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02"/>
+        <Number size="8" name="RequestIDLen" value="0x04">
+          <Relation type="size" of="RequestId"/>
+        </Number>
+        <Number name="RequestId" size="32" value="0x72a020a6"/>
+        <Blob name="SnmpErrorStatusType" valueType="hex" value="02"/>
+        <Number size="8" name="SnmpErrorStatusLen" value="0x01">
+          <Relation type="size" of="SnmpErrorStatus"/>
+        </Number>
+        <Number name="SnmpErrorStatus" size="8" signed="false" value="0x00"/>
+        <Blob name="SnmpErrorIndexTypeLen" valueType="hex" value="02 01"/>
+        <Number name="SnmpErrorIndex" size="8" signed="false" value="0x00"/>
+        <Blob name="VariableBindingsType" valueType="hex" value="30"/>
+        <Number name="VariableBindingsSize" size="8">
+          <Relation type="size" of="VariableBindings"/> 
+        </Number> 
+        <Block name="VariableBindings">
+          <Block name="SnmpBinding" >
+            <Blob name="SnmpVariable" valueType="hex" value="30"/>
+            <Number name="SnmpVariableLen" size="8">
+              <Relation type="size" of="SnmpName"/>
+            </Number>
+            <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
+            <Blob name="SnmpName" valueType="hex" value="06 09 2b 06 01 02 01 19 01 07 00 05 00"/>
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <!-- Simple Network Management Protocol: GetBulkRequest data model... -->
+  <DataModel name="SnmpBulk" ref="SNMPHeaderV2">
+    <Blob name="SnmpAll.RequestType" valueType="hex" value="a5"/>
+    <Block name="SnmpAll.PDU.PDUData">
+      <Block name="SnmpGetBulkRequest">
+        <Blob name="RequestIDTypeLen" valueType="hex" value="02"/>
+        <Number size="8" name="RequestIDLen" value="0x04">
+          <Relation type="size" of="RequestId"/>
+        </Number>
+        <Number name="RequestId" size="32" value="0x72a020a6"/>
+        <Blob name="NonRepeatersPad" valueType="hex" value="02 01"/>
+        <Number name="NonRepeaters" size="8" value="0"/>
+        <Blob name="MaxRepetitionsTypeLen" valueType="hex" value="02 01" />
+        <Number name="MaxRepetitions" size="8" signed="false" value="0x0a"/>
+        <Blob name="SnmpVariableBindingsPad" valueType="hex" value="0000"/>
+        <Block name="VariableBindings">
+          <Block name="SnmpBinding">
+            <Blob name="SnmpVariable" valueType="hex" value="30" />
+            <Number name="SnmpVariableLen" size="8">
+              <Relation type="size" of="SnmpName"/>
+            </Number>
+            <!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
+            <Blob name="SnmpName" valueType="hex" value="06 09 2b 06 01 02 01 19 01 07 00 05 00"/> 
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+</Peach>
+<!--End-->

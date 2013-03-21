@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Simple Network Management Protocol PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  
+  <!--
+      Simple Network Management Protocol v2c
+      
+      getRequest		- done
+      getNextRequest	- done
+      getBulkRequest	- done
+  -->
+
+	<Include ns="States" src="file:##Path##/_Common/Models/Net/SNMP_State.xml"/>
+	
+  <!-- Agent conifuration to monitor for crashes -->
+  <Agent name="TheAgent">
+  </Agent> 
+
+  <!-- Default test case -->
+  <Test name="Default">
+    <StateModel ref="States:ManagerToAgent"/>
+    
+    <Agent ref="TheAgent"/>
+    
+    <Publisher class="Udp" name="UdpHandler">
+      <Param name="SrcPort" value="##SnmpSrcPort##"/>
+      <Param name="Host" value="##SnmpHost##"/>
+      <Param name="Port" value="##SnmpPort##"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+		
+    <Logger class="logger.Filesystem">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>
+<!--End-->
+

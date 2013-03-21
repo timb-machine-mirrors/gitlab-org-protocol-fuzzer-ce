@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <Platform>
+  <All>
     <Define key="SnmpSrcPort" value="161"/>
     <Define key="SnmpPort"    value="161"/>
     <Define key="SnmpHost"    value="localhost"/>
     <Define key="CommString"  value="public"/>
     <Define key="LoggerPath"  value="./logs/snmp/"/>
-    <Define key="Strategy"  value="Sequential"/>
-  </Platform>
+    <Define key="Strategy"    value="Sequential"/>
+		<Define key="Path"        value="."/>
+  </All>
 </PitDefines>
