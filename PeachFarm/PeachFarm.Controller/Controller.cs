@@ -90,7 +90,7 @@ namespace PeachFarm.Controller
 		{
 			IsOpen = false;
 			rabbit.StopListener();
-
+			rabbit.CloseConnection();
 		}
 
 		private void StatusCheck(object state)

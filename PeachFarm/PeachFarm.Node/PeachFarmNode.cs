@@ -118,6 +118,7 @@ namespace PeachFarm.Node
 
 				#region deregister from RabbitMQ
 				rabbit.StopListener();
+				rabbit.CloseConnection();
 				#endregion
 
 			}
