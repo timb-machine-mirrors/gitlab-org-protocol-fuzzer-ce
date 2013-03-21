@@ -103,8 +103,8 @@
 					<Number name="ManagementAddressSubtype" size="8" endian="big" value="0x06"/>
 					<Blob name="ManagementAddressValue" valueType="hex" value="##SourceMAC##"/>
 					<Number name="InterfaceSubtype" size="8" endian="big" value="0x02"/>
-					<Number name="InterfaceNumber" size="16" value="1001" />
-					<Number name="OIDLength" size="8" value="00" />
+					<Number name="InterfaceNumber" size="16" value="1001"/>
+					<Number name="OIDLength" size="8" value="00"/>
 				</Block>
       </Block>
 

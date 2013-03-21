@@ -12,17 +12,14 @@
       <Action name="NtpSendLpeersPacket" type="output" publisher="UdpHandler">
 				<DataModel ref="DataModels:NtpqLpeers"/>
       </Action>
-
       <!-- generate ntp readlist request packet -->
       <Action name="NtpSendReadlistPacket" type="output" publisher="UdpHandler">
 				<DataModel ref="DataModels:NtpqReadlist"/>
       </Action>
-
       <!-- generate ntp monlist command packet -->
       <Action name="NtpSendMonlistPacket" type="output" publisher="UdpHandler">
 				<DataModel ref="DataModels:NtpdcMonlist" />
       </Action>
-
       <!-- close udp socket -->
       <Action type="close" publisher="UdpHandler"/>
     </State>

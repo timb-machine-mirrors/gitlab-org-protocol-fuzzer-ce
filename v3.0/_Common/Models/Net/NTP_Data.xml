@@ -7,7 +7,7 @@
 	<!-- Network Time Protocol: Listpeers data model... -->
   <DataModel name="NtpqLpeers">
     <Block name="NtpFlags">
-      <Flags name="NtpFlags" size="8">
+      <Flags name="NtpFlags" size="8" endian="big">
 				<Flag name="NtpFlagsLindicator" size="2" position="0"/>
 				<Flag name="NtpFlagsVersion" size="3" position="2"/>
 				<Flag name="NtpFlagsMode" size="3" position="5"/>
@@ -15,14 +15,13 @@
     </Block>
 
     <Block name="NtpctrlFlags2">
-      <Flags name="NtpctrlFlags2" size="8">
+      <Flags name="NtpctrlFlags2" size="8" endian="big">
 				<Flag name="NtpctrlFlags2Response" size="1" position="0"/>
 				<Flag name="NtpctrlFlags2Error" size="1" position="1"/>
 				<Flag name="NtpctrlFlags2More" size="1" position="2"/>
 				<Flag name="NtpctrlFlags2Opcode" size="5" position="3"/>
       </Flags>
     </Block>
-
     <!-- Sequence: 69 -->
     <Number name="NtpctrlSequence" size="16" signed="true" endian="big" value="0x0045"/>
     <!-- Status: 0 -->
@@ -38,7 +37,7 @@
   <!-- Network Time Protocol: Readlist data model... -->
   <DataModel name="NtpqReadlist">
     <Block name="NtpFlags">
-      <Flags name="NtpFlags" size="8">
+      <Flags name="NtpFlags" size="8" endian="big">
 				<!-- 00.. .... = Leap Indicator: no warning (0) -->
 				<Flag name="NtpFlagsLi" size="2" position="0"/>
 				<!-- ..01 0... = Version number: NTP Version 2 (2) -->
@@ -49,7 +48,7 @@
     </Block>
 
     <Block name="NtpctrlFlags2">
-      <Flags name="NtpctrlFlags2" size="8">
+      <Flags name="NtpctrlFlags2" size="8" endian="big">
 				<!-- 0... .... = Response bit: Request (0) -->
 				<Flag name="NtpctrlFlags2R" size="1" position="0"/>
 				<!-- .0.. .... = Error bit: 0 -->
@@ -60,7 +59,6 @@
 				<Flag name="NtpctrlFlags2Opcode" size="5" position="3"/>
       </Flags>
     </Block>
-    
     <!-- Sequence: 90 -->
     <Number name="NtpctrlSequence" size="16" signed="true" endian="big" value="0x005a"/>
     <!-- Status: 0 -->
@@ -76,7 +74,7 @@
   <!-- Network Time Protocol: Monlist data model... -->
   <DataModel name="NtpdcMonlist">
     <Block name="NtpFlags">
-      <Flags name="NtpFlags" size="8">
+      <Flags name="NtpFlags" size="8" endian="big">
 				<!-- 0... .... = Response bit: Request (0) -->
 				<Flag name="NtpprivFlagsR" size="1" position="0"/>
 				<!-- .0.. .... = More bit: 0 -->
@@ -89,18 +87,17 @@
     </Block>
 
     <Block name="NtpprivAuthSeq">
-      <Flags name="NtpprivAuthSeq" size="8">
+      <Flags name="NtpprivAuthSeq" size="8" endian="big">
 				<!-- 0... .... = Auth bit: 0 -->
 				<Flag name="NtpprivAuth" size="1" position="0"/>
 				<!-- .000 0000 = Sequence number: 0 -->
 				<Flag name="NtpprivSeq" size="7" position="1"/>
       </Flags>
     </Block>
-
     <!-- Implementation: XNTPD (3) -->
-    <Number name="NtpprivImpl" size="8" signed="false" value="0x03"/>
+    <Number name="NtpprivImpl" size="8" signed="false" endian="big" value="0x03"/>
     <!-- Request code: MONGETLIST_1 (42) -->
-    <Number name="NtpprivReqcode" size="8" signed="false" value="0x2a"/>
+    <Number name="NtpprivReqcode" size="8" signed="false" endian="big" value="0x2a"/>
   </DataModel>
 </Peach>
 <!--End-->

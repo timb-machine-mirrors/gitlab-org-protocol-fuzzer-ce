@@ -11,7 +11,7 @@
     <State name="Initial">
       <Action name="LldpSendPacket" type="output" publisher="RawHandler">
         <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
-				<DataModel ref="DataModels:LLDP" />
+				<DataModel ref="DataModels:LLDP"/>
       </Action>
     </State>
   </StateModel>
