@@ -33,15 +33,16 @@
 					<Param name="ref" value="Header"/>
 				</Fixup>
 			</Number>
-			<Blob name="SrcIP" value="##SourceIPv4##">
+			<Blob name="SrcIP" value="##SourceIPv4##" size="32">
 				<Transformer class="Ipv4StringToOctet" />
 			</Blob>
-			<Blob name="DestIP" value="##TargetIPv4##">
+			<Blob name="DestIP" value="##TargetIPv4##" size="32">
 				<Transformer class="Ipv4StringToOctet" />
 			</Blob>
 			<Blob name="Options"/>
 		</Block>
 		<Block name="IPv4Payload"/>
 	</DataModel>
+
 </Peach>
 <!-- end -->
