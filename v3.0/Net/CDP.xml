@@ -2,37 +2,36 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Cisco Discovery Protocol PIT" version="0.0.2">
-  
-  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
-  
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
   <!-- Requires Linux Peach for Raw publishing --> 
   
 	<Include ns="States" src="file:##Path##/_Common/Models/Net/CDP_State.xml"/>
 	
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##" />
-      <Param name="Arguments" value="-i ##tsharkInterface##" />
-      <Param name="FaultOnEarlyExit" value="true" />
+      <Param name="Executable" value="##tsharkBin##"/>
+      <Param name="Arguments" value="-i ##tsharkInterface##"/>
+      <Param name="FaultOnEarlyExit" value="true"/>
     </Monitor>
+		
     <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
+      <Param name="Device" value="##Interface##"/>
     </Monitor>
   </Agent>
   
   <Agent name="LocalAgent">
     <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
+      <Param name="Device" value="##Interface##"/>
     </Monitor>
   </Agent>
   
   <!-- Default test case uses Raw Publisher define interface in defines file-->
   <Test name="Default">
+		<StateModel ref="States:CdpStateModel"/>
+		
     <Agent ref="RemoteAgent"/>
     <Agent ref="LocalAgent"/>
-		
-    <StateModel ref="States:CdpStateModel"/>
-		
+
     <Publisher class="RawEther" name="RawHandler">
       <Param name="Interface" value="##Interface##"/>
       <Param name="Protocol" value="ETH_P_IP"/>
@@ -41,7 +40,8 @@
     <Strategy class="##Strategy##"/> 
 		
     <Logger class="logger.Filesystem" >
-      <Param name="Path" value="##LoggerPath##" />
+      <Param name="Path" value="##LoggerPath##"/>
     </Logger> 
   </Test>
 </Peach>
+<!--End-->
