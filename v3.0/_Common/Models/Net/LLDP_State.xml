@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Link Layer Discovery Protocol PIT StateModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+	
+	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/LLDP_Data.xml"/>
+	
+	<!-- LLDP Simple State Model -->
+  <StateModel name="TheStateModel" initialState="Initial">
+    <State name="Initial">
+      <Action name="LldpSendPacket" type="output" publisher="RawHandler">
+        <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
+				<DataModel ref="DataModels:LLDP" />
+      </Action>
+    </State>
+  </StateModel>
+</Peach>
+<!--End-->

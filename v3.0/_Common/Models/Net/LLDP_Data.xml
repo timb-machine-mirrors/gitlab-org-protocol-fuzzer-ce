@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
-       author="Deja Vu Security, LLC" description="Link Layer Discovery Protocol PIT" version="0.0.2">
+       author="Deja Vu Security, LLC" description="Link Layer Discovery Protocol PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
-
-  <!-- Requires Linux Peach 3 and RawEther publisher -->
-
-  <!-- Link Layer Discovery Protocol Main DataModel -->
+	
+	<!-- Link Layer Discovery Protocol Main DataModel -->
   <DataModel name="LLDP">
     <Block name="EtherHeader" mutable="false">
-      <Blob name="Dest" valueType="hex" value="0180c200000e" mutable="false"/> <!-- LLDP multicast address --> 
-      <Blob name="Src" valueType="hex" value="##SourceMAC##" mutable="false"/>
-      <Blob name="Type" valueType="hex" value="88cc" mutable="false"/>
+      <Blob name="Dest" mutable="false" valueType="hex" value="0180c200000e"/> <!-- LLDP multicast address --> 
+      <Blob name="Src" mutable="false" valueType="hex" value="##SourceMAC##"/>
+      <Blob name="Type" mutable="false" valueType="hex" value="88cc"/>
     </Block>
 
     <Block name="LLDPPayload" minOccurs="1">
@@ -23,11 +21,10 @@
 					</Number>
 				</Block>
 				<Block name="ChasisId">
-					<Number name="ChasisIdSubtype" size="8" value="04" valueType="hex" endian="big"/>
-					<Blob name="ChasisIdValue" value="##SourceMAC##" valueType="hex"/>
+					<Number name="ChasisIdSubtype" size="8" endian="big" value="0x04"/>
+					<Blob name="ChasisIdValue" valueType="hex" value="##SourceMAC##" />
 				</Block>
       </Block>
-
 
       <Block name="PortTlv" minOccurs="1">
 				<Block name="PortTlvHeader">
@@ -37,11 +34,10 @@
 					</Number>
 				</Block>
 				<Block name="PortId">
-					<Number name="PortIdSubtype" size="8" value="03" valueType="hex"	endian="big"/>
-					<Blob name="PortIdValue" value="##SourceMAC##" valueType="hex"/>
+					<Number name="PortIdSubtype" size="8" endian="big" value="0x03"/>
+					<Blob name="PortIdValue" valueType="hex" value="##SourceMAC##"/>
 				</Block>
       </Block>
-
 
       <Block name="TtlTlv" minOccurs="1">
 				<Block name="TtlTlvHeader">
@@ -50,9 +46,8 @@
 						<Relation type="size" of="TtlValue"/>
 					</Number>
 				</Block>
-				<Number name="TtlValue" size="16" value="120" endian="big"/>
+				<Number name="TtlValue" size="16" endian="big" value="120"/>
       </Block>
-
 
       <Block name="PortDescripTlv">
 				<Block name="PortDescripTlvHeader">
@@ -63,7 +58,6 @@
 				</Block>
 				<Blob name="PortDescripValue" value="Summit300-48-Port 1001" />
       </Block>
-
 
       <Block name="SystemNameTlv">
 				<Block name="SystemNameTlvHeader">
@@ -93,8 +87,8 @@
 					</Number>
 				</Block>
 				<Block name="CapabilitiesValue">
-					<Blob name="CapabilitiesAvalible" value="ffff" valueType="hex"/>
-					<Blob name="CapabilitiesEnabled" value="ffff" valueType="hex"/>
+					<Blob name="CapabilitiesAvalible" valueType="hex" value="ffff"/>
+					<Blob name="CapabilitiesEnabled" valueType="hex" value="ffff"/>
 				</Block>
       </Block>
 
@@ -106,9 +100,9 @@
 					</Number>
 				</Block>
 				<Block name="ManagementAddress">
-					<Number name="ManagementAddressSubtype" size="8" value="06" valueType="hex" endian="big"/>
-					<Blob name="ManagementAddressValue" value="##SourceMAC##" valueType="hex"/>
-					<Number name="InterfaceSubtype" size="8" value="02" valueType="hex" endian="big"/>
+					<Number name="ManagementAddressSubtype" size="8" endian="big" value="0x06"/>
+					<Blob name="ManagementAddressValue" valueType="hex" value="##SourceMAC##"/>
+					<Number name="InterfaceSubtype" size="8" endian="big" value="0x02"/>
 					<Number name="InterfaceNumber" size="16" value="1001" />
 					<Number name="OIDLength" size="8" value="00" />
 				</Block>
@@ -122,58 +116,12 @@
 					</Number>
 				</Block>
 				<Block name="OrganizationSpecificValue">
-					<Blob name="OrganizationUniqueCode" value="0000" valueType="hex" />
+					<Blob name="OrganizationUniqueCode" valueType="hex" value="0000"/>
 					<!-- this is the beginning of LLDP-MED, and it could have it's pit -->
 				</Block>
       </Block>
-
-
-      <Blob name="EndOfLLDPDU" value="00 00" valueType="hex" minOccurs="1" />
+      <Blob name="EndOfLLDPDU" minOccurs="1" valueType="hex" value="00 00"/>
     </Block>
-
   </DataModel>
-
-  <!-- LLDP Simple State Model -->
-  <StateModel name="TheStateModel" initialState="Initial">
-    <State name="Initial">
-      <Action name="LldpSendPacket" type="output" publisher="RawHandler">
-        <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
-				<DataModel ref="LLDP" />
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##" />
-      <Param name="Arguments" value="-i ##tsharkInterface##" />
-      <Param name="FaultOnEarlyExit" value="true" />
-    </Monitor>
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
-    </Monitor>
-  </Agent>
-
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##" />
-    </Monitor>
-  </Agent>
-
-  <!-- Default test for LLDP -->
-  <Test name="Default">
-    <Strategy class="Sequential"/>
-    <StateModel ref="TheStateModel"/>
-    <Agent ref="RemoteAgent"/>
-    <Agent ref="LocalAgent"/>
-    <Publisher class="RawEther" name="RawHandler">
-      <Param name="Interface" value="##Interface##"/>
-      <Param name="Protocol" value="ETH_P_IP"/>
-    </Publisher>
-    
-    <Strategy class="##Strategy##"/>
-    <Logger class="logger.Filesystem" >
-      <Param name="Path" value="##LoggerPath##" />
-    </Logger>
-  </Test>
 </Peach>
+<!--End-->
