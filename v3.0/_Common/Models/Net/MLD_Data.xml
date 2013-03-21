@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+       author="Deja Vu Security, LLC" description="Multicast Listener Discovery PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2012 -->
+	
+	<DataModel name="MLDHeader">
+    <Number name="Type" size="8" endian="big" value="130"/>
+    <Number name="Code" size="8" endian="big"/>
+    <Number name="Checksum" endian="big" size="16">
+      <Fixup class="IcmpV6ChecksumFixup">
+				<Param name="ref" value="MLDHeader"/>
+				<Param name="src" value="##SourceIPv6##"/>
+				<Param name="dst" value="##TargetIPv6##"/>
+      </Fixup>
+    </Number>
+    <Number name="MaxRespCode" size="16" endian="big"/>
+    <Number name="Reserved" size="16" endian="big"/>
+    <Blob name="MulticastAddress" length="16"/>
+    <Flags size="8" endian="big">
+      <Flag name="Resv" size="4" position="0"/>
+      <Flag name="Suppress" size="1" position="4"/>
+      <Flag name="QRV" size="3" position="5"/>
+    </Flags>
+    <Number name="QQIC" size="8"/>
+    <Number name="NumSources" size="16"/>
+    <Block name="SourceAddresses">
+      <Blob/>
+    </Block>
+  </DataModel>
+</Peach>
+<!--End-->

@@ -6,8 +6,8 @@
     <Define key="LoggerPath" value="logs/MLD/"/>
     <Define key="SourceIPv6" value="fe80::613a:8384:f4b:330c"/>
     <Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
   </All>
-  
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>
