@@ -55,6 +55,7 @@ namespace PeachFarm.Admin
 		{
 			ProcessAction(e.Action, e.Body);
 			rabbit.StopListener();
+			rabbit.CloseConnection();
 			this.IsListening = false;
 		}
 

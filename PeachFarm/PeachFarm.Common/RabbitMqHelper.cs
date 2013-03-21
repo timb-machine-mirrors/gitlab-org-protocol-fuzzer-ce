@@ -229,6 +229,18 @@ namespace PeachFarm.Common
 			}
 		}
 
+		public void CloseConnection()
+		{
+			if (sender.IsOpen)
+				sender.Close();
+
+			if (receiver.IsOpen)
+				receiver.Close();
+
+			if (connection.IsOpen)
+				connection.Close();
+
+		}
 		#endregion
 
 		#region MessageReceived
@@ -367,17 +379,6 @@ namespace PeachFarm.Common
 			return success;
 		}
 
-		private void CloseConnection()
-		{
-			if (sender.IsOpen)
-				sender.Close();
-
-			if (receiver.IsOpen)
-				receiver.Close();
-
-			if (connection.IsOpen)
-				connection.Close();
-		}
 
 		private BasicGetResult GetFromQueue(string queue)
 		{
