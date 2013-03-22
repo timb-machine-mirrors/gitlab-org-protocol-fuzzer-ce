@@ -90,7 +90,7 @@ namespace PeachFarm.Controller
 		{
 			IsOpen = false;
 			rabbit.StopListener();
-
+			rabbit.CloseConnection();
 		}
 
 		private void StatusCheck(object state)
@@ -396,7 +396,7 @@ namespace PeachFarm.Controller
 			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
 			response.ActiveJobs = activeJobs.ToMessagesJobs();
 			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
-			response.Errors = response.Nodes.GetErrors(config.MongoDb.ConnectionString);
+			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 
 			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);
 		}

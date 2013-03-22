@@ -32,14 +32,32 @@
       font-size:x-large;
       font-family: 'Segoe UI', Arial;
     }
-    #content
+    #linkbar
     {
       position: absolute;
       top:30px;
       left:0;
       right:0;
+      height:20px;
+    }
+    #gridcontainer
+    {
+      position: absolute;
+      top:50px;
+      left:0;
+      right:0;
+      bottom:0;
     }
   </style>
+  <script type="text/javascript">
+    function GridCreated(sender, args) {
+      var scrollArea = sender.GridDataDiv;
+      var parent = $get("gridContainer");
+      var gridHeader = sender.GridHeaderDiv;
+      scrollArea.style.height = parent.clientHeight -
+        gridHeader.clientHeight + "px";
+    }
+  </script>
 </head>
 <body>
   <form id="form1" runat="server">
@@ -51,17 +69,21 @@
         <asp:Label ID="lblJobID" runat="server" />
       </asp:Panel>
     </div>
-    <div id="content">
-      <div id="morestuff">
-        [&nbsp;
-        <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|&nbsp;
-        <asp:HyperLink ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
-      </div>
+    <div id="linkbar">
+      [&nbsp;
+      <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|&nbsp;
+      <asp:HyperLink ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
+    </div>
+    <div id="gridcontainer">
       <telerik:RadGrid 
-        ID="iterationsGrid" runat="server" 
+        ID="iterationsGrid" runat="server"
+        Width="100%" Height="100%"
         OnDetailTableDataBind="iterationsGrid_DetailTableDataBind" 
         OnItemDataBound="iterationsGrid_ItemDataBound" 
         AutoGenerateColumns="false" AutoGenerateHierarchy="true">
+        <ClientSettings>
+          <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+        </ClientSettings>
         <MasterTableView DataMember="Iterations" Caption="Iterations" HierarchyLoadMode="ServerOnDemand">
           <Columns>
             <telerik:GridBoundColumn DataField="IterationNumber" HeaderText="Iteration" />

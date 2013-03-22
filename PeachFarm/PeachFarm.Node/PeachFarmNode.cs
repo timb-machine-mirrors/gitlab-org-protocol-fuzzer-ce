@@ -31,7 +31,6 @@ namespace PeachFarm.Node
 		{
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-			AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 			#endregion
 
 			#region node state
@@ -119,6 +118,7 @@ namespace PeachFarm.Node
 
 				#region deregister from RabbitMQ
 				rabbit.StopListener();
+				rabbit.CloseConnection();
 				#endregion
 
 			}
@@ -130,15 +130,6 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Termination handlers
-
-		private void CurrentDomain_ProcessExit(object sender, EventArgs e)
-		{
-			if ((nodeState.Status != Status.Stopping))// && (connection != null) && (connection.IsOpen))
-			{
-				ChangeStatus(Status.Stopping);
-			}
-		}
-
 		private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
 			if (e.ExceptionObject is RabbitMqException)

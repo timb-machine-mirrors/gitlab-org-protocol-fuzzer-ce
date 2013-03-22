@@ -15,6 +15,7 @@ using Messages = PeachFarm.Common.Messages;
 using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.ViewModels;
 using Telerik.Web.UI;
+using RabbitMQ.Client.Exceptions;
 
 namespace PeachFarmMonitor
 {
@@ -23,7 +24,7 @@ namespace PeachFarmMonitor
     private static PeachFarm.Admin.Admin admin = null;
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
-
+    private static Messages.MonitorResponse response;
     private string guid;
     public Home()
     {
@@ -35,6 +36,7 @@ namespace PeachFarmMonitor
     protected void Page_Load(object sender, EventArgs e)
     {
       lblHost.Text = adminconfig.Controller.IpAddress;
+      Monitor();
     }
 
     #region Monitor
@@ -60,55 +62,24 @@ namespace PeachFarmMonitor
     {
       try
       {
-        Messages.MonitorResponse response = await MonitorAsync();
+        response = await MonitorAsync();
 
-        List<JobViewModel> alljobs = new List<JobViewModel>();
-        alljobs.AddRange(from Messages.Job j in response.ActiveJobs select new JobViewModel(j, JobStatus.Running));
-        alljobs.AddRange(from Messages.Job j in response.InactiveJobs select new JobViewModel(j));
-
-        foreach (var j in alljobs)
-        {
-          j.FaultCount = ((Job)j).GetFaultCount(monitorconfig.MongoDb.ConnectionString);
-        }
-
-        jobsGrid.DataSource = alljobs;
+        BindJobs();
         jobsGrid.DataBind();
 
-        //lstInactiveJobs.DataSource = response.InactiveJobs;
-        //lstInactiveJobs.DataBind();
-
-        //lstNodes.DataSource = response.Nodes;
-        //lstNodes.DataBind();
-
-        nodesGrid.DataSource = response.Nodes;
+        BindNodes();
         nodesGrid.DataBind();
 
-        /*
-        RadToolBarButton iconviewbutton = (RadToolBarButton)nodesToolbar.Items.FindItemByText("Icon");
-        if (iconviewbutton.Checked)
-        {
-          gridNodes.CssClass = "hidden";
-          lstNodes.CssClass = "";
-        }
-        else
-        {
-          lstNodes.CssClass = "hidden";
-          gridNodes.CssClass = "";
-        }
-        //*/
-
-        errorsGrid.DataSource = response.Errors;
+        BindErrors();
         errorsGrid.DataBind();
 
         loadingLabel.Text = "";
+        loadingLabel.Visible = false;
       }
-      catch(Exception ex)
+      catch
       {
-        loadingLabel.Text = ex.Message;
-        loadingLabel.BackColor = System.Drawing.Color.Red;
+        //do nothing
       }
-     
-
     }
     #endregion
 
@@ -175,6 +146,98 @@ namespace PeachFarmMonitor
             item.Style.Add("background-color", "lightgreen");
             break;
         }
+
+        //var cell = (TableCell)item["JobIDColumn"];
+        //var menu = cell.FindControl("jobMenu") as RadMenu;
+        //var topitem = menu.Items[0];
+        //topitem.Text = job.JobID;
+        //topitem.Items[0].NavigateUrl = "~/JobDetail.aspx?jobid=" + job.JobID;
+        //topitem.Items[1].NavigateUrl = "~/ReportViewer.aspx?jobid=" + job.JobID;
+      }
+    }
+
+    protected void nodesGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+    {
+      if (e.RebindReason == GridRebindReason.PostBackEvent)
+      {
+        if (response != null)
+        {
+          nodesGrid.DataSource = response.Nodes;
+          nodesGrid.DataBind();
+        }
+      }
+    }
+
+    protected void nodesGrid_SortCommand(object sender, GridSortCommandEventArgs e)
+    {
+      BindNodes();
+    }
+
+    protected void jobsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
+    {
+      BindJobs();
+    }
+
+    protected void errorsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
+    {
+      BindErrors();
+    }
+
+    private void BindNodes()
+    {
+      if (response != null)
+      {
+        nodesGrid.DataSource = response.Nodes;
+      }
+    }
+
+    private void BindJobs()
+    {
+      if (response != null)
+      {
+        List<JobViewModel> alljobs = new List<JobViewModel>();
+        alljobs.AddRange(from Messages.Job j in response.ActiveJobs select new JobViewModel(j, JobStatus.Running));
+        alljobs.AddRange(from Messages.Job j in response.InactiveJobs select new JobViewModel(j));
+
+        foreach (var j in alljobs)
+        {
+          j.FaultCount = ((Job)j).GetFaultCount(monitorconfig.MongoDb.ConnectionString);
+        }
+
+        jobsGrid.DataSource = alljobs;
+
+      }
+    }
+
+    private void BindErrors()
+    {
+      if (response != null)
+      {
+        errorsGrid.DataSource = response.Errors;
+      }
+    }
+
+    protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
+    {
+      switch (e.Tab.Text)
+      {
+        case "Nodes":
+          nodesPage.Selected = true;
+          break;
+        case "Jobs":
+          jobsPage.Selected = true;
+          break;
+        case "Errors":
+          errorsPage.Selected = true;
+          break;
+      }
+    }
+
+    protected void RadScriptManager1_AsyncPostBackError(object sender, AsyncPostBackErrorEventArgs e)
+    {
+      if (e.Exception.GetType().ToString().Contains("PageRequestManagerTimeoutException"))
+      {
+        //ignore error
       }
     }
 

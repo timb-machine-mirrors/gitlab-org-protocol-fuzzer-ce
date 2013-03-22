@@ -58,8 +58,8 @@ namespace PeachFarm.Common
 			listenQueue = queue;
 			lock (sender)
 			{
-				sender.QueueDeclare(listenQueue, true, false, false, null);
-				sender.QueuePurge(listenQueue);
+				receiver.QueueDeclare(listenQueue, true, false, false, null);
+				receiver.QueuePurge(listenQueue);
 			}
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
@@ -71,10 +71,9 @@ namespace PeachFarm.Common
 			IsListening = false;
 
 			listenTimer.Stop();
-			listenTimer = null;
-			lock (sender)
+			lock (receiver)
 			{
-				sender.QueueDelete(listenQueue);
+				receiver.QueueDelete(listenQueue);
 			}
 			listenQueue = String.Empty;
 		}
@@ -94,7 +93,6 @@ namespace PeachFarm.Common
 
 					if (open)
 					{
-						sender.QueueDeclare(queue, true, false, false, null);
 						sender.PublishToQueue(queue, body, action, replyQueue);
 					}
 					else
@@ -229,6 +227,18 @@ namespace PeachFarm.Common
 			}
 		}
 
+		public void CloseConnection()
+		{
+			if (sender.IsOpen)
+				sender.Close();
+
+			if (receiver.IsOpen)
+				receiver.Close();
+
+			if (connection.IsOpen)
+				connection.Close();
+
+		}
 		#endregion
 
 		#region MessageReceived
@@ -367,17 +377,6 @@ namespace PeachFarm.Common
 			return success;
 		}
 
-		private void CloseConnection()
-		{
-			if (sender.IsOpen)
-				sender.Close();
-
-			if (receiver.IsOpen)
-				receiver.Close();
-
-			if (connection.IsOpen)
-				connection.Close();
-		}
 
 		private BasicGetResult GetFromQueue(string queue)
 		{

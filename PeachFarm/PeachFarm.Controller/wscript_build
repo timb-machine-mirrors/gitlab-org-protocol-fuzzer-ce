@@ -17,3 +17,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachFarm.Controller.dll',
 )
+if bld.env.DEST_OS != "win32":
+	bld.install_files('${BINDIR}','pf_controller')
