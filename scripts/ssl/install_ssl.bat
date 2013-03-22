@@ -35,7 +35,7 @@ cd ..\ca
 C:\OpenSSL-Win32\bin\openssl ca -config openssl.cnf -in ..\client\req.pem -out ..\client\cert.pem -notext -batch -extensions client_ca_extensions
 cd ..\client
 C:\OpenSSL-Win32\bin\openssl pkcs12 -export -out keycert.p12 -in cert.pem -inkey key.pem -passout pass:MySecretPassword
-copy client\key.pem+client\cert.pem client\mongo.pem
+copy key.pem+cert.pem mongo.pem
 cd ..
 
 move ca C:\peachfarm\
@@ -50,7 +50,7 @@ copy rabbit.app "C:\peachfarm\rabbitmq\rabbitmq_server-3.0.4\ebin\"
 
 rem ###ENABLE MONGO SSL
 
-DEL "C:\peachfarm\mongodb\mongo.cfg"
+DEL "C:\peachfarm\mongodb\mongod.cfg"
 copy mongod.cfg "C:\peachfarm\mongodb\"
 
 net start RabbitMQ
