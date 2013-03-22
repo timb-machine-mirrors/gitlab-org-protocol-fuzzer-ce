@@ -125,6 +125,12 @@ namespace PeachFarm.Common.Mongo
 
 			return collection;
 		}
+
+		public static List<Heartbeat> GetAllErrors(string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			return collection.FindAll().ToList();
+		}
 	}
 
 	public static class MongoNames
