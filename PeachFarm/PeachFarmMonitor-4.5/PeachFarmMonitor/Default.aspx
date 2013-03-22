@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
   <title>Peach Farm Monitor</title>
-  <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server" />
+  <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server"  />
   <style type="text/css">
 	  html,body {
 	    height: 100%;
@@ -33,33 +33,6 @@
       font-size:x-large;
       font-family: 'Segoe UI', Arial;
     }
-    .error
-    {
-      overflow:auto;
-      color: black;
-    }
-    .error.alt
-    {
-      background-color: gainsboro;
-    }
-    .node
-    {
-      float:left;
-      padding: 10px;
-      margin: 2px;
-    }
-    .node.Running
-    {
-      background-color: lightgreen;
-    }
-    .node.Alive
-    {
-      background-color: lightblue;
-    }
-    td.fieldLabel
-    {
-      text-align: right;
-    }
     #tabstrip
     {
       position: absolute;
@@ -75,13 +48,6 @@
       left:0;
       right:0;
     }
-    .job
-    {
-      height:120px;
-      padding:10px;
-      margin:2px;
-      background-color:gainsboro;
-    }
     .hidden
     {
       display: none;
@@ -93,26 +59,14 @@
       padding-left: 4px;
       padding-right: 4px;
     }
+    #nodesGridPanel{ height:100%; }
+    #jobsGridPanel{ height:100%; }
+    #errorsGridPanel{ height:100%; }
   </style>
-  <script type="text/javascript">
-    function switchnodesview(source, args) {
-      var text = args.get_item().get_text();
-      var iconview = document.getElementById("lstNodes");
-      var listview = document.getElementById("gridNodes");
-      if (text == "Icon") {
-        listview.className = "hidden";
-        iconview.className = "";
-      }
-      else {
-        iconview.className = "hidden";
-        listview.className = "";
-      }
-    }
-  </script>
 </head>
 <body>
   <form id="Form1" runat="server">
-    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
+    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" OnAsyncPostBackError="RadScriptManager1_AsyncPostBackError" AllowCustomErrorsRedirect="true" AsyncPostBackTimeout="5000" />
     <telerik:RadAjaxManager ID="RadAjaxManager1" OnAjaxRequest="RadAjaxManager1_AjaxRequest" runat="server">
       <AjaxSettings>
         <telerik:AjaxSetting AjaxControlID="monitorTimer" EventName="Tick">
@@ -121,6 +75,21 @@
             <telerik:AjaxUpdatedControl ControlID="jobsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="errorsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="titlePanel" />
+          </UpdatedControls>
+        </telerik:AjaxSetting>
+        <telerik:AjaxSetting AjaxControlID="nodesGrid">
+          <UpdatedControls>
+            <telerik:AjaxUpdatedControl ControlID="nodesGrid" />
+          </UpdatedControls>
+        </telerik:AjaxSetting>
+        <telerik:AjaxSetting AjaxControlID="jobsGrid">
+          <UpdatedControls>
+            <telerik:AjaxUpdatedControl ControlID="jobsGrid" />
+          </UpdatedControls>
+        </telerik:AjaxSetting>
+        <telerik:AjaxSetting AjaxControlID="errorsGrid">
+          <UpdatedControls>
+            <telerik:AjaxUpdatedControl ControlID="errorsGrid" />
           </UpdatedControls>
         </telerik:AjaxSetting>
       </AjaxSettings>
@@ -136,40 +105,62 @@
       <Tabs>
         <telerik:RadTab Text="Nodes"></telerik:RadTab>
         <telerik:RadTab Text="Jobs"></telerik:RadTab>
-        <telerik:RadTab Text="Errors" Selected="True"></telerik:RadTab>
+        <telerik:RadTab Text="Errors"></telerik:RadTab>
       </Tabs>
     </telerik:RadTabStrip>
-    <telerik:RadMultiPage ID="toplevel" runat="server" SelectedIndex="0">
-      <telerik:RadPageView ID="nodesPage" runat="server">
-        <telerik:RadGrid ID="nodesGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" OnItemDataBound="nodesGrid_ItemDataBound">
-          <MasterTableView>
+    <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
+      <telerik:RadPageView ID="nodesPage" runat="server" Height="100%">
+        <telerik:RadGrid ID="nodesGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="True" 
+          OnItemDataBound="nodesGrid_ItemDataBound" 
+          OnSortCommand="nodesGrid_SortCommand" 
+          Width="100%" Height="100%">
+          <ClientSettings>
+            <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+          </ClientSettings>
+          <MasterTableView TableLayout="Fixed">
             <Columns>
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
               <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
               <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
               <telerik:GridBoundColumn DataField="Tags" HeaderText="Tags" />
-              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID"  />
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
       </telerik:RadPageView>
-      <telerik:RadPageView ID="jobsPage" runat="server">
-        <telerik:RadGrid ID="jobsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="true" OnItemDataBound="jobsGrid_ItemDataBound">
-          <MasterTableView>
+      <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
+        <telerik:RadGrid ID="jobsGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="false" 
+          OnItemDataBound="jobsGrid_ItemDataBound" 
+          OnSortCommand="jobsGrid_SortCommand"
+          Height="100%" Width="100%">
+          <ClientSettings>
+            <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+          </ClientSettings>
+          <MasterTableView TableLayout="Fixed">
             <Columns>
+              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" />
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
-              <telerik:GridHyperLinkColumn DataTextField="JobID" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
-              <telerik:GridBoundColumn DataField="FaultCount" HeaderText="Faults" />
+              <telerik:GridHyperLinkColumn DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank"/>
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
       </telerik:RadPageView>
-      <telerik:RadPageView ID="errorsPage" runat="server">
-        <telerik:RadGrid ID="errorsGrid" runat="server" AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="True" OnItemDataBound="errorsGrid_ItemDataBound">
+      <telerik:RadPageView ID="errorsPage" runat="server" Height="100%">
+        <telerik:RadGrid ID="errorsGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="True" AllowFilteringByColumn="False"
+          OnItemDataBound="errorsGrid_ItemDataBound" 
+          OnSortCommand="errorsGrid_SortCommand"
+          Width="100%" Height="100%">
+          <ClientSettings>
+            <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+          </ClientSettings>
           <MasterTableView>
             <Columns>
               <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
@@ -184,7 +175,7 @@
         </telerik:RadGrid>
       </telerik:RadPageView>
     </telerik:RadMultiPage>
-    <asp:Panel ID="Panel1" runat="server">
+    <asp:Panel ID="Panel1" runat="server" Width="0" Height="0">
       <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick">
       </asp:Timer>
     </asp:Panel>

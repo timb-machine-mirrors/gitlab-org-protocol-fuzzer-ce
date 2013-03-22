@@ -1,12 +1,13 @@
+/* original blue: #25a0da*/
 .RadMenu_DejaVu {
-  color: black;
+  color: white;
   font: normal 12px "Segoe UI", Arial, Helvetica, sans-serif;
   line-height: 22px;
   text-transform: uppercase; }
   .RadMenu_DejaVu div.rmRootGroup,
   .RadMenu_DejaVu ul.rmRootGroup {
     padding: 1px;
-    background-color: #25a0da; }
+    background-color: #f57e20; }
   .RadMenu_DejaVu .rmGroup {
     padding: 1px;
     border: 1px solid #cdcdcd;
@@ -31,7 +32,7 @@
     border-color: #ffffff; }
   .RadMenu_DejaVu .rmDisabled,
   .RadMenu_DejaVu .rmDisabled:hover {
-    border-color: #25a0da;
+    border-color: #f57e20;
     color: #8aceec; }
   .RadMenu_DejaVu .rmGroup .rmLink {
     border: 0;
@@ -45,9 +46,9 @@
   .RadMenu_DejaVu .rmGroup .rmSelected:hover,
   .RadMenu_DejaVu .rmGroup .rmExpanded,
   .RadMenu_DejaVu .rmGroup .rmExpanded:hover {
-    border-color: #25a0da;
+    border-color: #f57e20;
     color: white;
-    background-color: #25a0da; }
+    background-color: #f57e20; }
   .RadMenu_DejaVu .rmGroup .rmDisabled, .RadMenu_DejaVu .rmGroup .rmDisabled:hover {
     color: #767676;
     background-color: transparent; }
@@ -55,6 +56,8 @@
     margin: 0;
     padding: 0; }
   .RadMenu_DejaVu .rmRootLink .rmText {
+    cursor: pointer;
+    color: white;
     padding: 0; }
   .RadMenu_DejaVu .rmLeftImage {
     padding-bottom: 2px; }
@@ -104,7 +107,7 @@
   .RadMenu_DejaVu .rmRootGroup .rmBottomArrow,
   .RadMenu_DejaVu .rmRootGroup .rmLeftArrow,
   .RadMenu_DejaVu .rmRootGroup .rmRightArrow {
-    border-color: #25a0da;
+    border-color: #f57e20;
     background-color: #92cfec; }
   .RadMenu_DejaVu .rmRootGroup .rmLeftArrow,
   .RadMenu_DejaVu .rmRootGroup .rmRightArrow {
@@ -185,3 +188,5 @@
 .RadMenu_DejaVu .rmBottomLeft,
 .RadMenu_DejaVu .rmBottomRight {
   display: none; }
+
+/* Stuff added by Matt */
