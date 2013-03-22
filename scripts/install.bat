@@ -5,7 +5,7 @@ md C:\peachfarm
 echo INSTALLING...
 
 if %PROCESSOR_ARCHITECTURE%==x86 (
-  start /w erlang-x32.exe /S /D=C:\peachfarm\erlang
+  start /w erlang-x86.exe /S /D=C:\peachfarm\erlang
 ) else (
   start /w erlang-x64.exe /S /D=C:\peachfarm\erlang
 )

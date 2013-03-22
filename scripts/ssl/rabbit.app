@@ -51,7 +51,7 @@
      {env,
          [{hipe_compile,false},
           {tcp_listeners,[]},
-          {ssl_listeners,[5671]},
+          {ssl_listeners,[5672]},
           {ssl_options,[{cacertfile,"C:\\peachfarm\\ca\\cacert.pem"},
                     {certfile,"C:\\peachfarm\\server\\cert.pem"},
                     {keyfile,"C:\\peachfarm\\server\\key.pem"},
