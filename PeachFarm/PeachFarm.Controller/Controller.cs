@@ -111,7 +111,7 @@ namespace PeachFarm.Controller
 							remove.Add(pair.Value);
 							pair.Value.ErrorMessage = "Node Expired";
 							pair.Value.Stamp = DateTime.Now;
-							pair.Value.DatabaseInsert(config.MongoDb.ConnectionString);
+							pair.Value.SaveToDatabase(config.MongoDb.ConnectionString);
 						}
 						else
 						{
@@ -340,7 +340,7 @@ namespace PeachFarm.Controller
 			if (heartbeat.Status == Status.Error)
 			{
 				//errors.Add(heartbeat);
-				heartbeat.DatabaseInsert(config.MongoDb.ConnectionString);
+				heartbeat.SaveToDatabase(config.MongoDb.ConnectionString);
 				logger.Warn("{0} errored at {1}\n{2}", heartbeat.NodeName, heartbeat.Stamp, heartbeat.ErrorMessage);
 			}
 		}
@@ -423,7 +423,7 @@ namespace PeachFarm.Controller
 			mongoJob.UserName = request.UserName;
 			mongoJob.PitFileName = request.PitFileName;
 			mongoJob.StartDate = DateTime.Now;
-			mongoJob = mongoJob.DatabaseInsert(request.MongoDbConnectionString);
+			mongoJob = mongoJob.SaveToDatabase(request.MongoDbConnectionString);
 
 			#endregion
 		}

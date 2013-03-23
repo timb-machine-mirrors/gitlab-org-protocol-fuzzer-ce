@@ -28,6 +28,7 @@ namespace PeachFarm.Admin.Console
 				bool list = false;
 				bool errors = false;
 				bool jobInfo = false;
+				bool jobs = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -44,6 +45,7 @@ namespace PeachFarm.Admin.Console
 						{ "list", v => list = true},
 						{ "errors", v => errors = true },
 						{ "info", var => jobInfo = true },
+						{ "jobs", var => jobs = true },
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -53,7 +55,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !list && !errors && !jobInfo)
+				if (!stop && !start && !list && !errors && !jobInfo && !jobs)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -79,6 +81,7 @@ namespace PeachFarm.Admin.Console
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
 				admin.StopPeachCompleted += admin_StopPeachCompleted;
 				admin.JobInfoCompleted += admin_JobInfoCompleted;
+				admin.MonitorCompleted += admin_MonitorCompleted;
 				admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
 				#endregion
 
@@ -143,6 +146,13 @@ namespace PeachFarm.Admin.Console
 				}
 				#endregion
 
+				#region Jobs
+				if (jobs)
+				{
+					admin.MonitorAsync();
+				}
+				#endregion
+
 				System.Console.WriteLine("waiting for result...");
 				System.Console.ReadLine();
 			}
@@ -162,6 +172,8 @@ namespace PeachFarm.Admin.Console
 
 			Environment.Exit(0);
 		}
+
+
 
 		#region Peach Farm Admin message completion handlers
 		static void admin_StopPeachCompleted(object sender, Admin.StopPeachCompletedEventArgs e)
@@ -239,7 +251,7 @@ namespace PeachFarm.Admin.Console
 
 		static void admin_JobInfoCompleted(object sender, Admin.JobInfoCompletedEventArgs e)
 		{
-			string output = String.Format("JobID:\t\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
+			string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
 				e.Result.Job.JobID,
 				e.Result.Job.UserName,
 				e.Result.Job.PitFileName,
@@ -250,6 +262,43 @@ namespace PeachFarm.Admin.Console
 			foreach (Heartbeat heartbeat in e.Result.Nodes)
 			{
 				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+			}
+		}
+
+		static void admin_MonitorCompleted(object sender, Admin.MonitorCompletedEventArgs e)
+		{
+			string format = "{0,-13}{1,-21}{2,-21}{3,-24}";
+			System.Console.WriteLine("Active Jobs");
+			System.Console.WriteLine("-----------");
+			if (e.Result.ActiveJobs.Count == 0)
+			{
+				System.Console.WriteLine("(no active jobs)");
+			}
+			else
+			{
+				System.Console.WriteLine(String.Format(format, "Job ID", "User Name", "Pit Name", "Start Date"));
+				foreach (Job job in e.Result.ActiveJobs)
+				{
+					System.Console.WriteLine(String.Format(format,
+						job.JobID, job.UserName, job.PitFileName, job.StartDate));
+				}
+			}
+			System.Console.WriteLine();
+			System.Console.WriteLine("Inactive Jobs");
+			System.Console.WriteLine("-------------");
+
+			if (e.Result.InactiveJobs.Count == 0)
+			{
+				System.Console.WriteLine("(no inactive jobs)");
+			}
+			else
+			{
+				System.Console.WriteLine(String.Format(format, "Job ID", "User Name", "Pit Name", "Start Date"));
+				foreach (Job job in e.Result.InactiveJobs)
+				{
+					System.Console.WriteLine(String.Format(format,
+						job.JobID, job.UserName, job.PitFileName, job.StartDate));
+				}
 			}
 		}
 
@@ -305,6 +354,9 @@ Syntax:
       Get list of errors reported by Nodes for Job <jobID>
         pf_admin.exe -errors jobID
 
+			Get information for all Jobs
+				pf_admin.exe -jobs
+
       Get information for a Job and a list of Running Nodes
         pf_admin.exe -info jobID
 
@@ -327,6 +379,8 @@ Commands:
 
  errors - List any logged node errors
    jobID - Job ID
+
+ jobs - Get information for all Jobs
 
  info - Get information for a Job and a list of Running Nodes
    jobID - Job ID

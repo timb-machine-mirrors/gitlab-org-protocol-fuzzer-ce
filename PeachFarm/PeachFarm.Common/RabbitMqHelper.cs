@@ -16,6 +16,7 @@ namespace PeachFarm.Common
 		private static IConnection connection;
 		private static IModel receiver;
 		private static IModel sender;
+		private static IModel declarer;
 
 		private string hostName;
 		int port;
@@ -56,10 +57,10 @@ namespace PeachFarm.Common
 			IsListening = true;
 
 			listenQueue = queue;
-			lock (sender)
+			lock (declarer)
 			{
-				receiver.QueueDeclare(listenQueue, true, false, false, null);
-				receiver.QueuePurge(listenQueue);
+				declarer.QueueDeclare(listenQueue, true, false, false, null);
+				declarer.QueuePurge(listenQueue);
 			}
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
@@ -71,9 +72,9 @@ namespace PeachFarm.Common
 			IsListening = false;
 
 			listenTimer.Stop();
-			lock (receiver)
+			lock (declarer)
 			{
-				receiver.QueueDelete(listenQueue);
+				declarer.QueueDelete(listenQueue);
 			}
 			listenQueue = String.Empty;
 		}
@@ -113,19 +114,19 @@ namespace PeachFarm.Common
 
 			try
 			{
-				lock (sender)
+				lock (declarer)
 				{
-					if (sender.IsOpen == false)
+					if (declarer.IsOpen == false)
 					{
 						open = ReopenConnection();
 					}
 
 					if (open)
 					{
-						sender.ExchangeDeclare(exchange, "fanout", true);
+						declarer.ExchangeDeclare(exchange, "fanout", true);
 						foreach (var q in queues)
 						{
-							sender.QueueBind(q, exchange, routingKey);
+							declarer.QueueBind(q, exchange, routingKey);
 						}
 					}
 					else
@@ -146,16 +147,16 @@ namespace PeachFarm.Common
 
 			try
 			{
-				lock (sender)
+				lock (declarer)
 				{
-					if (sender.IsOpen == false)
+					if (declarer.IsOpen == false)
 					{
 						open = ReopenConnection();
 					}
 
 					if (open)
 					{
-						sender.QueueBind(queue, exchange, routingKey);
+						declarer.QueueBind(queue, exchange, routingKey);
 					}
 					else
 					{
@@ -175,16 +176,16 @@ namespace PeachFarm.Common
 
 			try
 			{
-				lock (sender)
+				lock (declarer)
 				{
-					if (sender.IsOpen == false)
+					if (declarer.IsOpen == false)
 					{
 						open = ReopenConnection();
 					}
 
 					if (open)
 					{
-						sender.ExchangeDelete(exchange, true);
+						declarer.ExchangeDelete(exchange, true);
 					}
 					else
 					{
@@ -234,6 +235,9 @@ namespace PeachFarm.Common
 
 			if (receiver.IsOpen)
 				receiver.Close();
+
+			if (declarer.IsOpen)
+				declarer.Close();
 
 			if (connection.IsOpen)
 				connection.Close();
@@ -320,6 +324,7 @@ namespace PeachFarm.Common
 				connection = factory.CreateConnection();
 				sender = connection.CreateModel();
 				receiver = connection.CreateModel();
+				declarer = connection.CreateModel();
 			}
 			catch (Exception ex)
 			{
@@ -366,6 +371,11 @@ namespace PeachFarm.Common
 					{
 						sender = connection.CreateModel();
 					}
+
+					if (declarer.IsOpen == false)
+					{
+						declarer = connection.CreateModel();
+					}
 				}
 				catch
 				{
@@ -391,10 +401,6 @@ namespace PeachFarm.Common
 				if ((connection == null) || (connection.IsOpen == false))
 				{
 					open = ReopenConnection();
-					if (open)
-					{
-						receiver.QueueDeclare(queue, true, false, false, null);
-					}
 				}
 
 				if (open)
