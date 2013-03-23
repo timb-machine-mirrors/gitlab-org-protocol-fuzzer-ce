@@ -187,6 +187,8 @@ namespace PeachFarm.Common.Mongo
 	public partial class Fault
 	{
 
+		private bool isReproductionField;
+
 		private bool controlIterationField;
 
 		private bool controlRecordingIterationField;
@@ -217,6 +219,18 @@ namespace PeachFarm.Common.Mongo
 		{
 			this.collectedDataField = new List<CollectedData>();
 			this.stateModelField = new List<Action>();
+		}
+
+		public bool IsReproduction
+		{
+			get
+			{
+				return this.isReproductionField;
+			}
+			set
+			{
+				this.isReproductionField = value;
+			}
 		}
 
 		public bool ControlIteration
@@ -351,7 +365,7 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 11)]
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 12)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<Action> StateModel
 		{
@@ -365,7 +379,7 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 12)]
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 13)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<CollectedData> CollectedData
 		{

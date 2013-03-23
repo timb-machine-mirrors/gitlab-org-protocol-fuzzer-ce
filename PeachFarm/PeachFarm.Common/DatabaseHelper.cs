@@ -131,6 +131,18 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
 			return collection.FindAll().ToList();
 		}
+
+		public static Iteration FindIteration(Iteration tofind, string connectionString)
+		{
+			MongoCollection<Iteration> collection = GetCollection<Iteration>(MongoNames.Iterations, connectionString);
+			var query = Query.And(
+				Query.EQ("IterationNumber", tofind.IterationNumber),
+				Query.EQ("JobID", tofind.JobID),
+				Query.EQ("NodeName", tofind.NodeName),
+				Query.EQ("SeedNumber", tofind.SeedNumber),
+				Query.EQ("TestName", tofind.TestName));
+			return collection.FindOne(query);
+		}
 	}
 
 	public static class MongoNames

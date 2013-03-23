@@ -39,6 +39,7 @@
 
   <xs:complexType name="Fault">
     <xs:sequence>
+			<xs:element name="IsReproduction" type="xs:boolean" maxOccurs="1" minOccurs="1" />
       <xs:element name="ControlIteration" type="xs:boolean" maxOccurs="1" minOccurs="1" />
       <xs:element name="ControlRecordingIteration" type="xs:boolean" maxOccurs="1" minOccurs="1" />
       <xs:element name="Description" type="xs:string" maxOccurs="1" minOccurs="1" />

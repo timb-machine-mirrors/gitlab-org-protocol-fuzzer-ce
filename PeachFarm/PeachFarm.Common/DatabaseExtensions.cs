@@ -14,37 +14,23 @@ namespace PeachFarm.Common.Mongo
 {
 	public static class ExtensionMethods
 	{
-		public static List<Job> DatabaseInsert(this List<Job> jobs, string connectionString)
+		public static Job SaveToDatabase(this Job job, string connectionString)
 		{
 			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 
-			foreach (Job job in jobs)
-			{
-				collection.Insert(job);
-			}
-
-			collection.Database.Server.Disconnect();
-
-			return jobs;
-		}
-
-		public static Job DatabaseInsert(this Job job, string connectionString)
-		{
-			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
-
-			collection.Insert(job);
+			collection.Save(job);
 			collection.Database.Server.Disconnect();
 
 			return job;
 		}
 
-		public static Iteration DatabaseInsert(this Iteration iteration, string connectionString)
+		public static Iteration SaveToDatabase(this Iteration iteration, string connectionString)
 		{
 			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 
 			iteration = UpdateDataPaths(iteration, connectionString);
 
-			collection.Insert(iteration);
+			collection.Save(iteration);
 
 			collection.Database.Server.Disconnect();
 
@@ -132,12 +118,10 @@ namespace PeachFarm.Common.Mongo
 			return String.Format("{0:yyyyMMddhhmmss}", dateTime);
 		}
 
-		public static Messages.Heartbeat DatabaseInsert(this Messages.Heartbeat heartbeat, string connectionString)
+		public static Messages.Heartbeat SaveToDatabase(this Messages.Heartbeat heartbeat, string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			collection.Insert(heartbeat);
-
-
+			collection.Save(heartbeat);
 			collection.Database.Server.Disconnect();
 
 			return heartbeat;

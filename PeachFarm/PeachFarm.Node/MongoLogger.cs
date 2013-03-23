@@ -33,13 +33,13 @@ namespace PeachFarm.Loggers
 
 		}
 
+		#region Properties
 		public string MongoConnectionString
 		{
 			get;
 			private set;
 		}
 
-		//public Guid JobID
 		public string JobID
 		{
 			get;
@@ -55,7 +55,45 @@ namespace PeachFarm.Loggers
 			get;
 			private set;
 		}
+		#endregion
 
+		#region Logger overrides
+		/// <summary>
+		/// first fault, going to reproduce
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="currentIteration"></param>
+		/// <param name="stateModel"></param>
+		/// <param name="faultData"></param>
+		protected override void Engine_ReproFault(Peach.Core.RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Peach.Core.Fault[] faultData)
+		{
+			Iteration iteration = new Iteration();
+			iteration.IterationNumber = currentIteration;
+			iteration.JobID = JobID;
+			iteration.NodeName = IPAddress;
+			iteration.TestName = context.test.name;
+			iteration.SeedNumber = context.config.randomSeed;
+			iteration.Stamp = DateTime.Now;
+
+			var result = DatabaseHelper.FindIteration(iteration, MongoConnectionString);
+
+			if (result != null)
+			{
+				iteration = result;
+			}
+
+			iteration.Faults.AddRange(GetMongoFaults(faultData, stateModel));
+			iteration.SaveToDatabase(MongoConnectionString);
+
+		}
+
+		/// <summary>
+		/// reproduced fault
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="currentIteration"></param>
+		/// <param name="stateModel"></param>
+		/// <param name="faultData"></param>
 		protected override void Engine_Fault(Peach.Core.RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Peach.Core.Fault[] faultData)
 		{
 			Iteration iteration = new Iteration();
@@ -66,8 +104,15 @@ namespace PeachFarm.Loggers
 			iteration.SeedNumber = context.config.randomSeed;
 			iteration.Stamp = DateTime.Now;
 
-			iteration.Faults = GetMongoFaults(faultData, stateModel);
-			iteration.DatabaseInsert(MongoConnectionString);
+			var result = DatabaseHelper.FindIteration(iteration, MongoConnectionString);
+
+			if (result != null)
+			{
+				iteration = result;
+			}
+
+			iteration.Faults.AddRange(GetMongoFaults(faultData, stateModel, true));
+			iteration.SaveToDatabase(MongoConnectionString);
 		}
 
 		protected override void Engine_TestStarting(Peach.Core.RunContext context)
@@ -84,29 +129,31 @@ namespace PeachFarm.Loggers
 				mongoJob.UserName = UserName;
 				mongoJob.PitFileName = PitFileName;
 				mongoJob.StartDate = DateTime.Now;
-				mongoJob = mongoJob.DatabaseInsert(MongoConnectionString);
+				mongoJob = mongoJob.SaveToDatabase(MongoConnectionString);
 			}
 			#endregion
 		}
 
-		protected override void Engine_TestError(Peach.Core.RunContext context, Exception e)
-		{
-			System.Console.WriteLine("******** MONGOLOGGER: TEST ERROR ************");
-			System.Console.WriteLine("******** " + e.Message);
-			System.Console.WriteLine("*********************************************");
-		}
-
-		protected override void Engine_TestFinished(Peach.Core.RunContext context)
-		{
-
-		}
-
 		protected override void Engine_IterationStarting(Peach.Core.RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			
-		}
+			Iteration iteration = new Iteration();
+			iteration.IterationNumber = currentIteration;
+			iteration.JobID = JobID;
+			iteration.NodeName = IPAddress;
+			iteration.TestName = context.test.name;
+			iteration.SeedNumber = context.config.randomSeed;
+			iteration.Stamp = DateTime.Now;
 
-		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.Dom.StateModel stateModel)
+			var result = DatabaseHelper.FindIteration(iteration, MongoConnectionString);
+			if (result == null)
+			{
+				iteration.SaveToDatabase(MongoConnectionString);
+			}
+		}
+		#endregion
+
+		#region private functions
+		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.Dom.StateModel stateModel, bool isreproduction = false)
 		{
 			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
 
@@ -127,6 +174,7 @@ namespace PeachFarm.Loggers
 				mongoFault.MajorHash = pf.majorHash;
 				mongoFault.MinorHash = pf.minorHash;
 				mongoFault.Title = pf.title;
+				mongoFault.IsReproduction = isreproduction;
 
 				mongoFault.StateModel = mongoActions;
 				mongoFault.CollectedData = GetMongoCollectedData(pf);
@@ -182,5 +230,6 @@ namespace PeachFarm.Loggers
 
 			return cds;
 		}
+		#endregion
 	}
 }
