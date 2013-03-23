@@ -70,8 +70,11 @@ namespace PeachFarm.Common
 		public void StopListener()
 		{
 			IsListening = false;
-
+			
 			listenTimer.Stop();
+			listenTimer.Dispose();
+			listenTimer = null;
+
 			lock (declarer)
 			{
 				declarer.QueueDelete(listenQueue);
@@ -272,9 +275,10 @@ namespace PeachFarm.Common
 		#endregion
 
 		#region private functions
-
+		private static bool ticking;
 		private void Listen(object source, System.Timers.ElapsedEventArgs e)
 		{
+			ticking = true;
 			if (IsListening)
 			{
 				BasicGetResult result = null;
@@ -307,6 +311,7 @@ namespace PeachFarm.Common
 					}
 				} while (result != null);
 			}
+			ticking = false;
 		}
 
 		private void OpenConnection()
