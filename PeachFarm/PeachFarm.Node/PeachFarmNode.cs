@@ -369,11 +369,15 @@ namespace PeachFarm.Node
 				heartbeat.JobID = nodeState.JobID;
 				heartbeat.UserName = nodeState.UserName;
 				heartbeat.PitFileName = nodeState.PitFileName;
+				heartbeat.Seed = nodeState.RunContext.config.randomSeed;
+				heartbeat.Iteration = nodeState.RunContext.test.strategy.Iteration;
 			}
 			heartbeat.Tags = nodeState.Tags;
 			heartbeat.QueueName = nodeState.ClientQueueName;
 			heartbeat.Stamp = DateTime.Now;
 			heartbeat.Status = nodeState.Status;
+
+
 			return heartbeat;
 		}
 

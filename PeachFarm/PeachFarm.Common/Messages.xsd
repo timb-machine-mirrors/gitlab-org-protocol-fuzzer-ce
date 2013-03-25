@@ -64,11 +64,14 @@
     <xs:attribute name="Stamp" type="xs:dateTime" use="required" />
     <xs:attribute name="Status" type="Status" use="required" />
     <xs:attribute name="QueueName" type="xs:string" use="required" />
-    <xs:attribute name="JobID" type="xs:string" use="required" />
-    <xs:attribute name="PitFileName" type="xs:string" use="required" />
-    <xs:attribute name="UserName" type="xs:string" use="required" />
-    <xs:attribute name="Tags" type="xs:string" use="required" />
-  </xs:complexType>
+		<xs:attribute name="Tags" type="xs:string" use="required" />
+
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="PitFileName" type="xs:string" use="required" />
+		<xs:attribute name="UserName" type="xs:string" use="required" />
+		<xs:attribute name="Seed" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="Iteration" type="xs:unsignedInt" use="required" />
+	</xs:complexType>
 
   <xs:simpleType name="Status">
     <xs:restriction base="xs:string">

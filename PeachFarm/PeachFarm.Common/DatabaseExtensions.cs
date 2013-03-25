@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver.Builders;
+using MongoDB.Driver.Linq;
 using System.Diagnostics;
 using System.IO;
 
@@ -127,18 +128,20 @@ namespace PeachFarm.Common.Mongo
 			return heartbeat;
 		}
 
-		public static MongoCursor<Iteration> GetIterationsCursor(this Job job, string connectionString)
+		public static List<Iteration> GetIterationsCursor(this Job job, string connectionString)
 		{
 			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
-			return collection.Find(query);
+			return collection.Find(query).OrderBy(i => i.IterationNumber).ToList();
 		}
 
 		public static long GetFaultCount(this Job job, string connectionString)
 		{
-			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			var query = Query.EQ("JobID", job.JobID);
-			return collection.Count(query);
+			var collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
+			var result = (from i in collection.AsQueryable<Iteration>()
+									where i.JobID == job.JobID
+									select i.Faults.Count()).ToList().Sum();
+			return result;
 		}
 
 		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)

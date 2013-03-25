@@ -136,19 +136,19 @@ namespace PeachFarm.Loggers
 
 		protected override void Engine_IterationStarting(Peach.Core.RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			Iteration iteration = new Iteration();
-			iteration.IterationNumber = currentIteration;
-			iteration.JobID = JobID;
-			iteration.NodeName = IPAddress;
-			iteration.TestName = context.test.name;
-			iteration.SeedNumber = context.config.randomSeed;
-			iteration.Stamp = DateTime.Now;
+			//Iteration iteration = new Iteration();
+			//iteration.IterationNumber = currentIteration;
+			//iteration.JobID = JobID;
+			//iteration.NodeName = IPAddress;
+			//iteration.TestName = context.test.name;
+			//iteration.SeedNumber = context.config.randomSeed;
+			//iteration.Stamp = DateTime.Now;
 
-			var result = DatabaseHelper.FindIteration(iteration, MongoConnectionString);
-			if (result == null)
-			{
-				iteration.SaveToDatabase(MongoConnectionString);
-			}
+			//var result = DatabaseHelper.FindIteration(iteration, MongoConnectionString);
+			//if (result == null)
+			//{
+			//  iteration.SaveToDatabase(MongoConnectionString);
+			//}
 		}
 		#endregion
 

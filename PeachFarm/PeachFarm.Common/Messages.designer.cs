@@ -896,13 +896,17 @@ namespace PeachFarm.Common.Messages
 
 		private string queueNameField;
 
+		private string tagsField;
+
 		private string jobIDField;
 
 		private string pitFileNameField;
 
 		private string userNameField;
 
-		private string tagsField;
+		private uint seedField;
+
+		private uint iterationField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -971,6 +975,19 @@ namespace PeachFarm.Common.Messages
 		}
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public string Tags
+		{
+			get
+			{
+				return this.tagsField;
+			}
+			set
+			{
+				this.tagsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
 		public string JobID
 		{
 			get
@@ -1010,15 +1027,28 @@ namespace PeachFarm.Common.Messages
 		}
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
-		public string Tags
+		public uint Seed
 		{
 			get
 			{
-				return this.tagsField;
+				return this.seedField;
 			}
 			set
 			{
-				this.tagsField = value;
+				this.seedField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public uint Iteration
+		{
+			get
+			{
+				return this.iterationField;
+			}
+			set
+			{
+				this.iterationField = value;
 			}
 		}
 
