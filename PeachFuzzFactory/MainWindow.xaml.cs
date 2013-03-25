@@ -175,7 +175,7 @@ namespace PeachFuzzFactory
 			}
 		}
 
-		void cracker_ExitHandleNodeEvent(DataElement element, long position)
+		void cracker_ExitHandleNodeEvent(DataElement element, long position, BitStream data)
 		{
 			var currentModel = crackMap[element];
 			currentModel.StopBits = position;
@@ -188,7 +188,7 @@ namespace PeachFuzzFactory
 			}
 		}
 
-		void cracker_EnterHandleNodeEvent(DataElement element, long position)
+		void cracker_EnterHandleNodeEvent(DataElement element, long position, BitStream data)
 		{
 			crackMap[element] = new CrackModel(element, position, 0);
 		}
