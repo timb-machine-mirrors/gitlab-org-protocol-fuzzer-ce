@@ -12,9 +12,8 @@ using System.Xml;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
-  public class DataElementContainer : NodeWithParameters, IXmlSerializable
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+  public class DataElementContainer : NodeWithParameters,IXmlSerializable
   {
     public DataElementContainer() { }
 

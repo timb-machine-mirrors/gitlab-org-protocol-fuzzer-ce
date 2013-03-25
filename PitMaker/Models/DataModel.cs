@@ -8,12 +8,14 @@ using System.ComponentModel;
 using System.Xml.Linq;
 using System.Xml;
 using System.IO;
+using System.Reflection;
 
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
+  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="DataModel")]
+	[System.Xml.Serialization.XmlRoot(DataType="DataModel",ElementName="DataModel",IsNullable=false,Namespace = "http://phed.org/2012/Peach")]
+	//[System.Xml.Serialization.XmlSchemaProvider("MySchema")]
   public class DataModel : Node, IXmlSerializable
   {
     public DataModel() { }
@@ -252,5 +254,21 @@ namespace PitMaker.Models
         }
       }
     }
+
+		public static XmlQualifiedName MySchema(System.Xml.Schema.XmlSchemaSet xs)
+		{
+			// This method is called by the framework to get the schema for this type. 
+			// We return an existing schema from disk.
+
+			XmlSerializer schemaSerializer = new XmlSerializer(typeof(System.Xml.Schema.XmlSchema));
+			using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PitMaker.DataModel.xsd"))
+			{
+				System.Xml.Schema.XmlSchema s = (System.Xml.Schema.XmlSchema)schemaSerializer.Deserialize(stream);
+				xs.XmlResolver = new XmlUrlResolver();
+				xs.Add(s);
+			}
+
+			return new XmlQualifiedName("dataModel", "http://phed.org/2012/Peach");
+		}
   }
 }

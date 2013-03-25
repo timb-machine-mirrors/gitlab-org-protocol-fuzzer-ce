@@ -85,6 +85,42 @@ namespace PeachFarmMonitor {
         protected global::System.Web.UI.WebControls.Label loadingLabel;
         
         /// <summary>
+        /// summaryPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel summaryPanel;
+        
+        /// <summary>
+        /// aliveNodesLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label aliveNodesLabel;
+        
+        /// <summary>
+        /// runningNodesLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label runningNodesLabel;
+        
+        /// <summary>
+        /// lateNodesLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lateNodesLabel;
+        
+        /// <summary>
         /// tabstrip control.
         /// </summary>
         /// <remarks>

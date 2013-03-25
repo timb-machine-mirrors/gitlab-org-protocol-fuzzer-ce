@@ -100,6 +100,7 @@
                 <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
                 <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" />
                 <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" />
+                <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" />
               </Columns>
               <DetailItemTemplate>
                 <telerik:RadPanelBar ID="descriptionPanel" runat="server" Width="100%">

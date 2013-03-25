@@ -46,7 +46,7 @@ namespace PeachFarmMonitor
       {
         string root = Server.MapPath(".");
         string archiveFolder = Path.Combine(root, "jobArchive");
-        Reports.FileWriter.CreateDirectory(archiveFolder);
+        //Reports.FileWriter.CreateDirectory(archiveFolder);
         Reports.FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, Job); 
         
         if ((iterationsGrid != null) && (iterationsGrid.DataSource == null))

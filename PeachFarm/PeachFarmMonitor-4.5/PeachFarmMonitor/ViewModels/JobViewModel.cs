@@ -26,10 +26,13 @@ namespace PeachFarmMonitor.ViewModels
       this.Status = status;
 
       this.Iterations = new List<IterationViewModel>();
+      long count = 0;
       foreach (var i in job.Iterations)
       {
         this.Iterations.Add(new IterationViewModel(i));
+        count += i.Faults.Count;
       }
+      FaultCount = count;
     }
 
     public JobStatus Status { get; set; }

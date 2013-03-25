@@ -12,9 +12,6 @@ using System.Diagnostics;
 
 namespace PitMaker.Models
 {
-  [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
   public class Node : DynamicObject, INotifyPropertyChanged
   {
     public Node()
@@ -177,9 +174,6 @@ namespace PitMaker.Models
     #endregion
   }
 
-  [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
   public class NodeWithParameters : Node
   {
     public NodeWithParameters() 

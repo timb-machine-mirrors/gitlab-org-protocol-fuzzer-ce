@@ -17,6 +17,7 @@ using PeachFarmMonitor.ViewModels;
 using Telerik.Web.UI;
 using RabbitMQ.Client.Exceptions;
 
+
 namespace PeachFarmMonitor
 {
   public partial class Home : System.Web.UI.Page
@@ -26,6 +27,9 @@ namespace PeachFarmMonitor
     private static PeachFarmMonitorSection monitorconfig = null;
     private static Messages.MonitorResponse response;
     private string guid;
+
+    private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
+
     public Home()
     {
       adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
@@ -67,6 +71,10 @@ namespace PeachFarmMonitor
         BindJobs();
         jobsGrid.DataBind();
 
+        aliveNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Alive select h).Count().ToString();
+        runningNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Running select h).Count().ToString();
+        lateNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Late select h).Count().ToString();
+
         BindNodes();
         nodesGrid.DataBind();
 
@@ -76,9 +84,18 @@ namespace PeachFarmMonitor
         loadingLabel.Text = "";
         loadingLabel.Visible = false;
       }
-      catch
+      catch(Exception ex)
       {
-        //do nothing
+        string message = ex.Message;
+        if(ex.InnerException != null)
+        {
+          message += "\n" + ex.InnerException.Message;
+        }
+        nlog.Warn(message);
+
+        loadingLabel.Text = "ERROR";
+        loadingLabel.BackColor = System.Drawing.Color.Red;
+        loadingLabel.Visible = true;
       }
     }
     #endregion
@@ -103,7 +120,7 @@ namespace PeachFarmMonitor
       if (item != null)
       {
         PeachFarm.Common.Messages.Heartbeat heartbeat = item.DataItem as PeachFarm.Common.Messages.Heartbeat;
-        Label label = item.DetailTemplateItemDataCell.FindControl("ErrorMessage") as Label;
+        TextBox label = item.DetailTemplateItemDataCell.FindControl("ErrorMessage") as TextBox;
         if (label != null)
         {
           label.Text = heartbeat.ErrorMessage;

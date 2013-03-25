@@ -10,7 +10,7 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [Serializable()]
-  [XmlType(AnonymousType = true, Namespace = "http://phed.org/2012/Peach")]
+  [XmlType(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
   [XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
   public class Agent : Node
   {

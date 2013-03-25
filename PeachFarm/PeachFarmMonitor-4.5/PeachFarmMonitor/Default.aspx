@@ -29,21 +29,28 @@
       top:0;
       left:0;
       right:0;
-      height:30px;
+      height:60px;
+    }
+    #titlePanel
+    {
       font-size:x-large;
       font-family: 'Segoe UI', Arial;
+    }
+    #summaryPanel
+    {
+      padding-left: 4px;
     }
     #tabstrip
     {
       position: absolute;
-      top:30px;
+      top:60px;
       left:0;
       right:0;
     }
     #toplevel
     {
       position: absolute;
-      top:58px;
+      top:88px;
       bottom:0;
       left:0;
       right:0;
@@ -75,6 +82,7 @@
             <telerik:AjaxUpdatedControl ControlID="jobsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="errorsGrid"/>
             <telerik:AjaxUpdatedControl ControlID="titlePanel" />
+            <telerik:AjaxUpdatedControl ControlID="summaryPanel" />
           </UpdatedControls>
         </telerik:AjaxSetting>
         <telerik:AjaxSetting AjaxControlID="nodesGrid">
@@ -100,6 +108,24 @@
         <asp:Label ID="lblHost" runat="server" />
         <asp:Label Text="LOADING" ID="loadingLabel" runat="server" BackColor="Green" />
       </asp:Panel>
+      <asp:Panel ID="summaryPanel" runat="server">
+        <asp:Table runat="server" CellPadding="2" CellSpacing="4">
+          <asp:TableRow>
+            <asp:TableCell>
+              <asp:Label Text="Alive:" runat="server" />&nbsp;
+              <asp:Label ID="aliveNodesLabel" runat="server" />
+            </asp:TableCell>
+            <asp:TableCell>
+              <asp:Label Text="Running:" runat="server" />&nbsp;
+              <asp:Label ID="runningNodesLabel" runat="server" />
+            </asp:TableCell>
+            <asp:TableCell>
+              <asp:Label Text="Late:" runat="server" />&nbsp;
+              <asp:Label ID="lateNodesLabel" runat="server" />
+            </asp:TableCell>
+          </asp:TableRow>
+        </asp:Table>
+      </asp:Panel>
     </div>
     <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" EnableEmbeddedSkins="false" Skin="DejaVu">
       <Tabs>
@@ -119,13 +145,18 @@
             <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
           </ClientSettings>
           <MasterTableView TableLayout="Fixed">
+            <ColumnGroups>
+              <telerik:GridColumnGroup HeaderText="Running Job Information" Name="JobInfo" />
+            </ColumnGroups>
             <Columns>
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
               <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
               <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
               <telerik:GridBoundColumn DataField="Tags" HeaderText="Tags" />
-              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID"  />
-              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" ColumnGroupName="JobInfo" />
+              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" ColumnGroupName="JobInfo" />
+              <telerik:GridBoundColumn DataField="Seed" HeaderText="Seed" ColumnGroupName="JobInfo" />
+              <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" ColumnGroupName="JobInfo" />
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
@@ -141,13 +172,13 @@
           </ClientSettings>
           <MasterTableView TableLayout="Fixed">
             <Columns>
-              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" />
+              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" />
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
               <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
-              <telerik:GridHyperLinkColumn DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank"/>
+              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
@@ -169,7 +200,7 @@
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
             </Columns>
             <DetailItemTemplate>
-              <asp:Label ID="ErrorMessage" runat="server" />
+              <asp:TextBox ID="ErrorMessage" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="25" />
             </DetailItemTemplate>
           </MasterTableView>
         </telerik:RadGrid>

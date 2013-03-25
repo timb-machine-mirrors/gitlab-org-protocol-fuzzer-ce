@@ -34,7 +34,7 @@ namespace PeachFarmMonitor
           {
             string root = Server.MapPath(".");
             string archiveFolder = Path.Combine(root, "jobArchive");
-            FileWriter.CreateDirectory(archiveFolder);
+            //FileWriter.CreateDirectory(archiveFolder);
             string zippath = FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, true);
             var jobName = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
             Response.AppendHeader( "content-disposition", "attachment; filename=" + jobName + ".zip");
