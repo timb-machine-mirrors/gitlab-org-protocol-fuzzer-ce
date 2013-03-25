@@ -4,17 +4,10 @@
 			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
 			 
 	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
-
-	<!--###Be sure to override the NextHeader Value##-->
-	<DataModel name="TLV">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Length" size="8">
-			<Relation type="size" of="Value"/>
-		</Number>
-		<Block name="Value"/>
-	</DataModel>
 	
+	<Include ns="Generic" src="file:##Path##/CommonHeaders/GenericDataTypes.xml"/>
 	
+	<!--###Be sure to override the NextHeader Value##-->	
 	<DataModel name="IPv6Header">
 		<Flags size="32" endian="big">
 			<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
@@ -44,7 +37,7 @@
 			</Number>
 			<Block name="TLVs">
 				<!-- size relation with padding -->
-				<Block name="InternalTLV" ref="TLV" minOccurs="0" maxOccurs="255">
+				<Block name="InternalTLV" ref="Generic:TLV" minOccurs="0" maxOccurs="255">
 					<Number name="Type" size="8" value="0"/>
 				</Block>
 				<Block name="Padding" minOccurs="1">
@@ -61,7 +54,7 @@
 	<DataModel name="Destination">
 		<Block ref="HopByHop">
 			<Block name="HopByHopContents.TLVs.InternalTLV">
-				<Block ref="TLV" name="HomeAddressOption">
+				<Block ref="Generic:TLV" name="HomeAddressOption">
 					<Number name="Type" size="8" endian="big" value="201"/>
 					<Block name="Value">
 						<Blob length="16" valueType="hex"/>
@@ -80,7 +73,7 @@
 										expressionSet="((size-8)/8) + int(bool(size % 8))"
 										expressionGet="((size+1)*8)" /><!-- this is length in 8-octet units -->
 				</Number>
-				<Block name="InternalTLV" ref="TLV" minOccurs="1" maxOccurs="255">
+				<Block name="InternalTLV" ref="Generic:TLV" minOccurs="1" maxOccurs="255">
 					<Number name="Type" size="8" value="c2" valueType="hex"/>
 					<Number name="Length" size="8" value="0">
 						<Relation type="size" of="Value"/>

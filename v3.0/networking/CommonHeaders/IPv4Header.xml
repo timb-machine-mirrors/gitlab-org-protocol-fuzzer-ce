@@ -33,12 +33,15 @@
 					<Param name="ref" value="Header"/>
 				</Fixup>
 			</Number>
-			<Blob name="SrcIP" value="##SourceIPv4##" size="32">
+			<!-- these won't crack since decode isn't implemented -->
+			<Block name="SrcIP" length="4">
+				<Blob name="IP" value="##SourceIP##"/>
 				<Transformer class="Ipv4StringToOctet" />
-			</Blob>
-			<Blob name="DestIP" value="##TargetIPv4##" size="32">
+			</Block>
+			<Block name="DestIP" length="4">
+				<Blob name="IP" value="##TargetIP##" />
 				<Transformer class="Ipv4StringToOctet" />
-			</Blob>
+			</Block>
 			<Blob name="Options"/>
 		</Block>
 		<Block name="IPv4Payload"/>

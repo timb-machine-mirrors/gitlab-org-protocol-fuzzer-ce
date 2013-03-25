@@ -2,15 +2,16 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIPv6" value="::1"/>
     <Define key="LoggerPath" value="logs/tcpV6/"/>
-    <Define key="SourceIPv6" value="::1"/>
+    <Define key="TargetIP" value="::1"/>
+    <Define key="SourceIP" value="::1"/>
+    <Define key="TargetPort" value="4321"/>
+    <Define key="SourcePort" value="5280"/>
     <Define key="Strategy"  value="Sequential"/>
   </All>
-  
   <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
-    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="Interface" value="lo"/>
+    <Define key="tsharkInterface" value="lo"/>
     <Define key="tsharkBin" value="/usr/bin/tshark"/>
   </Linux>
   <OSX platform="osx">
