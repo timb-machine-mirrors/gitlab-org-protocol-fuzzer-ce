@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from zlib import crc32 
+import time
 
 import clr
 clr.AddReferenceByPartialName('Peach.Core')
@@ -29,6 +30,10 @@ def init_seq(ctx):
         # code.InteractiveConsole(locals=globals()).interact()
     # print "verifying value is stored: %s" % get_store_val(ctx, 'SequenceNumber')
 
+
+def process_sequence(ctx):
+    return set_to_store(ctx, AcknowledgmentNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(ctx.dataModel.find('TcpPayload').InternalValue.ToString()) or 1))
+                        
 
 def set_to_store(ctx, **kwarg):
     print "setting value in store"
@@ -61,25 +66,20 @@ def inc_stored_vals(ctx, *args):
     for arg in args:
         inc_stored_val(ctx, arg)
 
-def done(ctx):
-    if "done" in ctx.parent.parent.parent.context.iterationStateStore:
-        return ctx.parent.parent.parent.context.iterationStateStore["done"]
-    return False
-
-def set_state(ctx, state):
-    print "setting state to %s" % state
-    ctx.parent.parent.parent.context.iterationStateStore["state"] = state
-    return True
-
-def get_state(ctx):
-    """http://www.ietf.org/rfc/rfc793.txt page 23"""
-    if "state" in ctx.parent.parent.parent.context.iterationStateStore:
-        return ctx.parent.parent.parent.context.iterationStateStore["state"]
-    else:
-        return "unknown"
 
 def chk_if_ack_for_me(ctx):
     return int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == get_store_val(ctx, 'SequenceNumber') and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
+
+
+def set_timestamp(ctx):
+    ctx.dataModel.find('TimestampValue').DefaultValue = Peach.Core.Variant(get_cur_timestamp())
+    ctx.dataModel.Value
+    return True
+    
+
+def get_cur_timestamp():
+    return int(time.mktime(time.gmtime()))
+
 
 # TCP.get_store_val(self, 'AcknowledgmentNumber')
 # self.dataModel.find('AcknowledgmentNumber').DefaultValue.ToString()

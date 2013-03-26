@@ -26,73 +26,102 @@
 		</Monitor>
 	</Agent>
 
-	<StateModel name="TheState" initialState="Initial">
+	<StateModel name="TheState" initialState="SendSyn">
 
-		<State name="Initial" >
-			<Action type="output" 
+		<State name="SendSyn" >
+			<Action type="output"
 							onStart="TCP.init_seq(self)"
-							onComplete="TCP.set_state(self, 'SYN SENT') and TCP.inc_stored_val(self, 'SequenceNumber')">
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
 				<Data ref="TCP:SYN"/>
 				<DataModel name="SYNPacket" ref="TCP:Packet"/>
 			</Action>
-			<Action type="changeState" ref="Read"/>
+			<Action name="Read" type="changeState" ref="SynSent" />
 		</State>
-		
-		<State name="Read">
-			<Action name="GetPacket" type="input" 
-							onComplete="TCP.set_to_store(self, AcknowledgmentNumber=int(self.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(self.dataModel.find('TcpPayload').InternalValue.ToString()) or 1))">
+
+		<State name="SynSent">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.process_sequence(self)">
 				<DataModel name="Packet" ref="TCP:InIPv4Packet"/>
 			</Action>
-			<Action type="changeState" ref="SetSynRecvd" 
-							when="TCP.chk_if_ack_for_me(self) and (TCP.get_state(self) == 'SYN SENT')"/>
-			<Action type="changeState" ref="SetFinished" 
-							when="TCP.chk_if_ack_for_me(self) and (TCP.get_state(self) == 'CLOSE')"/>
-			<Action type="changeState" ref="Read" />
+			<Action name="ChangeToSend"
+							type="changeState" ref="SynRecieved"
+							when="TCP.chk_if_ack_for_me(self)"/>
+			<Action name="ReadMore" type="changeState" ref="SynSent" />
 		</State>
-
-		<State name="SetSynRecvd">
-			<Action type="changeState" ref="Acknowledge" 
-							when="TCP.set_state(self, 'SYN RCVD')"/>
-		</State>
-
-		<State name="SetFinished">
-			<Action type="changeState" ref="Acknowledge" 
-							when="TCP.set_state(self, 'CLOSE')"/>
-		</State>
-
-		<State name="Acknowledge">
-			<!-- <Action type="changeState" ref="Acknowledge" when="code.InteractiveConsole(locals=globals()).interact()"/> -->
-			
-			<Action name="SendAck" type="output" 
+		
+		<State name="SynRecieved" >
+			<Action name="SendAck" type="output"
 							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')" >
-				<!-- onComplete="TCP.inc_stored_vals(self, 'SequenceNumber', 'AcknowledgmentNumber')" > -->
 				<Data ref="TCP:ACK"/>
 				<DataModel name="ACK" ref="TCP:Packet"/>
 			</Action>
-			<Action type="changeState" ref="SetEstablished" when="TCP.get_state(self) == 'SYN RCVD'"/>
-			<Action type="changeState" ref="ExitState" when="TCP.get_state(self) == 'CLOSE'"/>
+			<Action type="changeState" ref="Established"/>
 		</State>
 
-		<State name="SetEstablished">
-			<Action type="changeState" ref="SendFinal" 
-							when="TCP.set_state(self, 'ESTAB')"/>
+		<State name="Established" >
+			<Action type="changeState" ref="SimultaneousClose"/>
 		</State>
 
-		<State name="ExitState" />
-		
-		<State name="SendFinal">
+		<State name="SimultaneousClose">
 			<Action name="Close" type="output"
 							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
-							onComplete="TCP.set_state(self, 'CLOSE') and TCP.inc_stored_val(self, 'SequenceNumber')">
-							<!-- onStart="TCP.set_defaults_from_store(self, 'SequenceNumber')"  -->
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
 				<Data ref="TCP:FINACK"/>
-				<!-- <Data ref="TCP:FIN"/> -->
 				<DataModel name="FINACK" ref="TCP:Packet"/>
-				<!-- <DataModel name="FIN" ref="TCP:Packet"/> -->
 			</Action>
-			<Action type="changeState" ref="Read"/>
+			<Action type="changeState" ref="WaitingForFinAck"/>
 		</State>
 
+		<State name="WaitingForFinAck">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.process_sequence(self)">
+				<DataModel name="Packet" ref="TCP:InIPv4Packet"/>
+			</Action>
+			<Action name="ChangeToSend"
+							type="changeState" ref="SendFinalFinAck"
+							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
+		</State>
+		
+		<State name="SendFinalFinAck">
+			<Action name="Close" type="output"
+							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+				<Data ref="TCP:FINACK"/>
+				<DataModel name="FINACK" ref="TCP:Packet"/>
+			</Action>
+			<!-- <Action type="changeState" ref="BeginAckSeq"/> -->
+		</State>
+
+		<!-- <State name="BeginAckSeq"> -->
+		<!-- 	<Action name="SendAck" type="output" -->
+		<!-- 					onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')" -->
+		<!-- 					onComplete="TCP.inc_stored_val(self, 'SequenceNumber')"> -->
+		<!-- 		<Data ref="TCP:ACK"/> -->
+		<!-- 		<DataModel name="ACK" ref="TCP:Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action type="changeState" ref="GetLastAck"/> -->
+		<!-- </State> -->
+
+		<!-- <State name="GetLastAck"> -->
+		<!-- 	<Action name="GetPacket" type="input" -->
+		<!-- 					onComplete="TCP.process_sequence(self)"> -->
+		<!-- 		<DataModel name="Packet" ref="TCP:InIPv4Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action name="ChangeToSend" -->
+		<!-- 					type="changeState" ref="SendFinalAck" -->
+		<!-- 					when="TCP.chk_if_ack_for_me(self)"/> -->
+		<!-- 	<Action  name="ReadMore" type="changeState" ref="FinalAck" /> -->
+		<!-- </State> -->
+
+		<!-- <State name="FinalAck"> -->
+		<!-- 	<Action name="SendAck" type="output" -->
+		<!-- 					onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"> -->
+		<!-- 		<Data ref="TCP:ACK"/> -->
+		<!-- 		<DataModel name="ACK" ref="TCP:Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- </State> -->
+		
 		
 	</StateModel>
 
