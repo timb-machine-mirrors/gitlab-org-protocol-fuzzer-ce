@@ -2,7 +2,8 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
-
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
   <DataModel name="ICMPHeader">
     <Number name="Type" size="8"/>
     <Number name="Code" size="8"/>

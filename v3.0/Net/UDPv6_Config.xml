@@ -2,10 +2,11 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="logs/udp/"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="TargetIP" value="::1"/>
+    <Define key="LoggerPath" value="logs/udpV6/"/>
+    <Define key="SourceIP" value="::1"/>
     <Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
   </All>
   
   <Linux platform="linux">
