@@ -4,28 +4,7 @@
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol Version 6 PIT" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
-  <DataModel name="ICMPHeader">
-    <Number name="Type" size="8"  value="128" endian="network"/>
-    <Number name="Code" size="8"/>
-    <Number name="Checksum"  endian="big" size="16">
-      <Fixup class="IcmpV6ChecksumFixup">
-        <Param name="ref" value="ICMPHeader" />
-        <Param name="src" value="##SourceIPv6##" />
-        <Param name="dst" value="##TargetIPv6##" />
-      </Fixup>
-    </Number>
-    <Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
-    <Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
-    <Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
-  </DataModel>
-
-  <StateModel name="TheState" initialState="Initial">
-    <State name="Initial">
-      <Action type="output">
-        <DataModel ref="ICMPHeader"/>
-      </Action>
-    </State>
-  </StateModel>
+<Include ns="States" src="file:##Path##/_Common/Models/Net/ICMPv6_State.xml"/>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -38,9 +17,17 @@
     </Monitor>
   </Agent>
   
+	<Agent name="LocalAgent">
+		<Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+	</Agent>
+	
   <Test name="Default">
-    <Agent ref="RemoteAgent"/>
-    <StateModel ref="TheState"/>
+    <StateModel ref="States:TheState"/>
+		
+		<Agent ref="LocalAgent"/>
+    
     <Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>

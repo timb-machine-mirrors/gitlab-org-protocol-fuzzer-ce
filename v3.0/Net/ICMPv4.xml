@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
-       author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT" version="0.0.2">
+       author="Deja Vu Security, LLC" description="Internet Control Message Protocol Version 4 PIT" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
-  <DataModel name="ICMPHeader">
-    <Number name="Type" size="8"/>
-    <Number name="Code" size="8"/>
-    <Number name="Checksum" endian="big" size="16">
-      <Fixup class="IcmpChecksumFixup">
-        <Param name="ref" value="ICMPHeader" />
-      </Fixup>
-    </Number>
-    <Blob name="Remainder" length="4"/>
-    <Blob name="Data" valueType="hex" value="61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 75 76 77 61 62 63 64 65 66 67 68 69"/>
-  </DataModel>
+<Include ns="States" src="file:##Path##/_Common/Models/Net/ICMPv4_State.xml"/>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -27,17 +17,17 @@
     </Monitor>
   </Agent>
   
-  <StateModel name="TheState" initialState="Initial">
-    <State name="Initial">
-      <Action type="output">
-        <DataModel ref="ICMPHeader"/>
-      </Action>
-    </State>
-  </StateModel>
-
+	<Agent name="LocalAgent">
+		<Monitor class="Pcap">
+      <Param name="Device" value="##Interface##" />
+    </Monitor>
+	</Agent>
+	
   <Test name="Default">
-    <Agent ref="RemoteAgent"/>
-    <StateModel ref="TheState"/>
+    <StateModel ref="States:TheState"/>
+		
+		<Agent ref="LocalAgent"/>
+		
     <Publisher class="RawV4">
       <Param name="Host" value="##TargetIPv4##"/>
       <Param name="Interface" value="##SourceIPv4##"/>
