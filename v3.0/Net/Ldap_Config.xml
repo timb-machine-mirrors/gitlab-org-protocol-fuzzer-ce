@@ -3,7 +3,7 @@
 	<All>
 		<Define key="LoggerPath"  value="./logs/ldap"/> 
 		<Define key="Strategy"  value="Sequential"/>
-		<Define key="TargetIP" value="192.168.146.130"/>
+		<Define key="TargetIPv4" value="192.168.146.130"/>
 		<Define key="Port" value="389"/>
 		<Define key="Password" value="password"/>
 		<Define key="UserName" value="cn=admin,dc=example,dc=com"/>
