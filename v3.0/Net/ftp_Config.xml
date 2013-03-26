@@ -2,12 +2,13 @@
 <PitDefines>
   <All>
     <!-- <Define key="RemoteAgentIP" value="10.0.1.40"/> -->
-    <Define key="TargetHost" value="10.6.66.51"/>
+    <Define key="TargetIPv4" value="10.6.66.51"/>
 		<Define key="TargetPort" value="21"/>
     <Define key="LoggerPath" value="logs/ftp/"/>
     <Define key="Strategy"  value="Sequential"/>
 		<Define key="FtpUser" value="peach"/>
 		<Define key="FtpPass" value="peach"/>
+		<Define key="Path" value="."/>
   </All>
   
   <!-- <Linux platform="linux"> -->

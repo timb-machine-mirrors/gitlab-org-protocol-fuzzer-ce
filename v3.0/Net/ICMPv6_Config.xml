@@ -3,7 +3,7 @@
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
     <Define key="TargetIPv6" value="fe80::20c:29ff:fe1b:e7f8"/>
-    <Define key="LoggerPath" value="logs/IGMPv6/"/>
+    <Define key="LoggerPath" value="logs/ICMPv6/"/>
     <Define key="SourceIPv6" value="fe80::613a:8384:f4b:330c"/>
     <Define key="Strategy"  value="Sequential"/>
 		<Define key="Path" value="."/>

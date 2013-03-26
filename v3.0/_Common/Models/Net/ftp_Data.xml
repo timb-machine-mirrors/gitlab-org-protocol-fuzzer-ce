@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-       author="Deja Vu Security, LLC" description="Telnet Command Protocol PIT" version="0.0.2">
-
-  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-
-	<!-- This is an implementation of FTP as defined by RFC 959  -->
-	<!-- http://tools.ietf.org/html/rfc959 -->
-
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       author="Deja Vu Security, LLC" description="File Transfer Protocol PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
 	<!-- Helper Models -->
 	<DataModel name="ArgBlock">
 		<String name="Break" token="true" value=" "/>
@@ -377,5 +373,5 @@
 	<!-- 3.4.1.  STREAM MODE -->
 	<!-- 3.4.2.  BLOCK MODE -->
 	<!-- 3.4.3.  COMPRESSED MODE  -->
-
 </Peach>
+<!--END-->
