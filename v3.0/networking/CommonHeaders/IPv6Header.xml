@@ -37,14 +37,11 @@
 			</Number>
 			<Block name="TLVs">
 				<!-- size relation with padding -->
-				<Block name="InternalTLV" ref="Generic:TLV" minOccurs="0" maxOccurs="255">
+				<Block name="InternalTLV" ref="Generic:ValueLenTLV" minOccurs="0" maxOccurs="255">
 					<Number name="Type" size="8" value="0"/>
 				</Block>
-				<Block name="Padding" minOccurs="1">
+				<Block name="Padding" ref="Generic:ValueLenTLV" minOccurs="1">
 					<Number name="Type" size="8" value="1"/>
-					<Number name="Length" size="8" value="0">
-						<Relation type="size" of="PaddingValue"/>
-					</Number>
 				</Block>
 			</Block>
 			<Padding name="PaddingValue"  alignment="64" alignedTo="HopByHopContents"/>
@@ -54,7 +51,7 @@
 	<DataModel name="Destination">
 		<Block ref="HopByHop">
 			<Block name="HopByHopContents.TLVs.InternalTLV">
-				<Block ref="Generic:TLV" name="HomeAddressOption">
+				<Block ref="Generic:ValueLenTLV" name="HomeAddressOption">
 					<Number name="Type" size="8" endian="big" value="201"/>
 					<Block name="Value">
 						<Blob length="16" valueType="hex"/>
@@ -73,11 +70,8 @@
 										expressionSet="((size-8)/8) + int(bool(size % 8))"
 										expressionGet="((size+1)*8)" /><!-- this is length in 8-octet units -->
 				</Number>
-				<Block name="InternalTLV" ref="Generic:TLV" minOccurs="1" maxOccurs="255">
+				<Block name="InternalTLV" ref="Generic:ValueLenTLV" minOccurs="1" maxOccurs="255">
 					<Number name="Type" size="8" value="c2" valueType="hex"/>
-					<Number name="Length" size="8" value="0">
-						<Relation type="size" of="Value"/>
-					</Number>
 					<Block name="Value">
 						<Number name="SizeOfFrame" size="32">
 							<Relation type="size" of="PacketPayload"/>
