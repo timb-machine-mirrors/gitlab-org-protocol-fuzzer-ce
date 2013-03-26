@@ -120,7 +120,19 @@ namespace PeachFarmMonitor
       if (item != null)
       {
         PeachFarm.Common.Messages.Heartbeat heartbeat = item.DataItem as PeachFarm.Common.Messages.Heartbeat;
-        TextBox label = item.DetailTemplateItemDataCell.FindControl("ErrorMessage") as TextBox;
+        var panelbar = item.DetailTemplateItemDataCell.FindControl("messagePanel") as RadPanelBar;
+        var panelitem = panelbar.Items[0];
+        var newline = heartbeat.ErrorMessage.IndexOf("\n");
+
+        if (newline > 0)
+        {
+          panelitem.Text = String.Format("Message: {0} ... (click for more)", heartbeat.ErrorMessage.Substring(0,newline));
+        }
+        else
+        {
+          panelitem.Text = String.Format("Message: {0}", heartbeat.ErrorMessage);
+        }
+        var label = panelitem.FindControl("ErrorMessage") as TextBox;
         if (label != null)
         {
           label.Text = heartbeat.ErrorMessage;

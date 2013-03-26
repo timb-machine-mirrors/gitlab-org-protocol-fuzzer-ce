@@ -200,7 +200,15 @@
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
             </Columns>
             <DetailItemTemplate>
-              <asp:TextBox ID="ErrorMessage" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="25" />
+              <telerik:RadPanelBar ID="messagePanel" runat="server" Width="100%">
+                <Items>
+                  <telerik:RadPanelItem Text="Error Message" Expanded="false">
+                    <ContentTemplate>
+                      <asp:TextBox ID="ErrorMessage" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="25" />
+                    </ContentTemplate>
+                  </telerik:RadPanelItem>
+                </Items>
+              </telerik:RadPanelBar>
             </DetailItemTemplate>
           </MasterTableView>
         </telerik:RadGrid>

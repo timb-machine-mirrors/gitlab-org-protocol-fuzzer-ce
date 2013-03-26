@@ -137,11 +137,25 @@ namespace PeachFarm.Common.Mongo
 
 		public static long GetFaultCount(this Job job, string connectionString)
 		{
+			List<string> fields = new List<string>()
+      {
+				"JobID",
+				"NodeName",
+				"Faults.Description",
+				"Faults.DetectionSource",
+				"Faults.Exploitability",
+				"Faults.FolderName",
+				"Faults.MajorHash",
+				"Faults.MinorHash",
+				"Faults.Title",
+				"Faults.FaultType",
+				"Faults.StateModel",
+				"Faults.CollectedData"
+      };
 			var collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			var result = (from i in collection.AsQueryable<Iteration>()
-									where i.JobID == job.JobID
-									select i.Faults.Count()).ToList().Sum();
-			return result;
+			var query = Query.EQ("JobID", job.JobID);
+			var results = collection.Find(query).SetFields(Fields.Exclude(fields.ToArray()));
+			return results.Sum(i => i.Faults.Count());
 		}
 
 		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
