@@ -14,8 +14,8 @@
 			<Number name="Checksum" size="16" endian="big">
 				<Fixup class="UDPChecksumFixup">
 					<Param name="ref" value="Header"/>
-					<Param name="src" value="##SourceIPv4##"/>
-					<Param name="dst" value="##TargetIPv4##"/>
+					<Param name="src" value="127.0.0.1"/>
+					<Param name="dst" value="127.0.0.1"/>
 				</Fixup>
 			</Number>
 		</Block>

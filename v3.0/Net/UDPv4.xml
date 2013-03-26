@@ -26,11 +26,11 @@
   <Test name="Default">
     <StateModel ref="States:TheState"/>
 	
-		<Agent ref="LocalAgent"/>
+	<!--	<Agent ref="LocalAgent"/>-->
     
     <Publisher class="RawV4">
-      <Param name="Host" value="##TargetIP##"/>
-      <Param name="Interface" value="##SourceIP##"/>
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Protocol" value="17"/>
     </Publisher>
     
