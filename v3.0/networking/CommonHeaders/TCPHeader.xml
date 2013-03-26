@@ -16,6 +16,13 @@
 	<!-- <Include ns="IPv6" src="file:##Path##/CommonHeaders/IPv6Header.xml"/> -->
 
 	<DataModel name="OptionsAndPadding">
+		<Padding name="PaddingValue" alignment="32">
+			<Fixup class="FillValue">
+				<Param name="ref" value="PaddingValue"/>
+				<Param name="start" value="1"/>
+				<Param name="stop" value="1"/>
+			</Fixup>
+		</Padding>
 		<Choice name="Options" minOccurs="0">
 			<Block name="EndOfOp">
 				<Number value="0" name="TypeNumber"/>
@@ -93,7 +100,10 @@
 			<Block name="TSOPT" ref="Generic:TLV">  <!-- Time Stamp Option -->
 				<Number name="Type" size="8" value="8"/>
 				<Number name="Length" size="8" value="10"/>
-				<Block name="Value"/>
+				<Block name="Value">
+					<Number name="TimestampValue" size="32"/>
+					<Number name="TimestampEchoReply" size="32"/>
+				</Block>
 			</Block>
 			<Block name="PartialOrderConnectionPermitted" ref="Generic:TLV">  <!-- (obsolete) -->
 				<Number name="Type" size="8" value="9"/>
@@ -137,7 +147,6 @@
 				<Number name="Type" size="8" value="30"/>
 			</Block>
 		</Choice>
-		<Padding name="PaddingValue" alignment="32" />
 	</DataModel>
 
   <DataModel name="Packet">
@@ -178,24 +187,30 @@
  	<Data name="SYN">
 		<Field name="ControlBits.SYN" value="1"/>
 		<Field name="OptionsAndPadding.Options[0].MaximumSegmentSize.Value" valueType="hex" value="df 2e"/>
+		<Field name="OptionsAndPadding.Options[1].SACKPermitted"/>
+		<Field name="OptionsAndPadding.Options[2].TSOPT"/>
 	</Data>
 
  	<Data name="SYNACK">
 		<Field name="ControlBits.SYN" value="1"/>
 		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
 	</Data>
 
  	<Data name="ACK">
 		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
 	</Data>
 
  	<Data name="FINACK">
 		<Field name="ControlBits.FIN" value="1"/>
 		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
 	</Data>
 
  	<Data name="FIN">
 		<Field name="ControlBits.FIN" value="1"/>
+		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
 	</Data>
 
 	<DataModel name="InIPv4Packet" ref="IPv4:IPv4Header">
