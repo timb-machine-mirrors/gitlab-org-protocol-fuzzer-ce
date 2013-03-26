@@ -6,7 +6,7 @@
 
 	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
 	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
-	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMP_Data.xml"/>
+	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
 	
 	<!--###Be sure to override the NextHeader Value##-->
 	<DataModel name="TLV">

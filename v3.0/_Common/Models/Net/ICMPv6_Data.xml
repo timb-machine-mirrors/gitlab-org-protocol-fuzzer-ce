@@ -1,22 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
-       author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT DataModels" version="0.0.2">
+       author="Deja Vu Security, LLC" description="Internet Control Message Protocol v6 PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-
-  <DataModel name="ICMPv4Header">
-		<Block name="Content">
-			<Number name="Type" size="8"/>
-			<Number name="Code" size="8"/>
-			<Number name="Checksum" endian="big" size="16">
-				<Fixup class="IcmpChecksumFixup">
-					<Param name="ref" value="Content" />
-				</Fixup>
-			</Number>
-			<Blob name="Remainder" length="4"/>
-			<Blob name="Payload" value="Hello Peach World"/>
-		</Block>
-  </DataModel>
 
   <DataModel name="ICMPv6Header">
 		<Block name="Content">
