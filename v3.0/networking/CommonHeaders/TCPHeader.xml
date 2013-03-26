@@ -69,35 +69,35 @@
 			<Block name="TCPAO"> <!-- TCP Authentication Option -->
 				<Number value="29" name="TypeNumber"/>
 			</Block>
-			<Block name="MaximumSegmentSize" ref="Generic:TLV">
+			<Block name="MaximumSegmentSize" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="4"/>
 				<Number name="Value" size="16"/>
 			</Block>
-			<Block name="WSOPT" ref="Generic:TLV">  <!-- Window Scale -->
+			<Block name="WSOPT" ref="Generic:SelfLenTLV">  <!-- Window Scale -->
 				<Number name="Type" size="8" value="3"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="SACKPermitted" ref="Generic:TLV">
+			<Block name="SACKPermitted" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="4"/>
 				<Number name="Length" size="8" value="2"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="SACK" ref="Generic:TLV">
+			<Block name="SACK" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="5"/>
 			</Block>
-			<Block name="Echo" ref="Generic:TLV">  <!-- (obsoleted by option 8) -->
+			<Block name="Echo" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 8) -->
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="6"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="EchoReply" ref="Generic:TLV">  <!-- (obsoleted by option 8) -->
+			<Block name="EchoReply" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 8) -->
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="7"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TSOPT" ref="Generic:TLV">  <!-- Time Stamp Option -->
+			<Block name="TSOPT" ref="Generic:SelfLenTLV">  <!-- Time Stamp Option -->
 				<Number name="Type" size="8" value="8"/>
 				<Number name="Length" size="8" value="10"/>
 				<Block name="Value">
@@ -105,45 +105,45 @@
 					<Number name="TimestampEchoReply" size="32"/>
 				</Block>
 			</Block>
-			<Block name="PartialOrderConnectionPermitted" ref="Generic:TLV">  <!-- (obsolete) -->
+			<Block name="PartialOrderConnectionPermitted" ref="Generic:SelfLenTLV">  <!-- (obsolete) -->
 				<Number name="Type" size="8" value="9"/>
 				<Number name="Length" size="8" value="2"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="PartialOrderServiceProfile" ref="Generic:TLV">  <!-- (obsolete) -->
+			<Block name="PartialOrderServiceProfile" ref="Generic:SelfLenTLV">  <!-- (obsolete) -->
 				<Number name="Type" size="8" value="10"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TCPAlternateChecksumRequest" ref="Generic:TLV"> <!-- (obsolete) -->
+			<Block name="TCPAlternateChecksumRequest" ref="Generic:SelfLenTLV"> <!-- (obsolete) -->
 				<Number name="Type" size="8" value="14"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TCPAlternateChecksumData" ref="Generic:TLV"> <!-- (obsolete) -->
+			<Block name="TCPAlternateChecksumData" ref="Generic:SelfLenTLV"> <!-- (obsolete) -->
 				<Number name="Type" size="8" value="15"/>
 			</Block>
-			<Block name="TrailerChecksumOption" ref="Generic:TLV">
+			<Block name="TrailerChecksumOption" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="18"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="MD5SignatureOption" ref="Generic:TLV">  <!-- (obsoleted by option 29) -->
+			<Block name="MD5SignatureOption" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 29) -->
 				<Number name="Type" size="8" value="19"/>
 				<Number name="Length" size="8" value="18"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="QuickStartResponse" ref="Generic:TLV">
+			<Block name="QuickStartResponse" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="27"/>
 				<Number name="Length" size="8" value="8"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="UserTimeoutOption" ref="Generic:TLV">
+			<Block name="UserTimeoutOption" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="28"/>
 				<Number name="Length" size="8" value="4"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="MPTCP" ref="Generic:TLV"> <!-- Multipath TCP -->
+			<Block name="MPTCP" ref="Generic:SelfLenTLV"> <!-- Multipath TCP -->
 				<Number name="Type" size="8" value="30"/>
 			</Block>
 		</Choice>
