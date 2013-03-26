@@ -10,16 +10,16 @@
 	
   <DataModel name="Box">
     <Choice name="BoxLengthChoice" >
-	  <Block ref="MiniBox">
+	  <Block name="innerBox" ref="MiniBox"> <!--TODO these can't be same name, but the outer models need to overwrite Type...-->
         <Number name="Length" size="32" signed="false" endian="big" value="0" token="true"/>
 	  </Block>
-      <Block ref="MiniBox">
+      <Block name="innerBox" ref="MiniBox">
         <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/>
         <Number name="LengthExtended" size="64" signed="false" endian="big">
           <Relation type="size" of="Data" expressionGet="size - 16" expressionSet="size + 16" />
         </Number>		
       </Block>
-	  <Block ref="MiniBox">
+	  <Block name="innerBox" ref="MiniBox">
         <Number name="Length" size="32" signed="false" endian="big">
           <Relation type="size" of="Data" expressionGet="size - 8" expressionSet="size + 8"/>
         </Number>
@@ -72,7 +72,7 @@
     </Block>
   </DataModel>
   
-  <DataModel name="BoxColorSpecification" ref="Box"> <!--TODO fix -->
+  <DataModel name="BoxColorSpecification" ref="Box"> <!--TODO fix 
     <Blob name="Type" length="4" value="63 6F 6C 72" valueType="hex" token="true"/>
     <Block name="Data">
       <Number name="METH" endian="big" signed="false" size="8" />
@@ -123,7 +123,7 @@
         <Blob name="MethodUnknown" />
 
       </Choice>
-    </Block>
+    </Block-->
   </DataModel>
   
   <DataModel name="BoxPallete" ref="Box">
@@ -207,7 +207,7 @@
     <Blob name="Type" length="4" value="75 63 73 74" valueType="hex" token="true"/>
     <Block name="Data">
       <Number name="NU" endian="big" size="16" signed="false">
-        <Relation type="count" of="UUIDi"/> <!--TODO wat? -->
+        <Relation type="count" of="UUIDi"/> <!--TODO should this point to an array? -->
       </Number>
       <Blob name="UUIDi" length="16">
       </Blob>
@@ -236,24 +236,19 @@
 
   <!-- Begin JPX -->
 
-  <DataModel name="BoxReaderRequirements" ref="Box"><!--TODO-->
+  <DataModel name="BoxReaderRequirements" ref="Box"><!--TODO
     <Blob name="Type" length="4" value="72 72 65 71" valueType="hex" token="true"/>
     <Block name="Data">
       <Number name="ML" endian="big" signed="false" size="8" constraint="value == 1 or value == 2 or value == 4 or value == 8">
         <Relation type="size" of="FUAM" />
         <Relation type="size" of="DCM" />
       </Number>
-      <Blob name="FUAM">
-        <Relation type="size" from="ML" />
-      </Blob>
-      <Blob name="DCM">
-        <Relation type="size" from="ML" />
-      </Blob>
+      <Blob name="FUAM" />
+      <Blob name="DCM" />
       <Number name="NSF" endian="big" size="16" signed="false">
         <Relation type="count" of="ArrayUnwrap1" />
       </Number>
-      <Block name="ArrayUnwrap1" minOccurs="0" maxOccurs="3000">
-        <Relation type="count" from="NSF" />
+      <Block name="ArrayUnwrap1" minOccurs="0" >
         <Number name="SFi" endian="big" size="16" signed="false" constraint="value &gt;= 1 and value &lt;= 66"/>
         <Blob name="SMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
       </Block>
@@ -267,7 +262,7 @@
         <Blob name="VMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
                 
       </Block>
-    </Block>
+    </Block-->
   </DataModel>
 
 
@@ -324,6 +319,7 @@
 		  <Number name="NCH" endian="big" size="8" signed="false" />
           <Blob name="CVi" />
 		</Block>
+      </Choice>
     </Block>
   </DataModel>
 
@@ -374,7 +370,7 @@
     </Block>
   </DataModel>
 
-  <DataModel name="BoxInstructionSet" ref="Box"> <!--TODO-->
+  <DataModel name="BoxInstructionSet" ref="Box"> <!--TODO
     <Blob name="Type" length="4" value="69 6E 73 74" valueType="hex" token="true"/>
     <Block name="Data">
       <Flags name="Ityp" endian="big" size="16">
@@ -419,7 +415,7 @@
         </Number>
       </Block>
 	  
-    </Block>
+    </Block-->
   </DataModel>
 
   <DataModel name="BoxNumberList" ref="Box">
@@ -436,7 +432,7 @@
     </Block>
   </DataModel>
 
-  <DataModel name="BoxBinaryFilter" ref="Box"><!--TODO-->
+  <DataModel name="BoxBinaryFilter" ref="Box">
     <Blob name="Type" length="4" value="62 66 69 6C" valueType="hex" token="true"/>
     <Block name="Data">
       <Choice name="UUIDChoice">
@@ -444,11 +440,11 @@
           <Blob name="UUID" length="16" value="EC 34 0B 04 74 C5 11 D4 A7 29 87 9E A3 54 8F 0E" valueType="hex"/>
           <Block name="Data">
             <Transformer class="compress.GzipCompress" />
-            <Block name="TheBox" ref="Box" minOccurs="0" maxOccurs="3000" />
+            <Block name="TheBox" ref="Box" minOccurs="0" />
           </Block>
         </Block>
         <Block name="UnknownFilter">
-          <Blob name="UUID" length="16" value="" valueType="hex"/>
+          <Blob name="UUID" length="16"/>
           <Blob name="Data" analyzer="binary.Binary" />
         </Block>
       </Choice>
@@ -470,7 +466,7 @@
         <Number name="Ri" endian="big" size="8" signed="false" />
         <Number name="Rtypi" endian="big" size="8" signed="false" />
         <Number name="Rlcxi" endian="big" size="32" signed="false" />
-        <Number name="Rlcxi" endian="big" size="32" signed="false" />
+        <Number name="RlcxiTODO" endian="big" size="32" signed="false" />
         <Number name="Rlcyi" endian="big" size="32" signed="false" />
         <Number name="Rwdti" endian="big" size="32" signed="false" />
         <Number name="Rhthi" endian="big" size="32" signed="false" />
@@ -499,7 +495,7 @@
     </Block>
   </DataModel>
 
-  <DataModel name="BoxMPEG-7Binary" ref="Box">
+  <DataModel name="BoxMPEG7Binary" ref="Box">
     <Blob name="Type" length="4" value="6D 70 37 62" valueType="hex" token="true"/>
     <Blob name="Data" analyzer="binary.Binary" /><!--todo analyzer?-->
   </DataModel>
@@ -553,7 +549,7 @@
       <Block name="TheBoxGraphicsTechnologyStandardOutput" ref="BoxGraphicsTechnologyStandardOutput" />
       <Block name="TheBoxROIDescription" ref="BoxROIDescription" />
       <Block name="TheBoxDigitalSignature" ref="BoxDigitalSignature" />
-      <Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary" />
+      <Block name="TheBoxMPEG7Binary" ref="BoxMPEG7Binary" />
       <Block name="TheBoxFree" ref="BoxFree" />
       
       <!-- End JPX -->
@@ -571,7 +567,7 @@
     <Blob name="Type" length="4" value="6D 64 61 74" valueType="hex" token="true"/>
     <Block name="Data">
       <Choice minOccurs="1" >
-        <Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary" />
+        <Block name="TheBoxMPEG7Binary" ref="BoxMPEG7Binary" />
         <Block name="UnknownMediaBox" ref="BoxCatchAll" />        
       </Choice>
     </Block>
@@ -681,7 +677,7 @@
       <Block name="TheBoxAssociation" ref="BoxAssociation" />
       <Block name="TheBoxBinaryFilter" ref="BoxBinaryFilter" />
       <Block name="TheBoxDigitalSignature" ref="BoxDigitalSignature" />
-      <Block name="TheBoxMPEG-7Binary" ref="BoxMPEG-7Binary" />
+      <Block name="TheBoxMPEG7Binary" ref="BoxMPEG7Binary" />
       <Block name="TheBoxFree" ref="BoxFree" />
       <Block name="TheBoxXML" ref="BoxXML" />
       <Block name="TheBoxUUID" ref="BoxUUID" />
@@ -703,7 +699,7 @@
       </Action>
 
       <Action name="CloseFile"  type="close" publisher="writer" />
-      <Action name="Launch" type="call" method="FuzzMe" publisher="launch" />
+      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -712,19 +708,18 @@
        AGENT SECTION  
       *************** -->
 
-  <!-- WINDOWS  
-    <Agent name="Agent">
-    
-      <Monitor class="debugger.WindowsDebugEngine">
-        <Param name="CommandLine" value="C:\\path\\to\\target.exe fuzzed.jp2"/>
-        <Param name="StartOnCall" value="FuzzMe"/>
-      </Monitor>
-    
-      <Monitor class="process.PageHeap">
-        <Param name="Executable" value="target.exe"/>
-      </Monitor>
-    </Agent> 
-   -->
+  <Agent name="Agent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="C:\\windows\\system32\\mspaint.exe fuzzed.jp2"/>
+      <Param name="StartOnCall" value="FuzzMe"/>
+      <Param name="CpuKill" value="true"/>
+    </Monitor>
+
+    <Monitor class="PageHeap">
+      <Param name="Executable" value="mspaint.exe"/>
+    </Monitor>
+  </Agent>
+   
 
   <!-- LINUX 
     <Agent name="Agent" location="http://127.0.0.1:9000">
@@ -757,11 +752,11 @@
     <StateModel ref="StateModel" />
 
     <Publisher name="writer" class="file.FileWriter">
-      <Param name="Filename" value="fuzzed.jp2" />
+      <Param name="FileName" value="fuzzed.jp2" />
     </Publisher>
 
     <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
-    <Publisher name="launch" class="process.DebuggerLauncher"/>
+    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
 
     <!-- GUI Launcher: WINDOWS ONLY -->
     <!--
@@ -771,7 +766,7 @@
      -->
 	 
     <Logger class="logger.Filesystem">
-      <Param name="path" value=".\logs\"/>
+      <Param name="Path" value="logs/JPG2K/"/>
     </Logger>
   </Test>
   
