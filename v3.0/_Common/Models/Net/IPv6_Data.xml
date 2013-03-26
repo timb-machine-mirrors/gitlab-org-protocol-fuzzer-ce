@@ -1,49 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
+			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
 
-
-	<!-- Copyright (c) Deja Vu Security, LLC 2012 -->
-
-	<!-- Requires Linux Peach for Raw publishing -->
-
-	<!-- IPv6 DataModels -->
-
-	<!-- #################### Helper Templates #################### -->
-	<DataModel name="ICMPHeader">
-		<!-- This is included to help Jumbogram testing -->
-		<Number name="Type" size="8"  value="128" endian="network"/>
-		<Number name="Code" size="8"/>
-		<Number name="Checksum"  endian="big" size="16">
-			<Fixup class="IcmpV6ChecksumFixup">
-				<Param name="ref" value="ICMPHeader" />
-				<Param name="src" value="##SourceIPv6##" />
-				<Param name="dst" value="##TargetIPv6##" />
-			</Fixup>
-		</Number>
-		<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
-		<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
-		<Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
-	</DataModel>
-
-	<DataModel name="UDPv6Header">
-		<!-- This is included to help Jumbogram testing -->
-		<Number name="SrcPort" size="16" endian="network"/>
-		<Number name="DestPort" size="16" endian="network"/>
-		<Number name="Length" size="16" endian="network">
-			<Relation type="size" of="UDPv6Header" />
-		</Number>
-		<Number name="Checksum" size="16" endian="network">
-			<Fixup class="UDPChecksumFixup">
-				<Param name="ref" value="UDPv6Header" />
-				<Param name="src" value="##SourceIPv6##" />
-				<Param name="dst" value="##TargetIPv6##" />
-			</Fixup>
-		</Number>
-		<Blob name="Data" value="Hello"/>
-	</DataModel>
-
+	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
+	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
+	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMP_Data.xml"/>
+	
+	<!--###Be sure to override the NextHeader Value##-->
 	<DataModel name="TLV">
 		<Number name="Type" size="8" endian="big"/>
 		<Number name="Length" size="8">
@@ -52,42 +17,30 @@
 		<Block name="Value"/>
 	</DataModel>
 
-	<!-- #################### Header Templates #################### -->
-	<DataModel name="IPv6Ethernet">
-		<Block name="EtherHeader">
-			<Blob name="Dest" valueType="hex" mutable="false" value="##TargetMAC##"/>
-			<Blob name="Src" valueType="hex" mutable="false" value="##SourceMAC##"/>
-			<Blob name="Type" token="true" mutable="false" valueType="hex" value="86dd"/>
-		</Block>
-	</DataModel>
-
 	<DataModel name="IPv6Header">
-		<Block name="Header">
-			<Flags size="32" endian="big">
-				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
-				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
-				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
-				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
-			</Flags>
-			<Number name="PayloadLength" size="16" endian="big" valueType="hex" value="ffff"/>
-			<Number name="NextHeader" size="8" endian="big" value="59"/>
-			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/>
-			<Blob name="SrcIP" value="##SourceIPv6##">
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-			<Blob name="DestIP" value="##TargetIPv6##">
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-		</Block>
+		<Flags size="32" endian="big">
+			<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+			<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+			<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+			<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+		</Flags>
+		<Number name="PayloadLength" size="16" endian="big" valueType="hex" value="ffff"/>
+		<Number name="NextHeader" size="8" endian="big" value="59"/>
+		<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/>
+		<Blob name="SrcIP" value="##SourceIPv6##">
+			<Transformer class="Ipv6StringToOctet"/>
+		</Blob>
+		<Blob name="DestIP" value="##TargetIPv6##">
+			<Transformer class="Ipv6StringToOctet"/>
+		</Blob>
+		<Block name="IPv6Payload"/>
 	</DataModel>
-
+	
 	<DataModel name="HopByHop">
 		<Block name="HopByHopContents">
 			<Number name="NextHeader" size="8" value="59"/>
 			<Number name="PayloadLength" value="0" size="8">
-				<Relation type="size" of="HopByHopContents"
-									expressionSet="((size-8)/8) + int(bool(size % 8))"
-									expressionGet="((size+1)*8)" />
+				<Relation type="size" of="HopByHopContents" expressionSet="((size-8)/8) + int(bool(size % 8))" expressionGet="((size+1)*8)"/>
 			</Number>
 			<Block name="TLVs">
 				<!-- size relation with padding -->
@@ -142,7 +95,7 @@
 			<Padding name="PaddingValue"  alignment="64" alignedTo="JumboHopByHop"/>
 		</Block>
 		<!-- We're doing a UDP payload so this can be tested  -->
-		<Block name="PacketPayload"  ref="UDPv6Header">
+		<Block name="PacketPayload">
 			<Number name="SrcPort" size="16" endian="network" value="52161"/>
 			<Number name="DestPort" size="16" endian="network" value="9999"/>
 			<Number name="Length" size="16" endian="network" value="65527">
@@ -173,6 +126,7 @@
 			<Flag name="Mflag" size="1" position="15"/>
 		</Flags>
 		<Number name="Identification" size="32" endian="big"/>
+		<Blob name="Data" length="12"/>
 	</DataModel>
 
 	<DataModel name="DestinationOptions">
@@ -189,8 +143,9 @@
 		</Number>
 		<Number name="MH" size="8" endian="big"/>
 		<Number name="Reserved" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big">
+		<Number name="MHChecksum" size="16" endian="big">
 		</Number>
+		<Block name="MobilityOptions"/>
 	</DataModel>
 
 	<DataModel name="MobileRoutingType2Header">
@@ -201,85 +156,61 @@
 		<Number name="Reserved" size="32" endian="big"/>
 		<Blob name="HomeAddress" valueType="hex" length="16"/>
 	</DataModel>
-
-	<DataModel name="MobileICMP">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Code" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big">
-		</Number>
-		<Number name="Identifier" size="16" endian="big"/>
-		<Block name="Reserved"/>
-	</DataModel>
-
-	<DataModel name="MobileICMPRouterAdvertisement">
-		<Number name="Type" size="8" endian="big"/>
-		<Number name="Code" size="8" endian="big"/>
-		<Number name="Checksum" size="16" endian="big"/>
-		<Number name="CurrHopLimit" size="8" endian="big"/>
-		<Flags name="Flags" size="8" endian="big">
-			<Flag name="M" size="1" position="0"/>
-			<Flag name="O" size="1" position="1"/>
-			<Flag name="H" size="1" position="2"/>
-			<Flag name="Reserved" size="5" position="3"/>
-		</Flags>
-		<Number name="RouterLifetime" size="16" endian="big"/>
-		<Number name="ReachableTime" size="32" endian="big"/>
-		<Number name="RetransTimer" size="32" endian="big"/>
-		<Block name="Options"/>
-	</DataModel>
-
-	<!-- #################### Packet Definitions #################### -->
+	
+<!--START HERE-->	
+	
+	
 	<DataModel name="IPv6EmptyPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.NextHeader" size="8" value="59"/>
-			<Number name="Header.PayloadLength" value="0" size="16"/>
+			<Number name="PayloadLength" value="0" size="16"/>
+			<Number name="NextHeader" size="8" value="59"/>
 		</Block>
 	</DataModel>
 
 	<DataModel name="IPv6ICMPPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Blob name="Payload" valueType="hex" value="800014350a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 	</DataModel>
 
 	<DataModel name="IPv6UDPTestPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="17"/>
+			<Number name="NextHeader" size="8" value="17"/>
 		</Block>
-		<Block name="Payload" ref="UDPv6Header">
-			<Number name="SrcPort" size="16" endian="network" value="53526"/>
-			<Number name="DestPort" size="16" endian="network" value="9999"/>
-			<Number name="Length" size="16" endian="network">
+		<Block name="Payload" ref="UDP:UDPv6">
+			<Number name="Header.SrcPort" size="16" endian="network" value="53526"/>
+			<Number name="Header.DestPort" size="16" endian="network" value="9999"/>
+			<Number name="Header.Length" size="16" endian="network">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Checksum" size="16" endian="network">
+			<Number name="Header.Checksum" size="16" endian="network">
 				<Fixup class="UDPChecksumFixup">
 					<Param name="ref" value="Payload" />
 					<Param name="src" value="##SourceIPv6##" />
 					<Param name="dst" value="##TargetIPv6##" />
 				</Fixup>
 			</Number>
-			<Blob name="Data" value="foobarbaz\n"/>
+			<Blob name="UdpPayload" value="foobarbaz\n"/>
 		</Block>
 	</DataModel>
 
 	<DataModel name="IPv6HopByHopPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="0"/>
+			<Number name="NextHeader" size="8" value="0"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="HopByHop"/>
@@ -288,12 +219,12 @@
 
 	<DataModel name="IPv6DestinationPacket">
 		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="60"/>
+			<Number name="NextHeader" size="8" value="60"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Destination"/>
@@ -301,14 +232,14 @@
 	</DataModel>
 
 	<DataModel name="IPv6JumbogramPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big" value="0000" valueType="hex">
+			<Number name="PayloadLength" size="16" endian="big" value="0000" valueType="hex">
 			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"> -->
 				<!-- <Relation type="size" of="Payload"/> -->
 			</Number>
 			<!-- wireshark doesn't parse this ^ if 0, RFC says should be 0 for payloads over 65535 -->
-			<Number name="Header.NextHeader" size="8" value="0"/>
+			<Number name="NextHeader" size="8" value="0"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="JumboFrame"/>
@@ -316,12 +247,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket1">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="44"/>
+			<Number name="NextHeader" size="8" value="44"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
@@ -337,12 +268,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket2">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="44"/>
+			<Number name="NextHeader" size="8" value="44"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
@@ -358,12 +289,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket3">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="44"/>
+			<Number name="NextHeader" size="8" value="44"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Fragment">
@@ -379,12 +310,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBRRPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -408,12 +339,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTIPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -438,12 +369,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTIPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -468,12 +399,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -499,12 +430,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -530,12 +461,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBUPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -586,12 +517,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBAPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -637,12 +568,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBEPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="135"/>
+			<Number name="NextHeader" size="8" value="135"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="Mobile">
@@ -668,12 +599,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileRoutingType2HeaderPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="43"/>
+			<Number name="NextHeader" size="8" value="43"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="MobileRoutingType2Header">
@@ -683,12 +614,12 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Block name="Payload">
 			<Block ref="MobileICMP">
@@ -709,15 +640,15 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="MobileICMP">
+			<Block ref="ICMP:MobileICMP">
 				<Number name="Type" size="8" endian="big" value="145"/>
 				<Number name="Code" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -739,15 +670,15 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixSolicitationPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="MobileICMP">
+			<Block ref="ICMP:MobileICMP">
 				<Number name="Type" size="8" endian="big" value="146"/>
 				<Number name="Code" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -765,15 +696,15 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixAdvertisementPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="MobileICMP">
+			<Block ref="ICMP:MobileICMP">
 				<Number name="Type" size="8" endian="big" value="147"/>
 				<Number name="Code" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -801,15 +732,15 @@
 	<!--Mobile IPv6 adds the Advertisement Interval Option-->
 	<!-- See http://tools.ietf.org/html/rfc6275#section-7.1 -->
 	<DataModel name="IPv6MobileICMPRouterAdvertismentPacket">
-		<Block ref="IPv6Ethernet"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
-			<Number name="Header.PayloadLength" size="16" endian="big">
+			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
 			</Number>
-			<Number name="Header.NextHeader" size="8" value="58"/>
+			<Number name="NextHeader" size="8" value="58"/>
 		</Block>
 		<Block name="Payload">
-			<Block ref="MobileICMPRouterAdvertisement">
+			<Block ref="ICMP:MobileICMPRouterAdvertisement">
 				<Number name="Type" size="8" endian="big" value="134"/>
 				<Number name="Code" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -851,103 +782,5 @@
 			</Block>
 		</Block>
 	</DataModel>
-
-	<!-- #################### Agents #################### -->
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
-
-	<!-- #################### State Models #################### -->
-	<StateModel name="TheState" initialState="Initial">
-		<State name="Initial">
-			<Action type="output">
-				<DataModel ref="IPv6ICMPPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6EmptyPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6JumbogramPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6HopByHopPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6DestinationPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6FragmentPacket1"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6FragmentPacket2"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6FragmentPacket3"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBRRPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileHoTIPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileCoTIPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileHoTPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileCoTPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBUPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBAPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBEPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileRoutingType2HeaderPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileICMPPrefixSolicitationPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileICMPPrefixAdvertisementPacket"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileICMPRouterAdvertismentPacket"/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<!-- ####################### Tests ######################## -->
-	<Test name="Default">
-		<!-- <Agent ref="RemoteAgent"/> -->
-		<StateModel ref="TheState"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_IPV6"/>
-		</Publisher>
-		<Strategy class="##Strategy##"/>
-		<Logger class="logger.Filesystem" >
-			<Param name="Path" value="##LoggerPath##" />
-		</Logger>
-	</Test>
 </Peach>
 <!-- end -->

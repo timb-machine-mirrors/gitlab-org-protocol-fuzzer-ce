@@ -24,5 +24,11 @@
     </Number>
     <Blob name="Interframe" length="12" valueType="hex"/>
   </DataModel>
+	
+	<DataModel name="EtherHeader">
+		<Blob name="Dest" valueType="hex" mutable="false" value="##TargetMAC##"/>
+		<Blob name="Src" valueType="hex" mutable="false" value="##SourceMAC##"/>
+		<Blob name="Type" token="true" mutable="false" valueType="hex" value="86dd"/>
+	</DataModel>
 </Peach>
 <!--End-->

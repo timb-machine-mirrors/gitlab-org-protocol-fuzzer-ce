@@ -8,6 +8,7 @@
     <Define key="SourceMAC" value="000c29ef2a1b" />
     <Define key="TargetMAC" value="000c29ef2a1b" />
     <Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
   </All>
   
   <Linux platform="linux">

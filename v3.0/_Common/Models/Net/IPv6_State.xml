@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT StateModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
+	
+	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
+	
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6ICMPPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6EmptyPacket"/>
+			</Action>
+		<!--	<Action type="output">
+				<DataModel ref="DataModels:IPv6JumbogramPacket"/>
+			</Action>-->
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6HopByHopPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6DestinationPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6FragmentPacket1"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6FragmentPacket2"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6FragmentPacket3"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileBRRPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileHoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileCoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileHoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileCoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileBUPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileBAPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileBEPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileRoutingType2HeaderPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileICMPPrefixSolicitationPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileICMPPrefixAdvertisementPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6MobileICMPRouterAdvertismentPacket"/>
+			</Action>
+		</State>
+	</StateModel>
+</Peach>
+<!--END-->
