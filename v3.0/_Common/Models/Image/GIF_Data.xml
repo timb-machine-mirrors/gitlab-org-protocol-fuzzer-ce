@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://phed.org/2012/Peach /peach/peach.xsd" author="Deja vu Security" version="1">
-
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Gif PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
 	<!-- IMPORTS SECTION -->
 	<Import import="math"/>
 
-	<!-- DATA MODEL SECTION -->
 	<!-- Data Sub Block  -->
 	<DataModel name="DataSubBlock">
 		<Number name="BlockSize" size="8" signed="false" constraint="str(element.DefaultValue) != '0'">
@@ -97,9 +98,6 @@
 			</Block>
 		</Block>
 	</DataModel>
-
-
-
 
   <!-- Table Based Image -->
 	<DataModel name="TableBasedImage">
@@ -209,86 +207,5 @@
 			<Blob name="GIFTrailer" valueType="hex" value="3B" length="1" token="true"/>
 		</Block>
 	</DataModel>
-
-  
-  <!-- STATE MODEL SECTION -->
-  <StateModel name="TheStateModel" initialState="Initial">
-    <State name="Initial">
-
-      <Action name="WriteFileFromSample" type="output" publisher="writer">
-        <DataModel name="Gif" ref="GIF" />
-        <Data name="data" fileName="SeedFile.gif" />
-      </Action>
-
-      <Action name="CloseFile"  type="close" publisher="writer" />
-      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
-
-
-  <!-- ***************
-       AGENT SECTION  
-      *************** -->
-
-  <Agent name="TheAgent">
-    <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="C:\\windows\\system32\\mspaint.exe fuzzed.gif"/>
-      <Param name="StartOnCall" value="FuzzMe"/>
-      <Param name="CpuKill" value="true"/>
-    </Monitor>
-
-    <Monitor class="PageHeap">
-      <Param name="Executable" value="mspaint.exe"/>
-    </Monitor>
-  </Agent>
-
-  <!-- LINUX 
-    <Agent name="TheAgent" location="http://127.0.0.1:9000">
-      <Monitor class="debugger.UnixDebugger">
-        <Param name="Command" value="/bin/target" />
-        <Param name="Params" value="fuzzed.gif" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent> 
-    -->
-
-  <!-- OSX
-    <Agent name="TheAgent" location="http://127.0.0.1:9000">
-      <Monitor class="osx.CrashWrangler">
-        <Param name="Command" value="/Applications/Target/TargetName" />
-        <Param name="Arguments" value="fuzzed.gif" />
-        <Param name="ExecHandler" value="./exc_handler" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent>
-     -->
-
-
-  <!-- **************
-        TEST SECTION  
-       ************** -->
-  <Test name="Default">
-
-    <Agent ref="TheAgent"/>
-    <StateModel ref="TheStateModel" />
-
-    <Publisher name="writer" class="file.FileWriter">
-      <Param name="FileName" value="fuzzed.gif" />
-    </Publisher>
-
-    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
-    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
-
-    <!-- GUI Launcher: WINDOWS ONLY -->
-    <!--
-     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
-      <Param name="WindowName" value="GUI Window Name" /> 
-     </Publisher> 
-     -->
-	 <Strategy class="Random" />
-  <Logger class="logger.Filesystem">
-      <Param name="Path" value="logs/GIF/"/>
-    </Logger>
-  </Test>
-
 </Peach>
+<!--END-->
