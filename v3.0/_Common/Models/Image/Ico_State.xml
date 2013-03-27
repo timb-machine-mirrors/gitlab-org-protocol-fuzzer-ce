@@ -13,7 +13,7 @@
 			<Action type="output">
 				<DataModel ref="DataModels:ICO" />
 				<!-- This is our sample file to read in -->
-				<Data fileName="##Path##/_Common/Samples/Image/ico_sample_1.ico" />
+				<Data fileName="##Path##/_Common/Samples/Image/##Seed##" />
 			</Action>
 		
 			<Action type="close" />

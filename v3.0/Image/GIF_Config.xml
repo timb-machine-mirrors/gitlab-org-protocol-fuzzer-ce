@@ -2,9 +2,9 @@
 <PitDefines>
 
 	<All>
-		<Define key="Seed" value="png_sample_1.PNG"/>
+		<Define key="Seed" value="gif_sample_1.gif"/>
 		<Define key="Strategy"  value="Random"/>
-		<Define key="LoggerPath"  value="./logs/png/"/>
+		<Define key="LoggerPath"  value="./logs/gif/"/>
 		<Define key="Path" value="."/>
 	</All>
 		

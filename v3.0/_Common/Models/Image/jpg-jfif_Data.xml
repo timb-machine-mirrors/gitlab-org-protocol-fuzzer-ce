@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://phed.org/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
-	author="Deja vu Security" version="1">
-
-  <!--*********** BEGIN EXIF **************--><!--TODO actually use-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="JPG-JFIF PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<!--*********** BEGIN EXIF **************-->
   <DataModel name="TIFFHeader">
     <Choice name="EndianChoice" >
       <String name="EndianLittle" value="II" token="true" nullTerminated="false" length="2" mutable="false"/>
@@ -34,13 +35,6 @@
     <Block name="TheIFD" ref="IFD"/>
   </DataModel>
   <!-- ********** END EXIF *********** -->
-
-
-  
-  
-  
-  
-  
   
   <!-- ******** Marker Segmeent ******** -->
   <DataModel name="MarkerSegment">
@@ -388,7 +382,6 @@
 	</Block>
   </DataModel>
 
-
   <!-- ***** Define Number of Lines ********* -->
   <DataModel name="DefineNumberofLines" ref="MarkerSegment">
     <Blob name="Type" value="FFDC" length="2" valueType="hex" token="true" />
@@ -397,8 +390,6 @@
     </Block>
   </DataModel>
   
-  
-
   <!-- ********* Tables Misc *********  -->
   <DataModel name="TablesMisc">
     <Choice name="TablesChoice" minOccurs="0" >
@@ -410,7 +401,6 @@
       <Block name="TheComment" ref="Comment"/>
     </Choice>
   </DataModel>
-
 
   <!-- Hierarchical Mode: Progression Definition -->
   <DataModel name="DefineHierarchicalProgression" ref="FrameHeader">
@@ -426,7 +416,6 @@
       </Flags>
     </Block>
   </DataModel>
-
 
   <!-- Standard meta frame -->
   <DataModel name="Frame">
@@ -459,91 +448,5 @@
     </Choice>
     <Blob name="EOIMagic" value="FFD9" valueType="hex" token="true" length="2" />
   </DataModel>
-   
-   
-   
-   
-   
-  <!-- STATE MODEL SECTION -->
-  <StateModel name="StateModel" initialState="Initial">
-    <State name="Initial">
-
-      <Action name="WriteFileFromSample" type="output" publisher="writer">
-        <DataModel ref="JPG-JFIF" />
-        <Data name="data" fileName="SeedFile.jpg" />
-      </Action>
-
-      <Action name="CloseFile"  type="close" publisher="writer" />
-      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
-
-
-  <!-- ***************
-       AGENT SECTION  
-      *************** -->
-
-  <!-- WINDOWS -->
-  <Agent name="Agent">
-    <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="C:\\windows\\system32\\mspaint.exe fuzzed.jpg"/>
-      <Param name="StartOnCall" value="FuzzMe"/>
-	  <Param name="CPUKill" value="true"/>
-    </Monitor>
-
-    <Monitor class="PageHeap">
-      <Param name="Executable" value="mspaint.exe"/>
-    </Monitor>
-  </Agent>
-
-  
-  <!-- LINUX 
-    <Agent name="Agent" location="http://127.0.0.1:9000">
-      <Monitor class="debugger.UnixDebugger">
-        <Param name="Command" value="/bin/target" />
-        <Param name="Params" value="fuzzed.jpg" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent> 
-    -->
-
-  <!-- OSX
-    <Agent name="Agent" location="http://127.0.0.1:9000">
-      <Monitor class="osx.CrashWrangler">
-        <Param name="Command" value="/Applications/Target/TargetName" />
-        <Param name="Arguments" value="fuzzed.jpg" />
-        <Param name="ExecHandler" value="./exc_handler" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent>
-     -->
-
-
-  <!-- **************
-        TEST SECTION  
-       ************** -->
-  <Test name="Default">
-
-    <Agent ref="Agent"/>
-    <StateModel ref="StateModel" />
-
-    <Publisher name="writer" class="file.FileWriter">
-      <Param name="FileName" value="fuzzed.jpg" />
-    </Publisher>
-
-    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
-    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
-
-    <Logger class="logger.Filesystem">
-      <Param name="Path" value="logs/JPG-JFIF"/>
-    </Logger>	
-	
-    <!-- GUI Launcher: WINDOWS ONLY -->
-    <!--
-     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
-      <Param name="WindowName" value="GUI Window Name" /> 
-     </Publisher> 
-     -->
-
-  </Test>
 </Peach>
+<!--END-->
