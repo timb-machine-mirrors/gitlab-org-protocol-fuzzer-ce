@@ -4,7 +4,7 @@
 
 Pit Revision : 1.0 
 
-The included Peach Pit file png_3_0.xml covers the PNG file specification 1.0 and parts of the 1.2 specification. Peach uses this pit to perform automated negative testing of the PNG file format.   
+The included Peach Pit file png.xml covers the PNG file specification 1.0 and parts of the 1.2 specification. Peach uses this pit to perform automated negative testing of the PNG file format.   
 
 === Compatibility 
 
@@ -16,7 +16,7 @@ This pit is compatible with
 
 === Defines 
 
-The PNG_Defines.xml file is used to configure the pit file for each environment and target. 
+The PNG_Config.xml file is used to configure the pit file for each environment and target. 
 
 The following keys are used. 
 

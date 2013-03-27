@@ -1,0 +1,10 @@
+<PitDefines>
+  <All>
+		<Define key="Seed" value="avi_divx_sample_1.avi"/>
+		<Define key="Strategy"  value="Random"/>
+		<Define key="LoggerPath"  value="./logs/avi_divx/"/>
+		<Define key="Path" value="."/>
+  </All>
+</PitDefines>
+
+	
