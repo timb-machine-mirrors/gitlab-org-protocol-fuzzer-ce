@@ -13,7 +13,6 @@
 
 	<Include ns="Generic" src="file:##Path##/CommonHeaders/GenericDataTypes.xml"/>
 	<Include ns="IPv4" src="file:##Path##/CommonHeaders/IPv4Header.xml"/>
-	<!-- <Include ns="IPv6" src="file:##Path##/CommonHeaders/IPv6Header.xml"/> -->
 
 	<DataModel name="OptionsAndPadding">
 		<Padding name="PaddingValue" alignment="32">
@@ -196,6 +195,15 @@
 
  	<Data name="ACK">
 		<Field name="ControlBits.ACK" value="1"/>
+	</Data>
+
+	<DataModel name="PacketWithData" ref="Packet">
+		<Blob name="TcpPayload" value="this is a test packet\r\n"/>
+	</DataModel>
+
+ 	<Data name="PSHACK">
+		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="ControlBits.PSH" value="1"/>
 	</Data>
 
  	<Data name="FINACK">
