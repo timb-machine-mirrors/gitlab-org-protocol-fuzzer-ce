@@ -243,7 +243,7 @@ namespace PeachFarm.Common
 				declarer.Close();
 
 			if (connection.IsOpen)
-				connection.Close(1000);
+				connection.Close();
 
 		}
 		#endregion
@@ -314,14 +314,13 @@ namespace PeachFarm.Common
 			ticking = false;
 		}
 
-		private void OpenConnection(int timeout = 5000)
+		private void OpenConnection()
 		{
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.HostName = hostName;
 			factory.Port = port;
 			factory.UserName = userName;
 			factory.Password = password;
-			factory.RequestedConnectionTimeout = timeout;
 			factory.Ssl.Enabled = ssl;
 			factory.Ssl.AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateNotAvailable | SslPolicyErrors.RemoteCertificateChainErrors | SslPolicyErrors.RemoteCertificateNameMismatch;
 

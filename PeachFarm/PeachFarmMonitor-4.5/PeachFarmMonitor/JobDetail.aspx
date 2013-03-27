@@ -48,25 +48,21 @@
       right:0;
       bottom:0;
     }
-    #iterationsGridPanel
-    {
-      height:100%;
-    }
   </style>
+  <script type="text/javascript">
+    function GridCreated(sender, args) {
+      var scrollArea = sender.GridDataDiv;
+      var parent = $get("gridContainer");
+      var gridHeader = sender.GridHeaderDiv;
+      scrollArea.style.height = parent.clientHeight -
+        gridHeader.clientHeight + "px";
+    }
+  </script>
 </head>
 <body>
   <form id="form1" runat="server">
     <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
-    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
-      <AjaxSettings>
-        <telerik:AjaxSetting AjaxControlID="iterationsGrid">
-          <UpdatedControls>
-            <telerik:AjaxUpdatedControl ControlID="iterationsGrid" LoadingPanelID="loadingPanel" />
-          </UpdatedControls>
-        </telerik:AjaxSetting>
-      </AjaxSettings>
-    </telerik:RadAjaxManager>
-    <telerik:RadAjaxLoadingPanel ID="loadingPanel" MinDisplayTime="1000" runat="server" />
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server" />
     <div id="title">
       <asp:Panel ID="titlePanel" runat="server">
         <span style="padding-left: 4px">Job Detail:</span>
