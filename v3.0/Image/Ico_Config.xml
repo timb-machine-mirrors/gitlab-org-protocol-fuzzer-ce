@@ -3,7 +3,7 @@
 
 	<All>
 		<Define key="Seed" value="ico_sample_1.ico"/>
-		<Define key="Strategy"  value="Random"/>
+		<Define key="Strategy"  value="Sequential"/>
 		<Define key="LoggerPath"  value="./logs/ico/"/>
 		<Define key="Path" value="."/>
 	</All>

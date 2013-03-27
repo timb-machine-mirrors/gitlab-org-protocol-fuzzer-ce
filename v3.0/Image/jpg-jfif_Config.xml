@@ -2,8 +2,8 @@
 <PitDefines>
 
 	<All>
-		<Define key="Seed" value="jpg_sample_1.jpg"/>
-		<Define key="Strategy"  value="Random"/>
+		<Define key="Seed" value="jpg_sample_01.jpg"/>
+		<Define key="Strategy"  value="Sequential"/>
 		<Define key="LoggerPath"  value="./logs/jpg-jfif/"/>
 		<Define key="Path" value="."/>
 	</All>

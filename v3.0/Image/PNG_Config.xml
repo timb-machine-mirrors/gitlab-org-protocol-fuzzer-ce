@@ -2,8 +2,8 @@
 <PitDefines>
 
 	<All>
-		<Define key="Seed" value="png_sample_1.PNG"/>
-		<Define key="Strategy"  value="Random"/>
+		<Define key="Seed" value="png_sample_001.PNG"/>
+		<Define key="Strategy"  value="Sequential"/>
 		<Define key="LoggerPath"  value="./logs/png/"/>
 		<Define key="Path" value="."/>
 	</All>
