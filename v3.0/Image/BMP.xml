@@ -6,43 +6,29 @@
 
 	<Include ns="States" src="file:##Path##/_Common/Models/Image/BMP_State.xml"/>
 
-  <Agent name="TheAgent">
-    <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="C:\\windows\\system32\\mspaint.exe fuzzed.bmp"/>
-      <Param name="StartOnCall" value="FuzzMe"/>
-      <Param name="CpuKill" value="true"/>
-    </Monitor>
+  <Agent name="LinuxAgent">
+		<Monitor class="LinuxCrashMonitor"/>
+		<Monitor class="Process">
+				<Param name="Executable" value="##Target##"/>
+				<Param name="StartOnCall" value="FuzzMe"/>
+				<Param name="Arguments" value="fuzzed.bmp"/>
+		<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+	
+	<Agent name="WinAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="##Target## fuzzed.bmp"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
 
-    <Monitor class="PageHeap">
-      <Param name="Executable" value="mspaint.exe"/>
-    </Monitor>
-  </Agent>
-
-  <!-- LINUX 
-    <Agent name="TheAgent" location="http://127.0.0.1:9000">
-      <Monitor class="debugger.UnixDebugger">
-        <Param name="Command" value="/bin/target" />
-        <Param name="Params" value="fuzzed.bmp" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent> 
-    -->
-
-  <!-- OSX
-    <Agent name="TheAgent" location="http://127.0.0.1:9000">
-      <Monitor class="osx.CrashWrangler">
-        <Param name="Command" value="/Applications/Target/TargetName" />
-        <Param name="Arguments" value="fuzzed.bmp" />
-        <Param name="ExecHandler" value="./exc_handler" />
-        <Param name="StartOnCall" value="FuzzMe" />
-      </Monitor>
-    </Agent>
-     -->
 
   <Test name="Default">
 		<StateModel ref="States:TheStateModel" />
     
-		<Agent ref="TheAgent"/>
+		<Agent ref="##Agent##"/>
 
     <Publisher name="writer" class="file.FileWriter">
       <Param name="FileName" value="fuzzed.bmp" />

@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd" 
+	   version="1.0" author="Deja vu Security" description="PNG Graphics File Pit">
+
+	<Include ns="States" src="file:##Path##/_Common/Models/Image/PNG_State.xml"/>
+		 
+	<Agent name="LinuxAgent">
+		<Monitor class="LinuxCrashMonitor"/>
+	<Monitor class="Process">
+			<Param name="Executable" value="##Target##"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="Arguments" value="fuzzed.png"/>
+	<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+	
+	<Agent name="WinAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="##Target## fuzzed.png"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+
+
+	<Test name="Default">
+    <StateModel ref="States:TheStateModel"/>
+    
+		<Agent ref="##Agent##"/>
+    
+		<Publisher name="writer" class="File">
+      <Param name="FileName" value="fuzzed.png"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+     
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <!--Publisher name="launch" class=""> </Publisher>-->
+    
+    <!-- GUI Launcher: WINDOWS ONLY --> 
+    <!--
+     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+      <Param name="WindowName" value="GUI Window Name" /> 
+     </Publisher> 
+     -->
+		 
+    <Logger class="logger.Filesystem">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>
+<!-- end -->

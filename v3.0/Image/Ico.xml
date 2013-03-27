@@ -6,20 +6,26 @@
 
 	<Include ns="DataModels" src="file:##Path##/_Common/Models/Image/Ico_State.xml"/>
 
-	<Agent name="LocalAgent">
-		<Monitor class="WindowsDebugger">
-			<!-- The target application and fuzzed ico -->
-			<Param name="CommandLine" value="mspaint.exe fuzzed.ico"/>
-			<Param name="StartOnCall" value="LaunchPaint" />
+	<Agent name="LinuxAgent">
+		<Monitor class="LinuxCrashMonitor"/>
+		<Monitor class="Process">
+				<Param name="Executable" value="##Target##"/>
+				<Param name="StartOnCall" value="FuzzMe"/>
+				<Param name="Arguments" value="fuzzed.ico"/>
+		<Param name="CpuKill" value="true"/>
 		</Monitor>
-
-		<Monitor class="PageHeap">
-			<Param name="Executable" value="mspaint.exe"/>
+	</Agent>
+	
+	<Agent name="WinAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="##Target## fuzzed.ico"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="CpuKill" value="true"/>
 		</Monitor>
 	</Agent>
 
 	<Test name="Default">
-		<Agent ref="LocalAgent"/>
+		<Agent ref="##Agent##"/>
 		<StateModel ref="State"/>
 
 		<Publisher class="File">

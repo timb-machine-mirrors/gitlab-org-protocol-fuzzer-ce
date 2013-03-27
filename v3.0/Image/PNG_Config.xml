@@ -1,9 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
 
 	<All>
-		<Define key="Seed" value="SeedFile.png"/>
+		<Define key="Seed" value="png_sample_1.PNG"/>
 		<Define key="Strategy"  value="Random"/>
 		<Define key="LoggerPath"  value="./logs/png/"/>
+		<Define key="Path" value="."/>
 	</All>
 		
 	<Linux platform="linux">

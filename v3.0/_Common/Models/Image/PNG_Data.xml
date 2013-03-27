@@ -1,14 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd" 
-	   version="1.0" author="Deja vu Security" description="PNG Graphics File">
-
-  <!-- DEFAULTS SECTION -->
+	   version="1.0" author="Deja vu Security" description="PNG Graphics File Pit DataModels">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	  <!-- DEFAULTS SECTION -->
 	<Defaults>
 		<Number endian="network" signed="false" />
 	</Defaults>
-
-  <!-- DATA MODEL SECTION -->
+	
   <!-- Abstract Chunk Data Model -->
 	<DataModel name="Chunk">
 		<Number name="Length" size="32">
@@ -308,72 +308,5 @@
       
 		</Choice>
 	</DataModel>
-
-  <!-- STATE MODEL SECTION -->
-	<StateModel name="TheStateModel" initialState="Initial">
-		<State name="Initial">
-      <Action name="WriteFileFromSample" type="output" publisher="writer">
-        <DataModel name="PngModel" ref="Png" />
-        <Data name="Data" fileName="##Seed##" />
-      </Action>
-      
-      <Action name="CloseFile"  type="close" publisher="writer" />
-      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
-		</State>
-	</StateModel>
-  
-  
- <!-- ***************
-       AGENT SECTION  
-      *************** --> 
- 
-    <Agent name="LinuxAgent">
-      <Monitor class="LinuxCrashMonitor"/>
-	  <Monitor class="Process">
-        <Param name="Executable" value="##Target##"/>
-        <Param name="StartOnCall" value="FuzzMe"/>
-        <Param name="Arguments" value="fuzzed.png"/>
-		<Param name="CpuKill" value="true"/>
-      </Monitor>
-    </Agent>
-	
-	<Agent name="WinAgent">
-      <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="##Target## fuzzed.png"/>
-        <Param name="StartOnCall" value="FuzzMe"/>
-        <Param name="CpuKill" value="true"/>
-      </Monitor>
-    </Agent>
-
-  
-  <!-- **************
-        TEST SECTION  
-       ************** --> 
-	<Test name="Default">
-    
-    <Agent ref="##Agent##"/>
-		<StateModel ref="TheStateModel" />
-    
-    <Publisher name="writer" class="File">
-      <Param name="FileName" value="fuzzed.png" />
-    </Publisher>
-
-    <Strategy class="##Strategy##"/>
-     
-    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
-    <!--Publisher name="launch" class=""> </Publisher>-->
-    
-    <Logger class="logger.Filesystem">
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-    
-    <!-- GUI Launcher: WINDOWS ONLY --> 
-    <!--
-     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
-      <Param name="WindowName" value="GUI Window Name" /> 
-     </Publisher> 
-     -->
-    
-  </Test>
 </Peach>
-<!-- end -->
+<!--END-->
