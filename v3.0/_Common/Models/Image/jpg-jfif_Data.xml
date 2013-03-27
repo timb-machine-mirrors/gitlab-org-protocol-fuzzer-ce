@@ -164,7 +164,7 @@
   <DataModel name="HuffmanTableSpecification" ref="MarkerSegment">
     <Blob name="Type" value="FFC4" length="2" valueType="hex" token="true" />
     <Block name="SegmentData">
-      <Block name="" minOccurs="1">
+      <Block minOccurs="1">
         <Flags name="HuffmanTableSpecificationFlags" size="8">
           <Flag name="Tc" position="4" size="4" />
           <Flag name="Th" position="0" size="4" />
@@ -440,7 +440,7 @@
   </DataModel>
   
   <!-- MAIN Image container -->
-  <DataModel name="JPG-JFIF">
+  <DataModel name="JPGJFIF">
     <Blob name="SOIMagic" value="FFD8" valueType="hex" token="true" length="2" />
     <Choice name="FrameChoice" >
       <Block name="TheFrame" ref="Frame" />
