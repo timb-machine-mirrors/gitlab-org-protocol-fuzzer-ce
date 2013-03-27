@@ -11,9 +11,6 @@
       <Action type="output">
         <DataModel ref="DataModels:IPv4"/>
       </Action>
-			<Action type="input">
-        <DataModel ref="DataModels:IPv4"/>
-      </Action>
     </State>
   </StateModel>
 </Peach>

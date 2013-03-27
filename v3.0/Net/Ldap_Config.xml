@@ -7,6 +7,7 @@
 		<Define key="Port" value="389"/>
 		<Define key="Password" value="password"/>
 		<Define key="UserName" value="cn=admin,dc=example,dc=com"/>
+		<Define key="Path" value="."/>
 	</All>
 	
 	<Linux platform="linux">
