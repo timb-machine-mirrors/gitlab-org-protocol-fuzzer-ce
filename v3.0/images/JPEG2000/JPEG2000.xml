@@ -4,39 +4,42 @@
 			 author="Deja Vu Security, LLC" description="JPEG2000 PIT" version="1">
 
   <DataModel name="Box">
-	<Choice name="BoxLengthChoice">
-	  <Block name="LastBox">
-	    <Number name="Length" size="32" signed="false" endian="big" value="0" token="true"/>
-	  </Block>
-	  <Block name="ExtendedBox">
-	    <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/> <!--TODO tie the extended block to this specific case -->
-	  </Block>
-	  <Block name="NormalBlock">
-	    <Number name="Length" size="32" signed="false" endian="big">
-          <Relation type="size" of="Box" expressionGet="size" expressionSet="size"/>
-        </Number>
-	  </Block>
-	</Choice>
-	<Blob name="Type" length="4" />
+    <Block name="TheBox">
+      <Choice name="BoxLengthChoice">
+        <Block name="LastBox">
+          <Number name="Length" size="32" signed="false" endian="big" value="0" token="true"/>
+        </Block>
+        <Block name="ExtendedBox">
+          <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/> <!--TODO tie the extended block to this specific case -->
+        </Block>
+        <Block name="NormalBlock">
+          <Number name="Length" size="32" signed="false" endian="big">
+            <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size"/>
+          </Number>
+        </Block>
+      </Choice>
+      
+      <Blob name="Type" length="4" />
 	
-	<Number name="LengthExtended" size="64" signed="false" endian="big" minOccurs="0" maxOccurs="1">
-      <Relation type="size" of="Box" expressionGet="size" expressionSet="size" />
-    </Number>
+      <Number name="LengthExtended" size="64" signed="false" endian="big" minOccurs="0" maxOccurs="1">
+        <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" />
+      </Number>
 	
-    <Blob name="Data" />
+      <Blob name="Data" />
+	</Block>
   </DataModel>
 
   <!-- Begin JP2 -->
 
   
   <DataModel name="BoxJP2Signature" ref="Box">
-    <Blob name="Type" length="4" value="6A 50 20 20" valueType="hex" token="true"/>
-    <Blob name="Data" value ="0D 0A 87 0A" valueType="hex" token="true" />
+    <Blob name="TheBox.Type" length="4" value="6A 50 20 20" valueType="hex" token="true"/>
+    <Blob name="TheBox.Data" value ="0D 0A 87 0A" valueType="hex" token="true" />
   </DataModel>
   
   <DataModel name="BoxFileType" ref="Box">
-    <Blob name="Type" length="4" value="66 74 79 70" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="66 74 79 70" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <String name="BR" length="4" nullTerminated="false" />
       <Number name="MinV" size="32" signed="false" endian="big"/>
       <String name="CLi" length="4" nullTerminated="false" minOccurs="1" />
@@ -45,8 +48,8 @@
 
 
   <DataModel name="BoxImageHeader" ref="Box">
-    <Blob name="Type" length="4" value="69 68 64 72" valueType="hex" token="true"/>
-    <Block name="Data"> <!--TODO these flags determine values in other boxes, can they be accesses from them?-->
+    <Blob name="TheBox.Type" length="4" value="69 68 64 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data"> <!--TODO these flags determine values in other boxes, can they be accesses from them?-->
       <Number name="Height" endian="big" size="32" signed="false" />
       <Number name="Width" endian="big" size="32" signed="false" />
       <Number name="NC" endian="big" size="16" signed="false" />
@@ -58,15 +61,15 @@
   </DataModel>
 
   <DataModel name="BoxBitsPerComponent" ref="Box"> 
-    <Blob name="Type" length="4" value="62 70 63 63" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="62 70 63 63" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="BPCi" endian="big" size="8" signed="true" minOccurs="1" />
     </Block>
   </DataModel>
   
   <DataModel name="BoxColorSpecification" ref="Box">
-    <Blob name="Type" length="4" value="63 6F 6C 72" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="63 6F 6C 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Choice name="METHDAT">	
         <Block name="MethodEnum">
           <Number name="METH" endian="big" signed="false" size="8" value="1" token="true"/>
@@ -132,8 +135,8 @@
   </DataModel>
   
   <DataModel name="BoxPallete" ref="Box">
-    <Blob name="Type" length="4" value="70 63 6C 72" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="70 63 6C 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="NE" endian="big" size="16" signed="false">
         <Relation type="count" of="Cji" />
       </Number>
@@ -149,8 +152,8 @@
   </DataModel>
   
   <DataModel name="BoxComponentMapping" ref="Box">
-    <Blob name="Type" length="4" value="63 6D 61 70" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="63 6D 61 70" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Block name="ComponentMappingRepeater" minOccurs="1">
         <Number name="CMPi" endian="big" signed="false" size="16" />
         <Number name="MTYPi" endian="big" signed="false" size="8" />
@@ -160,8 +163,8 @@
   </DataModel>
   
   <DataModel name="BoxChannelDeffinition" ref="Box">
-    <Blob name="Type" length="4" value="63 64 65 66" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="63 64 65 66" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="N" endian="big" signed="false" size="16" />
       <Block name="ChannelDeffinitionRepeater" minOccurs="1">
         <Number name="Cni" endian="big" signed="false" size="16" />
@@ -172,8 +175,8 @@
   </DataModel>
 
   <DataModel name="BoxCaptureResolution" ref="Box">
-    <Blob name="Type" length="4" value="72 65 73 63" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 63" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="VRcN" endian="big" signed="false" size="16" />
       <Number name="VRcD" endian="big" signed="false" size="16" />
       <Number name="HRcN" endian="big" signed="false" size="16" />
@@ -184,8 +187,8 @@
   </DataModel>
 
   <DataModel name="BoxDisplayResolution" ref="Box">
-    <Blob name="Type" length="4" value="72 65 73 64" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 64" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="VRdN" endian="big" signed="false" size="16" />
       <Number name="VRdD" endian="big" signed="false" size="16" />
       <Number name="HRdN" endian="big" signed="false" size="16" />
@@ -196,8 +199,8 @@
   </DataModel>
   
   <DataModel name="BoxResolution" ref="Box">
-    <Blob name="Type" length="4" value="72 65 73 20" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 20" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
 	  <Choice minOccurs="1" maxOccurs="2">
         <Block name="TheBoxCaptureResolution" ref="BoxCaptureResolution"/>
         <Block name="TheBoxDefaultDisplayResolution" ref="BoxDisplayResolution"/>
@@ -206,42 +209,42 @@
   </DataModel>
 
   <DataModel name="BoxContiguousCodestream" ref="Box">
-    <Blob name="Type" length="4" value="6A 70 32 63" valueType="hex" token="true"/>
+    <Blob name="TheBox.Type" length="4" value="6A 70 32 63" valueType="hex" token="true"/>
   </DataModel>
   
   <DataModel name="BoxIntellectualProperty" ref="Box">
-    <Blob name="Type" length="4" value="6a 70 32 69" valueType="hex" token="true"/>
+    <Blob name="TheBox.Type" length="4" value="6a 70 32 69" valueType="hex" token="true"/>
       <!--undefined by spec-->
   </DataModel>
   
   <DataModel name="BoxXML" ref="Box">
-    <Blob name="Type" length="4" value="78 6D 6C 20" valueType="hex" token="true"/>
-    <Blob name="Data" analyzer="Xml"/>
+    <Blob name="TheBox.Type" length="4" value="78 6D 6C 20" valueType="hex" token="true"/>
+    <Blob name="TheBox.Data" analyzer="Xml"/>
   </DataModel>
   
   <DataModel name="BoxUUID" ref="Box">
-    <Blob name="Type" length="4" value="75 75 69 64" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="75 75 69 64" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Blob name="UUID" length="16" />
       <Blob name="UUIDSpecificData" />
     </Block>
   </DataModel>
 
   <DataModel name="BoxUUIDList" ref="Box">
-    <Blob name="Type" length="4" value="75 63 73 74" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="75 63 73 74" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="NU" endian="big" size="16" signed="false">
         <Relation type="count" of="UUIDs"/>
       </Number>
 	  <Block name="UUIDs" maxOccurs="0">
-        <Blob name="UUIDi" length="16">
+        <Blob name="UUIDi" length="16" />
       </Block>
     </Block>
   </DataModel>
   
   <DataModel name="BoxURL" ref="Box">
-    <Blob name="Type" length="4" value="75 72 6C 20" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="75 72 6C 20" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Number name="VERS" endian="big" signed="false" size="8" />
       <Number name="Flags" endian="big" signed="false" size="24" />
       <String name="LOC" nullTerminated="true" type="utf8" />
@@ -249,8 +252,8 @@
   </DataModel>
   
   <DataModel name="BoxUUIDInfo" ref="Box">
-    <Blob name="Type" length="4" value="75 69 6E 66" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="75 69 6E 66" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Block name="TheBoxUUIDList" ref="BoxUUIDList" minOccurs="0"/>
       <Block name="TheBoxURL" ref="BoxURL" minOccurs="0"/>
     </Block>
@@ -657,8 +660,8 @@
    -->
   
   <DataModel name="BoxJP2Header" ref="Box">
-    <Blob name="Type" length="4" value="6A 70 32 68" valueType="hex" token="true"/>
-    <Block name="Data">
+    <Blob name="TheBox.Type" length="4" value="6A 70 32 68" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
       <Block name="TheBoxImageHeader" ref="BoxImageHeader" />
       <Choice name="BoxJP2HeaderChoice" minOccurs="1" >
         <Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent" />
@@ -672,7 +675,7 @@
   </DataModel>
  
   <DataModel name="JP2Additional">
-    <Choice name="JP2Additional" >
+    <Choice name="JP2AdditionalChoice" >
       <Block name="TheBoxIntellectualProperty" ref="BoxIntellectualProperty" />
       <Block name="TheBoxXML" ref="BoxXML" />
       <Block name="TheBoxUUID" ref="BoxUUID" />
