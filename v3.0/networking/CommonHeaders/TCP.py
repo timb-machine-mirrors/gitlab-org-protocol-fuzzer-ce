@@ -59,8 +59,8 @@ def set_default_from_store(ctx, name):
     ctx.dataModel.Value #this shouldn't need to be called in future
 
 
-def inc_stored_val(ctx, name):
-    ctx.parent.parent.parent.context.iterationStateStore[name] += 1
+def inc_stored_val(ctx, name, amount=1):
+    ctx.parent.parent.parent.context.iterationStateStore[name] += amount
 
 def inc_stored_vals(ctx, *args):
     for arg in args:
