@@ -19,7 +19,7 @@
 			<Action type="close" />
 			
 			<!-- Launch the target process -->
-			<Action type="call" method="LaunchPaint" publisher="Peach.Agent"/>
+			<Action type="call" method="FuzzMe" publisher="Peach.Agent"/>
 		</State>
 	</StateModel>
 </Peach>
