@@ -28,81 +28,92 @@
 
 	<StateModel name="TheState" initialState="SendSyn">
 
+		<State name="TestPayload" >
+			<Action type="output">
+				<Data ref="TCP:TestPayload"/>
+				<DataModel name="SendData" ref="TCP:PacketWithData"/>
+			</Action>
+		</State>
+
 		<State name="SendSyn" >
 			<Action type="output"
 							onStart="TCP.init_seq(self)"
-							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:SYN"/>
-				<DataModel name="SYNPacket" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCP:Packet"/>
 			</Action>
 			<Action name="Read" type="changeState" ref="SynSent" />
 		</State>
 
 		<State name="SynSent">
 			<Action name="GetPacket" type="input"
-							onComplete="TCP.process_sequence(self)">
+							onComplete="TCP.store_next_acknum(self)">
 				<DataModel name="Packet" ref="TCP:InIPv4Packet"/>
 			</Action>
 			<Action name="ChangeToSend"
 							type="changeState" ref="SynRecieved"
-							when="TCP.chk_if_ack_for_me(self)"/>
+							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+			<Action name="ChangeToSend"
+							type="changeState" ref="Established"
+							when="TCP.chk_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="ReadMore" type="changeState" ref="SynSent" />
 		</State>
 		
 		<State name="SynRecieved" >
+			<!-- <Action type="changeState" ref="Established"/> -->
 			<Action name="SendAck" type="output"
-							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')" >
+							onStart="TCP.sync_from_store(self)" >
 				<Data ref="TCP:ACK"/>
-				<DataModel name="ACK" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCP:Packet"/>
 			</Action>
 			<Action type="changeState" ref="Established"/>
 		</State>
 
 		<State name="Established" >
-			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
-			<Action type="changeState" ref="BeginClose"/>
+			<Action type="changeState" ref="SendTestPayload"/>
+			<!-- <Action type="changeState" ref="BeginClose"/> -->
 		</State>
 
-		<!-- <State name="SendTestPayload" > -->
-		<!-- 	<Action type="output" -->
-		<!-- 					onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"  -->
-		<!-- 					onComplete="TCP.inc_stored_val(self, 'SequenceNumber', (int(self.dataModel.find('TcpPayload').CalcLengthBits())/8))"> -->
-		<!-- 		<Data ref="TCP:PSHACK"/> -->
-		<!-- 		<DataModel name="PSHACKPacket" ref="TCP:PacketWithData"/> -->
-		<!-- 	</Action> -->
-		<!-- 	<Action name="Read" type="changeState" ref="WaitForAck" /> -->
-		<!-- </State> -->
+		<State name="SendTestPayload" >
+			<Action type="output"
+							onStart="TCP.sync_from_store(self)"
+							onComplete="TCP.set_next_seq(self)">
+				<Data ref="TCP:PSH"/>
+				<DataModel name="PSHPacket" ref="TCP:PacketWithData"/>
+			</Action>
+			<Action name="Read" type="changeState" ref="WaitForAck" />
+		</State>
 		
-		<!-- <State name="WaitForAck"> -->
-		<!-- 	<Action name="GetPacket" type="input" -->
-		<!-- 					onComplete="TCP.process_sequence(self)"> -->
-		<!-- 		<DataModel name="Packet" ref="TCP:InIPv4Packet"/> -->
-		<!-- 	</Action> -->
-		<!-- 	<Action name="ChangeToSend" -->
-		<!-- 					type="changeState" ref="BeginClose" -->
-		<!-- 					when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/> -->
-		<!-- 	<Action  name="ReadMore" type="changeState" ref="WaitForAck" /> -->
-		<!-- </State> -->
+		<State name="WaitForAck">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.store_next_acknum(self)">
+				<DataModel name="Packet" ref="TCP:InIPv4Packet"/>
+			</Action>
+			<Action name="ChangeToSend"
+							type="changeState" ref="BeginClose"
+							when="TCP.chk_if_ack_for_me(self)"/>
+			<Action  name="ReadMore" type="changeState" ref="WaitForAck" />
+		</State>
 		
-
 		<State name="BeginClose" >
-			<Action type="changeState" ref="SimultaneousClose"/>
+			<Action type="changeState" ref="Close"/>
 		</State>
 		
 
-		<State name="SimultaneousClose">
+		<State name="Close">
 			<Action name="Close" type="output"
-							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
-							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
-				<Data ref="TCP:FINACK"/>
-				<DataModel name="FINACK" ref="TCP:Packet"/>
+							onStart="TCP.sync_from_store(self)"
+							onComplete="TCP.set_next_seq(self)">
+				<!-- <Data ref="TCP:FINACK"/> -->
+				<Data ref="TCP:FIN"/>
+				<DataModel name="Packet" ref="TCP:Packet"/>
 			</Action>
 			<Action type="changeState" ref="WaitingForFinAck"/>
 		</State>
 
 		<State name="WaitingForFinAck">
 			<Action name="GetPacket" type="input"
-							onComplete="TCP.process_sequence(self)">
+							onComplete="TCP.store_next_acknum(self)">
 				<DataModel name="Packet" ref="TCP:InIPv4Packet"/>
 			</Action>
 			<Action name="ChangeToSend"
@@ -113,10 +124,9 @@
 		
 		<State name="SendFinalFinAck">
 			<Action name="Close" type="output"
-							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
-							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:FINACK"/>
-				<DataModel name="FINACK" ref="TCP:Packet"/>
+				<DataModel name="FINACKPacket" ref="TCP:Packet"/>
 			</Action>
 		</State>
 	</StateModel>

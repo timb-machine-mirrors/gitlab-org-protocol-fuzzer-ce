@@ -150,69 +150,75 @@
 	</DataModel>
 
   <DataModel name="Packet">
-		<Number name="SrcPort" size="16" endian="big" value="##SourcePort##"/>
-		<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
-		<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
-		<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
-		<Flags name="DataOffset" size="4" endian="big">
-			<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
-				<Relation type="size" of="Packet" expressionGet="size * 4" expressionSet="size / 4"/>
-			</Flag>
-		</Flags>
-		<Flags name="ControlBits" size="12" endian="big">
-			<Flag name="Reserved" position="0" size ="3"/>
-			<Flag name="NS" position="3" size="1"/>
-			<Flag name="CWR" position="4" size="1"/>
-			<Flag name="ECE" position="5" size="1"/>
-			<Flag name="URG" position="6" size="1"/>
-			<Flag name="ACK" position="7" size="1"/>
-			<Flag name="PSH" position="8" size="1"/>
-			<Flag name="RST" position="9" size="1"/>
-			<Flag name="SYN" position="10" size="1"/>
-			<Flag name="FIN" position="11" size="1"/>
-		</Flags>
-		<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
-		<Number name="CheckSum" size="16" endian="big">
-      <Fixup class="TCPChecksumFixup">
-        <Param name="ref" value="Packet" />
-        <Param name="src" value="##TargetIP##" />
-        <Param name="dst" value="##SourceIP##" />
-      </Fixup>
-    </Number>
-		<Number name="UrgentPointer" size="16" endian="big"/>
-		<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
+		<Block name="Header">
+			<Number name="SrcPort" size="16" endian="big" value="##SourcePort##"/>
+			<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
+			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
+			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
+			<Flags name="DataOffset" size="4" endian="big">
+				<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
+					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+				</Flag>
+			</Flags>
+			<Flags name="ControlBits" size="12" endian="big">
+				<Flag name="Reserved" position="0" size ="3"/>
+				<Flag name="NS" position="3" size="1"/>
+				<Flag name="CWR" position="4" size="1"/>
+				<Flag name="ECE" position="5" size="1"/>
+				<Flag name="URG" position="6" size="1"/>
+				<Flag name="ACK" position="7" size="1"/>
+				<Flag name="PSH" position="8" size="1"/>
+				<Flag name="RST" position="9" size="1"/>
+				<Flag name="SYN" position="10" size="1"/>
+				<Flag name="FIN" position="11" size="1"/>
+			</Flags>
+			<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
+			<Number name="CheckSum" size="16" endian="big">
+				<Fixup class="TCPChecksumFixup">
+					<Param name="ref" value="Packet" />
+					<Param name="src" value="##TargetIP##" />
+					<Param name="dst" value="##SourceIP##" />
+				</Fixup>
+			</Number>
+			<Number name="UrgentPointer" size="16" endian="big"/>
+			<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
+		</Block>
 		<Block name="TcpPayload"/>
-  </DataModel>
+	</DataModel>
 
  	<Data name="SYN">
-		<Field name="ControlBits.SYN" value="1"/>
+		<Field name="Header.ControlBits.SYN" value="1"/>
 	</Data>
 
  	<Data name="SYNACK">
-		<Field name="ControlBits.SYN" value="1"/>
-		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="Header.ControlBits.SYN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="ACK">
-		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
 	<DataModel name="PacketWithData" ref="Packet">
-		<Blob name="TcpPayload" value="this is a test packet\r\n"/>
+		<Blob name="TcpPayload" value="this is a packet.\n"/>
 	</DataModel>
 
+ 	<Data name="PSH">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+	</Data>
+
  	<Data name="PSHACK">
-		<Field name="ControlBits.ACK" value="1"/>
-		<Field name="ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="FINACK">
-		<Field name="ControlBits.FIN" value="1"/>
-		<Field name="ControlBits.ACK" value="1"/>
+		<Field name="Header.ControlBits.FIN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="FIN">
-		<Field name="ControlBits.FIN" value="1"/>
+		<Field name="Header.ControlBits.FIN" value="1"/>
 	</Data>
 
 	<DataModel name="InIPv4Packet" ref="IPv4:IPv4Header">
@@ -221,6 +227,16 @@
 		<Blob name="Header.DestIP" length="4"/>
 		<Block name="IPv4Payload" ref="Packet"/>
 	</DataModel>
+
+	<Data name="TestPayload">
+		<!-- good: 10e3cb7079af52eb92702ce95018aaaafe380000 -->
+		<!--  bad: 10e3cb7079af52eb92702ce99018aaaa5ecd0000 -->
+		<Field name="Header.SequenceNumber" valuetype="hex" value="2041533163"/>
+		<Field name="Header.AcknowledgmentNumber" valuetype="hex" value="2456825065"/>
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
 
 </Peach>
 <!-- end -->
