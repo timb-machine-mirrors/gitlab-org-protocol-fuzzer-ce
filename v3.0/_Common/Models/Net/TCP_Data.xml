@@ -184,8 +184,8 @@
 			<Number name="CheckSum" size="16" endian="big">
 				<Fixup class="TCPChecksumFixup">
 					<Param name="ref" value="Packet" />
-					<Param name="src" value="##TargetIPv4##" />
-					<Param name="dst" value="##SourceIPv4##" />
+					<Param name="src" value="##TargetIP##" />
+					<Param name="dst" value="##SourceIP##" />
 				</Fixup>
 			</Number>
 			<Number name="UrgentPointer" size="16" endian="big"/>
@@ -235,14 +235,5 @@
 		<Blob name="Header.DestIP" length="4"/>
 		<Block name="Payload" ref="Packet"/>
 	</DataModel>
-
-	<Data name="TestPayload">
-		<!-- good: 10e3cb7079af52eb92702ce95018aaaafe380000 -->
-		<!--  bad: 10e3cb7079af52eb92702ce99018aaaa5ecd0000 -->
-		<Field name="Header.SequenceNumber" valueType="hex" value="41533163"/>
-		<Field name="Header.AcknowledgmentNumber" valueType="hex" value="24568250"/>
-		<Field name="Header.ControlBits.PSH" value="1"/>
-		<Field name="Header.ControlBits.ACK" value="1"/>
-	</Data>
 </Peach>
 <!--END-->

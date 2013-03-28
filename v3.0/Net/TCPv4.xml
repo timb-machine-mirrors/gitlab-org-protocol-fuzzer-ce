@@ -13,16 +13,14 @@
 
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="FaultOnEarlyExit" value="true" />
+			<Param name="Executable" value="##tsharkBin##"/>
+			<Param name="Arguments" value="-i ##tsharkInterface##"/>
+			<Param name="FaultOnEarlyExit" value="true"/>
 		</Monitor>
 		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
+			<Param name="Device" value="##Interface##"/>
 		</Monitor>
 	</Agent>
-
-	
 
 	<Test name="Default">
 		<StateModel ref="States:TheState"/>
@@ -30,8 +28,8 @@
 		<!-- <Agent ref="RemoteAgent"/> -->
 		
 		<Publisher class="RawV4">
-			<Param name="Host" value="##TargetIPv4##"/>
-			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Host" value="##TargetIP##"/>
+			<Param name="Interface" value="##SourceIP##"/>
 			<Param name="Protocol" value="6"/>
 		</Publisher>
 

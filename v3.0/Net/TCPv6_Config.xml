@@ -3,8 +3,8 @@
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
     <Define key="LoggerPath" value="logs/tcpV6/"/>
-    <Define key="TargetIPv6" value="::1"/>
-    <Define key="SourceIPv6" value="::1"/>
+    <Define key="TargetIP" value="::1"/>
+    <Define key="SourceIP" value="::1"/>
     <Define key="TargetPort" value="4321"/>
     <Define key="SourcePort" value="5280"/>
     <Define key="Strategy"  value="Sequential"/>
