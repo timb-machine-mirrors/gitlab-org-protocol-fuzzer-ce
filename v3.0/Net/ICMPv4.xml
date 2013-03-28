@@ -35,7 +35,7 @@
     </Publisher>
     
     <Strategy class="##Strategy##"/>
-    <Logger class="logger.Filesystem" >
+    <Logger class="File" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>
   </Test>

@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
@@ -24,7 +25,7 @@
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
-	    <Logger class="Filesystem">
+	    <Logger class="File">
 				<Param name="Path" value="##LoggerPath##/Search" />
 	    </Logger>
 	</Test>
@@ -40,7 +41,7 @@
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
-	    <Logger class="Filesystem">
+	    <Logger class="File">
 				<Param name="Path" value="##LoggerPath##/Add" />
 	    </Logger>
 	</Test>
@@ -56,7 +57,7 @@
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
-	    <Logger class="Filesystem">
+	    <Logger class="File">
 				<Param name="Path" value="##LoggerPath##/Compare" />
 	    </Logger>
 	</Test>
@@ -72,7 +73,7 @@
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
-	    <Logger class="Filesystem">
+	    <Logger class="File">
 				<Param name="Path" value="##LoggerPath##/Delete" />
 	    </Logger>
 	</Test>
@@ -88,7 +89,7 @@
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
-	    <Logger class="Filesystem">
+	    <Logger class="File">
 				<Param name="Path" value="##LoggerPath##/ExtendOp" />
 	    </Logger>
 	</Test>
