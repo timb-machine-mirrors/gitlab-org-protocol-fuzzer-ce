@@ -11,8 +11,8 @@
 		<Define key="Strategy" value="Random"/>
 		<Define key="TargetIPv4" value="192.168.2.11"/>
 		<Define key="SourceIPv4" value="192.168.2.13"/>
-		<Define key="TargetIPv6" value="::1"/>
-		<Define key="SourceIPv6" value="::1"/>
+		<Define key="TargetIP" value="::1"/>
+		<Define key="SourceIP" value="::1"/>
 		<!-- <Define key="TargetIPv6" value="fe80::20c:29ff:feb5:b9d9"/> -->
 		<!-- <Define key="SourceIPv6" value="fe80::cc0:53a1:fe8e:667b"/> -->
 		<Define key="CryptoKey" value="41414141414141414141414141414141"/>
