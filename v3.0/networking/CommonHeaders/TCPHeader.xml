@@ -13,7 +13,6 @@
 
 	<Include ns="Generic" src="file:##Path##/CommonHeaders/GenericDataTypes.xml"/>
 	<Include ns="IPv4" src="file:##Path##/CommonHeaders/IPv4Header.xml"/>
-	<!-- <Include ns="IPv6" src="file:##Path##/CommonHeaders/IPv6Header.xml"/> -->
 
 	<DataModel name="OptionsAndPadding">
 		<Padding name="PaddingValue" alignment="32">
@@ -69,35 +68,35 @@
 			<Block name="TCPAO"> <!-- TCP Authentication Option -->
 				<Number value="29" name="TypeNumber"/>
 			</Block>
-			<Block name="MaximumSegmentSize" ref="Generic:TLV">
+			<Block name="MaximumSegmentSize" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="4"/>
 				<Number name="Value" size="16"/>
 			</Block>
-			<Block name="WSOPT" ref="Generic:TLV">  <!-- Window Scale -->
+			<Block name="WSOPT" ref="Generic:SelfLenTLV">  <!-- Window Scale -->
 				<Number name="Type" size="8" value="3"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="SACKPermitted" ref="Generic:TLV">
+			<Block name="SACKPermitted" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="4"/>
 				<Number name="Length" size="8" value="2"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="SACK" ref="Generic:TLV">
+			<Block name="SACK" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="5"/>
 			</Block>
-			<Block name="Echo" ref="Generic:TLV">  <!-- (obsoleted by option 8) -->
+			<Block name="Echo" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 8) -->
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="6"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="EchoReply" ref="Generic:TLV">  <!-- (obsoleted by option 8) -->
+			<Block name="EchoReply" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 8) -->
 				<Number name="Type" size="8" value="2"/>
 				<Number name="Length" size="8" value="7"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TSOPT" ref="Generic:TLV">  <!-- Time Stamp Option -->
+			<Block name="TSOPT" ref="Generic:SelfLenTLV">  <!-- Time Stamp Option -->
 				<Number name="Type" size="8" value="8"/>
 				<Number name="Length" size="8" value="10"/>
 				<Block name="Value">
@@ -105,112 +104,121 @@
 					<Number name="TimestampEchoReply" size="32"/>
 				</Block>
 			</Block>
-			<Block name="PartialOrderConnectionPermitted" ref="Generic:TLV">  <!-- (obsolete) -->
+			<Block name="PartialOrderConnectionPermitted" ref="Generic:SelfLenTLV">  <!-- (obsolete) -->
 				<Number name="Type" size="8" value="9"/>
 				<Number name="Length" size="8" value="2"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="PartialOrderServiceProfile" ref="Generic:TLV">  <!-- (obsolete) -->
+			<Block name="PartialOrderServiceProfile" ref="Generic:SelfLenTLV">  <!-- (obsolete) -->
 				<Number name="Type" size="8" value="10"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TCPAlternateChecksumRequest" ref="Generic:TLV"> <!-- (obsolete) -->
+			<Block name="TCPAlternateChecksumRequest" ref="Generic:SelfLenTLV"> <!-- (obsolete) -->
 				<Number name="Type" size="8" value="14"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="TCPAlternateChecksumData" ref="Generic:TLV"> <!-- (obsolete) -->
+			<Block name="TCPAlternateChecksumData" ref="Generic:SelfLenTLV"> <!-- (obsolete) -->
 				<Number name="Type" size="8" value="15"/>
 			</Block>
-			<Block name="TrailerChecksumOption" ref="Generic:TLV">
+			<Block name="TrailerChecksumOption" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="18"/>
 				<Number name="Length" size="8" value="3"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="MD5SignatureOption" ref="Generic:TLV">  <!-- (obsoleted by option 29) -->
+			<Block name="MD5SignatureOption" ref="Generic:SelfLenTLV">  <!-- (obsoleted by option 29) -->
 				<Number name="Type" size="8" value="19"/>
 				<Number name="Length" size="8" value="18"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="QuickStartResponse" ref="Generic:TLV">
+			<Block name="QuickStartResponse" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="27"/>
 				<Number name="Length" size="8" value="8"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="UserTimeoutOption" ref="Generic:TLV">
+			<Block name="UserTimeoutOption" ref="Generic:SelfLenTLV">
 				<Number name="Type" size="8" value="28"/>
 				<Number name="Length" size="8" value="4"/>
 				<Block name="Value"/>
 			</Block>
-			<Block name="MPTCP" ref="Generic:TLV"> <!-- Multipath TCP -->
+			<Block name="MPTCP" ref="Generic:SelfLenTLV"> <!-- Multipath TCP -->
 				<Number name="Type" size="8" value="30"/>
 			</Block>
 		</Choice>
+		<!-- <Padding name="PaddingValue" alignment="32"/> -->
 	</DataModel>
 
   <DataModel name="Packet">
-		<Number name="SrcPort" size="16" endian="big" value="##SourcePort##"/>
-		<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
-		<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
-		<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
-		<Flags name="DataOffset" size="4" endian="big">
-			<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
-				<Relation type="size" of="Packet" expressionGet="size * 4" expressionSet="size / 4"/>
-			</Flag>
-		</Flags>
-		<Flags name="ControlBits" size="12" endian="big">
-			<Flag name="Reserved" position="0" size ="3"/>
-			<Flag name="NS" position="3" size="1"/>
-			<Flag name="CWR" position="4" size="1"/>
-			<Flag name="ECE" position="5" size="1"/>
-			<Flag name="URG" position="6" size="1"/>
-			<Flag name="ACK" position="7" size="1"/>
-			<Flag name="PSH" position="8" size="1"/>
-			<Flag name="RST" position="9" size="1"/>
-			<Flag name="SYN" position="10" size="1"/>
-			<Flag name="FIN" position="11" size="1"/>
-		</Flags>
-		<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
-		<Number name="CheckSum" size="16" endian="big">
-      <Fixup class="TCPChecksumFixup">
-        <Param name="ref" value="Packet" />
-        <Param name="src" value="##TargetIP##" />
-        <Param name="dst" value="##SourceIP##" />
-      </Fixup>
-    </Number>
-		<Number name="UrgentPointer" size="16" endian="big"/>
-		<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
+		<Block name="Header">
+			<Number name="SrcPort" size="16" endian="big" value="1234"/> <!-- this needs to be random, it gets repalced on each iteration -->
+			<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
+			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
+			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
+			<Flags name="DataOffset" size="4" endian="big">
+				<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
+					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+				</Flag>
+			</Flags>
+			<Flags name="ControlBits" size="12" endian="big">
+				<Flag name="Reserved" position="0" size ="3"/>
+				<Flag name="NS" position="3" size="1"/>
+				<Flag name="CWR" position="4" size="1"/>
+				<Flag name="ECE" position="5" size="1"/>
+				<Flag name="URG" position="6" size="1"/>
+				<Flag name="ACK" position="7" size="1"/>
+				<Flag name="PSH" position="8" size="1"/>
+				<Flag name="RST" position="9" size="1"/>
+				<Flag name="SYN" position="10" size="1"/>
+				<Flag name="FIN" position="11" size="1"/>
+			</Flags>
+			<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
+			<Number name="CheckSum" size="16" endian="big">
+				<Fixup class="TCPChecksumFixup">
+					<Param name="ref" value="Packet" />
+					<Param name="src" value="##TargetIP##" />
+					<Param name="dst" value="##SourceIP##" />
+				</Fixup>
+			</Number>
+			<Number name="UrgentPointer" size="16" endian="big"/>
+			<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
+		</Block>
 		<Block name="TcpPayload"/>
-  </DataModel>
+	</DataModel>
 
  	<Data name="SYN">
-		<Field name="ControlBits.SYN" value="1"/>
-		<Field name="OptionsAndPadding.Options[0].MaximumSegmentSize.Value" valueType="hex" value="df 2e"/>
-		<Field name="OptionsAndPadding.Options[1].SACKPermitted"/>
-		<Field name="OptionsAndPadding.Options[2].TSOPT"/>
+		<Field name="Header.ControlBits.SYN" value="1"/>
 	</Data>
 
  	<Data name="SYNACK">
-		<Field name="ControlBits.SYN" value="1"/>
-		<Field name="ControlBits.ACK" value="1"/>
-		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
+		<Field name="Header.ControlBits.SYN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="ACK">
-		<Field name="ControlBits.ACK" value="1"/>
-		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
+	<DataModel name="PacketWithData" ref="Packet">
+		<Blob name="TcpPayload" value="this is a packet.\n"/>
+	</DataModel>
+
+ 	<Data name="PSH">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+	</Data>
+
+ 	<Data name="PSHACK">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="FINACK">
-		<Field name="ControlBits.FIN" value="1"/>
-		<Field name="ControlBits.ACK" value="1"/>
-		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
+		<Field name="Header.ControlBits.FIN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
  	<Data name="FIN">
-		<Field name="ControlBits.FIN" value="1"/>
-		<Field name="OptionsAndPadding.Options[0].TSOPT"/>
+		<Field name="Header.ControlBits.FIN" value="1"/>
 	</Data>
 
 	<DataModel name="InIPv4Packet" ref="IPv4:IPv4Header">
@@ -219,6 +227,16 @@
 		<Blob name="Header.DestIP" length="4"/>
 		<Block name="IPv4Payload" ref="Packet"/>
 	</DataModel>
+
+	<Data name="TestPayload">
+		<!-- good: 10e3cb7079af52eb92702ce95018aaaafe380000 -->
+		<!--  bad: 10e3cb7079af52eb92702ce99018aaaa5ecd0000 -->
+		<Field name="Header.SequenceNumber" valuetype="hex" value="2041533163"/>
+		<Field name="Header.AcknowledgmentNumber" valuetype="hex" value="2456825065"/>
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
 
 </Peach>
 <!-- end -->
