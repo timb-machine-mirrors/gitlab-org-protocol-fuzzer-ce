@@ -10,21 +10,19 @@
           <Number name="Length" size="32" signed="false" endian="big" value="0" token="true"/>
         </Block>
         <Block name="ExtendedBox">
-          <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/> <!--TODO tie the extended block to this specific case -->
+          <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/>
+		  <!--Number name="LengthExtended" size="64" signed="false" endian="big">
+            <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" />
+			<Placement before="Data" />
+          </Number-->
         </Block>
         <Block name="NormalBlock">
           <Number name="Length" size="32" signed="false" endian="big">
             <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size"/>
           </Number>
         </Block>
-      </Choice>
-      
+      </Choice>      
       <Blob name="Type" length="4" />
-	
-      <Number name="LengthExtended" size="64" signed="false" endian="big" minOccurs="0" maxOccurs="1">
-        <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" />
-      </Number>
-	
       <Blob name="Data" />
 	</Block>
   </DataModel>
