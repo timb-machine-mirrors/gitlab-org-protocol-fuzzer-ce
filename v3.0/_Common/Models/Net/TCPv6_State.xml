@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Transport Control Protocol Version 6 PIT StateModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/TCPv6_Data.xml"/>
+	<PythonPath path="##Path##/_Common/Models/Net/"/>
+
+	<Import import="TCP"/>
+	
+	<StateModel name="TheState" initialState="SendSyn">
+
+		<State name="SendSyn" >
+			<Action type="output"
+							onStart="TCP.init_seq(self)"
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+				<Data ref="DataModels:SYN"/>
+				<DataModel name="SYNPacket" ref="DataModels:Packet"/>
+			</Action>
+			<Action name="Read" type="changeState" ref="SynSent" />
+		</State>
+
+		<State name="SynSent">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.process_sequence(self)">
+				<DataModel name="Packet" ref="DataModels:Packet"/>
+			</Action>
+			<Action name="ChangeToSend"
+							type="changeState" ref="SynRecieved"
+							when="TCP.chk_if_ack_for_me(self)"/>
+			<Action name="ReadMore" type="changeState" ref="SynSent" />
+		</State>
+		
+		<State name="SynRecieved" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')" >
+				<Data ref="DataModels:ACK"/>
+				<DataModel name="ACK" ref="DataModels:Packet"/>
+			</Action>
+			<Action type="changeState" ref="Established"/>
+		</State>
+
+		<State name="Established" >
+			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
+			<Action type="changeState" ref="BeginClose"/>
+		</State>
+
+		<!-- <State name="SendTestPayload" > -->
+		<!-- 	<Action type="output" -->
+		<!-- 					onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"  -->
+		<!-- 					onComplete="TCP.inc_stored_val(self, 'SequenceNumber', (int(self.dataModel.find('TcpPayload').CalcLengthBits())/8))"> -->
+		<!-- 		<Data ref="DataModels:PSHACK"/> -->
+		<!-- 		<DataModel name="PSHACKPacket" ref="DataModels:PacketWithData"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action name="Read" type="changeState" ref="WaitForAck" /> -->
+		<!-- </State> -->
+		
+		<!-- <State name="WaitForAck"> -->
+		<!-- 	<Action name="GetPacket" type="input" -->
+		<!-- 					onComplete="TCP.process_sequence(self)"> -->
+		<!-- 		<DataModel name="Packet" ref="DataModels:InIPv6Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action name="ChangeToSend" -->
+		<!-- 					type="changeState" ref="BeginClose" -->
+		<!-- 					when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/> -->
+		<!-- 	<Action  name="ReadMore" type="changeState" ref="WaitForAck" /> -->
+		<!-- </State> -->
+		
+
+		<State name="BeginClose" >
+			<Action type="changeState" ref="SimultaneousClose"/>
+		</State>
+		
+
+		<State name="SimultaneousClose">
+			<Action name="Close" type="output"
+							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+				<Data ref="DataModels:FINACK"/>
+				<DataModel name="FINACK" ref="DataModels:Packet"/>
+			</Action>
+			<Action type="changeState" ref="WaitingForFinAck"/>
+		</State>
+
+		<State name="WaitingForFinAck">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.process_sequence(self)">
+				<DataModel name="Packet" ref="DataModels:Packet"/>
+			</Action>
+			<Action name="ChangeToSend"
+							type="changeState" ref="SendFinalFinAck"
+							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
+		</State>
+		
+		<State name="SendFinalFinAck">
+			<Action name="Close" type="output"
+							onStart="TCP.set_defaults_from_store(self, 'SequenceNumber', 'AcknowledgmentNumber')"
+							onComplete="TCP.inc_stored_val(self, 'SequenceNumber')">
+				<Data ref="DataModels:FINACK"/>
+				<DataModel name="FINACK" ref="DataModels:Packet"/>
+			</Action>
+		</State>
+	</StateModel>
+</Peach>
+<!--END-->
