@@ -32,49 +32,49 @@
 		</Padding>
 		<Choice name="Options" minOccurs="0">
 			<Block name="EndOfOp">
-				<Number value="0" name="TypeNumber"/>
+				<Number size="8" value="0" name="TypeNumber"/>
 			</Block>
 			<Block name="Nop">
-				<Number value="1" name="TypeNumber"/>
+				<Number size="8" value="1" name="TypeNumber"/>
 			</Block>
 			<Block name="CC">  <!-- (obsolete) -->
-				<Number value="11" name="TypeNumber"/>
+				<Number size="8" value="11" name="TypeNumber"/>
 			</Block>
 			<Block name="CCNEW"> <!-- (obsolete) -->
-				<Number value="12" name="TypeNumber"/>
+				<Number size="8" value="12" name="TypeNumber"/>
 			</Block>
 			<Block name="CCECHO"> <!-- (obsolete) -->
-				<Number value="13" name="TypeNumber"/>
+				<Number size="8" value="13" name="TypeNumber"/>
 			</Block>
 			<Block name="Skeeter">
-				<Number value="16" name="TypeNumber"/>
+				<Number size="8"  value="16" name="TypeNumber"/>
 			</Block>
 			<Block name="Bubba">
-				<Number value="17" name="TypeNumber"/>
+				<Number size="8"  value="17" name="TypeNumber"/>
 			</Block>
 			<Block name="SCPSCapabilities">
-				<Number value="20" name="TypeNumber"/>
+				<Number size="8"  value="20" name="TypeNumber"/>
 			</Block>
 			<Block name="SelectiveNegativeAcknowledgements">
-				<Number value="21" name="TypeNumber"/>
+				<Number size="8"  value="21" name="TypeNumber"/>
 			</Block>
 			<Block name="RecordBoundaries">
-				<Number value="22" name="TypeNumber"/>
+				<Number size="8"  value="22" name="TypeNumber"/>
 			</Block>
 			<Block name="Corruptionexperienced">
-				<Number value="23" name="TypeNumber"/>
+				<Number size="8"  value="23" name="TypeNumber"/>
 			</Block>
 			<Block name="SNAP">
-				<Number value="24" name="TypeNumber"/>
+				<Number size="8"  value="24" name="TypeNumber"/>
 			</Block>
 			<Block name="Unassigned">  <!-- (released 2000-12-18) -->
-				<Number value="25" name="TypeNumber"/>
+				<Number size="8"  value="25" name="TypeNumber"/>
 			</Block>
 			<Block name="TCPCompressionFilter">
-				<Number value="26" name="TypeNumber"/>
+				<Number size="8"  value="26" name="TypeNumber"/>
 			</Block>
 			<Block name="TCPAO"> <!-- TCP Authentication Option -->
-				<Number value="29" name="TypeNumber"/>
+				<Number size="8"  value="29" name="TypeNumber"/>
 			</Block>
 			<Block name="MaximumSegmentSize" ref="SelfLenTLV">
 				<Number name="Type" size="8" value="2"/>
@@ -239,8 +239,8 @@
 	<Data name="TestPayload">
 		<!-- good: 10e3cb7079af52eb92702ce95018aaaafe380000 -->
 		<!--  bad: 10e3cb7079af52eb92702ce99018aaaa5ecd0000 -->
-		<Field name="Header.SequenceNumber" valuetype="hex" value="2041533163"/>
-		<Field name="Header.AcknowledgmentNumber" valuetype="hex" value="2456825065"/>
+		<Field name="Header.SequenceNumber" valueType="hex" value="41533163"/>
+		<Field name="Header.AcknowledgmentNumber" valueType="hex" value="24568250"/>
 		<Field name="Header.ControlBits.PSH" value="1"/>
 		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
