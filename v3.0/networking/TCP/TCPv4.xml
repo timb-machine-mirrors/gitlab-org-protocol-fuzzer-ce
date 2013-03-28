@@ -71,7 +71,6 @@
 
 		<State name="Established" >
 			<Action type="changeState" ref="SendTestPayload"/>
-			<!-- <Action type="changeState" ref="BeginClose"/> -->
 		</State>
 
 		<State name="SendTestPayload" >
