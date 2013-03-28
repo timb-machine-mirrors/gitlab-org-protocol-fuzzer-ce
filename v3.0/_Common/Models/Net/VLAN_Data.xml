@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-			 author="Deja Vu Security, LLC" description="Virtual LAN PIT" version="0.0.2">
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Virtual LAN PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
-	<!-- Copyright (c) Deja Vu Security, LLC 2012 -->
-	<!-- Requires Linux Peach 3.0 and RawEther publisher -->
+	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
+	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
+	
+	<Include ns="IPv4" src="file:##Path##/_Common/Models/Net/IPv4_Data.xml"/>
+	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
+	
+	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
+	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
 
-	<Include ns="IPv4" src="file:##Path##/CommonHeaders/IPv4Header.xml"/>
-	<Include ns="IPv6" src="file:##Path##/CommonHeaders/IPv6Header.xml"/>
-
-	<Include ns="TCP" src="file:##Path##/CommonHeaders/TCPHeader.xml"/>
-	<Include ns="UDP" src="file:##Path##/CommonHeaders/UDPHeader.xml"/>
-
-	<!-- header templates -->
-	<DataModel name="EtherHeader">
-		<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
-		<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
-		<Blob name="Type" token="true" valueType="hex" value="8100"/>
-	</DataModel>
 
 	<DataModel name="VLAN_TCI">
 		<Flags size="16" endian="big">
@@ -27,9 +22,8 @@
 		</Flags>
 	</DataModel>
 
-	<!-- Main data mdoe to send an VLAN -->
 	<DataModel name="VLAN">
-		<Block ref="EtherHeader"/>
+		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="VLAN_TCI"/>
 		<Block name="VlanTCIBlock" minOccurs="0">
 			<Blob name="Type" token="true" valueType="hex" value="9100"/>
@@ -646,7 +640,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
 					<Block name="IPv6Payload">
-						<Block ref="IPv6:MobileICMP">
+						<Block ref="ICMP:MobileICMP">
 							<Number name="Type" size="8" endian="big" value="144"/>
 							<Number name="Code" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -681,7 +675,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
 					<Block name="IPv6Payload">
-						<Block ref="IPv6:MobileICMP">
+						<Block ref="ICMP:MobileICMP">
 							<Number name="Type" size="8" endian="big" value="145"/>
 							<Number name="Code" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -720,7 +714,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
 					<Block name="IPv6Payload">
-						<Block ref="IPv6:MobileICMP">
+						<Block ref="ICMP:MobileICMP">
 							<Number name="Type" size="8" endian="big" value="146"/>
 							<Number name="Code" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -755,7 +749,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
 					<Block name="IPv6Payload">
-						<Block ref="IPv6:MobileICMP">
+						<Block ref="ICMP:MobileICMP">
 							<Number name="Type" size="8" endian="big" value="147"/>
 							<Number name="Code" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -797,7 +791,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="58"/>
 					<Block name="IPv6Payload">
-						<Block ref="IPv6:MobileICMPRouterAdvertisement">
+						<Block ref="ICMP:MobileICMPRouterAdvertisement">
 							<Number name="Type" size="8" endian="big" value="134"/>
 							<Number name="Code" size="8" endian="big" value="0"/>
 							<Number name="Checksum" size="16" endian="big">
@@ -852,11 +846,11 @@
 		<Block ref="VLAN">
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="0800" />
-				<Block name="PayloadContent" ref="IPv4:IPv4Header">
+				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
 					<Block name="IPv4Payload">
-						<Block name="TCP" ref="TCP:TCPHeader">
-							<Number name="Checksum" size="16" endian="big">
+						<Block name="TCP" ref="TCP:Packet">
+							<Number name="Header.CheckSum" size="16" endian="big">
 								<Fixup class="TCPChecksumFixup">
 									<Param name="ref" value="TCP" />
 									<Param name="src" value="##SourceIPv4##" />
@@ -883,7 +877,7 @@
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="0800" />
 				<Block name="PayloadContent">
-				  <Block name="IPv4" ref="IPv4:IPv4Header">
+				  <Block name="IPv4" ref="IPv4:IPv4">
 						<Block name="IPv4Payload">
 							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 						</Block>
@@ -908,12 +902,12 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="06"/>
 					<Block name="IPv6Payload">
-						<Block name="TCP" ref="TCP:TCPHeader">
-							<Number name="Checksum" size="16" endian="big">
+						<Block name="TCP" ref="TCP:Packet">
+							<Number name="Header.CheckSum" size="16" endian="big">
 								<Fixup class="TCPChecksumFixup">
 									<Param name="ref" value="TCP" />
-									<Param name="src" value="##SourceIPv6##" />
-									<Param name="dst" value="##TargetIPv6##" />
+									<Param name="src" value="##SourceIP##" />
+									<Param name="dst" value="##TargetIP##" />
 								</Fixup>
 							</Number>
 							<Block name="TcpPayload">
@@ -936,10 +930,10 @@
 			<Block name="VlanPayload">
 				<Blob name="Type" valueType="hex" value="0800" />
 				<!-- This takes the normal payload and overrides it with this payload -->
-				<Block name="PayloadContent" ref="IPv4:IPv4Header">
+				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
-						<Block name="UDPHeader" ref="UDP:UDPHeader">
+						<Block name="UDPHeader" ref="UDP:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
@@ -972,7 +966,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="17"/>
 					<Block name="IPv6Payload">
-						<Block name="UDPHeader" ref="UDP:UDPHeader">
+						<Block name="UDPHeader" ref="UDP:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup"> 
 									<Param name="ref" value="UDPHeader" />
@@ -994,117 +988,5 @@
 			</Block>
 		</Block>
 	</DataModel>
-
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
-
-	<!-- StateModel for All VLAN requests  -->
-	<StateModel name="TheState" initialState="Initial">
-		<State name="Initial">
-			<Action type="output">
-				<DataModel ref="IPv6EmptyPacketInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6HopByHopInVlan"/>
-			</Action>
-			<!--<Action type="output">
-				<DataModel ref="IPv6JumbogramInVlan"/>
-			</Action>-->
-			<Action type="output">
-				<DataModel ref="IPv6Fragment1InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6Fragment2InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6Fragment3InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6DestinationOptionsInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBRRInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileHoTIInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileCoTIInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileHoTInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileCoTInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBUInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBAInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6MobileBEInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6RoutingType2HeaderInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPHomeAgentAddressDiscoveryRequestInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPHomeAgentAddressDiscoveryReplyInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPPrefixSolicitationInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPPrefixAdvertisementInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6ICMPRouterAdvertismentInVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv4InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv4TCPv4InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6TCPv6InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv4UDPv4InVlan"/>
-			</Action>
-			<Action type="output">
-				<DataModel ref="IPv6UDPv6InVlan"/>
-			</Action>			
-		</State>
-	</StateModel>
-
-
-	<!-- Default test for fuzzing VLAN -->
-	<Test name="Default">
-		<!-- <Agent ref="RemoteAgent"/> -->
-		<StateModel ref="TheState"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
-		</Publisher>
-		<Strategy class="##Strategy##"/>
-		<Logger class="logger.Filesystem" >
-			<Param name="Path" value="##LoggerPath##" />
-		</Logger>
-	</Test>
 </Peach>
+<!--END-->
