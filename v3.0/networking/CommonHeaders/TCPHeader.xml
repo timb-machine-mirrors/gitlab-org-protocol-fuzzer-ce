@@ -151,7 +151,7 @@
 
   <DataModel name="Packet">
 		<Block name="Header">
-			<Number name="SrcPort" size="16" endian="big" value="##SourcePort##"/>
+			<Number name="SrcPort" size="16" endian="big" value="1234"/> <!-- this needs to be random, it gets repalced on each iteration -->
 			<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
 			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
 			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
