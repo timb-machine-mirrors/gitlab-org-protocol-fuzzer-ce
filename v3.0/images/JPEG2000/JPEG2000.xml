@@ -12,7 +12,7 @@
         <Block name="ExtendedBox">
           <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/>
 		  <Number name="LengthExtended" size="64" signed="false" endian="big">
-            <!--Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" /--> <!--TODO Peach Bug-->
+            <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" />
 			<Placement before="Data" />
           </Number>
         </Block>
@@ -217,7 +217,7 @@
   
   <DataModel name="BoxXML" ref="Box">
     <Blob name="TheBox.Type" length="4" value="78 6D 6C 20" valueType="hex" token="true"/>
-    <Blob name="TheBox.Data" /><!--analyzer="Xml"/-->
+    <Blob name="TheBox.Data"/>
   </DataModel>
   
   <DataModel name="BoxUUID" ref="Box">
