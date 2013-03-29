@@ -51,7 +51,7 @@
     {
       position: absolute;
       top:88px;
-      bottom:0;
+      bottom:50px;
       left:0;
       right:0;
     }
@@ -69,11 +69,20 @@
     #nodesGridPanel{ height:100%; }
     #jobsGridPanel{ height:100%; }
     #errorsGridPanel{ height:100%; }
+    #footer
+    {
+      background-color: #dcdcdc;
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:50px;
+    }
   </style>
 </head>
 <body>
   <form id="Form1" runat="server">
-    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" OnAsyncPostBackError="RadScriptManager1_AsyncPostBackError" AllowCustomErrorsRedirect="true" AsyncPostBackTimeout="5000" />
+    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" OnAsyncPostBackError="RadScriptManager1_AsyncPostBackError" AllowCustomErrorsRedirect="true" AsyncPostBackTimeout="5000" EnablePartialRendering="true" />
     <telerik:RadAjaxManager ID="RadAjaxManager1" OnAjaxRequest="RadAjaxManager1_AjaxRequest" runat="server">
       <AjaxSettings>
         <telerik:AjaxSetting AjaxControlID="monitorTimer" EventName="Tick">
@@ -214,9 +223,19 @@
         </telerik:RadGrid>
       </telerik:RadPageView>
     </telerik:RadMultiPage>
+    <asp:Table ID="footer" Width="100%" runat="server">
+      <asp:TableRow>
+        <asp:TableCell HorizontalAlign="Right" VerticalAlign="Middle">
+          <img src="dejavulogo.jpg" height="46" style="border-style:none;display:inline-block;" />
+        </asp:TableCell>
+        <asp:TableCell HorizontalAlign="Left" VerticalAlign="Middle">
+          <span>© 2013 Déjà vu Security - </span>
+          <a href="http://www.dejavusecurity.com/contact.html" style="color: black; text-decoration: none" target="_blank">Contact</a>
+        </asp:TableCell>
+      </asp:TableRow>
+    </asp:Table>
     <asp:Panel ID="Panel1" runat="server" Width="0" Height="0">
-      <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick">
-      </asp:Timer>
+      <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick" Enabled="true" />
     </asp:Panel>
   </form>
 </body>

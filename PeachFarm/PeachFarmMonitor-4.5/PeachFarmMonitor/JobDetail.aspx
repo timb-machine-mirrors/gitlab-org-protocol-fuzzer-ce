@@ -46,7 +46,16 @@
       top:50px;
       left:0;
       right:0;
+      bottom:50px;
+    }
+    #footer
+    {
+      background-color: #dcdcdc;
+      position:absolute;
+      left:0;
+      right:0;
       bottom:0;
+      height:50px;
     }
   </style>
   <script type="text/javascript">
@@ -134,6 +143,17 @@
         </MasterTableView>
       </telerik:RadGrid>
     </div>
+    <asp:Table ID="footer" Width="100%" runat="server">
+      <asp:TableRow>
+        <asp:TableCell HorizontalAlign="Right" VerticalAlign="Middle">
+          <img src="dejavulogo.jpg" height="46" style="border-style:none;display:inline-block;" />
+        </asp:TableCell>
+        <asp:TableCell HorizontalAlign="Left" VerticalAlign="Middle">
+          <span>© 2013 Déjà vu Security - </span>
+          <a href="http://www.dejavusecurity.com/contact.html" style="color: black; text-decoration: none" target="_blank">Contact</a>
+        </asp:TableCell>
+      </asp:TableRow>
+    </asp:Table>
   </form>
 </body>
 </html>

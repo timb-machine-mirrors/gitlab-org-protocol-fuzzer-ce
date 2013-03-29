@@ -33,13 +33,13 @@ namespace PeachFarmMonitor
       }
       else
       {
-        Response.Write("<html><body><h1>No Job ID supplied.</h1></body></html>");
+        lblJobID.Text = "No Job ID supplied";
         return;
       }
 
       if (Job == null)
       {
-        Response.Write(String.Format("<html><body><h1>Job {0} not found.</h1></body></html>", jobid));
+        lblJobID.Text = String.Format("Job {0} not found.", jobid);
         return;
       }
       else

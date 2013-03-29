@@ -26,7 +26,6 @@ namespace PeachFarmMonitor
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
     private static Messages.MonitorResponse response;
-    private string guid;
 
     private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
 
@@ -34,19 +33,27 @@ namespace PeachFarmMonitor
     {
       adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-      guid = Guid.NewGuid().ToString();
     }
 
     protected void Page_Load(object sender, EventArgs e)
     {
-      lblHost.Text = adminconfig.Controller.IpAddress;
-      Monitor();
+      if (!Page.IsPostBack)
+      {
+        lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
+        Monitor(true);
+      }
     }
 
     #region Monitor
     private Task<Messages.MonitorResponse> MonitorAsync()
     {
       TaskCompletionSource<Messages.MonitorResponse> tcs = new TaskCompletionSource<Messages.MonitorResponse>();
+      string guid = (string)ViewState["guid"];
+      if(String.IsNullOrEmpty(guid))
+      {
+        guid = Guid.NewGuid().ToString();
+        ViewState["guid"] = guid;
+      }
       admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
       admin.MonitorCompleted += (s, e) =>
         {
@@ -62,7 +69,8 @@ namespace PeachFarmMonitor
       return tcs.Task;
     }
 
-    private async void Monitor()
+
+    private async void Monitor(bool displayError = false)
     {
       try
       {
@@ -84,20 +92,24 @@ namespace PeachFarmMonitor
         loadingLabel.Text = "";
         loadingLabel.Visible = false;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         string message = ex.Message;
-        if(ex.InnerException != null)
+        if (ex.InnerException != null)
         {
           message += "\n" + ex.InnerException.Message;
         }
         nlog.Warn(message);
 
-        loadingLabel.Text = "ERROR";
-        loadingLabel.BackColor = System.Drawing.Color.Red;
-        loadingLabel.Visible = true;
+        if (displayError)
+        {
+          loadingLabel.Text = "ERROR";
+          loadingLabel.BackColor = System.Drawing.Color.Red;
+          loadingLabel.Visible = true;
+        }
       }
     }
+
     #endregion
 
     protected void RadAjaxManager1_AjaxRequest(object sender, Telerik.Web.UI.AjaxRequestEventArgs e)
@@ -107,9 +119,9 @@ namespace PeachFarmMonitor
     protected void Tick(object sender, EventArgs e)
     {
       //RadAjaxManager1.RaisePostBackEvent("Waiting for response...");
-
+      
       Monitor();
-
+      
       
     }
 
@@ -269,6 +281,8 @@ namespace PeachFarmMonitor
         //ignore error
       }
     }
+
+
 
     //protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
     //{
