@@ -11,10 +11,10 @@
         </Block>
         <Block name="ExtendedBox">
           <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/>
-		  <!--Number name="LengthExtended" size="64" signed="false" endian="big">
-            <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" />
+		  <Number name="LengthExtended" size="64" signed="false" endian="big">
+            <!--Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" /--> <!--TODO Peach Bug-->
 			<Placement before="Data" />
-          </Number-->
+          </Number>
         </Block>
         <Block name="NormalBlock">
           <Number name="Length" size="32" signed="false" endian="big">
@@ -217,7 +217,7 @@
   
   <DataModel name="BoxXML" ref="Box">
     <Blob name="TheBox.Type" length="4" value="78 6D 6C 20" valueType="hex" token="true"/>
-    <Blob name="TheBox.Data" analyzer="Xml"/>
+    <Blob name="TheBox.Data" /><!--analyzer="Xml"/-->
   </DataModel>
   
   <DataModel name="BoxUUID" ref="Box">
@@ -678,7 +678,7 @@
       <Block name="TheBoxXML" ref="BoxXML" />
       <Block name="TheBoxUUID" ref="BoxUUID" />
 	  <Block name="TheBoxUUIDInfo" ref="BoxUUIDInfo" />
-	  <Block name="Undefined" ref="Box" />
+	  <!--Block name="Undefined" ref="Box" /--> <!--TODO add constraints?-->
 	</Choice>
   </DataModel>
  
