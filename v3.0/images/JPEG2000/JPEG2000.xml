@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+			 author="Deja Vu Security, LLC" description="JPEG2000 PIT" version="1">
+
+  <DataModel name="Box">
+    <Block name="TheBox">
+      <Choice name="BoxLengthChoice">
+        <Block name="LastBox">
+          <Number name="Length" size="32" signed="false" endian="big" value="0" token="true"/>
+        </Block>
+        <Block name="ExtendedBox">
+          <Number name="Length" size="32" signed="false" endian="big" value="1" token="true"/>
+		  <Number name="LengthExtended" size="64" signed="false" endian="big">
+            <!--Relation type="size" of="TheBox" expressionGet="size" expressionSet="size" /--> <!--TODO Peach Bug-->
+			<Placement before="Data" />
+          </Number>
+        </Block>
+        <Block name="NormalBlock">
+          <Number name="Length" size="32" signed="false" endian="big">
+            <Relation type="size" of="TheBox" expressionGet="size" expressionSet="size"/>
+          </Number>
+        </Block>
+      </Choice>      
+      <Blob name="Type" length="4" />
+      <Blob name="Data" />
+	</Block>
+  </DataModel>
+
+  <!-- Begin JP2 -->
+
+  
+  <DataModel name="BoxJP2Signature" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="6A 50 20 20" valueType="hex" token="true"/>
+    <Blob name="TheBox.Data" value ="0D 0A 87 0A" valueType="hex" token="true" />
+  </DataModel>
+  
+  <DataModel name="BoxFileType" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="66 74 79 70" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <String name="BR" length="4" nullTerminated="false" />
+      <Number name="MinV" size="32" signed="false" endian="big"/>
+      <String name="CLi" length="4" nullTerminated="false" minOccurs="1" />
+    </Block>
+  </DataModel>
+
+
+  <DataModel name="BoxImageHeader" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="69 68 64 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data"> <!--TODO these flags determine values in other boxes, can they be accesses from them?-->
+      <Number name="Height" endian="big" size="32" signed="false" />
+      <Number name="Width" endian="big" size="32" signed="false" />
+      <Number name="NC" endian="big" size="16" signed="false" />
+      <Number name="BPC" endian="big" size="8" signed="true" />
+      <Number name="C" endian="big" size="8" signed="false" />
+      <Number name="UnkC" endian="big" size="8" signed="false" />
+      <Number name="IPR" endian="big" size="8" signed="false" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxBitsPerComponent" ref="Box"> 
+    <Blob name="TheBox.Type" length="4" value="62 70 63 63" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="BPCi" endian="big" size="8" signed="true" minOccurs="1" />
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxColorSpecification" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="63 6F 6C 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Choice name="METHDAT">	
+        <Block name="MethodEnum">
+          <Number name="METH" endian="big" signed="false" size="8" value="1" token="true"/>
+          <Number name="PREC" endian="big" signed="true" size="8" />
+          <Number name="APPROX" endian="big" signed="false" size="8" />		   
+          <Choice name="EPChoice">
+            <Block name="EPCIELab">
+	          <Number name="EnumCS" endian="big" signed="false" size="32" value="14" token="true" />
+              <Number name="RL" endian="big" size="32" signed="false" />
+              <Number name="OL" endian="big" size="32" signed="false" />
+              <Number name="RA" endian="big" size="32" signed="false" />
+              <Number name="OA" endian="big" size="32" signed="false" />
+              <Number name="RB" endian="big" size="32" signed="false" />
+              <Number name="OB" endian="big" size="32" signed="false" />
+              <Number name="IL" endian="big" size="32" />
+            </Block>
+            <Block name="EPCIEJab">
+              <Number name="EnumCS" endian="big" signed="false" size="32" value="19" token="true" />
+              <Number name="RJ" endian="big" size="32" signed="false" />
+              <Number name="OJ" endian="big" size="32" signed="false" />
+              <Number name="RA" endian="big" size="32" signed="false" />
+              <Number name="OA" endian="big" size="32" signed="false" />
+              <Number name="RB" endian="big" size="32" signed="false" />
+              <Number name="OB" endian="big" size="32" signed="false" />
+            </Block>            
+            <Block name="EPUnknown">
+  			  <Number name="EnumCS" endian="big" signed="false" size="32" />
+	          <Blob />
+		    </Block>
+          </Choice>
+        </Block>
+
+        <Block name="MethodRestrictedIIC" >
+          <Number name="METH" endian="big" signed="false" size="8" value="2" token="true" />
+          <Number name="PREC" endian="big" signed="true" size="8" />
+          <Number name="APPROX" endian="big" signed="false" size="8" />		
+          <Blob name="PROFILE" />
+        </Block>
+
+        <Block name="MethodAnyIIC" >
+          <Number name="METH" endian="big" signed="false" size="8" value="3" token="true"/>
+          <Number name="PREC" endian="big" signed="true" size="8" />
+          <Number name="APPROX" endian="big" signed="false" size="8" />
+          <Blob name="PROFILE" />
+        </Block>
+
+        <Block name="MethodVendorColor" >
+          <Number name="METH" endian="big" signed="false" size="8" value="4" token="true"/>
+          <Number name="PREC" endian="big" signed="true" size="8" />
+          <Number name="APPROX" endian="big" signed="false" size="8" />		
+          <Blob name="VCLR" length="16" />
+          <Blob name="VP" />
+        </Block>
+
+        <Block name="MethodUnknown">
+	      <Number name="METH" endian="big" signed="false" size="8" />
+          <Number name="PREC" endian="big" signed="true" size="8" />
+          <Number name="APPROX" endian="big" signed="false" size="8" />
+          <Blob />
+        </Block>
+      </Choice>
+	</Block>
+  </DataModel>
+  
+  <DataModel name="BoxPallete" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="70 63 6C 72" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="NE" endian="big" size="16" signed="false">
+        <Relation type="count" of="Cji" />
+      </Number>
+      <Number name="NPC" endian="big" size="8" signed="false" >
+        <Relation type="count" of="Bi" />
+        <Relation type="count" of="Ci" />
+      </Number>
+      <Number name="Bi" endian="big" size="8" signed="true" minOccurs="0" />
+      <Block name="Ci" minOccurs="0">
+        <Number name="Cji" endian="big" size="8" signed="false" minOccurs="0" />
+      </Block>  
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxComponentMapping" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="63 6D 61 70" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Block name="ComponentMappingRepeater" minOccurs="1">
+        <Number name="CMPi" endian="big" signed="false" size="16" />
+        <Number name="MTYPi" endian="big" signed="false" size="8" />
+        <Number name="PCOLi" endian="big" signed="false" size="8" />
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxChannelDeffinition" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="63 64 65 66" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="N" endian="big" signed="false" size="16" />
+      <Block name="ChannelDeffinitionRepeater" minOccurs="1">
+        <Number name="Cni" endian="big" signed="false" size="16" />
+        <Number name="Typi" endian="big" signed="false" size="16" />
+        <Number name="Asoci" endian="big" signed="false" size="16" />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCaptureResolution" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 63" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="VRcN" endian="big" signed="false" size="16" />
+      <Number name="VRcD" endian="big" signed="false" size="16" />
+      <Number name="HRcN" endian="big" signed="false" size="16" />
+      <Number name="HRcD" endian="big" signed="false" size="16" />
+      <Number name="VRcE" endian="big" signed="true" size="8" />
+      <Number name="HRcE" endian="big" signed="true" size="8" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxDisplayResolution" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 64" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="VRdN" endian="big" signed="false" size="16" />
+      <Number name="VRdD" endian="big" signed="false" size="16" />
+      <Number name="HRdN" endian="big" signed="false" size="16" />
+      <Number name="HRdD" endian="big" signed="false" size="16" />
+      <Number name="VRdE" endian="big" signed="true" size="8" />
+      <Number name="HRdE" endian="big" signed="true" size="8" />
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxResolution" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="72 65 73 20" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+	  <Choice minOccurs="1" maxOccurs="2">
+        <Block name="TheBoxCaptureResolution" ref="BoxCaptureResolution"/>
+        <Block name="TheBoxDefaultDisplayResolution" ref="BoxDisplayResolution"/>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxContiguousCodestream" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="6A 70 32 63" valueType="hex" token="true"/>
+  </DataModel>
+  
+  <DataModel name="BoxIntellectualProperty" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="6a 70 32 69" valueType="hex" token="true"/>
+      <!--undefined by spec-->
+  </DataModel>
+  
+  <DataModel name="BoxXML" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="78 6D 6C 20" valueType="hex" token="true"/>
+    <Blob name="TheBox.Data" /><!--analyzer="Xml"/-->
+  </DataModel>
+  
+  <DataModel name="BoxUUID" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="75 75 69 64" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Blob name="UUID" length="16" />
+      <Blob name="UUIDSpecificData" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxUUIDList" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="75 63 73 74" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="NU" endian="big" size="16" signed="false">
+        <Relation type="count" of="UUIDs"/>
+      </Number>
+	  <Block name="UUIDs" maxOccurs="0">
+        <Blob name="UUIDi" length="16" />
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxURL" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="75 72 6C 20" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Number name="VERS" endian="big" signed="false" size="8" />
+      <Number name="Flags" endian="big" signed="false" size="24" />
+      <String name="LOC" nullTerminated="true" type="utf8" />
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxUUIDInfo" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="75 69 6E 66" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Block name="TheBoxUUIDList" ref="BoxUUIDList" minOccurs="0"/>
+      <Block name="TheBoxURL" ref="BoxURL" minOccurs="0"/>
+    </Block>
+  </DataModel>
+
+  <!-- End JP2 -->
+
+
+  <!-- Begin JPX
+
+  <DataModel name="BoxReaderRequirements" ref="Box">
+    <Blob name="Type" length="4" value="72 72 65 71" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="ML" endian="big" signed="false" size="8" constraint="value == 1 or value == 2 or value == 4 or value == 8">
+        <Relation type="size" of="FUAM" />
+        <Relation type="size" of="DCM" />
+      </Number>
+      <Blob name="FUAM" />
+      <Blob name="DCM" />
+      <Number name="NSF" endian="big" size="16" signed="false">
+        <Relation type="count" of="ArrayUnwrap1" />
+      </Number>
+      <Block name="ArrayUnwrap1" minOccurs="0" >
+        <Number name="SFi" endian="big" size="16" signed="false" constraint="value &gt;= 1 and value &lt;= 66"/>
+        <Blob name="SMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
+      </Block>
+      <Number name="NVF" endian="big" size="16" signed="false">
+        <Relation type="count" of="ArrayUnwrap2"/>
+      </Number>
+      <Block name="ArrayUnwrap2" minOccurs="0" maxOccurs="3000">
+        <Relation type="count" from="NVF" />
+
+        <Blob name="VFi" length="16" />
+        <Blob name="VMi" lengthType="calc" length="self.find('ML').getInternalValue()"/>
+                
+      </Block>
+    </Block>
+  </DataModel>
+
+
+  <DataModel name="BoxDataReference" ref="Box">
+    <Blob name="Type" length="4" value="64 74 62 6C" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="NDR" endian="big" size="16" signed="false">
+        <Relation type="count" of="DRi" />
+      </Number>
+      <Block name="DRi" ref="BoxURL" minOccurs="0">
+        <Blob />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxFragmentList" ref="Box">
+    <Blob name="Type" length="4" value="66 6C 73 74" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="NF" endian="big" size="16" signed="false">
+        <Relation type="count" of="OLD" />
+      </Number>
+      <Block name="OLD" minOccurs="0">
+        <Number name="OFFi" size="64" endian="big" signed="false" />
+        <Number name="LENi" size="32" endian="big" signed="false" />
+        <Number name="DRi" size="16" endian="big" signed="false" />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxFragmentTable" ref="Box">
+    <Blob name="Type" length="4" value="66 74 62 6C" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="TheBoxFragmentList" ref="BoxFragmentList" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCrossReference" ref="Box">
+    <Blob name="Type" length="4" value="63 72 65 66" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Blob name="Rtyp" length="4" />
+      <Block name="Flist" ref="BoxFragmentList" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxOpacity" ref="Box">
+    <Blob name="Type" length="4" value="6F 70 63 74" valueType="hex" token="true"/>
+    <Block name="Data">     
+      <Choice>
+	    <Block>
+          <Number name="Otyp" endian="big" size="8" signed="false" value="2" token="true"/>
+        </Block>
+		<Block>
+          <Number name="Otyp" endian="big" size="8" signed="false" />
+		  <Number name="NCH" endian="big" size="8" signed="false" />
+          <Blob name="CVi" />
+		</Block>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCodestreamRegistration" ref="Box">
+    <Blob name="Type" length="4" value="63 72 65 67" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Choice name="XYChoice">
+        <Block name="Edge">
+          <Number name="XS" endian="big" size="16" signed="false" token="true" value="0" />
+          <Number name="YS" endian="big" size="16" signed="false">
+            <Relation type="count" of="YSUnwrap" />
+          </Number>
+          <Block name="YSUnwrap" minOccurs="0">
+            <Number name="CDNi" endian="big" size="16" signed="false" />
+            <Number name="XRi" endian="big" size="8" signed="false" />
+            <Number name="YRi" endian="big" size="8" signed="false" />
+            <Number name="XOi" endian="big" size="8" signed="false" />
+            <Number name="YOi" endian="big" size="8" signed="false" />
+          </Block>
+        </Block>
+        <Block name="Normal">
+          <Number name="XS" endian="big" size="16" signed="false">
+            <Relation type="count" of="XSUnwrap" />
+          </Number>
+          <Number name="YS" endian="big" size="16" signed="false">
+            <Relation type="count" of="YSUnwrap" />
+          </Number>
+          <Block name="XSUnwrap" minOccurs="0">
+            <Block name="YSUnwrap" minOccurs="0">
+              <Number name="CDNi" endian="big" size="16" signed="false" />
+              <Number name="XRi" endian="big" size="8" signed="false" />
+              <Number name="YRi" endian="big" size="8" signed="false" />
+              <Number name="XOi" endian="big" size="8" signed="false" />
+              <Number name="YOi" endian="big" size="8" signed="false" />
+            </Block>
+          </Block>
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCompositionOptions" ref="Box">
+    <Blob name="Type" length="4" value="72 72 65 71" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="HEIGHT" size="32" endian="big" signed="false" />
+      <Number name="WIDTH" size="32" endian="big" signed="false" />
+      <Number name="Loop" size="8" endian="big" signed="false" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxInstructionSet" ref="Box">
+    <Blob name="Type" length="4" value="69 6E 73 74" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Flags name="Ityp" endian="big" size="16">
+        <Flag name="bXOYO" position="0" size="1" />
+        <Flag name="bWH" position="1" size="1" />
+        <Flag name="bLNP" position="2" size="1" />
+        <Flag name="bCROP" position="4" size="1" />
+      </Flags>
+      <Number name="REPT" endian="big" size="16" signed="false" />
+      <Number name="TICK" endian="big" size="32" signed="false" />
+
+      <Block name="INSTi" minOccurs="0">
+        <Number name="XO" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bXOYO').getInternalValue() == 1"/>
+        </Number>
+        <Number name="YO" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bXOYO').getInternalValue() == 1"/>
+        </Number>
+        <Number name="WIDTH" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bWH').getInternalValue() == 1"/>
+        </Number>
+        <Number name="HEIGHT" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bWH').getInternalValue() == 1"/>
+        </Number>
+        <Number name="PERSIST_LIFE" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bLNP').getInternalValue() == 1"/>
+        </Number>
+        <Number name="NEXT_USE" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bLNP').getInternalValue() == 1"/>
+        </Number>
+        <Number name="XC" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+        </Number>
+        <Number name="YC" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+        </Number>
+        <Number name="WC" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+        </Number>
+        <Number name="HC" endian="big" size="32" signed="false">
+          <Relation type="when" when="self.find('bCROP').getInternalValue() == 1"/>
+        </Number>
+      </Block>
+	  
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxNumberList" ref="Box">
+    <Blob name="Type" length="4" value="6E 6C 73 74" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="ANi" endian="big" signed="false" size="32" minOccurs="1" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxLabel" ref="Box">
+    <Blob name="Type" length="4" value="6C 62 6C 20" valueType="hex" token="true"/>
+    <Block name="Data">
+      <String name="S" nullTerminated="false" /> 
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxBinaryFilter" ref="Box">
+    <Blob name="Type" length="4" value="62 66 69 6C" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Choice name="UUIDChoice">
+        <Block name="Gzip">
+          <Blob name="UUID" length="16" value="EC 34 0B 04 74 C5 11 D4 A7 29 87 9E A3 54 8F 0E" valueType="hex"/>
+          <Block name="Data">
+            <Transformer class="compress.GzipCompress" />
+            <Block name="TheBox" ref="Box" minOccurs="0" />
+          </Block>
+        </Block>
+        <Block name="UnknownFilter">
+          <Blob name="UUID" length="16"/>
+          <Blob name="Data" analyzer="binary.Binary" />
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxGraphicsTechnologyStandardOutput" ref="Box">
+    <Blob name="Type" length="4" value="67 74 73 6F" valueType="hex" token="true"/>
+    <Blob name="Data" />
+  </DataModel>
+  
+  <DataModel name="BoxROIDescription" ref="Box">
+    <Blob name="Type" length="4" value="67 74 73 6F" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Number name="Nroi" endian="big" size="8" signed="false">
+        <Relation type="count" of="ROI" />
+      </Number>
+      <Block name="ROI" minOccurs="0" >
+        <Number name="Ri" endian="big" size="8" signed="false" />
+        <Number name="Rtypi" endian="big" size="8" signed="false" />
+        <Number name="Rlcxi" endian="big" size="32" signed="false" />
+        <Number name="RlcxiTODO" endian="big" size="32" signed="false" />
+        <Number name="Rlcyi" endian="big" size="32" signed="false" />
+        <Number name="Rwdti" endian="big" size="32" signed="false" />
+        <Number name="Rhthi" endian="big" size="32" signed="false" />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxDigitalSignature" ref="Box">
+    <Blob name="Type" length="4" value="63 68 63 6B" valueType="hex" token="true"/>
+    <Block name="Data">
+	  <Number name="Styp" endian="big" size="8" signed="false" />
+	  <Choice>
+	    <Block>
+          <Number name="Ptyp" endian="big" size="8" signed="false" value="1" token="true"/>
+        </Block>	  
+	    <Block>
+          <Number name="Ptyp" endian="big" size="8" signed="false" />
+          <Number name="OFFSET" endian="big" size="64" signed="false">
+            <Hint name="OffsetHint" value="offset" />
+          </Number>
+          <Number name="LENGTH" endian="big" size="64" signed="false" />
+		</Block>
+      </Choice>
+      <Blob name="SubData" analyzer="binary.Binary" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxMPEG7Binary" ref="Box">
+    <Blob name="Type" length="4" value="6D 70 37 62" valueType="hex" token="true"/>
+    <Blob name="Data" analyzer="binary.Binary" />
+  </DataModel>
+
+
+  <DataModel name="BoxFree" ref="Box">
+    <Blob name="Type" length="4" value="66 72 65 65" valueType="hex" token="true"/>
+    <Blob name="Data" />
+  </DataModel>
+
+  <DataModel name="BoxCatchAll">
+    <Choice>
+      <Block name="TheBoxJP2Signature" ref="BoxJP2Signature" />
+      <Block name="TheBoxXML" ref="BoxXML" />
+      <Block name="TheBoxFileType" ref="BoxFileType" />
+      <Block name="TheBoxImageHeader" ref="BoxImageHeader" />
+      <Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent" />
+      <Block name="TheBoxColorSpecification" ref="BoxColorSpecification" />
+      <Block name="TheBoxPallete" ref="BoxPallete" />
+      <Block name="TheBoxComponentMapping" ref="BoxComponentMapping" />
+      <Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition" />
+      <Block name="TheBoxCaptureResolution" ref="BoxCaptureResolution" />
+      <Block name="TheBoxContiguousCodestream" ref="BoxContiguousCodestream" />
+      <Block name="TheBoxIntellectualProperty" ref="BoxIntellectualProperty" />
+      <Block name="TheBoxUUID" ref="BoxUUID" />
+      <Block name="TheBoxUUIDList" ref="BoxUUIDList" />
+      <Block name="TheBoxURL" ref="BoxURL" />
+      <Block name="TheBoxUUIDInfo" ref="BoxUUIDInfo" />
+
+           
+      <Block name="TheBoxReaderRequirements" ref="BoxReaderRequirements" />
+      <Block name="TheBoxDataReference" ref="BoxDataReference" />
+      <Block name="TheBoxFragmentList" ref="BoxFragmentList" />
+      <Block name="TheBoxFragmentTable" ref="BoxFragmentTable" />
+      <Block name="TheBoxCrossReference" ref="BoxCrossReference" />
+      <Block name="TheBoxOpacity" ref="BoxOpacity" />
+      <Block name="TheBoxCodestreamRegistration" ref="BoxCodestreamRegistration" />
+      <Block name="TheBoxCompositionOptions" ref="BoxCompositionOptions" />
+      <Block name="TheBoxInstructionSet" ref="BoxInstructionSet" />
+      <Block name="TheBoxNumberList" ref="BoxNumberList" />
+      <Block name="TheBoxLabel" ref="BoxLabel" />
+      <Block name="TheBoxBinaryFilter" ref="BoxBinaryFilter" />
+      <Block name="TheBoxGraphicsTechnologyStandardOutput" ref="BoxGraphicsTechnologyStandardOutput" />
+      <Block name="TheBoxROIDescription" ref="BoxROIDescription" />
+      <Block name="TheBoxDigitalSignature" ref="BoxDigitalSignature" />
+      <Block name="TheBoxMPEG7Binary" ref="BoxMPEG7Binary" />
+      <Block name="TheBoxFree" ref="BoxFree" />
+      
+
+      <Block name="Undefined" ref="Box" />
+      
+    </Choice>
+  </DataModel> 
+  -->
+
+  <!-- super boxes -->
+
+  <!--JPX  
+  <DataModel name="BoxMediaData" ref="Box">
+    <Blob name="Type" length="4" value="6D 64 61 74" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Choice minOccurs="1" >
+        <Block name="TheBoxMPEG7Binary" ref="BoxMPEG7Binary" />
+        <Block name="UnknownMediaBox" ref="BoxCatchAll" />        
+      </Choice>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="BoxDesiredReproduction" ref="Box">
+    <Blob name="Type" length="4" value="64 72 65 70" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Choice name="BoxChoice" minOccurs="1">
+        <Block name="GTS" ref="BoxGraphicsTechnologyStandardOutput" />
+        <Block name="UnknownDesiredReproduction" ref="BoxCatchAll" />
+      </Choice>
+    </Block>
+  </DataModel>
+
+
+  <DataModel name="BoxAssociation" ref="Box">
+    <Blob name="Type" length="4" value="61 73 6F 63" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="BF" ref="Box" />
+      <Block name="Bi" ref="Box" minOccurs="1" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCodestreamHeader" ref="Box">
+    <Blob name="Type" length="4" value="6A 70 63 68" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="TheBoxLabel" ref="BoxLabel" />
+      <Block name="TheBoxImageHeader" ref="BoxImageHeader" />
+      <Choice name="CodestreamHeaderUnwrap" minOccurs="4">
+        <Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent" />
+        <Block name="TheBoxPallete" ref="BoxPallete" />
+        <Block name="TheBoxComponentMapping" ref="BoxComponentMapping" />
+        <Block name="TheBoxROIDescription" ref="BoxROIDescription" />
+        <Block name="UnknownCodestreamHeaderBox" ref="BoxCatchAll" />
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxCompositingLayerHeader" ref="Box">
+    <Blob name="Type" length="4" value="6A 70 6C 68" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="TheBoxLabel" ref="BoxLabel" />
+      <Choice name="CompositingLayerHeaderUnwrap" minOccurs="5" >
+        <Block name="TheBoxColorGroup" ref="BoxColorGroup" />
+        <Block name="TheBoxOpacity" ref="BoxOpacity" />
+        <Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition" />
+        <Block name="TheBoxCodestreamRegistration" ref="BoxCodestreamRegistration" />
+        <Block name="TheBoxResolution" ref="BoxResolution" />
+        <Block name="UnknownCompositingLayerHeaderBox" ref="BoxCatchAll" />
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="BoxComposition" ref="Box">
+    <Blob name="Type" length="4" value="63 6F 6D 70" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="TheBoxCompositionOptions" ref="BoxCompositionOptions" />
+      <Block name="TheBoxInstructionSet" ref="BoxInstructionSet" minOccurs="0" />
+    </Block>
+  </DataModel>
+
+ 
+  
+  <DataModel name="BoxColorGroup" ref="Box">
+    <Blob name="Type" length="4" value="63 67 72 70" valueType="hex" token="true"/>
+    <Block name="Data">
+      <Block name="TheBoxColorSpecification" ref="BoxColorSpecification" minOccurs="1"/>
+    </Block>
+  </DataModel>
+  
+   -->
+  
+  <DataModel name="BoxJP2Header" ref="Box">
+    <Blob name="TheBox.Type" length="4" value="6A 70 32 68" valueType="hex" token="true"/>
+    <Block name="TheBox.Data">
+      <Block name="TheBoxImageHeader" ref="BoxImageHeader" />
+      <Choice name="BoxJP2HeaderChoice" minOccurs="1" >
+        <Block name="TheBoxBitsPerComponent" ref="BoxBitsPerComponent" />
+        <Block name="TheBoxColorSpecification" ref="BoxColorSpecification" minOccurs="1"/>
+        <Block name="TheBoxPallete" ref="BoxPallete" />
+        <Block name="TheBoxComponentMapping" ref="BoxComponentMapping" />
+        <Block name="TheBoxChannelDeffinition" ref="BoxChannelDeffinition" />
+        <Block name="TheBoxResolution" ref="BoxResolution" />
+      </Choice>
+    </Block>
+  </DataModel>
+ 
+  <DataModel name="JP2Additional">
+    <Choice name="JP2AdditionalChoice" >
+      <Block name="TheBoxIntellectualProperty" ref="BoxIntellectualProperty" />
+      <Block name="TheBoxXML" ref="BoxXML" />
+      <Block name="TheBoxUUID" ref="BoxUUID" />
+	  <Block name="TheBoxUUIDInfo" ref="BoxUUIDInfo" />
+	  <!--Block name="Undefined" ref="Box" /--> <!--TODO add constraints?-->
+	</Choice>
+  </DataModel>
+ 
+  <DataModel name="JPEG2000">
+    <Block name="TheBoxJP2Signature" ref="BoxJP2Signature"/>
+    <Block name="TheBoxFileType" ref="BoxFileType" />
+	<Block name="TheJP2Additional1" ref="JP2Additional" minOccurs="0" />
+	<Block name="BoxJP2Header" ref="BoxJP2Header" />
+    <Block name="TheJP2Additional2" ref="JP2Additional" minOccurs="0" />
+    <Block name="TheBoxContiguousCodestream" ref="BoxContiguousCodestream" />
+	<Choice name="MoreCodestreamOrMisc" minOccurs="0">
+      <Block name="MoreContiguousCodestream" ref="BoxContiguousCodestream" />
+      <Block name="TheJP2Additional3" ref="JP2Additional" />
+    </Choice>
+  </DataModel>
+
+
+  <!-- STATE MODEL SECTION -->
+  <StateModel name="StateModel" initialState="Initial">
+    <State name="Initial">
+
+      <Action name="WriteFileFromSample" type="output" publisher="writer">
+        <DataModel name="Jp2" ref="JPEG2000" />
+        <Data name="data" fileName="SeedFile.jp2" />
+      </Action>
+
+      <Action name="CloseFile"  type="close" publisher="writer" />
+      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+
+  <!-- ***************
+       AGENT SECTION  
+      *************** -->
+
+  <Agent name="Agent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="C:\\windows\\system32\\mspaint.exe fuzzed.jp2"/>
+      <Param name="StartOnCall" value="FuzzMe"/>
+      <Param name="CpuKill" value="true"/>
+    </Monitor>
+
+    <Monitor class="PageHeap">
+      <Param name="Executable" value="mspaint.exe"/>
+    </Monitor>
+  </Agent>
+   
+
+  <!-- LINUX 
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="debugger.UnixDebugger">
+        <Param name="Command" value="/bin/target" />
+        <Param name="Params" value="fuzzed.jp2" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent> 
+    -->
+
+  <!-- OSX
+    <Agent name="Agent" location="http://127.0.0.1:9000">
+      <Monitor class="osx.CrashWrangler">
+        <Param name="Command" value="/Applications/Target/TargetName" />
+        <Param name="Arguments" value="fuzzed.jp2" />
+        <Param name="ExecHandler" value="./exc_handler" />
+        <Param name="StartOnCall" value="FuzzMe" />
+      </Monitor>
+    </Agent>
+     -->
+
+
+  <!-- **************
+        TEST SECTION  
+       ************** -->
+  <Test name="Default">
+
+    <Agent ref="Agent"/>
+    <StateModel ref="StateModel" />
+
+    <Publisher name="writer" class="file.FileWriter">
+      <Param name="FileName" value="fuzzed.jp2" />
+    </Publisher>
+
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
+
+    <!-- GUI Launcher: WINDOWS ONLY -->
+    <!--
+     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+      <Param name="WindowName" value="GUI Window Name" /> 
+     </Publisher> 
+     -->
+	 
+    <Logger class="logger.Filesystem">
+      <Param name="Path" value="logs/JPG2K/"/>
+    </Logger>
+  </Test>
+  
+</Peach>
