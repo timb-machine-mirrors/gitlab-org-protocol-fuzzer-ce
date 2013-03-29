@@ -7,8 +7,8 @@
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
     
     <!-- Raw IP Header Config -->
-    <Define key="SourceIPv4"  value="10.0.1.63"/>
-    <Define key="TargetIPv4"  value="224.0.0.5"/>
+    <Define key="SourceIPv4"  value="127.0.0.1"/>
+    <Define key="TargetIPv4"  value="127.0.0.1"/>
 
     <!-- OSPF Header Config -->
     <Define key="OSPFSourceRouter" value="10.0.1.63"/>
