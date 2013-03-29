@@ -2,7 +2,7 @@
 <PitDefines>
 
 	<All>
-		<Define key="Seed" value="gif_sample_11.gif"/>
+		<Define key="Seed" value="gif_sample_12.gif"/>
 		<Define key="Strategy"  value="Sequential"/>
 		<Define key="LoggerPath"  value="./logs/gif/"/>
 		<Define key="Path" value="."/>
