@@ -138,12 +138,34 @@
     </div>
     <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" EnableEmbeddedSkins="false" Skin="DejaVu">
       <Tabs>
-        <telerik:RadTab Text="Nodes"></telerik:RadTab>
         <telerik:RadTab Text="Jobs"></telerik:RadTab>
+        <telerik:RadTab Text="Nodes"></telerik:RadTab>
         <telerik:RadTab Text="Errors"></telerik:RadTab>
       </Tabs>
     </telerik:RadTabStrip>
     <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
+      <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
+        <telerik:RadGrid ID="jobsGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="false" 
+          OnItemDataBound="jobsGrid_ItemDataBound" 
+          OnSortCommand="jobsGrid_SortCommand"
+          Height="100%" Width="100%">
+          <ClientSettings>
+            <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+          </ClientSettings>
+          <MasterTableView TableLayout="Fixed">
+            <Columns>
+              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" />
+              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
+              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+              <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
+              <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
+              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
+            </Columns>
+          </MasterTableView>
+        </telerik:RadGrid>
+      </telerik:RadPageView>
       <telerik:RadPageView ID="nodesPage" runat="server" Height="100%">
         <telerik:RadGrid ID="nodesGrid" runat="server" 
           AutoGenerateColumns="false" AllowSorting="True" 
@@ -166,28 +188,6 @@
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" ColumnGroupName="JobInfo" />
               <telerik:GridBoundColumn DataField="Seed" HeaderText="Seed" ColumnGroupName="JobInfo" />
               <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" ColumnGroupName="JobInfo" />
-            </Columns>
-          </MasterTableView>
-        </telerik:RadGrid>
-      </telerik:RadPageView>
-      <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
-        <telerik:RadGrid ID="jobsGrid" runat="server" 
-          AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="false" 
-          OnItemDataBound="jobsGrid_ItemDataBound" 
-          OnSortCommand="jobsGrid_SortCommand"
-          Height="100%" Width="100%">
-          <ClientSettings>
-            <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
-          </ClientSettings>
-          <MasterTableView TableLayout="Fixed">
-            <Columns>
-              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" />
-              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
-              <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
-              <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
-              <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
-              <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
-              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>

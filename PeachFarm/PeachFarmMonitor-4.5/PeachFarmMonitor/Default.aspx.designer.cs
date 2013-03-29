@@ -139,24 +139,6 @@ namespace PeachFarmMonitor {
         protected global::Telerik.Web.UI.RadMultiPage toplevel;
         
         /// <summary>
-        /// nodesPage control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadPageView nodesPage;
-        
-        /// <summary>
-        /// nodesGrid control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadGrid nodesGrid;
-        
-        /// <summary>
         /// jobsPage control.
         /// </summary>
         /// <remarks>
@@ -173,6 +155,24 @@ namespace PeachFarmMonitor {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::Telerik.Web.UI.RadGrid jobsGrid;
+        
+        /// <summary>
+        /// nodesPage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadPageView nodesPage;
+        
+        /// <summary>
+        /// nodesGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadGrid nodesGrid;
         
         /// <summary>
         /// errorsPage control.

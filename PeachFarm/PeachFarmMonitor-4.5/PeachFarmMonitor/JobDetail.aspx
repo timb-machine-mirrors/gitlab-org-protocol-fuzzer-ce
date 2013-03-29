@@ -93,7 +93,12 @@
         <ClientSettings>
           <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
         </ClientSettings>
-        <MasterTableView DataMember="Iterations" Caption="Iterations" HierarchyLoadMode="ServerOnDemand">
+        <MasterTableView 
+          AllowPaging="true" PageSize="50"
+          DataMember="Iterations" 
+          Caption="Iterations" 
+          HierarchyLoadMode="ServerOnDemand">
+          <PagerStyle PageSizeControlType="None" />
           <Columns>
             <telerik:GridBoundColumn DataField="IterationNumber" HeaderText="Iteration" />
             <telerik:GridBoundColumn DataField="TestName" HeaderText="Test" />
