@@ -2,9 +2,9 @@
 <PitDefines>
   <All>
     <Define key="LoggerPath" value="logs/dhcp4/"/>
-    <Define key="SourceIPv4" value="192.168.146.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="SourcePort" value="68"/>
-    <Define key="TargetIPv4" value="192.168.146.254"/>    
+    <Define key="TargetIPv4" value="127.0.0.1"/>    
     <Define key="TargetPort" value="67"/>
 
     <Define key="SourceMAC" value="0800c0565000"/>
