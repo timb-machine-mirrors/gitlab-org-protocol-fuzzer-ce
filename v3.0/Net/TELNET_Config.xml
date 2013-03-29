@@ -11,7 +11,7 @@
 	<Define key="Command" value="ls"/>
 	
     <Define key="TargetPort"    value="23"/>
-    <Define key="TargetIPv4"    value="10.6.66.51"/>
+    <Define key="TargetIPv4"    value="127.0.0.1"/>
     <Define key="LoggerPath"  value="./logs/telnet/"/>
     <Define key="Strategy"  value="Sequential"/>
 		<Define key="Path" value="."/>
