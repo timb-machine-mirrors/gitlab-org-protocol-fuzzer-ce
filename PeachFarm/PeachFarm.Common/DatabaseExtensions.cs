@@ -128,64 +128,44 @@ namespace PeachFarm.Common.Mongo
 			return heartbeat;
 		}
 
-		public static List<Iteration> GetIterationsCursor(this Job job, string connectionString)
+		public static IEnumerable<Job> FillIterations(this IEnumerable<Job> jobs, string connectionString, bool excludeFaultInfo = false)
+		{
+			foreach (var job in jobs)
+			{
+				job.Iterations = job.GetIterations(connectionString, excludeFaultInfo);
+			}
+			return jobs;
+		}
+
+		public static List<Iteration> GetIterations(this Job job, string connectionString, bool excludeFaultInfo = false)
 		{
 			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
-			return collection.Find(query).OrderBy(i => i.IterationNumber).ToList();
+
+			if (excludeFaultInfo)
+			{
+				return collection.Find(query).SetFields(Fields.Exclude(DatabaseHelper.FaultInfoFields)).OrderBy(i => i.IterationNumber).ToList();
+			}
+			else
+			{
+				return collection.Find(query).OrderBy(i => i.IterationNumber).ToList();
+			}
 		}
 
 		public static long GetFaultCount(this Job job, string connectionString)
 		{
-			List<string> fields = new List<string>()
-      {
-				"JobID",
-				"NodeName",
-				"Faults.Description",
-				"Faults.DetectionSource",
-				"Faults.Exploitability",
-				"Faults.FolderName",
-				"Faults.MajorHash",
-				"Faults.MinorHash",
-				"Faults.Title",
-				"Faults.FaultType",
-				"Faults.StateModel",
-				"Faults.CollectedData"
-      };
 			var collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
-			var results = collection.Find(query).SetFields(Fields.Exclude(fields.ToArray()));
+			var results = collection.Find(query).SetFields(Fields.Exclude(DatabaseHelper.FaultInfoFields));
 			return results.Sum(i => i.Faults.Count());
 		}
 
-		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString, bool excludeFaultInfo = false)
+		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
 		{
 			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 			var jobids = (from PeachFarm.Common.Messages.Heartbeat h in nodes where !String.IsNullOrEmpty(h.JobID) select BsonValue.Create(h.JobID)).Distinct();
 			var query = Query.In("JobID", jobids);
-
-			if (excludeFaultInfo)
-			{
-				List<string> fields = new List<string>()
-				{
-					"Faults.Description",
-					"Faults.DetectionSource",
-					"Faults.Exploitability",
-					"Faults.FolderName",
-					"Faults.MajorHash",
-					"Faults.MinorHash",
-					"Faults.Title",
-					"Faults.FaultType",
-					"Faults.StateModel",
-					"Faults.CollectedData"
-				};
-
-				return collection.Find(query).SetFields(Fields.Exclude(fields.ToArray())).OrderBy(k => k.StartDate).ToList();
-			}
-			else
-			{
-				return collection.Find(query).OrderBy(k => k.StartDate).ToList();
-			}
+			return collection.Find(query).OrderBy(k => k.StartDate).ToList();
 		}
 
 		public static List<Messages.Job> ToMessagesJobs(this IEnumerable<Mongo.Job> mongoJobs)

@@ -59,7 +59,8 @@ namespace PeachFarm.Common.Messages
 			this.PitFileName = mongoJob.PitFileName;
 			this.StartDate = mongoJob.StartDate;
 			this.UserName = mongoJob.UserName;
-			this.FaultCount = (from i in mongoJob.Iterations select i.Faults.Count).Sum();
+			if(mongoJob.Iterations != null)
+				this.FaultCount = (from i in mongoJob.Iterations select i.Faults.Count).Sum();
 		}
 	}
 }

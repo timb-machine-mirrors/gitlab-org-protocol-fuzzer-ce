@@ -11,6 +11,20 @@ namespace PeachFarm.Common.Mongo
 {
 	public class DatabaseHelper
 	{
+		public static string[] FaultInfoFields = new string[]
+				{
+					"Faults.Description",
+					"Faults.DetectionSource",
+					"Faults.Exploitability",
+					"Faults.FolderName",
+					"Faults.MajorHash",
+					"Faults.MinorHash",
+					"Faults.Title",
+					"Faults.FaultType",
+					"Faults.StateModel",
+					"Faults.CollectedData"
+				};
+
 		public static bool TestConnection(string connectionString)
 		{
 			bool result = true;
@@ -88,32 +102,10 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindOne(query);
 		}
 
-		public static List<Job> GetAllJobs(string connectionString, bool excludeFaultInfo = false)
+		public static List<Job> GetAllJobs(string connectionString)
 		{
 			MongoCollection<Job> collection = GetCollection<Job>(MongoNames.Jobs,connectionString);
-
-			if (excludeFaultInfo)
-			{
-				List<string> fields = new List<string>()
-				{
-					"Faults.Description",
-					"Faults.DetectionSource",
-					"Faults.Exploitability",
-					"Faults.FolderName",
-					"Faults.MajorHash",
-					"Faults.MinorHash",
-					"Faults.Title",
-					"Faults.FaultType",
-					"Faults.StateModel",
-					"Faults.CollectedData"
-				};
-
-				return collection.FindAll().SetFields(Fields.Exclude(fields.ToArray())).ToList();
-			}
-			else
-			{
-				return collection.FindAll().ToList();
-			}
+			return collection.FindAll().ToList();
 		}
 
 		public static List<Messages.Heartbeat> GetErrors(string connectionString)
