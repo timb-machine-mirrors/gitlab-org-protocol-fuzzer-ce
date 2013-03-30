@@ -5,6 +5,7 @@
 		<Define key="LoggerPath"  value="./logs/ethernet/"/> 
 		<Define key="Strategy"  value="Sequential"/>
 		<Define key="TargetMAC" value="0000000000"/>
+		<Define key="SourceMAC" value="0000000000"/>
 		<Define key="Path" value="."/>
 	</All>
 	<Linux platform="linux">
