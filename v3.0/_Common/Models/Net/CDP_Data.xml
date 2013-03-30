@@ -7,7 +7,7 @@
   <!-- Cisco Discovery Protocol Main DataModel -->
   <DataModel name="CDP">
     <Block name="EtherHeader" mutable="false">
-      <Blob name="Dest" mutable="false" valueType="hex" value="01000ccccccc"/> <!-- CDP Multicast -->
+      <Blob name="Dest" mutable="false" valueType="hex" value="##TargetMAC##"/> <!-- CDP Multicast -->
       <Blob name="Src" mutable="false" valueType="hex" value="##SourceMAC##"/>
       <Number name="PayloadSize" size="16" token="true"  endian="big" mutable="false">
 				<Relation type="size" of="Payload"/>
