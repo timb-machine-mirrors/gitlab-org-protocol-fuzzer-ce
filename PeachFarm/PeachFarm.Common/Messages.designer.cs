@@ -2575,7 +2575,8 @@ namespace PeachFarm.Common.Messages
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18034")]
 	[System.SerializableAttribute()]
 	[System.ComponentModel.DesignerCategoryAttribute("code")]
-	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Database")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = true)]
 	public partial class Job
 	{
 
@@ -2586,6 +2587,8 @@ namespace PeachFarm.Common.Messages
 		private string jobIDField;
 
 		private System.DateTime startDateField;
+
+		private int faultCountField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -2638,6 +2641,19 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.startDateField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public int FaultCount
+		{
+			get
+			{
+				return this.faultCountField;
+			}
+			set
+			{
+				this.faultCountField = value;
 			}
 		}
 

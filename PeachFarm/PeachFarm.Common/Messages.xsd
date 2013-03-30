@@ -5,11 +5,8 @@
     xmlns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:mstns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-		xmlns:db="http://phed.org/2012/PeachFarm/Database"
 >
   
-	<xs:import namespace="http://phed.org/2012/PeachFarm/Database" schemaLocation="Database.xsd" />
-
 	<xs:element name="StartPeachRequest" type="StartPeachRequest" />
   <xs:complexType name="StartPeachRequest">
     <xs:all>
@@ -126,7 +123,7 @@
 	<xs:complexType name="JobInfoResponse">
 		<xs:all>
 			<xs:element name="Message" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Job" type="db:Job" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="Job" type="Job" maxOccurs="1" minOccurs="1"/>
 			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
 				<xs:complexType>
 					<xs:sequence>
@@ -147,14 +144,14 @@
 			<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Job" type="db:Job" maxOccurs="unbounded" minOccurs="1" />
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Job" type="db:Job" maxOccurs="unbounded" minOccurs="1" />
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -174,5 +171,13 @@
 			</xs:element>
 		</xs:all>
 		<xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Job">
+		<xs:attribute name="UserName" type="xs:string" use="required" />
+		<xs:attribute name="PitFileName" type="xs:string" use="required" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="StartDate" type="xs:dateTime" use="required" />
+		<xs:attribute name="FaultCount" type="xs:int" use="required" />
 	</xs:complexType>
 </xs:schema>
