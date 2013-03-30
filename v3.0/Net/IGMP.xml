@@ -21,7 +21,7 @@
   <Test name="Default">
 		<StateModel ref="States:TheState"/>
 		
-    <Agent ref="RemoteAgent"/>
+    <!--Agent ref="RemoteAgent"/-->
 		
     <Publisher class="RawV4">
       <Param name="Host" value="##TargetIPv4##"/>
