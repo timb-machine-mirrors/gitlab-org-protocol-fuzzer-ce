@@ -29,8 +29,8 @@
   <Test name="Default">
     <StateModel ref="States:TheStateModel"/>
 		
-    <Agent ref="RemoteAgent"/>
-    <Agent ref="LocalAgent"/>
+    <!--Agent ref="RemoteAgent"/-->
+    <!--Agent ref="LocalAgent"/-->
 		
     <Publisher class="RawEther" name="RawHandler">
       <Param name="Interface" value="##Interface##"/>
