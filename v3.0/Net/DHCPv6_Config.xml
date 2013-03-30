@@ -9,6 +9,7 @@
     <Define key="SourceMAC" value="001122334455"/>
     <Define key="TargetMAC" value="010203040506"/>
     <Define key="Strategy"  value="Sequential"/>
+    <Define key="RemoteAgentIP"  value="127.0.0.1"/>
 		<Define key="Path" value="."/>
   </All>
   <Linux platform="linux">
