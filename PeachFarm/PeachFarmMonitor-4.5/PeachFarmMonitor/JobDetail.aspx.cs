@@ -14,6 +14,10 @@ namespace PeachFarmMonitor
 {
   public partial class JobDetail : System.Web.UI.Page
   {
+    private static PeachFarmMonitorSection monitorconfig = null;
+    private string jobid;
+    private bool jobfound;
+
     public JobDetail()
     {
       this.InitComplete += JobDetail_InitComplete;
@@ -21,15 +25,12 @@ namespace PeachFarmMonitor
 
     void JobDetail_InitComplete(object sender, EventArgs e)
     {
-      string jobid = Request.QueryString["jobid"];
+      jobid = Request.QueryString["jobid"];
+      
       if (String.IsNullOrEmpty(jobid) == false)
       {
         monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-        try
-        {
-          Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString).First());
-        }
-        catch { Job = null; }
+        jobfound = (PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobid, monitorconfig.MongoDb.ConnectionString) != null);
       }
       else
       {
@@ -37,31 +38,43 @@ namespace PeachFarmMonitor
         return;
       }
 
-      if (Job == null)
+      if (jobfound)
+      {
+        iterationsGrid.NeedDataSource += iterationsGrid_NeedDataSource;
+        iterationsGrid.DetailTableDataBind += iterationsGrid_DetailTableDataBind;
+        iterationsGrid.ItemDataBound += iterationsGrid_ItemDataBound;
+
+        lblJobID.Text = jobid;
+        downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
+        viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
+        Page.Title = "Job Detail: " + jobid;
+      }
+      else
       {
         lblJobID.Text = String.Format("Job {0} not found.", jobid);
         return;
       }
-      else
-      {
-        string root = Server.MapPath(".");
-        string archiveFolder = Path.Combine(root, "jobArchive");
-        //Reports.FileWriter.CreateDirectory(archiveFolder);
-        Reports.FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, Job); 
-        
-        if ((iterationsGrid != null) && (iterationsGrid.DataSource == null))
-        {
-          lblJobID.Text = jobid;
-          downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
-          viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
-          Page.Title = "Job Detail: " + jobid;
 
-          iterationsGrid.DataSource = Job.Iterations;
-          iterationsGrid.DataBind();
-        }
-      }
+
     }
-    private static PeachFarmMonitorSection monitorconfig = null;
+
+    void iterationsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+    {
+      int pagesize = iterationsGrid.MasterTableView.PageSize;
+      int pageindex = iterationsGrid.MasterTableView.CurrentPageIndex;
+
+      Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, pageindex, pagesize));
+
+      if (Job.Iterations.Count < pagesize)
+      {
+        int totalpages = pageindex + 1;
+        int totalrecords = ((totalpages - 1) * pagesize) + Job.Iterations.Count;
+        iterationsGrid.MasterTableView.VirtualItemCount = totalrecords;
+      }
+
+      iterationsGrid.DataSource = Job.Iterations;
+    }
+
 
     protected void Page_Load(object sender, EventArgs e)
     {

@@ -15,6 +15,7 @@ namespace PeachFarmMonitor.ViewModels
       this.StartDate = job.StartDate;
       this.UserName = job.UserName;
       this.Status = status;
+      this.FaultCount = job.FaultCount;
     }
 
     public JobViewModel(Job job, JobStatus status = JobStatus.Inactive)
@@ -26,20 +27,20 @@ namespace PeachFarmMonitor.ViewModels
       this.Status = status;
 
       this.Iterations = new List<IterationViewModel>();
-      long count = 0;
+      int count = 0;
       foreach (var i in job.Iterations)
       {
         this.Iterations.Add(new IterationViewModel(i));
         count += i.Faults.Count;
       }
-      FaultCount = count;
+      this.FaultCount = count;
     }
 
     public JobStatus Status { get; set; }
 
     public new List<IterationViewModel> Iterations { get; set; }
 
-    public long FaultCount { get; set; }
+    public int FaultCount { get; set; }
   }
 
   public enum JobStatus

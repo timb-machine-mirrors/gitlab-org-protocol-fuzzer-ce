@@ -57,6 +57,10 @@
       bottom:0;
       height:50px;
     }
+    .RadGrid_DejaVu .rgInfoPart
+    {
+      display: none;
+    }
   </style>
   <script type="text/javascript">
     function GridCreated(sender, args) {
@@ -94,11 +98,11 @@
           <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
         </ClientSettings>
         <MasterTableView 
-          AllowPaging="true" PageSize="50"
+          AllowPaging="true" PageSize="30" AllowCustomPaging="true" VirtualItemCount="1000000"
           DataMember="Iterations" 
           Caption="Iterations" 
           HierarchyLoadMode="ServerOnDemand">
-          <PagerStyle PageSizeControlType="None" />
+          <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
           <Columns>
             <telerik:GridBoundColumn DataField="IterationNumber" HeaderText="Iteration" />
             <telerik:GridBoundColumn DataField="TestName" HeaderText="Test" />
@@ -133,13 +137,13 @@
                     <telerik:GridBoundColumn DataField="ActionName" HeaderText="Action" />
                     <telerik:GridBoundColumn DataField="ActionType" HeaderText="Type" />
                     <telerik:GridBoundColumn DataField="Parameter" HeaderText="Parameter" />
-                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/jobArchive/{0}" HeaderText="File" Target="_blank" />
+                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
                   </Columns>
                 </telerik:GridTableView>
                 <telerik:GridTableView Caption="Collected Data" DataMember="CollectedData" HierarchyLoadMode="ServerBind">
                   <Columns>
                     <telerik:GridBoundColumn DataField="Key" HeaderText="Key" />
-                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/jobArchive/{0}" HeaderText="File" Target="_blank" />
+                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
                   </Columns>
                 </telerik:GridTableView>
               </DetailTables>

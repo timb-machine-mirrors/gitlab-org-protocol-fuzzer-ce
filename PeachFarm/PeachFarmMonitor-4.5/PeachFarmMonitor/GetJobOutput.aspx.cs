@@ -23,8 +23,15 @@ namespace PeachFarmMonitor
     {
       if (!IsPostBack)
       {
-        string jobID;
-        if (String.IsNullOrEmpty(jobID = Request.QueryString["jobid"]) == false)
+        string jobID = Request.QueryString["jobid"];
+        string filepath = Request.QueryString["file"];
+        
+        if (String.IsNullOrEmpty(filepath) == false && String.IsNullOrEmpty(jobID))
+        {
+          jobID = filepath.Substring(4, 12);
+        }
+
+        if (String.IsNullOrEmpty(jobID) == false)
         {
           adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
           monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
@@ -34,12 +41,23 @@ namespace PeachFarmMonitor
           {
             string root = Server.MapPath(".");
             string archiveFolder = Path.Combine(root, "jobArchive");
-            //FileWriter.CreateDirectory(archiveFolder);
-            string zippath = FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, true);
-            var jobName = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
-            Response.AppendHeader( "content-disposition", "attachment; filename=" + jobName + ".zip");
-            Response.ContentType = "application/zip";
-            Response.WriteFile(zippath);
+
+            if (String.IsNullOrEmpty(filepath))
+            {
+              string zippath = FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, true);
+              var jobName = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
+              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
+              Response.ContentType = "application/zip";
+              Response.WriteFile(zippath);
+            }
+            else
+            {
+              filepath = Path.Combine(archiveFolder, filepath);
+              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, false);
+              string filename = Path.GetFileName(filepath);
+              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
+              Response.WriteFile(filepath);
+            }
           }
         }
       }

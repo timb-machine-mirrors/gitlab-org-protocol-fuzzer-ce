@@ -240,11 +240,6 @@ namespace PeachFarmMonitor
         alljobs.AddRange(from Messages.Job j in response.ActiveJobs select new JobViewModel(j, JobStatus.Running));
         alljobs.AddRange(from Messages.Job j in response.InactiveJobs select new JobViewModel(j));
 
-        foreach (var j in alljobs)
-        {
-          j.FaultCount = ((Job)j).GetFaultCount(monitorconfig.MongoDb.ConnectionString);
-        }
-
         jobsGrid.DataSource = alljobs;
 
       }
