@@ -10,13 +10,6 @@
 	
 	<StateModel name="TheState" initialState="SendSyn">
 
-		<State name="TestPayload" >
-			<Action type="output">
-				<Data ref="TCP:TestPayload"/>
-				<DataModel name="SendData" ref="TCP:PacketWithData"/>
-			</Action>
-		</State>
-
 		<State name="SendSyn" >
 			<Action type="output"
 							onStart="TCP.init_seq(self)"
@@ -44,7 +37,6 @@ bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 		</State>
 		
 		<State name="SynRecieved" >
-			<!-- <Action type="changeState" ref="Established"/> -->
 			<Action name="SendAck" type="output"
 							onStart="TCP.sync_from_store(self)" >
 				<Data ref="TCP:ACK"/>
@@ -82,12 +74,10 @@ bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action type="changeState" ref="Close"/>
 		</State>
 		
-
 		<State name="Close">
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
-				<!-- <Data ref="TCP:FINACK"/> -->
 				<Data ref="TCP:FIN"/>
 				<DataModel name="Packet" ref="TCP:Packet"/>
 			</Action>
