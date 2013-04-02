@@ -8,8 +8,6 @@
 	<!-- the OS doesn't interfere with target communication. -->
 
 	<Include ns="States" src="file:##Path##/_Common/Models/Net/TCPv4_State.xml"/>
-	<PythonPath path="##Path##/_Common/Models/Net/"/>
-	<Import import="TCP"/>
 
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
