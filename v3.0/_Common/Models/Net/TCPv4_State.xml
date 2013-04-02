@@ -10,13 +10,6 @@
 	
 	<StateModel name="TheState" initialState="SendSyn">
 
-		<State name="TestPayload" >
-			<Action type="output">
-				<Data ref="DataModels:TestPayload"/>
-				<DataModel name="SendData" ref="DataModels:PacketWithData"/>
-			</Action>
-		</State>
-
 		<State name="SendSyn" >
 			<Action type="output"
 							onStart="TCP.init_seq(self)"
