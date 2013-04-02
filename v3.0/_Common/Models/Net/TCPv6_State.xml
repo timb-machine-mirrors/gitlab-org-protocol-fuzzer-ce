@@ -28,12 +28,10 @@
 			</Action>
 			<Action name="ChangeToSend"
 							type="changeState" ref="SynRecieved"
-							when="TCP.chk_if_ack_for_me(self) and
-bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="ChangeToSend"
 							type="changeState" ref="Established"
-							when="TCP.chk_if_ack_for_me(self) and not
-bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+							when="TCP.chk_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="ReadMore" type="changeState" ref="SynSent" />
 		</State>
 		
@@ -92,8 +90,7 @@ bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			</Action>
 			<Action name="ChangeToSend"
 							type="changeState" ref="SendFinalFinAck"
-							when="TCP.chk_if_ack_for_me(self) and
-bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
 		</State>
 		
