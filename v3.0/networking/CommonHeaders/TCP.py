@@ -97,6 +97,3 @@ def set_timestamp(ctx):
 def get_cur_timestamp():
     return int(time.mktime(time.gmtime()))
 
-
-# TCP.get_store_val(self, 'AcknowledgmentNumber')
-# self.dataModel.find('AcknowledgmentNumber').DefaultValue.ToString()
