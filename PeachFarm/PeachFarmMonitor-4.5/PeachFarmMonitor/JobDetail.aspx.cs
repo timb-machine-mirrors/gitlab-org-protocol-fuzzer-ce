@@ -23,14 +23,19 @@ namespace PeachFarmMonitor
       this.InitComplete += JobDetail_InitComplete;
     }
 
+    public JobViewModel Job { get; private set; }
+
     void JobDetail_InitComplete(object sender, EventArgs e)
     {
       jobid = Request.QueryString["jobid"];
-      
+      PeachFarm.Common.Mongo.Job job = null;
       if (String.IsNullOrEmpty(jobid) == false)
       {
         monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-        jobfound = (PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobid, monitorconfig.MongoDb.ConnectionString) != null);
+        //Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, 0, 0));
+        //jobfound = (Job != null);
+        job = PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobid, monitorconfig.MongoDb.ConnectionString);
+        jobfound = job != null;
       }
       else
       {
@@ -44,10 +49,10 @@ namespace PeachFarmMonitor
         iterationsGrid.DetailTableDataBind += iterationsGrid_DetailTableDataBind;
         iterationsGrid.ItemDataBound += iterationsGrid_ItemDataBound;
 
-        lblJobID.Text = jobid;
+        lblJobID.Text = job.PitFileName + " - " + job.JobID;
         downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
         viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
-        Page.Title = "Job Detail: " + jobid;
+        Page.Title = "Job Detail: " + job.PitFileName;
       }
       else
       {
@@ -60,46 +65,61 @@ namespace PeachFarmMonitor
 
     void iterationsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
     {
-      int pagesize = iterationsGrid.MasterTableView.PageSize;
-      int pageindex = iterationsGrid.MasterTableView.CurrentPageIndex;
-
-      Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, pageindex, pagesize));
-
-      if (Job.Iterations.Count < pagesize)
+      if (e.IsFromDetailTable == false)
       {
-        int totalpages = pageindex + 1;
-        int totalrecords = ((totalpages - 1) * pagesize) + Job.Iterations.Count;
-        iterationsGrid.MasterTableView.VirtualItemCount = totalrecords;
+        #region pagination code
+        //*
+        int pagesize = iterationsGrid.MasterTableView.PageSize;
+        int pageindex = iterationsGrid.MasterTableView.CurrentPageIndex;
+
+        Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, pageindex, pagesize));
+
+        if (Job.Iterations.Count < pagesize)
+        {
+          int totalpages = pageindex + 1;
+          int totalrecords = ((totalpages - 1) * pagesize) + Job.Iterations.Count;
+          iterationsGrid.MasterTableView.VirtualItemCount = totalrecords;
+        }
+        //*/
+        #endregion
+        
+        iterationsGrid.DataSource = Job.Iterations;
       }
-
-      iterationsGrid.DataSource = Job.Iterations;
     }
-
-
-    protected void Page_Load(object sender, EventArgs e)
-    {
-
-    }
-
-    public JobViewModel Job { get; private set; }
 
     protected void iterationsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
     {
-      object item = e.DetailTableView.ParentItem.DataItem;
-      if (item is IterationViewModel)
+      GridDataItem parent = e.DetailTableView.ParentItem;
+      if (parent != null)
       {
-        e.DetailTableView.DataSource = ((IterationViewModel)item).Faults;
-      }
-      else if (item is FaultViewModel)
-      {
-        FaultViewModel fault = item as FaultViewModel;
-        if (e.DetailTableView.DataMember == "StateModel")
+        switch (e.DetailTableView.DataMember)
         {
-          e.DetailTableView.DataSource = fault.StateModel;
-        }
-        else if (e.DetailTableView.DataMember == "CollectedData")
-        {
-          e.DetailTableView.DataSource = fault.CollectedData;
+          case "Faults":
+            /*
+            uint iterationnumber = (uint)parent.GetDataKeyValue("IterationNumber");
+            string nodename = (string)parent.GetDataKeyValue("NodeName");
+            IterationViewModel ivm = null;
+            if (Job == null)
+            {
+              PeachFarm.Common.Mongo.Iteration iteration = new PeachFarm.Common.Mongo.Iteration();
+              iteration.IterationNumber = iterationnumber;
+              iteration.NodeName = nodename;
+              ivm = new IterationViewModel(PeachFarm.Common.Mongo.DatabaseHelper.FindIteration(iteration, monitorconfig.MongoDb.ConnectionString));
+            }
+            else
+            {
+              ivm = (from i in Job.Iterations where i.IterationNumber == iterationnumber && i.NodeName == nodename select i).First();
+            }
+            e.DetailTableView.DataSource = ivm.Faults;
+            //*/
+            e.DetailTableView.DataSource = ((IterationViewModel)parent.DataItem).Faults;
+            break;
+          case "StateModel":
+            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).StateModel;
+            break;
+          case "CollectedData":
+            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).CollectedData;
+            break;
         }
       }
     }
@@ -108,7 +128,7 @@ namespace PeachFarmMonitor
     {
       GridDataItem item = e.Item as GridDataItem;
 
-      if (item != null)
+      if ((item != null) && (item.DataItem != null) && (item.DetailTemplateItemDataCell != null))
       {
         if (item.DataItem is FaultViewModel)
         {
@@ -119,6 +139,7 @@ namespace PeachFarmMonitor
         }
       }
     }
+
 
   }
 }

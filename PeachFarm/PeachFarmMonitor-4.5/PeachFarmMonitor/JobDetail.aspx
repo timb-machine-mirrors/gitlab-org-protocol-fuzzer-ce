@@ -27,50 +27,47 @@
       position:absolute;
       top:0;
       left:0;
-      right:0;
-      height:30px;
+      right:300px;
+      height:32px;
       font-size:x-large;
       font-family: 'Segoe UI', Arial;
     }
     #linkbar
     {
       position: absolute;
-      top:30px;
+      top:32px;
       left:0;
-      right:0;
+      right:150px;
       height:20px;
     }
     #gridcontainer
     {
       position: absolute;
-      top:50px;
+      top:52px;
       left:0;
       right:0;
-      bottom:50px;
+      bottom:0px;
     }
-    #footer
+    #brand
     {
       background-color: #dcdcdc;
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:0;
-      height:50px;
+      float:right;
+      height:32px;
+      width:300px;
     }
     .RadGrid_DejaVu .rgInfoPart
     {
       display: none;
     }
-  </style>
-  <script type="text/javascript">
-    function GridCreated(sender, args) {
-      var scrollArea = sender.GridDataDiv;
-      var parent = $get("gridContainer");
-      var gridHeader = sender.GridHeaderDiv;
-      scrollArea.style.height = parent.clientHeight -
-        gridHeader.clientHeight + "px";
+    .RadGrid_DejaVu .rgPageFirst
+    {
+      display: none;
     }
-  </script>
+    .RadGrid_DejaVu .rgPageLast
+    {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <form id="form1" runat="server">
@@ -87,31 +84,42 @@
       <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|&nbsp;
       <asp:HyperLink ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
     </div>
+    <asp:Table ID="brand" runat="server" CellPadding="0" CellSpacing="0">
+      <asp:TableRow>
+        <asp:TableCell HorizontalAlign="Center" VerticalAlign="Middle">
+          <span>© 2013 Déjà vu Security -</span>
+          <a href="http://www.dejavusecurity.com/contact.html" target="_blank">Contact</a>
+        </asp:TableCell>
+        <asp:TableCell HorizontalAlign="Center" VerticalAlign="Middle">
+          <img src="dejavulogo.jpg" height="30" style="display:inline-block;border:0" />
+        </asp:TableCell>
+      </asp:TableRow>
+    </asp:Table>
+
     <div id="gridcontainer">
       <telerik:RadGrid 
         ID="iterationsGrid" runat="server"
         Width="100%" Height="100%"
-        OnDetailTableDataBind="iterationsGrid_DetailTableDataBind" 
-        OnItemDataBound="iterationsGrid_ItemDataBound" 
         AutoGenerateColumns="false" AutoGenerateHierarchy="true">
         <ClientSettings>
           <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
         </ClientSettings>
         <MasterTableView 
           AllowPaging="true" PageSize="30" AllowCustomPaging="true" VirtualItemCount="1000000"
-          DataMember="Iterations" 
-          Caption="Iterations" 
-          HierarchyLoadMode="ServerOnDemand">
+          DataMember="Iterations" Caption="Iterations" 
+          NoDetailRecordsText="No iterations for this job."
+          HierarchyLoadMode="ServerBind">
           <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
           <Columns>
             <telerik:GridBoundColumn DataField="IterationNumber" HeaderText="Iteration" />
-            <telerik:GridBoundColumn DataField="TestName" HeaderText="Test" />
-            <telerik:GridBoundColumn DataField="SeedNumber" HeaderText="Seed" />
             <telerik:GridBoundColumn DataField="Stamp" HeaderText="Stamp" />
             <telerik:GridBoundColumn DataField="NodeName" HeaderText="Node" />
           </Columns>
           <DetailTables>
-            <telerik:GridTableView Caption="Faults" DataMember="Faults" HierarchyLoadMode="ServerBind">
+            <telerik:GridTableView 
+              Caption="Faults" DataMember="Faults" 
+              HierarchyLoadMode="ServerBind"
+              NoDetailRecordsText="No faults for this iteration.">
               <Columns>
                 <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
                 <telerik:GridBoundColumn DataField="DetectionSource" HeaderText="Source" />
@@ -132,7 +140,10 @@
                 </telerik:RadPanelBar>
               </DetailItemTemplate>
               <DetailTables>
-                <telerik:GridTableView Caption="State Model" DataMember="StateModel" HierarchyLoadMode="ServerBind">
+                <telerik:GridTableView 
+                  Caption="State Model" DataMember="StateModel" 
+                  HierarchyLoadMode="ServerBind"
+                  NoDetailRecordsText="No state model information for this fault.">
                   <Columns>
                     <telerik:GridBoundColumn DataField="ActionName" HeaderText="Action" />
                     <telerik:GridBoundColumn DataField="ActionType" HeaderText="Type" />
@@ -140,7 +151,10 @@
                     <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
                   </Columns>
                 </telerik:GridTableView>
-                <telerik:GridTableView Caption="Collected Data" DataMember="CollectedData" HierarchyLoadMode="ServerBind">
+                <telerik:GridTableView 
+                  Caption="Collected Data" DataMember="CollectedData" 
+                  HierarchyLoadMode="ServerBind"
+                  NoDetailRecordsText="No collected data for this fault.">
                   <Columns>
                     <telerik:GridBoundColumn DataField="Key" HeaderText="Key" />
                     <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
@@ -152,17 +166,6 @@
         </MasterTableView>
       </telerik:RadGrid>
     </div>
-    <asp:Table ID="footer" Width="100%" runat="server">
-      <asp:TableRow>
-        <asp:TableCell HorizontalAlign="Right" VerticalAlign="Middle">
-          <img src="dejavulogo.jpg" height="46" style="border-style:none;display:inline-block;" />
-        </asp:TableCell>
-        <asp:TableCell HorizontalAlign="Left" VerticalAlign="Middle">
-          <span>© 2013 Déjà vu Security - </span>
-          <a href="http://www.dejavusecurity.com/contact.html" style="color: black; text-decoration: none" target="_blank">Contact</a>
-        </asp:TableCell>
-      </asp:TableRow>
-    </asp:Table>
   </form>
 </body>
 </html>

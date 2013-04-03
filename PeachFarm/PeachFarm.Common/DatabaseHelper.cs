@@ -149,12 +149,23 @@ namespace PeachFarm.Common.Mongo
 		public static Iteration FindIteration(Iteration tofind, string connectionString)
 		{
 			MongoCollection<Iteration> collection = GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			var query = Query.And(
-				Query.EQ("IterationNumber", tofind.IterationNumber),
-				Query.EQ("JobID", tofind.JobID),
-				Query.EQ("NodeName", tofind.NodeName),
-				Query.EQ("SeedNumber", tofind.SeedNumber),
-				Query.EQ("TestName", tofind.TestName));
+			List<IMongoQuery> queries = new List<IMongoQuery>();
+			if(tofind.IterationNumber > 0)
+				queries.Add(Query.EQ("IterationNumber", tofind.IterationNumber));
+
+			if(String.IsNullOrEmpty(tofind.JobID) == false)
+				queries.Add(Query.EQ("JobID", tofind.JobID));
+
+			if(String.IsNullOrEmpty(tofind.NodeName) == false)
+				queries.Add(Query.EQ("NodeName", tofind.NodeName));
+
+			if(tofind.SeedNumber > 0)
+				queries.Add(Query.EQ("SeedNumber", tofind.SeedNumber));
+
+			if(String.IsNullOrEmpty(tofind.TestName) == false)
+				queries.Add(Query.EQ("TestName", tofind.TestName));
+
+			var query = Query.And(queries);
 			return collection.FindOne(query);
 		}
 	}

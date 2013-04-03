@@ -237,8 +237,8 @@ namespace PeachFarmMonitor
       if (response != null)
       {
         List<JobViewModel> alljobs = new List<JobViewModel>();
-        alljobs.AddRange(from Messages.Job j in response.ActiveJobs select new JobViewModel(j, JobStatus.Running));
-        alljobs.AddRange(from Messages.Job j in response.InactiveJobs select new JobViewModel(j));
+        alljobs.AddRange(from Messages.Job j in response.ActiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j, JobStatus.Running));
+        alljobs.AddRange(from Messages.Job j in response.InactiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j));
 
         jobsGrid.DataSource = alljobs;
 
