@@ -10,7 +10,7 @@
 			<Relation type="size" of="Data"/>
 		</Number>
 		<Blob name="Data"/>
-		<Padding aligned="true" alignment="8" />
+		<Padding alignment="8" />
 	</DataModel>
 	
 	<DataModel name="AVI">
@@ -19,15 +19,15 @@
 			<Block name="Data">
 				<String name="Type" value="AVI " token="true"/>
 				
-				<Choice name="ChunkChoice" maxOccurs="30000">
+				<Choice name="ChunkChoice">
 <!-- LIST -->		<Block name="Data">
-						<Choice name="ChunkChoice" maxOccurs="-1">
-							<Block name="ChunkList-head" ref="Chunk">
+						<Choice name="ChunkChoice" minOccurs="0">
+							<Block name="ChunkListHead" ref="Chunk">
 								<String name="ID" value="LIST" token="true" />
 								<Block name="Data">
 									<Choice name="TypeChoice" maxOccurs="4">
 			<!--hdrl-->
-										<Block name="hdrl-head">
+										<Block name="HdrlHead">
 											<String name="ID" value="hdrl" token="true" />
 											<Block name="Data">
 												<Block name="avih">
@@ -36,43 +36,43 @@
 														<Relation type="size" of="Data"/>
 													</Number>
 													<Blob name="Data"/>
-													<Padding aligned="true" alignment="16" />
+													<Padding alignment="16" />
 												</Block>
 											</Block>
 										</Block>
-										<Block name="hdrl-list">
-												<Block name="LIST" ref="Chunk"> 
-													<String name="ID" value="LIST" token="true" />
+										<Block name="HdrlList">
+											<Block name="LIST" ref="Chunk"> 
+												<String name="ID" value="LIST" token="true" />
+												<Block name="Data">
+													<String name="ID" value="strl" length="4" token="true" />
 													<Block name="Data">
-															<String name="ID" value="strl" length="4" token="true" />
-															<Block name="Data">
-																<Choice maxOccurs="2">
-																	<Block name="strh" >
-																		<String name="ID" value="strh" length="4" token="true" />
-																		<Number name="Size" size="32" signed="false">
-																			<Relation type="size" of="Data"/>
-																		</Number>
-																		<Blob name="Data"/>
-																		<Padding aligned="true" alignment="16" />
-																	</Block>
-																	<Block name="strf" >
-																		<String name="ID" value="strf" length="4" token="true" />
-																		<Number name="Size" size="32" signed="false">
-																			<Relation type="size" of="Data"/>
-																		</Number>
-																		<Blob name="Data"/>
-																		<Padding aligned="true" alignment="16" />
-																	</Block>
-																</Choice>
+														<Choice maxOccurs="2">
+															<Block name="strh" >
+																<String name="ID" value="strh" length="4" token="true" />
+																<Number name="Size" size="32" signed="false">
+																	<Relation type="size" of="Data"/>
+																</Number>
+																<Blob name="Data"/>
+																<Padding alignment="16" />
 															</Block>
+															<Block name="strf" >
+																<String name="ID" value="strf" length="4" token="true" />
+																<Number name="Size" size="32" signed="false">
+																	<Relation type="size" of="Data"/>
+																</Number>
+																<Blob name="Data"/>
+																<Padding alignment="16" />
+															</Block>
+														</Choice>
 													</Block>
 												</Block>
+											</Block>
 										</Block>
 									</Choice>
 								</Block>
 							</Block>
 		<!--INFO-->
-							<Block name="ChunkList-info" >
+							<Block name="ChunkListInfo" >
 								<String name="ID" value="LIST" token="true" />
 								<Number name="Size" size="32" signed="false">
 									<Relation type="size" of="Data"/>
@@ -81,14 +81,14 @@
 									<Block name="INFO" >
 										<String name="ID" value="INFO" token="true" />
 										<Block name="Data">
-											<Choice maxOccurs="30000" >
+											<Choice minOccurs="0" >
 												<Block name="SubChunk" >
 													<String name="ID" length="4" />
 													<Number name="Size" size="32" signed="false">
 														<Relation type="size" of="Data"/>
 													</Number>
 													<String name="Data" nullTerminated="true"/>
-													<Padding aligned="true" alignment="8" />
+													<Padding alignment="8" />
 												</Block>
 											</Choice>
 										</Block>
@@ -102,18 +102,18 @@
 								<String name="ID" value="JUNK" token="true" />
 							</Block>
 		<!--movi-->
-							<Block name="ChunkList-movi" ref="Chunk">
+							<Block name="ChunkListMovie" ref="Chunk">
 								<String name="ID" value="LIST" token="true" length="4" />
 								<Block name="Data">
 									<String name="ID" value="movi" token="true" length="4" />
-									<Choice name="movie" maxOccurs="-1">
-										<Block name="movie-data">
+									<Choice name="movie" minOccurs="0">
+										<Block name="MovieData">
 											<String name="ID" length="4" />
 											<Number name="Size" size="32" signed="false">
 												<Relation type="size" of="Data"/>
 											</Number>
 											<Blob name="Data" />
-											<Padding aligned="true" alignment="16" alignedTo="movie-data"/>
+											<Padding alignment="16" alignedTo="MovieData"/>
 										</Block>
 									</Choice>
 								</Block>
@@ -122,7 +122,7 @@
 							<Block name="idx1" ref="Chunk">
 								<String name="ID" value="idx1" token="true" />
 								<Block name="Data">
-									<Choice name="index" maxOccurs="-1">
+									<Choice name="index" minOccurs="0">
 										<Block>
 											<String name="Tag" length="4" />
 											<String name="Flags" length="4" />

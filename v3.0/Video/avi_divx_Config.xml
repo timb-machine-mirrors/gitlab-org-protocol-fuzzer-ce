@@ -14,7 +14,7 @@
 	</OSX>
 	<Windows platform="windows">
 		<Define key="Agent" value="WinAgent"/>
-		<Define key="Target" value="C:\\Program\ Files\ \(x86\)\\VideoLAN\\VLC\\vlc.exe" />
+		<Define key="Target" value="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe" />
 	</Windows>
 </PitDefines>
 
