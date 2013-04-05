@@ -88,7 +88,7 @@
 	<DataModel name="RequestTemplate">
 		<String name="Command" length="4"/>
 		<Block name="ReqArgBlock" ref="ArgBlock" minOccurs="0"/>
-		<String name="Terminator" length="2" immutable="true" token="true" value="\r\n"/>
+		<String name="Terminator" length="2" mutable="false" token="true" value="\r\n"/>
 	</DataModel>
 
 	<!-- 4.1.  FTP COMMANDS -->

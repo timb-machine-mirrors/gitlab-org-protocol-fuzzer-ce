@@ -25,9 +25,9 @@
 	<Test name="Default">
 		<StateModel ref="States:AgentToHost"/>
 		
-		<Agent ref="WinRemoteAgent" platform="windows"/>
+		<!--Agent ref="WinRemoteAgent" platform="windows"/>
 		<Agent ref="LinRemoteAgent" platform="linux"/>
-		<Agent ref="OSXRemoteAgent" platform="osx"/>
+		<Agent ref="OSXRemoteAgent" platform="osx"/-->
 
 		<Publisher class="Tcp" name="TcpHandler">
 			<Param name="Host" value="##TargetIPv4##"/>
