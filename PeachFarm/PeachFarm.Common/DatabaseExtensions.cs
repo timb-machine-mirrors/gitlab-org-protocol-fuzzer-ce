@@ -25,95 +25,6 @@ namespace PeachFarm.Common.Mongo
 			return job;
 		}
 
-		public static Iteration SaveToDatabase(this Iteration iteration, string connectionString)
-		{
-			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-
-			iteration = UpdateDataPaths(iteration, connectionString);
-
-			collection.Save(iteration);
-
-			collection.Database.Server.Disconnect();
-
-			Debug.WriteLine("******* WRITING ITERATION TO DATABASE ******");
-
-			return iteration;
-		}
-
-		private static Iteration UpdateDataPaths(Iteration iteration, string connectionString)
-		{
-			string jobFolder = String.Empty;
-			string nodeFolder = String.Empty;
-			string testFolder = String.Empty;
-			string faultsFolder = String.Empty;
-			string statusFile = String.Empty;
-			string faultFolder = String.Empty;
-			string iterationFolder = String.Empty;
-			string actionFile = String.Empty;
-			string collectedDataFile = String.Empty;
-
-			Job job = DatabaseHelper.GetJob(iteration.JobID, connectionString);
-
-			jobFolder = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
-			nodeFolder = Path.Combine(jobFolder, "Node_" + iteration.NodeName);
-			testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.PitFileName, iteration.TestName, FormatDate(job.StartDate)));
-			faultsFolder = Path.Combine(testFolder, "Faults");
-
-			foreach (Fault fault in iteration.Faults)
-			{
-				#region set faultFolder
-				if (fault.FolderName != null)
-				{
-					faultFolder = Path.Combine(faultsFolder, fault.FolderName);
-				}
-				else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
-				{
-					faultFolder = Path.Combine(faultsFolder, "Unknown");
-				}
-				else
-				{
-					faultFolder = Path.Combine(faultsFolder, String.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash));
-				}
-				#endregion
-
-				iterationFolder = Path.Combine(faultFolder, iteration.IterationNumber.ToString());
-
-				#region action files
-				int cnt = 0;
-				foreach (PeachFarm.Common.Mongo.Action action in fault.StateModel)
-				{
-					cnt++;
-					if (action.Parameter == 0)
-					{
-						actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
-										cnt, action.ActionType.ToString(), action.ActionName));
-
-					}
-					else
-					{
-						actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
-										cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
-					}
-
-					action.DataPath = actionFile;
-				}
-				#endregion
-
-
-				#region write collected data files
-				foreach (CollectedData cd in fault.CollectedData)
-				{
-					collectedDataFile = System.IO.Path.Combine(iterationFolder,
-						fault.DetectionSource + "_" + cd.Key);
-
-					cd.DataPath = collectedDataFile;
-				}
-				#endregion
-			}
-
-			return iteration;
-		}
-
 		private static string FormatDate(DateTime dateTime)
 		{
 			return String.Format("{0:yyyyMMddhhmmss}", dateTime);
@@ -121,43 +32,54 @@ namespace PeachFarm.Common.Mongo
 
 		public static Messages.Heartbeat SaveToDatabase(this Messages.Heartbeat heartbeat, string connectionString)
 		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			var query = Query.EQ("NodeName", heartbeat.NodeName);
+			var storedHeartbeat = collection.FindOne(query);
+			if (storedHeartbeat == null)
+			{
+				collection.Save(heartbeat);
+				storedHeartbeat = heartbeat;
+			}
+			else
+			{
+				storedHeartbeat.Iteration = heartbeat.Iteration;
+				storedHeartbeat.JobID = heartbeat.JobID;
+				storedHeartbeat.PitFileName = heartbeat.PitFileName;
+				storedHeartbeat.Seed = heartbeat.Seed;
+				storedHeartbeat.Stamp = heartbeat.Stamp;
+				storedHeartbeat.Tags = heartbeat.Tags;
+				storedHeartbeat.UserName = heartbeat.UserName;
+				storedHeartbeat.QueueName = heartbeat.QueueName;
+				storedHeartbeat.ErrorMessage = heartbeat.ErrorMessage;
+				storedHeartbeat.Status = heartbeat.Status;
+				collection.Save(storedHeartbeat);
+			}
+			collection.Database.Server.Disconnect();
+
+			return storedHeartbeat;
+		}
+
+		public static void RemoveFromDatabase(this Messages.Heartbeat heartbeat, string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			var query = Query.EQ("NodeName", heartbeat.NodeName);
+			if(collection.FindOne(query) != null)
+			{
+				collection.Remove(query);
+			}
+			collection.Database.Server.Disconnect();
+
+			return;
+		}
+		
+		public static Messages.Heartbeat SaveToErrors(this Messages.Heartbeat heartbeat, string connectionString)
+		{
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			heartbeat._id = BsonObjectId.Empty;
 			collection.Save(heartbeat);
 			collection.Database.Server.Disconnect();
 
 			return heartbeat;
-		}
-
-		public static IEnumerable<Job> FillIterations(this IEnumerable<Job> jobs, string connectionString, bool excludeFaultInfo = false)
-		{
-			foreach (var job in jobs)
-			{
-				job.Iterations = job.GetIterations(connectionString, excludeFaultInfo);
-			}
-			return jobs;
-		}
-
-		public static List<Iteration> GetIterations(this Job job, string connectionString, bool excludeFaultInfo = false)
-		{
-			MongoCollection<Iteration> collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			var query = Query.EQ("JobID", job.JobID);
-
-			if (excludeFaultInfo)
-			{
-				return collection.Find(query).SetFields(Fields.Exclude(DatabaseHelper.FaultInfoFields)).OrderBy(i => i.IterationNumber).ToList();
-			}
-			else
-			{
-				return collection.Find(query).OrderBy(i => i.IterationNumber).ToList();
-			}
-		}
-
-		public static long GetFaultCount(this Job job, string connectionString)
-		{
-			var collection = DatabaseHelper.GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			var query = Query.EQ("JobID", job.JobID);
-			var results = collection.Find(query).SetFields(Fields.Exclude(DatabaseHelper.FaultInfoFields));
-			return results.Sum(i => i.Faults.Count());
 		}
 
 		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
@@ -186,6 +108,41 @@ namespace PeachFarm.Common.Mongo
 			return collection.Find(query).OrderBy(k => k.NodeName).OrderBy(k => k.JobID).ToList();
 		}
 
+		public static Node SaveToDatabase(this Node node, string connectionString)
+		{
+			MongoCollection<Node> collection = DatabaseHelper.GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			collection.Save(node);
+			collection.Database.Server.Disconnect();
+			return node;
+		}
+
+		public static void SaveToDatabase(this List<PeachFarm.Common.Mongo.Fault> faults, string connectionString)
+		{
+			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+			foreach (var fault in faults)
+			{
+				collection.Save(fault);
+			}
+			collection.Database.Server.Disconnect();
+		}
+
+		public static void SaveToDatabase(this Fault fault, string connectionString)
+		{
+			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+			collection.Save(fault);
+			collection.Database.Server.Disconnect();
+		}
+
+		public static void UpdateNode(this Node node, string jobid, string connectionString)
+		{
+			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
+
+			var query = Query.EQ("JobID", jobid);
+			
+
+			collection.Database.Server.Disconnect();
+		}
+
 		public static MongoDB.Bson.ObjectId ToMongoID(this string input)
 		{
 			try
@@ -199,35 +156,14 @@ namespace PeachFarm.Common.Mongo
 		}
 	}
 	
-
-	public partial class Iteration
-	{
-
-		[XmlIgnore]
-		public BsonObjectId _id { get; set; }
-
-		[XmlAttribute]
-		[BsonIgnore]
-		public string ID
-		{
-			get
-			{
-				if ((_id == null) || (_id == BsonObjectId.Empty))
-					return String.Empty;
-				else
-					return _id.ToString();
-			}
-		}
-	}
-
 	public partial class Job
 	{
-		public Job() { }
-
 		public Job(Messages.Job mJob)
 		{
+			Nodes = new List<Node>();
+
 			this.JobID = mJob.JobID;
-			this.PitFileName = mJob.PitFileName;
+			this.Pit = new Pit(mJob.Pit);
 			this.StartDate = mJob.StartDate;
 			this.UserName = mJob.UserName;
 		}
@@ -248,16 +184,56 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[XmlIgnore]
+		private List<Node> nodesField = new List<Node>();
+		
 		[BsonIgnore]
-		public List<Iteration> Iterations { get; set; }
+		public List<Node> Nodes
+		{
+			get { return nodesField; }
+			set { nodesField = value; }
+		}
 	}
 
-}
+	public partial class Pit
+	{
+		public Pit() { }
 
-namespace PeachFarm.Common.Messages
-{
-	public partial class Heartbeat
+		public Pit(Messages.Pit mPit)
+		{
+			this.FileName = mPit.FileName;
+			this.FullText = mPit.FullText;
+			this.Version = mPit.Version;
+		}
+	}
+
+	public partial class Node
+	{
+		public Node()
+		{
+			Faults = new List<Fault>();
+		}
+
+		[XmlIgnore]
+		public BsonObjectId _id { get; set; }
+
+		[XmlAttribute]
+		[BsonIgnore]
+		public string ID
+		{
+			get
+			{
+				if ((_id == null) || (_id == BsonObjectId.Empty))
+					return String.Empty;
+				else
+					return _id.ToString();
+			}
+		}
+
+		[BsonIgnore]
+		public List<Fault> Faults { get; set; }
+	}
+
+	public partial class Fault
 	{
 		[XmlIgnore]
 		public BsonObjectId _id { get; set; }
@@ -275,18 +251,4 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 	}
-
-	public class JobComparer : EqualityComparer<Mongo.Job>
-	{
-		public override bool Equals(Common.Mongo.Job x, Common.Mongo.Job y)
-		{
-			return x.JobID == y.JobID;
-		}
-
-		public override int GetHashCode(Mongo.Job obj)
-		{
-			return obj.JobID.GetHashCode();
-		}
-	}
-
 }

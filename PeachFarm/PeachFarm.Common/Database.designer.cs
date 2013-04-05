@@ -18,13 +18,34 @@ namespace PeachFarm.Common.Mongo
 	public partial class Job
 	{
 
-		private string userNameField;
+		private Pit pitField;
 
-		private string pitFileNameField;
+		private string userNameField;
 
 		private string jobIDField;
 
 		private System.DateTime startDateField;
+
+		private string peachVersionField;
+
+		private string tagsField;
+
+		public Job()
+		{
+			this.pitField = new Pit();
+		}
+
+		public Pit Pit
+		{
+			get
+			{
+				return this.pitField;
+			}
+			set
+			{
+				this.pitField = value;
+			}
+		}
 
 		public string UserName
 		{
@@ -35,18 +56,6 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.userNameField = value;
-			}
-		}
-
-		public string PitFileName
-		{
-			get
-			{
-				return this.pitFileNameField;
-			}
-			set
-			{
-				this.pitFileNameField = value;
 			}
 		}
 
@@ -73,51 +82,124 @@ namespace PeachFarm.Common.Mongo
 				this.startDateField = value;
 			}
 		}
+
+		public string PeachVersion
+		{
+			get
+			{
+				return this.peachVersionField;
+			}
+			set
+			{
+				this.peachVersionField = value;
+			}
+		}
+
+		public string Tags
+		{
+			get
+			{
+				return this.tagsField;
+			}
+			set
+			{
+				this.tagsField = value;
+			}
+		}
 	}
 
-	public partial class Iteration
+	public partial class Pit
 	{
 
-		private uint iterationNumberField;
+		private string fullTextField;
 
-		private string testNameField;
+		private string fileNameField;
 
-		private uint seedNumberField;
+		private string versionField;
 
-		private System.DateTime stampField;
+		public string FullText
+		{
+			get
+			{
+				return this.fullTextField;
+			}
+			set
+			{
+				this.fullTextField = value;
+			}
+		}
 
-		private List<Fault> faultsField;
+		public string FileName
+		{
+			get
+			{
+				return this.fileNameField;
+			}
+			set
+			{
+				this.fileNameField = value;
+			}
+		}
+
+		public string Version
+		{
+			get
+			{
+				return this.versionField;
+			}
+			set
+			{
+				this.versionField = value;
+			}
+		}
+	}
+
+	public partial class Node
+	{
 
 		private string jobIDField;
 
-		private string nodeNameField;
+		private string nameField;
 
-		public Iteration()
-		{
-			this.faultsField = new List<Fault>();
-		}
+		private uint iterationCountField;
 
-		public uint IterationNumber
-		{
-			get
-			{
-				return this.iterationNumberField;
-			}
-			set
-			{
-				this.iterationNumberField = value;
-			}
-		}
+		private uint seedNumberField;
 
-		public string TestName
+		private string tagsField;
+
+		public string JobID
 		{
 			get
 			{
-				return this.testNameField;
+				return this.jobIDField;
 			}
 			set
 			{
-				this.testNameField = value;
+				this.jobIDField = value;
+			}
+		}
+
+		public string Name
+		{
+			get
+			{
+				return this.nameField;
+			}
+			set
+			{
+				this.nameField = value;
+			}
+		}
+
+		public uint IterationCount
+		{
+			get
+			{
+				return this.iterationCountField;
+			}
+			set
+			{
+				this.iterationCountField = value;
 			}
 		}
 
@@ -133,53 +215,15 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		public System.DateTime Stamp
+		public string Tags
 		{
 			get
 			{
-				return this.stampField;
+				return this.tagsField;
 			}
 			set
 			{
-				this.stampField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 4)]
-		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Fault> Faults
-		{
-			get
-			{
-				return this.faultsField;
-			}
-			set
-			{
-				this.faultsField = value;
-			}
-		}
-
-		public string JobID
-		{
-			get
-			{
-				return this.jobIDField;
-			}
-			set
-			{
-				this.jobIDField = value;
-			}
-		}
-
-		public string NodeName
-		{
-			get
-			{
-				return this.nodeNameField;
-			}
-			set
-			{
-				this.nodeNameField = value;
+				this.tagsField = value;
 			}
 		}
 	}
@@ -187,13 +231,19 @@ namespace PeachFarm.Common.Mongo
 	public partial class Fault
 	{
 
+		private string descriptionField;
+
+		private List<Action> stateModelField;
+
+		private List<CollectedData> collectedDataField;
+
+		private System.DateTime stampField;
+
 		private bool isReproductionField;
 
 		private bool controlIterationField;
 
 		private bool controlRecordingIterationField;
-
-		private string descriptionField;
 
 		private string detectionSourceField;
 
@@ -211,14 +261,70 @@ namespace PeachFarm.Common.Mongo
 
 		private string faultTypeField;
 
-		private List<Action> stateModelField;
+		private string testNameField;
 
-		private List<CollectedData> collectedDataField;
+		private uint seedNumberField;
+
+		private string jobIDField;
+
+		private string nodeNameField;
 
 		public Fault()
 		{
 			this.collectedDataField = new List<CollectedData>();
 			this.stateModelField = new List<Action>();
+		}
+
+		public string Description
+		{
+			get
+			{
+				return this.descriptionField;
+			}
+			set
+			{
+				this.descriptionField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 1)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<Action> StateModel
+		{
+			get
+			{
+				return this.stateModelField;
+			}
+			set
+			{
+				this.stateModelField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 2)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		public List<CollectedData> CollectedData
+		{
+			get
+			{
+				return this.collectedDataField;
+			}
+			set
+			{
+				this.collectedDataField = value;
+			}
+		}
+
+		public System.DateTime Stamp
+		{
+			get
+			{
+				return this.stampField;
+			}
+			set
+			{
+				this.stampField = value;
+			}
 		}
 
 		public bool IsReproduction
@@ -254,18 +360,6 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.controlRecordingIterationField = value;
-			}
-		}
-
-		public string Description
-		{
-			get
-			{
-				return this.descriptionField;
-			}
-			set
-			{
-				this.descriptionField = value;
 			}
 		}
 
@@ -365,31 +459,51 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 12)]
-		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Action> StateModel
+		public string TestName
 		{
 			get
 			{
-				return this.stateModelField;
+				return this.testNameField;
 			}
 			set
 			{
-				this.stateModelField = value;
+				this.testNameField = value;
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 13)]
-		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<CollectedData> CollectedData
+		public uint SeedNumber
 		{
 			get
 			{
-				return this.collectedDataField;
+				return this.seedNumberField;
 			}
 			set
 			{
-				this.collectedDataField = value;
+				this.seedNumberField = value;
+			}
+		}
+
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		public string NodeName
+		{
+			get
+			{
+				return this.nodeNameField;
+			}
+			set
+			{
+				this.nodeNameField = value;
 			}
 		}
 	}

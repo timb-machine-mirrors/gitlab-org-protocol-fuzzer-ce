@@ -313,7 +313,6 @@ namespace PeachFarm.Node
 
 			foreach (var test in dom.tests.Values)
 			{
-				//TODO
 				test.loggers = loggers;
 			}
 

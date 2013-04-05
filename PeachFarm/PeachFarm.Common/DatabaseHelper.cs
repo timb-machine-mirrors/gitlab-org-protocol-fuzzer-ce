@@ -45,7 +45,9 @@ namespace PeachFarm.Common.Mongo
 		public static void CreateCollections(MongoServer server)
 		{
 			CreateJobsCollection(server);
-			CreateIterationsCollection(server);
+			CreateJobNodesCollection(server);
+			CreateNodesCollection(server);
+			CreateFaultsCollection(server);
 			CreateErrorsCollection(server);
 		}
 
@@ -64,9 +66,24 @@ namespace PeachFarm.Common.Mongo
 
 		}
 
-		public static void CreateIterationsCollection(MongoServer server)
+		public static void CreateJobNodesCollection(MongoServer server)
 		{
-			string collectionname = MongoNames.Iterations;
+			string collectionname = MongoNames.JobNodes;
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			MongoCollection<Job> collection;
+			if (!db.CollectionExists(collectionname))
+			{
+				db.CreateCollection(collectionname);
+				collection = db.GetCollection<Job>(collectionname);
+				collection.CreateIndex(new string[] { "JobID", "Name" });
+			}
+
+		}
+
+		public static void CreateFaultsCollection(MongoServer server)
+		{
+			string collectionname = MongoNames.Faults;
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 
 			MongoCollection<Job> collection;
@@ -76,7 +93,6 @@ namespace PeachFarm.Common.Mongo
 				collection = db.GetCollection<Job>(collectionname);
 				collection.CreateIndex(new string[] { "JobID" });
 				collection.CreateIndex(new string[] { "NodeName" });
-				collection.CreateIndex(new string[] { "IterationNumber" });
 			}
 		}
 
@@ -95,6 +111,21 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
+
+		public static void CreateNodesCollection(MongoServer server)
+		{
+			string collectionname = MongoNames.PeachFarmNodes;
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			MongoCollection<Job> collection;
+			if (!db.CollectionExists(collectionname))
+			{
+				db.CreateCollection(collectionname);
+				collection = db.GetCollection<Job>(collectionname);
+				collection.CreateIndex(new string[] { "NodeName" });
+			}
+		}
+		
 		public static Job GetJob(string jobGuid, string connectionString)
 		{
 			MongoCollection<Job> collection = GetCollection<Job>(MongoNames.Jobs, connectionString);
@@ -104,7 +135,7 @@ namespace PeachFarm.Common.Mongo
 
 		public static List<Job> GetAllJobs(string connectionString)
 		{
-			MongoCollection<Job> collection = GetCollection<Job>(MongoNames.Jobs,connectionString);
+			MongoCollection<Job> collection = GetCollection<Job>(MongoNames.Jobs, connectionString);
 			return collection.FindAll().ToList();
 		}
 
@@ -125,7 +156,7 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			
+
 			MongoCollection<T> collection = null;
 
 			if (db.CollectionExists(collectionname))
@@ -146,26 +177,23 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
-		public static Iteration FindIteration(Iteration tofind, string connectionString)
+		public static List<Heartbeat> GetAllNodes(string connectionString)
 		{
-			MongoCollection<Iteration> collection = GetCollection<Iteration>(MongoNames.Iterations, connectionString);
-			List<IMongoQuery> queries = new List<IMongoQuery>();
-			if(tofind.IterationNumber > 0)
-				queries.Add(Query.EQ("IterationNumber", tofind.IterationNumber));
+			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			return collection.FindAll().ToList();
+		}
 
-			if(String.IsNullOrEmpty(tofind.JobID) == false)
-				queries.Add(Query.EQ("JobID", tofind.JobID));
+		public static Heartbeat GetNodeByName(string name, string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			var query = Query.EQ("NodeName", name);
+			return collection.FindOne(query);
+		}
 
-			if(String.IsNullOrEmpty(tofind.NodeName) == false)
-				queries.Add(Query.EQ("NodeName", tofind.NodeName));
-
-			if(tofind.SeedNumber > 0)
-				queries.Add(Query.EQ("SeedNumber", tofind.SeedNumber));
-
-			if(String.IsNullOrEmpty(tofind.TestName) == false)
-				queries.Add(Query.EQ("TestName", tofind.TestName));
-
-			var query = Query.And(queries);
+		public static Node GetJobNode(string nodeName, string jobID, string connectionString)
+		{
+			MongoCollection<Node> collection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			var query = Query.And(Query.EQ("NodeName", nodeName), Query.EQ("JobID", jobID));
 			return collection.FindOne(query);
 		}
 	}
@@ -174,8 +202,9 @@ namespace PeachFarm.Common.Mongo
 	{
 		public const string Database = "PeachFarm";
 		public const string Jobs = "jobs";
-		public const string Iterations = "job.iterations";
+		public const string JobNodes = "job.nodes";
+		public const string Faults = "node.faults";
 		public const string PeachFarmErrors = "peachFarm.errors";
-
+		public const string PeachFarmNodes = "peachFarm.nodes";
 	}
 }

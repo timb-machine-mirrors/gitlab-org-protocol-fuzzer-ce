@@ -11,12 +11,12 @@ using NLog;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using PeachFarm.Common.Mongo;
+using System.Xml.Linq;
  
 namespace PeachFarm.Controller
 {
 	public class PeachFarmController
 	{
-		private static Dictionary<string, Heartbeat> nodes = new Dictionary<string, Heartbeat>();
 
 		private UTF8Encoding encoding = new UTF8Encoding();
 		private static string ipaddress;
@@ -96,37 +96,27 @@ namespace PeachFarm.Controller
 		private void StatusCheck(object state)
 		{
 			//Catching all exceptions because StatusCheck is called often
-
-			List<Heartbeat> remove = new List<Heartbeat>();
+			List<Heartbeat> nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
 			try
 			{
-				lock (nodes)
+				foreach (var node in nodes)
 				{
-					foreach (KeyValuePair<string, Heartbeat> pair in nodes)
+					if (node.Stamp.AddMinutes(20) < DateTime.Now)
 					{
-						Debug.WriteLine(String.Format("Status Check:{0} {1}", pair.Value.Stamp.ToString(), DateTime.Now.ToString()));
-						if (pair.Value.Stamp.AddMinutes(20) < DateTime.Now)
+						logger.Warn("{0}\t{1}\t{2}", node.NodeName, "Node Expired", node.Stamp);
+						node.RemoveFromDatabase(config.MongoDb.ConnectionString);
+						node.ErrorMessage = "Node Expired";
+						node.Stamp = DateTime.Now;
+						node.SaveToErrors(config.MongoDb.ConnectionString);
+					}
+					else
+					{
+						if (node.Stamp.AddMinutes(10) < DateTime.Now)
 						{
-							logger.Warn("{0}\t{1}\t{2}", pair.Value.NodeName, "Node Expired", pair.Value.Stamp);
-							remove.Add(pair.Value);
-							pair.Value.ErrorMessage = "Node Expired";
-							pair.Value.Stamp = DateTime.Now;
-							pair.Value.SaveToDatabase(config.MongoDb.ConnectionString);
-						}
-						else
-						{
-							if (pair.Value.Stamp.AddMinutes(10) < DateTime.Now)
-							{
-								pair.Value.Status = Status.Late;
-								logger.Info("{0}\t{1}\t{2}", pair.Value.NodeName, pair.Value.Status.ToString(), pair.Value.Stamp);
-							}
+							node.Status = Status.Late;
+							logger.Info("{0}\t{1}\t{2}", node.NodeName, node.Status.ToString(), node.Stamp);
 						}
 					}
-				}
-
-				foreach (Heartbeat node in remove)
-				{
-					RemoveNode(node);
 				}
 			}
 			catch { }
@@ -244,13 +234,14 @@ namespace PeachFarm.Controller
 
 			if ((request.ClientCount == 1) && (request.IPAddress.Length > 0))
 			{
-				if ((nodes.ContainsKey(request.IPAddress)) && (nodes[request.IPAddress].Status == Status.Alive))
+				var node = DatabaseHelper.GetNodeByName(request.IPAddress, config.MongoDb.ConnectionString);
+				
+				if ((node != null) && (node.Status == Status.Alive))
 				{
-					DeclareJobExchange(request.JobID, new List<string>() { nodes[request.IPAddress].QueueName });
+					DeclareJobExchange(request.JobID, new List<string>() { node.QueueName });
 
-					CommitJobToMongo(request);
+					CommitJobToMongo(request, new List<Heartbeat>(){ node });
 
-					//modelSend.PublishToQueue(nodes[request.IPAddress].QueueName, request.Serialize(), action);
 					PublishToJob(request.JobID, request.Serialize(), action);
 
 
@@ -266,15 +257,16 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
+				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
 				var jobNodes = new List<Heartbeat>();
 
 				if (String.IsNullOrEmpty(request.Tags))
 				{
-					jobNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+					jobNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 				}
 				else
 				{
-					var aliveNodes = (from Heartbeat h in nodes.Values.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+					var aliveNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 					var ts = request.Tags.Split(',').ToList();
 					foreach (Heartbeat node in aliveNodes)
 					{
@@ -293,11 +285,12 @@ namespace PeachFarm.Controller
 						request.ClientCount = jobNodes.Count;
 					}
 
-					var jobQueues = (from Heartbeat h in jobNodes.Take(request.ClientCount) select h.QueueName).ToList();
+					jobNodes = jobNodes.Take(request.ClientCount).ToList();
+					var jobQueues = (from Heartbeat h in jobNodes select h.QueueName).ToList();
 
 					DeclareJobExchange(request.JobID, jobQueues);
 
-					CommitJobToMongo(request);
+					CommitJobToMongo(request, jobNodes);
 
 					foreach(string jobQueue in jobQueues)
 					{
@@ -340,7 +333,7 @@ namespace PeachFarm.Controller
 			if (heartbeat.Status == Status.Error)
 			{
 				//errors.Add(heartbeat);
-				heartbeat.SaveToDatabase(config.MongoDb.ConnectionString);
+				heartbeat.SaveToErrors(config.MongoDb.ConnectionString);
 				logger.Warn("{0} errored at {1}\n{2}", heartbeat.NodeName, heartbeat.Stamp, heartbeat.ErrorMessage);
 			}
 		}
@@ -348,7 +341,7 @@ namespace PeachFarm.Controller
 		private void ListNodes(ListNodesRequest request, string replyQueue)
 		{
 			ListNodesResponse response = new ListNodesResponse();
-			response.Nodes = nodes.Values.ToList();
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
 			ReplyToAdmin(response.Serialize(), "ListNodes", replyQueue);
 		}
 
@@ -380,7 +373,8 @@ namespace PeachFarm.Controller
 			{
 				response.Success = true;
 				response.Job = new Common.Messages.Job(mongoJob);
-				response.Nodes = (from Heartbeat h in nodes.Values where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
+				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
 			}
 
 			ReplyToAdmin(response.Serialize(), "JobInfo", replyQueue);
@@ -391,12 +385,11 @@ namespace PeachFarm.Controller
 			MonitorResponse response = new MonitorResponse();
 			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
-			response.Nodes = nodes.Values.ToList();
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
 			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
-			activeJobs = (List<Common.Mongo.Job>)activeJobs.FillIterations(config.MongoDb.ConnectionString, true);
 			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
 			response.ActiveJobs = activeJobs.ToMessagesJobs();
-			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).FillIterations(config.MongoDb.ConnectionString).ToMessagesJobs();
+			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
 
 			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 
@@ -415,7 +408,7 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		private void CommitJobToMongo(StartPeachRequest request)
+		private void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
 		{
 
 			#region Create Job record in Mongo
@@ -423,50 +416,71 @@ namespace PeachFarm.Controller
 			PeachFarm.Common.Mongo.Job mongoJob = new PeachFarm.Common.Mongo.Job();
 			mongoJob.JobID = request.JobID;
 			mongoJob.UserName = request.UserName;
-			mongoJob.PitFileName = request.PitFileName;
+			mongoJob.Pit.FileName = request.PitFileName;
+			mongoJob.Pit.FullText = request.Pit;
+
+			string text = request.Pit;
+			if (text.StartsWith("<!"))
+			{
+				text = text.Substring("<![CDATA[".Length);
+				text = text.Substring(0, text.Length - 2);
+			}
+
+			try
+			{
+				XDocument xdoc = XDocument.Parse(text);
+				var versionAttrib = xdoc.Root.Attribute("version");
+				if (versionAttrib != null)
+					mongoJob.Pit.Version = versionAttrib.Value;
+			}
+			catch
+			{
+
+			}
+
 			mongoJob.StartDate = DateTime.Now;
+			mongoJob.Tags = request.Tags;
+			
+			//TODO Peach Version
+
 			mongoJob = mongoJob.SaveToDatabase(request.MongoDbConnectionString);
+
+			mongoJob.Nodes = new List<Node>();
+
+			foreach (var n in nodes)
+			{
+				Node node = new Node();
+				node.Name = n.NodeName;
+				node.Tags = n.Tags;
+				node.JobID = request.JobID;
+				node.SaveToDatabase(config.MongoDb.ConnectionString);
+				mongoJob.Nodes.Add(node);
+			}
 
 			#endregion
 		}
 
 		private void UpdateNode(Heartbeat heartbeat)
 		{
-				if (nodes.ContainsKey(heartbeat.NodeName) == false)
+			heartbeat.SaveToDatabase(config.MongoDb.ConnectionString);
+			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+
+			if (heartbeat.Status == Status.Running)
+			{
+				try
 				{
-					lock (nodes)
-					{
-						nodes.Add(heartbeat.NodeName, heartbeat);
-					}
-					logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
-					if (heartbeat.Status == Status.Running)
-					{
-						try
-						{
-							rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
-						}
-						catch { }
-					}
+					rabbit.BindQueueToExchange(String.Format(QueueNames.EXCHANGE_JOB, heartbeat.JobID), heartbeat.QueueName, heartbeat.JobID);
 				}
-
-				nodes[heartbeat.NodeName] = heartbeat;
-				logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
-
+				catch { }
+			}
 		}
 
 		private void RemoveNode(Heartbeat heartbeat)
 		{
-			if (nodes.ContainsKey(heartbeat.NodeName))
-			{
-				lock (nodes)
-				{
-					nodes.Remove(heartbeat.NodeName);
-				}
 
-				logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
+			heartbeat.RemoveFromDatabase(config.MongoDb.ConnectionString);
+			logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
-			}
 		}
 	}
 }

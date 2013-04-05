@@ -12,45 +12,35 @@
   <xs:element name="Job" type="Job" />
 
   <xs:complexType name="Job">
+		<xs:sequence>
+			<xs:element name="Pit" type="Pit" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
     <xs:attribute name="UserName" type="xs:string" use="required" />
-    <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="JobID" type="xs:string" use="required" />
     <xs:attribute name="StartDate" type="xs:dateTime" use="required" />
-  </xs:complexType>
+		<xs:attribute name="PeachVersion" type="xs:string" use="required" />
+		<xs:attribute name="Tags" type="xs:string" use="required" />
+	</xs:complexType>
 
-	<xs:element name="Iteration" type="Iteration" />
-	<xs:complexType name="Iteration">
+	<xs:complexType name="Pit">
 		<xs:sequence>
-			<xs:element name="IterationNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1"/>
-			<xs:element name="TestName" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="SeedNumber" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Stamp" type="xs:dateTime" maxOccurs="1" minOccurs="1" />
-			<xs:element name="Faults">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="Fault" type="Fault" maxOccurs="unbounded" minOccurs="0" />
-					</xs:sequence>
-				</xs:complexType>
-			</xs:element>
+			<xs:element name="FullText" type="xs:string" maxOccurs="1" minOccurs="1" />
 		</xs:sequence>
-    <xs:attribute name="JobID" type="xs:string" use="required" />
-    <xs:attribute name="NodeName" type="xs:string" use="required" />
+		<xs:attribute name="FileName" type="xs:string" use="required" />
+		<xs:attribute name="Version" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Node">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Name" type="xs:string" use="required" />
+		<xs:attribute name="IterationCount" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="SeedNumber" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="Tags" type="xs:string" use="required" />
 	</xs:complexType>
 
   <xs:complexType name="Fault">
     <xs:sequence>
-			<xs:element name="IsReproduction" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-      <xs:element name="ControlIteration" type="xs:boolean" maxOccurs="1" minOccurs="1" />
-      <xs:element name="ControlRecordingIteration" type="xs:boolean" maxOccurs="1" minOccurs="1" />
       <xs:element name="Description" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="DetectionSource" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="Exploitability" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="FolderName" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="Iteration" type="xs:unsignedInt" maxOccurs="1" minOccurs="1" />
-      <xs:element name="MajorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="MinorHash" type="xs:string" maxOccurs="1" minOccurs="1" />
-      <xs:element name="Title" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<xs:element name="FaultType" type="xs:string" maxOccurs="1" minOccurs="1" />
 			<xs:element name="StateModel" maxOccurs="1" minOccurs="1" >
 				<xs:complexType>
 					<xs:sequence>
@@ -66,7 +56,23 @@
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-  </xs:complexType>
+		<xs:attribute name="Stamp" type="xs:dateTime" use="required" />
+		<xs:attribute name="IsReproduction" type="xs:boolean" use="required" />
+		<xs:attribute name="ControlIteration" type="xs:boolean" use="required" />
+		<xs:attribute name="ControlRecordingIteration" type="xs:boolean" use="required" />
+		<xs:attribute name="DetectionSource" type="xs:string" use="required" />
+		<xs:attribute name="Exploitability" type="xs:string" use="required" />
+		<xs:attribute name="FolderName" type="xs:string" use="required" />
+		<xs:attribute name="Iteration" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="MajorHash" type="xs:string" use="required" />
+		<xs:attribute name="MinorHash" type="xs:string" use="required" />
+		<xs:attribute name="Title" type="xs:string" use="required" />
+		<xs:attribute name="FaultType" type="xs:string" use="required" />
+		<xs:attribute name="TestName" type="xs:string" use="required" />
+		<xs:attribute name="SeedNumber" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="NodeName" type="xs:string" use="required" />
+	</xs:complexType>
 
   <xs:complexType name="CollectedData">
     <xs:sequence>

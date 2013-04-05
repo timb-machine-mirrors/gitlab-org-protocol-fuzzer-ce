@@ -174,10 +174,25 @@
 	</xs:complexType>
 
 	<xs:complexType name="Job">
+		<xs:sequence>
+			<xs:element name="Tags">
+				<xs:simpleType>
+					<xs:list itemType="xs:string" />
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Pit" type="Pit" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
 		<xs:attribute name="UserName" type="xs:string" use="required" />
-		<xs:attribute name="PitFileName" type="xs:string" use="required" />
 		<xs:attribute name="JobID" type="xs:string" use="required" />
 		<xs:attribute name="StartDate" type="xs:dateTime" use="required" />
-		<xs:attribute name="FaultCount" type="xs:int" use="required" />
+		<xs:attribute name="PeachVersion" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="Pit">
+		<xs:sequence>
+			<xs:element name="FullText" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="FileName" type="xs:string" use="required" />
+		<xs:attribute name="Version" type="xs:string" use="required" />
 	</xs:complexType>
 </xs:schema>

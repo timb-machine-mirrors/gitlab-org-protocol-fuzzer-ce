@@ -254,7 +254,7 @@ namespace PeachFarm.Admin.Console
 			string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
 				e.Result.Job.JobID,
 				e.Result.Job.UserName,
-				e.Result.Job.PitFileName,
+				e.Result.Job.Pit.FileName,
 				e.Result.Job.StartDate);
 
 			System.Console.WriteLine(output);
@@ -280,7 +280,7 @@ namespace PeachFarm.Admin.Console
 				foreach (Job job in e.Result.ActiveJobs)
 				{
 					System.Console.WriteLine(String.Format(format,
-						job.JobID, job.UserName, job.PitFileName, job.StartDate));
+						job.JobID, job.UserName, job.Pit.FileName, job.StartDate));
 				}
 			}
 			System.Console.WriteLine();
@@ -297,7 +297,7 @@ namespace PeachFarm.Admin.Console
 				foreach (Job job in e.Result.InactiveJobs)
 				{
 					System.Console.WriteLine(String.Format(format,
-						job.JobID, job.UserName, job.PitFileName, job.StartDate));
+						job.JobID, job.UserName, job.Pit.FileName, job.StartDate));
 				}
 			}
 		}
