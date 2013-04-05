@@ -193,7 +193,7 @@ namespace PeachFarm.Common.Mongo
 		public static Node GetJobNode(string nodeName, string jobID, string connectionString)
 		{
 			MongoCollection<Node> collection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
-			var query = Query.And(Query.EQ("NodeName", nodeName), Query.EQ("JobID", jobID));
+			var query = Query.And(Query.EQ("Name", nodeName), Query.EQ("JobID", jobID));
 			return collection.FindOne(query);
 		}
 	}
