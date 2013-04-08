@@ -167,7 +167,8 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			foreach (var fault in faults)
 			{
-				collection.Save(fault);
+				var updatedfault = fault.UpdateDataPaths(connectionString);
+				collection.Save(updatedfault);
 			}
 			collection.Database.Server.Disconnect();
 		}
