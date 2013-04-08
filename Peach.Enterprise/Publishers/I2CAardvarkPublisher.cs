@@ -74,11 +74,8 @@ namespace Peach.Core.Publishers
 
 			if (handle <= 0)
 			{
-				Console.WriteLine("Unable to open Aardvark device on port {0}",
-								  port);
-				Console.WriteLine("error: {0}",
-								  AardvarkApi.aa_status_string(handle));
-				return;
+				throw new PeachException(System.String.Format("Unable to open Aardvark device on port {0}: {1}",
+								  port, AardvarkApi.aa_status_string(handle)));
 			}
 
 			// Ensure that the I2C subsystem is enabled
@@ -106,9 +103,11 @@ namespace Peach.Core.Publishers
 
 		protected override void OnClose()
 		{
-			System.Diagnostics.Debug.Assert(handle > 0);
-			AardvarkApi.aa_close(handle);
-			handle = 0;
+			if (handle > 0)
+			{
+				AardvarkApi.aa_close(handle);
+				handle = 0;
+			}
 		}
 
 		protected override void OnOutput(byte[] buffer, int offset, int count)
@@ -120,7 +119,7 @@ namespace Peach.Core.Publishers
 									   (ushort)count, dataSend);
 			if (res < 0)
 			{
-				Console.WriteLine("ERROR: TODO");
+				throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
 			}
 			AardvarkApi.aa_sleep_ms((uint)sleepTime);
 		}
