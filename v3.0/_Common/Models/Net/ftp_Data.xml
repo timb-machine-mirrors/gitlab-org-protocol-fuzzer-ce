@@ -72,6 +72,14 @@
 		<String name="Status" value="220" token="true"/>
 	</DataModel>
 
+	<DataModel name="DirCreated" ref="ResponseTemplate">
+		<String name="Status" value="257" token="true"/>
+	</DataModel>
+
+	<DataModel name="DirDeleted" ref="ResponseTemplate">
+		<String name="Status" value="250" token="true"/>
+	</DataModel>
+
 	<DataModel name="ServerUserNeedsPass" ref="ResponseTemplate">
 		<String name="Status" value="331" token="true"/>
 	</DataModel>
