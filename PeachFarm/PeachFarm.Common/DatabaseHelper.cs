@@ -180,7 +180,13 @@ namespace PeachFarm.Common.Mongo
 		public static List<Heartbeat> GetAllNodes(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			return collection.FindAll().ToList();
+			var allnodes = collection.FindAll().ToList();
+			foreach (var node in allnodes)
+			{
+				node.Stamp = node.Stamp.ToLocalTime();
+			}
+			collection.Database.Server.Disconnect();
+			return allnodes;
 		}
 
 		public static Heartbeat GetNodeByName(string name, string connectionString)
@@ -195,6 +201,13 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Node> collection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
 			var query = Query.And(Query.EQ("Name", nodeName), Query.EQ("JobID", jobID));
 			return collection.FindOne(query);
+		}
+
+		public static List<Fault> GetJobFaults(string jobID, string connectionString)
+		{
+			MongoCollection<Fault> collection = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			var query = Query.EQ("JobID", jobID);
+			return collection.Find(query).ToList();
 		}
 	}
 
