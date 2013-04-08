@@ -50,8 +50,7 @@
 
 		<State name="DelDir">
 			<Action type="input" publisher="TcpHandler">
-				<!--DataModel ref="DataModels:DirCreated" /--><!--TODO-->
-				<DataModel ref="DataModels:ResponseTemplate" />
+				<DataModel ref="DataModels:DirCreated" />
 			</Action>
 			<Action type="output" publisher="TcpHandler">
 				<DataModel ref="DataModels:RMD" />
