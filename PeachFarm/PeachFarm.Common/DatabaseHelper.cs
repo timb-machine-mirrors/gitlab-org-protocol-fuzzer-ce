@@ -51,6 +51,30 @@ namespace PeachFarm.Common.Mongo
 			CreateErrorsCollection(server);
 		}
 
+		public static void CreateCollection(MongoServer server, string collectionName)
+		{
+			switch (collectionName)
+			{
+				case MongoNames.Faults:
+					CreateFaultsCollection(server);
+					break;
+				case MongoNames.JobNodes:
+					CreateJobNodesCollection(server);
+					break;
+				case MongoNames.Jobs:
+					CreateJobsCollection(server);
+					break;
+				case MongoNames.PeachFarmErrors:
+					CreateErrorsCollection(server);
+					break;
+				case MongoNames.PeachFarmNodes:
+					CreateNodesCollection(server);
+					break;
+				default:
+					throw new ApplicationException("Collection name unknown: " + collectionName);
+			}
+		}
+
 		public static void CreateJobsCollection(MongoServer server)
 		{
 			string collectionname = MongoNames.Jobs;
@@ -155,20 +179,25 @@ namespace PeachFarm.Common.Mongo
 		public static MongoCollection<T> GetCollection<T>(string collectionname, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 
-			MongoCollection<T> collection = null;
-
-			if (db.CollectionExists(collectionname))
+			if (server.DatabaseExists(MongoNames.Database))
 			{
+				MongoDatabase db = server.GetDatabase(MongoNames.Database);
+				MongoCollection<T> collection = null;
+
+				if (db.CollectionExists(collectionname) == false)
+				{
+					CreateCollection(server, collectionname);
+				}
+
 				collection = db.GetCollection<T>(collectionname);
+
+				return collection;
 			}
 			else
 			{
-				throw new ApplicationException(String.Format("Collection {0} does not exist", collectionname));
+				throw new ApplicationException("Database does not exist in MongoDB: " + MongoNames.Database);
 			}
-
-			return collection;
 		}
 
 		public static List<Heartbeat> GetAllErrors(string connectionString)
@@ -180,7 +209,13 @@ namespace PeachFarm.Common.Mongo
 		public static List<Heartbeat> GetAllNodes(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			return collection.FindAll().ToList();
+			var allnodes = collection.FindAll().ToList();
+			foreach (var node in allnodes)
+			{
+				node.Stamp = node.Stamp.ToLocalTime();
+			}
+			collection.Database.Server.Disconnect();
+			return allnodes;
 		}
 
 		public static Heartbeat GetNodeByName(string name, string connectionString)
@@ -195,6 +230,13 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Node> collection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
 			var query = Query.And(Query.EQ("Name", nodeName), Query.EQ("JobID", jobID));
 			return collection.FindOne(query);
+		}
+
+		public static List<Fault> GetJobFaults(string jobID, string connectionString)
+		{
+			MongoCollection<Fault> collection = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			var query = Query.EQ("JobID", jobID);
+			return collection.Find(query).ToList();
 		}
 	}
 
