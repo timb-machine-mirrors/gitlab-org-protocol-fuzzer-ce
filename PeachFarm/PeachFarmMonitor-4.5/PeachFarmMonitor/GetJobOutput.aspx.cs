@@ -9,6 +9,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using PeachFarm.Admin.Configuration;
 using PeachFarm.Common.Mongo;
+using PeachFarmMonitor.Common;
 using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.Reports;
 
@@ -44,8 +45,9 @@ namespace PeachFarmMonitor
 
             if (String.IsNullOrEmpty(filepath))
             {
-              string zippath = FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, true);
-              var jobName = String.Format("Job_{0}_{1}", job.JobID, job.PitFileName);
+              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job);
+              string zippath = ZipWriter.GetZip(job, archiveFolder);
+              var jobName = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
               Response.ContentType = "application/zip";
               Response.WriteFile(zippath);
@@ -53,7 +55,7 @@ namespace PeachFarmMonitor
             else
             {
               filepath = Path.Combine(archiveFolder, filepath);
-              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job, false);
+              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job);
               string filename = Path.GetFileName(filepath);
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
               Response.WriteFile(filepath);

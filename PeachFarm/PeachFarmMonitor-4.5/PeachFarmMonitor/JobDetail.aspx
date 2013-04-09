@@ -98,7 +98,7 @@
 
     <div id="gridcontainer">
       <telerik:RadGrid 
-        ID="iterationsGrid" runat="server"
+        ID="faultsGrid" runat="server"
         Width="100%" Height="100%"
         AutoGenerateColumns="false" AutoGenerateHierarchy="true">
         <ClientSettings>
@@ -106,26 +106,24 @@
         </ClientSettings>
         <MasterTableView 
           AllowPaging="true" PageSize="30" AllowCustomPaging="true" VirtualItemCount="1000000"
-          DataMember="Iterations" Caption="Iterations" 
+          DataMember="FaultBuckets" Caption="Faults" 
           NoDetailRecordsText="No iterations for this job."
           HierarchyLoadMode="ServerBind">
           <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
           <Columns>
-            <telerik:GridBoundColumn DataField="IterationNumber" HeaderText="Iteration" />
-            <telerik:GridBoundColumn DataField="Stamp" HeaderText="Stamp" />
-            <telerik:GridBoundColumn DataField="NodeName" HeaderText="Node" />
+            <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
+            <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
+            <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" />
+            <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" />
           </Columns>
           <DetailTables>
             <telerik:GridTableView 
-              Caption="Faults" DataMember="Faults" 
+              Caption="Iterations" DataMember="Faults" 
               HierarchyLoadMode="ServerBind"
               NoDetailRecordsText="No faults for this iteration.">
               <Columns>
-                <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
                 <telerik:GridBoundColumn DataField="DetectionSource" HeaderText="Source" />
-                <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
-                <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" />
-                <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" />
+                <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" />
                 <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" />
               </Columns>
               <DetailItemTemplate>

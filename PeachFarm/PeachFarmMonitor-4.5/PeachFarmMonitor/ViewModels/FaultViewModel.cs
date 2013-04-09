@@ -39,7 +39,10 @@ namespace PeachFarmMonitor.ViewModels
 
     public new List<CollectedData> CollectedData { get; set; }
 
+    public new List<uint> Iterations { get; set; }
+
     public bool IsExpanded { get; set; }
 
   }
+
 }

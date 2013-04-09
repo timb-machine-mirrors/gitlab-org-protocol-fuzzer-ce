@@ -45,14 +45,14 @@ namespace PeachFarmMonitor
 
       if (jobfound)
       {
-        iterationsGrid.NeedDataSource += iterationsGrid_NeedDataSource;
-        iterationsGrid.DetailTableDataBind += iterationsGrid_DetailTableDataBind;
-        iterationsGrid.ItemDataBound += iterationsGrid_ItemDataBound;
+        faultsGrid.NeedDataSource += iterationsGrid_NeedDataSource;
+        faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
+        faultsGrid.ItemDataBound += faultsGrid_ItemDataBound;
 
-        lblJobID.Text = job.PitFileName + " - " + job.JobID;
+        lblJobID.Text = job.Pit.FileName + " - " + job.JobID;
         downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
         viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
-        Page.Title = "Job Detail: " + job.PitFileName;
+        Page.Title = "Job Detail: " + job.Pit.FileName;
       }
       else
       {
@@ -69,25 +69,25 @@ namespace PeachFarmMonitor
       {
         #region pagination code
         //*
-        int pagesize = iterationsGrid.MasterTableView.PageSize;
-        int pageindex = iterationsGrid.MasterTableView.CurrentPageIndex;
+        int pagesize = faultsGrid.MasterTableView.PageSize;
+        int pageindex = faultsGrid.MasterTableView.CurrentPageIndex;
 
         Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, pageindex, pagesize));
 
-        if (Job.Iterations.Count < pagesize)
-        {
-          int totalpages = pageindex + 1;
-          int totalrecords = ((totalpages - 1) * pagesize) + Job.Iterations.Count;
-          iterationsGrid.MasterTableView.VirtualItemCount = totalrecords;
-        }
+        //if (Job.Faults.Count < pagesize)
+        //{
+        //  int totalpages = pageindex + 1;
+        //  int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
+        //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
+        //}
         //*/
         #endregion
         
-        iterationsGrid.DataSource = Job.Iterations;
+        faultsGrid.DataSource = Job.FaultBuckets;
       }
     }
 
-    protected void iterationsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
+    protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
     {
       GridDataItem parent = e.DetailTableView.ParentItem;
       if (parent != null)
@@ -112,7 +112,7 @@ namespace PeachFarmMonitor
             }
             e.DetailTableView.DataSource = ivm.Faults;
             //*/
-            e.DetailTableView.DataSource = ((IterationViewModel)parent.DataItem).Faults;
+            e.DetailTableView.DataSource = ((FaultBucketViewModel)parent.DataItem).Faults;
             break;
           case "StateModel":
             e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).StateModel;
@@ -124,7 +124,7 @@ namespace PeachFarmMonitor
       }
     }
 
-    protected void iterationsGrid_ItemDataBound(object sender, Telerik.Web.UI.GridItemEventArgs e)
+    protected void faultsGrid_ItemDataBound(object sender, Telerik.Web.UI.GridItemEventArgs e)
     {
       GridDataItem item = e.Item as GridDataItem;
 
