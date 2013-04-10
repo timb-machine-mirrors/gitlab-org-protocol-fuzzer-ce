@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PeachFarm.Common.Mongo;
 
+
 namespace PeachFarmMonitor.Common
 {
   public class FileWriter
@@ -156,7 +157,14 @@ namespace PeachFarmMonitor.Common
 
 						if (File.Exists(actionFile) == false)
 						{
-							File.WriteAllBytes(actionFile, action.Data);
+							if (action.Data == null)
+							{
+								DatabaseHelper.DownloadFromGridFS(actionFile, action.DataPath, mongoDbConnectionString);
+							}
+							else
+							{
+								File.WriteAllBytes(actionFile, action.Data);
+							}
 						}
 					}
 					#endregion
@@ -169,7 +177,14 @@ namespace PeachFarmMonitor.Common
 
 						if (File.Exists(collectedDataFile) == false)
 						{
-							File.WriteAllBytes(collectedDataFile, cd.Data);
+							if (cd.Data == null)
+							{
+								DatabaseHelper.DownloadFromGridFS(collectedDataFile, cd.DataPath, mongoDbConnectionString);
+							}
+							else
+							{
+								File.WriteAllBytes(collectedDataFile, cd.Data);
+							}
 						}
 					}
 					#endregion
