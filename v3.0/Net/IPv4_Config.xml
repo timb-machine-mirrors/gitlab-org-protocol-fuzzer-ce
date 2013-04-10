@@ -2,11 +2,13 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIP" value="127.0.0.1"/>
+    <Define key="TargetIP" value="192.168.146.128"/>
     <Define key="LoggerPath" value="logs/ipv4/"/>
-    <Define key="SourceIP" value="127.0.0.1"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="SourceIP" value="192.168.146.1"/>
+    <Define key="Strategy"  value="Random"/>
 		<Define key="Path" value="."/>
+		<Define key="TargetIPBytes" value="C0A89280"/>
+		<Define key="SourceIPBytes" value="C0A89201"/>
   </All>
   
   <Linux platform="linux">
@@ -22,7 +24,7 @@
   <Windows platform="windows">
     <!-- This can't run on windows anyway because it uses the RawEther publisher. -->
     <!-- Platform independance is added as an example. -->
-    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="Interface" value="VMware Network Adapter VMnet8"/>
     <Define key="tsharkInterface" value="2"/>
     <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
   </Windows>

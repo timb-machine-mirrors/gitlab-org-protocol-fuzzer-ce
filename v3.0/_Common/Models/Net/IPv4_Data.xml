@@ -33,8 +33,8 @@
           <Param name="ref" value="Header"/>
         </Fixup>
       </Number>
-      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 01"/>
-      <Number name="DestIP" size="32" endian="big" valueType="hex" value="C0 A8 FE 80"/>
+      <Number name="SrcIP" size="32" endian="big" valueType="hex" value="##SourceIPBytes##" mutable="false"/>
+      <Number name="DestIP" size="32" endian="big" valueType="hex" value="##TargetIPBytes##" mutable="false"/> <!--These fields must be nonmutable on windows-->
       <Blob name="Options"/>
     </Block>
 		<Block name="Payload" ref="DataModels:ICMPv4Header"/>
