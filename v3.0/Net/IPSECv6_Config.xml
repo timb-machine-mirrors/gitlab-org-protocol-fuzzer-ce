@@ -20,6 +20,8 @@
 		<Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
 		<Define key="TargetPort" value="1234"/>
 		<Define key="Path" value="."/>
+		<Define key="TargetIPBytes" value="C0A89280"/>
+		<Define key="SourceIPBytes" value="C0A89201"/>
 	</All>
 		
 	<Linux platform="linux">
