@@ -1,0 +1,29 @@
+Protocol
+--------
+
+ * Test Suite: PROTOCOL
+ * Direction: Client, Server
+ 
+Description of protocol in paragraph form.
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFCXXXX | RFC TITLE
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|MSG 1 | RFCXXXXX
+|
+| Supported Features | Specification
+|FEATURE 1 | RFCXXXXX
+|========
+

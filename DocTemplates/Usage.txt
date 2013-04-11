@@ -1,0 +1,29 @@
+
+Configuration
+~~~~~~~~~~~~~
+
+Any description text about configuring and using the
+fuzzer goes here.
+
+Target Configuration
+^^^^^^^^^^^^^^^^^^^^
+
+Any specific requirements for configuring the target here. 
+Such as needing to start netcat on a port.
+
+Options
+^^^^^^^
+
+.CommonConfig.xml
+[options="header"]
+|==========
+|Option | Default | Description
+|TargetIp | None | IPv4 IP address of target
+|==========
+
+.PROTOCOL_Config.xml
+[options="header"]
+|==========
+|Option | Default | Description
+|TargetIp | None | IPv4 IP address of target
+|==========
