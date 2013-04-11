@@ -22,8 +22,11 @@ Detailed Use Cases
 |========
 |Messages | Specification
 |MSG 1 | RFCXXXXX
-|
-| Supported Features | Specification
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
 |FEATURE 1 | RFCXXXXX
 |========
 
