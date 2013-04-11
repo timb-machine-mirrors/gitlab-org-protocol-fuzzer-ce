@@ -40,25 +40,23 @@ namespace PeachFarmMonitor
           Job job = DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);
           if (job != null)
           {
-            string root = Server.MapPath(".");
-            string archiveFolder = Path.Combine(root, "jobArchive");
-
             if (String.IsNullOrEmpty(filepath))
             {
-              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job);
-              string zippath = ZipWriter.GetZip(job, archiveFolder);
+              var temppath = Path.GetTempPath();
+              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job);
               var jobName = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
+              string zippath = ZipWriter.GetZip(job, temppath);
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
               Response.ContentType = "application/zip";
               Response.WriteFile(zippath);
             }
             else
             {
-              filepath = Path.Combine(archiveFolder, filepath);
-              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, archiveFolder, job);
+              var temppath = Path.GetTempFileName();
+              DatabaseHelper.DownloadFromGridFS(temppath, filepath, monitorconfig.MongoDb.ConnectionString);
               string filename = Path.GetFileName(filepath);
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
-              Response.WriteFile(filepath);
+              Response.WriteFile(temppath);
             }
           }
         }

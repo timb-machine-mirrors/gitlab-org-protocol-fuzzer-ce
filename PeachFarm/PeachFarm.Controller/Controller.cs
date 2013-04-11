@@ -292,10 +292,11 @@ namespace PeachFarm.Controller
 
 					CommitJobToMongo(request, jobNodes);
 
-					foreach(string jobQueue in jobQueues)
+					uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+					for(int i=0;i<jobQueues.Count;i++)
 					{
-						request.Seed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-						rabbit.PublishToQueue(jobQueue, request.Serialize(), action);
+						request.Seed = baseseed + Convert.ToUInt32(i);
+						rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
 					}
 
 					//PublishToJob(request.JobID, request.Serialize(), action);

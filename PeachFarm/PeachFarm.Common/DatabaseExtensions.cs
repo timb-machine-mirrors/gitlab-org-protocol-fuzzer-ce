@@ -243,6 +243,8 @@ namespace PeachFarm.Common.Mongo
 					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
 									cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
 				}
+				
+				DatabaseHelper.SaveToGridFS(action.Data, actionFile, connectionString);
 
 				action.DataPath = actionFile;
 			}
@@ -254,6 +256,8 @@ namespace PeachFarm.Common.Mongo
 			{
 				collectedDataFile = System.IO.Path.Combine(iterationFolder,
 					fault.DetectionSource + "_" + cd.Key);
+
+				DatabaseHelper.SaveToGridFS(cd.Data, collectedDataFile, connectionString);
 
 				cd.DataPath = collectedDataFile;
 			}
@@ -379,5 +383,23 @@ namespace PeachFarm.Common.Mongo
 					return _id.ToString();
 			}
 		}
+	}
+
+	public partial class CollectedData
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
+	}
+
+	public partial class Action
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
 	}
 }

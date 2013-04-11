@@ -238,6 +238,25 @@ namespace PeachFarm.Common.Mongo
 			var query = Query.EQ("JobID", jobID);
 			return collection.Find(query).ToList();
 		}
+
+		public static void SaveToGridFS(byte[] p, string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			using (var ms = new MemoryStream(p))
+			{
+				var gridFsInfo = db.GridFS.Upload(ms, remoteFileName);
+			}
+			server.Disconnect();
+		}
+
+		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			db.GridFS.Download(localFile, remoteFile);
+			server.Disconnect();
+		}
 	}
 
 	public static class MongoNames

@@ -8,21 +8,8 @@ namespace PeachFarmMonitor.ViewModels
 {
   public class FaultBucketViewModel : Fault
   {
-    public FaultBucketViewModel(Fault fault, List<Fault> childFaults)
+    public FaultBucketViewModel(Fault fault, List<Fault> childFaults = null)
     {
-      if (String.IsNullOrEmpty(fault.FolderName) == false)
-      {
-        BucketName = fault.FolderName;
-      }
-      else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
-      {
-        BucketName = "Unknown";
-      }
-      else
-      {
-        BucketName = string.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash);
-      }
-
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;
       this.DetectionSource = fault.DetectionSource;
@@ -39,11 +26,15 @@ namespace PeachFarmMonitor.ViewModels
       this.Stamp = fault.Stamp;
       this.TestName = fault.TestName;
       this.Title = fault.Title;
+      this.Group = fault.Group;
 
       Faults = new List<FaultViewModel>();
-      foreach (var child in childFaults)
+      if (childFaults != null)
       {
-        Faults.Add(new FaultViewModel(child));
+        foreach (var child in childFaults)
+        {
+          Faults.Add(new FaultViewModel(child));
+        }
       }
     }
 
@@ -56,33 +47,12 @@ namespace PeachFarmMonitor.ViewModels
   {
     public override bool Equals(Fault x, Fault y)
     {
-      string first = BuildString(x);
-      string second = BuildString(y);
-
-      return first.Equals(second);
-
-    }
-
-    private string BuildString(Fault x)
-    {
-      if (String.IsNullOrEmpty(x.FolderName) == false)
-      {
-        return x.FolderName;
-      }
-      else if (String.IsNullOrEmpty(x.MajorHash) && String.IsNullOrEmpty(x.MinorHash) && String.IsNullOrEmpty(x.Exploitability))
-      {
-        return "Unknown";
-      }
-      else
-      {
-        return string.Format("{0}_{1}_{2}", x.Exploitability, x.MajorHash, x.MinorHash);
-      }
-
+      return x.Group.Equals(y.Group);
     }
 
     public override int GetHashCode(Fault obj)
     {
-      return BuildString(obj).GetHashCode();
+      return obj.Group.GetHashCode();
     }
   }
 

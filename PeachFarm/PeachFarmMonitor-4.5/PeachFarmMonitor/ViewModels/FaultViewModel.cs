@@ -10,6 +10,7 @@ namespace PeachFarmMonitor.ViewModels
   {
     public FaultViewModel(Fault fault)
     {
+      this._id = fault._id;
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;
       this.Description = fault.Description;

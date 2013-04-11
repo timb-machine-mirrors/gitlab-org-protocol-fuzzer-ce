@@ -19,45 +19,11 @@ namespace PeachFarmMonitor.ViewModels
 
       this.Status = status;
 
-      Nodes = new List<NodeViewModel>();
-      foreach (Node node in job.Nodes)
-      {
-        Nodes.Add(new NodeViewModel(node));
-      }
-
       FaultBuckets = new List<FaultBucketViewModel>();
-      if (job.Faults != null)
-      {
-        FaultCount = job.Faults.Count;
-        FaultComparer comparer = new FaultComparer();
-        var buckets = job.Faults.Distinct(comparer);
-        foreach (var bucket in buckets)
-        {
-          var childfaults = (from f in job.Faults where comparer.Equals(f, bucket) select f).ToList();
-          FaultBucketViewModel fbvm = new FaultBucketViewModel(bucket, childfaults);
-          FaultBuckets.Add(fbvm);
-        }
-      }
     }
 
-    public void FillFaults(List<Fault> faults)
-    {
-      FaultBuckets = new List<FaultBucketViewModel>();
-      if (faults != null)
-      {
-        FaultCount = faults.Count;
-        FaultComparer comparer = new FaultComparer();
-        var buckets = faults.Distinct(comparer);
-        foreach (var bucket in buckets)
-        {
-          var childfaults = (from f in faults where comparer.Equals(f, bucket) select f).ToList();
-          FaultBucketViewModel fbvm = new FaultBucketViewModel(bucket, childfaults);
-          FaultBuckets.Add(fbvm);
-        }
-      }
-    }
 
-    public List<NodeViewModel> Nodes { get; set; }
+    public new List<NodeViewModel> Nodes { get; set; }
 
     public List<FaultBucketViewModel> FaultBuckets { get; set; }
 

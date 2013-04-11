@@ -269,6 +269,8 @@ namespace PeachFarm.Common.Mongo
 
 		private string nodeNameField;
 
+		private string groupField;
+
 		public Fault()
 		{
 			this.collectedDataField = new List<CollectedData>();
@@ -506,6 +508,18 @@ namespace PeachFarm.Common.Mongo
 				this.nodeNameField = value;
 			}
 		}
+
+		public string Group
+		{
+			get
+			{
+				return this.groupField;
+			}
+			set
+			{
+				this.groupField = value;
+			}
+		}
 	}
 
 	public partial class Action
@@ -516,8 +530,6 @@ namespace PeachFarm.Common.Mongo
 		private string actionTypeField;
 
 		private int parameterField;
-
-		private byte[] dataField;
 
 		private string dataPathField;
 
@@ -557,18 +569,6 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		public byte[] Data
-		{
-			get
-			{
-				return this.dataField;
-			}
-			set
-			{
-				this.dataField = value;
-			}
-		}
-
 		public string DataPath
 		{
 			get
@@ -587,8 +587,6 @@ namespace PeachFarm.Common.Mongo
 
 		private string keyField;
 
-		private byte[] dataField;
-
 		private string dataPathField;
 
 		public string Key
@@ -600,18 +598,6 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.keyField = value;
-			}
-		}
-
-		public byte[] Data
-		{
-			get
-			{
-				return this.dataField;
-			}
-			set
-			{
-				this.dataField = value;
 			}
 		}
 
