@@ -139,6 +139,19 @@ namespace PeachFarm.Loggers
 				mongoFault.TestName = context.test.name;
 				mongoFault.SeedNumber = context.config.randomSeed;
 
+				if (String.IsNullOrEmpty(pf.folderName) == false)
+				{
+					mongoFault.Group = pf.folderName;
+				}
+				else if (String.IsNullOrEmpty(pf.majorHash) && String.IsNullOrEmpty(pf.minorHash) && String.IsNullOrEmpty(pf.exploitability))
+				{
+					mongoFault.Group = "Unknown";
+				}
+				else
+				{
+					mongoFault.Group = string.Format("{0}_{1}_{2}", pf.exploitability, pf.majorHash, pf.minorHash);
+				}
+
 				mongoFault.StateModel = mongoActions;
 				mongoFault.CollectedData = GetMongoCollectedData(pf);
 

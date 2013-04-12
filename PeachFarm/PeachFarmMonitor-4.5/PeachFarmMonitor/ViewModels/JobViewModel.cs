@@ -8,37 +8,26 @@ namespace PeachFarmMonitor.ViewModels
 {
   public class JobViewModel : Job
   {
-    public JobViewModel(PeachFarm.Common.Messages.Job job, JobStatus status = JobStatus.Inactive)
-    {
-      this.JobID = job.JobID;
-      this.PitFileName = job.PitFileName;
-      this.StartDate = job.StartDate;
-      this.UserName = job.UserName;
-      this.Status = status;
-      this.FaultCount = job.FaultCount;
-    }
-
     public JobViewModel(Job job, JobStatus status = JobStatus.Inactive)
     {
       this.JobID = job.JobID;
-      this.PitFileName = job.PitFileName;
+      this.Pit = job.Pit;
       this.StartDate = job.StartDate;
       this.UserName = job.UserName;
+      this.PeachVersion = job.PeachVersion;
+      this.Tags = job.Tags;
+
       this.Status = status;
 
-      this.Iterations = new List<IterationViewModel>();
-      int count = 0;
-      foreach (var i in job.Iterations)
-      {
-        this.Iterations.Add(new IterationViewModel(i));
-        count += i.Faults.Count;
-      }
-      this.FaultCount = count;
+      FaultBuckets = new List<FaultBucketViewModel>();
     }
 
-    public JobStatus Status { get; set; }
 
-    public new List<IterationViewModel> Iterations { get; set; }
+    public new List<NodeViewModel> Nodes { get; set; }
+
+    public List<FaultBucketViewModel> FaultBuckets { get; set; }
+
+    public JobStatus Status { get; set; }
 
     public int FaultCount { get; set; }
   }

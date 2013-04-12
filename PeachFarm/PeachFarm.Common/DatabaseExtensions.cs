@@ -90,6 +90,52 @@ namespace PeachFarm.Common.Mongo
 			return collection.Find(query).OrderBy(k => k.StartDate).ToList();
 		}
 
+		public static void FillNodes(this Job job, string connectionString)
+		{
+			MongoCollection<Node> collection = DatabaseHelper.GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			var query = Query.EQ("JobID", job.JobID);
+			job.Nodes = collection.Find(query).ToList();
+			collection.Database.Server.Disconnect();
+		}
+
+		private static string[] dataFields = new string[]
+		{
+		    "Faults.CollectedData.Data",
+		    "StateModel.Data"
+		};
+
+		public static void FillFaults(this Job job, string connectionString, bool excludeData = false)
+		{
+			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+			var query = Query.EQ("JobID", job.JobID);
+			if(excludeData)
+				job.Faults = collection.Find(query).SetFields(Fields.Exclude(dataFields)).ToList();
+			else
+				job.Faults = collection.Find(query).ToList();
+
+			foreach (var fault in job.Faults)
+			{
+				fault.Stamp = fault.Stamp.ToLocalTime();
+			}
+			collection.Database.Server.Disconnect();
+		}
+
+		public static void FillFaults(this Node node, string connectionString, bool excludeData = false)
+		{
+			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+			var query = Query.And(Query.EQ("JobID", node.JobID), Query.EQ("NodeName", node.Name));
+			if (excludeData)
+				node.Faults = collection.Find(query).SetFields(Fields.Exclude(dataFields)).ToList();
+			else
+				node.Faults = collection.Find(query).ToList(); 
+			
+			foreach (var fault in node.Faults)
+			{
+				fault.Stamp = fault.Stamp.ToLocalTime();
+			} 
+			collection.Database.Server.Disconnect();
+		}
+
 		public static List<Messages.Job> ToMessagesJobs(this IEnumerable<Mongo.Job> mongoJobs)
 		{
 			List<Messages.Job> jobs = new List<Messages.Job>();
@@ -121,7 +167,8 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			foreach (var fault in faults)
 			{
-				collection.Save(fault);
+				var updatedfault = fault.UpdateDataPaths(connectionString);
+				collection.Save(updatedfault);
 			}
 			collection.Database.Server.Disconnect();
 		}
@@ -129,6 +176,7 @@ namespace PeachFarm.Common.Mongo
 		public static void SaveToDatabase(this Fault fault, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+			fault = fault.UpdateDataPaths(connectionString);
 			collection.Save(fault);
 			collection.Database.Server.Disconnect();
 		}
@@ -142,6 +190,82 @@ namespace PeachFarm.Common.Mongo
 
 			collection.Database.Server.Disconnect();
 		}
+
+		private static Fault UpdateDataPaths(this Fault fault, string connectionString)
+		{
+			string jobFolder = String.Empty;
+			string nodeFolder = String.Empty;
+			string testFolder = String.Empty;
+			string faultsFolder = String.Empty;
+			string statusFile = String.Empty;
+			string faultFolder = String.Empty;
+			string iterationFolder = String.Empty;
+			string actionFile = String.Empty;
+			string collectedDataFile = String.Empty;
+
+			Job job = DatabaseHelper.GetJob(fault.JobID, connectionString);
+
+			jobFolder = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
+			nodeFolder = Path.Combine(jobFolder, "Node_" + fault.NodeName);
+			testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.Pit.FileName, fault.TestName, FormatDate(job.StartDate)));
+			faultsFolder = Path.Combine(testFolder, "Faults");
+
+			#region set faultFolder
+			if (fault.FolderName != null)
+			{
+				faultFolder = Path.Combine(faultsFolder, fault.FolderName);
+			}
+			else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
+			{
+				faultFolder = Path.Combine(faultsFolder, "Unknown");
+			}
+			else
+			{
+				faultFolder = Path.Combine(faultsFolder, String.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash));
+			}
+			#endregion
+
+			iterationFolder = Path.Combine(faultFolder, fault.Iteration.ToString());
+
+			#region action files
+			int cnt = 0;
+			foreach (PeachFarm.Common.Mongo.Action action in fault.StateModel)
+			{
+				cnt++;
+				if (action.Parameter == 0)
+				{
+					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
+									cnt, action.ActionType.ToString(), action.ActionName));
+
+				}
+				else
+				{
+					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
+									cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
+				}
+				
+				DatabaseHelper.SaveToGridFS(action.Data, actionFile, connectionString);
+
+				action.DataPath = actionFile;
+			}
+			#endregion
+
+
+			#region write collected data files
+			foreach (CollectedData cd in fault.CollectedData)
+			{
+				collectedDataFile = System.IO.Path.Combine(iterationFolder,
+					fault.DetectionSource + "_" + cd.Key);
+
+				DatabaseHelper.SaveToGridFS(cd.Data, collectedDataFile, connectionString);
+
+				cd.DataPath = collectedDataFile;
+			}
+			#endregion
+
+			return fault;
+		}
+
 
 		public static MongoDB.Bson.ObjectId ToMongoID(this string input)
 		{
@@ -191,6 +315,15 @@ namespace PeachFarm.Common.Mongo
 		{
 			get { return nodesField; }
 			set { nodesField = value; }
+		}
+
+		private List<Fault> faultsField = new List<Fault>();
+
+		[BsonIgnore]
+		public List<Fault> Faults
+		{
+			get { return faultsField; }
+			set { faultsField = value; }
 		}
 	}
 
@@ -250,5 +383,23 @@ namespace PeachFarm.Common.Mongo
 					return _id.ToString();
 			}
 		}
+	}
+
+	public partial class CollectedData
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
+	}
+
+	public partial class Action
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
 	}
 }

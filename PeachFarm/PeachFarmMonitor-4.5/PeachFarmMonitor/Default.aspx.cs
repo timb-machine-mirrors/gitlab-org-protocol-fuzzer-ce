@@ -25,9 +25,12 @@ namespace PeachFarmMonitor
     private static PeachFarm.Admin.Admin admin = null;
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
-    private static Messages.MonitorResponse response;
 
     private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
+
+    private static List<Messages.Heartbeat> onlinenodes;
+    private static List<JobViewModel> jvms;
+    private static List<Messages.Heartbeat> errors;
 
     public Home()
     {
@@ -48,46 +51,70 @@ namespace PeachFarmMonitor
     private Task<Messages.MonitorResponse> MonitorAsync()
     {
       TaskCompletionSource<Messages.MonitorResponse> tcs = new TaskCompletionSource<Messages.MonitorResponse>();
-      string guid = (string)ViewState["guid"];
-      if(String.IsNullOrEmpty(guid))
-      {
-        guid = Guid.NewGuid().ToString();
-        ViewState["guid"] = guid;
-      }
-      admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
-      admin.MonitorCompleted += (s, e) =>
-        {
-          if (e.Error != null)
-            tcs.TrySetException(e.Error);
-          else if (e.Cancelled)
-            tcs.TrySetCanceled();
-          else
-            tcs.TrySetResult(e.Result);
+      //string guid = (string)ViewState["guid"];
+      //if(String.IsNullOrEmpty(guid))
+      //{
+      //  guid = Guid.NewGuid().ToString();
+      //  ViewState["guid"] = guid;
+      //}
+      //admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
+      //admin.MonitorCompleted += (s, e) =>
+      //  {
+      //    if (e.Error != null)
+      //      tcs.TrySetException(e.Error);
+      //    else if (e.Cancelled)
+      //      tcs.TrySetCanceled();
+      //    else
+      //      tcs.TrySetResult(e.Result);
 
-        };
-      admin.MonitorAsync();
+      //  };
+      //admin.MonitorAsync();
       return tcs.Task;
     }
 
 
-    private async void Monitor(bool displayError = false)
+    private void Monitor(bool displayError = false)
     {
       try
       {
-        response = await MonitorAsync();
-
-        BindJobs();
-        jobsGrid.DataBind();
-
-        aliveNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Alive select h).Count().ToString();
-        runningNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Running select h).Count().ToString();
-        lateNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Late select h).Count().ToString();
-
-        BindNodes();
+        #region nodes
+        onlinenodes = DatabaseHelper.GetAllNodes(monitorconfig.MongoDb.ConnectionString);
+        nodesGrid.DataSource = onlinenodes;
         nodesGrid.DataBind();
 
-        BindErrors();
+        var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
+
+        aliveNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h).Count().ToString();
+        runningNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Running select h).Count().ToString();
+        lateNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Late select h).Count().ToString();
+        #endregion
+
+        #region jobs
+        List<Job> jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
+        jvms = new List<JobViewModel>();
+        foreach (Job job in jobs)
+        {
+          job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+          job.FillFaults(monitorconfig.MongoDb.ConnectionString);
+
+          if (activejobids.Contains(job.JobID))
+          {
+            jvms.Add(new JobViewModel(job, JobStatus.Running));
+          }
+          else
+          {
+            jvms.Add(new JobViewModel(job));
+          }
+        }
+        jobsGrid.DataSource = jvms;
+        jobsGrid.DataBind();
+        #endregion
+
+        #region errors
+        errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
+        errorsGrid.DataSource = errors;
         errorsGrid.DataBind();
+        #endregion
 
         loadingLabel.Text = "";
         loadingLabel.Visible = false;
@@ -197,61 +224,18 @@ namespace PeachFarmMonitor
       }
     }
 
-    protected void nodesGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
-    {
-      if (e.RebindReason == GridRebindReason.PostBackEvent)
-      {
-        if (response != null)
-        {
-          nodesGrid.DataSource = response.Nodes;
-          nodesGrid.DataBind();
-        }
-      }
-    }
-
     protected void nodesGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindNodes();
     }
 
     protected void jobsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindJobs();
     }
 
     protected void errorsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindErrors();
     }
 
-    private void BindNodes()
-    {
-      if (response != null)
-      {
-        nodesGrid.DataSource = response.Nodes;
-      }
-    }
-
-    private void BindJobs()
-    {
-      if (response != null)
-      {
-        List<JobViewModel> alljobs = new List<JobViewModel>();
-        alljobs.AddRange(from Messages.Job j in response.ActiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j, JobStatus.Running));
-        alljobs.AddRange(from Messages.Job j in response.InactiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j));
-
-        jobsGrid.DataSource = alljobs;
-
-      }
-    }
-
-    private void BindErrors()
-    {
-      if (response != null)
-      {
-        errorsGrid.DataSource = response.Errors;
-      }
-    }
 
     protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
     {

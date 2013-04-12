@@ -10,6 +10,7 @@ namespace PeachFarmMonitor.ViewModels
   {
     public FaultViewModel(Fault fault)
     {
+      this._id = fault._id;
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;
       this.Description = fault.Description;
@@ -39,7 +40,10 @@ namespace PeachFarmMonitor.ViewModels
 
     public new List<CollectedData> CollectedData { get; set; }
 
+    public new List<uint> Iterations { get; set; }
+
     public bool IsExpanded { get; set; }
 
   }
+
 }
