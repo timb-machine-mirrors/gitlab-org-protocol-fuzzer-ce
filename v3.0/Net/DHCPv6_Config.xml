@@ -2,10 +2,9 @@
 <PitDefines>
   <All>
     <Define key="LoggerPath" value="logs/dhcpV6/"/>
-    <Define key="SourceIPv6" value="::1"/>
-    <Define key="SourcePort" value="546"/>
-    <Define key="TargetIPv6" value="::1"/>    
-    <Define key="TargetPort" value="547"/>
+    <Define key="SourcePort" value="547"/>
+		<Define key="MulticastDHCP" value="ff02::1:2"/>
+    <Define key="TargetPort" value="546"/>
     <Define key="SourceMAC" value="001122334455"/>
     <Define key="TargetMAC" value="010203040506"/>
     <Define key="Strategy"  value="Sequential"/>

@@ -19,15 +19,15 @@
   </Agent>
   
   <Test name="Default">
-		<StateModel ref="States:TheState"/>
+		<StateModel ref="States:Server"/>
 		
     <!--Agent ref="RemoteAgent"/-->
     
     <Publisher class="Udp">
-      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Host" value="##MulticastDHCP##"/>
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Interface" value="::1"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
