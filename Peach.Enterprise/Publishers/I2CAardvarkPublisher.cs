@@ -50,7 +50,7 @@ namespace Peach.Core.Publishers
 		public byte Address { get; set; }
 		public int SleepTime { get; set; }
 
-		public static int MaxRecvSize = 128; //TODO, also its in bytes
+		public static int MaxRecvSize = 256; //TODO have this be variable?
 
 		private MemoryStream _recvBuffer = null;
 		protected int _handle = 0;
