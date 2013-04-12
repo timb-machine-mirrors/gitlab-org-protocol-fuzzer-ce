@@ -40,10 +40,7 @@ namespace Peach.Core.Publishers
 	[Parameter("Port", typeof(int), "USB port connected to Aardvark device", "0")]
 	[Parameter("Bitrate", typeof(int), "Bitrate supported by target device", "100")]
 	[Parameter("Address", typeof(byte), "Address to write/read on target device")]
-	[Parameter("Power", typeof(bool), "Supply power to target [true/false, default true]", "true")]
-	[Parameter("Pullup", typeof(bool), "Enable pullup resistors [true/false, default true]", "true")]
-	[Parameter("SleepTime", typeof(int), "Time to sleep between actions [default 1000 ms]", "1000")]
-	[Parameter("FrameSize", typeof(int), "Size of frames to read and write [default is 1 byte]", "1")]
+	[Parameter("SleepTime", typeof(int), "Time to sleep between actions", "100")]
 
 	public class I2CAardvarkPublisher : Publisher
 	{
@@ -51,15 +48,13 @@ namespace Peach.Core.Publishers
 		public int Port { get; set; }
 		public int Bitrate { get; set; }
 		public byte Address { get; set; }
-		public bool Power { get; set; }
-		public bool Pullup { get; set; }
 		public int SleepTime { get; set; }
-		public int FrameSize { get; set; }
 
-		public static int MaxSendSize = 128; //TODO, also its in bytes
+		public static int MaxRecvSize = 128; //TODO, also its in bytes
 
 		private MemoryStream _recvBuffer = null;
 		protected int _handle = 0;
+		private string excptext = "AardvarkI2CPublisher: ";
 
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -73,44 +68,66 @@ namespace Peach.Core.Publishers
 		{
 			System.Diagnostics.Debug.Assert(_handle == 0);
 
-			_handle = AardvarkApi.aa_open(Port);
-
-			if (_handle <= 0)
+			this._handle = AardvarkApi.aa_open(this.Port);
+			if (this._handle <= 0)
 			{
-				throw new PeachException(System.String.Format("Unable to open Aardvark device on port {0}: {1}",
-								  Port, AardvarkApi.aa_status_string(_handle)));
+				throw new PeachException("Can't create an aardvark handle. Handle value is: " + ((int)this._handle).ToString());
 			}
-
-			// Ensure that the I2C subsystem is enabled
-			AardvarkApi.aa_configure(_handle, AardvarkConfig.AA_CONFIG_SPI_I2C);
-
-			// Enable the I2C bus pullup resistors (2.2k resistors).
-			// This command is only effective on v2.0 hardware or greater.
-			// The pullup resistors on the v1.02 hardware are enabled by default.
-			if (Pullup)
+			if (AardvarkApi.aa_configure(this._handle, AardvarkConfig.AA_CONFIG_GPIO_I2C) != System.Convert.ToInt32(AardvarkConfig.AA_CONFIG_GPIO_I2C))
 			{
-				AardvarkApi.aa_i2c_pullup(_handle, AardvarkApi.AA_I2C_PULLUP_BOTH);
+				throw new PeachException(this.excptext + "can't set the GPIO I2C configuration!");
 			}
-			// Power the board using the Aardvark adapter's power supply.
-			// This command is only effective on v2.0 hardware or greater.
-			// The power pins on the v1.02 hardware are not enabled by default.
-			if (Power)
+			if (AardvarkApi.aa_gpio_direction(this._handle, System.Convert.ToByte(AardvarkGpioBits.AA_GPIO_MOSI | AardvarkGpioBits.AA_GPIO_MISO)) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
 			{
-				AardvarkApi.aa_target_power(_handle,
-											 AardvarkApi.AA_TARGET_POWER_BOTH);
+				throw new PeachException(this.excptext + "can't set the GPIO deriction bit mask AA_GPIO_MISO | AA_GPIO_MOSI!");
 			}
-			// Set the bitrate
-			Bitrate = AardvarkApi.aa_i2c_bitrate(_handle, Bitrate);
+			if (AardvarkApi.aa_gpio_set(this._handle, System.Convert.ToByte(AardvarkGpioBits.AA_GPIO_MOSI | AardvarkGpioBits.AA_GPIO_MISO)) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+			{
+				throw new PeachException(this.excptext + "can't set the GPIO bit mask AA_GPIO_MISO | AA_GPIO_MOSI!");
+			}
+			if (AardvarkApi.aa_i2c_pullup(this._handle, 3) != System.Convert.ToInt32((byte)3))
+			{
+				throw new PeachException(this.excptext + "can't set the pull up AA_I2C_PULLUP_BOTH!");
+			}
+			if (AardvarkApi.aa_target_power(this._handle, 3) != System.Convert.ToInt32((byte)3))
+			{
+				throw new PeachException(this.excptext + "can't set the power on");
+			}
+			//if (AardvarkApi.aa_i2c_bus_timeout(this._handle, this.timeout) != this.timeout)
+			//{
+			//	throw new PeachException(this.excptext + "timeout not set!");
+			//}
+			if (AardvarkApi.aa_i2c_bitrate(this._handle, this.Bitrate) != this.Bitrate)
+			{
+				throw new PeachException(this.excptext + "bitrate not set!");
+			}
+			if (AardvarkApi.aa_i2c_slave_enable(this._handle, this.Address, 0, 0) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+			{
+				throw new PeachException(this.excptext + "slave is not enable");
+			}
+			System.Threading.Thread.Sleep(50);
 
 			if (_recvBuffer == null)
-				_recvBuffer = new MemoryStream(FrameSize); // TODO Maxbuffer size?
+				_recvBuffer = new MemoryStream(MaxRecvSize); // TODO Maxbuffer size?
+						
 		}
 
 		protected override void OnClose()
 		{
 			if (_handle > 0)
 			{
-				AardvarkApi.aa_close(_handle);
+				if (AardvarkApi.aa_i2c_slave_disable(this._handle) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+				{
+					throw new PeachException(this.excptext + "can't disable the connection to the slave device");
+				}
+				if (AardvarkApi.aa_target_power(this._handle, 0) != System.Convert.ToInt32((byte)0))
+				{
+					throw new PeachException(this.excptext + "can't set the power off");
+				}
+				if (AardvarkApi.aa_close(this._handle) != 1)
+				{
+					throw new PeachException("Can't close the connection to the aardvark");
+				}
 				_handle = 0;
 			}
 		}
@@ -118,29 +135,26 @@ namespace Peach.Core.Publishers
 		protected override void OnOutput(byte[] buffer, int offset, int count)
 		{
 			int size = count;
-			if (size > MaxSendSize)
+			if (size > MaxRecvSize)
 			{
 				// This will be logged below as a truncated send
-				size = MaxSendSize;
+				size = MaxRecvSize;
 			}
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(buffer, offset, count));
 
 			try
 			{
-				for (int i = offset; i<size+offset; i += FrameSize){
-					int arraySize = FrameSize > size ? size : FrameSize;
-					byte[] dataSend = buffer.Skip(i).Take(arraySize).ToArray();
-					int res = AardvarkApi.aa_i2c_write(_handle, Address,
-										   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
-										   (ushort)arraySize, dataSend);
-					if (res < 0)
-					{
-						throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
-					}
-					AardvarkApi.aa_sleep_ms((uint)SleepTime);
+				byte[] dataSend = buffer.Skip(offset).Take(size).ToArray();
+				int res = AardvarkApi.aa_i2c_write(_handle, Address,
+									   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
+									   (ushort)size, dataSend);
+
+				if (res < 0)
+				{
+					throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
 				}
-				
+				AardvarkApi.aa_sleep_ms((uint)SleepTime);				
 			}
 			catch (Exception ex)
 			{
@@ -153,7 +167,6 @@ namespace Peach.Core.Publishers
 		protected override void OnInput()
 		{
 			System.Diagnostics.Debug.Assert(_recvBuffer != null);
-
 			try
 			{
 				_recvBuffer.Seek(0, SeekOrigin.Begin);
