@@ -97,9 +97,11 @@
 .RadGrid_DejaVu .rgHoveredRow {
   background: #e5e5e5; }
 .RadGrid_DejaVu .rgMasterTable .rgSelectedCell,
+
+/* original blue */
 .RadGrid_DejaVu .rgSelectedRow {
   color: #fff;
-  background: #25a0da; }
+  background: #f57e20; }
 .RadGrid_DejaVu .rgSelectedCell a,
 .RadGrid_DejaVu .rgSelectedRow a {
   color: #fff; }

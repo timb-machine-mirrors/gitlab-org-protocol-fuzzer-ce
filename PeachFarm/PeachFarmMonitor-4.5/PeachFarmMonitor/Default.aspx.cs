@@ -16,6 +16,7 @@ using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.ViewModels;
 using Telerik.Web.UI;
 using RabbitMQ.Client.Exceptions;
+using MongoDB.Driver.Builders;
 
 
 namespace PeachFarmMonitor
@@ -94,17 +95,24 @@ namespace PeachFarmMonitor
         jvms = new List<JobViewModel>();
         foreach (Job job in jobs)
         {
-          job.FillNodes(monitorconfig.MongoDb.ConnectionString);
-          job.FillFaults(monitorconfig.MongoDb.ConnectionString);
+          //job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+          //job.FillFaults(monitorconfig.MongoDb.ConnectionString);
 
+          job.StartDate = job.StartDate.ToLocalTime();
+
+          JobViewModel jvm = null;
           if (activejobids.Contains(job.JobID))
           {
-            jvms.Add(new JobViewModel(job, JobStatus.Running));
+            jvm = new JobViewModel(job, JobStatus.Running);
           }
           else
           {
-            jvms.Add(new JobViewModel(job));
+            jvm = new JobViewModel(job);
           }
+          var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
+          jvm.FaultCount = collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count();
+          collection.Database.Server.Disconnect();
+          jvms.Add(jvm);
         }
         jobsGrid.DataSource = jvms;
         jobsGrid.DataBind();

@@ -9,12 +9,14 @@ bld.read_csshlib('Telerik.OpenAccess.35.Extensions.dll',    paths=['OpenAccess O
 bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
 bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
 bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
+bld.read_csshlib('Ionic.Zip.dll',                    		paths=['DotNetZipLib-v1.9/zip-v1.9'])
 
 bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+
 
 bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])

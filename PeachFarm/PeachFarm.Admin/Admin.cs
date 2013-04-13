@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Xml;
 using System.Configuration;
+using PeachFarm.Common.Mongo;
 
 namespace PeachFarm.Admin
 {
@@ -236,7 +237,16 @@ namespace PeachFarm.Admin
 		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
 		{
 			StartPeachRequest request = new StartPeachRequest();
-			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+
+			if (File.Exists(pitFilePath) == false)
+			{
+				throw new ApplicationException("File path does not exist: " + pitFilePath);
+			}
+
+			if ((String.IsNullOrEmpty(definesFilePath) == false) && (File.Exists(definesFilePath) == false))
+			{
+				throw new ApplicationException("File path does not exist: " + definesFilePath);
+			}
 
 			if (String.IsNullOrEmpty(definesFilePath) == false)
 			{
@@ -255,7 +265,17 @@ namespace PeachFarm.Admin
 				request.ClientCount = clientCount;
 				request.Tags = tagsString;
 			}
+
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+
+			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+
+			if (Path.GetExtension(pitFilePath) == ".zip")
+			{
+				string remoteFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+				request.ZipID = DatabaseHelper.SaveFileToGridFS(pitFilePath, remoteFile, config.MongoDb.ConnectionString);
+			}
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 			PublishToServer(request.Serialize(), "StartPeach");
 		}
@@ -337,8 +357,30 @@ namespace PeachFarm.Admin
 
 		private string GetPitXml(string pitFilePath)
 		{
-			XDocument doc = XDocument.Load(pitFilePath);
-			return doc.ToString();
+			if (Path.GetExtension(pitFilePath) == ".zip")
+			{
+			  //var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
+				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
+			  var pitfilename = Path.GetFileNameWithoutExtension(pitFilePath) + ".xml";
+			  var pitfile = (from e in zip.Entries where e.FileName == pitfilename select e).FirstOrDefault();
+
+			  if (pitfile == null)
+			    throw new ApplicationException("Your zip package must contain a Pit file with the name: " + pitfilename);
+
+				var stream = pitfile.OpenReader();
+			  XDocument doc = XDocument.Load(stream);
+			  stream.Close();
+			  return doc.ToString();
+			}
+			else if (Path.GetExtension(pitFilePath) == ".xml")
+			{
+			  XDocument doc = XDocument.Load(pitFilePath);
+			  return doc.ToString();
+			}
+			else
+			{
+			  throw new ApplicationException("Unsupported file extension. Peach Farm only accepts .xml and .zip files");
+			}
 		}
 
 

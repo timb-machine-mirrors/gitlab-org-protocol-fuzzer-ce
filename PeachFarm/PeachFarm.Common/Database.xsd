@@ -20,6 +20,7 @@
     <xs:attribute name="StartDate" type="xs:dateTime" use="required" />
 		<xs:attribute name="PeachVersion" type="xs:string" use="required" />
 		<xs:attribute name="Tags" type="xs:string" use="required" />
+		<xs:attribute name="ZipID" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="Pit">

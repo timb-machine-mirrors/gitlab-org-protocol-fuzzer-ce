@@ -55,10 +55,7 @@
       height:32px;
       width:300px;
     }
-    .RadGrid_DejaVu .rgInfoPart
-    {
-      display: none;
-    }
+
     .RadGrid_DejaVu .rgPageFirst
     {
       display: none;
@@ -67,12 +64,31 @@
     {
       display: none;
     }
+    #faultsGridPanel,#faultBucketsGridPanel
+    {
+      height: 100%;
+    }
   </style>
 </head>
 <body>
   <form id="form1" runat="server">
     <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
-    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server" />
+    <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server" />
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
+      <AjaxSettings>
+        <telerik:AjaxSetting AjaxControlID="faultBucketsGrid" EventName="ItemCommand">
+          <UpdatedControls>
+            <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" />
+            <telerik:AjaxUpdatedControl ControlID="faultsGrid" LoadingPanelID="loadingPanel" />
+          </UpdatedControls>
+        </telerik:AjaxSetting>
+        <telerik:AjaxSetting AjaxControlID="faultsGrid" EventName="NeedDataSource">
+          <UpdatedControls>
+            <telerik:AjaxUpdatedControl ControlID="faultsGrid" LoadingPanelID="loadingPanel" />
+          </UpdatedControls>
+        </telerik:AjaxSetting>
+      </AjaxSettings>
+    </telerik:RadAjaxManager>
     <div id="title">
       <asp:Panel ID="titlePanel" runat="server">
         <span style="padding-left: 4px">Job Detail:</span>
@@ -97,27 +113,44 @@
     </asp:Table>
 
     <div id="gridcontainer">
-      <telerik:RadGrid 
-        ID="faultsGrid" runat="server"
-        Width="100%" Height="100%"
-        AutoGenerateColumns="false" AutoGenerateHierarchy="true">
-        <ClientSettings>
-          <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
-        </ClientSettings>
-        <MasterTableView 
-          AllowPaging="true" PageSize="30" AllowCustomPaging="true" VirtualItemCount="1000000"
-          DataMember="FaultBuckets" Caption="Faults" 
-          NoDetailRecordsText="No iterations for this job."
-          HierarchyLoadMode="ServerOnDemand">
-          <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
-          <Columns>
+      <telerik:RadSplitter Height="100%" Width="100%" runat="server" >
+        <telerik:RadPane runat="server" Scrolling="None" Width="30%"> 
+          <telerik:RadGrid 
+            ID="faultBucketsGrid" runat="server"
+            Width="100%" Height="100%"
+            OnItemCommand="faultBucketsGrid_ItemCommand" DataSourceID="faultBucketsDS"
+            AutoGenerateColumns="false" AutoGenerateHierarchy="true">
+            <ClientSettings>
+              <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+            </ClientSettings>
+            <MasterTableView 
+              AllowPaging="true" PageSize="30" AllowCustomPaging="true" VirtualItemCount="1000000"
+              Caption="Fault Groups" 
+              NoDetailRecordsText="No faults for this job."
+              HierarchyLoadMode="ServerOnDemand">
+              <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
+              <Columns>
                 <telerik:GridBoundColumn DataField="Group" HeaderText="Fault" />
-          </Columns>
-          <DetailTables>
-            <telerik:GridTableView 
-              Caption="Iterations" DataMember="Faults" 
-              HierarchyLoadMode="ServerOnDemand"
-              NoDetailRecordsText="No faults for this iteration.">
+                <telerik:GridButtonColumn CommandName="FaultBucketSelect" DataTextField="FaultCount" DataTextFormatString="Faults ({0}) &gt;" />
+              </Columns>
+            </MasterTableView>
+          </telerik:RadGrid>
+        </telerik:RadPane>
+        <telerik:RadSplitBar runat="server" />
+        <telerik:RadPane runat="server" Scrolling="None">
+          <telerik:RadGrid 
+            ID="faultsGrid" runat="server"
+            Width="100%" Height="100%"
+            AutoGenerateColumns="False" AutoGenerateHierarchy="True" CellSpacing="0" GridLines="None">
+            <ClientSettings>
+              <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+            </ClientSettings>
+            <MasterTableView 
+              AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
+              Caption="Faults" 
+              NoDetailRecordsText="No faults for this group."
+              HierarchyLoadMode="ServerBind">
+              <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
               <Columns>
                 <telerik:GridBoundColumn DataField="ID" HeaderText="ID"  />
                 <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
@@ -142,7 +175,7 @@
               <DetailTables>
                 <telerik:GridTableView 
                   Caption="State Model" DataMember="StateModel" 
-                  HierarchyLoadMode="ServerOnDemand"
+                  HierarchyLoadMode="ServerBind"
                   NoDetailRecordsText="No state model information for this fault.">
                   <Columns>
                     <telerik:GridBoundColumn DataField="ActionName" HeaderText="Action" />
@@ -153,7 +186,7 @@
                 </telerik:GridTableView>
                 <telerik:GridTableView 
                   Caption="Collected Data" DataMember="CollectedData" 
-                  HierarchyLoadMode="ServerOnDemand"
+                  HierarchyLoadMode="ServerBind"
                   NoDetailRecordsText="No collected data for this fault.">
                   <Columns>
                     <telerik:GridBoundColumn DataField="Key" HeaderText="Key" />
@@ -161,10 +194,23 @@
                   </Columns>
                 </telerik:GridTableView>
               </DetailTables>
-            </telerik:GridTableView>
-          </DetailTables>
-        </MasterTableView>
-      </telerik:RadGrid>
+            </MasterTableView>
+          </telerik:RadGrid>
+        </telerik:RadPane>
+      </telerik:RadSplitter>
+      <asp:ObjectDataSource ID="faultBucketsDS" runat="server" SelectMethod="GetFaultBuckets" TypeName="PeachFarmMonitor.JobDetailData">
+        <SelectParameters>
+          <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
+        </SelectParameters>
+      </asp:ObjectDataSource>
+      <asp:ObjectDataSource ID="faultsDS" runat="server" SelectMethod="GetFaults" TypeName="PeachFarmMonitor.JobDetailData" >
+        <SelectParameters>
+          <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
+          <asp:Parameter Name="faultBucketName" Type="String" />
+          <asp:Parameter Name="pageSize" Type="Int32" />
+          <asp:Parameter Name="pageIndex" Type="Int32" />
+        </SelectParameters>
+      </asp:ObjectDataSource>
     </div>
   </form>
 </body>

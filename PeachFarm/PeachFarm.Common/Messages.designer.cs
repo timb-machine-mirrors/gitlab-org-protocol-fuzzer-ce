@@ -45,6 +45,8 @@ namespace PeachFarm.Common.Messages
 
 		private string tagsField;
 
+		private string zipIDField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		public string Pit
@@ -172,6 +174,19 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.tagsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public string ZipID
+		{
+			get
+			{
+				return this.zipIDField;
+			}
+			set
+			{
+				this.zipIDField = value;
 			}
 		}
 

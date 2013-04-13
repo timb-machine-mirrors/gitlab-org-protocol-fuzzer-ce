@@ -221,13 +221,10 @@ namespace PeachFarm.Controller
 		private void StartPeach(StartPeachRequest request, string replyQueue)
 		{
 			string action = "StartPeach";
-			request.JobID = CreateJobID();
 			request.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
-			while (Common.Mongo.DatabaseHelper.GetJob(request.JobID, request.MongoDbConnectionString) != null)
-			{
-				request.JobID = CreateJobID();
-			}
+			// moving this to Admin
+			//request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
 			StartPeachResponse response = new StartPeachResponse(request);
 
@@ -397,17 +394,6 @@ namespace PeachFarm.Controller
 			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);
 		}
 		#endregion
-
-		private string CreateJobID()
-		{
-			using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
-			{
-				// change the size of the array depending on your requirements
-				var rndBytes = new byte[6];
-				rng.GetBytes(rndBytes);
-				return BitConverter.ToString(rndBytes).Replace("-", "");
-			}
-		}
 
 		private void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
 		{

@@ -8,7 +8,7 @@ namespace PeachFarmMonitor.ViewModels
 {
   public class FaultBucketViewModel : Fault
   {
-    public FaultBucketViewModel(Fault fault, List<Fault> childFaults = null)
+    public FaultBucketViewModel(Fault fault)
     {
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;
@@ -28,19 +28,9 @@ namespace PeachFarmMonitor.ViewModels
       this.Title = fault.Title;
       this.Group = fault.Group;
 
-      Faults = new List<FaultViewModel>();
-      if (childFaults != null)
-      {
-        foreach (var child in childFaults)
-        {
-          Faults.Add(new FaultViewModel(child));
-        }
-      }
     }
 
-    public string BucketName { get; set; }
-
-    public List<FaultViewModel> Faults { get; set; }
+    public int FaultCount { get; set; }
   }
 
   public class FaultComparer : EqualityComparer<Fault>

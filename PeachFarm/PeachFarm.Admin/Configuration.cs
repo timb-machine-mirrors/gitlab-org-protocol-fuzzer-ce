@@ -22,6 +22,12 @@ namespace PeachFarm.Admin.Configuration
 			set { this[Constants.RabbitMq] = value; }
 		}
 
+		[ConfigurationProperty(Constants.MongoDb)]
+		public MongoDbElement MongoDb
+		{
+			get { return (MongoDbElement)this[Constants.MongoDb]; }
+			set { this[Constants.MongoDb] = value; }
+		}
   }
 
 	public class RabbitMqElement : ConfigurationElement
@@ -62,6 +68,16 @@ namespace PeachFarm.Admin.Configuration
 		}
 	}
 
+	public class MongoDbElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.ConnectionString)]
+		public string ConnectionString
+		{
+			get { return (string)this[Constants.ConnectionString]; }
+			set { this[Constants.ConnectionString] = value; }
+		}
+	}
+
 	public class Controller : ConfigurationElement
 	{
 		[ConfigurationProperty(Constants.IpAddress)]
@@ -83,5 +99,8 @@ namespace PeachFarm.Admin.Configuration
 		public const string UserName = "userName";
 		public const string Password = "password";
 		public const string SSL = "useSSL";
+
+		public const string MongoDb = "MongoDb";
+		public const string ConnectionString = "connectionString";
   }
 }
