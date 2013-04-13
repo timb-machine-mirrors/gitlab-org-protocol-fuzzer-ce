@@ -37,26 +37,24 @@ using NLog;
 namespace Peach.Core.Publishers
 {
 	[Publisher("I2C", true)]
-	[Parameter("port", typeof(int), "USB port connected to Aardvark device", "0")]
-	[Parameter("bitrate", typeof(int), "Bitrate supported by target device", "100")]
-	[Parameter("address", typeof(byte), "Address to write/read on target device")]
-	[Parameter("power", typeof(bool), "Supply power to target [true/false, default true]", "true")]
-	[Parameter("pullup", typeof(bool), "Enable pullup resistors [true/false, default true]", "true")]
-	[Parameter("sleepTime", typeof(int), "Time to sleep between actions [default 1000 ms]", "1000")]
+	[Parameter("Port", typeof(int), "USB port connected to Aardvark device", "0")]
+	[Parameter("Bitrate", typeof(int), "Bitrate supported by target device", "100")]
+	[Parameter("Address", typeof(byte), "Address to write/read on target device")]
+	[Parameter("SleepTime", typeof(int), "Time to sleep between actions", "100")]
 
 	public class I2CAardvarkPublisher : Publisher
 	{
 
-		protected int handle = 0;
-		public int port { get; set; }
-		public int bitrate { get; set; }
-		public byte address { get; set; }
-		public bool power { get; set; }
-		public bool pullup { get; set; }
-		public int sleepTime { get; set; }
+		public int Port { get; set; }
+		public int Bitrate { get; set; }
+		public byte Address { get; set; }
+		public int SleepTime { get; set; }
 
-		protected byte[] _received = null;
+		public static int MaxRecvSize = 256; //TODO have this be variable?
 
+		private MemoryStream _recvBuffer = null;
+		protected int _handle = 0;
+		private string excptext = "AardvarkI2CPublisher: ";
 
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -68,71 +66,178 @@ namespace Peach.Core.Publishers
 
 		protected override void OnOpen()
 		{
-			System.Diagnostics.Debug.Assert(handle == 0);
+			System.Diagnostics.Debug.Assert(_handle == 0);
 
-			handle = AardvarkApi.aa_open(port);
-
-			if (handle <= 0)
+			this._handle = AardvarkApi.aa_open(this.Port);
+			if (this._handle <= 0)
 			{
-				throw new PeachException(System.String.Format("Unable to open Aardvark device on port {0}: {1}",
-								  port, AardvarkApi.aa_status_string(handle)));
+				throw new PeachException("Can't create an aardvark handle. Handle value is: " + ((int)this._handle).ToString());
 			}
-
-			// Ensure that the I2C subsystem is enabled
-			AardvarkApi.aa_configure(handle, AardvarkConfig.AA_CONFIG_SPI_I2C);
-
-			// Enable the I2C bus pullup resistors (2.2k resistors).
-			// This command is only effective on v2.0 hardware or greater.
-			// The pullup resistors on the v1.02 hardware are enabled by default.
-			if (pullup)
+			if (AardvarkApi.aa_configure(this._handle, AardvarkConfig.AA_CONFIG_GPIO_I2C) != System.Convert.ToInt32(AardvarkConfig.AA_CONFIG_GPIO_I2C))
 			{
-				AardvarkApi.aa_i2c_pullup(handle, AardvarkApi.AA_I2C_PULLUP_BOTH);
+				throw new PeachException(this.excptext + "can't set the GPIO I2C configuration!");
 			}
-			// Power the board using the Aardvark adapter's power supply.
-			// This command is only effective on v2.0 hardware or greater.
-			// The power pins on the v1.02 hardware are not enabled by default.
-			if (power)
+			if (AardvarkApi.aa_gpio_direction(this._handle, System.Convert.ToByte(AardvarkGpioBits.AA_GPIO_MOSI | AardvarkGpioBits.AA_GPIO_MISO)) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
 			{
-				AardvarkApi.aa_target_power(handle,
-											 AardvarkApi.AA_TARGET_POWER_BOTH);
+				throw new PeachException(this.excptext + "can't set the GPIO deriction bit mask AA_GPIO_MISO | AA_GPIO_MOSI!");
 			}
-			// Set the bitrate
-			bitrate = AardvarkApi.aa_i2c_bitrate(handle, bitrate);
+			if (AardvarkApi.aa_gpio_set(this._handle, System.Convert.ToByte(AardvarkGpioBits.AA_GPIO_MOSI | AardvarkGpioBits.AA_GPIO_MISO)) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+			{
+				throw new PeachException(this.excptext + "can't set the GPIO bit mask AA_GPIO_MISO | AA_GPIO_MOSI!");
+			}
+			if (AardvarkApi.aa_i2c_pullup(this._handle, 3) != System.Convert.ToInt32((byte)3))
+			{
+				throw new PeachException(this.excptext + "can't set the pull up AA_I2C_PULLUP_BOTH!");
+			}
+			if (AardvarkApi.aa_target_power(this._handle, 3) != System.Convert.ToInt32((byte)3))
+			{
+				throw new PeachException(this.excptext + "can't set the power on");
+			}
+			//if (AardvarkApi.aa_i2c_bus_timeout(this._handle, this.timeout) != this.timeout)
+			//{
+			//	throw new PeachException(this.excptext + "timeout not set!");
+			//}
+			if (AardvarkApi.aa_i2c_bitrate(this._handle, this.Bitrate) != this.Bitrate)
+			{
+				throw new PeachException(this.excptext + "bitrate not set!");
+			}
+			if (AardvarkApi.aa_i2c_slave_enable(this._handle, this.Address, 0, 0) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+			{
+				throw new PeachException(this.excptext + "slave is not enable");
+			}
+			System.Threading.Thread.Sleep(50);
 
+			if (_recvBuffer == null)
+				_recvBuffer = new MemoryStream(MaxRecvSize); // TODO Maxbuffer size?
+						
 		}
 
 		protected override void OnClose()
 		{
-			if (handle > 0)
+			if (_handle > 0)
 			{
-				AardvarkApi.aa_close(handle);
-				handle = 0;
+				if (AardvarkApi.aa_i2c_slave_disable(this._handle) != System.Convert.ToInt32(AardvarkStatus.AA_OK))
+				{
+					throw new PeachException(this.excptext + "can't disable the connection to the slave device");
+				}
+				if (AardvarkApi.aa_target_power(this._handle, 0) != System.Convert.ToInt32((byte)0))
+				{
+					throw new PeachException(this.excptext + "can't set the power off");
+				}
+				if (AardvarkApi.aa_close(this._handle) != 1)
+				{
+					throw new PeachException("Can't close the connection to the aardvark");
+				}
+				_handle = 0;
 			}
 		}
 
 		protected override void OnOutput(byte[] buffer, int offset, int count)
 		{
-
-			byte[] dataSend = buffer.Skip(offset).Take(count).ToArray();
-			int res = AardvarkApi.aa_i2c_write(handle, address,
-									   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
-									   (ushort)count, dataSend);
-			if (res < 0)
+			int size = count;
+			if (size > MaxRecvSize)
 			{
-				throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
+				// This will be logged below as a truncated send
+				size = MaxRecvSize;
 			}
-			AardvarkApi.aa_sleep_ms((uint)sleepTime);
+			if (Logger.IsDebugEnabled)
+				Logger.Debug("\n\n" + Utilities.HexDump(buffer, offset, count));
+
+			try
+			{
+				byte[] dataSend = buffer.Skip(offset).Take(size).ToArray();
+				int res = AardvarkApi.aa_i2c_write(_handle, Address,
+									   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
+									   (ushort)size, dataSend);
+
+				if (res < 0)
+				{
+					throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
+				}
+				AardvarkApi.aa_sleep_ms((uint)SleepTime);				
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Unable to send data to address {0}:{1}",
+					Address, ex.Message);	
+				throw new SoftException(ex);
+			}
 		}
 
 		protected override void OnInput()
 		{
-			int length = 8;//TODO where does this number come from?
-			byte[] dataIn = new byte[length];
-			int res = AardvarkApi.aa_i2c_read(handle, address,
-									   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
-									   (ushort)length, dataIn);
-			_received = dataIn;
+			System.Diagnostics.Debug.Assert(_recvBuffer != null);
+			try
+			{
+				_recvBuffer.Seek(0, SeekOrigin.Begin);
+				_recvBuffer.SetLength(_recvBuffer.Capacity);
+
+
+				byte[] buf = _recvBuffer.GetBuffer();
+				int offset = (int)_recvBuffer.Position;
+				int size = (int)_recvBuffer.Length;
+
+				int res = AardvarkApi.aa_i2c_read(_handle, Address,
+						   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
+						   (ushort)size, buf);
+				if (res < 0)
+				{
+					throw new SoftException(System.String.Format("ERROR WRITING TO DEVICE: TODO"));
+				}
+
+				AardvarkApi.aa_sleep_ms((uint)SleepTime);
+
+				_recvBuffer.SetLength(size);
+
+				if (Logger.IsDebugEnabled)
+					Logger.Debug("\n\n" + Utilities.HexDump(_recvBuffer));
+
+				// Got valid data
+				return;
+
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Unable to read data from address {0}:{1}",
+					Address, ex.Message);			
+				throw new SoftException(ex);
+			}
 		}
+
+		#region Read Stream
+
+		public override bool CanRead
+		{
+			get { return _recvBuffer.CanRead; }
+		}
+
+		public override bool CanSeek
+		{
+			get { return _recvBuffer.CanSeek; }
+		}
+
+		public override long Length
+		{
+			get { return _recvBuffer.Length; }
+		}
+
+		public override long Position
+		{
+			get { return _recvBuffer.Position; }
+			set { _recvBuffer.Position = value; }
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			return _recvBuffer.Seek(offset, origin);
+		}
+
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			return _recvBuffer.Read(buffer, offset, count);
+		}
+
+		#endregion
 
 	}
 }
