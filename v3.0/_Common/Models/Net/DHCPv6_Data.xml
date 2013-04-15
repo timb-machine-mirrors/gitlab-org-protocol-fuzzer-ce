@@ -8,6 +8,30 @@
 	<!-- Implementation notes: Only implements the minimum necessary to support section 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
 
+	<!-- Supports: -->
+	<!-- SOLICIT (1) - partial, may not support all request types -->
+	<!-- ADVERTISE (2) -->
+	<!-- REQUEST (3) -->
+	<!-- REPLY (7) -->
+
+	<!-- Unknown if supports: -->
+	<!-- CONFIRM (4) -->
+	<!-- RENEW (5) -->
+	<!-- REBIND (6) -->
+	<!-- RELEASE (8) -->
+	<!-- DECLINE (9) -->
+	<!-- RECONFIGURE (10) -->
+	<!-- INFORMATION-REQUEST (11) -->
+	<!-- RELAY-FORW (12) -->
+	<!-- RELAY-REPL (13) -->
+
+	<!-- Needed in order of priority: -->
+	<!-- CONFIRM (4) workflow -->
+	<!-- RENEW (5) workflow -->
+	<!-- INFORMATION-REQUEST (11) workflow -->
+	<!-- REBIND (6) workflow -->
+	<!-- RELEASE (8) workflow -->
+
 	<Import import="time"/>
 	<Import import="code"/>
 
@@ -91,21 +115,6 @@
 					<Number name="ValidLifetime" size="32" value="3000"/>
 				</Block>
 			</Block>
-
-			<!-- <Block name="IaPrefix"> -->
-			<!-- 	<Number name="Option" size="16" value="26" token="true"/> -->
-			<!-- 	<Number name="Length" size="16" > -->
-			<!-- 		<Relation type="size" of="Data"/> -->
-			<!-- 	</Number> -->
-			<!-- 	<Block name="Data"> -->
-			<!-- 		<Number name="PreferredLifetime" size="32" value="100"/> -->
-			<!-- 		<Number name="ValidLifetime" size="32" value="100"/> -->
-			<!-- 		<Number name="PrefixLength" size="8"> -->
-			<!-- 			<Relation type="size" of="Ipv6Address"/> -->
-			<!-- 		</Number> -->
-			<!-- 		<Blob name="Ipv6Address" length="16" valueType="hex" value="fc000000000201000000000000000000"/> -->
-			<!-- 	</Block> -->
-			<!-- </Block> -->
 
 		</Choice>
 	</DataModel>
