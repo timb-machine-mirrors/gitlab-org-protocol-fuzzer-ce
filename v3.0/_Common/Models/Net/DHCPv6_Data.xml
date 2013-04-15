@@ -8,6 +8,9 @@
 	<!-- Implementation notes: Only implements the minimum necessary to support section 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
 
+	<Import import="time"/>
+	<Import import="code"/>
+
 	<Defaults>
 		<Number endian="big"/>
 	</Defaults>
@@ -22,8 +25,14 @@
 			<Block name="LinkLayerAddressPlusTime">
 				<Number name="Type" size="16" value="1" token="true"/>
 				<Number name="HardwareType" size="16" value="1"/>
-				<Number name="Time" size="32" value="1000"/>
-				<Blob name="Address" length="6" valueType="hex" value="00 1a a0 95 df 6f"/>
+				<Number name="Time" size="32" value="0">
+					<Fixup class="ExpressionFixup">
+						<Param name="ref" value="Time"/>
+						<!-- <Param name="expression" value="code.InteractiveConsole(locals=locals()).interact()"/> -->
+						<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0))) % (2**32))"/>
+					</Fixup>
+				</Number>
+				<Blob name="Address" length="6" valueType="hex" value="##SourceMAC##"/>
 			</Block>
 
 			<Block name="EnterpriseNumber">
@@ -36,7 +45,7 @@
 			<Block name="LinkLayerAddress">
 				<Number name="Type" size="16" value="3" token="true"/>
 				<Number name="HardwareType" size="16" value="1"/>
-				<Blob name="Address" length="6" valueType="hex" value="00 1a a0 95 df 6f"/>
+				<Blob name="Address" length="6" valueType="hex" value="##SourceMAC##"/>
 			</Block>
 
 			<!--<Block name="VendorAssignedIdBasedOnEnterpriseNumber"></Block>-->
@@ -65,6 +74,7 @@
 	-->
 
 	<DataModel name="IaOption">
+
 		<Choice name="IaOptionChoice">
 			<Block name="IaAddress">
 				<Number name="Option" size="16" value="5" token="true"/>
@@ -72,13 +82,31 @@
 					<Relation type="size" of="Data"/>
 				</Number>
 				<Block name="Data">
-					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="fe 80 00 00 00 00 00 00 09 08 7A 38 61 56 AC CE"/> -->
-					<Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/>
+					<Blob name="Ipv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce">
+					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="##TargetIPv6Lease##"> -->
+						<!-- <Transformer class="Ipv6StringToOctet"/> -->
+					</Blob>
+					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
 					<Number name="PreferredLifetime" size="32" value="2000"/>
 					<Number name="ValidLifetime" size="32" value="3000"/>
 				</Block>
-
 			</Block>
+
+			<!-- <Block name="IaPrefix"> -->
+			<!-- 	<Number name="Option" size="16" value="26" token="true"/> -->
+			<!-- 	<Number name="Length" size="16" > -->
+			<!-- 		<Relation type="size" of="Data"/> -->
+			<!-- 	</Number> -->
+			<!-- 	<Block name="Data"> -->
+			<!-- 		<Number name="PreferredLifetime" size="32" value="100"/> -->
+			<!-- 		<Number name="ValidLifetime" size="32" value="100"/> -->
+			<!-- 		<Number name="PrefixLength" size="8"> -->
+			<!-- 			<Relation type="size" of="Ipv6Address"/> -->
+			<!-- 		</Number> -->
+			<!-- 		<Blob name="Ipv6Address" length="16" valueType="hex" value="fc000000000201000000000000000000"/> -->
+			<!-- 	</Block> -->
+			<!-- </Block> -->
+
 		</Choice>
 	</DataModel>
 
@@ -136,8 +164,8 @@
 				</Number>
 				<Block name="Data">
 					<Number name="IAID" size="32" value="2"/>
-					<Number name="T1" size="32" value="2000"/>
-					<Number name="T2" size="32" value="3000"/>
+					<Number name="T1" size="32" value="1"/>
+					<Number name="T2" size="32" value="1"/>
 					<Block name="IaOptions" ref="IaOption" minOccurs="0" maxOccurs="65535"/>
 				</Block>
 			</Block>

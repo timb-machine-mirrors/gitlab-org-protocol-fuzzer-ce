@@ -12,53 +12,83 @@
 	<PythonPath path="##Path##/_Common/Models/Net/"/>
 	<Import import="DHCPv6"/>
 
+
+
 	<StateModel name="Server" initialState="Listening">
-	<!-- <StateModel name="Server" initialState="Testing"> -->
 		
 		<!-- "The client sends a Solicit message to the All_DHCP_Relay_Agents_and_Servers address to find available DHCP servers." -->
 		<State name="Listening">
-			<Action type="input" name="Listen">
+
+			<Action type="input" name="Listen" publisher="LisentenPublisher">
 				<DataModel name="DhcpRequest" ref="DHCP:Packet"/>
 			</Action>
-			<!-- Fix this on the python side -->
-			<Action type="changeState" ref="Advertising"
+			<Action type="getProperty" property="LastRecvAddr" publisher="LisentenPublisher">
+				<DataModel name="LastSendIP"/> <!-- Needed for ip address storage -->
+			</Action>
+			<Action name="GoToListen" type="changeState" ref="Listening"
+							when="DHCPv6.not_from_target(self,'##TargetIPv6##')"/>
+			<!-- !!TODO!! -->
+			<!-- The system could enter through multiple states here. These need to be handled. -->
+			<Action name="GoTodvert" type="changeState" ref="Advertising"
 							when="DHCPv6.is_solicit(self)" />
-			<Action type="changeState" ref="Reply"
+			<Action name="GoToReply" type="changeState" ref="Reply"
 							when="DHCPv6.is_request(self)" />
 		</State>
 		
-		<!-- Any server that can meet the client's requirements responds with an Advertise message. -->
-		<State name="Advertising" onStart="DHCPv6.set_client_id(self)">
-			<Action type="slurp" valueXpath="//DhcpRequest//XID" setXpath="//DhcpAdvertise//XID"/>
-			<Action type="slurp" valueXpath="//DhcpRequest//ClientIdentifier" setXpath="//DhcpAdvertise//ClientIdentifier"/>
-			<Action type="output" name="SendAdvertise">
+		<!-- "Any server that can meet the client's requirements responds with an Advertise message." -->
+		<!-- 17.2.2. Creation and Transmission of Advertise Messages -->
+		<State name="Advertising"> 
+			<!-- The server sets the "msg-type" field to ADVERTISE and copies the -->
+			<!-- contents of the transaction-id field from the Solicit message -->
+			<!-- received from the client to the Advertise message. -->
+			<Action type="slurp" valueXpath="//Listen//XID" setXpath="//DhcpAdvertise//XID"/>
+			<!-- The server ... copies the Client Identifier from the Solicit -->
+			<!-- message into the Advertise message. -->
+			<Action type="slurp" valueXpath="//Listen//LinkLayerAddressPlusTime/Address"
+							setXpath="//SendAdvertise//ClientIdentifier//LinkLayerAddressPlusTime/Address"/>
+			<Action type="slurp" valueXpath="//Listen//LinkLayerAddressPlusTime/Time"
+							setXpath="//SendAdvertise//ClientIdentifier//LinkLayerAddressPlusTime/Time"/>
+			<Action type="slurp" valueXpath="//Listen//IdentityAssociationForNonTemporary//IAID"
+							setXpath="//SendAdvertise//IdentityAssociationForNonTemporary//IAID"/>
+			<Action type="output" name="SendAdvertise" publisher="SendPublisher">
+				<!-- !!TODO!! -->
+				<!-- If the client has included an Option Request option in the -->
+				<!-- Solicit message, the server includes options in the Advertise -->
+				<!-- message containing configuration parameters for all of the -->
+				<!-- options identified in the Option Request option that the -->
+				<!-- server has been configured to return to the client. -->
 				<DataModel name="DhcpAdvertise" ref="DHCP:Packet"/>
 				<Data name="DataSet">
 					<Field name="MsgType" value="2"/>
-					<Field name="Option[0].OptionChoice.ClientIdentifier.Duid.DuidChoice.EnterpriseNumber" value=""/>
-					<Field name="Option[1].OptionChoice.ServerIdentifier.Option" value="2"/>
-					<Field name="Option[1].OptionChoice.ServerIdentifier.Duid.DuidChoice.EnterpriseNumber.Identifier"
-								 valueType="hex" value="506561636879204b65656e21"/> <!-- Peachy Keen! -->
-					<Field name="Option[2].OptionChoice.StatusCode" value="" />
+					<!-- The server ... copies the Client Identifier from the Solicit -->
+					<!-- message into the Advertise message. -->
+					<Field name="Option[0].OptionChoice.ClientIdentifier.Duid.DuidChoice.LinkLayerAddressPlusTime" value=""/>
+					<Field name="Option[1].OptionChoice.ServerIdentifier.Duid.DuidChoice.LinkLayerAddressPlusTime" value=""/>
 					<Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaAddress" value="" />
+					<!-- <Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaPrefix" value="" /> -->
 				</Data>
 			</Action>
 			<Action type="changeState" ref="Listening"/>
 		</State>
 
 		<State name="Reply">
-			<Action type="slurp" valueXpath="//DhcpRequest//XID" setXpath="//DhcpReply//XID"/>
-			<Action type="output">
+			<!-- 15.10. Reply Message -->
+			<Action type="slurp" valueXpath="//Listen//XID" setXpath="//DhcpReply//XID"/>
+			<Action type="slurp" valueXpath="//SendAdvertise//ClientIdentifier//LinkLayerAddressPlusTime/Address"
+							setXpath="//Reply//ClientIdentifier//LinkLayerAddressPlusTime/Address"/>
+			<Action type="slurp" valueXpath="//SendAdvertise//ClientIdentifier//LinkLayerAddressPlusTime/Time"
+							setXpath="//Reply//ClientIdentifier//LinkLayerAddressPlusTime/Time"/>
+
+			<Action type="slurp" valueXpath="//Listening//ServerIdentifier//LinkLayerAddressPlusTime/Time"
+							setXpath="//Reply//ServerIdentifier//LinkLayerAddressPlusTime/Time"/>
+
+			<Action type="output" name="Reply" publisher="SendPublisher">
 				<DataModel ref="DHCP:Packet" name="DhcpReply"/>
 				<Data name="DataSet">
 					<Field name="MsgType" value="7"/>
-					<Field	name="Option[0].OptionChoice.ClientIdentifier.Duid.DuidChoice.EnterpriseNumber"
-									value=""/>
-					<Field name="Option[1].OptionChoice.ServerIdentifier.Option" value="2"/>
-					<Field name="Option[1].OptionChoice.ServerIdentifier.Duid.DuidChoice.EnterpriseNumber.Identifier"
-								 			 valueType="hex" value="506561636879204b65656e21"/> <!-- Peachy Keen! -->
+					<Field name="Option[0].OptionChoice.ServerIdentifier.Duid.DuidChoice.LinkLayerAddressPlusTime" value=""/>
+					<Field name="Option[1].OptionChoice.ClientIdentifier.Duid.DuidChoice.LinkLayerAddressPlusTime" value=""/>
 					<Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaAddress" value="" />
-					<Field name="Option[3].OptionChoice.StatusCode" value="" />
 				</Data>
 			</Action>
 		</State>
@@ -73,6 +103,8 @@
 		</State>
 		<!-- Don't absolutely need to confirm, this can be added later for state verification -->
 	</StateModel>
+
+	
 
 </Peach>
 <!-- end -->

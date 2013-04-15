@@ -4,9 +4,12 @@
     <Define key="LoggerPath" value="logs/dhcpV6/"/>
     <Define key="SourcePort" value="547"/>
 		<Define key="MulticastDHCP" value="ff02::1:2"/>
+		<Define key="TargetIPv6" value="fe80::5054:ff:fe02:c880"/>
+		<!-- <Define key="TargetIPv6" value="fe80::c524:6fc8:899e:fd7d"/> -->
+		<Define key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
+		<Define key="SourceIPv6" value="fe80::3e97:eff:fe47:524a%4"/>
+		<Define key="SourceMAC" value="3c970e47524a"/>
     <Define key="TargetPort" value="546"/>
-    <Define key="SourceMAC" value="001122334455"/>
-    <Define key="TargetMAC" value="010203040506"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="RemoteAgentIP"  value="127.0.0.1"/>
 		<Define key="Path" value="."/>
