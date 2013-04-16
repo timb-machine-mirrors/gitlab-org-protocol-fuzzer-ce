@@ -126,14 +126,14 @@
 			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['NextTransaction'].actions[0].dataModel.find('EmptyPacket') != None"/>
 			
       <Action name="MessageIdSlurp2" type="slurp" valueXpath="//ReceiveClientRequest2//MessageId" setXpath="//MessageId"/>
-		
+						
+			<Action name="Unbind" type="changeState" ref="Done" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x42"/>
+			
 			<Action name="Bind" type="changeState" ref="BindResponse" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x60"/>
 		
 			<Action name="Search" type="changeState" ref="SearchResponse" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x63"/>
 			
 			<Action name="Add" type="changeState" ref="AddResponse" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x68"/>
-			
-			<Action name="Unbind" type="changeState" ref="Done" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x42"/>
 			
 			<Action name="Compare" type="changeState" ref="CompareResponse" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x6E"/>
 			
@@ -187,9 +187,25 @@
         <DataModel name="Request" ref="DataModels:Input"/>
       </Action>
 			
+			<!--Ends Iteration-->
+			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['NextTransaction'].actions[0].dataModel.find('EmptyPacket') != None"/>
+				
       <Action name="MessageIdSlurp2" type="slurp" valueXpath="//ReceiveClientRequest3//MessageId" setXpath="//MessageId"/>
+		
+			<Action name="Unbind" type="changeState" ref="Done" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x42"/>		
+		
+			<Action name="Bind" type="changeState" ref="BindResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x60"/>
+		
+			<Action name="Search" type="changeState" ref="SearchResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x63"/>
 			
-			<Action name="Search" type="changeState" ref="SearchResponse2" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x63"/>
+			<Action name="Add" type="changeState" ref="AddResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x68"/>
+			
+			<Action name="Compare" type="changeState" ref="CompareResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x6E"/>
+			
+			<Action name="Delete" type="changeState" ref="DeleteResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x4A"/>
+			
+			<!--TODO-->
+			<Action name="ExtendOp" type="changeState" ref="SearchResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x80"/>
 		</State>
 		
 		<State name="BindResponse">
