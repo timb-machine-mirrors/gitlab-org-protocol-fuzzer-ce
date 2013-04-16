@@ -3,93 +3,228 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Dynamic Host Configuration Protocol v6 PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-			 
-	<DataModel name="Options">
-    <Number name="CIdentifier" size="16" endian="big"/>
-    <Number name="CLength" size="16" endian="big">
-      <Relation type="size" of="CValue"/>
-    </Number>
-    <Block name="CValue"/>
-  </DataModel>
-  
-  <DataModel name="DHCPv6">
-    <Number name="type" size="8" endian="big" value="1"/>
-    <Number name="TranID" size="24" endian="big" value="0x004609"/>
-    <Choice minOccurs="0" maxOccurs="5">
-      <Block name="ClientID" ref="Options">
-        <Number name="CIdentifier" size="16" endian="big" token="true" value="1"/>
-        <Block name="CValue">
-          <Number name="DuidType" size="16" endian="big" value="0x0001"/>
-          <Number name="HWType" size="16" endian="big" value="0x0001"/>
-          <Blob name="Address" valueType="hex" value="##SourceMAC##"/>
-        </Block>
-      </Block>
-      
-      <Block name="ServerID" ref="Options">
-        <Number name="CIdentifier" size="16" endian="big" token="true" value="2"/>
-        <Block name="CValue">
-          <Number name="DuidType" size="16" endian="big" value="0x0003"/>
-          <Number name="HWType" size="16" endian="big" value="0x0001"/>
-          <Blob name="Time" valueType="hex" value="deadbeef"/>
-          <Blob name="Address" valueType="hex" value="##TargetMAC##"/>
-        </Block>
-      </Block>
-      
-      <Block name ="IAfNtA" ref="Options">
-        <Number name="CIdentifier" size="16" endian="big" token="true" value="3"/>
-        <Block name="CValue">
-          <Blob valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00"/>
-        </Block>
-      </Block>
-      
-      <Block name ="ElapsedTime" ref="Options">
-        <Number name="CIdentifier" size="16" endian="big" token="true" value="8"/>
-        <Block name="CValue">
-          <Blob valueType="hex" value="00 00"/>
-        </Block>
-      </Block>
-      
-      <Block name ="OptionRequest" ref="Options">
-        <Number name="CIdentifier" size="16" endian="big" token="true" value="6"/>
-        <Block name="CValue">
-          <Blob valueType="hex" value="00 03"/>
-        </Block>
-      </Block>
-    </Choice>
-  </DataModel>
-  
-  <DataModel name="DHCPv6standard">
-    <Number name="type" size="8" endian="big" value="1"/>
-    <Number name="TranID" size="24" endian="big" value="0x004609"/>
-    <Block name="ClientID" ref="Options">
-      <Number name="CIdentifier" size="16" endian="big" value="1"/>
-      <Block name="CValue">
-        <Number name="DuidType" size="16" endian="big" value="0x0003"/>
-        <Number name="HWType" size="16" endian="big" value="0x0001"/>
-        <Blob name="Address" valueType="hex" value="##SourceMAC##"/>
-      </Block>
-    </Block>
-		
-    <Block name ="IAfNtA" ref="Options">
-      <Number name="CIdentifier" size="16" endian="big" value="3"/>
-      <Block name="CValue">
-        <Blob valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00"/>
-      </Block>
-    </Block>
-		
-    <Block name ="ElapsedTime" ref="Options">
-      <Number name="CIdentifier" size="16" endian="big" value="8"/>
-      <Block name="CValue">
-        <Blob valueType="hex" value="00 00"/>
-      </Block>
-    </Block>
-		
-    <Block name ="OptionRequest" ref="Options">
-      <Number name="CIdentifier" size="16" endian="big" value="6"/>
-      <Block name="CValue">
-        <Blob valueType="hex" value="00 03"/>
-      </Block>
-    </Block>
-  </DataModel>
+	
+	<!-- Implements: RFC3315 [Dynamic Host Configuration Protocol for IPv6 (DHCPv6)](http://tools.ietf.org/html/rfc3315) -->
+	<!-- Implementation notes: Only implements the minimum necessary to support section 1.3 "Client-server Exchanges Involving Four Messages" -->
+	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
+
+	<!-- Supports: -->
+	<!-- SOLICIT (1) - partial, may not support all request types -->
+	<!-- ADVERTISE (2) -->
+	<!-- REQUEST (3) -->
+	<!-- REPLY (7) -->
+
+	<!-- Unknown if supports: -->
+	<!-- CONFIRM (4) -->
+	<!-- RENEW (5) -->
+	<!-- REBIND (6) -->
+	<!-- RELEASE (8) -->
+	<!-- DECLINE (9) -->
+	<!-- RECONFIGURE (10) -->
+	<!-- INFORMATION-REQUEST (11) -->
+	<!-- RELAY-FORW (12) -->
+	<!-- RELAY-REPL (13) -->
+
+	<!-- Needed in order of priority: -->
+	<!-- CONFIRM (4) workflow -->
+	<!-- RENEW (5) workflow -->
+	<!-- INFORMATION-REQUEST (11) workflow -->
+	<!-- REBIND (6) workflow -->
+	<!-- RELEASE (8) workflow -->
+
+	<Import import="time"/>
+	<Import import="code"/>
+
+	<Defaults>
+		<Number endian="big"/>
+	</Defaults>
+
+	<DataModel name="DuidTypes">
+		<Choice name="DuidChoice">
+			<!--
+					1. Link-layer address plus time
+					2. Vendor-assigned unique ID based on Enterprise Number
+					3. Link-layer address
+			-->
+			<Block name="LinkLayerAddressPlusTime">
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Number name="HardwareType" size="16" value="1"/>
+				<Number name="Time" size="32" value="0">
+					<Fixup class="ExpressionFixup">
+						<Param name="ref" value="Time"/>
+						<!-- <Param name="expression" value="code.InteractiveConsole(locals=locals()).interact()"/> -->
+						<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0))) % (2**32))"/>
+					</Fixup>
+				</Number>
+				<Blob name="Address" length="6" valueType="hex" value="##SourceMAC##"/>
+			</Block>
+
+			<Block name="EnterpriseNumber">
+				<Number name="Type" size="16" value="2" token="true"/>
+
+				<Blob name="EnterpriseNumber" length="4" valueType="hex" value="00 00 01 57"/>
+				<Blob name="Identifier" valueType="hex" value="3bbfd82d71bd2b44be155ec7ba7f35c1" />
+			</Block>
+
+			<Block name="LinkLayerAddress">
+				<Number name="Type" size="16" value="3" token="true"/>
+				<Number name="HardwareType" size="16" value="1"/>
+				<Blob name="Address" length="6" valueType="hex" value="##SourceMAC##"/>
+			</Block>
+
+			<!--<Block name="VendorAssignedIdBasedOnEnterpriseNumber"></Block>-->
+		</Choice>
+	</DataModel>
+	<!--
+			OPTION_CLIENTID 1
+			OPTION_SERVERID 2
+			OPTION_IA_NA 3
+			OPTION_IA_TA 4
+			OPTION_IAADDR 5
+			OPTION_ORO 6
+			OPTION_PREFERENCE 7
+			OPTION_ELAPSED_TIME 8
+			OPTION_RELAY_MSG 9
+			OPTION_AUTH 11
+			OPTION_UNICAST 12
+			OPTION_STATUS_CODE 13
+			OPTION_RAPID_COMMIT 14
+			OPTION_USER_CLASS 15
+			OPTION_VENDOR_CLASS 16
+			OPTION_VENDOR_OPTS 17
+			OPTION_INTERFACE_ID 18
+			OPTION_RECONF_MSG 19
+			OPTION_RECONF_ACCEPT 20
+	-->
+
+	<DataModel name="IaOption">
+
+		<Choice name="IaOptionChoice">
+			<Block name="IaAddress">
+				<Number name="Option" size="16" value="5" token="true"/>
+				<Number name="Length" size="16" >
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Blob name="Ipv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce">
+					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="##TargetIPv6Lease##"> -->
+						<!-- <Transformer class="Ipv6StringToOctet"/> -->
+					</Blob>
+					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
+					<Number name="PreferredLifetime" size="32" value="2000"/>
+					<Number name="ValidLifetime" size="32" value="3000"/>
+				</Block>
+			</Block>
+
+		</Choice>
+	</DataModel>
+
+	<DataModel name="DhcpOption">
+		<Choice name="OptionChoice">
+
+			<Block name="ClientIdentifier">
+				<Number name="Option" size="16" value="1" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Duid"/>
+				</Number>
+				<Block name="Duid" ref="DuidTypes"/>
+			</Block>
+
+			<Block name="ElapsedTime">
+				<Number name="Option" size="16" value="8" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Time"/>
+				</Number>
+				<Number name="Time" size="16"/>
+			</Block>
+
+			<Block name="OptionRequest">
+				<Number name="Option" size="16" value="6" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="RequestedOption"/>
+				</Number>
+				<Number name="RequestedOption" size="16" minOccurs="0" maxOccurs="65535"/>
+			</Block>
+
+			<Block name="ServerIdentifier">
+				<Number name="Option" size="16" value="2" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Duid"/>
+				</Number>
+				<Block name="Duid" ref="DuidTypes"/>
+			</Block>
+
+			<Block name="StatusCode">
+				<Number name="Option" size="16" value="13" token="true"/>
+				<Number name="Length" size="16" >
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="Code" size="16" value="0"/>
+					<String name="Msg" value="Peachy DHCP Message!" />
+				</Block>
+
+			</Block>
+
+			<Block name="IdentityAssociationForNonTemporary">
+				<Number name="Option" size="16" value="3" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="IAID" size="32" value="2"/>
+					<Number name="T1" size="32" value="1"/>
+					<Number name="T2" size="32" value="1"/>
+					<Block name="IaOptions" ref="IaOption" minOccurs="0" maxOccurs="65535"/>
+				</Block>
+			</Block>
+
+			<Block name="IdentityAssociationForTemporary">
+				<Number name="Option" size="16" value="4" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number name="IAID" size="32"/>
+					<Block name="IaOptions" ref="IaOption" minOccurs="0" maxOccurs="65535"/>
+				</Block>
+			</Block>
+
+			<Block name="Fqdn">
+				<Number name="Option" size="16" value="39" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="FqdnName"/>
+				</Number>
+				<String name="FqdnName"/>
+			</Block>
+
+			<Block name="ServerUnicast">
+				<Number name="Option" size="16" value="12" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Address"/>
+				</Number>
+				<Blob name="Address" valueType="hex" value="fe 80 00 00 00 00 00 00 02 1a a0 ff fe 95 df 6f"/>
+			</Block>
+
+			<Block name="VendorClass">
+				<Number name="Option" size="16" value="16" token="true"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Data"/>
+				</Number>
+				<Block name="Data">
+					<Number size="32"/>
+					<String name="VendorName"/>
+				</Block>
+			</Block>
+
+		</Choice>
+	</DataModel>
+
+	<DataModel name="Packet">
+		<Number name="MsgType" size="8"/>
+		<Number name="XID" size="24"/>
+		<Block name="Option" ref="DhcpOption" minOccurs="0" maxOccurs="100000"/>
+	</DataModel>
+
 </Peach>
 <!-- end -->
