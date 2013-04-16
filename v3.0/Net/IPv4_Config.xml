@@ -7,8 +7,6 @@
     <Define key="SourceIP" value="192.168.146.1"/>
     <Define key="Strategy"  value="Random"/>
 		<Define key="Path" value="."/>
-		<Define key="TargetIPBytes" value="C0A89280"/>
-		<Define key="SourceIPBytes" value="C0A89201"/>
   </All>
   
   <Linux platform="linux">
