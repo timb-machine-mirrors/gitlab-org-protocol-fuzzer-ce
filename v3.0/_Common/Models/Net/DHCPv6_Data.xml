@@ -10,6 +10,7 @@
 
 	<!-- Supports: -->
 	<!-- SOLICIT (1) - partial, may not support all request types -->
+
 	<!-- ADVERTISE (2) -->
 	<!-- REQUEST (3) -->
 	<!-- REPLY (7) -->
@@ -116,7 +117,22 @@
 				</Block>
 			</Block>
 
+      <Block name="IaPrefix">
+        <Number name="Option" size="16" value="26" token="true"/>
+        <Number name="Length" size="16" >
+          <Relation type="size" of="Data"/>
+        </Number>
+        <Block name="Data">
+          <Number name="PreferredLifetime" size="32" value="100"/>
+          <Number name="ValidLifetime" size="32" value="100"/>
+          <Number name="PrefixLength" size="8">
+            <Relation type="size" of="Ipv6Address"/>
+          </Number>
+          <Blob name="Ipv6Address" length="16" valueType="hex" value="fc000000000201000000000000000000"/>
+        </Block>
+      </Block>
 		</Choice>
+
 	</DataModel>
 
 	<DataModel name="DhcpOption">
