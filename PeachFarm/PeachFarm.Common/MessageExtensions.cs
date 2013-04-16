@@ -70,6 +70,7 @@ namespace PeachFarm.Common.Messages
 
 	public partial class StartPeachResponse
 	{
+		public StartPeachResponse() { }
 
 		public StartPeachResponse(StartPeachRequest request)
 		{
@@ -82,6 +83,8 @@ namespace PeachFarm.Common.Messages
 
 	public partial class StopPeachResponse
 	{
+		public StopPeachResponse() { }
+
 		public StopPeachResponse(StopPeachRequest request)
 		{
 			this.JobID = request.JobID;

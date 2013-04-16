@@ -184,7 +184,7 @@ namespace PeachFarm.Admin.Console
 			}
 			else
 			{
-				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.Message));
+				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace PeachFarm.Admin.Console
 			}
 			else
 			{
-				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.Message));
+				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
 		}
 
