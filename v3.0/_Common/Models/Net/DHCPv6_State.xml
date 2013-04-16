@@ -22,6 +22,8 @@
 		<!-- Needs: -->
 		<!-- all other client requests -->
 		
+		<!-- Does not support Rapid Commit (22.14) -->
+		
 		<!-- "The client sends a Solicit message to the All_DHCP_Relay_Agents_and_Servers address to find available DHCP servers." -->
 		<State name="Listening">
 
@@ -31,6 +33,8 @@
 			<Action type="getProperty" property="LastRecvAddr" publisher="LisentenPublisher">
 				<DataModel name="LastSendIP"/> <!-- Needed for ip address storage -->
 			</Action>
+			<Action name="GoToQuit" type="changeState" ref="Quit"
+							when="DHCPv6.too_many_tries(self, ##MaxTries##)"/>  
 			<Action name="GoToListen" type="changeState" ref="Listening"
 							when="DHCPv6.not_from_target(self,'##TargetIPv6##')"/>
 			<!-- !!TODO!! -->
@@ -107,7 +111,12 @@
 			</Action>
 			<Action type="changeState" ref="Advertising"/>
 		</State>
-		<!-- Don't absolutely need to confirm, this can be added later for state verification -->
+		
+		<State name="Quit">
+			<!-- This is a state that exists to exit after a given number of unmatched packets -->
+		</State>
+		
+		
 	</StateModel>
 
 	

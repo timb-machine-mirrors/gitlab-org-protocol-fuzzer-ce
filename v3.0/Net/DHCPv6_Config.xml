@@ -8,6 +8,7 @@
 		<!-- <Define key="TargetIPv6" value="fe80::c524:6fc8:899e:fd7d"/> -->
 		<Define key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
 		<Define key="SourceIPv6" value="fe80::3e97:eff:fe47:524a%4"/>
+		<Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iter -->
 		<Define key="SourceMAC" value="3c970e47524a"/>
     <Define key="TargetPort" value="546"/>
     <Define key="Strategy"  value="Sequential"/>
