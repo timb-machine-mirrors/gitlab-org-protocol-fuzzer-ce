@@ -20,7 +20,7 @@
 			<Strategy class="##Strategy##"/>
 			
 	    <Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
+			<Param name="Host" value="##TargetIP##" />
 			<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
@@ -36,7 +36,7 @@
 			<Strategy class="##Strategy##"/>
 		
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIPv4##" />
+				<Param name="Host" value="##TargetIP##" />
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
@@ -52,7 +52,7 @@
 			<Strategy class="##Strategy##"/>
 		
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIPv4##" />
+				<Param name="Host" value="##TargetIP##" />
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
@@ -68,7 +68,7 @@
 			<Strategy class="##Strategy##"/>		
 			
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIPv4##" />
+				<Param name="Host" value="##TargetIP##" />
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		
@@ -84,7 +84,7 @@
 			<Strategy class="##Strategy##"/>
 		
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIPv4##" />
+				<Param name="Host" value="##TargetIP##" />
 				<Param name="Port" value="##Port##" />
 	    </Publisher>
 		

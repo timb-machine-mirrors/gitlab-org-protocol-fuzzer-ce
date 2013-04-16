@@ -3,11 +3,12 @@
 	<All>
 		<Define key="LoggerPath"  value="./logs/ldap"/> 
 		<Define key="Strategy"  value="Sequential"/>
-		<Define key="TargetIPv4" value="127.0.0.1"/>
+		<Define key="TargetIP" value="192.168.146.128"/>
 		<Define key="Port" value="389"/>
 		<Define key="Password" value="password"/>
 		<Define key="UserName" value="cn=admin,dc=example,dc=com"/>
 		<Define key="Path" value="."/>
+		<Define key="SourceIP" value="127.0.0.1"/>
 	</All>
 	
 	<Linux platform="linux">
@@ -17,6 +18,6 @@
     <Define key="Interface" value="en0"/>
   </OSX>
   <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="Interface" value="VMware Network Adapter VMnet8"/>
   </Windows>
 </PitDefines>
