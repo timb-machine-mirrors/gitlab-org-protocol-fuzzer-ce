@@ -15,16 +15,6 @@ namespace PeachFarm.Common.Messages
 {
 	public static class ExtensionMethods
 	{
-		public static List<Mongo.Job> ToMongoJobs(this List<Messages.Job> jobs)
-		{
-			List<Mongo.Job> mongoJobs = new List<Mongo.Job>();
-			foreach (Messages.Job job in jobs)
-			{
-				mongoJobs.Add(new Mongo.Job(job));
-			}
-			return mongoJobs;
-		}
-
 		public static Dictionary<string, Heartbeat> ToDictionary(this IEnumerable<Heartbeat> nodes)
 		{
 			Dictionary<string, Heartbeat> dictionary = new Dictionary<string, Heartbeat>();
@@ -70,6 +60,7 @@ namespace PeachFarm.Common.Messages
 
 	public partial class StartPeachResponse
 	{
+		public StartPeachResponse() { }
 
 		public StartPeachResponse(StartPeachRequest request)
 		{
@@ -82,6 +73,8 @@ namespace PeachFarm.Common.Messages
 
 	public partial class StopPeachResponse
 	{
+		public StopPeachResponse() { }
+
 		public StopPeachResponse(StopPeachRequest request)
 		{
 			this.JobID = request.JobID;
@@ -113,5 +106,16 @@ namespace PeachFarm.Common.Messages
 			this.FullText = mongoPit.FullText;
 			this.Version = mongoPit.Version;
 		}
+	}
+
+	public static class Actions
+	{
+		public const string StartPeach = "StartPeach";
+		public const string StopPeach = "StopPeach";
+		public const string JobInfo = "JobInfo";
+		public const string ListNodes = "ListNodes";
+		public const string ListErrors = "ListErrors";
+		public const string Monitor = "Monitor";
+		public const string Heartbeat = "Heartbeat";
 	}
 }

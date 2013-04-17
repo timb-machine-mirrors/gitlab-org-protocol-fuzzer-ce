@@ -30,6 +30,8 @@ namespace PeachFarm.Common.Mongo
 
 		private string tagsField;
 
+		private string zipIDField;
+
 		public Job()
 		{
 			this.pitField = new Pit();
@@ -104,6 +106,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.tagsField = value;
+			}
+		}
+
+		public string ZipID
+		{
+			get
+			{
+				return this.zipIDField;
+			}
+			set
+			{
+				this.zipIDField = value;
 			}
 		}
 	}

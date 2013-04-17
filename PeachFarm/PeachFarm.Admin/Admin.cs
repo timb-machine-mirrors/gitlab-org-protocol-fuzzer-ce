@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Xml;
 using System.Configuration;
+using PeachFarm.Common.Mongo;
 
 namespace PeachFarm.Admin
 {
@@ -236,11 +237,30 @@ namespace PeachFarm.Admin
 		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
 		{
 			StartPeachRequest request = new StartPeachRequest();
-			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
 
-			if (String.IsNullOrEmpty(definesFilePath) == false)
+			if (File.Exists(pitFilePath) == false)
 			{
-				request.Defines = String.Format("<![CDATA[{0}]]", File.ReadAllText(definesFilePath));
+				throw new ApplicationException("File path does not exist: " + pitFilePath);
+			}
+
+			if (String.IsNullOrEmpty(definesFilePath))
+			{
+				if (Path.GetExtension(pitFilePath) == ".zip")
+				{
+					var definesxml = GetConfigXml(pitFilePath);
+					request.Defines = String.Format("<![CDATA[{0}]]", definesxml);
+				}
+			}
+			else
+			{
+				if (File.Exists(definesFilePath))
+				{
+					request.Defines = String.Format("<![CDATA[{0}]]", File.ReadAllText(definesFilePath));
+				}
+				else
+				{
+					throw new ApplicationException("File path does not exist: " + definesFilePath);
+				}
 			}
 
 			if (String.IsNullOrEmpty(ip) == false)
@@ -255,9 +275,19 @@ namespace PeachFarm.Admin
 				request.ClientCount = clientCount;
 				request.Tags = tagsString;
 			}
+
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
+
+			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+
+			if (Path.GetExtension(pitFilePath) == ".zip")
+			{
+				string remoteFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+				request.ZipID = DatabaseHelper.SaveFileToGridFS(pitFilePath, remoteFile, config.MongoDb.ConnectionString);
+			}
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-			PublishToServer(request.Serialize(), "StartPeach");
+			PublishToServer(request.Serialize(), Actions.StartPeach);
 		}
 
 		#endregion
@@ -275,26 +305,26 @@ namespace PeachFarm.Admin
 		public void ListNodesAsync()
 		{
 			ListNodesRequest request = new ListNodesRequest();
-			PublishToServer(request.Serialize(), "ListNodes");
+			PublishToServer(request.Serialize(), Actions.ListNodes);
 		}
 
 		public void ListErrorsAsync(string jobID = "")
 		{
 			ListErrorsRequest request = new ListErrorsRequest();
 			request.JobID = jobID;
-			PublishToServer(request.Serialize(), "ListErrors");
+			PublishToServer(request.Serialize(), Actions.ListErrors);
 		}
 
 		public void JobInfoAsync(string jobID)
 		{
 			JobInfoRequest request = new JobInfoRequest();
 			request.JobID = jobID;
-			PublishToServer(request.Serialize(), "JobInfo");
+			PublishToServer(request.Serialize(), Actions.JobInfo);
 		}
 
 		public void MonitorAsync()
 		{
-			PublishToServer(new MonitorRequest().Serialize(), "Monitor");
+			PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
 		}
 		#endregion
 
@@ -308,22 +338,22 @@ namespace PeachFarm.Admin
 		{
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					RaiseStartPeachCompleted(StartPeachResponse.Deserialize(body));
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
 					break;
-				case "ListNodes":
+				case Actions.ListNodes:
 					RaiseListNodesCompleted(ListNodesResponse.Deserialize(body));
 					break;
-				case "ListErrors":
+				case Actions.ListErrors:
 					RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
 					break;
-				case "JobInfo":
+				case Actions.JobInfo:
 					RaiseJobInfoCompleted(JobInfoResponse.Deserialize(body));
 					break;
-				case "Monitor":
+				case Actions.Monitor:
 					RaiseMonitorCompleted(MonitorResponse.Deserialize(body));
 					break;
 				default:
@@ -337,8 +367,59 @@ namespace PeachFarm.Admin
 
 		private string GetPitXml(string pitFilePath)
 		{
-			XDocument doc = XDocument.Load(pitFilePath);
-			return doc.ToString();
+			if (Path.GetExtension(pitFilePath) == ".zip")
+			{
+			  //var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
+				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
+			  var pitfilename = Path.GetFileNameWithoutExtension(pitFilePath) + ".xml";
+			  var pitfile = (from e in zip.Entries where e.FileName == pitfilename select e).FirstOrDefault();
+
+			  if (pitfile == null)
+			    throw new ApplicationException("Your zip package must contain a Pit file with the name: " + pitfilename);
+
+				var stream = pitfile.OpenReader();
+			  XDocument doc = XDocument.Load(stream);
+			  stream.Close();
+			  return doc.ToString();
+			}
+			else if (Path.GetExtension(pitFilePath) == ".xml")
+			{
+			  XDocument doc = XDocument.Load(pitFilePath);
+			  return doc.ToString();
+			}
+			else
+			{
+			  throw new ApplicationException("Unsupported file extension. Peach Farm only accepts .xml and .zip files");
+			}
+		}
+
+		private string GetConfigXml(string pitFilePath)
+		{
+			if (Path.GetExtension(pitFilePath) == ".zip")
+			{
+				//var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
+				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
+				var definesfilename = Path.GetFileNameWithoutExtension(pitFilePath) + ".xml.config";
+				var definesfile = (from e in zip.Entries where e.FileName == definesfilename select e).FirstOrDefault();
+
+				//if (pitfile == null)
+				//  throw new ApplicationException("Your zip package must contain a Pit file with the name: " + pitfilename);
+				if (definesfile == null)
+				{
+					return String.Empty;
+				}
+				else
+				{
+					var stream = definesfile.OpenReader();
+					XDocument doc = XDocument.Load(stream);
+					stream.Close();
+					return doc.ToString();
+				}
+			}
+			else
+			{
+				return String.Empty;
+			}
 		}
 
 

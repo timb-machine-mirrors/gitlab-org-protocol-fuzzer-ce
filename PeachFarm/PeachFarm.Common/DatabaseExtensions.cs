@@ -265,19 +265,6 @@ namespace PeachFarm.Common.Mongo
 
 			return fault;
 		}
-
-
-		public static MongoDB.Bson.ObjectId ToMongoID(this string input)
-		{
-			try
-			{
-				return new ObjectId(input);
-			}
-			catch
-			{
-				return MongoDB.Bson.ObjectId.Empty;
-			}
-		}
 	}
 	
 	public partial class Job

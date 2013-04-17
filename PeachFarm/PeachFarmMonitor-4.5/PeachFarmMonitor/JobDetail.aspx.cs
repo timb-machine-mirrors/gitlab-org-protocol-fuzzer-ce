@@ -17,17 +17,36 @@ namespace PeachFarmMonitor
 {
   public partial class JobDetail : System.Web.UI.Page
   {
+    #region private variables
     private static PeachFarmMonitorSection monitorconfig = null;
     private string jobid;
     private bool jobfound;
 
+    private static string[] dataFields = new string[]
+		{
+		    "CollectedData.Data",
+		    "StateModel.Data"
+		};
+
+    private static string[] collectionFields = new string[]
+    {
+      "CollectedData",
+      "StateModel"
+    };
+    #endregion
+
+    #region Ctor
     public JobDetail()
     {
       this.InitComplete += JobDetail_InitComplete;
     }
+    #endregion
 
+    #region Properties
     public JobViewModel Job { get; private set; }
+    #endregion
 
+    #region Page event handlers
     void JobDetail_InitComplete(object sender, EventArgs e)
     {
       jobid = Request.QueryString["jobid"];
@@ -50,7 +69,9 @@ namespace PeachFarmMonitor
       {
         Job = new JobViewModel(job);
 
-        faultsGrid.NeedDataSource += iterationsGrid_NeedDataSource;
+        faultBucketsGrid.ItemDataBound += faultBucketsGrid_ItemDataBound;
+
+        faultsGrid.NeedDataSource += faultsGrid_NeedDataSource;
         faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
         faultsGrid.ItemDataBound += faultsGrid_ItemDataBound;
 
@@ -68,68 +89,62 @@ namespace PeachFarmMonitor
 
     }
 
-    private List<string> reverseStringFormat(string template, string str)
+    #endregion
+
+    #region faultBucketsGrid event handlers
+    void faultBucketsGrid_ItemDataBound(object sender, GridItemEventArgs e)
     {
-      string pattern = "^" + Regex.Replace(template, @"\{[0-9]+\}", "(.*?)") + "$";
 
-      Regex r = new Regex(pattern);
-      Match m = r.Match(str);
-
-      List<string> ret = new List<string>();
-
-      for (int i = 1; i < m.Groups.Count; i++)
-      {
-        ret.Add(m.Groups[i].Value);
-      }
-
-      return ret;
     }
-
-    void iterationsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+    
+    protected void faultBucketsGrid_ItemCommand(object sender, GridCommandEventArgs e)
     {
-      if (e.IsFromDetailTable == false)
+      switch (e.CommandName)
       {
-        #region pagination code
-        //*
+        case "FaultBucketSelect":
+          int pagesize = faultsGrid.MasterTableView.PageSize;
+          int pageindex = 0;
+
+          e.Item.Selected = true;
+          var group = ((GridDataItem)e.Item)["Group"].Text;
+          ViewState["currentGroup"] = group;
+
+          var faults = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
+          faultsGrid.DataSource = faults;
+          faultsGrid.DataBind();
+
+          if (faults.Count < pagesize)
+          {
+            int totalpages = pageindex + 1;
+            int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
+            faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
+          }
+          break;
+      }
+    }
+    #endregion
+
+    #region faultsGrid event handlers
+    void faultsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+    {
+      string currentGroup = ViewState["currentGroup"] as string;
+      if ((e.IsFromDetailTable == false) && (String.IsNullOrEmpty(currentGroup) == false))
+      {
         int pagesize = faultsGrid.MasterTableView.PageSize;
         int pageindex = faultsGrid.MasterTableView.CurrentPageIndex;
+        var faults = JobDetailData.GetFaults(jobid, currentGroup, pagesize, pageindex);
+        faultsGrid.DataSource = faults;
+        //faultsGrid.DataBind();
 
-        var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-
-        var buckets = collection.Distinct("Group", Query.EQ("JobID", Job.JobID));
-        foreach (var bucket in buckets)
+        if (faults.Count < pagesize)
         {
-          Fault faultBucket = new Fault();
-          faultBucket.Group = bucket.AsString;
-          Job.FaultBuckets.Add(new FaultBucketViewModel(faultBucket));
+          int totalpages = pageindex + 1;
+          int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
+          faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
         }
-        
-
-        //if (Job.Faults.Count < pagesize)
-        //{
-        //  int totalpages = pageindex + 1;
-        //  int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
-        //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
-        //}
-        //*/
-        #endregion
-        
-        faultsGrid.DataSource = Job.FaultBuckets;
       }
     }
-
-    private static string[] dataFields = new string[]
-		{
-		    "CollectedData.Data",
-		    "StateModel.Data"
-		};
-
-    private static string[] collectionFields = new string[]
-    {
-      "CollectedData",
-      "StateModel"
-    };
-
+    
     protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
     {
       GridDataItem parent = e.DetailTableView.ParentItem;
@@ -137,64 +152,14 @@ namespace PeachFarmMonitor
       {
         switch (e.DetailTableView.DataMember)
         {
-          case "Faults":
-            {
-              /*
-              uint iterationnumber = (uint)parent.GetDataKeyValue("IterationNumber");
-              string nodename = (string)parent.GetDataKeyValue("NodeName");
-              IterationViewModel ivm = null;
-              if (Job == null)
-              {
-                PeachFarm.Common.Mongo.Iteration iteration = new PeachFarm.Common.Mongo.Iteration();
-                iteration.IterationNumber = iterationnumber;
-                iteration.NodeName = nodename;
-                ivm = new IterationViewModel(PeachFarm.Common.Mongo.DatabaseHelper.FindIteration(iteration, monitorconfig.MongoDb.ConnectionString));
-              }
-              else
-              {
-                ivm = (from i in Job.Iterations where i.IterationNumber == iterationnumber && i.NodeName == nodename select i).First();
-              }
-              e.DetailTableView.DataSource = ivm.Faults;
-              //*/
-              var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-              var query = Query.And(Query.EQ("JobID", Job.JobID), Query.EQ("Group", parent["Group"].Text));
-              var faults = collection.Find(query).SetFields(Fields.Exclude(collectionFields));
-              collection.Database.Server.Disconnect();
-              List<FaultViewModel> vms = new List<FaultViewModel>();
-              foreach (var fault in faults)
-              {
-                vms.Add(new FaultViewModel(fault));
-              }
-              e.DetailTableView.DataSource = vms;
-            }
-            break;
           case "StateModel":
             {
-              var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-              var query = Query.EQ("_id", new MongoDB.Bson.BsonObjectId(parent["ID"].Text));
-              var fault = collection.Find(query).SetFields(Fields.Exclude(dataFields)).First();
-
-              List<ActionViewModel> vms = new List<ActionViewModel>();
-              foreach (var action in fault.StateModel)
-              {
-                vms.Add(new ActionViewModel(action));
-              }
-              e.DetailTableView.DataSource = vms;
+              e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).StateModel;
             }
             break;
           case "CollectedData":
             {
-              var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-              var query = Query.EQ("_id", new MongoDB.Bson.BsonObjectId(parent["ID"].Text));
-              var fault = collection.Find(query).SetFields(Fields.Exclude(dataFields)).First();
-
-              List<CollectedDataViewModel> vms = new List<CollectedDataViewModel>();
-              foreach (var cd in fault.CollectedData)
-              {
-                vms.Add(new CollectedDataViewModel(cd));
-              }
-
-              e.DetailTableView.DataSource = vms;
+              e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).CollectedData;
             }
             break;
         }
@@ -216,7 +181,75 @@ namespace PeachFarmMonitor
         }
       }
     }
+    #endregion
 
+    #region private functions
+    private List<string> reverseStringFormat(string template, string str)
+    {
+      string pattern = "^" + Regex.Replace(template, @"\{[0-9]+\}", "(.*?)") + "$";
 
+      Regex r = new Regex(pattern);
+      Match m = r.Match(str);
+
+      List<string> ret = new List<string>();
+
+      for (int i = 1; i < m.Groups.Count; i++)
+      {
+        ret.Add(m.Groups[i].Value);
+      }
+
+      return ret;
+    }
+    #endregion
+  }
+
+  public class JobDetailData
+  {
+    private static PeachFarmMonitorSection monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
+
+    public static List<FaultBucketViewModel> GetFaultBuckets(string jobID)
+    {
+      var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
+      
+      var buckets = collection.Distinct("Group", Query.EQ("JobID", jobID));
+      List<FaultBucketViewModel> faultBuckets = new List<FaultBucketViewModel>();
+      foreach (var bucket in buckets)
+      {
+        Fault faultBucket = new Fault();
+        faultBucket.Group = bucket.AsString;
+        FaultBucketViewModel fbvm = new FaultBucketViewModel(faultBucket);
+        fbvm.FaultCount = collection.Distinct("_id", Query.And(Query.EQ("JobID", jobID),Query.EQ("Group", faultBucket.Group))).Count();
+        faultBuckets.Add(fbvm);
+      }
+      collection.Database.Server.Disconnect();
+
+      return faultBuckets;
+    }
+
+    public static List<FaultViewModel> GetFaults(string jobID, string faultBucketName, int pageSize, int pageIndex)
+    {
+      List<FaultViewModel> vms = new List<FaultViewModel>();
+      if (String.IsNullOrEmpty(faultBucketName) == false)
+      {
+        var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
+        var query = Query.And(Query.EQ("JobID", jobID), Query.EQ("Group", faultBucketName));
+        List<Fault> faults = null;
+        if (pageSize == 0)
+        {
+          faults = collection.Find(query).ToList();
+        }
+        else
+        {
+          int skip = pageIndex * pageSize;
+          faults = collection.Find(query).SetSkip(skip).SetLimit(pageSize).ToList();
+        }
+
+        foreach (var fault in faults)
+        {
+          vms.Add(new FaultViewModel(fault));
+        }
+      }
+      return vms;
+    }
   }
 }

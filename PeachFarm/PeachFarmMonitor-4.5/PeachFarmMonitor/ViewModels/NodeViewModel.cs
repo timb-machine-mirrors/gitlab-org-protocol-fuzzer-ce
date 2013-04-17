@@ -18,6 +18,5 @@ namespace PeachFarmMonitor.ViewModels
       this.Tags = node.Tags;
     }
 
-    public bool IsExpanded { get; set; }
   }
 }

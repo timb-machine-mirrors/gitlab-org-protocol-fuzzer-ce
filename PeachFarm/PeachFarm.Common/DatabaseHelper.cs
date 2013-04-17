@@ -11,6 +11,8 @@ namespace PeachFarm.Common.Mongo
 {
 	public class DatabaseHelper
 	{
+		private static UTF8Encoding encoding = new UTF8Encoding();
+		
 		public static string[] FaultInfoFields = new string[]
 				{
 					"Faults.Description",
@@ -163,12 +165,6 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
-		public static List<Messages.Heartbeat> GetErrors(string connectionString)
-		{
-			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
-		}
-
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
@@ -243,19 +239,75 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			using (var ms = new MemoryStream(p))
+			using (var stream = new MemoryStream(p))
 			{
-				var gridFsInfo = db.GridFS.Upload(ms, remoteFileName);
+				var gridFsInfo = db.GridFS.Upload(stream, remoteFileName);
 			}
 			server.Disconnect();
+		}
+
+		public static void SaveToGridFS(string s, string remoteFileName, string connectionString)
+		{
+			byte[] p = encoding.GetBytes(s);
+			SaveToGridFS(p, remoteFileName, connectionString);
+		}
+
+		public static string SaveFileToGridFS(string localFileName, string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			var gridFsInfo = db.GridFS.Upload(localFileName, remoteFileName);
+			server.Disconnect();
+			return gridFsInfo.Id.ToString();
 		}
 
 		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			db.GridFS.Download(localFile, remoteFile);
+
+			MongoDB.Bson.BsonObjectId remoteFileID = MongoDB.Bson.BsonObjectId.Empty;
+			bool isid = MongoDB.Bson.BsonObjectId.TryParse(remoteFile, out remoteFileID);
+
+			if (isid)
+			{
+				if (db.GridFS.ExistsById(remoteFileID))
+				{
+					var fsinfo = db.GridFS.FindOneById(remoteFileID);
+					db.GridFS.Download(localFile, fsinfo.Name);
+				}
+			}
+			else
+			{
+				if (db.GridFS.Exists(remoteFile))
+				{
+					db.GridFS.Download(localFile, remoteFile);
+				}
+			}
+
 			server.Disconnect();
+			return;
+		}
+
+		public static string GetJobID(string connectionString)
+		{
+			string jobID = CreateJobID();
+			while (Common.Mongo.DatabaseHelper.GetJob(jobID, connectionString) != null)
+			{
+				jobID = CreateJobID();
+			}
+			return jobID;
+		}
+
+		private static string CreateJobID()
+		{
+			using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+			{
+				// change the size of the array depending on your requirements
+				var rndBytes = new byte[6];
+				rng.GetBytes(rndBytes);
+				return BitConverter.ToString(rndBytes).Replace("-", "");
+			}
 		}
 	}
 

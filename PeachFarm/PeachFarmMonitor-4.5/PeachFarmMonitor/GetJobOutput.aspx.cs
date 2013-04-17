@@ -9,7 +9,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using PeachFarm.Admin.Configuration;
 using PeachFarm.Common.Mongo;
-using PeachFarmMonitor.Common;
+using PeachFarm.Common;
 using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.Reports;
 
@@ -42,13 +42,16 @@ namespace PeachFarmMonitor
           {
             if (String.IsNullOrEmpty(filepath))
             {
-              var temppath = Path.GetTempPath();
+              string temppath = Path.GetTempPath();
+              string jobName = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
+
               FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job);
-              var jobName = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
               string zippath = ZipWriter.GetZip(job, temppath);
+
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
               Response.ContentType = "application/zip";
               Response.WriteFile(zippath);
+              File.Delete(zippath);
             }
             else
             {
@@ -56,7 +59,9 @@ namespace PeachFarmMonitor
               DatabaseHelper.DownloadFromGridFS(temppath, filepath, monitorconfig.MongoDb.ConnectionString);
               string filename = Path.GetFileName(filepath);
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
+              Response.ContentType = "text/plain";
               Response.WriteFile(temppath);
+              File.Delete(temppath);
             }
           }
         }
