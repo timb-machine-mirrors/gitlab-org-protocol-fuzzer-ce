@@ -3,19 +3,59 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
        author="Deja Vu Security, LLC" description="LDAPv3 Pit DataModels" version="0.0.2">	 
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-			 
+	
+	<!--
+		Transaction Codes:
+			Bind 			: 0x60
+			Unbind		: 0x42
+			Search		: 0x63
+			Add 			: 0x68
+			Compare		: 0x6E
+			Delete		: 0x4A
+			ExtendOp	: 0x80
+	-->
 	<Defaults>
-		<Number endian="network" signed="false" />
+		<Number endian="big" signed="false"/>
 	</Defaults>
 	
-	<DataModel name="LdapHeader">
-		<Blob valueType="hex" value="30" />
-		<Number size="8" name="LengthOfPacket" />
-		<Number size="8" value="2" />
-		<Number size="8" name="LengthOfMessageId">
-			<Relation type="size" of="MessageId" />
+	<DataModel name="TLV">
+		<Number name="Type" size="8"/>
+		<Number name="Size" size="8">
+			<Relation type="size" of="Value"/>
 		</Number>
-		<Blob valueType="hex" value="01" name="MessageId" />
+		<Blob name="Value"/> 
+	</DataModel>
+	
+	<DataModel name="LdapHeader">
+		<Blob valueType="hex" value="30" token="true"/>
+		<Number name="LengthOfPacket" size="8"/>
+		<Number size="8" value="2" token="true"/>
+		<Number name="LengthOfMessageId" size="8">
+			<Relation type="size" of="MessageId"/>
+		</Number>
+		<Blob name="MessageId" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="Sequence">
+		<Blob valueType="hex" value="30" token="true"/>
+		<Blob valueType="hex" value="84" token="true"/>
+		<Number size="32" name="LengthOfValue">
+			<Relation type="size" of="Value" expressionGet="size" expressionSet="size"/>
+		</Number>
+		<Block name="Value">
+			<Block ref="TLV" minOccurs="0" maxOccurs="-1"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="LdapHeaderUniversal">
+		<Blob valueType="hex" token="true" value="30"/>
+		<Blob valueType="hex" token="true" value="84"/>
+		<Number name="LengthOfPacket" size="32"/>
+		<Number size="8" token="true" value="2"/>
+		<Number name="LengthOfMessageId" size="8">
+			<Relation type="size" of="MessageId"/>
+		</Number>
+		<Blob valueType="hex" value="01" name="MessageId"/>
 	</DataModel>
 	
 	<DataModel name="Bind">
@@ -395,6 +435,97 @@
 					<String value="3" />
 				</Block>
 			</Block>
+		</Block>
+	</DataModel>
+	
+	<!--Server Data model that will take in any input and crack it correctly-->
+	<!--The Outer Choice/Block is used so that if peach is listening for an input-->
+	<!--and gets no bytes back it will end the iteration, in combination with-->
+	<!--the state model, so peach continues to fuzz-->
+	<DataModel name="Input">
+		<Choice>
+			<Block>
+				<Choice minOccurs="1" maxOccurs="1">
+					<Block ref="LdapHeaderUniversal">
+						<Number name="LengthOfPacket" size="32">
+							<Relation type="size" of="Input" expressionGet="size+6" expressionSet="size-6"/>
+						</Number>
+					</Block>
+					<Block ref="LdapHeader">
+						<Number name="LengthOfPacket" size="8">
+							<Relation type="size" of="Input" expressionGet="size+2" expressionSet="size-2"/>
+						</Number>
+					</Block>
+				</Choice>
+				<Block name="NextSequence">
+					<Number name="Code" size="8" valueType="hex" value="63"/>
+					<Choice minOccurs="1" maxOccurs="1">
+						<Block>
+							<Blob name="Uni" valueType="hex" value="84" token="true"/>
+							<Number name="SizeOfBind" size="32">
+								<Relation type="size" of="NextSequence" expressionGet="size+6" expressionSet="size-6"/>
+							</Number>
+						</Block>
+						<Block>
+							<Number name="SizeOfBind" size="8">
+								<Relation type="size" of="NextSequence" expressionGet="size+2" expressionSet="size-2"/>
+							</Number>
+						</Block>
+						<Block name="Single">
+							<Blob length="1"/>
+						</Block>
+					</Choice>
+					<Choice minOccurs="0" maxOccurs="-1">
+						<Block ref="TLV"/>
+						<Block ref="Sequence"/>
+					</Choice>
+				</Block>
+			</Block>
+			<Blob name="EmptyPacket" length="0"/>
+		</Choice>
+	</DataModel>
+	
+	<DataModel name="Response">
+		<Number name="Code" size="8" valueType="hex" value="61"/>
+		<Number name="SizeOfBind" size="8">
+			<Relation type="size" of="Response" expressionGet="size+2" expressionSet="size-2"/>
+		</Number>
+		<Block name="ResultCode" ref="TLV">
+			<Number name="Type" size="8" value="0x0a"/>
+			<Blob name="Value" valueType="hex" value="00"/>
+		</Block>
+		<Block name="MatchedDN" ref="TLV">
+			<Number name="Type" size="8" value="4"/>
+			<Blob name="Value"/>
+		</Block>
+		<Block name="ErrorCode" ref="TLV">
+			<Number name="Type" size="8" value="4"/>
+			<Blob name="Value"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ServerResponse">
+		<Block ref="LdapHeader">
+			<Number name="LengthOfPacket" size="8">
+				<Relation type="size" of="ServerResponse" expressionGet="size+2" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="Result" ref="Response">
+			<Number name="Code" size="8" valueType="hex" value="65"/>
+			<Number name="ResultCode.Value" size="8" valueType="hex" value="00"/>
+		</Block>
+	</DataModel>
+	
+	<!--Send Root-->
+	<DataModel name="SearchResponse2">
+		<Block ref="LdapHeader">
+			<Number name="LengthOfPacket" size="8">
+				<Relation type="size" of="SearchResponse2" expressionGet="size+2" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="SearchResult">
+			<Number name="Code" size="8" valueType="hex" value="64"/>
+			<Blob valueType="hex" value="0404003000"/>
 		</Block>
 	</DataModel>
 </Peach>
