@@ -7,7 +7,7 @@
 	<!-- this pit it's necessary to block RST outgoing on the target port so -->
 	<!-- the OS doesn't interfere with target communication. -->
 
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/TCPv4_State.xml"/>
+	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCPv4_State.xml"/>
 
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
@@ -21,13 +21,13 @@
 	</Agent>
 
 	<Test name="Default">
-		<StateModel ref="States:TheState"/>
+		<StateModel ref="TCP:Listener"/>
 		
 		<!-- <Agent ref="RemoteAgent"/> -->
 		
 		<Publisher class="RawV4">
-			<Param name="Host" value="##TargetIP##"/>
-			<Param name="Interface" value="##SourceIP##"/>
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
 			<Param name="Protocol" value="6"/>
 		</Publisher>
 
