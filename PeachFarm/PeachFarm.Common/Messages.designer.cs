@@ -1461,13 +1461,9 @@ namespace PeachFarm.Common.Messages
 	public partial class JobInfoResponse : ResponseBase
 	{
 
-		private string messageField;
-
 		private Job jobField;
 
 		private List<Heartbeat> nodesField;
-
-		private bool success1Field;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -1475,23 +1471,9 @@ namespace PeachFarm.Common.Messages
 		{
 			this.nodesField = new List<Heartbeat>();
 			this.jobField = new Job();
-			this.success1Field = true;
 		}
 
 		[System.Xml.Serialization.XmlElementAttribute(Order = 0)]
-		public string Message
-		{
-			get
-			{
-				return this.messageField;
-			}
-			set
-			{
-				this.messageField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlElementAttribute(Order = 1)]
 		public Job Job
 		{
 			get
@@ -1504,7 +1486,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 2)]
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 1)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
 		public List<Heartbeat> Nodes
 		{
@@ -1515,20 +1497,6 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.nodesField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlAttributeAttribute("Success")]
-		[System.ComponentModel.DefaultValueAttribute(true)]
-		public bool Success1
-		{
-			get
-			{
-				return this.success1Field;
-			}
-			set
-			{
-				this.success1Field = value;
 			}
 		}
 
@@ -1726,26 +1694,26 @@ namespace PeachFarm.Common.Messages
 	public partial class ListErrorsResponse : ResponseBase
 	{
 
-		private List<Heartbeat> nodesField;
+		private List<Heartbeat> errorsField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		public ListErrorsResponse()
 		{
-			this.nodesField = new List<Heartbeat>();
+			this.errorsField = new List<Heartbeat>();
 		}
 
 		[System.Xml.Serialization.XmlArrayAttribute(Order = 0)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Heartbeat> Nodes
+		public List<Heartbeat> Errors
 		{
 			get
 			{
-				return this.nodesField;
+				return this.errorsField;
 			}
 			set
 			{
-				this.nodesField = value;
+				this.errorsField = value;
 			}
 		}
 

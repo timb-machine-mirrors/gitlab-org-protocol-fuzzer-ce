@@ -202,9 +202,9 @@ namespace PeachFarm.Admin.Console
 
 		static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
 		{
-			if (e.Result.Nodes.Count > 0)
+			if (e.Result.Errors.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				foreach (Heartbeat heartbeat in e.Result.Errors)
 				{
 					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.ErrorMessage));
 				}

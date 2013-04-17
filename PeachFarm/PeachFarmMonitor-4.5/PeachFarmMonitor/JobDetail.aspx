@@ -22,8 +22,8 @@
 	  }
     #title
     {
-      background: #333333;
-      color: white;
+      background: #dcdcdc;
+      color: black;
       position:absolute;
       top:0;
       left:0;
@@ -54,6 +54,7 @@
       float:right;
       height:32px;
       width:300px;
+      margin-top: -1px;
     }
 
     .RadGrid_DejaVu .rgPageFirst

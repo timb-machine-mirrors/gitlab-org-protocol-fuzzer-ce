@@ -35,8 +35,6 @@ namespace PeachFarm.Node
 
 			#region node state
 			nodeState = new NodeState((Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node"));
-
-
 			#endregion
 
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
@@ -192,10 +190,10 @@ namespace PeachFarm.Node
 		{
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					StartPeach(StartPeachRequest.Deserialize(body));
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					StopPeach(StopPeachRequest.Deserialize(body));
 					break;
 				default:
@@ -243,13 +241,20 @@ namespace PeachFarm.Node
 			ChangeStatus(Status.Running);
 
 
-			nodeState.PitFilePath = WriteTextToTempFile(request.Pit);
+			nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.JobID, request.PitFileName + ".xml");
 			
 			if(String.IsNullOrEmpty(request.Defines) == false)
 			{
-				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines);
+				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.JobID, request.PitFileName + ".xml.config");
 			}
 
+			if (String.IsNullOrEmpty(request.ZipID) == false)
+			{
+				string localfile = Path.Combine(Path.GetDirectoryName(nodeState.PitFilePath), nodeState.PitFileName + ".zip");
+				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, request.ZipID, nodeState.MongoDbConnectionString);
+				var zip = Ionic.Zip.ZipFile.Read(localfile);
+				zip.ExtractAll(Path.GetDirectoryName(nodeState.PitFilePath), Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
+			}
 
 			#region initialize Peach Engine
 			peach = new Peach.Core.Engine(null);
@@ -285,7 +290,9 @@ namespace PeachFarm.Node
 				else
 				{
 					Dictionary<string, object> parserArgs = new Dictionary<string, object>();
-					parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = ProcessDefines(nodeState.DefinesFilePath);
+					var defines = ProcessDefines(nodeState.DefinesFilePath);
+					defines.Add("##Peach.Cwd##", Path.GetDirectoryName(nodeState.PitFilePath));
+					parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = 
 					dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
 				}
 			}
@@ -323,7 +330,9 @@ namespace PeachFarm.Node
 			{
 				config.randomSeed = nodeState.Seed;
 			}
-			//config.runName = clientState.JobID.ToString();
+
+			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
+
 			try
 			{
 				peach.startFuzzing(dom, config);
@@ -335,6 +344,20 @@ namespace PeachFarm.Node
 			catch (Exception ex)
 			{
 				StopPeach("Unknown Exception from Peach:\n" + ex.Message);
+			}
+			finally
+			{
+				Environment.CurrentDirectory = nodeState.RootDirectory;
+
+				string temppath = Path.Combine(Environment.CurrentDirectory, "jobtmp", nodeState.JobID);
+				if (Directory.Exists(temppath))
+				{
+					try
+					{
+						Directory.Delete(temppath, true);
+					}
+					catch { }
+				}
 			}
 		}
 		#endregion
@@ -394,7 +417,7 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
-		private string WriteTextToTempFile(string text)
+		private string WriteTextToTempFile(string text, string jobID, string fileName = "")
 		{
 			if (text.StartsWith("<!"))
 			{
@@ -402,15 +425,14 @@ namespace PeachFarm.Node
 				text = text.Substring(0, text.Length - 2);
 			}
 
-			string temppath = Path.GetTempFileName();
-			using (FileStream stream = new FileStream(temppath, FileMode.Create))
+			if (String.IsNullOrEmpty(fileName))
 			{
-				StreamWriter writer = new StreamWriter(stream);
-				writer.Write(text);
-				writer.Flush();
-				writer.Close();
-				stream.Close();
+				fileName = Path.GetFileName(Path.GetTempFileName());
 			}
+
+			string temppath	= Path.Combine(Environment.CurrentDirectory, "jobtmp", jobID, fileName);
+			PeachFarm.Common.FileWriter.CreateDirectory(Path.GetDirectoryName(temppath));
+			File.WriteAllText(temppath, text);
 			return temppath;
 		}
 
@@ -536,6 +558,8 @@ namespace PeachFarm.Node
 			ClientQueueName = String.Format(QueueNames.QUEUE_NODE, IPAddress);
 
 			RabbitMq = config.RabbitMq;
+
+			RootDirectory = Environment.CurrentDirectory;
 		}
 
 		private Status statusField;
@@ -587,6 +611,8 @@ namespace PeachFarm.Node
 		internal string JobID { get; set; }
 		internal string UserName { get; set; }
 		internal string Tags { get; set; }
+
+		internal string RootDirectory { get; set; }
 	}
 
 	public class StatusChangedEventArgs : EventArgs

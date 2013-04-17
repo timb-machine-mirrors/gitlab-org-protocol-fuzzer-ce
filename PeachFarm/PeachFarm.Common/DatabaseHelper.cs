@@ -165,12 +165,6 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
-		public static List<Messages.Heartbeat> GetErrors(string connectionString)
-		{
-			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
-		}
-
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
@@ -271,9 +265,24 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			if (db.GridFS.Exists(remoteFile))
+
+			MongoDB.Bson.BsonObjectId remoteFileID = MongoDB.Bson.BsonObjectId.Empty;
+			bool isid = MongoDB.Bson.BsonObjectId.TryParse(remoteFile, out remoteFileID);
+
+			if (isid)
 			{
-				db.GridFS.Download(localFile, remoteFile);
+				if (db.GridFS.ExistsById(remoteFileID))
+				{
+					var fsinfo = db.GridFS.FindOneById(remoteFileID);
+					db.GridFS.Download(localFile, fsinfo.Name);
+				}
+			}
+			else
+			{
+				if (db.GridFS.Exists(remoteFile))
+				{
+					db.GridFS.Download(localFile, remoteFile);
+				}
 			}
 
 			server.Disconnect();
