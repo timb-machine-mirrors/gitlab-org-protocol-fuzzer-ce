@@ -188,7 +188,7 @@
       </Action>
 			
 			<!--Ends Iteration-->
-			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['NextTransaction'].actions[0].dataModel.find('EmptyPacket') != None"/>
+			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['NextTransaction2'].actions[0].dataModel.find('EmptyPacket') != None"/>
 				
       <Action name="MessageIdSlurp2" type="slurp" valueXpath="//ReceiveClientRequest3//MessageId" setXpath="//MessageId"/>
 		
