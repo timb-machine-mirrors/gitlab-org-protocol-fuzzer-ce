@@ -56,6 +56,11 @@
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
+		<!-- !!TODO!! -->
+		<!-- Add support for server closing first -->
+		<!-- Need to add tracking of all outgoing sequence numbers so any
+		     response to any packet can be handled. This is unneeded for
+		     the current projects. -->
 		<State name="SendTestPayload" >
 			<Action type="output"
 							onStart="TCP.sync_from_store(self)"
