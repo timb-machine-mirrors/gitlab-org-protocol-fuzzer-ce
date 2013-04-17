@@ -4,6 +4,8 @@
 			 author="Deja Vu Security, LLC" description="Transport Control Protocol PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
+	<!-- Implements RFC793 (http://tools.ietf.org/html/rfc793) -->
+	
 	<DataModel name="ValueLenTLV">
 		<Number name="Type" size="8" endian="big"/>
 		<Number name="Length" size="8">
@@ -160,6 +162,7 @@
 			<Number name="SrcPort" size="16" endian="big" value="1234"/> <!-- this needs to be random, it gets repalced on each iteration -->
 			<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
 			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
+			<!-- http://tools.ietf.org/html/rfc793#page-24 -->
 			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
 			<Flags name="DataOffset" size="4" endian="big">
 				<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
@@ -225,6 +228,10 @@
 
  	<Data name="FIN">
 		<Field name="Header.ControlBits.FIN" value="1"/>
+	</Data>
+
+ 	<Data name="RST">
+		<Field name="Header.ControlBits.RST" value="1"/>
 	</Data>
 
 </Peach>
