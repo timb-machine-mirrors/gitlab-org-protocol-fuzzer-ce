@@ -8,7 +8,7 @@
 		<Define key="Password" value="password"/>
 		<Define key="UserName" value="cn=admin,dc=example,dc=com"/>
 		<Define key="Path" value="."/>
-		<Define key="SourceIP" value="127.0.0.1"/>
+		<Define key="SourceIP" value="192.168.146.1"/>
 	</All>
 	
 	<Linux platform="linux">
