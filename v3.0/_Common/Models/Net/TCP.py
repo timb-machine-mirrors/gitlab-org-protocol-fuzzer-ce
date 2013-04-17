@@ -3,8 +3,6 @@
 from zlib import crc32 
 import time
 
-import code
-
 import clr
 clr.AddReferenceByPartialName('Peach.Core')
 

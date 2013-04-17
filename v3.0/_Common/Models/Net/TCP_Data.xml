@@ -185,8 +185,8 @@
 			<Number name="CheckSum" size="16" endian="big">
 				<Fixup class="TCPChecksumFixup">
 					<Param name="ref" value="Packet" />
-					<Param name="src" value="##TargetIP##" />
-					<Param name="dst" value="##SourceIP##" />
+					<Param name="src" value="127.0.0.1" />
+					<Param name="dst" value="127.0.0.1" />
 				</Fixup>
 			</Number>
 			<Number name="UrgentPointer" size="16" endian="big"/>

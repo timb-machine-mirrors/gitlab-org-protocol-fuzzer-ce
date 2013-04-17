@@ -13,7 +13,7 @@
 	<!-- Currenlty supports fuzzing a listener, not acting as a listener -->
 	
 	
-	<StateModel name="TheState" initialState="SendSyn">
+	<StateModel name="Listener" initialState="SendSyn">
 
 		<State name="SendSyn" >
 
@@ -23,7 +23,7 @@
 							onStart="TCP.init_seq(self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:SYN"/>
-				<DataModel name="Packet" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
 			<Action name="Read" type="changeState" ref="SynSent" />
 		</State>
@@ -46,7 +46,7 @@
 			<Action name="SendAck" type="output"
 							onStart="TCP.sync_from_store(self)" >
 				<Data ref="TCP:ACK"/>
-				<DataModel name="Packet" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
 			<Action type="changeState" ref="Established"/>
 		</State>
@@ -66,7 +66,7 @@
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:PSHACK"/>
-				<DataModel name="PSHPacket" ref="TCP:PacketWithData"/>
+				<DataModel name="PSHPacket" ref="TCPv4:PacketWithData"/>
 			</Action>
 			<Action name="Read" type="changeState" ref="WaitForAck" />
 		</State>
@@ -95,7 +95,7 @@
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:FINACK"/>
-				<DataModel name="Packet" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
 			<Action name="GoToWaitForAck" type="changeState" ref="WaitForAck"/>
 		</State>
@@ -105,7 +105,7 @@
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:FINACK"/>
-				<DataModel name="Packet" ref="TCP:Packet"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
 			<Action type="changeState" ref="WaitingForFinAck"/>
 		</State>
@@ -125,7 +125,7 @@
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:FINACK"/>
-				<DataModel name="FINACKPacket" ref="TCP:Packet"/>
+				<DataModel name="FINACKPacket" ref="TCPv4:Packet"/>
 			</Action>
 		</State>
 
@@ -133,7 +133,7 @@
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:ACK"/>
-				<DataModel name="ACKPacket" ref="TCP:Packet"/>
+				<DataModel name="ACKPacket" ref="TCPv4:Packet"/>
 			</Action>
 		</State>
 
@@ -141,7 +141,7 @@
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:RST"/>
-				<DataModel name="RSTPacket" ref="TCP:Packet"/>
+				<DataModel name="RSTPacket" ref="TCPv4:Packet"/>
 			</Action>
 			<Action name="TryAgain" type="changeState" ref="SendSyn"/>
 		</State>
