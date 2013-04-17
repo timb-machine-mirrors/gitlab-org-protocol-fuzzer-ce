@@ -34,10 +34,10 @@
         </Fixup>
       </Number>
       <String name="SrcIP" value="##SourceIP##" mutable="false">
-				 <Transformer class="Ipv4StringToNetworkOctet" />
+				 <Transformer class="Ipv4StringToOctet" />
 			</String>
       <String name="DestIP" value="##TargetIP##" mutable="false"> <!--These fields must be nonmutable on windows-->
-				 <Transformer class="Ipv4StringToNetworkOctet" />
+				 <Transformer class="Ipv4StringToOctet" />
 			</String>
 			<Blob name="Options"/>
     </Block>
