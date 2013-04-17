@@ -35,10 +35,10 @@
 			</Action>
 			<Action name="GoToSend"
 							type="changeState" ref="SynRecieved"
-							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="GoToSend"
 							type="changeState" ref="Established"
-							when="TCP.chk_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="ReadMore" type="changeState" ref="SynSent" />
 		</State>
 		
@@ -73,10 +73,10 @@
 			</Action>
 			<Action name="GoToClose"
 							type="changeState" ref="BeginClose"
-							when="TCP.chk_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action name="GoToSendFinalAck"
 							type="changeState" ref="SendFinalAck"
-							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action  name="ReadMore" type="changeState" ref="WaitForAck" />
 		</State>
 
@@ -112,7 +112,7 @@
 			</Action>
 			<Action name="GoToSend"
 							type="changeState" ref="SendFinalFinAck"
-							when="TCP.chk_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
 		</State>
 		

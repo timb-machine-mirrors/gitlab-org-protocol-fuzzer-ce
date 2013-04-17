@@ -81,7 +81,7 @@ def inc_stored_vals(ctx, *args):
         inc_stored_val(ctx, arg)
 
 
-def chk_if_ack_for_me(ctx):
+def get_if_ack_for_me(ctx):
     #print "AckNum ", int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString())
     #print "Expected AckNum ", get_store_val(ctx, 'NextSequenceNumber')
     ret = int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == (get_store_val(ctx, 'NextSequenceNumber')) and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
