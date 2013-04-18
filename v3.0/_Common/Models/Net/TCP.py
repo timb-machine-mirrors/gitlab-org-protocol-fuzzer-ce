@@ -28,8 +28,11 @@ def init_seq(ctx):
 
 
 def set_next_seq(ctx):
+    payload_size = 1
+    if ctx.dataModel.find('TcpPayload'):
+        payload_size = len(ctx.dataModel.find('TcpPayload').Value.Value)
     if ctx.dataModel.find('SequenceNumber'):
-        ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(ctx.dataModel.find('TcpPayload').Value.Value) or 1))
+        ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
     else:
         ret = 65535
     #print "NextSeq == ", get_store_val(ctx, "NextSequenceNumber")
@@ -37,8 +40,8 @@ def set_next_seq(ctx):
 
 
 def sync_from_store(ctx):
-    ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(get_store_val(ctx, "SrcPort"))
-    
+    if ctx.dataModel.find('SrcPort'):
+        ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(get_store_val(ctx, "SrcPort"))
     if ctx.dataModel.find('ACK') and bool(int(ctx.dataModel.find('ACK').InternalValue)):
         set_default_from_store(ctx, "AcknowledgmentNumber")
     if ctx.dataModel.find("SequenceNumber"):
@@ -47,8 +50,11 @@ def sync_from_store(ctx):
 
 
 def store_next_acknum(ctx):
+    payload_size = 1
+    if ctx.dataModel.find('TcpPayload'):
+        payload_size = len(ctx.dataModel.find('TcpPayload').Value.Value)
     if ctx.dataModel.find('SequenceNumber'):
-        ret = set_to_store(ctx, AcknowledgmentNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(ctx.dataModel.find('TcpPayload').InternalValue.ToString()) or 1))
+        ret = set_to_store(ctx, AcknowledgmentNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
     else:
         ret = 65535
     #print "AckNum == ", get_store_val(ctx, "AcknowledgmentNumber")
