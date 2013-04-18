@@ -165,6 +165,34 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
+		public static void ClearJobsWithZeroIterations(string connectionString)
+		{
+			var jobs = DatabaseHelper.GetAllJobs(connectionString);
+			List<Job> jobsToDelete = new List<Job>();
+			foreach (var job in jobs)
+			{
+				job.FillNodes(connectionString);
+				var iterationcount = (from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum();
+				if (iterationcount == 0)
+				{
+					jobsToDelete.Add(job);
+				}
+			}
+
+			MongoCollection<Job> jobsCollection = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			MongoCollection<Node> nodesCollection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+
+			foreach (var job in jobsToDelete)
+			{
+				var jobsQuery = Query.EQ("_id", job._id);
+				jobsCollection.Remove(jobsQuery);
+
+				var nodesQuery = Query.EQ("JobID", job.JobID);
+				nodesCollection.Remove(nodesQuery);
+			}
+			jobsCollection.Database.Server.Disconnect();
+		}
+
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);

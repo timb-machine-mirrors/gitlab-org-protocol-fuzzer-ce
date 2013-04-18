@@ -204,14 +204,6 @@
           <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
         </SelectParameters>
       </asp:ObjectDataSource>
-      <asp:ObjectDataSource ID="faultsDS" runat="server" SelectMethod="GetFaults" TypeName="PeachFarmMonitor.JobDetailData" >
-        <SelectParameters>
-          <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
-          <asp:Parameter Name="faultBucketName" Type="String" />
-          <asp:Parameter Name="pageSize" Type="Int32" />
-          <asp:Parameter Name="pageIndex" Type="Int32" />
-        </SelectParameters>
-      </asp:ObjectDataSource>
     </div>
   </form>
 </body>

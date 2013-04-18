@@ -281,20 +281,20 @@ namespace PeachFarm.Node
 			Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
 
 			Peach.Core.Dom.Dom dom = null;
+
+			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
+
 			try
 			{
-				if (String.IsNullOrEmpty(nodeState.DefinesFilePath))
+				Dictionary<string, object> parserArgs = new Dictionary<string, object>();
+				Dictionary<string, string> defines = new Dictionary<string, string>();
+				if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
 				{
-					dom = pitParser.asParser(null, nodeState.PitFilePath);
+					defines = ProcessDefines(nodeState.DefinesFilePath);
 				}
-				else
-				{
-					Dictionary<string, object> parserArgs = new Dictionary<string, object>();
-					var defines = ProcessDefines(nodeState.DefinesFilePath);
-					defines.Add("##Peach.Cwd##", Path.GetDirectoryName(nodeState.PitFilePath));
-					parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = 
-					dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
-				}
+				defines.Add("Peach.Cwd", Environment.CurrentDirectory);
+				parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
+				dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
 			}
 			catch (Peach.Core.PeachException ex)
 			{
@@ -330,8 +330,6 @@ namespace PeachFarm.Node
 			{
 				config.randomSeed = nodeState.Seed;
 			}
-
-			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
 
 			try
 			{

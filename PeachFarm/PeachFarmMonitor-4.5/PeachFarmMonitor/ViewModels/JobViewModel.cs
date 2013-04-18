@@ -29,7 +29,9 @@ namespace PeachFarmMonitor.ViewModels
 
     public JobStatus Status { get; set; }
 
-    public int FaultCount { get; set; }
+    public uint FaultCount { get; set; }
+
+    public uint IterationCount { get; set; }
   }
 
   public enum JobStatus
