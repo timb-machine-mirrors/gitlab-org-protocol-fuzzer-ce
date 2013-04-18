@@ -109,9 +109,9 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
 			if(excludeData)
-				job.Faults = collection.Find(query).SetFields(Fields.Exclude(dataFields)).ToList();
+				job.Faults = collection.Find(query).SetSortOrder("Group").SetFields(Fields.Exclude(dataFields)).ToList();
 			else
-				job.Faults = collection.Find(query).ToList();
+				job.Faults = collection.Find(query).SetSortOrder("Group").ToList();
 
 			foreach (var fault in job.Faults)
 			{

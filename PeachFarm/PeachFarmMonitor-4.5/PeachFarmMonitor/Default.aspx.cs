@@ -21,7 +21,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class Home : System.Web.UI.Page
+  public partial class Home : BasePage
   {
     private static PeachFarm.Admin.Admin admin = null;
     private static AdminSection adminconfig = null;
