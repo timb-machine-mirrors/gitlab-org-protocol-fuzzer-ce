@@ -38,12 +38,12 @@
     </Block>
     <Block name="OuterIP" ref="IPv4:IPv4">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-			<Blob name="Header.SrcIP" value="##OuterSourceIPv4##">
+			<String name="SrcBlock.Header.SrcIP" value="##OuterSourceIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
-			</Blob>
-			<Blob name="Header.DestIP" value="##OuterTargetIPv4##">
+			</String>
+			<String name="DstBlock.Header.DestIP" value="##OuterTargetIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
-			</Blob>
+			</String>
       <Block name="IPv4Payload" ref="UDP:UDP">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
 				<Number name="Header.DestPort" size="16" endian="big" value="9029"/>

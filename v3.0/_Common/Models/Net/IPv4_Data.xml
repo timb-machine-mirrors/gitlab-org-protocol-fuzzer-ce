@@ -33,12 +33,16 @@
           <Param name="ref" value="Header"/>
         </Fixup>
       </Number>
-      <String name="SrcIP" value="##SourceIP##" mutable="false">
-				 <Transformer class="Ipv4StringToNetworkOctet" />
-			</String>
-      <String name="DestIP" value="##TargetIP##" mutable="false"> <!--These fields must be nonmutable on windows-->
-				 <Transformer class="Ipv4StringToNetworkOctet" />
-			</String>
+			<Block name="SrcBlock" length="4"> <!--Used for cracking-->
+				<String name="SrcIP" value="##SourceIP##" mutable="false">
+				 <Transformer class="Ipv4StringToOctet" />
+				</String>
+			</Block>
+			<Block name="DstBlock" length="4"> <!--Used for cracking-->
+				<String name="DestIP" value="##TargetIP##" mutable="false"> <!--These fields must be nonmutable on windows-->
+					 <Transformer class="Ipv4StringToOctet" />
+				</String>
+			</Block>
 			<Blob name="Options"/>
     </Block>
 		<Block name="Payload" ref="DataModels:ICMPv4Header"/>

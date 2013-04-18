@@ -16,7 +16,9 @@
 	<DataModel name="IPSECv6Transport">
 		<Block name="ESPHeader">
 			<Blob name="SPI" valueType="hex" length="4" value="00 00 02 01" />
-			<Number name="Sequence" size="32" value="1" endian="big"/>
+			<Number name="Sequence" size="32" value="1" endian="big">
+				<Fixup class="SequenceIncrementFixup"/>
+			</Number>	
 				<Blob valueType="hex" name="IV" value="##IV##"/>
 				<Block name="EncryptedValues">
 					<Block name="GetPaddingSize">
@@ -33,7 +35,7 @@
 						</Number>
 						<Number name="NextHeader" size="8" value="1"/>
 					</Block>
-					<Transformer class="Aes128">											
+					<Transformer class="##EncryptionAlg##">											
 						<Param name="Key" value="##CryptoKey##"/>
 						<Param name="IV" value="##IV##"/>
 					</Transformer>
@@ -43,7 +45,7 @@
 			<Fixup class="HMAC">
 				<Param name="ref" value="ESPHeader"/>
 				<Param name="Key" value="##AuthKey##"/>
-				<Param name="Hash" value="HMACSHA1"/>
+				<Param name="Hash" value="##HashAlg##"/>
 				<Param name="Length" value="12"/>
 			</Fixup>
 		</Blob>
