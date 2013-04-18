@@ -2,8 +2,8 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIP" value="::1"/>
-    <Define key="SourceIP" value="::1"/>
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="SourceIPv6" value="::1"/>
     <Define key="LoggerPath" value="logs/IPv6/"/>
     <Define key="SourceMAC" value="000c29ef2a1b" />
     <Define key="TargetMAC" value="000c29ef2a1b" />
