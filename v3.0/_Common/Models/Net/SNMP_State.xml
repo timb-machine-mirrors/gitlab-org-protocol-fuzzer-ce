@@ -25,5 +25,22 @@
       </Action>
     </State>
   </StateModel>
+	
+		<!-- NTP simple state model -->
+  <StateModel name="AgentToManager" initialState="Initial">
+    <State name="Initial">
+      <!-- generate snmp get request packet -->
+      <Action name="SnmpGetRequest" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpInputChoice"/>
+      </Action>
+      
+			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpInputChoice//RequestId" setXpath="//SnmpResponse//RequestId"/>
+			
+      <!-- generate snmp next request packet -->
+      <Action name="SnmpReponse" type="output" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpReponse"/>
+      </Action>
+    </State>
+  </StateModel>
 </Peach>
 <!--End-->

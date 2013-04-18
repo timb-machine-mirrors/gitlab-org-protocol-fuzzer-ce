@@ -10,7 +10,8 @@
 	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
 	
 	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
-	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
+	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
+	<Include ns="UDPv4" src="file:##Path##/_Common/Models/Net/UDPv4_Data.xml"/>
 
 	<!--Data model for IPSECv6 w/ ESP Transport-->
 	<DataModel name="IPSECv6Transport">
@@ -77,8 +78,8 @@
 						<Number name="Checksum" size="16" endian="big">
 							<Fixup class="IcmpV6ChecksumFixup">
 								<Param name="ref" value="IPv6Payload" />
-								<Param name="src" value="##SourceIP##" />
-								<Param name="dst" value="##TargetIP##" />
+								<Param name="src" value="##SourceIPv6##" />
+								<Param name="dst" value="##TargetIPv6##" />
 							</Fixup>
 						</Number>
 						<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
@@ -243,8 +244,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileBRRIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -275,8 +276,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileHoTIIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -309,8 +310,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileCoTIIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -342,8 +343,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileHoTIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -376,8 +377,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileCoTIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -410,8 +411,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileBUIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -470,8 +471,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileBAIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -525,8 +526,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6MobileBEIPSECv6Transport"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 						</Block>
@@ -576,8 +577,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6Payload"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 							<Block name="Reserved">
@@ -606,8 +607,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6Payload"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 							<Block name="Reserved">
@@ -640,8 +641,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6Payload"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 							<Block name="Reserved">
@@ -670,8 +671,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6Payload"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 							<Block name="Reserved">
@@ -706,8 +707,8 @@
 							<Number name="Checksum" size="16" endian="big">
 								<Fixup class="IcmpV6ChecksumFixup">
 									<Param name="ref" value="IPv6Payload"/>
-									<Param name="src" value="##SourceIP##"/>
-									<Param name="dst" value="##TargetIP##"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
 								</Fixup>
 							</Number>
 							<Flags name="Flags" size="8">
@@ -801,8 +802,8 @@
 							<Number name="Header.CheckSum" size="16" endian="big">
 								<Fixup class="TCPChecksumFixup">
 									<Param name="ref" value="TCP" />
-									<Param name="src" value="##SourceIP##" />
-									<Param name="dst" value="##TargetIP##" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
 								</Fixup>
 							</Number>
 							<Block name="TcpPayload">
@@ -822,7 +823,7 @@
 				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
-						<Block name="UDPHeader" ref="UDP:UDP">
+						<Block name="UDPHeader" ref="UDPv4:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
@@ -850,12 +851,12 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="17"/>
 					<Block name="IPv6Payload">
-						<Block name="UDPHeader" ref="UDP:UDP">
+						<Block name="UDPHeader" ref="UDPv6:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup"> 
 									<Param name="ref" value="UDPHeader" />
-									<Param name="src" value="##SourceIP##" />
-									<Param name="dst" value="##TargetIP##" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
 								</Fixup>
 							</Number>
 							<Block name="UdpPayload">
@@ -911,8 +912,8 @@
 								<Number name="Checksum" size="16" endian="big">
 									<Fixup class="IcmpV6ChecksumFixup">
 										<Param name="ref" value="IPv6Payload" />
-										<Param name="src" value="##SourceIP##" />
-										<Param name="dst" value="##TargetIP##" />
+										<Param name="src" value="##SourceIPv6##" />
+										<Param name="dst" value="##TargetIPv6##" />
 									</Fixup>
 								</Number>
 								<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
@@ -1133,8 +1134,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileBRRIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1173,8 +1174,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileHoTIIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1215,8 +1216,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileCoTIIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1256,8 +1257,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileHoTIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1298,8 +1299,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileCoTIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1340,8 +1341,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileBUIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1408,8 +1409,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileBAIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1471,8 +1472,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6MobileBEIPSECv6Tunnel"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 								</Block>
@@ -1538,8 +1539,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6Payload"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 									<Block name="Reserved">
@@ -1576,8 +1577,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6Payload"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 									<Block name="Reserved">
@@ -1618,8 +1619,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6Payload"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 									<Block name="Reserved">
@@ -1656,8 +1657,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6Payload"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 									<Block name="Reserved">
@@ -1700,8 +1701,8 @@
 									<Number name="Checksum" size="16" endian="big">
 										<Fixup class="IcmpV6ChecksumFixup">
 											<Param name="ref" value="IPv6Payload"/>
-											<Param name="src" value="##SourceIP##"/>
-											<Param name="dst" value="##TargetIP##"/>
+											<Param name="src" value="##SourceIPv6##"/>
+											<Param name="dst" value="##TargetIPv6##"/>
 										</Fixup>
 									</Number>
 									<Flags name="Flags" size="8">
@@ -1819,8 +1820,8 @@
 									<Number name="Header.CheckSum" size="16" endian="big">
 										<Fixup class="TCPChecksumFixup">
 											<Param name="ref" value="TCP" />
-											<Param name="src" value="##SourceIP##" />
-											<Param name="dst" value="##TargetIP##" />
+											<Param name="src" value="##SourceIPv6##" />
+											<Param name="dst" value="##TargetIPv6##" />
 										</Fixup>
 									</Number>
 									<Block name="TcpPayload">
@@ -1848,7 +1849,7 @@
 						<Block name="PayloadContent" ref="IPv4:IPv4">
 							<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 							<Block name="IPv4Payload">
-								<Block name="UDPHeader" ref="UDP:UDP">
+								<Block name="UDPHeader" ref="UDPv4:UDP">
 									<Number name="Header.Checksum" size="16" endian="big">
 										<Fixup class="UDPChecksumFixup">
 											<Param name="ref" value="UDPHeader" />
@@ -1884,12 +1885,12 @@
 							</Number>
 							<Number name="NextHeader" size="8" endian="big" value="17"/>
 							<Block name="IPv6Payload">
-								<Block name="UDPHeader" ref="UDP:UDP">
+								<Block name="UDPHeader" ref="UDPv6:UDP">
 									<Number name="Header.Checksum" size="16" endian="big">
 										<Fixup class="UDPChecksumFixup"> 
 											<Param name="ref" value="UDPHeader" />
-											<Param name="src" value="##SourceIP##" />
-											<Param name="dst" value="##TargetIP##" />
+											<Param name="src" value="##SourceIPv6##" />
+											<Param name="dst" value="##TargetIPv6##" />
 										</Fixup>
 									</Number>
 									<Block name="UdpPayload">

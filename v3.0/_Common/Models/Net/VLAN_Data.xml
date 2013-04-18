@@ -11,8 +11,8 @@
 	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
 	
 	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
-	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
-
+	<Include ns="UDPv4" src="file:##Path##/_Common/Models/Net/UDPv4_Data.xml"/>
+	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
 
 	<DataModel name="VLAN_TCI">
 		<Flags size="16" endian="big">
@@ -906,8 +906,8 @@
 							<Number name="Header.CheckSum" size="16" endian="big">
 								<Fixup class="TCPChecksumFixup">
 									<Param name="ref" value="TCP" />
-									<Param name="src" value="##SourceIP##" />
-									<Param name="dst" value="##TargetIP##" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
 								</Fixup>
 							</Number>
 							<Block name="TcpPayload">
@@ -933,7 +933,7 @@
 				<Block name="PayloadContent" ref="IPv4:IPv4">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
-						<Block name="UDPHeader" ref="UDP:UDP">
+						<Block name="UDPHeader" ref="UDPv4:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
@@ -966,7 +966,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="17"/>
 					<Block name="IPv6Payload">
-						<Block name="UDPHeader" ref="UDP:UDP">
+						<Block name="UDPHeader" ref="UDPv6:UDP">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup"> 
 									<Param name="ref" value="UDPHeader" />

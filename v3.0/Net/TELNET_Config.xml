@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-	<Define key="UserPrompt" value="login:"/>
-	<Define key="Username" value="peach"/>
+		<Define key="UserPrompt" value="Ubuntu 12.04.2 LTS\r\n"/>
+		<Define key="Username" value="userv"/>
 
-	<Define key="PassPrompt" value="password:"/>
-	<Define key="Password" value="peach"/>
+		<Define key="PassPrompt" value="ubuntu login:"/>
+		<Define key="Password" value="server"/>
 
-	<Define key="CmdPrompt" value=":~$"/>
-	<Define key="Command" value="ls"/>
+		<Define key="CmdPrompt" value=":~$"/>
+		<Define key="Command" value="ls"/>
 	
     <Define key="TargetPort"    value="23"/>
-    <Define key="TargetIPv4"    value="127.0.0.1"/>
+    <Define key="TargetIPv4"    value="192.168.146.128"/>
     <Define key="LoggerPath"  value="./logs/telnet/"/>
     <Define key="Strategy"  value="Sequential"/>
 		<Define key="Path" value="."/>
+		
+		<Define key="ProgramPath" value="C:\Users\jordyn.DEJA\Downloads\"/>
+		<Define key="Program" value="putty.exe"/>
   </All>
   
   <Linux platform="linux">

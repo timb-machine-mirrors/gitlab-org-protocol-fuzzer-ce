@@ -3,7 +3,7 @@
   <All>
     <Define key="SnmpSrcPort" value="161"/>
     <Define key="SnmpPort"    value="161"/>
-    <Define key="SnmpHost"    value="localhost"/>
+    <Define key="SnmpHost"    value="127.0.0.1"/>
     <Define key="CommString"  value="public"/>
     <Define key="LoggerPath"  value="./logs/snmp/"/>
     <Define key="Strategy"    value="Sequential"/>
