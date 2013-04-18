@@ -157,12 +157,16 @@
 						<Param name="ref" value="IPHeader"/>
 					</Fixup>
 				</Number>
-				<Blob name="SrcIP" value="##SourceIPv4##">
-					<Transformer class="Ipv4StringToNetworkOctet"/>
-				</Blob>
-				<Blob name="DestIP" value="##TargetIPv4##">
-					<Transformer class="Ipv4StringToNetworkOctet"/>
-				</Blob>
+				<Block name="SrcBlock" length="4"> <!--Used for cracking-->
+					<String name="SrcIP" value="##SourceIPv4##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
+				<Block name="DstBlock" length="4"> <!--Used for cracking-->
+					<String name="DestIP" value="##TargetIPv4##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
       </Block>
       <Block name="OSPFMessage">
 				<Relation type="size" from="OSPFPacketLength"/>
@@ -171,9 +175,11 @@
 				<Number name="OSPFPacketLength" size="16" endian="big">
 					<Relation type="size" of="OSPFMessage"/>
 				</Number>
-				<Blob name="OSPFRouterID" value="##OSPFSourceRouter##">
-					<Transformer class="Ipv4StringToNetworkOctet"/>
-				</Blob>
+				<Block name="OSPFRouterIDBlock" length="4"> <!--Used for cracking-->
+					<String name="OSPFRouterID" value="##OSPFSourceRouter##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
 				<Number name="OSPFAreaID" size="32" endian="big" valueType="hex" value="##OSPFAreaID##"/>
 				<Number name="OSPFChecksum" size="16"> 
 					<Fixup class="IcmpChecksumFixup">
@@ -207,9 +213,11 @@
     <Number name="OSPFMessage.OSPFData.DesignatedRouterID" size="32" endian="big" valueType="hex" value="##OSPFRouterID##"/>
     <Number name="OSPFMessage.OSPFData.BackupDesignatedRouterID" size="32" endian="big" valueType="hex" value="##BackUpRouterID##"/>
     <Block name="OSPFMessage.OSPFData.ActiveNeighbors">
-      <Blob name="neighbor" value="##OSPFNeighbor##">
-				<Transformer class="Ipv4StringToNetworkOctet"/>
-      </Blob>
+			<Block name="NeighborIPBlock" length="4"> <!--Used for cracking-->
+				<String name="neighbor" value="##OSPFNeighbor##">
+					<Transformer class="Ipv4StringToOctet"/>
+				</String>
+			</Block>
     </Block>
   </DataModel>
   

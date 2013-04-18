@@ -24,18 +24,26 @@
 		<Flags size="16">
 			<Flag name="BroadCast" size="1" position="0"/>
 		</Flags>
-		<Blob name="CIAddr" value="##SourceIPv4##">
-			<Transformer class="Ipv4StringToNetworkOctet"/>
-		</Blob>
-		<Blob name="YIAddr"  value="##SourceIPv4##">
-			<Transformer class="Ipv4StringToNetworkOctet"/>
-		</Blob>
-		<Blob name="SIAddr" value="##TargetIPv4##">
-			<Transformer class="Ipv4StringToNetworkOctet"/>
-		</Blob>
-		<Blob name="GIAddr"  value="##TargetIPv4##">
-			<Transformer class="Ipv4StringToNetworkOctet"/>
-		</Blob>
+		<Block name="CIAddrBlock" length="4"> <!--Used for cracking-->
+			<String name="CIAddr" value="##SourceIPv4##">
+				<Transformer class="Ipv4StringToOctet"/>
+			</String>
+		</Block>
+		<Block name="YIAddrBlock" length="4"> <!--Used for cracking-->
+			<String name="YIAddr"  value="##SourceIPv4##">
+				<Transformer class="Ipv4StringToOctet"/>
+			</String>
+		</Block>
+		<Block name="SIAddrBlock" length="4"> <!--Used for cracking-->
+			<String name="SIAddr" value="##TargetIPv4##">
+				<Transformer class="Ipv4StringToOctet"/>
+			</String>
+		</Block>
+		<Block name="GIAddrBlock" length="4"> <!--Used for cracking-->
+			<String name="GIAddr"  value="##TargetIPv4##">
+				<Transformer class="Ipv4StringToOctet"/>
+			</String>
+		</Block>
 		<Block name="ClientMacAndPadding">
 			<Block name="ClientBlock">
 				<Blob name="ClientMacAddr1" valueType="hex" value="0800c0565000"/>
@@ -50,9 +58,11 @@
 	
   <DataModel name="DHCPv4Request" ref="DHCPv4">
     <Number name="OpCode" size="8" endian="big" value="0x01"/>
-		<Blob name="CIAddr" value="##SourceIPv4##">
-			<Transformer class="Ipv4StringToNetworkOctet"/>
-		</Blob>
+		<Block name="CIAddrBlock" length="4"> <!--Used for cracking-->
+			<String name="CIAddr" value="##SourceIPv4##">
+				<Transformer class="Ipv4StringToOctet"/>
+			</String>
+		</Block>
 		<Blob name="YIAddr" length="4"/>
 		<Blob name="SIAddr" length="4"/>
 		<Blob name="GIAddr" length="4"/>
@@ -130,9 +140,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="DHCPServerIP" value="##DHCPServerIP##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="DhcpServerIPBlock" length="4"> <!--Used for cracking-->
+						<String name="DHCPServerIP" value="##DHCPServerIP##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Block name="SubnetMask" ref="Options">
@@ -141,9 +153,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="SubnetMask" value="##SubnetMask##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="SubnetMaskBlock" length="4"> <!--Used for cracking-->
+						<String name="SubnetMask" value="##SubnetMask##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Block name="BroadcastAddress" ref="Options">
@@ -152,9 +166,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="BcastAddr" value="##BroadcastIP##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="BcastAddrBlock" length="4"> <!--Used for cracking-->
+						<String name="BcastAddr" value="##BroadcastIP##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Block name="Router" ref="Options">
@@ -163,9 +179,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="RouterIP" value="##RouterIP##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="RouterIPBlock" length="4"> <!--Used for cracking-->
+						<String name="RouterIP" value="##RouterIP##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Block name="DomainName" ref="Options">
@@ -183,9 +201,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="DNSIP" value="##DNS##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="DNSIPBlock" length="4"> <!--Used for cracking-->
+						<String name="DNSIP" value="##DNS##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Block name="NetBiosNameServer" ref="Options">
@@ -194,9 +214,11 @@
 					<Relation type="size" of="Value"/>
 				</Number>
 				<Block name="Value">
-					<Blob name="NetBios" value="##NetBios##">
-						<Transformer class="Ipv4StringToNetworkOctet"/>
-					</Blob>
+					<Block name="NetBiosBlock" length="4"> <!--Used for cracking-->
+						<String name="NetBios" value="##NetBios##">
+							<Transformer class="Ipv4StringToOctet"/>
+						</String>
+					</Block>
 				</Block>
 			</Block>
 			<Number name="End" size="8" value="255"/>

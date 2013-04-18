@@ -61,9 +61,11 @@
 						<Number name="AddressValueLength" size="8">
 							<Relation type="size" of="AddressTlvValue"/>
 						</Number>
-						<String name="AddressTlvValue" value="##SourceIPv4##">
-							<Transformer class="Ipv4StringToNetworkOctet"/>
-						</String>
+						<Block name="AddressTlvValueBlock" length="4">
+							<String name="AddressTlvValue" value="##SourceIPv4##">
+								<Transformer class="Ipv4StringToOctet"/>
+							</String>
+						</Block>
 					</Block>
 				</Block>
 				
