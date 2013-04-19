@@ -164,25 +164,25 @@ namespace PeachFarm.Controller
 			Debug.WriteLine(body);
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					StartPeach(StartPeachRequest.Deserialize(body), replyQueue);
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					StopPeach(StopPeachRequest.Deserialize(body), replyQueue);
 					break;
-				case "Heartbeat":
+				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
-				case "ListNodes":
+				case Actions.ListNodes:
 					ListNodes(ListNodesRequest.Deserialize(body), replyQueue);
 					break;
-				case "ListErrors":
+				case Actions.ListErrors:
 					ListErrors(ListErrorsRequest.Deserialize(body), replyQueue);
 					break;
-				case "JobInfo":
+				case Actions.JobInfo:
 					JobInfo(JobInfoRequest.Deserialize(body), replyQueue);
 					break;
-				case "Monitor":
+				case Actions.Monitor:
 					Monitor(MonitorRequest.Deserialize(body), replyQueue);
 					break;
 				default:
@@ -197,22 +197,22 @@ namespace PeachFarm.Controller
 			ResponseBase response = null;
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					response = new StartPeachResponse();
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					response = new StopPeachResponse();
 					break;
-				case "ListNodes":
+				case Actions.ListNodes:
 					response = new ListNodesResponse();
 					break;
-				case "ListErrors":
+				case Actions.ListErrors:
 					response = new ListErrorsResponse();
 					break;
-				case "JobInfo":
+				case Actions.JobInfo:
 					response = new JobInfoResponse();
 					break;
-				case "Monitor":
+				case Actions.Monitor:
 					response = new MonitorResponse();
 					break;
 				default:
@@ -250,13 +250,13 @@ namespace PeachFarm.Controller
 					response.ErrorMessage = String.Format("Cannot stop job {0}", request.JobID);
 				}
 			}
-			Reply(response.Serialize(), "StopPeach", replyQueue);
+			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
 
 		}
 
 		private void StartPeach(StartPeachRequest request, string replyQueue)
 		{
-			string action = "StartPeach";
+			string action = Actions.StartPeach;
 			request.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
 			// moving this to Admin
@@ -376,7 +376,7 @@ namespace PeachFarm.Controller
 		{
 			ListNodesResponse response = new ListNodesResponse();
 			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
-			Reply(response.Serialize(), "ListNodes", replyQueue);
+			Reply(response.Serialize(), Actions.ListNodes, replyQueue);
 		}
 
 		private void ListErrors(ListErrorsRequest listErrorsRequest, string replyQueue)
@@ -385,13 +385,13 @@ namespace PeachFarm.Controller
 			//response.Nodes = errors;
 			if (String.IsNullOrEmpty(listErrorsRequest.JobID))
 			{
-				response.Nodes = DatabaseHelper.GetErrors(config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 			}
 			else
 			{
-				response.Nodes = DatabaseHelper.GetErrors(listErrorsRequest.JobID, config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetErrors(listErrorsRequest.JobID, config.MongoDb.ConnectionString);
 			}
-			Reply(response.Serialize(), "ListErrors", replyQueue);
+			Reply(response.Serialize(), Actions.ListErrors, replyQueue);
 		}
 
 		private void JobInfo(JobInfoRequest request, string replyQueue)
@@ -401,7 +401,7 @@ namespace PeachFarm.Controller
 			if (mongoJob == null)
 			{
 				response.Success = false;
-				response.Message = String.Format("Job {0} does not exist.", request.JobID);
+				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
 			}
 			else
 			{
@@ -411,7 +411,7 @@ namespace PeachFarm.Controller
 				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
 			}
 
-			Reply(response.Serialize(), "JobInfo", replyQueue);
+			Reply(response.Serialize(), Actions.JobInfo, replyQueue);
 		}
 
 		private void Monitor(MonitorRequest request, string replyQueue)
@@ -427,7 +427,7 @@ namespace PeachFarm.Controller
 
 			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 
-			Reply(response.Serialize(), "Monitor", replyQueue);
+			Reply(response.Serialize(), Actions.Monitor, replyQueue);
 		}
 		#endregion
 

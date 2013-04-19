@@ -21,7 +21,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class Home : System.Web.UI.Page
+  public partial class Home : BasePage
   {
     private static PeachFarm.Admin.Admin admin = null;
     private static AdminSection adminconfig = null;
@@ -95,7 +95,7 @@ namespace PeachFarmMonitor
         jvms = new List<JobViewModel>();
         foreach (Job job in jobs)
         {
-          //job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+          job.FillNodes(monitorconfig.MongoDb.ConnectionString);
           //job.FillFaults(monitorconfig.MongoDb.ConnectionString);
 
           job.StartDate = job.StartDate.ToLocalTime();
@@ -110,7 +110,8 @@ namespace PeachFarmMonitor
             jvm = new JobViewModel(job);
           }
           var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-          jvm.FaultCount = collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count();
+          jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
+          jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
           collection.Database.Server.Disconnect();
           jvms.Add(jvm);
         }

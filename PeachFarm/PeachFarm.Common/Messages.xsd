@@ -118,7 +118,7 @@
 		<xs:complexContent>
 			<xs:extension base="ResponseBase">
 				<xs:sequence>
-					<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+					<xs:element name="Errors" maxOccurs="1" minOccurs="1">
 						<xs:complexType>
 							<xs:sequence>
 								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
@@ -140,7 +140,6 @@
 		<xs:complexContent>
 			<xs:extension base="ResponseBase">
 				<xs:sequence>
-					<xs:element name="Message" type="xs:string" maxOccurs="1" minOccurs="1" />
 					<xs:element name="Job" type="Job" maxOccurs="1" minOccurs="1"/>
 					<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
 						<xs:complexType>
@@ -150,7 +149,6 @@
 						</xs:complexType>
 					</xs:element>
 				</xs:sequence>
-				<xs:attribute name="Success" type="xs:boolean" default="true" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>

@@ -9,13 +9,13 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using PeachFarm.Admin.Configuration;
 using PeachFarm.Common.Mongo;
-using PeachFarmMonitor.Common;
+using PeachFarm.Common;
 using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.Reports;
 
 namespace PeachFarmMonitor
 {
-  public partial class GetJobOutput : System.Web.UI.Page
+  public partial class GetJobOutput : BasePage
   {
     private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
@@ -26,7 +26,7 @@ namespace PeachFarmMonitor
       {
         string jobID = Request.QueryString["jobid"];
         string filepath = Request.QueryString["file"];
-        
+
         if (String.IsNullOrEmpty(filepath) == false && String.IsNullOrEmpty(jobID))
         {
           jobID = filepath.Substring(4, 12);
@@ -36,7 +36,7 @@ namespace PeachFarmMonitor
         {
           adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
           monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
-
+          
           Job job = DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);
           if (job != null)
           {
@@ -47,21 +47,22 @@ namespace PeachFarmMonitor
 
               FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job);
               string zippath = ZipWriter.GetZip(job, temppath);
+              ((List<string>)Session["tempfiles"]).Add(zippath);
 
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
               Response.ContentType = "application/zip";
               Response.WriteFile(zippath);
-              File.Delete(zippath);
             }
             else
             {
-              var temppath = Path.GetTempFileName();
+              filepath = filepath.Replace('/', '\\');
+              var temppath = GetTempFile();
               DatabaseHelper.DownloadFromGridFS(temppath, filepath, monitorconfig.MongoDb.ConnectionString);
               string filename = Path.GetFileName(filepath);
+
               Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
               Response.ContentType = "text/plain";
               Response.WriteFile(temppath);
-              File.Delete(temppath);
             }
           }
         }

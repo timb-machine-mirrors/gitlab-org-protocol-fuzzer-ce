@@ -165,10 +165,32 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
-		public static List<Messages.Heartbeat> GetErrors(string connectionString)
+		public static void ClearJobsWithZeroIterations(string connectionString)
 		{
-			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
+			var jobs = DatabaseHelper.GetAllJobs(connectionString);
+			List<Job> jobsToDelete = new List<Job>();
+			foreach (var job in jobs)
+			{
+				job.FillNodes(connectionString);
+				var iterationcount = (from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum();
+				if (iterationcount == 0)
+				{
+					jobsToDelete.Add(job);
+				}
+			}
+
+			MongoCollection<Job> jobsCollection = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			MongoCollection<Node> nodesCollection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+
+			foreach (var job in jobsToDelete)
+			{
+				var jobsQuery = Query.EQ("_id", job._id);
+				jobsCollection.Remove(jobsQuery);
+
+				var nodesQuery = Query.EQ("JobID", job.JobID);
+				nodesCollection.Remove(nodesQuery);
+			}
+			jobsCollection.Database.Server.Disconnect();
 		}
 
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
@@ -271,9 +293,24 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			if (db.GridFS.Exists(remoteFile))
+
+			MongoDB.Bson.BsonObjectId remoteFileID = MongoDB.Bson.BsonObjectId.Empty;
+			bool isid = MongoDB.Bson.BsonObjectId.TryParse(remoteFile, out remoteFileID);
+
+			if (isid)
 			{
-				db.GridFS.Download(localFile, remoteFile);
+				if (db.GridFS.ExistsById(remoteFileID))
+				{
+					var fsinfo = db.GridFS.FindOneById(remoteFileID);
+					db.GridFS.Download(localFile, fsinfo.Name);
+				}
+			}
+			else
+			{
+				if (db.GridFS.Exists(remoteFile))
+				{
+					db.GridFS.Download(localFile, remoteFile);
+				}
 			}
 
 			server.Disconnect();

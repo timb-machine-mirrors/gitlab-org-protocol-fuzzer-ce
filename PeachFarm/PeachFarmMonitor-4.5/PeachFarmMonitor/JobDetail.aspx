@@ -22,8 +22,8 @@
 	  }
     #title
     {
-      background: #333333;
-      color: white;
+      background: #dcdcdc;
+      color: black;
       position:absolute;
       top:0;
       left:0;
@@ -54,6 +54,7 @@
       float:right;
       height:32px;
       width:300px;
+      margin-top: -1px;
     }
 
     .RadGrid_DejaVu .rgPageFirst
@@ -201,14 +202,6 @@
       <asp:ObjectDataSource ID="faultBucketsDS" runat="server" SelectMethod="GetFaultBuckets" TypeName="PeachFarmMonitor.JobDetailData">
         <SelectParameters>
           <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
-        </SelectParameters>
-      </asp:ObjectDataSource>
-      <asp:ObjectDataSource ID="faultsDS" runat="server" SelectMethod="GetFaults" TypeName="PeachFarmMonitor.JobDetailData" >
-        <SelectParameters>
-          <asp:QueryStringParameter Name="jobID" QueryStringField="jobid" Type="String" />
-          <asp:Parameter Name="faultBucketName" Type="String" />
-          <asp:Parameter Name="pageSize" Type="Int32" />
-          <asp:Parameter Name="pageIndex" Type="Int32" />
         </SelectParameters>
       </asp:ObjectDataSource>
     </div>
