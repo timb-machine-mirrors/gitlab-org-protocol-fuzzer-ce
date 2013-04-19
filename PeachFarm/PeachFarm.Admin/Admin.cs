@@ -56,7 +56,7 @@ namespace PeachFarm.Admin
 		{
 			ProcessAction(e.Action, e.Body);
 			rabbit.StopListener();
-			rabbit.CloseConnection();
+			//rabbit.CloseConnection();
 			this.IsListening = false;
 		}
 
@@ -283,8 +283,8 @@ namespace PeachFarm.Admin
 
 			if (Path.GetExtension(pitFilePath) == ".zip")
 			{
-				string remoteFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
-				request.ZipID = DatabaseHelper.SaveFileToGridFS(pitFilePath, remoteFile, config.MongoDb.ConnectionString);
+				request.ZipFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+				DatabaseHelper.SaveFileToGridFS(pitFilePath, request.ZipFile, config.MongoDb.ConnectionString);
 			}
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 			PublishToServer(request.Serialize(), Actions.StartPeach);

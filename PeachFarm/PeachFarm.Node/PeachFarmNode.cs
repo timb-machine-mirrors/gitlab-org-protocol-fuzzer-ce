@@ -32,13 +32,13 @@ namespace PeachFarm.Node
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			#endregion
+			Environment.CurrentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 
 			#region node state
 			nodeState = new NodeState((Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node"));
 			#endregion
 
-			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
-
+			
 			rabbit = new RabbitMqHelper(nodeState.RabbitMq.HostName, nodeState.RabbitMq.Port, nodeState.RabbitMq.UserName, nodeState.RabbitMq.Password, nodeState.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(nodeState.ClientQueueName);
@@ -46,6 +46,8 @@ namespace PeachFarm.Node
 			heartbeat = new System.Timers.Timer(10000);
 			heartbeat.Elapsed += (o, e) => { SendHeartbeat(); };
 			heartbeat.Start();
+
+			nlog.Info("Peach Farm Node connected.\nController: {0}\nRabbitMQ: {1}\nDirectory: {2}", nodeState.ServerQueueName, nodeState.RabbitMq.HostName, Environment.CurrentDirectory);
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -116,7 +118,7 @@ namespace PeachFarm.Node
 
 				#region deregister from RabbitMQ
 				rabbit.StopListener();
-				rabbit.CloseConnection();
+				//rabbit.CloseConnection();
 				#endregion
 
 			}
@@ -216,7 +218,7 @@ namespace PeachFarm.Node
 		{
 			if (nodeState.Status == Status.Running)
 			{
-				if ((request != null) && (request.JobID != nodeState.JobID))
+				if ((request != null) && (request.JobID != nodeState.StartPeachRequest.JobID))
 					return;
 					
 				StopFuzzer();
@@ -228,30 +230,25 @@ namespace PeachFarm.Node
 		{
 			if (nodeState.Status == Status.Running)
 			{
-				SendHeartbeat(CreateHeartbeat(String.Format("Node {0} is already running Job {1}", nodeState.IPAddress, nodeState.JobID)));
+				SendHeartbeat(CreateHeartbeat(String.Format("Node {0} is already running Job {1}", nodeState.IPAddress, nodeState.StartPeachRequest.JobID)));
 				return;
 			}
 
-			nodeState.MongoDbConnectionString = request.MongoDbConnectionString;
-			nodeState.JobID = request.JobID;
-			nodeState.PitFileName = request.PitFileName;
-			nodeState.UserName = request.UserName;
-			nodeState.Seed = request.Seed;
+			nodeState.StartPeachRequest = request;
 
 			ChangeStatus(Status.Running);
 
-
-			nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.JobID, request.PitFileName + ".xml");
+			nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml");
 			
 			if(String.IsNullOrEmpty(request.Defines) == false)
 			{
-				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.JobID, request.PitFileName + ".xml.config");
+				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml.config");
 			}
 
-			if (String.IsNullOrEmpty(request.ZipID) == false)
+			if (String.IsNullOrEmpty(request.ZipFile) == false)
 			{
-				string localfile = Path.Combine(Path.GetDirectoryName(nodeState.PitFilePath), nodeState.PitFileName + ".zip");
-				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, request.ZipID, nodeState.MongoDbConnectionString);
+				string localfile = Path.Combine(Path.GetDirectoryName(nodeState.PitFilePath), nodeState.StartPeachRequest.PitFileName + ".zip");
+				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, request.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
 				var zip = Ionic.Zip.ZipFile.Read(localfile);
 				zip.ExtractAll(Path.GetDirectoryName(nodeState.PitFilePath), Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
 			}
@@ -283,7 +280,7 @@ namespace PeachFarm.Node
 			Peach.Core.Dom.Dom dom = null;
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
-
+			string jobid = nodeState.StartPeachRequest.JobID;
 			try
 			{
 				Dictionary<string, object> parserArgs = new Dictionary<string, object>();
@@ -306,13 +303,13 @@ namespace PeachFarm.Node
 			List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
 
 
-			if (String.IsNullOrEmpty(nodeState.MongoDbConnectionString) == false)
+			if (String.IsNullOrEmpty(nodeState.StartPeachRequest.MongoDbConnectionString) == false)
 			{
 				Dictionary<string, Peach.Core.Variant> mongoargs = new Dictionary<string, Peach.Core.Variant>();
-				mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(nodeState.MongoDbConnectionString));
-				mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.JobID.ToString()));
-				mongoargs.Add("UserName", new Peach.Core.Variant(nodeState.UserName));
-				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.PitFileName));
+				mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(nodeState.StartPeachRequest.MongoDbConnectionString));
+				mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.StartPeachRequest.JobID));
+				mongoargs.Add("UserName", new Peach.Core.Variant(nodeState.StartPeachRequest.UserName));
+				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.StartPeachRequest.PitFileName));
 
 				loggers.Add(new Loggers.MongoLogger(mongoargs));
 			}
@@ -326,14 +323,15 @@ namespace PeachFarm.Node
 			Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
 			config.pitFile = nodeState.PitFilePath;
 			config.debug = false;
-			if (nodeState.Seed > 0)
+			if (nodeState.StartPeachRequest.Seed > 0)
 			{
-				config.randomSeed = nodeState.Seed;
+				config.randomSeed = nodeState.StartPeachRequest.Seed;
 			}
 
 			try
 			{
 				peach.startFuzzing(dom, config);
+
 			}
 			catch (Peach.Core.PeachException pex)
 			{
@@ -346,8 +344,7 @@ namespace PeachFarm.Node
 			finally
 			{
 				Environment.CurrentDirectory = nodeState.RootDirectory;
-
-				string temppath = Path.Combine(Environment.CurrentDirectory, "jobtmp", nodeState.JobID);
+				string temppath = Path.Combine(Environment.CurrentDirectory, "jobtmp", jobid);
 				if (Directory.Exists(temppath))
 				{
 					try
@@ -363,19 +360,19 @@ namespace PeachFarm.Node
 		#region Peach Event Handlers
 		void peach_TestStarting(Peach.Core.RunContext context)
 		{
-			nlog.Info("Test Starting: {0} | Seed: {0}", nodeState.JobID, context.config.randomSeed.ToString());
+			nlog.Info("Test Starting: {0} | Seed: {0}", nodeState.StartPeachRequest.JobID, context.config.randomSeed.ToString());
 			nodeState.RunContext = context;
 		}
 
 		void peach_TestFinished(Peach.Core.RunContext context)
 		{
-			nlog.Info("Test Finished: " + nodeState.JobID.ToString());
+			nlog.Info("Test Finished: " + nodeState.StartPeachRequest.JobID);
 			StopPeach();
 		}
 
 		void peach_TestError(Peach.Core.RunContext context, Exception e)
 		{
-			string message = String.Format("Test Error: {0}\n{1}", nodeState.JobID.ToString(), e.Message);
+			string message = String.Format("Test Error: {0}\n{1}", nodeState.StartPeachRequest.JobID, e.Message);
 			StopPeach(message);
 		}
 		#endregion
@@ -386,9 +383,9 @@ namespace PeachFarm.Node
 			heartbeat.NodeName = nodeState.IPAddress;
 			if (nodeState.Status == Common.Messages.Status.Running)
 			{
-				heartbeat.JobID = nodeState.JobID;
-				heartbeat.UserName = nodeState.UserName;
-				heartbeat.PitFileName = nodeState.PitFileName;
+				heartbeat.JobID = nodeState.StartPeachRequest.JobID;
+				heartbeat.UserName = nodeState.StartPeachRequest.UserName;
+				heartbeat.PitFileName = nodeState.StartPeachRequest.PitFileName;
 				if (nodeState.RunContext != null)
 				{
 					if (nodeState.RunContext.config != null)
@@ -576,12 +573,7 @@ namespace PeachFarm.Node
 					switch (value)
 					{
 						case Status.Alive:
-							MongoDbConnectionString = String.Empty;
-							PitFilePath = String.Empty;
-							DefinesFilePath = String.Empty;
-							JobID = String.Empty;
-							UserName = "";
-							PitFileName = String.Empty;
+							this.StartPeachRequest = null;
 							RunContext = null;
 							break;
 					}
@@ -589,28 +581,23 @@ namespace PeachFarm.Node
 			}
 		}
 
+		internal string Tags { get; private set; }
+
 		internal RabbitMqElement RabbitMq { get; private set; }
+
+		internal StartPeachRequest StartPeachRequest { get; set; }
 
 		internal string IPAddress { get; private set; }
 
 		internal string ClientQueueName { get; private set; }
 		internal string ServerQueueName { get; private set; }
 
-		internal string MongoDbConnectionString { get; set; }
+		internal Peach.Core.RunContext RunContext { get; set; }
+
+		internal string RootDirectory { get; set; }
 
 		internal string PitFilePath { get; set; }
 		internal string DefinesFilePath { get; set; }
-
-		internal uint Seed { get; set; }
-
-		internal string PitFileName { get; set; }
-		internal Peach.Core.RunContext RunContext { get; set; }
-		//internal Guid JobID { get; set; }
-		internal string JobID { get; set; }
-		internal string UserName { get; set; }
-		internal string Tags { get; set; }
-
-		internal string RootDirectory { get; set; }
 	}
 
 	public class StatusChangedEventArgs : EventArgs

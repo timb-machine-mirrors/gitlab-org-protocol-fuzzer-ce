@@ -29,7 +29,7 @@
     <xs:attribute name="PitFileName" type="xs:string" use="required" />
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
-		<xs:attribute name="ZipID" type="xs:string" use="required" />
+		<xs:attribute name="ZipFile" type="xs:string" use="required" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />

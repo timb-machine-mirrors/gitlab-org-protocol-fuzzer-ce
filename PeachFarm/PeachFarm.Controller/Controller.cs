@@ -87,7 +87,7 @@ namespace PeachFarm.Controller
 		{
 			IsOpen = false;
 			rabbit.StopListener();
-			rabbit.CloseConnection();
+			//rabbit.CloseConnection();
 		}
 
 		private void StatusCheck(object state)
@@ -441,6 +441,7 @@ namespace PeachFarm.Controller
 			mongoJob.UserName = request.UserName;
 			mongoJob.Pit.FileName = request.PitFileName;
 			mongoJob.Pit.FullText = request.Pit;
+			mongoJob.ZipFile = request.ZipFile;
 
 			string text = request.Pit;
 			if (text.StartsWith("<!"))

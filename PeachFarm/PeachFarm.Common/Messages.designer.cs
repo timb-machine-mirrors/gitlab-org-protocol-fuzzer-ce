@@ -2630,7 +2630,7 @@ namespace PeachFarm.Common.Messages
 
 		private string tagsField;
 
-		private string zipIDField;
+		private string zipFileField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -2765,15 +2765,15 @@ namespace PeachFarm.Common.Messages
 		}
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
-		public string ZipID
+		public string ZipFile
 		{
 			get
 			{
-				return this.zipIDField;
+				return this.zipFileField;
 			}
 			set
 			{
-				this.zipIDField = value;
+				this.zipFileField = value;
 			}
 		}
 

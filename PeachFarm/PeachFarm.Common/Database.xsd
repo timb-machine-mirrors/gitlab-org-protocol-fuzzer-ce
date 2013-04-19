@@ -5,10 +5,7 @@
     xmlns="http://phed.org/2012/PeachFarm/Database"
     xmlns:mstns="http://phed.org/2012/PeachFarm/Database"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:ms="http://microsoft.com/wsdl/types/"
 >
-  <xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="Guid.xsd" />
-  
   <xs:element name="Job" type="Job" />
 
   <xs:complexType name="Job">
@@ -20,7 +17,7 @@
     <xs:attribute name="StartDate" type="xs:dateTime" use="required" />
 		<xs:attribute name="PeachVersion" type="xs:string" use="required" />
 		<xs:attribute name="Tags" type="xs:string" use="required" />
-		<xs:attribute name="ZipID" type="xs:string" use="required" />
+		<xs:attribute name="ZipFile" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="Pit">
