@@ -10,6 +10,9 @@ inst = 'output'
 appname = 'epeach'
 maxdepth = 2
 
+def supported_variant(name):
+	return True
+
 def init(ctx):
 	wscript.init(ctx)
 
@@ -36,6 +39,3 @@ def build(ctx):
 			pass
 
 	wscript.build(ctx)
-
-def go(ctx):
-	wscript.go(ctx)
