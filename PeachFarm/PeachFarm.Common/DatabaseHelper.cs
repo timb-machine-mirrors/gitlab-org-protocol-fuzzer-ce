@@ -227,7 +227,12 @@ namespace PeachFarm.Common.Mongo
 		public static List<Heartbeat> GetAllErrors(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
+			var results = collection.FindAll().SetSortOrder(SortBy.Descending("Stamp")).ToList();
+			foreach (var result in results)
+			{
+				result.Stamp = result.Stamp.ToLocalTime();
+			}
+			return results;
 		}
 
 		public static List<Heartbeat> GetAllNodes(string connectionString)
