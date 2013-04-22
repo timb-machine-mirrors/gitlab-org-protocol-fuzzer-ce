@@ -32,6 +32,7 @@
 		<xs:attribute name="JobID" type="xs:string" use="required" />
 		<xs:attribute name="Name" type="xs:string" use="required" />
 		<xs:attribute name="IterationCount" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="FaultCount" type="xs:unsignedInt" use="required" />
 		<xs:attribute name="SeedNumber" type="xs:unsignedInt" use="required" />
 		<xs:attribute name="Tags" type="xs:string" use="required" />
 	</xs:complexType>

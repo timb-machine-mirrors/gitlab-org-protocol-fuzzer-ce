@@ -206,12 +206,9 @@ namespace PeachFarm.Node
 
 		private void StopPeach(string errorMessage)
 		{
-			if (nodeState.Status == Status.Running)
-			{
-				SendHeartbeat(CreateHeartbeat(errorMessage));
-				nlog.Error(errorMessage);
-				StopPeach();
-			}
+			SendHeartbeat(CreateHeartbeat(errorMessage));
+			nlog.Error(errorMessage);
+			StopPeach();
 		}
 
 		private void StopPeach(StopPeachRequest request = null)
@@ -222,7 +219,6 @@ namespace PeachFarm.Node
 					return;
 					
 				StopFuzzer();
-				ChangeStatus(Status.Alive);
 			}
 		}
 
@@ -353,6 +349,9 @@ namespace PeachFarm.Node
 					}
 					catch { }
 				}
+				nodeState.RunContext = null;
+				nodeState.StartPeachRequest = null;
+				ChangeStatus(Common.Messages.Status.Alive);
 			}
 		}
 		#endregion
@@ -367,13 +366,11 @@ namespace PeachFarm.Node
 		void peach_TestFinished(Peach.Core.RunContext context)
 		{
 			nlog.Info("Test Finished: " + nodeState.StartPeachRequest.JobID);
-			StopPeach();
 		}
 
 		void peach_TestError(Peach.Core.RunContext context, Exception e)
 		{
-			string message = String.Format("Test Error: {0}\n{1}", nodeState.StartPeachRequest.JobID, e.Message);
-			StopPeach(message);
+			nlog.Error("Test Error: {0}\n{1}", nodeState.StartPeachRequest.JobID, e.Message);
 		}
 		#endregion
 
@@ -439,7 +436,6 @@ namespace PeachFarm.Node
 				{
 					nodeState.RunContext.continueFuzzing = false;
 				}
-				nodeState.RunContext = null;
 			}
 		}
 
@@ -570,13 +566,6 @@ namespace PeachFarm.Node
 				if (statusField != value)
 				{
 					statusField = value;
-					switch (value)
-					{
-						case Status.Alive:
-							this.StartPeachRequest = null;
-							RunContext = null;
-							break;
-					}
 				}
 			}
 		}

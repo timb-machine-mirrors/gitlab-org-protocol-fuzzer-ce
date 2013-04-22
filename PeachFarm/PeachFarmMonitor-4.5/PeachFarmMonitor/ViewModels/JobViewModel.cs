@@ -20,6 +20,16 @@ namespace PeachFarmMonitor.ViewModels
       this.Status = status;
 
       FaultBuckets = new List<FaultBucketViewModel>();
+      Nodes = new List<NodeViewModel>();
+      if (job.Nodes != null)
+      {
+        foreach (var node in job.Nodes)
+        {
+          Nodes.Add(new NodeViewModel(node));
+          IterationCount += node.IterationCount;
+          FaultCount += node.FaultCount;
+        }
+      }
     }
 
 

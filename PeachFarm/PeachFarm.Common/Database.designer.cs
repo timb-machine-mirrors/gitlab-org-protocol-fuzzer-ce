@@ -177,6 +177,8 @@ namespace PeachFarm.Common.Mongo
 
 		private uint iterationCountField;
 
+		private uint faultCountField;
+
 		private uint seedNumberField;
 
 		private string tagsField;
@@ -214,6 +216,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.iterationCountField = value;
+			}
+		}
+
+		public uint FaultCount
+		{
+			get
+			{
+				return this.faultCountField;
+			}
+			set
+			{
+				this.faultCountField = value;
 			}
 		}
 

@@ -72,6 +72,8 @@ namespace PeachFarm.Loggers
 			List<Fault> faults = GetMongoFaults(faultData, stateModel, context);
 			faults.SaveToDatabase(MongoConnectionString);
 
+			mongoNode.FaultCount++;
+			mongoNode.SaveToDatabase(MongoConnectionString);
 		}
 
 		/// <summary>
@@ -85,6 +87,9 @@ namespace PeachFarm.Loggers
 		{
 			List<Fault> faults = GetMongoFaults(faultData, stateModel, context, true);
 			faults.SaveToDatabase(MongoConnectionString);
+
+			mongoNode.FaultCount++;
+			mongoNode.SaveToDatabase(MongoConnectionString);
 		}
 
 		protected override void Engine_TestStarting(Peach.Core.RunContext context)
@@ -96,14 +101,11 @@ namespace PeachFarm.Loggers
 
 		protected override void Engine_TestFinished(Peach.Core.RunContext context)
 		{
-			mongoNode.IterationCount = IterationCount;
-			mongoNode.SaveToDatabase(MongoConnectionString);
 		}
 
 		protected override void Engine_IterationStarting(Peach.Core.RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			IterationCount = currentIteration;
-			mongoNode.IterationCount = IterationCount;
+			mongoNode.IterationCount = currentIteration;
 			mongoNode.SaveToDatabase(MongoConnectionString);
 		}
 		#endregion
