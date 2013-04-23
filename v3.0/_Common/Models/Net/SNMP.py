@@ -21,6 +21,6 @@ def set_variables(ctx):
 			if x[2].DefaultValue.ToString() == "":
 				x[0].DefaultValue = Peach.Core.Variant(0x06)
 				x[2].DefaultValue = Peach.Core.Variant((0x2b,0x06, 0x01, 0x04, 0x01, 0x8f, 0x51, 0x01, 0x01, 0x01, 0x82, 0x29, 0x5d, 0x01, 0x1b, 0x02, 0x02, 0x01))
-		
+		#Look into the value that is set and its meaning(s)
 		output['VariableBindings'] = vars_block.Clone()
 		

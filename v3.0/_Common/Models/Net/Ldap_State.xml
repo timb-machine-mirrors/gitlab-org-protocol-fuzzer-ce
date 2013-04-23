@@ -233,7 +233,7 @@
 				</Data>
       </Action>
 			
-			<Action name="Next" type="changeState" ref="NextTransaction2"/>
+			<Action name="Next" type="changeState" ref="NextTransaction"/>
 		</State>
 		
 		<State name="SearchResponse2">			

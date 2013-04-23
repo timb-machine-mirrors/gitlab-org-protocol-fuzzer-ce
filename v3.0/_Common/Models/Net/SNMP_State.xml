@@ -29,16 +29,20 @@
   </StateModel>
 	
 		<!-- NTP simple state model -->
-  <StateModel name="AgentToManager" initialState="Initial">
-    <State name="Initial">
+  <StateModel name="AgentToManager" initialState="LaunchClient">
+    <State name="LaunchClient">
+      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+			<Action type="changeState" ref="ServerStart"/>
+		</State>
+		
+		<State name="ServerStart">
       <Action name="SnmpGetRequest" type="input" publisher="UdpHandler">
         <DataModel ref="DataModels:SNMPHeaderV2_"/>
       </Action>
-      
+     
 			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpGetRequest//RequestId//Value" setXpath="//SnmpResponse//RequestId//Value"/>
 			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpGetRequest//Community//Value" setXpath="//SnmpResponse//Community//Value"/>
-		<!--	<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpGetRequest//VariableBindings" setXpath="//SnmpResponse//VariableBindings"/>
-     -->
+
 			<Action name="SnmpResponse" type="output" publisher="UdpHandler" onStart="SNMP.set_variables(self)">
 				<DataModel ref="DataModels:SNMPHeaderV2_"/>
 				<Data DataModel="DataModels:SNMPHeaderV2_">
