@@ -331,11 +331,11 @@ namespace PeachFarm.Node
 			}
 			catch (Peach.Core.PeachException pex)
 			{
-				StopPeach("PeachException:\n" + pex.ToString());
+				nlog.Error("PeachException:\n" + pex.ToString());
 			}
 			catch (Exception ex)
 			{
-				StopPeach("Unknown Exception from Peach:\n" + ex.Message);
+				nlog.Error("Unknown Exception from Peach:\n" + ex.Message);
 			}
 			finally
 			{
