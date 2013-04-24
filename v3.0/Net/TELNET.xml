@@ -18,6 +18,7 @@
 		<Publisher class="Tcp" name="TcpHandler">
 			<Param name="Host" value="##TargetIPv4##"/>
 			<Param name="Port" value="##TargetPort##"/>
+			<Param name="Timeout" value="1000"/>
 		</Publisher>
 		
 		<Strategy class="##Strategy##"/>

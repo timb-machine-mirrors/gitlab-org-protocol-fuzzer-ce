@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-		<Define key="UserPrompt" value="Ubuntu 12.04.2 LTS\r\n"/>
-		<Define key="Username" value="userv"/>
-
-		<Define key="PassPrompt" value="ubuntu login:"/>
-		<Define key="Password" value="server"/>
-
-		<Define key="CmdPrompt" value=":~$"/>
-		<Define key="Command" value="ls"/>
-	
+  <All>	
     <Define key="TargetPort"    value="23"/>
     <Define key="TargetIPv4"    value="192.168.146.128"/>
     <Define key="LoggerPath"  value="./logs/telnet/"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
 		<Define key="Path" value="."/>
 		
 		<Define key="ProgramPath" value="C:\Users\jordyn.DEJA\Downloads\"/>
