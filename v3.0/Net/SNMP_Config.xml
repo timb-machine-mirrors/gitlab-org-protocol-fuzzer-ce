@@ -2,11 +2,11 @@
 <PitDefines>
   <All>
     <Define key="SnmpSrcPort" value="161"/>
-    <Define key="SnmpPort"    value="161"/>
-    <Define key="SnmpHost"    value="localhost"/>
+    <Define key="SnmpPort"    value="0"/>
+    <Define key="SnmpHost"    value="192.168.146.1"/>
     <Define key="CommString"  value="public"/>
     <Define key="LoggerPath"  value="./logs/snmp/"/>
-    <Define key="Strategy"    value="Sequential"/>
+    <Define key="Strategy"    value="Random"/>
 		<Define key="Path"        value="."/>
   </All>
 </PitDefines>

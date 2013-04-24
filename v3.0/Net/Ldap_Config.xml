@@ -2,7 +2,7 @@
 <PitDefines>
 	<All>
 		<Define key="LoggerPath"  value="./logs/ldap"/> 
-		<Define key="Strategy"  value="Sequential"/>
+		<Define key="Strategy"  value="Random"/>
 		<Define key="TargetIP" value="192.168.146.128"/>
 		<Define key="Port" value="389"/>
 		<Define key="Password" value="password"/>

@@ -11,8 +11,8 @@
 		<Define key="Strategy" value="Random"/>
 		<Define key="TargetIPv4" value="192.168.2.11"/>
 		<Define key="SourceIPv4" value="192.168.2.13"/>
-		<Define key="TargetIP" value="::1"/>
-		<Define key="SourceIP" value="::1"/>
+		<Define key="TargetIPv6" value="::1"/>
+		<Define key="SourceIPv6" value="::1"/>
 		<Define key="EncryptionAlg" value="Aes128"/>
 		<Define key="CryptoKey" value="41414141414141414141414141414141"/>
 		<Define key="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> <!--AES128 IV sample baae9ef59ff1ee56211769bd91da50ed--> <!--3Des IV sample aeaeaeaeaeaeaeae"/>-->
