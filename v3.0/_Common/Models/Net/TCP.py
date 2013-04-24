@@ -34,8 +34,7 @@ def set_next_seq(ctx):
     if ctx.dataModel.find('SequenceNumber'):
         ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
     else:
-        ret = 0
-    ret = ret % (2**32)
+        ret = False
     return ret
 
 
@@ -70,23 +69,23 @@ def set_to_store(ctx, **kwarg):
 
 
 
-def get_store_int(ctx, name, size):
+def get_store_uint(ctx, name, size):
     # this is always returning a 32 bit int
     if name in ctx.parent.parent.parent.context.iterationStateStore:
-        return ctx.parent.parent.parent.context.iterationStateStore[name]
+        return ctx.parent.parent.parent.context.iterationStateStore[name] % (2**size)
     else:
         return (2**size) - 1 
 
 
 def get_store_uint16(ctx, name):
-    return get_store_int(ctx, name, 16)
+    return get_store_uint(ctx, name, 16)
 
 
 def get_store_uint32(ctx, name):
-    return get_store_int(ctx, name, 32)
+    return get_store_uint(ctx, name, 32)
 
 
-def set_default_from_store(ctx, name):
+def set_default_uint32_from_store(ctx, name):
     if ctx.dataModel.find(name):
         ctx.dataModel.find(name).DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, name))
     else:
@@ -95,22 +94,11 @@ def set_default_from_store(ctx, name):
     return True
 
 
-# def inc_stored_uint32(ctx, name, amount=1):
-#     val = ctx.parent.parent.parent.context.iterationStateStore[name]
-#     ctx.parent.parent.parent.context.iterationStateStore[name] = (val + amount) % (2**32)
-    
-
-# def inc_stored_uint32s(ctx, *args):
-#     for arg in args:
-#         inc_stored_uint32(ctx, arg)
-
-
 def get_if_ack_for_me(ctx):
     if ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber'):
         ret = int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == (get_store_uint32(ctx, 'NextSequenceNumber')) and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
     else:
-        ret = 0
-    ret = ret % (2**32)
+        ret = False
     return ret
 
 
