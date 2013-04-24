@@ -13,7 +13,7 @@
 	<!-- Implements: RFC 793 (http://tools.ietf.org/html/rfc793) -->
 	<!-- Currenlty supports fuzzing a listener, not acting as a listener -->
 		
-	<StateModel name="TheState" initialState="SendSyn">
+	<StateModel name="Listener" initialState="SendSyn">
 
 		<State name="SendSyn" >
 
@@ -52,15 +52,32 @@
 		</State>
 
 		<State name="Established" >
-			<Action type="changeState" ref="SendTestPayload"/>
+			<Action type="changeState" ref="WaitServerClose"/>
+			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
-		<!-- !!TODO!! -->
-		<!-- Add support for server closing first -->
-		<!-- Need to add tracking of all outgoing sequence numbers so any
-		     response to any packet can be handled. This is unneeded for
-		     the current projects. -->
+		<State name="WaitServerClose">
+			<Action name="GetPacket" type="input" 
+							onComplete="TCP.store_next_acknum(self)">
+				<DataModel name="Packet" ref="TCPv6:Packet"/>
+			</Action>
+			<Action name="GoToSendTestPayload"
+							type="changeState" ref="SendTestPayloadToClosedServer"
+							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+			<Action  name="ReadMore" type="changeState" ref="WaitServerClose" />
+		</State>
+
+		<State name="SendTestPayloadToClosedServer" >
+			<Action type="output"
+							onStart="TCP.sync_from_store(self)"
+							onComplete="TCP.set_next_seq(self)">
+				<Data ref="TCP:PSHACK"/>
+				<DataModel name="PSHPacket" ref="TCPv6:PacketWithData"/>
+			</Action>
+			<Action name="GoToClose" type="changeState" ref="SyncClose" />
+		</State>
+
 		<State name="SendTestPayload" >
 			<Action type="output"
 							onStart="TCP.sync_from_store(self)"
@@ -88,6 +105,15 @@
 		<!-- http://tools.ietf.org/html/rfc793#section-3.5 -->
 		<State name="BeginClose" >
 			<Action type="changeState" ref="Close"/>
+		</State>
+
+		<State name="SyncClose">
+			<Action name="Close" type="output"
+							onStart="TCP.sync_from_store(self)"
+							onComplete="TCP.set_next_seq(self)">
+				<Data ref="TCP:FINACK"/>
+				<DataModel name="Packet" ref="TCPv6:Packet"/>
+			</Action>
 		</State>
 
 		<State name="ImmediateClose">

@@ -15,8 +15,9 @@ def init_seq(ctx):
     seq = crc32(str(seed)) % (2**32)
     sport = seq % (65535 - 1024) + 1024 
     # print "Setting value" 
-    ctx.dataModel.find('SequenceNumber').DefaultValue = Peach.Core.Variant(seq)
-    ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(sport)
+    if ctx.dataModel.find('SequenceNumber') and ctx.dataModel.find('SrcPort'):
+        ctx.dataModel.find('SequenceNumber').DefaultValue = Peach.Core.Variant(seq)
+        ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(sport)
     ctx.dataModel.Value #this shouldn't need to be called in future
     # print "Storing value"
     try:
@@ -27,22 +28,35 @@ def init_seq(ctx):
 
 
 def set_next_seq(ctx):
-    ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(ctx.dataModel.find('TcpPayload').Value.Value) or 1))
-    #print "NextSeq == ", get_store_val(ctx, "NextSequenceNumber")
-    return ret 
+    payload_size = 1
+    if ctx.dataModel.find('TcpPayload'):
+        payload_size = len(ctx.dataModel.find('TcpPayload').Value.Value)
+    if ctx.dataModel.find('SequenceNumber'):
+        ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
+    else:
+        ret = False
+    return ret
 
 
 def sync_from_store(ctx):
-    ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(get_store_val(ctx, "SrcPort"))
-    if bool(int(ctx.dataModel.find('ACK').InternalValue)):
-        set_default_from_store(ctx, "AcknowledgmentNumber")
-    ctx.dataModel.find("SequenceNumber").DefaultValue = Peach.Core.Variant(get_store_val(ctx, "NextSequenceNumber"))
+    if ctx.dataModel.find('SrcPort'):
+        ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(get_store_uint16(ctx, "SrcPort"))
+    if ctx.dataModel.find('ACK') and bool(int(ctx.dataModel.find('ACK').InternalValue)):
+        set_default_uint32_from_store(ctx, "AcknowledgmentNumber")
+    if ctx.dataModel.find("SequenceNumber"):
+        ctx.dataModel.find("SequenceNumber").DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, "NextSequenceNumber"))
     ctx.dataModel.Value
 
 
 def store_next_acknum(ctx):
-    ret = set_to_store(ctx, AcknowledgmentNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(len(ctx.dataModel.find('TcpPayload').InternalValue.ToString()) or 1))
-    #print "AckNum == ", get_store_val(ctx, "AcknowledgmentNumber")
+    payload_size = 1
+    if ctx.dataModel.find('TcpPayload'):
+        payload_size = len(ctx.dataModel.find('TcpPayload').Value.Value)
+    if ctx.dataModel.find('SequenceNumber'):
+        ret = set_to_store(ctx, AcknowledgmentNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
+    else:
+        ret = 0
+    ret = ret % (2**32)
     return ret
                         
 
@@ -54,42 +68,47 @@ def set_to_store(ctx, **kwarg):
     return True
 
 
-def get_store_val(ctx, name):
+
+def get_store_uint(ctx, name, size):
+    # this is always returning a 32 bit int
     if name in ctx.parent.parent.parent.context.iterationStateStore:
-        return ctx.parent.parent.parent.context.iterationStateStore[name]
+        return ctx.parent.parent.parent.context.iterationStateStore[name] % (2**size)
+    else:
+        return (2**size) - 1 
+
+
+def get_store_uint16(ctx, name):
+    return get_store_uint(ctx, name, 16)
+
+
+def get_store_uint32(ctx, name):
+    return get_store_uint(ctx, name, 32)
+
+
+def set_default_uint32_from_store(ctx, name):
+    if ctx.dataModel.find(name):
+        ctx.dataModel.find(name).DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, name))
     else:
         return False
-
-
-def set_defaults_from_store(ctx, *args):
-    for arg in args:
-        set_default_from_store(ctx, arg)
-
-
-def set_default_from_store(ctx, name):
-    ctx.dataModel.find(name).DefaultValue = Peach.Core.Variant(get_store_val(ctx, name))
     ctx.dataModel.Value #this shouldn't need to be called in future
-
-
-def inc_stored_val(ctx, name, amount=1):
-    ctx.parent.parent.parent.context.iterationStateStore[name] += amount
-
-def inc_stored_vals(ctx, *args):
-    for arg in args:
-        inc_stored_val(ctx, arg)
+    return True
 
 
 def get_if_ack_for_me(ctx):
-    #print "AckNum ", int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString())
-    #print "Expected AckNum ", get_store_val(ctx, 'NextSequenceNumber')
-    ret = int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == (get_store_val(ctx, 'NextSequenceNumber')) and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
+    if ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber'):
+        ret = int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == (get_store_uint32(ctx, 'NextSequenceNumber')) and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
+    else:
+        ret = False
     return ret
 
 
 def set_timestamp(ctx):
-    ctx.dataModel.find('TimestampValue').DefaultValue = Peach.Core.Variant(get_cur_timestamp())
-    ctx.dataModel.Value
-    return True
+    if ctx.dataModel.find('TimestampValue'):
+        ctx.dataModel.find('TimestampValue').DefaultValue = Peach.Core.Variant(get_cur_timestamp())
+        ctx.dataModel.Value
+        return True
+    else:
+        return False
     
 
 def get_cur_timestamp():

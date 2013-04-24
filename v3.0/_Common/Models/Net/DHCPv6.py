@@ -15,7 +15,7 @@ def set_to_store(ctx, **kwarg):
         # print v
         # print "setting value with key %s to %s" % (k, hex(v))
         ctx.parent.parent.parent.context.iterationStateStore[k] = v
-    return True
+        return True
 
 
 def get_store_val(ctx, name):
@@ -38,11 +38,16 @@ def too_many_tries(ctx, maxtries):
 
 
 def is_solicit(ctx):
-    return int(ctx.parent.actions[0].dataModel.find('MsgType').InternalValue) == 1
-    
+    if ctx.parent.actions[0].dataModel.find('MsgType'):
+        return int(ctx.parent.actions[0].dataModel.find('MsgType').InternalValue) == 1
+    return False
+
+
 
 def is_request(ctx):
-    return int(ctx.parent.actions[0].dataModel.find('MsgType').InternalValue) == 3
+    if ctx.parent.actions[0].dataModel.find('MsgType'):
+        return int(ctx.parent.actions[0].dataModel.find('MsgType').InternalValue) == 3
+    return False
 
 
 def not_from_target(ctx, target):

@@ -109,8 +109,7 @@
 
 		<State name="SyncClose">
 			<Action name="Close" type="output"
-							onStart="TCP.sync_from_store(self)"
-							onComplete="TCP.set_next_seq(self)">
+							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
