@@ -8,6 +8,82 @@
 	<PythonPath path="##Path##/_Common/Models/Net/"/>
 	<Import import="TELNET"/>	
 
+	<StateModel name="HostToAgent" initialState="StartServer">
+		<State name="StartServer">
+      <Action type="start" publisher="TcpHandler"/>
+
+      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+
+      <Action type="accept" publisher="TcpHandler"/>
+
+			<Action name="Next" type="changeState" ref="ServerListen"/>
+    </State>
+		
+		<State name="ServerListen">
+			<Action name="TelnetReceive" type="input" publisher="TcpHandler">
+				<DataModel ref="DataModels:TelnetSingleOptionCrack"/>
+			</Action>
+			
+			<!--Switches state to SendNeg Opts when no more bytes are left to read-->
+			<Action name="Done" type="changeState" ref="SendPrompt" when="StateModel.states['ServerListen'].actions[0].dataModel.find('EmptyPacket') != None"/>
+			
+			<!--Skips send of reply if Sub Options i sent-->
+			<Action name="NoReplyNegOption" type="changeState" ref="ServerListen" when="StateModel.states['ServerListen'].actions[0].dataModel.find('command') == None or int(StateModel.states['ServerListen'].actions[0].dataModel.find('command').DefaultValue) == 0xfa"/>
+			
+			<Action name="OptionSlurp" type="slurp" valueXpath="//ServerListen//TelnetReceive//optionIds" setXpath="//ServerListen//TelnetRespond//optionIds"/>
+			<Action name="CommandSlurp" type="slurp" valueXpath="//ServerListen//TelnetReceive//command" setXpath="//ServerListen//TelnetRespond//command"/>
+					
+			<Action name="TelnetRespond" type="output" publisher="TcpHandler" onStart="TELNET.process_server_output(self)">
+				<DataModel ref="DataModels:TelnetClientReply"/>
+			</Action>
+			
+			<Action name="TelnetSendTermSpeedNeg" type="output" publisher="TcpHandler" when="TELNET.value_needs_reply(self)">
+				<DataModel ref="DataModels:SendTermSpeedInit"/>
+			</Action>
+			
+			<Action name="TelnetSendNewEnvirNeg" type="output" publisher="TcpHandler" when="TELNET.value_needs_reply(self)">
+				<DataModel ref="DataModels:SendNewEnvirOptInit"/>
+			</Action>
+		
+			<Action name="TelnetSendTermTypeNeg" type="output" publisher="TcpHandler" when="TELNET.value_needs_reply(self)">
+				<DataModel ref="DataModels:SendTermTypeInit"/>
+			</Action>	
+			
+			<Action name="Next" type="changeState" ref="ServerListen"/>
+		</State>
+		
+		<State name="SendPrompt">
+			<Action name="TelnetSendTermTypeNeg" type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:SendPrompt"/>
+			</Action>	
+			
+			<Action name="TelnetReceive" type="input" publisher="TcpHandler">
+				<DataModel ref="DataModels:TelnetSingleOptionCrack"/>
+			</Action>
+			
+			<Action name="Next" type="changeState" ref="ReadData"/>
+		</State>
+		
+		<State name="ReadData">
+			<Action name="TelnetReceive" type="input" publisher="TcpHandler">
+				<DataModel ref="DataModels:TelnetSingleOptionCrack"/>
+			</Action>
+			
+			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['ReadData'].actions[0].dataModel.find('EmptyPacket') != None"/>
+			
+			<Action name="TelnetSendTermTypeNeg" type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:SendPrompt"/>
+			</Action>	
+			
+			<Action name="Next" type="changeState" ref="Done"/>
+		</State>
+		
+		<State name="Done">
+			<Action type="close" publisher="TcpHandler"/>
+			<Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+		</State>
+	</StateModel>
+	
 	<!-- Telnet Client State Model -->
   <StateModel name="AgentToHost" initialState="Initial">
 		<State name="Initial">
@@ -27,7 +103,7 @@
 			<Action name="Done" type="changeState" ref="SendNegOpts" when="StateModel.states['ReadInput'].actions[0].dataModel.find('EmptyPacket') != None"/>
 			
 			<!--Skips send of reply when server sends go ahead for Sub Options-->
-			<Action name="NoReplyNegOption" type="changeState" ref="ReadInput" when="int(StateModel.states['ReadInput'].actions[0].dataModel.find('command').DefaultValue) == 0xfa"/>
+			<Action name="NoReplyNegOption" type="changeState" ref="ReadInput" when="StateModel.states['ReadInput'].actions[0].dataModel.find('command') == None or int(StateModel.states['ReadInput'].actions[0].dataModel.find('command').DefaultValue) == 0xfa"/>
 			
 			<Action name="OptionSlurp" type="slurp" valueXpath="//ReadInput//TelnetReceive//optionIds" setXpath="//TelnetRespond//optionIds"/>
 			<Action name="CommandSlurp" type="slurp" valueXpath="//ReadInput//TelnetReceive//command" setXpath="//TelnetRespond//command"/>

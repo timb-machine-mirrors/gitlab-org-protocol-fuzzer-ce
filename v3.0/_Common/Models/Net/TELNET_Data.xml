@@ -204,6 +204,30 @@
 		<Blob name="data" valueType="hex" value="00585445524d"/>
 	</DataModel>
 	
+	<DataModel name="SendLineMode" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x22"/>
+		<Blob name="data" valueType="hex" value="0301000003620304020f05000007621c08020409421a0a027f0b02150f0211100213110000120000"/>
+	</DataModel>
+	
+	<DataModel name="SendTermSpeedInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x20"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendNewEnvirOptInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x27"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendTermTypeInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x18"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendPrompt">
+		<String value="Ubuntu 12.04.2 LTS\r\n"/>
+		<String value="ubuntu login: \r\n"/>
+	</DataModel>
   <!-- Telnet Negotiate Connect Model -->
   <DataModel name="TelnetConnect">
 		<Block name="TelnetNegotiateMessage">

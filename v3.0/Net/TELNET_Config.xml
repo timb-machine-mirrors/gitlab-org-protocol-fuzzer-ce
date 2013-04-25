@@ -3,8 +3,9 @@
   <All>	
     <Define key="TargetPort"    value="23"/>
     <Define key="TargetIPv4"    value="192.168.146.128"/>
-    <Define key="LoggerPath"  value="./logs/telnet/"/>
-    <Define key="Strategy"  value="Random"/>
+		<Define key="LocalIPv4" 		value="192.168.146.1"/>
+    <Define key="LoggerPath" 		value="./logs/telnet/"/>
+    <Define key="Strategy"  		value="Sequential"/>
 		<Define key="Path" value="."/>
 		
 		<Define key="ProgramPath" value="C:\Users\jordyn.DEJA\Downloads\"/>
