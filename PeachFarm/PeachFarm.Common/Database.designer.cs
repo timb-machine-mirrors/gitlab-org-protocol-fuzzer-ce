@@ -30,7 +30,7 @@ namespace PeachFarm.Common.Mongo
 
 		private string tagsField;
 
-		private string zipIDField;
+		private string zipFileField;
 
 		public Job()
 		{
@@ -109,15 +109,15 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		public string ZipID
+		public string ZipFile
 		{
 			get
 			{
-				return this.zipIDField;
+				return this.zipFileField;
 			}
 			set
 			{
-				this.zipIDField = value;
+				this.zipFileField = value;
 			}
 		}
 	}
@@ -177,6 +177,8 @@ namespace PeachFarm.Common.Mongo
 
 		private uint iterationCountField;
 
+		private uint faultCountField;
+
 		private uint seedNumberField;
 
 		private string tagsField;
@@ -214,6 +216,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.iterationCountField = value;
+			}
+		}
+
+		public uint FaultCount
+		{
+			get
+			{
+				return this.faultCountField;
+			}
+			set
+			{
+				this.faultCountField = value;
 			}
 		}
 

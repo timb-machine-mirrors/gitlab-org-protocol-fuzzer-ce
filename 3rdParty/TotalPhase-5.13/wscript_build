@@ -2,9 +2,12 @@
 
 from waflib import Utils
 
-if 'cshlib' in bld.env['supported_features']:
-	dll = bld.env['cshlib_PATTERN'] % '*'
-	src = bld.path.find_dir(bld.env['BASENAME']).ant_glob(dll)
+# Only do this if environment supports C#
+if 'cs' in bld.env['supported_features']:
 
-	if bld.env.MCS and bld.env.DEST_OS == "win32":
-		bld.install_files('${BINDIR}', src, chmod=Utils.O755)
+	# win_x86 or win_64
+	base = bld.env['BASENAME']
+
+	if base in bld.path.listdir():
+		bld.read_csshlib('aardvark_net.dll', paths=[ base ])
+		bld.install_files('${BINDIR}', '%s/aardvark.dll' % base, chmod=Utils.O755)

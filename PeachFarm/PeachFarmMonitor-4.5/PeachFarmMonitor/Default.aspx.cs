@@ -109,10 +109,10 @@ namespace PeachFarmMonitor
           {
             jvm = new JobViewModel(job);
           }
-          var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-          jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
-          jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
-          collection.Database.Server.Disconnect();
+          //var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
+          //jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
+          //jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
+          //collection.Database.Server.Disconnect();
           jvms.Add(jvm);
         }
         jobsGrid.DataSource = jvms;
@@ -223,13 +223,6 @@ namespace PeachFarmMonitor
             item.Style.Add("background-color", "lightgreen");
             break;
         }
-
-        //var cell = (TableCell)item["JobIDColumn"];
-        //var menu = cell.FindControl("jobMenu") as RadMenu;
-        //var topitem = menu.Items[0];
-        //topitem.Text = job.JobID;
-        //topitem.Items[0].NavigateUrl = "~/JobDetail.aspx?jobid=" + job.JobID;
-        //topitem.Items[1].NavigateUrl = "~/ReportViewer.aspx?jobid=" + job.JobID;
       }
     }
 
@@ -269,73 +262,5 @@ namespace PeachFarmMonitor
         //ignore error
       }
     }
-
-
-
-    //protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
-    //{
-    //  GridDataItem item = e.Item as GridDataItem;
-    //  switch (e.CommandName)
-    //  {
-    //    case "GetJobDetail":
-    //      GetJobDetail(((LinkButton)e.CommandSource).Text);
-    //      break;
-    //  }
-    //}
-
-    //private void GetJobDetail(string jobID)
-    //{
-    //  PeachFarm.Common.Mongo.Job job = PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);
-    //  string tabname = String.Format("{0}-{1}", job.JobID, job.PitFileName);
-    //  RadTab newtab = new RadTab(tabname);
-    //  tabstrip.Tabs.Add(newtab);
-
-    //  RadPageView newpage = new RadPageView();
-    //  newpage.ID = tabname;
-      
-
-    //  toplevel.PageViews.Add(newpage);
-    //  newpage.Selected = true;
-    //}
-
-    //protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
-    //{
-    //  switch (e.Tab.Text)
-    //  {
-    //    case "Nodes":
-    //      nodesPage.Selected = true;
-    //      break;
-    //    case "Jobs":
-    //      jobsPage.Selected = true;
-    //      break;
-    //    case "Errors":
-    //      errorsPage.Selected = true;
-    //      break;
-    //    default:
-    //      if (e.Tab.Text.IndexOf('-') == 12)
-    //      {
-    //        //string jobID = e.Tab.Text.Substring(0, 12);
-    //        //RadPageView pageView = (RadPageView)Page.FindControl(jobID + "_detail");
-
-    //        RadPageView pageView = (RadPageView)Page.FindControl(e.Tab.Text);
-    //        pageView.Selected = true;
-    //      }
-    //      break;
-    //  }
-    //}
-
-    //protected void toplevel_PageViewCreated(object sender, RadMultiPageEventArgs e)
-    //{
-    //  if (e.PageView.ID.IndexOf('-') == 12)
-    //  {
-    //    string jobID = e.PageView.ID.Substring(0, 12);
-
-    //    Job job = Reports.Report.GetJobDetailReport(jobID, monitorconfig.MongoDb.ConnectionString).First();
-    //    JobDetail jobDetail = (JobDetail)Page.LoadControl(typeof(JobDetail), new object[] { job });
-    //    jobDetail.ID = jobID + "_detail";
-
-    //    e.PageView.Controls.Add(jobDetail);
-    //  }
-    //}
   }
 }

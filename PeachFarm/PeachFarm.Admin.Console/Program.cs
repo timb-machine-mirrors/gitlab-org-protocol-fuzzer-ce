@@ -25,7 +25,7 @@ namespace PeachFarm.Admin.Console
 
 				bool start = false;
 				bool stop = false;
-				bool list = false;
+				bool nodes = false;
 				bool errors = false;
 				bool jobInfo = false;
 				bool jobs = false;
@@ -42,7 +42,7 @@ namespace PeachFarm.Admin.Console
 						// Commands
 						{ "start", v => start = true },
 						{ "stop", v => stop = true },
-						{ "list", v => list = true},
+						{ "nodes", v => nodes = true},
 						{ "errors", v => errors = true },
 						{ "info", var => jobInfo = true },
 						{ "jobs", var => jobs = true },
@@ -55,7 +55,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !list && !errors && !jobInfo && !jobs)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -117,7 +117,7 @@ namespace PeachFarm.Admin.Console
 				#endregion
 
 				#region List
-				if (list)
+				if (nodes)
 				{
 					admin.ListNodesAsync();
 				}
@@ -346,7 +346,7 @@ Syntax:
         pf_admin.exe -stop jobID
       
       Get list of all Nodes:
-        pf_admin.exe -list
+        pf_admin.exe -nodes
 
       Get list of errors reported by Nodes:
         pf_admin.exe -errors
@@ -369,13 +369,13 @@ Commands:
 
    ipAddress   - Address of specific node to launch on
 
-   pitFilePath - Full path to Pit File
+   pitFilePath - Full path to Pit File or Zip File
    definesFilePath - Full path to Defines File (optional)
 
  stop   - Stop some instances of Peach
    jobID - Job ID
 
- list   - List all nodes in the farm with status
+ nodes   - List all nodes in the farm with status
 
  errors - List any logged node errors
    jobID - Job ID
