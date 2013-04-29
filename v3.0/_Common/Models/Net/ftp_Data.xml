@@ -99,6 +99,7 @@
 		<String name="Terminator" length="2" mutable="false" token="true" value="\r\n"/>
 	</DataModel>
 
+	
 	<!-- 4.1.  FTP COMMANDS -->
 	
 	<!--      USER <SP> <username> <CRLF> -->
@@ -373,6 +374,7 @@
 			<Block name="MKDChoice" ref="MKD" />
 			<Block name="PWDChoice" ref="PWD" />
 			<Block name="SYSTChoice" ref="SYST" />
+			<Blob name="EmptyPacket" length="0"/>
 		</Choice>
 	</DataModel>
 
