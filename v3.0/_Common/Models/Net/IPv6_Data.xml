@@ -246,7 +246,6 @@
 	</DataModel>
 	
 	<DataModel name="IPv6RoutingPacket">
-		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
 		<Block ref="Ethernet:EtherHeader"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
