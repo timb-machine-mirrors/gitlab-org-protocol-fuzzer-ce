@@ -132,11 +132,21 @@
 		<Number name="Identification" size="32" endian="big"/>
 		<Blob name="Data" length="12"/>
 	</DataModel>
+	
+	<DataModel name="Routing">
+		<Number name="NextHeader" size="8" value="59" endian="big"/>
+		<Number name="HdrExtLen" size="8" endian="big" signed="false">
+			<Relation type="size" of="Data" expressionGet="size*8" expressionSet="size/8"/>
+		</Number>
+		<Number name="RoutingType" size="8" value="1"/>
+		<Number name="SegmentsLeft" size="8"/>
+		<Blog name="Data" valueType="hex"/>
+	</DataModel>
 
 	<DataModel name="DestinationOptions">
 			<Number name="NextHeader" size="8" endian="big" value="59"/>
 			<Number name="HdrExtLen" size="8" endian="big" signed="false">
-				<Relation type="size" of="Options" expressionGet="size" expressionSet="size/8"/>
+				<Relation type="size" of="Options" expressionGet="size*8" expressionSet="size/8"/>
 			</Number>
 			<Block name="Options"/>
 	</DataModel>
@@ -232,6 +242,20 @@
 		</Block>
 		<Block name="Payload">
 			<Block ref="Destination"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6RoutingPacket">
+		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
+		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="IPv6Header">
+			<Number name="PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="NextHeader" size="8" value="43"/>
+		</Block>
+		<Block name="Payload">
+			<Block ref="Routing"/>
 		</Block>
 	</DataModel>
 

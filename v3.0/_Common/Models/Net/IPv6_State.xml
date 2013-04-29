@@ -24,6 +24,9 @@
 				<DataModel ref="DataModels:IPv6DestinationPacket"/>
 			</Action>
 			<Action type="output">
+				<DataModel ref="DataModels:IPv6RoutingPacket"/>
+			</Action>
+			<Action type="output">
 				<DataModel ref="DataModels:IPv6FragmentPacket1"/>
 			</Action>
 			<Action type="output">
