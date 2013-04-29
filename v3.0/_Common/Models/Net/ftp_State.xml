@@ -84,30 +84,30 @@
 	
 		<State name="InputUserName">
 			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="DataModels:ServerReadyForUser" />
+				<DataModel ref="DataModels:ServerReadyForUser"/>
 				<Data DataModel="DataModels:ServerReadyForUser">
 					<Field name="LineModes.OneLine.Explaination" value="vsFTPd 2.3.5"/>
 				</Data>
 			</Action>
 			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="DataModels:USER" />
+				<DataModel ref="DataModels:USER"/>
 			</Action>
 			<Action type="changeState" ref="InputPasswd"/>
 		</State>
 
 		<State name="InputPasswd">
 			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="DataModels:ServerUserNeedsPass" />
+				<DataModel ref="DataModels:ServerUserNeedsPass"/>
 				<Data DataModel="DataModels:ServerUserNeedsPass">
 					<Field name="LineModes.OneLine.Explaination" value="Please specify the password"/>
 				</Data>
 			</Action>
 			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="DataModels:PASS" />
+				<DataModel ref="DataModels:PASS"/>
 			</Action>
 			
 			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="DataModels:ServerLoggedIn" />
+				<DataModel ref="DataModels:ServerLoggedIn"/>
 			</Action>
 			
 			<Action type="changeState" ref="Ready"/>
@@ -115,13 +115,13 @@
 
 		<State name="Ready">
 			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="DataModels:Request" />
+				<DataModel ref="DataModels:Request"/>
 			</Action>
 			
 			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['Ready'].actions[0].dataModel.find('EmptyPacket') != None"/>
 			
 			<Action type="output" publisher="TcpHandler" onStart="FTP.set_response(self)">
-				<DataModel ref="DataModels:ResponseTemplate" />
+				<DataModel ref="DataModels:ResponseTemplate"/>
 			</Action>
 			
 			<Action name="Quit" type="changeState" ref="Done" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'QUIT'"/>
@@ -129,6 +129,9 @@
 			<Action name="ReadNext" type="changeState" ref="Ready"/>
 		</State>
 		
-		<State name="Done"/>
+		<State name="Done">
+			<Action type="close" publisher="TcpHandler"/>
+			<Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+		</State>
 	</StateModel>
 </Peach>
