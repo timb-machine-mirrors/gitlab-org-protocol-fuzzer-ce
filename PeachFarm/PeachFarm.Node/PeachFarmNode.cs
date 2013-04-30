@@ -283,7 +283,7 @@ namespace PeachFarm.Node
 				Dictionary<string, string> defines = new Dictionary<string, string>();
 				if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
 				{
-					defines = ProcessDefines(nodeState.DefinesFilePath);
+					defines = Peach.Core.Analyzers.PitParser.parseDefines(nodeState.DefinesFilePath);
 				}
 				defines.Add("Peach.Cwd", Environment.CurrentDirectory);
 				parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
@@ -438,94 +438,6 @@ namespace PeachFarm.Node
 				}
 			}
 		}
-
-		#region functions copied from Peach
-		private Dictionary<string, string> ProcessDefines(string definedValuesFile)
-		{
-			Dictionary<string, string> DefinedValues = new Dictionary<string,string>();
-
-			if (definedValuesFile != null)
-			{
-				if (!File.Exists(definedValuesFile))
-					throw new Peach.Core.PeachException("Error, defined values file \"" + definedValuesFile + "\" does not exist.");
-
-				XmlDocument xmlDoc = new XmlDocument();
-				xmlDoc.Load(definedValuesFile);
-
-				var root = xmlDoc.FirstChild;
-				if (root.Name != "PitDefines")
-				{
-					root = xmlDoc.FirstChild.NextSibling;
-					if (root.Name != "PitDefines")
-						throw new Peach.Core.PeachException("Error, definition file root element must be PitDefines.");
-				}
-
-				foreach (XmlNode node in root.ChildNodes)
-				{
-					if (hasXmlAttribute(node, "platform"))
-					{
-						switch (getXmlAttribute(node, "platform").ToLower())
-						{
-							case "osx":
-								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.OSX)
-									continue;
-								break;
-							case "linux":
-								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
-									continue;
-								break;
-							case "windows":
-								if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Windows)
-									continue;
-								break;
-							default:
-								throw new Peach.Core.PeachException("Error, unknown platform name \"" + getXmlAttribute(node, "platform") + "\" in definition file.");
-						}
-					}
-
-					foreach (XmlNode defNode in node.ChildNodes)
-					{
-						if (defNode is XmlComment)
-							continue;
-
-						if (!hasXmlAttribute(defNode, "key") || !hasXmlAttribute(defNode, "value"))
-							throw new Peach.Core.PeachException("Error, Define elements in definition file must have both key and value attributes.");
-
-						// Allow command line to override values in XML file.
-						if (!DefinedValues.ContainsKey(getXmlAttribute(defNode, "key")))
-						{
-							DefinedValues[getXmlAttribute(defNode, "key")] =
-								getXmlAttribute(defNode, "value");
-						}
-					}
-				}
-			}
-
-			return DefinedValues;
-		}
-
-		private bool hasXmlAttribute(XmlNode node, string name)
-		{
-			if (node.Attributes == null)
-				return false;
-
-			object o = node.Attributes.GetNamedItem(name);
-			return o != null;
-		}
-
-		private string getXmlAttribute(XmlNode node, string name)
-		{
-			System.Xml.XmlAttribute attr = node.Attributes.GetNamedItem(name) as System.Xml.XmlAttribute;
-			if (attr != null)
-			{
-				return attr.InnerText;
-			}
-			else
-			{
-				return null;
-			}
-		}
-		#endregion
 	}
 
 	internal class NodeState
