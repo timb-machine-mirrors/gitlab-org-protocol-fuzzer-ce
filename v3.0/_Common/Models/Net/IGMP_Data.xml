@@ -35,7 +35,7 @@
       <Relation type="size" of="AuxData" />
     </Number>
     <Number name="NumSources" size="16" endian="big">
-      <Relation type="count" of="SourceAddresses">
+      <Relation type="count" of="SourceAddresses" />
     </Number>
     <Blob name="MulticastAddress" length="4"/>
     <Block name="SourceAddresses" minOccurs="0">
@@ -61,7 +61,7 @@
     </Flags>
     <Number name="QQIC" size="8" endian="big"/>
     <Number name="NumSources" size="16" endian="big">
-      <Relation type="count" of="SourceAddresses">
+      <Relation type="count" of="SourceAddresses" />
     </Number>
     <Block name="SourceAddresses" minOccurs="0">
       <Blob name="SourceAddress" length="4"/>
@@ -80,7 +80,7 @@
     </Number>
     <Blob name="Resv2" length="2"/>
     <Number name="NumGroupRecords" size="16" endian="big">
-      <Relation type="count" of="GroupRecords">
+      <Relation type="count" of="GroupRecords" />
     </Number>
     <Block name="GroupRecords" ref="GroupRecord" minOccurs="0" />
     <Blob name="RemainingData" />
