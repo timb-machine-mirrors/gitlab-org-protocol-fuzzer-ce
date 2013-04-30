@@ -5,11 +5,45 @@
 	<!-- Copyright (c) Deja Vu Security, LLC. 2013 -->
 		
 	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/ICMPv4_Data.xml"/>
-		
-	<DataModel name="IPv4">
+	
+  <!-- IPv4 Options -->
+  <DataModel name="OptionsBlock">
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />
+      <Flag name="OptionClass" position="1" size="2" />
+      <Flag name="OptionNumber" position="3" size="5" />
+    </Flags>
+  </DataModel>
+  
+  <DataModel name="ExtendedOptionsBlock">
+    <Block name="BaseOption" ref="OptionsBlock" />
+    <Number name="OptionLength" size="8" endian="big">
+      <Relation type="size" of="ExtendedOptionsBlock"/>
+    </Number>
+    <Blob name="OptionData" />
+  </DataModel>
+  
+  <!-- TODO Does not currently Crack,
+  add individual datamodels and tokens,
+  requires fix to issue #222-->
+  <DataModel name="IPv4Options"> 
+    <Choice>
+      <Block name="EndOfOptionList" ref="OptionsBlock" />
+      <Block name="NoOp" ref="OptionsBlock" />
+      <Block name="Security" ref="ExtendedOptionsBlock" />
+      <Block name="LooseSourceRouting" ref="ExtendedOptionsBlock" />
+      <Block name="StrictSourceRouting" ref="ExtendedOptionsBlock" />
+      <Block name="RecordRoute" ref="ExtendedOptionsBlock" />
+      <Block name="StreamID" ref="ExtendedOptionsBlock" />
+      <Block name="Timestamp" ref="ExtendedOptionsBlock" />
+    </Choice>
+  </DataModel>
+        
+  <!-- IP Packet RFC791 --> 
+  <DataModel name="IPv4">
     <Block name="Header">
       <Flags size="16" endian="big">
-        <Flag name="Version" position="0" size="4" valueType="hex" value="04"/>
+        <Flag name="Version" position="0" size="4" valueType="hex" value="04" token="true"/>
         <Flag name="HeaderLength" position="4" size="4" valueType="hex">
           <Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
         </Flag>
@@ -33,19 +67,22 @@
           <Param name="ref" value="Header"/>
         </Fixup>
       </Number>
-			<Block name="SrcBlock" length="4"> <!--Used for cracking-->
-				<String name="SrcIP" value="##SourceIPv4##" mutable="false">
-				 <Transformer class="Ipv4StringToOctet" />
-				</String>
-			</Block>
-			<Block name="DstBlock" length="4"> <!--Used for cracking-->
-				<String name="DestIP" value="##TargetIPv4##" mutable="false"> <!--These fields must be nonmutable on windows-->
-					 <Transformer class="Ipv4StringToOctet" />
-				</String>
-			</Block>
-			<Blob name="Options"/>
+      <Block name="SrcBlock" length="4"> <!--Used for cracking-->
+        <String name="SrcIP" value="##SourceIPv4##" mutable="false">
+          <Transformer class="Ipv4StringToOctet" />
+        </String>
+      </Block>
+      <Block name="DstBlock" length="4"> <!--Used for cracking-->
+        <String name="DestIP" value="##TargetIPv4##" mutable="false"> <!--These fields must be nonmutable on windows-->
+          <Transformer class="Ipv4StringToOctet" />
+        </String>
+      </Block>
+      <Block name="Options" >
+        <Block name="Option" ref="IPv4Options" minOccurs="0" />
+        <Padding alignment="32" />
+      </Block>
     </Block>
-		<Block name="Payload" ref="DataModels:ICMPv4Header"/>
+    <Block name="Payload" ref="DataModels:ICMPv4Header"/>
   </DataModel>
 </Peach>
 <!--END-->

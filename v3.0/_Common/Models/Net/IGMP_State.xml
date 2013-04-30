@@ -9,7 +9,10 @@
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-				<DataModel ref="DataModels:IGMPHeader"/>
+        <DataModel ref="DataModels:MembershipQuery"/>
+      </Action>
+      <Action type="output">
+        <DataModel ref="DataModels:Ver3MembershipReport"/>
       </Action>
     </State>
   </StateModel>

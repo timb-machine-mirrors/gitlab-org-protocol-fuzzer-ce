@@ -6,7 +6,7 @@
     <Define key="LoggerPath" value="logs/IGMP/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="Strategy"  value="Sequential"/>
-		<Define key="Path" value="."/>
+    <Define key="Path" value="."/>
   </All>
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
