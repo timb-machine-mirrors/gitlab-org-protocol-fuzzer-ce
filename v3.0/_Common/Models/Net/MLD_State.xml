@@ -9,7 +9,10 @@
 	<StateModel name="TheState" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-				<DataModel ref="DataModels:MLDHeader"/>
+		<DataModel ref="DataModels:MLDQuery"/>
+      </Action>
+      <Action type="output">
+		<DataModel ref="DataModels:Ver2MLDReport"/>
       </Action>
     </State>
   </StateModel>
