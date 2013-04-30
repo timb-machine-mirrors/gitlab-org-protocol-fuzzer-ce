@@ -1,0 +1,40 @@
+Protocol
+--------
+
+ * Test Suite: IGMPv4
+ * Direction: Client, Server (TODO)
+ 
+IGMPv4 is a Network Configuration protocol on top of IPv4.
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFC3376| Internet Group Management Protocol, Version 3
+|RFC4604| Using Internet Group Management Protocol Version 3 and Multicast Listener Discovery Protocol Version 2 for Source-Specific Multicast
+|RFC2236| Internet Group Management Protocol, Version 2
+|RFC1112| Host Extensions for IP Multicasting
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|Membership Query | RFC3376 (Section 4.0)
+|Version 3 Membership Report | RFC3376 (Section 4.0)
+|Version 1 Membership Report (TODO) | RFC1112
+|Version 2 Membership Report (TODO) | RFC2236
+|Version 2 Leave Group (TODO) | RFC2236
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|General Query | RFC3376 (Section 4.1.11)
+|Group-Specific Query | RFC3376 (Section 4.1.11)
+|Group-and-Source-Specific Query | RFC3376 (Section 4.1.11)
+|========

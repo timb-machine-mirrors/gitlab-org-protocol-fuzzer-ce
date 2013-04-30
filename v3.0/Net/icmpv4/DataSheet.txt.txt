@@ -1,0 +1,64 @@
+Protocol
+--------
+
+ * Test Suite: ICMPv4
+ * Direction: Client, Server(TODO)
+ 
+ICMPv4 protocol is message relay protocol on top of IPv4.
+It provides error responses for the IPv4 protocol as well as simple
+data transmision. It is commonly used in the ping application for 
+testing network response and connectivity.
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFC792 | Internet Control Message Protocol
+|RFC1071 | Computing the Internet Checksum
+|RFC1122 | Requirements for Internet Hosts -- Communication Layers
+|RFC1256 | ICMP Router Discovery Messages
+|RFC6918 | Formally Deprecating Some ICMPv4 Message Types
+|RFC6633 | Deprecation of ICMP Source Quench Messages
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|8)Echo | RFC792
+|0)Echo Reply (TODO) | RFC792
+|3)Destination Unreachable (TODO) | RFC792
+|4)Source Quench (TODO) | RFC792
+|5)Redirect (TODO) | RFC792
+|11)Time Exeeded (TODO) | RFC792
+|12)Parameter Problem (TODO) | RFC792
+|13)Timestamp (TODO) | RFC792
+|14)Timestamp Reply Problem (TODO) | RFC792 
+|15)Information Request (TODO) | RFC792
+|16)Information Reply (TODO) | RFC792
+|9)Router Advertisement (TODO) | RFC1256 (Section 3)
+|10)Router Solicitation (TODO) | RFC1256 (Section 3)
+
+
+
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Internet Checksum | RFC1071
+|========
+
+[options="header"]
+|========
+|Supported Payloads | Specification
+| IPv4 in Error Responses | RFC1122
+|========
+
+1D
+ --Doesn't support most messages, need choice block of options defined in RFC792
+ --Doesn't support response to ip packets defined in RFC1122

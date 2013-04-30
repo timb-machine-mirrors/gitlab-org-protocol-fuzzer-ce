@@ -1,0 +1,41 @@
+Protocol
+--------
+
+ * Test Suite: IPv4
+ * Direction: Client, Server (TODO)
+ 
+One way Network layer protocol.
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFC791 | INTERNET PROTOCOL DARPA INTERNET PROGRAM PROTOCOL SPECIFICATION
+|RFC760 | DOD STANDARD INTERNET PROTOCOL
+|RFC1071 | Computing the Internet Checksum
+|RFC2474 | Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers
+|RFC3168 | The Addition of Explicit Confestion Notification (ECN) to IP
+
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|MSG 1 | RFCXXXXX
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Internet Checksum | RFC1071
+|Fragmentation (TODO, add in state) | RFC791
+|Padding | RFC791 (Section 3.1)
+|Option Blocks (TODO) | RFC791 (Section 3.1)
+|Explicit Confestion Notification | RFC3168
+|========
+
