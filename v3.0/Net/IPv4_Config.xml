@@ -2,9 +2,9 @@
 <PitDefines>
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIP" value="192.168.146.128"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/ipv4/"/>
-    <Define key="SourceIP" value="192.168.146.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="Strategy"  value="Random"/>
 		<Define key="Path" value="."/>
   </All>

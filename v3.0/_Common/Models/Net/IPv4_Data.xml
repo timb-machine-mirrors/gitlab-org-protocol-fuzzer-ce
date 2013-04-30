@@ -9,9 +9,9 @@
   <!-- IPv4 Options -->
   <DataModel name="OptionsBlock">
     <Flags size="8" name="OptionType" endian="big">
-      <Flag name="CopiedFlag" position="0" size="1">
-      <Flag name="OptionClass" position="1" size="2">
-      <Flag name="OptionNumber" position="3" size="5">
+      <Flag name="CopiedFlag" position="0" size="1" />
+      <Flag name="OptionClass" position="1" size="2" />
+      <Flag name="OptionNumber" position="3" size="5" />
     </Flags>
   </DataModel>
   
@@ -23,7 +23,7 @@
     <Blob name="OptionData" />
   </DataModel>
   
-  <!--TODO Does not currently Crack,
+  <!-- TODO Does not currently Crack,
   add individual datamodels and tokens,
   requires fix to issue #222-->
   <DataModel name="IPv4Options"> 
@@ -77,7 +77,7 @@
           <Transformer class="Ipv4StringToOctet" />
         </String>
       </Block>
-      <Block name="Options" />
+      <Block name="Options" >
         <Block name="Option" ref="IPv4Options" minOccurs="0" />
         <Padding alignment="32" />
       </Block>
