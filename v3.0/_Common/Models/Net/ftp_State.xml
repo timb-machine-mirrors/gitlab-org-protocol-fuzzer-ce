@@ -124,14 +124,77 @@
 				<DataModel ref="DataModels:ResponseTemplate"/>
 			</Action>
 			
+			<Action name="GetFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOR'"/>
+			<Action name="SendFile" type="changeState" ref="SendFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'"/>
+			<Action name="SendDirectory" type="changeState" ref="SendDirectory" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NLST'"/>
+			<Action name="ListDirectory" type="changeState" ref="ListDir" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'LIST'"/>
+			<Action name="Relogin" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'USER'"/>
+			<Action name="Relogin2" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'REIN'"/>
 			<Action name="Quit" type="changeState" ref="Done" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'QUIT'"/>
 		
 			<Action name="ReadNext" type="changeState" ref="Ready"/>
 		</State>
 		
-		<State name="Done">
-			<Action type="close" publisher="TcpHandler"/>
-			<Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+		<State name="GetFile">
+			<Action type="input" publisher="TcpHandler">
+				<DataModel ref="DataModels:FileData"/>
+			</Action>
+
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:ServerDirectorySendOk"/>
+				<Data DataModel="DataModels:ServerDirectorySendOk">
+					<Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
+				</Data>
+			</Action>
+			
+			<Action name="ReadNext" type="changeState" ref="Ready"/>
 		</State>
+		
+		<State name="ListDir">
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:DirectoryList"/>
+			</Action>
+			
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:ServerDirectorySendOk"/>
+				<Data DataModel="DataModels:ServerDirectorySendOk">
+					<Field name="LineModes.OneLine.Explaination" value="Directory send OK."/>
+				</Data>
+			</Action>
+			
+			<Action name="ReadNext" type="changeState" ref="Ready"/>
+		</State>
+		
+		<State name="SendFile">
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:FileData"/>
+			</Action>
+
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:ServerDirectorySendOk"/>
+				<Data DataModel="DataModels:ServerDirectorySendOk">
+					<Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
+				</Data>
+			</Action>
+			
+			<Action name="ReadNext" type="changeState" ref="Ready"/>
+		</State>
+		
+		<State name="SendDirectory">
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:DirectoryData"/>
+			</Action>
+			
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="DataModels:ServerDirectorySendOk"/>
+				<Data DataModel="DataModels:ServerDirectorySendOk">
+					<Field name="LineModes.OneLine.Explaination" value="Directory Send OK."/>
+				</Data>
+			</Action>
+			
+			<Action name="ReadNext" type="changeState" ref="Ready"/>
+		</State>
+		
+		<State name="Done"/>
 	</StateModel>
 </Peach>
