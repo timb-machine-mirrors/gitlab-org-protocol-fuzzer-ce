@@ -43,3 +43,4 @@ test-results/
 # User-specific files
 *.user
 PeachFarm/PeachFarmMonitor-4.5/PeachFarmMonitor/logfile.txt
+*.cache
