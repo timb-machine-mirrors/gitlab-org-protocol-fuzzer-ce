@@ -88,6 +88,9 @@ namespace PeachFarm.Admin.Console
 				#region Start
 				if (start)
 				{
+					if (launchCount < 0)
+						System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
+
 					string pitFilePath = extra[0];
 
 					string definesFilePath = String.Empty;

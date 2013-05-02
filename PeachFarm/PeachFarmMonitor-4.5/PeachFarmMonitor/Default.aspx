@@ -3,7 +3,7 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head id="Head1" runat="server">
   <title>Peach Farm Monitor</title>
   <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server"  />
@@ -85,8 +85,8 @@
 </head>
 <body>
   <form id="Form1" runat="server">
-    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" OnAsyncPostBackError="RadScriptManager1_AsyncPostBackError" AllowCustomErrorsRedirect="true" AsyncPostBackTimeout="5000" EnablePartialRendering="true" />
-    <telerik:RadAjaxManager ID="RadAjaxManager1" OnAjaxRequest="RadAjaxManager1_AjaxRequest" runat="server">
+    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" AllowCustomErrorsRedirect="true" AsyncPostBackTimeout="5000" EnablePartialRendering="true" />
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
       <AjaxSettings>
         <telerik:AjaxSetting AjaxControlID="monitorTimer" EventName="Tick">
           <UpdatedControls>

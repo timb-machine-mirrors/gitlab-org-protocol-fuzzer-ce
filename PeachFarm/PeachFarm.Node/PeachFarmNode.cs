@@ -388,8 +388,9 @@ namespace PeachFarm.Node
 					if (nodeState.RunContext.config != null)
 						heartbeat.Seed = nodeState.RunContext.config.randomSeed;
 
-					if(nodeState.RunContext.test.strategy != null)
-						heartbeat.Iteration = nodeState.RunContext.test.strategy.Iteration;
+					if(nodeState.RunContext.test != null)
+						if(nodeState.RunContext.test.strategy != null)
+							heartbeat.Iteration = nodeState.RunContext.test.strategy.Iteration;
 				}
 			}
 			heartbeat.Tags = nodeState.Tags;

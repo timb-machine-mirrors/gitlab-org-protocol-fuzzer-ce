@@ -70,6 +70,7 @@ namespace PeachFarmMonitor
         Job = new JobViewModel(job);
 
         faultBucketsGrid.ItemDataBound += faultBucketsGrid_ItemDataBound;
+        faultBucketsGrid.NeedDataSource += faultBucketsGrid_NeedDataSource;
 
         faultsGrid.NeedDataSource += faultsGrid_NeedDataSource;
         faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
@@ -92,9 +93,21 @@ namespace PeachFarmMonitor
     #endregion
 
     #region faultBucketsGrid event handlers
+
+    void faultBucketsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+    {
+      if (e.IsFromDetailTable == false)
+      {
+        var faultBuckets = JobDetailData.GetFaultBuckets(jobid);
+
+        faultBucketsGrid.DataSource = faultBuckets;
+        //faultBucketsGrid.MasterTableView.VirtualItemCount = faultBuckets.Count;
+      }
+    }
+    
     void faultBucketsGrid_ItemDataBound(object sender, GridItemEventArgs e)
     {
-
+      
     }
     
     protected void faultBucketsGrid_ItemCommand(object sender, GridCommandEventArgs e)
@@ -110,15 +123,11 @@ namespace PeachFarmMonitor
           ViewState["currentGroup"] = group;
 
           var faults = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
+
           faultsGrid.DataSource = faults;
+          faultsGrid.MasterTableView.VirtualItemCount = Convert.ToInt32(((GridDataItem)e.Item)["FaultCount"].Text);
           faultsGrid.DataBind();
 
-          if (faults.Count < pagesize)
-          {
-            int totalpages = pageindex + 1;
-            int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
-            faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
-          }
           break;
       }
     }
@@ -136,12 +145,12 @@ namespace PeachFarmMonitor
         faultsGrid.DataSource = faults;
         //faultsGrid.DataBind();
 
-        if (faults.Count < pagesize)
-        {
-          int totalpages = pageindex + 1;
-          int totalrecords = ((totalpages - 1) * pagesize) + Job.Faults.Count;
-          faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
-        }
+        //if (faults.Count < pagesize)
+        //{
+        //  int totalpages = pageindex + 1;
+        //  int totalrecords = ((totalpages - 1) * pagesize) + faults.Count;
+        //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
+        //}
       }
     }
     
