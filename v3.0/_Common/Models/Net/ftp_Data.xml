@@ -328,9 +328,9 @@
 
   <!--      RMD - Remove Directory -->
 	<DataModel name="RMD" ref="RequestTemplate">
-		<Choice>
-			<String name="Command" value="RMD" token="true"/>
-			<String name="Command2" value="XRMD" token="true"/>
+		<Choice name="Command">
+			<String name="RMD" value="RMD" token="true"/>
+			<String name="XRMD" value="XRMD" token="true"/>
 		</Choice>
 		<Block name="ReqArgBlock" ref="ArgBlock">
 			<String name="Argument" value="foobarbaz"/>
@@ -339,9 +339,9 @@
 
   <!--      MKD - Make Directory -->
 	<DataModel name="MKD" ref="RequestTemplate">
-		<Choice>
-			<String name="Command" value="MKD" token="true"/>
-			<String name="Command2" value="XMKD" token="true"/>
+		<Choice name="Command">
+			<String name="MKD" value="MKD" token="true"/>
+			<String name="XMKD" value="XMKD" token="true"/>
 		</Choice>
 		<Block name="ReqArgBlock" ref="ArgBlock">
 			<String name="Argument" value="foobarbaz"/>
@@ -350,9 +350,9 @@
 
   <!--      PWD - Print Directory -->
 	<DataModel name="PWD" ref="RequestTemplate">
-		<Choice>
-			<String name="Command" value="PWD" token="true"/>
-			<String name="Command2" value="XPWD" token="true"/>
+		<Choice name="Command">
+			<String name="PWD" value="PWD" token="true"/>
+			<String name="XPWD" value="XPWD" token="true"/>
 		</Choice>
 	</DataModel>
 
