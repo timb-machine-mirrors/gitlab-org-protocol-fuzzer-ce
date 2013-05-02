@@ -29,7 +29,7 @@
 		<Agent ref="LocalAgent"/>
 
     <Publisher class="RawV6">
-      <Param name="Host" value="##TargetIv6P##"/>
+      <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="17"/>
     </Publisher>
