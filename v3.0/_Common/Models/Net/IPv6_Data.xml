@@ -388,7 +388,9 @@
 				</Number>
 			</Block>
 			<Number name="Reserved" size="16"/>
-			<Number name="HomeInitCookie" size="64"/>
+			<Number name="HomeInitCookie" size="64">
+				<Fixup class="SequenceRandomFixup"/>
+			</Number>
 			<Block name="MobilityOptions">
 			</Block>
 			<Padding  alignment="64"/>
@@ -418,7 +420,9 @@
 				</Number>
 			</Block>
 			<Number name="Reserved" size="16"/>
-			<Number name="CareInitCookie" size="64"/>
+			<Number name="CareInitCookie" size="64">
+				<Fixup class="SequenceRandomFixup"/>
+			<Number>
 			<Block name="MobilityOptions">
 			</Block>
 			<Padding  alignment="64"/>
@@ -448,7 +452,9 @@
 				</Number>
 			</Block>
 			<Number name="HomeNonceIndex" size="16"/>
-			<Number name="HomeInitCookie" size="64"/>
+			<Number name="HomeInitCookie" size="64">
+				<Fixup class="SequenceRandomFixup"/>
+			</Number>
 			<Number name="HomeKeygenToken" size="64"/>
 			<Block name="MobilityOptions">
 			</Block>
@@ -479,7 +485,9 @@
 				</Number>
 			</Block>
 			<Number name="CareNonceIndex" size="16"/>
-			<Number name="CareInitCookie" size="64"/>
+			<Number name="CareInitCookie" size="64">
+				<Fixup class="SequenceRandomFixup"/>
+			</Number>
 			<Number name="CareKeygenToken" size="64"/>
 			<Block name="MobilityOptions">
 			</Block>
