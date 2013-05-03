@@ -14,14 +14,14 @@
       <Action name="GroupSpecificQuery" type="output">
         <DataModel ref="DataModels:MLDQuery"/>
         <Data>
-          <Field name="MulticastAddress" valueType="hex" value="E0000002"/>
+          <Field name="MulticastAddress" valueType="hex" value="FF00 0000 0000 0000 0000 0000 0000 0002"/>
         </Data>
       </Action>
       <Action name="GroupandSourceSpecificQuery" type="output">
         <DataModel ref="DataModels:MLDQuery"/>
         <Data>
-          <Field name="MulticastAddress" valueType="hex" value="E0000002"/>
-          <Field name="SourceAddress[0].SourceAddress" valueType="hex" value="7F000001"/>
+          <Field name="MulticastAddress" valueType="hex" value="FF00 0000 0000 0000 0000 0000 0000 0002"/>
+          <Field name="SourceAddresses[0].SourceAddress" valueType="hex" value="0000 0000 0000 0000 0000 0000 0000 0001"/>
         </Data>
       </Action>
       
