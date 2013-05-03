@@ -1,0 +1,32 @@
+Protocol
+--------
+
+ * Test Suite: ARP
+ * Direction: Broadcast, Listen (TODO)
+ 
+The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFC826 | An Ethernet Address Resolution Protocol
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|MSG 1 | RFCXXXXX
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Arp Request Packet Generation for IPv4 over Ether| RFC826
+|========
+
