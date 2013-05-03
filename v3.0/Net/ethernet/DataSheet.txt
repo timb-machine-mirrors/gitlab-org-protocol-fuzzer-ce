@@ -28,6 +28,7 @@ Detailed Use Cases
 [options="header"]
 |========
 |Supported Features | Specification
-|Arp Request Packet Generation for IPv4 over Ether| RFC826
+| Address Fields | 802.3 Section 3.2.3
+| Length/Type Fields (Partial) | 802.3 Section 3.2.6
 |========
 
