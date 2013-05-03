@@ -30,4 +30,7 @@ Detailed Use Cases
 [options="header"]
 |========
 |Supported Features | Specification
+|General Query | RFC3810 (Section 5.1.13)
+|Multicast Address Specific Query | RFC3810 (Section 5.1.13)
+|Multicast Address and Source Specific Query | RFC3810 (Section 5.1.13)
 |========

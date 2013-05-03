@@ -8,9 +8,24 @@
 	
 	<StateModel name="TheState" initialState="Initial">
     <State name="Initial">
-      <Action type="output">
+      <Action name="GeneralQuery" type="output">
 		<DataModel ref="DataModels:MLDQuery"/>
       </Action>
+      <Action name="GroupSpecificQuery" type="output">
+        <DataModel ref="DataModels:MLDQuery"/>
+        <Data>
+          <Field name="MulticastAddress" valueType="hex" value="E0000002"/>
+        </Data>
+      </Action>
+      <Action name="GroupandSourceSpecificQuery" type="output">
+        <DataModel ref="DataModels:MLDQuery"/>
+        <Data>
+          <Field name="MulticastAddress" valueType="hex" value="E0000002"/>
+          <Field name="SourceAddress[0].SourceAddress" valueType="hex" value="7F000001"/>
+        </Data>
+      </Action>
+      
+      
       <Action type="output">
 		<DataModel ref="DataModels:Ver2MLDReport"/>
       </Action>
