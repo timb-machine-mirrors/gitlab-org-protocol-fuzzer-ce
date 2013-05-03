@@ -101,7 +101,7 @@
 
   <!-- Table Based Image -->
 	<DataModel name="TableBasedImage">
-		<Block name="TheImageDescriptor" minOccurs="0">
+		<Block name="TheImageDescriptor" minOccurs="1">
 			<Blob name="Seperator" token="true" valueType="hex" value="2C" length="1"/>
 			<Number name="ImageLeftPosition" signed="false" size="16"/>
 			<Number name="ImageTopPosition" signed="false" size="16"/>
@@ -198,9 +198,12 @@
 		<Block name="EveryThingElse" minOccurs="0">
 			<Choice name="DataChoice">
 				<Block name="TheGraphicsBlock">
-					<Block name="TheApplicationExtension" ref="ApplicationExtension" minOccurs="0"/>
-					<Block name="TheGraphicControlExtension" ref="GraphicControlExtension" minOccurs="0" maxOccurs="1"/>
-					<Block name="GraphicRenderingBlock">
+                    <Choice minOccurs="0">
+                        <Block name="TheApplicationExtension" ref="ApplicationExtension" />
+                        <Block name="TheGraphicControlExtension" ref="GraphicControlExtension" />
+                        <Block name="TheCommentExtension" ref="CommentExtension"/>
+                    </Choice>
+					<Block name="GraphicRenderingBlock" minOccurs="1">
 						<Choice name="RenderBlockChoice">
 							<Block name="TheTableBasedImage" ref="TableBasedImage"/>
 							<Block name="ThePlainTextExtension" ref="PlainTextExtension"/>
