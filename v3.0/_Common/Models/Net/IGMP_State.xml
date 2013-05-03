@@ -21,7 +21,7 @@
         <DataModel ref="DataModels:MembershipQuery"/>
         <Data>
           <Field name="GroupAddress" valueType="hex" value="E0000002"/>
-          <Field name="SourceAddress[0].SourceAddress" valueType="hex" value="7F000001"/>
+          <Field name="SourceAddresses[0].SourceAddress" valueType="hex" value="7F000001"/>
         </Data>
       </Action>
       
