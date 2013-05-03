@@ -12,7 +12,7 @@
 		<Block name="Payload" ref="ARP:Packet" />
 	</DataModel>
 
-	<StateModel name="TheState" initialState="Initial">
+	<StateModel name="Gratuitous" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
 				<DataModel ref="ARPPacket"/>
