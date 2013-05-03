@@ -116,8 +116,7 @@
 						<Flag name="SortFlag" position="5" size="1"/>
 						<Flag name="Reserved" position="3" size="2"/>
 						<Flag name="SizeofLocalColorTable" position="0" size="3">
-							<Relation type="count" of="ColorTripples" expressionGet="pow( 2, count + 1 )"
-								expressionSet="int(0 if count&lt;2 else math.log(count,2)-1)" />
+							<Relation type="count" of="ColorTripples" expressionGet="int(math.pow(2, count+1))" expressionSet="int(0 if count&lt;2 else math.log(count,2)-1)" />
 						</Flag>
 					</Flags>
 					<Block name="LocalColorTable" >
@@ -161,25 +160,39 @@
 		<Block name="LogicalScreenDescriptor" >
 			<Number name="LogicalScreenWidth" size="16" signed="false"/>
 			<Number name="LogicalScreenHeight" size="16" signed="false"/>
-
-			<Flags name="PackedFields" size="8">
-				<Flag name="GlobalColorTableFlag" position="7" size="1"/>
-				<Flag name="ColorResolution" position="4" size="3"/>
-				<Flag name="SortFlag" position="3" size="1"/>
-				<Flag name="SizeofGlobalColorTable" position="0" size="3">
-					<Relation type="count" of="ColorTripples" expressionGet="int(math.pow(2, count+1))" expressionSet="int(0 if count&lt;2 else math.log(count,2)-1)"/>
-				</Flag>
-			</Flags>
-			<Number name="BackgroundColorIndex" size="8"/>
-			<Number name="PixelAspectRatio" size="8"/>
-		</Block>
-		
-		<Block name="GlobalColorTable">
-			<Block name="ColorTripples" minOccurs="0">
-				<Number name="R" size="8" signed="false"/>
-				<Number name="G" size="8" signed="false"/>
-				<Number name="B" size="8" signed="false"/>
-			</Block>
+			<Choice>
+				<Block>
+					<Flags name="PackedFields" size="8">
+						<Flag name="GlobalColorTableFlag" position="7" size="1" token="true" value="1"/>
+						<Flag name="ColorResolution" position="4" size="3"/>
+						<Flag name="SortFlag" position="3" size="1"/>
+						<Flag name="SizeofGlobalColorTable" position="0" size="3">
+							<Relation type="count" of="ColorTripples" expressionGet="int(math.pow(2, count+1))" expressionSet="int(0 if count&lt;2 else math.log(count,2)-1)"/>
+						</Flag>
+					</Flags>
+					<Number name="BackgroundColorIndex" size="8"/>
+					<Number name="PixelAspectRatio" size="8"/>
+				
+					<Block name="GlobalColorTable">
+						<Block name="ColorTripples" minOccurs="0">
+							<Number name="R" size="8" signed="false"/>
+							<Number name="G" size="8" signed="false"/>
+							<Number name="B" size="8" signed="false"/>
+						</Block>
+					</Block>
+				</Block>
+				<Block>
+					<Flags name="PackedFields" size="8">
+						<Flag name="GlobalColorTableFlag" position="7" size="1" token="true" value="0"/>
+						<Flag name="ColorResolution" position="4" size="3"/>
+						<Flag name="SortFlag" position="3" size="1"/>
+						<Flag name="SizeofGlobalColorTable" position="0" size="3">
+						</Flag>
+					</Flags>
+					<Number name="BackgroundColorIndex" size="8"/>
+					<Number name="PixelAspectRatio" size="8"/>
+				</Block>
+			</Choice>
 		</Block>
 
 		<Block name="EveryThingElse" minOccurs="0">
