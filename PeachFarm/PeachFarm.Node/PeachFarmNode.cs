@@ -121,6 +121,19 @@ namespace PeachFarm.Node
 				//rabbit.CloseConnection();
 				#endregion
 
+				#region clean up temp files
+				var tempfolder = Path.Combine(nodeState.RootDirectory, "jobtmp");
+				var subfolders = Directory.GetDirectories(tempfolder);
+				foreach (var subfolder in subfolders)
+				{
+					try
+					{
+						Directory.Delete(subfolder, true);
+					}
+					catch { }
+				}
+				#endregion
+
 			}
 			catch (Exception ex)
 			{
@@ -232,22 +245,31 @@ namespace PeachFarm.Node
 
 			nodeState.StartPeachRequest = request;
 
+			string jobtempfolder = Path.Combine(nodeState.RootDirectory, "jobtmp", nodeState.StartPeachRequest.JobID);
+			FileWriter.CreateDirectory(jobtempfolder);
+
 			ChangeStatus(Status.Running);
 
-			nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml");
+			//nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml");
 			
-			if(String.IsNullOrEmpty(request.Defines) == false)
-			{
-				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml.config");
-			}
+			//if(String.IsNullOrEmpty(request.Defines) == false)
+			//{
+			//  nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml.config");
+			//}
 
-			if (String.IsNullOrEmpty(request.ZipFile) == false)
-			{
-				string localfile = Path.Combine(Path.GetDirectoryName(nodeState.PitFilePath), nodeState.StartPeachRequest.PitFileName + ".zip");
-				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, request.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
+			//if (String.IsNullOrEmpty(request.ZipFile) == false)
+			//{
+				string localfile = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".zip");
+				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, nodeState.StartPeachRequest.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
 				var zip = Ionic.Zip.ZipFile.Read(localfile);
-				zip.ExtractAll(Path.GetDirectoryName(nodeState.PitFilePath), Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
-			}
+				zip.ExtractAll(jobtempfolder, Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
+
+				//new
+				nodeState.PitFilePath = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".xml");
+
+				if (nodeState.StartPeachRequest.HasDefines)
+					nodeState.DefinesFilePath = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".xml.config");
+			//}
 
 			#region initialize Peach Engine
 			peach = new Peach.Core.Engine(null);
@@ -277,22 +299,36 @@ namespace PeachFarm.Node
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
 			string jobid = nodeState.StartPeachRequest.JobID;
-			try
+			Dictionary<string, object> parserArgs = new Dictionary<string, object>();
+			Dictionary<string, string> defines = new Dictionary<string, string>();
+
+			if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
 			{
-				Dictionary<string, object> parserArgs = new Dictionary<string, object>();
-				Dictionary<string, string> defines = new Dictionary<string, string>();
-				if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
+				try
 				{
 					defines = Peach.Core.Analyzers.PitParser.parseDefines(nodeState.DefinesFilePath);
 				}
-				defines.Add("Peach.Cwd", Environment.CurrentDirectory);
-				parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
+				catch (Exception ex)
+				{
+					string message = "Exception on Defines parse:\n" + ex.ToString();
+					StopPeach(message);
+					StartPeachCleanUp(jobid);
+					return;
+				}
+			}
+
+			defines["Peach.Cwd"] = Environment.CurrentDirectory;
+			parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
+
+			try
+			{
 				dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
 			}
 			catch (Peach.Core.PeachException ex)
 			{
-				string message = "Peach Exception on Pit parse:\n" + ex.ToString();
+				string message = "Exception on Pit parse:\n" + ex.ToString();
 				StopPeach(message);
+				StartPeachCleanUp(jobid);
 				return;
 			}
 
@@ -327,32 +363,38 @@ namespace PeachFarm.Node
 			try
 			{
 				peach.startFuzzing(dom, config);
-
 			}
 			catch (Peach.Core.PeachException pex)
 			{
-				nlog.Error("PeachException:\n" + pex.ToString());
+				string message = "PeachException:\n" + pex.ToString();
+				StopPeach(message);
 			}
 			catch (Exception ex)
 			{
-				nlog.Error("Unknown Exception from Peach:\n" + ex.Message);
+				string message = String.Format("Unknown Exception from Peach:\n{0}", ex.ToString());
+				StopPeach(message);
 			}
 			finally
 			{
-				Environment.CurrentDirectory = nodeState.RootDirectory;
-				string temppath = Path.Combine(Environment.CurrentDirectory, "jobtmp", jobid);
-				if (Directory.Exists(temppath))
-				{
-					try
-					{
-						Directory.Delete(temppath, true);
-					}
-					catch { }
-				}
-				nodeState.RunContext = null;
-				nodeState.StartPeachRequest = null;
-				ChangeStatus(Common.Messages.Status.Alive);
+				StartPeachCleanUp(jobid);
 			}
+		}
+
+		private void StartPeachCleanUp(string jobid)
+		{
+			Environment.CurrentDirectory = nodeState.RootDirectory;
+			string temppath = Path.Combine(nodeState.RootDirectory, "jobtmp", jobid);
+			if (Directory.Exists(temppath))
+			{
+				try
+				{
+					Directory.Delete(temppath, true);
+				}
+				catch { }
+			}
+			nodeState.RunContext = null;
+			nodeState.StartPeachRequest = null;
+			ChangeStatus(Common.Messages.Status.Alive);
 		}
 		#endregion
 

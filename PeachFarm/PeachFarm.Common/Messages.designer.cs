@@ -2610,10 +2610,6 @@ namespace PeachFarm.Common.Messages
 	public partial class StartPeachRequest
 	{
 
-		private string pitField;
-
-		private string definesField;
-
 		private uint seedField;
 
 		private int clientCountField;
@@ -2632,33 +2628,11 @@ namespace PeachFarm.Common.Messages
 
 		private string zipFileField;
 
+		private bool hasDefinesField;
+
+		private string pitVersionField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
-
-		[System.Xml.Serialization.XmlElementAttribute(Order = 0)]
-		public string Pit
-		{
-			get
-			{
-				return this.pitField;
-			}
-			set
-			{
-				this.pitField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlElementAttribute(Order = 1)]
-		public string Defines
-		{
-			get
-			{
-				return this.definesField;
-			}
-			set
-			{
-				this.definesField = value;
-			}
-		}
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
 		public uint Seed
@@ -2774,6 +2748,32 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.zipFileField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public bool HasDefines
+		{
+			get
+			{
+				return this.hasDefinesField;
+			}
+			set
+			{
+				this.hasDefinesField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		public string PitVersion
+		{
+			get
+			{
+				return this.pitVersionField;
+			}
+			set
+			{
+				this.pitVersionField = value;
 			}
 		}
 

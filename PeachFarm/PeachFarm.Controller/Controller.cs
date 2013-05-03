@@ -440,27 +440,29 @@ namespace PeachFarm.Controller
 			mongoJob.JobID = request.JobID;
 			mongoJob.UserName = request.UserName;
 			mongoJob.Pit.FileName = request.PitFileName;
-			mongoJob.Pit.FullText = request.Pit;
+			//mongoJob.Pit.FullText = request.Pit;
 			mongoJob.ZipFile = request.ZipFile;
 
-			string text = request.Pit;
-			if (text.StartsWith("<!"))
-			{
-				text = text.Substring("<![CDATA[".Length);
-				text = text.Substring(0, text.Length - 2);
-			}
+			//string text = request.Pit;
+			//if (text.StartsWith("<!"))
+			//{
+			//  text = text.Substring("<![CDATA[".Length);
+			//  text = text.Substring(0, text.Length - 2);
+			//}
 
-			try
-			{
-				XDocument xdoc = XDocument.Parse(text);
-				var versionAttrib = xdoc.Root.Attribute("version");
-				if (versionAttrib != null)
-					mongoJob.Pit.Version = versionAttrib.Value;
-			}
-			catch
-			{
+			mongoJob.Pit.Version = request.PitVersion;
 
-			}
+			//try
+			//{
+			//  XDocument xdoc = XDocument.Parse(text);
+			//  var versionAttrib = xdoc.Root.Attribute("version");
+			//  if (versionAttrib != null)
+			//    mongoJob.Pit.Version = versionAttrib.Value;
+			//}
+			//catch
+			//{
+
+			//}
 
 			mongoJob.StartDate = DateTime.Now;
 			mongoJob.Tags = request.Tags;

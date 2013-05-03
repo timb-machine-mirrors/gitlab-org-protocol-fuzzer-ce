@@ -28,6 +28,10 @@ namespace PeachFarm.Admin
 
 		RabbitMqHelper rabbit = null;
 
+		private const string configext = ".xml.config";
+		private const string xmlext = ".xml";
+		private const string zipext = ".zip";
+
 		public Admin(string adminQueueOverride = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
@@ -236,6 +240,8 @@ namespace PeachFarm.Admin
 
 		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
 		{
+			List<string> tempfiles = new List<string>();
+			string zipfilepath = String.Empty;
 			StartPeachRequest request = new StartPeachRequest();
 
 			if (File.Exists(pitFilePath) == false)
@@ -243,24 +249,69 @@ namespace PeachFarm.Admin
 				throw new ApplicationException("File path does not exist: " + pitFilePath);
 			}
 
-			if (String.IsNullOrEmpty(definesFilePath))
+			if((String.IsNullOrEmpty(definesFilePath) == false) && (File.Exists(definesFilePath) == false))
 			{
-				if (Path.GetExtension(pitFilePath) == ".zip")
-				{
-					var definesxml = GetConfigXml(pitFilePath);
-					request.Defines = String.Format("<![CDATA[{0}]]", definesxml);
-				}
+				throw new ApplicationException("File path does not exist: " + definesFilePath);
 			}
-			else
+
+			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+			string newdefinesfilepath = String.Empty;
+			if (Path.GetExtension(pitFilePath) == xmlext)
 			{
-				if (File.Exists(definesFilePath))
+				zipfilepath = Path.Combine(Path.GetTempPath(), request.PitFileName + zipext);
+				Ionic.Zip.ZipFile zipfile = new Ionic.Zip.ZipFile();
+				zipfile.AddFile(pitFilePath, ".");
+				if (String.IsNullOrEmpty(definesFilePath) == false)
 				{
-					request.Defines = String.Format("<![CDATA[{0}]]", File.ReadAllText(definesFilePath));
+					if (definesFilePath.EndsWith(request.PitFileName + configext))
+					{
+						zipfile.AddFile(definesFilePath, ".");
+					}
+					else
+					{
+						newdefinesfilepath = Path.Combine(Path.GetTempPath(), request.PitFileName + configext);
+						File.Copy(definesFilePath, newdefinesfilepath);
+						zipfile.AddFile(newdefinesfilepath, ".");
+						tempfiles.Add(newdefinesfilepath);
+					}
 				}
-				else
-				{
-					throw new ApplicationException("File path does not exist: " + definesFilePath);
-				}
+				zipfile.Save(zipfilepath);
+				tempfiles.Add(zipfilepath);
+			}
+			else if(Path.GetExtension(pitFilePath) == zipext)
+			{
+				zipfilepath = pitFilePath;
+			}
+
+
+			request.PitFileName = Path.GetFileNameWithoutExtension(zipfilepath);
+			//request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(zipfilepath));
+
+			#region get pit version if exists
+			XDocument xdoc = null;
+			try
+			{
+				xdoc = XDocument.Parse(GetPitXml(zipfilepath));
+			}
+			catch(Exception ex)
+			{
+				throw new ApplicationException("The pit file was not well formed.\n" + ex.ToString());
+			}
+
+			try
+			{
+				var versionAttrib = xdoc.Root.Attribute("version");
+				if (versionAttrib != null)
+					request.PitVersion = versionAttrib.Value;
+			}
+			catch { }
+			#endregion
+
+			var definesxml = GetConfigXml(zipfilepath);
+			if (String.IsNullOrEmpty(definesxml) == false)
+			{
+				//request.Defines = String.Format("<![CDATA[{0}]]", definesxml);
+				request.HasDefines = true;
 			}
 
 			if (String.IsNullOrEmpty(ip) == false)
@@ -276,18 +327,23 @@ namespace PeachFarm.Admin
 				request.Tags = tagsString;
 			}
 
-			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
-			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
 
 			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
-			if (Path.GetExtension(pitFilePath) == ".zip")
-			{
-				request.ZipFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
-				DatabaseHelper.SaveFileToGridFS(pitFilePath, request.ZipFile, config.MongoDb.ConnectionString);
-			}
+			request.ZipFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, config.MongoDb.ConnectionString);
+
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 			PublishToServer(request.Serialize(), Actions.StartPeach);
+
+			foreach (string tempfile in tempfiles)
+			{
+				try
+				{
+					File.Delete(tempfile);
+				}
+				catch { }
+			}
 		}
 
 		#endregion
@@ -295,37 +351,92 @@ namespace PeachFarm.Admin
 		#region StopPeachAsync
 		public void StopPeachAsync(string jobGuid)
 		{
-			StopPeachRequest request = new StopPeachRequest();
-			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-			request.JobID = jobGuid;
-			PublishToServer(request.Serialize(), "StopPeach");
+			var job = DatabaseHelper.GetJob(jobGuid, config.MongoDb.ConnectionString);
+			if (job == null)
+			{
+				throw new ApplicationException("Job does not exist: " + jobGuid);
+			}
+			else
+			{
+				StopPeachRequest request = new StopPeachRequest();
+				request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+				request.JobID = jobGuid;
+				PublishToServer(request.Serialize(), "StopPeach");
+			}
 		}
 		#endregion
 
 		public void ListNodesAsync()
 		{
-			ListNodesRequest request = new ListNodesRequest();
-			PublishToServer(request.Serialize(), Actions.ListNodes);
+			//ListNodesRequest request = new ListNodesRequest();
+			//PublishToServer(request.Serialize(), Actions.ListNodes);
+
+			ListNodesResponse response = new ListNodesResponse();
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
+			RaiseListNodesCompleted(response);
 		}
 
 		public void ListErrorsAsync(string jobID = "")
 		{
-			ListErrorsRequest request = new ListErrorsRequest();
-			request.JobID = jobID;
-			PublishToServer(request.Serialize(), Actions.ListErrors);
+			//ListErrorsRequest request = new ListErrorsRequest();
+			//request.JobID = jobID;
+			//PublishToServer(request.Serialize(), Actions.ListErrors);
+
+			ListErrorsResponse response = new ListErrorsResponse();
+			//response.Nodes = errors;
+			if (String.IsNullOrEmpty(jobID))
+			{
+				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+			}
+			else
+			{
+				response.Errors = DatabaseHelper.GetErrors(jobID, config.MongoDb.ConnectionString);
+			}
+			RaiseListErrorsCompleted(response);
 		}
 
 		public void JobInfoAsync(string jobID)
 		{
-			JobInfoRequest request = new JobInfoRequest();
-			request.JobID = jobID;
-			PublishToServer(request.Serialize(), Actions.JobInfo);
+			//JobInfoRequest request = new JobInfoRequest();
+			//request.JobID = jobID;
+			//PublishToServer(request.Serialize(), Actions.JobInfo);
+
+			JobInfoResponse response = new JobInfoResponse();
+			Common.Mongo.Job mongoJob = DatabaseHelper.GetJob(jobID, config.MongoDb.ConnectionString);
+			if (mongoJob == null)
+			{
+				response.Success = false;
+				response.ErrorMessage = String.Format("Job {0} does not exist.", jobID);
+				response.Job = new Common.Messages.Job() { JobID = jobID };
+			}
+			else
+			{
+				response.Success = true;
+				response.Job = new Common.Messages.Job(mongoJob);
+				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == jobID) select h).ToList();
+			}
+
+			RaiseJobInfoCompleted(response);
 		}
 
 		public void MonitorAsync()
 		{
-			PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
+			//PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
+
+			MonitorResponse response = new MonitorResponse();
+			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
+
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
+			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
+			response.ActiveJobs = activeJobs.ToMessagesJobs();
+			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
+
+			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+			RaiseMonitorCompleted(response);
 		}
+
 		#endregion
 
 		#region MQ functions
@@ -367,11 +478,11 @@ namespace PeachFarm.Admin
 
 		private string GetPitXml(string pitFilePath)
 		{
-			if (Path.GetExtension(pitFilePath) == ".zip")
+			if (Path.GetExtension(pitFilePath) == zipext)
 			{
 			  //var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
 				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
-			  var pitfilename = Path.GetFileNameWithoutExtension(pitFilePath) + ".xml";
+			  var pitfilename = Path.GetFileNameWithoutExtension(pitFilePath) + xmlext;
 			  var pitfile = (from e in zip.Entries where e.FileName == pitfilename select e).FirstOrDefault();
 
 			  if (pitfile == null)
@@ -382,7 +493,7 @@ namespace PeachFarm.Admin
 			  stream.Close();
 			  return doc.ToString();
 			}
-			else if (Path.GetExtension(pitFilePath) == ".xml")
+			else if (Path.GetExtension(pitFilePath) == xmlext)
 			{
 			  XDocument doc = XDocument.Load(pitFilePath);
 			  return doc.ToString();
@@ -395,11 +506,11 @@ namespace PeachFarm.Admin
 
 		private string GetConfigXml(string pitFilePath)
 		{
-			if (Path.GetExtension(pitFilePath) == ".zip")
+			if (Path.GetExtension(pitFilePath) == zipext)
 			{
 				//var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
 				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
-				var definesfilename = Path.GetFileNameWithoutExtension(pitFilePath) + ".xml.config";
+				var definesfilename = Path.GetFileNameWithoutExtension(pitFilePath) + configext;
 				var definesfile = (from e in zip.Entries where e.FileName == definesfilename select e).FirstOrDefault();
 
 				//if (pitfile == null)

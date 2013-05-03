@@ -72,6 +72,8 @@ namespace PeachFarm.Admin.Console
 
 				#endregion
 
+				bool mustwait = true;
+
 				#region Set up Admin listener
 
 				admin = new Admin();
@@ -122,6 +124,7 @@ namespace PeachFarm.Admin.Console
 				#region List
 				if (nodes)
 				{
+					mustwait = false;
 					admin.ListNodesAsync();
 				}
 				#endregion
@@ -129,6 +132,7 @@ namespace PeachFarm.Admin.Console
 				#region Errors
 				if (errors)
 				{
+					mustwait = false;
 					if (extra.Count > 0)
 					{
 						string jobID = extra[0];
@@ -144,6 +148,7 @@ namespace PeachFarm.Admin.Console
 				#region Job Info
 				if (jobInfo)
 				{
+					mustwait = false;
 					string jobID = extra[0];
 					admin.JobInfoAsync(jobID);
 				}
@@ -152,12 +157,16 @@ namespace PeachFarm.Admin.Console
 				#region Jobs
 				if (jobs)
 				{
+					mustwait = false;
 					admin.MonitorAsync();
 				}
 				#endregion
 
-				System.Console.WriteLine("waiting for result...");
-				System.Console.ReadLine();
+				if (mustwait)
+				{
+					System.Console.WriteLine("waiting for result...");
+					System.Console.ReadLine();
+				}
 			}
 			catch (RabbitMqException rex)
 			{
@@ -254,17 +263,24 @@ namespace PeachFarm.Admin.Console
 
 		static void admin_JobInfoCompleted(object sender, Admin.JobInfoCompletedEventArgs e)
 		{
-			string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
-				e.Result.Job.JobID,
-				e.Result.Job.UserName,
-				e.Result.Job.Pit.FileName,
-				e.Result.Job.StartDate);
-
-			System.Console.WriteLine(output);
-
-			foreach (Heartbeat heartbeat in e.Result.Nodes)
+			if (e.Result.Success)
 			{
-				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+				string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
+					e.Result.Job.JobID,
+					e.Result.Job.UserName,
+					e.Result.Job.Pit.FileName,
+					e.Result.Job.StartDate);
+
+				System.Console.WriteLine(output);
+
+				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				{
+					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+				}
+			}
+			else
+			{
+				System.Console.WriteLine("Job not found: " + e.Result.Job.JobID);
 			}
 		}
 
