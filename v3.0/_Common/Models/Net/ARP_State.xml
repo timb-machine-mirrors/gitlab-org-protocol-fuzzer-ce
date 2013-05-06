@@ -12,15 +12,35 @@
 		<Block name="Payload" ref="ARP:Packet" />
 	</DataModel>
 
-	<StateModel name="Gratuitous" initialState="Initial">
+	<StateModel name="Request" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
 				<DataModel ref="ARPPacket"/>
 				<Data name="ARPRequest">
+					<Field name="Dest" valueType="hex" mutable="false" value="ffffffffffff"/>
 					<Field name="Payload.Data.OPER.Request" value=""/>
 				</Data>
 			</Action>
 		</State>
 	</StateModel>
+
+	<StateModel name="Reply" initialState="Initial">
+		<State name="Initial">
+			<Action name="GetRequest" type="input">
+				<DataModel ref="ARPPacket"/>
+			</Action>
+			<Action type="slurp" valueXpath="//GetRequest//ARPPacket/Payload/Data/TPABlock/TPA" setXpath="//DoReply//SPA"/>
+			<Action type="slurp" valueXpath="//GetRequest//SPA" setXpath="//DoReply//TPA"/>
+			<Action type="slurp" valueXpath="//GetRequest//ARPPacket/Src" setXpath="//DoReply//Dest"/>
+			<Action type="slurp" valueXpath="//GetRequest//ARPPacket/Src" setXpath="//DoReply//THA"/>
+			<Action name="DoReply" type="output">
+				<DataModel ref="ARPPacket"/>
+				<Data name="ARPReply">
+					<Field name="Payload.Data.OPER.Reply" value=""/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
 </Peach>
 <!--End-->
