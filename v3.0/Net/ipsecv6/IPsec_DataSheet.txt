@@ -45,6 +45,7 @@ Detailed Use Cases
 |========
 |Messages | Specification
 |Encapsulating Security Payload Packet Format | RFC4303 2
+|Authentication Header (AH) | RFC4302
 |========
 
 [options="header"]
@@ -67,14 +68,13 @@ Detailed Use Cases
 |========
 
 --Doesn't support anti-replay (reestablishing the SA when Sequence number will cycle |Sequence Number Generation | RFC4303 3.3.3, 3.4.3
---Doesn't support Fragmentation (Cracking) processing (fragmentation reassembly should probably be done by the publisher)
+--Doesn't support Fragmentation (Cracking) processing (fragmentation reassembly should probably be done by the publisher/might already be done by publisher)
 --Doesn't support Fragmentented sending RFC4303 3.3.4-3.4.2
 --Doesn't support randomly generated IV's
 --Doesn't support ESP Encapsulated in UDP RFC3948 (Mainly used for IKE)
 --Doesn't support the following Encryption Algs: CAST-128, RC5, IDEA, Blowfish. RFC2451
 --Doesn't support IKE (RFC3947, RFC4555, RFC4307, RFC4806, RFC4835, RFC4945, RFC5996)
 --Doesn't support Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security Payload (ESP) RFC4106
---Doesn't support Authentication Header (AH) RFC4302
 --Doesn't support Extened Sequence Numbers (used with IKE) RFC4304
 --Partial support for Crypto Suites (Missing all IKE) RFC4308
 --Doesn't support AES CCM with ESP RFC4309

@@ -195,6 +195,10 @@
 		<Block name="TcpPayload"/>
 	</DataModel>
 
+	<DataModel name="PacketWithData" ref="Packet">
+		<Blob name="TcpPayload" value="this is a packet.\n"/>
+	</DataModel>
+
  	<Data name="SYN">
 		<Field name="Header.ControlBits.SYN" value="1"/>
 	</Data>
@@ -207,10 +211,6 @@
  	<Data name="ACK">
 		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
-
-	<DataModel name="PacketWithData" ref="Packet">
-		<Blob name="TcpPayload" value="this is a packet.\n"/>
-	</DataModel>
 
  	<Data name="PSH">
 		<Field name="Header.ControlBits.PSH" value="1"/>
