@@ -26,8 +26,8 @@
   </DataModel>
 	
 	<DataModel name="Frame">
-		<Blob name="Dest" valueType="hex" mutable="false" value="##TargetMAC##"/>
-		<Blob name="Src" valueType="hex" mutable="false" value="##SourceMAC##"/>
+		<Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
+		<Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
 		<!-- https://en.wikipedia.org/wiki/EtherType -->
 		<Blob name="TypeOrLen" token="true" mutable="false" valueType="hex" value="0806"/> <!-- ARP -->
 		<Blob name="Payload"/>
