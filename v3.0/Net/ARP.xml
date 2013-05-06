@@ -29,7 +29,7 @@
   <Test name="Default">
 		<Exclude xpath="//ARPPacket"/>
 		<Include xpath="//ARPPacket/Payload"/>
-    <StateModel ref="ARP:Gratuitous"/>
+    <StateModel ref="ARP:Request"/>
 		
     <!--Agent ref="RemoteAgent"/-->
     <!--Agent ref="LocalAgent"/-->
@@ -45,5 +45,27 @@
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
+
+  <Test name="Reply">
+		<Exclude xpath="//ARPPacket"/>
+		<Include xpath="//ARPPacket/Payload"/>
+    <StateModel ref="ARP:Reply"/>
+		
+    <!--Agent ref="RemoteAgent"/-->
+    <!--Agent ref="LocalAgent"/-->
+		
+    <Publisher class="RawEther">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_ARP"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+		
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+
+
 </Peach>
 <!--End-->
