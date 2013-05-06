@@ -25,13 +25,13 @@
 					<Number name="Op" size="16" endian="big" value="2"/>
 				</Block>
 			</Choice>
-			<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
+			<Blob name="SHA" valueType="hex" length="6" value="##SourceMAC##"/>
 			<Block name="SPABlock" length="4">
 				<String name="SPA" value="##SourceIPv4##">
 					<Transformer class="Ipv4StringToOctet"/>
 				</String>
 			</Block>
-			<Blob name="THA" valueType="hex" value="##TargetMAC##"/>
+			<Blob name="THA" valueType="hex" length="6" value="##TargetMAC##"/>
 			<Block name="TPABlock" length="4">
 				<String name="TPA" value="##TargetIPv4##">
 					<Transformer class="Ipv4StringToOctet"/>
