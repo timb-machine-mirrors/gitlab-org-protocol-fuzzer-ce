@@ -1,5 +1,4 @@
 <PitDefines>
-
 	<All>
 		<Define key="RemoteAgentIP" value="192.168.128.130"/>
     <Define key="LoggerPath"  value="./logs/ipsec/"/> 

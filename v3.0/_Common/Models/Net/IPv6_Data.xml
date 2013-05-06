@@ -61,7 +61,7 @@
 			<Padding name="PaddingValue"  alignment="64" alignedTo="HopByHopContents"/>
 		</Block>
 	</DataModel>
-
+	
 	<DataModel name="Destination">
 		<Block ref="HopByHop">
 			<Block name="HopByHopContents.TLVs.InternalTLV">
@@ -140,7 +140,7 @@
 		</Number>
 		<Number name="RoutingType" size="8" value="1"/>
 		<Number name="SegmentsLeft" size="8"/>
-		<Blog name="Data" valueType="hex"/>
+		<Blob name="Data" valueType="hex"/>
 	</DataModel>
 
 	<DataModel name="DestinationOptions">
@@ -148,7 +148,7 @@
 			<Number name="HdrExtLen" size="8" endian="big" signed="false">
 				<Relation type="size" of="Options" expressionGet="size*8" expressionSet="size/8"/>
 			</Number>
-			<Block name="Options"/>
+			<Block name="Options" ref="TLV" minOccurs="1" maxOccurs="-1"/>
 	</DataModel>
 
 	<DataModel name="Mobile">
@@ -347,7 +347,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -376,7 +376,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="1"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -408,7 +408,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="2"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -422,7 +422,7 @@
 			<Number name="Reserved" size="16"/>
 			<Number name="CareInitCookie" size="64">
 				<Fixup class="SequenceRandomFixup"/>
-			<Number>
+			</Number>
 			<Block name="MobilityOptions">
 			</Block>
 			<Padding  alignment="64"/>
@@ -440,7 +440,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="3"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -473,7 +473,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="4"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -506,7 +506,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="5"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -562,7 +562,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="6"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -613,7 +613,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="7"/>
 				<Number name="Checksum" size="16" endian="big">

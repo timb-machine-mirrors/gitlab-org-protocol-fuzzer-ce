@@ -10,6 +10,8 @@
 	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
 	
 	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
+	<Include ns="TCPv6" src="file:##Path##/_Common/Models/Net/TCPv6_Data.xml"/>
+	
 	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
 	<Include ns="UDPv4" src="file:##Path##/_Common/Models/Net/UDPv4_Data.xml"/>
 
@@ -52,6 +54,45 @@
 		</Blob>
 	</DataModel>
 
+	<DataModel name="IPsecV6AhTransport">
+		<Block name="AhHeader">
+			<Block name="inner">
+				<Number name="NextHeader" size="8" value="6"/>
+				<Number name="AhLength" size="8" endian="big">
+					<Relation type="size" of="inner" expressionGet="(size + 2) * 4" expressionSet="(size / 4) - 2"/>
+				</Number>
+				<Number name="Reservered" size="16"/>
+				<Number name="SPI" size="32" endian="big" value="0x00000201"/>
+				<Number name="Sequence" size="32" value="0" endian="big">
+					<Fixup class="SequenceIncrementFixup"/>
+				</Number>	
+				<Block>
+					<Blob name="ICV" valueType="hex">
+						<Fixup class="HMAC">
+							<Param name="ref" value="AhHeader"/>
+							<Param name="Key" value="##AuthKey##"/>
+							<Param name="Hash" value="##HashAlg##"/>
+							<Param name="Length" value="12"/>
+						</Fixup>
+					</Blob>
+					<Padding name="Pad" alignment="96" />
+				</Block>
+				<Padding name="Pad" alignment="64" >
+					<Fixup class="FillValue">
+						<Param name="ref" value="Pad"/>
+						<Param name="start" value="1"/>
+						<Param name="stop" value="15"/>
+					</Fixup>
+				</Padding>
+			</Block>
+			<Block name="AhPayload"> <!--Overwrite for tunnel-->
+				<Block name="DestOpts" ref="IPv6:DestinationOptions" minOccurs="0"/> <!--Optional. Only here if Header containts this option-->
+				<Block name="TCP" ref="TCPv6:PacketWithData"/>
+			</Block>
+		</Block>	
+		
+	</DataModel>
+	
 	<DataModel name="IPv6EmptyPacketIPSECv6Transport">
 		<Block ref="IPSECv6Transport">
 			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">

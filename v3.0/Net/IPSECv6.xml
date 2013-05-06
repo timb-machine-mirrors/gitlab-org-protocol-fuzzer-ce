@@ -26,7 +26,7 @@
   
   <!-- Default test for fuzzing IPSECv6 ESP-->
   <Test name="Default">
-    <StateModel ref="States:TheState"/>
+    <StateModel ref="States:ESP"/>
 		
 		<Agent ref="LocalAgent"/>
 		
