@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PitDefines>
+<PitDefines Include="./Net/ARP_Config.xml">
 	<All>
 		<Define key="RemoteAgent" value="10.0.1.40"/>
 		<Define key="LoggerPath"  value="./logs/ethernet/"/> 

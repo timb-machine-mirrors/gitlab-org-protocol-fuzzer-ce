@@ -1,0 +1,34 @@
+Protocol
+--------
+
+ * Test Suite: Ethernet
+ * Direction: Broadcast, Listen (TODO)
+ 
+The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|802.3 | Ethernet
+|802.1Q | VLAN Tagging
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+| Ethernet Frame | 802.3 Section 3.1.1
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+| Address Fields | 802.3 Section 3.2.3
+| Length/Type Fields (Partial) | 802.3 Section 3.2.6
+|========
+
