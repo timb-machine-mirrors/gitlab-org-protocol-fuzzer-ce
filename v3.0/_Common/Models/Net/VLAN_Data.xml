@@ -1,0 +1,992 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Virtual LAN PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
+	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
+	
+	<Include ns="IPv4" src="file:##Path##/_Common/Models/Net/IPv4_Data.xml"/>
+	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
+	
+	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
+	<Include ns="UDPv4" src="file:##Path##/_Common/Models/Net/UDPv4_Data.xml"/>
+	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
+
+	<DataModel name="VLAN_TCI">
+		<Flags size="16" endian="big">
+			<Flag name="Priority"  position="0" size="3"/>
+			<Flag name="CFI"  position="3" size="1" value="0"/>
+			<Flag name="VID"  position="4" size="12" value="1"/>
+		</Flags>
+	</DataModel>
+
+	<DataModel name="VLAN">
+		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="VLAN_TCI"/>
+		<Block name="VlanTCIBlock" minOccurs="0">
+			<Blob name="Type" token="true" valueType="hex" value="9100"/>
+			<Block ref="VLAN_TCI"/>
+			<Block name="ExtendedVlanTCIBlock" minOccurs="0">
+				<Blob name="Type" token="true" valueType="hex" value="8100"/>
+				<Block ref="VLAN_TCI"/>
+			</Block>
+		</Block>
+		<Block name="VlanPayload">
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6EmptyPacketInVlan">
+		<Block name="ThisVLAN" ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block  name="PayloadIPv6Header" ref="IPv6:IPv6Header"/>
+				<Block name="IPv6Header" ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" value="0" size="16"/>
+					<Number name="NextHeader" size="8" endian="big" value="59"/>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6EmptyPacketInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6ICMPInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Number name="Type" size="8"  value="128" endian="network"/>
+						<Number name="Code" size="8"/>
+						<Number name="Checksum"  endian="big" size="16">
+							<Fixup class="IcmpV6ChecksumFixup">
+								<Param name="ref" value="IPv6Payload" />
+								<Param name="src" value="##SourceIPv6##" />
+								<Param name="dst" value="##TargetIPv6##" />
+							</Fixup>
+						</Number>
+						<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+						<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+						<Blob name="Data" valueType="hex" value="6162636465666768696a6b6c6d6e6f7071727374757677616263646566676869"/>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6HopByHopInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="0"/>
+					<Block name="IPv6Payload" ref="IPv6:HopByHop"/>
+					<Number name="CRC" size="32" endian="big">
+						<Fixup class="checksums.Crc32Fixup">
+							<Param name="ref" value="IPv6HopByHopInVlan"/>
+						</Fixup>
+					</Number>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6JumbogramInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="0"/>
+					<Block name="IPv6Payload" ref="IPv6:JumboFrame"/>
+					<Number name="CRC" size="32" endian="big">
+						<Fixup class="checksums.Crc32Fixup">
+							<Param name="ref" value="IPv6JumbogramInVlan"/>
+						</Fixup>
+					</Number>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment1InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="44"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="0"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="1"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6Fragment1InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment2InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="44"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="12"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="1"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6Fragment2InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6Fragment3InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="44"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Fragment">
+							<Flags name="Flags" size="16" endian="big">
+								<Flag name="Offset" size="13" position="0" value="24"/>
+								<Flag name="Res" size="2" position="13"/>
+								<Flag name="Mflag" size="1" position="15" value="0"/>
+							</Flags>
+							<Number name="Identification" size="32" endian="big" value="374625"/>
+						</Block>
+						<Blob name="Data" length="12"/>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6Fragment3InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6DestinationOptionsInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="59"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:DestinationOptions">
+							<Block name="Options">
+								<Block ref="IPv6:TLV" name="HomeAddressOption">
+									<Number name="Type" size="8" endian="big" value="201"/>
+									<Block name="Value">
+										<Blob length="16" valueType="hex"/>
+									</Block>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6DestinationOptionsInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBRRInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBRRInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileBRRInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTIInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="1"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileHoTIInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Number name="HomeInitCookie" size="64"/>
+						<Block name="MobilityOptions">
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileHoTIInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoTIInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="2"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileCoTIInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Reserved" size="16"/>
+						<Number name="CareInitCookie" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileCoTIInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileHoTInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="3"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileHoTInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="HomeNonceIndex" size="16"/>
+						<Number name="HomeInitCookie" size="64"/>
+						<Number name="HomeKeygenToken" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileHoTInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileCoTInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="4"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileCoTInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="CareNonceIndex" size="16"/>
+						<Number name="CareInitCookie" size="64"/>
+						<Number name="CareKeygenToken" size="64"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileCoTInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBUInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="5"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBUInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Sequence" size="16" signed="false"/>
+						<Flags size="16" endian="big">
+							<Flag name="A" size="1" position="0"/>
+							<Flag name="H" size="1" position="1"/>
+							<Flag name="L" size="1" position="2"/>
+							<Flag name="K" size="1" position="3"/>
+							<Flag name="Reserved" size="12" position="4"/>
+						</Flags>
+						<Number name="Lifetime" size="16" signed="false"/>
+						<Block name="MobilityOptions">
+							<Block name="NonceIndices" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="4"/>
+								<Block name="Value">
+									<Number name="HomeNonceIndex" size="16"/>
+									<Number name="CareNonceIndex" size="16"/>
+								</Block>
+							</Block>
+							<Block name="AltCareofAddress" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="3"/>
+								<Block name="Value">
+									<Blob name="AltCareAddress" length="16"/>
+								</Block>
+							</Block>
+							<Block name="BindingAuthData" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="5"/>
+								<Block name="Value">
+									<Blob name="Authenticator" length="12" valueType="hex"/>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileBUInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="IPv6MobileBAInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="6"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBAInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Status" size="8" signed="false"/>
+						<Flags size="8" endian="big">
+							<Flag name="K" size="1" position="0"/>
+							<Flag name="Reserved" size="7" position="1"/>
+						</Flags>
+						<Number name="Sequnce" size="16" signed="false"/>
+						<Number name="Lifetime" size="16" signed="false"/>
+						<Block name="MobilityOptions">
+							<Block name="BindingRefreshAdvice" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="2"/>
+								<Number name="Length" size="8" endian="big" value="2"/>
+								<Block name="Value">
+									<Number name="RefreshInterval" size="16" endian="big"/> 
+								</Block>
+							</Block>
+							<Block name="BindingAuthData" ref="IPv6:TLV">
+								<Number name="Type" size="8" endian="big" value="5"/>
+								<Number name="Length" size="8" endian="big">
+									<Relation type="size" of="Value"/>
+								</Number>
+								<Block name="Value">
+									<Blob name="Authenticator" length="12" valueType="hex"/>
+								</Block>
+							</Block>
+						</Block>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileBAInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6MobileBEInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="135"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:Mobile">
+							<Number name="HeaderLen" size="8" endian="big">
+								<Relation type="size" of="IPv6Payload" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+							</Number>
+							<Number name="MH" size="8" endian="big" value="7"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6MobileBEInVlan"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+						</Block>
+						<Number name="Status" size="8" signed="false"/>
+						<Number name="Reserved" size="8"/>
+						<Blob name="HomeAddress" length="16"/>
+						<Block name="MobilityOptions"/>
+						<Padding  alignment="64"/>
+					</Block>	
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6MobileBEInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6RoutingType2HeaderInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="43"/>
+					<Block name="IPv6Payload">
+						<Block ref="IPv6:MobileRoutingType2Header">
+							<Number name="NextHeader" size="8" endian="big" value="59"/>
+						</Block>	
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6RoutingType2HeaderInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryRequestInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="ICMP:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="144"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>	
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPHomeAgentAddressDiscoveryRequestInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPHomeAgentAddressDiscoveryReplyInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="ICMP:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="145"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>
+						</Block>
+						<Block name="HomeAgentAddresses">
+							<Blob name="Address1" length="16" valueType="hex"/>
+							<Blob name="Address2" length="16" valueType="hex"/>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPHomeAgentAddressDiscoveryReplyInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPPrefixSolicitationInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="ICMP:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="146"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Number size="16" endian="big"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPPrefixSolicitationInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6ICMPPrefixAdvertisementInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="ICMP:MobileICMP">
+							<Number name="Type" size="8" endian="big" value="147"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Block name="Reserved">
+								<Flags size="16">
+									<Flag name="M" size="1" position="0"/>
+									<Flag name="O" size="1" position="1"/>
+									<Flag name="Reserved" size="14" position="2"/>
+								</Flags>
+							</Block>
+							<Block name="Options">
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPPrefixAdvertisementInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>	
+	
+	
+	<DataModel name="IPv6ICMPRouterAdvertismentInVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="58"/>
+					<Block name="IPv6Payload">
+						<Block ref="ICMP:MobileICMPRouterAdvertisement">
+							<Number name="Type" size="8" endian="big" value="134"/>
+							<Number name="Code" size="8" endian="big" value="0"/>
+							<Number name="Checksum" size="16" endian="big">
+								<Fixup class="IcmpV6ChecksumFixup">
+									<Param name="ref" value="IPv6Payload"/>
+									<Param name="src" value="##SourceIPv6##"/>
+									<Param name="dst" value="##TargetIPv6##"/>
+								</Fixup>
+							</Number>
+							<Flags name="Flags" size="8">
+								<Flag name="M" size="1" position="0"/>
+								<Flag name="O" size="1" position="1"/>
+								<Flag name="H" size="1" position="2"/>
+								<Flag name="Reserved" size="5" position="3"/>
+							</Flags>
+							<Block name="Options">
+								<Block name="PrefixInformation">
+									<Number name="Type" size="8" endian="big" value="3"/>
+									<Number name="Length" size="8" endian="big" value="4"/>
+									<Number name="PrefixLength" size="8" endian="big"/>
+									<Flags size="8" endian="big">
+										<Flag name="L" size="1" position="0"/>
+										<Flag name="A" size="1" position="1"/>
+										<Flag name="R" size="1" position="2"/>
+										<Flag name="Reserved" size="5" position="3"/>
+									</Flags>
+									<Number name="ValidLifeTime" size="32" endian="big" signed="false"/>
+									<Number name="PreferredLifetime" size="32" endian="big" signed="false"/>
+									<Number name="Reserved2" size="32" endian="big"/>
+									<Blob name="Prefix" length="16" valueType="hex"/>
+								</Block>
+								<Block name="AdvertisementInterval">
+									<Number name="Type" size="8" endian="big" value="7"/>
+									<Number name="Length" size="8" endian="big" value="1"/>
+									<Number name="Reserved" size="16" endian="big"/>
+									<Number name="AdvertisementInterval" size="32" endian="big"/>
+								</Block>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6ICMPRouterAdvertismentInVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4TCPv4InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="0800" />
+				<Block name="PayloadContent" ref="IPv4:IPv4">
+					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
+					<Block name="IPv4Payload">
+						<Block name="TCP" ref="TCP:Packet">
+							<Number name="Header.CheckSum" size="16" endian="big">
+								<Fixup class="TCPChecksumFixup">
+									<Param name="ref" value="TCP" />
+									<Param name="src" value="##SourceIPv4##" />
+									<Param name="dst" value="##TargetIPv4##" />
+								</Fixup>
+							</Number>
+							<Block name="TcpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv4TCPv4InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="0800" />
+				<Block name="PayloadContent">
+				  <Block name="IPv4" ref="IPv4:IPv4">
+						<Block name="IPv4Payload">
+							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv4InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6TCPv6InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block name="PayloadContent" ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="06"/>
+					<Block name="IPv6Payload">
+						<Block name="TCP" ref="TCP:Packet">
+							<Number name="Header.CheckSum" size="16" endian="big">
+								<Fixup class="TCPChecksumFixup">
+									<Param name="ref" value="TCP" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
+								</Fixup>
+							</Number>
+							<Block name="TcpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6TCPv6InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv4UDPv4InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="0800" />
+				<!-- This takes the normal payload and overrides it with this payload -->
+				<Block name="PayloadContent" ref="IPv4:IPv4">
+					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
+					<Block name="IPv4Payload">
+						<Block name="UDPHeader" ref="UDPv4:UDP">
+							<Number name="Header.Checksum" size="16" endian="big">
+								<Fixup class="UDPChecksumFixup">
+									<Param name="ref" value="UDPHeader" />
+									<Param name="src" value="##SourceIPv4##" />
+									<Param name="dst" value="##TargetIPv4##" />
+								</Fixup>
+							</Number>
+							<Block name="UdpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv4UDPv4InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="IPv6UDPv6InVlan">
+		<Block ref="VLAN">
+			<Block name="VlanPayload">
+				<Blob name="Type" valueType="hex" value="86dd" />
+				<Block name="PayloadContent" ref="IPv6:IPv6Header">
+					<Number name="PayloadLength" size="16" endian="big">
+						<Relation type="size" of="IPv6Payload" />
+					</Number>
+					<Number name="NextHeader" size="8" endian="big" value="17"/>
+					<Block name="IPv6Payload">
+						<Block name="UDPHeader" ref="UDPv6:UDP">
+							<Number name="Header.Checksum" size="16" endian="big">
+								<Fixup class="UDPChecksumFixup"> 
+									<Param name="ref" value="UDPHeader" />
+									<Param name="src" value="##SourceIPv6##" />
+									<Param name="dst" value="##TargetIPv6##" />
+								</Fixup>
+							</Number>
+							<Block name="UdpPayload">
+								<Blob value="Hello"/>
+							</Block>
+						</Block>
+					</Block>
+				</Block>
+				<Number name="CRC" size="32" endian="big">
+					<Fixup class="checksums.Crc32Fixup">
+						<Param name="ref" value="IPv6UDPv6InVlan"/>
+					</Fixup>
+				</Number>
+			</Block>
+		</Block>
+	</DataModel>
+</Peach>
+<!--END-->

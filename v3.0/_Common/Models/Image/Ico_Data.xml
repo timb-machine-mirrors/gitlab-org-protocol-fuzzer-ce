@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Ico PIT States" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<Defaults>
+		<Number endian="little" signed="false" />
+	</Defaults>
+	
+	<DataModel name="ICO">
+		<Block name="IconDirHeader">
+			<Number name="reserve" size="16" />
+			<Number name="type" size="16" />
+			<Number name="length" size="16">
+				<Relation type="count" of="IconDirEntry" />
+			</Number>
+		</Block>
+		<Block name="IconDirEntry" minOccurs="1">
+			<!-- Value between 0-255. 0 means 256 -->
+			<Number name="width" size="8"  />
+			<!-- Value between 0-255. 0 means 256 -->
+			<Number name="height" size="8"  />
+			<Number name="palette" size="8" />
+			<Number name="reserved" size="8" />
+			<Number name="planes" size="16" />
+			<Number name="bitsPerPixel" size="16"  />
+			<Number name="size" size="32">
+				<Relation type="size" of="raw" />
+			</Number>
+			<!-- Offset of the current IconDirEntry's 'raw' calculated from the beginning of the DataModel-->
+			<Number name="offset" size="32">
+				<Relation type="offset" of="raw" />
+			</Number>
+			
+			<Blob name="raw">
+				<Placement before="PlaceImagesHere" />
+			</Blob>
+		</Block>
+
+		<Block name="PlaceImagesHere" />
+	</DataModel>
+</Peach>
+<!--END-->

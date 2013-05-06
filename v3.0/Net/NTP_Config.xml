@@ -1,0 +1,10 @@
+<PitDefines>
+  <All>
+    <Define key="NtpSrcPort" value="123"/>
+    <Define key="NtpPort"    value="123"/>
+    <Define key="NtpHost"    value="localhost"/>
+    <Define key="LoggerPath" value="./logs/ntp/"/>
+    <Define key="Strategy"  value="Sequential"/>
+		<Define key="Path" value="."/>
+  </All>
+</PitDefines>

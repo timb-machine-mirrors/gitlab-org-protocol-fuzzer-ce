@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="LDAPv3 Pit DataModels" version="0.0.2">	 
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<!--
+		Transaction Codes:
+			Bind 			: 0x60
+			Unbind		: 0x42
+			Search		: 0x63
+			Add 			: 0x68
+			Compare		: 0x6E
+			Delete		: 0x4A
+			ExtendOp	: 0x80
+	-->
+	<Defaults>
+		<Number endian="big" signed="false"/>
+	</Defaults>
+	
+	<DataModel name="TLV">
+		<Number name="Type" size="8"/>
+		<Number name="Size" size="8">
+			<Relation type="size" of="Value"/>
+		</Number>
+		<Blob name="Value"/> 
+	</DataModel>
+	
+	<DataModel name="LdapHeader">
+		<Blob valueType="hex" value="30" token="true"/>
+		<Number name="LengthOfPacket" size="8"/>
+		<Number size="8" value="2" token="true"/>
+		<Number name="LengthOfMessageId" size="8">
+			<Relation type="size" of="MessageId"/>
+		</Number>
+		<Blob name="MessageId" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="Sequence">
+		<Blob valueType="hex" value="30" token="true"/>
+		<Blob valueType="hex" value="84" token="true"/>
+		<Number size="32" name="LengthOfValue">
+			<Relation type="size" of="Value" expressionGet="size" expressionSet="size"/>
+		</Number>
+		<Block name="Value">
+			<Block ref="TLV" minOccurs="0" maxOccurs="-1"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="LdapHeaderUniversal">
+		<Blob valueType="hex" token="true" value="30"/>
+		<Blob valueType="hex" token="true" value="84"/>
+		<Number name="LengthOfPacket" size="32"/>
+		<Number size="8" token="true" value="2"/>
+		<Number name="LengthOfMessageId" size="8">
+			<Relation type="size" of="MessageId"/>
+		</Number>
+		<Blob valueType="hex" value="01" name="MessageId"/>
+	</DataModel>
+	
+	<DataModel name="Bind">
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket" >
+				<Relation type="size" of="Bind" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="BindSequence" >
+			<Blob valueType="hex" value="60" />
+			<Number size="8" name="SizeOfBind">
+				<Relation type="size" of="BindSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Number size="8" value="2" /> <!--Num-->
+			<Number size="8" name="SizeOfVersion"> <!--Length-->
+				<Relation type="size" of="Version"/>
+			</Number>
+			<Blob valueType="hex" value="03" name="Version"/> <!--data-->
+			<Number size="8" value="4" />	<!--string-->
+			<Number size="8" name="SizeOfName">
+				<Relation type="size" of="Name"/>
+			</Number>
+			<!-- Used for Simple auth binding (No User or Password)-->
+			<!--
+			<Block>
+				<String name="Name" length="0" />
+				<Blob valueType="hex" value="80" />
+				<Number size="8" value="0"  name="Simple" />
+			</Block>
+			-->
+			<!-- Used for user Auth Binding-->
+			<Block>				
+				<String name="Name" value="##UserName##" /> <!--Set Creds Here!-->
+				<Blob valueType="hex" value="80" />
+				<Number size="8" name="SizeOfPassword">
+					<Relation type="size" of="Password"/>
+				</Number>
+				<String name="Password" value="##Password##"/>		<!--Set Password Here!-->
+			</Block>
+			
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Unbind">
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Unbind" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Blob valueType="hex" value="42" />
+		<Blob valueType="hex" value="00" />
+	</DataModel>
+	
+	<DataModel name="Search">
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Search" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="SearchSequence">
+			<Blob valueType="hex" value="63" />
+			<Number size="8" name="SizeOfSearch">
+				<Relation type="size" of="SearchSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Number size="8" value="4" />
+			<Number size="8" name="SizeOfBaseObject">
+				<Relation type="size" of="BaseObject"/>
+			</Number>
+			<Block name="BaseObject" >
+				<!--Enter query here -->
+				<String value="dc" />
+				<String value="=" token="true"/>
+				<String value="example" />
+				<String value="," token="true"/>
+				<String value="dc" />
+				<String value="=" token="true"/>
+				<String value="com" />
+			</Block>
+			<Blob valueType="hex" value="0a" />
+			<Number size="8" name="SizeOfTreeDepth">
+				<Relation type="size" of="TreeDepth"/>
+			</Number>
+			<!--Value of 2 means entire subtree -->
+			<Blob valueType="hex" value="02" name="TreeDepth"/>
+			<Blob valueType="hex" value="0a" />
+			<Number size="8" name="SizeOfDeref">
+				<Relation type="size" of="Deref" />
+			</Number>
+			<Blob valueType="hex" value="00" name="Deref"/>		<!--00 == neverDerefAliases. 01 ==DerefAliases-->
+			<Number size="8" value="2" />
+			<Number size="8" name="SizeOfSizeLimit">
+				<Relation type="size" of="SizeLimit" />
+			</Number>
+			<Blob valueType="hex" value="00" name="SizeLimit" /> <!--00 == Infinite Size-->
+			<Number size="8" value="2" />
+			<Number size="8" name="SizeOfTimeLimit">
+				<Relation type="size" of="TimeLimit" />
+			</Number>
+			<Blob valueType="hex" value="00" name="TimeLimit" /> <!--00 == Infinite Time-->
+			<Number size="8" value="1" />
+			<Number size="8" name="SizeOfBool">
+				<Relation type="size" of="Bool" />
+			</Number>
+			<Blob valueType="hex" value="00" name="Bool" />
+			<Blob valueType="hex" value="87" />
+			<Number size="8" name="SizeOfFilters">
+				<Relation type="size" of="Filters" />
+			</Number>
+			<Block name="Filters">
+				<String value="objectClass" />
+				<String value="=" token="true"/>
+				<String value="*" />
+			</Block>
+			<Blob valueType="hex" value="30" />
+			<Number size="8" name="SizeOfAttributeBlock">
+				<Relation type="size" of="AttributeBlock" />
+			</Number>
+			<Block name="AttributeBlock">
+				<Number size="8" value="4" />
+				<Number size="8" name="SizeOfAttributes">
+					<Relation type="size" of="Attributes" />
+				</Number>
+				<Block name="Attributes">
+					<String value="allusers" />
+					<String value="=" token="true"/>
+					<String value="*" />
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Add"> <!--Done-->
+		<!--Not referencing Header due to the extra hex value of 81 in add header-->
+		<Blob valueType="hex" value="30" />
+		<Blob valueType="hex" value="81" />
+		<Number size="8" name="LengthOfPacket">
+			<Relation type="size" of="Add" expressionGet="size" expressionSet="size-3"/>
+		</Number>
+		<Number size="8" value="2" />
+		<Number size="8" name="LengthOfMessageId">
+			<Relation type="size" of="MessageId" />
+		</Number>
+		<Blob valueType="hex" value="01" name="MessageId" />
+		<Block name="AddSequence">
+			<Blob valueType="hex" value="68" />
+			<Number size="8" name="SizeOfAdd">
+				<Relation type="size" of="AddSequence" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+			<Blob valueType="hex" value="04" />
+			<Number size="8" name="SizeOfQuery">
+				<Relation type="size" of="Query" />
+			</Number>
+			<Block name="Query">
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+			<Block name="Attributes">
+				<Blob valueType="hex" value="30" />
+				<Number size="8" name="SizeOfAdd">
+					<Relation type="size" of="Attributes" expressionGet="size" expressionSet="size-2"/>
+				</Number>
+				<Block name="Attributes1">
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttributes1">
+						<Relation type="size" of="Attributes1" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfAttr1">
+						<Relation type="size" of="Attr1" />
+					</Number>
+					<String name="Attr1" value="objectClass" />
+					
+					<Block name="Attributes2">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfAttributes2">
+							<Relation type="size" of="Attributes2" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfAttr2">
+							<Relation type="size" of="Attr2" />
+						</Number>
+						<String name="Attr2" value="dcObject" />
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfAttr3">
+							<Relation type="size" of="Attr3" />
+						</Number>
+						<String name="Attr3" value="organization" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList">
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList" >
+						<Relation type="size" of="AttrList" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfListItemType">
+						<Relation type="size" of="ListItemType" />
+					</Number>
+					<Blob valueType="hex" name="ListItemType" value="6f" />
+					<Block name="Attr">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfListAttr">
+							<Relation type="size" of="Attr" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8" name="SizeOfListItem1">
+							<Relation type="size" of="ListItem1"/>
+						</Number>
+						<String name="ListItem1" value="example.com" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList2" >
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList2">
+						<Relation type="size" of="AttrList2" expressionGet="size" expressionSet="size-2"/>
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfItem1">
+						<Relation type="size" of="Item1" />
+					</Number>
+					<String name="Item1" value="dc" />
+					<Block name="vals">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfItem2">
+							<Relation type="size" of="vals" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8">
+							<Relation type="size" of="Item2" />
+						</Number>
+						<String name="Item2" value="example" />
+					</Block>
+				</Block>
+				
+				<Block name="AttrList3" >
+					<Blob valueType="hex" value="30" />
+					<Number size="8" name="SizeOfAttrList3">
+						<Relation type="size" of="AttrList3" expressionGet="size" expressionSet="size-2" />
+					</Number>
+					<Blob valueType="hex" value="04" />
+					<Number size="8" name="SizeOfItem1">
+						<Relation type="size" of="Item1" />
+					</Number>
+					<String value="description" name="Item1"/>
+					<Block name="vals">
+						<Blob valueType="hex" value="31" />
+						<Number size="8" name="SizeOfItem2">
+							<Relation type="size" of="vals" expressionGet="size" expressionSet="size-2"/>
+						</Number>
+						<Blob valueType="hex" value="04" />
+						<Number size="8">
+							<Relation type="size" of="Item2" />
+						</Number>
+						<String name="Item2" value="Tree root" />
+					</Block>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Compare"> <!--Done-->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Compare" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="CompareSequence">
+			<Blob valueType="hex" value="6e" />
+			<Number size="8" name="SizeOfCompareSequence">
+				<Relation type="size" of="CompareSequence" expressionGet="size" expressionSet="size-2" />
+			</Number>
+			<Blob valueType="hex" value="04" />
+			<Number size="8" name="SizeOfEntry">
+				<Relation type="size" of="Entry" />
+			</Number>
+			<Block name="Entry">
+				<String value="cn" />
+				<String value="=" token="true" />
+				<String value="admin" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+			<Block name="ava">
+				<Blob valueType="hex" value="30" />
+				<Number size="8" name="SizeOfAva">
+					<Relation type="size" of="ava" expressionGet="size" expressionSet="size-2" />
+				</Number>
+				<Blob valueType="hex" value="04" />
+				<Number size="8" name="SizeOfEntry1">
+					<Relation type="size" of="Entry1" />
+				</Number>
+				<String name="Entry1" value="cn" />
+				<Blob valueType="hex" value="04" />
+				<Number size="8" name="SizeOfEntry2">
+					<Relation type="size" of="Entry2" />
+				</Number>
+				<String name="Entry2" value="aw" />
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="Delete"> <!-- Delete -->
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="Delete" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="DeleteSequence">
+			<Blob valueType="hex" value="4a" />
+			<Number size="8" name="SizeOfEntry">
+				<Relation type="size" of="Entry" />
+			</Number>
+			<Block name="Entry">
+				<String value="cn" />
+				<String value="=" token="true" />
+				<String value="Delete Me" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="example" />
+				<String value="," token="true" />
+				<String value="dc" />
+				<String value="=" token="true" />
+				<String value="com" />
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ExtendOp">
+		<Block ref="LdapHeader">
+			<Number size="8" name="LengthOfPacket">
+				<Relation type="size" of="ExtendOp" expressionGet="size" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="ExtendOpSequence">
+			<Blob valueType="hex" value="77" />
+			<Number size="8" name="SizeOfExtendOpReq">
+				<Relation type="size" of="ExtendOpReq" />
+			</Number>
+			<Block name="ExtendOpReq">
+				<Blob valueType ="hex" value="80"/>
+				<Number size="8" name="SizeOfEntry">
+					<Relation type="size" of="Entry" />
+				</Number>
+				<Block name="Entry">
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="3" />
+					<String value="." token="true" />
+					<String value="6" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="4" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="4203" />
+					<String value="." token="true" />
+					<String value="1" />
+					<String value="." token="true" />
+					<String value="11" />
+					<String value="." token="true" />
+					<String value="3" />
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+	
+	<!--Server Data model that will take in any input and crack it correctly-->
+	<!--The Outer Choice/Block is used so that if peach is listening for an input-->
+	<!--and gets no bytes back it will end the iteration, in combination with-->
+	<!--the state model, so peach continues to fuzz-->
+	<DataModel name="Input">
+		<Choice>
+			<Block>
+				<Choice minOccurs="1" maxOccurs="1">
+					<Block ref="LdapHeaderUniversal">
+						<Number name="LengthOfPacket" size="32">
+							<Relation type="size" of="Input" expressionGet="size+6" expressionSet="size-6"/>
+						</Number>
+					</Block>
+					<Block ref="LdapHeader">
+						<Number name="LengthOfPacket" size="8">
+							<Relation type="size" of="Input" expressionGet="size+2" expressionSet="size-2"/>
+						</Number>
+					</Block>
+				</Choice>
+				<Block name="NextSequence">
+					<Number name="Code" size="8" valueType="hex" value="63"/>
+					<Choice minOccurs="1" maxOccurs="1">
+						<Block>
+							<Blob name="Uni" valueType="hex" value="84" token="true"/>
+							<Number name="SizeOfBind" size="32">
+								<Relation type="size" of="NextSequence" expressionGet="size+6" expressionSet="size-6"/>
+							</Number>
+						</Block>
+						<Block>
+							<Number name="SizeOfBind" size="8">
+								<Relation type="size" of="NextSequence" expressionGet="size+2" expressionSet="size-2"/>
+							</Number>
+						</Block>
+						<Block name="Single">
+							<Blob length="1"/>
+						</Block>
+					</Choice>
+					<Choice minOccurs="0" maxOccurs="-1">
+						<Block ref="TLV"/>
+						<Block ref="Sequence"/>
+					</Choice>
+				</Block>
+			</Block>
+			<Blob name="EmptyPacket" length="0"/>
+		</Choice>
+	</DataModel>
+	
+	<DataModel name="Response">
+		<Number name="Code" size="8" valueType="hex" value="61"/>
+		<Number name="SizeOfBind" size="8">
+			<Relation type="size" of="Response" expressionGet="size+2" expressionSet="size-2"/>
+		</Number>
+		<Block name="ResultCode" ref="TLV">
+			<Number name="Type" size="8" value="0x0a"/>
+			<Blob name="Value" valueType="hex" value="00"/>
+		</Block>
+		<Block name="MatchedDN" ref="TLV">
+			<Number name="Type" size="8" value="4"/>
+			<Blob name="Value"/>
+		</Block>
+		<Block name="ErrorCode" ref="TLV">
+			<Number name="Type" size="8" value="4"/>
+			<Blob name="Value"/>
+		</Block>
+	</DataModel>
+	
+	<DataModel name="ServerResponse">
+		<Block ref="LdapHeader">
+			<Number name="LengthOfPacket" size="8">
+				<Relation type="size" of="ServerResponse" expressionGet="size+2" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="Result" ref="Response">
+			<Number name="Code" size="8" valueType="hex" value="65"/>
+			<Number name="ResultCode.Value" size="8" valueType="hex" value="00"/>
+		</Block>
+	</DataModel>
+	
+	<!--Send Root-->
+	<DataModel name="SearchResponse2">
+		<Block ref="LdapHeader">
+			<Number name="LengthOfPacket" size="8">
+				<Relation type="size" of="SearchResponse2" expressionGet="size+2" expressionSet="size-2"/>
+			</Number>
+		</Block>
+		<Block name="SearchResult">
+			<Number name="Code" size="8" valueType="hex" value="64"/>
+			<Blob valueType="hex" value="0404003000"/>
+		</Block>
+	</DataModel>
+</Peach>
+<!--END-->

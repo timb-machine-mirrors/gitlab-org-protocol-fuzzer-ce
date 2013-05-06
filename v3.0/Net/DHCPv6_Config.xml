@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="LoggerPath" value="logs/dhcpV6/"/>
+    <Define key="SourcePort" value="547"/>
+		<Define key="MulticastDHCP" value="ff02::1:2"/>
+		<Define key="TargetIPv6" value="fe80::5054:ff:fe02:c880"/>
+		<!-- <Define key="TargetIPv6" value="fe80::c524:6fc8:899e:fd7d"/> -->
+		<Define key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
+		<Define key="SourceIPv6" value="fe80::3e97:eff:fe47:524a%4"/>
+		<Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iter -->
+		<Define key="SourceMAC" value="3c970e47524a"/>
+    <Define key="TargetPort" value="546"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="RemoteAgentIP"  value="127.0.0.1"/>
+		<Define key="Path" value="."/>
+  </All>
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  </Linux>
+  <OSX platform="osx">
+    <Define key="Interface" value="em0"/>
+    <Define key="tsharkInterface" value="em0"/>
+    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  </OSX>
+  <Windows platform="windows">
+    <!-- This can't run on windows anyway because it uses the RawEther publisher. -->
+    <!-- Platform independance is added as an example. -->
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="tsharkInterface" value="2"/>
+    <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+  </Windows>
+</PitDefines>

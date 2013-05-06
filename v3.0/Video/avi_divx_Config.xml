@@ -1,0 +1,21 @@
+<PitDefines>
+  <All>
+		<Define key="Seed" value="avi_divx_sample_1.avi"/>
+		<Define key="Strategy"  value="Strategy"/>
+		<Define key="LoggerPath"  value="./logs/avi_divx/"/>
+		<Define key="Path" value="."/>
+  </All>
+  
+  	<Linux platform="linux">
+		<Define key="Agent" value="LinuxAgent"/>
+		<Define key="Target" value="vlc" />
+	</Linux>
+	<OSX platform="osx">
+	</OSX>
+	<Windows platform="windows">
+		<Define key="Agent" value="WinAgent"/>
+		<Define key="Target" value="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe" />
+	</Windows>
+</PitDefines>
+
+	

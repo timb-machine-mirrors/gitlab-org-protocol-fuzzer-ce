@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Link Layer Discovery Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<!-- Link Layer Discovery Protocol Main DataModel -->
+  <DataModel name="LLDP">
+    <Block name="EtherHeader" mutable="false">
+      <Blob name="Dest" mutable="false" valueType="hex" value="##TargetMAC##"/> <!-- LLDP multicast address --> 
+      <Blob name="Src" mutable="false" valueType="hex" value="##SourceMAC##"/>
+      <Blob name="Type" mutable="false" valueType="hex" value="88cc"/>
+    </Block>
+
+    <Block name="LLDPPayload" minOccurs="1">
+      <Block name="ChasisTlv">
+				<Block name="ChasisTlvHeader">
+					<Number name="ChasisTlvType" size="7" endian="big" value="1"/>
+					<Number name="ChasisTlvSize" size="9" endian="big" value="7">
+						<Relation type="size" of="ChasisId"/>
+					</Number>
+				</Block>
+				<Block name="ChasisId">
+					<Number name="ChasisIdSubtype" size="8" endian="big" value="0x04"/>
+					<Blob name="ChasisIdValue" valueType="hex" value="##SourceMAC##" />
+				</Block>
+      </Block>
+
+      <Block name="PortTlv" minOccurs="1">
+				<Block name="PortTlvHeader">
+					<Number name="PortTlvType" size="7" endian="big" value="2"/>
+					<Number name="PortTlvSize" size="9" endian="big" value="7">
+						<Relation type="size" of="PortId"/>
+					</Number>
+				</Block>
+				<Block name="PortId">
+					<Number name="PortIdSubtype" size="8" endian="big" value="0x03"/>
+					<Blob name="PortIdValue" valueType="hex" value="##SourceMAC##"/>
+				</Block>
+      </Block>
+
+      <Block name="TtlTlv" minOccurs="1">
+				<Block name="TtlTlvHeader">
+					<Number name="TtlTlvType" size="7" endian="big" value="3"/>
+					<Number name="TtlTlvSize" size="9" endian="big" value="2">
+						<Relation type="size" of="TtlValue"/>
+					</Number>
+				</Block>
+				<Number name="TtlValue" size="16" endian="big" value="120"/>
+      </Block>
+
+      <Block name="PortDescripTlv">
+				<Block name="PortDescripTlvHeader">
+					<Number name="PortDescripTlvType" size="7" endian="big" value="4"/>
+					<Number name="PortDescripTlvSize" size="9" endian="big" value="10">
+						<Relation type="size" of="PortDescripValue"/>
+					</Number>
+				</Block>
+				<Blob name="PortDescripValue" value="Summit300-48-Port 1001" />
+      </Block>
+
+      <Block name="SystemNameTlv">
+				<Block name="SystemNameTlvHeader">
+					<Number name="SystemNameTlvType" size="7" endian="big" value="5"/>
+					<Number name="SystemNameTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="SystemNameValue"/>
+					</Number>
+				</Block>
+				<Blob name="SystemNameValue" value="##Hostname##"/>
+      </Block>
+
+      <Block name="SystemDescripTlv">
+				<Block name="SystemDescripTlvHeader">
+					<Number name="SystemDescripTlvType" size="7" endian="big" value="6"/>
+					<Number name="SystemDescripTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="SystemDescripValue"/>
+					</Number>
+				</Block>
+				<Blob name="SystemDescripValue" value="Summit300-48 - Version 7.4e.1 (Build 5) by Release_Master 05/27/05 04:53:11"/>
+      </Block>
+
+      <Block name="CapabilitesTlv">
+				<Block name="CapabilitesTlvHeader">
+					<Number name="CapabilitesTlvType" size="7" endian="big" value="7"/>
+					<Number name="CapabilitesTlvSize" size="9" endian="big" value="4">
+						<Relation type="size" of="CapabilitiesValue"/>
+					</Number>
+				</Block>
+				<Block name="CapabilitiesValue">
+					<Blob name="CapabilitiesAvalible" valueType="hex" value="ffff"/>
+					<Blob name="CapabilitiesEnabled" valueType="hex" value="ffff"/>
+				</Block>
+      </Block>
+
+      <Block name="ManagementAddressTlv">
+				<Block name="ManagementAddressTlvHeader">
+					<Number name="ManagementAddressTlvType" size="7" endian="big" value="5"/>
+					<Number name="ManagementAddressTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="ManagementAddressValue"/>
+					</Number>
+				</Block>
+				<Block name="ManagementAddress">
+					<Number name="ManagementAddressSubtype" size="8" endian="big" value="0x06"/>
+					<Blob name="ManagementAddressValue" valueType="hex" value="##SourceMAC##"/>
+					<Number name="InterfaceSubtype" size="8" endian="big" value="0x02"/>
+					<Number name="InterfaceNumber" size="16" value="1001"/>
+					<Number name="OIDLength" size="8" value="00"/>
+				</Block>
+      </Block>
+
+      <Block name="OrganizationSpecificTlv">
+				<Block name="OrganizationSpecificTlvHeader">
+					<Number name="OrganizationSpecificTlvType" size="7" endian="big" value="127"/>
+					<Number name="OrganizationSpecificTlvSize" size="9" endian="big" value="6">
+						<Relation type="size" of="OrganizationSpecificValue"/>
+					</Number>
+				</Block>
+				<Block name="OrganizationSpecificValue">
+					<Blob name="OrganizationUniqueCode" valueType="hex" value="0000"/>
+					<!-- this is the beginning of LLDP-MED, and it could have it's pit -->
+				</Block>
+      </Block>
+      <Blob name="EndOfLLDPDU" minOccurs="1" valueType="hex" value="00 00"/>
+    </Block>
+  </DataModel>
+</Peach>
+<!--End-->

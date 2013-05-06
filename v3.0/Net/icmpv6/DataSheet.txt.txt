@@ -1,0 +1,74 @@
+Protocol
+--------
+
+ * Test Suite: ICMPv6
+ * Direction: Client, Server(TODO)
+ 
+ICMPv6 protocol is message relay protocol on top of IPv6.
+
+Used Specifications
+~~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Specification | Title
+|RFC4443 | Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6) Specification
+|RFC2460 | Internet Protocol, Version 6 (IPv6) Specification
+|RFC2710 | Multicast Listener Discovery (MLD) for IPv6
+|RFC4861 | Neighbor Discovery for IP version 6 (IPv6)
+|RFC6275 | Mobility Support in IPv6
+|RFC4620 | IPv6 Node Information Queries
+|RFC3122 | Extensions to IPv6 Neighbor Discovery for Inverse Discovery Specification
+|RFC3810 | Multicast Listener Discovery Version 2 (MLDv2) for IPv6
+|RFC4286 | Multicast Router Discovery
+|RFC4861 | Neighbor Discovery
+|RFC5568 | Mobile IPv6 Fast Handovers
+|RFC3971 | SEcure Neighbor Discovery (SEND)
+|RFC6550 | RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks
+|RFC6743 | ICMP Locator Update Message for the Identifier-Locator Network Protocol for IPv6 (ILNPv6)
+
+
+|========
+
+Detailed Use Cases
+~~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|========
+|Messages | Specification
+|Path MTU Discovery (TODO) | RFCXXXX
+|Neighbor Discovery (TODO) | RFCXXXX
+
+|Destination Unreachable (TODO) | RFC4443 (Section 3.1)
+|Packet Too Big (TODO) | RFC4443 (Section 3.2)
+|Time Exceeded (TODO) | RFC4443 (Section 3.3)
+|Parameter Problem (TODO) | RFC4443 (Section 3.4)
+|Echo Request (TODO) | RFC4443 (Section 4.1)
+|Echo Reply (TODO) | RFC4443 (Section 4.2)
+
+
+|ETC (TODO)
+|...
+|MLDv2 (Currently seperate pit) | RFC 3810
+|...
+|ETC (TODO)
+
+
+
+
+
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Internet Checksum | RFC2460 (Section 8.1)
+|========
+
+[options="header"]
+|========
+|Supported Payloads | Specification
+
+
+TODO: has a bunch of mobile datamodels not used in state
+tons of messages here: http://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xml

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Transport Control Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<!-- Implements RFC793 (http://tools.ietf.org/html/rfc793) -->
+	
+	<DataModel name="ValueLenTLV">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Length" size="8">
+			<Relation type="size" of="Value"/>
+		</Number>
+		<Block name="Value"/>
+	</DataModel>
+
+	<DataModel name="SelfLenTLV">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Length" size="8">
+			<Relation type="size" of="SelfLenTLV"/>
+		</Number>
+		<Block name="Value"/>
+	</DataModel>
+	
+	<DataModel name="OptionsAndPadding">
+		<Padding name="PaddingValue" alignment="32">
+			<Fixup class="FillValue">
+				<Param name="ref" value="PaddingValue"/>
+				<Param name="start" value="1"/>
+				<Param name="stop" value="1"/>
+			</Fixup>
+		</Padding>
+		<Choice name="Options" minOccurs="0">
+			<Block name="EndOfOp">
+				<Number size="8" value="0" name="TypeNumber"/>
+			</Block>
+			<Block name="Nop">
+				<Number size="8" value="1" name="TypeNumber"/>
+			</Block>
+			<Block name="CC">  <!-- (obsolete) -->
+				<Number size="8" value="11" name="TypeNumber"/>
+			</Block>
+			<Block name="CCNEW"> <!-- (obsolete) -->
+				<Number size="8" value="12" name="TypeNumber"/>
+			</Block>
+			<Block name="CCECHO"> <!-- (obsolete) -->
+				<Number size="8" value="13" name="TypeNumber"/>
+			</Block>
+			<Block name="Skeeter">
+				<Number size="8"  value="16" name="TypeNumber"/>
+			</Block>
+			<Block name="Bubba">
+				<Number size="8"  value="17" name="TypeNumber"/>
+			</Block>
+			<Block name="SCPSCapabilities">
+				<Number size="8"  value="20" name="TypeNumber"/>
+			</Block>
+			<Block name="SelectiveNegativeAcknowledgements">
+				<Number size="8"  value="21" name="TypeNumber"/>
+			</Block>
+			<Block name="RecordBoundaries">
+				<Number size="8"  value="22" name="TypeNumber"/>
+			</Block>
+			<Block name="Corruptionexperienced">
+				<Number size="8"  value="23" name="TypeNumber"/>
+			</Block>
+			<Block name="SNAP">
+				<Number size="8"  value="24" name="TypeNumber"/>
+			</Block>
+			<Block name="Unassigned">  <!-- (released 2000-12-18) -->
+				<Number size="8"  value="25" name="TypeNumber"/>
+			</Block>
+			<Block name="TCPCompressionFilter">
+				<Number size="8"  value="26" name="TypeNumber"/>
+			</Block>
+			<Block name="TCPAO"> <!-- TCP Authentication Option -->
+				<Number size="8"  value="29" name="TypeNumber"/>
+			</Block>
+			<Block name="MaximumSegmentSize" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="2"/>
+				<Number name="Length" size="8" value="4"/>
+				<Number name="Value" size="16"/>
+			</Block>
+			<Block name="WSOPT" ref="SelfLenTLV">  <!-- Window Scale -->
+				<Number name="Type" size="8" value="3"/>
+				<Number name="Length" size="8" value="3"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="SACKPermitted" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="4"/>
+				<Number name="Length" size="8" value="2"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="SACK" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="5"/>
+			</Block>
+			<Block name="Echo" ref="SelfLenTLV">  <!-- (obsoleted by option 8) -->
+				<Number name="Type" size="8" value="2"/>
+				<Number name="Length" size="8" value="6"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="EchoReply" ref="SelfLenTLV">  <!-- (obsoleted by option 8) -->
+				<Number name="Type" size="8" value="2"/>
+				<Number name="Length" size="8" value="7"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="TSOPT" ref="SelfLenTLV">  <!-- Time Stamp Option -->
+				<Number name="Type" size="8" value="8"/>
+				<Number name="Length" size="8" value="10"/>
+				<Block name="Value">
+					<Number name="TimestampValue" size="32"/>
+					<Number name="TimestampEchoReply" size="32"/>
+				</Block>
+			</Block>
+			<Block name="PartialOrderConnectionPermitted" ref="SelfLenTLV">  <!-- (obsolete) -->
+				<Number name="Type" size="8" value="9"/>
+				<Number name="Length" size="8" value="2"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="PartialOrderServiceProfile" ref="SelfLenTLV">  <!-- (obsolete) -->
+				<Number name="Type" size="8" value="10"/>
+				<Number name="Length" size="8" value="3"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="TCPAlternateChecksumRequest" ref="SelfLenTLV"> <!-- (obsolete) -->
+				<Number name="Type" size="8" value="14"/>
+				<Number name="Length" size="8" value="3"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="TCPAlternateChecksumData" ref="SelfLenTLV"> <!-- (obsolete) -->
+				<Number name="Type" size="8" value="15"/>
+			</Block>
+			<Block name="TrailerChecksumOption" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="18"/>
+				<Number name="Length" size="8" value="3"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="MD5SignatureOption" ref="SelfLenTLV">  <!-- (obsoleted by option 29) -->
+				<Number name="Type" size="8" value="19"/>
+				<Number name="Length" size="8" value="18"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="QuickStartResponse" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="27"/>
+				<Number name="Length" size="8" value="8"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="UserTimeoutOption" ref="SelfLenTLV">
+				<Number name="Type" size="8" value="28"/>
+				<Number name="Length" size="8" value="4"/>
+				<Block name="Value"/>
+			</Block>
+			<Block name="MPTCP" ref="SelfLenTLV"> <!-- Multipath TCP -->
+				<Number name="Type" size="8" value="30"/>
+			</Block>
+		</Choice>
+		<!-- <Padding name="PaddingValue" alignment="32"/> -->
+	</DataModel>
+
+  <DataModel name="Packet">
+		<Block name="Header">
+			<Number name="SrcPort" size="16" endian="big" value="1234"/> <!-- this needs to be random, it gets repalced on each iteration -->
+			<Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
+			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
+			<!-- http://tools.ietf.org/html/rfc793#page-24 -->
+			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
+			<Flags name="DataOffset" size="4" endian="big">
+				<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
+					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+				</Flag>
+			</Flags>
+			<Flags name="ControlBits" size="12" endian="big">
+				<Flag name="Reserved" position="0" size ="3"/>
+				<Flag name="NS" position="3" size="1"/>
+				<Flag name="CWR" position="4" size="1"/>
+				<Flag name="ECE" position="5" size="1"/>
+				<Flag name="URG" position="6" size="1"/>
+				<Flag name="ACK" position="7" size="1"/>
+				<Flag name="PSH" position="8" size="1"/>
+				<Flag name="RST" position="9" size="1"/>
+				<Flag name="SYN" position="10" size="1"/>
+				<Flag name="FIN" position="11" size="1"/>
+			</Flags>
+			<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
+			<Number name="CheckSum" size="16" endian="big">
+				<Fixup class="TCPChecksumFixup">
+					<Param name="ref" value="Packet" />
+					<Param name="src" value="127.0.0.1" />
+					<Param name="dst" value="127.0.0.1" />
+				</Fixup>
+			</Number>
+			<Number name="UrgentPointer" size="16" endian="big"/>
+			<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
+		</Block>
+		<Block name="TcpPayload"/>
+	</DataModel>
+
+ 	<Data name="SYN">
+		<Field name="Header.ControlBits.SYN" value="1"/>
+	</Data>
+
+ 	<Data name="SYNACK">
+		<Field name="Header.ControlBits.SYN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
+ 	<Data name="ACK">
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
+	<DataModel name="PacketWithData" ref="Packet">
+		<Blob name="TcpPayload" value="this is a packet.\n"/>
+	</DataModel>
+
+ 	<Data name="PSH">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+	</Data>
+
+ 	<Data name="PSHACK">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
+ 	<Data name="FINACK">
+		<Field name="Header.ControlBits.FIN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
+ 	<Data name="FIN">
+		<Field name="Header.ControlBits.FIN" value="1"/>
+	</Data>
+
+ 	<Data name="RST">
+		<Field name="Header.ControlBits.RST" value="1"/>
+	</Data>
+
+</Peach>
+<!--END-->

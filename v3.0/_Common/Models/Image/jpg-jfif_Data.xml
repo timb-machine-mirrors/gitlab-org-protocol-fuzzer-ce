@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="JPG-JFIF PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<!--*********** BEGIN EXIF **************-->
+  <DataModel name="TIFFHeader">
+    <Choice name="EndianChoice" >
+      <String name="EndianLittle" value="II" token="true" nullTerminated="false" length="2" mutable="false"/>
+      <String name="EndianBig" value="MM" token="true" nullTerminated="false" length="2" mutable="false"/>
+    </Choice>
+    <Blob name="Tag" value="2A 00" valueType="hex" token="true" mutable="false"/>
+  </DataModel>
+
+  <DataModel name="IFDEntry">
+    <Number name="Tag" signed="false" size="16" />
+    <Number name="Type" signed="false" size="16" />
+    <Number name="ComponentCount" signed="false" size="32" />
+    <Blob name="Data" length="4" />
+  </DataModel>
+  
+  <DataModel name="IFD">
+    <Number size="16" name="DirEntries" signed="false">
+      <Relation type="count" of="TheEntry"/>
+    </Number>
+    <Block name="TheEntry" ref="IFDEntry" minOccurs="1" />
+  </DataModel>
+
+  <DataModel name="EXIF">
+    <Block name="TheTIFFHeader" ref="TIFFHeader" />
+    <Number size="32" signed="false" name="OffsettoFirstIFD">
+      <Relation type="offset" of="TheIFD" relative="true" relativeTo="TheTIFFHeader"/>
+    </Number>
+    <Block name="TheIFD" ref="IFD"/>
+  </DataModel>
+  <!-- ********** END EXIF *********** -->
+  
+  <!-- ******** Marker Segmeent ******** -->
+  <DataModel name="MarkerSegment">
+    <Blob name="Type" length="2" />
+    <Number endian="big" name="Length" size="16" signed="false">
+      <Relation type="size" of="SegmentData" expressionGet="size - 2" expressionSet="size + 2"/>
+    </Number>
+    <Block name="SegmentData" >
+	  <Blob/>
+	</Block>
+  </DataModel>
+  
+  <!-- NOTE this model is weird, it assumes it is called from EntropyCodedDataSegment and the FF was eaten earlier-->
+  <DataModel name="RestartSegment" ref="MarkerSegment">
+    <Block name="Type">
+      <Choice>
+        <Blob name="Restart0" length="1" valueType="hex" token="true" value="D0"/>
+		<Blob name="Restart1" length="1" valueType="hex" token="true" value="D1"/>
+		<Blob name="Restart2" length="1" valueType="hex" token="true" value="D2"/>
+		<Blob name="Restart3" length="1" valueType="hex" token="true" value="D3"/>
+		<Blob name="Restart4" length="1" valueType="hex" token="true" value="D4"/>
+		<Blob name="Restart5" length="1" valueType="hex" token="true" value="D5"/>
+		<Blob name="Restart6" length="1" valueType="hex" token="true" value="D6"/>
+		<Blob name="Restart7" length="1" valueType="hex" token="true" value="D7"/>
+	  </Choice>
+	</Block>
+  </DataModel>
+
+  <!-- ******** Entropy Coded Data Segment ******** -->
+  <DataModel name="EntropyCodedDataSegment">
+	<Blob />
+    <Block minOccurs="0">
+		<Blob valueType="hex" value="FF" token="true" />
+		<Choice>
+			<Blob name="Ignore" length="1" valueType="hex" token="true" value="00"/>			
+			<Block ref="RestartSegment" />
+		</Choice>
+		<Blob />
+	</Block>
+  </DataModel>
+
+
+  <!-- ********* Frame Header ********* -->
+  <DataModel name="FrameHeader" ref="MarkerSegment">
+    <Block name="Type">
+      <Choice name="TypeChoice">
+        <Blob name="BaseLineDCT"    length="2" valueType="hex" token="true" value="FFC0"/>
+        <Blob name="ExtenedSeqDCT"  length="2" valueType="hex" token="true" value="FFC1"/>
+        <Blob name="ProgressiveDCT" length="2" valueType="hex" token="true" value="FFC2"/>
+        <Blob name="LoselessSeq"    length="2" valueType="hex" token="true" value="FFC3"/>
+        <Blob name="DifffSeqDCT"    length="2" valueType="hex" token="true" value="FFC5"/>
+        <Blob name="DiffProgDCT"    length="2" valueType="hex" token="true" value="FFC6"/>
+        <Blob name="DiffLossSeq"    length="2" valueType="hex" token="true" value="FFC7"/>
+        <Blob name="Reserved"       length="2" valueType="hex" token="true" value="FFC8"/>
+        <Blob name="NonDiffSeqDCT"  length="2" valueType="hex" token="true" value="FFC9"/>
+        <Blob name="NonDiffProgDCT" length="2" valueType="hex" token="true" value="FFCA"/>
+        <Blob name="NonDiffLosless" length="2" valueType="hex" token="true" value="FFCB"/>
+        <Blob name="DiffDiffSeqDCT" length="2" valueType="hex" token="true" value="FFCD"/>
+        <Blob name="DiffDiffProDCT" length="2" valueType="hex" token="true" value="FFCE"/>
+        <Blob name="DiffDiffLosDCT" length="2" valueType="hex" token="true" value="FFCF"/>
+      </Choice>
+    </Block>
+	
+    <Block name="SegmentData">
+      <Number endian="big" name="SamplePrecision" size="8" signed="false" />
+      <Number endian="big" name="Y" size="16" signed="false" />
+      <Number endian="big" name="X" size="16" signed="false" />
+      <Number endian="big" name="Nf" size="8" signed="false">
+        <Relation type="count" of="ImageComponent"/>
+      </Number>
+      <Block name="ImageComponent" minOccurs="0">
+        <Number endian="big" name="C" size="8" signed="false"/>
+        <Flags name="ImageComponentFlags" size="8">
+          <Flag name="H" position="4" size="4" />
+          <Flag name="V" position="0" size="4" />
+        </Flags>
+        <Number endian="big" name="Tq" size="8" signed="false"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+
+  <!-- SCAN HEADER -->
+  <DataModel name="ScanHeader" ref="MarkerSegment">
+    <Blob name="Type" value="FFDA" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Number endian="big" name="Ns" size="8" signed="false">
+        <Relation type="count" of="ImageComponentFlags1"/>
+      </Number>
+
+      <Block name="ImageComponentFlags1" minOccurs="0" maxOccurs="255">
+        <Number endian="big" name="Cs" size="8" signed="false" />
+        
+        <Flags name="TheImageComponentFlags1" size="8" >
+          <Flag name="Td" position="4" size="4" />
+          <Flag name="Ta" position="0" size="4" />
+        </Flags>
+      </Block>
+      
+      <Number endian="big" name="Ss" size="8" signed="false" />
+      <Number endian="big" name="Se" size="8" signed="false" />
+
+      <Flags name="ImageComponentFlags2" size="8">
+        <Flag name="Ah" position="4" size="4" />
+        <Flag name="Al" position="0" size="4" />
+      </Flags>
+
+    </Block>
+  </DataModel>
+
+
+  <!-- *************** Quantized Table ********--> 
+  <DataModel name="QuantizedTableSpecification" ref="MarkerSegment">
+    <Blob name="Type" value="FFDB" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Block name="QuanTable" minOccurs="1">
+        <Flags size="8">
+          <Flag name="Pq" position="4" size="4" />
+          <Flag name="Tq" position="0" size="4" />
+        </Flags>
+        <Blob name="qTable" length="64" />
+      </Block>
+    </Block>
+  </DataModel>
+
+  <!-- ************ Huffman Table Specification ************ -->
+  <DataModel name="HuffmanTableSpecification" ref="MarkerSegment">
+    <Blob name="Type" value="FFC4" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Block minOccurs="1">
+        <Flags name="HuffmanTableSpecificationFlags" size="8">
+          <Flag name="Tc" position="4" size="4" />
+          <Flag name="Th" position="0" size="4" />
+        </Flags>
+        <Block name="TableDefs">
+          <Number endian="big" size="8" signed="false" name="T1">
+            <Relation type="count" of="V1"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T2">
+            <Relation type="count" of="V2"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T3">
+            <Relation type="count" of="V3"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T4">
+            <Relation type="count" of="V4"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T5">
+            <Relation type="count" of="V5"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T6">
+            <Relation type="count" of="V6"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T7">
+            <Relation type="count" of="V7"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T8">
+            <Relation type="count" of="V8"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T9">
+            <Relation type="count" of="V9"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T10">
+            <Relation type="count" of="V10"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T11">
+            <Relation type="count" of="V11"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T12">
+            <Relation type="count" of="V12"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T13">
+            <Relation type="count" of="V13"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T14">
+            <Relation type="count" of="V14"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T15">
+            <Relation type="count" of="V15"/>
+          </Number>
+          <Number endian="big" size="8" signed="false" name="T16">
+            <Relation type="count" of="V16"/>
+          </Number>
+        </Block>
+        
+        <Block name="TableVals">
+          <Number endian="big" size="8" signed="false" name="V1" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V2" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V3" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V4" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V5" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V6" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V7" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V8" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V9" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V10" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V11" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V12" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V13" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V14" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V15" minOccurs="0" maxOccurs="255" />
+          <Number endian="big" size="8" signed="false" name="V16" minOccurs="0" maxOccurs="255" />
+        </Block>
+        
+      </Block>
+    </Block>
+  </DataModel>
+
+
+  <!-- *********** Arithmetic Conditioning ********** -->
+  <DataModel name="ArithmeticConditioningTableSpecification" ref="MarkerSegment">
+    <Blob name="Type" value="FFCC" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Block minOccurs="1" >
+        <Flags name="ArithmeticConditioningTableSpecificationFlags" size="8">
+          <Flag name="Tc" position="4" size="4"/>
+          <Flag name="Tb" position="0" size="4"/>
+        </Flags>
+        <Number endian="big" name="Cs" signed="false" size="8"/>
+      </Block>
+    </Block>
+  </DataModel>
+ 
+  <!-- ********* Restart Interval Def ***********-->
+  <DataModel name="RestartIntervalDefinition" ref="MarkerSegment">
+    <Blob name="Type" value="FFDD" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Number endian="big" name="Ri" signed="false" size="16" />
+    </Block>
+  </DataModel>
+ 
+  <!-- ********* Comment Data ***************-->
+  <DataModel name="Comment" ref="MarkerSegment">
+    <Blob name="Type" value="FFFE" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Blob name="CommentBlob" />
+    </Block>
+  </DataModel>
+  
+  <!--*********** Generic App Data *********** -->
+  <DataModel name="GenericApplicationData" ref="MarkerSegment">
+    <Block name="Type">
+      <Choice name="TypeChoice">
+        <Blob length="2" valueType="hex" token="true" value="FFE1"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE2"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE3"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE4"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE5"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE6"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE7"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE8"/>
+        <Blob length="2" valueType="hex" token="true" value="FFE9"/>
+        <Blob length="2" valueType="hex" token="true" value="FFEA"/>
+        <Blob length="2" valueType="hex" token="true" value="FFEB"/>
+        <Blob length="2" valueType="hex" token="true" value="FFEC"/>
+        <Blob length="2" valueType="hex" token="true" value="FFED"/>
+        <Blob length="2" valueType="hex" token="true" value="FFEE"/>
+        <Blob length="2" valueType="hex" token="true" value="FFEF"/>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <!-- ********** JFIF Format Data ************ -->
+  <DataModel name="JFIFFormatData" ref="MarkerSegment">
+    
+    <Blob name="Type" valueType="hex" length="2" value="FFE0" token="true" />
+    
+    <Block name="SegmentData">
+      <Blob name="JFIFIdentifier" token="true" value="4A 46 49 46 00" valueType="hex"/>
+      <Blob name="VersionHigh" length="1" value="01" valueType="hex" />
+      <Blob name="VersionLow" length="1" value="02" valueType="hex" />
+      <Number endian="big" name="Units" size="8" signed="false" />
+      <Number endian="big" name="Xdensity" size="16" signed="false" />
+      <Number endian="big" name="Ydensity" size="16" signed="false" />
+
+      <Choice name="GridChoice">
+
+        <Block name="Edge">
+          <Number name="Xthumbnail" size="8" signed="false" value="0">
+            <Relation type="count" of="xScan" />
+          </Number>
+          <Number name="Ythumbnail" size="8" signed="false" token="true" value="0" />
+          <Block name="xScan" minOccurs="0" maxOccurs="255">
+            <Blob name="RGB" length="3" />
+          </Block>
+        </Block>
+
+        <Block name="Normal">
+          <Number endian="big" name="Xthumbnail" size="8" signed="false" >
+            <Relation type="count" of="xScan"/>
+          </Number>
+          <Number endian="big" name="Ythumbnail" size="8" signed="false" >
+            <Relation type="count" of="yScan" />
+          </Number>
+          <Block name="yScan" minOccurs="0" maxOccurs="255">
+            <Block name="xScan" minOccurs="0" maxOccurs="255">
+              <Blob name="RGB" length="3" />
+            </Block>
+          </Block>
+        </Block>
+		
+      </Choice>
+      
+    </Block>
+  </DataModel>
+
+  <!-- ******** JFIF Extenstion ************** -->
+  <DataModel name="JFIFExtension" ref="MarkerSegment">
+    <Blob name="Type" valueType="hex" length="2" value="FFE0" token="true" />
+    <Block name="SegmentData">
+  	  <Blob name="JFXXIdentifier" token="true" value="4A 46 58 58 00" valueType="hex"/>    
+      <Number endian="big" name="ExtensionCode" size="8" signed="false"/>
+      <Blob name="ExtensionData" />
+	</Block>
+  </DataModel>
+
+  <!-- ********** App Data ************ -->
+  <DataModel name="ApplicationData">
+    <Choice name="AppDataChoice">
+      <Block name="TheJFIFFormatData" ref="JFIFFormatData"/>
+      <Block name="TheJFIFExtension" ref="JFIFExtension" />
+      <Block name="TheGenericApplicationData" ref="GenericApplicationData" />
+    </Choice>
+  </DataModel>
+
+  <!-- ********** Jpeg Data marker segment ****-->
+  <DataModel name="JPEGData" ref="MarkerSegment">
+	<Block name="Type">
+      <Choice name="TypeChoice">
+        <Blob length="2" valueType="hex" token="true" value="FFF0"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF1"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF2"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF3"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF4"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF5"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF6"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF7"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF8"/>
+        <Blob length="2" valueType="hex" token="true" value="FFF9"/>
+        <Blob length="2" valueType="hex" token="true" value="FFFA"/>
+        <Blob length="2" valueType="hex" token="true" value="FFFB"/>
+        <Blob length="2" valueType="hex" token="true" value="FFFC"/>
+        <Blob length="2" valueType="hex" token="true" value="FFFD"/>
+      </Choice>
+	</Block>
+  </DataModel>
+
+  <!-- ***** Define Number of Lines ********* -->
+  <DataModel name="DefineNumberofLines" ref="MarkerSegment">
+    <Blob name="Type" value="FFDC" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">
+      <Number endian="big" name="NL" size="16" signed="false" />
+    </Block>
+  </DataModel>
+  
+  <!-- ********* Tables Misc *********  -->
+  <DataModel name="TablesMisc">
+    <Choice name="TablesChoice" minOccurs="0" >
+      <Block name="TheApplicationData" ref="ApplicationData"/>
+      <Block name="TheQuantizedTableSpecification" ref="QuantizedTableSpecification"/>
+      <Block name="TheHuffmanTableSpecification" ref="HuffmanTableSpecification"/>
+      <Block name="TheArithmeticConditioningTableSpecification" ref="ArithmeticConditioningTableSpecification"/>
+      <Block name="TheRestartIntervalDefinition" ref="RestartIntervalDefinition"/>
+      <Block name="TheComment" ref="Comment"/>
+    </Choice>
+  </DataModel>
+
+  <!-- Hierarchical Mode: Progression Definition -->
+  <DataModel name="DefineHierarchicalProgression" ref="FrameHeader">
+    <Blob name="Type" value="FFDE" length="2" valueType="hex" token="true" />
+  </DataModel>
+
+  <DataModel name="ExpandSegment" ref="MarkerSegment">
+    <Blob name="Type" value="FFDF" length="2" valueType="hex" token="true" />
+    <Block name="SegmentData">      
+      <Flags name="ExpandSegmentFlags" size="8">
+        <Flag name="Eh" position="4" size="4" />
+        <Flag name="Ev" position="0" size="4" />
+      </Flags>
+    </Block>
+  </DataModel>
+
+  <!-- Standard meta frame -->
+  <DataModel name="Frame">
+    <Block name="TheTablesMisc" ref="TablesMisc" />
+    <Block name="TheFrameHeader" ref="FrameHeader"/>
+    <Block name="Scan" minOccurs="1">
+      <Block name="ScanTablesMisc" ref="TablesMisc" />
+      <Block name="TheScanHeader" ref="ScanHeader"/>
+      <Block name="TheEntropyCodedDataSegment" ref="EntropyCodedDataSegment" />
+    </Block>
+  </DataModel>
+
+  <!-- Hierarchical Mode Frame  -->
+  <DataModel name="HierarchicalMode">
+    <Block name="DHP" ref="DefineHierarchicalProgression"/>
+    <Block name="aFrame" ref="Frame" minOccurs="1"> 
+      <Block name="TheFrameHeader">
+        <Block name="EXP" ref="ExpandSegment" minOccurs="0" maxOccurs="1"/>
+        <Block name="ActualHeader" ref="FrameHeader" />
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <!-- MAIN Image container -->
+  <DataModel name="JPGJFIF">
+    <Blob name="SOIMagic" value="FFD8" valueType="hex" token="true" length="2" />
+    <Choice name="FrameChoice" >
+      <Block name="TheFrame" ref="Frame" />
+      <Block name="TheHierarchicalMode" ref="HierarchicalMode" />
+    </Choice>
+    <Blob name="EOIMagic" value="FFD9" valueType="hex" token="true" length="2" />
+  </DataModel>
+</Peach>
+<!--END-->

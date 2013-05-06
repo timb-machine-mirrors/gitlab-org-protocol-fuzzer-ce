@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       author="Deja Vu Security, LLC" description="Internet Group Message Protocol PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+			 
+  <!--Membership Report Sub-unit-->
+  <DataModel name="GroupRecord">
+    <Number name="RecordType" size="8" endian="big"/>
+    <Number name="AuxDataLength" size="8" endian="big">
+      <Relation type="size" of="AuxData" />
+    </Number>
+    <Number name="NumSources" size="16" endian="big">
+      <Relation type="count" of="SourceAddresses" />
+    </Number>
+    <Blob name="MulticastAddress" length="4"/>
+    <Block name="SourceAddresses" minOccurs="0">
+      <Blob name="SourceAddress" length="4"/>
+    </Block>
+    <Blob name="AuxData" />
+  </DataModel>
+  
+  <!--RFC3376 Section 4.0-->
+  <DataModel name="MembershipQuery">
+    <Number name="Type" size="8" endian="big" valueType="hex" value="0x11" token="true"/>
+    <Number name="MaxRespCode" size="8" endian="big"/>
+    <Number name="Checksum" size="16" endian="big">
+      <Fixup class="IcmpChecksumFixup">
+        <Param name="ref" value="MembershipQuery"/>
+      </Fixup>
+    </Number>
+    <Blob name="GroupAddress" length="4"/>
+    <Flags size="8" endian="big">
+      <Flag name="Resv" size="4" position="0"/>
+      <Flag name="Suppress" size="1" position="4"/>
+      <Flag name="QRV" size="3" position="5"/>
+    </Flags>
+    <Number name="QQIC" size="8" endian="big"/>
+    <Number name="NumSources" size="16" endian="big">
+      <Relation type="count" of="SourceAddresses" />
+    </Number>
+    <Block name="SourceAddresses" minOccurs="0">
+      <Blob name="SourceAddress" length="4"/>
+    </Block>
+    <Blob name="RemainingData" />
+  </DataModel>
+  
+  <!--RFC3376 Section 4.0-->
+  <DataModel name="Ver3MembershipReport">
+    <Number name="Type" size="8" endian="big" valueType="hex" value="0x22" token="true"/>
+    <Blob name="Resv1" length="1"/>
+    <Number name="Checksum" size="16" endian="big">
+      <Fixup class="IcmpChecksumFixup">
+        <Param name="ref" value="Ver3MembershipReport"/>
+      </Fixup>
+    </Number>
+    <Blob name="Resv2" length="2"/>
+    <Number name="NumGroupRecords" size="16" endian="big">
+      <Relation type="count" of="GroupRecords" />
+    </Number>
+    <Block name="GroupRecords" ref="GroupRecord" minOccurs="0" />
+    <Blob name="RemainingData" />
+  </DataModel>
+
+  
+</Peach>
+<!-- end -->

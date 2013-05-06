@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Telnet Command Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+  <!--
+      Telnet Command Protocol
+  -->
+
+  <!-- Telnet Command Choice -->
+  <DataModel name="Commands">
+    <Choice>
+			<!-- Stop Use - Demand to stop using specified option. -->
+			<Number name="Dont" size="8" valueType="hex" value="fe" token="true"/>
+			<!-- Start Use - Request to start using specified option. -->
+			<Number name="Do" size="8" valueType="hex" value="fd" token="true"/>
+			<!-- Won't Use - Reject the proposed option. -->
+			<Number name="Wont" size="8" valueType="hex" value="fc" token="true"/>
+			<!-- Will Use - Agreement to use the specified option. -->
+			<Number name="Will" size="8" valueType="hex" value="fb" token="true"/>
+			<!-- SubNegotiate - Begin option subnegotiation. -->
+			<Number name="SubNeg" size="8" valueType="hex" value="fa" token="true"/>
+			<!-- Go ahead! - End of input for half-duplex connections. -->
+			<Number name="GA" size="8" valueType="hex" value="f9" token="true"/>
+			<!-- Erase line - Request that operator erase the previous line. -->
+			<Number name="EraseLine" size="8" valueType="hex" value="f8" token="true"/>
+			<!-- Erase Char - Request that operator erase the previous character. -->
+			<Number name="EraseChar" size="8" valueType="hex" value="f7" token="true"/>
+			<!-- You there? - Request acknowledgment. -->
+			<Number name="Ping" size="8" valueType="hex" value="f6" token="true"/>
+			<!-- Abort Output - Cancel output from current process. -->
+			<Number name="AbortOutput" size="8" valueType="hex" value="f5" token="true"/>
+			<!-- Interrupt Process - Interrupt current process. -->
+			<Number name="IntProc" size="8" valueType="hex" value="f4" token="true"/>
+			<!-- Break - Operator pressed the Break key or the Attention key. -->
+			<Number name="Break" size="8" valueType="hex" value="f3" token="true"/>
+			<!-- Data Mark - End of urgent data stream. -->
+			<Number name="DataMark" size="8" valueType="hex" value="f2" token="true"/>
+			<!-- No Operation - No operation command. -->
+			<Number name="NoOp" size="8" valueType="hex" value="f1" token="true"/>
+			<!-- End subNeg - End of option subnegotiation command. -->
+			<Number name="EndSubNeg" size="8" valueType="hex" value="f0" token="true"/>
+			<!-- Generic catch-all for custom/unknown commands. -->
+			<Blob name="Unknown" length="2"/>
+		</Choice>
+  </DataModel>
+
+  <!-- Telnet Option ID Choice -->
+  <DataModel name="Options">
+    <Choice> 
+			<!-- Binary Xmit - Allows transmission of binary data. -->
+			<Number name="BinXmit" size="8" valueType="hex" value="00" token="true"/>
+			<!-- Echo Date - Causes server to echo back all keystrokes. -->
+			<Number name="Echo" size="8" valueType="hex" value="01" token="true"/>
+			<!-- Reconnect - Reconnects to another TELNET host. -->
+			<Number name="Reconnect" size="8" valueType="hex" value="02" token="true"/>
+			<!-- Suppress Go Ahead! - Disables Go Ahead! command. -->
+			<Number name="SuppressGA" size="8" valueType="hex" value="03" token="true"/>
+			<!-- Message Size - Conveys approximate message size. -->
+			<Number name="MessageSize" size="8" valueType="hex" value="04" token="true"/>
+			<!-- Option Status - Lists status of options. -->
+			<Number name="OptStat" size="8" valueType="hex" value="05" token="true"/>
+			<!-- Timing Mark - Marks a data stream position for reference. -->
+			<Number name="TimingMark" size="8" valueType="hex" value="06" token="true"/>
+			<!-- R/C XmtEcho - Allows remote control of terminal printers. -->
+			<Number name="RCEcho" size="8" valueType="hex" value="07" token="true"/>
+			<!-- Line Width - Sets output line width. -->
+			<Number name="LineWidth" size="8" valueType="hex" value="08" token="true"/>
+			<!-- Page Length - Sets page length in lines. -->
+			<Number name="PageLen" size="8" valueType="hex" value="09" token="true"/>
+			<!-- CR Use - Determines handling of carriage returns. -->
+			<Number name="CRUse" size="8" valueType="hex" value="0a" token="true"/>
+			<!-- Horizontal Tabs - Sets horizontal tabs. -->
+			<Number name="HorizTab" size="8" valueType="hex" value="0b" token="true"/>
+			<!-- Horizontal Tab Use - Determines handling of horizontal tabs. -->
+			<Number name="HorizTabUse" size="8" valueType="hex" value="0c" token="true"/>
+			<!-- Form Feed Use - Determines handling of form feeds. -->
+			<Number name="FFUse" size="8" valueType="hex" value="0d" token="true"/>
+			<!-- Vertical Tabs - Sets vertical tabs. -->
+			<Number name="VerTabs" size="8" valueType="hex" value="0e" token="true"/>
+			<!-- Vertical Tab Use - Determines handling of vertical tabs. -->
+			<Number name="VerTabUse" size="8" valueType="hex" value="0f" token="true"/>
+			<!-- Line Feed Use - Determines handling of line feeds. -->
+			<Number name="LFUse" size="8" valueType="hex" value="10" token="true"/>
+			<!-- Extended ASCII - Defines extended ASCII characters. -->
+			<Number name="ExtASCII" size="8" valueType="hex" value="11" token="true"/>
+			<!-- Logout - Allows for forced log-off. -->
+			<Number name="Logout" size="8" valueType="hex" value="12" token="true"/>
+			<!-- Byte Macro - Defines byte macros. -->
+			<Number name="ByteMacro" size="8" valueType="hex" value="13" token="true"/>
+			<!-- Data Terminal - Allows subcommands for Data Entry to be sent. -->
+			<Number name="DataTerm" size="8" valueType="hex" value="14" token="true"/>
+			<!-- SUPDUP - Allows use of SUPDUP display protocol. -->
+			<Number name="SUPDUP" size="8" valueType="hex" value="15" token="true"/>
+			<!-- SUPDUP Output - Allows sending of SUPDUP output. -->
+			<Number name="SUPDUPOut" size="8" valueType="hex" value="16" token="true"/>
+			<!-- Send Locale - Allows terminal location to be sent. -->
+			<Number name="SendLocale" size="8" valueType="hex" value="17" token="true"/>
+			<!-- Terminal Type - Allows exchange of terminal type information. -->
+			<Number name="TermType" size="8" valueType="hex" value="18" token="true"/>
+			<!-- End Record - Allows use of the End of record code (0xEF). -->
+			<Number name="EndRecord" size="8" valueType="hex" value="19" token="true"/>
+			<!-- TACACS ID - User ID exchange used to avoid more than 1 log-in. -->
+			<Number name="TACACSID" size="8" valueType="hex" value="1a" token="true"/>
+			<!-- Output Mark - Allows banner markings to be sent on output. -->
+			<Number name="OutputMark" size="8" valueType="hex" value="1b" token="true"/>
+			<!-- Terminal ID -A numeric ID used to identify terminals. -->
+			<Number name="TermID" size="8" valueType="hex" value="1c" token="true"/>
+			<!-- 3270 Regime - Allows emulation of 3270 family terminals. -->
+			<Number name="3270" size="8" valueType="hex" value="1d" token="true"/>
+			<!-- X.3 PAD - Allows use of X.3 protocol emulation. -->
+			<Number name="X3" size="8" valueType="hex" value="1e" token="true"/>
+			<!-- Window Size  - Extended options list. -->
+			<Number name="WinSize" size="8" valueType="hex" value="1f" token="true"/>
+			<!-- Terminal Speed - Conveys baud rate information. -->
+			<Number name="TermSpeed" size="8" valueType="hex" value="20" token="true"/>
+			<!-- Remote Flow - Provides flow control (XON, XOFF). -->
+			<Number name="RemoteFlow" size="8" valueType="hex" value="21" token="true"/>
+			<!-- Linemode - Provides linemode bulk character transactions. -->
+			<Number name="Linemode" size="8" valueType="hex" value="22" token="true"/>
+			<!-- Location - ... -->
+			<Number name="Location" size="8" valueType="hex" value="23" token="true"/>		
+			<!-- Extended - Extended options list. -->
+			<Number name="Ext" size="8" valueType="hex" value="ff" token="true"/>
+			<!-- Generic catch-all for custom/unknown options. -->
+			<Blob name="Unknown" length="2"/>
+		</Choice>
+  </DataModel>
+
+  <!-- Telnet OptCode Negotiation Block -->
+  <DataModel name="optCodeWithOptData">
+    <Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+		<Number name="command" size="8" valueType="hex" value="fa" token="true"/>
+		<Number name="optionIds" size="8"/>
+		<Blob name="data" />
+		<Number name="iac2" size="8" valueType="hex" value="ff" token="true"/>
+		<Number name="EndSubNeg" size="8" valueType="hex" value="f0" token="true"/>
+  </DataModel>
+	
+	<!-- Telnet OptCode Block -->
+	<DataModel name="optCode">
+    <Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+		<Number name="command" size="8"/>
+		<Number name="optionIds" size="8"/>
+  </DataModel>
+	
+	<DataModel name="OneBytePlusRest">
+		<Blob name="Text" length="1"/>
+		<Blob name="Rest"/>
+	</DataModel>
+	
+	<DataModel name="TelnetSingleOptionCrack">
+		<Choice>
+			<Block name="negOpt" ref="optCodeWithOptData"/>
+			<Block name="opt" ref="optCode"/>
+			<Block name="ReadOne" ref="OneBytePlusRest"/>
+			<Blob name="EmptyPacket" length="0"/>
+		</Choice>
+  </DataModel>
+	
+	<DataModel name="TelnetClientReply">
+		<Block name="optCodes">
+			<Block>
+				<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+				<Number name="command" size="8" valueType="hex"/>
+				<Number name="optionIds" size="8" valueType="hex"/>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="TelnetSendPayload">
+		<String name="Payload" value="sudo su"/>
+		<Blob name="return" valueType="hex" value="0d" token="true"/>
+	</DataModel>
+	
+	<DataModel name="TelnetSendPayload2">
+		<String name="Payload2" value="mkdir temp"/>
+		<Blob name="return2" valueType="hex" value="0d" token="true"/>
+	</DataModel>
+	
+	<DataModel name="TelnetSendPayload3">
+		<String name="Payload3" value="nc -l 31337"/>
+		<Blob name="return3" valueType="hex" value="0d" token="true"/>
+	</DataModel>
+	
+	<DataModel name="SendWindowNegtiate" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x1f"/>
+		<Blob name="data" valueType="hex" value="00500018"/>
+	</DataModel>
+	
+	<DataModel name="SendTermSpeed" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x20"/>
+		<Blob name="data" valueType="hex" value="0033383430302c3338343030"/>
+	</DataModel>
+	
+	<DataModel name="SendNewEnvirOpt" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x27"/>
+		<Blob name="data" valueType="hex" value="00"/>
+	</DataModel>
+	
+	<DataModel name="SendTermType" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x18"/>
+		<Blob name="data" valueType="hex" value="00585445524d"/>
+	</DataModel>
+	
+	<DataModel name="SendLineMode" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x22"/>
+		<Blob name="data" valueType="hex" value="0301000003620304020f05000007621c08020409421a0a027f0b02150f0211100213110000120000"/>
+	</DataModel>
+	
+	<DataModel name="SendTermSpeedInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x20"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendNewEnvirOptInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x27"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendTermTypeInit" ref="optCodeWithOptData">
+		<Number name="optionIds" size="8" value="0x18"/>
+		<Blob name="data" valueType="hex" value="01"/>
+	</DataModel>
+	
+	<DataModel name="SendPrompt">
+		<String value="Ubuntu 12.04.2 LTS\r\n"/>
+		<String value="ubuntu login: \r\n"/>
+	</DataModel>
+  <!-- Telnet Negotiate Connect Model -->
+  <DataModel name="TelnetConnect">
+		<Block name="TelnetNegotiateMessage">
+			<Block name="optCodes">
+				<Block name="DoSuppressGA">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fd" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="03" token="true"/>
+				</Block>
+				<Block name="WillSuppressGA">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fb" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="03" token="true"/>
+				</Block>
+				<Block name="DontEcho">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fe" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="01" token="true"/>
+				</Block>
+				<Block name="WontEcho">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fc" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="01" token="true"/>
+				</Block>
+				<Block name="WillNegWin">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fb" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="1f" token="true"/>
+				</Block>
+				<Block name="WillTermSpeed">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fb" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="20" token="true"/>
+				</Block>
+				<Block name="WillTermType">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fb" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="18" token="true"/>
+				</Block>
+				<Block name="WillNewEnviOpt">
+					<Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
+					<Number name="Command" size="8" valueType="hex" value="fb" token="true"/>
+					<Number name="Option" size="8" valueType="hex" value="27" token="true"/>
+				</Block>
+			</Block>
+		</Block>
+  </DataModel>
+</Peach>
+<!--END-->

@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Open Shortest Path First Version 2 PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+	<!-- Generic LSA Header --> 
+  <DataModel name="LSAHeader">
+    <Block name="LSATotal">
+      <Number name="LSAge" size="16" endian="big" value="0x3000"/> 
+      <Block name="LSACheckSumArea">
+        <Number name="LSAOptionAndType"     size="16" endian="big" value="0x2001"/> 
+        <Number name="LSALinkStateID"       size="32" endian="big" value="0xA0A0A0A0"/>
+        <Number name="LSAAdvertisingRouter" size="32" endian="big" valueType="hex" value="##OSPFRouterID##"/> 
+        <Number name="LSASequenceNumber"    size="32" endian="big" value="0x80000001"> 
+          <Fixup class="SequenceIncrementFixup"/> 
+        </Number> 
+        <Number name="LSAChecksum" size="16" endian="big">
+          <Fixup class="IcmpChecksumFixup">
+            <Param name="ref" value="LSACheckSumArea"/>
+          </Fixup>
+        </Number> 
+        <Number name="LSALength" size="16" endian="big" value="0x0024"/>
+				<Block name="LSAData"/> 
+      </Block>
+    </Block>
+  </DataModel>
+
+  <!-- Type 1: LSA Router Header  -->
+  <DataModel name="RouterLSA" ref="LSAHeader">
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2001"/>
+    <Block name="LSATotal.LSACheckSumArea.LSAData">
+      <Flags name="flags" size="8" endian="big">
+        <Flag name="Nt" size="1" position="4"/>
+        <Flag name="x"  size="1" position="5"/>
+        <Flag name="V"  size="1" position="6"/>
+        <Flag name="E"  size="1" position="7"/> 
+      </Flags>
+      <Number name="RouterLSAOptions" size="8" endian="big" value="0x00"/>
+      <Number name="NumberofLinks" size="16" endian="big">
+        <Relation type="count" of="Interfaces"/>
+      </Number>
+      <Block name="Interfaces" minOccurs="1" maxOccurs="5">
+        <Choice name="LinkIDs">
+          <Number name="LinkIDRouterID"          size="32" endian="big" value="1"/>
+          <Number name="LinkIDDRInterface"       size="32" endian="big" value="2"/>
+          <Number name="LinkIDIPNetworkOrSubnet" size="32" endian="big" value="3"/>
+          <Number name="LinkIDNeighbotRouterID"  size="32" endian="big" value="4"/>
+        </Choice>
+        <Number name="LinkData" size="32" endian="big" value="0xDEADBEEF"/>
+        <Choice name="LinkTypes">
+          <Number name="LinkTypePtoP"                       size="8" endian="big" value="1"/>
+          <Number name="LinkTypeConnectionToTransitNetwork" size="8" endian="big" value="2"/>
+          <Number name="LinkTypeConnectionToStubNetwork"    size="8" endian="big" value="3"/>
+          <Number name="LinkTypeVirtualLink"                size="8" endian="big" value="4"/> 
+        </Choice>
+        <Number name="NumberOfTOS" size="8" endian="big">
+          <Relation type="count" of="TOSs"/>
+        </Number>
+        <Number name="Metric" size="16" endian="big"/> 
+        <Block name="TOSs" minOccurs="0" maxOccurs="4"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <!-- Type 2: Network-LSA -->
+  <DataModel name="NetworkLSA"  ref="LSAHeader">
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2002"/> 
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+  
+  <!-- Type 3: Inter-Area-Prefix-LSA Header --> 
+  <DataModel name="InterAreaPrefixLSA" ref="LSAHeader">
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2003"/> 
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel> 
+  
+  <!-- Type 4 : Inter-Area-Router-LSA Header --> 
+  <DataModel name="InterAreaRouterLSA" ref="LSAHeader">
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2004"/> 
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+
+  <!-- Type :5 AS-External-LSA Header --> 
+  <DataModel name="ASExternalLSA" ref="LSAHeader"> 
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x4005"/>       
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+
+  <!-- MOSPF LSA Header (Deprecated)  --> 
+  <DataModel name="MOSPFLSA" ref="LSAHeader"> 
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2006"/>       
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+
+  
+  <!-- NSSA-LSA Header -->  
+  <DataModel name="NSSALSA" ref="LSAHeader"> 
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2007"/>       
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+  
+  <!-- Link-LSA Header -->  
+  <DataModel name="LinkLSA" ref="LSAHeader"> 
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x0008"/>
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+  
+  <!-- Intra-Area-Prefix LSA Header -->
+  <DataModel name="IntraAreaPrefixLSA" ref="LSAHeader"> 
+    <Number name="LSATotal.LSACheckSumArea.LSAOptionAndType" size="16" endian="big" value="0x2009"/>
+    <Block name="LSATotal.LSACheckSumArea.LSAData"/>
+  </DataModel>
+
+  <!-- LSA choice block --> 
+  <DataModel name="LSAs">
+    <Choice name="LSAChosen">
+      <Block name="LSA1" ref="RouterLSA"           />
+      <Block name="LSA2" ref="NetworkLSA"          />
+      <Block name="LSA3" ref="InterAreaPrefixLSA"  />
+      <Block name="LSA4" ref="InterAreaRouterLSA"  />
+      <Block name="LSA5" ref="ASExternalLSA"       />
+      <Block name="LSA6" ref="MOSPFLSA"            />
+      <Block name="LSA7" ref="NSSALSA"             />
+      <Block name="LSA8" ref="LinkLSA"             /> 
+      <Block name="LSA9" ref="IntraAreaPrefixLSA"  /> 
+    </Choice>
+  </DataModel>
+  
+  <!-- OSPF V2 over IPV4 -->
+  <DataModel name="OSPFv2">
+    <Block name="EntirePacket">
+      <Relation type="size" from="TotalLength"/>
+      <Block name="IPHeader">
+				<!--Number name="VerLenDSPECN" size="16" endian="big" value="0x4500" /-->
+				<Flags size="16" endian="big">
+					<Flag name="Version"      position="0"  size="4" valueType="hex" value="4"/>
+					<Flag name="HeaderLength" position="4"  size="4" valueType="hex" value="5"/>
+					<Flag name="DSCP"         position="8"  size="6" valueType="hex" value="00"/>
+					<Flag name="ECN"          position="14" size="2" valueType="hex" value="00"/>
+				</Flags>
+				<Number name="TotalLength" size="16" endian="big">
+					<Relation type="size" of="EntirePacket"/>
+				</Number>
+				<Number name="Identification" size="16" endian="big" value="0x0000"/>
+				<Flags name="Flags" size="8" endian="big">
+					<Flag name="Reserved" size="1" position="0" valueType="hex" value="00"/>
+					<Flag name="DF"       size="1" position="1" valueType="hex" value="01"/>
+					<Flag name="MF"       size="1" position="2" valueType="hex" value="00"/>
+				</Flags>
+				<Number name="FragOffset" size="8" endian="big" value="0x00"/>
+				<Number name="TTL" size="8" endian="big" value="1"/>
+				<!-- Protocol # for OSPF dec 89 hex 59  -->
+				<Number name="Protocol" size="8" endian="big" token="true" value="0x59"/>
+				<Number name="Checksum" size="16" endian="little" value="0x0000">
+					<Fixup class="checksums.IcmpChecksumFixup">
+						<Param name="ref" value="IPHeader"/>
+					</Fixup>
+				</Number>
+				<Block name="SrcBlock" length="4"> <!--Used for cracking-->
+					<String name="SrcIP" value="##SourceIPv4##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
+				<Block name="DstBlock" length="4"> <!--Used for cracking-->
+					<String name="DestIP" value="##TargetIPv4##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
+      </Block>
+      <Block name="OSPFMessage">
+				<Relation type="size" from="OSPFPacketLength"/>
+				<Number name="OSPFVersion"      size="8"  endian="big" value="0x02"/>
+				<Number name="OSPFType"         size="8"  endian="big" value="0x01"/>
+				<Number name="OSPFPacketLength" size="16" endian="big">
+					<Relation type="size" of="OSPFMessage"/>
+				</Number>
+				<Block name="OSPFRouterIDBlock" length="4"> <!--Used for cracking-->
+					<String name="OSPFRouterID" value="##OSPFSourceRouter##">
+						<Transformer class="Ipv4StringToOctet"/>
+					</String>
+				</Block>
+				<Number name="OSPFAreaID" size="32" endian="big" valueType="hex" value="##OSPFAreaID##"/>
+				<Number name="OSPFChecksum" size="16"> 
+					<Fixup class="IcmpChecksumFixup">
+						<Param name="ref" value="OSPFMessage"/>
+					</Fixup>
+				</Number>
+				<Number name="AuthenticationType" size="16" endian="big" value="0x0000"/>
+				<Number name="AuthenticationData" size="64" endian="big" valueType="hex" value="00 00 00 00 00 00 00 00"/>
+				<Block name="OSPFData"/>
+      </Block>
+    </Block>
+  </DataModel>
+  
+  <!-- OSPF Hello Packet Type : 1 -->
+  <DataModel name="OSPFHello" ref="OSPFv2">
+    <Number name="OSPFMessage.OSPFType" size="8" endian="big" value="01"/>
+    <Block name="OSPFMessage.OSPFData">
+      <Number name="NetworkMask"        size="32" endian="big" value="0x00000000"/>
+      <Number name="HelloInterval"      size="16" endian="big" valueType="hex" value="##HelloInterval##"/>
+      <Number name="Options"            size="8"  endian="big" value="0x02"/>
+      <Number name="RouterPriority"     size="8"  endian="big" value="0xF0"/>
+      <Number name="RouterDeadInterval" size="32" endian="big" value="0x0000000C"/>
+      <Number name="DesignatedRouterID" size="32" endian="big" value="0x00000000"/>
+      <Number name="BackupDesignatedRouterID" size="32" endian="big" value="0x00000000"/> 
+      <Block name="ActiveNeighbors"/>
+    </Block>
+  </DataModel>
+
+  <!-- established hello --> 
+  <DataModel name="OSPFHello2Way" ref="OSPFHello">
+    <Number name="OSPFMessage.OSPFData.DesignatedRouterID" size="32" endian="big" valueType="hex" value="##OSPFRouterID##"/>
+    <Number name="OSPFMessage.OSPFData.BackupDesignatedRouterID" size="32" endian="big" valueType="hex" value="##BackUpRouterID##"/>
+    <Block name="OSPFMessage.OSPFData.ActiveNeighbors">
+			<Block name="NeighborIPBlock" length="4"> <!--Used for cracking-->
+				<String name="neighbor" value="##OSPFNeighbor##">
+					<Transformer class="Ipv4StringToOctet"/>
+				</String>
+			</Block>
+    </Block>
+  </DataModel>
+  
+  <!-- Database description Packet Type : 2 -->
+  <DataModel name="OSPFDatabaseDesc" ref="OSPFv2">
+    <Number name="OSPFMessage.OSPFType" size="8" endian="big" value="0x02"/>  
+    <Block name="OSPFMessage.OSPFData">
+      <Number name="MTU" size="16" endian="big" value="0x05DC"/>
+      <Number name="Options" size="8" endian="big" value="0x02"/>
+      <Flags name="DDFlags" size="8" endian="big">
+				<Flag name="OOBResyncBit" size="1" position="4" value="0"/>
+				<Flag name="InitialBit"   size="1" position="5" value="1"/> 
+				<Flag name="MoreBit"      size="1" position="6" value="1"/> 
+				<Flag name="MS"           size="1" position="7" value="1"/> 
+      </Flags>
+      <Number name="Seq2" size="32" value="0x6FF2FF00"/>
+      <Block name="DDLSAs" minOccurs="0" maxOccurs="100" ref="LSAHeader"/> 
+    </Block>   
+  </DataModel>
+
+  <!-- Send LSAs for sync-->
+  <DataModel name="OSPFDatabaseDescLSA" ref="OSPFDatabaseDesc">
+    <Flags name="OSPFMessage.OSPFData.DDFlags" size="8" endian="big">
+      <Flag name="OOBResyncBit" size="1" position="4"  value="0"/>
+      <Flag name="InitialBit"   size="1" position="5"  value="0"/> 
+      <Flag name="MoreBit"      size="1" position="6"  value="1"/> 
+      <Flag name="MS"           size="1" position="7"  value="1"/> 
+    </Flags>
+    <Number name="OSPFMessage.OSPFData.Seq2" size="32" value="0x6FF2FF01"/>
+    <Block name="OSPFMessage.OSPFData.DDLSAs" minOccurs="5" maxOccurs="100" ref="LSAHeader"/> 
+  </DataModel>
+
+  <!-- Send LSAs for sync-->
+  <DataModel name="OSPFDatabaseDescLSA2" ref="OSPFDatabaseDesc">
+    <Flags name="OSPFMessage.OSPFData.DDFlags" size="8" endian="big">
+      <Flag name="OOBResyncBit" position="4" size="1" value="0"/>
+      <Flag name="InitialBit"   position="5" size="1" value="0"/> 
+      <Flag name="MoreBit"      position="6" size="1" value="0"/> 
+      <Flag name="MS"           position="7" size="1" value="1"/> 
+    </Flags>
+    <Number name="OSPFMessage.OSPFData.Seq2" size="32" value="0x6FF2FF02"/>
+    <Block name="OSPFMessage.OSPFData.DDLSAs" minOccurs="5" maxOccurs="100" ref="LSAHeader"/> 
+  </DataModel>
+  
+  <!-- Database Sync Slave -->
+  <DataModel name="OSPFDatabaseDescSlave" ref="OSPFDatabaseDesc">
+    <Number name="OSPFMessage.OSPFData.DDFlags" size="8" value="6"/> 
+  </DataModel>
+
+  <!-- Link State Request Packet Type 3 --> 
+  <DataModel name="OSPFLinkStateReq" ref="OSPFv2">
+    <Number name="OSPFMessage.OSPFType" size="8" endian="big" value="0x03"/>  
+    <Block name="OSPFMessage.OSPFData">
+      <Number name="LSType"      size="32" endian="big" value="0x00000001"/>
+      <Number name="LinkStateID" size="32" endian="big" value="0x00000000"/>
+      <Number name="AdvertisingRouter" size="32" endian="big" value="0xC0A80A02"/> 
+    </Block>  
+  </DataModel>
+
+  <!-- Link State Update Packet --> 
+  <DataModel name="OSPFLinkStateUpdate" ref="OSPFv2">
+    <Number name="OSPFMessage.OSPFType" size="8" endian="big" value="4"/>
+    <Block name="OSPFMessage.OSPFData">
+      <Number name="LSACount" size="32" endian="big">
+				<Relation type="count" of="LSABlock"/>
+      </Number>
+      <Block name="LSABlock" ref="RouterLSA" minOccurs="1" maxOccurs="100">
+				<Relation from="LSACount" type="count"/>
+      </Block>
+    </Block>   
+  </DataModel>
+
+  <!-- Link State Acknowledgement -->
+  <DataModel name="OSPFLinkStateAck" ref="OSPFv2">
+    <Number name="OSPFMessage.OSPFType" size="8"  endian="big" value="5"/>
+    <!-- fix me-->
+    <Block name="OSPFMessage.OSPFData">
+      <Block name="LSAcks" minOccurs="0" maxOccurs="1024" ref="LSAHeader"/> 
+    </Block>
+  </DataModel>
+
+  <!-- dump model for incoming packets --> 
+  <DataModel name="HelloDump">
+    <Blob name="IPHeader1" length="9"/>
+    <Number name="IPProtocol" size="8" token="true" value="0x59"/>
+    <Blob name="IPHeader2" length="10"/> 
+    <Number name="Version" size="8" token="true" value="0x02"/>
+  </DataModel>
+
+  <!-- DD import dump -->
+  <DataModel name="DDDump">
+    <!-- IP Header -->
+    <Blob name="Truck" length="9"/>
+    <Number name="Protocol" size="8" token="true" value="0x59"/>
+    <Blob name="HeaderRemains" length="10"/>
+    <!-- -->
+    <Number name="Version" size="8" token="true" value="0x02"/>
+    <Number name="Type" size="8"/>
+    <Blob name="OSPFHeader" length="26"/>
+    <Number name="Seq1" size="32" value="0"/>
+    <Blob name="TheRest"/> 
+  </DataModel>
+  
+  <!-- LSR input model -->
+  <DataModel name="LSRDump">
+    <!-- IP Header -->
+    <Blob name="Truck" length="9"/>
+    <Number name="Protocol" size="8" token="true" value="0x59"/>
+    <Blob name="HeaderRemains" length="10"/>
+    <!-- -->
+    <Number name="Version" size="8" token="true" value="0x02"/>
+    <Number name="Type" size="8"/>
+    <Blob name="OSPFHeader" length="22"/>
+    <Blob name="Remains"/> 
+  </DataModel>
+</Peach>
+<!--End-->
