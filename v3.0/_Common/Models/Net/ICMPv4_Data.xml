@@ -4,7 +4,7 @@
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol v4 PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
-  <DataModel name="ICMPv4Header">
+  <DataModel name="Packet">
 		<Block name="Content">
 			<Number name="Type" size="8"/>
 			<Number name="Code" size="8"/>
