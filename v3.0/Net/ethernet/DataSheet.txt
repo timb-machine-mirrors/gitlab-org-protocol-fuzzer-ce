@@ -1,7 +1,7 @@
 Protocol
 --------
 
- * Test Suite: ARP
+ * Test Suite: Ethernet
  * Direction: Broadcast, Listen (TODO)
  
 The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
@@ -12,7 +12,8 @@ Used Specifications
 [options="header"]
 |========
 |Specification | Title
-|RFC826 | An Ethernet Address Resolution Protocol
+|802.3 | Ethernet
+|802.1Q | VLAN Tagging
 |========
 
 Detailed Use Cases
@@ -21,13 +22,13 @@ Detailed Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|MSG 1 | RFC826
+| Ethernet Frame | 802.3 Section 3.1.1
 |========
 
 [options="header"]
 |========
 |Supported Features | Specification
-|Arp Request Packet Generation for IPv4 over Ether| RFC826
-|Arp Reply Packet Generation in response to a request for IPv4 over Ether| RFC826
+| Address Fields | 802.3 Section 3.2.3
+| Length/Type Fields (Partial) | 802.3 Section 3.2.6
 |========
 
