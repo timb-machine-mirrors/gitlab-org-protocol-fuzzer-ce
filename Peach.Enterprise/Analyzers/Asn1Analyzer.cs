@@ -75,15 +75,16 @@ namespace Peach.Enterprise.Analyzers
 			length.length = 32;
 			length.Signed = false;
 			length.LittleEndian = false;
+			length.DefaultValue = new Variant(node.DataLength);
 			asn1Length.Add(length);
 
 			container.Add(type);
 			container.Add(asn1Length);
 			container.Add(data);
 
+			length.relations.Add(lengthRelation);
 			lengthRelation.FromName = length.name;
 			lengthRelation.OfName = data.name;
-			length.relations.Add(lengthRelation);
 
 			return container;
 		}
