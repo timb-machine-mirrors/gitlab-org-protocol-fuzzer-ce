@@ -95,7 +95,7 @@
 	<StateModel name="AH" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-				<DataModel ref="DataModels:IPsecV6AhTransport"/>
+				<DataModel ref="DataModels:IPsecV6Ah##Mode##"/>
 			 </Action>
 		</State>
 	</StateModel>

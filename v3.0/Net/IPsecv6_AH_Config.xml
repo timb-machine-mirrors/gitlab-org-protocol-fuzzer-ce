@@ -4,7 +4,7 @@
     <Define key="LoggerPath"  value="./logs/ipsec/"/> 
     <Define key="SourceMAC" value="6805ca0589fe" />
     <Define key="TargetMAC" value="000000000000"/>
-		<Define key="Mode" value="Transport"/>
+		<Define key="Mode" value="Tunnel"/>
 		<Define key="DestMAC" value="f0def113b69d" /> 
 		<Define key="Strategy" value="Random"/>
 		<Define key="TargetIPv4" value="192.168.2.11"/>
