@@ -37,9 +37,9 @@ Detailed Use Cases
 |General Query | RFC3376 (Section 4.1.11)
 |Group-Specific Query | RFC3376 (Section 4.1.11)
 |Group-and-Source-Specific Query | RFC3376 (Section 4.1.11)
-|Current-State Record | RFC3376 (Section 4.2.12)
-|Filter-Mode-Change Record | RFC3376 (Section 4.2.12)
-|Source-List-Change Record | RFC3376 (Section 4.2.12)
-|Group-and-Source-Specific Query | RFC3376 (Section 4.1.11)
+|Current-State Record (TODO) | RFC3376 (Section 4.2.12)
+|Filter-Mode-Change Record (TODO) | RFC3376 (Section 4.2.12)
+|Source-List-Change Record (TODO) | RFC3376 (Section 4.2.12)
+|Group-and-Source-Specific Query (TODO) | RFC3376 (Section 4.1.11)
 
 |========
