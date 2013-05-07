@@ -55,7 +55,7 @@ namespace PeachFarm.Controller
 
     protected override void OnStop()
     {
-      if ((server != null) && (server.IsOpen))
+      if ((server != null) && (server.IsListening))
       {
         server.Close();
         logger.Info("Peach Farm Controller Stopped.");
