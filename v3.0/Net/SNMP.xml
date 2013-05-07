@@ -12,15 +12,25 @@
       getBulkRequest	- done
   -->
 
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/SNMP_State.xml"/>
+	<Include ns="SNMP" src="file:##Path##/_Common/Models/Net/SNMP_State.xml"/>
 	
   <!-- Agent conifuration to monitor for crashes -->
   <Agent name="TheAgent">
   </Agent> 
+	
+	<Agent name="ServerAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="..\..\..\..\Downloads\SnmpWalk.exe -r:##SnmpHost## -c:public -v:2c"/>
+			<Param name="NoCpuKill" value="true"/>
+			<Param name="FaultOnEarlyExit" value="true"/>
+			<Param name="WaitForExitTimeout" value="500"/>
+			<Param name="StartOnCall" value="launchProgram"/>
+		</Monitor>
+	</Agent>
 
   <!-- Default test case -->
   <Test name="Default">
-    <StateModel ref="States:ManagerToAgent"/>
+    <StateModel ref="SNMP:ManagerToAgent"/>
     
     <Agent ref="TheAgent"/>
     
@@ -28,6 +38,25 @@
       <Param name="SrcPort" value="##SnmpSrcPort##"/>
       <Param name="Host" value="##SnmpHost##"/>
       <Param name="Port" value="##SnmpPort##"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+		
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+	
+	<Test name="Server">
+    <StateModel ref="SNMP:AgentToManager"/>
+    
+    <Agent ref="ServerAgent"/>
+    
+    <Publisher class="Udp" name="UdpHandler">
+      <Param name="SrcPort" value="##SnmpSrcPort##"/>
+      <Param name="Host" value="##SnmpHost##"/>
+      <Param name="Port" value="##SnmpPort##"/>
+			<Param name="Timeout" value="5000"/>
     </Publisher>
     
     <Strategy class="##Strategy##"/>

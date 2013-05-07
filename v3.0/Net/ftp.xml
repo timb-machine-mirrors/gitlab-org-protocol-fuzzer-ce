@@ -4,7 +4,7 @@
        author="Deja Vu Security, LLC" description="File  Protocol PIT" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/ftp_State.xml"/>
+	<Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_State.xml"/>
 
 	<Agent name="WinRemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="WindowsDebugger">
@@ -20,10 +20,20 @@
 		<Monitor class="CrashReporter"/>
 	</Agent>
 
+	<Agent name="ServerAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="ftp 192.168.146.1"/>
+			<Param name="NoCpuKill" value="true"/>
+			<Param name="FaultOnEarlyExit" value="false"/>
+			<Param name="WaitForExitTimeout" value="250"/>
+			<Param name="StartOnCall" value="launchProgram"/>
+			<Param name="WaitForExitOnCall" value="exitProgram"/>
+		</Monitor>
+	</Agent>
 
 	<!-- Default test case -->
 	<Test name="Default">
-		<StateModel ref="States:AgentToHost"/>
+		<StateModel ref="FTP:AgentToHost"/>
 		
 		<!--Agent ref="WinRemoteAgent" platform="windows"/>
 		<Agent ref="LinRemoteAgent" platform="linux"/>
@@ -39,5 +49,23 @@
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>	
 	</Test>
+	
+	<!--Server side test-->
+	<Test name="Server">
+		<StateModel ref="FTP:HostToAgent"/>
+		
+		<Agent ref="ServerAgent"/>
+		
+		<Publisher name="TcpHandler" class="TcpListener">
+			<Param name="Interface" value="##LocalIPv4##"/>
+			<Param name="Port" value="21"/>
+		</Publisher>
+		
+		<Strategy class="##Strategy##"/>
+		
+		<Logger class="File" >
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>	
+  </Test>
 </Peach>
 <!--END-->
