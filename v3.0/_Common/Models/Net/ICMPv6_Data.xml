@@ -11,8 +11,8 @@
 			<Number name="Checksum"  endian="big" size="16">
 				<Fixup class="IcmpV6ChecksumFixup">
 					<Param name="ref" value="Content" />
-					<Param name="src" value="##SourceIP##" />
-					<Param name="dst" value="##TargetIP##" />
+					<Param name="src" value="##SourceIPv6##" />
+					<Param name="dst" value="##TargetIPv6##" />
 				</Fixup>
 			</Number>
 			<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
@@ -38,8 +38,8 @@
 				<Number name="Checksum" size="16" endian="big">
 					<Fixup class="IcmpV6ChecksumFixup">
 						<Param name="ref" value="Payload"/>
-						<Param name="src" value="##SourceIP##"/>
-						<Param name="dst" value="##TargetIP##"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -57,8 +57,8 @@
 				<Number name="Checksum" size="16" endian="big">
 					<Fixup class="IcmpV6ChecksumFixup">
 						<Param name="ref" value="Payload"/>
-						<Param name="src" value="##SourceIP##"/>
-						<Param name="dst" value="##TargetIP##"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -80,8 +80,8 @@
 				<Number name="Checksum" size="16" endian="big">
 					<Fixup class="IcmpV6ChecksumFixup">
 						<Param name="ref" value="Payload"/>
-						<Param name="src" value="##SourceIP##"/>
-						<Param name="dst" value="##TargetIP##"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -99,8 +99,8 @@
 				<Number name="Checksum" size="16" endian="big">
 					<Fixup class="IcmpV6ChecksumFixup">
 						<Param name="ref" value="Payload"/>
-						<Param name="src" value="##SourceIP##"/>
-						<Param name="dst" value="##TargetIP##"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
 					</Fixup>
 				</Number>
 			</Block>
@@ -124,8 +124,8 @@
 				<Number name="Checksum" size="16" endian="big">
 					<Fixup class="IcmpV6ChecksumFixup">
 						<Param name="ref" value="Payload"/>
-						<Param name="src" value="##SourceIP##"/>
-						<Param name="dst" value="##TargetIP##"/>
+						<Param name="src" value="##SourceIPv6##"/>
+						<Param name="dst" value="##TargetIPv6##"/>
 					</Fixup>
 				</Number>
 			</Block>

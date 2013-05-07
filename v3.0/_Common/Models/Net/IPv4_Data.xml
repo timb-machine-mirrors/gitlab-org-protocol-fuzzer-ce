@@ -14,26 +14,143 @@
   </DataModel>
   
   <DataModel name="ExtendedOptionsBlock">
-    <Block name="BaseOption" ref="OptionsBlock" />
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />
+      <Flag name="OptionClass" position="1" size="2" />
+      <Flag name="OptionNumber" position="3" size="5" />
+    </Flags>
     <Number name="OptionLength" size="8" endian="big">
       <Relation type="size" of="ExtendedOptionsBlock"/>
     </Number>
     <Blob name="OptionData" />
   </DataModel>
   
-  <!-- TODO Does not currently Crack,
-  add individual datamodels and tokens,
-  requires fix to issue #222-->
+  <DataModel name="SRROptionPayload">
+    <Blob name="Pointer" length="1" />
+    <Block name="RouteData" minOccurs="0">
+        <Blob name="Address" length="4" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="TimeStampOptionPayload" ref="ExtendedOptionsBlock"> <!--TODO Length should not include data?-->
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />  
+      <Flag name="OptionClass" position="1" size="2" value="2" token="true" />
+      <Flag name="OptionNumber" position="3" size="5" value="4" token="true" />
+    </Flags>
+    <Block name="OptionData">
+      <Blob name="Pointer" length="1" />
+      <Number name="oflw" size="4" />
+      <Choice>
+        <Block>
+          <Number name="flags" size="4" value="0" token="true" />
+          <Block minOccurs="0" >
+            <Blob name="Time" length="4" />
+          </Block>  
+        </Block>
+        <Block>
+          <Number name="flags" size="4" />
+          <Block minOccurs="0" >
+            <Blob name="Address" length="4" />        
+            <Blob name="Time" length="4" />
+          </Block>  
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="SecurityOptionPayload" ref="ExtendedOptionsBlock">
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+      <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+      <Flag name="OptionNumber" position="3" size="5" value="2" token="true" />
+    </Flags>
+    <Block name="OptionData">
+      <Block name="SField" length="2">
+        <Choice>
+          <Blob name="Unclassified" valueType="hex" value="00 00" token="true" />
+          <Blob name="Confidential" valueType="hex" value="F1 35" token="true" />
+          <Blob name="EFTO" valueType="hex" value="78 9A" token="true" />
+          <Blob name="MMMM" valueType="hex" value="BC 4D" token="true" />
+          <Blob name="PROG" valueType="hex" value="5E 26" token="true" />
+          <Blob name="Restricted" valueType="hex" value="AF 13" token="true" />
+          <Blob name="Secret" valueType="hex" value="D7 88" token="true" />
+          <Blob name="TopSecret" valueType="hex" value="6B C5" token="true" />
+          <Blob name="Reserved1" valueType="hex" value="35 E3" token="true" />
+          <Blob name="Reserved2" valueType="hex" value="9A F1" token="true" />
+          <Blob name="Reserved3" valueType="hex" value="4D 7F" token="true" />
+          <Blob name="Reserved4" valueType="hex" value="24 BD" token="true" />
+          <Blob name="Reserved5" valueType="hex" value="13 5E" token="true" />
+          <Blob name="Reserved6" valueType="hex" value="89 AF" token="true" />
+          <Blob name="Reserved7" valueType="hex" value="C4 D6" token="true" />
+          <Blob name="Reserved8" valueType="hex" value="E2 6B" token="true" />
+        </Choice>
+      </Block>
+      <Blob name="CField" length="2" />
+      <Blob name="HField" length="2" />
+      <Blob name="TCCField" length="3" />
+    </Block>
+  </DataModel>
+  
   <DataModel name="IPv4Options"> 
     <Choice>
-      <Block name="EndOfOptionList" ref="OptionsBlock" />
-      <Block name="NoOp" ref="OptionsBlock" />
-      <Block name="Security" ref="ExtendedOptionsBlock" />
-      <Block name="LooseSourceRouting" ref="ExtendedOptionsBlock" />
-      <Block name="StrictSourceRouting" ref="ExtendedOptionsBlock" />
-      <Block name="RecordRoute" ref="ExtendedOptionsBlock" />
-      <Block name="StreamID" ref="ExtendedOptionsBlock" />
-      <Block name="Timestamp" ref="ExtendedOptionsBlock" />
+    
+      <Block name="EndOfOptionList" ref="OptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="0" token="true" />
+        </Flags>
+      </Block>
+
+      <Block name="NoOp" ref="OptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="1" token="true" />
+        </Flags>
+      </Block>
+
+      <Block name="Security" ref="SecurityOptionPayload" />
+
+      <Block name="LooseSourceRouting" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="3" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="StrictSourceRouting" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="9" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="RecordRoute" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="7" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="StreamID" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="8" token="true" />
+        </Flags>
+        <Blob name="OptionData" length="2" />
+      </Block>
+      
+      <Block name="Timestamp" />
+      
     </Choice>
   </DataModel>
         

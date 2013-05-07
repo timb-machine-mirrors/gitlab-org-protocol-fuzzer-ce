@@ -6,7 +6,7 @@
 	
 	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/IPSECv6_Data.xml"/>
 	
-	<StateModel name="TheState" initialState="Initial">
+	<StateModel name="ESP" initialState="Initial">
     <State name="Initial">
       <Action type="output">
 				<DataModel ref="DataModels:IPv6EmptyPacketIPSECv6##Mode##"/>
@@ -91,5 +91,13 @@
       </Action>
     </State>
   </StateModel>
+	
+	<StateModel name="AH" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="DataModels:IPsecV6Ah##Mode##"/>
+			 </Action>
+		</State>
+	</StateModel>
 </Peach>
 <!--END-->

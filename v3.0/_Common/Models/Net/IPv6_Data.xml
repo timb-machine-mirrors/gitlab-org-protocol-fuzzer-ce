@@ -61,7 +61,7 @@
 			<Padding name="PaddingValue"  alignment="64" alignedTo="HopByHopContents"/>
 		</Block>
 	</DataModel>
-
+	
 	<DataModel name="Destination">
 		<Block ref="HopByHop">
 			<Block name="HopByHopContents.TLVs.InternalTLV">
@@ -140,7 +140,7 @@
 		</Number>
 		<Number name="RoutingType" size="8" value="1"/>
 		<Number name="SegmentsLeft" size="8"/>
-		<Blog name="Data" valueType="hex"/>
+		<Blob name="Data" valueType="hex"/>
 	</DataModel>
 
 	<DataModel name="DestinationOptions">
@@ -148,7 +148,7 @@
 			<Number name="HdrExtLen" size="8" endian="big" signed="false">
 				<Relation type="size" of="Options" expressionGet="size*8" expressionSet="size/8"/>
 			</Number>
-			<Block name="Options"/>
+			<Block name="Options" ref="TLV" minOccurs="1" maxOccurs="-1"/>
 	</DataModel>
 
 	<DataModel name="Mobile">
@@ -175,7 +175,7 @@
 	
 	
 	<DataModel name="IPv6EmptyPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" value="0" size="16"/>
 			<Number name="NextHeader" size="8" value="59"/>
@@ -183,7 +183,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6ICMPPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -194,7 +194,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6UDPTestPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -219,7 +219,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6HopByHopPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -233,7 +233,7 @@
 
 	<DataModel name="IPv6DestinationPacket">
 		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -246,7 +246,7 @@
 	</DataModel>
 	
 	<DataModel name="IPv6RoutingPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -259,7 +259,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6JumbogramPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big" value="0000" valueType="hex">
 			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"> -->
@@ -274,7 +274,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket1">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -295,7 +295,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket2">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -316,7 +316,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket3">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -337,7 +337,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBRRPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -347,7 +347,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 0"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="0"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -366,7 +366,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTIPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -376,7 +376,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="1"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -398,7 +398,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTIPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -408,7 +408,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="2"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -422,7 +422,7 @@
 			<Number name="Reserved" size="16"/>
 			<Number name="CareInitCookie" size="64">
 				<Fixup class="SequenceRandomFixup"/>
-			<Number>
+			</Number>
 			<Block name="MobilityOptions">
 			</Block>
 			<Padding  alignment="64"/>
@@ -430,7 +430,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -440,7 +440,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="3"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -463,7 +463,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -473,7 +473,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="4"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -496,7 +496,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBUPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -506,7 +506,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="5"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -552,7 +552,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBAPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -562,7 +562,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 1"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="6"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -603,7 +603,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBEPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -613,7 +613,7 @@
 		<Block name="Payload">
 			<Block ref="Mobile">
 				<Number name="HeaderLen" size="8" endian="big">
-					<Relation type="size" of="MobilityOptions" expressionGet="size" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
+					<Relation type="size" of="MobilityOptions" expressionGet="(size + 8) * 8" expressionSet="(((size-8) > 0) and ((size-8)/8)) or 2"/>
 				</Number>
 				<Number name="MH" size="8" endian="big" value="7"/>
 				<Number name="Checksum" size="16" endian="big">
@@ -634,7 +634,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileRoutingType2HeaderPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -649,7 +649,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -675,7 +675,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -705,7 +705,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixSolicitationPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -731,7 +731,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixAdvertisementPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -767,7 +767,7 @@
 	<!--Mobile IPv6 adds the Advertisement Interval Option-->
 	<!-- See http://tools.ietf.org/html/rfc6275#section-7.1 -->
 	<DataModel name="IPv6MobileICMPRouterAdvertismentPacket">
-		<Block ref="Ethernet:EtherHeader"/>
+		<Block ref="Ethernet:Frame"/>
 		<Block ref="IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
