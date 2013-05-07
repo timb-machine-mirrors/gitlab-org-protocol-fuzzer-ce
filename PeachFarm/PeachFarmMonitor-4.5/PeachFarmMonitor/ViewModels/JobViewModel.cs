@@ -16,8 +16,18 @@ namespace PeachFarmMonitor.ViewModels
       this.UserName = job.UserName;
       this.PeachVersion = job.PeachVersion;
       this.Tags = job.Tags;
+      this.ZipFile = job.ZipFile;
 
       this.Status = status;
+
+      //if (String.IsNullOrEmpty(job.ZipFile))
+      //{
+      //  JobInput = String.Format("{0}\\{1}.xml", job.JobID, job.Pit.FileName);
+      //}
+      //else
+      //{
+      //  JobInput = job.ZipFile;
+      //}
 
       Nodes = new List<NodeViewModel>();
       if (job.Nodes != null)
@@ -44,6 +54,8 @@ namespace PeachFarmMonitor.ViewModels
     public uint FaultCount { get; set; }
 
     public uint IterationCount { get; set; }
+
+    //public string JobInput { get; set; }
   }
 
   public enum JobStatus

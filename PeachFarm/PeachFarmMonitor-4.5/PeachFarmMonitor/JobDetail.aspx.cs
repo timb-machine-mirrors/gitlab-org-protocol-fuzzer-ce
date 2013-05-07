@@ -77,6 +77,7 @@ namespace PeachFarmMonitor
         faultsGrid.ItemDataBound += faultsGrid_ItemDataBound;
 
         lblJobID.Text = job.Pit.FileName + " - " + job.JobID;
+        downloadInputLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ZipFile;
         downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
         viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
         Page.Title = "Job Detail: " + job.Pit.FileName;

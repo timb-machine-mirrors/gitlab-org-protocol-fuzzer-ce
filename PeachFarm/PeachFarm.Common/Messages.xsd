@@ -17,10 +17,12 @@
 	
 	<xs:element name="StartPeachRequest" type="StartPeachRequest" />
   <xs:complexType name="StartPeachRequest">
+		<!--
     <xs:sequence>
       <xs:element name="Pit" type="xs:string" maxOccurs="1" minOccurs="1" />
 			<xs:element name="Defines" type="xs:string" maxOccurs="1" minOccurs="1" />
     </xs:sequence>
+		-->
 		<xs:attribute name="Seed" type="xs:unsignedInt" use="required" />
     <xs:attribute name="ClientCount" type="xs:int" use="required" />
     <xs:attribute name="IPAddress" type="xs:string" use="required" />
@@ -30,6 +32,8 @@
     <xs:attribute name="UserName" type="xs:string" use="required" />
     <xs:attribute name="Tags" type="xs:string" use="required" />
 		<xs:attribute name="ZipFile" type="xs:string" use="required" />
+		<xs:attribute name="HasDefines" type="xs:boolean" use="required" />
+		<xs:attribute name="PitVersion" type="xs:string" use="required" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />

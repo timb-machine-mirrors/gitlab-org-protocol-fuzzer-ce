@@ -117,8 +117,8 @@ namespace PeachFarm.Common.Mongo
 			{
 				db.CreateCollection(collectionname);
 				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID" });
-				collection.CreateIndex(new string[] { "NodeName" });
+				collection.CreateIndex(new string[] { "JobID", "NodeName" });
+				collection.CreateIndex(new string[] { "Group" });
 			}
 		}
 

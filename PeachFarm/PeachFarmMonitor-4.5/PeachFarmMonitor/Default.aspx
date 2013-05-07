@@ -157,6 +157,7 @@
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
+              <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank"/>
               <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
               <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" />
             </Columns>
@@ -224,9 +225,9 @@
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
             </Columns>
             <DetailItemTemplate>
-              <telerik:RadPanelBar ID="messagePanel" runat="server" Width="100%">
+              <telerik:RadPanelBar ID="messagePanel" runat="server" Width="100%" PersistStateInCookie="true" >
                 <Items>
-                  <telerik:RadPanelItem Text="Error Message" Expanded="false">
+                  <telerik:RadPanelItem Text="Error Message">
                     <ContentTemplate>
                       <asp:TextBox ID="ErrorMessage" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="25" />
                     </ContentTemplate>

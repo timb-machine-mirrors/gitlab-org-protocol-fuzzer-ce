@@ -27,27 +27,38 @@ namespace PeachFarm.Node
 
 		private RabbitMqHelper rabbit;
 
-		public PeachFarmNode()
+		public PeachFarmNode(string nodeQueueName = "")
 		{
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			#endregion
-			Environment.CurrentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+
+			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetEntryAssembly();
+
+			if (assembly == null)
+			{
+				assembly = System.Reflection.Assembly.GetAssembly(typeof(PeachFarmNode));
+			}
+
+			Environment.CurrentDirectory = Path.GetDirectoryName(assembly.Location);
 
 			#region node state
 			nodeState = new NodeState((Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node"));
+			if (String.IsNullOrEmpty(nodeQueueName) == false)
+				nodeState.NodeQueueName = nodeQueueName;
+
 			#endregion
 
 			
 			rabbit = new RabbitMqHelper(nodeState.RabbitMq.HostName, nodeState.RabbitMq.Port, nodeState.RabbitMq.UserName, nodeState.RabbitMq.Password, nodeState.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(nodeState.ClientQueueName);
+			rabbit.StartListener(nodeState.NodeQueueName);
 
 			heartbeat = new System.Timers.Timer(10000);
 			heartbeat.Elapsed += (o, e) => { SendHeartbeat(); };
 			heartbeat.Start();
 
-			nlog.Info("Peach Farm Node connected.\nController: {0}\nRabbitMQ: {1}\nDirectory: {2}", nodeState.ServerQueueName, nodeState.RabbitMq.HostName, Environment.CurrentDirectory);
+			nlog.Info("Peach Farm Node connected.\nController: {0}\nRabbitMQ: {1}\nDirectory: {2}", nodeState.ControllerQueueName, nodeState.RabbitMq.HostName, Environment.CurrentDirectory);
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -74,8 +85,14 @@ namespace PeachFarm.Node
 
 		public string ServerQueue
 		{
-			get { return nodeState.ServerQueueName; }
+			get { return nodeState.ControllerQueueName; }
 		}
+
+		public bool IsListening
+		{
+			get { return rabbit.IsListening; }
+		}
+
 
 		#endregion
 
@@ -119,6 +136,28 @@ namespace PeachFarm.Node
 				#region deregister from RabbitMQ
 				rabbit.StopListener();
 				//rabbit.CloseConnection();
+				#endregion
+
+				#region clean up temp files
+				var tempfolder = Path.Combine(nodeState.RootDirectory, "jobtmp");
+				string[] subfolders = null;
+				try
+				{
+					subfolders = Directory.GetDirectories(tempfolder);
+				}
+				catch { }
+
+				if (subfolders != null)
+				{
+					foreach (var subfolder in subfolders)
+					{
+						try
+						{
+							Directory.Delete(subfolder, true);
+						}
+						catch { }
+					}
+				}
 				#endregion
 
 			}
@@ -219,6 +258,7 @@ namespace PeachFarm.Node
 					return;
 					
 				StopFuzzer();
+				nodeState.Reset();
 			}
 		}
 
@@ -232,22 +272,31 @@ namespace PeachFarm.Node
 
 			nodeState.StartPeachRequest = request;
 
+			string jobtempfolder = Path.Combine(nodeState.RootDirectory, "jobtmp", nodeState.StartPeachRequest.JobID);
+			FileWriter.CreateDirectory(jobtempfolder);
+
 			ChangeStatus(Status.Running);
 
-			nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml");
+			//nodeState.PitFilePath = WriteTextToTempFile(request.Pit, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml");
 			
-			if(String.IsNullOrEmpty(request.Defines) == false)
-			{
-				nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml.config");
-			}
+			//if(String.IsNullOrEmpty(request.Defines) == false)
+			//{
+			//  nodeState.DefinesFilePath = WriteTextToTempFile(request.Defines, nodeState.StartPeachRequest.JobID, request.PitFileName + ".xml.config");
+			//}
 
-			if (String.IsNullOrEmpty(request.ZipFile) == false)
-			{
-				string localfile = Path.Combine(Path.GetDirectoryName(nodeState.PitFilePath), nodeState.StartPeachRequest.PitFileName + ".zip");
-				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, request.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
+			//if (String.IsNullOrEmpty(request.ZipFile) == false)
+			//{
+				string localfile = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".zip");
+				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, nodeState.StartPeachRequest.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
 				var zip = Ionic.Zip.ZipFile.Read(localfile);
-				zip.ExtractAll(Path.GetDirectoryName(nodeState.PitFilePath), Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
-			}
+				zip.ExtractAll(jobtempfolder, Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);
+
+				//new
+				nodeState.PitFilePath = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".xml");
+
+				if (nodeState.StartPeachRequest.HasDefines)
+					nodeState.DefinesFilePath = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".xml.config");
+			//}
 
 			#region initialize Peach Engine
 			peach = new Peach.Core.Engine(null);
@@ -277,22 +326,36 @@ namespace PeachFarm.Node
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
 			string jobid = nodeState.StartPeachRequest.JobID;
-			try
+			Dictionary<string, object> parserArgs = new Dictionary<string, object>();
+			Dictionary<string, string> defines = new Dictionary<string, string>();
+
+			if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
 			{
-				Dictionary<string, object> parserArgs = new Dictionary<string, object>();
-				Dictionary<string, string> defines = new Dictionary<string, string>();
-				if (String.IsNullOrEmpty(nodeState.DefinesFilePath) == false)
+				try
 				{
 					defines = Peach.Core.Analyzers.PitParser.parseDefines(nodeState.DefinesFilePath);
 				}
-				defines.Add("Peach.Cwd", Environment.CurrentDirectory);
-				parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
+				catch (Exception ex)
+				{
+					string message = "Exception on Defines parse:\n" + ex.ToString();
+					StopPeach(message);
+					StartPeachCleanUp(jobid);
+					return;
+				}
+			}
+
+			defines["Peach.Cwd"] = Environment.CurrentDirectory;
+			parserArgs[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defines;
+
+			try
+			{
 				dom = pitParser.asParser(parserArgs, nodeState.PitFilePath);
 			}
 			catch (Peach.Core.PeachException ex)
 			{
-				string message = "Peach Exception on Pit parse:\n" + ex.ToString();
+				string message = "Exception on Pit parse:\n" + ex.ToString();
 				StopPeach(message);
+				StartPeachCleanUp(jobid);
 				return;
 			}
 
@@ -327,32 +390,38 @@ namespace PeachFarm.Node
 			try
 			{
 				peach.startFuzzing(dom, config);
-
 			}
 			catch (Peach.Core.PeachException pex)
 			{
-				nlog.Error("PeachException:\n" + pex.ToString());
+				string message = "PeachException:\n" + pex.ToString();
+				StopPeach(message);
 			}
 			catch (Exception ex)
 			{
-				nlog.Error("Unknown Exception from Peach:\n" + ex.Message);
+				string message = String.Format("Unknown Exception from Peach:\n{0}", ex.ToString());
+				StopPeach(message);
 			}
 			finally
 			{
-				Environment.CurrentDirectory = nodeState.RootDirectory;
-				string temppath = Path.Combine(Environment.CurrentDirectory, "jobtmp", jobid);
-				if (Directory.Exists(temppath))
-				{
-					try
-					{
-						Directory.Delete(temppath, true);
-					}
-					catch { }
-				}
-				nodeState.RunContext = null;
-				nodeState.StartPeachRequest = null;
-				ChangeStatus(Common.Messages.Status.Alive);
+				StartPeachCleanUp(jobid);
 			}
+		}
+
+		private void StartPeachCleanUp(string jobid)
+		{
+			Environment.CurrentDirectory = nodeState.RootDirectory;
+			string temppath = Path.Combine(nodeState.RootDirectory, "jobtmp", jobid);
+			if (Directory.Exists(temppath))
+			{
+				try
+				{
+					Directory.Delete(temppath, true);
+				}
+				catch { }
+			}
+			nodeState.Reset();
+			ChangeStatus(Common.Messages.Status.Alive);
+
 		}
 		#endregion
 
@@ -394,7 +463,7 @@ namespace PeachFarm.Node
 				}
 			}
 			heartbeat.Tags = nodeState.Tags;
-			heartbeat.QueueName = nodeState.ClientQueueName;
+			heartbeat.QueueName = nodeState.NodeQueueName;
 			heartbeat.Stamp = DateTime.Now;
 			heartbeat.Status = nodeState.Status;
 
@@ -439,6 +508,7 @@ namespace PeachFarm.Node
 				}
 			}
 		}
+
 	}
 
 	internal class NodeState
@@ -447,7 +517,7 @@ namespace PeachFarm.Node
 		{
 			Status = Common.Messages.Status.Alive;
 
-			ServerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);
+			ControllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);
 			
 			if ((config.Tags != null) && (config.Tags.Count > 0))
 			{
@@ -459,7 +529,7 @@ namespace PeachFarm.Node
 			IPAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 			#endregion
 
-			ClientQueueName = String.Format(QueueNames.QUEUE_NODE, IPAddress);
+			NodeQueueName = String.Format(QueueNames.QUEUE_NODE, IPAddress);
 
 			RabbitMq = config.RabbitMq;
 
@@ -491,8 +561,8 @@ namespace PeachFarm.Node
 
 		internal string IPAddress { get; private set; }
 
-		internal string ClientQueueName { get; private set; }
-		internal string ServerQueueName { get; private set; }
+		internal string NodeQueueName { get; set; }
+		internal string ControllerQueueName { get; private set; }
 
 		internal Peach.Core.RunContext RunContext { get; set; }
 
@@ -500,6 +570,14 @@ namespace PeachFarm.Node
 
 		internal string PitFilePath { get; set; }
 		internal string DefinesFilePath { get; set; }
+
+		public void Reset()
+		{
+			RunContext = null;
+			PitFilePath = String.Empty;
+			DefinesFilePath = String.Empty;
+			StartPeachRequest = null;
+		}
 	}
 
 	public class StatusChangedEventArgs : EventArgs
