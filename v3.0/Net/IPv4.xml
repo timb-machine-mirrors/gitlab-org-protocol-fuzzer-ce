@@ -4,9 +4,9 @@
        author="Deja Vu Security, LLC" description="Internet Protocol Version 4 PIT" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC. 2013 -->
 
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/IPv4_State.xml"/>
+	<Include ns="IPv4" src="file:##Path##/_Common/Models/Net/IPv4_State.xml"/>
 	
- <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
       <Param name="Executable" value="##tsharkBin##"/>
       <Param name="Arguments" value="-i ##tsharkInterface##"/>
@@ -24,7 +24,7 @@
 	</Agent>
 
   <Test name="Default">
-    <StateModel ref="States:TheState"/>
+    <StateModel ref="IPv4:PingTest"/>
 		
 		<Agent ref="LocalAgent"/>
 		
