@@ -5,7 +5,7 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
   <!-- Requires Linux Peach for Raw publishing --> 
   
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/CDP_State.xml"/>
+	<Include ns="CDP" src="file:##Path##/_Common/Models/Net/CDP_State.xml"/>
 	
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
@@ -27,7 +27,7 @@
   
   <!-- Default test case uses Raw Publisher define interface in defines file-->
   <Test name="Default">
-		<StateModel ref="States:CdpStateModel"/>
+		<StateModel ref="CDP:Multicast"/>
 		
     <!--Agent ref="RemoteAgent"/-->
     <!--Agent ref="LocalAgent"/-->
