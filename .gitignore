@@ -39,6 +39,8 @@ test-results/
 /*/[Oo]bj/
 /PeachFarm/*/[Bb]in/
 /PeachFarm/*/[Oo]bj/
+/3rdParty/Irony*/*/[Bb]in/
+/3rdParty/Irony*/*/[Oo]bj/
 
 # User-specific files
 *.user

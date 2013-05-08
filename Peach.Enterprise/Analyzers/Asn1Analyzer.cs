@@ -83,6 +83,7 @@ namespace Peach.Enterprise.Analyzers
 			container.Add(data);
 
 			length.relations.Add(lengthRelation);
+			data.relations.Add(lengthRelation);
 			lengthRelation.FromName = length.name;
 			lengthRelation.OfName = data.name;
 
@@ -102,8 +103,41 @@ namespace Peach.Enterprise.Analyzers
 			return MakeAsn1Der(block, sequence);
 		}
 
+		DataElementContainer HandleBitString(DataElementContainer parent, Asn1Node sequence)
+		{
+			var block = new Block();
+
+			var num = new Number();
+			num.length = 8;
+			num.Signed = false;
+			num.LittleEndian = false;
+			num.DefaultValue = new Variant(0);
+			block.Add(num);
+
+			if (sequence.ChildNodeCount == 0)
+			{
+				var data = new Blob();
+				data.DefaultValue = new Variant(sequence.Data);
+				block.Add(data);
+			}
+			else for (int count = 0; count < sequence.ChildNodeCount; count++)
+			{
+				var child = sequence.GetChildNode(count);
+				block.Add(HandleAsn1Node(block, child));
+			}
+
+			return MakeAsn1Der(block, sequence);
+		}
+
 		DataElement HandleAsn1Node(DataElementContainer parent, Asn1Node node)
 		{
+			switch (node.Tag & Asn1TagClasses.CLASS_MASK)
+			{
+				case Asn1TagClasses.CONTEXT_SPECIFIC:
+					return HandleSequence(parent, node);
+
+			}
+
 			switch (node.Tag & Asn1Tag.TAG_MASK)
 			{
 				case Asn1Tag.NUMERIC_STRING:
@@ -121,7 +155,7 @@ namespace Peach.Enterprise.Analyzers
 				case Asn1Tag.INTEGER:
 				// handle on own
 
-				case Asn1Tag.BIT_STRING:
+
 				case Asn1Tag.OCTET_STRING:
 				case Asn1Tag.UTF8_STRING:
 				case Asn1Tag.RELATIVE_OID:
@@ -138,21 +172,19 @@ namespace Peach.Enterprise.Analyzers
 
 						return MakeAsn1Der(blob, node);
 					}
+
+				case Asn1Tag.BIT_STRING:
+					return HandleBitString(parent, node);
+
 				case Asn1Tag.SEQUENCE:
 					return HandleSequence(parent, node);
 				
 				case Asn1Tag.SET:
 					return HandleSequence(parent, node);
-			}
-
-			switch(node.Tag & Asn1TagClasses.CLASS_MASK)
-			{
-				case Asn1TagClasses.CONTEXT_SPECIFIC:
-					return HandleSequence(parent, node);
-
 				default:
 					throw new PeachException("Error parsing ASN.1: " + node.Tag.ToString());
 			}
+
 		}
 	}
 }
