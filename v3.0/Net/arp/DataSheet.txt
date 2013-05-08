@@ -1,13 +1,13 @@
-Protocol
---------
+:Doctitle: ARP Peach Pit Data Sheet
+:Description: Address Resolution Protocol
 
  * Test Suite: ARP
  * Direction: Broadcast, Listen
  
-The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
+The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. It is most commonly used for translation between IPv4 and MAC addresses in Ethernet and Wireless networks.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+==============
 
 [options="header"]
 |========
@@ -15,8 +15,8 @@ Used Specifications
 |RFC826 | An Ethernet Address Resolution Protocol
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
