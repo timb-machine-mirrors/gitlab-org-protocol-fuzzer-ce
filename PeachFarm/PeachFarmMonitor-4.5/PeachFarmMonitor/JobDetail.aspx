@@ -83,12 +83,13 @@
 <body>
   <form id="form1" runat="server">
     <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
-    <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server" />
-    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
+    <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server"  />
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server" >
       <AjaxSettings>
+
         <telerik:AjaxSetting AjaxControlID="faultBucketsGrid" EventName="ItemCommand">
           <UpdatedControls>
-            <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" />
+            <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" LoadingPanelID="loadingPanel" />
             <telerik:AjaxUpdatedControl ControlID="faultsGrid" LoadingPanelID="loadingPanel" />
           </UpdatedControls>
         </telerik:AjaxSetting>
