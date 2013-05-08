@@ -18,9 +18,16 @@ namespace PeachFarmMonitor.ViewModels
       this.Exploitability = fault.Exploitability;
       this.FaultType = fault.FaultType;
       this.FolderName = fault.FolderName;
+      this.Group = fault.Group;
+      this.IsReproduction = fault.IsReproduction;
       this.Iteration = fault.Iteration;
+      this.JobID = fault.JobID;
       this.MajorHash = fault.MajorHash;
       this.MinorHash = fault.MinorHash;
+      this.NodeName = fault.NodeName;
+      this.SeedNumber = fault.SeedNumber;
+      this.Stamp = fault.Stamp;
+      this.TestName = fault.TestName;
       this.Title = fault.Title;
 
       this.StateModel = new List<ActionViewModel>();

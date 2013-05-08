@@ -256,9 +256,8 @@ namespace PeachFarm.Node
 			{
 				if ((request != null) && (request.JobID != nodeState.StartPeachRequest.JobID))
 					return;
-					
+
 				StopFuzzer();
-				nodeState.Reset();
 			}
 		}
 
@@ -394,12 +393,12 @@ namespace PeachFarm.Node
 			catch (Peach.Core.PeachException pex)
 			{
 				string message = "PeachException:\n" + pex.ToString();
-				StopPeach(message);
+				SendHeartbeat(CreateHeartbeat(message));
 			}
 			catch (Exception ex)
 			{
 				string message = String.Format("Unknown Exception from Peach:\n{0}", ex.ToString());
-				StopPeach(message);
+				SendHeartbeat(CreateHeartbeat(message));
 			}
 			finally
 			{
@@ -419,9 +418,8 @@ namespace PeachFarm.Node
 				}
 				catch { }
 			}
-			nodeState.Reset();
 			ChangeStatus(Common.Messages.Status.Alive);
-
+			nodeState.Reset();
 		}
 		#endregion
 
