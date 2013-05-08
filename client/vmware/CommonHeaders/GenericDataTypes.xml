@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Generic Data Types used across multiple pits PIT" version="0.0.2">
+			 
+	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
+
+	<DataModel name="ValueLenTLV">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Length" size="8">
+			<Relation type="size" of="Value"/>
+		</Number>
+		<Block name="Value"/>
+	</DataModel>
+
+	<DataModel name="SelfLenTLV">
+		<Number name="Type" size="8" endian="big"/>
+		<Number name="Length" size="8">
+			<Relation type="size" of="SelfLenTLV"/>
+		</Number>
+		<Block name="Value"/>
+	</DataModel>
+
+</Peach>

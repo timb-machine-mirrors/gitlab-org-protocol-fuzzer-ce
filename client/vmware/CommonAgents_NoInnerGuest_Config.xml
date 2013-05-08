@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+
+	<All>
+		<!-- Sender interface information.  Typically from Agent VM -->
+		<Define key="SourceMAC"  value="000c2922b4df"/>
+		<Define key="SourceIPv4" value="192.168.2.2"/>
+		<Define key="SourceIPv6" value="fe80::20c:29ff:fe22:b4df"/>
+
+		<!-- Target interface information -->
+		<Define key="TargetMAC"  value="000c29cdd6b0"/>
+		<Define key="TargetIPv4" value="192.168.2.11"/>
+		<Define key="TargetIPv6" value="fe80::250:56ff:fe69:584"/>
+
+		<!-- Interface on Agent VM we will send data from -->
+		<Define key="Interface" value="eth1"/>
+
+		<!-- Fuzzing strategy to use -->
+		<Define key="Strategy" value="Random"/>
+
+		<!-- Path to current working folder -->
+		<Define key="Path"     value="/home/pentest/definitions" />
+
+		<!-- IP Address of remote agent -->
+		<Define key="RemoteAgentIP"  value="192.168.2.10"/>
+
+		<!-- Vmware Monitor: ESXi Target Guest -->
+		<Define key="Vmx" value="[disk1] ESXi Target/ESXi Target.vmx"/>
+		<Define key="VmxHost" value="10.0.1.60"/>
+		<Define key="VmxLogin" value="test"/>
+		<Define key="VmxPassword" value="vmware123"/>
+		<Define key="VmxSnapshotName" value="Fuzzing"/>
+
+		<!-- EsxiConsole Monitor -->
+		<Define key="EsxiConsoleSerialPort" value="/dev/ttyS0"/>
+		<Define key="EsxiConsoleLog" value="true"/>
+
+		<!-- SSH Downloader & Command Monitors -->
+		<Define key="SshHost" value="192.168.2.1"/>
+		<Define key="SshUser" value="root"/>
+		<Define key="SshPassword" value="vmware123"/>
+		<Define key="SshFolder" value="/scratch/core"/>
+		<Define key="SshCommand" value="esxcfg-dumppart -C -D /vmfs/devices/disks/mpx.vmhba1\:C0\:T1\:L0:1" />
+	</All>
+</PitDefines>

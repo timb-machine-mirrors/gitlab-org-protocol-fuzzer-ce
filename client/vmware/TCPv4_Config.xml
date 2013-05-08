@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<Define key="LoggerPath" value="logs/TCPv4/"/>
+		<Define key="TargetPort" value="8000"/>
+    <Define key="SourcePort" value="52081"/>
+		<Define key="InitialState" value="SendSyn"/>
+	</All>
+</PitDefines>

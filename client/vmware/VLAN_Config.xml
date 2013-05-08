@@ -1,0 +1,13 @@
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+  <All>
+    <Define key="LoggerPath"  value="logs/vlan/"/> 
+		
+		<!--LLDP-->
+		<Define key="Hostname" 		 value="foobar"/>
+		
+		<!--LACP-->
+		<Define key="ActorPort" value="0012"/>
+    <Define key="PartnerPort" value="0000"/>
+  </All>
+</PitDefines>

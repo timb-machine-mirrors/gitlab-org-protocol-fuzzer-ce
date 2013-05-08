@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
+
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<Include ns="CommonAgents" src="file:##Path##/CommonAgents.xml"/>
+
+	<DataModel name="MTU">
+		<Number size="16" value="1500" signed="false"/>
+	</DataModel>
+
+	<DataModel name="IPv6Header">
+		<Block name="Header">
+			<Flags size="32" endian="big">
+				<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+				<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
+				<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
+				<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>
+			</Flags>
+			<Number name="PayloadLength" size="16" endian="big" valueType="hex">
+				<Relation type="size" of="Payload"/>
+			</Number>
+			<Number name="NextHeader" size="8" endian="big" value="58"/>
+			<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/>
+			<Blob name="SrcIP" value="##SourceIPv6##">
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+			<Blob name="DestIP" value="##TargetIPv6##">
+				<Transformer class="Ipv6StringToOctet"/>
+			</Blob>
+		</Block>
+		<Block minOccurs="0" maxOccurs="3" name="ExtensionHeaders">
+			<!--TODO-->
+		</Block>
+		<Blob name="Payload" valueType="hex" value="800014350a440001617bef50000000004e6a030000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
+	</DataModel>
+
+	<DataModel name="IPv6Ethernet">
+		<Block name="EtherHeader">
+			<Blob name="Dest" valueType="hex" mutable="false" value="##TargetMAC##"/>
+			<Blob name="Src" valueType="hex" mutable="false" value="##SourceMAC##"/>
+			<Blob name="Type" token="true" valueType="hex" value="86dd"/>
+		</Block>
+		<Block ref="IPv6Header"/>
+	</DataModel>
+
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="IPv6Ethernet"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<StateModel name="MtuFuzzStates" initialState="Initial">
+		<State name="Initial">
+			<Action type="setProperty" property="MTU">
+				<DataModel ref="MTU"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6Ethernet"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<!-- The order of agents has importance -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_IPV6"/>
+		</Publisher>
+		<StateModel ref="TheState"/>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+	<Test name="MtuFuzz">
+		<!-- The order of agents has importance -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_IPV6"/>
+		</Publisher>
+		<StateModel ref="MtuFuzzStates"/>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+</Peach>
+<!-- end -->

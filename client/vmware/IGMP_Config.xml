@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<All>
+		<Define key="LoggerPath" value="logs/IGMP/"/>
+	</All>
+</PitDefines>

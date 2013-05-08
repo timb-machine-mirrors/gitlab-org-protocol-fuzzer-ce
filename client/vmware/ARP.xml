@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+			 author="Deja Vu Security, LLC" description="Adress Resolution Protocol PIT" version="0.0.2">
+
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<!-- Requires Linux Peach 3.0 and RawEther publisher -->
+
+	<Include ns="CommonAgents" src="file:##Path##/CommonAgents.xml"/>
+
+	<DataModel name="MTU">
+		<Number size="32" value="1281" signed="false"/>
+	</DataModel>
+
+	<!-- Main data mdoe to send an ARP request -->
+	<DataModel name="ARP">
+		<Block name="EtherHeader">
+			<Blob name="Dest" valueType="hex" value="ffffffffffff"/>
+			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
+			<Blob name="Type" token="true" valueType="hex" value="0806"/>
+		</Block>
+		<Block name="ARPPayload">
+			<Number name="HTYPE" size="16" value="01" endian="big" signed="true"/>
+			<Number name="PTYPE" size="16" valueType="hex" value="0800" endian="big" signed="true"/>
+			<Number name="HLEN" size="8">
+				<Relation type="size" of="SHA"/>
+				<Relation type="size" of="THA"/>
+			</Number>
+			<Number name="PLEN" size="8">
+				<Relation type="size" of="SPA"/>
+				<Relation type="size" of="TPA"/>
+			</Number>
+			<Number name="OPER" size="16" value="1" endian="big"/>
+			<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
+			<Blob name="SPA" value="##SourceIPv4##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
+			<Blob name="THA" valueType="hex" value="##TargetMAC##"/>
+			<Blob name="TPA" value="##TargetIPv4##">
+				<Transformer class="Ipv4StringToNetworkOctet"/>
+			</Blob>
+		</Block>
+		<Blob name="Trailer"/>
+	</DataModel>
+
+
+	<!-- StateModel for All ARP requests  -->
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="ARP"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<!-- Default test for fuzzing ARP -->
+	<StateModel name="MtuFuzzStates" initialState="Initial">
+		<State name="Initial">
+			<Action type="setProperty" property="MTU">
+				<DataModel ref="MTU"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="ARP"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<!-- The order of agents has importance -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_ARP"/>
+		</Publisher>
+		<StateModel ref="TheState"/>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+	<Test name="MtuFuzz">
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_ARP"/>
+		</Publisher>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+		<StateModel ref="MtuFuzzStates"/>
+	</Test>
+
+</Peach>

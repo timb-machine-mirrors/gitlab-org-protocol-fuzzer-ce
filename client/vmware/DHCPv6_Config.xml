@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<All>
+		<Define key="LoggerPath"  value="./logs/dhcpv6/"/>
+		<Define key="MulticastDHCP" value="ff02::1:2"/>
+    <Define key="SourcePort" value="547"/>
+		<Define key="Timeout" value="6000000"/> <!-- 10 minutes, in miliseconds -->
+    <Define key="TargetPort" value="546"/>
+		<Define key="TargetIPv6Lease" value="20010db83c4d001500000000abcdef12"/> 
+		<Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iter -->
+		<Define key="ESXITargetIf" value="vmk2"/>
+		<Define key="InitialState" value="RestartDHCP"/>
+	</All>
+</PitDefines>

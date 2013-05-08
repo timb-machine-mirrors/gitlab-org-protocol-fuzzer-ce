@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Internet Group Message Protocol PIT" version="0.0.2">
+
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+
+	<Include ns="CommonAgents" src="file:##Path##/CommonAgents.xml"/>
+
+	<DataModel name="MTU">
+		<Number size="16" value="1500" signed="false"/>
+	</DataModel>
+
+	<DataModel name="IGMPHeader">
+		<Blob name="Type" length="1" valueType="hex" value="11"/>
+		<Number name="Code" size="8" endian="big"/>
+		<Number name="Checksum" endian="big" size="16">
+			<Fixup class="IcmpChecksumFixup">
+				<Param name="ref" value="IGMPHeader"/>
+			</Fixup>
+		</Number>
+		<Blob name="GroupAddress" length="4"/>
+		<Flags size="8" endian="big">
+			<Flag name="Resv" size="4" position="0"/>
+			<Flag name="Suppress" size="1" position="4"/>
+			<Flag name="QRV" size="3" position="5"/>
+		</Flags>
+		<Number name="QQIC" size="8" endian="big"/>
+		<Number name="NumSources" size="16" endian="big"/>
+		<Block name="SourceAddresses">
+			<Blob/>
+		</Block>
+	</DataModel>
+
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="IGMPHeader"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<StateModel name="MtuFuzzStates" initialState="Initial">
+		<State name="Initial">
+			<Action type="setProperty" property="MTU">
+				<DataModel ref="MTU"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IGMPHeader"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<!-- The order of agents has importance -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawV4"/>
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Protocol" value="2"/>
+		</Publisher>
+		<StateModel ref="TheState"/>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+	<Test name="MtuFuzz">
+		<StateModel ref="MtuFuzzStates"/>
+		<!-- The order of agents has importance -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawV4"/>
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Protocol" value="2"/>
+		</Publisher>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+</Peach>
+<!-- end -->

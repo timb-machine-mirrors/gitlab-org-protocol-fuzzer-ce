@@ -1,0 +1,7 @@
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<All>
+		<Define key="Hostname" value="foobar"/>
+		<Define key="LoggerPath" value="logs/cdp/"/>
+	</All>
+</PitDefines>

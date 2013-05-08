@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+			 author="Deja Vu Security, LLC" description="proptest" version="0.0.2">
+
+	<Agent name="Remote" location="tcp://192.168.2.10:9001" />
+	<DataModel name="TheDataModel">
+		<Number size="32" value="1281"/>
+	</DataModel>
+
+	<StateModel name="StateModel" initialState="InitialState">
+		<State name="InitialState">
+			<Action type="getProperty" property="MTU">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+			<Action type="setProperty" property="MTU">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+			<Action type="getProperty" property="MTU">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="StateModel"/>
+		<Agent ref="Remote"/>
+		<!-- <Publisher class="Remote"> -->
+		<!-- 	<Param name="Agent" value="Remote"/> -->
+		<!-- 	<Param name="Class" value="RawEther"/> -->
+		<!-- 	<Param name="Interface" value="eth"/> -->
+		<!-- 	<Param name="Protocol" value="ETH_P_ARP"/> -->
+		<!-- </Publisher> -->
+
+		<Publisher class="RawEther">
+			<Param name="Interface" value="eth0"/>
+			<Param name="Protocol" value="ETH_P_ARP"/>
+		</Publisher>
+
+		<!-- <Publisher class="Udp"> -->
+		<!-- 	<Param name="Host" value="127.0.0.1"/> -->
+		<!-- 	<Param name="Port" value="8080"/> -->
+		<!-- 	<Param name="Interface" value="127.0.0.1"/> -->
+		<!-- </Publisher> -->
+	</Test>
+
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+	<!-- Requires Linux Peach 3.0 and RawEther publisher -->
+
+	<!-- <Import import="time"/> -->
+	<!-- <Include ns="CommonAgents" src="file:##Path##/CommonAgents.xml"/> -->
+
+	<!-- <DataModel name="MTU"> -->
+	<!-- 	<Number size="16" value="1650" signed="false"/> -->
+	<!-- </DataModel> -->
+
+	<!-- <DataModel name="Test"> -->
+	<!-- 	<Number size="16" value="1650" signed="false"/> -->
+	<!-- </DataModel> -->
+
+
+	<!-- Default test for fuzzing ARP -->
+	<!-- <StateModel name="Default" initialState="Initial"> -->
+	<!-- 	<State name="Initial" onComplete="time.sleep(3)"> -->
+	<!-- 		<Action type="setProperty"> -->
+	<!-- 			<DataModel ref="MTU"/> -->
+	<!-- 		</Action> -->
+	<!-- 		<Action type="output"> -->
+	<!-- 			<DataModel ref="Test"/> -->
+	<!-- 		</Action> -->
+	<!-- 	</State> -->
+	<!-- </StateModel> -->
+
+	<!-- <Test name="Default"> -->
+		<!-- <Agent ref="CommonAgents:Remote"/> -->
+		<!-- <Publisher class="Remote"> -->
+		<!-- 	<Param name="Agent" value="Remote"/> -->
+		<!-- 	<Param name="Class" value="RawEther"/> -->
+		<!-- 	<Param name="Interface" value="##Interface##"/> -->
+		<!-- 	<Param name="Protocol" value="ETH_P_ARP"/> -->
+		<!-- </Publisher> -->
+
+	<!-- 	<Publisher class="Udp"> -->
+	<!-- 		<Param name="Host" value="127.0.0.1"/> -->
+	<!-- 		<Param name="Port" value="8080"/> -->
+	<!-- 		<Param name="Interface" value="127.0.0.1"/> -->
+	<!-- 	</Publisher> -->
+
+		<!-- <Publisher class="RawEther"> -->
+    <!--   <Param name="Interface" value="eth0"/> -->
+    <!-- </Publisher> -->
+
+	<!-- 	<StateModel ref="Default"/> -->
+	<!-- 	<Strategy class="##Strategy##"/> -->
+	<!-- 	<Logger class="logger.Filesystem"> -->
+	<!-- 		<Param name="Path" value="##LoggerPath##"/> -->
+	<!-- 	</Logger> -->
+	<!-- </Test> -->
+
+
+</Peach>

@@ -1,0 +1,4 @@
+#!/bin/sh
+PROTO=$1
+shift
+MONO_GC_PARAMS=max-heap-size=1g mono --debug ../peach/peach.exe $@ --definedvalues=CommonConfig.xml -D InitialState=SetMTU  --definedvalues=${PROTO}_Config.xml --debug ${PROTO}.xml MtuFuzz

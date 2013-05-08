@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+			 author="Deja Vu Security, LLC" description="Transport Control Protocol PIT" version="0.0.2">
+
+	<!-- This pit uses TCP in a way the OS is not aware of. In order to use -->
+	<!-- this pit it's necessary to block RST outgoing on the target port so -->
+	<!-- the OS doesn't interfere with target communication. -->
+	
+
+	<!--  iptables -A OUTPUT -p tcp -m tcp \-\-tcp-flags RST RST -j DROP -->
+
+	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCPv4_State.xml"/>
+	<Include ns="CommonAgents" src="file:##Path##/CommonAgents.xml"/>
+
+	<Test name="Default">
+		<StateModel ref="TCP:Listener"/>
+		<!-- The order of agents has importance -->
+		<!-- <Agent ref="CommonAgents:Local"/> -->
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawV4"/>
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Protocol" value="6"/>
+		</Publisher>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+	<Test name="MtuFuzz">
+		<StateModel ref="TCP:Listener"/>
+		<!-- The order of agents has importance -->
+		<!-- <Agent ref="CommonAgents:Local"/> -->
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawV4"/>
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Protocol" value="6"/>
+		</Publisher>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+
+</Peach>
+<!-- end -->

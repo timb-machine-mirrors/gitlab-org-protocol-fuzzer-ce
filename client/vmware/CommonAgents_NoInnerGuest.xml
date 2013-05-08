@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC">
+
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+
+	<Agent name="Local">
+
+		<!-- NOTE: The order of monitors in this section has importance -->
+
+		<!-- Start ESXi Target Guest -->
+
+		<Monitor class="Vmware">
+			<Param name="Vmx" value="##Vmx##" />
+			<Param name="Host" value="##VmxHost##" />
+			<Param name="Login" value="##VmxLogin##" />
+			<Param name="Password" value="##VmxPassword##" />
+			<Param name="WaitForToolsInGuest" value="false" />
+			<Param name="SnapshotName" value="##VmxSnapshotName##" />
+		</Monitor>
+
+		<!-- Wait for boot and monitor for faults -->
+		<Monitor class="EsxiConsole">
+			<Param name="SerialPort" value="##EsxiConsoleSerialPort##" />
+			<Param name="Log" value="##EsxiConsoleLog##" />
+		</Monitor>
+
+		<!-- Extract Core File -->
+		<Monitor class="SshCommand">
+			<Param name="Host" value="##SshHost##" />
+			<Param name="Username" value="##SshUser##" />
+			<Param name="Password" value="##SshPassword##" />
+			<Param name="Command" value="##SshCommand##" />
+		</Monitor>
+
+		<!-- Download core files -->
+		<Monitor class="SshDownloader">
+			<Param name="Host" value="##SshHost##" />
+			<Param name="Username" value="##SshUser##" />
+			<Param name="Password" value="##SshPassword##" />
+			<Param name="Folder" value="##SshFolder##" />
+			<Param name="Remove" value="true" />
+		</Monitor>
+
+	</Agent>
+
+</Peach>

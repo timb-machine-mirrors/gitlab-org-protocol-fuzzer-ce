@@ -1,0 +1,23 @@
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+
+	<All>
+		<Define key="LoggerPath"   value="./logs/ipsecv6/"/> 
+		<!--Valid values: (Tunnel) (Transport) -->
+		<Define key="Mode"         value="Transport"/> 
+		<Define key="TransportKey" value="41414141414141414141414141414141" />
+		<Define key="CryptoKey"    value="41414141414141414141414141414141" />
+		<Define key="IV"           value="42424242424242424242424242424242" />
+		<Define key="AuthKey"      value="4141414141414141414141414141414141414141"/>
+		<Define key="HmacHash"     value="HMACSHA1"/>
+		
+		<!--LLDP-->
+		<Define key="Hostname" 		 value="foobar"/>
+		
+		<!--LACP-->
+		<Define key="ActorPort" value="0012"/>
+    <Define key="PartnerPort" value="0000"/>
+		
+		
+	</All>
+</PitDefines>

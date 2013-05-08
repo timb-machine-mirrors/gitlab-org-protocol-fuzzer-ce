@@ -1,0 +1,18 @@
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+  <All>
+    <Define key="OuterSourceMAC" value="5254005335d3"/> 
+    <Define key="OuterSourceIPv4" value="192.168.2.10" />
+    <Define key="OuterTargetMAC"   value="000000000000"/>
+    <Define key="OuterTargetIPv4" value="192.168.2.11"/> 
+	
+		<!--LLDP-->
+		<Define key="Hostname" 		 value="foobar"/>
+		
+		<!--LACP-->
+		<Define key="ActorPort" value="0012"/>
+    <Define key="PartnerPort" value="0000"/>
+	
+    <Define key="LoggerPath"  value="logs/vxlan/"/>     
+  </All>
+</PitDefines>

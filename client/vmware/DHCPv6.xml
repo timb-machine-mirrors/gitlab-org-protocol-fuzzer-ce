@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="Dynamic Host Configuration Protocol v6 PIT" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+	<!-- Configuration notes: A VMKernel interface needs to be added to -->
+	<!-- vSwitch1. This interface should be called vkm2, if it is not the -->
+	<!-- configuration will need to be changed to reflect this. The vmk -->
+	<!-- interface will need to use the ipv6 network type, with the "Obtain -->
+	<!-- IPv6 automatically through DHCP" option checked. No gateway is needed. -->
+
+	<!-- The following command on the ESXi target should show the interface names and IPaddreses -->
+	<!-- # esxcli network ip interface ipv6 address list -->
+	<!-- Interface  Address                   Netmask  Type    Status -->
+	<!-- vmk0       fe80::20c:29ff:fe97:5b21       64  STATIC  PREFERRED -->
+	<!-- vmk1       fe80::250:56ff:fe6a:4b9        64  STATIC  PREFERRED -->
+	<!-- vmk2       fe80::250:56ff:fe69:584        64  STATIC  PREFERRED -->
+
+	<!-- The dhcpv6_reset.sh shell script will need to be copied in to -->
+	<!--      /scratch directory -->
+	
+	<Include ns="CommonAgents" src="file:##Path##/CommonAgents_NoInnerGuest.xml"/>			 
+	<Include ns="DHCPv6" src="file:##Path##/_Common/Models/Net/DHCPv6_State.xml"/>
+
+	<Agent name="DHCPReset">
+		<Monitor class="SshCommand">
+			<Param name="Host" value="##SshHost##" />
+			<Param name="Username" value="##SshUser##" />
+			<Param name="Password" value="##SshPassword##" />
+			<Param name="Command" value="/scratch/dhcpv6_reset.sh ##ESXITargetIf##" />
+			<Param name="StartOnCall" value="RestartDHCPClient" />
+		</Monitor>
+	</Agent>
+
+  
+  <Test name="Default">
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="DHCPReset"/>
+    <Publisher class="Udp" name="LisentenPublisher">
+      <Param name="Host" value="##MulticastDHCP##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="::1"/>
+			<Param name="Timeout" value="##Timeout##"/> <!-- one minute -->
+    </Publisher>
+
+		<Publisher class="Udp" name="SendPublisher">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+    </Publisher>
+		
+    <Strategy class="##Strategy##"/>
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+		<StateModel ref="DHCPv6:Server"/>
+  </Test>
+
+  <Test name="MtuFuzz">
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="DHCPReset"/>
+
+    <Publisher class="Udp" name="LisentenPublisher">
+      <Param name="Host" value="##MulticastDHCP##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="::1"/>
+			<Param name="Timeout" value="3600"/> one minute
+    </Publisher>
+
+		<Publisher class="Udp" name="SendPublisher">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+    </Publisher>
+		
+    <Strategy class="##Strategy##"/>
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+		<StateModel ref="DHCPv6:Server"/>
+  </Test>
+
+	
+</Peach>
+<!-- end -->

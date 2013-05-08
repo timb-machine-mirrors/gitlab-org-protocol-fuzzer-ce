@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
+  <All>
+		<Define key="Fuzztype" value="Default"/>
+		<Define key="LoggerPath" value="logs/IPv6/"/>
+	</All>
+</PitDefines>
