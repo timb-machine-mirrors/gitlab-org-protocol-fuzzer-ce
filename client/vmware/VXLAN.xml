@@ -6,7 +6,8 @@
 
 	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
 	<!-- Requires Linux Peach 3.0 and RawEther publisher -->
-
+	
+	<Include ns="Generic" src="file:##Path##/CommonHeaders/GenericDataTypes.xml"/>
 
 	<!-- Headers -->
 	<Include ns="Ethernet" src="file:##Path##/CommonHeaders/EthernetHeader.xml"/>
@@ -302,7 +303,7 @@
 					<Block name="IPv6Payload">
 						<Block ref="IPv6:DestinationOptions">
 							<Block name="Options">
-								<Block ref="IPv6:TLV" name="HomeAddressOption">
+								<Block ref="Generic:ValueLenTLV" name="HomeAddressOption">
 									<Number name="Type" size="8" endian="big" value="201"/>
 									<Number name="Length" size="8">
 										<Relation type="size" of="Value"/>
@@ -342,7 +343,7 @@
 	<DataModel name="IPv4TCPInVxlan">
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="6"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:TCPHeader"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="TCP:Packet"/>
 		</Block>
 	</DataModel>
 	<!-- VXLAN IPv6 Frame + TCP Payload -->
@@ -353,7 +354,7 @@
 				<Relation type="size" of="IPv6Payload" />
 			</Number>
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="6"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="TCP:TCPHeader"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="TCP:Packet"/>
 		</Block>
 	</DataModel>
 	<!-- VXLAN IPv4 Frame + UDP Payload -->
@@ -537,11 +538,13 @@
 	<!-- Default test for fuzzing VXLAN -->
 	<Test name="Default">
 		<!-- The order of agents has importance -->
-		<Agent ref="CommonAgents:Local"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
-		</Publisher>
+		<!-- <Agent ref="CommonAgents:Local"/> -->
+		<!-- <Publisher class="RawEther"> -->
+		<!-- 	<Param name="Interface" value="##Interface##"/> -->
+		<!-- 	<Param name="Protocol" value="ETH_P_8021Q"/> -->
+		<!-- </Publisher> -->
+
+		<Publisher class="ConsoleHex"/>
 
 		<StateModel ref="TheState"/>
 		<Strategy class="##Strategy##"/>
@@ -550,18 +553,18 @@
 		</Logger>
 	</Test>
 
-	<Test name="MtuFuzz">
-		<StateModel ref="MtuFuzzStates"/>
+	<!-- <Test name="MtuFuzz"> -->
+	<!-- 	<StateModel ref="MtuFuzzStates"/> -->
 		<!-- The order of agents has importance -->
-		<Agent ref="CommonAgents:Local"/>
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
-		</Publisher>
-		<Strategy class="##Strategy##"/>
-		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##"/>
-		</Logger>
-	</Test>
+	<!-- 	<Agent ref="CommonAgents:Local"/> -->
+	<!-- 	<Publisher class="RawEther"> -->
+	<!-- 		<Param name="Interface" value="##Interface##"/> -->
+	<!-- 		<Param name="Protocol" value="ETH_P_8021Q"/> -->
+	<!-- 	</Publisher> -->
+	<!-- 	<Strategy class="##Strategy##"/> -->
+	<!-- 	<Logger class="File"> -->
+	<!-- 		<Param name="Path" value="##LoggerPath##"/> -->
+	<!-- 	</Logger> -->
+	<!-- </Test> -->
 
 </Peach>
