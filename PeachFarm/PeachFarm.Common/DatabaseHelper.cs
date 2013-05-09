@@ -151,6 +151,29 @@ namespace PeachFarm.Common.Mongo
 				collection.CreateIndex(new string[] { "NodeName" });
 			}
 		}
+
+		public static void TruncateAllCollections(string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			var jobs = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			jobs.RemoveAll(WriteConcern.Acknowledged);
+
+			var nodes = GetCollection<Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			nodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			errors.RemoveAll(WriteConcern.Acknowledged);
+
+			var jobnodes = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			jobnodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			faults.RemoveAll(WriteConcern.Acknowledged);
+
+			server.Disconnect();
+		}
 		
 		public static Job GetJob(string jobGuid, string connectionString)
 		{
