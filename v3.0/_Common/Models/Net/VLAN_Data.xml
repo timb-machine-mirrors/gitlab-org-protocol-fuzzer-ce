@@ -23,15 +23,24 @@
 	</DataModel>
 
 	<DataModel name="VLAN">
-		<Block ref="Ethernet:Frame"/>
-		<Block ref="VLAN_TCI"/>
-		<Block name="VlanTCIBlock" minOccurs="0">
+		<Block ref="Ethernet:Frame">
+		<Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
+		<Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
+		<!--<Block ref="VLAN_TCI"/>-->
+		<!--<Block name="VlanTCIBlock" minOccurs="0">
 			<Blob name="Type" token="true" valueType="hex" value="9100"/>
 			<Block ref="VLAN_TCI"/>
 			<Block name="ExtendedVlanTCIBlock" minOccurs="0">
 				<Blob name="Type" token="true" valueType="hex" value="8100"/>
 				<Block ref="VLAN_TCI"/>
 			</Block>
+		</Block>-->
+		<Block name="VlanTCIBlock" minOccurs="0">
+			<Blob name="TypeOrLen" token="true" valueType="hex" value="9100"/>
+			<Block ref="VLAN_TCI"/>
+		</Block>
+		<Blob name="TypeOrLen" token="true" valueType="hex" value="8100"/>
+		<Block ref="VLAN_TCI"/>
 		</Block>
 		<Block name="VlanPayload">
 		</Block>
