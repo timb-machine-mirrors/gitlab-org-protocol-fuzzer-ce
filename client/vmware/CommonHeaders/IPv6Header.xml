@@ -18,10 +18,10 @@
 		<Number name="PayloadLength" size="16" endian="big" valueType="hex" value="ffff"/>
 		<Number name="NextHeader" size="8" endian="big" value="59"/>
 		<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/>
-		<Blob name="SrcIP" value="##SourceIP##">
+		<Blob name="SrcIP" value="##SourceIPv6##">
 			<Transformer class="Ipv6StringToOctet"/>
 		</Blob>
-		<Blob name="DestIP" value="##TargetIP##">
+		<Blob name="DestIP" value="##TargetIPv6##">
 			<Transformer class="Ipv6StringToOctet"/>
 		</Blob>
 		<Block name="IPv6Payload"/>
@@ -91,8 +91,8 @@
 			<Number name="Checksum" size="16" endian="network">
 				<Fixup class="UDPChecksumFixup">
 					<Param name="ref" value="PacketPayload" />
-					<Param name="src" value="##SourceIP##" />
-					<Param name="dst" value="##TargetIP##" />
+					<Param name="src" value="##SourceIPv6##" />
+					<Param name="dst" value="##TargetIPv6##" />
 				</Fixup>
 			</Number>
 			<Block name="Data" >

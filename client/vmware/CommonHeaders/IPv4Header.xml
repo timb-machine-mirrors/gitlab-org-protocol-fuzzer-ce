@@ -35,11 +35,11 @@
 			</Number>
 			<!-- these won't crack since decode isn't implemented -->
 			<Block name="SrcIP" length="4">
-				<Blob name="IP" value="##SourceIP##"/>
+				<Blob name="IP" value="##SourceIPv4##"/>
 				<Transformer class="Ipv4StringToOctet" />
 			</Block>
 			<Block name="DestIP" length="4">
-				<Blob name="IP" value="##TargetIP##" />
+				<Blob name="IP" value="##TargetIPv4##" />
 				<Transformer class="Ipv4StringToOctet" />
 			</Block>
 			<Blob name="Options"/>
