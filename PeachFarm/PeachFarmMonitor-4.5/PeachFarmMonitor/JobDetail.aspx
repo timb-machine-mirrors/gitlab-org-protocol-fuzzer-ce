@@ -40,6 +40,11 @@
       right:150px;
       height:20px;
     }
+    .linkbarItem
+    {
+      color: #f57e20;
+      font-weight: bold;
+    }
     #gridcontainer
     {
       position: absolute;
@@ -78,12 +83,13 @@
 <body>
   <form id="form1" runat="server">
     <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
-    <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server" />
-    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
+    <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server"  />
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server" >
       <AjaxSettings>
+
         <telerik:AjaxSetting AjaxControlID="faultBucketsGrid" EventName="ItemCommand">
           <UpdatedControls>
-            <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" />
+            <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" LoadingPanelID="loadingPanel" />
             <telerik:AjaxUpdatedControl ControlID="faultsGrid" LoadingPanelID="loadingPanel" />
           </UpdatedControls>
         </telerik:AjaxSetting>
@@ -101,9 +107,10 @@
       </asp:Panel>
     </div>
     <div id="linkbar">
-      [&nbsp;
-      <asp:HyperLink ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|&nbsp;
-      <asp:HyperLink ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
+      [
+      <asp:HyperLink CssClass="linkbarItem" ID="downloadInputLink" runat="server" Text="Download Job Input" Target="_blank" />&nbsp;|
+      <asp:HyperLink CssClass="linkbarItem" ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|
+      <asp:HyperLink CssClass="linkbarItem" ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
     </div>
     <asp:Table ID="brand" runat="server" CellPadding="0" CellSpacing="0">
       <asp:TableRow>

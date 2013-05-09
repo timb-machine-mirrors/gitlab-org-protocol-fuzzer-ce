@@ -56,16 +56,6 @@ namespace PeachFarm.Admin
 			this.IsListening = true;
 		}
 
-		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
-		{
-			ProcessAction(e.Action, e.Body);
-			rabbit.StopListener();
-			//rabbit.CloseConnection();
-			this.IsListening = false;
-		}
-
-
-
 		#region Properties
 		public string ServerHostName { get; private set; }
 
@@ -443,6 +433,14 @@ namespace PeachFarm.Admin
 		private void PublishToServer(string message, string action)
 		{
 			rabbit.PublishToQueue(serverQueueName, message, action, adminQueueName);
+		}
+
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			ProcessAction(e.Action, e.Body);
+			rabbit.StopListener();
+			//rabbit.CloseConnection();
+			this.IsListening = false;
 		}
 
 		private void ProcessAction(string action, string body)

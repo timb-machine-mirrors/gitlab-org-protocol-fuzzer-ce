@@ -17,7 +17,7 @@ namespace PeachFarmMonitor.ViewModels
       this.PeachVersion = job.PeachVersion;
       this.Tags = job.Tags;
       this.ZipFile = job.ZipFile;
-
+      
       this.Status = status;
 
       //if (String.IsNullOrEmpty(job.ZipFile))

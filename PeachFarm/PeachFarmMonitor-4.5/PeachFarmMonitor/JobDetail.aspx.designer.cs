@@ -76,6 +76,15 @@ namespace PeachFarmMonitor {
         protected global::System.Web.UI.WebControls.Label lblJobID;
         
         /// <summary>
+        /// downloadInputLink control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink downloadInputLink;
+        
+        /// <summary>
         /// downloadOutputLink control.
         /// </summary>
         /// <remarks>

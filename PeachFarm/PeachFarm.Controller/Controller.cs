@@ -30,7 +30,7 @@ namespace PeachFarm.Controller
 
 		private string serverQueueName;
 
-		public PeachFarmController()
+		public PeachFarmController(string serverQueueOverride = "")
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
@@ -47,16 +47,21 @@ namespace PeachFarm.Controller
 			}
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			if (String.IsNullOrEmpty(serverQueueOverride))
+			{
+				this.serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			}
+			else
+			{
+				this.serverQueueName = serverQueueOverride;
+			}
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(serverQueueName);
+			rabbit.StartListener(this.serverQueueName);
 
 			if (statusCheck == null)
 			{
 				statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(1));
 			}
-
-			IsOpen = true;
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -72,7 +77,10 @@ namespace PeachFarm.Controller
 		}
 
 		#region Properties
-		public bool IsOpen { get; set; }
+		public bool IsListening
+		{
+			get { return rabbit.IsListening; }
+		}
 
 		public string QueueName
 		{
@@ -85,7 +93,6 @@ namespace PeachFarm.Controller
 
 		public void Close()
 		{
-			IsOpen = false;
 			rabbit.StopListener();
 			//rabbit.CloseConnection();
 		}
