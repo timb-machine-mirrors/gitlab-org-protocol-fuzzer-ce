@@ -27,6 +27,8 @@
   
   <!-- Default test case uses Raw Publisher define interface in defines file-->
   <Test name="Default">
+		<Exclude xpath="//CDPPacket"/>
+		<Include xpath="//CDPPacket/Payload/CDP"/>
 		<StateModel ref="CDP:Multicast"/>
 		
     <!--Agent ref="RemoteAgent"/-->
