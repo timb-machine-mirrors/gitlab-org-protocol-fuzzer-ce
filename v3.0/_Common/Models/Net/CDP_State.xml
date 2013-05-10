@@ -9,6 +9,10 @@
 	<Include ns="LLC" src="file:##Path##/_Common/Models/Net/LLC_Data.xml"/>
 
 	<DataModel name="CDPPacket" ref="Ethernet:Frame">
+		<Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
+			<Relation type="size" of="Payload"/>
+			<!-- !!FIXME!! Strip this relation out when relation implemented in parent ref -->
+		</Number>
 		<Block name="Payload" >
 			<Block name="LLC" ref="LLC:Header" />
 			<Block name="CDP" ref="CDP:Packet" />

@@ -29,8 +29,11 @@
 		<Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
 		<Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
 		<!-- https://en.wikipedia.org/wiki/EtherType -->
-		<Blob name="TypeOrLen" token="true" mutable="false" valueType="hex" value="0806"/> <!-- ARP -->
-		<Blob name="Payload"/>
+		<Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
+			<!-- <Relation type="size" of="Payload"/> -->
+			<!-- !!FIXME!! Parents of relations cannot be overriden. This will be fixed when that is fixed. -->
+		</Number>
+		<Block name="Payload"/>
 	</DataModel>
 </Peach>
 <!--End-->
