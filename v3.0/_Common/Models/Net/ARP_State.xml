@@ -8,7 +8,7 @@
 	<Include ns="ARP" src="file:##Path##/_Common/Models/Net/ARP_Data.xml"/>
 
 	<DataModel name="ARPPacket" ref="Ethernet:Frame">
-		<Blob name="TypeOrLen" token="true" valueType="hex" value="0806"/>
+		<Number name="TypeOrLen" token="true" valueType="hex" size="16" value="0806"/>
 		<Block name="Payload" ref="ARP:Packet" />
 	</DataModel>
 
