@@ -60,11 +60,11 @@
     </Block>
     <Block name="OuterIP" ref="IPv4:IPv4Header">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-			<Blob name="Header.SrcIP" value="##OuterSourceIPv4##">
-				<Transformer class="Ipv4StringToOctet" />
+			<Blob name="Header.SrcIP" mutable="false" value="##OuterSourceIPv4##">
+				<Transformer class="Ipv4StringToNetworkOctet" />
 			</Blob>
-			<Blob name="Header.DestIP" value="##OuterTargetIPv4##">
-				<Transformer class="Ipv4StringToOctet" />
+			<Blob name="Header.DestIP" mutable="false" value="##OuterTargetIPv4##">
+				<Transformer class="Ipv4StringToNetworkOctet" />
 			</Blob>
       <Block name="IPv4Payload" ref="UDP:UDPHeader">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
@@ -128,11 +128,11 @@
 						<Param name="ref" value="Header"/>
 					</Fixup>
 				</Number>
-				<Blob name="SrcIP" value="##OuterSourceIPv4##">
-					<Transformer class="Ipv4StringToOctet" />
+				<Blob name="SrcIP" mutable="false" value="##OuterSourceIPv4##">
+					<Transformer class="Ipv4StringToNetworkOctet" />
 				</Blob>
-				<Blob name="DestIP" value="##OuterTargetIPv4##">
-					<Transformer class="Ipv4StringToOctet" />
+				<Blob name="DestIP" mutable="false" value="##OuterTargetIPv4##">
+					<Transformer class="Ipv4StringToNetworkOctet" />
 				</Blob>
 				<Blob name="Options"/>
 			</Block>
@@ -178,11 +178,11 @@
 											<Param name="ref" value="Header"/>
 										</Fixup>
 									</Number>
-									<Blob name="SrcIP" value="##SourceIPv4##">
-										<Transformer class="Ipv4StringToOctet" />
+									<Blob name="SrcIP" mutable="false" value="##SourceIPv4##">
+										<Transformer class="Ipv4StringToNetworkOctet" />
 									</Blob>
-									<Blob name="DestIP" value="##TargetIPv4##">
-										<Transformer class="Ipv4StringToOctet" />
+									<Blob name="DestIP" mutable="false" value="##TargetIPv4##">
+										<Transformer class="Ipv4StringToNetworkOctet" />
 									</Blob>
 									<Blob name="Options"/>
 								</Block>
