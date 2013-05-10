@@ -32,7 +32,7 @@ namespace PeachFarm.Admin
 		private const string xmlext = ".xml";
 		private const string zipext = ".zip";
 
-		public Admin(string adminQueueOverride = "")
+		public Admin(string adminName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
 			ServerHostName = config.Controller.IpAddress;
@@ -41,13 +41,13 @@ namespace PeachFarm.Admin
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
-			if (String.IsNullOrEmpty(adminQueueOverride))
+			if (String.IsNullOrEmpty(adminName))
 			{
 				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
 			}
 			else
 			{
-				adminQueueName = adminQueueOverride;
+				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName);
 			}
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);

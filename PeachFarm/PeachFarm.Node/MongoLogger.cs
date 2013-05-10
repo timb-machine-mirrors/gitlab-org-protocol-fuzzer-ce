@@ -10,7 +10,7 @@ namespace PeachFarm.Loggers
 	[Peach.Core.Logger("logger.PeachFarm.Mongo")]
 	[Peach.Core.Parameter("MongoDbConnectionString", typeof(string), "Connection string to Mongo database")]
 	[Peach.Core.Parameter("JobID", typeof(string), "")]
-	[Peach.Core.Parameter("UserName", typeof(string), "")]
+	[Peach.Core.Parameter("NodeName", typeof(string), "")]
 	[Peach.Core.Parameter("PitFileName", typeof(string), "")]
 	public class MongoLogger : Peach.Core.Logger
 	{
@@ -24,12 +24,8 @@ namespace PeachFarm.Loggers
 
 			MongoConnectionString = (string)args["MongoDbConnectionString"];
 			JobID = (string)args["JobID"];
-			UserName = (string)args["UserName"];
+			NodeName = (string)args["NodeName"];
 			PitFileName = (string)args["PitFileName"];
-
-			System.Net.IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			IPAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
-
 
 		}
 
@@ -46,15 +42,9 @@ namespace PeachFarm.Loggers
 			private set;
 		}
 
-		public string UserName { get; private set; }
+		public string NodeName { get; private set; }
 
 		public string PitFileName { get; private set; }
-
-		public string IPAddress
-		{
-			get;
-			private set;
-		}
 
 		public uint IterationCount { get; private set; }
 		#endregion
@@ -96,7 +86,7 @@ namespace PeachFarm.Loggers
 		{
 			System.Console.WriteLine("******** PEACH: START TEST ************");
 			mongoJob = DatabaseHelper.GetJob(JobID, MongoConnectionString);
-			mongoNode = DatabaseHelper.GetJobNode(IPAddress, JobID, MongoConnectionString);
+			mongoNode = DatabaseHelper.GetJobNode(NodeName, JobID, MongoConnectionString);
 		}
 
 		protected override void Engine_TestFinished(Peach.Core.RunContext context)
@@ -123,7 +113,7 @@ namespace PeachFarm.Loggers
 
 				mongoFault.Stamp = DateTime.Now;
 				mongoFault.JobID = JobID;
-				mongoFault.NodeName = IPAddress;
+				mongoFault.NodeName = this.NodeName;
 
 				mongoFault.ControlIteration = pf.controlIteration;
 				mongoFault.ControlRecordingIteration = pf.controlRecordingIteration;

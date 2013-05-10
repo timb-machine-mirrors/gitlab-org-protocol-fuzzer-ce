@@ -5,8 +5,6 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
-using PeachFarm.Admin;
-using PeachFarm.Admin.Configuration;
 
 namespace PeachFarmMonitor
 {
@@ -16,9 +14,6 @@ namespace PeachFarmMonitor
     {
     }
 
-    void admin_MonitorCompleted(object sender, Admin.MonitorCompletedEventArgs e)
-    {
-    }
 
     protected void Session_Start(object sender, EventArgs e)
     {

@@ -20,6 +20,7 @@ namespace PeachFarm.Test
 		private static Admin.Admin admin;
 		private static Controller.PeachFarmController controller;
 		private static Node.PeachFarmNode node;
+		private const string testName = "localhost";
 
 		#region setup
 		
@@ -30,9 +31,9 @@ namespace PeachFarm.Test
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
-			controller = new Controller.PeachFarmController("peachfarm.controller.localhost");
+			controller = new Controller.PeachFarmController(testName);
 			while (controller.IsListening == false) { }
-			node = new Node.PeachFarmNode("peachfarm.node.localhost");
+			node = new Node.PeachFarmNode(testName);
 			while (node.IsListening == false) { }
 			Debug.WriteLine("Waiting for node to register with controller...");
 			WaitForNode(30);
@@ -53,7 +54,7 @@ namespace PeachFarm.Test
 		[SetUp]
 		public void SetUp()
 		{
-			admin = new Admin.Admin("peachfarm.admin.localhost");
+			admin = new Admin.Admin(testName);
 		}
 
 		[TearDown]

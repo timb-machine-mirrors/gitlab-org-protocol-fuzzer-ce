@@ -28,9 +28,9 @@ namespace PeachFarm.Controller
 
 		RabbitMqHelper rabbit = null;
 
-		private string serverQueueName;
+		private string controllerQueueName;
 
-		public PeachFarmController(string serverQueueOverride = "")
+		public PeachFarmController(string controllerName = "")
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
@@ -47,16 +47,16 @@ namespace PeachFarm.Controller
 			}
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			if (String.IsNullOrEmpty(serverQueueOverride))
+			if (String.IsNullOrEmpty(controllerName))
 			{
-				this.serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
 			}
 			else
 			{
-				this.serverQueueName = serverQueueOverride;
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, controllerName);
 			}
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(this.serverQueueName);
+			rabbit.StartListener(this.controllerQueueName);
 
 			if (statusCheck == null)
 			{
@@ -86,7 +86,7 @@ namespace PeachFarm.Controller
 		{
 			get
 			{
-				return serverQueueName;
+				return controllerQueueName;
 			}
 		}
 		#endregion
