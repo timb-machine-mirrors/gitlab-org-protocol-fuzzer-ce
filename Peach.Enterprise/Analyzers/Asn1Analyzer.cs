@@ -140,31 +140,57 @@ namespace Peach.Enterprise.Analyzers
 
 			switch (node.Tag & Asn1Tag.TAG_MASK)
 			{
-				case Asn1Tag.NUMERIC_STRING:
+
 				case Asn1Tag.PRINTABLE_STRING:
+				case Asn1Tag.IA5_STRING:
+					{
+						var str = new Peach.Core.Dom.String();
+						str.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
+						return MakeAsn1Der(str, node);
+					}
+				case Asn1Tag.UTC_TIME:
+				case Asn1Tag.NUMERIC_STRING:
+					{
+						var numstr = new Peach.Core.Dom.String();
+						numstr.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
+						// TODO add hint for numeric
+						return MakeAsn1Der(numstr, node);
+					}
+				case Asn1Tag.UTF8_STRING:
+					{
+						var ustr = new Peach.Core.Dom.String();
+						ustr.stringType = StringType.utf8;
+						ustr.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
+						return MakeAsn1Der(ustr, node);				
+					}
+
+				case Asn1Tag.REAL:
+				case Asn1Tag.INTEGER:
+					// Issue cannot have bigger than 8 byte Number lengths... 
+					/*{
+						var num = new Number();
+						num.length = node.Data.Length * 8;
+						num.Signed = false;
+						num.LittleEndian = false;
+						num.DefaultValue = new Variant(node.Data);
+						return MakeAsn1Der(num, node);
+					}*/
 				case Asn1Tag.T61_STRING:
 				case Asn1Tag.VIDEOTEXT_STRING:
-				case Asn1Tag.IA5_STRING:
-				case Asn1Tag.UTC_TIME:
 				case Asn1Tag.GENERALIZED_TIME:
 				case Asn1Tag.GRAPHIC_STRING:
 				case Asn1Tag.VISIBLE_STRING:
 				case Asn1Tag.GENERAL_STRING:
 				case Asn1Tag.UNIVERSAL_STRING:
 				case Asn1Tag.BMPSTRING:
-				case Asn1Tag.INTEGER:
-				// handle on own
-
-
 				case Asn1Tag.OCTET_STRING:
-				case Asn1Tag.UTF8_STRING:
 				case Asn1Tag.RELATIVE_OID:
 				case Asn1Tag.BOOLEAN:
 				case Asn1Tag.TAG_NULL:
 				case Asn1Tag.OBJECT_IDENTIFIER:
 				case Asn1Tag.OBJECT_DESCRIPTOR:
 				case Asn1Tag.EXTERNAL:
-				case Asn1Tag.REAL:
+				
 				case Asn1Tag.ENUMERATED:
 					{
 						var blob = new Blob();
@@ -173,7 +199,7 @@ namespace Peach.Enterprise.Analyzers
 						return MakeAsn1Der(blob, node);
 					}
 
-				case Asn1Tag.BIT_STRING:
+				case Asn1Tag.BIT_STRING: // TODO Double check this
 					return HandleBitString(parent, node);
 
 				case Asn1Tag.SEQUENCE:
