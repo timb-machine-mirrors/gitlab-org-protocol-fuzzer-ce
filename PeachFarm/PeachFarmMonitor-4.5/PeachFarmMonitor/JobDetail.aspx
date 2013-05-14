@@ -78,6 +78,11 @@
     {
       height: 100%;
     }
+    .rgExpandCol
+    {
+      width: 70px;
+    }
+
   </style>
 </head>
 <body>
@@ -152,9 +157,9 @@
         <telerik:RadSplitBar runat="server" />
         <telerik:RadPane runat="server" Scrolling="None">
           <telerik:RadGrid 
-            ID="faultsGrid" runat="server"
-            Width="100%" Height="100%"
-            AutoGenerateColumns="False" AutoGenerateHierarchy="True" CellSpacing="0" GridLines="None">
+            ID="faultsGrid" runat="server" 
+            Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid"
+            AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None">
             <ClientSettings>
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
@@ -164,8 +169,8 @@
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
               <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
+              <ExpandCollapseColumn Visible="True" HeaderText="OOOOOOOO" Resizable="true" />
               <Columns>
-                <telerik:GridBoundColumn DataField="ID" HeaderText="ID"  />
                 <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
                 <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
                 <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" />
@@ -174,18 +179,16 @@
                 <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" />
                 <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" />
               </Columns>
-              <DetailItemTemplate>
-                <telerik:RadPanelBar ID="descriptionPanel" runat="server" Width="100%">
-                  <Items>
-                    <telerik:RadPanelItem Text="Description" Expanded="false">
-                      <ContentTemplate>
-                        <asp:TextBox ID="descriptionLabel" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="25" />
-                      </ContentTemplate>
-                    </telerik:RadPanelItem>
-                  </Items>
-                </telerik:RadPanelBar>
-              </DetailItemTemplate>
               <DetailTables>
+                <telerik:GridTableView Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">
+                  <Columns>
+                    <telerik:GridTemplateColumn DataField="Description">
+                      <ItemTemplate>
+                        <asp:TextBox Text="<%# Container.DataItem %>" TextMode="MultiLine" BorderStyle="None" BorderWidth="0" ReadOnly="true" Wrap="true" Font-Names="Consolas, Courier New" Font-Size="Small" runat="server" Width="100%" Rows="10" />
+                      </ItemTemplate>
+                    </telerik:GridTemplateColumn>
+                  </Columns>
+                </telerik:GridTableView>
                 <telerik:GridTableView 
                   Caption="State Model" DataMember="StateModel" 
                   HierarchyLoadMode="ServerBind"
