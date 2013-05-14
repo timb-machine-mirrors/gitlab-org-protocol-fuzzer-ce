@@ -17,8 +17,11 @@ bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
 bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
 bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
 
+bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
+bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
+
 #Iconic.Zip.dll is already provided in Peach/3rdParty
-#bld.read_csshlib('Ionic.Zip.dll',                           paths=['DotNetZipLib-v1.9/zip-v1.9'])
+#bld.read_csshlib('Ionic.Zip.dll',                          paths=['DotNetZipLib-v1.9/zip-v1.9'])
 
 bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])

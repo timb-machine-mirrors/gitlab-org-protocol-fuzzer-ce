@@ -24,7 +24,6 @@ namespace Peach.Enterprise.Mutators
 		public static string NinjaDB
 		{
 			get { return "default.db"; }
-			set;
 		}
 
 		public SampleNinjaMutator(DataElement obj)

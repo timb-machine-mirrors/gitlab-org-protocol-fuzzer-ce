@@ -7,9 +7,38 @@ name = 'PeachSampleNinja.exe'
 #	name = ''
 #	bld.install_files('${BINDIR}', 'peach', chmod=Utils.O755)
 
+deps = [
+	'NLog.dll',
+	'System.dll',
+	'System.Core.dll',
+	'Peach.Core.dll',
+
+	'System.Data.DataSetExtensions.dll',
+	'System.Runtime.Remoting.dll',
+
+	'System.Management.dll',
+	'System.Xml.dll',
+
+	'System.Data.dll',
+	'System.Web.dll',
+	'System.Web.Services.dll',
+	'Microsoft.Dynamic.dll',
+	'Microsoft.CSharp.dll',
+	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
+
+	'System.Data.SQLite.dll',
+	'System.Data.DataSetExtensions.dll',
+	'System.Linq.dll',
+	'System.Data.dll',
+	'System.Data.DataSetExtensions.dll',
+	
+	]
+
+
 bld(
 	features = 'cs',
-	use = 'System.Data.SQLite.dll System.Data.DataSetExtensions.dll Peach.Core.dll',
+	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = name,
 	#namespace = 'PeachE',
