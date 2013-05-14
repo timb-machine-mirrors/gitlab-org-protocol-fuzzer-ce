@@ -29,7 +29,6 @@ deps = [
 
 	'System.Data.SQLite.dll',
 	'System.Data.DataSetExtensions.dll',
-	'System.Linq.dll',
 	'System.Data.dll',
 	'System.Data.DataSetExtensions.dll',
 	
