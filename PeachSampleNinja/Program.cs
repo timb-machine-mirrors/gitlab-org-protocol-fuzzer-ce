@@ -7,6 +7,7 @@ using System.Data.Sql;
 using System.Data.SQLite;
 using System.Data.SqlClient;
 using System.Security.Cryptography;
+using System.Reflection;
 
 using Peach.Core;
 using Peach.Core.IO;
@@ -22,11 +23,16 @@ namespace PeachSampleNinja
 		{
 			Console.WriteLine();
 			Console.WriteLine(">> Peach Sample Ninja -- Sample Scanner");
-			Console.WriteLine(">> Copyright (c) Deja vu Security");
-			Console.WriteLine(">> Michael Eddington <mike@dejavusecurity.com\n");
+			Console.WriteLine(">> Copyright (c) Deja vu Security\n");
 
 			if (args.Length < 2)
 			{
+				Console.WriteLine(@"
+This program will build the sample ninja database from a set sample files.  This
+database is used to recombine sample files into new files during a Peach fuzzing
+run.
+");
+
 				Console.WriteLine("Syntax: PeachSampleNinja <pitfile> <datamodel> <samplefolder>");
 				return;
 			}
@@ -42,7 +48,22 @@ namespace PeachSampleNinja
 
 			Model = dom.dataModels[datamodel];
 
-			Connection = new SQLiteConnection("data source=default.db");
+			var database = Path.Combine(
+				Path.GetDirectoryName(pitfile),
+				Path.GetFileNameWithoutExtension(pitfile) + ".db");
+
+			if (!File.Exists(database))
+			{
+				// Create database
+				var assembly = Assembly.GetExecutingAssembly();
+				using(var dbStream = assembly.GetManifestResourceStream("SampleNinja.db"))
+				using (var fout = File.OpenWrite(database))
+				{
+					dbStream.CopyTo(fout);
+				}
+			}
+
+			Connection = new SQLiteConnection("data source=" + database);
 			Connection.Open();
 
 			using(var cmd = new SQLiteCommand(Connection))
@@ -55,7 +76,7 @@ namespace PeachSampleNinja
 				//cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String, dom.author));
 
 				cmd.Parameters[0].Value = DefinitionId;
-				cmd.Parameters[1].Value = pitfile;
+				cmd.Parameters[1].Value = Path.GetFileName(pitfile);
 
 				cmd.ExecuteNonQuery();
 			}
@@ -78,6 +99,34 @@ namespace PeachSampleNinja
 			using (var sha1 = new SHA1Managed())
 			{
 				return sha1.ComputeHash(File.ReadAllBytes(filename));
+			}
+		}
+
+		/// <summary>
+		/// Check to see if a sample file has already been processed.
+		/// </summary>
+		/// <remarks>
+		/// Checks file name and file hash.
+		/// </remarks>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		bool FileAlreadyProcessed(string fileName)
+		{
+			using (var cmd = new SQLiteCommand(Connection))
+			{
+				cmd.CommandText = "select sampleid, hash from sample where file = ?";
+				SampleId = Guid.NewGuid();
+				cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
+				cmd.Parameters[0].Value = fileName;
+
+				var reader = cmd.ExecuteReader();
+				if (!reader.NextResult())
+					return false;
+
+				var fileHash = Hash(fileName);
+				var dbHash = (byte[])reader[0];
+
+				return fileHash.SequenceEqual<byte>(dbHash);
 			}
 		}
 
