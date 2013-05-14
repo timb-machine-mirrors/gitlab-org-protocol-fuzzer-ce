@@ -1,3 +1,6 @@
+/* original blue 25a0da */
+/* deja orange f57e20*/
+
 .RadGrid_DejaVu {
   border: 1px solid #e5e5e5;
   background: white;
@@ -98,7 +101,6 @@
   background: #e5e5e5; }
 .RadGrid_DejaVu .rgMasterTable .rgSelectedCell,
 
-/* original blue */
 .RadGrid_DejaVu .rgSelectedRow {
   color: #fff;
   background: #f57e20; }
@@ -189,8 +191,8 @@
   .RadGrid_DejaVu .rgPageLast:hover {
     background-position: 0 -1050px; }
 .RadGrid_DejaVu .rgPager .rgPagerButton {
-  border-color: #25a0da;
-  background: #25a0da;
+  border-color: #f57e20;
+  background: #f57e20;
   color: #fff;
   font: 12px/12px "segoe ui", arial, sans-serif; }
 .RadGrid_DejaVu .rgNumPart a {
@@ -293,8 +295,8 @@
   background: #fff;
   color: #000; }
 .RadGrid_DejaVu .rgMasterTable td.rgGroupCol, .RadGrid_DejaVu .rgMasterTable td.rgExpandCol {
-  border-color: #c9c9c9;
-  background: #c9c9c9 none; }
+  border-color: #dcdcdc;
+  background: #dcdcdc none; }
 .RadGrid_DejaVu .rgGroupHeader {
   background: #c9c9c9;
   font-size: 1.1em;

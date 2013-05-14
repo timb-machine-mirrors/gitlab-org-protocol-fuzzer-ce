@@ -136,8 +136,9 @@
             ID="faultBucketsGrid" runat="server"
             Width="100%" Height="100%"
             OnItemCommand="faultBucketsGrid_ItemCommand"
-            AutoGenerateColumns="false" AutoGenerateHierarchy="true">
+            AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None">
             <ClientSettings>
+              <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
             <MasterTableView 
@@ -147,9 +148,9 @@
               HierarchyLoadMode="ServerOnDemand">
               <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="false"  />
               <Columns>
-                <telerik:GridBoundColumn DataField="Group" HeaderText="Fault" />
-                <telerik:GridBoundColumn DataField="FaultCount" />
-                <telerik:GridButtonColumn CommandName="FaultBucketSelect" DataTextField="FaultCount" DataTextFormatString="Faults ({0}) &gt;" />
+                <telerik:GridBoundColumn DataField="Group" HeaderText="Fault" Resizable="false"/>
+                <telerik:GridBoundColumn DataField="FaultCount" HeaderText="Count" Resizable="false" ItemStyle-Width="50px" HeaderStyle-Width="50px"/>
+                <telerik:GridButtonColumn CommandName="FaultBucketSelect" Text="View Faults &gt;" Resizable="false" ItemStyle-Width="90px" HeaderStyle-Width="90px"/>
               </Columns>
             </MasterTableView>
           </telerik:RadGrid>
@@ -161,6 +162,7 @@
             Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid"
             AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None">
             <ClientSettings>
+              <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
             <MasterTableView 
@@ -169,15 +171,15 @@
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
               <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
-              <ExpandCollapseColumn Visible="True" HeaderText="OOOOOOOO" Resizable="true" />
+              <ExpandCollapseColumn Visible="True" Resizable="true" />
               <Columns>
                 <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
                 <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
-                <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" />
-                <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" />
                 <telerik:GridBoundColumn DataField="DetectionSource" HeaderText="Source" />
-                <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" />
-                <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" />
+                <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
+                <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
+                <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" ItemStyle-Width="60px" HeaderStyle-Width="60px" />
+                <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" ItemStyle-Width="100px" HeaderStyle-Width="100px" />
               </Columns>
               <DetailTables>
                 <telerik:GridTableView Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">
