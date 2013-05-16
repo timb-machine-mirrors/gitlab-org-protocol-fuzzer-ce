@@ -74,7 +74,6 @@ namespace PeachFarmMonitor
 
         faultsGrid.NeedDataSource += faultsGrid_NeedDataSource;
         faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
-        faultsGrid.ItemDataBound += faultsGrid_ItemDataBound;
 
         lblJobID.Text = job.Pit.FileName + " - " + job.JobID;
         downloadInputLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ZipFile;
@@ -162,6 +161,13 @@ namespace PeachFarmMonitor
       {
         switch (e.DetailTableView.DataMember)
         {
+          case "Description":
+            {
+              List<string> description = new List<string>();
+              description.Add(((FaultViewModel)parent.DataItem).Description);
+              e.DetailTableView.DataSource = description;
+            }
+            break;
           case "StateModel":
             {
               e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).StateModel;
@@ -172,22 +178,6 @@ namespace PeachFarmMonitor
               e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).CollectedData;
             }
             break;
-        }
-      }
-    }
-
-    protected void faultsGrid_ItemDataBound(object sender, Telerik.Web.UI.GridItemEventArgs e)
-    {
-      GridDataItem item = e.Item as GridDataItem;
-
-      if ((item != null) && (item.DataItem != null) && (item.DetailTemplateItemDataCell != null))
-      {
-        if (item.DataItem is FaultViewModel)
-        {
-          FaultViewModel fault = item.DataItem as FaultViewModel;
-          var panelbar = item.DetailTemplateItemDataCell.FindControl("descriptionPanel") as RadPanelBar;
-          var label = panelbar.Items[0].FindControl("descriptionLabel") as TextBox;
-          label.Text = fault.Description;
         }
       }
     }
@@ -211,6 +201,7 @@ namespace PeachFarmMonitor
       return ret;
     }
     #endregion
+
   }
 
   public class JobDetailData

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using PeachFarm.Admin.Configuration;
 using PeachFarm.Common.Mongo;
 using PeachFarm.Common;
 using PeachFarmMonitor.Configuration;
@@ -17,7 +16,6 @@ namespace PeachFarmMonitor
 {
   public partial class GetJobOutput : BasePage
   {
-    private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
 
     protected void Page_Load(object sender, EventArgs e)
@@ -34,7 +32,6 @@ namespace PeachFarmMonitor
 
         if (String.IsNullOrEmpty(jobID) == false)
         {
-          adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
           monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
           
           Job job = DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);

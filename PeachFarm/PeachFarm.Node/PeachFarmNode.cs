@@ -27,7 +27,7 @@ namespace PeachFarm.Node
 
 		private RabbitMqHelper rabbit;
 
-		public PeachFarmNode(string nodeQueueName = "")
+		public PeachFarmNode(string nodeName = "")
 		{
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
@@ -44,8 +44,8 @@ namespace PeachFarm.Node
 
 			#region node state
 			nodeState = new NodeState((Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node"));
-			if (String.IsNullOrEmpty(nodeQueueName) == false)
-				nodeState.NodeQueueName = nodeQueueName;
+			if (String.IsNullOrEmpty(nodeName) == false)
+				nodeState.NodeQueueName = String.Format(QueueNames.QUEUE_NODE, nodeName);
 
 			#endregion
 
@@ -363,10 +363,16 @@ namespace PeachFarm.Node
 
 			if (String.IsNullOrEmpty(nodeState.StartPeachRequest.MongoDbConnectionString) == false)
 			{
+				string nodeName = nodeState.NodeQueueName;
+				var ret = nodeState.NodeQueueName.ReverseFormatString(QueueNames.QUEUE_NODE);
+				if (ret.Count == 1)
+				{
+					nodeName = ret[0];
+				}
 				Dictionary<string, Peach.Core.Variant> mongoargs = new Dictionary<string, Peach.Core.Variant>();
 				mongoargs.Add("MongoDbConnectionString", new Peach.Core.Variant(nodeState.StartPeachRequest.MongoDbConnectionString));
 				mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.StartPeachRequest.JobID));
-				mongoargs.Add("UserName", new Peach.Core.Variant(nodeState.StartPeachRequest.UserName));
+				mongoargs.Add("NodeName", new Peach.Core.Variant(nodeName));
 				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.StartPeachRequest.PitFileName));
 
 				loggers.Add(new Loggers.MongoLogger(mongoargs));

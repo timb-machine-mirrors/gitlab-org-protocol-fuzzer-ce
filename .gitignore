@@ -41,6 +41,8 @@ test-results/
 /PeachFarm/*/[Oo]bj/
 /3rdParty/Irony*/*/[Bb]in/
 /3rdParty/Irony*/*/[Oo]bj/
+/3rdParty/TotalPhase-5.13/[Bb]in/
+/3rdParty/TotalPhase-5.13/[Oo]bj/
 
 # User-specific files
 *.user

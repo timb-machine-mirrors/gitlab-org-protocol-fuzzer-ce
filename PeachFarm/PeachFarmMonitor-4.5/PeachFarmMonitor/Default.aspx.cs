@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using PeachFarm.Admin.Configuration;
 using PeachFarm.Common;
 using PeachFarm.Common.Mongo;
 using Messages = PeachFarm.Common.Messages;
@@ -23,8 +22,6 @@ namespace PeachFarmMonitor
 {
   public partial class Home : BasePage
   {
-    private static PeachFarm.Admin.Admin admin = null;
-    private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
 
     private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
@@ -35,7 +32,6 @@ namespace PeachFarmMonitor
 
     public Home()
     {
-      adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
     }
 
@@ -43,7 +39,7 @@ namespace PeachFarmMonitor
     {
       if (!Page.IsPostBack)
       {
-        lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
+        //lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
         Monitor(true);
       }
     }
