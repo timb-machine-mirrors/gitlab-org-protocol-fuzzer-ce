@@ -791,7 +791,7 @@
 	<DataModel name="IPv4TCPv4IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
 			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
-				<Block name="PayloadContent" ref="IPv4:IPv4">
+				<Block name="PayloadContent" ref="IPv4:Packet">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
 					<Block name="IPv4Payload">
 						<Block name="TCP" ref="TCP:Packet">
@@ -817,7 +817,7 @@
 		<Block ref="IPSECv6Transport">
 			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
 				<Block name="PayloadContent">
-				  <Block name="IPv4" ref="IPv4:IPv4">
+				  <Block name="IPv4" ref="IPv4:Packet">
 						<Block name="IPv4Payload">
 							<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 						</Block>
@@ -860,7 +860,7 @@
 	<DataModel name="IPv4UDPv4IPSECv6Transport">
 		<Block ref="IPSECv6Transport">
 			<Block name="ESPHeader.EncryptedValues.GetPaddingSize.IpSecPayload">
-				<Block name="PayloadContent" ref="IPv4:IPv4">
+				<Block name="PayloadContent" ref="IPv4:Packet">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
 						<Block name="UDPHeader" ref="UDPv4:UDP">
@@ -1837,7 +1837,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="4"/>
 					<Block name="IPv6Payload">
-						<Block name="PayloadContent" ref="IPv4:IPv4">
+						<Block name="PayloadContent" ref="IPv4:Packet">
 							<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
 							<Block name="IPv4Payload">
 								<Block name="TCP" ref="TCP:Packet">
@@ -1871,7 +1871,7 @@
 					<Number name="NextHeader" size="8" endian="big" value="04"/>
 					<Block name="IPv6Payload">
 						<Block name="PayloadContent">
-							<Block name="IPv4" ref="IPv4:IPv4">
+							<Block name="IPv4" ref="IPv4:Packet">
 								<Block name="IPv4Payload">
 									<Blob valueType="hex" value="0800b95d0bec0001c686c14ebedc010008090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"/>
 								</Block>
@@ -1930,7 +1930,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="4"/>
 					<Block name="IPv6Payload">
-						<Block name="PayloadContent" ref="IPv4:IPv4">
+						<Block name="PayloadContent" ref="IPv4:Packet">
 							<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 							<Block name="IPv4Payload">
 								<Block name="UDPHeader" ref="UDPv4:UDP">

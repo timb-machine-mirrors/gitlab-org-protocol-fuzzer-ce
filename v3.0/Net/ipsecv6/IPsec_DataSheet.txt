@@ -59,6 +59,16 @@ Detailed Use Cases
 |ICV HMAC-RIPEMD-160-96 | RFC2857
 |3DES-CBC Cipher Encryption | RFC2405, RFC2451 
 |Null Encryption | RFC2410
+|ESP Encapsulated in UDP (TODO IKE) | RFC3948
+|Encryption Algs: CAST-128, RC5, IDEA, Blowfish (TODO) | RFC2451
+|IKE Support (TODO) | RFC3947, RFC4555, RFC4307, RFC4806, RFC4835, RFC4945, RFC5996
+|Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security Payload (ESP) (TODO) | RFC4106
+|Extened Sequence Numbers (TODO) | RFC4304
+|Crypto Suites (TODO IKE) | RFC4308
+|AES CCM with ESP (TODO) | RFC4309
+|AES GCM (GMAC) (TODO) | RFC4543
+|Combined Confidentiality and Integrity Algorithms (TODO) | RFC4303 3.4.4.2
+|Sequence Number Generation (Partial TODO) | RFC4303 3.3.3, 3.4.3
 |========
 
 [options="header"]
@@ -67,16 +77,7 @@ Detailed Use Cases
 |
 |========
 
---Doesn't support anti-replay (reestablishing the SA when Sequence number will cycle |Sequence Number Generation | RFC4303 3.3.3, 3.4.3
+--Doesn't support anti-replay (reestablishing the SA when Sequence number will cycle 
 --Doesn't support Fragmentation (Cracking) processing (fragmentation reassembly should probably be done by the publisher/might already be done by publisher)
 --Doesn't support Fragmentented sending RFC4303 3.3.4-3.4.2
 --Doesn't support randomly generated IV's
---Doesn't support ESP Encapsulated in UDP RFC3948 (Mainly used for IKE)
---Doesn't support the following Encryption Algs: CAST-128, RC5, IDEA, Blowfish. RFC2451
---Doesn't support IKE (RFC3947, RFC4555, RFC4307, RFC4806, RFC4835, RFC4945, RFC5996)
---Doesn't support Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security Payload (ESP) RFC4106
---Doesn't support Extened Sequence Numbers (used with IKE) RFC4304
---Partial support for Crypto Suites (Missing all IKE) RFC4308
---Doesn't support AES CCM with ESP RFC4309
---Doesn't support AES GCM (GMAC) RFC4543
---Maybe supports |Combined Confidentiality and Integrity Algorithms | RFC4303 3.4.4.2
