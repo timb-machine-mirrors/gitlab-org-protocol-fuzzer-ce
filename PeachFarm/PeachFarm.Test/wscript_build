@@ -11,6 +11,8 @@ deps = [
 	'PeachFarm.Controller.dll',
 	'PeachFarm.Node.dll',
 	'nunit.framework.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(
