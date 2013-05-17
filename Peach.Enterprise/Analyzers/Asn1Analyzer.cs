@@ -21,7 +21,9 @@ namespace Peach.Enterprise.Analyzers
 	[Serializable]
 	public class Asn1Analyzer : Analyzer
 	{
-        static Asn1Analyzer()
+		string CurrentTag = null;
+
+		static Asn1Analyzer()
         {
             supportParser = false;
             supportDataElement = true;
@@ -59,12 +61,15 @@ namespace Peach.Enterprise.Analyzers
 			block.parent[blob.name] = block;
 		}
 
+		static int NameCounter = 0;
 		DataElementContainer MakeAsn1Der(DataElement data, Asn1Node node)
 		{
-			var container = new Block();
-			var type = new Number();
-			var asn1Length = new Asn1DerLength();
-			var length = new Number();
+			NameCounter++;
+
+			var container = new Block(CurrentTag + NameCounter);
+			var type = new Number("Type");
+			var asn1Length = new Asn1DerLength("Asn1DerLength");
+			var length = new Number("Length");
 			var lengthRelation = new SizeRelation();
 
 			type.length = 8;
@@ -92,7 +97,7 @@ namespace Peach.Enterprise.Analyzers
 
 		DataElementContainer HandleSequence(DataElementContainer parent, Asn1Node sequence)
 		{
-			var block = new Block();
+			var block = new Block(CurrentTag + NameCounter);
 
 			for (int count = 0; count < sequence.ChildNodeCount; count++)
 			{
@@ -105,7 +110,7 @@ namespace Peach.Enterprise.Analyzers
 
 		DataElementContainer HandleBitString(DataElementContainer parent, Asn1Node sequence)
 		{
-			var block = new Block();
+			var block = new Block(CurrentTag + NameCounter);
 
 			var num = new Number();
 			num.length = 8;
@@ -131,34 +136,39 @@ namespace Peach.Enterprise.Analyzers
 
 		DataElement HandleAsn1Node(DataElementContainer parent, Asn1Node node)
 		{
-			switch (node.Tag & Asn1TagClasses.CLASS_MASK)
+			NameCounter++;
+
+			switch ((Asn1TagClasses)(node.Tag & (byte)Asn1TagClasses.CLASS_MASK))
 			{
 				case Asn1TagClasses.CONTEXT_SPECIFIC:
+					CurrentTag = Asn1TagClasses.CONTEXT_SPECIFIC.ToString();
 					return HandleSequence(parent, node);
 
 			}
 
-			switch (node.Tag & Asn1Tag.TAG_MASK)
+			CurrentTag = ((Asn1Tag)(node.Tag & (byte)Asn1Tag.TAG_MASK)).ToString();
+
+			switch ((Asn1Tag)(node.Tag & (byte)Asn1Tag.TAG_MASK))
 			{
 
 				case Asn1Tag.PRINTABLE_STRING:
 				case Asn1Tag.IA5_STRING:
 					{
-						var str = new Peach.Core.Dom.String();
+						var str = new Peach.Core.Dom.String("String");
 						str.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
 						return MakeAsn1Der(str, node);
 					}
 				case Asn1Tag.UTC_TIME:
 				case Asn1Tag.NUMERIC_STRING:
 					{
-						var numstr = new Peach.Core.Dom.String();
+						var numstr = new Peach.Core.Dom.String("NumericString");
 						numstr.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
 						// TODO add hint for numeric
 						return MakeAsn1Der(numstr, node);
 					}
 				case Asn1Tag.UTF8_STRING:
 					{
-						var ustr = new Peach.Core.Dom.String();
+						var ustr = new Peach.Core.Dom.String("Utf8String");
 						ustr.stringType = StringType.utf8;
 						ustr.DefaultValue = new Variant(System.Text.Encoding.Default.GetString(node.Data));
 						return MakeAsn1Der(ustr, node);				
@@ -193,7 +203,7 @@ namespace Peach.Enterprise.Analyzers
 				
 				case Asn1Tag.ENUMERATED:
 					{
-						var blob = new Blob();
+						var blob = new Blob("Blob"+NameCounter);
 						blob.DefaultValue = new Variant(node.Data);
 
 						return MakeAsn1Der(blob, node);
