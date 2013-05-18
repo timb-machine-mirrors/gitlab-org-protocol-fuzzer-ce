@@ -172,6 +172,12 @@ namespace PeachFarm.Common.Mongo
 			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
 			faults.RemoveAll(WriteConcern.Acknowledged);
 
+			var files = db.GridFS.FindAll();
+			foreach (var file in files)
+			{
+				file.Delete();
+			}
+
 			server.Disconnect();
 		}
 		
@@ -315,6 +321,15 @@ namespace PeachFarm.Common.Mongo
 			var gridFsInfo = db.GridFS.Upload(localFileName, remoteFileName);
 			server.Disconnect();
 			return gridFsInfo.Id.ToString();
+		}
+
+		public static StreamWriter CreateFileGridFS(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			
+			return db.GridFS.CreateText(remoteFileName);
+
 		}
 
 		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)

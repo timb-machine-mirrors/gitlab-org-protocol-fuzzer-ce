@@ -62,13 +62,12 @@ namespace PeachFarm.Node.Service
 
     protected override void OnStop()
     {
-      base.OnStop();
-
       if (node != null)
       {
         node.Close();
         logger.Info("Peach Farm Node Stopped.");
       }
-    }
+			base.OnStop();
+		}
   }
 }

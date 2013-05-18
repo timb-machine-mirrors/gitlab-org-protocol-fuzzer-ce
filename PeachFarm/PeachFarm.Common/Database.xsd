@@ -40,6 +40,14 @@
   <xs:complexType name="Fault">
     <xs:sequence>
       <xs:element name="Description" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="GeneratedFiles" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="GeneratedFile" type="GeneratedFile" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!--
 			<xs:element name="StateModel" maxOccurs="1" minOccurs="1" >
 				<xs:complexType>
 					<xs:sequence>
@@ -54,6 +62,7 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
+			-->
 		</xs:sequence>
 		<xs:attribute name="Stamp" type="xs:dateTime" use="required" />
 		<xs:attribute name="IsReproduction" type="xs:boolean" use="required" />
@@ -71,16 +80,17 @@
 		<xs:attribute name="SeedNumber" type="xs:unsignedInt" use="required" />
 		<xs:attribute name="JobID" type="xs:string" use="required" />
 		<xs:attribute name="NodeName" type="xs:string" use="required" />
-		<xs:attribute name="Group" type="xs:string" use="required" />
 	</xs:complexType>
 
+	<xs:complexType name="GeneratedFile">
+		<xs:attribute name="Name" type="xs:string" use="required" />
+		<xs:attribute name="GridFsLocation" type="xs:string" use="required" />
+	</xs:complexType>
+	<!--
   <xs:complexType name="CollectedData">
     <xs:sequence>
 			<xs:element name="Key" type="xs:string" maxOccurs="1" minOccurs="1" />
 			<xs:element name="DataPath" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<!--
-			<xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
-			-->
 		</xs:sequence>
 	</xs:complexType>
 
@@ -90,9 +100,7 @@
       <xs:element name="ActionType" type="xs:string" maxOccurs="1" minOccurs="1" />
       <xs:element name="Parameter" type="xs:int" maxOccurs="1" minOccurs="1" />
 			<xs:element name="DataPath" type="xs:string" maxOccurs="1" minOccurs="1" />
-			<!--
-			<xs:element name="Data" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
-			-->
-    </xs:sequence>
+		</xs:sequence>
 	</xs:complexType>
+	-->
 </xs:schema>

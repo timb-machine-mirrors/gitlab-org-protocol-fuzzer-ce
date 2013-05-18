@@ -31,12 +31,14 @@ namespace PeachFarm.Test
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
+			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+
 			controller = new Controller.PeachFarmController(testName);
 			while (controller.IsListening == false) { }
 			node = new Node.PeachFarmNode(testName);
 			while (node.IsListening == false) { }
 			Debug.WriteLine("Waiting for node to register with controller...");
-			WaitForNode(30);
+			WaitForNode(200);
 			Debug.WriteLine("Node online");
 		}
 
@@ -100,11 +102,49 @@ namespace PeachFarm.Test
 			while (!done) { }
 			admin.StartPeachCompleted -= startHandler;
 
-			while (WaitForNode().Status == Common.Messages.Status.Running)
+			WaitForNode(100, n => n.Status == Common.Messages.Status.Running);
+			WaitForNode(100, n => n.Status == Common.Messages.Status.Alive);
+
+			Assert.AreEqual(Common.Messages.Status.Alive, node.Status);
+			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString).Count);
+		}
+
+
+		public void DebuggerWindows()
+		{
+			bool done = false;
+			string jobid = String.Empty;
+			PeachFarm.Admin.Admin.StartPeachCompletedEventHandler startHandler = (o, e) =>
 			{
-				Sleep(1000);
-			}
-			Assert.AreEqual(Common.Messages.Status.Alive, WaitForNode().Status);
+				Assert.AreEqual(true, e.Result.Success);
+				jobid = e.Result.JobID;
+				Assert.IsNotNullOrEmpty(jobid);
+				done = true;
+			};
+			admin.StartPeachCompleted += startHandler;
+			admin.StartPeachAsync("DebuggerWindows.xml", null, 1, null, null);
+			while (!done) { }
+			admin.StartPeachCompleted -= startHandler;
+
+			WaitForNode(30, n => n.Status == Common.Messages.Status.Running);
+
+			done = false;
+			PeachFarm.Admin.Admin.StopPeachCompletedEventHandler stopHandler = (o, e) =>
+			{
+				Assert.AreEqual(true, e.Result.Success);
+				done = true;
+			};
+			admin.StopPeachCompleted += stopHandler;
+			admin.StopPeachAsync(jobid);
+			while (!done) { }
+			admin.StopPeachCompleted -= stopHandler;
+
+			WaitForNode(30, n => n.Status == Common.Messages.Status.Alive);
+
+			var job = DatabaseHelper.GetJob(jobid, config.MongoDb.ConnectionString);
+			job.FillNodes(config.MongoDb.ConnectionString);
+			Assert.AreEqual(1, job.Nodes.Count);
+			Assert.Less(0, job.Nodes[0].IterationCount);
 			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString).Count);
 		}
 		#endregion
@@ -115,11 +155,19 @@ namespace PeachFarm.Test
 			System.Threading.Thread.Sleep(milliseconds);
 		}
 
-		private PeachFarm.Common.Messages.Heartbeat WaitForNode(int tries = 0)
+		private PeachFarm.Common.Messages.Heartbeat WaitForNode(int tries = 0, Func<PeachFarm.Common.Messages.Heartbeat, bool> condition = null)
 		{
-			bool limittries = (tries != 0);
-			List<PeachFarm.Common.Messages.Heartbeat> nodes = null;
-			while ((nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString)).Count == 0)
+			bool limittries = (tries > 0);
+			PeachFarm.Common.Messages.Heartbeat node = null;
+			if(condition == null)
+			{
+				node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault();
+			}
+			else
+			{
+				node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault(condition);
+			}
+			while (node == null)
 			{
 				if (limittries)
 				{
@@ -128,9 +176,17 @@ namespace PeachFarm.Test
 					else
 						throw new TimeoutException("WaitForNode tries exceeded.");
 				}
-				Sleep(1000);
+				Sleep(100);
+				if (condition == null)
+				{
+					node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault();
+				}
+				else
+				{
+					node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault(condition);
+				}
 			}
-			return nodes[0];
+			return node;
 		}
 		#endregion
 	}

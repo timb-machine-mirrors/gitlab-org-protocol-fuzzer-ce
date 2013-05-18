@@ -29,6 +29,8 @@ namespace PeachFarm.Admin.Console
 				bool errors = false;
 				bool jobInfo = false;
 				bool jobs = false;
+				bool output = false;
+				bool truncate = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -46,6 +48,8 @@ namespace PeachFarm.Admin.Console
 						{ "errors", v => errors = true },
 						{ "info", var => jobInfo = true },
 						{ "jobs", var => jobs = true },
+						{ "output", var => output = true},
+						{ "truncate", var => truncate = true},
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -55,7 +59,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -68,6 +72,9 @@ namespace PeachFarm.Admin.Console
 					Program.syntax();
 
 				if (jobInfo && extra.Count != 1)
+					Program.syntax();
+
+				if (output && extra.Count != 2)
 					Program.syntax();
 
 				#endregion
@@ -159,6 +166,44 @@ namespace PeachFarm.Admin.Console
 				{
 					mustwait = false;
 					admin.MonitorAsync();
+				}
+				#endregion
+
+				#region Job Output
+				if (output)
+				{
+					mustwait = false;
+
+					string jobID = extra[0];
+					string destinationFolder = extra[1];
+
+					try
+					{
+						admin.DumpFiles(jobID, destinationFolder);
+					}
+					catch (Exception ex)
+					{
+						System.Console.WriteLine("Error getting files:\n" + ex.Message);
+						return;
+					}
+					System.Console.WriteLine("Done!");
+				}
+				#endregion
+
+				#region Truncate
+				if (truncate)
+				{
+					mustwait = false;
+					try
+					{
+						admin.TruncateAllCollections();
+					}
+					catch (Exception ex)
+					{
+						System.Console.WriteLine("Error truncating tables:\n" + ex.ToString());
+						return;
+					}
+					System.Console.WriteLine("Done!");
 				}
 				#endregion
 
@@ -379,6 +424,8 @@ Syntax:
       Get information for a Job and a list of Running Nodes
         pf_admin.exe -info jobID
 
+			Get generated files for a Job
+				pf_admin.exe -output jobID destinationFolder
 
 Commands:
 
@@ -403,6 +450,10 @@ Commands:
 
  info - Get information for a Job and a list of Running Nodes
    jobID - Job ID
+
+ output - Get generated files for a Job
+	 jobID - Job ID
+   destinationFolder - Folder where files will be downloaded to
 
 ");
 		}

@@ -532,5 +532,15 @@ namespace PeachFarm.Admin
 		}
 
 
+
+		public void DumpFiles(string jobID, string destinationFolder)
+		{
+			FileWriter.DumpFiles(config.MongoDb.ConnectionString, destinationFolder, jobID);
+		}
+
+		public void TruncateAllCollections()
+		{
+			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+		}
 	}
 }

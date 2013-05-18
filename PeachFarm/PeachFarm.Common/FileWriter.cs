@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PeachFarm.Common.Mongo;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 
 namespace PeachFarm.Common
@@ -57,151 +59,21 @@ namespace PeachFarm.Common
 
 		private static void ProcessJob(Job job, string mongoDbConnectionString, string destinationFolder)
     {
-			string jobFolder = String.Empty;
-			string nodeFolder = String.Empty;
-			string testFolder = String.Empty;
-			string faultsFolder = String.Empty;
-			string statusFile = String.Empty;
-			string faultFolder = String.Empty;
-			string iterationFolder = String.Empty;
-			string actionFile = String.Empty;
-			string collectedDataFile = String.Empty;
-
-			if((job.Nodes == null) || (job.Nodes.Count == 0))
+			MongoServer server = new MongoClient(mongoDbConnectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			string jobfolder = String.Format("Job_{0}_{1}*", job.JobID, job.Pit.FileName);
+			var query = Query.Matches("filename", new MongoDB.Bson.BsonRegularExpression(jobfolder, "i"));
+			var files = db.GridFS.Find(query);
+			foreach(var file in files)
 			{
-				job.FillNodes(mongoDbConnectionString);
-				foreach (Node node in job.Nodes)
-				{
-					node.FillFaults(mongoDbConnectionString, false);
-				}
+				string localFile = Path.Combine(destinationFolder, file.Name);
+				CreateDirectory(Path.GetDirectoryName(localFile));
+				db.GridFS.Download(localFile, file.Name);
 			}
+			server.Disconnect();
+		}
 
-			System.Console.WriteLine("Processing Job: " + job.JobID);
-
-			jobFolder = Path.Combine(destinationFolder, "Job_" + job.JobID + "_" + job.Pit.FileName);
-			CreateDirectory(jobFolder);
-
-			foreach (Node node in job.Nodes)
-			{
-				nodeFolder = Path.Combine(jobFolder, "Node_" + node.Name);
-				CreateDirectory(nodeFolder);
-
-				foreach (Fault fault in node.Faults)
-				{
-					testFolder = Path.Combine(nodeFolder, String.Format("{0}_{1}_{2}", job.Pit.FileName, fault.TestName, FormatDate(job.StartDate)));
-					CreateDirectory(testFolder);
-
-					statusFile = Path.Combine(testFolder, "status.txt");
-
-					if (File.Exists(statusFile) == false)
-					{
-						StringBuilder statusHeader = new StringBuilder();
-						statusHeader.AppendLine("Peach Fuzzing Run");
-						statusHeader.AppendLine("=================");
-						statusHeader.AppendLine("");
-						statusHeader.AppendLine("Date of run: " + job.StartDate.ToString());
-						//log.WriteLine("Peach Version: " + context.config.version);
-						statusHeader.AppendLine("Peach Version: 3.0.0.0");
-
-						statusHeader.AppendLine("Seed: " + fault.SeedNumber.ToString());
-
-						statusHeader.AppendLine("Command line: " + job.Pit.FileName);
-						statusHeader.AppendLine("Pit File: " + job.Pit.FileName);
-						statusHeader.AppendLine(". Test starting: " + fault.TestName);
-						statusHeader.AppendLine("");
-						File.AppendAllText(statusFile, statusHeader.ToString());
-					}
-
-					File.AppendAllText(statusFile, String.Format("! Fault detected at iteration {0} : {1}\n", fault.Iteration.ToString(), fault.Stamp.ToString()));
-
-					faultsFolder = Path.Combine(testFolder, "Faults");
-					CreateDirectory(faultsFolder);
-
-
-					#region set faultFolder
-					if (fault.FolderName != null)
-					{
-						faultFolder = System.IO.Path.Combine(faultsFolder, fault.FolderName);
-					}
-					else if (String.IsNullOrEmpty(fault.MajorHash) && String.IsNullOrEmpty(fault.MinorHash) && String.IsNullOrEmpty(fault.Exploitability))
-					{
-						faultFolder = System.IO.Path.Combine(faultsFolder, "Unknown");
-					}
-					else
-					{
-						faultFolder = System.IO.Path.Combine(faultsFolder,
-							string.Format("{0}_{1}_{2}", fault.Exploitability, fault.MajorHash, fault.MinorHash));
-					}
-					#endregion
-					CreateDirectory(faultFolder);
-
-					iterationFolder = Path.Combine(faultFolder, fault.Iteration.ToString());
-					CreateDirectory(iterationFolder);
-
-					#region write action files
-					int cnt = 0;
-					foreach (PeachFarm.Common.Mongo.Action action in fault.StateModel)
-					{
-						cnt++;
-						if (action.Parameter == 0)
-						{
-							actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}_{1}_{2}.txt",
-											cnt, action.ActionType.ToString(), action.ActionName));
-
-						}
-						else
-						{
-							actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
-											cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
-						}
-
-						if (File.Exists(actionFile) == false)
-						{
-							if (action.Data == null)
-							{
-								DatabaseHelper.DownloadFromGridFS(actionFile, action.DataPath, mongoDbConnectionString);
-							}
-							else
-							{
-								File.WriteAllBytes(actionFile, action.Data);
-							}
-						}
-					}
-					#endregion
-
-					#region write collected data files
-					foreach (CollectedData cd in fault.CollectedData)
-					{
-						collectedDataFile = System.IO.Path.Combine(iterationFolder,
-							fault.DetectionSource + "_" + cd.Key);
-
-						if (File.Exists(collectedDataFile) == false)
-						{
-							if (cd.Data == null)
-							{
-								DatabaseHelper.DownloadFromGridFS(collectedDataFile, cd.DataPath, mongoDbConnectionString);
-							}
-							else
-							{
-								File.WriteAllBytes(collectedDataFile, cd.Data);
-							}
-						}
-					}
-					#endregion
-				}
-			}
-    }
-
-    private static string FormatDate(DateTime dateTime)
-    {
-      return String.Format("{0:yyyyMMddhhmmss}", dateTime);
-    }
-
-    public static void CreateDirectory(string folder)
-    {
-      if (Directory.Exists(folder) == false)
-        Directory.CreateDirectory(folder);
-    }
+		
 
 		#region GetZip
 		/*
@@ -242,5 +114,13 @@ namespace PeachFarm.Common
     }
 		//*/
 		#endregion
+
+		public static void CreateDirectory(string folder)
+		{
+			if (Directory.Exists(folder) == false)
+			{
+				Directory.CreateDirectory(folder);
+			}
+		}
 	}
 }

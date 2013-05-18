@@ -13,6 +13,7 @@ using PeachFarm.Common;
 using PeachFarm.Common.Messages;
 using System.Net;
 using PeachFarm.Node.Configuration;
+using System.Text.RegularExpressions;
 
 namespace PeachFarm.Node
 {
@@ -126,6 +127,10 @@ namespace PeachFarm.Node
 				if (nodeState.Status == Status.Running)
 				{
 					StopPeach();
+					while (nodeState.Status != Status.Alive)
+					{
+						Thread.Sleep(1000);
+					}
 				}
 				#endregion
 
@@ -374,6 +379,7 @@ namespace PeachFarm.Node
 				mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.StartPeachRequest.JobID));
 				mongoargs.Add("NodeName", new Peach.Core.Variant(nodeName));
 				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.StartPeachRequest.PitFileName));
+				mongoargs.Add("Path", new Peach.Core.Variant(String.Format("Job_{0}_{1}\\Node_{2}", nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueueName)[0])));
 
 				loggers.Add(new Loggers.MongoLogger(mongoargs));
 			}
@@ -513,6 +519,22 @@ namespace PeachFarm.Node
 			}
 		}
 
+		private List<string> reverseStringFormat(string template, string str)
+		{
+			string pattern = "^" + Regex.Replace(template, @"\{[0-9]+\}", "(.*?)") + "$";
+
+			Regex r = new Regex(pattern);
+			Match m = r.Match(str);
+
+			List<string> ret = new List<string>();
+
+			for (int i = 1; i < m.Groups.Count; i++)
+			{
+				ret.Add(m.Groups[i].Value);
+			}
+
+			return ret;
+		}
 	}
 
 	internal class NodeState

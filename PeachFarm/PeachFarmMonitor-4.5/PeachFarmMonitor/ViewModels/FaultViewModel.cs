@@ -18,7 +18,6 @@ namespace PeachFarmMonitor.ViewModels
       this.Exploitability = fault.Exploitability;
       this.FaultType = fault.FaultType;
       this.FolderName = fault.FolderName;
-      this.Group = fault.Group;
       this.IsReproduction = fault.IsReproduction;
       this.Iteration = fault.Iteration;
       this.JobID = fault.JobID;
@@ -30,23 +29,14 @@ namespace PeachFarmMonitor.ViewModels
       this.TestName = fault.TestName;
       this.Title = fault.Title;
 
-      this.StateModel = new List<ActionViewModel>();
-      foreach (var a in fault.StateModel)
-      {
-        this.StateModel.Add(new ActionViewModel(a));
-      }
-
-      this.CollectedData = new List<CollectedData>();
-      foreach (var c in fault.CollectedData)
-      {
-        this.CollectedData.Add(new CollectedDataViewModel(c));
-      }
+			this.GeneratedFiles = new List<GeneratedFileViewModel>();
+			foreach (var gf in fault.GeneratedFiles)
+			{
+				this.GeneratedFiles.Add(new GeneratedFileViewModel(gf));
+			}
     }
 
-    public new List<ActionViewModel> StateModel { get; set; }
-
-    public new List<CollectedData> CollectedData { get; set; }
-
+    public new List<GeneratedFileViewModel> GeneratedFiles { get; set; }
   }
 
 }

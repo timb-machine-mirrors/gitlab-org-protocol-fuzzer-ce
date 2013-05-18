@@ -12,7 +12,8 @@ namespace PeachFarm.Loggers
 	[Peach.Core.Parameter("JobID", typeof(string), "")]
 	[Peach.Core.Parameter("NodeName", typeof(string), "")]
 	[Peach.Core.Parameter("PitFileName", typeof(string), "")]
-	public class MongoLogger : Peach.Core.Logger
+	[Peach.Core.Parameter("Path", typeof(string),"")]
+	public class MongoLogger : Peach.Core.Loggers.FileLogger
 	{
 		private Common.Mongo.Job mongoJob = null;
 		private Common.Mongo.Node mongoNode = null;
@@ -20,13 +21,14 @@ namespace PeachFarm.Loggers
 		private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
 
 		public MongoLogger(Dictionary<string, Peach.Core.Variant> args)
+			:base(args)
 		{
 
 			MongoConnectionString = (string)args["MongoDbConnectionString"];
 			JobID = (string)args["JobID"];
 			NodeName = (string)args["NodeName"];
 			PitFileName = (string)args["PitFileName"];
-
+			
 		}
 
 		#region Properties
@@ -59,8 +61,7 @@ namespace PeachFarm.Loggers
 		/// <param name="faultData"></param>
 		protected override void Engine_ReproFault(Peach.Core.RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Peach.Core.Fault[] faultData)
 		{
-			List<Fault> faults = GetMongoFaults(faultData, stateModel, context);
-			faults.SaveToDatabase(MongoConnectionString);
+			base.Engine_ReproFault(context, currentIteration, stateModel, faultData);
 
 			mongoNode.FaultCount++;
 			mongoNode.SaveToDatabase(MongoConnectionString);
@@ -75,8 +76,7 @@ namespace PeachFarm.Loggers
 		/// <param name="faultData"></param>
 		protected override void Engine_Fault(Peach.Core.RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Peach.Core.Fault[] faultData)
 		{
-			List<Fault> faults = GetMongoFaults(faultData, stateModel, context, true);
-			faults.SaveToDatabase(MongoConnectionString);
+			base.Engine_Fault(context, currentIteration, stateModel, faultData);
 
 			mongoNode.FaultCount++;
 			mongoNode.SaveToDatabase(MongoConnectionString);
@@ -84,23 +84,82 @@ namespace PeachFarm.Loggers
 
 		protected override void Engine_TestStarting(Peach.Core.RunContext context)
 		{
+			base.Engine_TestStarting(context);
+
 			System.Console.WriteLine("******** PEACH: START TEST ************");
 			mongoJob = DatabaseHelper.GetJob(JobID, MongoConnectionString);
 			mongoNode = DatabaseHelper.GetJobNode(NodeName, JobID, MongoConnectionString);
 		}
 
-		protected override void Engine_TestFinished(Peach.Core.RunContext context)
-		{
-		}
-
 		protected override void Engine_IterationStarting(Peach.Core.RunContext context, uint currentIteration, uint? totalIterations)
 		{
+			base.Engine_IterationStarting(context, currentIteration, totalIterations);
+
 			mongoNode.IterationCount = currentIteration;
 			mongoNode.SaveToDatabase(MongoConnectionString);
+		}
+
+		protected override string GetBasePath(Peach.Core.RunContext context)
+		{
+			return Path;
+		}
+
+		protected override System.IO.TextWriter OpenStatusLog()
+		{
+			return DatabaseHelper.CreateFileGridFS(System.IO.Path.Combine(Path, "status.txt"), MongoConnectionString);
+		}
+
+		protected override void SaveFile(Peach.Core.Loggers.FileLogger.Category category, string fullPath, byte[] contents)
+		{
+			if (category == Category.Reproducing)
+				return;
+
+			DatabaseHelper.SaveToGridFS(contents, fullPath, MongoConnectionString);
+		}
+
+		protected override void OnFaultSaved(Category category, Peach.Core.Fault fault, string[] dataFiles)
+		{
+			if (category == Category.Reproducing)
+				return;
+
+			// TODO: Make mongo fault record and add to database
+			Fault mongoFault = new Fault();
+			mongoFault.ControlIteration = fault.controlIteration;
+			mongoFault.ControlRecordingIteration = fault.controlRecordingIteration;
+			mongoFault.Description = fault.description;
+			mongoFault.DetectionSource = fault.detectionSource;
+			mongoFault.Exploitability = fault.exploitability;
+			mongoFault.FaultType = fault.type.ToString();
+			mongoFault.FolderName = fault.folderName;
+			mongoFault.IsReproduction = (category == Category.Faults);
+			mongoFault.Iteration = fault.iteration;
+			mongoFault.JobID = mongoJob.JobID;
+			mongoFault.MajorHash = fault.majorHash;
+			mongoFault.MinorHash = fault.minorHash;
+			mongoFault.NodeName = mongoNode.Name;
+			mongoFault.SeedNumber = mongoNode.SeedNumber;
+			mongoFault.Stamp = DateTime.Now;
+			//mongoFault.TestName = fault.te
+			mongoFault.Title = fault.title;
+
+			mongoFault.GeneratedFiles = new List<GeneratedFile>();
+			foreach (var dataFile in dataFiles)
+			{
+				GeneratedFile newfile = new GeneratedFile();
+				newfile.Name = dataFile.Substring(Path.Length + 8);
+				newfile.GridFsLocation = dataFile;
+				mongoFault.GeneratedFiles.Add(newfile);
+			}
+
+			mongoFault.SaveToDatabase(MongoConnectionString);
+
+			// folderName is the bucket name used for this fault
+			//string bucket = fault.folderName;
 		}
 		#endregion
 
 		#region private functions
+		/*
 		private List<Common.Mongo.Fault> GetMongoFaults(Peach.Core.Fault[] peachFaults, Peach.Core.Dom.StateModel stateModel, Peach.Core.RunContext context, bool isreproduction = false)
 		{
 			List<Common.Mongo.Fault> mongoFaults = new List<Fault>();
@@ -198,6 +257,7 @@ namespace PeachFarm.Loggers
 
 			return cds;
 		}
+		//*/
 		#endregion
 	}
 }
