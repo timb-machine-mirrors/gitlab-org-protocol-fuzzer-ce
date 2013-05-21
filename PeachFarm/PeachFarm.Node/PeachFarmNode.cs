@@ -379,7 +379,7 @@ namespace PeachFarm.Node
 				mongoargs.Add("JobID", new Peach.Core.Variant(nodeState.StartPeachRequest.JobID));
 				mongoargs.Add("NodeName", new Peach.Core.Variant(nodeName));
 				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.StartPeachRequest.PitFileName));
-				mongoargs.Add("Path", new Peach.Core.Variant(String.Format("Job_{0}_{1}\\Node_{2}", nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueueName)[0])));
+				mongoargs.Add("Path", new Peach.Core.Variant(String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueueName)[0])));
 
 				loggers.Add(new Loggers.MongoLogger(mongoargs));
 			}

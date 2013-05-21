@@ -320,7 +320,7 @@ namespace PeachFarm.Admin
 
 			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
-			request.ZipFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+			request.ZipFile = String.Format(Formats.JobFolder + "{1}.zip", request.JobID, request.PitFileName);
 			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, config.MongoDb.ConnectionString);
 
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);

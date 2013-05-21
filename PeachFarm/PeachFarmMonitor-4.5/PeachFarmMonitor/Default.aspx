@@ -7,6 +7,9 @@
 <head id="Head1" runat="server">
   <title>Peach Farm Monitor</title>
   <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server"  />
+	<!--
+	-->
+	<meta http-equiv="refresh" content="300" />
   <style type="text/css">
 	  html,body {
 	    height: 100%;
@@ -183,7 +186,7 @@
             </asp:TableRow>
           </asp:Table>
         </asp:Panel>
-        <telerik:RadGrid ID="nodesGrid" runat="server" 
+        <telerik:RadGrid ID="nodesGrid" runat="server"
           AutoGenerateColumns="false" AllowSorting="True" 
           OnItemDataBound="nodesGrid_ItemDataBound" 
           OnSortCommand="nodesGrid_SortCommand" 
@@ -240,6 +243,8 @@
       </telerik:RadPageView>
     </telerik:RadMultiPage>
     <asp:Panel ID="Panel1" runat="server" Width="0" Height="0">
+			<!--
+			-->
       <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick" Enabled="true" />
     </asp:Panel>
   </form>

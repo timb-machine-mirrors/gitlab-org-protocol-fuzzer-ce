@@ -316,6 +316,16 @@ namespace PeachFarm.Common.Mongo
 			get { return faultsField; }
 			set { faultsField = value; }
 		}
+
+		[BsonIgnore]
+		[XmlIgnore]
+		public string JobFolder
+		{
+			get
+			{
+				return String.Format(Formats.JobFolder, this.JobID, this.Pit.FileName);
+			}
+		}
 	}
 
 	public partial class Pit
@@ -355,6 +365,12 @@ namespace PeachFarm.Common.Mongo
 
 		[BsonIgnore]
 		public List<Fault> Faults { get; set; }
+
+		[BsonIgnore]
+		public string NodeFolder
+		{
+			get { return "Node_" + this.Name; }
+		}
 	}
 
 	public partial class Fault

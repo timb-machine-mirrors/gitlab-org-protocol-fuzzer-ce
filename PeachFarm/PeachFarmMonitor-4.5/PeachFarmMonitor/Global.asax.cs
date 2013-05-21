@@ -44,8 +44,14 @@ namespace PeachFarmMonitor
         {
           try
           {
-            if (File.Exists(tempfile))
-              File.Delete(tempfile);
+						FileInfo fi = new FileInfo(tempfile);
+						if (fi.Exists)
+						{
+							if (fi.Attributes.HasFlag(FileAttributes.Directory))
+								Directory.Delete(tempfile);
+							else
+								File.Delete(tempfile);
+						}
           }
           catch { }
         }

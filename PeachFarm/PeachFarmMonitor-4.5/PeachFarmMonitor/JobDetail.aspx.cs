@@ -69,9 +69,7 @@ namespace PeachFarmMonitor
       {
         Job = new JobViewModel(job);
 
-        faultBucketsGrid.ItemDataBound += faultBucketsGrid_ItemDataBound;
         faultBucketsGrid.NeedDataSource += faultBucketsGrid_NeedDataSource;
-
         faultsGrid.NeedDataSource += faultsGrid_NeedDataSource;
         faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
 
@@ -103,11 +101,8 @@ namespace PeachFarmMonitor
         faultBucketsGrid.DataSource = faultBuckets;
         //faultBucketsGrid.MasterTableView.VirtualItemCount = faultBuckets.Count;
       }
-    }
-    
-    void faultBucketsGrid_ItemDataBound(object sender, GridItemEventArgs e)
-    {
-      
+			faultBucketsGrid.NeedDataSource -= faultBucketsGrid_NeedDataSource;
+
     }
     
     protected void faultBucketsGrid_ItemCommand(object sender, GridCommandEventArgs e)
@@ -152,7 +147,8 @@ namespace PeachFarmMonitor
         //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
         //}
       }
-    }
+			faultsGrid.NeedDataSource -= faultsGrid_NeedDataSource;
+		}
     
     protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
     {
@@ -175,6 +171,7 @@ namespace PeachFarmMonitor
             break;
         }
       }
+			faultsGrid.DetailTableDataBind -= faultsGrid_DetailTableDataBind;
     }
     #endregion
 
