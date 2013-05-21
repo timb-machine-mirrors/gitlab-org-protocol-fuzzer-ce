@@ -125,6 +125,8 @@
 			</Action>
 			
 			<Action name="GetFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOR'"/>
+			<Action name="AppenFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'APPE'"/>
+			<Action name="STOUFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOU'"/>
 			<Action name="SendFile" type="changeState" ref="SendFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'"/>
 			<Action name="SendDirectory" type="changeState" ref="SendDirectory" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NLST'"/>
 			<Action name="ListDirectory" type="changeState" ref="ListDir" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'LIST'"/>
