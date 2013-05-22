@@ -66,7 +66,7 @@ namespace PeachFarm.Common
 			IsListening = true;
 		}
 
-		public void StopListener()
+		public void StopListener(bool deleteQueue = true)
 		{
 			IsListening = false;
 			
@@ -74,9 +74,12 @@ namespace PeachFarm.Common
 			listenTimer.Dispose();
 			listenTimer = null;
 
-			lock (declarer)
+			if (deleteQueue)
 			{
-				declarer.QueueDelete(listenQueue);
+				lock (declarer)
+				{
+					declarer.QueueDelete(listenQueue);
+				}
 			}
 			listenQueue = String.Empty;
 		}

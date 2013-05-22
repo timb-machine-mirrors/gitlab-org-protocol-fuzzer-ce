@@ -32,6 +32,8 @@ namespace PeachFarm.Common.Mongo
 
 		private string zipFileField;
 
+		private string reportLocationField;
+
 		public Job()
 		{
 			this.pitField = new Pit();
@@ -118,6 +120,18 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.zipFileField = value;
+			}
+		}
+
+		public string ReportLocation
+		{
+			get
+			{
+				return this.reportLocationField;
+			}
+			set
+			{
+				this.reportLocationField = value;
 			}
 		}
 	}

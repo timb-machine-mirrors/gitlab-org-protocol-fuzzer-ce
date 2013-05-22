@@ -17,6 +17,7 @@ namespace PeachFarmMonitor.ViewModels
       this.PeachVersion = job.PeachVersion;
       this.Tags = job.Tags;
       this.ZipFile = job.ZipFile;
+			this.ReportLocation = job.ReportLocation;
       
       this.Status = status;
 
