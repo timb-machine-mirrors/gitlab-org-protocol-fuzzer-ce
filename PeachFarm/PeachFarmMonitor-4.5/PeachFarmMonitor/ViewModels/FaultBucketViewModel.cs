@@ -26,7 +26,6 @@ namespace PeachFarmMonitor.ViewModels
       this.Stamp = fault.Stamp;
       this.TestName = fault.TestName;
       this.Title = fault.Title;
-      this.Group = fault.Group;
 
     }
 
@@ -37,12 +36,12 @@ namespace PeachFarmMonitor.ViewModels
   {
     public override bool Equals(Fault x, Fault y)
     {
-      return x.Group.Equals(y.Group);
+			return x.FolderName.Equals(y.FolderName);
     }
 
     public override int GetHashCode(Fault obj)
     {
-      return obj.Group.GetHashCode();
+			return obj.FolderName.GetHashCode();
     }
   }
 

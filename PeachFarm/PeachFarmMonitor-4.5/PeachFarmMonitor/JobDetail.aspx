@@ -114,8 +114,10 @@
     <div id="linkbar">
       [
       <asp:HyperLink CssClass="linkbarItem" ID="downloadInputLink" runat="server" Text="Download Job Input" Target="_blank" />&nbsp;|
-      <asp:HyperLink CssClass="linkbarItem" ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;|
+      <asp:HyperLink CssClass="linkbarItem" ID="downloadOutputLink" runat="server" Text="Download Job Output" Target="_blank" />&nbsp;]
+			<!--
       <asp:HyperLink CssClass="linkbarItem" ID="viewReportLink" runat="server" Text="View Printable Report" Target="_blank" />&nbsp;]
+			-->
     </div>
     <asp:Table ID="brand" runat="server" CellPadding="0" CellSpacing="0">
       <asp:TableRow>
@@ -148,7 +150,7 @@
               HierarchyLoadMode="ServerOnDemand">
               <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="false"  />
               <Columns>
-                <telerik:GridBoundColumn DataField="Group" HeaderText="Fault" Resizable="false"/>
+                <telerik:GridBoundColumn DataField="FolderName" HeaderText="Fault" Resizable="false"/>
                 <telerik:GridBoundColumn DataField="FaultCount" HeaderText="Count" Resizable="false" ItemStyle-Width="50px" HeaderStyle-Width="50px"/>
                 <telerik:GridButtonColumn CommandName="FaultBucketSelect" Text="View Faults &gt;" Resizable="false" ItemStyle-Width="90px" HeaderStyle-Width="90px"/>
               </Columns>
@@ -192,23 +194,11 @@
                   </Columns>
                 </telerik:GridTableView>
                 <telerik:GridTableView 
-                  Caption="State Model" DataMember="StateModel" 
+                  Caption="Generated Files" DataMember="GeneratedFiles" 
                   HierarchyLoadMode="ServerBind"
-                  NoDetailRecordsText="No state model information for this fault.">
+                  NoDetailRecordsText="No generated files for this fault.">
                   <Columns>
-                    <telerik:GridBoundColumn DataField="ActionName" HeaderText="Action" />
-                    <telerik:GridBoundColumn DataField="ActionType" HeaderText="Type" />
-                    <telerik:GridBoundColumn DataField="Parameter" HeaderText="Parameter" />
-                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
-                  </Columns>
-                </telerik:GridTableView>
-                <telerik:GridTableView 
-                  Caption="Collected Data" DataMember="CollectedData" 
-                  HierarchyLoadMode="ServerBind"
-                  NoDetailRecordsText="No collected data for this fault.">
-                  <Columns>
-                    <telerik:GridBoundColumn DataField="Key" HeaderText="Key" />
-                    <telerik:GridHyperLinkColumn Text="Download File" DataNavigateUrlFields="DataPath" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
+                    <telerik:GridHyperLinkColumn DataTextField="Name" DataNavigateUrlFields="GridFSLocation" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" HeaderText="File" Target="_blank" />
                   </Columns>
                 </telerik:GridTableView>
               </DetailTables>

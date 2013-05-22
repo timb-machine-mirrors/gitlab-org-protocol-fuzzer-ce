@@ -7,6 +7,9 @@
 <head id="Head1" runat="server">
   <title>Peach Farm Monitor</title>
   <telerik:RadStyleSheetManager ID="RadStyleSheetManager1" EnableStyleSheetCombine="true" runat="server"  />
+	<!--
+	-->
+	<meta http-equiv="refresh" content="300" />
   <style type="text/css">
 	  html,body {
 	    height: 100%;
@@ -159,7 +162,7 @@
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
               <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank"/>
               <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
-              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" />
+              <telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" Visible="false" />
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
@@ -183,7 +186,7 @@
             </asp:TableRow>
           </asp:Table>
         </asp:Panel>
-        <telerik:RadGrid ID="nodesGrid" runat="server" 
+        <telerik:RadGrid ID="nodesGrid" runat="server"
           AutoGenerateColumns="false" AllowSorting="True" 
           OnItemDataBound="nodesGrid_ItemDataBound" 
           OnSortCommand="nodesGrid_SortCommand" 
@@ -240,6 +243,8 @@
       </telerik:RadPageView>
     </telerik:RadMultiPage>
     <asp:Panel ID="Panel1" runat="server" Width="0" Height="0">
+			<!--
+			-->
       <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick" Enabled="true" />
     </asp:Panel>
   </form>

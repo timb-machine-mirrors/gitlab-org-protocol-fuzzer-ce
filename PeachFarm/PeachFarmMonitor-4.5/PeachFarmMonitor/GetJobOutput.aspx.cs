@@ -40,13 +40,13 @@ namespace PeachFarmMonitor
             if (String.IsNullOrEmpty(filepath))
             {
               string temppath = Path.GetTempPath();
-              string jobName = String.Format("Job_{0}_{1}", job.JobID, job.Pit.FileName);
 
               FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job);
               string zippath = ZipWriter.GetZip(job, temppath);
               ((List<string>)Session["tempfiles"]).Add(zippath);
+							((List<string>)Session["tempfiles"]).Add(Path.Combine(temppath, job.JobFolder));
 
-              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", jobName));
+              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", job.JobFolder));
               Response.ContentType = "application/zip";
               Response.WriteFile(zippath);
             }
