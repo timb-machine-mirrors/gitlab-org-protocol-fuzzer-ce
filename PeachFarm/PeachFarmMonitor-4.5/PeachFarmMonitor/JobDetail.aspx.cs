@@ -101,7 +101,7 @@ namespace PeachFarmMonitor
         faultBucketsGrid.DataSource = faultBuckets;
         //faultBucketsGrid.MasterTableView.VirtualItemCount = faultBuckets.Count;
       }
-			faultBucketsGrid.NeedDataSource -= faultBucketsGrid_NeedDataSource;
+			//faultBucketsGrid.NeedDataSource -= faultBucketsGrid_NeedDataSource;
 
     }
     
@@ -147,7 +147,7 @@ namespace PeachFarmMonitor
         //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
         //}
       }
-			faultsGrid.NeedDataSource -= faultsGrid_NeedDataSource;
+			//faultsGrid.NeedDataSource -= faultsGrid_NeedDataSource;
 		}
     
     protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
@@ -158,20 +158,16 @@ namespace PeachFarmMonitor
         switch (e.DetailTableView.DataMember)
         {
           case "Description":
-            {
-              List<string> description = new List<string>();
-              description.Add(((FaultViewModel)parent.DataItem).Description);
-              e.DetailTableView.DataSource = description;
-            }
+            List<string> description = new List<string>();
+            description.Add(((FaultViewModel)parent.DataItem).Description);
+            e.DetailTableView.DataSource = description;
             break;
           case "GeneratedFiles":
-            {
-              e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).GeneratedFiles;
-            }
+            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).GeneratedFiles;
             break;
         }
       }
-			faultsGrid.DetailTableDataBind -= faultsGrid_DetailTableDataBind;
+			//faultsGrid.DetailTableDataBind -= faultsGrid_DetailTableDataBind;
     }
     #endregion
 
