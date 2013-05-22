@@ -18,6 +18,7 @@
 		<xs:attribute name="PeachVersion" type="xs:string" use="required" />
 		<xs:attribute name="Tags" type="xs:string" use="required" />
 		<xs:attribute name="ZipFile" type="xs:string" use="required" />
+		<xs:attribute name="ReportLocation" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="Pit">

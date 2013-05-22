@@ -360,6 +360,15 @@ namespace PeachFarm.Common.Mongo
 			return;
 		}
 
+		public static bool GridFSFileExists(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			bool result = db.GridFS.Exists(remoteFile);
+			server.Disconnect();
+			return result;
+		}
+
 		public static string GetJobID(string connectionString)
 		{
 			string jobID = CreateJobID();
