@@ -192,6 +192,28 @@ namespace PeachFarmMonitor
             item.Style.Add("background-color", "lightgreen");
             break;
         }
+
+				var dr = item.FindControl("linkDownloadReport") as HyperLink;
+				if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+				{
+					dr.NavigateUrl = String.Empty;
+					dr.Target = String.Empty;
+
+					if (job.Status == JobStatus.Running)
+					{
+						dr.Text = "Waiting for Job completion.";
+					}
+					else
+					{
+						dr.Text = "Processing";
+					}
+				}
+				else
+				{
+					dr.Text = "Download";
+					dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+					dr.Target = "_blank";
+				}
       }
     }
 

@@ -332,6 +332,14 @@ namespace PeachFarm.Common.Mongo
 
 		}
 
+		public static Stream GetGridFSStream(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			return db.GridFS.Create(remoteFileName);
+		}
+
 		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();

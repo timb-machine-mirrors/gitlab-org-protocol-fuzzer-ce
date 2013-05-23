@@ -76,8 +76,29 @@ namespace PeachFarmMonitor
         lblJobID.Text = job.Pit.FileName + " - " + job.JobID;
         downloadInputLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ZipFile;
         downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
-        viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
-        Page.Title = "Job Detail: " + job.Pit.FileName;
+
+				if (String.IsNullOrEmpty(job.ReportLocation))
+				{
+					viewReportLink.NavigateUrl = String.Empty;
+					viewReportLink.Target = String.Empty;
+
+					if (Job.Status == JobStatus.Running)
+					{
+						viewReportLink.Text = "Waiting for Job completion.";
+					}
+					else
+					{
+						viewReportLink.Text = "Processing";
+					}
+				}
+				else
+				{
+					viewReportLink.Text = "Download PDF Report";
+					viewReportLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+					viewReportLink.Target = "_blank";
+				} 
+
+				Page.Title = "Job Detail: " + job.Pit.FileName;
       }
       else
       {

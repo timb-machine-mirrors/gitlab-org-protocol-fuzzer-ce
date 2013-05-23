@@ -162,7 +162,11 @@
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
               <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank"/>
               <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
-							<telerik:GridHyperLinkColumn Text="Download Report" DataNavigateUrlFields="ReportLocation" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank" AllowSorting="false"/>
+							<telerik:GridTemplateColumn HeaderText="PDF Report">
+								<ItemTemplate>
+									<asp:HyperLink ID="linkDownloadReport" runat="server"/>
+								</ItemTemplate>
+							</telerik:GridTemplateColumn>
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
