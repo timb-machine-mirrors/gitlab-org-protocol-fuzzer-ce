@@ -101,6 +101,7 @@ namespace PeachFarm.Controller
 		{
 			//Catching all exceptions because StatusCheck is called often
 			List<Heartbeat> nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+
 			try
 			{
 				foreach (var node in nodes)
@@ -192,12 +193,16 @@ namespace PeachFarm.Controller
 				case Actions.Monitor:
 					Monitor(MonitorRequest.Deserialize(body), replyQueue);
 					break;
+				case Actions.GenerateReport:
+					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
+					break;
 				default:
 					string error = String.Format("Received unknown action {0}", action);
 					logger.Error(error);
 					break;
 			}
 		}
+
 
 		private void ProcessException(Exception ex, string action, string replyQueue)
 		{
@@ -362,6 +367,8 @@ namespace PeachFarm.Controller
 
 		private void HeartbeatReceived(Heartbeat heartbeat)
 		{
+			Heartbeat lastHeartbeat = DatabaseHelper.GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
+
 			if (heartbeat.Status == Status.Stopping)
 			{
 				RemoveNode(heartbeat);
@@ -370,6 +377,19 @@ namespace PeachFarm.Controller
 			{
 				UpdateNode(heartbeat);
 			}
+
+			if ((heartbeat.Status == Status.Alive) && (lastHeartbeat.Status == Status.Running) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
+			{
+				bool jobFinished = (from n in DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
+				if (jobFinished)
+				{
+					GenerateReportRequest grr = new GenerateReportRequest();
+					grr.JobID = lastHeartbeat.JobID;
+					grr.ReportFormat = ReportFormat.PDF;
+					rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+				}
+			}
+
 
 			if (heartbeat.Status == Status.Error)
 			{
@@ -435,6 +455,11 @@ namespace PeachFarm.Controller
 			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 
 			Reply(response.Serialize(), Actions.Monitor, replyQueue);
+		}
+
+		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
+		{
+			
 		}
 		#endregion
 

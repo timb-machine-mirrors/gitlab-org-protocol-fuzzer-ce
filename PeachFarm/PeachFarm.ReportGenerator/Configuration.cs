@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 
-namespace PeachFarm.ReportGenerator.Configuration
+namespace PeachFarm.Reporting.Configuration
 {
   public class ReportGeneratorSection : ConfigurationSection
   {
@@ -35,7 +35,28 @@ namespace PeachFarm.ReportGenerator.Configuration
 			get { return (MonitorElement)this[Constants.Monitor]; }
 			set { this[Constants.Monitor] = value; }
 		}
+
+		/*
+		[ConfigurationProperty(Constants.ReportGenerator)]
+		public ReportGeneratorElement ReportGenerator
+		{
+			get { return (ReportGeneratorElement)this[Constants.ReportGenerator]; }
+			set { this[Constants.ReportGenerator] = value; }
+		}
+		//*/
   }
+
+	/*
+	public class ReportGeneratorElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.ConcurrentJobs)]
+		public int ConcurrentJobs
+		{
+			get { return (int)this[Constants.ConcurrentJobs]; }
+			set { this[Constants.ConcurrentJobs] = value; }
+		}
+	}
+	//*/
 
 	public class MonitorElement : ConfigurationElement
 	{
@@ -122,5 +143,8 @@ namespace PeachFarm.ReportGenerator.Configuration
 
 		public const string Monitor = "Monitor";
 		public const string BaseURL = "baseURL";
+
+		public const string ReportGenerator = "ReportGenerator";
+		public const string ConcurrentJobs = "concurrentJobs";
   }
 }

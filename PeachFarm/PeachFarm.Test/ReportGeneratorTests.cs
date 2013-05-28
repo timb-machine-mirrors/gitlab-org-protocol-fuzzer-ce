@@ -5,7 +5,7 @@ using System.Text;
 
 using NUnit.Framework;
 using PeachFarm.Common.Mongo;
-using PeachFarm.ReportGenerator;
+using PeachFarm.Reporting;
 using PeachFarm.Common.Messages;
 
 namespace PeachFarm.Test
@@ -14,12 +14,12 @@ namespace PeachFarm.Test
 	public class ReportGeneratorTests
 	{
 		#region setup
-		private static PeachFarm.ReportGenerator.Configuration.ReportGeneratorSection config;
+		private static PeachFarm.Reporting.Configuration.ReportGeneratorSection config;
 
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
 		{
-			config = (ReportGenerator.Configuration.ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reportgenerator");
+			config = (Reporting.Configuration.ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reporting");
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
 		}
@@ -43,20 +43,14 @@ namespace PeachFarm.Test
 		[Test]
 		public void Test()
 		{
-			var rg = new PeachFarm.ReportGenerator.ReportGenerator();
+			var rg = new PeachFarm.Reporting.ReportGenerator();
 			GenerateReportRequest request = new GenerateReportRequest();
-			request.JobID = "D1AD3C7CE24A";
+			request.JobID = "65685BFA66C7";
 			request.ReportFormat = ReportFormat.PDF;
 
-			rg.GenerateReportCompleted += (o, e) =>
-			{
-				Assert.IsTrue(e.Result.Success);
-				Assert.AreEqual(ReportGenerationStatus.Complete, e.Result.Status);
-				var job = DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
-				Assert.IsTrue(DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString));
-			};
+			var response = rg.GenerateReport(request);
 
-			rg.GenerateReport(request);
+			Assert.IsTrue(response.Success);
 		}
 	}
 }

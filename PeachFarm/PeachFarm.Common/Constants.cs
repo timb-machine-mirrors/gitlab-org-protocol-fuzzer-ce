@@ -18,7 +18,7 @@ namespace PeachFarm.Common
     public static readonly string EXCHANGE_NODE = "peachfarm.node";
     public static readonly string QUEUE_NODE = "peachfarm.node.{0}";
 
-		public static readonly string QUEUE_REPORTGENERATOR = "peachfarm.reportgenerator.{0}";
+		public static readonly string QUEUE_REPORTGENERATOR = "peachfarm.reportgenerator";
 
     public static readonly string EXCHANGE_JOB = "peachfarm.job.{0}";
   }

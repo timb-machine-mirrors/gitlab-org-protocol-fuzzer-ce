@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PeachFarm.Reporting")]
+[assembly: AssemblyTitle("PeachFarm.Reporting.Service")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PeachFarm.Reporting")]
+[assembly: AssemblyProduct("PeachFarm.Reporting.Service")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f27f63db-4d33-4a00-bb3e-00462598fad8")]
+[assembly: Guid("d9fa527d-c349-449a-ac63-7dca81c1dded")]
 
 // Version information for an assembly consists of the following four values:
 //

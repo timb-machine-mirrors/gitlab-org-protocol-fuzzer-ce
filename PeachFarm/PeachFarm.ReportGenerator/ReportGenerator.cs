@@ -2,28 +2,76 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using PeachFarm.ReportGenerator.Configuration;
+using PeachFarm.Reporting.Configuration;
 using PeachFarm.Common.Messages;
 using System.IO;
 using PeachFarm.Common.Mongo;
 using System.ComponentModel;
+using PeachFarm.Common;
+using Telerik.Reporting.Processing;
 
-namespace PeachFarm.ReportGenerator
+namespace PeachFarm.Reporting
 {
 	public class ReportGenerator
 	{
 		ReportGeneratorSection config = null;
+		RabbitMqHelper rabbit = null;
 
 		public ReportGenerator()
 		{
-			config = (ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reportgenerator");
+			config = (ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reporting");
 			if (config.Monitor.BaseURL.EndsWith("/") == false)
 			{
 				config.Monitor.BaseURL = config.Monitor.BaseURL + "/";
 			}
+
+			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
+
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
+
+
+			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
+		}
+
+		public void Close()
+		{
+			if (rabbit.IsListening)
+			{
+				rabbit.StopListener(false);
+			}
+		}
+
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			if(e.Action != Actions.GenerateReport)
+				return;
+
+			rabbit.StopListener(false);
+
+			GenerateReportRequest request = GenerateReportRequest.Deserialize(e.Body);
+
+			GenerateReportResponse response = new GenerateReportResponse();
+
+			try
+			{
+				response = GenerateReport(request);
+			}
+			catch (Exception ex)
+			{
+				response.Success = false;
+				response.ErrorMessage = ex.Message;
+				response.Status = ReportGenerationStatus.Error;
+				response.JobID = request.JobID;
+			}
+
+			rabbit.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
+
+			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
 		}
 
 		#region GenerateReportCompleted
+		/*
 		public event EventHandler<GenerateReportCompletedEventArgs> GenerateReportCompleted;
 
 		private void OnGenerateReportCompleted(PeachFarm.Common.Messages.GenerateReportResponse result)
@@ -43,26 +91,22 @@ namespace PeachFarm.ReportGenerator
 
 			public PeachFarm.Common.Messages.GenerateReportResponse Result { get; private set; }
 		}
+		//*/
 		#endregion
 
 
-
-
-		//public void GenerateReport(GenerateReportRequest request)
-		//{
-		//  BackgroundWorker worker = new BackgroundWorker();
-		//  worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-
-		//}
-
-		//void worker_DoWork(object sender, DoWorkEventArgs e)
-		//{
-		//  GenerateReportWork((GenerateReportRequest)e.Argument);
-		//}
-
-		public void GenerateReport(GenerateReportRequest request)
+		public GenerateReportResponse GenerateReport(GenerateReportRequest request)
 		{
 			GenerateReportResponse response = new GenerateReportResponse();
+
+			if (String.IsNullOrEmpty(request.JobID))
+			{
+				response.Status = ReportGenerationStatus.Error;
+				response.ErrorMessage = "Job ID is null";
+				response.Success = false;
+				return response;
+			}
+
 			response.JobID = request.JobID;
 
 			var job = DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
@@ -71,8 +115,7 @@ namespace PeachFarm.ReportGenerator
 				response.Status = ReportGenerationStatus.Error;
 				response.ErrorMessage = "Job ID does not exist: " + request.JobID;
 				response.Success = false;
-				OnGenerateReportCompleted(response);
-				return;
+				return response;
 			}
 
 			if (String.IsNullOrEmpty(job.ReportLocation))
@@ -83,8 +126,7 @@ namespace PeachFarm.ReportGenerator
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
 				response.Status = ReportGenerationStatus.Complete;
-				OnGenerateReportCompleted(response);
-				return;
+				return response;
 			}
 
 			Telerik.Reporting.Processing.ReportProcessor reportProcessor = new Telerik.Reporting.Processing.ReportProcessor();
@@ -93,7 +135,7 @@ namespace PeachFarm.ReportGenerator
 
 			Telerik.Reporting.InstanceReportSource irs = new Telerik.Reporting.InstanceReportSource();
 
-			irs.ReportDocument = new JobDetailReport();
+			irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
 
 			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
 			irs.Parameters.Add("jobID", request.JobID);
@@ -101,17 +143,28 @@ namespace PeachFarm.ReportGenerator
 
 			//string documentName = String.Empty;
 			//bool success = reportProcessor.RenderReport("PDF", irs, deviceInfo, new Telerik.Reporting.Processing.CreateStream(CreateStream), out documentName);
-			var result = reportProcessor.RenderReport("PDF", irs, deviceInfo);
-			DatabaseHelper.SaveToGridFS(result.DocumentBytes, job.ReportLocation, config.MongoDb.ConnectionString);
-			job.SaveToDatabase(config.MongoDb.ConnectionString);
-			response.Status = ReportGenerationStatus.Complete;
-			OnGenerateReportCompleted(response);
+			RenderingResult result = null;
+			try
+			{
+				result = reportProcessor.RenderReport("PDF", irs, deviceInfo);
+			}
+			catch (Exception ex)
+			{
+				response.Status = ReportGenerationStatus.Error;
+				response.ErrorMessage = "Error while processing report:\n" + ex.Message;
+				response.Success = false;
+				return response;
+			}
 
-		}
+			if (result != null)
+			{
+				DatabaseHelper.SaveToGridFS(result.DocumentBytes, job.ReportLocation, config.MongoDb.ConnectionString);
+				job.SaveToDatabase(config.MongoDb.ConnectionString);
+				response.Status = ReportGenerationStatus.Complete;
+			}
 
-		private Stream CreateStream(string name, string extension, Encoding encoding, string mimeType)
-		{
-			return DatabaseHelper.GetGridFSStream(name, config.MongoDb.ConnectionString);
+			return response;
+
 		}
 	}
 }
