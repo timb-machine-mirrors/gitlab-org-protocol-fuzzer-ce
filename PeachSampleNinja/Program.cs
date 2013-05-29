@@ -22,7 +22,7 @@ namespace PeachSampleNinja
 		static void Main(string[] args)
 		{
 			Console.WriteLine();
-			Console.WriteLine(">> Peach Sample Ninja -- Sample Scanner");
+			Console.WriteLine(">> Peach Enterprise Sample Ninja -- Sample Scanner");
 			Console.WriteLine(">> Copyright (c) Deja vu Security\n");
 
 			if (args.Length < 2)
@@ -42,24 +42,46 @@ run.
 
 		public Program(string pitfile, string datamodel, string samplefolder)
 		{
+			var config = Path.Combine(
+				Path.GetDirectoryName(pitfile),
+				Path.GetFileNameWithoutExtension(pitfile) + ".config");
+			var DefinedValues = new Dictionary<string,string>();
+
+			if (File.Exists(config))
+			{
+				var defs = PitParser.parseDefines(config);
+
+				foreach (var kv in defs)
+				{
+					// Allow command line to override values in XML file.
+					if (!DefinedValues.ContainsKey(kv.Key))
+						DefinedValues.Add(kv.Key, kv.Value);
+				}
+			}
+
 			var parser = new PitParser();
 			var parserArgs = new Dictionary<string, object>();
+			parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
+
 			var dom = parser.asParser(parserArgs, pitfile);
 
 			Model = dom.dataModels[datamodel];
 
 			var database = Path.Combine(
 				Path.GetDirectoryName(pitfile),
-				Path.GetFileNameWithoutExtension(pitfile) + ".db");
+				Path.GetFileNameWithoutExtension(pitfile) + ".ninja");
 
 			if (!File.Exists(database))
 			{
+				Console.WriteLine("Creating new sample database.");
+
 				// Create database
 				var assembly = Assembly.GetExecutingAssembly();
-				using(var dbStream = assembly.GetManifestResourceStream("SampleNinja.db"))
+				using (var dbStream = assembly.GetManifestResourceStream("PeachSampleNinja.SampleNinja.db"))
 				using (var fout = File.OpenWrite(database))
 				{
 					dbStream.CopyTo(fout);
+					fout.Flush();
 				}
 			}
 
@@ -102,26 +124,32 @@ run.
 			}
 		}
 
-		/// <summary>
-		/// Check to see if a sample file has already been processed.
-		/// </summary>
-		/// <remarks>
-		/// Checks file name and file hash.
-		/// </remarks>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
 		bool FileAlreadyProcessed(string fileName)
 		{
 			using (var cmd = new SQLiteCommand(Connection))
 			{
-				cmd.CommandText = "select sampleid, hash from sample where file = ?";
+				cmd.CommandText = "select sampleid from sample where file = ?";
+				SampleId = Guid.NewGuid();
+				cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
+				cmd.Parameters[0].Value = fileName;
+
+				var reader = cmd.ExecuteReader();
+				return reader.NextResult();
+			}
+		}
+
+		bool FileHashChanged(string fileName)
+		{
+			using (var cmd = new SQLiteCommand(Connection))
+			{
+				cmd.CommandText = "select hash from sample where file = ?";
 				SampleId = Guid.NewGuid();
 				cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
 				cmd.Parameters[0].Value = fileName;
 
 				var reader = cmd.ExecuteReader();
 				if (!reader.NextResult())
-					return false;
+					throw new ApplicationException("Error, file not found");
 
 				var fileHash = Hash(fileName);
 				var dbHash = (byte[])reader[0];
@@ -130,9 +158,60 @@ run.
 			}
 		}
 
+		Guid GetSampleId(string fileName)
+		{
+			using (var cmd = new SQLiteCommand(Connection))
+			{
+				cmd.CommandText = "select sampleid from sample where file = ?";
+				SampleId = Guid.NewGuid();
+				cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
+				cmd.Parameters[0].Value = fileName;
+
+				var reader = cmd.ExecuteReader();
+				if (!reader.NextResult())
+					throw new ApplicationException("Error, file not found");
+
+				return reader.GetGuid(0);
+			}
+		}
+
 		DataModel ProcessSample(string fileName)
 		{
-			Console.WriteLine("Processing: " + fileName);
+			if (FileAlreadyProcessed(fileName))
+			{
+				if (FileHashChanged(fileName))
+				{
+					Console.WriteLine("Updating: " + fileName);
+
+					// Remove old file information
+					Guid sampleId = GetSampleId(fileName);
+
+					using (var cmd = Connection.CreateCommand())
+					{
+						cmd.CommandText = "delete from sample where sampleid = ?";
+						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
+						cmd.Parameters[0].Value = sampleId;
+						cmd.ExecuteNonQuery();
+
+						cmd.CommandText = "delete from element where sampleid = ?";
+						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
+						cmd.Parameters[0].Value = sampleId;
+						cmd.ExecuteNonQuery();
+
+						cmd.CommandText = "delete from sampleelement where sampleid = ?";
+						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
+						cmd.Parameters[0].Value = sampleId;
+						cmd.ExecuteNonQuery();
+					}
+				}
+				else
+				{
+					Console.WriteLine("Skipping: " + fileName);
+					return null;
+				}
+			}
+			else
+				Console.WriteLine("Processing: " + fileName);
 
 			try
 			{
@@ -176,7 +255,7 @@ run.
 			object elementId;
 			var name = container.fullName;
 
-			Console.WriteLine(name);
+			//Console.WriteLine(name);
 
 			using (var cmd = new SQLiteCommand(Connection))
 			{
