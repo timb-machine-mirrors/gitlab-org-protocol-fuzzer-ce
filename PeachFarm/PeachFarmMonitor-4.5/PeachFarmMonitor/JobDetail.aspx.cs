@@ -69,17 +69,36 @@ namespace PeachFarmMonitor
       {
         Job = new JobViewModel(job);
 
-        faultBucketsGrid.ItemDataBound += faultBucketsGrid_ItemDataBound;
         faultBucketsGrid.NeedDataSource += faultBucketsGrid_NeedDataSource;
-
         faultsGrid.NeedDataSource += faultsGrid_NeedDataSource;
         faultsGrid.DetailTableDataBind += faultsGrid_DetailTableDataBind;
 
         lblJobID.Text = job.Pit.FileName + " - " + job.JobID;
         downloadInputLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ZipFile;
         downloadOutputLink.NavigateUrl = "GetJobOutput.aspx?jobid=" + jobid;
-        viewReportLink.NavigateUrl = "ReportViewer.aspx?jobid=" + jobid;
-        Page.Title = "Job Detail: " + job.Pit.FileName;
+
+				if (String.IsNullOrEmpty(job.ReportLocation))
+				{
+					viewReportLink.NavigateUrl = String.Empty;
+					viewReportLink.Target = String.Empty;
+
+					if (Job.Status == JobStatus.Running)
+					{
+						viewReportLink.Text = "Waiting for Job completion.";
+					}
+					else
+					{
+						viewReportLink.Text = "Processing";
+					}
+				}
+				else
+				{
+					viewReportLink.Text = "Download PDF Report";
+					viewReportLink.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+					viewReportLink.Target = "_blank";
+				} 
+
+				Page.Title = "Job Detail: " + job.Pit.FileName;
       }
       else
       {
@@ -103,11 +122,8 @@ namespace PeachFarmMonitor
         faultBucketsGrid.DataSource = faultBuckets;
         //faultBucketsGrid.MasterTableView.VirtualItemCount = faultBuckets.Count;
       }
-    }
-    
-    void faultBucketsGrid_ItemDataBound(object sender, GridItemEventArgs e)
-    {
-      
+			//faultBucketsGrid.NeedDataSource -= faultBucketsGrid_NeedDataSource;
+
     }
     
     protected void faultBucketsGrid_ItemCommand(object sender, GridCommandEventArgs e)
@@ -119,7 +135,7 @@ namespace PeachFarmMonitor
           int pageindex = 0;
 
           e.Item.Selected = true;
-          var group = ((GridDataItem)e.Item)["Group"].Text;
+          var group = ((GridDataItem)e.Item)["FolderName"].Text;
           ViewState["currentGroup"] = group;
 
           var faults = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
@@ -152,7 +168,8 @@ namespace PeachFarmMonitor
         //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
         //}
       }
-    }
+			//faultsGrid.NeedDataSource -= faultsGrid_NeedDataSource;
+		}
     
     protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
     {
@@ -162,24 +179,16 @@ namespace PeachFarmMonitor
         switch (e.DetailTableView.DataMember)
         {
           case "Description":
-            {
-              List<string> description = new List<string>();
-              description.Add(((FaultViewModel)parent.DataItem).Description);
-              e.DetailTableView.DataSource = description;
-            }
+            List<string> description = new List<string>();
+            description.Add(((FaultViewModel)parent.DataItem).Description);
+            e.DetailTableView.DataSource = description;
             break;
-          case "StateModel":
-            {
-              e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).StateModel;
-            }
-            break;
-          case "CollectedData":
-            {
-              e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).CollectedData;
-            }
+          case "GeneratedFiles":
+            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).GeneratedFiles;
             break;
         }
       }
+			//faultsGrid.DetailTableDataBind -= faultsGrid_DetailTableDataBind;
     }
     #endregion
 
@@ -212,14 +221,14 @@ namespace PeachFarmMonitor
     {
       var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
       
-      var buckets = collection.Distinct("Group", Query.EQ("JobID", jobID));
+      var buckets = collection.Distinct("FolderName", Query.EQ("JobID", jobID));
       List<FaultBucketViewModel> faultBuckets = new List<FaultBucketViewModel>();
       foreach (var bucket in buckets)
       {
         Fault faultBucket = new Fault();
-        faultBucket.Group = bucket.AsString;
+        faultBucket.FolderName = bucket.AsString;
         FaultBucketViewModel fbvm = new FaultBucketViewModel(faultBucket);
-        fbvm.FaultCount = collection.Distinct("_id", Query.And(Query.EQ("JobID", jobID),Query.EQ("Group", faultBucket.Group))).Count();
+				fbvm.FaultCount = collection.Distinct("_id", Query.And(Query.EQ("JobID", jobID), Query.EQ("FolderName", faultBucket.FolderName))).Count();
         faultBuckets.Add(fbvm);
       }
       collection.Database.Server.Disconnect();
@@ -233,7 +242,7 @@ namespace PeachFarmMonitor
       if (String.IsNullOrEmpty(faultBucketName) == false)
       {
         var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-        var query = Query.And(Query.EQ("JobID", jobID), Query.EQ("Group", faultBucketName));
+        var query = Query.And(Query.EQ("JobID", jobID), Query.EQ("FolderName", faultBucketName));
         List<Fault> faults = null;
         if (pageSize == 0)
         {

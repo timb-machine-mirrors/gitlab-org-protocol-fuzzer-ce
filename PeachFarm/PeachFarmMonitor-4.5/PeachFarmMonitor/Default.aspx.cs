@@ -29,7 +29,7 @@ namespace PeachFarmMonitor
     private static List<Messages.Heartbeat> onlinenodes;
     private static List<JobViewModel> jvms;
     private static List<Messages.Heartbeat> errors;
-
+		private System.Timers.Timer refreshTimer;
     public Home()
     {
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
@@ -41,34 +41,13 @@ namespace PeachFarmMonitor
       {
         //lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
         Monitor(true);
+				refreshTimer = new System.Timers.Timer(10000);
+				refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
+				refreshTimer.Start();
       }
     }
 
     #region Monitor
-    private Task<Messages.MonitorResponse> MonitorAsync()
-    {
-      TaskCompletionSource<Messages.MonitorResponse> tcs = new TaskCompletionSource<Messages.MonitorResponse>();
-      //string guid = (string)ViewState["guid"];
-      //if(String.IsNullOrEmpty(guid))
-      //{
-      //  guid = Guid.NewGuid().ToString();
-      //  ViewState["guid"] = guid;
-      //}
-      //admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
-      //admin.MonitorCompleted += (s, e) =>
-      //  {
-      //    if (e.Error != null)
-      //      tcs.TrySetException(e.Error);
-      //    else if (e.Cancelled)
-      //      tcs.TrySetCanceled();
-      //    else
-      //      tcs.TrySetResult(e.Result);
-
-      //  };
-      //admin.MonitorAsync();
-      return tcs.Task;
-    }
-
 
     private void Monitor(bool displayError = false)
     {
@@ -123,6 +102,8 @@ namespace PeachFarmMonitor
 
         loadingLabel.Text = "";
         loadingLabel.Visible = false;
+
+				
       }
       catch (Exception ex)
       {
@@ -144,17 +125,9 @@ namespace PeachFarmMonitor
 
     #endregion
 
-    protected void RadAjaxManager1_AjaxRequest(object sender, Telerik.Web.UI.AjaxRequestEventArgs e)
-    {
-    }
-
     protected void Tick(object sender, EventArgs e)
     {
-      //RadAjaxManager1.RaisePostBackEvent("Waiting for response...");
-      
       Monitor();
-      
-      
     }
 
     protected void errorsGrid_ItemDataBound(object sender, GridItemEventArgs e)
@@ -219,6 +192,28 @@ namespace PeachFarmMonitor
             item.Style.Add("background-color", "lightgreen");
             break;
         }
+
+				var dr = item.FindControl("linkDownloadReport") as HyperLink;
+				if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+				{
+					dr.NavigateUrl = String.Empty;
+					dr.Target = String.Empty;
+
+					if (job.Status == JobStatus.Running)
+					{
+						dr.Text = "Waiting for Job completion.";
+					}
+					else
+					{
+						dr.Text = "Processing";
+					}
+				}
+				else
+				{
+					dr.Text = "Download";
+					dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+					dr.Target = "_blank";
+				}
       }
     }
 
@@ -251,12 +246,10 @@ namespace PeachFarmMonitor
       }
     }
 
-    protected void RadScriptManager1_AsyncPostBackError(object sender, AsyncPostBackErrorEventArgs e)
-    {
-      if (e.Exception.GetType().ToString().Contains("PageRequestManagerTimeoutException"))
-      {
-        //ignore error
-      }
-    }
+		protected void RadAjaxManager1_AjaxRequest(object sender, AjaxRequestEventArgs e)
+		{
+			//Monitor(true);
+			RadAjaxManager1.Alert("yay");
+		}
   }
 }

@@ -199,6 +199,22 @@
 		</xs:complexContent>
 	</xs:complexType>
 
+	<xs:element name="GenerateReportRequest" type="GenerateReportRequest" />
+	<xs:complexType name="GenerateReportRequest">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
+	</xs:complexType>
+
+	<xs:element name="GenerateReportResponse" type="GenerateReportResponse" />
+	<xs:complexType name="GenerateReportResponse">
+		<xs:complexContent>
+			<xs:extension base="ResponseBase">
+				<xs:attribute name="JobID" type="xs:string" use="required" />
+				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
 	<xs:complexType name="Job">
 		<xs:sequence>
 			<xs:element name="Tags">
@@ -221,4 +237,18 @@
 		<xs:attribute name="FileName" type="xs:string" use="required" />
 		<xs:attribute name="Version" type="xs:string" use="required" />
 	</xs:complexType>
+
+	<xs:simpleType name="ReportFormat">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PDF" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ReportGenerationStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Generating" />
+			<xs:enumeration value="Complete" />
+			<xs:enumeration value="Error" />
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>

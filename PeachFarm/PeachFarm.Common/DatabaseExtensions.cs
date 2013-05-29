@@ -167,8 +167,8 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			foreach (var fault in faults)
 			{
-				var updatedfault = fault.UpdateDataPaths(connectionString);
-				collection.Save(updatedfault);
+				//var updatedfault = fault.UpdateDataPaths(connectionString);
+				collection.Save(fault);
 			}
 			collection.Database.Server.Disconnect();
 		}
@@ -176,7 +176,7 @@ namespace PeachFarm.Common.Mongo
 		public static void SaveToDatabase(this Fault fault, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
-			fault = fault.UpdateDataPaths(connectionString);
+			//fault = fault.UpdateDataPaths(connectionString);
 			collection.Save(fault);
 			collection.Database.Server.Disconnect();
 		}
@@ -191,6 +191,8 @@ namespace PeachFarm.Common.Mongo
 			collection.Database.Server.Disconnect();
 		}
 
+		#region old code
+		/*
 		private static Fault UpdateDataPaths(this Fault fault, string connectionString)
 		{
 			string jobFolder = String.Empty;
@@ -265,6 +267,8 @@ namespace PeachFarm.Common.Mongo
 
 			return fault;
 		}
+		//*/
+		#endregion
 	}
 	
 	public partial class Job
@@ -312,6 +316,16 @@ namespace PeachFarm.Common.Mongo
 			get { return faultsField; }
 			set { faultsField = value; }
 		}
+
+		[BsonIgnore]
+		[XmlIgnore]
+		public string JobFolder
+		{
+			get
+			{
+				return String.Format(Formats.JobFolder, this.JobID, this.Pit.FileName);
+			}
+		}
 	}
 
 	public partial class Pit
@@ -351,6 +365,12 @@ namespace PeachFarm.Common.Mongo
 
 		[BsonIgnore]
 		public List<Fault> Faults { get; set; }
+
+		[BsonIgnore]
+		public string NodeFolder
+		{
+			get { return "Node_" + this.Name; }
+		}
 	}
 
 	public partial class Fault
@@ -372,6 +392,7 @@ namespace PeachFarm.Common.Mongo
 		}
 	}
 
+	/*
 	public partial class CollectedData
 	{
 		private byte[] dataField;
@@ -389,4 +410,5 @@ namespace PeachFarm.Common.Mongo
 		[BsonIgnore]
 		public byte[] Data { get; set; }
 	}
+	//*/
 }

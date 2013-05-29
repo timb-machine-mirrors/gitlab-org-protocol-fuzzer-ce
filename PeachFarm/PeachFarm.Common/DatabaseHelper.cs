@@ -172,6 +172,12 @@ namespace PeachFarm.Common.Mongo
 			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
 			faults.RemoveAll(WriteConcern.Acknowledged);
 
+			var files = db.GridFS.FindAll();
+			foreach (var file in files)
+			{
+				file.Delete();
+			}
+
 			server.Disconnect();
 		}
 		
@@ -317,6 +323,23 @@ namespace PeachFarm.Common.Mongo
 			return gridFsInfo.Id.ToString();
 		}
 
+		public static StreamWriter CreateFileGridFS(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			
+			return db.GridFS.CreateText(remoteFileName);
+
+		}
+
+		public static Stream GetGridFSStream(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			return db.GridFS.Create(remoteFileName);
+		}
+
 		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
@@ -343,6 +366,15 @@ namespace PeachFarm.Common.Mongo
 
 			server.Disconnect();
 			return;
+		}
+
+		public static bool GridFSFileExists(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			bool result = db.GridFS.Exists(remoteFile);
+			server.Disconnect();
+			return result;
 		}
 
 		public static string GetJobID(string connectionString)

@@ -94,6 +94,15 @@ namespace PeachFarm.Common.Messages
 			this.UserName = mongoJob.UserName;
 			this.Tags = mongoJob.Tags;
 		}
+
+		[XmlIgnore]
+		public string JobFolder
+		{
+			get
+			{
+				return String.Format(Formats.JobFolder, this.JobID, this.Pit.FileName);
+			}
+		}
 	}
 
 	public partial class Pit
@@ -117,5 +126,6 @@ namespace PeachFarm.Common.Messages
 		public const string ListErrors = "ListErrors";
 		public const string Monitor = "Monitor";
 		public const string Heartbeat = "Heartbeat";
+		public const string GenerateReport = "GenerateReport";
 	}
 }

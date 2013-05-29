@@ -273,10 +273,6 @@ namespace PeachFarm.Admin
 				zipfilepath = pitFilePath;
 			}
 
-
-			request.PitFileName = Path.GetFileNameWithoutExtension(zipfilepath);
-			//request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(zipfilepath));
-
 			#region get pit version if exists
 			XDocument xdoc = null;
 			try
@@ -320,7 +316,7 @@ namespace PeachFarm.Admin
 
 			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
-			request.ZipFile = String.Format("Job_{0}_{1}\\{1}.zip", request.JobID, request.PitFileName);
+			request.ZipFile = String.Format(Formats.JobFolder + "\\{1}.zip", request.JobID, request.PitFileName);
 			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, config.MongoDb.ConnectionString);
 
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
@@ -532,5 +528,15 @@ namespace PeachFarm.Admin
 		}
 
 
+
+		public void DumpFiles(string jobID, string destinationFolder)
+		{
+			FileWriter.DumpFiles(config.MongoDb.ConnectionString, destinationFolder, jobID);
+		}
+
+		public void TruncateAllCollections()
+		{
+			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+		}
 	}
 }

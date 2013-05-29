@@ -10,6 +10,7 @@ deps = [
 	'PeachFarm.Admin.dll',
 	'PeachFarm.Controller.dll',
 	'PeachFarm.Node.dll',
+	'PeachFarm.Reporting.dll',
 	'nunit.framework.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
