@@ -34,13 +34,11 @@ deps = [
 	
 	]
 
-
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = name,
-	#namespace = 'PeachE',
+	resource = 'SampleNinja.db',
 	ver_product = 'Peach Enterprise',
-	#install = bld.path.ant_glob('template.xml samples/*')
 )

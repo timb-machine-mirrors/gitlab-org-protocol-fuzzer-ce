@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Data.Sql;
@@ -21,15 +22,17 @@ namespace Peach.Enterprise.Mutators
 		uint pos = 0;
 		Guid ElementId = Guid.Empty;
 
-		public static string NinjaDB
-		{
-			get { return "default.db"; }
-		}
+		string NinjaDB = null;
 
 		public SampleNinjaMutator(DataElement obj)
 			: base(obj)
         {
             name = "SampleNinja";
+
+			var pitFile = ((DataModel)obj.getRoot()).dom.context.config.pitFile;
+			NinjaDB = Path.Combine(
+				Path.GetFullPath(pitFile),
+				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
 
             using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
             {
@@ -53,7 +56,12 @@ select from count('x'), se.elementid
 					cmd.Parameters[0].Value = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
                     cmd.Parameters[1].Value = obj.fullName;
 
-                    _count = (int)cmd.ExecuteScalar();
+					using (var reader = cmd.ExecuteReader())
+					{
+						reader.NextResult();
+						_count = reader.GetInt32(0);
+						ElementId = reader.GetGuid(1);
+					}
                 }
             }
         }
@@ -71,13 +79,20 @@ select from count('x'), se.elementid
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
+			return false;
+
+			var pitFile = ((DataModel)obj.getRoot()).dom.context.config.pitFile;
+			var ninjaDb = Path.Combine(
+				Path.GetFullPath(pitFile),
+				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
+
 			// If our database doesn't exist JETTISON!
-			if (!System.IO.File.Exists(NinjaDB))
+			if (!File.Exists(ninjaDb))
 				return false;
 
 			if (obj.isMutable)
 			{
-				using (var Connection = new SQLiteConnection("data source="+NinjaDB))
+				using (var Connection = new SQLiteConnection("data source=" + ninjaDb))
 				{
 					Connection.Open();
 
@@ -110,7 +125,7 @@ select from count('x'), se.elementid
 
 		public byte[] GetAt(uint index)
 		{
-			using (var Connection = new SQLiteConnection("data source=default.db"))
+			using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
 			{
 				Connection.Open();
 

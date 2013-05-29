@@ -19,6 +19,7 @@ bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12
 
 bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
 bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
+bld.install_files('${BINDIR}','sqlite-netFx40-binary-x64-2010-1.0.84.0\\SQLite.Interop.dll')
 
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #bld.read_csshlib('Ionic.Zip.dll',                          paths=['DotNetZipLib-v1.9/zip-v1.9'])
