@@ -21,6 +21,7 @@ namespace Peach.Enterprise.Runtime
 		uint _currentIteration = 0;
 		uint _totalIterations = 0;
 		List<Fault> _faults = new List<Fault>();
+		Dictionary<string, int> _majorFaultCount = new Dictionary<string, int>();
 		DateTime _started = DateTime.Now;
 		string _status = "";
 		string _eta = "";
@@ -35,7 +36,7 @@ namespace Peach.Enterprise.Runtime
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
-			_status = string.Format("\n -- Could not reproduce fault at iteration {0}", currentIteration);
+			_status = string.Format("Could not reproduce fault at iteration {0}", currentIteration);
 			reproducing = false;
 
 			RefreshScreen();
@@ -52,7 +53,14 @@ namespace Peach.Enterprise.Runtime
 			foreach(Fault fault in faultData)
 			{
 				if (fault.type == FaultType.Fault)
+				{
 					_faults.Add(fault);
+
+					if (_majorFaultCount.ContainsKey(fault.majorHash))
+						_majorFaultCount[fault.majorHash] += 1;
+					else
+						_majorFaultCount[fault.majorHash] = 1;
+				}
 			}
 
 			RefreshScreen();
@@ -79,15 +87,8 @@ namespace Peach.Enterprise.Runtime
 			if(totalIterations != null)
 				_totalIterations = totalIterations.Value;
 
-			string controlIteration = "";
-			if (context.controlIteration && context.controlRecordingIteration)
-				controlIteration = "R";
-			else if (context.controlIteration)
-				controlIteration = "C";
-
 			string strTotal = "-";
 			string strEta = "-";
-
 
 			if (!timer.IsRunning)
 			{
@@ -118,8 +119,15 @@ namespace Peach.Enterprise.Runtime
 			}
 
 
-			if(!reproducing)
-				_status = "Performing iteration";
+			if (!reproducing)
+			{
+				if (context.controlIteration && context.controlRecordingIteration)
+					_status = "Recording iteration";
+				else if (context.controlIteration)
+					_status = "Control iteration";
+				else
+					_status = "Fuzzing iteration";
+			}
 
 			RefreshIterationAndStatus();
 		}
@@ -185,6 +193,22 @@ namespace Peach.Enterprise.Runtime
 			Console.SetCursorPosition(4, 7);
 			DisplayStaticText("Status: ");
 			Console.Write(_status);
+
+			if (_currentIteration % 4 == 0)
+			{
+				// Display running
+
+				Console.SetCursorPosition(36, 4);
+				DisplayStaticText("Running: ");
+				Console.Write((DateTime.Now - _started).ToString());
+
+				// Display speed
+
+				Console.SetCursorPosition(38, 5);
+				DisplayStaticText("Speed: ");
+				Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
+				Console.Write("/hr");
+			}
 		}
 
 		void RefreshScreen()
@@ -197,12 +221,12 @@ namespace Peach.Enterprise.Runtime
 			Console.BackgroundColor = ConsoleColor.Blue;
 
 			Console.SetCursorPosition(0, 0);
-			for (int i = 0; i < Console.BufferWidth; i++)
+			for (int i = 0; i < Console.WindowWidth; i++)
 				Console.Write(" ");
 
 			Console.SetCursorPosition(0, 0);
 			Console.Write(_title);
-			Console.SetCursorPosition(Console.BufferWidth - _copyright.Length, 0);
+			Console.SetCursorPosition(Console.WindowWidth - _copyright.Length, 0);
 			Console.Write(_copyright);
 
 			Console.ForegroundColor = ConsoleColor.Gray;
@@ -228,16 +252,25 @@ namespace Peach.Enterprise.Runtime
 
 			// Display running
 
-			Console.SetCursorPosition(36, 5);
+			Console.SetCursorPosition(36, 4);
 			DisplayStaticText("Running: ");
 			Console.Write((DateTime.Now - _started).ToString());
 
 			// Display speed
 
-			Console.SetCursorPosition(38, 6);
+			Console.SetCursorPosition(38, 5);
 			DisplayStaticText("Speed: ");
-			Console.Write((DateTime.Now - _started).TotalHours / _currentIteration);
+			Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
 			Console.Write("/hr");
+
+			if (!string.IsNullOrEmpty(_eta))
+			{
+				// Display eta
+
+				Console.SetCursorPosition(37, 6);
+				DisplayStaticText("Finish: ");
+				Console.Write(_eta);
+			}
 
 			// Display iterations
 
@@ -262,10 +295,13 @@ namespace Peach.Enterprise.Runtime
 			Console.Write("[ ");
 			Console.ForegroundColor = ConsoleColor.Red;
 			Console.Write("FAULTS");
+			Console.ForegroundColor = ConsoleColor.DarkRed;
+			Console.Write(" Total: " + _faults.Count);
+			Console.Write(" - Major: " + _majorFaultCount.Count);
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write(" ]");
 			Console.ForegroundColor = ConsoleColor.DarkGray;
-			for (int i = "---[ FAULTS ]".Length; i < Console.BufferWidth; i++)
+			for (int i = Console.CursorLeft; i < Console.WindowWidth; i++)
 				Console.Write("-");
 
 			Console.ForegroundColor = ConsoleColor.Gray;
