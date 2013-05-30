@@ -8,6 +8,8 @@ deps = [
 	'System.Windows.Forms.dll',
 	'PeachFarm.Common.dll',
 	'Telerik.Reporting.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(

@@ -9,6 +9,8 @@ deps = [
 	'PeachFarm.Common.dll',
 	'PeachFarm.Reporting.Reports.dll',
 	'Telerik.Reporting.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(
