@@ -16,7 +16,7 @@ namespace Peach.Enterprise.MutationStrategies
 {
 	[DefaultMutationStrategy]
 	[MutationStrategy("Replay", true)]
-	[Description("Replay an exist set of test files")]
+	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{
 		class DataSetTracker
