@@ -182,7 +182,7 @@ namespace Peach.Enterprise.Runtime
 		{
 			// Display iterations
 
-			Console.SetCursorPosition(1, 6);
+			Console.SetCursorPosition(1, 5);
 			DisplayStaticText("Iteration: ");
 			Console.Write(_currentIteration);
 			if (_totalIterations > 0 && _totalIterations < UInt32.MaxValue)
@@ -190,7 +190,7 @@ namespace Peach.Enterprise.Runtime
 
 			// Display status
 
-			Console.SetCursorPosition(4, 7);
+			Console.SetCursorPosition(4, 6);
 			DisplayStaticText("Status: ");
 			Console.Write(_status);
 
@@ -198,16 +198,16 @@ namespace Peach.Enterprise.Runtime
 			{
 				// Display running
 
-				Console.SetCursorPosition(36, 4);
+				Console.SetCursorPosition(36, 3);
 				DisplayStaticText("Running: ");
 				Console.Write((DateTime.Now - _started).ToString());
 
 				// Display speed
 
-				Console.SetCursorPosition(38, 5);
+				Console.SetCursorPosition(38, 4);
 				DisplayStaticText("Speed: ");
 				Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
-				Console.Write("/hr");
+				Console.Write("/hr         ");
 			}
 		}
 
@@ -234,47 +234,47 @@ namespace Peach.Enterprise.Runtime
 
 			// Display pit
 
-			Console.SetCursorPosition(7, 3);
+			Console.SetCursorPosition(7, 2);
 			DisplayStaticText("Pit: ");
 			Console.Write(_context.config.pitFile);
 
 			// Display seed
 
-			Console.SetCursorPosition(6, 4);
+			Console.SetCursorPosition(6, 3);
 			DisplayStaticText("Seed: ");
 			Console.Write(_context.config.randomSeed);
 
 			// Display started
 
-			Console.SetCursorPosition(3, 5);
+			Console.SetCursorPosition(3, 4);
 			DisplayStaticText("Started: ");
 			Console.Write(_started.ToShortDateString());
 
 			// Display running
 
-			Console.SetCursorPosition(36, 4);
+			Console.SetCursorPosition(36, 3);
 			DisplayStaticText("Running: ");
 			Console.Write((DateTime.Now - _started).ToString());
 
 			// Display speed
 
-			Console.SetCursorPosition(38, 5);
+			Console.SetCursorPosition(38, 4);
 			DisplayStaticText("Speed: ");
 			Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
-			Console.Write("/hr");
+			Console.Write("/hr     ");
 
 			if (!string.IsNullOrEmpty(_eta))
 			{
 				// Display eta
 
-				Console.SetCursorPosition(37, 6);
+				Console.SetCursorPosition(37, 5);
 				DisplayStaticText("Finish: ");
 				Console.Write(_eta);
 			}
 
 			// Display iterations
 
-			Console.SetCursorPosition(1, 6);
+			Console.SetCursorPosition(1, 5);
 			DisplayStaticText("Iteration: ");
 			Console.Write(_currentIteration);
 			if(_totalIterations > 0 && _totalIterations < UInt32.MaxValue)
@@ -282,13 +282,13 @@ namespace Peach.Enterprise.Runtime
 
 			// Display status
 
-			Console.SetCursorPosition(4, 7);
+			Console.SetCursorPosition(4, 6);
 			DisplayStaticText("Status: ");
 			Console.Write(_status);
 
 			// Display faults
 
-			Console.SetCursorPosition(0, 9);
+			Console.SetCursorPosition(0, 8);
 			Console.ForegroundColor = ConsoleColor.DarkGray;
 			Console.Write("---");
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -296,7 +296,7 @@ namespace Peach.Enterprise.Runtime
 			Console.ForegroundColor = ConsoleColor.Red;
 			Console.Write("FAULTS");
 			Console.ForegroundColor = ConsoleColor.DarkRed;
-			Console.Write(" Total: " + _faults.Count);
+			Console.Write(" - Total: " + _faults.Count);
 			Console.Write(" - Major: " + _majorFaultCount.Count);
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write(" ]");
@@ -306,10 +306,10 @@ namespace Peach.Enterprise.Runtime
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
-			int x = 10;
+			int x = 9;
 			int y = 0;
 
-			for (int cnt = 0; cnt < _faults.Count && (x+cnt) <= Console.WindowHeight; cnt++)
+			for (int cnt = 0; cnt < _faults.Count && (x+cnt+1) <= Console.WindowHeight; cnt++)
 			{
 				var fault = _faults[_faults.Count - (cnt+1)];
 
