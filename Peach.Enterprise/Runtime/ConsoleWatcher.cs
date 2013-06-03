@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Reflection;
 
 using Peach.Core;
 using Peach.Core.Agent;
@@ -13,6 +14,9 @@ namespace Peach.Enterprise.Runtime
 {
 	public class ConsoleWatcher : Watcher
 	{
+		string _title = "Peach Enterprise v";
+		string _copyright = "Copyright (c) Deja vu Security";
+
 		Stopwatch timer = new Stopwatch();
 		uint startIteration = 0;
 		bool reproducing = false;
@@ -25,6 +29,11 @@ namespace Peach.Enterprise.Runtime
 		DateTime _started = DateTime.Now;
 		string _status = "";
 		string _eta = "";
+
+		public ConsoleWatcher() : base()
+		{
+			_title += Assembly.GetExecutingAssembly().GetName().Version;
+		}
 
 		protected override void Engine_ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault [] faultData)
 		{
@@ -157,9 +166,6 @@ namespace Peach.Enterprise.Runtime
 		protected override void MutationStrategy_Mutating(string elementName, string mutatorName)
 		{
 		}
-
-		string _title = "Peach Enterprise v3.0";
-		string _copyright = "Copyright (c) Deja vu Security";
 
 		void DisplayStaticText(string text)
 		{
