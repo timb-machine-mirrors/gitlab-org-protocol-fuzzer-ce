@@ -29,7 +29,7 @@ namespace Peach.Enterprise.Mutators
         {
             name = "SampleNinja";
 
-			var pitFile = ((DataModel)obj.getRoot()).dom.context.config.pitFile;
+			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
 			NinjaDB = Path.Combine(
 				Path.GetFullPath(pitFile),
 				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
@@ -79,9 +79,7 @@ select from count('x'), se.elementid
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			return false;
-
-			var pitFile = ((DataModel)obj.getRoot()).dom.context.config.pitFile;
+			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
 			var ninjaDb = Path.Combine(
 				Path.GetFullPath(pitFile),
 				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
