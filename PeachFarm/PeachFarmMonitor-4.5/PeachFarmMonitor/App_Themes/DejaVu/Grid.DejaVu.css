@@ -70,6 +70,7 @@
 .RadGrid_DejaVu .rgHeader {
   color: #767676; }
   .RadGrid_DejaVu .rgHeader a {
+		font-size: larger;
     color: #767676; }
 .RadGrid_DejaVu th.rgSorted {
   color: #000; }

@@ -37,6 +37,7 @@ namespace PeachFarm.Controller
 			ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			config = (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");
+			config.Validate();
 
 			//ipaddress = config.ServerHost.IpAddress;
 

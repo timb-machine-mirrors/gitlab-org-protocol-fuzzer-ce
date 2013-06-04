@@ -489,25 +489,6 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
-		private string WriteTextToTempFile(string text, string jobID, string fileName = "")
-		{
-			if (text.StartsWith("<!"))
-			{
-				text = text.Substring("<![CDATA[".Length);
-				text = text.Substring(0, text.Length - 2);
-			}
-
-			if (String.IsNullOrEmpty(fileName))
-			{
-				fileName = Path.GetFileName(Path.GetTempFileName());
-			}
-
-			string temppath	= Path.Combine(Environment.CurrentDirectory, "jobtmp", jobID, fileName);
-			PeachFarm.Common.FileWriter.CreateDirectory(Path.GetDirectoryName(temppath));
-			File.WriteAllText(temppath, text);
-			return temppath;
-		}
-
 		private void StopFuzzer()
 		{
 			if (nodeState.RunContext != null)
@@ -541,6 +522,8 @@ namespace PeachFarm.Node
 	{
 		public NodeState(PeachFarm.Node.Configuration.NodeSection config)
 		{
+			config.Validate();
+
 			Status = Common.Messages.Status.Alive;
 
 			ControllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);

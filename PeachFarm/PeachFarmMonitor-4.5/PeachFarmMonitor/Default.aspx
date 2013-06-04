@@ -144,10 +144,24 @@
     </telerik:RadTabStrip>
     <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
       <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
-        <telerik:RadGrid ID="jobsGrid" runat="server" 
-          AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="false" 
+        <asp:Panel ID="jobActionPanel" runat="server">
+          <asp:Table ID="Table2" runat="server" CellPadding="2" CellSpacing="4">
+            <asp:TableRow>
+              <asp:TableCell>
+                <telerik:RadButton Text="Start New Job" ID="btnOpenStartJobWindow" runat="server"/>
+              </asp:TableCell>
+              <asp:TableCell>
+              </asp:TableCell>
+              <asp:TableCell>
+              </asp:TableCell>
+            </asp:TableRow>
+          </asp:Table>
+        </asp:Panel>
+				<telerik:RadGrid ID="jobsGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="true"
+					AllowFilteringByColumn="false" 
           OnItemDataBound="jobsGrid_ItemDataBound" 
-          OnSortCommand="jobsGrid_SortCommand"
+					OnSortCommand="jobsGrid_SortCommand"
           Height="100%" Width="100%">
           <ClientSettings>
             <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
@@ -160,8 +174,8 @@
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
-              <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank"/>
-              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
+              <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank" AllowSorting="false"/>
+              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount" AllowSorting="false"/>
 							<telerik:GridTemplateColumn HeaderText="PDF Report">
 								<ItemTemplate>
 									<asp:HyperLink ID="linkDownloadReport" runat="server"/>
@@ -170,6 +184,13 @@
             </Columns>
           </MasterTableView>
         </telerik:RadGrid>
+				<telerik:RadWindow ID="startJobWindow" runat="server" Width="360px" Height="360px" VisibleOnPageLoad="false" OpenerElementID="btnOpenStartJobWindow" Modal="True" Title="Start New Job">
+					<ContentTemplate>
+						<div style="padding: 10px; text-align: center;">
+							window blah blah blah
+						</div>
+					</ContentTemplate>
+				</telerik:RadWindow>
       </telerik:RadPageView>
       <telerik:RadPageView ID="nodesPage" runat="server" Height="100%">
         <asp:Panel ID="summaryPanel" runat="server">

@@ -35,6 +35,9 @@ namespace PeachFarm.Admin
 		public Admin(string adminName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
+
+			config.Validate();
+
 			ServerHostName = config.Controller.IpAddress;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());

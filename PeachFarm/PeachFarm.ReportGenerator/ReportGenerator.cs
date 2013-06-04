@@ -135,12 +135,19 @@ namespace PeachFarm.Reporting
 
 			Telerik.Reporting.InstanceReportSource irs = new Telerik.Reporting.InstanceReportSource();
 
-			irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
+			try
+			{
+				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
+			}
+			catch(Exception ex)
+			{
+				return ReturnError(request.JobID, "Error while loading report file: " + ex.Message);
+			}
 
 			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
 			irs.Parameters.Add("jobID", request.JobID);
 			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
-
+			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
 			//string documentName = String.Empty;
 			//bool success = reportProcessor.RenderReport("PDF", irs, deviceInfo, new Telerik.Reporting.Processing.CreateStream(CreateStream), out documentName);
 			RenderingResult result = null;
@@ -165,6 +172,21 @@ namespace PeachFarm.Reporting
 
 			return response;
 
+		}
+
+		private GenerateReportResponse ReturnError(string jobid, string message)
+		{
+			GenerateReportResponse response = new GenerateReportResponse();
+			response.JobID = jobid;
+			response.ErrorMessage = message;
+			response.Success = false;
+			response.Status = ReportGenerationStatus.Error;
+			return response;
+		}
+
+		void reportProcessor_Error(object sender, Telerik.Reporting.ErrorEventArgs eventArgs)
+		{
+			eventArgs.Cancel = false;
 		}
 	}
 }

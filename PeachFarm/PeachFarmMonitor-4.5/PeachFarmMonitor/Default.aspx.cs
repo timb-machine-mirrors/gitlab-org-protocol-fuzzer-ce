@@ -41,9 +41,9 @@ namespace PeachFarmMonitor
       {
         //lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
         Monitor(true);
-				refreshTimer = new System.Timers.Timer(10000);
-				refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
-				refreshTimer.Start();
+				//refreshTimer = new System.Timers.Timer(10000);
+				//refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
+				//refreshTimer.Start();
       }
     }
 
@@ -65,6 +65,12 @@ namespace PeachFarmMonitor
         lateNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Late select h).Count().ToString();
         #endregion
 
+				#region errors
+				errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
+				errorsGrid.DataSource = errors;
+				errorsGrid.DataBind();
+				#endregion
+
         #region jobs
         List<Job> jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
         jvms = new List<JobViewModel>();
@@ -84,6 +90,13 @@ namespace PeachFarmMonitor
           {
             jvm = new JobViewModel(job);
           }
+
+					if ((from e in errors where e.JobID == job.JobID select e).Count() > 0)
+					{
+						jvm.ErrorsOccurred = true;
+						jvm.Status = JobStatus.Error;
+					}
+
           //var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
           //jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
           //jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
@@ -92,12 +105,6 @@ namespace PeachFarmMonitor
         }
         jobsGrid.DataSource = jvms;
         jobsGrid.DataBind();
-        #endregion
-
-        #region errors
-        errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
-        errorsGrid.DataSource = errors;
-        errorsGrid.DataBind();
         #endregion
 
         loadingLabel.Text = "";
@@ -191,6 +198,9 @@ namespace PeachFarmMonitor
           case JobStatus.Running:
             item.Style.Add("background-color", "lightgreen");
             break;
+					case JobStatus.Error:
+						item.Style.Add("background-color", "#FF8080");
+						break;
         }
 
 				var dr = item.FindControl("linkDownloadReport") as HyperLink;
@@ -202,6 +212,10 @@ namespace PeachFarmMonitor
 					if (job.Status == JobStatus.Running)
 					{
 						dr.Text = "Waiting for Job completion.";
+					}
+					else if (job.Status == JobStatus.Error)
+					{
+						dr.Text = "Unavailable";
 					}
 					else
 					{
@@ -219,14 +233,170 @@ namespace PeachFarmMonitor
 
     protected void nodesGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-    }
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status descending select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName descending select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp descending select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags descending select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID descending select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName descending select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed descending select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration descending select n);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration select n);
+						break;
+				}
+			}
+		}
 
     protected void jobsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount descending select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount descending select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID descending select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate descending select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status descending select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName descending select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName descending select jvm);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName select jvm);
+						break;
+				}
+			}
     }
 
     protected void errorsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
+
+							//			<telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
+							//<telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
+							//<telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+							//<telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+				}
+			}
     }
 
 
