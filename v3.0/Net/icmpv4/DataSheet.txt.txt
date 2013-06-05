@@ -30,18 +30,18 @@ Detailed Use Cases
 |========
 |Messages | Specification
 |8)Echo | RFC792
-|0)Echo Reply (TODO) | RFC792
-|3)Destination Unreachable (TODO) | RFC792
-|4)Source Quench (TODO) | RFC792
-|5)Redirect (TODO) | RFC792
-|11)Time Exeeded (TODO) | RFC792
-|12)Parameter Problem (TODO) | RFC792
-|13)Timestamp (TODO) | RFC792
-|14)Timestamp Reply Problem (TODO) | RFC792 
-|15)Information Request (TODO) | RFC792
-|16)Information Reply (TODO) | RFC792
-|9)Router Advertisement (TODO) | RFC1256 (Section 3)
-|10)Router Solicitation (TODO) | RFC1256 (Section 3)
+|0)Echo Reply | RFC792
+|3)Destination Unreachable | RFC792
+|4)Source Quench | RFC792
+|5)Redirect | RFC792
+|11)Time Exeeded | RFC792
+|12)Parameter Problem | RFC792
+|13)Timestamp | RFC792
+|14)Timestamp Reply Problem | RFC792 
+|15)Information Request | RFC792
+|16)Information Reply | RFC792
+|9)Router Advertisement | RFC1256 (Section 3)
+|10)Router Solicitation | RFC1256 (Section 3)
 
 
 
@@ -59,6 +59,4 @@ Detailed Use Cases
 | IPv4 in Error Responses | RFC1122
 |========
 
-1D
- --Doesn't support most messages, need choice block of options defined in RFC792
  --Doesn't support response to ip packets defined in RFC1122
