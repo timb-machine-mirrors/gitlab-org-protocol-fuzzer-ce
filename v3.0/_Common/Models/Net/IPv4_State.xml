@@ -14,9 +14,9 @@
 	<StateModel name="PingTest" initialState="Initial">
     <State name="Initial">
       <Action type="output">
-				<Data name="Request">
-					<Field name="Payload.Content.Type" value="8"/>
-				</Data>
+        <Data name="Request">
+          <Field name="Payload.Content.Type" value="8"/>
+        </Data>
         <DataModel ref="ICMPInIPv4"/>
       </Action>
     </State>

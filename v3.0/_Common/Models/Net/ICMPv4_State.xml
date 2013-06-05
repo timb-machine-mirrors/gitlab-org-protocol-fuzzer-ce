@@ -8,8 +8,95 @@
 	
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
-      <Action type="output">
-        <DataModel ref="DataModels:ICMPv4Header"/>
+      <Action name="EchoRequest" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="8"/>
+        </Data>
+      </Action>
+      
+      <Action name="EchoReply" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="0"/>
+        </Data>
+      </Action>
+      
+      <Action name="DestinationUnreachable" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="3"/>
+        </Data>
+      </Action>
+      
+      <Action name="SourceQuench" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="4"/>
+        </Data>
+      </Action>
+      
+      <Action name="Redirect" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="5"/>
+        </Data>
+      </Action>
+      
+      <Action name="TimeExceeded" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="11"/>
+        </Data>
+      </Action>
+      
+      <Action name="ParameterProblem" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="12"/>
+        </Data>
+      </Action>
+      
+      <Action name="Timestamp" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="13"/>
+        </Data>
+      </Action>
+      
+      <Action name="TimestampReplyProblem" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="14"/>
+        </Data>
+      </Action>
+      
+      <Action name="InformationRequest" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="15"/>
+        </Data>
+      </Action>
+      
+      <Action name="InformationReply" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="16"/>
+        </Data>
+      </Action>
+      
+      <Action name="RouterAdvertisement" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="9"/>
+        </Data>
+      </Action>
+      
+      <Action name="RouterSolicitation" type="output">
+        <DataModel ref="DataModels:Packet"/>
+        <Data>
+          <Field name="Content.Type" value="10"/>
+        </Data>
       </Action>
     </State>
   </StateModel>
