@@ -9,7 +9,7 @@
 	<!-- LLDP Simple State Model -->
   <StateModel name="TheStateModel" initialState="Initial">
     <State name="Initial">
-      <Action name="LldpSendPacket" type="output" publisher="RawHandler">
+      <Action name="LldpSendPacket" type="output">
         <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
 				<DataModel ref="DataModels:LLDP"/>
       </Action>
