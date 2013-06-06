@@ -28,8 +28,16 @@
 	<DataModel name="Frame">
 		<Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
 		<Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
-		<!-- https://en.wikipedia.org/wiki/EtherType -->
+		<!-- IEEE 802.3 Section 3.2.6 Length/Type field -->
+		<!-- More information can also be found at https://en.wikipedia.org/wiki/EtherType -->
 		<Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
+			<!-- "a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/ -->
+			<!-- Type field indicates the number of MAC client data octets contained in the subsequent MAC Client -->
+			<!-- Data field of the basic frame (Length interpretation). -->
+			<!-- b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the -->
+			<!-- Length/Type field indicates the nature of the MAC client protocol (Type interpretation).19 -->
+			<!-- The Length and Type interpretations of this field are mutually exclusive." -->
+
 			<!-- <Relation type="size" of="Payload"/> -->
 			<!-- !!FIXME!! Parents of relations cannot be overriden. This will be fixed when that is fixed. -->
 		</Number>
