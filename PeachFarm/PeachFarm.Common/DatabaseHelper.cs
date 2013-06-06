@@ -11,6 +11,8 @@ namespace PeachFarm.Common.Mongo
 {
 	public class DatabaseHelper
 	{
+		private static UTF8Encoding encoding = new UTF8Encoding();
+		
 		public static string[] FaultInfoFields = new string[]
 				{
 					"Faults.Description",
@@ -115,8 +117,8 @@ namespace PeachFarm.Common.Mongo
 			{
 				db.CreateCollection(collectionname);
 				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID" });
-				collection.CreateIndex(new string[] { "NodeName" });
+				collection.CreateIndex(new string[] { "JobID", "NodeName" });
+				collection.CreateIndex(new string[] { "Group" });
 			}
 		}
 
@@ -149,6 +151,35 @@ namespace PeachFarm.Common.Mongo
 				collection.CreateIndex(new string[] { "NodeName" });
 			}
 		}
+
+		public static void TruncateAllCollections(string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			var jobs = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			jobs.RemoveAll(WriteConcern.Acknowledged);
+
+			var nodes = GetCollection<Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			nodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			errors.RemoveAll(WriteConcern.Acknowledged);
+
+			var jobnodes = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			jobnodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			faults.RemoveAll(WriteConcern.Acknowledged);
+
+			var files = db.GridFS.FindAll();
+			foreach (var file in files)
+			{
+				file.Delete();
+			}
+
+			server.Disconnect();
+		}
 		
 		public static Job GetJob(string jobGuid, string connectionString)
 		{
@@ -163,10 +194,32 @@ namespace PeachFarm.Common.Mongo
 			return collection.FindAll().ToList();
 		}
 
-		public static List<Messages.Heartbeat> GetErrors(string connectionString)
+		public static void ClearJobsWithZeroIterations(string connectionString)
 		{
-			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
+			var jobs = DatabaseHelper.GetAllJobs(connectionString);
+			List<Job> jobsToDelete = new List<Job>();
+			foreach (var job in jobs)
+			{
+				job.FillNodes(connectionString);
+				var iterationcount = (from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum();
+				if (iterationcount == 0)
+				{
+					jobsToDelete.Add(job);
+				}
+			}
+
+			MongoCollection<Job> jobsCollection = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			MongoCollection<Node> nodesCollection = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+
+			foreach (var job in jobsToDelete)
+			{
+				var jobsQuery = Query.EQ("_id", job._id);
+				jobsCollection.Remove(jobsQuery);
+
+				var nodesQuery = Query.EQ("JobID", job.JobID);
+				nodesCollection.Remove(nodesQuery);
+			}
+			jobsCollection.Database.Server.Disconnect();
 		}
 
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
@@ -203,7 +256,12 @@ namespace PeachFarm.Common.Mongo
 		public static List<Heartbeat> GetAllErrors(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			return collection.FindAll().ToList();
+			var results = collection.FindAll().SetSortOrder(SortBy.Descending("Stamp")).ToList();
+			foreach (var result in results)
+			{
+				result.Stamp = result.Stamp.ToLocalTime();
+			}
+			return results;
 		}
 
 		public static List<Heartbeat> GetAllNodes(string connectionString)
@@ -237,6 +295,107 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = GetCollection<Fault>(MongoNames.Faults, connectionString);
 			var query = Query.EQ("JobID", jobID);
 			return collection.Find(query).ToList();
+		}
+
+		public static void SaveToGridFS(byte[] p, string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			using (var stream = new MemoryStream(p))
+			{
+				var gridFsInfo = db.GridFS.Upload(stream, remoteFileName);
+			}
+			server.Disconnect();
+		}
+
+		public static void SaveToGridFS(string s, string remoteFileName, string connectionString)
+		{
+			byte[] p = encoding.GetBytes(s);
+			SaveToGridFS(p, remoteFileName, connectionString);
+		}
+
+		public static string SaveFileToGridFS(string localFileName, string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			var gridFsInfo = db.GridFS.Upload(localFileName, remoteFileName);
+			server.Disconnect();
+			return gridFsInfo.Id.ToString();
+		}
+
+		public static StreamWriter CreateFileGridFS(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			
+			return db.GridFS.CreateText(remoteFileName);
+
+		}
+
+		public static Stream GetGridFSStream(string remoteFileName, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			return db.GridFS.Create(remoteFileName);
+		}
+
+		public static void DownloadFromGridFS(string localFile, string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			MongoDB.Bson.BsonObjectId remoteFileID = MongoDB.Bson.BsonObjectId.Empty;
+			bool isid = MongoDB.Bson.BsonObjectId.TryParse(remoteFile, out remoteFileID);
+
+			if (isid)
+			{
+				if (db.GridFS.ExistsById(remoteFileID))
+				{
+					var fsinfo = db.GridFS.FindOneById(remoteFileID);
+					db.GridFS.Download(localFile, fsinfo.Name);
+				}
+			}
+			else
+			{
+				if (db.GridFS.Exists(remoteFile))
+				{
+					db.GridFS.Download(localFile, remoteFile);
+				}
+			}
+
+			server.Disconnect();
+			return;
+		}
+
+		public static bool GridFSFileExists(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			bool result = db.GridFS.Exists(remoteFile);
+			server.Disconnect();
+			return result;
+		}
+
+		public static string GetJobID(string connectionString)
+		{
+			string jobID = CreateJobID();
+			while (Common.Mongo.DatabaseHelper.GetJob(jobID, connectionString) != null)
+			{
+				jobID = CreateJobID();
+			}
+			return jobID;
+		}
+
+		private static string CreateJobID()
+		{
+			using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+			{
+				// change the size of the array depending on your requirements
+				var rndBytes = new byte[6];
+				rng.GetBytes(rndBytes);
+				return BitConverter.ToString(rndBytes).Replace("-", "");
+			}
 		}
 	}
 

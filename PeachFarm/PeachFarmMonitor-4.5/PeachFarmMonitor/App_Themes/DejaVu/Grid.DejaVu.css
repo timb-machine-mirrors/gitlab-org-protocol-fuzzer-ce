@@ -1,3 +1,6 @@
+/* original blue 25a0da */
+/* deja orange f57e20*/
+
 .RadGrid_DejaVu {
   border: 1px solid #e5e5e5;
   background: white;
@@ -49,7 +52,7 @@
 .RadGrid_DejaVu .rgRow > td:first-child,
 .RadGrid_DejaVu .rgAltRow > td:first-child {
   border-left-width: 0;
-  padding-left: 8px; }
+  padding-left: 0px; }
 .RadGrid_DejaVu .rgHeader,
 .RadGrid_DejaVu th.rgResizeCol,
 .RadGrid_DejaVu .rgHeaderWrapper {
@@ -67,6 +70,7 @@
 .RadGrid_DejaVu .rgHeader {
   color: #767676; }
   .RadGrid_DejaVu .rgHeader a {
+		font-size: larger;
     color: #767676; }
 .RadGrid_DejaVu th.rgSorted {
   color: #000; }
@@ -97,14 +101,15 @@
 .RadGrid_DejaVu .rgHoveredRow {
   background: #e5e5e5; }
 .RadGrid_DejaVu .rgMasterTable .rgSelectedCell,
+
 .RadGrid_DejaVu .rgSelectedRow {
   color: #fff;
-  background: #25a0da; }
+  background: #f57e20; }
 .RadGrid_DejaVu .rgSelectedCell a,
 .RadGrid_DejaVu .rgSelectedRow a {
   color: #fff; }
 .RadGrid_DejaVu .rgMasterTable .rgActiveCell,
-.RadGrid_DejaVu .rgActiveRow {
+.RadGrid_DejaVu .rgActiveRow {first-child
   background: white 0 -5200px repeat-x url('Grid/sprite.gif');
   color: #000; }
 .RadGrid_DejaVu .rgMasterTable .rgActiveCell {
@@ -187,8 +192,8 @@
   .RadGrid_DejaVu .rgPageLast:hover {
     background-position: 0 -1050px; }
 .RadGrid_DejaVu .rgPager .rgPagerButton {
-  border-color: #25a0da;
-  background: #25a0da;
+  border-color: #f57e20;
+  background: #f57e20;
   color: #fff;
   font: 12px/12px "segoe ui", arial, sans-serif; }
 .RadGrid_DejaVu .rgNumPart a {
@@ -291,8 +296,8 @@
   background: #fff;
   color: #000; }
 .RadGrid_DejaVu .rgMasterTable td.rgGroupCol, .RadGrid_DejaVu .rgMasterTable td.rgExpandCol {
-  border-color: #c9c9c9;
-  background: #c9c9c9 none; }
+  border-color: #dcdcdc;
+  background: #dcdcdc none; }
 .RadGrid_DejaVu .rgGroupHeader {
   background: #c9c9c9;
   font-size: 1.1em;
@@ -380,7 +385,7 @@
 .RadGridRTL_DejaVu .rgRow > td:first-child,
 .RadGridRTL_DejaVu .rgAltRow > td:first-child {
   border-left-width: 1px;
-  padding-left: 7px; }
+  padding-left: 0px; }
 .RadGridRTL_DejaVu .rgPageFirst {
   background-position: 0 -1000px; }
   .RadGridRTL_DejaVu .rgPageFirst:hover {

@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Xml;
 using System.Configuration;
+using PeachFarm.Common.Mongo;
 
 namespace PeachFarm.Admin
 {
@@ -27,22 +28,29 @@ namespace PeachFarm.Admin
 
 		RabbitMqHelper rabbit = null;
 
-		public Admin(string adminQueueOverride = "")
+		private const string configext = ".xml.config";
+		private const string xmlext = ".xml";
+		private const string zipext = ".zip";
+
+		public Admin(string adminName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
+
+			config.Validate();
+
 			ServerHostName = config.Controller.IpAddress;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
-			if (String.IsNullOrEmpty(adminQueueOverride))
+			if (String.IsNullOrEmpty(adminName))
 			{
 				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
 			}
 			else
 			{
-				adminQueueName = adminQueueOverride;
+				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName);
 			}
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
@@ -50,16 +58,6 @@ namespace PeachFarm.Admin
 			rabbit.StartListener(adminQueueName);
 			this.IsListening = true;
 		}
-
-		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
-		{
-			ProcessAction(e.Action, e.Body);
-			rabbit.StopListener();
-			rabbit.CloseConnection();
-			this.IsListening = false;
-		}
-
-
 
 		#region Properties
 		public string ServerHostName { get; private set; }
@@ -235,12 +233,74 @@ namespace PeachFarm.Admin
 
 		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
 		{
+			List<string> tempfiles = new List<string>();
+			string zipfilepath = String.Empty;
 			StartPeachRequest request = new StartPeachRequest();
-			request.Pit = String.Format("<![CDATA[{0}]]", GetPitXml(pitFilePath));
 
-			if (String.IsNullOrEmpty(definesFilePath) == false)
+			if (File.Exists(pitFilePath) == false)
 			{
-				request.Defines = String.Format("<![CDATA[{0}]]", File.ReadAllText(definesFilePath));
+				throw new ApplicationException("File path does not exist: " + pitFilePath);
+			}
+
+			if((String.IsNullOrEmpty(definesFilePath) == false) && (File.Exists(definesFilePath) == false))
+			{
+				throw new ApplicationException("File path does not exist: " + definesFilePath);
+			}
+
+			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+			string newdefinesfilepath = String.Empty;
+			if (Path.GetExtension(pitFilePath) == xmlext)
+			{
+				zipfilepath = Path.Combine(Path.GetTempPath(), request.PitFileName + zipext);
+				Ionic.Zip.ZipFile zipfile = new Ionic.Zip.ZipFile();
+				zipfile.AddFile(pitFilePath, ".");
+				if (String.IsNullOrEmpty(definesFilePath) == false)
+				{
+					if (definesFilePath.EndsWith(request.PitFileName + configext))
+					{
+						zipfile.AddFile(definesFilePath, ".");
+					}
+					else
+					{
+						newdefinesfilepath = Path.Combine(Path.GetTempPath(), request.PitFileName + configext);
+						File.Copy(definesFilePath, newdefinesfilepath);
+						zipfile.AddFile(newdefinesfilepath, ".");
+						tempfiles.Add(newdefinesfilepath);
+					}
+				}
+				zipfile.Save(zipfilepath);
+				tempfiles.Add(zipfilepath);
+			}
+			else if(Path.GetExtension(pitFilePath) == zipext)
+			{
+				zipfilepath = pitFilePath;
+			}
+
+			#region get pit version if exists
+			XDocument xdoc = null;
+			try
+			{
+				xdoc = XDocument.Parse(GetPitXml(zipfilepath));
+			}
+			catch(Exception ex)
+			{
+				throw new ApplicationException("The pit file was not well formed.\n" + ex.ToString());
+			}
+
+			try
+			{
+				var versionAttrib = xdoc.Root.Attribute("version");
+				if (versionAttrib != null)
+					request.PitVersion = versionAttrib.Value;
+			}
+			catch { }
+			#endregion
+
+			var definesxml = GetConfigXml(zipfilepath);
+			if (String.IsNullOrEmpty(definesxml) == false)
+			{
+				//request.Defines = String.Format("<![CDATA[{0}]]", definesxml);
+				request.HasDefines = true;
 			}
 
 			if (String.IsNullOrEmpty(ip) == false)
@@ -255,9 +315,24 @@ namespace PeachFarm.Admin
 				request.ClientCount = clientCount;
 				request.Tags = tagsString;
 			}
-			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+
+
+			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+
+			request.ZipFile = String.Format(Formats.JobFolder + "\\{1}.zip", request.JobID, request.PitFileName);
+			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, config.MongoDb.ConnectionString);
+
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-			PublishToServer(request.Serialize(), "StartPeach");
+			PublishToServer(request.Serialize(), Actions.StartPeach);
+
+			foreach (string tempfile in tempfiles)
+			{
+				try
+				{
+					File.Delete(tempfile);
+				}
+				catch { }
+			}
 		}
 
 		#endregion
@@ -265,37 +340,92 @@ namespace PeachFarm.Admin
 		#region StopPeachAsync
 		public void StopPeachAsync(string jobGuid)
 		{
-			StopPeachRequest request = new StopPeachRequest();
-			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-			request.JobID = jobGuid;
-			PublishToServer(request.Serialize(), "StopPeach");
+			var job = DatabaseHelper.GetJob(jobGuid, config.MongoDb.ConnectionString);
+			if (job == null)
+			{
+				throw new ApplicationException("Job does not exist: " + jobGuid);
+			}
+			else
+			{
+				StopPeachRequest request = new StopPeachRequest();
+				request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+				request.JobID = jobGuid;
+				PublishToServer(request.Serialize(), "StopPeach");
+			}
 		}
 		#endregion
 
 		public void ListNodesAsync()
 		{
-			ListNodesRequest request = new ListNodesRequest();
-			PublishToServer(request.Serialize(), "ListNodes");
+			//ListNodesRequest request = new ListNodesRequest();
+			//PublishToServer(request.Serialize(), Actions.ListNodes);
+
+			ListNodesResponse response = new ListNodesResponse();
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
+			RaiseListNodesCompleted(response);
 		}
 
 		public void ListErrorsAsync(string jobID = "")
 		{
-			ListErrorsRequest request = new ListErrorsRequest();
-			request.JobID = jobID;
-			PublishToServer(request.Serialize(), "ListErrors");
+			//ListErrorsRequest request = new ListErrorsRequest();
+			//request.JobID = jobID;
+			//PublishToServer(request.Serialize(), Actions.ListErrors);
+
+			ListErrorsResponse response = new ListErrorsResponse();
+			//response.Nodes = errors;
+			if (String.IsNullOrEmpty(jobID))
+			{
+				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+			}
+			else
+			{
+				response.Errors = DatabaseHelper.GetErrors(jobID, config.MongoDb.ConnectionString);
+			}
+			RaiseListErrorsCompleted(response);
 		}
 
 		public void JobInfoAsync(string jobID)
 		{
-			JobInfoRequest request = new JobInfoRequest();
-			request.JobID = jobID;
-			PublishToServer(request.Serialize(), "JobInfo");
+			//JobInfoRequest request = new JobInfoRequest();
+			//request.JobID = jobID;
+			//PublishToServer(request.Serialize(), Actions.JobInfo);
+
+			JobInfoResponse response = new JobInfoResponse();
+			Common.Mongo.Job mongoJob = DatabaseHelper.GetJob(jobID, config.MongoDb.ConnectionString);
+			if (mongoJob == null)
+			{
+				response.Success = false;
+				response.ErrorMessage = String.Format("Job {0} does not exist.", jobID);
+				response.Job = new Common.Messages.Job() { JobID = jobID };
+			}
+			else
+			{
+				response.Success = true;
+				response.Job = new Common.Messages.Job(mongoJob);
+				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == jobID) select h).ToList();
+			}
+
+			RaiseJobInfoCompleted(response);
 		}
 
 		public void MonitorAsync()
 		{
-			PublishToServer(new MonitorRequest().Serialize(), "Monitor");
+			//PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
+
+			MonitorResponse response = new MonitorResponse();
+			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
+
+			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
+			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
+			response.ActiveJobs = activeJobs.ToMessagesJobs();
+			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
+
+			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+			RaiseMonitorCompleted(response);
 		}
+
 		#endregion
 
 		#region MQ functions
@@ -304,26 +434,34 @@ namespace PeachFarm.Admin
 			rabbit.PublishToQueue(serverQueueName, message, action, adminQueueName);
 		}
 
+		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			ProcessAction(e.Action, e.Body);
+			rabbit.StopListener();
+			//rabbit.CloseConnection();
+			this.IsListening = false;
+		}
+
 		private void ProcessAction(string action, string body)
 		{
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					RaiseStartPeachCompleted(StartPeachResponse.Deserialize(body));
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
 					break;
-				case "ListNodes":
+				case Actions.ListNodes:
 					RaiseListNodesCompleted(ListNodesResponse.Deserialize(body));
 					break;
-				case "ListErrors":
+				case Actions.ListErrors:
 					RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
 					break;
-				case "JobInfo":
+				case Actions.JobInfo:
 					RaiseJobInfoCompleted(JobInfoResponse.Deserialize(body));
 					break;
-				case "Monitor":
+				case Actions.Monitor:
 					RaiseMonitorCompleted(MonitorResponse.Deserialize(body));
 					break;
 				default:
@@ -337,10 +475,71 @@ namespace PeachFarm.Admin
 
 		private string GetPitXml(string pitFilePath)
 		{
-			XDocument doc = XDocument.Load(pitFilePath);
-			return doc.ToString();
+			if (Path.GetExtension(pitFilePath) == zipext)
+			{
+			  //var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
+				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
+			  var pitfilename = Path.GetFileNameWithoutExtension(pitFilePath) + xmlext;
+			  var pitfile = (from e in zip.Entries where e.FileName == pitfilename select e).FirstOrDefault();
+
+			  if (pitfile == null)
+			    throw new ApplicationException("Your zip package must contain a Pit file with the name: " + pitfilename);
+
+				var stream = pitfile.OpenReader();
+			  XDocument doc = XDocument.Load(stream);
+			  stream.Close();
+			  return doc.ToString();
+			}
+			else if (Path.GetExtension(pitFilePath) == xmlext)
+			{
+			  XDocument doc = XDocument.Load(pitFilePath);
+			  return doc.ToString();
+			}
+			else
+			{
+			  throw new ApplicationException("Unsupported file extension. Peach Farm only accepts .xml and .zip files");
+			}
+		}
+
+		private string GetConfigXml(string pitFilePath)
+		{
+			if (Path.GetExtension(pitFilePath) == zipext)
+			{
+				//var zip = Telerik.Windows.Zip.ZipPackage.OpenFile(pitFilePath, FileAccess.Read);
+				var zip = Ionic.Zip.ZipFile.Read(pitFilePath);
+				var definesfilename = Path.GetFileNameWithoutExtension(pitFilePath) + configext;
+				var definesfile = (from e in zip.Entries where e.FileName == definesfilename select e).FirstOrDefault();
+
+				//if (pitfile == null)
+				//  throw new ApplicationException("Your zip package must contain a Pit file with the name: " + pitfilename);
+				if (definesfile == null)
+				{
+					return String.Empty;
+				}
+				else
+				{
+					var stream = definesfile.OpenReader();
+					XDocument doc = XDocument.Load(stream);
+					stream.Close();
+					return doc.ToString();
+				}
+			}
+			else
+			{
+				return String.Empty;
+			}
 		}
 
 
+
+		public void DumpFiles(string jobID, string destinationFolder)
+		{
+			FileWriter.DumpFiles(config.MongoDb.ConnectionString, destinationFolder, jobID);
+		}
+
+		public void TruncateAllCollections()
+		{
+			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+		}
 	}
 }

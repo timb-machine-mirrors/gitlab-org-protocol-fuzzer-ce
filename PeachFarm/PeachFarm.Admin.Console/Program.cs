@@ -25,10 +25,12 @@ namespace PeachFarm.Admin.Console
 
 				bool start = false;
 				bool stop = false;
-				bool list = false;
+				bool nodes = false;
 				bool errors = false;
 				bool jobInfo = false;
 				bool jobs = false;
+				bool output = false;
+				bool truncate = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -42,10 +44,12 @@ namespace PeachFarm.Admin.Console
 						// Commands
 						{ "start", v => start = true },
 						{ "stop", v => stop = true },
-						{ "list", v => list = true},
+						{ "nodes", v => nodes = true},
 						{ "errors", v => errors = true },
 						{ "info", var => jobInfo = true },
 						{ "jobs", var => jobs = true },
+						{ "output", var => output = true},
+						{ "truncate", var => truncate = true},
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -55,7 +59,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !list && !errors && !jobInfo && !jobs)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -70,7 +74,12 @@ namespace PeachFarm.Admin.Console
 				if (jobInfo && extra.Count != 1)
 					Program.syntax();
 
+				if (output && extra.Count != 2)
+					Program.syntax();
+
 				#endregion
+
+				bool mustwait = true;
 
 				#region Set up Admin listener
 
@@ -88,6 +97,9 @@ namespace PeachFarm.Admin.Console
 				#region Start
 				if (start)
 				{
+					if (launchCount < 0)
+						System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
+
 					string pitFilePath = extra[0];
 
 					string definesFilePath = String.Empty;
@@ -117,8 +129,9 @@ namespace PeachFarm.Admin.Console
 				#endregion
 
 				#region List
-				if (list)
+				if (nodes)
 				{
+					mustwait = false;
 					admin.ListNodesAsync();
 				}
 				#endregion
@@ -126,6 +139,7 @@ namespace PeachFarm.Admin.Console
 				#region Errors
 				if (errors)
 				{
+					mustwait = false;
 					if (extra.Count > 0)
 					{
 						string jobID = extra[0];
@@ -141,6 +155,7 @@ namespace PeachFarm.Admin.Console
 				#region Job Info
 				if (jobInfo)
 				{
+					mustwait = false;
 					string jobID = extra[0];
 					admin.JobInfoAsync(jobID);
 				}
@@ -149,12 +164,54 @@ namespace PeachFarm.Admin.Console
 				#region Jobs
 				if (jobs)
 				{
+					mustwait = false;
 					admin.MonitorAsync();
 				}
 				#endregion
 
-				System.Console.WriteLine("waiting for result...");
-				System.Console.ReadLine();
+				#region Job Output
+				if (output)
+				{
+					mustwait = false;
+
+					string jobID = extra[0];
+					string destinationFolder = extra[1];
+
+					try
+					{
+						admin.DumpFiles(jobID, destinationFolder);
+					}
+					catch (Exception ex)
+					{
+						System.Console.WriteLine("Error getting files:\n" + ex.Message);
+						return;
+					}
+					System.Console.WriteLine("Done!");
+				}
+				#endregion
+
+				#region Truncate
+				if (truncate)
+				{
+					mustwait = false;
+					try
+					{
+						admin.TruncateAllCollections();
+					}
+					catch (Exception ex)
+					{
+						System.Console.WriteLine("Error truncating tables:\n" + ex.ToString());
+						return;
+					}
+					System.Console.WriteLine("Done!");
+				}
+				#endregion
+
+				if (mustwait)
+				{
+					System.Console.WriteLine("waiting for result...");
+					System.Console.ReadLine();
+				}
 			}
 			catch (RabbitMqException rex)
 			{
@@ -184,7 +241,7 @@ namespace PeachFarm.Admin.Console
 			}
 			else
 			{
-				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.Message));
+				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
 		}
 
@@ -196,15 +253,15 @@ namespace PeachFarm.Admin.Console
 			}
 			else
 			{
-				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.Message));
+				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
 		}
 
 		static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
 		{
-			if (e.Result.Nodes.Count > 0)
+			if (e.Result.Errors.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				foreach (Heartbeat heartbeat in e.Result.Errors)
 				{
 					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.ErrorMessage));
 				}
@@ -251,17 +308,24 @@ namespace PeachFarm.Admin.Console
 
 		static void admin_JobInfoCompleted(object sender, Admin.JobInfoCompletedEventArgs e)
 		{
-			string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
-				e.Result.Job.JobID,
-				e.Result.Job.UserName,
-				e.Result.Job.Pit.FileName,
-				e.Result.Job.StartDate);
-
-			System.Console.WriteLine(output);
-
-			foreach (Heartbeat heartbeat in e.Result.Nodes)
+			if (e.Result.Success)
 			{
-				System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+				string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
+					e.Result.Job.JobID,
+					e.Result.Job.UserName,
+					e.Result.Job.Pit.FileName,
+					e.Result.Job.StartDate);
+
+				System.Console.WriteLine(output);
+
+				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				{
+					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+				}
+			}
+			else
+			{
+				System.Console.WriteLine("Job not found: " + e.Result.Job.JobID);
 			}
 		}
 
@@ -346,7 +410,7 @@ Syntax:
         pf_admin.exe -stop jobID
       
       Get list of all Nodes:
-        pf_admin.exe -list
+        pf_admin.exe -nodes
 
       Get list of errors reported by Nodes:
         pf_admin.exe -errors
@@ -360,6 +424,8 @@ Syntax:
       Get information for a Job and a list of Running Nodes
         pf_admin.exe -info jobID
 
+			Get generated files for a Job
+				pf_admin.exe -output jobID destinationFolder
 
 Commands:
 
@@ -369,13 +435,13 @@ Commands:
 
    ipAddress   - Address of specific node to launch on
 
-   pitFilePath - Full path to Pit File
+   pitFilePath - Full path to Pit File or Zip File
    definesFilePath - Full path to Defines File (optional)
 
  stop   - Stop some instances of Peach
    jobID - Job ID
 
- list   - List all nodes in the farm with status
+ nodes   - List all nodes in the farm with status
 
  errors - List any logged node errors
    jobID - Job ID
@@ -384,6 +450,10 @@ Commands:
 
  info - Get information for a Job and a list of Running Nodes
    jobID - Job ID
+
+ output - Get generated files for a Job
+	 jobID - Job ID
+   destinationFolder - Folder where files will be downloaded to
 
 ");
 		}

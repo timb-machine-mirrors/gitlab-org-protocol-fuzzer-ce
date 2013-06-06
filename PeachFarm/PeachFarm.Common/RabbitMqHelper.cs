@@ -13,10 +13,10 @@ namespace PeachFarm.Common
 	{
 		private UTF8Encoding encoding = new UTF8Encoding();
 
-		private static IConnection connection;
-		private static IModel receiver;
-		private static IModel sender;
-		private static IModel declarer;
+		private IConnection connection;
+		private IModel receiver;
+		private IModel sender;
+		private IModel declarer;
 
 		private string hostName;
 		int port;
@@ -24,8 +24,8 @@ namespace PeachFarm.Common
 		string password;
 		bool ssl;
 
-		private static System.Timers.Timer listenTimer;
-		private static string listenQueue;
+		private System.Timers.Timer listenTimer;
+		private string listenQueue;
 
 		public RabbitMqHelper(string hostName, int port = -1, string userName = "guest", string password = "guest", bool ssl = false)
 		{
@@ -53,8 +53,6 @@ namespace PeachFarm.Common
 			{
 				throw new ApplicationException("queue parameter cannot be empty");
 			}
-			
-			IsListening = true;
 
 			listenQueue = queue;
 			lock (declarer)
@@ -65,9 +63,10 @@ namespace PeachFarm.Common
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
 			listenTimer.Start();
+			IsListening = true;
 		}
 
-		public void StopListener()
+		public void StopListener(bool deleteQueue = true)
 		{
 			IsListening = false;
 			
@@ -75,9 +74,12 @@ namespace PeachFarm.Common
 			listenTimer.Dispose();
 			listenTimer = null;
 
-			lock (declarer)
+			if (deleteQueue)
 			{
-				declarer.QueueDelete(listenQueue);
+				lock (declarer)
+				{
+					declarer.QueueDelete(listenQueue);
+				}
 			}
 			listenQueue = String.Empty;
 		}

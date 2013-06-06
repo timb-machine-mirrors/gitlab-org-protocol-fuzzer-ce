@@ -10,6 +10,9 @@ inst = 'output'
 appname = 'epeach'
 maxdepth = 2
 
+def supported_variant(name):
+	return True
+
 def init(ctx):
 	wscript.init(ctx)
 
@@ -27,7 +30,12 @@ def configure(ctx):
 	wscript.configure(ctx)
 
 def build(ctx):
-	wscript.build(ctx)
+	subdirs = getattr(ctx, 'subdirs', None)
 
-def go(ctx):
-	wscript.go(ctx)
+	if subdirs:
+		try:
+			subdirs.remove(os.path.join('Peach', 'Peach'))
+		except ValueError:
+			pass
+
+	wscript.build(ctx)

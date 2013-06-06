@@ -40,6 +40,15 @@ namespace PeachFarmMonitor {
         protected global::Telerik.Web.UI.RadScriptManager RadScriptManager1;
         
         /// <summary>
+        /// loadingPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadAjaxLoadingPanel loadingPanel;
+        
+        /// <summary>
         /// RadAjaxManager1 control.
         /// </summary>
         /// <remarks>
@@ -65,6 +74,15 @@ namespace PeachFarmMonitor {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblJobID;
+        
+        /// <summary>
+        /// downloadInputLink control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink downloadInputLink;
         
         /// <summary>
         /// downloadOutputLink control.
@@ -94,12 +112,21 @@ namespace PeachFarmMonitor {
         protected global::System.Web.UI.WebControls.Table brand;
         
         /// <summary>
-        /// iterationsGrid control.
+        /// faultBucketsGrid control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Telerik.Web.UI.RadGrid iterationsGrid;
+        protected global::Telerik.Web.UI.RadGrid faultBucketsGrid;
+        
+        /// <summary>
+        /// faultsGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadGrid faultsGrid;
     }
 }

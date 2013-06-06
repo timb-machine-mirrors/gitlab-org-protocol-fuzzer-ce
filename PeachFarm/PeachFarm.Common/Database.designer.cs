@@ -30,6 +30,10 @@ namespace PeachFarm.Common.Mongo
 
 		private string tagsField;
 
+		private string zipFileField;
+
+		private string reportLocationField;
+
 		public Job()
 		{
 			this.pitField = new Pit();
@@ -106,6 +110,30 @@ namespace PeachFarm.Common.Mongo
 				this.tagsField = value;
 			}
 		}
+
+		public string ZipFile
+		{
+			get
+			{
+				return this.zipFileField;
+			}
+			set
+			{
+				this.zipFileField = value;
+			}
+		}
+
+		public string ReportLocation
+		{
+			get
+			{
+				return this.reportLocationField;
+			}
+			set
+			{
+				this.reportLocationField = value;
+			}
+		}
 	}
 
 	public partial class Pit
@@ -163,6 +191,8 @@ namespace PeachFarm.Common.Mongo
 
 		private uint iterationCountField;
 
+		private uint faultCountField;
+
 		private uint seedNumberField;
 
 		private string tagsField;
@@ -203,6 +233,18 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
+		public uint FaultCount
+		{
+			get
+			{
+				return this.faultCountField;
+			}
+			set
+			{
+				this.faultCountField = value;
+			}
+		}
+
 		public uint SeedNumber
 		{
 			get
@@ -233,9 +275,7 @@ namespace PeachFarm.Common.Mongo
 
 		private string descriptionField;
 
-		private List<Action> stateModelField;
-
-		private List<CollectedData> collectedDataField;
+		private List<GeneratedFile> generatedFilesField;
 
 		private System.DateTime stampField;
 
@@ -271,8 +311,7 @@ namespace PeachFarm.Common.Mongo
 
 		public Fault()
 		{
-			this.collectedDataField = new List<CollectedData>();
-			this.stateModelField = new List<Action>();
+			this.generatedFilesField = new List<GeneratedFile>();
 		}
 
 		public string Description
@@ -289,29 +328,15 @@ namespace PeachFarm.Common.Mongo
 
 		[System.Xml.Serialization.XmlArrayAttribute(Order = 1)]
 		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<Action> StateModel
+		public List<GeneratedFile> GeneratedFiles
 		{
 			get
 			{
-				return this.stateModelField;
+				return this.generatedFilesField;
 			}
 			set
 			{
-				this.stateModelField = value;
-			}
-		}
-
-		[System.Xml.Serialization.XmlArrayAttribute(Order = 2)]
-		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
-		public List<CollectedData> CollectedData
-		{
-			get
-			{
-				return this.collectedDataField;
-			}
-			set
-			{
-				this.collectedDataField = value;
+				this.generatedFilesField = value;
 			}
 		}
 
@@ -508,122 +533,34 @@ namespace PeachFarm.Common.Mongo
 		}
 	}
 
-	public partial class Action
+	public partial class GeneratedFile
 	{
 
-		private string actionNameField;
+		private string nameField;
 
-		private string actionTypeField;
+		private string gridFsLocationField;
 
-		private int parameterField;
-
-		private byte[] dataField;
-
-		private string dataPathField;
-
-		public string ActionName
+		public string Name
 		{
 			get
 			{
-				return this.actionNameField;
+				return this.nameField;
 			}
 			set
 			{
-				this.actionNameField = value;
+				this.nameField = value;
 			}
 		}
 
-		public string ActionType
+		public string GridFsLocation
 		{
 			get
 			{
-				return this.actionTypeField;
+				return this.gridFsLocationField;
 			}
 			set
 			{
-				this.actionTypeField = value;
-			}
-		}
-
-		public int Parameter
-		{
-			get
-			{
-				return this.parameterField;
-			}
-			set
-			{
-				this.parameterField = value;
-			}
-		}
-
-		public byte[] Data
-		{
-			get
-			{
-				return this.dataField;
-			}
-			set
-			{
-				this.dataField = value;
-			}
-		}
-
-		public string DataPath
-		{
-			get
-			{
-				return this.dataPathField;
-			}
-			set
-			{
-				this.dataPathField = value;
-			}
-		}
-	}
-
-	public partial class CollectedData
-	{
-
-		private string keyField;
-
-		private byte[] dataField;
-
-		private string dataPathField;
-
-		public string Key
-		{
-			get
-			{
-				return this.keyField;
-			}
-			set
-			{
-				this.keyField = value;
-			}
-		}
-
-		public byte[] Data
-		{
-			get
-			{
-				return this.dataField;
-			}
-			set
-			{
-				this.dataField = value;
-			}
-		}
-
-		public string DataPath
-		{
-			get
-			{
-				return this.dataPathField;
-			}
-			set
-			{
-				this.dataPathField = value;
+				this.gridFsLocationField = value;
 			}
 		}
 	}

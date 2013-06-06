@@ -28,15 +28,16 @@ namespace PeachFarm.Controller
 
 		RabbitMqHelper rabbit = null;
 
-		private string serverQueueName;
+		private string controllerQueueName;
 
-		public PeachFarmController()
+		public PeachFarmController(string controllerName = "")
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			config = (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");
+			config.Validate();
 
 			//ipaddress = config.ServerHost.IpAddress;
 
@@ -47,16 +48,21 @@ namespace PeachFarm.Controller
 			}
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			if (String.IsNullOrEmpty(controllerName))
+			{
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			}
+			else
+			{
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, controllerName);
+			}
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(serverQueueName);
+			rabbit.StartListener(this.controllerQueueName);
 
 			if (statusCheck == null)
 			{
 				statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(1));
 			}
-
-			IsOpen = true;
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -67,36 +73,36 @@ namespace PeachFarm.Controller
 			}
 			catch (Exception ex)
 			{
-				StartPeachResponse response = new StartPeachResponse();
-				response.Success = false;
-				response.Message = ex.Message;
-				ReplyToAdmin(response.ToString(), "StartPeach", e.ReplyQueue);
+				ProcessException(ex, e.Action, e.ReplyQueue);
 			}
 		}
 
 		#region Properties
-		public bool IsOpen { get; set; }
+		public bool IsListening
+		{
+			get { return rabbit.IsListening; }
+		}
 
 		public string QueueName
 		{
 			get
 			{
-				return serverQueueName;
+				return controllerQueueName;
 			}
 		}
 		#endregion
 
 		public void Close()
 		{
-			IsOpen = false;
 			rabbit.StopListener();
-			rabbit.CloseConnection();
+			//rabbit.CloseConnection();
 		}
 
 		private void StatusCheck(object state)
 		{
 			//Catching all exceptions because StatusCheck is called often
 			List<Heartbeat> nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+
 			try
 			{
 				foreach (var node in nodes)
@@ -115,6 +121,7 @@ namespace PeachFarm.Controller
 						{
 							node.Status = Status.Late;
 							logger.Info("{0}\t{1}\t{2}", node.NodeName, node.Status.ToString(), node.Stamp);
+							node.SaveToDatabase(config.MongoDb.ConnectionString);
 						}
 					}
 				}
@@ -153,10 +160,10 @@ namespace PeachFarm.Controller
 			rabbit.DeleteExchange(exchangeName);
 		}
 
-		private void ReplyToAdmin(string body, string action, string replyQueue)
+		private void Reply(string body, string action, string replyQueue)
 		{
 			rabbit.PublishToQueue(replyQueue, body, action);
-			logger.Trace("Sent Action to Admin: {0}\nBody:\n{1}", action, body);
+			logger.Trace("Sent Action to {2}: {0}\nBody:\n{1}", action, body, replyQueue);
 		}
 
 		private void ProcessAction(string action, string body, string replyQueue)
@@ -166,30 +173,72 @@ namespace PeachFarm.Controller
 			Debug.WriteLine(body);
 			switch (action)
 			{
-				case "StartPeach":
+				case Actions.StartPeach:
 					StartPeach(StartPeachRequest.Deserialize(body), replyQueue);
 					break;
-				case "StopPeach":
+				case Actions.StopPeach:
 					StopPeach(StopPeachRequest.Deserialize(body), replyQueue);
 					break;
-				case "Heartbeat":
+				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
-				case "ListNodes":
+				case Actions.ListNodes:
 					ListNodes(ListNodesRequest.Deserialize(body), replyQueue);
 					break;
-				case "ListErrors":
+				case Actions.ListErrors:
 					ListErrors(ListErrorsRequest.Deserialize(body), replyQueue);
 					break;
-				case "JobInfo":
+				case Actions.JobInfo:
 					JobInfo(JobInfoRequest.Deserialize(body), replyQueue);
 					break;
-				case "Monitor":
+				case Actions.Monitor:
 					Monitor(MonitorRequest.Deserialize(body), replyQueue);
+					break;
+				case Actions.GenerateReport:
+					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
 					break;
 				default:
 					string error = String.Format("Received unknown action {0}", action);
-					throw new ApplicationException(error);
+					logger.Error(error);
+					break;
+			}
+		}
+
+
+		private void ProcessException(Exception ex, string action, string replyQueue)
+		{
+			ResponseBase response = null;
+			switch (action)
+			{
+				case Actions.StartPeach:
+					response = new StartPeachResponse();
+					break;
+				case Actions.StopPeach:
+					response = new StopPeachResponse();
+					break;
+				case Actions.ListNodes:
+					response = new ListNodesResponse();
+					break;
+				case Actions.ListErrors:
+					response = new ListErrorsResponse();
+					break;
+				case Actions.JobInfo:
+					response = new JobInfoResponse();
+					break;
+				case Actions.Monitor:
+					response = new MonitorResponse();
+					break;
+				default:
+					string error = String.Format("Error while processing {0} message from {1}:\n{2}", action, replyQueue, ex.Message);
+					logger.Error(error);
+					return;
+			}
+
+			if (response != null)
+			{
+				response.Success = false;
+				response.ErrorMessage = ex.Message;
+				Reply(response.ToString(), action, replyQueue);
 			}
 		}
 
@@ -202,7 +251,7 @@ namespace PeachFarm.Controller
 			if (Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString) == null)
 			{
 				response.Success = false;
-				response.Message = String.Format("Job {0} does not exist.", request.JobID);
+				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
 			}
 			else
 			{
@@ -211,23 +260,20 @@ namespace PeachFarm.Controller
 				if (result == false)
 				{
 					response.Success = false;
-					response.Message = String.Format("Cannot stop job {0}", request.JobID);
+					response.ErrorMessage = String.Format("Cannot stop job {0}", request.JobID);
 				}
 			}
-			ReplyToAdmin(response.Serialize(), "StopPeach", replyQueue);
+			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
 
 		}
 
 		private void StartPeach(StartPeachRequest request, string replyQueue)
 		{
-			string action = "StartPeach";
-			request.JobID = CreateJobID();
+			string action = Actions.StartPeach;
 			request.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
-			while (Common.Mongo.DatabaseHelper.GetJob(request.JobID, request.MongoDbConnectionString) != null)
-			{
-				request.JobID = CreateJobID();
-			}
+			// moving this to Admin
+			//request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
 			StartPeachResponse response = new StartPeachResponse(request);
 
@@ -245,14 +291,14 @@ namespace PeachFarm.Controller
 					PublishToJob(request.JobID, request.Serialize(), action);
 
 
-					ReplyToAdmin(response.Serialize(), action, replyQueue);
+					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
 					response.JobID = String.Empty;
 					response.Success = false;
-					response.Message = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
-					ReplyToAdmin(response.Serialize(), action, replyQueue);
+					response.ErrorMessage = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
+					Reply(response.Serialize(), action, replyQueue);
 				}
 			}
 			else
@@ -292,15 +338,16 @@ namespace PeachFarm.Controller
 
 					CommitJobToMongo(request, jobNodes);
 
-					foreach(string jobQueue in jobQueues)
+					uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+					for(int i=0;i<jobQueues.Count;i++)
 					{
-						request.Seed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-						rabbit.PublishToQueue(jobQueue, request.Serialize(), action);
+						request.Seed = baseseed + Convert.ToUInt32(i);
+						rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
 					}
 
 					//PublishToJob(request.JobID, request.Serialize(), action);
 
-					ReplyToAdmin(response.Serialize(), action, replyQueue);
+					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
@@ -308,19 +355,21 @@ namespace PeachFarm.Controller
 					response.Success = false;
 					if (String.IsNullOrEmpty(request.Tags))
 					{
-						response.Message = String.Format("Not enough Alive nodes available, current available: {0}\n", jobNodes.Count);
+						response.ErrorMessage = String.Format("Not enough Alive nodes available, current available: {0}\n", jobNodes.Count);
 					}
 					else
 					{
-						response.Message = String.Format("Not enough Alive nodes matching tags ({0}), current available: {1}\n", request.Tags, jobNodes.Count);
+						response.ErrorMessage = String.Format("Not enough Alive nodes matching tags ({0}), current available: {1}\n", request.Tags, jobNodes.Count);
 					}
-					ReplyToAdmin(response.Serialize(), action, replyQueue);
+					Reply(response.Serialize(), action, replyQueue);
 				}
 			}
 		}
 
 		private void HeartbeatReceived(Heartbeat heartbeat)
 		{
+			Heartbeat lastHeartbeat = DatabaseHelper.GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
+
 			if (heartbeat.Status == Status.Stopping)
 			{
 				RemoveNode(heartbeat);
@@ -329,6 +378,19 @@ namespace PeachFarm.Controller
 			{
 				UpdateNode(heartbeat);
 			}
+
+			if ((heartbeat.Status == Status.Alive) && (lastHeartbeat.Status == Status.Running) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
+			{
+				bool jobFinished = (from n in DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
+				if (jobFinished)
+				{
+					GenerateReportRequest grr = new GenerateReportRequest();
+					grr.JobID = lastHeartbeat.JobID;
+					grr.ReportFormat = ReportFormat.PDF;
+					rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+				}
+			}
+
 
 			if (heartbeat.Status == Status.Error)
 			{
@@ -342,7 +404,7 @@ namespace PeachFarm.Controller
 		{
 			ListNodesResponse response = new ListNodesResponse();
 			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
-			ReplyToAdmin(response.Serialize(), "ListNodes", replyQueue);
+			Reply(response.Serialize(), Actions.ListNodes, replyQueue);
 		}
 
 		private void ListErrors(ListErrorsRequest listErrorsRequest, string replyQueue)
@@ -351,13 +413,13 @@ namespace PeachFarm.Controller
 			//response.Nodes = errors;
 			if (String.IsNullOrEmpty(listErrorsRequest.JobID))
 			{
-				response.Nodes = DatabaseHelper.GetErrors(config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 			}
 			else
 			{
-				response.Nodes = DatabaseHelper.GetErrors(listErrorsRequest.JobID, config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetErrors(listErrorsRequest.JobID, config.MongoDb.ConnectionString);
 			}
-			ReplyToAdmin(response.Serialize(), "ListErrors", replyQueue);
+			Reply(response.Serialize(), Actions.ListErrors, replyQueue);
 		}
 
 		private void JobInfo(JobInfoRequest request, string replyQueue)
@@ -367,7 +429,7 @@ namespace PeachFarm.Controller
 			if (mongoJob == null)
 			{
 				response.Success = false;
-				response.Message = String.Format("Job {0} does not exist.", request.JobID);
+				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
 			}
 			else
 			{
@@ -377,7 +439,7 @@ namespace PeachFarm.Controller
 				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
 			}
 
-			ReplyToAdmin(response.Serialize(), "JobInfo", replyQueue);
+			Reply(response.Serialize(), Actions.JobInfo, replyQueue);
 		}
 
 		private void Monitor(MonitorRequest request, string replyQueue)
@@ -393,20 +455,14 @@ namespace PeachFarm.Controller
 
 			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
 
-			ReplyToAdmin(response.Serialize(), "Monitor", replyQueue);
+			Reply(response.Serialize(), Actions.Monitor, replyQueue);
+		}
+
+		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
+		{
+			
 		}
 		#endregion
-
-		private string CreateJobID()
-		{
-			using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
-			{
-				// change the size of the array depending on your requirements
-				var rndBytes = new byte[6];
-				rng.GetBytes(rndBytes);
-				return BitConverter.ToString(rndBytes).Replace("-", "");
-			}
-		}
 
 		private void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
 		{
@@ -417,26 +473,29 @@ namespace PeachFarm.Controller
 			mongoJob.JobID = request.JobID;
 			mongoJob.UserName = request.UserName;
 			mongoJob.Pit.FileName = request.PitFileName;
-			mongoJob.Pit.FullText = request.Pit;
+			//mongoJob.Pit.FullText = request.Pit;
+			mongoJob.ZipFile = request.ZipFile;
 
-			string text = request.Pit;
-			if (text.StartsWith("<!"))
-			{
-				text = text.Substring("<![CDATA[".Length);
-				text = text.Substring(0, text.Length - 2);
-			}
+			//string text = request.Pit;
+			//if (text.StartsWith("<!"))
+			//{
+			//  text = text.Substring("<![CDATA[".Length);
+			//  text = text.Substring(0, text.Length - 2);
+			//}
 
-			try
-			{
-				XDocument xdoc = XDocument.Parse(text);
-				var versionAttrib = xdoc.Root.Attribute("version");
-				if (versionAttrib != null)
-					mongoJob.Pit.Version = versionAttrib.Value;
-			}
-			catch
-			{
+			mongoJob.Pit.Version = request.PitVersion;
 
-			}
+			//try
+			//{
+			//  XDocument xdoc = XDocument.Parse(text);
+			//  var versionAttrib = xdoc.Root.Attribute("version");
+			//  if (versionAttrib != null)
+			//    mongoJob.Pit.Version = versionAttrib.Value;
+			//}
+			//catch
+			//{
+
+			//}
 
 			mongoJob.StartDate = DateTime.Now;
 			mongoJob.Tags = request.Tags;

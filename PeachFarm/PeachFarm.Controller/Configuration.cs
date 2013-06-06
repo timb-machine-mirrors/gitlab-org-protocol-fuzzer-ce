@@ -16,24 +16,59 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.Controller] = value; }
     }
 		//*/
-    [ConfigurationProperty(Constants.MongoDb)]
+		[ConfigurationProperty(Constants.MongoDb, IsRequired = true)]
     public MongoDbElement MongoDb
     {
       get { return (MongoDbElement)this[Constants.MongoDb]; }
       set { this[Constants.MongoDb] = value; }
     }
 
-    [ConfigurationProperty(Constants.RabbitMq)]
+    [ConfigurationProperty(Constants.RabbitMq, IsRequired=true)]
     public RabbitMqElement RabbitMq
     {
       get { return (RabbitMqElement)this[Constants.RabbitMq]; }
       set { this[Constants.RabbitMq] = value; }
     }
+
+		public void Validate()
+		{
+			StringBuilder message = new StringBuilder();
+
+			if (this.MongoDb == null)
+			{
+				message.AppendLine(") Missing configuration element in peachfarm.controller: <MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
+			}
+			else
+			{
+				if (String.IsNullOrEmpty(this.MongoDb.ConnectionString))
+				{
+					message.AppendLine(") MongoDB connection string is required");
+				}
+			}
+
+			if (this.RabbitMq == null)
+			{
+				message.AppendLine(") Missing configuration element in peachfarm.controller: <RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
+			}
+			else
+			{
+				if (String.IsNullOrEmpty(this.RabbitMq.HostName))
+				{
+					message.AppendLine(") RabbitMQ host name is required");
+				}
+			}
+
+			if (message.Length > 0)
+			{
+				message.Insert(0, "Errors found in application config file: \n");
+				throw new ApplicationException(message.ToString());
+			}
+		}
   }
 
   public class MongoDbElement : ConfigurationElement
   {
-    [ConfigurationProperty(Constants.ConnectionString)]
+		[ConfigurationProperty(Constants.ConnectionString, IsRequired = true)]
     public string ConnectionString
     {
       get { return (string)this[Constants.ConnectionString]; }
@@ -43,7 +78,7 @@ namespace PeachFarm.Controller.Configuration
 
   public class RabbitMqElement : ConfigurationElement
   {
-    [ConfigurationProperty(Constants.HostName)]
+		[ConfigurationProperty(Constants.HostName, IsRequired = true)]
     public string HostName
     {
       get { return (string)this[Constants.HostName]; }
@@ -81,7 +116,7 @@ namespace PeachFarm.Controller.Configuration
 
   public class Controller : ConfigurationElement
   {
-    [ConfigurationProperty(Constants.IpAddress)]
+		[ConfigurationProperty(Constants.IpAddress, IsRequired = true)]
     public string IpAddress
     {
       get { return (string)this[Constants.IpAddress]; }

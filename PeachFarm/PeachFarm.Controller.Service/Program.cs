@@ -28,7 +28,7 @@ namespace PeachFarm.Controller
         try
         {
           server = new PeachFarmController();
-          if (server.IsOpen)
+          if (server.IsListening)
           {
             System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
             System.Console.ReadLine();

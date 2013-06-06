@@ -109,9 +109,9 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
 			if(excludeData)
-				job.Faults = collection.Find(query).SetFields(Fields.Exclude(dataFields)).ToList();
+				job.Faults = collection.Find(query).SetSortOrder("Group").SetFields(Fields.Exclude(dataFields)).ToList();
 			else
-				job.Faults = collection.Find(query).ToList();
+				job.Faults = collection.Find(query).SetSortOrder("Group").ToList();
 
 			foreach (var fault in job.Faults)
 			{
@@ -167,6 +167,7 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			foreach (var fault in faults)
 			{
+				//var updatedfault = fault.UpdateDataPaths(connectionString);
 				collection.Save(fault);
 			}
 			collection.Database.Server.Disconnect();
@@ -175,7 +176,7 @@ namespace PeachFarm.Common.Mongo
 		public static void SaveToDatabase(this Fault fault, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
-			fault = fault.UpdateDataPaths(connectionString);
+			//fault = fault.UpdateDataPaths(connectionString);
 			collection.Save(fault);
 			collection.Database.Server.Disconnect();
 		}
@@ -190,6 +191,8 @@ namespace PeachFarm.Common.Mongo
 			collection.Database.Server.Disconnect();
 		}
 
+		#region old code
+		/*
 		private static Fault UpdateDataPaths(this Fault fault, string connectionString)
 		{
 			string jobFolder = String.Empty;
@@ -242,6 +245,8 @@ namespace PeachFarm.Common.Mongo
 					actionFile = System.IO.Path.Combine(iterationFolder, string.Format("action_{0}-{1}_{2}_{3}.txt",
 									cnt, action.Parameter, action.ActionType.ToString(), action.ActionName));
 				}
+				
+				DatabaseHelper.SaveToGridFS(action.Data, actionFile, connectionString);
 
 				action.DataPath = actionFile;
 			}
@@ -254,25 +259,16 @@ namespace PeachFarm.Common.Mongo
 				collectedDataFile = System.IO.Path.Combine(iterationFolder,
 					fault.DetectionSource + "_" + cd.Key);
 
+				DatabaseHelper.SaveToGridFS(cd.Data, collectedDataFile, connectionString);
+
 				cd.DataPath = collectedDataFile;
 			}
 			#endregion
 
 			return fault;
 		}
-
-
-		public static MongoDB.Bson.ObjectId ToMongoID(this string input)
-		{
-			try
-			{
-				return new ObjectId(input);
-			}
-			catch
-			{
-				return MongoDB.Bson.ObjectId.Empty;
-			}
-		}
+		//*/
+		#endregion
 	}
 	
 	public partial class Job
@@ -320,6 +316,16 @@ namespace PeachFarm.Common.Mongo
 			get { return faultsField; }
 			set { faultsField = value; }
 		}
+
+		[BsonIgnore]
+		[XmlIgnore]
+		public string JobFolder
+		{
+			get
+			{
+				return String.Format(Formats.JobFolder, this.JobID, this.Pit.FileName);
+			}
+		}
 	}
 
 	public partial class Pit
@@ -359,6 +365,12 @@ namespace PeachFarm.Common.Mongo
 
 		[BsonIgnore]
 		public List<Fault> Faults { get; set; }
+
+		[BsonIgnore]
+		public string NodeFolder
+		{
+			get { return "Node_" + this.Name; }
+		}
 	}
 
 	public partial class Fault
@@ -379,4 +391,24 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 	}
+
+	/*
+	public partial class CollectedData
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
+	}
+
+	public partial class Action
+	{
+		private byte[] dataField;
+
+		[XmlIgnore]
+		[BsonIgnore]
+		public byte[] Data { get; set; }
+	}
+	//*/
 }

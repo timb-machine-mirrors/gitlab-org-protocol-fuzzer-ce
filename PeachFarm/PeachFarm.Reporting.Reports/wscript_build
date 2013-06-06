@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Configuration.dll',
+	'System.Core.dll',
+	'System.Drawing.dll',
+	'System.Windows.Forms.dll',
+	'PeachFarm.Common.dll',
+	'Telerik.Reporting.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name='PeachFarm.Reporting.Reports.dll',
+)

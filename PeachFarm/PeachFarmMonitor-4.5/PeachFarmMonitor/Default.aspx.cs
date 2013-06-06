@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using PeachFarm.Admin.Configuration;
 using PeachFarm.Common;
 using PeachFarm.Common.Mongo;
 using Messages = PeachFarm.Common.Messages;
@@ -16,22 +15,23 @@ using PeachFarmMonitor.Configuration;
 using PeachFarmMonitor.ViewModels;
 using Telerik.Web.UI;
 using RabbitMQ.Client.Exceptions;
+using MongoDB.Driver.Builders;
 
 
 namespace PeachFarmMonitor
 {
-  public partial class Home : System.Web.UI.Page
+  public partial class Home : BasePage
   {
-    private static PeachFarm.Admin.Admin admin = null;
-    private static AdminSection adminconfig = null;
     private static PeachFarmMonitorSection monitorconfig = null;
-    private static Messages.MonitorResponse response;
 
     private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
 
+    private static List<Messages.Heartbeat> onlinenodes;
+    private static List<JobViewModel> jvms;
+    private static List<Messages.Heartbeat> errors;
+		private System.Timers.Timer refreshTimer;
     public Home()
     {
-      adminconfig = (AdminSection)ConfigurationManager.GetSection("peachfarm.admin");
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
     }
 
@@ -39,58 +39,78 @@ namespace PeachFarmMonitor
     {
       if (!Page.IsPostBack)
       {
-        lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
+        //lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
         Monitor(true);
+				//refreshTimer = new System.Timers.Timer(10000);
+				//refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
+				//refreshTimer.Start();
       }
     }
 
     #region Monitor
-    private Task<Messages.MonitorResponse> MonitorAsync()
-    {
-      TaskCompletionSource<Messages.MonitorResponse> tcs = new TaskCompletionSource<Messages.MonitorResponse>();
-      string guid = (string)ViewState["guid"];
-      if(String.IsNullOrEmpty(guid))
-      {
-        guid = Guid.NewGuid().ToString();
-        ViewState["guid"] = guid;
-      }
-      admin = new PeachFarm.Admin.Admin(String.Format(QueueNames.QUEUE_MONITOR, guid));
-      admin.MonitorCompleted += (s, e) =>
-        {
-          if (e.Error != null)
-            tcs.TrySetException(e.Error);
-          else if (e.Cancelled)
-            tcs.TrySetCanceled();
-          else
-            tcs.TrySetResult(e.Result);
 
-        };
-      admin.MonitorAsync();
-      return tcs.Task;
-    }
-
-
-    private async void Monitor(bool displayError = false)
+    private void Monitor(bool displayError = false)
     {
       try
       {
-        response = await MonitorAsync();
-
-        BindJobs();
-        jobsGrid.DataBind();
-
-        aliveNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Alive select h).Count().ToString();
-        runningNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Running select h).Count().ToString();
-        lateNodesLabel.Text = (from Messages.Heartbeat h in response.Nodes where h.Status == Messages.Status.Late select h).Count().ToString();
-
-        BindNodes();
+        #region nodes
+        onlinenodes = DatabaseHelper.GetAllNodes(monitorconfig.MongoDb.ConnectionString);
+        nodesGrid.DataSource = onlinenodes;
         nodesGrid.DataBind();
 
-        BindErrors();
-        errorsGrid.DataBind();
+        var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
+
+        aliveNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h).Count().ToString();
+        runningNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Running select h).Count().ToString();
+        lateNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Late select h).Count().ToString();
+        #endregion
+
+				#region errors
+				errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
+				errorsGrid.DataSource = errors;
+				errorsGrid.DataBind();
+				#endregion
+
+        #region jobs
+        List<Job> jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
+        jvms = new List<JobViewModel>();
+        foreach (Job job in jobs)
+        {
+          job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+          //job.FillFaults(monitorconfig.MongoDb.ConnectionString);
+
+          job.StartDate = job.StartDate.ToLocalTime();
+
+          JobViewModel jvm = null;
+          if (activejobids.Contains(job.JobID))
+          {
+            jvm = new JobViewModel(job, JobStatus.Running);
+          }
+          else
+          {
+            jvm = new JobViewModel(job);
+          }
+
+					if ((from e in errors where e.JobID == job.JobID select e).Count() > 0)
+					{
+						jvm.ErrorsOccurred = true;
+						jvm.Status = JobStatus.Error;
+					}
+
+          //var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
+          //jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
+          //jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
+          //collection.Database.Server.Disconnect();
+          jvms.Add(jvm);
+        }
+        jobsGrid.DataSource = jvms;
+        jobsGrid.DataBind();
+        #endregion
 
         loadingLabel.Text = "";
         loadingLabel.Visible = false;
+
+				
       }
       catch (Exception ex)
       {
@@ -112,17 +132,9 @@ namespace PeachFarmMonitor
 
     #endregion
 
-    protected void RadAjaxManager1_AjaxRequest(object sender, Telerik.Web.UI.AjaxRequestEventArgs e)
-    {
-    }
-
     protected void Tick(object sender, EventArgs e)
     {
-      //RadAjaxManager1.RaisePostBackEvent("Waiting for response...");
-      
       Monitor();
-      
-      
     }
 
     protected void errorsGrid_ItemDataBound(object sender, GridItemEventArgs e)
@@ -186,72 +198,207 @@ namespace PeachFarmMonitor
           case JobStatus.Running:
             item.Style.Add("background-color", "lightgreen");
             break;
+					case JobStatus.Error:
+						item.Style.Add("background-color", "#FF8080");
+						break;
         }
 
-        //var cell = (TableCell)item["JobIDColumn"];
-        //var menu = cell.FindControl("jobMenu") as RadMenu;
-        //var topitem = menu.Items[0];
-        //topitem.Text = job.JobID;
-        //topitem.Items[0].NavigateUrl = "~/JobDetail.aspx?jobid=" + job.JobID;
-        //topitem.Items[1].NavigateUrl = "~/ReportViewer.aspx?jobid=" + job.JobID;
-      }
-    }
+				var dr = item.FindControl("linkDownloadReport") as HyperLink;
+				if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+				{
+					dr.NavigateUrl = String.Empty;
+					dr.Target = String.Empty;
 
-    protected void nodesGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
-    {
-      if (e.RebindReason == GridRebindReason.PostBackEvent)
-      {
-        if (response != null)
-        {
-          nodesGrid.DataSource = response.Nodes;
-          nodesGrid.DataBind();
-        }
+					if (job.Status == JobStatus.Running)
+					{
+						dr.Text = "Waiting for Job completion.";
+					}
+					else if (job.Status == JobStatus.Error)
+					{
+						dr.Text = "Unavailable";
+					}
+					else
+					{
+						dr.Text = "Processing";
+					}
+				}
+				else
+				{
+					dr.Text = "Download";
+					dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+					dr.Target = "_blank";
+				}
       }
     }
 
     protected void nodesGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindNodes();
-    }
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status descending select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName descending select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp descending select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags descending select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID descending select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName descending select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed descending select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration descending select n);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration select n);
+						break;
+				}
+			}
+		}
 
     protected void jobsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindJobs();
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount descending select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount descending select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID descending select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate descending select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status descending select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName descending select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName descending select jvm);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName select jvm);
+						break;
+				}
+			}
     }
 
     protected void errorsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-      BindErrors();
+
+							//			<telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
+							//<telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
+							//<telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+							//<telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+				}
+			}
     }
 
-    private void BindNodes()
-    {
-      if (response != null)
-      {
-        nodesGrid.DataSource = response.Nodes;
-      }
-    }
-
-    private void BindJobs()
-    {
-      if (response != null)
-      {
-        List<JobViewModel> alljobs = new List<JobViewModel>();
-        alljobs.AddRange(from Messages.Job j in response.ActiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j, JobStatus.Running));
-        alljobs.AddRange(from Messages.Job j in response.InactiveJobs.OrderByDescending(j => j.StartDate) select new JobViewModel(j));
-
-        jobsGrid.DataSource = alljobs;
-
-      }
-    }
-
-    private void BindErrors()
-    {
-      if (response != null)
-      {
-        errorsGrid.DataSource = response.Errors;
-      }
-    }
 
     protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
     {
@@ -269,80 +416,10 @@ namespace PeachFarmMonitor
       }
     }
 
-    protected void RadScriptManager1_AsyncPostBackError(object sender, AsyncPostBackErrorEventArgs e)
-    {
-      if (e.Exception.GetType().ToString().Contains("PageRequestManagerTimeoutException"))
-      {
-        //ignore error
-      }
-    }
-
-
-
-    //protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
-    //{
-    //  GridDataItem item = e.Item as GridDataItem;
-    //  switch (e.CommandName)
-    //  {
-    //    case "GetJobDetail":
-    //      GetJobDetail(((LinkButton)e.CommandSource).Text);
-    //      break;
-    //  }
-    //}
-
-    //private void GetJobDetail(string jobID)
-    //{
-    //  PeachFarm.Common.Mongo.Job job = PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobID, monitorconfig.MongoDb.ConnectionString);
-    //  string tabname = String.Format("{0}-{1}", job.JobID, job.PitFileName);
-    //  RadTab newtab = new RadTab(tabname);
-    //  tabstrip.Tabs.Add(newtab);
-
-    //  RadPageView newpage = new RadPageView();
-    //  newpage.ID = tabname;
-      
-
-    //  toplevel.PageViews.Add(newpage);
-    //  newpage.Selected = true;
-    //}
-
-    //protected void tabstrip_TabClick(object sender, RadTabStripEventArgs e)
-    //{
-    //  switch (e.Tab.Text)
-    //  {
-    //    case "Nodes":
-    //      nodesPage.Selected = true;
-    //      break;
-    //    case "Jobs":
-    //      jobsPage.Selected = true;
-    //      break;
-    //    case "Errors":
-    //      errorsPage.Selected = true;
-    //      break;
-    //    default:
-    //      if (e.Tab.Text.IndexOf('-') == 12)
-    //      {
-    //        //string jobID = e.Tab.Text.Substring(0, 12);
-    //        //RadPageView pageView = (RadPageView)Page.FindControl(jobID + "_detail");
-
-    //        RadPageView pageView = (RadPageView)Page.FindControl(e.Tab.Text);
-    //        pageView.Selected = true;
-    //      }
-    //      break;
-    //  }
-    //}
-
-    //protected void toplevel_PageViewCreated(object sender, RadMultiPageEventArgs e)
-    //{
-    //  if (e.PageView.ID.IndexOf('-') == 12)
-    //  {
-    //    string jobID = e.PageView.ID.Substring(0, 12);
-
-    //    Job job = Reports.Report.GetJobDetailReport(jobID, monitorconfig.MongoDb.ConnectionString).First();
-    //    JobDetail jobDetail = (JobDetail)Page.LoadControl(typeof(JobDetail), new object[] { job });
-    //    jobDetail.ID = jobID + "_detail";
-
-    //    e.PageView.Controls.Add(jobDetail);
-    //  }
-    //}
+		protected void RadAjaxManager1_AjaxRequest(object sender, AjaxRequestEventArgs e)
+		{
+			//Monitor(true);
+			RadAjaxManager1.Alert("yay");
+		}
   }
 }

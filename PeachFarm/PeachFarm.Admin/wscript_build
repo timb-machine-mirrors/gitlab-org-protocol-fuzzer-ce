@@ -8,6 +8,9 @@ deps = [
 	'System.Xml.Linq.dll',
 	'RabbitMQ.Client.dll',
 	'PeachFarm.Common.dll',
+	'Ionic.Zip.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
 ]
 
 bld(

@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Configuration.dll',
+	'System.Xml.dll',
+	'System.Xml.Linq.dll',
+	'PeachFarm.Common.dll',
+	'PeachFarm.Admin.dll',
+	'PeachFarm.Controller.dll',
+	'PeachFarm.Node.dll',
+	'PeachFarm.Reporting.dll',
+	'nunit.framework.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
+]
+
+bld(
+	features = 'cs test',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name = 'PeachFarm.Test.dll',
+)
