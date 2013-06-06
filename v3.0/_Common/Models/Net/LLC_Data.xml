@@ -5,9 +5,9 @@
 
   <DataModel name="Header">
     <Block name="LogicalLinkControl">
-			<Blob name="DSAP" token="true" valueType="hex" value="aa"/>
-			<Blob name="SSAP" token="true" valueType="hex" value="aa"/>
-			<Blob name="ControlField" token="true"  valueType="hex" value="03"/>
+			<Blob name="DSAP" valueType="hex" value="aa"/>
+			<Blob name="SSAP" valueType="hex" value="aa"/>
+			<Blob name="ControlField" valueType="hex" value="03"/>
 			<Blob name="OU" valueType="hex" value="00000c"/>
 			<Blob name="PID" valueType="hex" value="2000"/>
     </Block>
