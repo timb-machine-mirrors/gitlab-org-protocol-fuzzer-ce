@@ -15,10 +15,17 @@ EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
 COLOR_CODES = {'red': 31,
                'green': 32,
-               'yellow':92}
+               'yellow': 92}
 
 all_tests = {}
 all_defines = {}
+
+#Switch to using unittest
+#top level dirs should be test suites (Net, Image)
+
+#as of right now we're only testing if something passes or fails. More
+#advanced testing is likely to stay external (Nunit) meaning that
+#unittest may be overengineering. Lets see how this goes.
 
 class PeachTest:
     # defines should probably be generated on the fly. we can come
