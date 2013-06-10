@@ -5,7 +5,6 @@ from random import randint
 
 
 def setup(ctx):
-    assert os.getuid() == 0, "must be root to run this"
     null = open('/dev/null', 'r+')
     os.system('iptables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP')
     port = randint(1024,65535)
@@ -22,6 +21,7 @@ def teardown(ctx):
 
 
 test(name="TCPv4",
+     platform="linux",
      setup=setup,
      teardown=teardown)
 
