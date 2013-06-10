@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
 import os
+import re
+
 from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
@@ -11,6 +13,10 @@ PEACH_OPTS = []
 BASE_DEFINES = {"Path":"."}
 EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
+COLOR_CODES = {'red': 31,
+               'green': 32,
+               'yellow':92}
+
 all_tests = {}
 all_defines = {}
 
@@ -19,9 +25,10 @@ class PeachTest:
     # back to this.
     
     def __init__(self, pit, config, cwd=None, base_opts=PEACH_OPTS, 
-                 setup=None, teardown=None, extra_opts=None, 
+                 setup=None, teardown=None, extra_opts=None, platform='all',
                  defines=BASE_DEFINES):
         assert os.getuid() == 0, "must be root to run this"
+        self.platform = platform
         self.pit = pit
         self.name = os.path.basename(pit)[:-4] #pit - '.xml'
         self.peach = self._get_peach_bin(config.peach)
@@ -35,8 +42,6 @@ class PeachTest:
         self.setup = setup and MethodType(setup, self, PeachTest)
         self.teardown = setup and MethodType(teardown, self, PeachTest)
         self.defines = copy(defines)
-        if self.setup:
-            self.setup() 
 
     def _get_peach_bin(self, peach):
         if peach:
@@ -49,7 +54,8 @@ class PeachTest:
     def _show_cmd(self):
         return ' '.join(arg for arg in self.args)
 
-    def color_text(self, code, text):
+    def color_text(self, color, text):
+        code = COLOR_CODES[color]
         #this shouldn't take a code, it should take a name
         if IS_WIN:
             return text
@@ -76,12 +82,22 @@ class PeachTest:
         if self.count:
             assert type(self.count) is int and self.count > 0,\
                 "Count must be a positive integer"
-            opts.append('--range=1,%d' % self.count)
+            if self.count == 1:
+                opts.append('-1')
+            else:
+                opts.append('--range=1,%d' % self.count)
         self.args.extend(opts)
         self.args.extend(['--definedvalues', self.pit + '.config'])
         self.args.append(self.pit)
 
     def run(self):
+        if (self.platform != 'all') and\
+                (self.platform != get_platform()):
+            print "%s was %s " % (self.pit, self.color_text('yellow',"SKIPPED!"))
+            self.status = "skip"
+            return False
+        if self.setup:
+            self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
         print "running %s" % self.cmd
@@ -89,12 +105,17 @@ class PeachTest:
         self.stdout, self.stderr = self.proc.communicate()
         self.pid = self.proc.pid
         self.returncode = self.proc.returncode
-        self.failed = bool(self.proc.returncode)
-        self.hasrun = True
-        if self.failed:
-            print "...and it "+self.color_text("91","FAILED!")
+        if bool(self.proc.returncode):
+            self.status = "fail"
         else:
-            print self.color_text("92","SUCCESS!")
+            self.status = "pass"
+        self.hasrun = True
+        if self.status == "fail":
+            print "...and it " + self.color_text("red","FAILED!")
+        else:
+            print self.color_text("green","SUCCESS!")
+        if self.teardown:
+            self.teardown()
 
     def log_output(self):
         assert self.hasrun, "Cannot log before running"
@@ -116,17 +137,27 @@ class PeachTest:
         output.close()
 
     def clean_up(self):
-        del(self.stderr)
-        del(self.stdout)
-        del(self.proc)
-        if self.teardown:
-            self.teardown()
+        if "stderr" in self.__dict__:
+            del(self.stderr)
+        if "stdout" in self.__dict__:
+            del(self.stdout)
+        if "proc" in self.__dict__:            
+            del(self.proc)
 
 
 
 ###############################################################################
-# setup stuff 
+# setup stuff
 ###############################################################################
+
+
+def get_platform():
+    plat = sys.platform
+    if plat in ('win32', 'cli', 'cygwin'):
+        return 'win'
+    if plat in ['powerpc', 'darwin']:
+        return 'osx'
+    return re.split('\d+$', plat)[0]
 
 
 def test(**kw):
