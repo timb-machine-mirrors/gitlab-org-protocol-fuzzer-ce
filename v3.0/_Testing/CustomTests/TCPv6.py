@@ -24,6 +24,7 @@ def teardown(ctx):
     os.system("ip addr del %s dev lo" % ctx.testip)
 
 
-test(name="TCPv6", 
+test(name="TCPv6",
+     platform="linux",
      setup=setup, 
      teardown=teardown)
