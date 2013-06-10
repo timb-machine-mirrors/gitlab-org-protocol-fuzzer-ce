@@ -7,8 +7,6 @@ from subprocess import Popen, PIPE
 
 IS_WIN = os.name == 'nt'
 #resolution order is ./peach, last arg, PEACH env var
-PEACH_BIN = 'peach.bat' if IS_WIN else 'peach'
-PEACH_BIN = os.environ.get('PEACH') 
 PEACH_OPTS = []
 BASE_DEFINES = {"Path":"."}
 EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
@@ -20,17 +18,19 @@ class PeachTest:
     # defines should probably be generated on the fly. we can come
     # back to this.
     
-    def __init__(self, pit, logdir, cwd=None, base_opts=PEACH_OPTS, 
+    def __init__(self, pit, config, cwd=None, base_opts=PEACH_OPTS, 
                  setup=None, teardown=None, extra_opts=None, 
                  defines=BASE_DEFINES):
         assert os.getuid() == 0, "must be root to run this"
         self.pit = pit
         self.name = os.path.basename(pit)[:-4] #pit - '.xml'
-        self.args = [PEACH_BIN]
+        self.peach = self._get_peach_bin(config.peach)
+        self.args = []
+        self.count = config.count
         self.base_opts = copy(base_opts)
         self.extra_opts = copy(extra_opts)
         self.cwd = cwd or os.getcwd()
-        self.logdir = logdir
+        self.logdir = config.logdir
         self.hasrun = False
         self.setup = setup and MethodType(setup, self, PeachTest)
         self.teardown = setup and MethodType(teardown, self, PeachTest)
@@ -38,7 +38,19 @@ class PeachTest:
         if self.setup:
             self.setup() 
 
+    def _get_peach_bin(self, peach):
+        if peach:
+            return peach
+        peach = os.environ.get('PEACH')
+        if peach:
+            return peach
+        return 'peach.bat' if IS_WIN else 'peach'
+
+    def _show_cmd(self):
+        return ' '.join(arg for arg in self.args)
+
     def color_text(self, code, text):
+        #this shouldn't take a code, it should take a name
         if IS_WIN:
             return text
         return "\033["+str(code)+"m"+str(text)+"\033[0m"
@@ -53,24 +65,27 @@ class PeachTest:
             yield '-D'
             yield '%s=%s' % (k,v)
 
-    def build_cmd(self, args=None):
-        if not args:
-            args = copy(self.args)
+    def build_cmd(self):
+        #lets store args in self so args can be analyzed for each test
+        self.args = [self.peach]
         opts = copy(self.base_opts)
         if self.extra_opts:
             opts.extend(self.extra_opts)
         if self.defines:
             opts.extend(self.render_defines())
-        args.extend(opts)
-        args.extend(['--definedvalues', self.pit + '.config'])
-        args.append(self.pit)
-        self.cmd = ' '.join(arg for arg in args)
-        return args
+        if self.count:
+            assert type(self.count) is int and self.count > 0,\
+                "Count must be a positive integer"
+            opts.append('--range=1,%d' % self.count)
+        self.args.extend(opts)
+        self.args.extend(['--definedvalues', self.pit + '.config'])
+        self.args.append(self.pit)
 
-    def run(self, args=None):
-        args = self.build_cmd(args)
+    def run(self):
+        self.build_cmd()
+        self.cmd = self._show_cmd()
         print "running %s" % self.cmd
-        self.proc = Popen(args, stdout=PIPE, stderr=PIPE)
+        self.proc = Popen(self.args, stdout=PIPE, stderr=PIPE)
         self.stdout, self.stderr = self.proc.communicate()
         self.pid = self.proc.pid
         self.returncode = self.proc.returncode
@@ -80,14 +95,6 @@ class PeachTest:
             print "...and it "+self.color_text("91","FAILED!")
         else:
             print self.color_text("92","SUCCESS!")
-
-    def run_first_pass(self):
-        args = list(self.args)
-        args.append('-1')
-        self.run(args)
-
-    def run_long_random(self):
-        self.run()
 
     def log_output(self):
         assert self.hasrun, "Cannot log before running"
@@ -116,14 +123,6 @@ class PeachTest:
             self.teardown()
 
 
-###############################################################################
-# helper 
-###############################################################################
-
-
-def get_ipv4():
-    pass
-
 
 ###############################################################################
 # setup stuff 
@@ -146,18 +145,19 @@ def define(**kw):
     all_defines[name] = kw
 
 
-def get_test(target, logdir):
+def get_test(target, base_config):
     name = target["file"][:-4]
     pit = os.path.join(target["path"], target["file"])
     if name in all_tests:
-        test = PeachTest(pit, logdir, **all_tests[name])
+        test = PeachTest(pit, base_config, **all_tests[name])
     else:
-        test = PeachTest(pit, logdir)
+        test = PeachTest(pit, base_config)
     if name in all_defines:
         test.update_defines(**all_defines[name])
     return test
 
 
+#this is not efficent
 for filename in os.listdir(EXECPATH):
     if filename[-3:] == ".py" and filename[0] not in ['.', '_']:
         execfile(os.path.join(EXECPATH, filename))
