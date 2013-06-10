@@ -7,7 +7,7 @@ from random import randint
 def setup(ctx):
     null = open('/dev/null', 'r+')
     os.system('ip6tables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP')
-    ctx.testip = "::%d" % randint(1,9)
+    ctx.testip = "::%d" % randint(2,9)
     os.system('ip addr add %s dev lo'  % ctx.testip)
     port = randint(1024,65535)
     ctx.socat_proc = Popen(['socat', 
@@ -19,8 +19,8 @@ def setup(ctx):
     
 
 def teardown(ctx):
-    os.system('iptables -D OUTPUT 1')
     ctx.socat_proc.kill()
+    os.system('ip6tables -D OUTPUT 1')
     os.system("ip addr del %s dev lo" % ctx.testip)
 
 
