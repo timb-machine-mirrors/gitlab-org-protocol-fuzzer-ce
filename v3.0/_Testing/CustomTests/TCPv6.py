@@ -10,8 +10,12 @@ def setup(ctx):
     ctx.testip = "::%d" % randint(1,9)
     os.system('ip addr add %s dev lo'  % ctx.testip)
     port = randint(1024,65535)
-    ctx.socat_proc = Popen(['socat', 'tcp6-l:%d,fork,reuseaddr' % port, 'READLINE'], stdin=null, stdout=null)
-    ctx.args.extend(['-D', 'TargetPort=%d' % port, "-D", "SourceIPv6=%s" % ctx.testip])
+    ctx.socat_proc = Popen(['socat', 
+                            'tcp6-l:%d,fork,reuseaddr' % port,
+                            'READLINE'],
+                           stdin=null, stdout=null, stderr=null)
+    ctx.update_defines(TargetPort=port,
+                       SourceIPv6=ctx.testip)
     
 
 def teardown(ctx):
