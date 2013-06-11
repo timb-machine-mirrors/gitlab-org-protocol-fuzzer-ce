@@ -27,7 +27,25 @@
   
   <DataModel name="EchoReply" ref="Packet">
     <Number name="Content.Type" size="8" value="129" token="true" />
-  </DataModel>  
+  </DataModel>
+
+  <DataModel name="DestinationUnreachable" ref="Packet">
+    <Number name="Content.Type" size="8" value="1" token="true" />
+  </DataModel>
+
+  <DataModel name="PacketTooBig" ref="Packet">
+    <Number name="Content.Type" size="8" value="2" token="true" />
+  </DataModel>
+
+  <DataModel name="TimeExceeded" ref="Packet">
+    <Number name="Content.Type" size="8" value="3" token="true" />
+  </DataModel>
+
+  <DataModel name="ParameterProblem" ref="Packet">
+    <Number name="Content.Type" size="8" value="4" token="true" />
+  </DataModel>
+
+  
   
   
   <DataModel name="MobileICMP">

@@ -36,26 +36,46 @@ Detailed Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|Path MTU Discovery (TODO) | RFCXXXX
-|Neighbor Discovery (TODO) | RFCXXXX
 
-|1)Destination Unreachable (TODO) | RFC4443 (Section 3.1)
+|1)Destination Unreachable (INCOMPLETE) | RFC4443 (Section 3.1)
 |2)Packet Too Big (TODO) | RFC4443 (Section 3.2)
 |3)Time Exceeded (TODO) | RFC4443 (Section 3.3)
-|4)Parameter Problem (TODO) | RFC4443 (Section 3.4)
+|4)Parameter Problem (INCOMPLETE) | RFC4443 (Section 3.4)
 |128)Echo Request | RFC4443 (Section 4.1)
 |129)Echo Reply | RFC4443 (Section 4.2)
 
+|130)Multicast Listener Query (MLD Pit) | RFC2710
 
-|ETC (TODO)
-|...
-|MLDv2 (Currently seperate pit) | RFC 3810
-|...
-|ETC (TODO)
+|131)Multicast Listener Report (TODO) | RFC2710
+|132)Multicast Listener Done (TODO) | [RFC2710]
+|133)Router Solicitation (TODO) | [RFC4861]
+|134)Router Advertisement (INCOMPLETE) | [RFC4861]
+|135)Neighbor Solicitation (TODO) | [RFC4861]
+|136)Neighbor Advertisement (TODO) | [RFC4861]
+|137)Redirect Message (TODO) | [RFC4861]
+|138)Router Renumbering (TODO) | [Matt_Crawford]
+|139)ICMP Node Information Query (TODO) | [RFC4620]
+|140)ICMP Node Information Response (TODO) | [RFC4620]
+|141)Inverse Neighbor Discovery Solicitation Message (TODO) | [RFC3122]
+|142)Inverse Neighbor Discovery Advertisement Message (TODO) | [RFC3122]
 
+|143)Version 2 Multicast Listener Report (MLD Pit) | RFC3810
 
-
-
+|144)Home Agent Address Discovery Request Message (INCOMPLETE) | [RFC6275]
+|145)Home Agent Address Discovery Reply Message (INCOMPLETE) | [RFC6275]
+|146)Mobile Prefix Solicitation (INCOMPLETE) | [RFC6275]
+|147)Mobile Prefix Advertisement (INCOMPLETE) | [RFC6275]
+|148)Certification Path Solicitation Message (TODO) | [RFC3971]
+|149)Certification Path Advertisement Message (TODO) | [RFC3971]
+|150)ICMP messages utilized by experimental mobility protocols such as Seamoby (TODO) | [RFC4065]
+|151)Multicast Router Advertisement (TODO) | [RFC4286]
+|152)Multicast Router Solicitation (TODO) | [RFC4286]
+|153)Multicast Router Termination (TODO) | [RFC4286]
+|154)FMIPv6 Messages (TODO) | [RFC5568]
+|155)RPL Control Message (TODO) | [RFC6550]
+|156)ILNPv6 Locator Update Message (TODO) | [RFC6743]
+|157)Duplicate Address Request (TODO) | [RFC-ietf-6lowpan-nd-21]
+|158)Duplicate Address Confirmation (TODO) | [RFC-ietf-6lowpan-nd-21]
 
 |========
 
@@ -65,7 +85,7 @@ Detailed Use Cases
 |Internet Checksum | RFC2460 (Section 8.1)
 |========
 
-[options="header"]
+[options="Payloads"]
 |========
 |Supported Payloads | Specification
 
