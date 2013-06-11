@@ -35,6 +35,7 @@ class PeachTest:
                  setup=None, teardown=None, extra_opts=None, platform='all',
                  defines=BASE_DEFINES):
         assert os.getuid() == 0, "must be root to run this"
+        self.status = None
         self.platform = platform
         self.pit = pit
         self.name = os.path.basename(pit)[:-4] #pit - '.xml'
