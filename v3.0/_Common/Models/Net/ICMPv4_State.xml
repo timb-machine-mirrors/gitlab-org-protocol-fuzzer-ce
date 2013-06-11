@@ -7,7 +7,8 @@
 	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/ICMPv4_Data.xml"/>
 	
   <StateModel name="TheState" initialState="Initial">
-    <State name="Initial">
+ 
+    <State name="Initial2">
       <Action name="EchoRequest" type="output">
         <DataModel ref="DataModels:Packet"/>
         <Data>
@@ -98,6 +99,62 @@
           <Field name="Content.Type" value="10"/>
         </Data>
       </Action>
+    </State>
+    
+    <State name="Initial">
+       
+      <Action name="EchoRequest" type="output">
+        <DataModel ref="DataModels:EchoRequest" />
+      </Action>
+      
+      <Action name="EchoReply" type="output">
+        <DataModel ref="DataModels:EchoReply" />
+      </Action>
+      
+      <Action name="DestinationUnreachable" type="output">
+        <DataModel ref="DataModels:DestinationUnreachable" />
+      </Action>
+      
+      <Action name="SourceQuench" type="output">
+        <DataModel ref="DataModels:SourceQuench" />
+      </Action>
+      
+      <Action name="Redirect" type="output">
+        <DataModel ref="DataModels:Redirect" />
+      </Action>
+      
+      <Action name="TimeExceeded" type="output">
+        <DataModel ref="DataModels:TimeExceeded" />
+      </Action>
+      
+      <Action name="ParameterProblem" type="output">
+        <DataModel ref="DataModels:ParameterProblem" />
+      </Action>
+      
+      <Action name="Timestamp" type="output">
+        <DataModel ref="DataModels:Timestamp" />
+      </Action>
+      
+      <Action name="TimestampReplyProblem" type="output">
+        <DataModel ref="DataModels:TimestampReplyProblem" />
+      </Action>
+      
+      <Action name="InformationRequest" type="output">
+        <DataModel ref="DataModels:InformationRequest" />
+      </Action>
+      
+      <Action name="InformationReply" type="output">
+        <DataModel ref="DataModels:InformationReply" />
+      </Action>
+      
+      <Action name="RouterAdvertisement" type="output">
+        <DataModel ref="DataModels:RouterAdvertisement" />
+      </Action>
+
+      <Action name="RouterSolicitation" type="output">
+        <DataModel ref="DataModels:RouterSolicitation" />
+      </Action>
+      
     </State>
   </StateModel>
 </Peach>

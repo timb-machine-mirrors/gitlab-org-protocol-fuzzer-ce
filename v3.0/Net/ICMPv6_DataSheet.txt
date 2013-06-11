@@ -39,12 +39,12 @@ Detailed Use Cases
 |Path MTU Discovery (TODO) | RFCXXXX
 |Neighbor Discovery (TODO) | RFCXXXX
 
-|Destination Unreachable (TODO) | RFC4443 (Section 3.1)
-|Packet Too Big (TODO) | RFC4443 (Section 3.2)
-|Time Exceeded (TODO) | RFC4443 (Section 3.3)
-|Parameter Problem (TODO) | RFC4443 (Section 3.4)
-|Echo Request (TODO) | RFC4443 (Section 4.1)
-|Echo Reply (TODO) | RFC4443 (Section 4.2)
+|1)Destination Unreachable (TODO) | RFC4443 (Section 3.1)
+|2)Packet Too Big (TODO) | RFC4443 (Section 3.2)
+|3)Time Exceeded (TODO) | RFC4443 (Section 3.3)
+|4)Parameter Problem (TODO) | RFC4443 (Section 3.4)
+|128)Echo Request | RFC4443 (Section 4.1)
+|129)Echo Reply | RFC4443 (Section 4.2)
 
 
 |ETC (TODO)
