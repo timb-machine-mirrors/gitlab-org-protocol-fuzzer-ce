@@ -25,9 +25,9 @@
 
   <Test name="Default">
     <StateModel ref="IPv4:PingTest"/>
-		
+
     <Agent ref="LocalAgent"/>
-		
+
     <Publisher class="RawIPv4">
       <Param name="Host" value="##TargetIPv4##"/>
       <Param name="Interface" value="##SourceIPv4##"/>
@@ -35,7 +35,7 @@
     </Publisher>
     
     <Strategy class="##Strategy##"/>
-		
+
     <Logger class="File" >
       <Param name="Path" value="##LoggerPath##" />
     </Logger>

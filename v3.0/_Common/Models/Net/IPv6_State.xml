@@ -663,7 +663,7 @@
     
     
     
-	<StateModel name="TheState" initialState="Initial">
+	<StateModel name="Transmit" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
 				<DataModel ref="IPv6ICMPPacket"/>
