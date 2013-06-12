@@ -2,9 +2,15 @@
 	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
   <All>
     <Define key="OuterSourceMAC" value="5254005335d3"/> 
-    <Define key="OuterSourceIPv4" value="192.168.2.10" />
-    <Define key="OuterTargetMAC"   value="000000000000"/>
-    <Define key="OuterTargetIPv4" value="192.168.2.11"/> 
+    <Define key="OuterSourceIPv4" value="10.6.66.2" />
+
+    <!-- <Define key="OuterTargetMAC"   value="000c29cdd6b2"/> --> <!-- VTEP or router -->
+    <Define key="OuterTargetMAC"   value="000c29cdd6b2"/> <!-- VTEP or router -->
+    <!-- <Define key="OuterTargetIPv4" value="192.168.2.11"/>  --><!-- VTEP -->
+    <Define key="OuterTargetIPv4" value="10.6.66.1"/><!-- VTEP -->
+
+    <Define key="VNI" value="42"/> 
+    <Define key="VXLANPort" value="4789"/> <!-- Since it isn't actually officially defined -->
 	
 		<!--LLDP-->
 		<Define key="Hostname" 		 value="foobar"/>

@@ -68,7 +68,7 @@
 			</Blob>
       <Block name="IPv4Payload" ref="UDP:UDPHeader">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
-				<Number name="Header.DestPort" size="16" endian="big" value="9029"/>
+				<Number name="Header.DestPort" size="16" endian="big" value="##VXLANPort##"/>
 				<Number name="Header.Checksum" size="16" endian="big"/> <!-- VXLAN has no inner CRC -->
 				<Block name="UdpPayload">
 					<Block name="VXHeader" ref="VXLANHeader">
@@ -234,7 +234,6 @@
 	<DataModel name="IPv4ICMPInVxlan">
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="1"/>
-			
 			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="ICMP:ICMPv4Header">
 				<Number name="Content.Type" size="8" value="8"/>
 				<Number name="Content.Code" size="8" value="0"/>
@@ -281,8 +280,11 @@
 	<DataModel name="ARPInVxlan">
 		<Block name="VXLAN"  ref="VXLAN">
 			<Blob name="OuterIP.IPv4Payload.UdpPayload.VXHeader.EtherHeader.Type" valueType="hex" value="0806"/>
+			<Blob name="OuterIP.IPv4Payload.UdpPayload.VXHeader.EtherHeader.Dest" valueType="hex" value="ffffffffffff"/>
 			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload">
-				<Block name="InnerIP" ref="ARP:ARP"/>
+				<Block name="InnerIP" ref="ARP:ARPPayload">
+					<Blob name="THA" valueType="hex" value="000000000000"/>
+				</Block>
 			</Block>
 		</Block>
 	</DataModel>

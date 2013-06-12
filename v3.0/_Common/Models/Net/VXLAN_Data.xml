@@ -3,7 +3,9 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
-	
+
+	<!-- http://tools.ietf.org/html/draft-mahalingam-dutt-dcops-vxlan-04 -->
+
 	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
 	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
 	<Include ns="VLAN" src="file:##Path##/_Common/Models/Net/VLAN_Data.xml"/>
@@ -23,18 +25,16 @@
 		<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
 		<Number name="SmallReserve" size="8" endian="big"/>
 		<Block name="EtherHeader" ref="Ethernet:Frame">
-			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="Dest" valueType="hex" value="##TargetMAC##"/>
-			<Blob name="Type" valueType="hex" value="0800"/>
+			<Blob name="TypeOrLen" valueType="hex" value="0800"/>
 		</Block>
 		<Block name="VXLANPayload"/>
 	</DataModel>
 
   <DataModel name="VXLAN">
     <Block name="OuterEtherHeader" ref="Ethernet:Frame">
-      <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
+      <Blob name="Dest" valueType="hex" value="##OuterTargetMAC##"/>
       <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
-      <Blob name="Type" valueType="hex" value="0800"/>
+      <Blob name="TypeOrLen" valueType="hex" value="0800"/>
     </Block>
     <Block name="OuterIP" ref="IPv4:Packet">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
@@ -46,7 +46,7 @@
 			</String>
       <Block name="IPv4Payload" ref="UDPv4:UDP">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
-				<Number name="Header.DestPort" size="16" endian="big" value="9029"/>
+				<Number name="Header.DestPort" size="16" endian="big" value="4789"/>
 				<Number name="Header.Checksum" size="16" endian="big"/> <!-- VXLAN has no inner CRC -->
 				<Block name="UdpPayload">
 					<Block name="VXHeader" ref="VXLANHeader">
