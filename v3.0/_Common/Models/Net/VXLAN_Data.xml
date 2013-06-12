@@ -22,7 +22,7 @@
 		<Number name="LargeReserve" size="24" endian="big"/>
 		<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
 		<Number name="SmallReserve" size="8" endian="big"/>
-		<Block name="EtherHeader" ref="Ethernet:EtherHeader">
+		<Block name="EtherHeader" ref="Ethernet:Frame">
 			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
 			<Blob name="Dest" valueType="hex" value="##TargetMAC##"/>
 			<Blob name="Type" valueType="hex" value="0800"/>
@@ -31,17 +31,17 @@
 	</DataModel>
 
   <DataModel name="VXLAN">
-    <Block name="OuterEtherHeader" ref="Ethernet:EtherHeader">
+    <Block name="OuterEtherHeader" ref="Ethernet:Frame">
       <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
       <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
       <Blob name="Type" valueType="hex" value="0800"/>
     </Block>
     <Block name="OuterIP" ref="IPv4:Packet">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-			<String name="SrcBlock.Header.SrcIP" value="##OuterSourceIPv4##">
+			<String name="Header.SrcBlock.SrcIP" value="##OuterSourceIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
 			</String>
-			<String name="DstBlock.Header.DestIP" value="##OuterTargetIPv4##">
+			<String name="Header.DstBlock.DestIP" value="##OuterTargetIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
 			</String>
       <Block name="IPv4Payload" ref="UDPv4:UDP">
@@ -100,7 +100,7 @@
 				<Relation type="size" of="IPv6Payload" />
 			</Number>
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:ICMPv6Header"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:Packet"/>
 		</Block>
 	</DataModel>
 
