@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
        author="Deja Vu Security, LLC" description="Multicast Listener Discovery PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	  
+  
   <!--Membership Report Sub-unit-->
   <DataModel name="AddressRecord">
     <Number name="RecordType" size="8" endian="big"/>
@@ -22,12 +22,12 @@
       
       
   <!--RFC3810 Section 5.1-->  
-  <DataModel name="MLDQuery">
+  <DataModel name="Query">
     <Number name="Type" size="8" endian="big" value="130" token="true" />
     <Number name="Code" size="8" endian="big"/>
     <Number name="Checksum" endian="big" size="16">
       <Fixup class="IcmpV6ChecksumFixup">
-        <Param name="ref" value="MLDQuery"/>
+        <Param name="ref" value="Query"/>
         <Param name="src" value="##SourceIPv6##"/>
         <Param name="dst" value="##TargetIPv6##"/>
       </Fixup>
@@ -50,12 +50,12 @@
   </DataModel>
       
   <!--RFC3810 Section 5.2-->  
-  <DataModel name="Ver2MLDReport">
+  <DataModel name="Ver2Report">
     <Number name="Type" size="8" endian="big" value="143" token="true" />
     <Blob name="Resv1" length="1"/>
     <Number name="Checksum" endian="big" size="16">
       <Fixup class="IcmpV6ChecksumFixup">
-        <Param name="ref" value="Ver2MLDReport"/>
+        <Param name="ref" value="Ver2Report"/>
         <Param name="src" value="##SourceIPv6##"/>
         <Param name="dst" value="##TargetIPv6##"/>
       </Fixup>
