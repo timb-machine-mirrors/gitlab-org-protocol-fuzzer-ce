@@ -942,7 +942,7 @@
 				<Block name="PayloadContent" ref="IPv4:Packet">
 					<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 					<Block name="IPv4Payload">
-						<Block name="UDPHeader" ref="UDPv4:UDP">
+						<Block name="UDPHeader" ref="UDPv4:Packet">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup">
 									<Param name="ref" value="UDPHeader" />
@@ -975,7 +975,7 @@
 					</Number>
 					<Number name="NextHeader" size="8" endian="big" value="17"/>
 					<Block name="IPv6Payload">
-						<Block name="UDPHeader" ref="UDPv6:UDP">
+						<Block name="UDPHeader" ref="UDPv6:Packet">
 							<Number name="Header.Checksum" size="16" endian="big">
 								<Fixup class="UDPChecksumFixup"> 
 									<Param name="ref" value="UDPHeader" />

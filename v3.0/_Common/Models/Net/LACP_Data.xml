@@ -3,52 +3,52 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
        author="Deja Vu Security, LLC" description="Link Aggregation Control Protocol PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
-	<DataModel name="Packet">
+
+  <DataModel name="Packet">
     <Block name="EtherHeader">
       <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
       <Blob name="Src" valueType="hex" value="##SourceMAC##"/>
       <Blob name="Type" valueType="hex" value="8809"/>
     </Block>
-		
+
     <Block name="LACPHeader">
       <Blob name="Subtype" valueType="hex" value="01"/>
       <Blob name="Version" valueType="hex" value="01"/>
       <Block name="Actor">
-				<Blob name="Info" valueType="hex" value="01"/>
-				<Number name="Length" size="8">
-					<Relation type="size" of="Actor"/>
-				</Number>
-				<Blob name="SysPriority" valueType="hex" value="91f4"/>
-				<Blob name="Sys" valueType="hex" value="##SourceMAC##"/>
-				<Blob name="Key" valueType="hex" value="8000"/>
-				<Blob name="PortPriority" valueType="hex" value="0000"/>
-				<Blob name="Port" valueType="hex" value="##ActorPort##"/>
-				<Blob name="State" valueType="hex"  value="47"/>
-				<Blob name="Reserved" valueType="hex" value="000000"/>
-			</Block>
-			
-			<Block name="Partner">
-				<Blob name="Info" valueType="hex" value="02"/>
-				<Number name="Length" size="8">
-					<Relation type="size" of="Partner"/>
-				</Number>
-				<Blob name="SysPriority" valueType="hex" value="0000"/>
-				<Blob name="Sys" valueType="hex" value="##TargetMAC##"/>
-				<Blob name="Key" valueType="hex" value="0000"/>
-				<Blob name="PortPriority" valueType="hex" value="0000"/>
-				<Blob name="Port" valueType="hex" value="##PartnerPort##"/>
-				<Blob name="State" valueType="hex"  value="3b"/>
-				<Blob name="Reserved" valueType="hex" value="000000"/>
-			</Block>
-			
-			<Block name="Collector">
-				<Blob name="Info" valueType="hex" value="03"/>
-				<Number name="Length" size="8">
-					<Relation type="size" of="Collector"/>
-				</Number>
-				<Blob name="MaxDelay" valueType="hex" value="0002"/>
-				<Blob name="Reserved" valueType="hex" length="12" />
+        <Blob name="Info" valueType="hex" value="01"/>
+        <Number name="Length" size="8">
+          <Relation type="size" of="Actor"/>
+        </Number>
+        <Blob name="SysPriority" valueType="hex" value="91f4"/>
+        <Blob name="Sys" valueType="hex" value="##SourceMAC##"/>
+        <Blob name="Key" valueType="hex" value="8000"/>
+        <Blob name="PortPriority" valueType="hex" value="0000"/>
+        <Blob name="Port" valueType="hex" value="##ActorPort##"/>
+        <Blob name="State" valueType="hex"  value="47"/>
+        <Blob name="Reserved" valueType="hex" value="000000"/>
+      </Block>
+
+      <Block name="Partner">
+        <Blob name="Info" valueType="hex" value="02"/>
+        <Number name="Length" size="8">
+          <Relation type="size" of="Partner"/>
+        </Number>
+        <Blob name="SysPriority" valueType="hex" value="0000"/>
+        <Blob name="Sys" valueType="hex" value="##TargetMAC##"/>
+        <Blob name="Key" valueType="hex" value="0000"/>
+        <Blob name="PortPriority" valueType="hex" value="0000"/>
+        <Blob name="Port" valueType="hex" value="##PartnerPort##"/>
+        <Blob name="State" valueType="hex"  value="3b"/>
+        <Blob name="Reserved" valueType="hex" value="000000"/>
+      </Block>
+
+      <Block name="Collector">
+        <Blob name="Info" valueType="hex" value="03"/>
+        <Number name="Length" size="8">
+          <Relation type="size" of="Collector"/>
+        </Number>
+        <Blob name="MaxDelay" valueType="hex" value="0002"/>
+        <Blob name="Reserved" valueType="hex" length="12" />
       </Block>
       <Blob name="TermInfo" valueType="hex" value="00"/>
       <Number name="TermLength" size="8" value="0" />

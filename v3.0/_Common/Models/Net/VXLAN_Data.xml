@@ -44,7 +44,7 @@
 			<String name="Header.DstBlock.DestIP" value="##OuterTargetIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
 			</String>
-      <Block name="IPv4Payload" ref="UDPv4:UDP">
+      <Block name="IPv4Payload" ref="UDPv4:Packet">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
 				<Number name="Header.DestPort" size="16" endian="big" value="4789"/>
 				<Number name="Header.Checksum" size="16" endian="big"/> <!-- VXLAN has no inner CRC -->
@@ -54,7 +54,7 @@
 						<Block name="VXLANPayload">
 							<Block name="InnerIP" ref="IPv4:Packet">
 								<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-								<Block name="IPv4Payload" ref="UDPv4:UDP">
+								<Block name="IPv4Payload" ref="UDPv4:Packet">
 									<Number name="Header.SrcPort" size="16" endian="network" value="1234"/>
 									<Number name="Header.DestPort" size="16" endian="network" value="1234"/>
 									<Block name="UdpPayload">
@@ -220,7 +220,7 @@
 	<DataModel name="IPv4UDPInVxlan">
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="17"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDPv4:UDP"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDPv4:Packet"/>
 		</Block>
 	</DataModel>
 
@@ -232,7 +232,7 @@
 				<Relation type="size" of="IPv6Payload" />
 			</Number>
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="17"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDPv4:UDP"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDPv4:Packet"/>
 		</Block>
 	</DataModel>
 </Peach>
