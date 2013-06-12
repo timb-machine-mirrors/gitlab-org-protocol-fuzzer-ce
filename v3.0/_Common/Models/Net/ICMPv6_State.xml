@@ -7,6 +7,25 @@
   <Include ns="ICMPv6" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
   <Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
     
+    
+  <DataModel name="IPv6inDestinationUnreachable" ref="ICMPv6:DestinationUnreachable">
+    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+  </DataModel>
+
+  <DataModel name="IPv6inPacketTooBig" ref="ICMPv6:PacketTooBig">
+    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+  </DataModel>
+
+  <DataModel name="IPv6inTimeExceeded" ref="ICMPv6:TimeExceeded">
+    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+  </DataModel>
+
+  <DataModel name="IPv6inParameterProblem" ref="ICMPv6:ParameterProblem">
+    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+  </DataModel>  
+    
+    
+    
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
       
@@ -19,19 +38,19 @@
       </Action>
       
       <Action name="DestinationUnreachable" type="output"><!--Not Displaying on Wireshark?-->
-        <DataModel ref="ICMPv6:DestinationUnreachable" />
+        <DataModel ref="IPv6inDestinationUnreachable" />
       </Action>
       
       <Action name="PacketTooBig" type="output">
-        <DataModel ref="ICMPv6:PacketTooBig" />
+        <DataModel ref="IPv6inPacketTooBig" />
       </Action>
       
       <Action name="TimeExceeded" type="output">
-        <DataModel ref="ICMPv6:TimeExceeded" />
+        <DataModel ref="IPv6inTimeExceeded" />
       </Action>
       
       <Action name="ParameterProblem" type="output"><!--Not Displaying on Wireshark?-->
-        <DataModel ref="ICMPv6:ParameterProblem" />
+        <DataModel ref="IPv6inParameterProblem" />
       </Action>
 
     </State>
