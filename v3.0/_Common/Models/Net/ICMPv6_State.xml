@@ -9,19 +9,19 @@
     
     
   <DataModel name="IPv6inDestinationUnreachable" ref="ICMPv6:DestinationUnreachable">
-    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
   </DataModel>
 
   <DataModel name="IPv6inPacketTooBig" ref="ICMPv6:PacketTooBig">
-    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
   </DataModel>
 
   <DataModel name="IPv6inTimeExceeded" ref="ICMPv6:TimeExceeded">
-    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
   </DataModel>
 
   <DataModel name="IPv6inParameterProblem" ref="ICMPv6:ParameterProblem">
-    <Block name="Content.Body.Data" ref="IPv6:IPv6Header" />
+    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
   </DataModel>  
     
     
