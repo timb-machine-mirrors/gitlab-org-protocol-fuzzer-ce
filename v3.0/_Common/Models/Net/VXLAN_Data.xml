@@ -36,7 +36,7 @@
       <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
       <Blob name="Type" valueType="hex" value="0800"/>
     </Block>
-    <Block name="OuterIP" ref="IPv4:IPv4">
+    <Block name="OuterIP" ref="IPv4:Packet">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
 			<String name="SrcBlock.Header.SrcIP" value="##OuterSourceIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
@@ -52,7 +52,7 @@
 					<Block name="VXHeader" ref="VXLANHeader">
 						<Blob name="EtherHeader.Type" valueType="hex" value="0800"/>
 						<Block name="VXLANPayload">
-							<Block name="InnerIP" ref="IPv4:IPv4">
+							<Block name="InnerIP" ref="IPv4:Packet">
 								<Number name="Header.Protocol" size="8" endian="big" value="17"/>
 								<Block name="IPv4Payload" ref="UDPv4:UDP">
 									<Number name="Header.SrcPort" size="16" endian="network" value="1234"/>
