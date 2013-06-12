@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-			 author="Deja Vu Security, LLC" description="User Datagram Protocol PIT DataModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	<!--RFC768: Implements all features-->
-	<DataModel name="UDP">
-		<Block name="Header">
-			<Number name="SrcPort"  size="16" endian="big"/>
-			<Number name="DestPort" size="16" endian="big"/>
-			<Number name="Length"   size="16" endian="big">
-				<Relation type="size" of="UDP"/>
-			</Number>
-			<Number name="Checksum" size="16" endian="big">
-				<Fixup class="UDPChecksumFixup">
-					<Param name="ref" value="Header"/>
-					<Param name="src" value="127.0.0.1"/>
-					<Param name="dst" value="127.0.0.1"/>
-				</Fixup>
-			</Number>
-		</Block>
-		<Block name="UdpPayload"/>
-	</DataModel>
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+        author="Deja Vu Security, LLC" description="User Datagram Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!--RFC768: Implements all features-->
+  <DataModel name="Packet">
+    <Block name="Header">
+      <Number name="SrcPort"  size="16" endian="big"/>
+      <Number name="DestPort" size="16" endian="big"/>
+      <Number name="Length"   size="16" endian="big">
+        <Relation type="size" of="Packet"/>
+      </Number>
+      <Number name="Checksum" size="16" endian="big">
+        <Fixup class="UDPChecksumFixup">
+          <Param name="ref" value="Header"/>
+          <Param name="src" value="127.0.0.1"/>
+          <Param name="dst" value="127.0.0.1"/>
+        </Fixup>
+      </Number>
+    </Block>
+    <Block name="UdpPayload"/>
+  </DataModel>
 </Peach>
 <!-- end -->

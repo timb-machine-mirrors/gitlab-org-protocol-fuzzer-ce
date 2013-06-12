@@ -39,7 +39,7 @@
 			</Number>
 			<Number name="NextHeader" size="8" value="17"/>
 		</Block>
-		<Block name="Payload" ref="UDPv6:UDP">
+		<Block name="Payload" ref="UDPv6:Packet">
 			<Number name="Header.SrcPort" size="16" endian="network" value="53526"/>
 			<Number name="Header.DestPort" size="16" endian="network" value="9999"/>
 			<Number name="Header.Length" size="16" endian="network">
