@@ -5,15 +5,15 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 
-	<Include ns="LACP" src="file:##Path##/_Common/Models/Net/LACP_State.xml"/>
-	
+  <Include ns="LACP" src="file:##Path##/_Common/Models/Net/LACP_State.xml"/>
+
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">
       <Param name="Executable" value="##tsharkBin##"/>
       <Param name="Arguments" value="-i ##tsharkInterface##"/>
       <Param name="FaultOnEarlyExit" value="true"/>
     </Monitor>
-		
+
     <Monitor class="Pcap">
       <Param name="Device" value="##Interface##"/>
     </Monitor>
@@ -21,8 +21,8 @@
 
   <!-- Default test for fuzzing LACP -->
   <Test name="Default">
-		<StateModel ref="LACP:Transmit"/>
-	
+    <StateModel ref="LACP:Transmit"/>
+
     <!--Agent ref="RemoteAgent"/-->
     
     <Publisher class="RawEther">
@@ -31,7 +31,7 @@
     </Publisher>
     
     <Strategy class="##Strategy##"/>
-		
+
     <Logger class="File" >
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
