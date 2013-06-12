@@ -20,9 +20,18 @@
 		<Monitor class="CrashReporter"/>
 	</Agent>
 
-	<Agent name="ServerAgent">
+	<Agent name="LinServerAgent">
+    <Monitor class="LinuxCrashMonitor"/>
+    <Monitor class="Process">
+      <Param name="Executable" value="ftp" />
+      <Param name="StartOnCall" value="Start" />
+      <Param name="Arguments" value="##LocalIPv4##" />
+    </Monitor>
+	</Agent>
+
+	<Agent name="WinServerAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="ftp 192.168.146.1"/>
+			<Param name="CommandLine" value="ftp ##LocalIPv4##"/>
 			<Param name="NoCpuKill" value="true"/>
 			<Param name="FaultOnEarlyExit" value="false"/>
 			<Param name="WaitForExitTimeout" value="250"/>
@@ -31,13 +40,13 @@
 		</Monitor>
 	</Agent>
 
-	<!-- Default test case -->
-	<Test name="Default">
+	<!-- Client test case -->
+	<Test name="Default"> 
 		<StateModel ref="FTP:AgentToHost"/>
 		
-		<!--Agent ref="WinRemoteAgent" platform="windows"/>
-		<Agent ref="LinRemoteAgent" platform="linux"/>
-		<Agent ref="OSXRemoteAgent" platform="osx"/-->
+		<!-- <Agent ref="WinRemoteAgent" platform="windows"/> -->
+		<!-- <Agent ref="LinRemoteAgent" platform="linux"/> -->
+		<!-- <Agent ref="OSXRemoteAgent" platform="osx"/> -->
 
 		<Publisher class="Tcp" name="TcpHandler">
 			<Param name="Host" value="##TargetIPv4##"/>
