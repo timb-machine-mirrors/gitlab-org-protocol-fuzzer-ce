@@ -30,7 +30,7 @@
     
      
     
-  <StateModel name="TheState" initialState="Initial">
+  <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
        
       <Action name="EchoRequest" type="output">

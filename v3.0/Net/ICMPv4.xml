@@ -24,7 +24,7 @@
   </Agent>
 	
   <Test name="Default">
-    <StateModel ref="States:TheState"/>
+    <StateModel ref="States:Transmit"/>
 	
     <Agent ref="LocalAgent"/>
 		
