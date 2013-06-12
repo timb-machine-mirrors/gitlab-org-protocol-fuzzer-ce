@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
-       author="Deja Vu Security, LLC" description="802.3 Ethernet PIT with 802.1Q support DataModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+        author="Deja Vu Security, LLC" description="802.3 Ethernet PIT with 802.1Q support DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
   <DataModel name="VlanFrame">
     <Blob name="MACDest" length="6" valueType="hex" value="00 50 56 F1 C1 53"/>
     <Blob name="MACSrc" length="6" valueType="hex" value="00 0C 29 A3 9C B8"/>
@@ -24,24 +24,24 @@
     </Number>
     <Blob name="Interframe" length="12" valueType="hex"/>
   </DataModel>
-	
-	<DataModel name="Frame">
-		<Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
-		<Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
-		<!-- IEEE 802.3 Section 3.2.6 Length/Type field -->
-		<!-- More information can also be found at https://en.wikipedia.org/wiki/EtherType -->
-		<Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
-			<!-- "a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/ -->
-			<!-- Type field indicates the number of MAC client data octets contained in the subsequent MAC Client -->
-			<!-- Data field of the basic frame (Length interpretation). -->
-			<!-- b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the -->
-			<!-- Length/Type field indicates the nature of the MAC client protocol (Type interpretation).19 -->
-			<!-- The Length and Type interpretations of this field are mutually exclusive." -->
 
-			<!-- <Relation type="size" of="Payload"/> -->
-			<!-- !!FIXME!! Parents of relations cannot be overriden. This will be fixed when that is fixed. -->
-		</Number>
-		<Block name="Payload"/>
-	</DataModel>
+  <DataModel name="Frame">
+    <Blob name="Dest" valueType="hex" mutable="false" length="6" value="##TargetMAC##"/>
+    <Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
+    <!-- IEEE 802.3 Section 3.2.6 Length/Type field -->
+    <!-- More information can also be found at https://en.wikipedia.org/wiki/EtherType -->
+    <Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
+      <!-- "a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/ -->
+      <!-- Type field indicates the number of MAC client data octets contained in the subsequent MAC Client -->
+      <!-- Data field of the basic frame (Length interpretation). -->
+      <!-- b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the -->
+      <!-- Length/Type field indicates the nature of the MAC client protocol (Type interpretation).19 -->
+      <!-- The Length and Type interpretations of this field are mutually exclusive." -->
+
+      <!-- <Relation type="size" of="Payload"/> -->
+      <!-- !!FIXME!! Parents of relations cannot be overriden. This will be fixed when that is fixed. -->
+    </Number>
+    <Block name="Payload"/>
+  </DataModel>
 </Peach>
 <!--End-->
