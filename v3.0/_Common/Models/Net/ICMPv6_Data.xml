@@ -5,22 +5,61 @@
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
   <DataModel name="Packet">
-		<Block name="Content">
-			<Number name="Type" size="8"/>
-			<Number name="Code" size="8"/>
-			<Number name="Checksum"  endian="big" size="16">
-				<Fixup class="IcmpV6ChecksumFixup">
-					<Param name="ref" value="Content" />
-					<Param name="src" value="##SourceIPv6##" />
-					<Param name="dst" value="##TargetIPv6##" />
-				</Fixup>
-			</Number>
-			<Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
-			<Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
-			<Blob name="Data" value="Hello Peach World"/>
-		</Block>
+    <Block name="Content">
+      <Number name="Type" size="8"/>
+      <Number name="Code" size="8"/>
+      <Number name="Checksum"  endian="big" size="16">
+        <Fixup class="IcmpV6ChecksumFixup">
+          <Param name="ref" value="Content" />
+          <Param name="src" value="##SourceIPv6##" />
+          <Param name="dst" value="##TargetIPv6##" />
+        </Fixup>
+      </Number>
+      <Block name="Payload"/>        
+    </Block>
   </DataModel>
 
+  <DataModel name="EchoRequest" ref="Packet">
+    <Number name="Content.Type" size="8" value="128" token="true" />
+    <Number name="Content.Payload.Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+    <Number name="Content.Payload.Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+  
+  <DataModel name="EchoReply" ref="Packet">
+    <Number name="Content.Type" size="8" value="129" token="true" />
+    <Number name="Content.Payload.Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+    <Number name="Content.Payload.Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+
+  <DataModel name="DestinationUnreachable" ref="Packet">
+    <Number name="Content.Type" size="8" value="1" token="true" />
+    <Blob name="Content.Payload.Unused" length="4" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+
+  <DataModel name="PacketTooBig" ref="Packet">
+    <Number name="Content.Type" size="8" value="2" token="true" />
+    <Number name="Content.Payload.MTU" size="32" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+
+  <DataModel name="TimeExceeded" ref="Packet">
+    <Number name="Content.Type" size="8" value="3" token="true" />
+    <Blob name="Content.Payload.Unused" length="4" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+
+  <DataModel name="ParameterProblem" ref="Packet">
+    <Number name="Content.Type" size="8" value="4" token="true" />
+    <Number name="Content.Payload.Pointer" size="32" />
+    <Blob name="Content.Payload.Data" value="Hello Peach World"/>
+  </DataModel>
+
+  
+  
+  
   <DataModel name="MobileICMP">
 		<Number name="Type" size="8" endian="big"/>
 		<Number name="Code" size="8" endian="big"/>

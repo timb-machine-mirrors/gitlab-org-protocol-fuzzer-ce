@@ -2,102 +2,89 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol PIT Version 4 StateModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
-	<Include ns="DataModels" src="file:##Path##/_Common/Models/Net/ICMPv4_Data.xml"/>
-	
+  <Include ns="ICMPv4" src="file:##Path##/_Common/Models/Net/ICMPv4_Data.xml"/>
+  <Include ns="IPv4" src="file:##Path##/_Common/Models/Net/IPv4_Data.xml"/>
+    
+    
+  <DataModel name="IPv4inDestinationUnreachable" ref="ICMPv4:DestinationUnreachable">
+    <Block name="Content.Payload.Data" ref="IPv4:Packet" />
+  </DataModel>
+
+  <DataModel name="IPv4inTimeExceeded" ref="ICMPv4:TimeExceeded">
+    <Block name="Content.Payload.Data" ref="IPv4:Packet" />
+  </DataModel>
+
+  <DataModel name="IPv4inParameterProblem" ref="ICMPv4:ParameterProblem">
+    <Block name="Content.Payload.Data" ref="IPv4:Packet" />
+  </DataModel>    
+  
+  <DataModel name="IPv4inSourceQuench" ref="ICMPv4:SourceQuench">
+    <Block name="Content.Payload.Data" ref="IPv4:Packet" />
+  </DataModel>
+  
+  <DataModel name="IPv4inRedirect" ref="ICMPv4:Redirect">
+    <Block name="Content.Payload.Data" ref="IPv4:Packet" />
+  </DataModel>
+    
+     
+    
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
+       
       <Action name="EchoRequest" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="8"/>
-        </Data>
+        <DataModel ref="ICMPv4:EchoRequest" />
       </Action>
       
       <Action name="EchoReply" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="0"/>
-        </Data>
+        <DataModel ref="ICMPv4:EchoReply" />
       </Action>
       
-      <Action name="DestinationUnreachable" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="3"/>
-        </Data>
+      <Action name="DestinationUnreachable" type="output"><!--Not Displaying on Wireshark?-->
+        <DataModel ref="IPv4inDestinationUnreachable" />
       </Action>
       
       <Action name="SourceQuench" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="4"/>
-        </Data>
+        <DataModel ref="IPv4inSourceQuench" />
       </Action>
       
       <Action name="Redirect" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="5"/>
-        </Data>
+        <DataModel ref="IPv4inRedirect" />
       </Action>
       
       <Action name="TimeExceeded" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="11"/>
-        </Data>
+        <DataModel ref="IPv4inTimeExceeded" />
       </Action>
       
       <Action name="ParameterProblem" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="12"/>
-        </Data>
+        <DataModel ref="IPv4inParameterProblem" />
       </Action>
       
       <Action name="Timestamp" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="13"/>
-        </Data>
+        <DataModel ref="ICMPv4:Timestamp" />
       </Action>
       
       <Action name="TimestampReplyProblem" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="14"/>
-        </Data>
+        <DataModel ref="ICMPv4:TimestampReplyProblem" />
       </Action>
       
       <Action name="InformationRequest" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="15"/>
-        </Data>
+        <DataModel ref="ICMPv4:InformationRequest" />
       </Action>
       
       <Action name="InformationReply" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="16"/>
-        </Data>
+        <DataModel ref="ICMPv4:InformationReply" />
       </Action>
       
       <Action name="RouterAdvertisement" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="9"/>
-        </Data>
+        <DataModel ref="ICMPv4:RouterAdvertisement" />
+      </Action>
+
+      <Action name="RouterSolicitation" type="output">
+        <DataModel ref="ICMPv4:RouterSolicitation" />
       </Action>
       
-      <Action name="RouterSolicitation" type="output">
-        <DataModel ref="DataModels:Packet"/>
-        <Data>
-          <Field name="Content.Type" value="10"/>
-        </Data>
-      </Action>
     </State>
   </StateModel>
 </Peach>
