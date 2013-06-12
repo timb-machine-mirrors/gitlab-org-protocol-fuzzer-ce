@@ -15,34 +15,46 @@
           <Param name="dst" value="##TargetIPv6##" />
         </Fixup>
       </Number>
-      <Number name="Identifier" endian="big" size="16" valueType="hex" value="00 01" />
-      <Number name="Sequence" endian="big" size="16" valueType="hex" value="00 01" />
-      <Blob name="Data" value="Hello Peach World"/>
+      <Block name="Body"/>        
     </Block>
   </DataModel>
 
   <DataModel name="EchoRequest" ref="Packet">
     <Number name="Content.Type" size="8" value="128" token="true" />
+    <Number name="Content.Body.Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+    <Number name="Content.Body.Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
   
   <DataModel name="EchoReply" ref="Packet">
     <Number name="Content.Type" size="8" value="129" token="true" />
+    <Number name="Body.Identifier" endian="big" size="16" valueType="hex" value="00 01" />
+    <Number name="Body.Sequence" endian="big" size="16" valueType="hex" value="00 01" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
 
   <DataModel name="DestinationUnreachable" ref="Packet">
     <Number name="Content.Type" size="8" value="1" token="true" />
+    <Blob name="Content.Body.Unused" length="4" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
 
   <DataModel name="PacketTooBig" ref="Packet">
     <Number name="Content.Type" size="8" value="2" token="true" />
+    <Number name="Content.Body.MTU" size="32" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
 
   <DataModel name="TimeExceeded" ref="Packet">
     <Number name="Content.Type" size="8" value="3" token="true" />
+    <Blob name="Content.Body.Unused" length="4" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
 
   <DataModel name="ParameterProblem" ref="Packet">
     <Number name="Content.Type" size="8" value="4" token="true" />
+    <Number name="Content.Body.Pointer" size="32" />
+    <Blob name="Content.Body.Data" value="Hello Peach World"/>
   </DataModel>
 
   
