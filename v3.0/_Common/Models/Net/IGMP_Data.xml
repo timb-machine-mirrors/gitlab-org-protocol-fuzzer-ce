@@ -2,8 +2,8 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Internet Group Message Protocol PIT DataModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-			 
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+ 
   <!--Membership Report Sub-unit-->
   <DataModel name="GroupRecord">
     <Number name="RecordType" size="8" endian="big"/>
