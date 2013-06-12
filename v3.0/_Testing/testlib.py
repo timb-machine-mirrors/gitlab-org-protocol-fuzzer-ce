@@ -11,7 +11,8 @@ IS_WIN = os.name == 'nt'
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path":"."}
-EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
+if not __name__ == "__main__":
+    EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
 COLOR_CODES = {'red': 31,
                'green': 32,
@@ -31,9 +32,9 @@ class PeachTest:
     # defines should probably be generated on the fly. we can come
     # back to this.
     
-    def __init__(self, pit, config, cwd=None, base_opts=PEACH_OPTS, 
-                 setup=None, teardown=None, extra_opts=None, platform='all',
-                 defines=BASE_DEFINES):
+    def __init__(self, pit, config, cwd=None, test="Default", 
+                 base_opts=PEACH_OPTS, setup=None, teardown=None, 
+                 extra_opts=None, platform='all', defines=BASE_DEFINES):
         assert os.getuid() == 0, "must be root to run this"
         self.status = None
         self.platform = platform
@@ -50,6 +51,7 @@ class PeachTest:
         self.setup = setup and MethodType(setup, self, PeachTest)
         self.teardown = setup and MethodType(teardown, self, PeachTest)
         self.defines = copy(defines)
+        self.test = test
 
     def _get_peach_bin(self, peach):
         if peach:
@@ -97,6 +99,7 @@ class PeachTest:
         self.args.extend(opts)
         self.args.extend(['--definedvalues', self.pit + '.config'])
         self.args.append(self.pit)
+        self.args.append(self.test)
 
     def run(self):
         if (self.platform != 'all') and\
@@ -120,16 +123,19 @@ class PeachTest:
         self.hasrun = True
         if self.status == "fail":
             print "...and it " + self.color_text("red","FAILED!")
+            self.log_output()
         else:
             print self.color_text("green","SUCCESS!")
         if self.teardown:
             self.teardown()
+        self.clean_up()
 
     def log_output(self):
         assert self.hasrun, "Cannot log before running"
         if not os.path.exists(self.logdir):
             os.mkdir(self.logdir)
-        errlog = open(os.path.join(self.logdir, 'errors-%s' % self.name),
+        errlog = open(os.path.join(self.logdir, 'errors-%s_%s' % (self.name,
+                                                                  self.test)),
                       'w') #this will fail if no permissions
         errlog.write("ran %s\n" % ' '.join(arg for arg in self.args))
         errlog.write("Process exited with code %d\n" % self.returncode)
@@ -137,7 +143,8 @@ class PeachTest:
         errlog.write(self.stderr)
         del(self.stderr)
         errlog.close()
-        output = open(os.path.join(self.logdir, 'out-%s' % self.name),
+        output = open(os.path.join(self.logdir, 'out-%s_%s' % (self.name,
+                                                               self.test)),
                       'w') #this will fail if no permissions
         output.write(self.stdout)
         del(self.stdout)
@@ -173,7 +180,10 @@ def test(**kw):
     assert "name" in kw, '"name" is a required value'
     name = kw["name"]
     del(kw["name"])
-    all_tests[name] = kw
+    if not name in all_tests:
+        all_tests[name] = [kw]
+    else:
+        all_tests[name].append(kw)
 
 
 def define(**kw):
@@ -184,20 +194,25 @@ def define(**kw):
     all_defines[name] = kw
 
 
-def get_test(target, base_config):
+def get_tests(target, base_config):
+    #this is horrible and should die in a fire...
     name = target["file"][:-4]
     pit = os.path.join(target["path"], target["file"])
+    my_tests = []
     if name in all_tests:
-        test = PeachTest(pit, base_config, **all_tests[name])
+        for test_def in all_tests[name]:
+            my_tests.append(PeachTest(pit, base_config, **test_def))
     else:
-        test = PeachTest(pit, base_config)
+        my_tests.append(PeachTest(pit, base_config))
     if name in all_defines:
-        test.update_defines(**all_defines[name])
-    return test
+        for test in my_tests:
+            test.update_defines(**all_defines[name])
+    return my_tests
 
 
-#this is not efficent
-for filename in os.listdir(EXECPATH):
-    if filename[-3:] == ".py" and filename[0] not in ['.', '_']:
-        execfile(os.path.join(EXECPATH, filename))
+if not __name__ == "__main__":
+    #this is not efficent
+    for filename in os.listdir(EXECPATH):
+        if filename[-3:] == ".py" and filename[0] not in ['.', '_']:
+            execfile(os.path.join(EXECPATH, filename))
 
