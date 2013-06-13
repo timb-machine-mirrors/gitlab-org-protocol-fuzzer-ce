@@ -53,17 +53,12 @@
 	</DataModel>
 
   <DataModel name="VXLAN">
-    <Block name="OuterEtherHeader" ref="Ethernet:EthernetHeader">
-      <Blob name="Dest" valueType="hex" value="##OuterTargetMAC##"/>
-      <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
-      <Blob name="Type" valueType="hex" value="0800"/>
-    </Block>
     <Block name="OuterIP" ref="IPv4:IPv4Header">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-			<Blob name="Header.SrcIP" mutable="false" value="##OuterSourceIPv4##">
+			<Blob name="Header.SrcIP" mutable="false" value="##SourceIPv4##">
 				<Transformer class="Ipv4StringToNetworkOctet" />
 			</Blob>
-			<Blob name="Header.DestIP" mutable="false" value="##OuterTargetIPv4##">
+			<Blob name="Header.DestIP" mutable="false" value="##TargetIPv4##">
 				<Transformer class="Ipv4StringToNetworkOctet" />
 			</Blob>
       <Block name="IPv4Payload" ref="UDP:UDPHeader">
@@ -443,9 +438,10 @@
 	<Test name="Default">
 		<!-- The order of agents has importance -->
 		<!-- <Agent ref="CommonAgents:Local"/> -->
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
+		<Publisher class="RawIPv4">
+			<Param name="Interface" value="##OuterSourceIPv4##"/>
+			<Param name="Host" value="##OuterTargetIPv4##"/>
+			<Param name="Protocol" value="17"/>
 		</Publisher>
 
 		<Publisher class="ConsoleHex"/>
@@ -461,9 +457,10 @@
 		<StateModel ref="MtuFuzzStates"/>
 		<!-- The order of agents has importance -->
 		<!-- <Agent ref="CommonAgents:Local"/> -->
-		<Publisher class="RawEther">
-			<Param name="Interface" value="##Interface##"/>
-			<Param name="Protocol" value="ETH_P_8021Q"/>
+		<Publisher class="RawIPv4">
+			<Param name="Interface" value="##OuterSourceIPv4##"/>
+			<Param name="Host" value="##OuterTargetIPv4##"/>
+			<Param name="Protocol" value="17"/>
 		</Publisher>
 		<Strategy class="##Strategy##"/>
 		<Logger class="File">
