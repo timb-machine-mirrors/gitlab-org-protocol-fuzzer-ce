@@ -29,152 +29,253 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using Peach.Core.Dom;
 
 namespace Peach.Core.Runtime
 {
-    public class WebWatcher : Watcher
+    public class WebWatcher : Watcher, IDisposable
     {
+        private HttpListener httpListener = null;
+        private Thread _httpThread;
+        private string lastJson = ""; 
+
+		public static string startUpPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "PeachView" + Path.DirectorySeparatorChar;
+        private string _elementName = "";
+        private string _mutatorName = "";
+        private uint _totalIterations = 0; 
+
+
         public WebWatcher()
         {
+		    if(!HttpListener.IsSupported)
+			{
+			    throw new PeachException("Web Watcher not supported on this platform!");
+			}
+
+            try
+            {
+                httpListener = new HttpListener();
+                httpListener.Prefixes.Add("http://+:8888/");
+                httpListener.Start();
+                _httpThread = new Thread(new ThreadStart(ClientListener));
+                _httpThread.Start();
+            }
+            catch(Exception e )
+            {
+                throw new PeachException("Could not start web watcher: are you admin?", e);
+            }
         }
+
+		public void ClientListener()
+        {
+            while (true)
+            {
+                try
+                {
+					HttpListenerContext context = httpListener.GetContext();
+                    string filename = Path.GetFileName(context.Request.RawUrl);
+                    string path = Path.Combine(startUpPath, filename);
+                    byte[] msg;
+                    if (!File.Exists(path)) 
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                        msg = File.ReadAllBytes(startUpPath + @"error.html");
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.OK;
+
+                        msg = File.ReadAllBytes(path);
+                    }
+
+                    context.Response.ContentLength64 = msg.Length;
+					if(path.Contains(".json"))
+					{
+					    context.Response.ContentType = "application/json"; 
+					}
+
+                    using (Stream s = context.Response.OutputStream)
+                        s.Write(msg, 0, msg.Length);
+                }
+                catch( Exception e)
+                {
+                    // swallow exceptions for now
+                    // TODO: fix race condition for file r/w from http server / peach 
+                    Thread.Sleep(500);
+                }
+            }
+        }
+
+		public void Dispose()
+		{
+		    httpListener.Close(); 
+		}
 
         protected override void MutationStrategy_Mutating(string elementName, string mutatorName)
         {
-						//TODO use this to hightligh where in the model is being fuzzed 
+            _elementName = elementName;
+            _mutatorName = mutatorName; 
         }
 
-        protected override void Engine_IterationStarting(RunContext context, uint currentIteration,
-                                                         uint? totalIterations)
+        protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
         {
-						try
-            {
-							if (context.controlIteration || context.controlRecordingIteration)
-									return;
-
-							StringBuilder stringBuilder = new StringBuilder();
-							StringWriter stringWriter = new StringWriter(stringBuilder);
-
-							using (JsonWriter jsonWriter = new JsonTextWriter(stringWriter))
-							{
-									jsonWriter.WriteStartObject();
-									jsonWriter.WritePropertyName("DataModels");
-									jsonWriter.WriteStartArray();
-
-									foreach(var stateModel in context.dom.stateModels)
-									foreach(var action in stateModel.Value.dataActions )
-									{
-										jsonWriter.WriteStartObject();
-										DataModelToJson(action.dataModel.name, action.dataModel, jsonWriter);
-										jsonWriter.WriteEndObject();
-									}
-
-									jsonWriter.WriteEndArray();
-
-									jsonWriter.WritePropertyName("StateModels");
-									jsonWriter.WriteValue("");
-
-									jsonWriter.WritePropertyName("Agents");
-									jsonWriter.WriteValue("");
-
-									jsonWriter.WritePropertyName("Tests");
-									jsonWriter.WriteValue("");
-
-									jsonWriter.WriteEndObject();
-							}
-
-                FileStream jsonModel = File.OpenWrite("peach.json");
-                StreamWriter streamWriter = new StreamWriter(jsonModel);
-                streamWriter.Write(stringBuilder.ToString());
-                streamWriter.Flush();
-                streamWriter.Close();
-                jsonModel.Close();
-            }
-						catch(Exception e)
-						{
-						    throw new PeachException("Failure writing Peach JSON Model for WebWatcher",e);
-						}
+            if(totalIterations != null)
+                _totalIterations = (uint)totalIterations; 
         }
 
-				private void DataModelToJson(string name, DataElementContainer model, JsonWriter writer)
-				{
-						writer.WritePropertyName("name");
-						writer.WriteValue(name);
-						writer.WritePropertyName("children");
-						writer.WriteStartArray();
-						foreach(var item in model)
-						{
-							writer.WriteStartObject();
+        protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
+        {
+            try
+            {
+                if (context.controlIteration || context.controlRecordingIteration)
+                    return;
 
-							if(item is Dom.Array)
-							{
-								DataModelToJson(item.name, (DataElementContainer)item, writer);							    
-							}
+                StringBuilder stringBuilder = new StringBuilder();
+                StringWriter stringWriter = new StringWriter(stringBuilder);
 
-							if(item is Block)
-							{
-								DataModelToJson(item.name, (DataElementContainer)item, writer);
-							}
+                using (JsonWriter jsonWriter = new JsonTextWriter(stringWriter))
+                {
+                    jsonWriter.WriteStartArray();
+                    jsonWriter.WriteStartObject();
+                    jsonWriter.WritePropertyName("IterationNumber");
+                    jsonWriter.WriteValue(Convert.ToString(currentIteration));
+                    jsonWriter.WritePropertyName("TotalIteration");
+                    jsonWriter.WriteValue(Convert.ToString(_totalIterations));
+                    jsonWriter.WritePropertyName("ElementName");
+                    jsonWriter.WriteValue(_elementName);
+                    jsonWriter.WritePropertyName("MutatorName");
+                    jsonWriter.WriteValue(_mutatorName);
+                    jsonWriter.WriteEndObject();
 
-							if(item is Dom.Flag)
-							{
-								 DataModelToJson(item.name, (DataElementContainer)item, writer); 
-							}
+                    jsonWriter.WriteStartObject();
+                    jsonWriter.WritePropertyName("DataModels");
+                    jsonWriter.WriteStartArray();
 
-							if(item is Dom.Choice)
-							{
-								 DataModelToJson(item.name, (DataElementContainer)item, writer);
-							}
+                    foreach (var stateModel in context.dom.stateModels)
+                    {
+                        foreach (var action in stateModel.Value.dataActions)
+                        {
+                            jsonWriter.WriteStartObject();
+                            DataModelToJson(action.dataModel.name, action.dataModel, jsonWriter);
+                            jsonWriter.WriteEndObject();
+                        }
+                    }
 
-							if(item is Dom.String)
-							{
-								writer.WritePropertyName("name");
-							  writer.WriteValue(item.name); 
-								writer.WritePropertyName("type");
-								writer.WriteValue("String");
+                    jsonWriter.WriteEndArray();
+                    jsonWriter.WriteEndObject();
+                    jsonWriter.WriteEndArray();
+                }
 
-							}
+                lastJson = stringBuilder.ToString();
+                if (File.Exists(startUpPath + "peach.json"))
+                {
+                    File.Delete(startUpPath + "peach.json");
+                }
 
-							if(item is Number) 
-							{
-								writer.WritePropertyName("name");
-							  writer.WriteValue(item.name); 
-								writer.WritePropertyName("type");
-								writer.WriteValue("Number");
+                try
+                {
+                    FileStream jsonFile = File.OpenWrite(startUpPath + "peach.json");
+                    StreamWriter streamWriter = new StreamWriter(jsonFile);
+                    streamWriter.Write(lastJson);
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                    jsonFile.Close();
+                }
+                catch (Exception e)
+                {
+                }
+                //Thread.Sleep(1000);
+            }
+			catch(Exception e)
+			{
+			    throw new PeachException("Failure writing Peach JSON Model for WebWatcher",e);
+			}
+        }
 
-							}
+		private void DataModelToJson(string name, DataElementContainer model, JsonWriter writer)
+		{
+            writer.WritePropertyName("name");
+            writer.WriteValue(name);
+            writer.WritePropertyName("children");
+            writer.WriteStartArray();
+            foreach(var item in model)
+            {
+                writer.WriteStartObject();
 
-							if(item is Blob) 
-							{
-								writer.WritePropertyName("name");
-							  writer.WriteValue(item.name);
- 								writer.WritePropertyName("type");
-								writer.WriteValue("Number");
-							}
+                if(item is Dom.Array)
+                {
+                    DataModelToJson(item.name, (DataElementContainer)item, writer);							    
+                }
 
-							if(item is XmlElement) 
-							{
-								writer.WritePropertyName("name");
-							  writer.WriteValue(item.name);
-								writer.WritePropertyName("type");
-								writer.WriteValue("XmlElement");
-							}
-							writer.WriteEndObject();
-						}
+                if(item is Block)
+                {
+                    DataModelToJson(item.name, (DataElementContainer)item, writer);
+                }
 
-						writer.WriteEndArray();
-				}
+                if(item is Dom.Flag)
+                {
+                    DataModelToJson(item.name, (DataElementContainer)item, writer); 
+                }
 
-				private string StateModelToJson(StateModel model)
-				{
-				    return "StateModel";
-				}
-				
-				private string AgentToJson(Dom.Agent agent)
-				{
-				    return "Agent";
-				}
+                if(item is Dom.Choice)
+                {
+                    DataModelToJson(item.name, (DataElementContainer)item, writer);
+                }
+
+                if(item is Dom.String)
+                {
+                    writer.WritePropertyName("name");
+                    writer.WriteValue(item.name); 
+                    writer.WritePropertyName("type");
+                    writer.WriteValue("String");
+
+                }
+
+                if(item is Number) 
+                {
+                    writer.WritePropertyName("name");
+                    writer.WriteValue(item.name); 
+                    writer.WritePropertyName("type");
+                    writer.WriteValue("Number");
+
+                }
+
+                if(item is Blob) 
+                {
+                    writer.WritePropertyName("name");
+                    writer.WriteValue(item.name);
+                    writer.WritePropertyName("type");
+                    writer.WriteValue("Number");
+                }
+
+                if(item is XmlElement) 
+                {
+                    writer.WritePropertyName("name");
+                    writer.WriteValue(item.name);
+                    writer.WritePropertyName("type");
+                    writer.WriteValue("XmlElement");
+                }
+                
+                writer.WriteEndObject();
+            }
+
+            writer.WriteEndArray();
+		}
+
+		private string StateModelToJson(StateModel model)
+		{
+		    return "StateModel";
+		}
+		
+	    private string AgentToJson(Dom.Agent agent)
+	    {
+	        return "Agent";
+		}
     }
 }
+
