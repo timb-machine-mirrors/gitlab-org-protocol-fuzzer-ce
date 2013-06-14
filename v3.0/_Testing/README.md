@@ -1,4 +1,4 @@
-If you're working on pits you may have noticed the new _Testing dir under the v3.0 dir. This dir contains a set of tools to test that pits launch and run. As you're writing pits please use this tool to verify your pit works.
+This dir contains a set of tools to test that pits launch and run. As you're writing pits please use this tool to verify your pit works.
 
 Since a lot of pits have a lot of cross reliance changes to one pit can easily break another. These testing tools will make sure that pits are not broken by changes to peach itself or other pits. 
 
