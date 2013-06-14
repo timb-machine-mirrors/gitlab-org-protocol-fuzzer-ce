@@ -111,7 +111,11 @@ class PeachTest:
         self.build_cmd()
         self.cmd = self._show_cmd()
         print "running %s" % self.cmd
-        self.proc = Popen(self.args, stdout=PIPE, stderr=PIPE)
+        if IS_WIN:
+            output = sys.stdout
+        else:
+            output = PIPE
+        self.proc = Popen(self.args, stdout=output, stderr=PIPE)
         self.stdout, self.stderr = self.proc.communicate()
         self.pid = self.proc.pid
         self.returncode = self.proc.returncode
