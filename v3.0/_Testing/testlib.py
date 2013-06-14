@@ -7,7 +7,6 @@ from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
 
-IS_WIN = get_platform() == 'win'
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path":"."}
@@ -58,7 +57,7 @@ class PeachTest:
         peach = os.environ.get('PEACH')
         if peach:
             return peach
-        return 'peach.bat' if IS_WIN else 'peach'
+        return 'peach.bat' if get_platform() == 'win' else 'peach'
 
     def _show_cmd(self):
         return ' '.join(arg for arg in self.args)
@@ -66,7 +65,7 @@ class PeachTest:
     def color_text(self, color, text):
         code = COLOR_CODES[color]
         #this shouldn't take a code, it should take a name
-        if IS_WIN:
+        if get_platform() == 'win':
             return text
         return "\033["+str(code)+"m"+str(text)+"\033[0m"
 
@@ -111,7 +110,7 @@ class PeachTest:
         self.build_cmd()
         self.cmd = self._show_cmd()
         print "running %s" % self.cmd
-        if IS_WIN:
+        if get_platform() == 'win':
             output = sys.stdout
         else:
             output = PIPE
