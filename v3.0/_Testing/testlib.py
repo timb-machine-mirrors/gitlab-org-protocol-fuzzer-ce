@@ -7,7 +7,7 @@ from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
 
-IS_WIN = os.name == 'nt'
+IS_WIN = get_platform() == 'win'
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path":"."}
