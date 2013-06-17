@@ -313,7 +313,6 @@ namespace Peach.Enterprise.Runtime
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			int x = 9;
-			int y = 0;
 
 			for (int cnt = 0; cnt < _faults.Count && (x+cnt+1) <= Console.WindowHeight; cnt++)
 			{
