@@ -48,5 +48,7 @@ bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['A
 bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 
+bld.read_csshlib('Newtonsoft.Json.dll',              paths=['Json.net-5'])
+
 #if bld.env.MCS and bld.env.DEST_OS == "win32":
 #	bld.install_files('${BINDIR}','TotalPhase-5.13\\aardvark.dll')
