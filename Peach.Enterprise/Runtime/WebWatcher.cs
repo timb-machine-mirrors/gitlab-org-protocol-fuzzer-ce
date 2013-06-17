@@ -102,7 +102,7 @@ namespace Peach.Core.Runtime
                     using (Stream s = context.Response.OutputStream)
                         s.Write(msg, 0, msg.Length);
                 }
-                catch( Exception e)
+                catch( Exception)
                 {
                     // swallow exceptions for now
                     // TODO: fix race condition for file r/w from http server / peach 
@@ -186,7 +186,7 @@ namespace Peach.Core.Runtime
                     streamWriter.Close();
                     jsonFile.Close();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
                 //Thread.Sleep(1000);
