@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE
 
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
-BASE_DEFINES = {"Path":"."}
+BASE_DEFINES = {"Path": "."}
 if not __name__ == "__main__":
     EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
@@ -27,17 +27,18 @@ all_defines = {}
 #advanced testing is likely to stay external (Nunit) meaning that
 #unittest may be overengineering. Lets see how this goes.
 
+
 class PeachTest:
     # defines should probably be generated on the fly. we can come
     # back to this.
-    
-    def __init__(self, pit, config, cwd=None, test="Default", 
-                 base_opts=PEACH_OPTS, setup=None, teardown=None, 
+
+    def __init__(self, pit, config, cwd=None, test="Default",
+                 base_opts=PEACH_OPTS, setup=None, teardown=None,
                  extra_opts=None, platform='all', defines=BASE_DEFINES):
         self.status = None
         self.platform = platform
         self.pit = pit
-        self.name = os.path.basename(pit)[:-4] #pit - '.xml'
+        self.name = os.path.basename(pit)[:-4]  # pit - '.xml'
         self.peach = self._get_peach_bin(config.peach)
         self.args = []
         self.count = config.count
@@ -70,14 +71,14 @@ class PeachTest:
         return "\033["+str(code)+"m"+str(text)+"\033[0m"
 
     def update_defines(self, **kw):
-        for k,v in kw.iteritems():
+        for k, v in kw.iteritems():
             self.defines[k] = v
-            
+
     def render_defines(self):
         asopts = []
-        for k,v in self.defines.iteritems():
+        for k, v in self.defines.iteritems():
             yield '-D'
-            yield '%s=%s' % (k,v)
+            yield '%s=%s' % (k, v)
 
     def build_cmd(self):
         #lets store args in self so args can be analyzed for each test
@@ -102,7 +103,7 @@ class PeachTest:
     def run(self):
         if (self.platform != 'all') and\
                 (self.platform != get_platform()):
-            print "%s was %s " % (self.pit, self.color_text('yellow',"SKIPPED!"))
+            print "%s was %s " % (self.pit, self.color_text('yellow', "SKIPPED!"))
             self.status = "skip"
             return False
         if self.setup:
@@ -124,10 +125,10 @@ class PeachTest:
             self.status = "pass"
         self.hasrun = True
         if self.status == "fail":
-            print "...and it " + self.color_text("red","FAILED!")
+            print "...and it " + self.color_text("red", "FAILED!")
             self.log_output()
         else:
-            print self.color_text("green","SUCCESS!")
+            print self.color_text("green", "SUCCESS!")
         if self.teardown:
             self.teardown()
         self.clean_up()
@@ -138,7 +139,7 @@ class PeachTest:
             os.mkdir(self.logdir)
         errlog = open(os.path.join(self.logdir, 'errors-%s_%s' % (self.name,
                                                                   self.test)),
-                      'w') #this will fail if no permissions
+                      'w')  # this will fail if no permissions
         errlog.write("ran %s\n" % ' '.join(arg for arg in self.args))
         errlog.write("Process exited with code %d\n" % self.returncode)
         errlog.write("#" * 79)
@@ -147,7 +148,7 @@ class PeachTest:
         errlog.close()
         output = open(os.path.join(self.logdir, 'out-%s_%s' % (self.name,
                                                                self.test)),
-                      'w') #this will fail if no permissions
+                      'w')  # this will fail if no permissions
         output.write(self.stdout)
         del(self.stdout)
         del(self.proc)
@@ -158,7 +159,7 @@ class PeachTest:
             del(self.stderr)
         if "stdout" in self.__dict__:
             del(self.stdout)
-        if "proc" in self.__dict__:            
+        if "proc" in self.__dict__:
             del(self.proc)
 
 
@@ -217,4 +218,3 @@ if not __name__ == "__main__":
     for filename in os.listdir(EXECPATH):
         if filename[-3:] == ".py" and filename[0] not in ['.', '_']:
             execfile(os.path.join(EXECPATH, filename))
-
