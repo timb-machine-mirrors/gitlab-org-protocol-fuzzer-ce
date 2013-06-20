@@ -18,7 +18,7 @@
         <Relation type="count" of="Value"/>
       </Number> 
       <Block name="ValueBlock" length="4">
-        <Block name="Value" minOccurs="1"/>          <!-- Overwrite -->
+        <Block name="Value" minOccurs="1" constraint="True == False"/>     <!-- Overwrite -->
         <Padding name="Pad" alignment="32" />
       </Block>  
     </Block>
@@ -34,7 +34,7 @@
       </Number>
       <Block name="ValueBlock">
         <Placement after="TailPlace" /> <!--TODO Should this matter that its after?-->
-        <Block name="Value" minOccurs="1" /> <!-- Overwrite -->
+        <Block name="Value" minOccurs="1" constraint="True == False"/> <!-- Overwrite -->
       </Block>
     </Block>  
   </DataModel>
@@ -42,7 +42,7 @@
   <!-- Entry Types -->
   
   <DataModel name="ByteEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="1" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -72,7 +72,7 @@
 
 
   <DataModel name="AsciiEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="2" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -105,7 +105,7 @@
 
 
   <DataModel name="ShortEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="3" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -125,7 +125,7 @@
 
 
   <DataModel name="LongEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="4" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -153,7 +153,7 @@
   <!-- TIFF 6.0 Entry Types -->
   
   <DataModel name="SByteEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="6" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -183,7 +183,7 @@
 
 
   <DataModel name="UndefinedEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="7" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -213,7 +213,7 @@
 
 
   <DataModel name="SShortEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="8" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -233,7 +233,7 @@
 
 
   <DataModel name="SLongEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="9" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -259,7 +259,7 @@
 
 
   <DataModel name="FloatEntry">
-    <Choice>
+    <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
         <Number name="Type" size="16" value="11" token="true" />
         <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
@@ -282,28 +282,149 @@
 
   <!-- Tags -->
 
+  <DataModel name="PhotometricInterpretation">
+    <Block ref="ShortEntry">
+      <Number name="CountN.C1.Tag" size="16" value="262" token="true" signed="false"/>
+      <Block name="CountN.C1.Body.ValueBlock.Value">
+        <Choice>
+          <Number name="WhiteIsZero" size="16" signed="false" value="0" token="true"/>
+          <Number name="BlackIsZero" size="16" signed="false" value="1" token="true"/>
+          <Number name="RGB" size="16" signed="false" value="2" token="true"/>
+          <Number name="Palette" size="16" signed="false" value="3" token="true"/>
+          <Number name="TransparencyMask" size="16" signed="false" value="4" token="true"/>
+        </Choice>
+      </Block>
+      <Block name="CountN.C2" constraint="True == False"/>
+      <Block name="CountN.CX" constraint="True == False"/>
+    </Block>
+  </DataModel>
+
+
+  <!--DataModel name="RowsPerStrip">
+    <Choice>
+      <Block ref="ShortEntry">
+        <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
+        <Block name="CountN.C2" />
+        <Block name="CountN.CX" />
+      </Block>
+      <Block ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
+        <Block name="CountN.CX" />
+      </Block>
+    <Choice>
+  </DataModel-->
+
+
+  <DataModel name="StripOffsets">
+    <Choice name="ShortOrLong">
+      <Block ref="ShortEntry">
+        <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" />
+        <Number name="CountN.C2.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C2.Body.ValueBlock.Value" /-->
+
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
+
+
+        <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
+        <Number name="CountN.CX.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripOffsetsContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+      </Block>
+      <Block ref="LongEntry">
+        <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" /-->
+
+        <Block name="CountN.C1" constraint="True == False"/>
+
+        <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
+        <Number name="CountN.CX.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripOffsetsContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <DataModel name="StripByteCounts">
+    <Choice name="ShortOrLong">
+      <Block ref="ShortEntry">
+        <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" />
+        <Number name="CountN.C2.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C2.Body.ValueBlock.Value" /-->
+
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
+
+        <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
+        <Number name="CountN.CX.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripSizesContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+        
+      </Block>
+      <Block ref="LongEntry">
+        <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" /-->
+
+        <Block name="CountN.C1" constraint="True == False"/>
+
+        <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
+        <Number name="CountN.CX.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripSizesContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+
+
   
   <!-- Entry Choices TODO replace with tag specific-->
   <DataModel name="DirectoryEntryOptions">
     <Choice>
-      <Block ref="ByteEntry" />
-      <Block ref="AsciiEntry" />
-      <Block ref="ShortEntry" />
-      <Block ref="LongEntry" />
-      <Block ref="RationalEntry" />
-      <Block ref="SByteEntry" />
-      <Block ref="UndefinedEntry" />
-      <Block ref="SShortEntry" />
-      <Block ref="SLongEntry" />
-      <Block ref="SRationalEntry" />
-      <Block ref="FloatEntry" />
-      <Block ref="DoubleEntry" />
+      <!--Specific Tags-->
+      <Block ref="PhotometricInterpretation" name="ThePhotometricInterpretation" />
+      <Block ref="StripOffsets" name="TheStripOffsets" />
+      <Block ref="StripByteCounts" name="TheStripByteCounts" />
+
+
+      <!--Catchall Types-->
+      <Block ref="ByteEntry" name="TheByteEntry" />
+      <Block ref="AsciiEntry" name="TheAsciiEntry" />
+      <Block ref="ShortEntry" name="TheShortEntry" />
+      <Block ref="LongEntry" name="TheLongEntry" />
+      <Block ref="RationalEntry" name="TheRationalEntry" />
+      <Block ref="SByteEntry" name="TheSByteEntry" />
+      <Block ref="UndefinedEntry" name="TheUndefinedEntry" />
+      <Block ref="SShortEntry" name="TheSShortEntry" />
+      <Block ref="SLongEntry" name="TheSLongEntry" />
+      <Block ref="SRationalEntry" name="TheSRationalEntry" />
+      <Block ref="FloatEntry" name="TheFloatEntry" />
+      <Block ref="DoubleEntry" name="TheDoubleEntry" />
     </Choice>
   </DataModel>
 
 
   <DataModel name="ImageFileDirectoryChunk">
-    <Placement before="TailPlace" />
+    <!--Placement before="TailPlace" /-->
     <Number name="EntryCount" size="16" signed="false">
       <Relation type="count" of="IFDEntry"/>
     </Number>
@@ -319,6 +440,7 @@
     </Choice>
   </DataModel>
 
+  <!--TODO this only allows for one layer of recursion-->
   <DataModel name="ImageFileDirectory" ref="ImageFileDirectoryChunk">
     <Block name="ListChoice.NextItem.NextImageFileDirectory" ref="ImageFileDirectoryChunk" />
   </DataModel>
@@ -339,15 +461,55 @@
     </Number>
 
     <Block name="TheIFD" ref="ImageFileDirectory" />
-
     
+    <Block name="Strips" minOccurs="1">
+      <Blob name="ImageData">
+        <Placement before="StripDataContainer.Holder" />
+      </Blob>
+      <Choice>
+        <Block>
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.ShortEntry') != None" />
+          <Number size="16" name="StripSize">
+            <Placement before="StripSizesContainer.Holder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Number size="32" name="StripSize">
+            <Placement before="StripSizesContainer.Holder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+      </Choice>
+      <Choice>
+        <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.ShortEntry') != None"  />
+          <Number size="16" name="StripOffset">
+            <Placement before="StripOffsetsContainer.Holder" />
+            <Relation type="offset" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Number size="32" name="StripOffset">
+            <Placement before="StripOffsetsContainer.Holder" />
+            <Relation type="offset" of="ImageData" />
+          </Number>
+        </Block>
+      </Choice>
+    </Block>
 
-    <Blob name="ImageData" minOccurs="1" >
-      <!--Relation type="count"  from="ImageCount" /-->
-      <!--Relation type="offset" from="ImageOffset"/-->
-      <!--Relation type="size"   from="StripeSize" /-->
-    </Blob>
-    
+    <Block name="StripOffsetsContainer">
+      <Block name="Holder" />
+    </Block>
+
+    <Block name="StripSizesContainer">
+      <Block name="Holder" />
+    </Block>
+
+    <Block name="StripDataContainer">
+      <Block name="Holder" />
+    </Block>
+
     <Block name="TailPlace" /><!--TODO why cant this be above ImageData?-->
 
   </DataModel>
