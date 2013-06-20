@@ -9,6 +9,7 @@
   </Defaults>
 
   <!-- Base Entry Types -->
+  <Import import="code" />
 
   <DataModel name="DirectoryEntry">
     <Number name="Tag" size="16" signed="false" />
@@ -33,7 +34,7 @@
         <Relation type="offset" of="ValueBlock" />
       </Number>
       <Block name="ValueBlock">
-        <Placement after="TailPlace" /> <!--TODO Should this matter that its after?-->
+        <Placement before="TailPlace" /> <!--TODO Should this matter that its after?-->
         <Block name="Value" minOccurs="1" constraint="True == False"/> <!-- Overwrite -->
       </Block>
     </Block>  
@@ -280,7 +281,9 @@
     </Block>
   </DataModel>
 
+  <!--      -->
   <!-- Tags -->
+  <!--      -->
 
   <DataModel name="PhotometricInterpretation">
     <Block ref="ShortEntry">
@@ -317,78 +320,79 @@
 
   <DataModel name="StripOffsets">
     <Choice name="ShortOrLong">
-      <Block ref="ShortEntry">
+      <Block name="TheShortEntry" ref="ShortEntry">
         <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C2.Body.ValueBlock.Value" /-->
-
+        <!-- TODO find a way to allow this option -->
         <Block name="CountN.C1" constraint="True == False"/>
         <Block name="CountN.C2" constraint="True == False"/>
 
-
         <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
-        <Number name="CountN.CX.Count" size="32" signed="false">
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
         </Number>
-        <Number name="CountN.CX.Pointer" size="32" signed="false">
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
           <Relation type="offset" of="StripOffsetsContainer" />
         </Number>
-        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+        <Block name="CountN.CX.Body.ValueBlock"/>
       </Block>
-      <Block ref="LongEntry">
-        <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
-        <Block name="CountN.C1.Body.ValueBlock.Value" /-->
 
-        <Block name="CountN.C1" constraint="True == False"/>
+      <Block name="TheLongEntry" ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value">
+          <Block name="StripOffsetLongPlaceholder" />
+        </Block>
+        <!--Block name="CountN.C1" constraint="True == False"/-->
 
         <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
-        <Number name="CountN.CX.Count" size="32" signed="false">
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
         </Number>
-        <Number name="CountN.CX.Pointer" size="32" signed="false">
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
           <Relation type="offset" of="StripOffsetsContainer" />
         </Number>
-        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+        <Block name="CountN.CX.Body.ValueBlock"/>
       </Block>
     </Choice>
   </DataModel>
 
   <DataModel name="StripByteCounts">
     <Choice name="ShortOrLong">
-      <Block ref="ShortEntry">
+      <Block name="TheShortEntry" ref="ShortEntry">
         <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="279" token="true" signed="false" />
         <Block name="CountN.C2.Body.ValueBlock.Value" /-->
-
         <Block name="CountN.C1" constraint="True == False"/>
         <Block name="CountN.C2" constraint="True == False"/>
 
         <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
-        <Number name="CountN.CX.Count" size="32" signed="false">
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
         </Number>
-        <Number name="CountN.CX.Pointer" size="32" signed="false">
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
           <Relation type="offset" of="StripSizesContainer" />
         </Number>
-        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
-        
+        <Block name="CountN.CX.Body.ValueBlock"/>
       </Block>
-      <Block ref="LongEntry">
-        <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
-        <Block name="CountN.C1.Body.ValueBlock.Value" /-->
 
-        <Block name="CountN.C1" constraint="True == False"/>
+      <Block name="TheLongEntry" ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value">
+          <Block name="StripSizeLongPlaceholder" />
+        </Block>
+        <!--Block name="CountN.C1" constraint="True == False"/-->
 
         <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
-        <Number name="CountN.CX.Count" size="32" signed="false">
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
         </Number>
-        <Number name="CountN.CX.Pointer" size="32" signed="false">
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
           <Relation type="offset" of="StripSizesContainer" />
         </Number>
-        <Block name="CountN.CX.Body.ValueBlock" constraint="True == False"/>
+        <Block name="CountN.CX.Body.ValueBlock"/>
       </Block>
     </Choice>
   </DataModel>
@@ -399,7 +403,7 @@
   
   <!-- Entry Choices TODO replace with tag specific-->
   <DataModel name="DirectoryEntryOptions">
-    <Choice>
+    <Choice name="EntryChoice">
       <!--Specific Tags-->
       <Block ref="PhotometricInterpretation" name="ThePhotometricInterpretation" />
       <Block ref="StripOffsets" name="TheStripOffsets" />
@@ -424,7 +428,6 @@
 
 
   <DataModel name="ImageFileDirectoryChunk">
-    <!--Placement before="TailPlace" /-->
     <Number name="EntryCount" size="16" signed="false">
       <Relation type="count" of="IFDEntry"/>
     </Number>
@@ -442,6 +445,7 @@
 
   <!--TODO this only allows for one layer of recursion-->
   <DataModel name="ImageFileDirectory" ref="ImageFileDirectoryChunk">
+    <!--Placement before="TailPlace" /--><!--TODO Why does this break it -->
     <Block name="ListChoice.NextItem.NextImageFileDirectory" ref="ImageFileDirectoryChunk" />
   </DataModel>
 
@@ -462,34 +466,56 @@
 
     <Block name="TheIFD" ref="ImageFileDirectory" />
     
+
+
     <Block name="Strips" minOccurs="1">
+      <!-- Image Data Strips-->
       <Blob name="ImageData">
         <Placement before="StripDataContainer.Holder" />
       </Blob>
-      <Choice>
+      <!-- Strip Offsets -->
+      <Choice name="StripOffsetChoice">
         <Block>
-          <Block constraint="element.find('TheStripOffsets.ShortOrLong.ShortEntry') != None" />
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheShortEntry') != None"/>
           <Number size="16" name="StripSize">
             <Placement before="StripSizesContainer.Holder" />
             <Relation type="size" of="ImageData" />
           </Number>
         </Block>
         <Block>
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheLongEntry.CountN.C1') != None"/>
+          <Number size="32" name="StripSize">
+            <Placement before="StripOffsetLongPlaceholder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+         <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheLongEntry.CountN.CX') != None"/>
           <Number size="32" name="StripSize">
             <Placement before="StripSizesContainer.Holder" />
             <Relation type="size" of="ImageData" />
           </Number>
         </Block>
+
       </Choice>
-      <Choice>
+      <!-- Strip Lengths -->
+      <Choice name="StripSizeChoice">
         <Block>
-          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.ShortEntry') != None"  />
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheShortEntry') != None"/>
           <Number size="16" name="StripOffset">
             <Placement before="StripOffsetsContainer.Holder" />
             <Relation type="offset" of="ImageData" />
           </Number>
         </Block>
         <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheLongEntry.CountN.C1') != None"/>
+          <Number size="32" name="StripSize">
+            <Placement before="StripSizeLongPlaceholder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheLongEntry.CountN.CX') != None"/>
           <Number size="32" name="StripOffset">
             <Placement before="StripOffsetsContainer.Holder" />
             <Relation type="offset" of="ImageData" />
@@ -497,6 +523,9 @@
         </Block>
       </Choice>
     </Block>
+
+
+
 
     <Block name="StripOffsetsContainer">
       <Block name="Holder" />
@@ -510,7 +539,7 @@
       <Block name="Holder" />
     </Block>
 
-    <Block name="TailPlace" /><!--TODO why cant this be above ImageData?-->
+    <Block name="TailPlace" />
 
   </DataModel>
 
