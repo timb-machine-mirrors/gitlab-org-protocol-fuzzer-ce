@@ -286,7 +286,7 @@
   <!--      -->
 
   <DataModel name="PhotometricInterpretation">
-    <Block ref="ShortEntry">
+    <Block name="TheShortEntry" ref="ShortEntry">
       <Number name="CountN.C1.Tag" size="16" value="262" token="true" signed="false"/>
       <Block name="CountN.C1.Body.ValueBlock.Value">
         <Choice>
@@ -302,30 +302,65 @@
     </Block>
   </DataModel>
 
+  <DataModel name="Compression">
+    <Block name="TheShortEntry" ref="ShortEntry">
+      <Number name="CountN.C1.Tag" size="16" value="259" token="true" signed="false"/>
+      <Block name="CountN.C1.Body.ValueBlock.Value">
+        <Choice>
+          <Number name="NoCompression" size="16" signed="false" value="1" token="true"/>
+          <Number name="CCITT" size="16" signed="false" value="2" token="true"/>
+          <Number name="PackBits" size="16" signed="false" value="32773" token="true"/>
+        </Choice>
+      </Block>
+      <Block name="CountN.C2" constraint="True == False"/>
+      <Block name="CountN.CX" constraint="True == False"/>
+    </Block>
+  </DataModel>
 
-  <!--DataModel name="RowsPerStrip">
+
+  <!--
+    TODO More to add
+
+
+imagewidth Short or long - 1
+imagelength SHORT or long - 1
+
+xres RATIONAL - 1 Not Req?
+yres RATIONAL - 1 not Req?
+resunit Short - 1 : 1/2/3 not Req?
+
+bitspersample SHORT - sample per pixle many??
+colormap SHORT - 3*(2^BitsPerSample)
+samplesperpixel SHORT - 1
+
+
+
+  -->
+
+
+  <DataModel name="RowsPerStrip">
     <Choice>
-      <Block ref="ShortEntry">
+      <Block name="TheShortEntry" ref="ShortEntry">
         <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
-        <Block name="CountN.C2" />
-        <Block name="CountN.CX" />
+        <Block name="CountN.C2" constraint="True == False"/>
+        <Block name="CountN.CX" constraint="True == False"/>
       </Block>
-      <Block ref="LongEntry">
+      <Block name="TheLongEntry" ref="LongEntry">
         <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
-        <Block name="CountN.CX" />
+        <Block name="CountN.CX" constraint="True == False"/>
       </Block>
-    <Choice>
-  </DataModel-->
+    </Choice>
+  </DataModel>
 
 
   <DataModel name="StripOffsets">
     <Choice name="ShortOrLong">
       <Block name="TheShortEntry" ref="ShortEntry">
+        <!-- TODO find a way to allow this option -->
         <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C2.Body.ValueBlock.Value" /-->
-        <!-- TODO find a way to allow this option -->
         <Block name="CountN.C1" constraint="True == False"/>
         <Block name="CountN.C2" constraint="True == False"/>
 
@@ -344,8 +379,6 @@
         <Block name="CountN.C1.Body.ValueBlock.Value">
           <Block name="StripOffsetLongPlaceholder" />
         </Block>
-        <!--Block name="CountN.C1" constraint="True == False"/-->
-
         <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
@@ -361,6 +394,7 @@
   <DataModel name="StripByteCounts">
     <Choice name="ShortOrLong">
       <Block name="TheShortEntry" ref="ShortEntry">
+        <!-- TODO -->
         <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="279" token="true" signed="false" />
@@ -383,8 +417,6 @@
         <Block name="CountN.C1.Body.ValueBlock.Value">
           <Block name="StripSizeLongPlaceholder" />
         </Block>
-        <!--Block name="CountN.C1" constraint="True == False"/-->
-
         <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
           <Relation type="count" of="Strips"/>
@@ -401,14 +433,15 @@
 
 
   
-  <!-- Entry Choices TODO replace with tag specific-->
+  <!-- Entry Choices TODO Add More tag specific-->
   <DataModel name="DirectoryEntryOptions">
     <Choice name="EntryChoice">
       <!--Specific Tags-->
-      <Block ref="PhotometricInterpretation" name="ThePhotometricInterpretation" />
       <Block ref="StripOffsets" name="TheStripOffsets" />
       <Block ref="StripByteCounts" name="TheStripByteCounts" />
-
+      <Block ref="RowsPerStrip" name="TheRowsPerStrip" />
+      <Block ref="PhotometricInterpretation" name="ThePhotometricInterpretation" />
+      <Block ref="Compression" name="TheCompression" />
 
       <!--Catchall Types-->
       <Block ref="ByteEntry" name="TheByteEntry" />
@@ -476,7 +509,7 @@
       <!-- Strip Offsets -->
       <Choice name="StripOffsetChoice">
         <Block>
-          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheShortEntry') != None"/>
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheShortEntry.CountN.CX') != None"/>
           <Number size="16" name="StripSize">
             <Placement before="StripSizesContainer.Holder" />
             <Relation type="size" of="ImageData" />
@@ -501,7 +534,7 @@
       <!-- Strip Lengths -->
       <Choice name="StripSizeChoice">
         <Block>
-          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheShortEntry') != None"/>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheShortEntry.CountN.CX') != None" />
           <Number size="16" name="StripOffset">
             <Placement before="StripOffsetsContainer.Holder" />
             <Relation type="offset" of="ImageData" />
