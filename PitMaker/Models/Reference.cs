@@ -16,7 +16,7 @@ namespace PitMaker.Models
 
 
   [Serializable()]
-  [System.Xml.Serialization.XmlType(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="AgentReference")]
+  [System.Xml.Serialization.XmlType(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="AgentReference")]
   public class AgentReferenceNode : ReferenceNode
   {
     public AgentReferenceNode() { }
@@ -70,7 +70,7 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="StateModelReference")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="StateModelReference")]
   public class StateModelReferenceNode : ReferenceNode
   {
     public StateModelReferenceNode() { }
@@ -101,7 +101,7 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="TestReference")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="TestReference")]
   public class TestReferenceNode : ReferenceNode
   {
     public TestReferenceNode() { }
@@ -131,7 +131,7 @@ namespace PitMaker.Models
   }
 
   [Serializable()]
-  [System.Xml.Serialization.XmlType(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="DataModelReference")]
+  [System.Xml.Serialization.XmlType(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="DataModelReference")]
   public class DataModelReferenceNode : ReferenceNode
   {
     public DataModelReferenceNode() { }

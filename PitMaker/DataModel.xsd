@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:tns="http://phed.org/2012/Peach" elementFormDefault="qualified" targetNamespace="http://phed.org/2012/Peach" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:tns="http://peachfuzzer.com/2012/Peach" elementFormDefault="qualified" targetNamespace="http://peachfuzzer.com/2012/Peach" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:complexType name="DataModel">
         <xs:sequence>
           <xs:choice minOccurs="0" maxOccurs="unbounded">

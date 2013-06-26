@@ -108,9 +108,9 @@ namespace PitMaker
           foundproperty = true;
           e.PropertyDefinition.Description = pa.description;
           if (pa.required)
-            e.PropertyDefinition.GroupName = "Required";
+            e.PropertyDefinition.GroupName = Categories.Required;
           else
-            e.PropertyDefinition.GroupName = "Optional";
+            e.PropertyDefinition.GroupName = Categories.Optional;
         }
       }
       if (!foundproperty)
@@ -129,7 +129,7 @@ namespace PitMaker
           {
             if (category.Category == "Misc")
             {
-              e.PropertyDefinition.GroupName = "Required";
+              e.PropertyDefinition.GroupName = Categories.Required;
             }
             else
             {
@@ -140,6 +140,7 @@ namespace PitMaker
         }
       }
       #endregion
+
     }
 
     void PitMakerControl_Loaded(object sender, RoutedEventArgs e)
@@ -162,7 +163,11 @@ namespace PitMaker
       var destination = e.Options.Destination as T.RadTreeViewItem;
       if (destination != null)
       {
-        if (
+				if (source == destination)
+				{
+					e.QueryResult = false;
+				}
+        else if (
           (source.DataContext is TestIncludeExcludeViewModel)
           && (destination.DataContext is TestIncludeExcludeViewModel)
           && (destination.DropPosition != T.DropPosition.Inside)
@@ -244,14 +249,14 @@ namespace PitMaker
 
     public void SavePitFile(string fileName, bool overwriteUi = true)
     {
-      if(File.Exists(fileName))
-      {
-		    if (overwriteUi)
-		    {
-			    if (MessageBox.Show("File \"" + fileName + "\" exists. Overwrite?", "Fuzz Factory", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-				    return;
-		    }
-      }
+			//if(File.Exists(fileName))
+			//{
+			//  if (overwriteUi)
+			//  {
+			//    if (MessageBox.Show("File \"" + fileName + "\" exists. Overwrite?", "Fuzz Factory", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			//      return;
+			//  }
+			//}
 
 		  using (FileStream stream = new FileStream(fileName, FileMode.Create))
       using (StreamWriter writer = new StreamWriter(stream, Encoding.UTF8))

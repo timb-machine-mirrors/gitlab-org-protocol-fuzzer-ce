@@ -12,7 +12,7 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [Serializable]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
   public class Analyzer : NodeWithParameters
   {
     public Analyzer() { }
