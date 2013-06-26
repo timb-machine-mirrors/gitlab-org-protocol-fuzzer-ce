@@ -44,8 +44,7 @@ namespace PeachFarmMonitor.ViewModels
 
       }
     }
-
-
+		
     public new List<NodeViewModel> Nodes { get; set; }
 
     public List<FaultBucketViewModel> FaultBuckets { get; set; }

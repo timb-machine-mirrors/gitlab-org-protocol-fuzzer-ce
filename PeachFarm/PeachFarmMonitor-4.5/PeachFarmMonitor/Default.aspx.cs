@@ -44,6 +44,14 @@ namespace PeachFarmMonitor
 				//refreshTimer = new System.Timers.Timer(10000);
 				//refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
 				//refreshTimer.Start();
+
+				//upPitFile.AllowedFileExtensions = new string[1] { ".xml" };
+
+				chkSelectByCount.Attributes.Add("onClick", "SelectBy(\"count\");");
+				chkSelectByTags.Attributes.Add("onClick", "SelectBy(\"tags\");");
+
+				lstCount.Attributes.Add("style", "display: block");
+				lstTags.Attributes.Add("style", "display: none");
       }
     }
 
@@ -60,9 +68,20 @@ namespace PeachFarmMonitor
 
         var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
 
-        aliveNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h).Count().ToString();
+				var aliveNodes = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h);
+				var aliveNodesCount = aliveNodes.Count();
+        aliveNodesLabel.Text = aliveNodesCount.ToString();
         runningNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Running select h).Count().ToString();
         lateNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Late select h).Count().ToString();
+
+				lstCount.Items.Clear();
+				for (int i = 1; i <= aliveNodesCount; i++)
+				{
+					lstCount.Items.Add(new DropDownListItem(i.ToString()));
+				}
+
+				var aliveNodeTags = aliveNodes.Select(n => n.Tags.Split(',')).SelectMany(s => s).Distinct().OrderBy(t => t);
+				lstTags.Items.AddRange(aliveNodeTags.Select(t => new ListItem(t)).ToArray());
         #endregion
 
 				#region errors
@@ -72,6 +91,7 @@ namespace PeachFarmMonitor
 				#endregion
 
         #region jobs
+				//*
         List<Job> jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
         jvms = new List<JobViewModel>();
         foreach (Job job in jobs)
@@ -97,14 +117,11 @@ namespace PeachFarmMonitor
 						jvm.Status = JobStatus.Error;
 					}
 
-          //var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-          //jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
-          //jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
-          //collection.Database.Server.Disconnect();
           jvms.Add(jvm);
         }
         jobsGrid.DataSource = jvms;
         jobsGrid.DataBind();
+				//*/
         #endregion
 
         loadingLabel.Text = "";
@@ -192,41 +209,54 @@ namespace PeachFarmMonitor
 
       if (item != null)
       {
-        JobViewModel job = item.DataItem as JobViewModel;
-        switch (job.Status)
-        {
-          case JobStatus.Running:
-            item.Style.Add("background-color", "lightgreen");
-            break;
-					case JobStatus.Error:
-						item.Style.Add("background-color", "#FF8080");
-						break;
-        }
-
-				var dr = item.FindControl("linkDownloadReport") as HyperLink;
-				if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+				if (item.DataItem is JobViewModel)
 				{
-					dr.NavigateUrl = String.Empty;
-					dr.Target = String.Empty;
-
-					if (job.Status == JobStatus.Running)
+					JobViewModel job = item.DataItem as JobViewModel;
+					switch (job.Status)
 					{
-						dr.Text = "Waiting for Job completion.";
+						case JobStatus.Running:
+							item.Style.Add("background-color", "lightgreen");
+							var button = item["StopJobButton"].Controls[0];
+							break;
+						case JobStatus.Error:
+							item.Style.Add("background-color", "#FF8080");
+							break;
 					}
-					else if (job.Status == JobStatus.Error)
+
+					if (job.Status != JobStatus.Running)
 					{
-						dr.Text = "Unavailable";
+						//item["StopJobButton"].Controls[0].Visible = false;
+					}
+
+					var dr = item.FindControl("linkDownloadReport") as HyperLink;
+					if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+					{
+						dr.NavigateUrl = String.Empty;
+						dr.Target = String.Empty;
+
+						if (job.Status == JobStatus.Running)
+						{
+							dr.Text = "Waiting for Job completion.";
+						}
+						else if (job.Status == JobStatus.Error)
+						{
+							dr.Text = "Unavailable";
+						}
+						else
+						{
+							dr.Text = "Processing";
+						}
 					}
 					else
 					{
-						dr.Text = "Processing";
+						dr.Text = "Download";
+						dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+						dr.Target = "_blank";
 					}
 				}
-				else
+				else if (item.DataItem is NodeViewModel)
 				{
-					dr.Text = "Download";
-					dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
-					dr.Target = "_blank";
+
 				}
       }
     }
@@ -421,5 +451,70 @@ namespace PeachFarmMonitor
 			//Monitor(true);
 			RadAjaxManager1.Alert("yay");
 		}
+
+		protected void chkSelectByCount_CheckedChanged(object sender, EventArgs e)
+		{
+			lstCount.Visible = chkSelectByCount.Checked;
+			lstTags.Visible = chkSelectByTags.Checked;
+		}
+
+		protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
+		{
+
+		}
+
+		protected void jobsGrid_DetailTableDataBind(object sender, GridDetailTableDataBindEventArgs e)
+		{
+			GridDataItem parent = e.DetailTableView.ParentItem;
+			if ((parent != null) && (parent.DataItem != null))
+			{
+				switch (e.DetailTableView.DataMember)
+				{
+					case "Nodes":
+						var job = ((JobViewModel)parent.DataItem);
+						//if((job.Nodes == null) || (job.Nodes.Count == 0))
+						//{
+						//	job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+						//}
+						e.DetailTableView.DataSource = job.Nodes;
+						break;
+				}
+			}
+		}
+
+		protected void jobsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+		{
+			/*
+			var jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
+			var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
+			jvms = new List<JobViewModel>();
+			foreach (var job in jobs)
+			{
+				job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+
+				job.StartDate = job.StartDate.ToLocalTime();
+
+				JobViewModel jvm = null;
+				if (activejobids.Contains(job.JobID))
+				{
+					jvm = new JobViewModel(job, JobStatus.Running);
+				}
+				else
+				{
+					jvm = new JobViewModel(job);
+				}
+
+				if ((from err in errors where err.JobID == job.JobID select err).Count() > 0)
+				{
+					jvm.ErrorsOccurred = true;
+					jvm.Status = JobStatus.Error;
+				}
+
+				jvms.Add(jvm);
+			}
+			jobsGrid.DataSource = jvms;
+			//*/
+		}
+
   }
 }
