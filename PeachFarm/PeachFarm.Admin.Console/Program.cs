@@ -31,6 +31,7 @@ namespace PeachFarm.Admin.Console
 				bool jobs = false;
 				bool output = false;
 				bool truncate = false;
+				bool report = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -50,6 +51,7 @@ namespace PeachFarm.Admin.Console
 						{ "jobs", var => jobs = true },
 						{ "output", var => output = true},
 						{ "truncate", var => truncate = true},
+						{ "report", var => report = true},
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -59,7 +61,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -76,6 +78,11 @@ namespace PeachFarm.Admin.Console
 
 				if (output && extra.Count != 2)
 					Program.syntax();
+
+				if (report && extra.Count != 1)
+				{
+					//
+				}
 
 				#endregion
 
@@ -205,6 +212,16 @@ namespace PeachFarm.Admin.Console
 					}
 					System.Console.WriteLine("Done!");
 				}
+				#endregion
+
+				#region Report
+				if (report)
+				{
+					string jobid = extra[0];
+					admin.Report(jobid);
+					mustwait = false;
+				}
+
 				#endregion
 
 				if (mustwait)
