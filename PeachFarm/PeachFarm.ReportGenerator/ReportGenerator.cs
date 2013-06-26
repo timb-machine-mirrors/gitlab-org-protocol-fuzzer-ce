@@ -137,7 +137,7 @@ namespace PeachFarm.Reporting
 
 			try
 			{
-				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
+				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport2();
 			}
 			catch(Exception ex)
 			{
