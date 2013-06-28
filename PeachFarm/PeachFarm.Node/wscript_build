@@ -11,7 +11,7 @@ deps = [
 	'RabbitMQ.Client.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
-	'Ionic.Zip.dll',
+	'Ionic.Zip.Reduced.dll',
 ]
 
 bld(

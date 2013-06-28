@@ -158,11 +158,18 @@ namespace Peach.Core.Runtime
 
                     foreach (var stateModel in context.dom.stateModels)
                     {
-                        foreach (var action in stateModel.Value.dataActions)
+                        foreach (var item in stateModel.Value.dataActions)
                         {
-                            jsonWriter.WriteStartObject();
-                            DataModelToJson(action.dataModel.name, action.dataModel, jsonWriter);
-                            jsonWriter.WriteEndObject();
+							// StateModel.dataActions is now the serialized data model
+							// in order to properly keep the data around when actions
+							// have been re-entered.  This code will need to be updated
+							// to hook ActionFinished event and serialize each action
+							// to json when it runs.  This way our serialized json is correct
+							// when actions have been re-entered.
+                            throw new NotImplementedException("Needs fixing!");
+                            //jsonWriter.WriteStartObject();
+                            //DataModelToJson(item.Key, item.Value, jsonWriter);
+                            //jsonWriter.WriteEndObject();
                         }
                     }
 
