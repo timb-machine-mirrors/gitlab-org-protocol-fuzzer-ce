@@ -10,8 +10,8 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [Serializable()]
-  [XmlType(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false)]
+  [XmlType(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false)]
   public class Agent : Node
   {
     public Agent()
@@ -23,6 +23,7 @@ namespace PitMaker.Models
 
     private string nameField = "agent";
 
+		[Category(Categories.Required)]
     [XmlAttribute(AttributeName = "name")]
     public string Name
     {
@@ -46,7 +47,7 @@ namespace PitMaker.Models
 
     private string passwordField = String.Empty;
 
-    [Category("Optional")]
+    [Category(Categories.Optional)]
     [XmlAttribute(AttributeName = "password")]
     public string Password
     {
@@ -70,7 +71,8 @@ namespace PitMaker.Models
 
     private string locationField = "local://";
 
-    [XmlAttribute(AttributeName = "location")]
+		[Category(Categories.Required)]
+		[XmlAttribute(AttributeName = "location")]
     public string Location
     {
       get
