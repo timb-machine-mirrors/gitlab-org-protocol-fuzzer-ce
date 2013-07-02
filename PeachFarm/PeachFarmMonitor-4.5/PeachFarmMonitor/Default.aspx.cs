@@ -41,9 +41,17 @@ namespace PeachFarmMonitor
       {
         //lblHost.Text = String.Format("{0}", adminconfig.Controller.IpAddress);
         Monitor(true);
-				refreshTimer = new System.Timers.Timer(10000);
-				refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
-				refreshTimer.Start();
+				//refreshTimer = new System.Timers.Timer(10000);
+				//refreshTimer.Elapsed += (o, a) => { RadAjaxManager1.RaisePostBackEvent(String.Empty); };
+				//refreshTimer.Start();
+
+				//upPitFile.AllowedFileExtensions = new string[1] { ".xml" };
+
+				chkSelectByCount.Attributes.Add("onClick", "SelectBy(\"count\");");
+				chkSelectByTags.Attributes.Add("onClick", "SelectBy(\"tags\");");
+
+				lstCount.Attributes.Add("style", "display: block");
+				lstTags.Attributes.Add("style", "display: none");
       }
     }
 
@@ -60,12 +68,30 @@ namespace PeachFarmMonitor
 
         var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
 
-        aliveNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h).Count().ToString();
+				var aliveNodes = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Alive select h);
+				var aliveNodesCount = aliveNodes.Count();
+        aliveNodesLabel.Text = aliveNodesCount.ToString();
         runningNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Running select h).Count().ToString();
         lateNodesLabel.Text = (from Messages.Heartbeat h in onlinenodes where h.Status == Messages.Status.Late select h).Count().ToString();
+
+				lstCount.Items.Clear();
+				for (int i = 1; i <= aliveNodesCount; i++)
+				{
+					lstCount.Items.Add(new DropDownListItem(i.ToString()));
+				}
+
+				var aliveNodeTags = aliveNodes.Select(n => n.Tags.Split(',')).SelectMany(s => s).Distinct().OrderBy(t => t);
+				lstTags.Items.AddRange(aliveNodeTags.Select(t => new ListItem(t)).ToArray());
         #endregion
 
+				#region errors
+				errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
+				errorsGrid.DataSource = errors;
+				errorsGrid.DataBind();
+				#endregion
+
         #region jobs
+				//*
         List<Job> jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
         jvms = new List<JobViewModel>();
         foreach (Job job in jobs)
@@ -84,20 +110,18 @@ namespace PeachFarmMonitor
           {
             jvm = new JobViewModel(job);
           }
-          //var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-          //jvm.FaultCount = Convert.ToUInt32(collection.Distinct("_id", Query.EQ("JobID", job.JobID)).Count());
-          //jvm.IterationCount = Convert.ToUInt32((from n in job.Nodes select Convert.ToDecimal(n.IterationCount)).Sum());
-          //collection.Database.Server.Disconnect();
+
+					if ((from e in errors where e.JobID == job.JobID select e).Count() > 0)
+					{
+						jvm.ErrorsOccurred = true;
+						jvm.Status = JobStatus.Error;
+					}
+
           jvms.Add(jvm);
         }
         jobsGrid.DataSource = jvms;
         jobsGrid.DataBind();
-        #endregion
-
-        #region errors
-        errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
-        errorsGrid.DataSource = errors;
-        errorsGrid.DataBind();
+				//*/
         #endregion
 
         loadingLabel.Text = "";
@@ -185,48 +209,224 @@ namespace PeachFarmMonitor
 
       if (item != null)
       {
-        JobViewModel job = item.DataItem as JobViewModel;
-        switch (job.Status)
-        {
-          case JobStatus.Running:
-            item.Style.Add("background-color", "lightgreen");
-            break;
-        }
-
-				var dr = item.FindControl("linkDownloadReport") as HyperLink;
-				if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+				if (item.DataItem is JobViewModel)
 				{
-					dr.NavigateUrl = String.Empty;
-					dr.Target = String.Empty;
-
-					if (job.Status == JobStatus.Running)
+					JobViewModel job = item.DataItem as JobViewModel;
+					switch (job.Status)
 					{
-						dr.Text = "Waiting for Job completion.";
+						case JobStatus.Running:
+							item.Style.Add("background-color", "lightgreen");
+							var button = item["StopJobButton"].Controls[0];
+							break;
+						case JobStatus.Error:
+							item.Style.Add("background-color", "#FF8080");
+							break;
+					}
+
+					if (job.Status != JobStatus.Running)
+					{
+						//item["StopJobButton"].Controls[0].Visible = false;
+					}
+
+					var dr = item.FindControl("linkDownloadReport") as HyperLink;
+					if ((dr != null) && (String.IsNullOrEmpty(job.ReportLocation)))
+					{
+						dr.NavigateUrl = String.Empty;
+						dr.Target = String.Empty;
+
+						if (job.Status == JobStatus.Running)
+						{
+							dr.Text = "Waiting for Job completion.";
+						}
+						else if (job.Status == JobStatus.Error)
+						{
+							dr.Text = "Unavailable";
+						}
+						else
+						{
+							dr.Text = "Processing";
+						}
 					}
 					else
 					{
-						dr.Text = "Processing";
+						dr.Text = "Download";
+						dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
+						dr.Target = "_blank";
 					}
 				}
-				else
+				else if (item.DataItem is NodeViewModel)
 				{
-					dr.Text = "Download";
-					dr.NavigateUrl = "GetJobOutput.aspx?file=" + job.ReportLocation;
-					dr.Target = "_blank";
+
 				}
       }
     }
 
     protected void nodesGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
-    }
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status descending select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName descending select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp descending select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags descending select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID descending select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName descending select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed descending select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration descending select n);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "Status":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Status select n);
+						break;
+					case "NodeName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.NodeName select n);
+						break;
+					case "Stamp":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Stamp select n);
+						break;
+					case "Tags":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Tags select n);
+						break;
+					case "JobID":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.JobID select n);
+						break;
+					case "PitFileName":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.PitFileName select n);
+						break;
+					case "Seed":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Seed select n);
+						break;
+					case "Iteration":
+						nodesGrid.DataSource = (from n in onlinenodes orderby n.Iteration select n);
+						break;
+				}
+			}
+		}
 
     protected void jobsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount descending select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount descending select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID descending select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate descending select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status descending select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName descending select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName descending select jvm);
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "FaultCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.FaultCount select jvm);
+						break;
+					case "IterationCount":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.IterationCount select jvm);
+						break;
+					case "JobID":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.JobID select jvm);
+						break;
+					case "StartDate":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.StartDate select jvm);
+						break;
+					case "Status":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Status select jvm);
+						break;
+					case "Pit.FileName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.Pit.FileName select jvm);
+						break;
+					case "UserName":
+						jobsGrid.DataSource = (from jvm in jvms orderby jvm.UserName select jvm);
+						break;
+				}
+			}
     }
 
     protected void errorsGrid_SortCommand(object sender, GridSortCommandEventArgs e)
     {
+
+							//			<telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
+							//<telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
+							//<telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
+							//<telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" />
+
+			if (e.NewSortOrder == GridSortOrder.Descending)
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName descending select err;
+						break;
+				}
+			}
+			else
+			{
+				switch (e.SortExpression)
+				{
+					case "NodeName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "Stamp":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "JobID":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+					case "PitFileName":
+						errorsGrid.DataSource = from err in errors orderby err.NodeName select err;
+						break;
+				}
+			}
     }
 
 
@@ -251,5 +451,70 @@ namespace PeachFarmMonitor
 			//Monitor(true);
 			RadAjaxManager1.Alert("yay");
 		}
+
+		protected void chkSelectByCount_CheckedChanged(object sender, EventArgs e)
+		{
+			lstCount.Visible = chkSelectByCount.Checked;
+			lstTags.Visible = chkSelectByTags.Checked;
+		}
+
+		protected void jobsGrid_ItemCommand(object sender, GridCommandEventArgs e)
+		{
+
+		}
+
+		protected void jobsGrid_DetailTableDataBind(object sender, GridDetailTableDataBindEventArgs e)
+		{
+			GridDataItem parent = e.DetailTableView.ParentItem;
+			if ((parent != null) && (parent.DataItem != null))
+			{
+				switch (e.DetailTableView.DataMember)
+				{
+					case "Nodes":
+						var job = ((JobViewModel)parent.DataItem);
+						//if((job.Nodes == null) || (job.Nodes.Count == 0))
+						//{
+						//	job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+						//}
+						e.DetailTableView.DataSource = job.Nodes;
+						break;
+				}
+			}
+		}
+
+		protected void jobsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+		{
+			/*
+			var jobs = DatabaseHelper.GetAllJobs(monitorconfig.MongoDb.ConnectionString);
+			var activejobids = (from h in onlinenodes where h.Status == Messages.Status.Running select h.JobID).ToList();
+			jvms = new List<JobViewModel>();
+			foreach (var job in jobs)
+			{
+				job.FillNodes(monitorconfig.MongoDb.ConnectionString);
+
+				job.StartDate = job.StartDate.ToLocalTime();
+
+				JobViewModel jvm = null;
+				if (activejobids.Contains(job.JobID))
+				{
+					jvm = new JobViewModel(job, JobStatus.Running);
+				}
+				else
+				{
+					jvm = new JobViewModel(job);
+				}
+
+				if ((from err in errors where err.JobID == job.JobID select err).Count() > 0)
+				{
+					jvm.ErrorsOccurred = true;
+					jvm.Status = JobStatus.Error;
+				}
+
+				jvms.Add(jvm);
+			}
+			jobsGrid.DataSource = jvms;
+			//*/
+		}
+
   }
 }

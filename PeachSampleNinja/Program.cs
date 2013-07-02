@@ -250,6 +250,26 @@ run.
 			return null;
 		}
 
+		private static byte[] ToByteArray(BitwiseStream data)
+		{
+			data.SeekBits(0, SeekOrigin.Begin);
+
+			int len = 0;
+			int count = (int)data.Length;
+			int offset = 0;
+			byte[] buffer = new byte[count];
+
+			while ((len = data.Read(buffer, offset, count)) != 0)
+			{
+				offset += len;
+				count -= len;
+			}
+
+			System.Diagnostics.Debug.Assert(count == 0);
+
+			return buffer;
+		}
+
 		void ProcessContainer(DataElementContainer container)
 		{
 			object elementId;
@@ -289,7 +309,7 @@ run.
 				cmd.Parameters[0].Value = Guid.NewGuid();
 				cmd.Parameters[1].Value = SampleId;
 				cmd.Parameters[2].Value = elementId;
-				cmd.Parameters[3].Value = container.Value.Value;
+				cmd.Parameters[3].Value = ToByteArray(container.Value);
 
 				cmd.ExecuteNonQuery();
 			}
@@ -332,7 +352,7 @@ run.
 						cmd.Parameters[0].Value = Guid.NewGuid();
 						cmd.Parameters[1].Value = SampleId;
 						cmd.Parameters[2].Value = elementId;
-						cmd.Parameters[3].Value = child.Value.Value;
+						cmd.Parameters[3].Value = ToByteArray(child.Value);
 
 						cmd.ExecuteNonQuery();
 					}

@@ -8,16 +8,14 @@ using PeachFarm.Reporting;
 
 namespace PeachFarm.Reporting.Reports
 {
-  public class ReportData
-  {
-    public static List<Job> GetJobDetailReport(string jobID, string connectionString)
-    {
-      List<Job> jobs = new List<Job>();
-      Job job = DatabaseHelper.GetJob(jobID, connectionString);
-      job.FillNodes(connectionString);
-      job.FillFaults(connectionString, true);
-      jobs.Add(job);
-      return jobs;
-    }
-  }
+	public class ReportData
+	{
+		public static List<Fault> GetJobDetailReport(string jobID, string connectionString)
+		{
+			Job job = DatabaseHelper.GetJob(jobID, connectionString);
+			job.FillNodes(connectionString);
+			job.FillFaults(connectionString, true);
+			return job.Faults;
+		}
+	}
 }

@@ -84,7 +84,26 @@
     #nodesGridPanel{ height:100%; }
     #jobsGridPanel{ height:100%; }
     #errorsGridPanel{ height:100%; }
+		input[type='radio']
+		{
+			border-color: #f57e20;
+		}
   </style>
+	<script>
+		function SelectBy(param) {
+			var lstCount = document.getElementById("startJobWindow_C_lstCount");
+			var lstTags = document.getElementById("startJobWindow_C_lstTags");
+
+			if (param == "count") {
+				lstCount.style.display = "block";
+				lstTags.style.display = "none";
+			}
+			else {
+				lstTags.style.display = "block";
+				lstCount.style.display = "none";
+			}
+		}
+	</script>
 </head>
 <body>
   <form id="Form1" runat="server">
@@ -144,30 +163,53 @@
     </telerik:RadTabStrip>
     <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
       <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
-        <telerik:RadGrid ID="jobsGrid" runat="server" 
-          AutoGenerateColumns="false" AllowSorting="true" AllowFilteringByColumn="false" 
+        <asp:Panel ID="jobActionPanel" runat="server" Visible="false">
+          <asp:Table ID="Table2" runat="server" CellPadding="2" CellSpacing="4">
+            <asp:TableRow>
+              <asp:TableCell>
+                <telerik:RadButton Text="Start New Job" ID="btnOpenStartJobWindow" runat="server"/>
+              </asp:TableCell>
+              <asp:TableCell>
+                <telerik:RadButton Text="Stop Job" ID="btnStopJob" runat="server"/>
+              </asp:TableCell>
+              <asp:TableCell>
+              </asp:TableCell>
+            </asp:TableRow>
+          </asp:Table>
+        </asp:Panel>
+				<telerik:RadGrid ID="jobsGrid" runat="server" 
+          AutoGenerateColumns="false" AllowSorting="true"
+					AllowFilteringByColumn="false" 
           OnItemDataBound="jobsGrid_ItemDataBound" 
-          OnSortCommand="jobsGrid_SortCommand"
+					OnSortCommand="jobsGrid_SortCommand"
+					OnItemCommand="jobsGrid_ItemCommand"
+					OnNeedDataSource="jobsGrid_NeedDataSource"
+					OnDetailTableDataBind="jobsGrid_DetailTableDataBind"
+					ImagesPath="~/App_Themes/DejaVu/Grid"
           Height="100%" Width="100%">
           <ClientSettings>
             <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
+						<Selecting AllowRowSelect="true" CellSelectionMode="None" />
+						<ClientEvents OnRowSelected="" />
           </ClientSettings>
-          <MasterTableView TableLayout="Fixed">
+          <MasterTableView HierarchyLoadMode="ServerBind" TableLayout="Fixed" ViewStateMode="Enabled">
             <Columns>
+							<telerik:GridButtonColumn Text="Stop Job" ButtonType="LinkButton" CommandName="StopJob" ConfirmDialogType="RadWindow" ConfirmTextFields="JobID" ConfirmTextFormatString="Are you sure you want to stop Job {0}?" UniqueName="StopJobButton" Visible="false" />
               <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
               <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" />
               <telerik:GridBoundColumn DataField="Pit.FileName" HeaderText="Pit File" />
               <telerik:GridBoundColumn DataField="UserName" HeaderText="Owner" />
               <telerik:GridBoundColumn DataField="StartDate" HeaderText="Start Date" />
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
-              <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank"/>
-              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount"/>
-							<telerik:GridTemplateColumn HeaderText="PDF Report">
+              <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank" AllowSorting="false"/>
+              <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount" AllowSorting="false"/>
+							<telerik:GridTemplateColumn HeaderText="PDF Report" Visible="true">
 								<ItemTemplate>
 									<asp:HyperLink ID="linkDownloadReport" runat="server"/>
 								</ItemTemplate>
 							</telerik:GridTemplateColumn>
             </Columns>
+
           </MasterTableView>
         </telerik:RadGrid>
       </telerik:RadPageView>
@@ -178,24 +220,18 @@
               <asp:TableCell>
                 <asp:Label ID="Label1" Text="Alive:" runat="server" />&nbsp;
                 <asp:Label ID="aliveNodesLabel" runat="server" />
-              </asp:TableCell>
-              <asp:TableCell>
+              </asp:TableCell><asp:TableCell>
                 <asp:Label ID="Label2" Text="Running:" runat="server" />&nbsp;
                 <asp:Label ID="runningNodesLabel" runat="server" />
-              </asp:TableCell>
-              <asp:TableCell>
+              </asp:TableCell><asp:TableCell>
                 <asp:Label ID="Label3" Text="Late:" runat="server" />&nbsp;
                 <asp:Label ID="lateNodesLabel" runat="server" />
-              </asp:TableCell>
-            </asp:TableRow>
-          </asp:Table>
-        </asp:Panel>
-        <telerik:RadGrid ID="nodesGrid" runat="server"
+              </asp:TableCell></asp:TableRow></asp:Table></asp:Panel><telerik:RadGrid ID="nodesGrid" runat="server"
           AutoGenerateColumns="false" AllowSorting="True" 
           OnItemDataBound="nodesGrid_ItemDataBound" 
           OnSortCommand="nodesGrid_SortCommand" 
           Width="100%" Height="100%">
-          <ClientSettings>
+					<ClientSettings>
             <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
           </ClientSettings>
           <MasterTableView TableLayout="Fixed">
@@ -247,13 +283,54 @@
       </telerik:RadPageView>
     </telerik:RadMultiPage>
     <asp:Panel ID="Panel1" runat="server" Width="0" Height="0">
-			<!--
-			-->
+				<telerik:RadWindow ID="startJobWindow" runat="server" Width="360px" Height="360px" VisibleOnPageLoad="false" OpenerElementID="btnOpenStartJobWindow" Modal="True" Title="Start New Job" AutoSize="True">
+					<ContentTemplate>
+						<div style="padding: 10px; text-align: center;">
+							<asp:Table ID="Table3" runat="server">
+								<asp:TableRow>
+									<asp:TableCell HorizontalAlign="Right">
+										Pit File:
+									</asp:TableCell>
+									<asp:TableCell HorizontalAlign="Left">
+									</asp:TableCell>
+								</asp:TableRow>
+								<asp:TableRow>
+									<asp:TableCell HorizontalAlign="Right">
+										Other Files:
+									</asp:TableCell>
+									<asp:TableCell HorizontalAlign="Left">
+									</asp:TableCell>
+								</asp:TableRow>
+								<asp:TableRow>
+									<asp:TableCell HorizontalAlign="Left" ColumnSpan="2">
+										<!--
+										<asp:RadioButtonList ID="chkSelectBy" runat="server" ClientIDMode="Static" RepeatDirection="Horizontal">
+											<asp:ListItem Selected="True" Value="count" Text="Count" />
+											<asp:ListItem Value="tags" Text="Tags" />
+										</asp:RadioButtonList>
+										-->
+										<asp:RadioButton GroupName="SelectBy" ID="chkSelectByCount" Text="Count" Checked="true" runat="server" ClientIDMode="Static" />
+										<asp:RadioButton GroupName="SelectBy" ID="chkSelectByTags" Text="Tags" runat="server" ClientIDMode="Static" />
+									</asp:TableCell>
+								</asp:TableRow>
+								<asp:TableRow>
+									<asp:TableCell HorizontalAlign="Left" ColumnSpan="2">
+										<telerik:RadDropDownList ID="lstCount" runat="server" />
+										<asp:CheckBoxList ID="lstTags" runat="server" />
+									</asp:TableCell>
+								</asp:TableRow>
+								<asp:TableRow>
+									<asp:TableCell ColumnSpan="2" HorizontalAlign="Right">
+										<telerik:RadButton ID="btnCancel" Text="Cancel" runat="server" />
+										<telerik:RadButton ID="btnStartJob" Text="Start" runat="server" />
+									</asp:TableCell>
+								</asp:TableRow>
+							</asp:Table>
+						</div>
+					</ContentTemplate>
+				</telerik:RadWindow>
       <asp:Timer ID="monitorTimer" runat="server" Interval="10000" OnTick="Tick" Enabled="true" />
     </asp:Panel>
   </form>
 </body>
 </html>
-              <!--
-							<telerik:GridHyperLinkColumn Text="Generate Report" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/ReportViewer.aspx?jobid={0}" Target="_blank" AllowSorting="false" Visible="false" />
-							-->

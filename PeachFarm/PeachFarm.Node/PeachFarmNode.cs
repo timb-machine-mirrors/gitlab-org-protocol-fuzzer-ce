@@ -32,6 +32,7 @@ namespace PeachFarm.Node
 		{
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 			#endregion
 
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetEntryAssembly();
@@ -174,6 +175,15 @@ namespace PeachFarm.Node
 		#endregion
 
 		#region Termination handlers
+		void CurrentDomain_ProcessExit(object sender, EventArgs e)
+		{
+			try
+			{
+				this.Close();
+			}
+			catch { }
+		}
+
 		private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
 			if (e.ExceptionObject is RabbitMqException)
@@ -188,13 +198,11 @@ namespace PeachFarm.Node
 
 			if ((nodeState.Status != Status.Stopping))// && (connection != null) && (connection.IsOpen) && e.IsTerminating)
 			{
-				ChangeStatus(Status.Stopping);
-
 				try
 				{
-					rabbit.StopListener();
+					this.Close();
 				}
-				catch (RabbitMqException) { }
+				catch { }
 			}
 		}
 		#endregion
@@ -237,7 +245,20 @@ namespace PeachFarm.Node
 			switch (action)
 			{
 				case Actions.StartPeach:
-					StartPeach(StartPeachRequest.Deserialize(body));
+					StartPeachRequest request = null;
+					try
+					{
+						request = StartPeachRequest.Deserialize(body);
+						StartPeach(request);
+					}
+					catch (Exception ex)
+					{
+						if (request != null)
+						{
+							StartPeachCleanUp(request.JobID);
+						}
+						throw ex;
+					}
 					break;
 				case Actions.StopPeach:
 					StopPeach(StopPeachRequest.Deserialize(body));
@@ -489,25 +510,6 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
-		private string WriteTextToTempFile(string text, string jobID, string fileName = "")
-		{
-			if (text.StartsWith("<!"))
-			{
-				text = text.Substring("<![CDATA[".Length);
-				text = text.Substring(0, text.Length - 2);
-			}
-
-			if (String.IsNullOrEmpty(fileName))
-			{
-				fileName = Path.GetFileName(Path.GetTempFileName());
-			}
-
-			string temppath	= Path.Combine(Environment.CurrentDirectory, "jobtmp", jobID, fileName);
-			PeachFarm.Common.FileWriter.CreateDirectory(Path.GetDirectoryName(temppath));
-			File.WriteAllText(temppath, text);
-			return temppath;
-		}
-
 		private void StopFuzzer()
 		{
 			if (nodeState.RunContext != null)
@@ -541,6 +543,8 @@ namespace PeachFarm.Node
 	{
 		public NodeState(PeachFarm.Node.Configuration.NodeSection config)
 		{
+			config.Validate();
+
 			Status = Common.Messages.Status.Alive;
 
 			ControllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);

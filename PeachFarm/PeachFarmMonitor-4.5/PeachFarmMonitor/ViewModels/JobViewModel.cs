@@ -44,8 +44,7 @@ namespace PeachFarmMonitor.ViewModels
 
       }
     }
-
-
+		
     public new List<NodeViewModel> Nodes { get; set; }
 
     public List<FaultBucketViewModel> FaultBuckets { get; set; }
@@ -56,12 +55,15 @@ namespace PeachFarmMonitor.ViewModels
 
     public uint IterationCount { get; set; }
 
+		public bool ErrorsOccurred { get; set; }
+
     //public string JobInput { get; set; }
   }
 
   public enum JobStatus
   {
     Running,
-    Inactive
+    Inactive,
+		Error
   }
 }

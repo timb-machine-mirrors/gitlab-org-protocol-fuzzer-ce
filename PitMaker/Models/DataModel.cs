@@ -13,8 +13,8 @@ using System.Reflection;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="DataModel")]
-	[System.Xml.Serialization.XmlRoot(DataType="DataModel",ElementName="DataModel",IsNullable=false,Namespace = "http://phed.org/2012/Peach")]
+  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="DataModel")]
+	[System.Xml.Serialization.XmlRoot(DataType="DataModel",ElementName="DataModel",IsNullable=false,Namespace = "http://peachfuzzer.com/2012/Peach")]
 	//[System.Xml.Serialization.XmlSchemaProvider("MySchema")]
   public class DataModel : Node, IXmlSerializable
   {
@@ -100,7 +100,7 @@ namespace PitMaker.Models
 
     #region Mutable Property
 
-    private bool mutableField = false;
+    private bool mutableField = true;
 
     [Category(Categories.Required)]
     [XmlAttribute(AttributeName = "mutable")]
@@ -268,7 +268,7 @@ namespace PitMaker.Models
 				xs.Add(s);
 			}
 
-			return new XmlQualifiedName("dataModel", "http://phed.org/2012/Peach");
+			return new XmlQualifiedName("dataModel", "http://peachfuzzer.com/2012/Peach");
 		}
   }
 }

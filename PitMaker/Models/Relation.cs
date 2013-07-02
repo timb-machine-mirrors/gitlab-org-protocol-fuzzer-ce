@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="Relation")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="Relation")]
   [XmlInclude(typeof(CountRelation))]
   [XmlInclude(typeof(SizeRelation))]
   [XmlInclude(typeof(OffsetRelation))]
@@ -134,7 +134,7 @@ namespace PitMaker.Models
   }
 
   //[System.SerializableAttribute()]
-  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="Relation")]
+  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="Relation")]
   public class SizeRelation : Relation
   {
     public SizeRelation()
@@ -144,8 +144,8 @@ namespace PitMaker.Models
   }
 
 	//[System.SerializableAttribute()]
-	//[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-	//[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Relation")]
+	//[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+	//[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Relation")]
   public class CountRelation : Relation
   {
     public CountRelation()
@@ -155,8 +155,8 @@ namespace PitMaker.Models
   }
 
 	//[System.SerializableAttribute()]
-	//[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-	//[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Relation")]
+	//[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+	//[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Relation")]
   public class OffsetRelation : Relation
   {
     public OffsetRelation()
@@ -212,7 +212,7 @@ namespace PitMaker.Models
   }
 
   //[System.SerializableAttribute()]
-  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+  //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
   //public enum RelationType
   //{
 

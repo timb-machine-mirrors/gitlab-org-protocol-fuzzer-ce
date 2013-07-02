@@ -23,7 +23,7 @@ namespace PeachFarm.Admin
 
 		PeachFarm.Admin.Configuration.AdminSection config;
 
-		private string serverQueueName;
+		private string controllerQueueName;
 		private string adminQueueName;
 
 		RabbitMqHelper rabbit = null;
@@ -35,12 +35,15 @@ namespace PeachFarm.Admin
 		public Admin(string adminName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
+
+			config.Validate();
+
 			ServerHostName = config.Controller.IpAddress;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
-			serverQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
+			controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
 			if (String.IsNullOrEmpty(adminName))
 			{
 				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
@@ -347,7 +350,7 @@ namespace PeachFarm.Admin
 				StopPeachRequest request = new StopPeachRequest();
 				request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 				request.JobID = jobGuid;
-				PublishToServer(request.Serialize(), "StopPeach");
+				PublishToServer(request.Serialize(), Actions.StopPeach);
 			}
 		}
 		#endregion
@@ -423,12 +426,20 @@ namespace PeachFarm.Admin
 			RaiseMonitorCompleted(response);
 		}
 
+		public void Report(string jobid)
+		{
+			GenerateReportRequest request = new GenerateReportRequest();
+			request.JobID = jobid;
+			request.ReportFormat = ReportFormat.PDF;
+
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, request.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+		}
 		#endregion
 
 		#region MQ functions
 		private void PublishToServer(string message, string action)
 		{
-			rabbit.PublishToQueue(serverQueueName, message, action, adminQueueName);
+			rabbit.PublishToQueue(controllerQueueName, message, action, adminQueueName);
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)

@@ -45,7 +45,7 @@ namespace PeachFarm.Test
 		{
 			var rg = new PeachFarm.Reporting.ReportGenerator();
 			GenerateReportRequest request = new GenerateReportRequest();
-			request.JobID = "65685BFA66C7";
+			request.JobID = "9CB41D020E39";
 			request.ReportFormat = ReportFormat.PDF;
 
 			var response = rg.GenerateReport(request);

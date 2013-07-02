@@ -86,6 +86,10 @@ namespace PeachFarmMonitor
 					{
 						viewReportLink.Text = "Waiting for Job completion.";
 					}
+					else if (Job.Status == JobStatus.Error)
+					{
+						viewReportLink.Text = "Unavailable";
+					}
 					else
 					{
 						viewReportLink.Text = "Processing";

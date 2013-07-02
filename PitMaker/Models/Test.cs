@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-	[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+	[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
   public class Test : Node
   {
     public Test() { }
@@ -93,7 +93,7 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
   public class TestInclude : Node
   {
     #region XPath Property
@@ -121,7 +121,7 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
   public class TestExclude : Node
   {
     #region XPath Property

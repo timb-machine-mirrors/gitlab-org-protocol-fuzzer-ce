@@ -10,12 +10,12 @@ namespace PeachFarm.Reporting.Reports
 		private void InitializeComponent()
 		{
 			Telerik.Reporting.NavigateToUrlAction navigateToUrlAction1 = new Telerik.Reporting.NavigateToUrlAction();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(JobDetailReport));
 			Telerik.Reporting.TableGroup tableGroup3 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup4 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup1 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup2 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.NavigateToUrlAction navigateToUrlAction2 = new Telerik.Reporting.NavigateToUrlAction();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(JobDetailReport));
 			Telerik.Reporting.ReportParameter reportParameter1 = new Telerik.Reporting.ReportParameter();
 			Telerik.Reporting.ReportParameter reportParameter2 = new Telerik.Reporting.ReportParameter();
 			Telerik.Reporting.ReportParameter reportParameter3 = new Telerik.Reporting.ReportParameter();
@@ -26,7 +26,6 @@ namespace PeachFarm.Reporting.Reports
 			this.pageInfoTextBox = new Telerik.Reporting.TextBox();
 			this.reportHeader = new Telerik.Reporting.ReportHeaderSection();
 			this.jobOutputLink = new Telerik.Reporting.TextBox();
-			this.pictureBox1 = new Telerik.Reporting.PictureBox();
 			this.startDateDataTextBox = new Telerik.Reporting.TextBox();
 			this.startDateCaptionTextBox = new Telerik.Reporting.TextBox();
 			this.userNameDataTextBox = new Telerik.Reporting.TextBox();
@@ -60,6 +59,7 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox1 = new Telerik.Reporting.TextBox();
 			this.textBox3 = new Telerik.Reporting.TextBox();
 			this.textBox4 = new Telerik.Reporting.TextBox();
+			this.pictureBox1 = new Telerik.Reporting.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
 			// 
 			// peachFarmMongo
@@ -106,7 +106,6 @@ namespace PeachFarm.Reporting.Reports
 			this.reportHeader.Height = Telerik.Reporting.Drawing.Unit.Inch(2.5999999046325684D);
 			this.reportHeader.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.jobOutputLink,
-            this.pictureBox1,
             this.startDateDataTextBox,
             this.startDateCaptionTextBox,
             this.userNameDataTextBox,
@@ -115,7 +114,8 @@ namespace PeachFarm.Reporting.Reports
             this.pitFileNameCaptionTextBox,
             this.jobIDDataTextBox,
             this.jobIDCaptionTextBox,
-            this.titleTextBox});
+            this.titleTextBox,
+            this.pictureBox1});
 			this.reportHeader.Name = "reportHeader";
 			// 
 			// jobOutputLink
@@ -129,15 +129,6 @@ namespace PeachFarm.Reporting.Reports
 			this.jobOutputLink.Style.Font.Underline = true;
 			this.jobOutputLink.StyleName = "Data";
 			this.jobOutputLink.Value = "Download Full Job Output";
-			// 
-			// pictureBox1
-			// 
-			this.pictureBox1.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(3.9378803194267675E-05D));
-			this.pictureBox1.MimeType = "image/jpeg";
-			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.5D), Telerik.Reporting.Drawing.Unit.Inch(1D));
-			this.pictureBox1.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox1.Value = ((object)(resources.GetObject("pictureBox1.Value")));
 			// 
 			// startDateDataTextBox
 			// 
@@ -527,6 +518,15 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox4.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
 			this.textBox4.StyleName = "Caption";
 			// 
+			// pictureBox1
+			// 
+			this.pictureBox1.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0D), Telerik.Reporting.Drawing.Unit.Inch(3.9339065551757812E-05D));
+			this.pictureBox1.MimeType = "image/jpeg";
+			this.pictureBox1.Name = "pictureBox1";
+			this.pictureBox1.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.5D), Telerik.Reporting.Drawing.Unit.Inch(1D));
+			this.pictureBox1.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
+			this.pictureBox1.Value = ((object)(resources.GetObject("pictureBox1.Value")));
+			// 
 			// JobDetailReport
 			// 
 			this.DataSource = this.peachFarmMongo;
@@ -588,7 +588,6 @@ namespace PeachFarm.Reporting.Reports
 		private Telerik.Reporting.TextBox textBox3;
 		private Telerik.Reporting.TextBox textBox4;
 		private Telerik.Reporting.TextBox jobOutputLink;
-		private Telerik.Reporting.PictureBox pictureBox1;
 		private Telerik.Reporting.TextBox startDateDataTextBox;
 		private Telerik.Reporting.TextBox startDateCaptionTextBox;
 		private Telerik.Reporting.TextBox userNameDataTextBox;
@@ -598,6 +597,7 @@ namespace PeachFarm.Reporting.Reports
 		private Telerik.Reporting.TextBox jobIDDataTextBox;
 		private Telerik.Reporting.TextBox jobIDCaptionTextBox;
 		private Telerik.Reporting.TextBox titleTextBox;
+		private Telerik.Reporting.PictureBox pictureBox1;
 
 	}
 }

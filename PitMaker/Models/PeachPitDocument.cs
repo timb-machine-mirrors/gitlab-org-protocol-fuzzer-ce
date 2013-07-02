@@ -11,7 +11,7 @@ using System.ComponentModel;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName="Peach", DataType="Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName="Peach", DataType="Peach")]
   public class PeachPitDocument : Node
   {
     public PeachPitDocument()
