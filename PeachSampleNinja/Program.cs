@@ -44,7 +44,7 @@ run.
 		{
 			var config = Path.Combine(
 				Path.GetDirectoryName(pitfile),
-				Path.GetFileNameWithoutExtension(pitfile) + ".config");
+				Path.GetFileName(pitfile) + ".config");
 			var DefinedValues = new Dictionary<string,string>();
 
 			if (File.Exists(config))
@@ -69,7 +69,7 @@ run.
 
 			var database = Path.Combine(
 				Path.GetDirectoryName(pitfile),
-				Path.GetFileNameWithoutExtension(pitfile) + ".ninja");
+				Path.GetFileName(pitfile) + ".ninja");
 
 			if (!File.Exists(database))
 			{

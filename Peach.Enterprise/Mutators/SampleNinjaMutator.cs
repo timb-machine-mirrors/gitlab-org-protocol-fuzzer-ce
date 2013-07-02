@@ -32,7 +32,7 @@ namespace Peach.Enterprise.Mutators
 			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
 			NinjaDB = Path.Combine(
 				Path.GetFullPath(pitFile),
-				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
+				Path.GetFileName(pitFile) + ".ninja");
 
             using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
             {
@@ -82,7 +82,7 @@ select from count('x'), se.elementid
 			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
 			var ninjaDb = Path.Combine(
 				Path.GetFullPath(pitFile),
-				Path.GetFileNameWithoutExtension(pitFile) + ".ninja");
+				Path.GetFileName(pitFile) + ".ninja");
 
 			// If our database doesn't exist JETTISON!
 			if (!File.Exists(ninjaDb))
