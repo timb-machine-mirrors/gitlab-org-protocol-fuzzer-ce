@@ -150,17 +150,16 @@ select from count('x'), se.elementid
 		public override void sequentialMutation(DataElement obj)
 		{
 			obj.MutatedValue = new Variant(GetAt(pos));
-			obj.mutationFlags = DataElement.MUTATE_DEFAULT;
-			obj.mutationFlags |= DataElement.MUTATE_OVERRIDE_TYPE_TRANSFORM;
+			obj.mutationFlags = MutateOverride.Default;
+			obj.mutationFlags |= MutateOverride.TypeTransform;
 		}
 
 		public override void randomMutation(DataElement obj)
 		{
 			int index = context.Random.Next(count);
 			obj.MutatedValue = new Variant(GetAt((uint)index));
-
-			obj.mutationFlags = DataElement.MUTATE_DEFAULT;
-			obj.mutationFlags |= DataElement.MUTATE_OVERRIDE_TYPE_TRANSFORM;
+			obj.mutationFlags = MutateOverride.Default;
+			obj.mutationFlags |= MutateOverride.TypeTransform;
 		}
 	}
 }

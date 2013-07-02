@@ -169,7 +169,7 @@ namespace Peach.Enterprise.MutationStrategies
 			var dataModel = GetNewDataModel(action);
 
 			dataModel.MutatedValue = new Variant(fileBytes);
-			dataModel.mutationFlags = DataElement.MUTATE_OVERRIDE_TYPE_TRANSFORM;
+			dataModel.mutationFlags = MutateOverride.TypeTransform;
 
 			return dataModel;
 		}

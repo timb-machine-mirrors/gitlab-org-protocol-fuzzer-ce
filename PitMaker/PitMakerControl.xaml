@@ -220,7 +220,8 @@
       <StackPanel Orientation="Horizontal">
         <StackPanel.ContextMenu>
           <ContextMenu>
-            <MenuItem Header="New">
+						<MenuItem Header="New Data Element" ItemsSource="{Binding DataElementTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}" >
+							<!--
               <MenuItem Header="Data Element" ItemsSource="{Binding DataElementTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}" />
               <MenuItem Header="Fixup" ItemsSource="{Binding FixupTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}"/>
               <MenuItem Header="Hint" Command="{Binding CreateChild}" CommandParameter="Hint" />
@@ -231,6 +232,7 @@
                 <MenuItem Header="Offset" Command="{Binding CreateChild}" CommandParameter="RelationOffset" />
               </MenuItem>
               <MenuItem Header="Transformer" ItemsSource="{Binding TransformerTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}"/>
+								-->
             </MenuItem>
             <MenuItem Header="Delete" Command="{Binding Delete}" />
           </ContextMenu>
@@ -278,15 +280,17 @@
             <MenuItem Header="New">
               <MenuItem Header="Data Element" ItemsSource="{Binding DataElementTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}" />
               <MenuItem Header="Analyzer" ItemsSource="{Binding AnalyzerTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}"/>
-              <MenuItem Header="Fixup" ItemsSource="{Binding FixupTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}" />
-              <MenuItem Header="Hint" Command="{Binding CreateChild}" CommandParameter="Hint" />
               <MenuItem Header="Placement" Command="{Binding CreateChild}" CommandParameter="Placement" />
-              <MenuItem Header="Relation">
+							<!--
+              <MenuItem Header="Hint" Command="{Binding CreateChild}" CommandParameter="Hint" />
+							<MenuItem Header="Fixup" ItemsSource="{Binding FixupTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}" />
+							<MenuItem Header="Relation">
                 <MenuItem Header="Count" Command="{Binding CreateChild}" CommandParameter="RelationCount" />
                 <MenuItem Header="Size" Command="{Binding CreateChild}" CommandParameter="RelationSize" />
                 <MenuItem Header="Offset" Command="{Binding CreateChild}" CommandParameter="RelationOffset" />
               </MenuItem>
               <MenuItem Header="Transformer" ItemsSource="{Binding TransformerTypeCommands}" ItemTemplate="{StaticResource createTypeCommandTemplate}"/>
+							-->
             </MenuItem>
             <MenuItem Header="Delete" Command="{Binding Delete}" />
           </ContextMenu>
@@ -1457,8 +1461,8 @@
 			<GridSplitter Width="4" Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Left" />
 
 			<telerik:RadPropertyGrid AutoGeneratePropertyDefinitions="{Binding HasPropertyDefinitions, Mode=OneWay}"  
-									 Grid.Row="1" Grid.Column="1" Item="{Binding SelectedItem, ElementName=treeView}" 
-									 Margin="4,0,0,0" x:Name="propertyGrid">
+				Grid.Row="1" Grid.Column="1" Item="{Binding SelectedItem, ElementName=treeView}" 
+				Margin="4,0,0,0" x:Name="propertyGrid">
 				<telerik:RadPropertyGrid.EditorTemplateSelector>
 					<local:PropertyGridDataTemplateSelector>
 						<local:PropertyGridDataTemplateSelector.StateSelectorDataTemplate>

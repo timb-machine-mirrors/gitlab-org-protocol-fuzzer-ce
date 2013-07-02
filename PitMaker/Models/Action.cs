@@ -13,7 +13,7 @@ using System.Xml;
 namespace PitMaker.Models
 {
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlType(Namespace = "http://phed.org/2012/Peach", TypeName="Action")]
+  [System.Xml.Serialization.XmlType(Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="Action")]
   public class Action : Node //, IXmlSerializable
   {
     public Action() { }
@@ -490,8 +490,8 @@ namespace PitMaker.Models
   #region action classes
   /*
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName="Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName="Action")]
   public class InputAction : Action
   {
     public InputAction()
@@ -526,8 +526,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class OutputAction : Action
   {
     public OutputAction()
@@ -563,8 +563,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class ChangeStateAction : Action
   {
     public ChangeStateAction()
@@ -597,8 +597,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class CallAction : Action
   {
     public CallAction()
@@ -657,8 +657,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class GetPropAction : Action
   {
     public GetPropAction()
@@ -716,8 +716,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class SetPropAction : Action
   {
     public SetPropAction()
@@ -776,8 +776,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class SlurpAction : Action
   {
     public SlurpAction()
@@ -834,8 +834,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class StartAction : Action
   {
     public StartAction()
@@ -845,8 +845,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class StopAction : Action
   {
     public StopAction()
@@ -856,8 +856,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class ConnectAction : Action
   {
     public ConnectAction()
@@ -867,8 +867,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class OpenAction : Action
   {
     public OpenAction()
@@ -878,8 +878,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class AcceptAction : Action
   {
     public AcceptAction()
@@ -889,8 +889,8 @@ namespace PitMaker.Models
   }
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach")]
-  [System.Xml.Serialization.XmlRoot(Namespace = "http://phed.org/2012/Peach", IsNullable = false, ElementName = "Action")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach")]
+  [System.Xml.Serialization.XmlRoot(Namespace = "http://peachfuzzer.com/2012/Peach", IsNullable = false, ElementName = "Action")]
   public class CloseAction : Action
   {
     public CloseAction()
@@ -903,7 +903,7 @@ namespace PitMaker.Models
 
 
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://phed.org/2012/Peach", TypeName="ActionParam")]
+  [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = false, Namespace = "http://peachfuzzer.com/2012/Peach", TypeName="ActionParam")]
   public class ActionParam : Node
   {
     public ActionParam()

@@ -33,6 +33,7 @@ using System.Linq;
 using Peach.Core.Dom;
 using TotalPhase;
 using NLog;
+using Peach.Core.IO;
 
 namespace Peach.Core.Publishers
 {
@@ -132,23 +133,22 @@ namespace Peach.Core.Publishers
 			}
 		}
 
-		protected override void OnOutput(byte[] buffer, int offset, int count)
+		protected override void OnOutput(BitwiseStream data)
 		{
-			int size = count;
-			if (size > MaxRecvSize)
-			{
-				// This will be logged below as a truncated send
-				size = MaxRecvSize;
-			}
 			if (Logger.IsDebugEnabled)
-				Logger.Debug("\n\n" + Utilities.HexDump(buffer, offset, count));
+				Logger.Debug("\n\n" + Utilities.HexDump(data));
+
+			data.Seek(0, SeekOrigin.Begin);
+
+			// If data.Length > MaxRecvSize, send will be truncated
+			var buf = new byte[MaxRecvSize];
+			var size = data.Read(buf, 0, buf.Length);
 
 			try
 			{
-				byte[] dataSend = buffer.Skip(offset).Take(size).ToArray();
 				int res = AardvarkApi.aa_i2c_write(_handle, Address,
 									   AardvarkI2cFlags.AA_I2C_NO_FLAGS,
-									   (ushort)size, dataSend);
+									   (ushort)size, buf);
 
 				if (res < 0)
 				{

@@ -25,7 +25,7 @@ bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx
 bld.install_files('${BINDIR}', os.path.join('sqlite-netFx40-binary-x64-2010-1.0.84.0', 'SQLite.Interop.dll'))
 
 #Iconic.Zip.dll is already provided in Peach/3rdParty
-#bld.read_csshlib('Ionic.Zip.dll',                          paths=['DotNetZipLib-v1.9/zip-v1.9'])
+#Newtonsoft.Json.dll is already provided in Peach/3rdParty
 
 bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])

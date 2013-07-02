@@ -47,11 +47,13 @@ namespace Peach.Enterprise.Analyzers
 			var blob = parent as Blob;
 			var data = blob.Value;
 
-			if (data.LengthBytes == 0)
+			if (data.Length == 0)
 				return;
 
+			data.Seek(0, SeekOrigin.Begin);
+
 			var parser = new ASN1.Asn1Parser();
-			parser.LoadData(data.Stream);
+			parser.LoadData(data);
 			var rootNode = parser.RootNode;
 
 			var block = new Block(blob.name);
