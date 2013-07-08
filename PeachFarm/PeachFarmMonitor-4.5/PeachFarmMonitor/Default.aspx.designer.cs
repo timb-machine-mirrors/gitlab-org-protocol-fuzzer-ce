@@ -103,6 +103,33 @@ namespace PeachFarmMonitor {
         protected global::Telerik.Web.UI.RadTabStrip tabstrip;
         
         /// <summary>
+        /// controllerOnline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl controllerOnline;
+        
+        /// <summary>
+        /// nodesOnline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl nodesOnline;
+        
+        /// <summary>
+        /// reportingOnline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl reportingOnline;
+        
+        /// <summary>
         /// toplevel control.
         /// </summary>
         /// <remarks>

@@ -267,7 +267,7 @@ namespace PeachFarm.Common.Mongo
 		public static List<Heartbeat> GetAllNodes(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			var allnodes = collection.FindAll().ToList();
+			var allnodes = collection.FindAll().SetFlags(QueryFlags.NoCursorTimeout).ToList();
 			foreach (var node in allnodes)
 			{
 				node.Stamp = node.Stamp.ToLocalTime();

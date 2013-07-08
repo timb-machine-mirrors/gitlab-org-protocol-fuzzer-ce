@@ -88,6 +88,20 @@
 		{
 			border-color: #f57e20;
 		}
+  	.square {
+			height: 8px;
+			width: 8px;
+			vertical-align: middle;
+			background-color: green;
+			margin-top: 3px;
+  	}
+  	#statusBar {
+      position: absolute;
+			height: 28px;
+      top:32px;
+			right: 0;
+			color: white;
+  	}
   </style>
 	<script>
 		function SelectBy(param) {
@@ -161,6 +175,30 @@
         <telerik:RadTab Text="Errors"></telerik:RadTab>
       </Tabs>
     </telerik:RadTabStrip>
+		<div id="statusBar">
+			<asp:Table runat="server">
+				<asp:TableRow>
+					<asp:TableCell>
+						Controller:
+					</asp:TableCell>
+					<asp:TableCell>
+						<div id="controllerOnline" class="square" runat="server" />
+					</asp:TableCell>
+					<asp:TableCell>
+						Nodes: 
+					</asp:TableCell>
+					<asp:TableCell>
+						<div id="nodesOnline" class="square" runat="server" />
+					</asp:TableCell>
+					<asp:TableCell>
+						Reporting: 
+					</asp:TableCell>
+					<asp:TableCell>
+						<div id="reportingOnline" class="square" runat="server" />
+					</asp:TableCell>
+				</asp:TableRow>
+			</asp:Table>
+		</div>
     <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
       <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
         <asp:Panel ID="jobActionPanel" runat="server" Visible="false">

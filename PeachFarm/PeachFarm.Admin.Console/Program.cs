@@ -6,11 +6,11 @@ using PeachFarm.Common;
 using System.IO;
 using PeachFarm.Common.Messages;
 
-namespace PeachFarm.Admin.Console
+namespace PeachFarm.Admin
 {
-	class Program
+	public class Program
 	{
-		private static Admin admin = null;
+		private static PeachFarmAdmin admin = null;
 
 		static void syntax() { throw new SyntaxException(); }
 
@@ -32,6 +32,7 @@ namespace PeachFarm.Admin.Console
 				bool output = false;
 				bool truncate = false;
 				bool report = false;
+				bool listen = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -47,11 +48,12 @@ namespace PeachFarm.Admin.Console
 						{ "stop", v => stop = true },
 						{ "nodes", v => nodes = true},
 						{ "errors", v => errors = true },
-						{ "info", var => jobInfo = true },
-						{ "jobs", var => jobs = true },
-						{ "output", var => output = true},
-						{ "truncate", var => truncate = true},
-						{ "report", var => report = true},
+						{ "info", v => jobInfo = true },
+						{ "jobs", v => jobs = true },
+						{ "output", v => output = true},
+						{ "truncate", v => truncate = true},
+						{ "report", v => report = true},
+						{ "listen", v => listen = true},
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -61,7 +63,7 @@ namespace PeachFarm.Admin.Console
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report && !listen)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -90,15 +92,13 @@ namespace PeachFarm.Admin.Console
 
 				#region Set up Admin listener
 
-				admin = new Admin();
+				admin = new PeachFarmAdmin();
+				//ServiceHost host = null;
 
-				admin.ListNodesCompleted += admin_ListNodesCompleted;
-				admin.ListErrorsCompleted += admin_ListErrorsCompleted;
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
 				admin.StopPeachCompleted += admin_StopPeachCompleted;
-				admin.JobInfoCompleted += admin_JobInfoCompleted;
-				admin.MonitorCompleted += admin_MonitorCompleted;
-				admin.AdminException += new EventHandler<Admin.ExceptionEventArgs>(admin_AdminException);
+
+				admin.AdminException += new EventHandler<PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs>(admin_AdminException);
 				#endregion
 
 				#region Start
@@ -139,7 +139,7 @@ namespace PeachFarm.Admin.Console
 				if (nodes)
 				{
 					mustwait = false;
-					admin.ListNodesAsync();
+					PrintListNodes(admin.ListNodes());
 				}
 				#endregion
 
@@ -150,11 +150,11 @@ namespace PeachFarm.Admin.Console
 					if (extra.Count > 0)
 					{
 						string jobID = extra[0];
-						admin.ListErrorsAsync(jobID);
+						PrintListErrors(admin.ListErrors(jobID));
 					}
 					else
 					{
-						admin.ListErrorsAsync();
+						PrintListErrors(admin.ListErrors());
 					}
 				}
 				#endregion
@@ -164,7 +164,7 @@ namespace PeachFarm.Admin.Console
 				{
 					mustwait = false;
 					string jobID = extra[0];
-					admin.JobInfoAsync(jobID);
+					admin.JobInfo(jobID);
 				}
 				#endregion
 
@@ -172,7 +172,7 @@ namespace PeachFarm.Admin.Console
 				if (jobs)
 				{
 					mustwait = false;
-					admin.MonitorAsync();
+					PrintMonitor(admin.Monitor());
 				}
 				#endregion
 
@@ -224,11 +224,27 @@ namespace PeachFarm.Admin.Console
 
 				#endregion
 
+				#region Listen
+				if (listen)
+				{
+					//using (host = new ServiceHost(typeof(JsonRest)))
+					//{
+					//  host.AddDefaultEndpoints();
+					//  host.Open();
+					//}
+				}
+				#endregion
+
 				if (mustwait)
 				{
 					System.Console.WriteLine("waiting for result...");
 					System.Console.ReadLine();
 				}
+
+				//if ((host != null) && (host.State == CommunicationState.Opened))
+				//{
+				//  host.Close();
+				//}
 			}
 			catch (RabbitMqException rex)
 			{
@@ -250,7 +266,7 @@ namespace PeachFarm.Admin.Console
 
 
 		#region Peach Farm Admin message completion handlers
-		static void admin_StopPeachCompleted(object sender, Admin.StopPeachCompletedEventArgs e)
+		static void admin_StopPeachCompleted(object sender, PeachFarm.Admin.PeachFarmAdmin.StopPeachCompletedEventArgs e)
 		{
 			if (e.Result.Success)
 			{
@@ -262,7 +278,7 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_StartPeachCompleted(object sender, Admin.StartPeachCompletedEventArgs e)
+		static void admin_StartPeachCompleted(object sender, PeachFarm.Admin.PeachFarmAdmin.StartPeachCompletedEventArgs e)
 		{
 			if (e.Result.Success)
 			{
@@ -274,11 +290,11 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_ListErrorsCompleted(object sender, Admin.ListErrorsCompletedEventArgs e)
+		private static void PrintListErrors(ListErrorsResponse e)
 		{
-			if (e.Result.Errors.Count > 0)
+			if (e.Errors.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Errors)
+				foreach (Heartbeat heartbeat in e.Errors)
 				{
 					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\n{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.ErrorMessage));
 				}
@@ -289,11 +305,11 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_ListNodesCompleted(object sender, Admin.ListNodesCompletedEventArgs e)
+		private static void PrintListNodes(ListNodesResponse e)
 		{
-			if (e.Result.Nodes.Count > 0)
+			if (e.Nodes.Count > 0)
 			{
-				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				foreach (Heartbeat heartbeat in e.Nodes)
 				{
 					if (heartbeat.Status == Status.Running)
 					{
@@ -308,13 +324,13 @@ namespace PeachFarm.Admin.Console
 
 				System.Console.WriteLine();
 
-				var statusgroup = from c in e.Result.Nodes where c.Status == Status.Alive select c;
+				var statusgroup = from c in e.Nodes where c.Status == Status.Alive select c;
 				System.Console.WriteLine(String.Format("Waiting for work: {0}", statusgroup.Count()));
 
-				statusgroup = from c in e.Result.Nodes where c.Status == Status.Running select c;
+				statusgroup = from c in e.Nodes where c.Status == Status.Running select c;
 				System.Console.WriteLine(String.Format("Running: {0}", statusgroup.Count()));
 
-				statusgroup = from c in e.Result.Nodes where c.Status == Status.Late select c;
+				statusgroup = from c in e.Nodes where c.Status == Status.Late select c;
 				System.Console.WriteLine(String.Format("Late: {0}", statusgroup.Count()));
 			}
 			else
@@ -323,42 +339,42 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_JobInfoCompleted(object sender, Admin.JobInfoCompletedEventArgs e)
+		private static void PrintJobInfo(JobInfoResponse e)
 		{
-			if (e.Result.Success)
+			if (e.Success)
 			{
 				string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
-					e.Result.Job.JobID,
-					e.Result.Job.UserName,
-					e.Result.Job.Pit.FileName,
-					e.Result.Job.StartDate);
+					e.Job.JobID,
+					e.Job.UserName,
+					e.Job.Pit.FileName,
+					e.Job.StartDate);
 
 				System.Console.WriteLine(output);
 
-				foreach (Heartbeat heartbeat in e.Result.Nodes)
+				foreach (Heartbeat heartbeat in e.Nodes)
 				{
 					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
 				}
 			}
 			else
 			{
-				System.Console.WriteLine("Job not found: " + e.Result.Job.JobID);
+				System.Console.WriteLine("Job not found: " + e.Job.JobID);
 			}
 		}
 
-		static void admin_MonitorCompleted(object sender, Admin.MonitorCompletedEventArgs e)
+		static void PrintMonitor(MonitorResponse e)
 		{
 			string format = "{0,-13}{1,-21}{2,-21}{3,-24}";
 			System.Console.WriteLine("Active Jobs");
 			System.Console.WriteLine("-----------");
-			if (e.Result.ActiveJobs.Count == 0)
+			if (e.ActiveJobs.Count == 0)
 			{
 				System.Console.WriteLine("(no active jobs)");
 			}
 			else
 			{
 				System.Console.WriteLine(String.Format(format, "Job ID", "User Name", "Pit Name", "Start Date"));
-				foreach (Job job in e.Result.ActiveJobs)
+				foreach (Job job in e.ActiveJobs)
 				{
 					System.Console.WriteLine(String.Format(format,
 						job.JobID, job.UserName, job.Pit.FileName, job.StartDate));
@@ -368,14 +384,14 @@ namespace PeachFarm.Admin.Console
 			System.Console.WriteLine("Inactive Jobs");
 			System.Console.WriteLine("-------------");
 
-			if (e.Result.InactiveJobs.Count == 0)
+			if (e.InactiveJobs.Count == 0)
 			{
 				System.Console.WriteLine("(no inactive jobs)");
 			}
 			else
 			{
 				System.Console.WriteLine(String.Format(format, "Job ID", "User Name", "Pit Name", "Start Date"));
-				foreach (Job job in e.Result.InactiveJobs)
+				foreach (Job job in e.InactiveJobs)
 				{
 					System.Console.WriteLine(String.Format(format,
 						job.JobID, job.UserName, job.Pit.FileName, job.StartDate));
@@ -383,7 +399,7 @@ namespace PeachFarm.Admin.Console
 			}
 		}
 
-		static void admin_AdminException(object sender, Admin.ExceptionEventArgs e)
+		static void admin_AdminException(object sender, PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs e)
 		{
 			System.Console.WriteLine(e.Exception.ToString());
 		}

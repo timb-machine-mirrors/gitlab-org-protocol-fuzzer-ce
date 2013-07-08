@@ -17,11 +17,11 @@ using PeachFarm.Common.Mongo;
 
 namespace PeachFarm.Admin
 {
-	public class Admin
+	public class PeachFarmAdmin
 	{
 		private UTF8Encoding encoding = new UTF8Encoding();
 
-		PeachFarm.Admin.Configuration.AdminSection config;
+		Configuration.AdminSection config;
 
 		private string controllerQueueName;
 		private string adminQueueName;
@@ -32,7 +32,7 @@ namespace PeachFarm.Admin
 		private const string xmlext = ".xml";
 		private const string zipext = ".zip";
 
-		public Admin(string adminName = "")
+		public PeachFarmAdmin(string adminName = "")
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
 
@@ -114,6 +114,7 @@ namespace PeachFarm.Admin
 		#endregion
 
 		#region ListNodesCompleted
+		/*
 		public class ListNodesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
 		{
 			public ListNodesCompletedEventArgs(ListNodesResponse result)
@@ -133,6 +134,7 @@ namespace PeachFarm.Admin
 			if (ListNodesCompleted != null)
 				ListNodesCompleted(this, new ListNodesCompletedEventArgs(result));
 		}
+		//*/
 		#endregion
 
 		#region ListErrorsCompleted
@@ -355,17 +357,17 @@ namespace PeachFarm.Admin
 		}
 		#endregion
 
-		public void ListNodesAsync()
+		public ListNodesResponse ListNodes()
 		{
 			//ListNodesRequest request = new ListNodesRequest();
 			//PublishToServer(request.Serialize(), Actions.ListNodes);
 
 			ListNodesResponse response = new ListNodesResponse();
 			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
-			RaiseListNodesCompleted(response);
+			return response;
 		}
 
-		public void ListErrorsAsync(string jobID = "")
+		public ListErrorsResponse ListErrors(string jobID = "")
 		{
 			//ListErrorsRequest request = new ListErrorsRequest();
 			//request.JobID = jobID;
@@ -381,10 +383,11 @@ namespace PeachFarm.Admin
 			{
 				response.Errors = DatabaseHelper.GetErrors(jobID, config.MongoDb.ConnectionString);
 			}
-			RaiseListErrorsCompleted(response);
+			//RaiseListErrorsCompleted(response);
+			return response;
 		}
 
-		public void JobInfoAsync(string jobID)
+		public JobInfoResponse JobInfo(string jobID)
 		{
 			//JobInfoRequest request = new JobInfoRequest();
 			//request.JobID = jobID;
@@ -406,10 +409,11 @@ namespace PeachFarm.Admin
 				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == jobID) select h).ToList();
 			}
 
-			RaiseJobInfoCompleted(response);
+			//RaiseJobInfoCompleted(response);
+			return response;
 		}
 
-		public void MonitorAsync()
+		public MonitorResponse Monitor()
 		{
 			//PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
 
@@ -423,7 +427,8 @@ namespace PeachFarm.Admin
 			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
 
 			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
-			RaiseMonitorCompleted(response);
+			//RaiseMonitorCompleted(response);
+			return response;
 		}
 
 		public void Report(string jobid)
@@ -460,9 +465,9 @@ namespace PeachFarm.Admin
 				case Actions.StopPeach:
 					RaiseStopPeachCompleted(StopPeachResponse.Deserialize(body));
 					break;
-				case Actions.ListNodes:
-					RaiseListNodesCompleted(ListNodesResponse.Deserialize(body));
-					break;
+				//case Actions.ListNodes:
+				//  RaiseListNodesCompleted(ListNodesResponse.Deserialize(body));
+				//  break;
 				case Actions.ListErrors:
 					RaiseListErrorsCompleted(ListErrorsResponse.Deserialize(body));
 					break;
