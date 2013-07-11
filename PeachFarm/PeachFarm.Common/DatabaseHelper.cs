@@ -297,6 +297,13 @@ namespace PeachFarm.Common.Mongo
 			return collection.Find(query).ToList();
 		}
 
+		public static IQueryable<Fault> GetJobFaultsAsQueryable(string jobID, string connectionString)
+		{
+			MongoCollection<Fault> collection = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			var query = Query.EQ("JobID", jobID);
+			return collection.Find(query).AsQueryable();
+		}
+
 		public static void SaveToGridFS(byte[] p, string remoteFileName, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();

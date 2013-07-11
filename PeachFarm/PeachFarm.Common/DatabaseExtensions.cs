@@ -10,6 +10,7 @@ using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace PeachFarm.Common.Mongo
 {
@@ -352,6 +353,7 @@ namespace PeachFarm.Common.Mongo
 
 		[XmlAttribute]
 		[BsonIgnore]
+		[DataMember]
 		public string ID
 		{
 			get
@@ -380,6 +382,7 @@ namespace PeachFarm.Common.Mongo
 
 		[XmlAttribute]
 		[BsonIgnore]
+		[DataMember]
 		public string ID
 		{
 			get

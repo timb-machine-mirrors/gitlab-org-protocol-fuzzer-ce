@@ -39,6 +39,7 @@ namespace PeachFarm.Admin
 			config.Validate();
 
 			ServerHostName = config.Controller.IpAddress;
+			MongoDbConnectionString = config.MongoDb.ConnectionString;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
@@ -63,6 +64,8 @@ namespace PeachFarm.Admin
 		public string ServerHostName { get; private set; }
 
 		public bool IsListening { get; private set; }
+
+		public string MongoDbConnectionString { get; private set; }
 		#endregion
 
 		#region AsyncCompletes
@@ -319,10 +322,10 @@ namespace PeachFarm.Admin
 			}
 
 
-			request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+			request.JobID = DatabaseHelper.GetJobID(MongoDbConnectionString);
 
 			request.ZipFile = String.Format(Formats.JobFolder + "\\{1}.zip", request.JobID, request.PitFileName);
-			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, config.MongoDb.ConnectionString);
+			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, MongoDbConnectionString);
 
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
 			PublishToServer(request.Serialize(), Actions.StartPeach);
@@ -342,7 +345,7 @@ namespace PeachFarm.Admin
 		#region StopPeachAsync
 		public void StopPeachAsync(string jobGuid)
 		{
-			var job = DatabaseHelper.GetJob(jobGuid, config.MongoDb.ConnectionString);
+			var job = DatabaseHelper.GetJob(jobGuid, MongoDbConnectionString);
 			if (job == null)
 			{
 				throw new ApplicationException("Job does not exist: " + jobGuid);
@@ -363,7 +366,7 @@ namespace PeachFarm.Admin
 			//PublishToServer(request.Serialize(), Actions.ListNodes);
 
 			ListNodesResponse response = new ListNodesResponse();
-			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
+			response.Nodes = DatabaseHelper.GetAllNodes(MongoDbConnectionString).ToList();
 			return response;
 		}
 
@@ -377,11 +380,11 @@ namespace PeachFarm.Admin
 			//response.Nodes = errors;
 			if (String.IsNullOrEmpty(jobID))
 			{
-				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetAllErrors(MongoDbConnectionString);
 			}
 			else
 			{
-				response.Errors = DatabaseHelper.GetErrors(jobID, config.MongoDb.ConnectionString);
+				response.Errors = DatabaseHelper.GetErrors(jobID, MongoDbConnectionString);
 			}
 			//RaiseListErrorsCompleted(response);
 			return response;
@@ -394,7 +397,7 @@ namespace PeachFarm.Admin
 			//PublishToServer(request.Serialize(), Actions.JobInfo);
 
 			JobInfoResponse response = new JobInfoResponse();
-			Common.Mongo.Job mongoJob = DatabaseHelper.GetJob(jobID, config.MongoDb.ConnectionString);
+			Common.Mongo.Job mongoJob = DatabaseHelper.GetJob(jobID, MongoDbConnectionString);
 			if (mongoJob == null)
 			{
 				response.Success = false;
@@ -405,7 +408,7 @@ namespace PeachFarm.Admin
 			{
 				response.Success = true;
 				response.Job = new Common.Messages.Job(mongoJob);
-				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				var nodes = DatabaseHelper.GetAllNodes(MongoDbConnectionString);
 				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == jobID) select h).ToList();
 			}
 
@@ -418,15 +421,15 @@ namespace PeachFarm.Admin
 			//PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
 
 			MonitorResponse response = new MonitorResponse();
-			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
+			response.MongoDbConnectionString = MongoDbConnectionString;
 
-			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
-			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
-			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
+			response.Nodes = DatabaseHelper.GetAllNodes(MongoDbConnectionString);
+			var activeJobs = response.Nodes.GetJobs(MongoDbConnectionString);
+			var allJobs = DatabaseHelper.GetAllJobs(MongoDbConnectionString);
 			response.ActiveJobs = activeJobs.ToMessagesJobs();
 			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
 
-			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
+			response.Errors = DatabaseHelper.GetAllErrors(MongoDbConnectionString);
 			//RaiseMonitorCompleted(response);
 			return response;
 		}
@@ -547,12 +550,12 @@ namespace PeachFarm.Admin
 
 		public void DumpFiles(string jobID, string destinationFolder)
 		{
-			FileWriter.DumpFiles(config.MongoDb.ConnectionString, destinationFolder, jobID);
+			FileWriter.DumpFiles(MongoDbConnectionString, destinationFolder, jobID);
 		}
 
 		public void TruncateAllCollections()
 		{
-			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+			DatabaseHelper.TruncateAllCollections(MongoDbConnectionString);
 		}
 	}
 }

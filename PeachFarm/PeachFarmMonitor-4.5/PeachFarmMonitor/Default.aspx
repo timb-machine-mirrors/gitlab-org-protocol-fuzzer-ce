@@ -168,14 +168,14 @@
         </asp:TableRow>
       </asp:Table>
     </div>
-    <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" EnableEmbeddedSkins="false" Skin="DejaVu">
+    <telerik:RadTabStrip ID="tabstrip" MultiPageID="toplevel" runat="server" SelectedIndex="0" EnableEmbeddedSkins="false" Skin="DejaVu" Visible="True">
       <Tabs>
         <telerik:RadTab Text="Jobs"></telerik:RadTab>
         <telerik:RadTab Text="Nodes"></telerik:RadTab>
         <telerik:RadTab Text="Errors"></telerik:RadTab>
       </Tabs>
     </telerik:RadTabStrip>
-		<div id="statusBar">
+		<div id="statusBar" style="display: none">
 			<asp:Table runat="server">
 				<asp:TableRow>
 					<asp:TableCell>
@@ -241,7 +241,7 @@
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
               <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank" AllowSorting="false"/>
               <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount" AllowSorting="false"/>
-							<telerik:GridTemplateColumn HeaderText="PDF Report" Visible="true">
+							<telerik:GridTemplateColumn HeaderText="PDF Report" Visible="false">
 								<ItemTemplate>
 									<asp:HyperLink ID="linkDownloadReport" runat="server"/>
 								</ItemTemplate>
