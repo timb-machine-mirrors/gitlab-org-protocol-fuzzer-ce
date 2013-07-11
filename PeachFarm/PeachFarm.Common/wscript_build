@@ -3,11 +3,11 @@
 deps = [
 	'System.dll',
 	'System.Core.dll',
-	'System.Management.dll',
 	'System.Xml.dll',
 	'RabbitMQ.Client.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
+	'System.Runtime.Serialization.dll'
 ]
 
 bld(
