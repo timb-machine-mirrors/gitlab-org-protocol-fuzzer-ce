@@ -77,6 +77,7 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
 			heartbeat._id = BsonObjectId.Empty;
+			heartbeat.ErrorMessage = System.Web.HttpUtility.HtmlEncode(heartbeat.ErrorMessage);
 			collection.Save(heartbeat);
 			collection.Database.Server.Disconnect();
 
@@ -177,7 +178,7 @@ namespace PeachFarm.Common.Mongo
 		public static void SaveToDatabase(this Fault fault, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
-			//fault = fault.UpdateDataPaths(connectionString);
+			//fault.Description = System.Web.HttpUtility.HtmlEncode(fault.Description);
 			collection.Save(fault);
 			collection.Database.Server.Disconnect();
 		}
