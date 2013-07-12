@@ -33,7 +33,7 @@ namespace PeachFarm.Test
 
 			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
 
-			controller = new Controller.PeachFarmController(testName);
+			controller = new Controller.PeachFarmController();
 			while (controller.IsListening == false) { }
 			node = new Node.PeachFarmNode(testName);
 			while (node.IsListening == false) { }

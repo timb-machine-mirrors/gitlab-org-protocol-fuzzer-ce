@@ -8,9 +8,9 @@ namespace PeachFarm.Controller.Configuration
 {
   public class ControllerSection : ConfigurationSection
   {
-		/*
+		//*
     [ConfigurationProperty(Constants.Controller)]
-    public Controller ServerHost
+    public Controller Controller
     {
       get { return (Controller)this[Constants.Controller]; }
       set { this[Constants.Controller] = value; }
@@ -116,11 +116,11 @@ namespace PeachFarm.Controller.Configuration
 
   public class Controller : ConfigurationElement
   {
-		[ConfigurationProperty(Constants.IpAddress, IsRequired = true)]
-    public string IpAddress
+		[ConfigurationProperty(Constants.Name, IsRequired = true)]
+    public string Name
     {
-      get { return (string)this[Constants.IpAddress]; }
-      set { this[Constants.IpAddress] = value; }
+      get { return (string)this[Constants.Name]; }
+      set { this[Constants.Name] = value; }
     }
   }
 
@@ -137,6 +137,6 @@ namespace PeachFarm.Controller.Configuration
 		public const string SSL = "useSSL";
 
     public const string Controller = "Controller";
-    public const string IpAddress = "ipAddress";
+    public const string Name = "nameOverride";
   }
 }

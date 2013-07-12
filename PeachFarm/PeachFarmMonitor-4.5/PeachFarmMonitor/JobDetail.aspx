@@ -171,7 +171,7 @@
               Caption="Faults" 
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
-              <PagerStyle PageSizeControlType="None" Mode="NextPrev" AlwaysVisible="true"  />
+              <PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
               <ExpandCollapseColumn Visible="True" Resizable="true" />
               <Columns>
                 <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />

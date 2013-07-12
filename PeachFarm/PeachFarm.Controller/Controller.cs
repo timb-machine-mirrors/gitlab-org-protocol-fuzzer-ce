@@ -30,7 +30,7 @@ namespace PeachFarm.Controller
 
 		private string controllerQueueName;
 
-		public PeachFarmController(string controllerName = "")
+		public PeachFarmController()
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
@@ -39,7 +39,7 @@ namespace PeachFarm.Controller
 			config = (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");
 			config.Validate();
 
-			//ipaddress = config.ServerHost.IpAddress;
+			//ipaddress = config.ServerHost.Name;
 
 			if (Common.Mongo.DatabaseHelper.TestConnection(config.MongoDb.ConnectionString) == false)
 			{
@@ -48,13 +48,13 @@ namespace PeachFarm.Controller
 			}
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			if (String.IsNullOrEmpty(controllerName))
+			if ((config.Controller == null) || (String.IsNullOrEmpty(config.Controller.Name)))
 			{
 				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
 			}
 			else
 			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, controllerName);
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.Name);
 			}
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(this.controllerQueueName);
@@ -248,23 +248,34 @@ namespace PeachFarm.Controller
 		private void StopPeach(StopPeachRequest request, string replyQueue)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
-			if (Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString) == null)
+
+			var job = Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
+			if (job == null)
 			{
 				response.Success = false;
 				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
 			}
 			else
 			{
-				bool result = PublishToJob(request.JobID, request.Serialize(), "StopPeach");
-
-				if (result == false)
+				var nodes = Common.Mongo.DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				var jobnodes = (from n in nodes where n.Status == Status.Running && n.JobID == request.JobID select n).Count();
+				if (jobnodes == 0)
 				{
 					response.Success = false;
-					response.ErrorMessage = String.Format("Cannot stop job {0}", request.JobID);
+					response.ErrorMessage = String.Format("Job {0} is not running.", request.JobID);
+				}
+				else
+				{
+					bool result = PublishToJob(request.JobID, request.Serialize(), "StopPeach");
+
+					if (result == false)
+					{
+						response.Success = false;
+						response.ErrorMessage = String.Format("Cannot stop job {0}", request.JobID);
+					}
 				}
 			}
 			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
-
 		}
 
 		private void StartPeach(StartPeachRequest request, string replyQueue)
