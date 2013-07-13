@@ -20,7 +20,7 @@ NAME=PeachFarm.Node.Service.exe
 DAEMON=/usr/bin/mono-service
 DAEMON_ARGS="/opt/peachfarm/$NAME"
 SCRIPTNAME=/etc/init.d/pf_node
-OPTIONS="MONO_GC_PARAMS=max-heap-size=1g"
+OPTIONS="--gc=sgen --debug"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -38,8 +38,7 @@ do_start()
 	then
 		return 1
 	fi
-	export $OPTIONS
-	$DAEMON $DAEMON_ARGS
+	MONO_OPTIONS="$OPTIONS" $DAEMON $DAEMON_ARGS
 	return "$?"
 }
 
@@ -55,8 +54,10 @@ do_stop()
 	#   other if a failure occurred
 	if [ -f /tmp/$NAME.lock ]
 	then
-		kill `cat /tmp/$NAME.lock `
-		return "$?"
+		kill -9 `cat /tmp/$NAME.lock`
+		RETVAL="$?"
+		rm /tmp/$NAME.lock
+		return "$RETVAL"
 	fi
 	return 1
 }
