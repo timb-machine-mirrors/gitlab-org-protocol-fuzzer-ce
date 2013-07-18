@@ -434,14 +434,7 @@ namespace PeachFarm.Admin
 			return response;
 		}
 
-		public void Report(string jobid)
-		{
-			GenerateReportRequest request = new GenerateReportRequest();
-			request.JobID = jobid;
-			request.ReportFormat = ReportFormat.PDF;
 
-			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, request.Serialize(), Actions.GenerateReport, this.controllerQueueName);
-		}
 		#endregion
 
 		#region MQ functions
@@ -553,9 +546,20 @@ namespace PeachFarm.Admin
 			FileWriter.DumpFiles(MongoDbConnectionString, destinationFolder, jobID);
 		}
 
+#if DEBUG
+		public void Report(string jobid)
+		{
+			GenerateReportRequest request = new GenerateReportRequest();
+			request.JobID = jobid;
+			request.ReportFormat = ReportFormat.PDF;
+
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, request.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+		}
+
 		public void TruncateAllCollections()
 		{
 			DatabaseHelper.TruncateAllCollections(MongoDbConnectionString);
 		}
+#endif
 	}
 }

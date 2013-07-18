@@ -8,7 +8,11 @@ namespace PeachFarmMonitor.ViewModels
 {
   public class FaultBucketViewModel : Fault
   {
-    public FaultBucketViewModel(Fault fault)
+	  public FaultBucketViewModel()
+	  {
+	  }
+
+	  public FaultBucketViewModel(Fault fault)
     {
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;

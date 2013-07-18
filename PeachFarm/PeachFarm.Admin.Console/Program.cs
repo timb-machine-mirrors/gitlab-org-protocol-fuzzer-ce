@@ -196,7 +196,7 @@ namespace PeachFarm.Admin
 					System.Console.WriteLine("Done!");
 				}
 				#endregion
-
+#if DEBUG
 				#region Truncate
 				if (truncate)
 				{
@@ -234,7 +234,7 @@ namespace PeachFarm.Admin
 					//}
 				}
 				#endregion
-
+#endif
 				if (mustwait)
 				{
 					System.Console.WriteLine("waiting for result...");

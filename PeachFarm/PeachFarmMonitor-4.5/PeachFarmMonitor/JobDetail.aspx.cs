@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using PeachFarm.Common.Mongo;
 using PeachFarmMonitor.Configuration;
@@ -38,8 +39,11 @@ namespace PeachFarmMonitor
     #region Ctor
     public JobDetail()
     {
+			this.Load += JobDetail_Load;
       this.InitComplete += JobDetail_InitComplete;
+			this.PreRender += JobDetail_PreRender;
     }
+
     #endregion
 
     #region Properties
@@ -47,7 +51,21 @@ namespace PeachFarmMonitor
     #endregion
 
     #region Page event handlers
-    void JobDetail_InitComplete(object sender, EventArgs e)
+
+	  private string key;
+
+		void JobDetail_Load(object sender, EventArgs e)
+		{
+
+		}
+
+		void JobDetail_PreRender(object sender, EventArgs e)
+		{
+			GridSettingsPersister savePersister = new GridSettingsPersister(faultsGrid);
+			Session[key] = savePersister.SaveSettings();
+		}
+
+		void JobDetail_InitComplete(object sender, EventArgs e)
     {
       jobid = Request.QueryString["jobid"];
       PeachFarm.Common.Mongo.Job job = null;
@@ -110,7 +128,15 @@ namespace PeachFarmMonitor
         return;
       }
 
+			key = "faultsGrid-" + Session.SessionID;
+			GridSettingsPersister loadPersister = new GridSettingsPersister(faultsGrid);
 
+			if (Session[key] != null)
+			{
+				string settings = (string)Session[key];
+				loadPersister.LoadSettings(settings);
+				faultsGrid.Rebind();
+			}
     }
 
     #endregion
@@ -121,7 +147,7 @@ namespace PeachFarmMonitor
     {
       if (e.IsFromDetailTable == false)
       {
-        var faultBuckets = JobDetailData.GetFaultBuckets(jobid);
+				List<FaultBucketViewModel> faultBuckets = JobDetailData.GetFaultBuckets(jobid);
 
         faultBucketsGrid.DataSource = faultBuckets;
         //faultBucketsGrid.MasterTableView.VirtualItemCount = faultBuckets.Count;
@@ -140,7 +166,7 @@ namespace PeachFarmMonitor
 
           e.Item.Selected = true;
           var group = ((GridDataItem)e.Item)["FolderName"].Text;
-          ViewState["currentGroup"] = group;
+					ViewState[ViewStateNames.CurrentGroup] = group;
 
           var faults = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
 
@@ -156,7 +182,7 @@ namespace PeachFarmMonitor
     #region faultsGrid event handlers
     void faultsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
     {
-      string currentGroup = ViewState["currentGroup"] as string;
+      string currentGroup = ViewState[ViewStateNames.CurrentGroup] as string;
       if ((e.IsFromDetailTable == false) && (String.IsNullOrEmpty(currentGroup) == false))
       {
         int pagesize = faultsGrid.MasterTableView.PageSize;
@@ -219,6 +245,8 @@ namespace PeachFarmMonitor
 
   public class JobDetailData
   {
+	  public const string ALL_FAULTS = "ALL FAULTS";
+
     private static PeachFarmMonitorSection monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
 
     public static List<FaultBucketViewModel> GetFaultBuckets(string jobID)
@@ -227,6 +255,12 @@ namespace PeachFarmMonitor
       
       var buckets = collection.Distinct("FolderName", Query.EQ("JobID", jobID));
       List<FaultBucketViewModel> faultBuckets = new List<FaultBucketViewModel>();
+
+			FaultBucketViewModel allFaultsBucket = new FaultBucketViewModel();
+	    allFaultsBucket.FolderName = ALL_FAULTS;
+			allFaultsBucket.FaultCount = collection.Distinct("_id", Query.EQ("JobID", jobID)).Count();
+			faultBuckets.Add(allFaultsBucket);
+
       foreach (var bucket in buckets)
       {
         Fault faultBucket = new Fault();
@@ -246,7 +280,15 @@ namespace PeachFarmMonitor
       if (String.IsNullOrEmpty(faultBucketName) == false)
       {
         var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-        var query = Query.And(Query.EQ("JobID", jobID), Query.EQ("FolderName", faultBucketName));
+	      IMongoQuery query = null;
+				if (faultBucketName == ALL_FAULTS)
+				{
+					query = Query.EQ("JobID", jobID);
+				}
+				else
+				{
+					query = Query.And(Query.EQ("JobID", jobID), Query.EQ("FolderName", faultBucketName));
+				}
         List<Fault> faults = null;
         if (pageSize == 0)
         {
@@ -266,4 +308,9 @@ namespace PeachFarmMonitor
       return vms;
     }
   }
+
+	internal static class ViewStateNames
+	{
+		internal const string CurrentGroup = "currentGroup";
+	}
 }
