@@ -13,7 +13,7 @@ namespace PeachFarmMonitor.ViewModels
       this._id = fault._id;
       this.ControlIteration = fault.ControlIteration;
       this.ControlRecordingIteration = fault.ControlRecordingIteration;
-      this.Description = fault.Description;
+      this.Description = HttpUtility.HtmlEncode(fault.Description);
       this.DetectionSource = fault.DetectionSource;
       this.Exploitability = fault.Exploitability;
       this.FaultType = fault.FaultType;

@@ -137,7 +137,7 @@ namespace PeachFarm.Reporting
 
 			try
 			{
-				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport2();
+				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
 			}
 			catch(Exception ex)
 			{
@@ -146,7 +146,8 @@ namespace PeachFarm.Reporting
 
 			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
 			irs.Parameters.Add("jobID", request.JobID);
-			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
+			
+			//irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
 			//string documentName = String.Empty;
 			//bool success = reportProcessor.RenderReport("PDF", irs, deviceInfo, new Telerik.Reporting.Processing.CreateStream(CreateStream), out documentName);

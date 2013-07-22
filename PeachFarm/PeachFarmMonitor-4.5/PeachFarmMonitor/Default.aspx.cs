@@ -29,8 +29,8 @@ namespace PeachFarmMonitor
     private static List<Messages.Heartbeat> onlinenodes;
     private static List<JobViewModel> jvms;
     private static List<Messages.Heartbeat> errors;
-		private System.Timers.Timer refreshTimer;
-    public Home()
+
+		public Home()
     {
       monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
     }
@@ -86,6 +86,10 @@ namespace PeachFarmMonitor
 
 				#region errors
 				errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
+	      foreach (var error in errors)
+	      {
+		      error.ErrorMessage = HttpUtility.HtmlEncode(error.ErrorMessage);
+	      }
 				errorsGrid.DataSource = errors;
 				errorsGrid.DataBind();
 				#endregion
