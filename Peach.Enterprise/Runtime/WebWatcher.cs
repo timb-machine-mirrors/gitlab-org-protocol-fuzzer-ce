@@ -146,7 +146,7 @@ namespace Peach.Enterprise.Runtime
 			base.Action_Finished(action);
 
 			// TODO - Handle parameters
-			dataModelsFromActions.Add(new Tuple<string,DataModel>(action.name, action.dataModel));
+			dataModelsFromActions.Add(new Tuple<string,DataModel>(action.dataModel.name, action.dataModel));
 		}
 
         protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
