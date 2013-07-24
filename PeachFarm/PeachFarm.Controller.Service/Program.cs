@@ -52,10 +52,17 @@ namespace PeachFarm.Controller
       }
       else
       {
-        PeachFarmControllerWindowsService service = new PeachFarmControllerWindowsService();
-        ServiceBase[] ServicesToRun;
-        ServicesToRun = new ServiceBase[] { service };
-        ServiceBase.Run(ServicesToRun);
+	      try
+	      {
+					PeachFarmControllerWindowsService service = new PeachFarmControllerWindowsService();
+					ServiceBase[] ServicesToRun;
+					ServicesToRun = new ServiceBase[] { service };
+					ServiceBase.Run(ServicesToRun);
+				}
+	      catch (Exception ex)
+	      {
+					logger.Fatal(ex.ToString());
+	      }
       }
     }
   }
