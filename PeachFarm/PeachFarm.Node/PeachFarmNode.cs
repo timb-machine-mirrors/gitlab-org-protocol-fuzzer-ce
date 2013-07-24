@@ -45,7 +45,10 @@ namespace PeachFarm.Node
 			Environment.CurrentDirectory = Path.GetDirectoryName(assembly.Location);
 
 			#region node state
-			nodeState = new NodeState((Configuration.NodeSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.node"));
+
+			var nodeconfig = (Configuration.NodeSection) System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
+			nodeconfig.Validate();
+			nodeState = new NodeState(nodeconfig);
 			if (String.IsNullOrEmpty(nodeName) == false)
 				nodeState.NodeQueueName = String.Format(QueueNames.QUEUE_NODE, nodeName);
 

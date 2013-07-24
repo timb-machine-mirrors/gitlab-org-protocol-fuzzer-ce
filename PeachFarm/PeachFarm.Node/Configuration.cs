@@ -8,21 +8,21 @@ namespace PeachFarm.Node.Configuration
 {
   public class NodeSection : ConfigurationSection
   {
-    [ConfigurationProperty(Constants.Controller, IsRequired=true)]
+		[ConfigurationProperty(Constants.Controller, IsRequired = false)]
     public Controller Controller
     {
       get { return (Controller)this[Constants.Controller]; }
       set { this[Constants.Controller] = value; }
     }
 
-		[ConfigurationProperty(Constants.Tags, IsRequired = true)]
+		[ConfigurationProperty(Constants.Tags, IsRequired = false)]
     public TagsCollection Tags
     {
       get { return (TagsCollection)this[Constants.Tags]; }
       set { this[Constants.Tags] = value; }
     }
 
-		[ConfigurationProperty(Constants.RabbitMq, IsRequired = true)]
+		[ConfigurationProperty(Constants.RabbitMq, IsRequired = false)]
 		public RabbitMqElement RabbitMq
 		{
 			get { return (RabbitMqElement)this[Constants.RabbitMq]; }
@@ -33,33 +33,22 @@ namespace PeachFarm.Node.Configuration
 		{
 			StringBuilder message = new StringBuilder();
 
-			if (this.Controller == null)
+			if (String.IsNullOrEmpty(this.Controller.IpAddress))
 			{
-				message.AppendLine(") Missing configuration element in peachfarm.node: <Controller ipAddress=\0.0.0.0\" />");
+				message.AppendLine(") Controller IP address or overridden name is required.");
+				message.AppendLine("\t<Controller ipAddress=\"0.0.0.0\" />");
 			}
-			else
+
+			if (String.IsNullOrEmpty(this.RabbitMq.HostName))
 			{
-				if (String.IsNullOrEmpty(this.Controller.IpAddress))
-				{
-					message.AppendLine(") Controller IP address is required");
-				}
+				message.AppendLine(") RabbitMQ host name is required");
+				message.AppendLine(
+					"\t<RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
 			}
 
 			if (this.Tags == null)
 			{
 				this.Tags = new TagsCollection();
-			}
-
-			if (this.RabbitMq == null)
-			{
-				message.AppendLine(") Missing configuration element in peachfarm.node: <RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
-			}
-			else
-			{
-				if (String.IsNullOrEmpty(this.RabbitMq.HostName))
-				{
-					message.AppendLine(") RabbitMQ host name is required");
-				}
 			}
 
 			if (message.Length > 0)
@@ -73,7 +62,7 @@ namespace PeachFarm.Node.Configuration
 
   public class Controller : ConfigurationElement
   {
-		[ConfigurationProperty(Constants.IPAddress, IsRequired = true)]
+		[ConfigurationProperty(Constants.IPAddress, IsRequired = false)]
     public string IpAddress
     {
       get { return (string)this[Constants.IPAddress]; }
@@ -83,35 +72,35 @@ namespace PeachFarm.Node.Configuration
 
 	public class RabbitMqElement : ConfigurationElement
 	{
-		[ConfigurationProperty(Constants.HostName, IsRequired = true)]
+		[ConfigurationProperty(Constants.HostName, IsRequired = false)]
 		public string HostName
 		{
 			get { return (string)this[Constants.HostName]; }
 			set { this[Constants.HostName] = value; }
 		}
 
-		[ConfigurationProperty(Constants.Port)]
+		[ConfigurationProperty(Constants.Port, IsRequired = false)]
 		public int Port
 		{
 			get { return (int)this[Constants.Port]; }
 			set { this[Constants.Port] = value; }
 		}
 
-		[ConfigurationProperty(Constants.UserName)]
+		[ConfigurationProperty(Constants.UserName, IsRequired = false)]
 		public string UserName
 		{
 			get { return (string)this[Constants.UserName]; }
 			set { this[Constants.UserName] = value; }
 		}
 
-		[ConfigurationProperty(Constants.Password)]
+		[ConfigurationProperty(Constants.Password, IsRequired = false)]
 		public string Password
 		{
 			get { return (string)this[Constants.Password]; }
 			set { this[Constants.Password] = value; }
 		}
 
-		[ConfigurationProperty(Constants.SSL)]
+		[ConfigurationProperty(Constants.SSL, IsRequired = false)]
 		public bool SSL
 		{
 			get { return (bool)this[Constants.SSL]; }
@@ -166,7 +155,7 @@ namespace PeachFarm.Node.Configuration
 
   public class Tag : ConfigurationElement
   {
-		[ConfigurationProperty(Constants.Name, IsRequired = true)]
+		[ConfigurationProperty(Constants.Name, IsRequired = false)]
     public string Name
     {
       get { return (string)this[Constants.Name]; }
