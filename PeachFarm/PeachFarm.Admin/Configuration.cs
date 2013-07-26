@@ -8,21 +8,21 @@ namespace PeachFarm.Admin.Configuration
 {
   public class AdminSection : ConfigurationSection
   {
-		[ConfigurationProperty(Constants.Controller, IsRequired = true)]
+		[ConfigurationProperty(Constants.Controller, IsRequired = false)]
     public Controller Controller
     {
       get { return (Controller)this[Constants.Controller]; }
       set { this[Constants.Controller] = value; }
     }
 
-		[ConfigurationProperty(Constants.RabbitMq, IsRequired = true)]
+		[ConfigurationProperty(Constants.RabbitMq, IsRequired = false)]
 		public RabbitMqElement RabbitMq
 		{
 			get { return (RabbitMqElement)this[Constants.RabbitMq]; }
 			set { this[Constants.RabbitMq] = value; }
 		}
 
-		[ConfigurationProperty(Constants.MongoDb, IsRequired = true)]
+		[ConfigurationProperty(Constants.MongoDb, IsRequired = false)]
 		public MongoDbElement MongoDb
 		{
 			get { return (MongoDbElement)this[Constants.MongoDb]; }
@@ -33,40 +33,23 @@ namespace PeachFarm.Admin.Configuration
 		{
 			StringBuilder message = new StringBuilder();
 
-			if (this.Controller == null)
+			if (String.IsNullOrEmpty(this.Controller.IpAddress))
 			{
-				message.AppendLine(") Missing configuration element in peachfarm.admin: <Controller ipAddress=\0.0.0.0\" />");
-			}
-			else
-			{
-				if (String.IsNullOrEmpty(this.Controller.IpAddress))
-				{
-					message.AppendLine(") Controller IP address is required");
-				}
+				message.AppendLine(") Controller IP address or overridden name is required.");
+				message.AppendLine("\t<Controller ipAddress=\"0.0.0.0\" />");
 			}
 
-			if (this.MongoDb == null)
+			if (String.IsNullOrEmpty(this.MongoDb.ConnectionString))
 			{
-				message.AppendLine(") Missing configuration element in peachfarm.admin: <MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
-			}
-			else
-			{
-				if (String.IsNullOrEmpty(this.MongoDb.ConnectionString))
-				{
-					message.AppendLine(") MongoDB connection string is required");
-				}
+				message.AppendLine(") MongoDB Connection String is required.");
+				message.AppendLine("\t<MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
 			}
 
-			if (this.RabbitMq == null)
+			if (String.IsNullOrEmpty(this.RabbitMq.HostName))
 			{
-				message.AppendLine(") Missing configuration element in peachfarm.admin: <RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
-			}
-			else
-			{
-				if (String.IsNullOrEmpty(this.RabbitMq.HostName))
-				{
-					message.AppendLine(") RabbitMQ host name is required");
-				}
+				message.AppendLine(") RabbitMQ host name is required");
+				message.AppendLine(
+					"\t<RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
 			}
 
 			if (message.Length > 0)
@@ -80,35 +63,35 @@ namespace PeachFarm.Admin.Configuration
 
 	public class RabbitMqElement : ConfigurationElement
 	{
-		[ConfigurationProperty(Constants.HostName, IsRequired = true)]
+		[ConfigurationProperty(Constants.HostName, IsRequired = false)]
 		public string HostName
 		{
 			get { return (string)this[Constants.HostName]; }
 			set { this[Constants.HostName] = value; }
 		}
 
-		[ConfigurationProperty(Constants.Port)]
+		[ConfigurationProperty(Constants.Port, IsRequired = false)]
 		public int Port
 		{
 			get { return (int)this[Constants.Port]; }
 			set { this[Constants.Port] = value; }
 		}
 
-		[ConfigurationProperty(Constants.UserName)]
+		[ConfigurationProperty(Constants.UserName, IsRequired = false)]
 		public string UserName
 		{
 			get { return (string)this[Constants.UserName]; }
 			set { this[Constants.UserName] = value; }
 		}
 
-		[ConfigurationProperty(Constants.Password)]
+		[ConfigurationProperty(Constants.Password, IsRequired = false)]
 		public string Password
 		{
 			get { return (string)this[Constants.Password]; }
 			set { this[Constants.Password] = value; }
 		}
 
-		[ConfigurationProperty(Constants.SSL)]
+		[ConfigurationProperty(Constants.SSL, IsRequired = false)]
 		public bool SSL
 		{
 			get { return (bool)this[Constants.SSL]; }
@@ -118,7 +101,7 @@ namespace PeachFarm.Admin.Configuration
 
 	public class MongoDbElement : ConfigurationElement
 	{
-		[ConfigurationProperty(Constants.ConnectionString, IsRequired = true)]
+		[ConfigurationProperty(Constants.ConnectionString, IsRequired = false)]
 		public string ConnectionString
 		{
 			get { return (string)this[Constants.ConnectionString]; }
@@ -128,7 +111,7 @@ namespace PeachFarm.Admin.Configuration
 
 	public class Controller : ConfigurationElement
 	{
-		[ConfigurationProperty(Constants.IpAddress, IsRequired = true)]
+		[ConfigurationProperty(Constants.IpAddress, IsRequired = false)]
 		public string IpAddress
 		{
 			get { return (string)this[Constants.IpAddress]; }
