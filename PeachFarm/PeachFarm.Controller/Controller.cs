@@ -30,34 +30,27 @@ namespace PeachFarm.Controller
 
 		private string controllerQueueName;
 
+		#region testing
+		// these are here for testing purposes and shouldn't be mucked with in prod
+		// everything _should_ function normally if left alone
+		public static bool __test_should_rabbitmq_init  = true;
+		public static bool __test_should_mongodb_init = true;
+		public static Configuration.ControllerSection __test_config = null;
+		public static IPAddress[] __test_LocalIPs = null;
+		//-------------------------------------------------------------------------
+		#endregion testing
+
 		public PeachFarmController()
 		{
 			// Startup as application
-			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+			IPAddress[] ipaddresses = LocalIPs();
+			string ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
-			config = (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");
-			config.Validate();
+			this.config = this.ControllerConfigSection();
+			this.config.Validate();
 
-			//ipaddress = config.ServerHost.Name;
-
-			if (Common.Mongo.DatabaseHelper.TestConnection(config.MongoDb.ConnectionString) == false)
-			{
-				string error = String.Format("No connection can be made to MongoDB at:\n{0}", config.MongoDb.ConnectionString);
-				throw new ApplicationException(error);
-			}
-
-			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			if ((config.Controller == null) || (String.IsNullOrEmpty(config.Controller.Name)))
-			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
-			}
-			else
-			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.Name);
-			}
-			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(this.controllerQueueName);
+			RabbitInitializer();
+			MongoDBInitializer();
 
 			if (statusCheck == null)
 			{
@@ -552,5 +545,45 @@ namespace PeachFarm.Controller
 			logger.Info("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
 
 		}
+
+		// this and the mongodb initializer might need to be refactored into classes later...
+		private void RabbitInitializer() {
+			if (__test_should_rabbitmq_init == false) return;
+
+			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
+			if ((config.Controller == null) || (String.IsNullOrEmpty(config.Controller.Name)))
+			{
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+			}
+			else
+			{
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.Name);
+			}
+			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
+			rabbit.StartListener(this.controllerQueueName);
+		}
+
+		private void MongoDBInitializer() {
+			if (__test_should_mongodb_init == false) return;
+
+			if (Common.Mongo.DatabaseHelper.TestConnection(config.MongoDb.ConnectionString) == false)
+			{
+				string error = String.Format("No connection can be made to MongoDB at:\n{0}", config.MongoDb.ConnectionString);
+				throw new ApplicationException(error);
+			}
+		}
+
+		private IPAddress[] LocalIPs()
+		{
+			if (__test_LocalIPs != null) return __test_LocalIPs;
+			else return System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+		}
+
+		private Configuration.ControllerSection ControllerConfigSection()
+		{
+			if (PeachFarmController.__test_config != null) return PeachFarmController.__test_config;
+			else return (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");	
+		}
+
 	}
 }
