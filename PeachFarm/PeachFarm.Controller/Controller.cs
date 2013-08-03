@@ -20,9 +20,9 @@ namespace PeachFarm.Controller
 
 		private UTF8Encoding encoding = new UTF8Encoding();
 		private static string ipaddress;
-		private Configuration.ControllerSection config;
+		protected Configuration.ControllerSection config;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		protected static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private static Timer statusCheck = null;
 
@@ -33,10 +33,9 @@ namespace PeachFarm.Controller
 		#region testing
 		// these are here for testing purposes and shouldn't be mucked with in prod
 		// everything _should_ function normally if left alone
-		public static bool __test_should_rabbitmq_init  = true;
-		public static bool __test_should_mongodb_init = true;
-		public static Configuration.ControllerSection __test_config = null;
-		public static IPAddress[] __test_LocalIPs = null;
+		protected static bool __test_should_rabbitmq_init  = true;
+		protected static bool __test_should_mongodb_init = true;
+		protected static Configuration.ControllerSection __test_config = null;
 		//-------------------------------------------------------------------------
 		#endregion testing
 
@@ -91,10 +90,10 @@ namespace PeachFarm.Controller
 			//rabbit.CloseConnection();
 		}
 
-		private void StatusCheck(object state)
+		protected void StatusCheck(object state)
 		{
 			//Catching all exceptions because StatusCheck is called often
-			List<Heartbeat> nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+			List<Heartbeat> nodes = NodeList(config);
 
 			try
 			{
@@ -198,7 +197,7 @@ namespace PeachFarm.Controller
 		}
 
 
-		private void ProcessException(Exception ex, string action, string replyQueue)
+		protected void ProcessException(Exception ex, string action, string replyQueue)
 		{
 			ResponseBase response = null;
 			switch (action)
@@ -250,7 +249,7 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
-				var nodes = Common.Mongo.DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				var nodes = NodeList(config);
 				var jobnodes = (from n in nodes where n.Status == Status.Running && n.JobID == request.JobID select n).Count();
 				if (jobnodes == 0)
 				{
@@ -307,7 +306,7 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
-				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				var nodes = NodeList(config);
 				var jobNodes = new List<Heartbeat>();
 
 				if (String.IsNullOrEmpty(request.Tags))
@@ -385,7 +384,7 @@ namespace PeachFarm.Controller
 
 			if ((heartbeat.Status == Status.Alive) && (lastHeartbeat.Status == Status.Running) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
 			{
-				bool jobFinished = (from n in DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
+				bool jobFinished = (from n in NodeList(config) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
 				if (jobFinished)
 				{
 					GenerateReportRequest grr = new GenerateReportRequest();
@@ -407,7 +406,7 @@ namespace PeachFarm.Controller
 		private void ListNodes(ListNodesRequest request, string replyQueue)
 		{
 			ListNodesResponse response = new ListNodesResponse();
-			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).ToList();
+			response.Nodes = NodeList(config).ToList();
 			Reply(response.Serialize(), Actions.ListNodes, replyQueue);
 		}
 
@@ -439,7 +438,7 @@ namespace PeachFarm.Controller
 			{
 				response.Success = true;
 				response.Job = new Common.Messages.Job(mongoJob);
-				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+				var nodes = NodeList(config);
 				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
 			}
 
@@ -451,7 +450,7 @@ namespace PeachFarm.Controller
 			MonitorResponse response = new MonitorResponse();
 			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
-			response.Nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+			response.Nodes = NodeList(config);
 			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
 			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
 			response.ActiveJobs = activeJobs.ToMessagesJobs();
@@ -573,10 +572,9 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		private IPAddress[] LocalIPs()
+		protected virtual IPAddress[] LocalIPs()
 		{
-			if (__test_LocalIPs != null) return __test_LocalIPs;
-			else return System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+			return System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 		}
 
 		private Configuration.ControllerSection ControllerConfigSection()
@@ -585,5 +583,10 @@ namespace PeachFarm.Controller
 			else return (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");	
 		}
 
+		protected  virtual List<Heartbeat> NodeList(PeachFarm.Controller.Configuration.ControllerSection config)
+		{
+			/* This could be static, but we need to be able to override it for testing purposes */
+			return DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+		}
 	}
 }
