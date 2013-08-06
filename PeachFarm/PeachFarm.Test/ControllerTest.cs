@@ -101,24 +101,76 @@ namespace PeachFarm.Test
 		public void Test_StatusCheck()
 		{
 			//TODO: consider pushing down the functionality of the actual status check into the nodes themselves
-			// since StatusCheck doesn't return anything this test just makes sure
+			// since StatusCheck doesn't return anything this test just makes sure it doesn't barf
 			TestController tc = new TestController();
 
 			TestController.__test_node_list = new List<Heartbeat>();
 			var nl = tc.callNodeList();
+
+			System.Console.WriteLine("Calling first status check");
 			tc.callStatusCheck();
-			/*
-			Heartbeat hb = new Heartbeat();
-			TestController.__test_node_list.Add(hb);
-			Assert.IsTrue(false, "one nodes");
-			Assert.IsTrue(false, "two nodes");
-			Assert.IsTrue(false, "a thousand nodes");
-			 */
+
+			System.Console.WriteLine("Calling second status check");
+			TestHeartbeat hbNow = new TestHeartbeat();
+			hbNow.Stamp = DateTime.Now;
+			nl.Add(hbNow);
+
+			System.Console.WriteLine("Calling third status check");
+			TestHeartbeat hb = new TestHeartbeat();
+			hb.Stamp = DateTime.Now.AddMinutes(-21);
+			nl.Add(hb);
+			tc.callStatusCheck();
+			Assert.IsTrue(hb.__test_was_saved_to_errors);
+			Assert.IsTrue(hb.__test_was_removed_from_database);
+
+			System.Console.WriteLine("Calling fourth status check");
+			hb.Stamp = DateTime.Now.AddMinutes(-11);
+			nl.Add(hb);
+			tc.callStatusCheck();
+			Assert.IsTrue(hb.__test_was_saved_to_database);
+
+			System.Console.WriteLine("Calling full up status check");
+			// for funsiesa, don't flop under pressure
+			for (int k = 0; k < 1000; k++) nl.Add(hb);
+			tc.callStatusCheck();
 		}
 
 		[Test]
-		public void Test_StopPeach()
+		public void Test_StopPeach_WithNullJob()
 		{
+			TestController tc = new TestController();
+			TestController.__test_use_test_job = true;
+			Common.Mongo.Job job = new Common.Mongo.Job();
+
+			// need to rig NodeList() and GetJob()
+
+			string rq = "TestingReplyQueue";
+			StopPeachRequest spr = new StopPeachRequest();
+			spr.JobID = "asdfasdfasdfasdfasdfasdf";
+
+			tc.callStopPeach(spr, rq);
+			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
+			Assert.AreEqual(TestController.__test_reply_bodies.Count, 1);
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(spr.JobID));
+		}
+
+		[Test]
+		public void Test_StopPeach_WithJobCountZero()
+		{
+			// need to rig NodeList() and GetJob()
+			StopPeachRequest spr = new StopPeachRequest();
+			spr.JobID = "asdfasdfasdfasdfasdfasdf";
+			Assert.IsTrue(false);
+		}
+
+		[Test]
+		public void Test_StopPeach_WithJobCountNonZero()
+		{
+			// need to rig NodeList() and GetJob()
+			StopPeachRequest spr = new StopPeachRequest();
+			spr.JobID = "asdfasdfasdfasdfasdfasdf";
 			Assert.IsTrue(false);
 		}
 

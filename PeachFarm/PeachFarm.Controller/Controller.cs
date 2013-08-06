@@ -152,7 +152,7 @@ namespace PeachFarm.Controller
 			rabbit.DeleteExchange(exchangeName);
 		}
 
-		private void Reply(string body, string action, string replyQueue)
+		protected virtual void Reply(string body, string action, string replyQueue)
 		{
 			rabbit.PublishToQueue(replyQueue, body, action);
 			logger.Trace("Sent Action to {2}: {0}\nBody:\n{1}", action, body, replyQueue);
@@ -237,11 +237,11 @@ namespace PeachFarm.Controller
 		#endregion
 
 		#region Receives
-		private void StopPeach(StopPeachRequest request, string replyQueue)
+		protected void StopPeach(StopPeachRequest request, string replyQueue)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
 
-			var job = Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
+			var job = GetJob(request);
 			if (job == null)
 			{
 				response.Success = false;
@@ -268,6 +268,11 @@ namespace PeachFarm.Controller
 				}
 			}
 			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
+		}
+
+		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)
+		{
+			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
 		}
 
 		private void StartPeach(StartPeachRequest request, string replyQueue)

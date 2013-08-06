@@ -17,6 +17,11 @@ namespace PeachFarm.Test
 		public static IPAddress[] __test_LocalIPs = null;
 		public static List<Heartbeat> __test_node_list = null;
 
+		public static bool __test_use_test_job = false;
+		public static Common.Mongo.Job __test_job = null;
+		public static List<string> __test_reply_queues_hit = new List<string>();
+		public static List<string> __test_reply_bodies     = new List<string>();
+
 		public static void setShouldRabbitmqInit(bool should)
 		{
 			PeachFarmController.__test_should_rabbitmq_init = should;
@@ -30,6 +35,12 @@ namespace PeachFarm.Test
 		public static void setConfig(PeachFarm.Controller.Configuration.ControllerSection config)
 		{
 			PeachFarmController.__test_config = config;
+		}
+
+		public static void resetReplyInfo()
+		{
+			__test_reply_bodies = new List<string>();
+			__test_reply_queues_hit = new List<string>();
 		}
 		#endregion
 
@@ -47,6 +58,13 @@ namespace PeachFarm.Test
 			Object foo = new Object();
 			base.StatusCheck(foo);
 		}
+
+		public void callStopPeach(StopPeachRequest request, string replyQueue)
+		{
+			// wrapper around the protected StopPeach()
+			this.StopPeach(request, replyQueue);
+		}
+
 		public List<Heartbeat> callNodeList()
 		{
 			return NodeList(new PeachFarm.Controller.Configuration.ControllerSection());
@@ -64,6 +82,21 @@ namespace PeachFarm.Test
 		{
 			if (TestController.__test_node_list != null) return TestController.__test_node_list; 
 			else                                         return base.NodeList(config);
+		}
+
+		protected override Common.Mongo.Job GetJob(StopPeachRequest request)
+		{
+			// this may have to work with a dictionary mapping of id's to
+			// jobs later for multiple jobs
+			if (__test_use_test_job) return __test_job;
+			else                    return base.GetJob(request);
+		}
+
+		protected override void Reply(string body, string action, string replyQueue)
+		{
+			__test_reply_queues_hit.Add(replyQueue);
+			__test_reply_bodies.Add(body);
+			// NOP for now at the what/how boundary
 		}
 	}
 }
