@@ -31,57 +31,6 @@ namespace PeachFarm.Common.Mongo
 			return String.Format("{0:yyyyMMddhhmmss}", dateTime);
 		}
 
-		public static Messages.Heartbeat SaveToDatabase(this Messages.Heartbeat heartbeat, string connectionString)
-		{
-			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			var query = Query.EQ("NodeName", heartbeat.NodeName);
-			var storedHeartbeat = collection.FindOne(query);
-			if (storedHeartbeat == null)
-			{
-				collection.Save(heartbeat);
-				storedHeartbeat = heartbeat;
-			}
-			else
-			{
-				storedHeartbeat.Iteration = heartbeat.Iteration;
-				storedHeartbeat.JobID = heartbeat.JobID;
-				storedHeartbeat.PitFileName = heartbeat.PitFileName;
-				storedHeartbeat.Seed = heartbeat.Seed;
-				storedHeartbeat.Stamp = heartbeat.Stamp;
-				storedHeartbeat.Tags = heartbeat.Tags;
-				storedHeartbeat.UserName = heartbeat.UserName;
-				storedHeartbeat.QueueName = heartbeat.QueueName;
-				storedHeartbeat.ErrorMessage = heartbeat.ErrorMessage;
-				storedHeartbeat.Status = heartbeat.Status;
-				collection.Save(storedHeartbeat);
-			}
-			collection.Database.Server.Disconnect();
-
-			return storedHeartbeat;
-		}
-
-		public static void RemoveFromDatabase(this Messages.Heartbeat heartbeat, string connectionString)
-		{
-			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			var query = Query.EQ("NodeName", heartbeat.NodeName);
-			if(collection.FindOne(query) != null)
-			{
-				collection.Remove(query);
-			}
-			collection.Database.Server.Disconnect();
-
-			return;
-		}
-		
-		public static Messages.Heartbeat SaveToErrors(this Messages.Heartbeat heartbeat, string connectionString)
-		{
-			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			heartbeat._id = BsonObjectId.Empty;
-			collection.Save(heartbeat);
-			collection.Database.Server.Disconnect();
-
-			return heartbeat;
-		}
 
 		public static List<Job> GetJobs(this List<PeachFarm.Common.Messages.Heartbeat> nodes, string connectionString)
 		{
