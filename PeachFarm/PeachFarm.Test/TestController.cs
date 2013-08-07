@@ -21,6 +21,8 @@ namespace PeachFarm.Test
 		public static Common.Mongo.Job __test_job = null;
 		public static List<string> __test_reply_queues_hit = new List<string>();
 		public static List<string> __test_reply_bodies     = new List<string>();
+		public static bool __test_should_override_PublishToJob = false;
+		public static bool __test_PublishToJob_Response = false;
 
 		public static void setShouldRabbitmqInit(bool should)
 		{
@@ -97,6 +99,12 @@ namespace PeachFarm.Test
 			__test_reply_queues_hit.Add(replyQueue);
 			__test_reply_bodies.Add(body);
 			// NOP for now at the what/how boundary
+		}
+
+		protected override bool PublishToJob(string JobID, string RequestBody, string action)
+		{
+			if (__test_should_override_PublishToJob) return __test_PublishToJob_Response;
+			else                                     return base.PublishToJob(JobID, RequestBody, action);
 		}
 	}
 }

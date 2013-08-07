@@ -128,14 +128,21 @@ namespace PeachFarm.Controller
 			logger.Trace("Sent Action to Clients: {0}\nBody:\n{1}", action, body);
 		}
 
-		private bool PublishToJob(string jobID, string body, string action)
+		protected virtual bool PublishToJob(string jobID, string body, string action)
 		{
-			bool result = false;
+			bool result = true;
 			string exchangename = String.Format(QueueNames.EXCHANGE_JOB, jobID);
 
-			rabbit.PublishToExchange(exchangename, body, action);
-			logger.Trace("Sent Action to Job {0}: {1}\nBody:\n{2}", jobID, action, body);
-			result = true;
+			try
+			{
+				rabbit.PublishToExchange(exchangename, body, action);
+				logger.Trace("Sent Action to Job {0}: {1}\nBody:\n{2}", jobID, action, body);
+			}
+			catch (RabbitMqException rex)
+			{
+				logger.Error("Failed to publish to job: " + rex.Message);
+				result = false;
+			}
 
 			return result;
 		}

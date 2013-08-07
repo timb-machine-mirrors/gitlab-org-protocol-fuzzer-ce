@@ -138,9 +138,31 @@ namespace PeachFarm.Test
 		[Test]
 		public void Test_StopPeach_WithNullJob()
 		{
+			// need to rig GetJob() so it returns null
 			TestController tc = new TestController();
 			TestController.__test_use_test_job = true;
 			Common.Mongo.Job job = new Common.Mongo.Job();
+
+			string rq = "TestingReplyQueue";
+			StopPeachRequest spr = new StopPeachRequest();
+			spr.JobID = "asdfasdfasdfasdfasdfasdf";
+
+			tc.callStopPeach(spr, rq);
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
+			Assert.AreEqual(TestController.__test_reply_bodies.Count, 1);
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(spr.JobID));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("does not exist"));
+		}
+
+		[Test]
+		public void Test_StopPeach_WithJobCountZero()
+		{
+			TestController tc = new TestController();
+			TestController.__test_use_test_job = true;
+			TestController.__test_job = new Common.Mongo.Job();
+			TestController.__test_node_list = new List<Heartbeat>();
 
 			// need to rig NodeList() and GetJob()
 
@@ -149,29 +171,79 @@ namespace PeachFarm.Test
 			spr.JobID = "asdfasdfasdfasdfasdfasdf";
 
 			tc.callStopPeach(spr, rq);
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("is not running"));
+		}
+
+		[Test]
+		public void Test_StopPeach_WithJobCountNonZero_PublishFails()
+		{
+			// need to rig NodeList() and GetJob()
+			TestController tc = new TestController();
+			TestController.__test_use_test_job = true;
+			PeachFarm.Common.Mongo.Job jobby = new Common.Mongo.Job();
+			Heartbeat hb = new Heartbeat();
+			TestController.__test_job = jobby;
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController.__test_node_list.Add(hb);
+			TestController.__test_should_override_PublishToJob = true;
+			TestController.__test_PublishToJob_Response = false;
+
+			string rq = "TestingReplyQueue";
+			StopPeachRequest spr = new StopPeachRequest();
+			spr.JobID = "asdfasdfasdfasdfasdfasdf";
+			hb.JobID = spr.JobID;
+			hb.Status = Status.Running;
+
+			tc.callStopPeach(spr, rq);
+
 			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
 			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
-			Assert.AreEqual(TestController.__test_reply_bodies.Count, 1);
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("Cannot stop job"));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(spr.JobID));
 		}
 
 		[Test]
-		public void Test_StopPeach_WithJobCountZero()
+		public void Test_StopPeach_WithJobCountNonZero_PublishSucceeds()
 		{
 			// need to rig NodeList() and GetJob()
-			StopPeachRequest spr = new StopPeachRequest();
-			spr.JobID = "asdfasdfasdfasdfasdfasdf";
-			Assert.IsTrue(false);
-		}
+			TestController tc = new TestController();
+			TestController.__test_use_test_job = true;
+			PeachFarm.Common.Mongo.Job jobby = new Common.Mongo.Job();
+			Heartbeat hb = new Heartbeat();
+			TestController.__test_job = jobby;
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController.__test_node_list.Add(hb);
+			TestController.__test_should_override_PublishToJob = true;
+			// ################################################################################
+			// ### this tests is almost the same as Test_StopPeach_WithJobCountNonZero_PublishFails except
+			// ### the __test_PublishToJob_Response and the asserts
+			// ################################################################################
+			TestController.__test_PublishToJob_Response = true;
 
-		[Test]
-		public void Test_StopPeach_WithJobCountNonZero()
-		{
-			// need to rig NodeList() and GetJob()
+			string rq = "TestingReplyQueue";
 			StopPeachRequest spr = new StopPeachRequest();
 			spr.JobID = "asdfasdfasdfasdfasdfasdf";
-			Assert.IsTrue(false);
+			hb.JobID = spr.JobID;
+			hb.Status = Status.Running;
+
+			tc.callStopPeach(spr, rq);
+
+			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+
+			string replyBody = TestController.__test_reply_bodies[0];
+			var split = replyBody.Split('\n');
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
+			Assert.IsTrue(split.Length == 2);
+			Assert.IsTrue(split[1].StartsWith("<StopPeachResponse"));
+			Assert.IsTrue(split[1].Contains(spr.JobID));
 		}
 
 		[Test]

@@ -204,7 +204,7 @@ namespace PeachFarm.Common
 			}
 		}
 
-		public void PublishToExchange(string exchange, string body, string action)
+		public virtual void PublishToExchange(string exchange, string body, string action)
 		{
 			bool open = true;
 
@@ -316,7 +316,7 @@ namespace PeachFarm.Common
 			ticking = false;
 		}
 
-		private void OpenConnection()
+		protected virtual void OpenConnection()
 		{
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.HostName = hostName;
