@@ -12,6 +12,9 @@ namespace PeachFarmMonitor.ViewModels
 		{
 			this.Name = file.Name;
 			this.GridFsLocation = file.GridFsLocation;
+			this.FullText = "Full Text";
 		}
+
+		public string FullText { get; set; }
 	}
 }

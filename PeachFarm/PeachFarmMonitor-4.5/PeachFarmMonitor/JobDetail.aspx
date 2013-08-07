@@ -91,7 +91,6 @@
     <telerik:RadAjaxLoadingPanel ID="loadingPanel" runat="server"  />
     <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server" >
       <AjaxSettings>
-
         <telerik:AjaxSetting AjaxControlID="faultBucketsGrid" EventName="ItemCommand">
           <UpdatedControls>
             <telerik:AjaxUpdatedControl ControlID="faultBucketsGrid" LoadingPanelID="loadingPanel" />
@@ -132,7 +131,7 @@
 
     <div id="gridcontainer">
       <telerik:RadSplitter Height="100%" Width="100%" runat="server" >
-        <telerik:RadPane runat="server" Scrolling="None" Width="30%"> 
+        <telerik:RadPane runat="server" Scrolling="None" Width="30%" ID="faultBucketsPane"> 
           <telerik:RadGrid 
             ID="faultBucketsGrid" runat="server"
             Width="100%" Height="100%"
@@ -158,6 +157,11 @@
         </telerik:RadPane>
         <telerik:RadSplitBar runat="server" />
         <telerik:RadPane runat="server" Scrolling="None">
+	        <div>
+		        Find Iteration:
+						<telerik:RadSearchBox ID="faultSearch" EnableAutoComplete="False" ShowSearchButton="True" runat="server">
+						</telerik:RadSearchBox>
+	        </div>
           <telerik:RadGrid 
             ID="faultsGrid" runat="server" 
             Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid"
@@ -166,7 +170,7 @@
               <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
-            <MasterTableView 
+            <MasterTableView
               AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
               Caption="Faults"
               NoDetailRecordsText="No faults for this group."
@@ -181,9 +185,11 @@
                 <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" AllowFiltering="False" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
                 <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" AllowFiltering="False" ItemStyle-Width="60px" HeaderStyle-Width="60px" />
                 <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" AllowFiltering="False" ItemStyle-Width="100px" HeaderStyle-Width="100px" />
+								<telerik:GridHyperLinkColumn Text="Link/Print" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="~/FaultDetail.aspx?faultid={0}"/>
               </Columns>
               <DetailTables>
-                <telerik:GridTableView Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">
+                <telerik:GridTableView  BorderColor="#f57e20" BorderWidth="2"
+									Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">
                   <Columns>
                     <telerik:GridTemplateColumn DataField="Description">
                       <ItemTemplate>
@@ -192,8 +198,8 @@
                     </telerik:GridTemplateColumn>
                   </Columns>
                 </telerik:GridTableView>
-                <telerik:GridTableView 
-                  Caption="Generated Files" DataMember="GeneratedFiles" 
+                <telerik:GridTableView BorderColor="#f57e20" BorderWidth="2"
+                  Caption="Generated Files" DataMember="GeneratedFileViewModels" 
                   HierarchyLoadMode="ServerBind"
                   NoDetailRecordsText="No generated files for this fault.">
                   <Columns>

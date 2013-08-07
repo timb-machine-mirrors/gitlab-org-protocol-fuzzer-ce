@@ -78,8 +78,7 @@
     #loadingLabel
     {
       float:right;
-      padding-left: 4px;
-      padding-right: 4px;
+	    padding-right: 300px;
     }
     #nodesGridPanel{ height:100%; }
     #jobsGridPanel{ height:100%; }
@@ -241,7 +240,7 @@
               <telerik:GridBoundColumn DataField="IterationCount" HeaderText="Iterations" />
               <telerik:GridHyperLinkColumn HeaderText="Job Input" Text="Download" DataNavigateUrlFields="ZipFile" DataNavigateUrlFormatString="~/GetJobOutput.aspx?file={0}" Target="_blank" AllowSorting="false"/>
               <telerik:GridHyperLinkColumn HeaderText="Faults" DataTextField="FaultCount" DataTextFormatString="View Faults ({0})" DataNavigateUrlFields="JobID" DataNavigateUrlFormatString="~/JobDetail.aspx?jobid={0}" Target="_blank" SortExpression="FaultCount" AllowSorting="false"/>
-							<telerik:GridTemplateColumn HeaderText="PDF Report" Visible="false">
+							<telerik:GridTemplateColumn HeaderText="PDF Report" Visible="true">
 								<ItemTemplate>
 									<asp:HyperLink ID="linkDownloadReport" runat="server"/>
 								</ItemTemplate>
