@@ -8,8 +8,8 @@ namespace PeachFarm.Node.Service
   static class Program
   {
     private static PeachFarmNode peachFarmNode = null;
-
-    /// <summary>
+		private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
+		/// <summary>
     /// The main entry point for the application.
     /// </summary>
     static void Main()
@@ -37,12 +37,19 @@ namespace PeachFarm.Node.Service
       }
       else
       {
-        ServiceBase[] ServicesToRun;
-        ServicesToRun = new ServiceBase[] 
-			  { 
-				  new PeachFarmNodeWindowsService() 
-			  };
-        ServiceBase.Run(ServicesToRun);
+	      try
+	      {
+							ServiceBase[] ServicesToRun;
+							ServicesToRun = new ServiceBase[] 
+						{ 
+							new PeachFarmNodeWindowsService() 
+						};
+							ServiceBase.Run(ServicesToRun);
+				}
+	      catch (Exception ex)
+	      {
+		      nlog.Fatal(ex.ToString());
+	      }
       }
     }
 

@@ -161,26 +161,26 @@
           <telerik:RadGrid 
             ID="faultsGrid" runat="server" 
             Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid"
-            AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None">
+            AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None" AllowFilteringByColumn="False">
             <ClientSettings>
               <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
             <MasterTableView 
               AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
-              Caption="Faults" 
+              Caption="Faults"
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
               <PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
               <ExpandCollapseColumn Visible="True" Resizable="true" />
               <Columns>
-                <telerik:GridBoundColumn DataField="Title" HeaderText="Title" />
-                <telerik:GridBoundColumn DataField="Exploitability" HeaderText="Exploitability" />
-                <telerik:GridBoundColumn DataField="DetectionSource" HeaderText="Source" />
-                <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
-                <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
-                <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" ItemStyle-Width="60px" HeaderStyle-Width="60px" />
-                <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" ItemStyle-Width="100px" HeaderStyle-Width="100px" />
+                <telerik:GridBoundColumn DataField="Title" AllowFiltering="False" HeaderText="Title" />
+                <telerik:GridBoundColumn DataField="Exploitability" AllowFiltering="False" HeaderText="Exploitability" />
+                <telerik:GridBoundColumn DataField="DetectionSource" AllowFiltering="False" HeaderText="Source" />
+                <telerik:GridBoundColumn DataField="MajorHash" HeaderText="Major Hash" AllowFiltering="False" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
+                <telerik:GridBoundColumn DataField="MinorHash" HeaderText="Minor Hash" AllowFiltering="False" ItemStyle-Width="80px" HeaderStyle-Width="80px" />
+                <telerik:GridBoundColumn DataField="Iteration" HeaderText="Iteration" AllowFiltering="False" ItemStyle-Width="60px" HeaderStyle-Width="60px" />
+                <telerik:GridBoundColumn DataField="IsReproduction" HeaderText="Is Reproduction" AllowFiltering="False" ItemStyle-Width="100px" HeaderStyle-Width="100px" />
               </Columns>
               <DetailTables>
                 <telerik:GridTableView Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">

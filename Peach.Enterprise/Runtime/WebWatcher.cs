@@ -33,10 +33,13 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using Newtonsoft.Json;
-using Peach.Core.Dom;
 
-namespace Peach.Core.Runtime
+using Newtonsoft.Json;
+
+using Peach.Core.Dom;
+using Peach.Core;
+
+namespace Peach.Enterprise.Runtime
 {
     public class WebWatcher : Watcher, IDisposable
     {
@@ -59,6 +62,7 @@ namespace Peach.Core.Runtime
 
             try
             {
+				Console.WriteLine(" --> STARTING WEBWATCHER <-- ");
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add("http://+:8888/");
                 httpListener.Start();
@@ -102,8 +106,9 @@ namespace Peach.Core.Runtime
                     using (Stream s = context.Response.OutputStream)
                         s.Write(msg, 0, msg.Length);
                 }
-                catch( Exception)
+                catch( Exception ex)
                 {
+					Console.WriteLine("ClientListener Exception: " + ex.ToString());
                     // swallow exceptions for now
                     // TODO: fix race condition for file r/w from http server / peach 
                     Thread.Sleep(500);
@@ -125,8 +130,24 @@ namespace Peach.Core.Runtime
         protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
         {
             if(totalIterations != null)
-                _totalIterations = (uint)totalIterations; 
+                _totalIterations = (uint)totalIterations;
+
+			// Remove any data models from last iteration
+			dataModelsFromActions.Clear();
         }
+
+		/// <summary>
+		/// Collection of data models from Action_Finished event.
+		/// </summary>
+		List<Tuple<string, DataModel>> dataModelsFromActions = new List<Tuple<string, DataModel>>();
+
+		protected override void Action_Finished(Peach.Core.Dom.Action action)
+		{
+			base.Action_Finished(action);
+
+			// TODO - Handle parameters
+			dataModelsFromActions.Add(new Tuple<string,DataModel>(action.dataModel.name, action.dataModel));
+		}
 
         protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
         {
@@ -156,21 +177,22 @@ namespace Peach.Core.Runtime
                     jsonWriter.WritePropertyName("DataModels");
                     jsonWriter.WriteStartArray();
 
-                    foreach (var stateModel in context.dom.stateModels)
+                    foreach (var item in dataModelsFromActions)
                     {
-                        foreach (var item in stateModel.Value.dataActions)
-                        {
-							// StateModel.dataActions is now the serialized data model
-							// in order to properly keep the data around when actions
-							// have been re-entered.  This code will need to be updated
-							// to hook ActionFinished event and serialize each action
-							// to json when it runs.  This way our serialized json is correct
-							// when actions have been re-entered.
-                            throw new NotImplementedException("Needs fixing!");
-                            //jsonWriter.WriteStartObject();
-                            //DataModelToJson(item.Key, item.Value, jsonWriter);
-                            //jsonWriter.WriteEndObject();
-                        }
+						// StateModel.dataActions is now the serialized data model
+						// in order to properly keep the data around when actions
+						// have been re-entered.  This code will need to be updated
+						// to hook ActionFinished event and serialize each action
+						// to json when it runs.  This way our serialized json is correct
+						// when actions have been re-entered.
+                        //throw new NotImplementedException("Needs fixing!");
+
+						// EDDINGTON
+						// Easy fix was to store datamodels during Action_Finished.
+
+                        jsonWriter.WriteStartObject();
+                        DataModelToJson(item.Item1, item.Item2, jsonWriter);
+                        jsonWriter.WriteEndObject();
                     }
 
                     jsonWriter.WriteEndArray();
@@ -214,27 +236,27 @@ namespace Peach.Core.Runtime
             {
                 writer.WriteStartObject();
 
-                if(item is Dom.Array)
+                if(item is Peach.Core.Dom.Array)
                 {
                     DataModelToJson(item.name, (DataElementContainer)item, writer);							    
                 }
 
-                if(item is Block)
+				if (item is Peach.Core.Dom.Block)
                 {
                     DataModelToJson(item.name, (DataElementContainer)item, writer);
                 }
 
-                if(item is Dom.Flag)
+				if (item is Peach.Core.Dom.Flag)
                 {
                     DataModelToJson(item.name, (DataElementContainer)item, writer); 
                 }
 
-                if(item is Dom.Choice)
+                if(item is Peach.Core.Dom.Choice)
                 {
                     DataModelToJson(item.name, (DataElementContainer)item, writer);
                 }
 
-                if(item is Dom.String)
+                if(item is Peach.Core.Dom.String)
                 {
                     writer.WritePropertyName("name");
                     writer.WriteValue(item.name); 
@@ -278,8 +300,8 @@ namespace Peach.Core.Runtime
 		{
 		    return "StateModel";
 		}
-		
-	    private string AgentToJson(Dom.Agent agent)
+
+		private string AgentToJson(Peach.Core.Dom.Agent agent)
 	    {
 	        return "Agent";
 		}

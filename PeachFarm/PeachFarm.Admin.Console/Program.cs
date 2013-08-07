@@ -164,7 +164,7 @@ namespace PeachFarm.Admin
 				{
 					mustwait = false;
 					string jobID = extra[0];
-					admin.JobInfo(jobID);
+					PrintJobInfo(admin.JobInfo(jobID));
 				}
 				#endregion
 
@@ -196,7 +196,7 @@ namespace PeachFarm.Admin
 					System.Console.WriteLine("Done!");
 				}
 				#endregion
-
+#if DEBUG
 				#region Truncate
 				if (truncate)
 				{
@@ -234,7 +234,7 @@ namespace PeachFarm.Admin
 					//}
 				}
 				#endregion
-
+#endif
 				if (mustwait)
 				{
 					System.Console.WriteLine("waiting for result...");
@@ -343,17 +343,21 @@ namespace PeachFarm.Admin
 		{
 			if (e.Success)
 			{
-				string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\n\nRunning Nodes:",
+				string output = String.Format("JobID:\t{0}\nUser Name:\t{1}\nPit Name:\t{2}\nStart Date:\t{3}\nIterations:\t{4}\n\nRunning Nodes:",
 					e.Job.JobID,
 					e.Job.UserName,
 					e.Job.Pit.FileName,
-					e.Job.StartDate);
+					e.Job.StartDate,
+					e.Nodes.Sum((h) => h.Iteration));
 
 				System.Console.WriteLine(output);
 
+				string format = "{0,-16}{1,-8}{2,-25}{3,-13}{4,-17}";
+				System.Console.WriteLine(format,"Name","Status","Last Updated", "Job ID", "Iterations");
+				System.Console.WriteLine(format,"---------------","-------","------------------------","------------","----------------");
 				foreach (Heartbeat heartbeat in e.Nodes)
 				{
-					System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+					System.Console.WriteLine(String.Format(format, heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID, heartbeat.Iteration));
 				}
 			}
 			else

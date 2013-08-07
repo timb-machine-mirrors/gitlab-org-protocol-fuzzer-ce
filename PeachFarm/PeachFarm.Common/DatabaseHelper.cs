@@ -152,35 +152,6 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
-		public static void TruncateAllCollections(string connectionString)
-		{
-			MongoServer server = new MongoClient(connectionString).GetServer();
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			var jobs = GetCollection<Job>(MongoNames.Jobs, connectionString);
-			jobs.RemoveAll(WriteConcern.Acknowledged);
-
-			var nodes = GetCollection<Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
-			nodes.RemoveAll(WriteConcern.Acknowledged);
-
-			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			errors.RemoveAll(WriteConcern.Acknowledged);
-
-			var jobnodes = GetCollection<Node>(MongoNames.JobNodes, connectionString);
-			jobnodes.RemoveAll(WriteConcern.Acknowledged);
-
-			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
-			faults.RemoveAll(WriteConcern.Acknowledged);
-
-			var files = db.GridFS.FindAll();
-			foreach (var file in files)
-			{
-				file.Delete();
-			}
-
-			server.Disconnect();
-		}
-		
 		public static Job GetJob(string jobGuid, string connectionString)
 		{
 			MongoCollection<Job> collection = GetCollection<Job>(MongoNames.Jobs, connectionString);
@@ -404,6 +375,37 @@ namespace PeachFarm.Common.Mongo
 				return BitConverter.ToString(rndBytes).Replace("-", "");
 			}
 		}
+
+#if DEBUG
+		public static void TruncateAllCollections(string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			var jobs = GetCollection<Job>(MongoNames.Jobs, connectionString);
+			jobs.RemoveAll(WriteConcern.Acknowledged);
+
+			var nodes = GetCollection<Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			nodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			errors.RemoveAll(WriteConcern.Acknowledged);
+
+			var jobnodes = GetCollection<Node>(MongoNames.JobNodes, connectionString);
+			jobnodes.RemoveAll(WriteConcern.Acknowledged);
+
+			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
+			faults.RemoveAll(WriteConcern.Acknowledged);
+
+			var files = db.GridFS.FindAll();
+			foreach (var file in files)
+			{
+				file.Delete();
+			}
+
+			server.Disconnect();
+		}
+#endif
 	}
 
 	public static class MongoNames

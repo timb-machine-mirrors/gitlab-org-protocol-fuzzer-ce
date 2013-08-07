@@ -77,7 +77,6 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
 			heartbeat._id = BsonObjectId.Empty;
-			heartbeat.ErrorMessage = System.Web.HttpUtility.HtmlEncode(heartbeat.ErrorMessage);
 			collection.Save(heartbeat);
 			collection.Database.Server.Disconnect();
 
