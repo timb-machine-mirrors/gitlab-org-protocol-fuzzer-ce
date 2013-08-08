@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using PeachFarm.Common.Mongo;
@@ -22,6 +23,8 @@ namespace PeachFarmMonitor
     private static PeachFarmMonitorSection monitorconfig = null;
     private string jobid;
     private bool jobfound;
+	  private string faultid;
+	  private bool faultfound;
 
     private static string[] dataFields = new string[]
 		{
@@ -48,6 +51,7 @@ namespace PeachFarmMonitor
 
     #region Properties
     public JobViewModel Job { get; private set; }
+
     #endregion
 
     #region Page event handlers
@@ -56,7 +60,23 @@ namespace PeachFarmMonitor
 
 		void JobDetail_Load(object sender, EventArgs e)
 		{
+			faultSearch.Search += faultSearch_Search;
+		}
 
+		void faultSearch_Search(object sender, SearchBoxEventArgs e)
+		{
+			int iteration = 0;
+			if (Int32.TryParse(e.Text, out iteration))
+			{
+				var faults = (from f in
+					             DatabaseHelper.GetJobFaultsAsQueryable(Request.QueryString["jobid"],
+					                                                    monitorconfig.MongoDb.ConnectionString)
+				             where f.Iteration == iteration
+				             select new FaultViewModel(f));
+
+				faultsGrid.DataSource = faults;
+				faultsGrid.DataBind();
+			}
 		}
 
 		void JobDetail_PreRender(object sender, EventArgs e)
@@ -66,12 +86,13 @@ namespace PeachFarmMonitor
 		}
 
 		void JobDetail_InitComplete(object sender, EventArgs e)
-    {
+		{
+			monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
       jobid = Request.QueryString["jobid"];
       PeachFarm.Common.Mongo.Job job = null;
       if (String.IsNullOrEmpty(jobid) == false)
       {
-        monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
+        
         //Job = new JobViewModel(Reports.Report.GetJobDetailReport(jobid, monitorconfig.MongoDb.ConnectionString, 0, 0));
         //jobfound = (Job != null);
         job = PeachFarm.Common.Mongo.DatabaseHelper.GetJob(jobid, monitorconfig.MongoDb.ConnectionString);
@@ -213,8 +234,8 @@ namespace PeachFarmMonitor
             description.Add(((FaultViewModel)parent.DataItem).Description);
             e.DetailTableView.DataSource = description;
             break;
-          case "GeneratedFiles":
-            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).GeneratedFiles;
+          case "GeneratedFileViewModels":
+            e.DetailTableView.DataSource = ((FaultViewModel)parent.DataItem).GeneratedFileViewModels;
             break;
         }
       }

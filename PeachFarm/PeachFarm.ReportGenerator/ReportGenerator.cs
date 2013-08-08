@@ -8,6 +8,7 @@ using System.IO;
 using PeachFarm.Common.Mongo;
 using System.ComponentModel;
 using PeachFarm.Common;
+using Telerik.Reporting.Drawing;
 using Telerik.Reporting.Processing;
 
 namespace PeachFarm.Reporting
@@ -125,8 +126,12 @@ namespace PeachFarm.Reporting
 
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
+#if DEBUG
+				DatabaseHelper.DeleteGridFSFile(job.ReportLocation, config.MongoDb.ConnectionString);
+#else
 				response.Status = ReportGenerationStatus.Complete;
 				return response;
+#endif
 			}
 
 			Telerik.Reporting.Processing.ReportProcessor reportProcessor = new Telerik.Reporting.Processing.ReportProcessor();
@@ -144,13 +149,20 @@ namespace PeachFarm.Reporting
 				return ReturnError(request.JobID, "Error while loading report file: " + ex.Message);
 			}
 
+			Unit margin = new Unit(0.5, UnitType.Inch);
+			irs.ReportDocument.PageSettings = new PageSettings();
+			irs.ReportDocument.PageSettings.Margins.Bottom = margin;
+			irs.ReportDocument.PageSettings.Margins.Left = margin;
+			irs.ReportDocument.PageSettings.Margins.Right = margin;
+			irs.ReportDocument.PageSettings.Margins.Top = margin;
+
+
 			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
 			irs.Parameters.Add("jobID", request.JobID);
+			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 			
-			//irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
-			//string documentName = String.Empty;
-			//bool success = reportProcessor.RenderReport("PDF", irs, deviceInfo, new Telerik.Reporting.Processing.CreateStream(CreateStream), out documentName);
+
 			RenderingResult result = null;
 			try
 			{

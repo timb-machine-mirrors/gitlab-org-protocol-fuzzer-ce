@@ -16,5 +16,6 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
+	resource = 'dejavulogo.jpg Resources/pfreportstyle.xml',
 	name='PeachFarm.Reporting.Reports.dll',
 )

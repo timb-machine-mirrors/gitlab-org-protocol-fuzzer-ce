@@ -112,6 +112,15 @@ namespace PeachFarmMonitor {
         protected global::System.Web.UI.WebControls.Table brand;
         
         /// <summary>
+        /// faultBucketsPane control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadPane faultBucketsPane;
+        
+        /// <summary>
         /// faultBucketsGrid control.
         /// </summary>
         /// <remarks>
@@ -119,6 +128,15 @@ namespace PeachFarmMonitor {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::Telerik.Web.UI.RadGrid faultBucketsGrid;
+        
+        /// <summary>
+        /// faultSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Telerik.Web.UI.RadSearchBox faultSearch;
         
         /// <summary>
         /// faultsGrid control.
