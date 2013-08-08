@@ -175,6 +175,11 @@ namespace PeachFarm.Controller
 				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
+				case Actions.GenerateReport:
+					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
+					break;
+				#region deprecated
+				/*
 				case Actions.ListNodes:
 					ListNodes(ListNodesRequest.Deserialize(body), replyQueue);
 					break;
@@ -187,9 +192,8 @@ namespace PeachFarm.Controller
 				case Actions.Monitor:
 					Monitor(MonitorRequest.Deserialize(body), replyQueue);
 					break;
-				case Actions.GenerateReport:
-					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
-					break;
+				//*/
+				#endregion
 				default:
 					string error = String.Format("Received unknown action {0}", action);
 					logger.Error(error);
@@ -238,36 +242,53 @@ namespace PeachFarm.Controller
 		#endregion
 
 		#region Receives
+
+		/// <summary>
+		/// For Stopping a Job
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="replyQueue"></param>
 		private void StopPeach(StopPeachRequest request, string replyQueue)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
 
+			// Try to find job
 			var job = Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
+
 			if (job == null)
-			{
+			{	// Job does not exist
 				response.Success = false;
 				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
 			}
 			else
-			{
+			{ // Job exists
+
+				// get a list of all the online nodes
 				var nodes = Common.Mongo.DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+
+				// pare down the nodes to those running the Job
 				var jobnodes = (from n in nodes where n.Status == Status.Running && n.JobID == request.JobID select n).Count();
+
 				if (jobnodes == 0)
-				{
+				{	// there's no nodes running the job, so no point in stopping
 					response.Success = false;
 					response.ErrorMessage = String.Format("Job {0} is not running.", request.JobID);
 				}
 				else
-				{
+				{	// there's nodes running the job.
+
+					// forward the StopPeach message to all the nodes running the job.
 					bool result = PublishToJob(request.JobID, request.Serialize(), "StopPeach");
 
 					if (result == false)
-					{
+					{	// if somehow the publish to rabbit fails, notify the admin that the request failed.
 						response.Success = false;
 						response.ErrorMessage = String.Format("Cannot stop job {0}", request.JobID);
 					}
 				}
 			}
+
+			// After building the response to the Admin, send it.
 			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
 		}
 
@@ -276,29 +297,71 @@ namespace PeachFarm.Controller
 			string action = Actions.StartPeach;
 			request.MongoDbConnectionString = config.MongoDb.ConnectionString;
 
-			// moving this to Admin
-			//request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
 
 			StartPeachResponse response = new StartPeachResponse(request);
-
+			
+			/*
+			Explanation of the StartPeachRequest, looking at the properties that the Controller uses:
+					ClientCount
+					IPAddress
+					Tags
+			
+			These three properties are used to select Alive nodes for running a job.
+					Case 1: ClientCount is 1 (default), IPAddress is specified
+						Run the Peach Job on a specific IPAddress
+			
+					Case 2: Tags are specified, ClientCount is not
+						Run the Peach Job on nodes with tags that match *all* the tags specified in the request
+						Examples- 5 Alive nodes with tags:
+							Windows, ApplicationA
+							Windows, ApplicationA
+							Linux, ApplicationA
+							Linux, ApplicationA
+							Windows
+			 
+						--If Tags in the request is "Windows", the 3 nodes with the Windows tag will be chosen.
+						--If Tags in the request is "ApplicationA", the 4 nodes with the ApplicationA tag will be chosen.
+			  		--If Tags in the request is "Linux,ApplicationA" the 2 nodes with both the Linux tag and ApplicationA tag will be chosen.
+			  		
+			  		Summary: All tags specified in the request must match within the set of tags for each individual node
+			   
+					Case 3: Tags are specified, so is ClientCount
+			  		Same as Case 2, but the total nodes selected are limited by ClientCount
+			  		Example, consider the 5 Alive nodes from Case 2. If Tags is "ApplicationA" and ClientCount is 3, while in Case 2 four nodes
+			  			would be selected, in this case the first three available would be selected.
+			 
+			  	Case 4: ClientCount is specified, but Tags is not
+			  		In this case, the total set of Alive nodes will be taken from based on ClientCount. If the total Alive nodes is 10, and
+			  		ClientCount is 4, then the first 4 available nodes will be selected to run the Job.
+			  		
+			 
+			*/
 
 			if ((request.ClientCount == 1) && (request.IPAddress.Length > 0))
-			{
+			{	// Case 1
+
+				// try to find the node by its name or "ipaddress"
 				var node = DatabaseHelper.GetNodeByName(request.IPAddress, config.MongoDb.ConnectionString);
 				
+				// make certain the node was found and it is Alive
 				if ((node != null) && (node.Status == Status.Alive))
-				{
+				{	// found and alive
+
+					// create an exchange in RabbitMQ for the job with the single node
 					DeclareJobExchange(request.JobID, new List<string>() { node.QueueName });
 
+					// write the Job to Mongo
 					CommitJobToMongo(request, new List<Heartbeat>(){ node });
 
+					// publish the StartPeach message to the nodes
 					PublishToJob(request.JobID, request.Serialize(), action);
 
-
+					// reply success to the Admin
 					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
-				{
+				{	// node was either not found or wasn't alive
+
 					response.JobID = String.Empty;
 					response.Success = false;
 					response.ErrorMessage = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
@@ -307,17 +370,27 @@ namespace PeachFarm.Controller
 			}
 			else
 			{
+				// Get all the online nodes
 				var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
 				var jobNodes = new List<Heartbeat>();
 
+				#region Handle Tags, 
 				if (String.IsNullOrEmpty(request.Tags))
-				{
+				{	// Tags is empty, so we're going to use all Alive nodes, ordering by newest Stamp date
+					// Case 3
 					jobNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 				}
 				else
-				{
+				{	// Case 2 or Case 3
+
+					// get all of our Alive nodes
 					var aliveNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+
+					// split up the Tags string into a list
 					var ts = request.Tags.Split(',').ToList();
+
+					#region match each node against *all* the tags specified in the request
+					// note: the Intersect function
 					foreach (Heartbeat node in aliveNodes)
 					{
 						var matches = node.Tags.Split(',').Intersect(ts).ToList();
@@ -326,35 +399,60 @@ namespace PeachFarm.Controller
 							jobNodes.Add(node);
 						}
 					}
+					#endregion
 				}
+				#endregion
+
+				#region Handle ClientCount
+				// In the Handle Tags region we've selected the maximum set of nodes we can use.
+				// Now, in Handle ClientCount we're going to limit the count of nodes to the number specified in ClientCount
 
 				if ((jobNodes.Count > 0) && (jobNodes.Count >= request.ClientCount))
-				{
+				{	// our total count of selected nodes is greater than or equal to the ClientCount, good.
+
+					// we're interpreting a ClientCount of 0 or less as meaning "all nodes"
 					if (request.ClientCount <= 0)
 					{
 						request.ClientCount = jobNodes.Count;
 					}
 
+					// here's where we take the first n nodes where n=ClientCount, note the Take LINQ function
 					jobNodes = jobNodes.Take(request.ClientCount).ToList();
+
+					// get all the queue names for our selected, limited nodes
 					var jobQueues = (from Heartbeat h in jobNodes select h.QueueName).ToList();
 
+					// make the exchange in RabbitMQ for the job
 					DeclareJobExchange(request.JobID, jobQueues);
 
+					// write the job to Mongo
 					CommitJobToMongo(request, jobNodes);
+
+					#region Peach Seed
+					/* 
+					 * Important: to make certain that each Node uses a different Seed for initializing Peach,
+					 *		we're determining the seed here in the Controller and setting it for each Node
+					 */		
+					
 
 					uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
 					for(int i=0;i<jobQueues.Count;i++)
 					{
 						request.Seed = baseseed + Convert.ToUInt32(i);
+
+						// Here's the slightly odd bit. Because the Seed is different for each node,
+						// we're sending StartPeach requests to each node individually instead of publishing
+						// to the exchange
 						rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
 					}
+					#endregion
 
-					//PublishToJob(request.JobID, request.Serialize(), action);
-
+					// Replying to the Admin that the StartPeach messages have been sent out to the Nodes a-okay.
 					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
-				{
+				{	// The user has specified a ClientCount that's greater than the number of selected/all Alive nodes
+					// so send back an error
 					response.JobID = String.Empty;
 					response.Success = false;
 					if (String.IsNullOrEmpty(request.Tags))
@@ -367,43 +465,78 @@ namespace PeachFarm.Controller
 					}
 					Reply(response.Serialize(), action, replyQueue);
 				}
+				#endregion
 			}
 		}
 
 		private void HeartbeatReceived(Heartbeat heartbeat)
 		{
+			/* The last received Heartbeat for every online Node is stored in MongoDB.
+			 * When a new Heartbeat is received, that record is overwritten.
+			 * If there are 4 online nodes, there will be only 4 records in the Nodes collection in MongoDB
+			 */
+			  
+			// find the Heartbeat in the Nodes collection that matches the Node in the incoming heartbeat 
 			Heartbeat lastHeartbeat = DatabaseHelper.GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
 
 			if (heartbeat.Status == Status.Stopping)
-			{
+			{	// if the incoming heartbeat is Stopping, then remove the Node from the database since it's going offline.
 				RemoveNode(heartbeat);
 			}
 			else
-			{
+			{	// if the incoming heartbeat is any other status, update it.
 				UpdateNode(heartbeat);
 			}
 
+			#region Stuff that gets executed when the Controller determines that a Node has completed a Peach Run
 			if ((heartbeat.Status == Status.Alive) && (lastHeartbeat.Status == Status.Running) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
 			{
+				#region Stuff that gets executed when the Controller determines that all Nodes running a Job have completed
+				/* The important thing here is that the Nodes don't have any visibility to each other, they don't talk to each other.
+				 * So while each individual Node knows that it's completed a Peach run, they individually have no idea if the others have completed.
+				 * The Controller has to ask two questions to know if a Job has been completed:
+				 *	1) Did this Node we're updating just complete Peach? This is answered by the if statement above
+				 *	2) Are there any Nodes still running the Job? If no, then the Job is complete. Answered by the LINQ query and if statement below.
+				 */	
+
+				// Are there 0 nodes still running this Job?
 				bool jobFinished = (from n in DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
 				if (jobFinished)
-				{
+				{	// There are no nodes running the Job
+
+					#region Generate Report, send request to Reporting Service.
 					GenerateReportRequest grr = new GenerateReportRequest();
 					grr.JobID = lastHeartbeat.JobID;
 					grr.ReportFormat = ReportFormat.PDF;
 					rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+					#endregion
 				}
+				#endregion
 			}
+			#endregion
+
+			#region Log all Error Heartbeats to the Errors collection in MongoDB
+
+			/* Heartbeats have two important properties: Status and ErrorMessage.
+			 * Heartbeats are used to report Status updates from the Nodes, but also to report Errors.
+			 * Nodes may encounter an Error, but in most (ideally, all) cases the Node should be able to recover
+			 *		and become available for new work-- instead of crashing.
+			 * So a Node won't really sit in an Error state. It'll send an Error heartbeat, which gets logged here.
+			 * Then the Node will go to an Alive state so that it's available for new work. This all happens within
+			 * a fraction of a second, which is why you should never see a Node sitting in an Error state.
+			 */
 
 
 			if (heartbeat.Status == Status.Error)
 			{
-				//errors.Add(heartbeat);
 				heartbeat.SaveToErrors(config.MongoDb.ConnectionString);
 				logger.Warn("{0} errored at {1}\n{2}", heartbeat.NodeName, heartbeat.Stamp, heartbeat.ErrorMessage);
 			}
+			#endregion
 		}
 
+		#region deprecated
+		/*
 		private void ListNodes(ListNodesRequest request, string replyQueue)
 		{
 			ListNodesResponse response = new ListNodesResponse();
@@ -461,10 +594,12 @@ namespace PeachFarm.Controller
 
 			Reply(response.Serialize(), Actions.Monitor, replyQueue);
 		}
+		//*/
+		#endregion
 
 		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
 		{
-			
+			// do nothing when report complete response is received
 		}
 		#endregion
 
