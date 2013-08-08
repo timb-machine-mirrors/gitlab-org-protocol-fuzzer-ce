@@ -21,8 +21,12 @@ namespace PeachFarm.Test
 		public static Common.Mongo.Job __test_job = null;
 		public static List<string> __test_reply_queues_hit = new List<string>();
 		public static List<string> __test_reply_bodies     = new List<string>();
+		public static List<string> __test_reply_actions    = new List<string>();
 		public static bool __test_should_override_PublishToJob = false;
 		public static bool __test_PublishToJob_Response = false;
+		public static bool __test_use_base_StartPeach = false;
+		public static bool __test_use_base_GetNodeByName = false;
+		public static Heartbeat __test_GetNodeByName_response = null;
 
 		public static void setShouldRabbitmqInit(bool should)
 		{
@@ -59,6 +63,12 @@ namespace PeachFarm.Test
 		{
 			Object foo = new Object();
 			base.StatusCheck(foo);
+		}
+
+		public void callStartPeach(StartPeachRequest request, string replyQueue)
+		{
+			if (__test_use_base_StartPeach) base.StartPeach(request, replyQueue);
+			else this.StartPeach(request, replyQueue);
 		}
 
 		public void callStopPeach(StopPeachRequest request, string replyQueue)
@@ -98,6 +108,7 @@ namespace PeachFarm.Test
 		{
 			__test_reply_queues_hit.Add(replyQueue);
 			__test_reply_bodies.Add(body);
+			__test_reply_actions.Add(action);
 			// NOP for now at the what/how boundary
 		}
 
@@ -105,6 +116,24 @@ namespace PeachFarm.Test
 		{
 			if (__test_should_override_PublishToJob) return __test_PublishToJob_Response;
 			else                                     return base.PublishToJob(JobID, RequestBody, action);
+		}
+
+		protected override Heartbeat GetNodeByName(string ipaddress, string mongoConnectionString)
+		{
+			if (!__test_use_base_GetNodeByName) return __test_GetNodeByName_response;
+			else return base.GetNodeByName(ipaddress, mongoConnectionString);
+		}
+
+		protected override void DeclareJobExchange(string JobId, List<string> queueNames)
+		{
+			// NOP, always for now
+			// base.DeclareJobExchange(JobId, queueNames);
+		}
+
+		protected override void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
+		{
+			// NOP always for now
+			// base.CommitJobToMongo(request, nodes);
 		}
 	}
 }

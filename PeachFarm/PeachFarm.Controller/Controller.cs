@@ -147,7 +147,7 @@ namespace PeachFarm.Controller
 			return result;
 		}
 
-		private void DeclareJobExchange(string jobID, List<string> queueNames)
+		protected virtual void DeclareJobExchange(string jobID, List<string> queueNames)
 		{
 			string exchangeName = String.Format(QueueNames.EXCHANGE_JOB, jobID);
 			rabbit.DeclareExchange(exchangeName, queueNames, jobID);
@@ -282,51 +282,51 @@ namespace PeachFarm.Controller
 			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
 		}
 
-		private void StartPeach(StartPeachRequest request, string replyQueue)
+		protected virtual void StartPeach(StartPeachRequest request, string replyQueue)
 		{
 			string action = Actions.StartPeach;
 			request.MongoDbConnectionString = config.MongoDb.ConnectionString;
-
-			// moving this to Admin
-			//request.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
-
 			StartPeachResponse response = new StartPeachResponse(request);
 
-
+			#region SingleSpecificNodeChosen
+			// is a single specific node chosen?
 			if ((request.ClientCount == 1) && (request.IPAddress.Length > 0))
 			{
-				var node = DatabaseHelper.GetNodeByName(request.IPAddress, config.MongoDb.ConnectionString);
-				
+				var node = GetNodeByName(request.IPAddress, config.MongoDb.ConnectionString);
+
 				if ((node != null) && (node.Status == Status.Alive))
 				{
+					// run job with this node's IP on 1 box (command line start with --clientCount=1)
 					DeclareJobExchange(request.JobID, new List<string>() { node.QueueName });
-
 					CommitJobToMongo(request, new List<Heartbeat>(){ node });
-
 					PublishToJob(request.JobID, request.Serialize(), action);
-
-
 					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
+					// null node returned, OR node is not alive
 					response.JobID = String.Empty;
 					response.Success = false;
 					response.ErrorMessage = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
 					Reply(response.Serialize(), action, replyQueue);
 				}
 			}
+			#endregion
 			else
 			{
+				// either both ipaddress and clientcount not given, or clientcount nonzero w/ no ips
 				var nodes = NodeList(config);
 				var jobNodes = new List<Heartbeat>();
 
+				#region DoOrDontCareAboutTags
 				if (String.IsNullOrEmpty(request.Tags))
 				{
+					// grab all nodes
 					jobNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 				}
 				else
 				{
+					// grab all nodes that match the tags given
 					var aliveNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
 					var ts = request.Tags.Split(',').ToList();
 					foreach (Heartbeat node in aliveNodes)
@@ -338,30 +338,23 @@ namespace PeachFarm.Controller
 						}
 					}
 				}
-
+				#endregion
 				if ((jobNodes.Count > 0) && (jobNodes.Count >= request.ClientCount))
 				{
 					if (request.ClientCount <= 0)
 					{
 						request.ClientCount = jobNodes.Count;
 					}
-
 					jobNodes = jobNodes.Take(request.ClientCount).ToList();
 					var jobQueues = (from Heartbeat h in jobNodes select h.QueueName).ToList();
-
 					DeclareJobExchange(request.JobID, jobQueues);
-
 					CommitJobToMongo(request, jobNodes);
-
 					uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
 					for(int i=0;i<jobQueues.Count;i++)
 					{
 						request.Seed = baseseed + Convert.ToUInt32(i);
 						rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
 					}
-
-					//PublishToJob(request.JobID, request.Serialize(), action);
-
 					Reply(response.Serialize(), action, replyQueue);
 				}
 				else
@@ -479,7 +472,7 @@ namespace PeachFarm.Controller
 		}
 		#endregion
 
-		private void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
+		protected virtual void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
 		{
 
 			#region Create Job record in Mongo
@@ -599,6 +592,11 @@ namespace PeachFarm.Controller
 		{
 			/* This could be static, but we need to be able to override it for testing purposes */
 			return DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+		}
+
+		protected virtual Heartbeat GetNodeByName(string ipaddress, string mongoConnectionString)
+		{
+			return DatabaseHelper.GetNodeByName(ipaddress, mongoConnectionString);
 		}
 	}
 }

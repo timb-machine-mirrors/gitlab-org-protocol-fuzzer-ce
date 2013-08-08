@@ -246,11 +246,78 @@ namespace PeachFarm.Test
 			Assert.IsTrue(split[1].Contains(spr.JobID));
 		}
 
+		#region SingleSpecificNode
 		[Test]
-		public void Test_StartPeach()
+		public void Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned()
 		{
-			Assert.IsTrue(false);
+			TestController.__test_use_base_StartPeach = true;
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 1;
+			startReq.IPAddress = "4.2.2.2";
+			string replyQueue = "TestReplyQueue";
+			tc.callStartPeach(startReq, replyQueue);
+
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("No Alive Node"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(startReq.IPAddress));
 		}
+
+		[Test]
+		public void Test_StartPeach_SpecificSingleNodeChosen_NonLiveNodeReturned()
+		{
+			TestController.__test_use_base_StartPeach = true;
+			// next two lines different than Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned
+			TestController.__test_GetNodeByName_response = new Heartbeat();
+			TestController.__test_GetNodeByName_response.Status = Status.Stopping;
+			// ---------------------------------------------------------------------------------------
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 1;
+			startReq.IPAddress = "4.2.2.2";
+			string replyQueue = "TestReplyQueue";
+			tc.callStartPeach(startReq, replyQueue);
+
+			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			// foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("No Alive Node"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(startReq.IPAddress));
+		}
+
+		[Test]
+		public void Test_StartPeach_SpecificSingleNodeChosen_LiveNodeReturned()
+		{
+			TestController.__test_use_base_StartPeach = true;
+			TestController.__test_should_override_PublishToJob = true;
+			// next two lines different than Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned
+			TestController.__test_GetNodeByName_response = new Heartbeat();
+			TestController.__test_GetNodeByName_response.Status = Status.Alive;
+			// ---------------------------------------------------------------------------------------
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 1;
+			startReq.IPAddress = "4.2.2.2";
+			string replyQueue = "TestReplyQueue";
+			tc.callStartPeach(startReq, replyQueue);
+
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
+			Assert.IsTrue(TestController.__test_reply_actions.Contains("StartPeach"));
+		}
+		#endregion
+
 
 
 		[Test]
