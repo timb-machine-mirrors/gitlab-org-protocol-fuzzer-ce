@@ -44,7 +44,7 @@ namespace PeachFarm.Controller
 		{
 			// Startup as application
 			IPAddress[] ipaddresses = LocalIPs();
-			string ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+			ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			this.config = this.ControllerConfigSection();
 			this.config.Validate();
@@ -54,7 +54,7 @@ namespace PeachFarm.Controller
 
 			if (statusCheck == null)
 			{
-				statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(1));
+				statusCheck = new Timer(new TimerCallback(StatusCheck), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
 			}
 		}
 
