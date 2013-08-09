@@ -272,8 +272,10 @@ namespace PeachFarm.Test
 		{
 			TestController.__test_use_base_StartPeach = true;
 			// next two lines different than Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned
-			TestController.__test_GetNodeByName_response = new Heartbeat();
-			TestController.__test_GetNodeByName_response.Status = Status.Stopping;
+			Heartbeat hb = new Heartbeat();
+			hb.Status = Status.Stopping;
+			hb.NodeName = "4.2.2.2";
+			TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
 			// ---------------------------------------------------------------------------------------
 			TestController tc = new TestController();
 
@@ -296,9 +298,11 @@ namespace PeachFarm.Test
 		{
 			TestController.__test_use_base_StartPeach = true;
 			TestController.__test_should_override_PublishToJob = true;
-			// next two lines different than Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned
-			TestController.__test_GetNodeByName_response = new Heartbeat();
-			TestController.__test_GetNodeByName_response.Status = Status.Alive;
+			// next four lines different than Test_StartPeach_SpecificSingleNodeChosen_NullNodeReturned
+			Heartbeat hb = new Heartbeat();
+			hb.Status = Status.Alive;
+			hb.NodeName = "4.2.2.2";
+			TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
 			// ---------------------------------------------------------------------------------------
 			TestController tc = new TestController();
 
@@ -318,6 +322,139 @@ namespace PeachFarm.Test
 		}
 		#endregion
 
+		[Test]
+		public void Test_StartPeach_NotEnoughLiveNodes_NodeCountTotal()
+		{
+			TestController.__test_use_base_StartPeach = true;
+			TestController.__test_should_override_PublishToJob = true;
+			TestController.__test_node_list = new List<Heartbeat>();
+
+			#region  add nodes
+			Heartbeat hb = new Heartbeat();
+			hb.NodeName = "4.2.2.2";
+			hb.Status = Status.Stopping;
+			TestController.__test_node_list.Add(hb);
+			#endregion
+
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 2;
+			string replyQueue = "TestReplyQueue";
+
+			tc.callStartPeach(startReq, replyQueue);
+
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("Not enough Alive nodes available"));
+			Assert.IsTrue(TestController.__test_reply_actions.Contains("StartPeach"));
+		}
+
+		[Test]
+		public void Test_StartPeach_NotEnoughLiveNodes_StatusCount()
+		{
+			TestController.__test_use_base_StartPeach = true;
+			TestController.__test_should_override_PublishToJob = true;
+			TestController.__test_node_list = new List<Heartbeat>();
+
+			#region  add nodes
+			Heartbeat hb = new Heartbeat();
+			hb.NodeName = "4.2.2.2";
+			hb.Status = Status.Alive; // <<<<=======================
+			TestController.__test_node_list.Add(hb);
+
+			Heartbeat hb2 = new Heartbeat();
+			hb2.NodeName = "4.2.2.2";
+			hb2.Status = Status.Stopping; // <<<<=======================
+			TestController.__test_node_list.Add(hb2);
+
+			Heartbeat hb3 = new Heartbeat();
+			hb3.NodeName = "4.2.2.2";
+			hb3.Status = Status.Stopping; // <<<<=======================
+			TestController.__test_node_list.Add(hb3);
+			#endregion
+
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 2;
+			string replyQueue = "TestReplyQueue";
+
+			tc.callStartPeach(startReq, replyQueue);
+
+			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
+			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("Not enough Alive nodes available"));
+			Assert.IsTrue(TestController.__test_reply_actions.Contains("StartPeach"));
+		}
+
+		[Test]
+		public void Test_StartPeach_SUCCESS_NodesWithMatchingTags()
+		{
+			TestController.__test_use_base_StartPeach = true;
+			TestController.__test_should_override_PublishToJob = true;
+			TestController.__test_node_list = new List<Heartbeat>();
+
+			#region  add nodes
+			// we're interested in the tags here
+			Heartbeat hb = new Heartbeat();
+			hb.NodeName = "4.2.2.2";
+			hb.Status = Status.Alive;
+			hb.Tags = "foo.test"; // <<<<=======================
+			hb.QueueName = "test.q1";
+			TestController.__test_node_list.Add(hb);
+
+			Heartbeat hb2 = new Heartbeat();
+			hb2.NodeName = "4.2.2.3";
+			hb2.Status = Status.Alive;
+			hb2.Tags = "foo.test"; // <<<<=======================
+			hb2.QueueName = "test.q2";
+			TestController.__test_node_list.Add(hb2);
+
+			Heartbeat hb3 = new Heartbeat();
+			hb3.NodeName = "4.2.2.4";
+			hb3.Status = Status.Alive;
+			hb3.Tags = ""; // <<<<=======================
+			hb3.QueueName = "test.q3";
+			TestController.__test_node_list.Add(hb3);
+			#endregion
+
+			TestController tc = new TestController();
+
+			StartPeachRequest startReq = new StartPeachRequest();
+			startReq.ClientCount = 2;
+			startReq.Tags = "foo.test";
+			startReq.IPAddress = ""; // otherwise it err's on IPAddress.length
+
+			string replyQueue = "TestReplyQueue";
+
+			tc.callStartPeach(startReq, replyQueue);
+
+			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
+			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
+			// foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
+
+			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
+
+			Assert.IsTrue(TestController.__test_seeded_job_queues.Contains(hb.QueueName));
+			Assert.IsTrue(TestController.__test_seeded_job_queues.Contains(hb2.QueueName));
+			Assert.IsTrue(! TestController.__test_seeded_job_queues.Contains(hb3.QueueName));
+
+			string ReplyBody = TestController.__test_reply_bodies[0];
+			Assert.IsTrue(   ReplyBody.Contains("\n<StartPeachResponse"));
+			Assert.IsTrue( ! ReplyBody.Contains("<ErrorMessage"));
+			Assert.IsTrue(TestController.__test_reply_actions.Contains("StartPeach"));
+		}
 
 
 		[Test]
@@ -371,6 +508,12 @@ namespace PeachFarm.Test
 
 		[Test]
 		public void Test_RabbitInitializer()
+		{
+			Assert.IsTrue(false);
+		}
+
+		[Test]
+		public void Test_SeedTheJobQueues()
 		{
 			Assert.IsTrue(false);
 		}

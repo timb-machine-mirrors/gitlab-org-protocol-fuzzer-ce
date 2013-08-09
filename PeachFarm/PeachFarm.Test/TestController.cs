@@ -26,7 +26,11 @@ namespace PeachFarm.Test
 		public static bool __test_PublishToJob_Response = false;
 		public static bool __test_use_base_StartPeach = false;
 		public static bool __test_use_base_GetNodeByName = false;
-		public static Heartbeat __test_GetNodeByName_response = null;
+		public static bool __test_use_base_SeedTheJobQueues = false;
+		public static List<string> __test_seeded_job_queues = new List<string>();
+
+		// map ip addresses (as strings) to HeartBeats (aka nodes)
+		public static Dictionary<string, Heartbeat> __test_GetNodeByName_nodes = new Dictionary<string,Heartbeat>();
 
 		public static void setShouldRabbitmqInit(bool should)
 		{
@@ -120,7 +124,11 @@ namespace PeachFarm.Test
 
 		protected override Heartbeat GetNodeByName(string ipaddress, string mongoConnectionString)
 		{
-			if (!__test_use_base_GetNodeByName) return __test_GetNodeByName_response;
+			if (!__test_use_base_GetNodeByName)
+			{
+				if (!__test_GetNodeByName_nodes.ContainsKey(ipaddress)) return null;
+				else return __test_GetNodeByName_nodes[ipaddress];
+			}
 			else return base.GetNodeByName(ipaddress, mongoConnectionString);
 		}
 
@@ -134,6 +142,12 @@ namespace PeachFarm.Test
 		{
 			// NOP always for now
 			// base.CommitJobToMongo(request, nodes);
+		}
+
+		protected override void SeedTheJobQueues(List<string> jobQueues, StartPeachRequest request, string action)
+		{
+			if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = jobQueues;
+			else base.SeedTheJobQueues(jobQueues, request, action);
 		}
 	}
 }
