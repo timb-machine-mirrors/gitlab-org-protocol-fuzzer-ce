@@ -32,15 +32,15 @@ namespace PeachFarm.Reporting
 
 
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
+			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR, 1000, false, true);
 		}
 
 		public void Close()
 		{
-			if (rabbit.IsListening)
-			{
-				rabbit.StopListener(false);
-			}
+			//if (rabbit.IsListening)
+			//{
+			//  rabbit.StopListener(false);
+			//}
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -48,11 +48,11 @@ namespace PeachFarm.Reporting
 			if(e.Action != Actions.GenerateReport)
 				return;
 
-			rabbit.StopListener(false);
-
 			GenerateReportRequest request = GenerateReportRequest.Deserialize(e.Body);
 
 			GenerateReportResponse response = new GenerateReportResponse();
+
+			System.Diagnostics.Debug.WriteLine("Report generator: MESSAGE RECEIVED " + request.JobID);
 
 			try
 			{
@@ -68,7 +68,7 @@ namespace PeachFarm.Reporting
 
 			rabbit.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
 
-			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
+			rabbit.ResumeListening();
 		}
 
 		#region GenerateReportCompleted
@@ -126,12 +126,8 @@ namespace PeachFarm.Reporting
 
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
-#if DEBUG
-				DatabaseHelper.DeleteGridFSFile(job.ReportLocation, config.MongoDb.ConnectionString);
-#else
 				response.Status = ReportGenerationStatus.Complete;
 				return response;
-#endif
 			}
 
 			Telerik.Reporting.Processing.ReportProcessor reportProcessor = new Telerik.Reporting.Processing.ReportProcessor();
