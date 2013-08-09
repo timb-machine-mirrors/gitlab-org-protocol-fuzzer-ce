@@ -88,7 +88,8 @@ namespace PeachFarmMonitor
 				errors = DatabaseHelper.GetAllErrors(monitorconfig.MongoDb.ConnectionString);
 	      foreach (var error in errors)
 	      {
-		      error.ErrorMessage = HttpUtility.HtmlEncode(error.ErrorMessage);
+		      error.ErrorMessage = error.ErrorMessage.Replace("<", String.Empty).Replace(">", String.Empty).Replace("/", String.Empty);
+		      //error.ErrorMessage = String.Empty;
 	      }
 				errorsGrid.DataSource = errors;
 				errorsGrid.DataBind();
@@ -115,7 +116,7 @@ namespace PeachFarmMonitor
             jvm = new JobViewModel(job);
           }
 
-					if ((from e in errors where e.JobID == job.JobID select e).Count() > 0)
+					if (errors.Any((e) => e.JobID == job.JobID))
 					{
 						jvm.ErrorsOccurred = true;
 						jvm.Status = JobStatus.Error;
@@ -185,6 +186,7 @@ namespace PeachFarmMonitor
       }
     }
 
+
     protected void nodesGrid_ItemDataBound(object sender, GridItemEventArgs e)
     {
       GridDataItem item = e.Item as GridDataItem;
@@ -248,7 +250,14 @@ namespace PeachFarmMonitor
 						}
 						else
 						{
-							dr.Text = "Processing";
+							if (job.FaultCount == 0)
+							{
+								dr.Text = "No Faults";
+							}
+							else
+							{
+								dr.Text = "Processing";
+							}
 						}
 					}
 					else

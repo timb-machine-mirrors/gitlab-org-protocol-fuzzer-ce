@@ -8,6 +8,7 @@ using System.IO;
 using PeachFarm.Common.Mongo;
 using System.ComponentModel;
 using PeachFarm.Common;
+using Telerik.Reporting.Drawing;
 using Telerik.Reporting.Processing;
 
 namespace PeachFarm.Reporting
@@ -31,15 +32,15 @@ namespace PeachFarm.Reporting
 
 
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
+			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR, 1000, false, true);
 		}
 
 		public void Close()
 		{
-			if (rabbit.IsListening)
-			{
-				rabbit.StopListener(false);
-			}
+			//if (rabbit.IsListening)
+			//{
+			//  rabbit.StopListener(false);
+			//}
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -47,11 +48,11 @@ namespace PeachFarm.Reporting
 			if(e.Action != Actions.GenerateReport)
 				return;
 
-			rabbit.StopListener(false);
-
 			GenerateReportRequest request = GenerateReportRequest.Deserialize(e.Body);
 
 			GenerateReportResponse response = new GenerateReportResponse();
+
+			System.Diagnostics.Debug.WriteLine("Report generator: MESSAGE RECEIVED " + request.JobID);
 
 			try
 			{
@@ -67,7 +68,7 @@ namespace PeachFarm.Reporting
 
 			rabbit.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
 
-			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR);
+			rabbit.ResumeListening();
 		}
 
 		#region GenerateReportCompleted
@@ -144,13 +145,20 @@ namespace PeachFarm.Reporting
 				return ReturnError(request.JobID, "Error while loading report file: " + ex.Message);
 			}
 
+			Unit margin = new Unit(0.5, UnitType.Inch);
+			irs.ReportDocument.PageSettings = new PageSettings();
+			irs.ReportDocument.PageSettings.Margins.Bottom = margin;
+			irs.ReportDocument.PageSettings.Margins.Left = margin;
+			irs.ReportDocument.PageSettings.Margins.Right = margin;
+			irs.ReportDocument.PageSettings.Margins.Top = margin;
+
+
 			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
 			irs.Parameters.Add("jobID", request.JobID);
+			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 			
-			//irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
-			//string documentName = String.Empty;
-			//bool success = reportProcessor.RenderReport("PDF", irs, deviceInfo, new Telerik.Reporting.Processing.CreateStream(CreateStream), out documentName);
+
 			RenderingResult result = null;
 			try
 			{

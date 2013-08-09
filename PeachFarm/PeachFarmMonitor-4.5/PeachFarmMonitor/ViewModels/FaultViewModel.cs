@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using PeachFarm.Common.Mongo;
+using PeachFarmMonitor.Configuration;
+using System.Configuration;
 
 namespace PeachFarmMonitor.ViewModels
 {
@@ -29,14 +31,24 @@ namespace PeachFarmMonitor.ViewModels
       this.TestName = fault.TestName;
       this.Title = fault.Title;
 
-			this.GeneratedFiles = new List<GeneratedFileViewModel>();
+			this.GeneratedFileViewModels = new List<GeneratedFileViewModel>();
 			foreach (var gf in fault.GeneratedFiles)
 			{
-				this.GeneratedFiles.Add(new GeneratedFileViewModel(gf));
+				this.GeneratedFileViewModels.Add(new GeneratedFileViewModel(gf));
 			}
     }
 
-    public new List<GeneratedFileViewModel> GeneratedFiles { get; set; }
+    public List<GeneratedFileViewModel> GeneratedFileViewModels { get; set; }
+
+		public void GetFullTextForGeneratedFiles()
+		{
+			var monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
+
+			foreach (var gf in this.GeneratedFileViewModels)
+			{
+				gf.FullText = DatabaseHelper.ReadFromGridFS(gf.GridFsLocation, monitorconfig.MongoDb.ConnectionString);
+			}
+		}
   }
 
 }

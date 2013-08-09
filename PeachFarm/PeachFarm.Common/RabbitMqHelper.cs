@@ -27,6 +27,8 @@ namespace PeachFarm.Common
 		private System.Timers.Timer listenTimer;
 		private string listenQueue;
 
+		private bool processOne = false;
+
 		public RabbitMqHelper(string hostName, int port = -1, string userName = "guest", string password = "guest", bool ssl = false)
 		{
 			if (String.IsNullOrEmpty(hostName))
@@ -47,7 +49,7 @@ namespace PeachFarm.Common
 
 		#region Public Methods
 
-		public void StartListener(string queue, double interval = 1000)
+		public void StartListener(string queue, double interval = 1000, bool purgeQueue = true, bool processOne = false)
 		{
 			if (String.IsNullOrEmpty(queue))
 			{
@@ -55,10 +57,15 @@ namespace PeachFarm.Common
 			}
 
 			listenQueue = queue;
+			this.processOne = processOne;
+
 			lock (declarer)
 			{
 				declarer.QueueDeclare(listenQueue, true, false, false, null);
-				declarer.QueuePurge(listenQueue);
+				if (purgeQueue)
+				{
+					declarer.QueuePurge(listenQueue);
+				}
 			}
 			listenTimer = new System.Timers.Timer(interval);
 			listenTimer.Elapsed += Listen;
@@ -82,6 +89,11 @@ namespace PeachFarm.Common
 				}
 			}
 			listenQueue = String.Empty;
+		}
+
+		public void ResumeListening()
+		{
+			IsListening = true;
 		}
 
 		public void PublishToQueue(string queue, string body, string action, string replyQueue = "")
@@ -277,10 +289,9 @@ namespace PeachFarm.Common
 		#endregion
 
 		#region private functions
-		private static bool ticking;
+
 		private void Listen(object source, System.Timers.ElapsedEventArgs e)
 		{
-			ticking = true;
 			if (IsListening)
 			{
 				BasicGetResult result = null;
@@ -299,6 +310,11 @@ namespace PeachFarm.Common
 
 					if (result != null)
 					{
+						if (processOne)
+						{
+							IsListening = false;
+						}
+
 						AckMessage(result.DeliveryTag);
 
 						string body = encoding.GetString(result.Body);
@@ -311,9 +327,8 @@ namespace PeachFarm.Common
 
 						OnMessageReceived(action, body, replyQueue);
 					}
-				} while (result != null);
+				} while (result != null && !processOne);
 			}
-			ticking = false;
 		}
 
 		private void OpenConnection()

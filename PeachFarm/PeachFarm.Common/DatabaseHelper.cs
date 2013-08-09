@@ -346,6 +346,26 @@ namespace PeachFarm.Common.Mongo
 			return;
 		}
 
+		public static string ReadFromGridFS(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+			if (db.GridFS.Exists(remoteFile))
+			{
+				using (StreamReader reader = db.GridFS.OpenText(remoteFile))
+				{
+					return reader.ReadToEnd();
+				}
+			}
+			else
+			{
+				throw new Exception("File not found: " + remoteFile);
+			}
+
+			//server.Disconnect();
+		}
+
 		public static bool GridFSFileExists(string remoteFile, string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
@@ -403,6 +423,37 @@ namespace PeachFarm.Common.Mongo
 				file.Delete();
 			}
 
+			server.Disconnect();
+		}
+
+		public static void DeleteAllPDFs(string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			var pdfs = db.GridFS.Find(Query.Matches("filename", ".pdf"));
+			foreach (var mongoGridFsFileInfo in pdfs)
+			{
+				mongoGridFsFileInfo.Delete();
+			}
+
+			var jobs = DatabaseHelper.GetAllJobs(connectionString);
+			foreach (var job in jobs)
+			{
+				job.ReportLocation = "";
+				job.SaveToDatabase(connectionString);
+			}
+
+			server.Disconnect();
+		}
+
+		public static void DeleteGridFSFile(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			if (db.GridFS.Exists(remoteFile))
+			{
+				db.GridFS.Delete(remoteFile);
+			}
 			server.Disconnect();
 		}
 #endif
