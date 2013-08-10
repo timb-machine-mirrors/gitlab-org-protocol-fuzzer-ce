@@ -11,6 +11,8 @@ using MongoDB.Driver.GridFS;
 using MongoDB.Driver.Builders;
 using System.Security.Cryptography;
 
+using PeachFarm.Common.Mongo;
+
 namespace PeachFarm.Common.Messages
 {
 	public static class ExtensionMethods
@@ -42,6 +44,58 @@ namespace PeachFarm.Common.Messages
 				else
 					return _id.ToString();
 			}
+		}
+
+		public virtual Messages.Heartbeat SaveToDatabase(string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			var query = Query.EQ("NodeName", this.NodeName);
+			var storedHeartbeat = collection.FindOne(query);
+			if (storedHeartbeat == null)
+			{
+				collection.Save(this);
+				storedHeartbeat = this;
+			}
+			else
+			{
+				storedHeartbeat.Iteration = this.Iteration;
+				storedHeartbeat.JobID = this.JobID;
+				storedHeartbeat.PitFileName = this.PitFileName;
+				storedHeartbeat.Seed = this.Seed;
+				storedHeartbeat.Stamp = this.Stamp;
+				storedHeartbeat.Tags = this.Tags;
+				storedHeartbeat.UserName = this.UserName;
+				storedHeartbeat.QueueName = this.QueueName;
+				storedHeartbeat.ErrorMessage = this.ErrorMessage;
+				storedHeartbeat.Status = this.Status;
+				collection.Save(storedHeartbeat);
+			}
+			collection.Database.Server.Disconnect();
+
+			return storedHeartbeat;
+		}
+
+		public virtual void RemoveFromDatabase(string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
+			var query = Query.EQ("NodeName", this.NodeName);
+			if(collection.FindOne(query) != null)
+			{
+				collection.Remove(query);
+			}
+			collection.Database.Server.Disconnect();
+
+			return;
+		}
+
+		public virtual Messages.Heartbeat SaveToErrors(string connectionString)
+		{
+			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			this._id = BsonObjectId.Empty;
+			collection.Save(this);
+			collection.Database.Server.Disconnect();
+
+			return this;
 		}
 	}
 
