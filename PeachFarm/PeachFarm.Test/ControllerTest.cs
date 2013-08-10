@@ -16,6 +16,8 @@ namespace PeachFarm.Test
 	[TestFixture]
 	public class ControllerTests
 	{
+		public static Status[] AllStatuses = {Status.Alive, Status.Error, Status.Late, Status.Running, Status.Stopping};
+
 		#region setup
 		private static PeachFarm.Reporting.Configuration.ReportGeneratorSection config;
 
@@ -36,6 +38,8 @@ namespace PeachFarm.Test
 			// we want to do this _almost_ everywhere
 			TestController.setShouldRabbitmqInit(false);
 			TestController.setShouldMongodbInit(false);
+
+			TestController.ResetStaticTestingVariables();
 		}
 
 		[TearDown]
@@ -107,15 +111,15 @@ namespace PeachFarm.Test
 			TestController.__test_node_list = new List<Heartbeat>();
 			var nl = tc.callNodeList();
 
-			System.Console.WriteLine("Calling first status check");
+			// System.Console.WriteLine("Calling first status check");
 			tc.callStatusCheck();
 
-			System.Console.WriteLine("Calling second status check");
+			// System.Console.WriteLine("Calling second status check");
 			TestHeartbeat hbNow = new TestHeartbeat();
 			hbNow.Stamp = DateTime.Now;
 			nl.Add(hbNow);
 
-			System.Console.WriteLine("Calling third status check");
+			// System.Console.WriteLine("Calling third status check");
 			TestHeartbeat hb = new TestHeartbeat();
 			hb.Stamp = DateTime.Now.AddMinutes(-21);
 			nl.Add(hb);
@@ -123,13 +127,13 @@ namespace PeachFarm.Test
 			Assert.IsTrue(hb.__test_was_saved_to_errors);
 			Assert.IsTrue(hb.__test_was_removed_from_database);
 
-			System.Console.WriteLine("Calling fourth status check");
+			// System.Console.WriteLine("Calling fourth status check");
 			hb.Stamp = DateTime.Now.AddMinutes(-11);
 			nl.Add(hb);
 			tc.callStatusCheck();
 			Assert.IsTrue(hb.__test_was_saved_to_database);
 
-			System.Console.WriteLine("Calling full up status check");
+			// System.Console.WriteLine("Calling full up status check");
 			// for funsiesa, don't flop under pressure
 			for (int k = 0; k < 1000; k++) nl.Add(hb);
 			tc.callStatusCheck();
@@ -148,8 +152,6 @@ namespace PeachFarm.Test
 			spr.JobID = "asdfasdfasdfasdfasdfasdf";
 
 			tc.callStopPeach(spr, rq);
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
 			Assert.AreEqual(TestController.__test_reply_bodies.Count, 1);
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(spr.JobID));
@@ -171,8 +173,6 @@ namespace PeachFarm.Test
 			spr.JobID = "asdfasdfasdfasdfasdfasdf";
 
 			tc.callStopPeach(spr, rq);
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
 
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(rq));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
@@ -201,8 +201,6 @@ namespace PeachFarm.Test
 
 			tc.callStopPeach(spr, rq);
 
-			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("<ErrorMessage>"));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("Cannot stop job"));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(spr.JobID));
@@ -234,8 +232,6 @@ namespace PeachFarm.Test
 
 			tc.callStopPeach(spr, rq);
 
-			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
 
 			string replyBody = TestController.__test_reply_bodies[0];
 			var split = replyBody.Split('\n');
@@ -259,10 +255,6 @@ namespace PeachFarm.Test
 			string replyQueue = "TestReplyQueue";
 			tc.callStartPeach(startReq, replyQueue);
 
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
-
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("No Alive Node"));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(startReq.IPAddress));
 		}
@@ -284,10 +276,6 @@ namespace PeachFarm.Test
 			startReq.IPAddress = "4.2.2.2";
 			string replyQueue = "TestReplyQueue";
 			tc.callStartPeach(startReq, replyQueue);
-
-			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			// foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
 
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("No Alive Node"));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains(startReq.IPAddress));
@@ -311,10 +299,6 @@ namespace PeachFarm.Test
 			startReq.IPAddress = "4.2.2.2";
 			string replyQueue = "TestReplyQueue";
 			tc.callStartPeach(startReq, replyQueue);
-
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
 
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
@@ -343,10 +327,6 @@ namespace PeachFarm.Test
 			string replyQueue = "TestReplyQueue";
 
 			tc.callStartPeach(startReq, replyQueue);
-
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
 
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
@@ -386,10 +366,6 @@ namespace PeachFarm.Test
 			string replyQueue = "TestReplyQueue";
 
 			tc.callStartPeach(startReq, replyQueue);
-
-			foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
 
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
 			Assert.IsTrue(TestController.__test_reply_bodies[0].Contains("\n<StartPeachResponse"));
@@ -440,10 +416,6 @@ namespace PeachFarm.Test
 
 			tc.callStartPeach(startReq, replyQueue);
 
-			// foreach (var q in TestController.__test_reply_queues_hit) System.Console.WriteLine(q);
-			// foreach (var b in TestController.__test_reply_bodies) System.Console.WriteLine(b);
-			// foreach (var b in TestController.__test_reply_actions) System.Console.WriteLine(b);
-
 			Assert.IsTrue(TestController.__test_reply_queues_hit.Contains(replyQueue));
 
 			Assert.IsTrue(TestController.__test_seeded_job_queues.Contains(hb.QueueName));
@@ -458,65 +430,207 @@ namespace PeachFarm.Test
 
 
 		[Test]
-		public void Test_HeartBeatReceived()
+		public void Test_HeartBeatReceived_RemoveNode()
 		{
-			Assert.IsTrue(false);
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController tc = new TestController();
+
+			Heartbeat hb = new Heartbeat();
+			hb.Status = Status.Stopping;
+			hb.NodeName = "4.2.2.2";
+			TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+			tc.callHeartBeatReceived(hb);
+
+
+			Assert.IsTrue(TestController.__test_removed_nodes.Contains(hb));
 		}
 
 		[Test]
-		public void Test_ListNodes()
+		public void Test_HeartBeatReceived_UpdateNode()
 		{
-			Assert.IsTrue(false);
+			Status[] updatable = {Status.Alive, Status.Running, Status.Error, Status.Late};
+			foreach (var status in updatable)
+			{
+				TestController.__test_node_list = new List<Heartbeat>();
+				TestController tc = new TestController();
+
+				TestHeartbeat hb = new TestHeartbeat();
+				hb.Status = status;
+				hb.NodeName = "4.2.2.2";
+				TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+				tc.callHeartBeatReceived(hb);
+
+
+				Assert.IsTrue(! TestController.__test_removed_nodes.Contains(hb));
+				Assert.IsTrue(TestController.__test_updated_nodes.Contains(hb));
+			}
 		}
 
 		[Test]
-		public void Test_ListErrors()
+		public void Test_HeartBeatReceived_SaveErrors()
 		{
-			Assert.IsTrue(false);
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController tc = new TestController();
+
+			TestHeartbeat hb = new TestHeartbeat();
+			hb.Status = Status.Error;
+			hb.NodeName = "4.2.2.2";
+			TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+			tc.callHeartBeatReceived(hb);
+
+			Assert.IsTrue(hb.__test_was_saved_to_errors);
 		}
 
 		[Test]
-		public void Test_JobInfo()
+		public void Test_HeartBeatReceived_JobFinished()
 		{
-			Assert.IsTrue(false);
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController tc = new TestController();
+
+			TestHeartbeat hb = new TestHeartbeat();
+			hb.Status = Status.Alive;
+			hb.NodeName = "4.2.2.2";
+
+			TestHeartbeat previous_hb = new TestHeartbeat();
+			previous_hb.NodeName = "4.2.2.2";
+			previous_hb.Status = Status.Running;
+			previous_hb.JobID = "test_jobid";
+
+			TestController.__test_GetNodeByName_nodes[previous_hb.NodeName] = previous_hb;
+
+			tc.callHeartBeatReceived(hb);
+
+			var pushedOutReports = TestController.__test_pushed_out_reports;
+			Assert.IsTrue(pushedOutReports.Count == 1);
+			Assert.IsTrue(pushedOutReports[0].JobID == previous_hb.JobID);
 		}
 
 		[Test]
-		public void Test_Monitor()
+		public void Test_HeartBeatReceived_isNodeFinished_badHeartbeatStatus()
 		{
-			Assert.IsTrue(false);
+			foreach (var incomingStatus in AllStatuses)
+			{
+				if (incomingStatus == Status.Alive) continue; // skip dat one
+
+				// the __test_node_list being empty ensures isJobFinished true
+				TestController.__test_node_list = new List<Heartbeat>();
+				TestController tc = new TestController();
+
+				TestHeartbeat hb = new TestHeartbeat();
+				hb.Status = incomingStatus;   // <<======= this is the only thing that changes
+				hb.NodeName = "4.2.2.2";
+
+				TestHeartbeat previous_hb = new TestHeartbeat();
+				previous_hb.Status = Status.Running;
+				previous_hb.JobID = "previous_jobID";
+				TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+				tc.callHeartBeatReceived(hb);
+
+				Assert.IsTrue(TestController.__test_pushed_out_reports.Count == 0);
+			}
 		}
 
+		[Test]
+		public void Test_HeartBeatReceived_isNodeFinished_badLastHeartbeatStatus()
+		{
+			foreach (var previousStatus in AllStatuses)
+			{
+				if (previousStatus == Status.Running) continue; // <<<========   skip dat one
+
+				// the __test_node_list being empty ensures isJobFinished true
+				TestController.__test_node_list = new List<Heartbeat>();
+				TestController tc = new TestController();
+
+				TestHeartbeat hb = new TestHeartbeat();
+				hb.Status = Status.Alive;
+				hb.NodeName = "4.2.2.2";
+
+				TestHeartbeat previous_hb = new TestHeartbeat();
+				previous_hb.Status = previousStatus;   // <<======= this is the only thing that changes
+				previous_hb.JobID = "previous_jobID";
+				TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+				tc.callHeartBeatReceived(hb);
+
+				Assert.IsTrue(TestController.__test_pushed_out_reports.Count == 0);
+			}
+		}
+
+		[Test]
+		public void Test_HeartBeatReceived_isNodeFinished_badJobID()
+		{
+			// can't have null or empty
+			TestController.__test_node_list = new List<Heartbeat>();
+			TestController tc = new TestController();
+
+			TestHeartbeat hb = new TestHeartbeat();
+			hb.Status = Status.Alive;
+			hb.NodeName = "4.2.2.2";
+
+			TestHeartbeat previous_hb = new TestHeartbeat();
+			previous_hb.NodeName = hb.NodeName;
+			previous_hb.Status = Status.Running;
+			previous_hb.JobID = null; // <<<<<<===============  This thing
+
+			TestController.__test_GetNodeByName_nodes[hb.NodeName] = hb;
+
+			tc.callHeartBeatReceived(hb);
+
+			var pushedOutReports = TestController.__test_pushed_out_reports;
+			Assert.IsTrue(pushedOutReports.Count == 0);
+		}
+
+
+		[Ignore]
 		[Test]
 		public void Test_CommitJobToMongo()
 		{
-			// this has a lot of direct information with mongo... figure out how to shim this....
-			Assert.IsTrue(false);
+			// don't test, no real conditionals or intrestingness. lots of mongo stuff
+			throw new NotImplementedException();
 		}
 
-		[Test]
-		public void Test_UpdateNode()
-		{
-			Assert.IsTrue(false);
-		}
-
+		[Ignore]
 		[Test]
 		public void Test_MongoDBInitializer()
 		{
-			Assert.IsTrue(false);
+			// don't test
+			throw new NotImplementedException();
 		}
 
+		[Ignore]
 		[Test]
 		public void Test_RabbitInitializer()
 		{
-			Assert.IsTrue(false);
+			// don't test
+			throw new NotImplementedException();
 		}
 
+		[Ignore]
 		[Test]
 		public void Test_SeedTheJobQueues()
 		{
-			Assert.IsTrue(false);
+			// don't test
+			throw new NotImplementedException();
 		}
 
+		[Ignore]
+		[Test]
+		public void Test_RemoveNode()
+		{
+			// don't test
+			throw new NotImplementedException();
+		}
+
+		[Ignore]
+		[Test]
+		public void Test_UpdateNode()
+		{
+			// don't test
+			throw new NotImplementedException();
+		}
 	}
 }

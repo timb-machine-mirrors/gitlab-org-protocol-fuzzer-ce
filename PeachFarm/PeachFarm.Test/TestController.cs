@@ -16,7 +16,6 @@ namespace PeachFarm.Test
 		// fields then methods
 		public static IPAddress[] __test_LocalIPs = null;
 		public static List<Heartbeat> __test_node_list = null;
-
 		public static bool __test_use_test_job = false;
 		public static Common.Mongo.Job __test_job = null;
 		public static List<string> __test_reply_queues_hit = new List<string>();
@@ -28,6 +27,11 @@ namespace PeachFarm.Test
 		public static bool __test_use_base_GetNodeByName = false;
 		public static bool __test_use_base_SeedTheJobQueues = false;
 		public static List<string> __test_seeded_job_queues = new List<string>();
+		public static bool __test_use_base_RemoveNode = false;
+		public static bool __test_use_base_UpdateNode = false;
+		public static List<Heartbeat> __test_removed_nodes = new List<Heartbeat>();
+		public static List<Heartbeat> __test_updated_nodes = new List<Heartbeat>();
+		public static List<GenerateReportRequest> __test_pushed_out_reports = new List<GenerateReportRequest>();
 
 		// map ip addresses (as strings) to HeartBeats (aka nodes)
 		public static Dictionary<string, Heartbeat> __test_GetNodeByName_nodes = new Dictionary<string,Heartbeat>();
@@ -148,6 +152,66 @@ namespace PeachFarm.Test
 		{
 			if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = jobQueues;
 			else base.SeedTheJobQueues(jobQueues, request, action);
+		}
+
+		protected override void RemoveNode(Heartbeat heartbeat)
+		{
+			if (__test_use_base_RemoveNode)
+			{
+				base.RemoveNode(heartbeat);
+			}
+			else
+			{
+				__test_removed_nodes.Add(heartbeat);
+			}
+		}
+
+		protected override void UpdateNode(Heartbeat heartbeat)
+		{
+			if (__test_use_base_UpdateNode)
+			{
+				base.UpdateNode(heartbeat);
+			}
+			else
+			{
+				__test_updated_nodes.Add(heartbeat);
+			}
+		}
+
+		public void callHeartBeatReceived(Heartbeat hb)
+		{
+			base.HeartbeatReceived(hb);
+		}
+
+		protected override void PushReportToQueue(GenerateReportRequest grr)
+		{
+			__test_pushed_out_reports.Add(grr);
+		}
+
+		public static void ResetStaticTestingVariables()
+		{
+			// This is basically copied from the stuff at the top
+			TestController.__test_LocalIPs = null;
+			TestController.__test_node_list = null;
+			TestController.__test_use_test_job = false;
+			TestController.__test_job = null;
+			TestController.__test_reply_queues_hit = new List<string>();
+			TestController.__test_reply_bodies     = new List<string>();
+			TestController.__test_reply_actions    = new List<string>();
+			TestController.__test_should_override_PublishToJob = false;
+			TestController.__test_PublishToJob_Response = false;
+			TestController.__test_use_base_StartPeach = false;
+			TestController.__test_use_base_GetNodeByName = false;
+			TestController.__test_use_base_SeedTheJobQueues = false;
+			TestController.__test_seeded_job_queues = new List<string>();
+			TestController.__test_use_base_RemoveNode = false;
+			TestController.__test_use_base_UpdateNode = false;
+			TestController.__test_removed_nodes = new List<Heartbeat>();
+			TestController.__test_updated_nodes = new List<Heartbeat>();
+			TestController.__test_pushed_out_reports = new List<GenerateReportRequest>();
+
+			// map ip addresses (as strings) to HeartBeats (aka nodes)
+			TestController.__test_GetNodeByName_nodes = new Dictionary<string,Heartbeat>();
 		}
 	}
 }

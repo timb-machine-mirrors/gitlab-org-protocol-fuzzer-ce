@@ -454,7 +454,7 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		private void HeartbeatReceived(Heartbeat heartbeat)
+		protected void HeartbeatReceived(Heartbeat heartbeat)
 		{
 			/* The last received Heartbeat for every online Node is stored in MongoDB.
 			 * When a new Heartbeat is received, that record is overwritten.
@@ -462,19 +462,21 @@ namespace PeachFarm.Controller
 			 */
 
 			// find the Heartbeat in the Nodes collection that matches the Node in the incoming heartbeat 
-			Heartbeat lastHeartbeat = DatabaseHelper.GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
+			Heartbeat lastHeartbeat = GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
 
 			if (heartbeat.Status == Status.Stopping)
-			{	// if the incoming heartbeat is Stopping, then remove the Node from the database since it's going offline.
+			{
 				RemoveNode(heartbeat);
 			}
 			else
-			{	// if the incoming heartbeat is any other status, update it.
+			{
 				UpdateNode(heartbeat);
 			}
 
-			#region Stuff that gets executed when the Controller determines that a Node has completed a Peach Run
-			if ((heartbeat.Status == Status.Alive) && (lastHeartbeat.Status == Status.Running) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
+			bool isNodeFinished = heartbeat.Status     == Status.Alive
+			                   && lastHeartbeat.Status == Status.Running
+			                   && String.IsNullOrEmpty(lastHeartbeat.JobID) == false;
+			if (isNodeFinished)
 			{
 				#region Stuff that gets executed when the Controller determines that all Nodes running a Job have completed
 				/* The important thing here is that the Nodes don't have any visibility to each other, they don't talk to each other.
@@ -485,15 +487,16 @@ namespace PeachFarm.Controller
 				 */	
 
 				// Are there 0 nodes still running this Job?
-				bool jobFinished = (from n in DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString) where n.JobID == lastHeartbeat.JobID select n).Count() == 0;
-				if (jobFinished)
-				{	// There are no nodes running the Job
-
+				bool isJobFinished = (from n in NodeList(config)
+				                    where n.JobID == lastHeartbeat.JobID select n
+				                   ).Count() == 0;
+				if (isJobFinished)
+				{
 					#region Generate Report, send request to Reporting Service.
 					GenerateReportRequest grr = new GenerateReportRequest();
 					grr.JobID = lastHeartbeat.JobID;
 					grr.ReportFormat = ReportFormat.PDF;
-					rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+					PushReportToQueue(grr);
 					#endregion
 				}
 				#endregion
@@ -521,75 +524,17 @@ namespace PeachFarm.Controller
 			#endregion
 		}
 
-		#region deprecated
-		/*
-		private void ListNodes(ListNodesRequest request, string replyQueue)
+		protected virtual void PushReportToQueue(GenerateReportRequest grr)
 		{
-			ListNodesResponse response = new ListNodesResponse();
-			response.Nodes = NodeList(config).ToList();
-			Reply(response.Serialize(), Actions.ListNodes, replyQueue);
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
 		}
-
-		private void ListErrors(ListErrorsRequest listErrorsRequest, string replyQueue)
-		{
-			ListErrorsResponse response = new ListErrorsResponse();
-			//response.Nodes = errors;
-			if (String.IsNullOrEmpty(listErrorsRequest.JobID))
-			{
-				response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
-			}
-			else
-			{
-				response.Errors = DatabaseHelper.GetErrors(listErrorsRequest.JobID, config.MongoDb.ConnectionString);
-			}
-			Reply(response.Serialize(), Actions.ListErrors, replyQueue);
-		}
-
-		private void JobInfo(JobInfoRequest request, string replyQueue)
-		{
-			JobInfoResponse response = new JobInfoResponse();
-			Common.Mongo.Job mongoJob = DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
-			if (mongoJob == null)
-			{
-				response.Success = false;
-				response.ErrorMessage = String.Format("Job {0} does not exist.", request.JobID);
-			}
-			else
-			{
-				response.Success = true;
-				response.Job = new Common.Messages.Job(mongoJob);
-				var nodes = NodeList(config);
-				response.Nodes = (from Heartbeat h in nodes where (h.Status == Status.Running) && (h.JobID == request.JobID) select h).ToList();
-			}
-
-			Reply(response.Serialize(), Actions.JobInfo, replyQueue);
-		}
-
-		private void Monitor(MonitorRequest request, string replyQueue)
-		{
-			MonitorResponse response = new MonitorResponse();
-			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
-
-			response.Nodes = NodeList(config);
-			var activeJobs = response.Nodes.GetJobs(config.MongoDb.ConnectionString);
-			var allJobs = DatabaseHelper.GetAllJobs(config.MongoDb.ConnectionString);
-			response.ActiveJobs = activeJobs.ToMessagesJobs();
-			response.InactiveJobs = allJobs.Except(activeJobs, new JobComparer()).ToMessagesJobs();
-
-			response.Errors = DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString);
-
-			Reply(response.Serialize(), Actions.Monitor, replyQueue);
-		}
-		//*/
-		#endregion
 
 		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
 		{
 			// do nothing when report complete response is received
 		}
-		#endregion
 
-		private void RemoveNode(Heartbeat heartbeat)
+		protected virtual void RemoveNode(Heartbeat heartbeat)
 		{
 
 			heartbeat.RemoveFromDatabase(config.MongoDb.ConnectionString);
@@ -597,12 +542,8 @@ namespace PeachFarm.Controller
 
 		}
 
-		// this and the mongodb initializer might need to be refactored into classes later...
 		protected virtual void CommitJobToMongo(StartPeachRequest request, List<Heartbeat> nodes)
 		{
-
-			#region Create Job record in Mongo
-
 			PeachFarm.Common.Mongo.Job mongoJob = new PeachFarm.Common.Mongo.Job();
 			mongoJob.JobID = request.JobID;
 			mongoJob.UserName = request.UserName;
@@ -610,30 +551,11 @@ namespace PeachFarm.Controller
 			//mongoJob.Pit.FullText = request.Pit;
 			mongoJob.ZipFile = request.ZipFile;
 
-			//string text = request.Pit;
-			//if (text.StartsWith("<!"))
-			//{
-			//  text = text.Substring("<![CDATA[".Length);
-			//  text = text.Substring(0, text.Length - 2);
-			//}
-
 			mongoJob.Pit.Version = request.PitVersion;
-
-			//try
-			//{
-			//  XDocument xdoc = XDocument.Parse(text);
-			//  var versionAttrib = xdoc.Root.Attribute("version");
-			//  if (versionAttrib != null)
-			//    mongoJob.Pit.Version = versionAttrib.Value;
-			//}
-			//catch
-			//{
-
-			//}
 
 			mongoJob.StartDate = DateTime.Now;
 			mongoJob.Tags = request.Tags;
-			
+
 			//TODO Peach Version
 
 			mongoJob = mongoJob.SaveToDatabase(request.MongoDbConnectionString);
@@ -649,11 +571,9 @@ namespace PeachFarm.Controller
 				node.SaveToDatabase(config.MongoDb.ConnectionString);
 				mongoJob.Nodes.Add(node);
 			}
-
-			#endregion
 		}
 
-		private void UpdateNode(Heartbeat heartbeat)
+		protected virtual void UpdateNode(Heartbeat heartbeat)
 		{
 			heartbeat.SaveToDatabase(config.MongoDb.ConnectionString);
 			logger.Debug("{0}\t{1}\t{2}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp);
