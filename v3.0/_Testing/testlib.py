@@ -54,7 +54,7 @@ class PeachTest:
 
     def _get_peach_bin(self, peach):
         if peach:
-            return peach
+            return os.path.expanduser(peach)
         peach = os.environ.get('PEACH')
         if peach:
             return peach
