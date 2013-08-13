@@ -9,6 +9,7 @@ deps = [
 	'System.Data.dll',
 	'PeachFarm.Controller.dll',
 	'System.ServiceProcess.dll',
+	'PeachFarm.Common.dll',
 ]
 
 bld(
