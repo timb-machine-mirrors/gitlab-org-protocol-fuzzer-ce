@@ -39,7 +39,7 @@ namespace PeachFarm.Node.Service
       {
         node = new PeachFarmNode();
         node.StatusChanged += new EventHandler<StatusChangedEventArgs>(node_StatusChanged);
-        logger.Info("Peach Farm Node Started.");
+        logger.Info("Peach Farm Node Started. Version: " + node.Version);
       }
       catch (ApplicationException aex)
       {

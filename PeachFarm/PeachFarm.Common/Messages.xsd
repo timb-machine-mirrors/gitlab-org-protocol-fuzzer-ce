@@ -80,6 +80,7 @@
 		<xs:attribute name="UserName" type="xs:string" use="required" />
 		<xs:attribute name="Seed" type="xs:unsignedInt" use="required" />
 		<xs:attribute name="Iteration" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="Version" type="xs:string" use="required" />
 	</xs:complexType>
 
   <xs:simpleType name="Status">

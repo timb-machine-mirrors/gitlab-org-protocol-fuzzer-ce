@@ -20,6 +20,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine();
 				System.Console.WriteLine("] Peach Farm - Admin Client");
+				System.Console.WriteLine("] Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
 				System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
 				System.Console.WriteLine();
 
@@ -309,15 +310,22 @@ namespace PeachFarm.Admin
 		{
 			if (e.Nodes.Count > 0)
 			{
+				string format = "{0,-16}{1,-8}{2,-25}{3,-13}{4}";
+				System.Console.WriteLine(format, "Name", "Status", "Stamp", "Version", "JobID/Tags");
 				foreach (Heartbeat heartbeat in e.Nodes)
 				{
+					if(string.IsNullOrEmpty(heartbeat.Version))
+					{
+						heartbeat.Version = "(Dev Build)";
+					}
+
 					if (heartbeat.Status == Status.Running)
 					{
-						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.JobID));
+						System.Console.WriteLine(String.Format(format, heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.Version, heartbeat.JobID));
 					}
 					else
 					{
-						System.Console.WriteLine(String.Format("{0}\t{1}\t{2}\t{3}", heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp, heartbeat.Tags));
+						System.Console.WriteLine(String.Format(format, heartbeat.NodeName, heartbeat.Status.ToString(), heartbeat.Stamp.ToLocalTime(), heartbeat.Version, heartbeat.Tags));
 					}
 				}
 

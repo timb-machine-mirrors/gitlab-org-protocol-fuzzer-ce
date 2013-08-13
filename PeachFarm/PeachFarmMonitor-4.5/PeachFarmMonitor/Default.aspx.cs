@@ -63,6 +63,7 @@ namespace PeachFarmMonitor
       {
         #region nodes
         onlinenodes = DatabaseHelper.GetAllNodes(monitorconfig.MongoDb.ConnectionString);
+
         nodesGrid.DataSource = onlinenodes;
         nodesGrid.DataBind();
 

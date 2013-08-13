@@ -98,7 +98,10 @@ namespace PeachFarm.Node
 			get { return rabbit.IsListening; }
 		}
 
-
+		public string Version
+		{
+			get { return nodeState.Version; }
+		}
 		#endregion
 
 		#region Events
@@ -481,6 +484,8 @@ namespace PeachFarm.Node
 		{
 			Heartbeat heartbeat = new Heartbeat();
 			heartbeat.NodeName = nodeState.IPAddress;
+			heartbeat.Version = nodeState.Version;
+			
 			if (nodeState.Status == Common.Messages.Status.Running)
 			{
 				heartbeat.JobID = nodeState.StartPeachRequest.JobID;
@@ -566,6 +571,8 @@ namespace PeachFarm.Node
 
 			RabbitMq = config.RabbitMq;
 
+			Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
 			RootDirectory = Environment.CurrentDirectory;
 		}
 
@@ -603,6 +610,8 @@ namespace PeachFarm.Node
 
 		internal string PitFilePath { get; set; }
 		internal string DefinesFilePath { get; set; }
+
+		internal string Version { get; private set; }
 
 		public void Reset()
 		{

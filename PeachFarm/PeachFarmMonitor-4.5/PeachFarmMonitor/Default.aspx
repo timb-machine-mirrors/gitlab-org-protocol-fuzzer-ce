@@ -274,12 +274,14 @@
           <MasterTableView TableLayout="Fixed">
             <ColumnGroups>
               <telerik:GridColumnGroup HeaderText="Running Job Information" Name="JobInfo" />
+              <telerik:GridColumnGroup HeaderText="Node Information" Name="NodeInfo" />
             </ColumnGroups>
             <Columns>
-              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" />
-              <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" />
-              <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" />
-              <telerik:GridBoundColumn DataField="Tags" HeaderText="Tags" />
+              <telerik:GridBoundColumn DataField="Status" HeaderText="Status" ColumnGroupName="NodeInfo" />
+              <telerik:GridBoundColumn DataField="NodeName" HeaderText="Name" ColumnGroupName="NodeInfo" />
+              <telerik:GridBoundColumn DataField="Stamp" HeaderText="Last Update" ColumnGroupName="NodeInfo" />
+              <telerik:GridBoundColumn DataField="Tags" HeaderText="Tags" ColumnGroupName="NodeInfo" />
+							<telerik:GridBoundColumn DataField="Version" HeaderText="Version" ColumnGroupName="NodeInfo" />
               <telerik:GridBoundColumn DataField="JobID" HeaderText="Job ID" ColumnGroupName="JobInfo" />
               <telerik:GridBoundColumn DataField="PitFileName" HeaderText="Pit File" ColumnGroupName="JobInfo" />
               <telerik:GridBoundColumn DataField="Seed" HeaderText="Seed" ColumnGroupName="JobInfo" />
