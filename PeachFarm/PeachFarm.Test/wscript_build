@@ -14,6 +14,7 @@ deps = [
 	'nunit.framework.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
+	'NLog.dll'
 ]
 
 bld(
