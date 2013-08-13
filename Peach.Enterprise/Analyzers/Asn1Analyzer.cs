@@ -13,6 +13,7 @@ using Peach.Enterprise.DataElements;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Cracker;
 
 namespace Peach.Enterprise.Analyzers
 {
@@ -39,7 +40,7 @@ namespace Peach.Enterprise.Analyzers
         {
         }
 
-		public override void asDataElement(DataElement parent, object dataBuffer)
+		public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)
 		{
 			if (!(parent is Blob))
 				throw new PeachException("Error, Asn1 analyzer only operates on Blob elements!");
