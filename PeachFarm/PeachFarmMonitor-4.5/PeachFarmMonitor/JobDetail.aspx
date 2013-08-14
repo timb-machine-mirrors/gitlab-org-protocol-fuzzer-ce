@@ -157,9 +157,9 @@
         </telerik:RadPane>
         <telerik:RadSplitBar runat="server" />
         <telerik:RadPane runat="server" Scrolling="None">
-	        <div>
+	        <div style="display:none">
 		        Find Iteration:
-						<telerik:RadSearchBox ID="faultSearch" EnableAutoComplete="False" ShowSearchButton="True" runat="server">
+						<telerik:RadSearchBox ID="faultSearch" EnableAutoComplete="False" ShowSearchButton="True" runat="server" Visible="false">
 						</telerik:RadSearchBox>
 	        </div>
           <telerik:RadGrid 

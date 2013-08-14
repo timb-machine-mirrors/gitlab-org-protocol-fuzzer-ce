@@ -83,6 +83,7 @@ namespace PeachFarm.Common.Messages
 		}
 
 		#region Serialize/Deserialize
+		/*
 		/// <summary>
 		/// Serializes current ResponseBase object into an XML document
 		/// </summary>
@@ -157,7 +158,7 @@ namespace PeachFarm.Common.Messages
 				}
 			}
 		}
-
+		
 		/// <summary>
 		/// Serializes current ResponseBase object into file
 		/// </summary>
@@ -253,6 +254,8 @@ namespace PeachFarm.Common.Messages
 				}
 			}
 		}
+		//*/
+
 		#endregion
 	}
 

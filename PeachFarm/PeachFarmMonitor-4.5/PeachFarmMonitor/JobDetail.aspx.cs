@@ -60,7 +60,7 @@ namespace PeachFarmMonitor
 
 		void JobDetail_Load(object sender, EventArgs e)
 		{
-			faultSearch.Search += faultSearch_Search;
+			//faultSearch.Search += faultSearch_Search;
 		}
 
 		void faultSearch_Search(object sender, SearchBoxEventArgs e)
