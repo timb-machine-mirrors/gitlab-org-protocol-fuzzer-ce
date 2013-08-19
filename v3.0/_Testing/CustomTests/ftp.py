@@ -2,9 +2,7 @@
 from os import system
 
 ftp_start = {"linux": '/etc/init.d/vsftpd start',
-             "win": '
-                 
-'/etc/init.d/vsftpd stop'
+             "win": ''} #needs to be finished
 
 
 def setup(ctx):
