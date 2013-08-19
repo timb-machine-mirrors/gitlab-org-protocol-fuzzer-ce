@@ -1,21 +1,21 @@
-#!/usr/bin/env python
-from os import system
+# #!/usr/bin/env python
+# from os import system
 
-ftp_start = {"linux": '/etc/init.d/vsftpd start',
-             "win": ''} #needs to be finished
-
-
-def setup(ctx):
-    system(ftp_start[platform])
+# ftp_start = {"linux": '/etc/init.d/vsftpd start',
+#              "win": ''} #needs to be finished
 
 
-def teardown(ctx):
-    system(system(ftp_stop[platform])
+# def setup(ctx):
+#     system(ftp_start[platform])
 
-test(name="ftp",
-     setup=setup,
-     teardown=teardown)
 
-test(name="ftp",
-     test="Server")
+# def teardown(ctx):
+#     system(system(ftp_stop[platform])
+
+# test(name="ftp",
+#      setup=setup,
+#      teardown=teardown)
+
+# test(name="ftp",
+#      test="Server")
 

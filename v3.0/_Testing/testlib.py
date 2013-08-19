@@ -102,8 +102,8 @@ class PeachTest:
 
     def run(self):
         if (self.platform != 'all') and\
-                (self.platform != get_platform()):
-            print "%s was %s " % (self.pit, self.color_text('yellow', "SKIPPED!"))
+                (self.platform != get_platform()) and\
+                (not get_platform() in self.platform):
             self.status = "skip"
             return False
         if self.setup:
@@ -125,10 +125,7 @@ class PeachTest:
             self.status = "pass"
         self.hasrun = True
         if self.status == "fail":
-            print "...and it " + self.color_text("red", "FAILED!")
             self.log_output()
-        else:
-            print self.color_text("green", "SUCCESS!")
         if self.teardown:
             self.teardown()
         self.clean_up()
