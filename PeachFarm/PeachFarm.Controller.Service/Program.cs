@@ -26,13 +26,15 @@ namespace PeachFarm.Controller
         PeachFarmController server = null;
         try
         {
-          server = new PeachFarmController();
-          if (server.IsListening)
-          {
-            System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
-            System.Console.ReadLine();
-          }
-          server.Close();
+					using (server = new PeachFarmController())
+					{
+						if (server.IsListening)
+						{
+							System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
+							System.Console.ReadLine();
+						}
+						server.Close();
+					}
         }
         catch (ApplicationException aex)
         {

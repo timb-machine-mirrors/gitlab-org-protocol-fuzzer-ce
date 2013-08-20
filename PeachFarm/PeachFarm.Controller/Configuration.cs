@@ -30,6 +30,13 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.RabbitMq] = value; }
     }
 
+		[ConfigurationProperty(Constants.NodeExpirationRules, IsRequired = false)]
+		public NodeExpirationRulesElement NodeExpirationRules
+		{
+			get { return (NodeExpirationRulesElement)this[Constants.NodeExpirationRules]; }
+			set { this[Constants.NodeExpirationRules] = value; }
+		}
+
 		public void Validate()
 		{
 			StringBuilder message = new StringBuilder();
@@ -45,6 +52,16 @@ namespace PeachFarm.Controller.Configuration
 				message.AppendLine(") RabbitMQ host name is required");
 				message.AppendLine(
 					"\t<RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
+			}
+
+			if (this.NodeExpirationRules.Late <= 0)
+			{
+				this.NodeExpirationRules.Late = 5;
+			}
+
+			if (this.NodeExpirationRules.Expired <= 0)
+			{
+				this.NodeExpirationRules.Expired = 30;
 			}
 
 			if (message.Length > 0)
@@ -113,6 +130,23 @@ namespace PeachFarm.Controller.Configuration
     }
   }
 
+	public class NodeExpirationRulesElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.Late, IsRequired = false)]
+		public int Late
+		{
+			get { return (int)this[Constants.Late]; }
+			set { this[Constants.Late] = value; }
+		}
+
+		[ConfigurationProperty(Constants.Expired, IsRequired = false)]
+		public int Expired
+		{
+			get { return (int)this[Constants.Expired]; }
+			set { this[Constants.Expired] = value; }
+		}
+	}
+
   public static class Constants
   {
     public const string MongoDb = "MongoDb";
@@ -127,5 +161,9 @@ namespace PeachFarm.Controller.Configuration
 
     public const string Controller = "Controller";
     public const string Name = "nameOverride";
+
+		public const string NodeExpirationRules = "NodeExpirationRules";
+		public const string Late = "lateMinutes";
+		public const string Expired = "expiredMinutes";
   }
 }

@@ -15,7 +15,7 @@ using System.Xml.Linq;
  
 namespace PeachFarm.Controller
 {
-	public class PeachFarmController
+	public class PeachFarmController : IDisposable
 	{
 
 		private UTF8Encoding encoding = new UTF8Encoding();
@@ -86,8 +86,11 @@ namespace PeachFarm.Controller
 
 		public void Close()
 		{
-			rabbit.StopListener();
-			//rabbit.CloseConnection();
+			if (rabbit != null)
+			{
+				rabbit.StopListener();
+				rabbit = null;
+			}
 		}
 
 		protected void StatusCheck(object state)
@@ -99,7 +102,7 @@ namespace PeachFarm.Controller
 			{
 				foreach (var node in nodes)
 				{
-					if (node.Stamp.AddMinutes(20) < DateTime.Now)
+					if (node.Stamp.AddMinutes(config.NodeExpirationRules.Expired) < DateTime.Now)
 					{
 						logger.Warn("{0}\t{1}\t{2}", node.NodeName, "Node Expired", node.Stamp);
 						node.RemoveFromDatabase(config.MongoDb.ConnectionString);
@@ -109,7 +112,7 @@ namespace PeachFarm.Controller
 					}
 					else
 					{
-						if (node.Stamp.AddMinutes(10) < DateTime.Now)
+						if (node.Stamp.AddMinutes(config.NodeExpirationRules.Late) < DateTime.Now)
 						{
 							node.Status = Status.Late;
 							logger.Info("{0}\t{1}\t{2}", node.NodeName, node.Status.ToString(), node.Stamp);
@@ -636,6 +639,11 @@ namespace PeachFarm.Controller
 		protected virtual Heartbeat GetNodeByName(string ipaddress, string mongoConnectionString)
 		{
 			return DatabaseHelper.GetNodeByName(ipaddress, mongoConnectionString);
+		}
+
+		public void Dispose()
+		{
+			Close();
 		}
 	}
 }
