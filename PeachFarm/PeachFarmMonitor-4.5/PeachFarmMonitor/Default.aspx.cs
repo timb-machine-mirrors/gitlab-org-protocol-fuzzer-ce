@@ -204,7 +204,7 @@ namespace PeachFarmMonitor
             item.Style.Add("background-color", "lightgreen");
             break;
           case Messages.Status.Late:
-            item.Style.Add("background-color", "lightyellow");
+            item.Style.Add("background-color", "yellow");
             break;
         }
       }
