@@ -343,7 +343,7 @@ namespace PeachFarm.Common.Mongo
 			}
 			else
 			{
-				remoteFileName = remoteFileName.Replace('\\', '/');
+				remoteFile = remoteFile.Replace('\\', '/');
 				if (db.GridFS.Exists(remoteFile))
 				{
 					db.GridFS.Download(localFile, remoteFile);
@@ -376,7 +376,7 @@ namespace PeachFarm.Common.Mongo
 
 		public static bool GridFSFileExists(string remoteFile, string connectionString)
 		{
-			remoteFileName = remoteFileName.Replace('\\', '/');
+			remoteFile = remoteFile.Replace('\\', '/');
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 			bool result = db.GridFS.Exists(remoteFile);
