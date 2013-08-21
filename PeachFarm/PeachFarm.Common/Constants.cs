@@ -27,6 +27,6 @@ namespace PeachFarm.Common
 	{
 		public static readonly string JobFolder = "Job_{0}_{1}";
 		public static readonly string NodeFolder = "Node_{0}";
-		public static readonly string JobNodeFolder = "Job_{0}_{1}\\Node_{2}";
+		public static readonly string JobNodeFolder = "Job_{0}_{1}/Node_{2}";
 	}
 }

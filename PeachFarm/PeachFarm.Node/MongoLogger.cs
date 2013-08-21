@@ -85,6 +85,7 @@ namespace PeachFarm.Loggers
 			if (category == Category.Reproducing)
 				return;
 
+			fullPath = fullPath.Replace('/', '\\');
 			DatabaseHelper.SaveToGridFS(contents, fullPath, MongoConnectionString);
 		}
 
@@ -116,7 +117,7 @@ namespace PeachFarm.Loggers
 			{
 				GeneratedFile newfile = new GeneratedFile();
 				newfile.Name = dataFile.Substring(Path.Length + 8);
-				newfile.GridFsLocation = dataFile;
+				newfile.GridFsLocation = dataFile.Replace('\\','/');
 				mongoFault.GeneratedFiles.Add(newfile);
 			}
 

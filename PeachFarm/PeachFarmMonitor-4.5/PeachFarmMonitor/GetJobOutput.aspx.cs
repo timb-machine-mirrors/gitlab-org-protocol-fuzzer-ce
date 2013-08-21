@@ -52,7 +52,10 @@ namespace PeachFarmMonitor
             }
             else
             {
-              filepath = filepath.Replace('/', '\\');
+							if (DatabaseHelper.GridFSFileExists(filepath, monitorconfig.MongoDb.ConnectionString) == false)
+							{
+								filepath = filepath.Replace('\\','/');
+							}
               var temppath = GetTempFile();
               DatabaseHelper.DownloadFromGridFS(temppath, filepath, monitorconfig.MongoDb.ConnectionString);
               string filename = Path.GetFileName(filepath);
