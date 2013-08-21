@@ -124,6 +124,8 @@ namespace PeachFarm.Reporting
 				job.ReportLocation = Path.Combine(job.JobFolder, job.JobFolder + ".pdf");
 			}
 
+			job.ReportLocation.Replace('\\', '/');
+
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
 				response.Status = ReportGenerationStatus.Complete;
