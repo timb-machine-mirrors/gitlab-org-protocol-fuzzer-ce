@@ -68,6 +68,7 @@ namespace PeachFarm.Common.Messages
 				storedHeartbeat.QueueName = this.QueueName;
 				storedHeartbeat.ErrorMessage = this.ErrorMessage;
 				storedHeartbeat.Status = this.Status;
+				storedHeartbeat.Version = this.Version;
 				collection.Save(storedHeartbeat);
 			}
 			collection.Database.Server.Disconnect();

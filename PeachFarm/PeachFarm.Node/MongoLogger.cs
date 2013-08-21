@@ -116,8 +116,8 @@ namespace PeachFarm.Loggers
 			foreach (var dataFile in dataFiles)
 			{
 				GeneratedFile newfile = new GeneratedFile();
-				newfile.Name = dataFile.Substring(Path.Length + 8);
 				newfile.GridFsLocation = dataFile.Replace('\\','/');
+				newfile.Name = newfile.GridFsLocation.Substring(Path.Length + 8);
 				mongoFault.GeneratedFiles.Add(newfile);
 			}
 
