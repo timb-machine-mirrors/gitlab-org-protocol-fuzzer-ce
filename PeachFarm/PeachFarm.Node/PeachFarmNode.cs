@@ -303,6 +303,12 @@ namespace PeachFarm.Node
 
 			nodeState.StartPeachRequest = request;
 
+			if (PeachFarm.Common.Mongo.DatabaseHelper.GridFSFileExists(nodeState.StartPeachRequest.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString) == false)
+			{
+				SendHeartbeat(CreateHeartbeat("Error with StartPeachRequest. Zip file can not be found in database: " + nodeState.StartPeachRequest.ZipFile));
+				return;
+			}
+
 			string jobtempfolder = Path.Combine(nodeState.RootDirectory, "jobtmp", nodeState.StartPeachRequest.JobID);
 			FileWriter.CreateDirectory(jobtempfolder);
 
@@ -318,6 +324,7 @@ namespace PeachFarm.Node
 			//if (String.IsNullOrEmpty(request.ZipFile) == false)
 			//{
 				string localfile = Path.Combine(jobtempfolder, nodeState.StartPeachRequest.PitFileName + ".zip");
+
 				PeachFarm.Common.Mongo.DatabaseHelper.DownloadFromGridFS(localfile, nodeState.StartPeachRequest.ZipFile, nodeState.StartPeachRequest.MongoDbConnectionString);
 				var zip = Ionic.Zip.ZipFile.Read(localfile);
 				zip.ExtractAll(jobtempfolder, Ionic.Zip.ExtractExistingFileAction.DoNotOverwrite);

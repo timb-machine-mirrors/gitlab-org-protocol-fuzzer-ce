@@ -324,7 +324,7 @@ namespace PeachFarm.Admin
 
 			request.JobID = DatabaseHelper.GetJobID(MongoDbConnectionString);
 
-			request.ZipFile = String.Format(Formats.JobFolder + "\\{1}.zip", request.JobID, request.PitFileName);
+			request.ZipFile = String.Format(Formats.JobFolder + "/{1}.zip", request.JobID, request.PitFileName);
 			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, MongoDbConnectionString);
 
 			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
