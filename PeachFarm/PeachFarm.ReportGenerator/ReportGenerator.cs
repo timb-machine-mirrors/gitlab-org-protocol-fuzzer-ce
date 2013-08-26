@@ -28,11 +28,14 @@ namespace PeachFarm.Reporting
 
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
-			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-
-
+			rabbit = GetRabbitMqHelper();
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR, 1000, false, true);
+		}
+
+		protected RabbitMqHelper GetRabbitMqHelper()
+		{
+			return new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 		}
 
 		public void Close()
@@ -60,10 +63,7 @@ namespace PeachFarm.Reporting
 			}
 			catch (Exception ex)
 			{
-				response.Success = false;
-				response.ErrorMessage = ex.Message;
-				response.Status = ReportGenerationStatus.Error;
-				response.JobID = request.JobID;
+				response = ErrorResponse(request.JobID, ex.Message);
 			}
 
 			rabbit.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
@@ -99,43 +99,34 @@ namespace PeachFarm.Reporting
 		public GenerateReportResponse GenerateReport(GenerateReportRequest request)
 		{
 			GenerateReportResponse response = new GenerateReportResponse();
-
-			if (String.IsNullOrEmpty(request.JobID))
-			{
-				response.Status = ReportGenerationStatus.Error;
-				response.ErrorMessage = "Job ID is null";
-				response.Success = false;
-				return response;
-			}
-
 			response.JobID = request.JobID;
 
+			#region validate
+			if (String.IsNullOrEmpty(request.JobID))
+			{
+				return ErrorResponse(request.JobID, "Job ID is null");
+			}
 			var job = DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
 			if (job == null)
 			{
-				response.Status = ReportGenerationStatus.Error;
-				response.ErrorMessage = "Job ID does not exist: " + request.JobID;
-				response.Success = false;
-				return response;
+				return ErrorResponse(request.JobID, "Job with given ID does not exist: " + (string)request.JobID);
 			}
+			#endregion
 
+			#region have a stashed report
 			if (String.IsNullOrEmpty(job.ReportLocation))
 			{
 				job.ReportLocation = Path.Combine(job.JobFolder, job.JobFolder + ".pdf");
 			}
-
-			job.ReportLocation = job.ReportLocation.Replace('\\', '/');
-
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
 				response.Status = ReportGenerationStatus.Complete;
 				return response;
 			}
+			#endregion
 
 			Telerik.Reporting.Processing.ReportProcessor reportProcessor = new Telerik.Reporting.Processing.ReportProcessor();
-
 			System.Collections.Hashtable deviceInfo = new System.Collections.Hashtable();
-
 			Telerik.Reporting.InstanceReportSource irs = new Telerik.Reporting.InstanceReportSource();
 
 			try
@@ -144,20 +135,10 @@ namespace PeachFarm.Reporting
 			}
 			catch(Exception ex)
 			{
-				return ReturnError(request.JobID, "Error while loading report file: " + ex.Message);
+				return ErrorResponse(request.JobID, "Error while loading report file: " + ex.Message);
 			}
 
-			Unit margin = new Unit(0.5, UnitType.Inch);
-			irs.ReportDocument.PageSettings = new PageSettings();
-			irs.ReportDocument.PageSettings.Margins.Bottom = margin;
-			irs.ReportDocument.PageSettings.Margins.Left = margin;
-			irs.ReportDocument.PageSettings.Margins.Right = margin;
-			irs.ReportDocument.PageSettings.Margins.Top = margin;
-
-
-			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
-			irs.Parameters.Add("jobID", request.JobID);
-			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
+			ConfigureInstanceReportSource(request, irs);
 			
 			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
 
@@ -168,10 +149,7 @@ namespace PeachFarm.Reporting
 			}
 			catch (Exception ex)
 			{
-				response.Status = ReportGenerationStatus.Error;
-				response.ErrorMessage = "Error while processing report:\n" + ex.Message;
-				response.Success = false;
-				return response;
+				return ErrorResponse(request.JobID, "Error while processing report. Could not render report to PDF:\n" + ex.Message);
 			}
 
 			if (result != null)
@@ -185,7 +163,22 @@ namespace PeachFarm.Reporting
 
 		}
 
-		private GenerateReportResponse ReturnError(string jobid, string message)
+		private void ConfigureInstanceReportSource(GenerateReportRequest request, Telerik.Reporting.InstanceReportSource irs)
+		{
+			Unit margin = new Unit(0.5, UnitType.Inch);
+			irs.ReportDocument.PageSettings = new PageSettings();
+			irs.ReportDocument.PageSettings.Margins.Bottom = margin;
+			irs.ReportDocument.PageSettings.Margins.Left = margin;
+			irs.ReportDocument.PageSettings.Margins.Right = margin;
+			irs.ReportDocument.PageSettings.Margins.Top = margin;
+
+
+			irs.Parameters.Add("connectionString", config.MongoDb.ConnectionString);
+			irs.Parameters.Add("jobID", request.JobID);
+			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
+		}
+
+		private GenerateReportResponse ErrorResponse(string jobid, string message)
 		{
 			GenerateReportResponse response = new GenerateReportResponse();
 			response.JobID = jobid;
@@ -199,5 +192,6 @@ namespace PeachFarm.Reporting
 		{
 			eventArgs.Cancel = false;
 		}
+
 	}
 }
