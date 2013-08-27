@@ -6,11 +6,12 @@ deps = [
 	'System.Core.dll',
 	'System.Drawing.dll',
 	'System.Windows.Forms.dll',
-	'PeachFarm.Common.dll',
-	'PeachFarm.Reporting.Reports.dll',
 	'Telerik.Reporting.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
+	'NLog.dll',
+	'PeachFarm.Common.dll',
+	'PeachFarm.Reporting.Reports.dll',
 ]
 
 bld(

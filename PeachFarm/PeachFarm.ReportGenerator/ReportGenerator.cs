@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NLog;
 using PeachFarm.Reporting.Configuration;
 using PeachFarm.Common.Messages;
 using System.IO;
@@ -17,6 +18,8 @@ namespace PeachFarm.Reporting
 	{
 		ReportGeneratorSection config = null;
 		RabbitMqHelper rabbit = null;
+
+		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		public ReportGenerator()
 		{
@@ -40,10 +43,10 @@ namespace PeachFarm.Reporting
 
 		public void Close()
 		{
-			//if (rabbit.IsListening)
-			//{
-			//  rabbit.StopListener(false);
-			//}
+			if (rabbit.IsListening)
+			{
+				rabbit.StopListener(false);
+			}
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -55,7 +58,7 @@ namespace PeachFarm.Reporting
 
 			GenerateReportResponse response = new GenerateReportResponse();
 
-			System.Diagnostics.Debug.WriteLine("Report generator: MESSAGE RECEIVED " + request.JobID);
+			logger.Info("Report generator: Received report request " + request.JobID);
 
 			try
 			{
@@ -70,31 +73,6 @@ namespace PeachFarm.Reporting
 
 			rabbit.ResumeListening();
 		}
-
-		#region GenerateReportCompleted
-		/*
-		public event EventHandler<GenerateReportCompletedEventArgs> GenerateReportCompleted;
-
-		private void OnGenerateReportCompleted(PeachFarm.Common.Messages.GenerateReportResponse result)
-		{
-			if (GenerateReportCompleted != null)
-			{
-				GenerateReportCompleted(this, new GenerateReportCompletedEventArgs(result));
-			}
-		}
-
-		public class GenerateReportCompletedEventArgs : EventArgs
-		{
-			public GenerateReportCompletedEventArgs(PeachFarm.Common.Messages.GenerateReportResponse result)
-			{
-				this.Result = result;
-			}
-
-			public PeachFarm.Common.Messages.GenerateReportResponse Result { get; private set; }
-		}
-		//*/
-		#endregion
-
 
 		public GenerateReportResponse GenerateReport(GenerateReportRequest request)
 		{
@@ -142,6 +120,7 @@ namespace PeachFarm.Reporting
 			
 			reportProcessor.Error += new Telerik.Reporting.ErrorEventHandler(reportProcessor_Error);
 
+			logger.Info("Report Generator: Starting report generation " + job.JobID);
 			RenderingResult result = null;
 			try
 			{
@@ -157,6 +136,7 @@ namespace PeachFarm.Reporting
 				DatabaseHelper.SaveToGridFS(result.DocumentBytes, job.ReportLocation, config.MongoDb.ConnectionString);
 				job.SaveToDatabase(config.MongoDb.ConnectionString);
 				response.Status = ReportGenerationStatus.Complete;
+				logger.Info("Report Generator: Completed report generation " + job.JobID);
 			}
 
 			return response;
@@ -185,6 +165,7 @@ namespace PeachFarm.Reporting
 			response.ErrorMessage = message;
 			response.Success = false;
 			response.Status = ReportGenerationStatus.Error;
+			logger.Error("Report Generator: Error\n" + message);
 			return response;
 		}
 

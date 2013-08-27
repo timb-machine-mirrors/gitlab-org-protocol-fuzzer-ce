@@ -5,6 +5,7 @@ deps = [
 	'System.Core.dll',
 	'System.Configuration.Install.dll',
 	'System.ServiceProcess.dll',
+	'NLog.dll',
 	'PeachFarm.Reporting.dll',
 	'PeachFarm.Common.dll',
 ]
