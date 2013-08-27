@@ -36,27 +36,51 @@ namespace PeachFarm.Reporting.Configuration
 			set { this[Constants.Monitor] = value; }
 		}
 
-		/*
-		[ConfigurationProperty(Constants.ReportGenerator)]
-		public ReportGeneratorElement ReportGenerator
+		public void Validate()
 		{
-			get { return (ReportGeneratorElement)this[Constants.ReportGenerator]; }
-			set { this[Constants.ReportGenerator] = value; }
-		}
-		//*/
-  }
+			StringBuilder message = new StringBuilder();
 
-	/*
-	public class ReportGeneratorElement : ConfigurationElement
-	{
-		[ConfigurationProperty(Constants.ConcurrentJobs)]
-		public int ConcurrentJobs
-		{
-			get { return (int)this[Constants.ConcurrentJobs]; }
-			set { this[Constants.ConcurrentJobs] = value; }
+			if (String.IsNullOrEmpty(this.Controller.IpAddress))
+			{
+				message.AppendLine(") Controller IP address or overridden name is required.");
+				message.AppendLine("\t<Controller ipAddress=\"0.0.0.0\" />");
+			}
+
+
+			if (String.IsNullOrEmpty(this.MongoDb.ConnectionString))
+			{
+				message.AppendLine(") MongoDB Connection String is required.");
+				message.AppendLine("\t<MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
+			}
+
+			if (String.IsNullOrEmpty(this.RabbitMq.HostName))
+			{
+				message.AppendLine(") RabbitMQ host name is required");
+				message.AppendLine(
+					"\t<RabbitMq hostName=\"0.0.0.0\" port=\"-1\" userName=\"guest\" password=\"guest\" useSSL=\"false\" />");
+			}
+
+			if (String.IsNullOrEmpty(this.Monitor.BaseURL))
+			{
+				message.AppendLine(") Monitor baseUrl is required");
+				message.AppendLine(
+					"\t<Monitor baseurl=\"http://host/vfolder\" />");
+			}
+			else
+			{
+				if (this.Monitor.BaseURL.EndsWith("/") == false)
+				{
+					this.Monitor.BaseURL = this.Monitor.BaseURL + "/";
+				}
+			}
+
+			if (message.Length > 0)
+			{
+				message.Insert(0, "Errors found in application config file: \n");
+				throw new ApplicationException(message.ToString());
+			}
 		}
-	}
-	//*/
+  }
 
 	public class MonitorElement : ConfigurationElement
 	{

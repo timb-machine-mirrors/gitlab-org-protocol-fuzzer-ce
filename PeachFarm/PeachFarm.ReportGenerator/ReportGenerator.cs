@@ -24,10 +24,7 @@ namespace PeachFarm.Reporting
 		public ReportGenerator()
 		{
 			config = (ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reporting");
-			if (config.Monitor.BaseURL.EndsWith("/") == false)
-			{
-				config.Monitor.BaseURL = config.Monitor.BaseURL + "/";
-			}
+			config.Validate();
 
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
