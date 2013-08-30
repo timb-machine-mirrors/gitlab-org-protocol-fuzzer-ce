@@ -17,6 +17,8 @@ COLOR_CODES = {'red': 31,
                'green': 32,
                'yellow': 92}
 
+INTERACTIVE = bool(os.environ.get("PS1"))
+
 all_tests = {}
 all_defines = {}
 
@@ -64,10 +66,10 @@ class PeachTest:
         return ' '.join(arg for arg in self.args)
 
     def color_text(self, color, text):
-        code = COLOR_CODES[color]
         #this shouldn't take a code, it should take a name
-        if get_platform() == 'win':
+        if get_platform() == 'win' or not INTERACTIVE:
             return text
+        code = COLOR_CODES[color]
         return "\033["+str(code)+"m"+str(text)+"\033[0m"
 
     def update_defines(self, **kw):
