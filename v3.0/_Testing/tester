@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import shutil
+import platform
 
 sys.path.append(os.path.join('.', '_Testing'))
 import dependency
@@ -22,27 +23,31 @@ FULL_TARGET_PATH = os.getcwd()
 # Buildbot stuff is down under
 # DETERMINE WHICH PEACH TO FIND
 
-ARCH, OS = platform.architecture()
-IS_64_BIT = '64' in ARCH
-IS_WINDOWS = 'windows' in OS.lower()
-# split the current path by othe os seperator and jump to top of build dir
-_path = os.getcwd().split(os.sep)
-_epeach_idx = _path.index('epeach')
-_path = _path[ : _epeach_idx + 1]
-# piece together the path to the peach.exe we want
-# if it's not windows, assume linux for time being
-# also assuming x86 or x86_64 right now, no ARM
-which_build = ''
-if IS_WINDOWS:
-    assert False # oops, notchet. add when you can see the slave build machine
-else:
-    which_build += 'linux_x86'
-if IS_64_BIT:
-    which_build += '_64'
-# debug has better info
-which_build += '_debug'
-_path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
-PEACH_PATH = os.sep.join(_path)
+def find_peach():
+    if not testlib.INTERACTIVE:
+        return "peach"
+    ARCH, OS = platform.architecture()
+    IS_64_BIT = '64' in ARCH
+    IS_WINDOWS = 'windows' in OS.lower()
+    # split the current path by othe os seperator and jump to top of build dir
+    _path = os.getcwd().split(os.sep)
+    _epeach_idx = _path.index('epeach')
+    _path = _path[ : _epeach_idx + 1]
+    # piece together the path to the peach.exe we want
+    # if it's not windows, assume linux for time being
+    # also assuming x86 or x86_64 right now, no ARM
+    which_build = ''
+    if IS_WINDOWS:
+        assert False # oops, notchet. add when you can see the slave build machine
+    else:
+        which_build += 'linux_x86'
+    if IS_64_BIT:
+        which_build += '_64'
+    # debug has better info
+    which_build += '_debug'
+    _path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
+    PEACH_PATH = os.sep.join(_path)
+    return PEACH_PATH
 
 ###############################################################################
 
@@ -79,7 +84,7 @@ if __name__ == "__main__":
                         default=PEACH_RUN_COUNT)
     parser.add_argument('-p', '--peach', dest='peach', type=str,
                         help='The location of the peach binary',
-                        default=PEACH_PATH)
+                        default=find_peach())
     parser.add_argument('targets', type=str, metavar="target", nargs='*',
                         help=('The the specific targets to test, '
                               'e.g.: Net/TCPv4.xml'))
