@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import shutil
+
+sys.path.append(os.path.join('.', '_Testing'))
+import dependency
+import testlib
+
+if testlib.get_platform() == "win":
+    from win32com.shell import shell
+
+
+LOGDIR = os.environ.get('PEACH_LOGDIR') or \
+    os.path.join(os.getcwd(), 'test_logs')
+PEACH_RUN_COUNT = os.environ.get('PEACH_RUN_COUNT') or 1
+FULL_TARGET_PATH = os.getcwd()
+
+################################################################################
+# Buildbot stuff is down under
+# DETERMINE WHICH PEACH TO FIND
+
+ARCH, OS = platform.architecture()
+IS_64_BIT = '64' in ARCH
+IS_WINDOWS = 'windows' in OS.lower()
+# split the current path by othe os seperator and jump to top of build dir
+_path = os.getcwd().split(os.sep)
+_epeach_idx = _path.index('epeach')
+_path = _path[ : _epeach_idx + 1]
+# piece together the path to the peach.exe we want
+# if it's not windows, assume linux for time being
+# also assuming x86 or x86_64 right now, no ARM
+which_build = ''
+if IS_WINDOWS:
+    assert False # oops, notchet. add when you can see the slave build machine
+else:
+    which_build += 'linux_x86'
+if IS_64_BIT:
+    which_build += '_64'
+# debug has better info
+which_build += '_debug'
+_path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
+PEACH_PATH = os.sep.join(_path)
+
+###############################################################################
+
+
+def get_targets(target_path):
+    for w in os.walk(target_path):
+        w[1].sort()
+        curpath = w[0]
+        if "_Common" in curpath:
+            continue
+        file_list = w[2]
+        for fn in file_list:
+            if fn[-4:].lower() == '.xml':
+                yield {"path": curpath, "file": fn}
+
+
+def user_is_admin():
+    if testlib.get_platform() == "win":
+        return shell.IsUserAnAdmin()
+    else:
+        return os.getuid() == 0
+
+
+###############################################################################
+# main
+###############################################################################
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Test peach pits (this must be run as root)')
+    parser.add_argument('-c', '--count', dest='count', type=int,
+                        help='The number of iterations to run',
+                        default=PEACH_RUN_COUNT)
+    parser.add_argument('-p', '--peach', dest='peach', type=str,
+                        help='The location of the peach binary',
+                        default=PEACH_PATH)
+    parser.add_argument('targets', type=str, metavar="target", nargs='*',
+                        help=('The the specific targets to test, '
+                              'e.g.: Net/TCPv4.xml'))
+    parser.add_argument('-l', '--logdir', dest='logdir', type=str,
+                        help='location to log test output',
+                        default=LOGDIR)
+    parser.add_argument('-d', '--dependency', action='store_true',
+                        required=False, help=('Used to test pit dependencies'))
+    config = parser.parse_args()
+    if not user_is_admin():
+        print "You must be root or admin to run this"
+        exit(1)
+    tests = []
+    if not os.path.isdir(config.logdir):
+        os.mkdir(config.logdir)
+    test_log = open(os.path.join(config.logdir, "test_status.log"), 'w')
+    if config.targets:
+        targets = []
+        for target in config.targets:
+            path = os.path.dirname(target)
+            fn = os.path.basename(target)
+            if config.dependency:
+                pits = dependency.GetPits(path, fn)
+                for pit in pits:
+                    targets.append(pit)
+            targets.append({"path": path, "file": fn})
+    else:
+        targets = get_targets(FULL_TARGET_PATH)
+    for target in targets:
+        try:
+            pit_tests = testlib.get_tests(target, config)
+            for test in pit_tests:
+                test.run()
+                if test.status == "skip":
+                    print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
+                elif test.status == "fail":
+                    print "...and it " + test.color_text("red", "FAILED!")
+                else:
+                    print test.color_text("green", "SUCCESS!")
+                tests.append(test)
+        except Exception, e:
+            msg =  "Testing of pit {0} failed with exception {1}{2}".format(
+                target, e, os.linesep)
+            print msg
+            test_log.write(msg)
+    tests.sort(key = lambda obj: obj.name)
+    for test in tests:
+        status = test.status
+        if test.hasrun:
+            status += " after running %s" % test.hasrun
+        if test.status in ["pass", "fail"]:
+            test_log.write(
+                "{0:<20} {1:<5} returned {2} for command {3}{4}".format(
+                    test.name + " " + status,
+                    test.pid,
+                    test.returncode,
+                    test.cmd,
+                    os.linesep))
+        elif test.status == "skip":
+            test_log.write("{0:<20}{1}".format(
+                    test.name + " was " + status, os.linesep))
+    test_log.close()
