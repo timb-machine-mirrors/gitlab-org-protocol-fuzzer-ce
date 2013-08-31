@@ -76,9 +76,31 @@
 			<Action type="changeState" ref="Established"/>
 		</State>
 
-		<State name="Established" >
-			<!-- <Action type="changeState" ref="WaitServerClose"/> -->
+		<!-- <State name="EstablishedCheckForIncoming"> -->
+		<!-- 	<Action name="GetPacket" type="input" -->
+		<!-- 					onComplete="TCP.store_next_acknum(self)"> -->
+		<!-- 		<DataModel name="Packet" ref="TCPv4:InIPv4Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action name="GoToSendFinAck" -->
+		<!-- 					type="changeState" ref="SendFinAck" -->
+		<!-- 					when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/> -->
+		<!-- 	<Action name="GoToSendTestPayload" type="changeState" ref="SendTestPayload" /> -->
+		<!-- </State> -->
+
+		<State name="SendFinAck" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_store(self)">
+				<Data ref="TCP:ACK"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
+			</Action>
 			<Action type="changeState" ref="SendTestPayload"/>
+		</State>
+
+		<State name="Established" >
+			<!-- Established needs to check for incoming state changes before attempting to send data -->
+			<!-- <Action type="changeState" ref="EstablishedCheckForIncoming"/> -->
+			<Action type="changeState" ref="SendTestPayload"/>
+			<!-- <Action type="changeState" ref="WaitServerClose"/> -->
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
