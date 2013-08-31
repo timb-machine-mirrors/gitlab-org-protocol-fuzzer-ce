@@ -226,6 +226,12 @@
 		<Field name="Header.ControlBits.ACK" value="1"/>
 	</Data>
 
+ 	<Data name="FINPSHACK">
+		<Field name="Header.ControlBits.PSH" value="1"/>
+		<Field name="Header.ControlBits.FIN" value="1"/>
+		<Field name="Header.ControlBits.ACK" value="1"/>
+	</Data>
+
  	<Data name="FIN">
 		<Field name="Header.ControlBits.FIN" value="1"/>
 	</Data>
