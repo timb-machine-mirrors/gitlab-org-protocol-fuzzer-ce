@@ -2,6 +2,8 @@
 import sys
 import os
 import re
+import shutil
+import time
 
 from copy import copy
 from types import MethodType
@@ -17,7 +19,10 @@ COLOR_CODES = {'red': 31,
                'green': 32,
                'yellow': 92}
 
-INTERACTIVE = bool(os.environ.get("PS1"))
+# if this isn't being run interactive, it's probably buildbot. (*NIX then WIN.)
+# if there's something strange in the neighborhood
+IS_INTERACTIVE = bool(os.environ.get("PS1") or os.environ.get('PROMPT'))
+TIMEOUT_MINUTES = 10
 
 all_tests = {}
 all_defines = {}
@@ -36,7 +41,8 @@ class PeachTest:
 
     def __init__(self, pit, config, cwd=None, test="Default",
                  base_opts=PEACH_OPTS, setup=None, teardown=None,
-                 extra_opts=None, platform='all', defines=BASE_DEFINES):
+                 extra_opts=None, platform='all', defines=BASE_DEFINES,
+                 timeout_minutes=None):
         self.status = None
         self.platform = platform
         self.pit = pit
@@ -53,6 +59,8 @@ class PeachTest:
         self.teardown = setup and MethodType(teardown, self, PeachTest)
         self.defines = copy(defines)
         self.test = test
+        self.timeout_minutes = timeout_minutes
+        self.is_timed_out = False
 
     def _get_peach_bin(self, peach):
         if peach:
@@ -67,7 +75,7 @@ class PeachTest:
 
     def color_text(self, color, text):
         #this shouldn't take a code, it should take a name
-        if get_platform() == 'win' or not INTERACTIVE:
+        if get_platform() == 'win' or not IS_INTERACTIVE:
             return text
         code = COLOR_CODES[color]
         return "\033["+str(code)+"m"+str(text)+"\033[0m"
@@ -117,15 +125,37 @@ class PeachTest:
             output = sys.stdout
         else:
             output = PIPE
-        self.proc = Popen(self.args, stdout=output, stderr=PIPE)
-        self.stdout, self.stderr = self.proc.communicate()
+
+        temp_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
+        timeout_counter = 0
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+        os.mkdir(temp_dir)
+        sout = open(os.path.join(temp_dir, 'sout'), 'w')
+        serr = open(os.path.join(temp_dir, 'serr'), 'w')
+        self.proc = Popen(self.args, stdout=sout, stderr=serr)
+        if self.timeout_minutes:
+            while (not self.proc.poll()) and timeout_counter < timeout_counter:
+                time.sleep(60) # in seconds
+                timeout_counter += 1
+        else:
+            self.proc.wait()
+        if not self.proc.poll():
+            # kill the process if it's still running
+            self.proc.kill()
+            self.is_timed_out = True
+        sout.close()
+        serr.close()
+        self.stdout = open(os.path.join(temp_dir, 'sout'), 'r').read()
+        self.stderr = open(os.path.join(temp_dir, 'serr'), 'r').read()
+
         self.pid = self.proc.pid
         self.returncode = self.proc.returncode
+        self.hasrun = True
         if bool(self.proc.returncode):
             self.status = "fail"
         else:
             self.status = "pass"
-        self.hasrun = True
         if self.status == "fail":
             self.log_output()
         if self.teardown:
@@ -140,7 +170,11 @@ class PeachTest:
                                                                   self.test)),
                       'w')  # this will fail if no permissions
         errlog.write("ran %s\n" % ' '.join(arg for arg in self.args))
-        errlog.write("Process exited with code %d\n" % self.returncode)
+        if self.is_timed_out:
+            errlog.write("Process timed out after %d minutes\n" %
+                         self.timeout_minutes)
+        else:
+            errlog.write("Process exited with code %d\n" % self.returncode)
         errlog.write("#" * 79)
         errlog.write(self.stderr)
         del(self.stderr)
@@ -201,11 +235,13 @@ def get_tests(target, base_config):
     name = target["file"][:-4]
     pit = os.path.join(target["path"], target["file"])
     my_tests = []
+    xtra_kwarg = {} if IS_INTERACTIVE else {'timeout_minutes': TIMEOUT_MINUTES}
     if name in all_tests:
         for test_def in all_tests[name]:
+            test_def.update(xtra_kwarg)
             my_tests.append(PeachTest(pit, base_config, **test_def))
     else:
-        my_tests.append(PeachTest(pit, base_config))
+        my_tests.append(PeachTest(pit, base_config, **xtra_kwarg))
     if name in all_defines:
         for test in my_tests:
             test.update_defines(**all_defines[name])
