@@ -24,7 +24,7 @@ FULL_TARGET_PATH = os.getcwd()
 # DETERMINE WHICH PEACH TO FIND
 
 def find_peach():
-    if not testlib.IS_INTERACTIVE:
+    if testlib.IS_INTERACTIVE:
         return "peach"
     ARCH, OS = platform.architecture()
     IS_64_BIT = '64' in ARCH
