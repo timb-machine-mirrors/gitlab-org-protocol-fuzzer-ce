@@ -130,6 +130,10 @@ if __name__ == "__main__":
                 target, e, os.linesep)
             print msg
             test_log.write(msg)
+            if 'test' in locals():
+                arg_msg = "Test args: {0}".format(test.args)
+                print args
+                test_log.write(arg_msg)
     tests.sort(key = lambda obj: obj.name)
     for test in tests:
         status = test.status

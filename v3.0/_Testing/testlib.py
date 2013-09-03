@@ -24,6 +24,8 @@ COLOR_CODES = {'red': 31,
 IS_INTERACTIVE = bool(os.environ.get("PS1") or os.environ.get('PROMPT'))
 TIMEOUT_MINUTES = 10
 
+print "IS_INTERACTIVE: {0}".format(IS_INTERACTIVE)
+
 all_tests = {}
 all_defines = {}
 
