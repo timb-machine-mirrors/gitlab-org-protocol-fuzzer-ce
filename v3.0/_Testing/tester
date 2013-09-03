@@ -132,7 +132,7 @@ if __name__ == "__main__":
             test_log.write(msg)
             if 'test' in locals():
                 arg_msg = "Test args: {0}".format(test.args)
-                print args
+                print arg_msg
                 test_log.write(arg_msg)
     tests.sort(key = lambda obj: obj.name)
     for test in tests:
