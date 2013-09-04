@@ -114,6 +114,7 @@ if __name__ == "__main__":
         print "You must be root or admin to run this"
         exit(1)
     tests = []
+    assert config.timeout >= 0, "timeout cannot be negative"
     if not os.path.isdir(config.logdir):
         os.mkdir(config.logdir)
     test_log = open(os.path.join(config.logdir, "test_status.log"), 'w')

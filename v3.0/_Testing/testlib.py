@@ -133,13 +133,14 @@ class PeachTest:
         sout = open(os.path.join(temp_dir, 'sout'), 'w')
         serr = open(os.path.join(temp_dir, 'serr'), 'w')
         self.proc = Popen(self.args, stdout=sout, stderr=serr)
-        if self.timeout:
-            while (not self.proc.poll()) and timeout_counter < timeout_counter:
-                time.sleep(60) # in seconds
+        if self.timeout > 0:
+            while (self.proc.poll() == None) and\
+                    (timeout_counter < (self.timeout * 12)):
+                time.sleep(5) # in seconds
                 timeout_counter += 1
         else:
             self.proc.wait()
-        if not self.proc.poll():
+        if self.proc.poll() == None:
             # kill the process if it's still running
             self.proc.kill()
             self.is_timed_out = True
