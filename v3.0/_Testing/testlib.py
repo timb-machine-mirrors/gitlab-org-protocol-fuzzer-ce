@@ -129,6 +129,7 @@ class PeachTest:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
         os.mkdir(temp_dir)
+        # execution should live inside of a 'with'
         sout = open(os.path.join(temp_dir, 'sout'), 'w')
         serr = open(os.path.join(temp_dir, 'serr'), 'w')
         self.proc = Popen(self.args, stdout=sout, stderr=serr)
@@ -143,18 +144,18 @@ class PeachTest:
             # kill the process if it's still running
             self.proc.kill()
             self.status = "timeout"
+        else:
+            self.pid = self.proc.pid
+            self.returncode = self.proc.returncode
+            self.hasrun = True
+            if bool(self.proc.returncode):
+                self.status = "fail"
+            else:
+                self.status = "pass"
         sout.close()
         serr.close()
         self.stdout = open(os.path.join(temp_dir, 'sout'), 'r').read()
         self.stderr = open(os.path.join(temp_dir, 'serr'), 'r').read()
-
-        self.pid = self.proc.pid
-        self.returncode = self.proc.returncode
-        self.hasrun = True
-        if bool(self.proc.returncode):
-            self.status = "fail"
-        else:
-            self.status = "pass"
         if self.status == "fail":
             self.log_output()
         if self.teardown:
