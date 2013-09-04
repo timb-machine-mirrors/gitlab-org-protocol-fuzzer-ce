@@ -136,14 +136,16 @@ if __name__ == "__main__":
             except Exception:
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
-            if test.status == "skip":
+            if test.status == "pass":
+                print test.color_text("green", "SUCCESS!")
+            elif test.status == "skip":
                 print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
             elif test.status == "fail" or test.status == "except":
                 print "...and it " + test.color_text("red", "FAILED!")
             elif test.status == "timeout":
                 print "...and it " + test.color_text("yellow", "TIMEDOUT!")
             else:
-                print test.color_text("green", "SUCCESS!")
+                print test.color_text("red", "UNKNOWN FAILURE!")
             tests.append(test)
     tests.sort(key = lambda obj: obj.name)
     for test in tests:
