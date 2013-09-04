@@ -104,11 +104,9 @@ if __name__ == "__main__":
                         required=False, default=True,
                         help=('Turns off color codes in output'))
     parser.add_argument('-t', '--timeout', type=int,
-                        default=TIMEOUT_MINUTES,
-                        required=False, help=('Time to let pits run before '
-                                              'killing them. Defaults to 10 '
-                                              'minutes.'))
-
+                        default=TIMEOUT_MINUTES,required=False, 
+                        help=('Time to let pits run before killing them. '
+                              'Defaults to 10 minutes.'))
     config = parser.parse_args()
     if not user_is_admin():
         print "You must be root or admin to run this"
