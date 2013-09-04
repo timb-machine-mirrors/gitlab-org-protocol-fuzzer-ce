@@ -140,6 +140,8 @@ if __name__ == "__main__":
                 print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
             elif test.status == "fail" or test.status == "except":
                 print "...and it " + test.color_text("red", "FAILED!")
+            elif test.status == "timeout":
+                print "...and it " + test.color_text("yellow", "TIMEDOUT!")
             else:
                 print test.color_text("green", "SUCCESS!")
             tests.append(test)

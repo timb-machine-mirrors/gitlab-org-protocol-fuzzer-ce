@@ -61,7 +61,6 @@ class PeachTest:
         self.defines = copy(defines)
         self.test = test
         self.timeout = config.timeout
-        self.is_timed_out = False
 
     def _get_peach_bin(self, peach):
         if peach:
@@ -143,7 +142,7 @@ class PeachTest:
         if self.proc.poll() == None:
             # kill the process if it's still running
             self.proc.kill()
-            self.is_timed_out = True
+            self.status = "timeout"
         sout.close()
         serr.close()
         self.stdout = open(os.path.join(temp_dir, 'sout'), 'r').read()
@@ -170,7 +169,7 @@ class PeachTest:
                                                                   self.test)),
                       'w')  # this will fail if no permissions
         errlog.write("ran %s\n" % ' '.join(arg for arg in self.args))
-        if self.is_timed_out:
+        if self.status == "timeout":
             errlog.write("Process timed out after %d minutes\n" %
                          self.timeout)
         else:
