@@ -21,10 +21,8 @@ COLOR_CODES = {'red': 31,
 
 # if this isn't being run interactive, it's probably buildbot. (*NIX then WIN.)
 # if there's something strange in the neighborhood
-IS_INTERACTIVE = bool(os.environ.get("PS1") or os.environ.get('PROMPT'))
-TIMEOUT_MINUTES = 10
 
-print "IS_INTERACTIVE: {0}".format(IS_INTERACTIVE)
+
 
 all_tests = {}
 all_defines = {}
@@ -43,15 +41,16 @@ class PeachTest:
 
     def __init__(self, pit, config, cwd=None, test="Default",
                  base_opts=PEACH_OPTS, setup=None, teardown=None,
-                 extra_opts=None, platform='all', defines=BASE_DEFINES,
-                 timeout_minutes=None):
+                 extra_opts=None, platform='all', defines=BASE_DEFINES):
         self.status = None
         self.platform = platform
         self.pit = pit
         self.name = os.path.basename(pit)[:-4]  # pit - '.xml'
         self.peach = self._get_peach_bin(config.peach)
         self.args = []
-        self.count = config.count
+        self.iterations = config.iterations
+        self.timeout = config.timeout
+        self.color = config.color
         self.base_opts = copy(base_opts)
         self.extra_opts = copy(extra_opts)
         self.cwd = cwd or os.getcwd()
@@ -61,7 +60,7 @@ class PeachTest:
         self.teardown = setup and MethodType(teardown, self, PeachTest)
         self.defines = copy(defines)
         self.test = test
-        self.timeout_minutes = timeout_minutes
+        self.timeout = config.timeout
         self.is_timed_out = False
 
     def _get_peach_bin(self, peach):
@@ -76,11 +75,10 @@ class PeachTest:
         return ' '.join(arg for arg in self.args)
 
     def color_text(self, color, text):
-        #this shouldn't take a code, it should take a name
-        if get_platform() == 'win' or not IS_INTERACTIVE:
-            return text
-        code = COLOR_CODES[color]
-        return "\033["+str(code)+"m"+str(text)+"\033[0m"
+        if self.color:
+            code = COLOR_CODES[color]
+            return "\033["+str(code)+"m"+str(text)+"\033[0m"
+        return text
 
     def update_defines(self, **kw):
         for k, v in kw.iteritems():
@@ -100,13 +98,13 @@ class PeachTest:
             opts.extend(self.extra_opts)
         if self.defines:
             opts.extend(self.render_defines())
-        if self.count:
-            assert type(self.count) is int and self.count > 0,\
-                "Count must be a positive integer"
-            if self.count == 1:
+        if self.iterations:
+            assert type(self.iterations) is int and self.iterations > 0,\
+                "Iterations must be a positive integer"
+            if self.iterations == 1:
                 opts.append('-1')
             else:
-                opts.append('--range=1,%d' % self.count)
+                opts.append('--range=1,%d' % self.iterations)
         self.args.extend(opts)
         self.args.extend(['--definedvalues', self.pit + '.config'])
         self.args.append(self.pit)
@@ -136,7 +134,7 @@ class PeachTest:
         sout = open(os.path.join(temp_dir, 'sout'), 'w')
         serr = open(os.path.join(temp_dir, 'serr'), 'w')
         self.proc = Popen(self.args, stdout=sout, stderr=serr)
-        if self.timeout_minutes:
+        if self.timeout:
             while (not self.proc.poll()) and timeout_counter < timeout_counter:
                 time.sleep(60) # in seconds
                 timeout_counter += 1
@@ -174,7 +172,7 @@ class PeachTest:
         errlog.write("ran %s\n" % ' '.join(arg for arg in self.args))
         if self.is_timed_out:
             errlog.write("Process timed out after %d minutes\n" %
-                         self.timeout_minutes)
+                         self.timeout)
         else:
             errlog.write("Process exited with code %d\n" % self.returncode)
         errlog.write("#" * 79)
@@ -237,13 +235,11 @@ def get_tests(target, base_config):
     name = target["file"][:-4]
     pit = os.path.join(target["path"], target["file"])
     my_tests = []
-    xtra_kwarg = {} if IS_INTERACTIVE else {'timeout_minutes': TIMEOUT_MINUTES}
     if name in all_tests:
         for test_def in all_tests[name]:
-            test_def.update(xtra_kwarg)
             my_tests.append(PeachTest(pit, base_config, **test_def))
     else:
-        my_tests.append(PeachTest(pit, base_config, **xtra_kwarg))
+        my_tests.append(PeachTest(pit, base_config))
     if name in all_defines:
         for test in my_tests:
             test.update_defines(**all_defines[name])

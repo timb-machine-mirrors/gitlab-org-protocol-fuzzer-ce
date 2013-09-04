@@ -5,6 +5,7 @@ import sys
 import argparse
 import shutil
 import platform
+import traceback
 
 sys.path.append(os.path.join('.', '_Testing'))
 import dependency
@@ -18,17 +19,22 @@ LOGDIR = os.environ.get('PEACH_LOGDIR') or \
     os.path.join(os.getcwd(), 'test_logs')
 PEACH_RUN_COUNT = os.environ.get('PEACH_RUN_COUNT') or 1
 FULL_TARGET_PATH = os.getcwd()
+TIMEOUT_MINUTES = 10
+ARCH, OS = platform.architecture()
+IS_64_BIT = '64' in ARCH
+IS_WINDOWS = 'windows' in OS.lower()
+IS_INTERACTIVE = sys.stdout.isatty()
+USE_COLOR = IS_INTERACTIVE and not IS_WINDOWS
+
 
 ################################################################################
 # Buildbot stuff is down under
 # DETERMINE WHICH PEACH TO FIND
 
+
 def find_peach():
-    if testlib.IS_INTERACTIVE:
+    if IS_INTERACTIVE:
         return "peach"
-    ARCH, OS = platform.architecture()
-    IS_64_BIT = '64' in ARCH
-    IS_WINDOWS = 'windows' in OS.lower()
     # split the current path by othe os seperator and jump to top of build dir
     _path = os.getcwd().split(os.sep)
     _epeach_idx = _path.index('epeach')
@@ -40,7 +46,7 @@ def find_peach():
     if IS_WINDOWS:
         assert False # oops, notchet. add when you can see the slave build machine
     else:
-        which_build += 'linux_x86'
+        which_build += 'linux_x86' #darwin?
     if IS_64_BIT:
         which_build += '_64'
     # debug has better info
@@ -48,6 +54,7 @@ def find_peach():
     _path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
     PEACH_PATH = os.sep.join(_path)
     return PEACH_PATH
+
 
 ###############################################################################
 
@@ -79,8 +86,8 @@ def user_is_admin():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Test peach pits (this must be run as root)')
-    parser.add_argument('-c', '--count', dest='count', type=int,
-                        help='The number of iterations to run',
+    parser.add_argument('-i', '--iterations', dest='iterations',
+                        type=int, help='The number of iterations to run',
                         default=PEACH_RUN_COUNT)
     parser.add_argument('-p', '--peach', dest='peach', type=str,
                         help='The location of the peach binary',
@@ -93,6 +100,16 @@ if __name__ == "__main__":
                         default=LOGDIR)
     parser.add_argument('-d', '--dependency', action='store_true',
                         required=False, help=('Used to test pit dependencies'))
+    parser.add_argument('-c', '--color', dest='color', type=bool,
+                        required=False, default=True,
+                        help=('Turns off color codes in output'))
+    parser.add_argument('-t', '--timeout', dest='timeout',
+                        default=TIMEOUT_MINUTES,
+                        required=False, help=('Time to let pits run before '
+                                              'killing them. Defaults to 10 '
+                                              'minutes.'))
+
+
     config = parser.parse_args()
     if not user_is_admin():
         print "You must be root or admin to run this"
@@ -114,26 +131,20 @@ if __name__ == "__main__":
     else:
         targets = get_targets(FULL_TARGET_PATH)
     for target in targets:
-        try:
-            pit_tests = testlib.get_tests(target, config)
-            for test in pit_tests:
+        pit_tests = testlib.get_tests(target, config)
+        for test in pit_tests:
+            try:
                 test.run()
-                if test.status == "skip":
-                    print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
-                elif test.status == "fail":
-                    print "...and it " + test.color_text("red", "FAILED!")
-                else:
-                    print test.color_text("green", "SUCCESS!")
-                tests.append(test)
-        except Exception, e:
-            msg =  "Testing of pit {0} failed with exception {1}{2}".format(
-                target, e, os.linesep)
-            print msg
-            test_log.write(msg)
-            if 'test' in locals():
-                arg_msg = "Test args: {0}".format(test.args)
-                print arg_msg
-                test_log.write(arg_msg)
+            except Exception:
+                traceback.print_exception(*sys.exc_info())
+                test.status = "except"
+            if test.status == "skip":
+                print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
+            elif test.status == "fail" or test.status == "except":
+                print "...and it " + test.color_text("red", "FAILED!")
+            else:
+                print test.color_text("green", "SUCCESS!")
+            tests.append(test)
     tests.sort(key = lambda obj: obj.name)
     for test in tests:
         status = test.status
@@ -150,4 +161,9 @@ if __name__ == "__main__":
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
+        elif test.status == "except":
+            test_log.write("{0:<20}{1}".format(
+                    test.name + " failed with exception", os.linesep))
+
     test_log.close()
+
