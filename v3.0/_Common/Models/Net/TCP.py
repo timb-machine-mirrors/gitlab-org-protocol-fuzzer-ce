@@ -10,6 +10,7 @@ clr.AddReferenceByPartialName('Peach.Core')
 
 import Peach.Core
 
+
 def init_seq(ctx):
     # print "init running"
     seed = (int(ctx.parent.parent.parent.context.test.strategy.Iteration) + int(ctx.parent.parent.parent.context.test.strategy.Seed))
@@ -22,10 +23,9 @@ def init_seq(ctx):
     if ctx.dataModel.find('SequenceNumber') and ctx.dataModel.find('SrcPort'):
         ctx.dataModel.find('SequenceNumber').DefaultValue = Peach.Core.Variant(seq)
         ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(sport)
-    ctx.dataModel.Value #this shouldn't need to be called in future
     # print "Storing value"
     try:
-        set_to_store(ctx, SequenceNumber=seq, SrcPort=sport)
+        set_to_store(ctx, SequenceNumber=seq, SrcPort=sport) #can sport just come from the data model??
     except Exception, e:
         print e
         raise e
@@ -51,7 +51,6 @@ def sync_from_store(ctx):
         set_default_uint32_from_store(ctx, "AcknowledgmentNumber")
     if ctx.dataModel.find("SequenceNumber"):
         ctx.dataModel.find("SequenceNumber").DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, "NextSequenceNumber"))
-    ctx.dataModel.Value
 
 
 def store_next_acknum(ctx):
@@ -96,7 +95,6 @@ def set_default_uint32_from_store(ctx, name):
         ctx.dataModel.find(name).DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, name))
     else:
         return False
-    ctx.dataModel.Value #this shouldn't need to be called in future
     return True
 
 
@@ -115,7 +113,6 @@ def get_if_ack_for_me(ctx):
 def set_timestamp(ctx):
     if ctx.dataModel.find('TimestampValue'):
         ctx.dataModel.find('TimestampValue').DefaultValue = Peach.Core.Variant(get_cur_timestamp())
-        ctx.dataModel.Value
         return True
     else:
         return False
