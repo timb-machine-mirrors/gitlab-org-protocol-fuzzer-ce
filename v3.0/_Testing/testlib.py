@@ -125,7 +125,6 @@ class PeachTest:
             output = sys.stdout
         else:
             output = PIPE
-
         temp_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
         timeout_counter = 0
         if os.path.exists(temp_dir):

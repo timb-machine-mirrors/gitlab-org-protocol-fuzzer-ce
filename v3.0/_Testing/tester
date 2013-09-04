@@ -19,12 +19,12 @@ LOGDIR = os.environ.get('PEACH_LOGDIR') or \
     os.path.join(os.getcwd(), 'test_logs')
 PEACH_RUN_COUNT = os.environ.get('PEACH_RUN_COUNT') or 1
 FULL_TARGET_PATH = os.getcwd()
-TIMEOUT_MINUTES = 10
+TIMEOUT_MINUTES = os.environ.get('PEACH_TIMEOUT_MINUTES') or 10
 ARCH, OS = platform.architecture()
 IS_64_BIT = '64' in ARCH
 IS_WINDOWS = 'windows' in OS.lower()
 IS_INTERACTIVE = sys.stdout.isatty()
-USE_COLOR = IS_INTERACTIVE and not IS_WINDOWS
+USE_COLOR = IS_INTERACTIVE and (not IS_WINDOWS)
 
 
 ################################################################################
@@ -89,26 +89,25 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--iterations', dest='iterations',
                         type=int, help='The number of iterations to run',
                         default=PEACH_RUN_COUNT)
-    parser.add_argument('-p', '--peach', dest='peach', type=str,
+    parser.add_argument('-p', '--peach', type=str,
                         help='The location of the peach binary',
                         default=find_peach())
     parser.add_argument('targets', type=str, metavar="target", nargs='*',
                         help=('The the specific targets to test, '
                               'e.g.: Net/TCPv4.xml'))
-    parser.add_argument('-l', '--logdir', dest='logdir', type=str,
+    parser.add_argument('-l', '--logdir',type=str,
                         help='location to log test output',
                         default=LOGDIR)
     parser.add_argument('-d', '--dependency', action='store_true',
                         required=False, help=('Used to test pit dependencies'))
-    parser.add_argument('-c', '--color', dest='color', type=bool,
+    parser.add_argument('-c', '--color', type=bool,
                         required=False, default=True,
                         help=('Turns off color codes in output'))
-    parser.add_argument('-t', '--timeout', dest='timeout',
+    parser.add_argument('-t', '--timeout', type=int,
                         default=TIMEOUT_MINUTES,
                         required=False, help=('Time to let pits run before '
                                               'killing them. Defaults to 10 '
                                               'minutes.'))
-
 
     config = parser.parse_args()
     if not user_is_admin():
