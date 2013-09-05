@@ -43,6 +43,8 @@ test-results/
 /3rdParty/Irony*/*/[Oo]bj/
 /3rdParty/TotalPhase-5.13/[Bb]in/
 /3rdParty/TotalPhase-5.13/[Oo]bj/
+/3rdParty/Managed.AndroidDebugBridge/*/[Oo]bj/
+/3rdParty/Managed.AndroidDebugBridge/*/[Bb]in/
 
 # User-specific files
 *.user

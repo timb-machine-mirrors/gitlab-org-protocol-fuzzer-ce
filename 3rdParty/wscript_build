@@ -6,6 +6,7 @@ subdirs = [
 	'ASN1-Editor',
 	'Irony_2013_03_10',
 	'TotalPhase-5.13',
+	'Managed.AndroidDebugBridge',
 ]
 
 bld.recurse(subdirs)
@@ -48,4 +49,3 @@ bld.read_csshlib('ActiproSoftware.Text.LLParser.Wpf.dll',              paths=['A
 bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('Managed.Adb.dll',                  paths=[])
