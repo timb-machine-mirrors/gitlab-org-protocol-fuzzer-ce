@@ -5,7 +5,7 @@
 	<Import import="time" />
 
 	<DataModel name="NetPayload">
-		<String name="str" value="HelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorld" />
+		<String name="str" value="HelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorldHelloWorld" />
 		<String value="\r\n" mutable="false"/>
 	</DataModel>
 	<DataModel name="resp">
