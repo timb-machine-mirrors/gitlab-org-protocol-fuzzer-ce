@@ -141,7 +141,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			bool restart = false;
-			if (RestartEveryIteration || (_fault != null && RestartAfterFault))
+			if (RestartEveryIteration || (_fault != null && _fault.type == FaultType.Fault && RestartAfterFault))
 			{
 				restart = true;
 			}
