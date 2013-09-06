@@ -6,6 +6,7 @@ using System.Threading;
 using Peach.Core.Agent;
 using Managed.Adb;
 using Peach.Core;
+using System.Text.RegularExpressions;
 
 namespace Peach.Enterprise.Agent.Monitors
 {
@@ -17,6 +18,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Device _dev = null;
 		private FileEntry _tombs = null;
 		private int _retries = 20;
+
+		private Regex reHash = new Regex(@"^backtrace:(\r\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
 		public string CmdOnStart { get; private set; }
 
@@ -44,6 +47,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			CommandResultReceiver creciever = new CommandResultReceiver();
 			if (type.Equals("dismiss")){
 				_dev.ExecuteShellCommand("input keyevent 66", creciever); //Enter
+				Thread.Sleep(250);
 				_dev.ExecuteShellCommand("input keyevent 66", creciever); //Enter
 			}
 			else if (type.Equals("unlock")){
@@ -86,7 +90,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			_fault = new Fault();
 			_fault.type = FaultType.Fault;
 			_fault.detectionSource = "AndroidMonitor";
-			_fault.folderName = "AndroidMonitor";
+			_fault.exploitability = "Unknown";
 
 			try
 			{
@@ -159,6 +163,15 @@ namespace Peach.Enterprise.Agent.Monitors
 				CommandResultReceiver creciever = new CommandResultReceiver();
 				_dev.ExecuteShellCommand("cat " + tomb.FullPath, creciever);
 				string tombstr = creciever.Result;
+
+				var hash = reHash.Match(tombstr);
+				if (hash.Success)
+				{
+					_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
+					_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
+				}
+
+
 				_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
 				// TODO: this might be ok, since a core dump implies it was a native crash
 				// And native crashes are the only crashes that need to physically dismiss the message
