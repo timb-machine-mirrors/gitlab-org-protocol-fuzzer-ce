@@ -11,7 +11,11 @@ using System.Text.RegularExpressions;
 namespace Peach.Enterprise.Agent.Monitors
 {
 	[Monitor("Android", true)]
-	[Parameter("CmdOnStart", typeof(string), "Command on beginning of each iteration.", "")]
+	[Parameter("ApplicationName", typeof(string), "Android Application")]
+	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
+	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
+	
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		private Fault _fault = null;
@@ -21,7 +25,10 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		private Regex reHash = new Regex(@"^backtrace:(\r\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
-		public string CmdOnStart { get; private set; }
+		public string ApplicationName { get; private set; }
+		public string ActivityName { get; private set; }
+		public bool RestartEveryIteration { get; private set; }
+		public bool RestartAfterFault { get; private set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -55,6 +62,18 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 		}
 
+		private void restartApp()
+		{
+			string cmd = "am start -S -n " + ApplicationName;
+			if (ActivityName.Length > 0)
+			{
+				cmd = cmd + "/" + ActivityName;
+			}
+			cmd += " && sleep 2";
+			ConsoleOutputReceiver creciever = new ConsoleOutputReceiver();
+			_dev.ExecuteShellCommand(cmd, creciever);
+		}
+
 		private bool devIsReady()
 		{
 			// HACK: none of the api's functions will reliably tell this.
@@ -79,6 +98,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			_tombs = FileEntry.FindOrCreate(_dev, path);
 			CleanTombs();
 			CleanLogs();
+			if (!RestartEveryIteration)
+			{
+				restartApp();
+			}
 		}
 
 		public override void SessionFinished()
@@ -117,6 +140,12 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
+			bool restart = false;
+			if (RestartEveryIteration || (_fault != null && RestartAfterFault))
+			{
+				restart = true;
+			}
+			
 			_fault = null;
 
 			// Make sure the device is ready
@@ -140,10 +169,9 @@ namespace Peach.Enterprise.Agent.Monitors
 				CleanUI("unlock");
 			}
 
-			if (CmdOnStart != "")
+			if (restart)
 			{
-				ConsoleOutputReceiver creciever = new ConsoleOutputReceiver();
-				_dev.ExecuteShellCommand(CmdOnStart, creciever);
+				restartApp();
 			}
 		}
 
