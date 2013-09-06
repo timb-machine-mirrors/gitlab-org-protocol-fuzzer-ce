@@ -76,7 +76,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
 			var path = "/data/tombstones/";
-			_tombs = FileEntry.Find(_dev, path);
+			_tombs = FileEntry.FindOrCreate(_dev, path);
 			CleanTombs();
 			CleanLogs();
 		}
@@ -94,21 +94,23 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			try
 			{
-				_fault.type = FaultType.Data;
-				_fault.title = "Response";
 				CommandResultReceiver creciever = new CommandResultReceiver();
 				_dev.ExecuteShellCommand("logcat -s -d AndroidRuntime:e ActivityManager:e *:f", creciever);
+
+				_fault.type = FaultType.Data;
+				_fault.title = "Response";
 				_fault.description = creciever.Result;
-				if (_fault.description.Length > 0)
-				{
+
+				if (!string.IsNullOrEmpty(_fault.description))
 					_fault.type = FaultType.Fault;
-				}
 			}
 			catch (Exception ex)
 			{
 				_fault.title = "Exception";
 				_fault.description = ex.Message;
+				_fault.type = FaultType.Fault;
 			}
+
 			return _fault.type == FaultType.Fault;
 
 		}
