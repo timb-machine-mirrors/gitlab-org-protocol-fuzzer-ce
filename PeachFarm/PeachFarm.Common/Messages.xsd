@@ -158,6 +158,33 @@
 		</xs:complexContent>
 	</xs:complexType>
 
+	<xs:element name="ListJobsRequest" type="ListJobsRequest" />
+	<xs:complexType name="ListJobsRequest" />
+
+	<xs:element name="ListJobsResponse" type="ListJobsResponse" />
+	<xs:complexType name="ListJobsResponse">
+		<xs:complexContent>
+			<xs:extension base="ResponseBase">
+				<xs:sequence>
+					<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
 	<xs:element name="MonitorRequest" type="MonitorRequest" />
 	<xs:complexType name="MonitorRequest" />
 
