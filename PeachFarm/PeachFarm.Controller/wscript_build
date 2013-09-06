@@ -11,6 +11,14 @@ deps = [
 	'MongoDB.Bson.dll',
 	'System.Xml.dll',
 	'System.Xml.Linq.dll',
+	'ServiceStack.Common.dll',           
+	'ServiceStack.dll',                  
+	'ServiceStack.Interfaces.dll',       
+	'ServiceStack.OrmLite.dll',          
+	'ServiceStack.OrmLite.SqlServer.dll',
+	'ServiceStack.Redis.dll',            
+	'ServiceStack.ServiceInterface.dll', 
+	'ServiceStack.Text.dll',             
 ]
 
 bld(
