@@ -65,7 +65,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private void restartApp()
 		{
 			string cmd = "am start -S -n " + ApplicationName;
-			if (ActivityName.Length > 0)
+			if (!string.IsNullOrEmpty(ActivityName))
 			{
 				cmd = cmd + "/" + ActivityName;
 			}
