@@ -41,7 +41,9 @@
 
 	<Agent name="Ag">
 		<Monitor class="Android">
-			<Param name="CmdOnStart" value="am start -S -n com.example.crashingapp1/.MainActivity" />
+			<!--Param name="CmdOnStart" value="am start -S -n com.example.crashingapp1/.MainActivity" /-->
+			<Param name="ApplicationName" value="com.example.crashingapp1" />
+			<Param name="ActivityName" value=".MainActivity" />
 		</Monitor>
 	</Agent>
 
