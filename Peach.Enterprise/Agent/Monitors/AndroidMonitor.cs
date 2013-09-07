@@ -91,6 +91,27 @@ namespace Peach.Enterprise.Agent.Monitors
 			return true;
 		}
 
+		private byte[] imageClean(byte[] unclean)
+		{
+			List<byte> clean = new List<byte>();
+			int i = 0;
+			while (i < unclean.Length - 1)
+			{
+				if (unclean[i] != '\r' || unclean[i + 1] != '\n')
+				{
+					clean.Add(unclean[i]);
+					i += 1;
+				}
+				else
+				{
+					clean.Add(unclean[i+1]);
+					i += 2;
+				}
+			}
+			return clean.ToArray();
+		}
+
+
 		public override void SessionStarting()
 		{
 			_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
@@ -187,10 +208,18 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
+			CommandResultReceiver creciever = null;
+			CommandResultBinaryReceiver breciever = null;
+
+			// Get 1st Screenshot
+			breciever = new CommandResultBinaryReceiver();
+			_dev.ExecuteShellCommand("screencap -p", breciever);
+			_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+
 			// Grab Tomb
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 			{
-				CommandResultReceiver creciever = new CommandResultReceiver();
+				creciever = new CommandResultReceiver();
 				_dev.ExecuteShellCommand("cat " + tomb.FullPath, creciever);
 				string tombstr = creciever.Result;
 
@@ -210,6 +239,12 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			CleanTombs();
 			CleanLogs();
+
+			// Get 2nd ScreenShot
+			breciever = new CommandResultBinaryReceiver();
+			_dev.ExecuteShellCommand("screencap -p", breciever);
+			_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+
 			return _fault;
 		}
 
