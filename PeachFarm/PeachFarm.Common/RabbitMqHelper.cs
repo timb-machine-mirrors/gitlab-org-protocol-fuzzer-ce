@@ -98,6 +98,10 @@ namespace PeachFarm.Common
 
 		public void PublishToQueue(string queue, string body, string action, string replyQueue = "")
 		{
+			RunGuarded(sender, () => { PublishToQueue(sender, queue, body, action, replyQueue); });
+
+			#region old
+			/*
 			bool open = true;
 
 			try
@@ -111,7 +115,7 @@ namespace PeachFarm.Common
 
 					if (open)
 					{
-						sender.PublishToQueue(queue, body, action, replyQueue);
+						PublishToQueue(sender, queue, body, action, replyQueue);
 					}
 					else
 					{
@@ -123,10 +127,23 @@ namespace PeachFarm.Common
 			{
 				throw new RabbitMqException(ex, hostName);
 			}
+			//*/
+			#endregion
 		}
 
 		public void DeclareExchange(string exchange, List<string> queues, string routingKey = "")
 		{
+			RunGuarded(declarer, () =>
+				{
+					declarer.ExchangeDeclare(exchange, "fanout", true);
+					foreach (var q in queues)
+					{
+						declarer.QueueBind(q, exchange, routingKey);
+					}
+				});
+
+			#region old
+			/*
 			bool open = true;
 
 			try
@@ -156,10 +173,19 @@ namespace PeachFarm.Common
 			{
 				throw new RabbitMqException(ex, hostName);
 			}
+			//*/
+			#endregion
 		}
 
 		public void BindQueueToExchange(string exchange, string queue, string routingKey = "")
 		{
+			RunGuarded(declarer, () =>
+				{
+					declarer.QueueBind(queue, exchange, routingKey);
+				});
+
+			#region old
+			/*
 			bool open = true;
 
 			try
@@ -185,10 +211,16 @@ namespace PeachFarm.Common
 			{
 				throw new RabbitMqException(ex, hostName);
 			}
+			//*/
+			#endregion
 		}
 
 		public void DeleteExchange(string exchange)
 		{
+			RunGuarded(declarer, () => { declarer.ExchangeDelete(exchange, true); });
+
+			#region old
+			/*
 			bool open = true;
 
 			try
@@ -214,10 +246,16 @@ namespace PeachFarm.Common
 			{
 				throw new RabbitMqException(ex, hostName);
 			}
+			//*/
+			#endregion
 		}
 
 		public virtual void PublishToExchange(string exchange, string body, string action)
 		{
+			RunGuarded(sender, () => { PublishToExchange(sender, exchange, body, action); });
+
+			#region old
+			/*
 			bool open = true;
 
 			try
@@ -231,7 +269,7 @@ namespace PeachFarm.Common
 
 					if (open)
 					{
-						sender.PublishToExchange(exchange, body, action);
+						PublishToExchange(sender, exchange, body, action);
 					}
 					else
 					{
@@ -243,6 +281,8 @@ namespace PeachFarm.Common
 			{
 				throw new RabbitMqException(ex, hostName);
 			}
+			//*/
+			#endregion
 		}
 
 		public void CloseConnection()
@@ -289,6 +329,65 @@ namespace PeachFarm.Common
 		#endregion
 
 		#region private functions
+
+		private void RunGuarded(IModel model, Action action)
+		{
+			bool open = true;
+
+			try
+			{
+				lock (model)
+				{
+					if (model.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
+
+					if (open)
+					{
+						action.Invoke();
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
+		private T RunGuarded<T>(IModel model, Func<T> function)
+		{
+			bool open = true;
+
+			try
+			{
+				lock (model)
+				{
+					if (model.IsOpen == false)
+					{
+						open = ReopenConnection();
+					}
+
+					if (open)
+					{
+						return function.Invoke();
+					}
+					else
+					{
+						throw new RabbitMqException(null, hostName);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RabbitMqException(ex, hostName);
+			}
+
+		}
 
 		private void Listen(object source, System.Timers.ElapsedEventArgs e)
 		{
@@ -409,6 +508,27 @@ namespace PeachFarm.Common
 			return success;
 		}
 
+		private void PublishToQueue(IModel model, string queue, string message, string action, string replyQueue = "")
+		{
+			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
+			properties.DeliveryMode = 2;
+			properties.Headers = new Dictionary<string, string>();
+			properties.Headers.Add("Action", action);
+			if (String.IsNullOrEmpty(replyQueue) == false)
+			{
+				properties.Headers.Add("ReplyQueue", replyQueue);
+			}
+			model.BasicPublish("", queue, properties, encoding.GetBytes(message));
+		}
+
+		private void PublishToExchange(IModel model, string exchange, string message, string action)
+		{
+			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
+			properties.DeliveryMode = 2;
+			properties.Headers = new Dictionary<string, string>();
+			properties.Headers.Add("Action", action);
+			model.BasicPublish(exchange, "", properties, encoding.GetBytes(message));
+		}
 
 		private BasicGetResult GetFromQueue(string queue)
 		{
@@ -468,29 +588,5 @@ namespace PeachFarm.Common
 		public string RabbitMqHost { get; private set; }
 	}
 
-	public static class RabbitMqExtensions
-	{
-		private static UTF8Encoding encoding = new UTF8Encoding();
-
-		public static void PublishToQueue(this IModel model, string queue, string message, string action, string replyQueue = "")
-		{
-			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
-			properties.Headers = new Dictionary<string, string>();
-			properties.Headers.Add("Action", action);
-			if (String.IsNullOrEmpty(replyQueue) == false)
-			{
-				properties.Headers.Add("ReplyQueue", replyQueue);
-			}
-			model.BasicPublish("", queue, properties, encoding.GetBytes(message));
-		}
-
-		public static void PublishToExchange(this IModel model, string exchange, string message, string action)
-		{
-			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
-			properties.Headers = new Dictionary<string, string>();
-			properties.Headers.Add("Action", action);
-			model.BasicPublish(exchange, "", properties, encoding.GetBytes(message));
-		}
-	}
 
 }
