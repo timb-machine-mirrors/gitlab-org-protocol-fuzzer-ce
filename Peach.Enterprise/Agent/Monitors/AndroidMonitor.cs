@@ -7,6 +7,7 @@ using Peach.Core.Agent;
 using Managed.Adb;
 using Peach.Core;
 using System.Text.RegularExpressions;
+using NLog;
 
 namespace Peach.Enterprise.Agent.Monitors
 {
@@ -18,6 +19,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		private Fault _fault = null;
 		private Device _dev = null;
 		private FileEntry _tombs = null;
@@ -212,9 +215,16 @@ namespace Peach.Enterprise.Agent.Monitors
 			CommandResultBinaryReceiver breciever = null;
 
 			// Get 1st Screenshot
-			breciever = new CommandResultBinaryReceiver();
-			_dev.ExecuteShellCommand("screencap -p", breciever);
-			_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+			try
+			{
+				breciever = new CommandResultBinaryReceiver();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+			}
+			catch (Exception ex)
+			{
+				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex.Message);
+			}
 
 			// Grab Tomb
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
@@ -226,6 +236,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				var hash = reHash.Match(tombstr);
 				if (hash.Success)
 				{
+					//TODO not real major minor hashes
 					_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
 					_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
 				}
@@ -241,9 +252,16 @@ namespace Peach.Enterprise.Agent.Monitors
 			CleanLogs();
 
 			// Get 2nd ScreenShot
-			breciever = new CommandResultBinaryReceiver();
-			_dev.ExecuteShellCommand("screencap -p", breciever);
-			_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+			try
+			{
+				breciever = new CommandResultBinaryReceiver();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+			}
+			catch (Exception ex)
+			{
+				logger.Warn("AndroidScreenshot: Warn, Unable to capture second screenshot:\n" + ex.Message);
+			}
 
 			return _fault;
 		}
