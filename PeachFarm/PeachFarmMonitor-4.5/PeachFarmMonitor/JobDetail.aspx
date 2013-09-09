@@ -171,6 +171,7 @@
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
             <MasterTableView
+							
               AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
               Caption="Faults"
               NoDetailRecordsText="No faults for this group."

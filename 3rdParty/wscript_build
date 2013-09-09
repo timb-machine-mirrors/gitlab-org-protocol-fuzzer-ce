@@ -49,3 +49,12 @@ bld.read_csshlib('ActiproSoftware.Text.LLParser.Wpf.dll',              paths=['A
 bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+
+bld.read_csshlib('ServiceStack.Common.dll',              paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.dll',                     paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.Interfaces.dll',          paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.OrmLite.dll',             paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.OrmLite.SqlServer.dll',   paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.Redis.dll',               paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.ServiceInterface.dll',    paths=['ServiceStack'])
+bld.read_csshlib('ServiceStack.Text.dll',                paths=['ServiceStack'])
