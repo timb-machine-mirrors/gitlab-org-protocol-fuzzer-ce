@@ -33,19 +33,6 @@ namespace PeachFarm.Common.Messages
 		[XmlIgnore]
 		public BsonObjectId _id { get; set; }
 
-		[XmlAttribute]
-		[BsonIgnore]
-		public string ID
-		{
-			get
-			{
-				if ((_id == null) || (_id == BsonObjectId.Empty))
-					return String.Empty;
-				else
-					return _id.ToString();
-			}
-		}
-
 		public virtual Messages.Heartbeat SaveToDatabase(string connectionString)
 		{
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmNodes, connectionString);

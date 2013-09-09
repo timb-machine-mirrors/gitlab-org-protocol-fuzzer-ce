@@ -30,6 +30,8 @@ namespace PeachFarm.Controller
 
 		private string controllerQueueName;
 
+		List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts;
+
 		#region testing
 		// these are here for testing purposes and shouldn't be mucked with in prod
 		// everything _should_ function normally if left alone
@@ -50,6 +52,7 @@ namespace PeachFarm.Controller
 
 			RabbitInitializer();
 			MongoDBInitializer();
+			hosts = RestInitializer();
 
 			if (statusCheck == null)
 			{
@@ -72,7 +75,13 @@ namespace PeachFarm.Controller
 		#region Properties
 		public bool IsListening
 		{
-			get { return rabbit.IsListening; }
+			get 
+			{
+				if (rabbit != null)
+					return rabbit.IsListening;
+				else
+					return false;
+			}
 		}
 
 		public string QueueName
@@ -90,6 +99,14 @@ namespace PeachFarm.Controller
 			{
 				rabbit.StopListener();
 				rabbit = null;
+			}
+
+			if (hosts != null)
+			{
+				foreach (var host in hosts)
+				{
+					host.Stop();
+				}
 			}
 		}
 
@@ -163,6 +180,9 @@ namespace PeachFarm.Controller
 
 		protected virtual void Reply(string body, string action, string replyQueue)
 		{
+			if (replyQueue == null)
+				return;
+
 			rabbit.PublishToQueue(replyQueue, body, action);
 			logger.Trace("Sent Action to {2}: {0}\nBody:\n{1}", action, body, replyQueue);
 		}
@@ -172,19 +192,21 @@ namespace PeachFarm.Controller
 			Debug.WriteLine("action: " + action);
 			Debug.WriteLine("reply: " + replyQueue);
 			Debug.WriteLine(body);
+
+			ResponseBase response = null;
 			switch (action)
 			{
 				case Actions.StartPeach:
-					StartPeach(StartPeachRequest.Deserialize(body), replyQueue);
+					response = StartPeach(StartPeachRequest.Deserialize(body));
 					break;
 				case Actions.StopPeach:
-					StopPeach(StopPeachRequest.Deserialize(body), replyQueue);
+					response = StopPeach(StopPeachRequest.Deserialize(body));
 					break;
 				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
 				case Actions.GenerateReport:
-					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
+					GenerateReportComplete(GenerateReportResponse.Deserialize(body));
 					break;
 				#region deprecated
 				/*
@@ -206,6 +228,11 @@ namespace PeachFarm.Controller
 					string error = String.Format("Received unknown action {0}", action);
 					logger.Error(error);
 					break;
+			}
+
+			if (response != null)
+			{
+				Reply(response.Serialize(), action, replyQueue);
 			}
 		}
 
@@ -247,16 +274,23 @@ namespace PeachFarm.Controller
 			}
 		}
 
+
 		#endregion
 
-		#region Receives
+		#region Process Action functions
+
+		protected virtual void StopPeach(StopPeachRequest request, string replyQueue)
+		{
+			var response = StopPeach(request);
+			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
+		}
 
 		/// <summary>
 		/// For Stopping a Job
 		/// </summary>
 		/// <param name="request"></param>
 		/// <param name="replyQueue"></param>
-		protected void StopPeach(StopPeachRequest request, string replyQueue)
+		internal virtual StopPeachResponse StopPeach(StopPeachRequest request)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
 
@@ -294,16 +328,17 @@ namespace PeachFarm.Controller
 				}
 			}
 
-			// After building the response to the Admin, send it.
-			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
+			return response;
 		}
 
-		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)
-		{
-			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
-		}
 
 		protected virtual void StartPeach(StartPeachRequest request, string replyQueue)
+		{
+			var response = StartPeach(request);
+			Reply(request.Serialize(), Actions.StartPeach, replyQueue);
+		}
+
+		internal virtual StartPeachResponse StartPeach(StartPeachRequest request)
 		{
 			#region Method Explanation
 			/*
@@ -355,16 +390,16 @@ namespace PeachFarm.Controller
 				if ((node != null) && (node.Status == Status.Alive))
 				{
 					DeclareJobExchange(request.JobID, new List<string>() { node.QueueName });
-					CommitJobToMongo(request, new List<Heartbeat>(){ node });
+					CommitJobToMongo(request, new List<Heartbeat>() { node });
 					PublishToJob(request.JobID, request.Serialize(), action);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
 					response.JobID = String.Empty;
 					response.Success = false;
 					response.ErrorMessage = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 			}
 			#endregion
@@ -392,7 +427,7 @@ namespace PeachFarm.Controller
 					DeclareJobExchange(request.JobID, jobQueues);
 					CommitJobToMongo(request, jobNodes);
 					SeedTheJobQueues(jobQueues, request, action);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
@@ -407,54 +442,12 @@ namespace PeachFarm.Controller
 					{
 						response.ErrorMessage = String.Format("Not enough Alive nodes matching tags ({0}), current available: {1}\n", request.Tags, jobNodes.Count);
 					}
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				#endregion
 			}
-		}
 
-		private static List<Heartbeat> NodesMatchingTags(List<Heartbeat> nodes, string tags)
-		{
-			var jobNodes = new List<Heartbeat>();
-			bool shouldUseAllNodes = String.IsNullOrEmpty(tags);
-			if (shouldUseAllNodes)
-			{
-				jobNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
-			}
-			else
-			{
-				var aliveNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
-				var ts = tags.Split(',').ToList();
-
-				// grab nodes that have *all* the tags specified in the request
-				foreach (Heartbeat node in aliveNodes)
-				{
-					var matches = node.Tags.Split(',').Intersect(ts).ToList(); // note: the Intersect function
-					if (matches.Count == ts.Count)
-					{
-						jobNodes.Add(node);
-					}
-				}
-			}
-			return jobNodes;
-		}
-
-		protected virtual void SeedTheJobQueues(List<string> jobQueues, StartPeachRequest request, string action)
-		{
-			/*
-			 * Important: to make certain that each Node uses a different Seed for initializing Peach,
-			 * we're determining the seed here in the Controller and setting it for each Node
-			 * 
-			 * Here's the slightly odd bit. Because the Seed is different for each node,
-			 * we're sending StartPeach requests to each node individually instead of publishing
-			 * to the exchange
-			 */
-			uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-			for(int i=0;i<jobQueues.Count;i++)
-			{
-				request.Seed = baseseed + Convert.ToUInt32(i);
-				rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
-			}
+			return response;
 		}
 
 		protected void HeartbeatReceived(Heartbeat heartbeat)
@@ -504,7 +497,6 @@ namespace PeachFarm.Controller
 				}
 				#endregion
 			}
-			#endregion
 
 			#region Log all Error Heartbeats to the Errors collection in MongoDB
 
@@ -527,14 +519,65 @@ namespace PeachFarm.Controller
 			#endregion
 		}
 
+		private void GenerateReportComplete(GenerateReportResponse generateReportResponse)
+		{
+			// do nothing when report complete response is received
+		}
+
+		#endregion
+
+		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)
+		{
+			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
+		}
+
+		private static List<Heartbeat> NodesMatchingTags(List<Heartbeat> nodes, string tags)
+		{
+			var jobNodes = new List<Heartbeat>();
+			bool shouldUseAllNodes = String.IsNullOrEmpty(tags);
+			if (shouldUseAllNodes)
+			{
+				jobNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+			}
+			else
+			{
+				var aliveNodes = (from Heartbeat h in nodes.OrderByDescending(h => h.Stamp) where h.Status == Status.Alive select h).ToList();
+				var ts = tags.Split(',').ToList();
+
+				// grab nodes that have *all* the tags specified in the request
+				foreach (Heartbeat node in aliveNodes)
+				{
+					var matches = node.Tags.Split(',').Intersect(ts).ToList(); // note: the Intersect function
+					if (matches.Count == ts.Count)
+					{
+						jobNodes.Add(node);
+					}
+				}
+			}
+			return jobNodes;
+		}
+
+		protected virtual void SeedTheJobQueues(List<string> jobQueues, StartPeachRequest request, string action)
+		{
+			/*
+			 * Important: to make certain that each Node uses a different Seed for initializing Peach,
+			 * we're determining the seed here in the Controller and setting it for each Node
+			 * 
+			 * Here's the slightly odd bit. Because the Seed is different for each node,
+			 * we're sending StartPeach requests to each node individually instead of publishing
+			 * to the exchange
+			 */
+			uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+			for(int i=0;i<jobQueues.Count;i++)
+			{
+				request.Seed = baseseed + Convert.ToUInt32(i);
+				rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
+			}
+		}
+
 		protected virtual void PushReportToQueue(GenerateReportRequest grr)
 		{
 			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
-		}
-
-		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
-		{
-			// do nothing when report complete response is received
 		}
 
 		protected virtual void RemoveNode(Heartbeat heartbeat)
@@ -619,6 +662,20 @@ namespace PeachFarm.Controller
 			}
 		}
 
+		private List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> RestInitializer()
+		{
+			List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts = new List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase>();
+
+			var listeningOn = "http://*:1337/";
+
+			var appHost = new AppHost();
+			appHost.Init();
+			appHost.Start(listeningOn);
+			hosts.Add(appHost);
+
+			return hosts;
+		}
+
 		protected virtual IPAddress[] LocalIPs()
 		{
 			return System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
@@ -630,7 +687,7 @@ namespace PeachFarm.Controller
 			else return (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");	
 		}
 
-		protected  virtual List<Heartbeat> NodeList(PeachFarm.Controller.Configuration.ControllerSection config)
+		protected virtual List<Heartbeat> NodeList(PeachFarm.Controller.Configuration.ControllerSection config)
 		{
 			/* This could be static, but we need to be able to override it for testing purposes */
 			return DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);

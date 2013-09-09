@@ -7,6 +7,7 @@ using Peach.Core.Agent;
 using Managed.Adb;
 using Peach.Core;
 using System.Text.RegularExpressions;
+using NLog;
 
 namespace Peach.Enterprise.Agent.Monitors
 {
@@ -18,6 +19,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		private Fault _fault = null;
 		private Device _dev = null;
 		private FileEntry _tombs = null;
@@ -90,6 +93,27 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			return true;
 		}
+
+		private byte[] imageClean(byte[] unclean)
+		{
+			List<byte> clean = new List<byte>();
+			int i = 0;
+			while (i < unclean.Length - 1)
+			{
+				if (unclean[i] != '\r' || unclean[i + 1] != '\n')
+				{
+					clean.Add(unclean[i]);
+					i += 1;
+				}
+				else
+				{
+					clean.Add(unclean[i+1]);
+					i += 2;
+				}
+			}
+			return clean.ToArray();
+		}
+
 
 		public override void SessionStarting()
 		{
@@ -187,16 +211,32 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
+			CommandResultReceiver creciever = null;
+			CommandResultBinaryReceiver breciever = null;
+
+			// Get 1st Screenshot
+			try
+			{
+				breciever = new CommandResultBinaryReceiver();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+			}
+			catch (Exception ex)
+			{
+				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex.Message);
+			}
+
 			// Grab Tomb
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 			{
-				CommandResultReceiver creciever = new CommandResultReceiver();
+				creciever = new CommandResultReceiver();
 				_dev.ExecuteShellCommand("cat " + tomb.FullPath, creciever);
 				string tombstr = creciever.Result;
 
 				var hash = reHash.Match(tombstr);
 				if (hash.Success)
 				{
+					//TODO not real major minor hashes
 					_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
 					_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
 				}
@@ -210,6 +250,19 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			CleanTombs();
 			CleanLogs();
+
+			// Get 2nd ScreenShot
+			try
+			{
+				breciever = new CommandResultBinaryReceiver();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+			}
+			catch (Exception ex)
+			{
+				logger.Warn("AndroidScreenshot: Warn, Unable to capture second screenshot:\n" + ex.Message);
+			}
+
 			return _fault;
 		}
 

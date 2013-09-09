@@ -140,6 +140,7 @@
     <Compile Include="RawImage.cs" />
     <Compile Include="Receivers\BatteryReceiver.cs" />
     <Compile Include="Receivers\CommandErrorReceiver.cs" />
+    <Compile Include="Receivers\CommandResultBinaryReceiver.cs" />
     <Compile Include="Receivers\CommandResultReceiver.cs" />
     <Compile Include="Receivers\ConsoleOutputReceiver.cs" />
     <Compile Include="DdmPreferences.cs" />
