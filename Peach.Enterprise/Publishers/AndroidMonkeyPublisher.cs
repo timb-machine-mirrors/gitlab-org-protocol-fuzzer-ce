@@ -33,6 +33,10 @@ namespace Peach.Enterprise.Publishers
 		public AndroidMonkeyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
+		}
+
+		private void GrabDevice()
+		{
 			try
 			{
 				_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
@@ -46,10 +50,7 @@ namespace Peach.Enterprise.Publishers
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
-			if (IsControlIteration)
-			{
-				//return null; //TODO remove this later, this is so it wont fault on -1
-			}
+			GrabDevice();
 			if (method.Equals("tap"))
 			{	
 				_dev.ExecuteShellCommand("input tap " + _x.ToString() + " " + _y.ToString(), _creciever);
@@ -62,7 +63,10 @@ namespace Peach.Enterprise.Publishers
 
 			else if (method.Equals("monkey"))
 			{
-
+				if (IsControlIteration)
+				{
+					return null;
+				}
 				if (args.Count != 1)
 					throw new SoftException("Invalid Pit, monkey method takes one DataModel as an argument.");
 

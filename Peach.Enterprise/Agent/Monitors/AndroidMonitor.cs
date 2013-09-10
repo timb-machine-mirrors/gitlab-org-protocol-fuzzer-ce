@@ -8,11 +8,14 @@ using Managed.Adb;
 using Peach.Core;
 using System.Text.RegularExpressions;
 using NLog;
+using System.Diagnostics;
+using System.IO;
 
 namespace Peach.Enterprise.Agent.Monitors
 {
 	[Monitor("Android", true)]
 	[Parameter("ApplicationName", typeof(string), "Android Application")]
+	[Parameter("AdbPath", typeof(string), "Directory Path to Adb")]
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
@@ -29,6 +32,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
 		public string ApplicationName { get; private set; }
+		public string AdbPath { get; private set; }
 		public string ActivityName { get; private set; }
 		public bool RestartEveryIteration { get; private set; }
 		public bool RestartAfterFault { get; private set; }
@@ -114,9 +118,25 @@ namespace Peach.Enterprise.Agent.Monitors
 			return clean.ToArray();
 		}
 
+		private void controlAdb(string command)
+		{
+			Process p = new Process();
+			p.StartInfo.FileName = Path.Combine(AdbPath, "adb");
+			p.StartInfo.Arguments = command;
+			p.StartInfo.UseShellExecute = false;
+			p.Start();
+			p.WaitForExit();
+		}
+
+		private void restartAdb()
+		{
+			controlAdb("kill-server");
+			controlAdb("start-server");
+		}
 
 		public override void SessionStarting()
 		{
+			restartAdb();
 			_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
 			var path = "/data/tombstones/";
 			_tombs = FileEntry.FindOrCreate(_dev, path);
