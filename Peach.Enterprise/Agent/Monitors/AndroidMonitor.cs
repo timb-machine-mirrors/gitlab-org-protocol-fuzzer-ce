@@ -26,7 +26,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private FileEntry _tombs = null;
 		private int _retries = 20;
 
-		private Regex reHash = new Regex(@"^backtrace:(\r\n    #([^\r\n])*)*", RegexOptions.Multiline);
+		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
 		public string ApplicationName { get; private set; }
 		public string ActivityName { get; private set; }
@@ -172,27 +172,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			
 			_fault = null;
 
-			// Make sure the device is ready
-			int i = 0;
-			bool screenLocked = false;
-			while (!devIsReady()){
-				screenLocked = true;
-				Thread.Sleep(1000);
-				i += 1;
-				if (i >= _retries)
-				{
-					throw new SoftException("Unable to Communicate with Device after " + _retries.ToString() + " attempts.");
-				}
-			}
-			//TODO: This part is stupid, this is not the right place for this, and the sleep is totally arbitrary
-			// Replace with a blocking call that makes sure the ui has fully started
-			// Also this makes the assumption that it is not ready because of a system crash.  That could totally not be true
-			if (screenLocked)
-			{
-				Thread.Sleep(60000);
-				CleanUI("unlock");
-			}
-
 			if (restart)
 			{
 				restartApp();
@@ -214,7 +193,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			CommandResultReceiver creciever = null;
 			CommandResultBinaryReceiver breciever = null;
 
-			// Get 1st Screenshot
+			// STEP 1: Get 1st Screenshot
 			try
 			{
 				breciever = new CommandResultBinaryReceiver();
@@ -226,7 +205,31 @@ namespace Peach.Enterprise.Agent.Monitors
 				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex.Message);
 			}
 
-			// Grab Tomb
+
+			// STEP 2: Wait for boot if system crashed.
+			// Make sure the device is ready
+			int i = 0;
+			bool screenLocked = false;
+			while (!devIsReady())
+			{
+				screenLocked = true;
+				Thread.Sleep(1000);
+				i += 1;
+				if (i >= _retries)
+				{
+					throw new SoftException("Unable to Communicate with Device after " + _retries.ToString() + " attempts.");
+				}
+			}
+			//TODO: This part is stupid, this is not the right place for this, and the sleep is totally arbitrary
+			// Replace with a blocking call that makes sure the ui has fully started
+			// Also this makes the assumption that it is not ready because of a system crash.  That could totally not be true
+			if (screenLocked)
+			{
+				Thread.Sleep(60000);
+				CleanUI("unlock");
+			}
+
+			// STEP 3: Grab Tomb
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 			{
 				creciever = new CommandResultReceiver();
@@ -236,22 +239,25 @@ namespace Peach.Enterprise.Agent.Monitors
 				var hash = reHash.Match(tombstr);
 				if (hash.Success)
 				{
-					//TODO not real major minor hashes
+					// TODO not real major minor hashes
+					// Also these wont bucket when from a linux and windows node
+					// Since it will have different newlines and thus different hashcodes
 					_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
 					_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
 				}
-
-
 				_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
 				// TODO: this might be ok, since a core dump implies it was a native crash
 				// And native crashes are the only crashes that need to physically dismiss the message
-				Thread.Sleep(1000);
-				CleanUI("dismiss");
+				if (!screenLocked)
+				{
+					Thread.Sleep(1000);
+					CleanUI("dismiss");
+				}
 			}
 			CleanTombs();
 			CleanLogs();
 
-			// Get 2nd ScreenShot
+			// STEP 4: Get 2nd ScreenShot
 			try
 			{
 				breciever = new CommandResultBinaryReceiver();
