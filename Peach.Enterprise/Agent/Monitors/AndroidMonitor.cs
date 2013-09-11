@@ -28,6 +28,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Device _dev = null;
 		private FileEntry _tombs = null;
 		private int _retries = 20;
+		private ConsoleOutputReceiver _creciever = null;
 
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
@@ -41,6 +42,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			: base(agent, name, args)
 		{
 			ParameterParser.Parse(this, args);
+			_creciever = new ConsoleOutputReceiver();
 		}
 
 		private void CleanTombs(){
@@ -59,12 +61,14 @@ namespace Peach.Enterprise.Agent.Monitors
 		private void CleanUI(string type)
 		{
 			CommandResultReceiver creciever = new CommandResultReceiver();
-			if (type.Equals("dismiss")){
+			if (type.Equals("dismiss"))
+			{
 				_dev.ExecuteShellCommand("input keyevent 66", creciever); //Enter
 				Thread.Sleep(250);
 				_dev.ExecuteShellCommand("input keyevent 66", creciever); //Enter
 			}
-			else if (type.Equals("unlock")){
+			else if (type.Equals("unlock"))
+			{
 				_dev.ExecuteShellCommand("input keyevent 82", creciever); //Menu
 			}
 		}
@@ -77,8 +81,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				cmd = cmd + "/" + ActivityName;
 			}
 			cmd += " && sleep 2";
-			ConsoleOutputReceiver creciever = new ConsoleOutputReceiver();
-			_dev.ExecuteShellCommand(cmd, creciever);
+			_dev.ExecuteShellCommand(cmd, _creciever);
 		}
 
 		private bool devIsReady()
@@ -194,7 +197,14 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (restart)
 			{
-				restartApp();
+				try
+				{
+					restartApp();
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException("Unable to Restart Android Application:\n" + ex);
+				}
 			}
 		}
 
@@ -222,7 +232,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex.Message);
+				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex);
 			}
 
 
@@ -230,15 +240,22 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Make sure the device is ready
 			int i = 0;
 			bool screenLocked = false;
-			while (!devIsReady())
+			try
 			{
-				screenLocked = true;
-				Thread.Sleep(1000);
-				i += 1;
-				if (i >= _retries)
+				while (!devIsReady())
 				{
-					throw new SoftException("Unable to Communicate with Device after " + _retries.ToString() + " attempts.");
+					screenLocked = true;
+					Thread.Sleep(1000);
+					i += 1;
+					if (i >= _retries)
+					{
+						throw new SoftException("Unable to Communicate with Device after " + _retries.ToString() + " attempts.");
+					}
 				}
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex);
 			}
 			//TODO: This part is stupid, this is not the right place for this, and the sleep is totally arbitrary
 			// Replace with a blocking call that makes sure the ui has fully started
@@ -246,36 +263,52 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (screenLocked)
 			{
 				Thread.Sleep(60000);
-				CleanUI("unlock");
+				try
+				{
+					restartAdb();
+					CleanUI("unlock");
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException("Unable to Clean Android UI:\n" + ex);
+				}
 			}
 
 			// STEP 3: Grab Tomb
-			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
+			try
 			{
-				creciever = new CommandResultReceiver();
-				_dev.ExecuteShellCommand("cat " + tomb.FullPath, creciever);
-				string tombstr = creciever.Result;
 
-				var hash = reHash.Match(tombstr);
-				if (hash.Success)
+				foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 				{
-					// TODO not real major minor hashes
-					// Also these wont bucket when from a linux and windows node
-					// Since it will have different newlines and thus different hashcodes
-					_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
-					_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
+					creciever = new CommandResultReceiver();
+					_dev.ExecuteShellCommand("cat " + tomb.FullPath, creciever);
+					string tombstr = creciever.Result;
+
+					var hash = reHash.Match(tombstr);
+					if (hash.Success)
+					{
+						// TODO not real major minor hashes
+						// Also these wont bucket when from a linux and windows node
+						// Since it will have different newlines and thus different hashcodes
+						_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
+						_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
+					}
+					_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
+					// TODO: this might be ok, since a core dump implies it was a native crash
+					// And native crashes are the only crashes that need to physically dismiss the message
+					if (!screenLocked)
+					{
+						Thread.Sleep(1000);
+						CleanUI("dismiss");
+					}
 				}
-				_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
-				// TODO: this might be ok, since a core dump implies it was a native crash
-				// And native crashes are the only crashes that need to physically dismiss the message
-				if (!screenLocked)
-				{
-					Thread.Sleep(1000);
-					CleanUI("dismiss");
-				}
+				CleanTombs();
+				CleanLogs();
 			}
-			CleanTombs();
-			CleanLogs();
+			catch (Exception ex)
+			{
+				throw new SoftException(ex);
+			}
 
 			// STEP 4: Get 2nd ScreenShot
 			try

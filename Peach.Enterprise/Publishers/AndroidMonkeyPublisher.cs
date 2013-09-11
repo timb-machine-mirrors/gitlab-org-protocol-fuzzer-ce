@@ -33,6 +33,7 @@ namespace Peach.Enterprise.Publishers
 		public AndroidMonkeyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
+			_creciever = new ConsoleOutputReceiver();
 		}
 
 		private void GrabDevice()
@@ -40,77 +41,68 @@ namespace Peach.Enterprise.Publishers
 			try
 			{
 				_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
-				_creciever = new ConsoleOutputReceiver();
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException(ex.Message);
+				throw new SoftException(ex.Message);
 			}
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			GrabDevice();
-			if (method.Equals("tap"))
-			{	
-				_dev.ExecuteShellCommand("input tap " + _x.ToString() + " " + _y.ToString(), _creciever);
-			}
-
-			else if (method.Equals("keyevent"))
+			try
 			{
-				_dev.ExecuteShellCommand("input keyevent " + _keycode.ToString(), _creciever);
-			}
-
-			else if (method.Equals("monkey"))
-			{
-				if (IsControlIteration)
+				if (method.Equals("tap"))
 				{
-					return null;
+					_dev.ExecuteShellCommand("input tap " + _x.ToString() + " " + _y.ToString(), _creciever);
 				}
-				if (args.Count != 1)
-					throw new SoftException("Invalid Pit, monkey method takes one DataModel as an argument.");
 
-				try
+				else if (method.Equals("keyevent"))
 				{
+					_dev.ExecuteShellCommand("input keyevent " + _keycode.ToString(), _creciever);
+				}
+
+				else if (method.Equals("monkey"))
+				{
+					if (IsControlIteration)
+					{
+						return null;
+					}
+					if (args.Count != 1)
+						throw new SoftException("Invalid Pit, monkey method takes one DataModel as an argument.");
+
 					int seed = (int)args[0].dataModel[0].InternalValue;
 					_dev.ExecuteShellCommand("monkey -s " + seed.ToString() + " -p " + Target + " " + NumActions.ToString() + " && sleep " + Sleep.ToString(), _creciever);
 				}
-				catch (Exception ex)
-				{
-					throw new SoftException(ex.Message);
-				}
 			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex.Message);
+			}	
 			return null;
 		}
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
+			System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
+			var bs = (BitwiseStream)value;
+			bs.SeekBits(0, SeekOrigin.Begin);
+			ulong bits;
+			int len = bs.ReadBits(out bits, 32);
+			uint prop = Endian.Little.GetUInt32(bits, len);
+
 			if (property.Equals("x"))
 			{
-				System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
-				var bs = (BitwiseStream)value;
-				bs.SeekBits(0, SeekOrigin.Begin);
-				ulong bits;
-				int len = bs.ReadBits(out bits, 32);
-				_x = Endian.Little.GetUInt32(bits, len);
+				_x = prop;
 			}
 			else if (property.Equals("y"))
 			{
-				System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
-				var bs = (BitwiseStream)value;
-				bs.SeekBits(0, SeekOrigin.Begin);
-				ulong bits;
-				int len = bs.ReadBits(out bits, 32);
-				_y = Endian.Little.GetUInt32(bits, len);
+				_y = prop;
 			}
 			else if (property.Equals("keycode"))
 			{
-				System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
-				var bs = (BitwiseStream)value;
-				bs.SeekBits(0, SeekOrigin.Begin);
-				ulong bits;
-				int len = bs.ReadBits(out bits, 32);
-				_keycode = Endian.Little.GetUInt32(bits, len);
+				_keycode = prop;
 			}
 		}
 	}
