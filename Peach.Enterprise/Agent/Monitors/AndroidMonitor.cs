@@ -45,6 +45,23 @@ namespace Peach.Enterprise.Agent.Monitors
 			_creciever = new ConsoleOutputReceiver();
 		}
 
+		//TODO Duplicate method
+		private void grabDevice()
+		{
+			try
+			{
+				_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
+				var path = "/data/tombstones/";
+				_tombs = FileEntry.FindOrCreate(_dev, path);
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex.Message);
+			}
+		}
+
+
+
 		private void CleanTombs(){
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 			{
@@ -140,9 +157,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void SessionStarting()
 		{
 			restartAdb();
-			_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
-			var path = "/data/tombstones/";
-			_tombs = FileEntry.FindOrCreate(_dev, path);
+			grabDevice();
 			CleanTombs();
 			CleanLogs();
 			if (!RestartEveryIteration)
@@ -200,6 +215,12 @@ namespace Peach.Enterprise.Agent.Monitors
 				try
 				{
 					restartApp();
+				}
+				catch (Managed.Adb.Exceptions.DeviceNotFoundException ex)
+				{
+					restartAdb();
+					grabDevice();
+					throw new SoftException(ex);
 				}
 				catch (Exception ex)
 				{
@@ -266,6 +287,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				try
 				{
 					restartAdb();
+					grabDevice();
 					CleanUI("unlock");
 				}
 				catch (Exception ex)
