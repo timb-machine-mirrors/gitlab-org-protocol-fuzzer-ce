@@ -44,7 +44,7 @@ namespace Peach.Enterprise.Publishers
 			}
 			catch (Exception ex)
 			{
-				throw new SoftException(ex.Message);
+				throw new SoftException(ex);
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace Peach.Enterprise.Publishers
 			}
 			catch (Exception ex)
 			{
-				throw new SoftException(ex.Message);
+				throw new SoftException(ex);
 			}	
 			return null;
 		}
