@@ -114,7 +114,15 @@ namespace Peach.Enterprise.Agent.Monitors
 				}
 				catch
 				{
-					break;
+					try
+					{
+						restartAdb();
+						grabDevice();
+					}
+					catch
+					{
+					}
+					continue;
 				}
 
 				if (!creciever.Result.Equals("running"))
@@ -166,10 +174,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			controlAdb("kill-server");
 			controlAdb("start-server");
 		}
-
-
-
-
 
 		public override void SessionStarting()
 		{
@@ -281,8 +285,6 @@ namespace Peach.Enterprise.Agent.Monitors
 				if (restarted = devRestarted())
 				{
 					Thread.Sleep(2000); //Boot Animation is finished, give it two seconds before unlocking
-					restartAdb();
-					grabDevice();
 					CleanUI("unlock");
 				}
 			}
