@@ -27,7 +27,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Fault _fault = null;
 		private Device _dev = null;
 		private FileEntry _tombs = null;
-		private int _retries = 20;
+		private int _retries = 200;
+		private bool _muststop = false;
 		private ConsoleOutputReceiver _creciever = null;
 
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
@@ -45,7 +46,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			_creciever = new ConsoleOutputReceiver();
 		}
 
-		//TODO Duplicate method
+		//TODO Duplicate method in Publisher
 		private void grabDevice()
 		{
 			try
@@ -59,8 +60,6 @@ namespace Peach.Enterprise.Agent.Monitors
 				throw new SoftException(ex.Message);
 			}
 		}
-
-
 
 		private void CleanTombs(){
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
@@ -101,21 +100,35 @@ namespace Peach.Enterprise.Agent.Monitors
 			_dev.ExecuteShellCommand(cmd, _creciever);
 		}
 
-		private bool devIsReady()
+
+		private bool devRestarted()
 		{
-			// HACK: none of the api's functions will reliably tell this.
-			// _dev.isOnline() totally should work
-			// or _dev.State == "Online"
-			// But nope, those show it as always online.
- 			// This works though, but it totally sucks.
-			CommandResultReceiver creciever = new CommandResultReceiver();
-			_dev.ExecuteShellCommand("monkey 0", creciever);
-			if (creciever.Result.Equals("** Error: Unable to connect to activity manager; is the system running?") ||
-				creciever.Result.Equals("** Error: Unable to connect to window manager; is the system running?"))
+			bool restarted = false;
+			int i = 0;
+			while (i < _retries)
 			{
-				return false;
+				CommandResultReceiver creciever = new CommandResultReceiver();
+				try
+				{
+					_dev.ExecuteShellCommand("getprop init.svc.bootanim", creciever);
+				}
+				catch
+				{
+					break;
+				}
+
+				if (!creciever.Result.Equals("running"))
+				{
+					return restarted;
+				}
+				else
+				{
+					restarted = true;
+					Thread.Sleep(1000);
+					i += 1;
+				}
 			}
-			return true;
+			throw new Exception("Unable to Communicate with Android Device after " + i.ToString() + " attempts.");
 		}
 
 		private byte[] imageClean(byte[] unclean)
@@ -153,6 +166,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			controlAdb("kill-server");
 			controlAdb("start-server");
 		}
+
+
+
+
 
 		public override void SessionStarting()
 		{
@@ -256,44 +273,23 @@ namespace Peach.Enterprise.Agent.Monitors
 				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex);
 			}
 
-
 			// STEP 2: Wait for boot if system crashed.
 			// Make sure the device is ready
-			int i = 0;
-			bool screenLocked = false;
+			bool restarted = false;
 			try
 			{
-				while (!devIsReady())
+				if (restarted = devRestarted())
 				{
-					screenLocked = true;
-					Thread.Sleep(1000);
-					i += 1;
-					if (i >= _retries)
-					{
-						throw new SoftException("Unable to Communicate with Device after " + _retries.ToString() + " attempts.");
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new SoftException(ex);
-			}
-			//TODO: This part is stupid, this is not the right place for this, and the sleep is totally arbitrary
-			// Replace with a blocking call that makes sure the ui has fully started
-			// Also this makes the assumption that it is not ready because of a system crash.  That could totally not be true
-			if (screenLocked)
-			{
-				Thread.Sleep(60000);
-				try
-				{
+					Thread.Sleep(2000); //Boot Animation is finished, give it two seconds before unlocking
 					restartAdb();
 					grabDevice();
 					CleanUI("unlock");
 				}
-				catch (Exception ex)
-				{
-					throw new SoftException("Unable to Clean Android UI:\n" + ex);
-				}
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex.Message);
+				_muststop = true;
 			}
 
 			// STEP 3: Grab Tomb
@@ -318,7 +314,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
 					// TODO: this might be ok, since a core dump implies it was a native crash
 					// And native crashes are the only crashes that need to physically dismiss the message
-					if (!screenLocked)
+					if (!restarted)
 					{
 						Thread.Sleep(1000);
 						CleanUI("dismiss");
@@ -329,7 +325,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				throw new SoftException(ex);
+				logger.Warn(ex.Message);
 			}
 
 			// STEP 4: Get 2nd ScreenShot
@@ -349,7 +345,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool MustStop()
 		{
-			return false;
+			return _muststop;
 		}
 
 		public override Variant Message(string name, Variant data)
