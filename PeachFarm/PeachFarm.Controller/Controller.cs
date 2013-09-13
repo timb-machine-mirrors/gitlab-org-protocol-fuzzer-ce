@@ -122,10 +122,13 @@ namespace PeachFarm.Controller
 					if (node.Stamp.AddMinutes(config.NodeExpirationRules.Expired) < DateTime.Now)
 					{
 						logger.Warn("{0}\t{1}\t{2}", node.NodeName, "Node Expired", node.Stamp);
-						node.RemoveFromDatabase(config.MongoDb.ConnectionString);
 						node.ErrorMessage = "Node Expired";
 						node.Stamp = DateTime.Now;
+						node.Status = Status.Error;
 						node.SaveToErrors(config.MongoDb.ConnectionString);
+
+						node.Status = Status.Stopping;
+						HeartbeatReceived(node);
 					}
 					else
 					{
@@ -196,6 +199,9 @@ namespace PeachFarm.Controller
 			ResponseBase response = null;
 			switch (action)
 			{
+				case Actions.CreateJob:
+					response = CreateJob(CreateJobRequest.Deserialize(body));
+					break;
 				case Actions.StartPeach:
 					response = StartPeach(StartPeachRequest.Deserialize(body));
 					break;
@@ -278,6 +284,28 @@ namespace PeachFarm.Controller
 		#endregion
 
 		#region Process Action functions
+
+		internal virtual CreateJobResponse CreateJob(CreateJobRequest request)
+		{
+			PeachFarm.Common.Mongo.Job mongojob = new Common.Mongo.Job();
+			mongojob.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+
+			string jobfolder = String.Format(Formats.JobFolder, mongojob.JobID);
+			mongojob.Pit.FileName = request.PitFileName;
+
+			mongojob.Tags = request.Tags;
+
+			string jobzip = String.Format("{0}/{1}.zip", jobfolder, request.PitFileName);
+			mongojob.ZipFile = jobzip;
+
+			mongojob.UserName = request.UserName;
+
+			DatabaseHelper.SaveToGridFS(request.ZipFile, jobzip, config.MongoDb.ConnectionString);
+
+			var response = new CreateJobResponse();
+			response.JobID = mongojob.JobID;
+			return response;
+		}
 
 		protected virtual void StopPeach(StopPeachRequest request, string replyQueue)
 		{
@@ -457,6 +485,9 @@ namespace PeachFarm.Controller
 			 * If there are 4 online nodes, there will be only 4 records in the Nodes collection in MongoDB
 			 */
 
+			// this is to account for nodes that have their time set incorrectly
+			heartbeat.Stamp = DateTime.Now;
+
 			// find the Heartbeat in the Nodes collection that matches the Node in the incoming heartbeat 
 			Heartbeat lastHeartbeat = GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
 
@@ -469,8 +500,8 @@ namespace PeachFarm.Controller
 				UpdateNode(heartbeat);
 			}
 
-			bool isNodeFinished = heartbeat.Status     == Status.Alive
-			                   && lastHeartbeat.Status == Status.Running
+			//&& lastHeartbeat.Status == Status.Running
+			bool isNodeFinished = heartbeat.Status != Status.Running
 			                   && String.IsNullOrEmpty(lastHeartbeat.JobID) == false;
 			if (isNodeFinished)
 			{

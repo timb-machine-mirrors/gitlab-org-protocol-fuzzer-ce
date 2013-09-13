@@ -161,6 +161,7 @@ namespace PeachFarm.Common.Messages
 
 	public static class Actions
 	{
+		public const string CreateJob = "CreateJob";
 		public const string StartPeach = "StartPeach";
 		public const string StopPeach = "StopPeach";
 		public const string JobInfo = "JobInfo";
