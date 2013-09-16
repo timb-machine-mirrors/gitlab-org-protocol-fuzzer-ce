@@ -30,6 +30,8 @@ namespace PeachFarm.Controller
 
 		private string controllerQueueName;
 
+		List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts;
+
 		#region testing
 		// these are here for testing purposes and shouldn't be mucked with in prod
 		// everything _should_ function normally if left alone
@@ -50,6 +52,7 @@ namespace PeachFarm.Controller
 
 			RabbitInitializer();
 			MongoDBInitializer();
+			hosts = RestInitializer();
 
 			if (statusCheck == null)
 			{
@@ -72,7 +75,13 @@ namespace PeachFarm.Controller
 		#region Properties
 		public bool IsListening
 		{
-			get { return rabbit.IsListening; }
+			get 
+			{
+				if (rabbit != null)
+					return rabbit.IsListening;
+				else
+					return false;
+			}
 		}
 
 		public string QueueName
@@ -91,6 +100,14 @@ namespace PeachFarm.Controller
 				rabbit.StopListener();
 				rabbit = null;
 			}
+
+			if (hosts != null)
+			{
+				foreach (var host in hosts)
+				{
+					host.Stop();
+				}
+			}
 		}
 
 		protected void StatusCheck(object state)
@@ -105,10 +122,13 @@ namespace PeachFarm.Controller
 					if (node.Stamp.AddMinutes(config.NodeExpirationRules.Expired) < DateTime.Now)
 					{
 						logger.Warn("{0}\t{1}\t{2}", node.NodeName, "Node Expired", node.Stamp);
-						node.RemoveFromDatabase(config.MongoDb.ConnectionString);
 						node.ErrorMessage = "Node Expired";
 						node.Stamp = DateTime.Now;
+						node.Status = Status.Error;
 						node.SaveToErrors(config.MongoDb.ConnectionString);
+
+						node.Status = Status.Stopping;
+						HeartbeatReceived(node);
 					}
 					else
 					{
@@ -163,6 +183,9 @@ namespace PeachFarm.Controller
 
 		protected virtual void Reply(string body, string action, string replyQueue)
 		{
+			if (replyQueue == null)
+				return;
+
 			rabbit.PublishToQueue(replyQueue, body, action);
 			logger.Trace("Sent Action to {2}: {0}\nBody:\n{1}", action, body, replyQueue);
 		}
@@ -172,19 +195,24 @@ namespace PeachFarm.Controller
 			Debug.WriteLine("action: " + action);
 			Debug.WriteLine("reply: " + replyQueue);
 			Debug.WriteLine(body);
+
+			ResponseBase response = null;
 			switch (action)
 			{
+				case Actions.CreateJob:
+					response = CreateJob(CreateJobRequest.Deserialize(body));
+					break;
 				case Actions.StartPeach:
-					StartPeach(StartPeachRequest.Deserialize(body), replyQueue);
+					response = StartPeach(StartPeachRequest.Deserialize(body));
 					break;
 				case Actions.StopPeach:
-					StopPeach(StopPeachRequest.Deserialize(body), replyQueue);
+					response = StopPeach(StopPeachRequest.Deserialize(body));
 					break;
 				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
 				case Actions.GenerateReport:
-					GenerateReportComplete(GenerateReportResponse.Deserialize(body), replyQueue);
+					GenerateReportComplete(GenerateReportResponse.Deserialize(body));
 					break;
 				#region deprecated
 				/*
@@ -206,6 +234,11 @@ namespace PeachFarm.Controller
 					string error = String.Format("Received unknown action {0}", action);
 					logger.Error(error);
 					break;
+			}
+
+			if (response != null)
+			{
+				Reply(response.Serialize(), action, replyQueue);
 			}
 		}
 
@@ -247,16 +280,45 @@ namespace PeachFarm.Controller
 			}
 		}
 
+
 		#endregion
 
-		#region Receives
+		#region Process Action functions
+
+		internal virtual CreateJobResponse CreateJob(CreateJobRequest request)
+		{
+			PeachFarm.Common.Mongo.Job mongojob = new Common.Mongo.Job();
+			mongojob.JobID = DatabaseHelper.GetJobID(config.MongoDb.ConnectionString);
+
+			string jobfolder = String.Format(Formats.JobFolder, mongojob.JobID);
+			mongojob.Pit.FileName = request.PitFileName;
+
+			mongojob.Tags = request.Tags;
+
+			string jobzip = String.Format("{0}/{1}.zip", jobfolder, request.PitFileName);
+			mongojob.ZipFile = jobzip;
+
+			mongojob.UserName = request.UserName;
+
+			DatabaseHelper.SaveToGridFS(request.ZipFile, jobzip, config.MongoDb.ConnectionString);
+
+			var response = new CreateJobResponse();
+			response.JobID = mongojob.JobID;
+			return response;
+		}
+
+		protected virtual void StopPeach(StopPeachRequest request, string replyQueue)
+		{
+			var response = StopPeach(request);
+			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
+		}
 
 		/// <summary>
 		/// For Stopping a Job
 		/// </summary>
 		/// <param name="request"></param>
 		/// <param name="replyQueue"></param>
-		protected void StopPeach(StopPeachRequest request, string replyQueue)
+		internal virtual StopPeachResponse StopPeach(StopPeachRequest request)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
 
@@ -294,16 +356,17 @@ namespace PeachFarm.Controller
 				}
 			}
 
-			// After building the response to the Admin, send it.
-			Reply(response.Serialize(), Actions.StopPeach, replyQueue);
+			return response;
 		}
 
-		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)
-		{
-			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
-		}
 
 		protected virtual void StartPeach(StartPeachRequest request, string replyQueue)
+		{
+			var response = StartPeach(request);
+			Reply(request.Serialize(), Actions.StartPeach, replyQueue);
+		}
+
+		internal virtual StartPeachResponse StartPeach(StartPeachRequest request)
 		{
 			#region Method Explanation
 			/*
@@ -355,16 +418,16 @@ namespace PeachFarm.Controller
 				if ((node != null) && (node.Status == Status.Alive))
 				{
 					DeclareJobExchange(request.JobID, new List<string>() { node.QueueName });
-					CommitJobToMongo(request, new List<Heartbeat>(){ node });
+					CommitJobToMongo(request, new List<Heartbeat>() { node });
 					PublishToJob(request.JobID, request.Serialize(), action);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
 					response.JobID = String.Empty;
 					response.Success = false;
 					response.ErrorMessage = String.Format("No Alive Node running at IP address {0}\n", request.IPAddress);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 			}
 			#endregion
@@ -392,7 +455,7 @@ namespace PeachFarm.Controller
 					DeclareJobExchange(request.JobID, jobQueues);
 					CommitJobToMongo(request, jobNodes);
 					SeedTheJobQueues(jobQueues, request, action);
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				else
 				{
@@ -407,10 +470,96 @@ namespace PeachFarm.Controller
 					{
 						response.ErrorMessage = String.Format("Not enough Alive nodes matching tags ({0}), current available: {1}\n", request.Tags, jobNodes.Count);
 					}
-					Reply(response.Serialize(), action, replyQueue);
+					//Reply(response.Serialize(), action, replyQueue);
 				}
 				#endregion
 			}
+
+			return response;
+		}
+
+		protected void HeartbeatReceived(Heartbeat heartbeat)
+		{
+			/* The last received Heartbeat for every online Node is stored in MongoDB.
+			 * When a new Heartbeat is received, that record is overwritten.
+			 * If there are 4 online nodes, there will be only 4 records in the Nodes collection in MongoDB
+			 */
+
+			// this is to account for nodes that have their time set incorrectly
+			heartbeat.Stamp = DateTime.Now;
+
+			// find the Heartbeat in the Nodes collection that matches the Node in the incoming heartbeat 
+			Heartbeat lastHeartbeat = GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
+
+			if (heartbeat.Status == Status.Stopping)
+			{
+				RemoveNode(heartbeat);
+			}
+			else
+			{
+				UpdateNode(heartbeat);
+			}
+
+			//&& lastHeartbeat.Status == Status.Running
+			bool isNodeFinished = heartbeat.Status != Status.Running
+			                   && String.IsNullOrEmpty(lastHeartbeat.JobID) == false;
+			if (isNodeFinished)
+			{
+				#region Stuff that gets executed when the Controller determines that all Nodes running a Job have completed
+				/* The important thing here is that the Nodes don't have any visibility to each other, they don't talk to each other.
+				 * So while each individual Node knows that it's completed a Peach run, they individually have no idea if the others have completed.
+				 * The Controller has to ask two questions to know if a Job has been completed:
+				 *	1) Did this Node we're updating just complete Peach? This is answered by the if statement above
+				 *	2) Are there any Nodes still running the Job? If no, then the Job is complete. Answered by the LINQ query and if statement below.
+				 */	
+
+				// Are there 0 nodes still running this Job?
+				bool isJobFinished = (from n in NodeList(config)
+				                    where n.JobID == lastHeartbeat.JobID select n
+				                   ).Count() == 0;
+				if (isJobFinished)
+				{
+					#region Generate Report, send request to Reporting Service.
+					GenerateReportRequest grr = new GenerateReportRequest();
+					grr.JobID = lastHeartbeat.JobID;
+					grr.ReportFormat = ReportFormat.PDF;
+					PushReportToQueue(grr);
+					#endregion
+				}
+				#endregion
+			}
+
+			#region Log all Error Heartbeats to the Errors collection in MongoDB
+
+			/* Heartbeats have two important properties: Status and ErrorMessage.
+			 * Heartbeats are used to report Status updates from the Nodes, but also to report Errors.
+			 * Nodes may encounter an Error, but in most (ideally, all) cases the Node should be able to recover
+			 *		and become available for new work-- instead of crashing.
+			 * So a Node won't really sit in an Error state. It'll send an Error heartbeat, which gets logged here.
+			 * Then the Node will go to an Alive state so that it's available for new work. This all happens within
+			 * a fraction of a second, which is why you should never see a Node sitting in an Error state.
+			 */
+
+
+			if (heartbeat.Status == Status.Error)
+			{
+				//errors.Add(heartbeat);
+				heartbeat.SaveToErrors(config.MongoDb.ConnectionString);
+				logger.Warn("{0} errored at {1}\n{2}", heartbeat.NodeName, heartbeat.Stamp, heartbeat.ErrorMessage);
+			}
+			#endregion
+		}
+
+		private void GenerateReportComplete(GenerateReportResponse generateReportResponse)
+		{
+			// do nothing when report complete response is received
+		}
+
+		#endregion
+
+		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)
+		{
+			return Common.Mongo.DatabaseHelper.GetJob(request.JobID, config.MongoDb.ConnectionString);
 		}
 
 		private static List<Heartbeat> NodesMatchingTags(List<Heartbeat> nodes, string tags)
@@ -457,84 +606,9 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		protected void HeartbeatReceived(Heartbeat heartbeat)
-		{
-			/* The last received Heartbeat for every online Node is stored in MongoDB.
-			 * When a new Heartbeat is received, that record is overwritten.
-			 * If there are 4 online nodes, there will be only 4 records in the Nodes collection in MongoDB
-			 */
-
-			// find the Heartbeat in the Nodes collection that matches the Node in the incoming heartbeat 
-			Heartbeat lastHeartbeat = GetNodeByName(heartbeat.NodeName, config.MongoDb.ConnectionString);
-
-			if (heartbeat.Status == Status.Stopping)
-			{
-				RemoveNode(heartbeat);
-			}
-			else
-			{
-				UpdateNode(heartbeat);
-			}
-
-			bool isNodeFinished = heartbeat.Status     == Status.Alive
-			                   && lastHeartbeat.Status == Status.Running
-			                   && String.IsNullOrEmpty(lastHeartbeat.JobID) == false;
-			if (isNodeFinished)
-			{
-				#region Stuff that gets executed when the Controller determines that all Nodes running a Job have completed
-				/* The important thing here is that the Nodes don't have any visibility to each other, they don't talk to each other.
-				 * So while each individual Node knows that it's completed a Peach run, they individually have no idea if the others have completed.
-				 * The Controller has to ask two questions to know if a Job has been completed:
-				 *	1) Did this Node we're updating just complete Peach? This is answered by the if statement above
-				 *	2) Are there any Nodes still running the Job? If no, then the Job is complete. Answered by the LINQ query and if statement below.
-				 */	
-
-				// Are there 0 nodes still running this Job?
-				bool isJobFinished = (from n in NodeList(config)
-				                    where n.JobID == lastHeartbeat.JobID select n
-				                   ).Count() == 0;
-				if (isJobFinished)
-				{
-					#region Generate Report, send request to Reporting Service.
-					GenerateReportRequest grr = new GenerateReportRequest();
-					grr.JobID = lastHeartbeat.JobID;
-					grr.ReportFormat = ReportFormat.PDF;
-					PushReportToQueue(grr);
-					#endregion
-				}
-				#endregion
-			}
-			#endregion
-
-			#region Log all Error Heartbeats to the Errors collection in MongoDB
-
-			/* Heartbeats have two important properties: Status and ErrorMessage.
-			 * Heartbeats are used to report Status updates from the Nodes, but also to report Errors.
-			 * Nodes may encounter an Error, but in most (ideally, all) cases the Node should be able to recover
-			 *		and become available for new work-- instead of crashing.
-			 * So a Node won't really sit in an Error state. It'll send an Error heartbeat, which gets logged here.
-			 * Then the Node will go to an Alive state so that it's available for new work. This all happens within
-			 * a fraction of a second, which is why you should never see a Node sitting in an Error state.
-			 */
-
-
-			if (heartbeat.Status == Status.Error)
-			{
-				//errors.Add(heartbeat);
-				heartbeat.SaveToErrors(config.MongoDb.ConnectionString);
-				logger.Warn("{0} errored at {1}\n{2}", heartbeat.NodeName, heartbeat.Stamp, heartbeat.ErrorMessage);
-			}
-			#endregion
-		}
-
 		protected virtual void PushReportToQueue(GenerateReportRequest grr)
 		{
 			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, grr.Serialize(), Actions.GenerateReport, this.controllerQueueName);
-		}
-
-		private void GenerateReportComplete(GenerateReportResponse generateReportResponse, string replyQueue)
-		{
-			// do nothing when report complete response is received
 		}
 
 		protected virtual void RemoveNode(Heartbeat heartbeat)
@@ -619,6 +693,20 @@ namespace PeachFarm.Controller
 			}
 		}
 
+		private List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> RestInitializer()
+		{
+			List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts = new List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase>();
+
+			var listeningOn = "http://*:1337/";
+
+			var appHost = new AppHost();
+			appHost.Init();
+			appHost.Start(listeningOn);
+			hosts.Add(appHost);
+
+			return hosts;
+		}
+
 		protected virtual IPAddress[] LocalIPs()
 		{
 			return System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
@@ -630,7 +718,7 @@ namespace PeachFarm.Controller
 			else return (Configuration.ControllerSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.controller");	
 		}
 
-		protected  virtual List<Heartbeat> NodeList(PeachFarm.Controller.Configuration.ControllerSection config)
+		protected virtual List<Heartbeat> NodeList(PeachFarm.Controller.Configuration.ControllerSection config)
 		{
 			/* This could be static, but we need to be able to override it for testing purposes */
 			return DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
