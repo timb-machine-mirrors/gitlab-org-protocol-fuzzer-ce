@@ -510,7 +510,12 @@ namespace PeachFarm.Node
 			}
 			heartbeat.Tags = nodeState.Tags;
 			heartbeat.QueueName = nodeState.NodeQueueName;
-			heartbeat.Stamp = DateTime.Now;
+
+			// Nodes shouldn't set their own stamp, system time/date could be incorrect.
+			// Really it shouldn't be necessary for a node to set its own stamp,
+			// the Controller can do that itself
+			// heartbeat.Stamp = DateTime.Now;
+			
 			heartbeat.Status = nodeState.Status;
 
 
