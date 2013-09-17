@@ -62,7 +62,18 @@ namespace Peach.Enterprise.Publishers
 				{
 					_dev.ExecuteShellCommand("input keyevent " + _keycode.ToString(), _creciever);
 				}
+				else if (method.Equals("text"))
+				{
+					if (args.Count != 1)
+						throw new SoftException("Invalid Pit, 'text' method takes one DataModel as an argument.");
 
+					var bs = args[0].dataModel[0].Value;
+					bs.Seek(0, SeekOrigin.Begin);
+					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
+
+					var escaped = val.Replace("\"", "\\\"");
+					_dev.ExecuteShellCommand("input text \"" + escaped + "\"", _creciever);
+				}
 				else if (method.Equals("monkey"))
 				{
 					if (IsControlIteration)
