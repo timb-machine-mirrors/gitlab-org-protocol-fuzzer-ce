@@ -13,8 +13,17 @@
 
 	<DataModel name="Y">
 		<Number size="10" mutable="true" value="0" />
-	</DataModel>	
+	</DataModel>
 
+	<DataModel name="Enter">
+		<Number size="16" mutable="false" value="66" />
+	</DataModel>
+
+	<DataModel name="Url">
+		<String value="http://google.com/m?hl=en&amp;source=android-browser-type&amp;q=foo">
+			<Analyzer class="StringToken"/>
+		</String>
+	</DataModel>
 
 	<StateModel name="State" initialState="State1" >
 		<State name="State1"  >
@@ -33,14 +42,38 @@
 		</State>
 	</StateModel>
 
+	<StateModel name="BrowserState" initialState="State1" >
+		<State name="State1"  >
+			<Action type="call" method="text">
+				<Param>
+					<DataModel ref="Url"/>
+				</Param>
+			</Action>
+
+			<Action type="setProperty" property="keycode">
+				<DataModel ref="Enter" />
+			</Action>
+
+			<Action type="call" method="keyevent"/>
+		</State>
+	</StateModel>
+
 	<Agent name="Ag">
 		<Monitor class="Android">
 			<!--Param name="CmdOnStart" value="am start -S -n com.android.development/.BadBehaviorActivity &amp;&amp; sleep 2" /-->
 			<Param name="ApplicationName" value="com.android.development" />
 			<Param name="ActivityName" value=".BadBehaviorActivity" />
+			<Param name="AdbPath" value=""/>
 		</Monitor>
 	</Agent>
 
+	<Agent name="Browser">
+		<Monitor class="Android">
+			<Param name="ApplicationName" value="com.android.browser" />
+			<Param name="ActivityName" value=".BrowserActivity" />
+			<Param name="AdbPath" value=""/>
+		</Monitor>
+	</Agent>
 
 	<Test name="Default">
 		<StateModel ref="State"/>
@@ -49,6 +82,21 @@
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
 			<Param name="Target" value="com.android.development" />
+			<Param name="NumActions" value="20" />
+			<Param name="Sleep" value="0" />
+		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+	<Test name="Browser">
+		<StateModel ref="BrowserState"/>
+		<Agent ref="Ag" />
+
+		<!--Publisher class="Null" /-->
+		<Publisher class="AndroidMonkey">
+			<Param name="Target" value="com.android.browser" />
 			<Param name="NumActions" value="20" />
 			<Param name="Sleep" value="0" />
 		</Publisher>
