@@ -24,6 +24,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
+		static Regex logFilter = new Regex(@"^-+ beginning of (/\w+)+(\r\n|\r|\n)?", RegexOptions.Multiline);
+
 		private Fault _fault = null;
 		private Device _dev = null;
 		private FileEntry _tombs = null;
@@ -207,7 +209,11 @@ namespace Peach.Enterprise.Agent.Monitors
 				_fault.title = "Response";
 				_fault.description = creciever.Result;
 
-				if (!string.IsNullOrEmpty(_fault.description))
+				// Filter out lines that look like:
+				// --------- beginning of /dev/log/main
+				var filtered = logFilter.Replace(_fault.description, "");
+
+				if (!string.IsNullOrEmpty(filtered))
 					_fault.type = FaultType.Fault;
 			}
 			catch (Exception ex)
