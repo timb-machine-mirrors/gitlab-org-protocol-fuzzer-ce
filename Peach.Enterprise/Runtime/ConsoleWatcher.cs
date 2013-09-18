@@ -65,10 +65,13 @@ namespace Peach.Enterprise.Runtime
 				{
 					_faults.Add(fault);
 
-					if (_majorFaultCount.ContainsKey(fault.majorHash))
-						_majorFaultCount[fault.majorHash] += 1;
-					else
-						_majorFaultCount[fault.majorHash] = 1;
+					if (!string.IsNullOrEmpty(fault.majorHash))
+					{
+						if (_majorFaultCount.ContainsKey(fault.majorHash))
+							_majorFaultCount[fault.majorHash] += 1;
+						else
+							_majorFaultCount[fault.majorHash] = 1;
+					}
 				}
 			}
 
