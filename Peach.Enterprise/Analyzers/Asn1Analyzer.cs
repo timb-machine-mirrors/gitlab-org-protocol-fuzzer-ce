@@ -444,7 +444,7 @@ namespace Peach.Enterprise.Analyzers
 				if (b < 0)
 					throw new IOException("Unable to read unused bit count.");
 
-				var unusedBits = new Number("UnusedBits")
+				var unusedLen = new Number("UnusedLen")
 				{
 					lengthType = LengthType.Bits,
 					length = 8,
@@ -456,9 +456,6 @@ namespace Peach.Enterprise.Analyzers
 
 				var slice = stream.SliceBits(stream.LengthBits - (8 + b));
 
-				ulong bits;
-				stream.ReadBits(out bits, b);
-
 				DataElement value;
 
 				if (b == 0)
@@ -466,18 +463,24 @@ namespace Peach.Enterprise.Analyzers
 				else
 					value = new Blob("Value") { DefaultValue = new Variant(slice) };
 
-				var pad = new Padding("Padding") { alignedTo = value, alignment = 8 };
+				var unusedBits = new Blob("UnusedBits")
+				{
+					DefaultValue = new Variant(stream.SliceBits(b))
+				};
+
+				var pad = new Padding("Padding") { alignment = 8 };
 
 				var blk = new Block("Value");
-				blk.Add(unusedBits);
+				blk.Add(unusedLen);
 				blk.Add(value);
+				blk.Add(unusedBits);
 				blk.Add(pad);
 
 				var rel = new SizeRelation() { lengthType = LengthType.Bits };
-				rel.OfName = "Padding";
-				rel.FromName = "UnusedBits";
-				pad.relations.Add(rel);
+				rel.OfName = "UnusedBits";
+				rel.FromName = "UnusedLen";
 				unusedBits.relations.Add(rel);
+				unusedLen.relations.Add(rel);
 
 				if (positions != null)
 				{
@@ -486,9 +489,10 @@ namespace Peach.Enterprise.Analyzers
 					var padPos = startPos + stream.LengthBits - b;
 					var endPos = padPos + b;
 
-					positions[unusedBits] = new Position(startPos, dataPos);
+					positions[unusedLen] = new Position(startPos, dataPos);
 					positions[value] = new Position(dataPos, padPos);
-					positions[pad] = new Position(padPos, endPos);
+					positions[unusedBits] = new Position(padPos, endPos);
+					positions[pad] = new Position(endPos, endPos);
 				}
 
 				return blk;
