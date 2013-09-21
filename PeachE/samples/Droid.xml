@@ -63,7 +63,7 @@
 			<!--Param name="CmdOnStart" value="am start -S -n com.android.development/.BadBehaviorActivity &amp;&amp; sleep 2" /-->
 			<Param name="ApplicationName" value="com.android.development" />
 			<Param name="ActivityName" value=".BadBehaviorActivity" />
-			<Param name="AdbPath" value=""/>
+			<!--Param name="AdbPath" value="/path/to/adb"/-->
 		</Monitor>
 	</Agent>
 
@@ -71,7 +71,7 @@
 		<Monitor class="Android">
 			<Param name="ApplicationName" value="com.android.browser" />
 			<Param name="ActivityName" value=".BrowserActivity" />
-			<Param name="AdbPath" value=""/>
+			<!--Param name="AdbPath" value="/path/to/adb"/-->
 		</Monitor>
 	</Agent>
 
@@ -92,7 +92,7 @@
 
 	<Test name="Browser">
 		<StateModel ref="BrowserState"/>
-		<Agent ref="Ag" />
+		<Agent ref="Browser" />
 
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">

@@ -15,7 +15,7 @@ namespace Peach.Enterprise.Agent.Monitors
 {
 	[Monitor("Android", true)]
 	[Parameter("ApplicationName", typeof(string), "Android Application")]
-	[Parameter("AdbPath", typeof(string), "Directory Path to Adb")]
+	[Parameter("AdbPath", typeof(string), "Directory Path to Adb", "")]
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
@@ -46,6 +46,41 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			ParameterParser.Parse(this, args);
 			_creciever = new ConsoleOutputReceiver();
+
+			string p = Environment.GetEnvironmentVariable("PATH");
+			p += Path.PathSeparator;
+			p += "C:\\Users\\seth\\Downloads\\adt-bundle-windows-x86_64-20130717\\sdk\\platform-tools";
+			Environment.SetEnvironmentVariable("PATH", p);
+
+			AdbPath = FindAdb(AdbPath);
+		}
+
+		static string FindAdb(string path)
+		{
+			var adb = Platform.GetOS() == Platform.OS.Windows ? "adb.exe" : "adb";
+
+			if (path != null)
+			{
+				var fullPath = Path.Combine(path, adb);
+
+				if (!File.Exists(fullPath))
+					throw new PeachException("Error, uunable to locate " + adb + "in provided AdbPath.");
+
+				return fullPath;
+			}
+
+			path = Environment.GetEnvironmentVariable("PATH");
+			var dirs = path.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
+
+			foreach (var dir in dirs)
+			{
+				var fullPath = Path.Combine(dir, adb);
+
+				if (File.Exists(fullPath))
+					return fullPath;
+			}
+
+			throw new PeachException("Error, unable to locate " + adb + ", please specify using 'AdbPath' parameter.");
 		}
 
 		//TODO Duplicate method in Publisher
@@ -164,7 +199,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private void controlAdb(string command)
 		{
 			Process p = new Process();
-			p.StartInfo.FileName = Path.Combine(AdbPath, "adb");
+			p.StartInfo.FileName = AdbPath;
 			p.StartInfo.Arguments = command;
 			p.StartInfo.UseShellExecute = false;
 			p.Start();
