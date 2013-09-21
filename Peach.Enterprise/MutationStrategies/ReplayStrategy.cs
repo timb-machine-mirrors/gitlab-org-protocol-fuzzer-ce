@@ -193,14 +193,14 @@ namespace Peach.Enterprise.MutationStrategies
 				referenceName = action.dataModel.name;
 
 			var sm = action.parent.parent;
-			Dom dom = _context.dom;
+			var dom = _context.dom;
 
 			int i = sm.name.IndexOf(':');
 			if (i > -1)
 			{
 				string prefix = sm.name.Substring(0, i);
 
-				Dom other;
+				Peach.Core.Dom.Dom other;
 				if (!_context.dom.ns.TryGetValue(prefix, out other))
 					throw new PeachException("Unable to locate namespace '" + prefix + "' in state model '" + sm.name + "'.");
 

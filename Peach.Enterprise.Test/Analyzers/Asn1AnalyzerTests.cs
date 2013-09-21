@@ -2,11 +2,11 @@ using System;
 using NUnit.Framework;
 using System.Reflection;
 using System.IO;
-using Asn1Lib;
 using System.Text;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
 using Peach.Core.Cracker;
+using Peach;
 
 namespace Peach.Enterprise.Test.Analyzers
 {
@@ -30,22 +30,6 @@ namespace Peach.Enterprise.Test.Analyzers
 			googleDer.Seek(0, SeekOrigin.Begin);
 		}
 
-		[Test]
-		public void Test1()
-		{
-			var der = Asn1.Decode(googleDer);
-
-			var ms = new MemoryStream();
-
-			Asn1.ExportText(ms, der);
-
-			var final = Encoding.ASCII.GetString(ms.ToArray());
-
-			Console.WriteLine(final);
-
-			Assert.NotNull(der);
-		}
-
 		private static MemoryStream LoadResource(string name)
 		{
 			var asm = Assembly.GetExecutingAssembly();
@@ -59,30 +43,22 @@ namespace Peach.Enterprise.Test.Analyzers
 		}
 
 		[Test]
-		public void ParserTest()
+		public void TestGoogle()
 		{
-			var data = new MemoryStream(File.ReadAllBytes("C:\\Users\\seth\\Downloads\\TEST_SUITE\\TEST_SUITE\\tc38.ber"));
-
-			var ber = Asn1.Decode(data);
-
-			var ms = new MemoryStream();
-
-			Asn1.ExportText(ms, ber);
-
-			var final = Encoding.ASCII.GetString(ms.ToArray());
-
-			Console.WriteLine(final);
-
+			CrackData(googleDer);
 		}
 
 		[Test]
 		public void Crack1()
 		{
-			var data = new MemoryStream(File.ReadAllBytes("C:\\Users\\seth\\Downloads\\TEST_SUITE\\TEST_SUITE\\tc38.ber"));
-			CrackData(data);
+			// Constructed Indefinite Length BitString comprised of 2 BitStrings
+			// First has no unused bits
+			// Second has unused bits
+			var data = new byte[] { 0x23, 0x80, 0x03, 0x03, 0x00, 0x0a, 0x3b, 0x03, 0x05, 0x04, 0x5f, 0x29, 0x1c, 0xd0, 0x00, 0x00 };
+			CrackData(new MemoryStream(data));
 		}
 
-		private static void CrackData(Stream data)
+		private static void CrackData(MemoryStream data)
 		{
 
 			var parser = new PitParser();
@@ -93,6 +69,11 @@ namespace Peach.Enterprise.Test.Analyzers
 
 			var cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], bs);
+
+			var final = dom.dataModels[0].Value.ToArray();
+			var expected = data.ToArray();
+
+			Assert.AreEqual(expected, final);
 
 		}
 	}
