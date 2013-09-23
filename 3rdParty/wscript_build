@@ -6,6 +6,7 @@ subdirs = [
 	'ASN1-Editor',
 	'Irony_2013_03_10',
 	'TotalPhase-5.13',
+	'Managed.AndroidDebugBridge',
 ]
 
 bld.recurse(subdirs)
