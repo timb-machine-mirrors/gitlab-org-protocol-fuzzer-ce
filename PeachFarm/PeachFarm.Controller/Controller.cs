@@ -453,8 +453,9 @@ namespace PeachFarm.Controller
 					jobNodes = jobNodes.Take(request.ClientCount).ToList();
 					var jobQueues = (from Heartbeat h in jobNodes select h.QueueName).ToList();
 					DeclareJobExchange(request.JobID, jobQueues);
+					jobNodes = SeedNodes(jobNodes);
 					CommitJobToMongo(request, jobNodes);
-					SeedTheJobQueues(jobQueues, request, action);
+					SendToJobQueues(jobNodes, request);
 					//Reply(response.Serialize(), action, replyQueue);
 				}
 				else
@@ -588,7 +589,17 @@ namespace PeachFarm.Controller
 			return jobNodes;
 		}
 
-		protected virtual void SeedTheJobQueues(List<string> jobQueues, StartPeachRequest request, string action)
+		protected virtual List<Heartbeat> SeedNodes(List<Heartbeat> nodes)
+		{
+			uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				nodes[i].Seed = baseseed + Convert.ToUInt32(i);
+			}
+			return nodes;
+		}
+
+		protected virtual void SendToJobQueues(List<Heartbeat> nodes, StartPeachRequest request)
 		{
 			/*
 			 * Important: to make certain that each Node uses a different Seed for initializing Peach,
@@ -598,11 +609,10 @@ namespace PeachFarm.Controller
 			 * we're sending StartPeach requests to each node individually instead of publishing
 			 * to the exchange
 			 */
-			uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-			for(int i=0;i<jobQueues.Count;i++)
+			foreach(var node in nodes)
 			{
-				request.Seed = baseseed + Convert.ToUInt32(i);
-				rabbit.PublishToQueue(jobQueues[i], request.Serialize(), action);
+				request.Seed = node.Seed;
+				rabbit.PublishToQueue(node.QueueName, request.Serialize(), Actions.StartPeach);
 			}
 		}
 

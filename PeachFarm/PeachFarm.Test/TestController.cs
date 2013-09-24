@@ -26,7 +26,7 @@ namespace PeachFarm.Test
 		public static bool __test_use_base_StartPeach = false;
 		public static bool __test_use_base_GetNodeByName = false;
 		public static bool __test_use_base_SeedTheJobQueues = false;
-		public static List<string> __test_seeded_job_queues = new List<string>();
+		public static List<Heartbeat> __test_seeded_job_queues = new List<Heartbeat>();
 		public static bool __test_use_base_RemoveNode = false;
 		public static bool __test_use_base_UpdateNode = false;
 		public static List<Heartbeat> __test_removed_nodes = new List<Heartbeat>();
@@ -148,10 +148,10 @@ namespace PeachFarm.Test
 			// base.CommitJobToMongo(request, nodes);
 		}
 
-		protected override void SeedTheJobQueues(List<string> jobQueues, StartPeachRequest request, string action)
+		protected override void SendToJobQueues(List<Heartbeat> nodes, StartPeachRequest request)
 		{
-			if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = jobQueues;
-			else base.SeedTheJobQueues(jobQueues, request, action);
+			if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = nodes;
+			else base.SendToJobQueues(nodes, request);
 		}
 
 		protected override void RemoveNode(Heartbeat heartbeat)
@@ -203,7 +203,7 @@ namespace PeachFarm.Test
 			TestController.__test_use_base_StartPeach = false;
 			TestController.__test_use_base_GetNodeByName = false;
 			TestController.__test_use_base_SeedTheJobQueues = false;
-			TestController.__test_seeded_job_queues = new List<string>();
+			TestController.__test_seeded_job_queues = new List<Heartbeat>();
 			TestController.__test_use_base_RemoveNode = false;
 			TestController.__test_use_base_UpdateNode = false;
 			TestController.__test_removed_nodes = new List<Heartbeat>();
