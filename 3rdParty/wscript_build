@@ -11,6 +11,7 @@ subdirs = [
 
 bld.recurse(subdirs)
 
+bld.read_csshlib('BouncyCastle.Crypto.dll',                 paths=['BouncyCastle-1.7'])
 bld.read_csshlib('EasyHook.dll',                            paths=['EasyHook-2.6'])
 bld.read_csshlib('RabbitMQ.Client.dll',                     paths=['rabbitmq-dotnet-client-3.0.2-dotnet-2.0/bin'])
 bld.read_csshlib('MongoDB.Bson.dll',                        paths=['CSharpDriver-1.7.0.4714'])
@@ -36,7 +37,7 @@ bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls 
 bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q2 2013/Bin'])
 
-bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                   paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.PropertyGrid.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 bld.read_csshlib('ActiproSoftware.Shared.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])

@@ -209,13 +209,13 @@ namespace Peach.Enterprise.Runtime
 
 				Console.SetCursorPosition(36, 3);
 				DisplayStaticText("Running: ");
-				Console.Write((DateTime.Now - _started).ToString());
+				Console.Write((DateTime.Now - _started).ToString(@"hh\:mm\:ss"));
 
 				// Display speed
 
 				Console.SetCursorPosition(38, 4);
 				DisplayStaticText("Speed: ");
-				Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
+				Console.Write((int)((_currentIteration / (DateTime.Now - _started).TotalSeconds) * 3600));
 				Console.Write("/hr         ");
 			}
 		}
@@ -263,13 +263,13 @@ namespace Peach.Enterprise.Runtime
 
 			Console.SetCursorPosition(36, 3);
 			DisplayStaticText("Running: ");
-			Console.Write((DateTime.Now - _started).ToString());
+			Console.Write((DateTime.Now - _started).ToString(@"hh\:mm\:ss"));
 
 			// Display speed
 
 			Console.SetCursorPosition(38, 4);
 			DisplayStaticText("Speed: ");
-			Console.Write((int)(((DateTime.Now - _started).TotalSeconds / _currentIteration) * 120));
+			Console.Write((int)((_currentIteration / (DateTime.Now - _started).TotalSeconds) * 3600));
 			Console.Write("/hr     ");
 
 			if (!string.IsNullOrEmpty(_eta))
