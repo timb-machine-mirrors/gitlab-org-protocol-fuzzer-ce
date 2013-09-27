@@ -130,8 +130,8 @@ class PeachTest:
             shutil.rmtree(temp_dir)
         os.mkdir(temp_dir)
         # execution should live inside of a 'with'
-        sout = open(os.path.join(temp_dir, 'sout'), 'w')
-        serr = open(os.path.join(temp_dir, 'serr'), 'w')
+        sout = open(os.path.join(temp_dir, 'sout'), 'w+')
+        serr = open(os.path.join(temp_dir, 'serr'), 'w+')
         self.proc = Popen(self.args, stdout=sout, stderr=serr)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
@@ -152,10 +152,12 @@ class PeachTest:
                 self.status = "fail"
             else:
                 self.status = "pass"
+        sout.seek(0)
+        serr.seek(0)
+        self.stdout = sout.read()
+        self.stderr = serr.read()
         sout.close()
         serr.close()
-        self.stdout = open(os.path.join(temp_dir, 'sout'), 'r').read()
-        self.stderr = open(os.path.join(temp_dir, 'serr'), 'r').read()
         if self.status == "fail":
             self.log_output()
         if self.teardown:
