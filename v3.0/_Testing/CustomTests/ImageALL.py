@@ -6,8 +6,10 @@ from subprocess import Popen, PIPE
 def setup(ctx):
     if "linux" in get_platform():
         ctx.null = open('/dev/null', 'r+')
-        ctx.x_proc = Popen(['Xvfb',':1'],
+        ctx.x_proc = Popen(['Xvfb',':0'],
                            stdin=null, stdout=null, stderr=null)
+        os.environ['DISPLAY'] = ':0'
+        
 
 def teardown(ctx):
     if "linux" in get_platform():
