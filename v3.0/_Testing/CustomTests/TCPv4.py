@@ -5,7 +5,7 @@ from random import randint
 
 
 def setup(ctx):
-    null = open('/dev/null', 'r+')
+    ctx.null = open('/dev/null', 'r+')
     os.system('iptables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP')
     port = randint(1024,65535)
     ctx.socat_proc = Popen(['socat',
@@ -18,6 +18,7 @@ def setup(ctx):
 def teardown(ctx):
     os.system('iptables -D OUTPUT 1')
     ctx.socat_proc.kill()
+    ctx.null.close()
 
 
 test(name="TCPv4",
