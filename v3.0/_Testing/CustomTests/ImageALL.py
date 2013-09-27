@@ -6,14 +6,14 @@ from subprocess import Popen, PIPE
 def setup(ctx):
     if "linux" in get_platform():
         ctx.null = open('/dev/null', 'r+')
-        ctx.x_proc = Popen(['Xvfb',':0'],
-                           stdin=null, stdout=null, stderr=null)
-        os.environ['DISPLAY'] = ':0'
+        ctx.x_proc = Popen(['Xvfb',':23'],
+                           stdin=ctx.null, stdout=ctx.null, stderr=ctx.null)
+        os.environ['DISPLAY'] = ':23'
         
 
 def teardown(ctx):
     if "linux" in get_platform():
-        ctx.socat_proc.kill()
+        ctx.x_proc.kill()
         ctx.null.close()
 
 test(name="BMP",

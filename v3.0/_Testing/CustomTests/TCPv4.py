@@ -11,7 +11,7 @@ def setup(ctx):
     ctx.socat_proc = Popen(['socat',
                             'tcp4-l:%d,fork,reuseaddr' % port,
                             'READLINE'],
-                           stdin=null, stdout=null, stderr=null)
+                           stdin=ctx.null, stdout=ctx.null, stderr=ctx.null)
     ctx.update_defines(TargetPort=port)
 
 
