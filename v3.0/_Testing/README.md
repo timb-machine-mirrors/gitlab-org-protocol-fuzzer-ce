@@ -2,7 +2,13 @@ This dir contains a set of tools to test that pits launch and run. As you're wri
 
 Since a lot of pits have a lot of cross reliance changes to one pit can easily break another. These testing tools will make sure that pits are not broken by changes to peach itself or other pits. 
 
-To run tests change directories to pits/v3.0 and run `_Testing/testlib.py` as an administrator. 
+This is run nightly against Peach Community and PeachE:
+Peach Community - http://10.0.1.76:8010/ 
+PeachE - http://10.0.1.76:8011/ 
+
+It can also be run in a stand alone mode.
+
+To run tests in stand alone change directories to pits/v3.0 and run `_Testing/testlib.py` as root or administrator. 
 
 The testing system requires win32 python2.7 on windows, and python2.7 on Linux/OSX.
 
