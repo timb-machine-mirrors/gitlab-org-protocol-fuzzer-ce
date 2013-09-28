@@ -683,26 +683,67 @@
 			<Action type="setProperty" property="MTU">
 				<DataModel ref="MTU"/>
 			</Action>
-			<!-- <Action type="output"> -->
-			<!-- 	<DataModel ref="IPv6Ethernet"/> -->
-			<!-- </Action> -->
+			<Action type="output">
+				<DataModel ref="IPv6EmptyPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6HopByHopPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6DestinationPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6RoutingPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket1"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket2"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6FragmentPacket3"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBRRPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTIPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileHoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileCoTPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBUPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBAPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileBEPacket"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="IPv6MobileRoutingType2HeaderPacket"/>
+			</Action>
 		</State>
 	</StateModel>
 
 	<Test name="Default">
 		<!-- The order of agents has importance -->
-		<!-- <Agent ref="CommonAgents:Local"/> -->
-		<!-- <Agent ref="CommonAgents:Remote"/> -->
-		<!-- <Publisher class="Remote"> -->
-		<!-- 	<Param name="Agent" value="Remote"/> -->
-		<!-- 	<Param name="Class" value="RawEther"/> -->
-		<!-- 	<Param name="Interface" value="##Interface##"/> -->
-		<!-- 	<Param name="Protocol" value="ETH_P_IPV6"/> -->
-		<!-- </Publisher> -->
-    <Publisher class="RawEther">
-      <Param name="Interface" value="##Interface##"/>
-      <Param name="Protocol" value="ETH_P_IPV6"/>
-    </Publisher>
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_IPV6"/>
+		</Publisher>
 		<StateModel ref="Transmit"/>
 		<Strategy class="##Strategy##"/>
 		<Logger class="logger.Filesystem">
@@ -710,22 +751,22 @@
 		</Logger>
 	</Test>
 
-	<!-- <Test name="MtuFuzz"> -->
+	<Test name="MtuFuzz">
 		<!-- The order of agents has importance -->
-		<!-- <Agent ref="CommonAgents:Local"/> -->
-		<!-- <Agent ref="CommonAgents:Remote"/> -->
-		<!-- <Publisher class="Remote"> -->
-		<!-- 	<Param name="Agent" value="Remote"/> -->
-		<!-- 	<Param name="Class" value="RawEther"/> -->
-		<!-- 	<Param name="Interface" value="##Interface##"/> -->
-		<!-- 	<Param name="Protocol" value="ETH_P_IPV6"/> -->
-		<!-- </Publisher> -->
-	<!-- 	<StateModel ref="MtuFuzzStates"/> -->
-	<!-- 	<Strategy class="##Strategy##"/> -->
-	<!-- 	<Logger class="logger.Filesystem"> -->
-	<!-- 		<Param name="Path" value="##LoggerPath##"/> -->
-	<!-- 	</Logger> -->
-	<!-- </Test> -->
+		<Agent ref="CommonAgents:Local"/>
+		<Agent ref="CommonAgents:Remote"/>
+		<Publisher class="Remote">
+			<Param name="Agent" value="Remote"/>
+			<Param name="Class" value="RawEther"/>
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_IPV6"/>
+		</Publisher>
+		<StateModel ref="MtuFuzzStates"/>
+		<Strategy class="##Strategy##"/>
+		<Logger class="logger.Filesystem">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
 
 </Peach>
 <!-- end -->
