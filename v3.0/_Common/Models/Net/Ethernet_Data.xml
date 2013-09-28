@@ -8,14 +8,14 @@
     <Blob name="MACDest" length="6" valueType="hex" value="00 50 56 F1 C1 53"/>
     <Blob name="MACSrc" length="6" valueType="hex" value="00 0C 29 A3 9C B8"/>
     <Block name="802_1Q_Tag">
-      <Number name="TPID" size="16" endian="big" value="0x8100"/>
+      <Number name="TPID" size="16" endian="big" value="8100"/>
       <Flags size="16" endian="big">
         <Flag name="Priority" size="3" position="0" valueType="hex" value="00"/>
         <Flag name="CFI" size="1" position="3" valueType="hex" value="0"/>
         <Flag name="VID" size="12" position="4" valueType="hex" value="0020"/>
       </Flags>
     </Block>
-    <Number name="Ethertype" size="16" endian="big" value="0x0800"/>
+    <Number name="Ethertype" size="16" endian="big" valueType="hex" value="0800"/>
     <Blob name="Payload" valueType="hex" />
     <Number name="CRC" size="32" endian="big">
       <Fixup class="checksums.Crc32Fixup">
