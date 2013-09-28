@@ -25,8 +25,8 @@
 		<!-- <define key="TargetIPv6" value="fe80::20c:29ff:fecd:d6b0"/> -->
 
 		<!-- Interface on Agent VM we will send data from -->
-		<!-- <Define key="Interface" value="eth1"/> -->
-		<Define key="Interface" value="virbr1"/>
+		<Define key="Interface" value="eth1"/>
+		<!-- <Define key="Interface" value="virbr1"/> -->
 
 		<!-- Fuzzing strategy to use -->
 		<Define key="Strategy" value="Random"/>

@@ -2,17 +2,6 @@
 <PitDefines>
 	<!-- Copyright 2013 (c) Deja vu Security, LLC. All rights reserved. -->
   <All>
-    <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIPv6" value="::1"/>
-    <Define key="SourceIPv6" value="::1"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="SourceMAC" value="000c29ef2a1b" />
-    <Define key="TargetMAC" value="000c29ef2a1b" />
-    <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
-		<Define key="Fuzztype" value="Default"/>
 		<Define key="LoggerPath" value="logs/IPv6/"/>
-    <Define key="Interface" value="lo"/>
 	</All>
 </PitDefines>
