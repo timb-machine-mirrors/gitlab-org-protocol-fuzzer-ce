@@ -3,17 +3,20 @@
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
 			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT StateModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
-	
+
 	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
 	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
 	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
 	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
-    	
-<!--START HERE-->	
-	
-	
+
+	<!--START HERE-->
+
+	<DataModel name="EthernetFrame" ref="Ethernet:Frame">
+		<Number name="TypeOrLen" size="16" endian="big" valueType="hex" value="86DD"/>
+	</DataModel>
+
 	<DataModel name="IPv6EmptyPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" value="0" size="16"/>
 			<Number name="NextHeader" size="8" value="59"/>
@@ -21,7 +24,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6ICMPPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -32,7 +35,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6UDPTestPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -57,7 +60,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6HopByHopPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -71,7 +74,7 @@
 
 	<DataModel name="IPv6DestinationPacket">
 		<!-- Destination options are structured in the same way as Hop-By-Hop options -->
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -82,9 +85,9 @@
 			<Block ref="IPv6:Destination"/>
 		</Block>
 	</DataModel>
-	
+
 	<DataModel name="IPv6RoutingPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -97,7 +100,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6JumbogramPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big" value="0000" valueType="hex">
 			<!-- <Number name="Header.PayloadLength" size="16" endian="big" value="FFFF" valueType="hex"> -->
@@ -112,7 +115,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket1">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -133,7 +136,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket2">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -154,7 +157,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6FragmentPacket3">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -175,7 +178,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBRRPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -204,7 +207,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTIPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -236,7 +239,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTIPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -268,7 +271,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileHoTPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -301,7 +304,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileCoTPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -334,7 +337,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBUPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -390,7 +393,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBAPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -441,7 +444,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileBEPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -472,7 +475,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileRoutingType2HeaderPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload" />
@@ -487,7 +490,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryRequestPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -513,7 +516,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPHomeAgentAddressDiscoveryReplyPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -543,7 +546,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixSolicitationPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -569,7 +572,7 @@
 	</DataModel>
 
 	<DataModel name="IPv6MobileICMPPrefixAdvertisementPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -605,7 +608,7 @@
 	<!--Mobile IPv6 adds the Advertisement Interval Option-->
 	<!-- See http://tools.ietf.org/html/rfc6275#section-7.1 -->
 	<DataModel name="IPv6MobileICMPRouterAdvertismentPacket">
-		<Block ref="Ethernet:Frame"/>
+		<Block ref="EthernetFrame"/>
 		<Block ref="IPv6:IPv6Header">
 			<Number name="PayloadLength" size="16" endian="big">
 				<Relation type="size" of="Payload"/>
@@ -655,14 +658,8 @@
 			</Block>
 		</Block>
 	</DataModel>
-    
-    
-    
-    
-    
-    
-    
-    
+
+
 	<StateModel name="Transmit" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
