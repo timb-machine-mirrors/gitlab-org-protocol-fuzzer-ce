@@ -41,7 +41,9 @@ class PeachTest:
 
     def __init__(self, pit, config, cwd=None, test="Default",
                  base_opts=PEACH_OPTS, setup=None, teardown=None,
-                 extra_opts=None, platform='all', defines=BASE_DEFINES):
+                 extra_opts=None, platform='all', defines=BASE_DEFINES, env=None):
+        self.env = os.environ #this emmulates the default behavor of
+                              #Popen with a bit more flexibility
         self.status = None
         self.platform = platform
         self.pit = pit
@@ -132,7 +134,7 @@ class PeachTest:
         # execution should live inside of a 'with'
         sout = open(os.path.join(temp_dir, 'sout'), 'w+')
         serr = open(os.path.join(temp_dir, 'serr'), 'w+')
-        self.proc = Popen(self.args, stdout=sout, stderr=serr)
+        self.proc = Popen(self.args, stdout=sout, stderr=serr, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
                     (timeout_counter < (self.timeout * 12)):

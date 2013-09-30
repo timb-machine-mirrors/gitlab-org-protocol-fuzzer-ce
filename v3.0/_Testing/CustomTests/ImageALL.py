@@ -8,7 +8,7 @@ def setup(ctx):
         ctx.null = open('/dev/null', 'r+')
         ctx.x_proc = Popen(['Xvfb',':23'],
                            stdin=ctx.null, stdout=ctx.null, stderr=ctx.null)
-        os.environ['DISPLAY'] = ':23'
+        ctx.env['DISPLAY'] = ':23'
         
 
 def teardown(ctx):
