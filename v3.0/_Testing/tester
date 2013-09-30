@@ -148,11 +148,14 @@ if __name__ == "__main__":
                 print test.color_text("red", "UNKNOWN FAILURE!")
             tests.append(test)
     tests.sort(key = lambda obj: obj.name)
+    ret = 0
     for test in tests:
         status = test.status
         if test.hasrun:
             status += " after running %s" % test.hasrun
         if test.status in ["pass", "fail"]:
+            if test.status == "pass" and IS_INTERACTIVE == False:
+                continue #for non interactive we can silently succede. 
             test_log.write(
                 "{0:<20} {1:<5} returned {2} for command {3}{4}".format(
                     test.name + " " + status,
@@ -160,12 +163,13 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
+        ret |= test.returncode #any failure should cause build failure 
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
         elif test.status == "except":
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
-
     test_log.close()
+    return ret
 

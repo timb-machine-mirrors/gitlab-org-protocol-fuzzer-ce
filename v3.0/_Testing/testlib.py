@@ -19,9 +19,9 @@ COLOR_CODES = {'red': 31,
                'green': 32,
                'yellow': 92}
 
+
 # if this isn't being run interactive, it's probably buildbot. (*NIX then WIN.)
 # if there's something strange in the neighborhood
-
 
 
 all_tests = {}
