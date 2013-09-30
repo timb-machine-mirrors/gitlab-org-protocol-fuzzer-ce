@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dependency', action='store_true',
                         required=False, help=('Used to test pit dependencies'))
     parser.add_argument('-c', '--color', type=bool,
-                        required=False, default=True,
+                        required=False, default=USE_COLOR,
                         help=('Turns off color codes in output'))
     parser.add_argument('-t', '--timeout', type=int,
                         default=TIMEOUT_MINUTES,required=False, 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
-        ret |= test.returncode #any failure should cause build failure 
+            ret |= test.returncode #any failure should cause build failure
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
@@ -171,5 +171,5 @@ if __name__ == "__main__":
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
     test_log.close()
-    return ret
+    exit(ret)
 
