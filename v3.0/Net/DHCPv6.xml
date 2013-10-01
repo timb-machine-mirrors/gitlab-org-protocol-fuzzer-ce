@@ -15,6 +15,7 @@
 	</Agent>
 
   <Test name="Default">
+		<!-- Default is to run as a server. We should add a dhcp client.  -->
 		<StateModel ref="States:Server"/>
 		
 		<Agent ref="DHCPTestClient"/>
