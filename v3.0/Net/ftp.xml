@@ -23,8 +23,7 @@
 	<Agent name="LinServerAgent">
     <Monitor class="LinuxCrashMonitor"/>
     <Monitor class="Process">
-      <Param name="Executable" value="ftp" />
-      <Param name="StartOnCall" value="Start" />
+      <Param name="Executable" value="##LinuxFTPCmd##" />
       <Param name="Arguments" value="##LocalIPv4##" />
     </Monitor>
 	</Agent>
@@ -42,12 +41,11 @@
 
 	<!-- Client test case -->
 	<Test name="Default"> 
-		<StateModel ref="FTP:AgentToHost"/>
-		
-		<!-- <Agent ref="WinRemoteAgent" platform="windows"/> -->
-		<!-- <Agent ref="LinRemoteAgent" platform="linux"/> -->
-		<!-- <Agent ref="OSXRemoteAgent" platform="osx"/> -->
+		<Agent ref="WinRemoteAgent" platform="windows"/>
+		<Agent ref="LinRemoteAgent" platform="linux"/>
+		<Agent ref="OSXRemoteAgent" platform="osx"/>
 
+		<StateModel ref="FTP:AgentToHost"/>
 		<Publisher class="Tcp" name="TcpHandler">
 			<Param name="Host" value="##TargetIPv4##"/>
 			<Param name="Port" value="##TargetPort##"/>
@@ -61,9 +59,14 @@
 	
 	<!--Server side test-->
 	<Test name="Server">
+
+		<Agent ref="WinServerAgent" platform="windows"/>
+		<Agent ref="LinServerAgent" platform="linux"/>
+		<!-- <Agent ref="OSXServerAgent" platform="osx"/> -->
+ 		<!-- We need to add OSX support for this, probably no more than adding an agent -->
+
+
 		<StateModel ref="FTP:HostToAgent"/>
-		
-		<Agent ref="ServerAgent"/>
 		
 		<Publisher name="TcpHandler" class="TcpListener">
 			<Param name="Interface" value="##LocalIPv4##"/>
