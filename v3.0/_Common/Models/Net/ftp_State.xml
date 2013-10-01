@@ -74,15 +74,10 @@
 	<StateModel name="HostToAgent" initialState="StartServer">
 		<State name="StartServer">
 			<Action type="start" publisher="TcpHandler"/>
-
 			<Action type="call" method="launchProgram" publisher="Peach.Agent"/>
-
 			<Action type="accept" publisher="TcpHandler"/>
-
-			<!-- <Action name="Next" type="changeState" ref="InputUserName"/> -->
 			<Action name="Next" type="changeState" ref="PreAuth"/>
 		</State>
-
 
 		<!-- This needs to be changed to support any set of client interactions. -->
 		<State name="PreAuth">
