@@ -79,9 +79,25 @@
 
       <Action type="accept" publisher="TcpHandler"/>
 
-			<Action name="Next" type="changeState" ref="InputUserName"/>
+			<!-- <Action name="Next" type="changeState" ref="InputUserName"/> -->
+			<Action name="Next" type="changeState" ref="WaitForSyst"/>
     </State>
-	
+
+		
+		<!-- This needs to be changed to support any set of client interactions. -->
+		<State name="WaitForSyst">
+			<Action type="output" publisher="TcpHandler">
+				<DataModel ref="FTP:ServerReadyForUser"/>
+				<Data DataModel="FTP:ServerReadyForUser">
+					<Field name="LineModes.OneLine.Explaination" value="vsFTPd 2.3.5"/>
+				</Data>
+			</Action>
+			<Action type="input" publisher="TcpHandler">
+				<DataModel ref="FTP:SYST"/>
+			</Action>
+			<Action type="changeState" ref="InputUserName"/>
+		</State>
+
 		<State name="InputUserName">
 			<Action type="output" publisher="TcpHandler">
 				<DataModel ref="FTP:ServerReadyForUser"/>
