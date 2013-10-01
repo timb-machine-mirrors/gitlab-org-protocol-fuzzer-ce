@@ -7,7 +7,7 @@
 	<Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
 	<PythonPath path="##Path##/_Common/Models/Net/"/>
 	<Import import="FTP"/>	
-	
+
 	<!-- FTP simple state model -->
 	<StateModel name="AgentToHost" initialState="InputUserName">
 		<State name="InputUserName">
@@ -80,35 +80,29 @@
       <Action type="accept" publisher="TcpHandler"/>
 
 			<!-- <Action name="Next" type="changeState" ref="InputUserName"/> -->
-			<Action name="Next" type="changeState" ref="WaitForSyst"/>
+			<Action name="Next" type="changeState" ref="PreAuth"/>
     </State>
 
 		
 		<!-- This needs to be changed to support any set of client interactions. -->
-		<State name="WaitForSyst">
+		<State name="PreAuth">
 			<Action type="output" publisher="TcpHandler">
 				<DataModel ref="FTP:ServerReadyForUser"/>
 				<Data DataModel="FTP:ServerReadyForUser">
 					<Field name="LineModes.OneLine.Explaination" value="vsFTPd 2.3.5"/>
 				</Data>
 			</Action>
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:SYST"/>
+			<Action name="Read" type="input" publisher="TcpHandler">
+				<DataModel name="PreauthCommand">
+					<Choice name="Command">
+						<Block name="SYST" ref="FTP:SYST"/>
+						<Block name="USER" ref="FTP:USER"/>
+					</Choice>
+				</DataModel>
 			</Action>
-			<Action type="changeState" ref="InputUserName"/>
-		</State>
-
-		<State name="InputUserName">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerReadyForUser"/>
-				<Data DataModel="FTP:ServerReadyForUser">
-					<Field name="LineModes.OneLine.Explaination" value="vsFTPd 2.3.5"/>
-				</Data>
-			</Action>
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:USER"/>
-			</Action>
-			<Action type="changeState" ref="InputPasswd"/>
+			<!-- This state model methodology needs to be applied in the authed state also -->
+			<Action type="changeState" ref="PreAuth" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'SYST'"/>
+			<Action type="changeState" ref="InputPasswd" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'USER'"/>
 		</State>
 
 		<State name="InputPasswd">
