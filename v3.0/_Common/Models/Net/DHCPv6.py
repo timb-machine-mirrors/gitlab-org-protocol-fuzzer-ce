@@ -43,7 +43,6 @@ def is_solicit(ctx):
     return False
 
 
-
 def is_request(ctx):
     if ctx.parent.actions[0].dataModel.find('MsgType'):
         return int(ctx.parent.actions[0].dataModel.find('MsgType').InternalValue) == 3
