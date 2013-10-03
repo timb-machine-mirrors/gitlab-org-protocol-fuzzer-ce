@@ -96,7 +96,7 @@ set PATH=%PYTHON_DIR%;%PYTHON_DIR%Scripts;%PYTHON_DIR%Tools\Scripts;%PATH%
 
 @echo Using %PYTHON%
 
-"%PYTHON%" -x "%~dp0run_all_pits" %*
+"%PYTHON%" -x "%~dp0tester" %*
 set WAFERROR=%ERRORLEVEL%
 Endlocal & exit /b %WAFERROR%
 
