@@ -143,6 +143,7 @@ if __name__ == "__main__":
             except Exception:
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
+                test.clean_up()
             if test.status == "pass":
                 print test.color_text("green", "SUCCESS!")
             elif test.status == "skip":
