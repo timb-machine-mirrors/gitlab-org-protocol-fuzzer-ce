@@ -91,6 +91,7 @@ def user_is_admin():
 
 
 if __name__ == "__main__":
+    return_code=1
     parser = argparse.ArgumentParser(
         description='Test peach pits (this must be run as root)')
     parser.add_argument('-i', '--iterations', dest='iterations',
@@ -111,7 +112,7 @@ if __name__ == "__main__":
                         required=False, default=USE_COLOR,
                         help=('Turns off color codes in output'))
     parser.add_argument('-t', '--timeout', type=int,
-                        default=TIMEOUT_MINUTES,required=False, 
+                        default=TIMEOUT_MINUTES,required=False,
                         help=('Time to let pits run before killing them. '
                               'Defaults to 10 minutes.'))
     config = parser.parse_args()
@@ -162,7 +163,7 @@ if __name__ == "__main__":
             status += " after running %s" % test.hasrun
         if test.status in ["pass", "fail"]:
             if test.status == "pass" and IS_INTERACTIVE == False:
-                continue #for non interactive we can silently succede. 
+                continue #for non interactive we can silently succede.
             test_log.write(
                 "{0:<20} {1:<5} returned {2} for command {3}{4}".format(
                     test.name + " " + status,
@@ -171,12 +172,17 @@ if __name__ == "__main__":
                     test.cmd,
                     os.linesep))
             ret |= test.returncode #any failure should cause build failure
+            if test.status != "pass":
+                ret +=1
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
         elif test.status == "except":
+            if test.status != "pass":
+                ret +=1
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
     test_log.close()
-    exit(ret)
+    return_code = ret
+    exit(return_code)
 
