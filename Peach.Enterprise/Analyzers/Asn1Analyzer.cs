@@ -57,17 +57,11 @@ namespace Peach.Enterprise.Analyzers
 
 			var block = new Block(blob.name);
 
-			// Move over relations
-			foreach (var relation in blob.relations)
-				block.relations.Add(relation);
-			blob.relations.Clear();
-
 			// Decode ASN.1
 			Decode(block, data, positions, 0);
 
 			// Replace blob with block
-			block.parent = blob.parent;
-			block.parent[blob.name] = block;
+			blob.parent[blob.name] = block;
 
 			// Copy over positions
 			if (positions != null)
@@ -368,11 +362,8 @@ namespace Peach.Enterprise.Analyzers
 
 			if (!node.IndefiniteLength)
 			{
-				var rel = new SizeRelation();
-				rel.OfName = "Value";
-				rel.FromName = "Length";
-				cont["Value"].relations.Add(rel);
-				cont["Length"].relations.Add(rel);
+				var rel = new SizeRelation(cont["Length"]);
+				rel.Of = cont["Value"];
 			}
 
 			parent.Add(cont);
@@ -476,11 +467,8 @@ namespace Peach.Enterprise.Analyzers
 				blk.Add(unusedBits);
 				blk.Add(pad);
 
-				var rel = new SizeRelation() { lengthType = LengthType.Bits };
-				rel.OfName = "UnusedBits";
-				rel.FromName = "UnusedLen";
-				unusedBits.relations.Add(rel);
-				unusedLen.relations.Add(rel);
+				var rel = new SizeRelation(unusedLen) { lengthType = LengthType.Bits };
+				rel.Of = unusedBits;
 
 				if (positions != null)
 				{
