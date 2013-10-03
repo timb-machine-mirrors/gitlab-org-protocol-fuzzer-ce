@@ -2,10 +2,10 @@
 from os import system
 from sys import platform
 
-ftp_start = {"linux2": '/etc/init.d/vsftpd start',
+ftp_start = {"linux2": 'service vsftpd start',
              "win": ''} #needs to be finished
 
-ftp_stop = {"linux2": '/etc/init.d/vsftpd stop',
+ftp_stop = {"linux2": 'service vsftpd stop',
              "win": ''} #needs to be finished
 
 
