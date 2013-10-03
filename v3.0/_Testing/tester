@@ -91,7 +91,6 @@ def user_is_admin():
 
 
 if __name__ == "__main__":
-    return_code=1
     parser = argparse.ArgumentParser(
         description='Test peach pits (this must be run as root)')
     parser.add_argument('-i', '--iterations', dest='iterations',
@@ -156,7 +155,7 @@ if __name__ == "__main__":
                 print test.color_text("red", "UNKNOWN FAILURE!")
             tests.append(test)
     tests.sort(key = lambda obj: obj.name)
-    ret = 0
+    return_code = 0
     for test in tests:
         status = test.status
         if test.hasrun:
@@ -171,18 +170,16 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
-            ret |= test.returncode #any failure should cause build failure
+            return_code |= test.returncode #any failure should cause build failure
             if test.status != "pass":
-                ret +=1
+                return_code += 1
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
         elif test.status == "except":
-            if test.status != "pass":
-                ret +=1
+            return_code += 1
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
     test_log.close()
-    return_code = ret
-    exit(return_code)
+    exit(return_code) # exit w/ code equal to num of pit test failures
 
