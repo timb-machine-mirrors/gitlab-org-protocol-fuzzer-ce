@@ -23,6 +23,9 @@ TIMEOUT_MINUTES = os.environ.get('PEACH_TIMEOUT_MINUTES') or 10
 ARCH, OS = platform.architecture()
 IS_64_BIT = '64' in ARCH
 IS_WINDOWS = 'windows' in OS.lower()
+IS_LINUX   = 'elf'     in OS.lower()
+# '' was as seen on peach farm mac mini for arch -> op. sys.
+IS_OSX     = '' == OS or 'darwin' in OS.lower() or 'osx' in OS.lower()
 IS_INTERACTIVE = sys.stdout.isatty()
 USE_COLOR = IS_INTERACTIVE and (not IS_WINDOWS)
 
@@ -44,11 +47,15 @@ def find_peach():
     # also assuming x86 or x86_64 right now, no ARM
     which_build = ''
     if IS_WINDOWS:
-        assert False # oops, notchet. add when you can see the slave build machine
-    else:
+        which_build += 'win_x'
+        which_build += '64' if IS_64_BIT else '86'
+    elif IS_LINUX:
         which_build += 'linux_x86' #darwin?
-    if IS_64_BIT:
-        which_build += '_64'
+        which_build += '_64' if IS_64_BIT else ''
+    elif IS_OSX:
+        which_build += 'osx'
+    else:
+        assert False, "Unknown os"
     # debug has better info
     which_build += '_debug'
     _path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
