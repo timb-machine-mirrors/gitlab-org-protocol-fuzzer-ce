@@ -22,10 +22,8 @@ bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
 bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
 bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
 
-bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
-bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-binary-x64-2010-1.0.84.0'])
-
-bld.install_files('${BINDIR}', os.path.join('sqlite-netFx40-binary-x64-2010-1.0.84.0', 'SQLite.Interop.dll'))
+bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
+bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
 
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #Newtonsoft.Json.dll is already provided in Peach/3rdParty
@@ -33,6 +31,9 @@ bld.install_files('${BINDIR}', os.path.join('sqlite-netFx40-binary-x64-2010-1.0.
 bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q2 2013/Bin'])
 
 if bld.env.TARGET == 'win':
+	# Install the x86/x64 sql interop dll
+	bld.read_shlib('SQLite.Interop', paths=['sqlite-netFx40-static-binary-2010-1.0.88.0/%s' % bld.env.SUBARCH])
+
 	bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 	bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 	bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
