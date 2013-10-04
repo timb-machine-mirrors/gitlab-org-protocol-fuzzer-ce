@@ -19,7 +19,7 @@ namespace PeachFarm.Test
 		public static Status[] AllStatuses = {Status.Alive, Status.Error, Status.Late, Status.Running, Status.Stopping};
 
 		#region setup
-		private static PeachFarm.Reporting.Configuration.ReportGeneratorSection config;
+		//private static PeachFarm.Reporting.Configuration.ReportGeneratorSection config;
 
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
@@ -59,12 +59,14 @@ namespace PeachFarm.Test
 			TestController.setConfig(config);
 			TestController.__test_LocalIPs = ips;
 			var controller = new PeachFarm.Controller.PeachFarmController();
+			Assert.NotNull(controller);
 		}
 
 		[Test]
 		public void TestControllerOverridesIPGetter()
 		{
 			TestController tc = new TestController();
+			Assert.NotNull(tc);
 		}
 
 		[Test]
@@ -86,11 +88,17 @@ namespace PeachFarm.Test
 			// this method is pretty straightforward, so we just want to ensure it can instantiate
 			// the response objects it depends on. assume the (straightforward) mapping just works
 			var a = new StartPeachResponse();
+			Assert.NotNull(a);
 			var b = new StopPeachResponse();
+			Assert.NotNull(b);
 			var c = new ListNodesResponse();
+			Assert.NotNull(c);
 			var d = new ListErrorsResponse();
+			Assert.NotNull(d);
 			var e = new JobInfoResponse();
+			Assert.NotNull(e);
 			var f = new MonitorResponse();
+			Assert.NotNull(f);
 
 			// also ping the default just to cover everything
 			TestController tc = new TestController();
@@ -146,6 +154,7 @@ namespace PeachFarm.Test
 			TestController tc = new TestController();
 			TestController.__test_use_test_job = true;
 			Common.Mongo.Job job = new Common.Mongo.Job();
+			Assert.NotNull(job);
 
 			string rq = "TestingReplyQueue";
 			StopPeachRequest spr = new StopPeachRequest();

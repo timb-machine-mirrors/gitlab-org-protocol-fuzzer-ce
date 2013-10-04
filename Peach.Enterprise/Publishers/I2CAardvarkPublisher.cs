@@ -174,7 +174,6 @@ namespace Peach.Core.Publishers
 
 
 				byte[] buf = _recvBuffer.GetBuffer();
-				int offset = (int)_recvBuffer.Position;
 				int size = (int)_recvBuffer.Length;
 
 				int res = AardvarkApi.aa_i2c_read(_handle, Address,

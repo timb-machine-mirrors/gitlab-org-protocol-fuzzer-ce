@@ -15,7 +15,7 @@ namespace PeachFarm.Test
 	[TestFixture]
 	public class IntegrationTests
 	{
-		private static RabbitMqHelper rabbit;
+		private static RabbitMqHelper rabbit { get; set; }
 		private static Admin.Configuration.AdminSection config;
 
 		private static Admin.PeachFarmAdmin admin;

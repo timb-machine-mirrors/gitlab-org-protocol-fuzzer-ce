@@ -99,7 +99,6 @@ namespace Peach.Enterprise.Runtime
 			if(totalIterations != null)
 				_totalIterations = totalIterations.Value;
 
-			string strTotal = "-";
 			string strEta = "-";
 
 			if (!timer.IsRunning)
@@ -110,8 +109,6 @@ namespace Peach.Enterprise.Runtime
 
 			if (totalIterations != null && totalIterations < uint.MaxValue)
 			{
-				strTotal = totalIterations.ToString();
-
 				var done = currentIteration - startIteration;
 				var total = totalIterations.Value - startIteration + 1;
 				var elapsed = timer.ElapsedMilliseconds;

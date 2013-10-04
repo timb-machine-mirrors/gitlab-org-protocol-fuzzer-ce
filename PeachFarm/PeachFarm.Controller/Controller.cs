@@ -12,13 +12,12 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using PeachFarm.Common.Mongo;
 using System.Xml.Linq;
- 
+
 namespace PeachFarm.Controller
 {
 	public class PeachFarmController : IDisposable
 	{
 
-		private UTF8Encoding encoding = new UTF8Encoding();
 		private static string ipaddress;
 		protected Configuration.ControllerSection config;
 
@@ -317,7 +316,6 @@ namespace PeachFarm.Controller
 		/// For Stopping a Job
 		/// </summary>
 		/// <param name="request"></param>
-		/// <param name="replyQueue"></param>
 		internal virtual StopPeachResponse StopPeach(StopPeachRequest request)
 		{
 			StopPeachResponse response = new StopPeachResponse(request);
@@ -363,6 +361,7 @@ namespace PeachFarm.Controller
 		protected virtual void StartPeach(StartPeachRequest request, string replyQueue)
 		{
 			var response = StartPeach(request);
+			System.Diagnostics.Debug.Assert(response != null);
 			Reply(request.Serialize(), Actions.StartPeach, replyQueue);
 		}
 

@@ -91,7 +91,6 @@ namespace Godel.Core
 
 		void State_ChangingState(State state, State toState)
 		{
-			string s = "change";
 		}
 
 		void State_Finished(State state)

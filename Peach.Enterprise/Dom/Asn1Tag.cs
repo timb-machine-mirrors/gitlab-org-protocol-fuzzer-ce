@@ -6,7 +6,6 @@ using System.Text;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Enterprise.Analyzers.ASN1;
 using System.IO;
 
 namespace Peach.Enterprise.Dom

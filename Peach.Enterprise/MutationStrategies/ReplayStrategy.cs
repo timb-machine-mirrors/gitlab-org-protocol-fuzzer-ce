@@ -45,7 +45,6 @@ namespace Peach.Enterprise.MutationStrategies
 
 		uint _count = 0;
 		uint _iteration;
-		uint _lastIteration = 1;
 
 		public ReplayStrategy(Dictionary<string, Variant> args)
 			: base(args)
@@ -103,7 +102,6 @@ namespace Peach.Enterprise.MutationStrategies
 			}
 			set
 			{
-				_lastIteration = _iteration;
 				_iteration = value;
 
 				if (!Context.controlIteration)

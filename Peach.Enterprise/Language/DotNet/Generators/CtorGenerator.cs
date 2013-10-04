@@ -35,10 +35,10 @@ namespace Peach.Enterprise.Language.DotNet.Generators
 {
 	public class CtorGenerator : ITypeGenerator
 	{
-		IContext _context;
-		IGroup _group;
-		ConstructorInfo _ctorInfo;
-		object[] _args = null;
+		IContext _context { set; get; }
+		IGroup _group { set; get; }
+		ConstructorInfo _ctorInfo { set; get; }
+		object[] _args { set; get; }
 
 		Dictionary<ParameterInfo, IGenerator> _parameterGenerators = new Dictionary<ParameterInfo, IGenerator>();
 

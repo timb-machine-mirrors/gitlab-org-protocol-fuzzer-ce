@@ -141,7 +141,6 @@ namespace Managed.Adb {
 			if ( CanExecute ) {
 				val |= Modes.Execute;
 			}
-			int ival = (int)val;
 			return val;
 		}
 

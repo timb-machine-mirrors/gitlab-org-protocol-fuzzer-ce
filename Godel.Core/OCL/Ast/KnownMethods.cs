@@ -24,7 +24,6 @@ namespace Godel.Core.OCL.Ast
 	/// </summary>
 	public class KnownMethods
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public static int abs(int num)
 		{
 			return Math.Abs(num);
