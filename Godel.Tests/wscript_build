@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+deps = [
+	'nunit.framework.dll',
+	'NLog.dll',
+	
+	'System.dll',
+	'System.Core.dll',
+	'System.Data.dll',
+	'System.Data.DataSetExtensions.dll',
+	'System.Xml.dll',
+
+	'Microsoft.CSharp.dll',
+
+	'Peach.Core.dll',
+
+	'Irony.dll',
+	'Irony.Interpreter.dll',
+
+	'Godel.Core.dll',
+]
+
+bld(
+	features = 'cs test',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name = 'Godel.Tests.dll',
+)
