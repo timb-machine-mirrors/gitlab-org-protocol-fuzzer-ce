@@ -47,11 +47,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			ParameterParser.Parse(this, args);
 			_creciever = new ConsoleOutputReceiver();
 
-			string p = Environment.GetEnvironmentVariable("PATH");
-			p += Path.PathSeparator;
-			p += "C:\\Users\\seth\\Downloads\\adt-bundle-windows-x86_64-20130717\\sdk\\platform-tools";
-			Environment.SetEnvironmentVariable("PATH", p);
-
 			AdbPath = FindAdb(AdbPath);
 		}
 
@@ -64,7 +59,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				var fullPath = Path.Combine(path, adb);
 
 				if (!File.Exists(fullPath))
-					throw new PeachException("Error, uunable to locate " + adb + "in provided AdbPath.");
+					throw new PeachException("Error, unable to locate " + adb + "in provided AdbPath.");
 
 				return fullPath;
 			}
@@ -208,7 +203,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		private void restartAdb()
 		{
-			controlAdb("kill-server");
+			// No need to stop, the start-server cmd will just ensure it is running
 			controlAdb("start-server");
 		}
 
