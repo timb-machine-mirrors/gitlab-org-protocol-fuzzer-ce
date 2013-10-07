@@ -11,8 +11,6 @@ namespace PeachFarm.Common.Mongo
 {
 	public class DatabaseHelper
 	{
-		private static UTF8Encoding encoding = new UTF8Encoding();
-		
 		public static string[] FaultInfoFields = new string[]
 				{
 					"Faults.Description",
@@ -200,6 +198,7 @@ namespace PeachFarm.Common.Mongo
 			using (var stream = new MemoryStream(p))
 			{
 				var gridFsInfo = db.GridFS.Upload(stream, remoteFileName);
+				System.Diagnostics.Debug.Assert(gridFsInfo != null);
 			}
 			server.Disconnect();
 		}
