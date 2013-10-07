@@ -21,6 +21,7 @@ namespace Peach.Enterprise.Publishers
 		protected override NLog.Logger Logger { get { return logger; } }
 
 		public string Target { get; set; }
+		public string DeviceSerial { get; set; }
 		public int NumActions { get; set; }
 		public int Sleep { get; set; }
 		private Device _dev = null;
@@ -40,7 +41,29 @@ namespace Peach.Enterprise.Publishers
 		{
 			try
 			{
-				_dev = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress)[0];
+				logger.Debug("DeviceSerial is set to " + DeviceSerial);
+				List<Managed.Adb.Device> _devices = AdbHelper.Instance.GetDevices(AndroidDebugBridge.SocketAddress);
+				if (DeviceSerial == null || (_devices.Count == 1))
+				{
+					logger.Debug("Attempting to fetch first adb device");
+					_dev = _devices[0];
+				}
+				else
+				{
+					logger.Debug("Attempting to fetch device with serial " +  DeviceSerial);
+					//should this be a LINQ statement?
+					foreach (Device d in _devices)
+						if (d.SerialNumber == DeviceSerial)
+						{
+							logger.Debug("Device found");
+							_dev = d;
+							break;
+						}
+				}
+				if ( _dev == null)
+					throw new PeachException("Device " + DeviceSerial + "not found");
+				else
+					logger.Debug("Using device with serial " + _dev.SerialNumber);
 			}
 			catch (Exception ex)
 			{
