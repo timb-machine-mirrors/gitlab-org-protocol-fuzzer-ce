@@ -73,17 +73,22 @@ namespace Peach.Enterprise.Publishers
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
+			string _cmd = "";
 			GrabDevice();
 			try
 			{
 				if (method.Equals("tap"))
 				{
-					_dev.ExecuteShellCommand("input tap " + _x.ToString() + " " + _y.ToString(), _creciever);
+					_cmd = "input tap " + _x.ToString() + " " + _y.ToString();
+					logger.Debug("Executing \"tap\" command " + _cmd );
+					_dev.ExecuteShellCommand(_cmd,  _creciever);
 				}
 
 				else if (method.Equals("keyevent"))
 				{
-					_dev.ExecuteShellCommand("input keyevent " + _keycode.ToString(), _creciever);
+					_cmd = "input keyevent " + _keycode.ToString();
+					logger.Debug("Executing \"keyevent\" command " + _cmd);
+					_dev.ExecuteShellCommand(_cmd, _creciever);
 				}
 				else if (method.Equals("text"))
 				{
@@ -95,7 +100,9 @@ namespace Peach.Enterprise.Publishers
 					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
 
 					var escaped = val.Replace("\"", "\\\"");
-					_dev.ExecuteShellCommand("input text \"" + escaped + "\"", _creciever);
+					_cmd = "input text \"" + escaped + "\"";
+					logger.Debug("Sending text with command " + _cmd);
+					_dev.ExecuteShellCommand(_cmd, _creciever);
 				}
 				else if (method.Equals("monkey"))
 				{
