@@ -180,6 +180,7 @@ namespace Peach.Enterprise.Language.DotNet
 
 	public interface ITypeGenerator : IGenerator
 	{
+#if DISABLED
 		/// <summary>
 		/// Check if this type fuzzer supports the specified type.
 		/// </summary>
@@ -196,6 +197,7 @@ namespace Peach.Enterprise.Language.DotNet
 		/// <param name="obj">Optional parameter</param>
 		/// <returns>Returns an instance of the Generator</returns>
 		//public static ITypeGenerator CreateInstance(IContext context, IGroup group, Type type, object obj);
+#endif
 	}
 }
 

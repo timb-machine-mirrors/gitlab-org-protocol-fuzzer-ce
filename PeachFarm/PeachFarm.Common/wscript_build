@@ -15,4 +15,9 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PeachFarm.Common.dll',
+
+	# xsd2code generated classes have warnings in them
+	# http://xsd2code.codeplex.com/workitem/10041
+	# http://xsd2code.codeplex.com/discussions/73398
+	csflags = [ '/nowarn:0114,0108'],
 )

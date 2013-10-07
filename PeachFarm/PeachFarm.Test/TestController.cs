@@ -148,11 +148,11 @@ namespace PeachFarm.Test
 			// base.CommitJobToMongo(request, nodes);
 		}
 
-		protected override void SendToJobQueues(List<Heartbeat> nodes, StartPeachRequest request)
-		{
-			if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = nodes;
-			else base.SendToJobQueues(nodes, request);
-		}
+		//protected override void SendToJobQueues(List<Heartbeat> nodes, StartPeachRequest request)
+		//{
+		//    if (!__test_use_base_SeedTheJobQueues) __test_seeded_job_queues = nodes;
+		//    else base.SendToJobQueues(nodes, request);
+		//}
 
 		protected override void RemoveNode(Heartbeat heartbeat)
 		{

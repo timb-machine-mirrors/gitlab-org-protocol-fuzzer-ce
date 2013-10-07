@@ -21,7 +21,6 @@ namespace Godel.Core.OCL.Ast
 {
 	public abstract class LogicalExpressionNode : OclAstNode
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		AstNode _left = null;
 		AstNode _right = null;
 

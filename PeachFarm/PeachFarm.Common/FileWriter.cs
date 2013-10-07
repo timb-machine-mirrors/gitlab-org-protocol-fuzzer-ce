@@ -43,7 +43,6 @@ namespace PeachFarm.Common
     /// <param name="mongoDbConnectionString">Connection to MongoDB</param>
     /// <param name="destinationFolder">Where the jobs get stored</param>
     /// <param name="job">The job to write</param>
-    /// <param name="getZip">Create zip file</param>
     /// <returns>Returns zip file path if getZip is true, otherwise empty</returns>
     public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, Job job)
     {

@@ -18,8 +18,6 @@ namespace PeachFarm.Loggers
 		private Common.Mongo.Job mongoJob = null;
 		private Common.Mongo.Node mongoNode = null;
 
-		private static NLog.Logger nlog = NLog.LogManager.GetCurrentClassLogger();
-
 		public MongoLogger(Dictionary<string, Peach.Core.Variant> args)
 			:base(args)
 		{

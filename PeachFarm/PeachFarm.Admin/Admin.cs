@@ -19,8 +19,6 @@ namespace PeachFarm.Admin
 {
 	public class PeachFarmAdmin
 	{
-		private UTF8Encoding encoding = new UTF8Encoding();
-
 		Configuration.AdminSection config;
 
 		private string controllerQueueName;

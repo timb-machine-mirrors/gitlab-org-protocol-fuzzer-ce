@@ -35,11 +35,11 @@ namespace Peach.Enterprise.Language.DotNet.Generators
 {
 	public class MethodGenerator : ITypeGenerator
 	{
-		IContext _context;
-		IGroup _group;
-		MethodInfo _methodInfo;
-		object[] _args = null;
-		IGenerator _ctorGenerator;
+		IContext _context { set; get; }
+		IGroup _group { set; get; }
+		MethodInfo _methodInfo { set; get; }
+		object[] _args { set; get; }
+		IGenerator _ctorGenerator { set; get; }
 
 		Dictionary<ParameterInfo, IGenerator> _parameterGenerators = new Dictionary<ParameterInfo, IGenerator>();
 

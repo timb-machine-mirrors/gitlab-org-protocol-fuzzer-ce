@@ -57,6 +57,8 @@ namespace Godel.Core.OCL
 		/// Execute all invariant constraints
 		/// </summary>
 		/// <param name="self">Our self instance</param>
+		/// <param name="preSelf"></param>
+		/// <param name="context"></param>
 		/// <returns></returns>
 		public bool Inv(object self, object preSelf, object context = null)
 		{
@@ -77,6 +79,8 @@ namespace Godel.Core.OCL
 		/// Execute all pre constraints
 		/// </summary>
 		/// <param name="self"></param>
+		/// <param name="preSelf"></param>
+		/// <param name="context"></param>
 		/// <returns></returns>
 		public bool Pre(object self, object preSelf, object context = null)
 		{
@@ -97,6 +101,8 @@ namespace Godel.Core.OCL
 		/// Execute all post constraints
 		/// </summary>
 		/// <param name="self"></param>
+		/// <param name="preSelf"></param>
+		/// <param name="context"></param>
 		/// <returns></returns>
 		public bool Post(object self, object preSelf, object context = null)
 		{

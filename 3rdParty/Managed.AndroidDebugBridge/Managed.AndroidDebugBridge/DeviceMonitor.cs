@@ -21,11 +21,11 @@ namespace Managed.Adb {
 		/// <summary>
 		/// 
 		/// </summary>
-		private byte[] LengthBuffer = null;
+		private byte[] LengthBuffer { get; set; }
 		/// <summary>
 		/// 
 		/// </summary>
-		private byte[] LengthBuffer2 = null;
+		private byte[] LengthBuffer2 { get; set; }
 
 
 		/// <summary>

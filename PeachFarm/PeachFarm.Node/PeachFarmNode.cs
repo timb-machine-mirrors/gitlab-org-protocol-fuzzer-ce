@@ -19,7 +19,6 @@ namespace PeachFarm.Node
 {
 	public class PeachFarmNode
 	{
-		private static UTF8Encoding encoding = new UTF8Encoding();
  		private static System.Timers.Timer heartbeat;
 		private static NodeState nodeState;
 		private static Peach.Core.Engine peach;

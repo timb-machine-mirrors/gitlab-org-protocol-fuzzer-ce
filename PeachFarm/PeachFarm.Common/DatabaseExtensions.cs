@@ -136,7 +136,7 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 
 			var query = Query.EQ("JobID", jobid);
-			
+			System.Diagnostics.Debug.Assert(query != null);
 
 			collection.Database.Server.Disconnect();
 		}

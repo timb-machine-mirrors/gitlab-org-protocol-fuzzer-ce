@@ -45,6 +45,8 @@ namespace PeachHooker
 		public bool recv = false;
 		public bool send = false;
 
+		public string onlyfile { get; set; }
+
 		static void Main(string[] args)
 		{
 			Context = new Program();
@@ -70,7 +72,6 @@ namespace PeachHooker
 				string command = null;
 				string executable = null;
 				int TargetPid = -1;
-				string onlyfile = null;
 
 				var p = new OptionSet()
 				{

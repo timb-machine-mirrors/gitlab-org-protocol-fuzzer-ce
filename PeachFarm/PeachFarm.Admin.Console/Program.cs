@@ -33,7 +33,7 @@ namespace PeachFarm.Admin
 				bool output = false;
 				bool truncate = false;
 				bool report = false;
-				bool listen = false;
+				bool web = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -54,7 +54,7 @@ namespace PeachFarm.Admin
 						{ "output", v => output = true},
 						{ "truncate", v => truncate = true},
 						{ "report", v => report = true},
-						{ "listen", v => listen = true},
+						{ "web", v => web = true},
 
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
@@ -64,7 +64,7 @@ namespace PeachFarm.Admin
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report && !listen)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report && !web)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -226,13 +226,9 @@ namespace PeachFarm.Admin
 				#endregion
 
 				#region Listen
-				if (listen)
+				if (web)
 				{
-					//using (host = new ServiceHost(typeof(JsonRest)))
-					//{
-					//  host.AddDefaultEndpoints();
-					//  host.Open();
-					//}
+
 				}
 				#endregion
 #endif

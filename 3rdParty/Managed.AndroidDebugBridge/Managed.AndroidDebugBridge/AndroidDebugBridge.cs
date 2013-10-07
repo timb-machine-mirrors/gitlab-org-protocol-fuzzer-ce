@@ -660,10 +660,6 @@ namespace Managed.Adb {
 						String message = String.Format ( "Required minimum version of adb: {0}.{1}.{2}. Current version is {0}.{1}.{3}",
 										majorVersion, minorVersion, ADB_VERSION_MICRO_MIN, microVersion );
 						Log.LogAndDisplay ( LogLevel.Error, ADB, message );
-					} else if ( ADB_VERSION_MICRO_MAX != -1 && microVersion > ADB_VERSION_MICRO_MAX ) {
-						String message = String.Format ( "Required maximum version of adb: {0}.{1}.{2}. Current version is {0}.{1}.{3}", 
-										majorVersion, minorVersion, ADB_VERSION_MICRO_MAX, microVersion );
-						Log.LogAndDisplay ( LogLevel.Error, ADB, message );
 					} else {
 						VersionCheck = true;
 					}

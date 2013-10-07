@@ -105,7 +105,7 @@ run.
 
 			foreach (var file in Directory.EnumerateFiles(samplefolder))
 			{
-				var crackedModel = ProcessSample(file);
+				ProcessSample(file);
 			}
 
 			Connection.Close();

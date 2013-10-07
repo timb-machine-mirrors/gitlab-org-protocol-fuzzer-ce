@@ -138,7 +138,7 @@ namespace Peach.Enterprise.Language.DotNet.Generators
 	public class NumberGenerator : SystemTypesGenerator
 	{
 		int _position = 0;
-		Type _type;
+		Type _type { set; get; }
 
 		NumberGenerator(IContext context, IGroup group, Type type)
 		{
@@ -295,9 +295,9 @@ namespace Peach.Enterprise.Language.DotNet.Generators
 
 	public class ArrayGenerator : SystemTypesGenerator
 	{
-		IGenerator _elementGenerator;
-		Type _type;
-		object _array;
+		IGenerator _elementGenerator { set; get; }
+		Type _type { set; get; }
+		object _array { set; get; }
 
 		public ArrayGenerator(IContext context, IGroup group, Type type, object[] obj)
 			: base()

@@ -125,8 +125,8 @@ namespace Managed.Adb.Logs {
 			offset += 4;
 			entry.ThreadId = data.Swap32bitFromArray ( offset );
 			offset += 4;
-			var sec = data.Swap32bitFromArray ( offset );
-			
+			/*var sec =*/ data.Swap32bitFromArray ( offset );
+
 			offset += 4;
 			entry.NanoSeconds = data.Swap32bitFromArray ( offset );
 			offset += 4;

@@ -36,10 +36,10 @@ namespace Peach.Enterprise.Language.DotNet.Generators
 {
 	public class PropertyGenerator : Generators.Generator, ITypeGenerator
 	{
-		IContext _context;
-		Type _type;
-		PropertyInfo _info;
-		IGenerator _ctorGenerator;
+		IContext _context { set; get; }
+		Type _type { set; get; }
+		PropertyInfo _info { set; get; }
+		IGenerator _ctorGenerator { set; get; }
 
 		Dictionary<MethodInfo, IGenerator> _methodGenerators = new Dictionary<MethodInfo, IGenerator>(2);
 

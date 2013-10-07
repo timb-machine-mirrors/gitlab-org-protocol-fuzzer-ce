@@ -12,7 +12,7 @@ namespace PitMaker.ViewModels
   {
     TestIncludesExcludesAssociation tiea = null;
     TestPublishersAssociation tpa = null;
-    TestLoggersAssociation tla = null;
+    //TestLoggersAssociation tla = null;
 
     public TestViewModel(Test model, ViewModelBase parent)
       :base(model, parent)

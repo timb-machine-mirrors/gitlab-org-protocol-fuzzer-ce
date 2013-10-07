@@ -22,7 +22,6 @@ namespace Managed.Adb.IO {
 		/// <param name="height">The height.</param>
 		/// <returns></returns>
 		public static Image ToImage( PixelFormat format, byte[] data, int width, int height ) {
-			int pixels = data.Length / 2;
 			Bitmap bitmap = null;
 			Bitmap image = null;
 			BitmapData bitmapdata = null;

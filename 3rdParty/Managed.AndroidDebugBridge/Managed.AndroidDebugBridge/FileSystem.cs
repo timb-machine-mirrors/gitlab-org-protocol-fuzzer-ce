@@ -245,6 +245,7 @@ namespace Managed.Adb {
 
 			CommandErrorReceiver cer = new CommandErrorReceiver ( );
 			FileEntry entry = Device.FileListingService.FindFileEntry ( path );
+			System.Diagnostics.Debug.Assert(cer != null);
 
 			Delete ( entry );
 		}

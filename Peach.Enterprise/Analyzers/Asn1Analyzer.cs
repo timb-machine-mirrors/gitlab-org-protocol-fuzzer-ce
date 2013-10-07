@@ -71,7 +71,7 @@ namespace Peach.Enterprise.Analyzers
 		#region Asn1Node
 
 		/// <summary>
-		/// Helper class for parsing the Identifier & Length from a stream
+		/// Helper class for parsing the Identifier &amp; Length from a stream
 		/// </summary>
 		class Asn1Node
 		{

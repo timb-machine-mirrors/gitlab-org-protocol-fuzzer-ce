@@ -12,7 +12,6 @@ namespace PeachFarm.Reporting.Reports
 		private void InitializeComponent()
 		{
 			Telerik.Reporting.NavigateToUrlAction navigateToUrlAction1 = new Telerik.Reporting.NavigateToUrlAction();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(JobDetailReport));
 			Telerik.Reporting.TableGroup tableGroup3 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup4 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup1 = new Telerik.Reporting.TableGroup();
