@@ -6,6 +6,7 @@ import argparse
 import shutil
 import platform
 import traceback
+import subprocess
 
 sys.path.append(os.path.join('.', '_Testing'))
 import dependency
@@ -40,26 +41,47 @@ def find_peach():
         return "peach"
     # split the current path by othe os seperator and jump to top of build dir
     _path = os.getcwd().split(os.sep)
-    _epeach_idx = _path.index('epeach')
-    _path = _path[ : _epeach_idx + 1]
-    # piece together the path to the peach.exe we want
-    # if it's not windows, assume linux for time being
-    # also assuming x86 or x86_64 right now, no ARM
-    which_build = ''
+    # this index _could_ turn into a bug over long run. nothing better a.t.m.
+    _test_build_idx = _path.index('v3.0')
+    _path = _path[ : _test_build_idx + 1]
+    # figure out which epeach we want, it should be under the 'v3.0' directory
+    # debug has better info
+    ls = os.listdir(os.sep.join(_path))
+    peach_dir = ''
     if IS_WINDOWS:
-        which_build += 'win_x'
-        which_build += '64' if IS_64_BIT else '86'
+        for f in ls:
+            if 'win' not in f                : continue
+            elif not f.startswith('epeach-') : continue
+            elif not f.endswith('-debug')    : continue
+            elif IS_64_BIT and 'x64' not in f: continue
+            elif not IS_64_BIT and 'x64' in f: continue
+            else                             : peach_dir = f
     elif IS_LINUX:
-        which_build += 'linux_x86' #darwin?
-        which_build += '_64' if IS_64_BIT else ''
+        for f in ls:
+            if 'linux' not in f              : continue
+            elif not f.startswith('epeach-') : continue
+            elif not f.endswith('-debug')    : continue
+            elif IS_64_BIT and '_64' not in f: continue
+            elif not IS_64_BIT and '_64' in f: continue
+            else                            : peach_dir = f
     elif IS_OSX:
-        which_build += 'osx'
+        for f in ls:
+            if 'osx' not in f               : continue
+            elif not f.startswith('epeach-'): continue
+            elif not f.endswith('-debug')   : continue
+            else                            : peach_dir = f
     else:
         assert False, "Unknown os"
-    # debug has better info
-    which_build += '_debug'
-    _path.extend([which_build, 'build', 'output', which_build, 'bin', 'peach.exe'])
+    if peach_dir == '':
+	raise Exception('no peach dir found')
+    _path.extend([peach_dir, 'peach.exe'])
     PEACH_PATH = os.sep.join(_path)
+
+    # make sure peach.exe is actully executable on *nix after extraction
+    # this isn't the greatest place for it but hey
+    if IS_OSX or IS_LINUX:
+        p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+
     return PEACH_PATH
 
 
@@ -145,7 +167,8 @@ if __name__ == "__main__":
                 test.status = "except"
                 test.clean_up()
             if test.status == "pass":
-                print test.color_text("green", "SUCCESS!")
+                # print test.color_text("green", "SUCCESS!")
+                pass
             elif test.status == "skip":
                 print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
             elif test.status == "fail" or test.status == "except":
