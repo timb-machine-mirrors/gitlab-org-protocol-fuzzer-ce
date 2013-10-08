@@ -9,6 +9,8 @@ from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
 
+IS_INTERACTIVE = sys.stdout.isatty()
+
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path": "."}
@@ -121,7 +123,8 @@ class PeachTest:
             self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
-        print "running %s" % self.cmd
+        if IS_INTERACTIVE:
+            print "running %s" % self.cmd
         if get_platform() == 'win':
             output = sys.stdout
         else:
