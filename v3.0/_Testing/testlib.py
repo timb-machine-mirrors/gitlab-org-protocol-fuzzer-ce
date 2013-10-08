@@ -129,14 +129,14 @@ class PeachTest:
             output = sys.stdout
         else:
             output = PIPE
-        temp_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
+        self.output_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
         timeout_counter = 0
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
-        os.mkdir(temp_dir)
+        if os.path.exists(self.output_dir):
+            shutil.rmtree(self.output_dir)
+        os.mkdir(self.output_dir)
         # execution should live inside of a 'with'
-        sout = open(os.path.join(temp_dir, 'sout'), 'w+')
-        serr = open(os.path.join(temp_dir, 'serr'), 'w+')
+        sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
+        serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
         self.proc = Popen(self.args, stdout=sout, stderr=serr, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\

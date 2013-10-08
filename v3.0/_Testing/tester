@@ -173,6 +173,11 @@ if __name__ == "__main__":
                 print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
             elif test.status == "fail" or test.status == "except":
                 print "...and it " + test.color_text("red", "FAILED!")
+                with open(os.path.join(test.output_dir, 'sout')) as f:
+                    for line in f: print line
+                with open(os.path.join(test.output_dir, 'serr')) as f:
+                    for line in f: print line
+                print ''
             elif test.status == "timeout":
                 print "...and it " + test.color_text("yellow", "TIMEDOUT!")
             else:
