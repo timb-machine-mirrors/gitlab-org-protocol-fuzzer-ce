@@ -42,7 +42,7 @@ def find_peach():
     # split the current path by othe os seperator and jump to top of build dir
     _path = os.getcwd().split(os.sep)
     # this index _could_ turn into a bug over long run. nothing better a.t.m.
-    _test_build_idx = _path.index('v3.0')
+    _test_build_idx = _path.index('build')
     _path = _path[ : _test_build_idx + 1]
     # figure out which epeach we want, it should be under the 'v3.0' directory
     # debug has better info
@@ -166,12 +166,15 @@ if __name__ == "__main__":
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
                 test.clean_up()
-            if test.status == "pass":
-                # print test.color_text("green", "SUCCESS!")
+            if   test.status == "pass" and     IS_INTERACTIVE:
+                print "Ran: ", test.args
+                print test.color_text("green", "SUCCESS!")
+            elif test.status == "pass" and not IS_INTERACTIVE:
                 pass
             elif test.status == "skip":
                 print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
             elif test.status == "fail" or test.status == "except":
+                print "Ran: ", test.args
                 print "...and it " + test.color_text("red", "FAILED!")
                 with open(os.path.join(test.output_dir, 'sout')) as f:
                     for line in f: print line
