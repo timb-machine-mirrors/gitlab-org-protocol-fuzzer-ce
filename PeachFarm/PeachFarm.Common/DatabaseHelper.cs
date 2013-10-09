@@ -44,111 +44,28 @@ namespace PeachFarm.Common.Mongo
 
 		public static void CreateCollections(MongoServer server)
 		{
-			CreateJobsCollection(server);
-			CreateJobNodesCollection(server);
-			CreateNodesCollection(server);
-			CreateFaultsCollection(server);
-			CreateErrorsCollection(server);
-		}
-
-		public static void CreateCollection(MongoServer server, string collectionName)
-		{
-			switch (collectionName)
+			foreach (var kvp in collections)
 			{
-				case MongoNames.Faults:
-					CreateFaultsCollection(server);
-					break;
-				case MongoNames.JobNodes:
-					CreateJobNodesCollection(server);
-					break;
-				case MongoNames.Jobs:
-					CreateJobsCollection(server);
-					break;
-				case MongoNames.PeachFarmErrors:
-					CreateErrorsCollection(server);
-					break;
-				case MongoNames.PeachFarmNodes:
-					CreateNodesCollection(server);
-					break;
-				default:
-					throw new ApplicationException("Collection name unknown: " + collectionName);
+				MongoDatabase db = server.GetDatabase(MongoNames.Database);
+
+				MongoCollection<Job> collection;
+				if (!db.CollectionExists(kvp.Key))
+				{
+					db.CreateCollection(kvp.Key);
+					collection = db.GetCollection<Job>(kvp.Key);
+					collection.CreateIndex(kvp.Value.ToArray());
+				}
 			}
 		}
 
-		public static void CreateJobsCollection(MongoServer server)
+		private static Dictionary<string, string[]> collections = new Dictionary<string, string[]>()
 		{
-			string collectionname = MongoNames.Jobs;
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection;
-			if (!db.CollectionExists(collectionname))
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID" });
-			}
-
-		}
-
-		public static void CreateJobNodesCollection(MongoServer server)
-		{
-			string collectionname = MongoNames.JobNodes;
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection;
-			if (!db.CollectionExists(collectionname))
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID", "Name" });
-			}
-
-		}
-
-		public static void CreateFaultsCollection(MongoServer server)
-		{
-			string collectionname = MongoNames.Faults;
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection;
-			if (!db.CollectionExists(collectionname))
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID", "NodeName" });
-				collection.CreateIndex(new string[] { "Group" });
-			}
-		}
-
-		public static void CreateErrorsCollection(MongoServer server)
-		{
-			string collectionname = MongoNames.PeachFarmErrors;
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection;
-			if (!db.CollectionExists(collectionname))
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "JobID" });
-				collection.CreateIndex(new string[] { "NodeName" });
-			}
-		}
-
-
-		public static void CreateNodesCollection(MongoServer server)
-		{
-			string collectionname = MongoNames.PeachFarmNodes;
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-
-			MongoCollection<Job> collection;
-			if (!db.CollectionExists(collectionname))
-			{
-				db.CreateCollection(collectionname);
-				collection = db.GetCollection<Job>(collectionname);
-				collection.CreateIndex(new string[] { "NodeName" });
-			}
-		}
+			{MongoNames.Faults, new string[3]{"JobID", "NodeName", "Group"}},
+			{MongoNames.JobNodes, new string[2]{"JobID", "Name"}},
+			{MongoNames.Jobs, new string[1]{"JobID"}},
+			{MongoNames.PeachFarmErrors, new string[2]{"JobID","NodeName"}},
+			{MongoNames.PeachFarmNodes, new string[1]{"NodeName"}}
+		};
 
 		public static Job GetJob(string jobGuid, string connectionString)
 		{
@@ -209,7 +126,7 @@ namespace PeachFarm.Common.Mongo
 
 				if (db.CollectionExists(collectionname) == false)
 				{
-					CreateCollection(server, collectionname);
+					CreateCollections(server);
 				}
 
 				collection = db.GetCollection<T>(collectionname);
