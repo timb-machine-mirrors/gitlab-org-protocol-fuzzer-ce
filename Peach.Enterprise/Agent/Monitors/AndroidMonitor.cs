@@ -47,6 +47,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
+			// doesn't actually work with an unrooted device.
 			ParameterParser.Parse(this, args);
 			AndroidBridge.SetAdbPath(AdbPath);
 			_creciever = new ConsoleOutputReceiver();
@@ -266,10 +267,13 @@ namespace Peach.Enterprise.Agent.Monitors
 			// STEP 1: Get 1st Screenshot
 			try
 			{
-				logger.Debug("Taking screenshot");
 				// this can fail, add exception handling
+				//Image img = _dev.Screenshot; // this is the faster way to do it, but we need a way to convert to an image in mono...
+				//_dev.Screenshot.ToImage().Save("test.bmp");
+
 				_dev.ExecuteShellCommand("screencap -p", _breciever);
 				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(_breciever.Result)));
+				_breciever.Flush();
 			}
 			catch (Exception ex)
 			{
@@ -339,6 +343,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				// also, this can fail, add exception handling
 				_dev.ExecuteShellCommand("screencap -p", _breciever);
 				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(_breciever.Result)));
+				_breciever.Flush();
 			}
 			catch (Exception ex)
 			{
