@@ -19,7 +19,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
-	
+
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -33,6 +33,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private bool _muststop = false;
 		private ConsoleOutputReceiver _creciever = null;
 		private CommandResultReceiver _cmdreciever = null;
+		CommandResultBinaryReceiver _breciever = null;
 
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
@@ -47,9 +48,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			: base(agent, name, args)
 		{
 			ParameterParser.Parse(this, args);
+			AndroidBridge.SetAdbPath(AdbPath);
 			_creciever = new ConsoleOutputReceiver();
 			_cmdreciever = new CommandResultReceiver();
-			AndroidBridge.SetAdbPath(AdbPath);
+			_breciever = new CommandResultBinaryReceiver();
 		}
 
 
@@ -102,6 +104,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		private bool devRestarted()
 		{
+			// what? This doesn't do what it says it does....
 			bool restarted = false;
 			int i = 0;
 			while (i < _retries)
@@ -188,7 +191,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			return _fault.type == FaultType.Fault;
 		}
-		
+
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			// needs to check if the system is booted and unlocked
@@ -197,7 +200,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				restart = true;
 			}
-			
+
 			_fault = null;
 
 			if (restart)
@@ -235,12 +238,10 @@ namespace Peach.Enterprise.Agent.Monitors
 				_fault.title = "Response";
 				_fault.description = _cmdreciever.Result;
 
-				// Filter out lines that look like:
-				// --------- beginning of /dev/log/main
-				
-
-				if (!string.IsNullOrEmpty(_cmdreciever.Result))
+				if (!string.IsNullOrEmpty(_fault.description))
 				{
+					// Filter out lines that look like:
+					// --------- beginning of /dev/log/main
 					var filtered = logFilter.Replace(_fault.description, "");
 					if (!string.IsNullOrEmpty(filtered))
 						_fault.type = FaultType.Fault;
@@ -250,7 +251,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				throw new SoftException(ex.ToString());
 			}
-			return true; 
+			return true;
 		}
 
 		public override void StopMonitor()
@@ -260,15 +261,15 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-			CommandResultBinaryReceiver breciever = null;
+
 
 			// STEP 1: Get 1st Screenshot
 			try
 			{
-				breciever = new CommandResultBinaryReceiver();
-				// also, this can fail, add exception handling
-				_dev.ExecuteShellCommand("screencap -p", breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+				logger.Debug("Taking screenshot");
+				// this can fail, add exception handling
+				_dev.ExecuteShellCommand("screencap -p", _breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(_breciever.Result)));
 			}
 			catch (Exception ex)
 			{
@@ -277,6 +278,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			// STEP 2: Wait for boot if system crashed.
 			// Make sure the device is ready
+			logger.Debug("Checking for restart");
 			bool restarted = false;
 			try
 			{
@@ -295,7 +297,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			// STEP 3: Grab Tomb
 			try
 			{
-
+				logger.Debug("Getting tombstones");
 				foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 				{
 					// also, this can fail, add exception handling
@@ -330,14 +332,13 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				logger.Warn(ex.Message);
 			}
-
+			logger.Debug("Taking screenshots");
 			// STEP 4: Get 2nd ScreenShot
 			try
 			{
-				breciever = new CommandResultBinaryReceiver();
 				// also, this can fail, add exception handling
-				_dev.ExecuteShellCommand("screencap -p", breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+				_dev.ExecuteShellCommand("screencap -p", _breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(_breciever.Result)));
 			}
 			catch (Exception ex)
 			{
