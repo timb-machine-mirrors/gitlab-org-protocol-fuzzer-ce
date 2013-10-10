@@ -115,7 +115,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				}
 			}
 			else
-				throw new PeachException("Shell command `{}` had no output".format(cmd));
+				throw new PeachException("Shell command `" + cmd +"` had no output");
 		}
 
 
