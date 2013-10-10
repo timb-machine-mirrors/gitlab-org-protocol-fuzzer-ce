@@ -36,9 +36,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		private bool _muststop = false;
 		private ConsoleOutputReceiver _creciever = null;
 		private CommandResultReceiver _cmdreciever = null;
-		CommandResultBinaryReceiver _breciever = null;
-
-		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
 		public string ApplicationName { get; private set; }
 		public string AdbPath { get; private set; }
@@ -55,7 +52,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			AndroidBridge.SetAdbPath(AdbPath);
 			_creciever = new ConsoleOutputReceiver();
 			_cmdreciever = new CommandResultReceiver();
-			_breciever = new CommandResultBinaryReceiver();
 		}
 
 
@@ -101,8 +97,25 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				cmd = cmd + "/" + ActivityName;
 			}
-			// this can fail, add exception handling
-			_dev.ExecuteShellCommand(cmd, _creciever);
+			// this can fail, add exception handling.
+			// ways it could fail
+			// 1. no device
+			// 2. adb not there
+			// ..
+			_dev.ExecuteShellCommand(cmd, _cmdreciever);
+			if (!string.IsNullOrEmpty(_cmdreciever.Result))
+			{
+				if (!amProcessSuccess.Match(_cmdreciever.Result).Success)
+				{
+					Match m = amProcessFailure.Match(_cmdreciever.Result);
+					if (m.Success)
+						throw new PeachException("Activity Manager failed to start application: \n" + m);
+					else
+						throw new PeachException("Peach failed to parse response output of Activity manager: \n" + _cmdreciever.Result);
+				}
+			}
+			else
+				throw new PeachException("Shell command `{}` had no output".format(cmd));
 		}
 
 
@@ -221,10 +234,11 @@ namespace Peach.Enterprise.Agent.Monitors
 					restartAdb();
 					throw new SoftException(ex);
 				}
-				catch (Exception ex)
-				{
-					throw new SoftException("Unable to Restart Android Application:\n" + ex);
-				}
+				// We don't want to just swollow exceptions 
+				// catch (Exception ex)
+				// {
+				// 	throw new SoftException("Unable to Restart Android Application:\n" + ex);
+				// }
 			}
 			if (_dev.CanSU())
 				CleanTombs();
@@ -269,7 +283,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-
+			CommandResultBinaryReceiver breciever = new CommandResultBinaryReceiver();;
 
 			// STEP 1: Get 1st Screenshot
 			try
@@ -278,9 +292,9 @@ namespace Peach.Enterprise.Agent.Monitors
 				//Image img = _dev.Screenshot; // this is the faster way to do it, but we need a way to convert to an image in mono...
 				//_dev.Screenshot.ToImage().Save("test.bmp");
 
-				_dev.ExecuteShellCommand("screencap -p", _breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(_breciever.Result)));
-				_breciever.Flush();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
+				breciever.Flush();
 			}
 			catch (Exception ex)
 			{
@@ -348,9 +362,9 @@ namespace Peach.Enterprise.Agent.Monitors
 			try
 			{
 				// also, this can fail, add exception handling
-				_dev.ExecuteShellCommand("screencap -p", _breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(_breciever.Result)));
-				_breciever.Flush();
+				_dev.ExecuteShellCommand("screencap -p", breciever);
+				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
+				breciever.Flush();
 			}
 			catch (Exception ex)
 			{
