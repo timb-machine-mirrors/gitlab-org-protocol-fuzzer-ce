@@ -91,7 +91,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 		}
 
-		private void restartApp()
+		private void StartApp()
 		{
 			string cmd = "am start -W -S -n " + ApplicationName;
 			if (!string.IsNullOrEmpty(ActivityName))
@@ -171,16 +171,19 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void SessionStarting()
 		{
 			_dev = AndroidBridge.GetDevice(DeviceSerial);
-			var path = "/data/tombstones/";
-			_tombs = FileEntry.FindOrCreate(_dev, path);
+			if (_dev.CanSU())
+			{
+				var path = "/data/tombstones/";
+				_tombs = FileEntry.FindOrCreate(_dev, path);
+				if (!_tombs.IsDirectory)
+					throw new PeachException("Tomb path " + _tombs + " could not be found or created");
+				CleanTombs();
+			}
 			// file creation can silently fail
-			if (!_tombs.IsDirectory)
-				throw new PeachException("Tomb path " + _tombs + " could not be found or created");
-			CleanTombs();
 			CleanLogs();
 			if (!RestartEveryIteration)
 			{
-				restartApp();
+				StartApp();
 			}
 		}
 
@@ -208,7 +211,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				try
 				{
-					restartApp();
+					StartApp();
 				}
 				catch (Managed.Adb.Exceptions.DeviceNotFoundException ex)
 				{
@@ -219,9 +222,10 @@ namespace Peach.Enterprise.Agent.Monitors
 				{
 					throw new SoftException("Unable to Restart Android Application:\n" + ex);
 				}
-			CleanTombs();
-			CleanLogs();
 			}
+			if (_dev.CanSU())
+				CleanTombs();
+			CleanLogs();
 		}
 
 		public override bool IterationFinished()
