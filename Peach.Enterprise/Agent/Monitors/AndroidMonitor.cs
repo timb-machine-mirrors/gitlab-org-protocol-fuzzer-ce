@@ -47,7 +47,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
-			// doesn't actually work with an unrooted device.
 			ParameterParser.Parse(this, args);
 			AndroidBridge.SetAdbPath(AdbPath);
 			_creciever = new ConsoleOutputReceiver();

@@ -51,6 +51,17 @@ namespace Peach.Enterprise.Publishers
 					logger.Debug("Executing \"tap\" command " + _cmd );
 					_dev.ExecuteShellCommand(_cmd,  _creciever);
 				}
+				else if (method.Equals("exec"))
+				{
+					if (args.Count != 1)
+						throw new SoftException("Invalid Pit, 'exec' method takes one DataModel as an argument.");
+					var bs = args[0].dataModel[0].Value;
+					bs.Seek(0, SeekOrigin.Begin);
+					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
+					_cmd = val;
+					logger.Debug("Executing command " + _cmd );
+					_dev.ExecuteShellCommand(_cmd,  _creciever);
+				}
 
 				else if (method.Equals("keyevent"))
 				{
@@ -66,7 +77,7 @@ namespace Peach.Enterprise.Publishers
 					var bs = args[0].dataModel[0].Value;
 					bs.Seek(0, SeekOrigin.Begin);
 					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
-
+					// this is definitely not escaped
 					var escaped = val.Replace("\"", "\\\"");
 					_cmd = "input text \"" + escaped + "\"";
 					logger.Debug("Sending text with command " + _cmd);
