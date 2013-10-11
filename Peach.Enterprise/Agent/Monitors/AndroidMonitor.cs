@@ -321,29 +321,32 @@ namespace Peach.Enterprise.Agent.Monitors
 			// STEP 3: Grab Tomb
 			try
 			{
-				logger.Debug("Getting tombstones");
-				foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
+				if (_dev.CanSU())
 				{
-					// also, this can fail, add exception handling
-					_dev.ExecuteShellCommand("cat " + tomb.FullPath, _cmdreciever);
-					string tombstr = _cmdreciever.Result;
+					logger.Debug("Getting tombstones");
+					foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
+					{
+						// also, this can fail, add exception handling
+						_dev.ExecuteShellCommand("cat " + tomb.FullPath, _cmdreciever);
+						string tombstr = _cmdreciever.Result;
 
-					var hash = reHash.Match(tombstr);
-					if (hash.Success)
-					{
-						// TODO not real major minor hashes
-						// Also these wont bucket when from a linux and windows node
-						// Since it will have different newlines and thus different hashcodes
-						_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
-						_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
-					}
-					_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
-					// TODO: this might be ok, since a core dump implies it was a native crash
-					// And native crashes are the only crashes that need to physically dismiss the message
-					if (!restarted)
-					{
-						Thread.Sleep(1000);
-						CleanUI("dismiss");
+						var hash = reHash.Match(tombstr);
+						if (hash.Success)
+						{
+							// TODO not real major minor hashes
+							// Also these wont bucket when from a linux and windows node
+							// Since it will have different newlines and thus different hashcodes
+							_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
+							_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
+						}
+						_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
+						// TODO: this might be ok, since a core dump implies it was a native crash
+						// And native crashes are the only crashes that need to physically dismiss the message
+						if (!restarted)
+						{
+							Thread.Sleep(1000);
+							CleanUI("dismiss");
+						}
 					}
 				}
 				// This should happen on each iteration start, not after we
