@@ -19,6 +19,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
+	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations (defaults to false)", "false")]
 
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
@@ -28,6 +29,12 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 		private Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
 		private Regex amProcessFailure = new Regex(@".*\Error: (.*?)\r?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
+
+		private Regex pmProcessSuccess = new Regex(@"^Success$\r?\n?");
+		private Regex pmProcessFailure = new Regex(@"^Failed$\r?\n?");
+
+		// private Regex bmgrProcessSuccess = new Regex(@"^Wiped backup data for .*\r?\n?");
+		// private Regex bmgrProcessFailure = new Regex(@"^Failed$\r?\n?");
 
 		private Fault _fault = null;
 		private Device _dev = null;
@@ -43,6 +50,9 @@ namespace Peach.Enterprise.Agent.Monitors
 		public string DeviceSerial { get; set; }
 		public bool RestartEveryIteration { get; private set; }
 		public bool RestartAfterFault { get; private set; }
+		public bool ClearAppDataOnFault { get; private set; }
+
+
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -214,11 +224,52 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			// needs to check if the system is booted and unlocked
+			bool fault = _fault.type == FaultType.Fault;
 			bool restart = false;
-			if (RestartEveryIteration || (_fault != null && _fault.type == FaultType.Fault && RestartAfterFault))
+			string cmd = "pm clear " + ApplicationName;
+			if (RestartEveryIteration || (_fault != null && fault && RestartAfterFault))
 			{
 				restart = true;
 			}
+
+			if (fault && ClearAppDataOnFault)
+			{
+
+				_dev.ExecuteShellCommand(cmd, _cmdreciever);
+				// this needs to get turned in to a method....
+				// ExecCheckReturn(cmd, fail_re, success_re)
+				if (!string.IsNullOrEmpty(_cmdreciever.Result))
+				{
+					if (!pmProcessSuccess.Match(_cmdreciever.Result).Success)
+					{
+						Match m = pmProcessFailure.Match(_cmdreciever.Result);
+						if (m.Success)
+							throw new PeachException("Package Manager failed to clear cache: \n" + m);
+						else
+							throw new PeachException("Peach failed to parse response output of Package Manager while trying to clear cache: \n" + _cmdreciever.Result);
+					}
+				}
+				else
+					throw new PeachException("Shell command `" + cmd +"` had no output");
+
+				cmd = "bmgr wipe " + ApplicationName;
+				_dev.ExecuteShellCommand(cmd, _cmdreciever);
+				if (!string.IsNullOrEmpty(_cmdreciever.Result))
+				{
+					// if (!pmProcessSuccess.Match(_cmdreciever.Result).Success)
+					// {
+					//	// need to put in fail check here.
+					// //		Match m = amProcessFailure.Match(_cmdreciever.Result);
+					// //		if (m.Success)
+					// //			throw new PeachException("Backup Manager failed to clear data: \n" + m);
+					// //		else
+					// //			throw new PeachException("Peach failed to parse response output of Package Manager while trying to clear cache: \n" + _cmdreciever.Result);
+					// // }
+				}
+				else
+					throw new PeachException("Shell command `" + cmd +"` had no output");
+
+				}
 
 			_fault = null;
 
