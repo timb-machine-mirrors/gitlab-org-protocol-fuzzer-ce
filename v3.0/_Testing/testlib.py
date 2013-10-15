@@ -9,6 +9,8 @@ from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
 
+IS_INTERACTIVE = sys.stdout.isatty()
+
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path": "."}
@@ -121,19 +123,20 @@ class PeachTest:
             self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
-        print "running %s" % self.cmd
+        if IS_INTERACTIVE:
+            print "running %s" % self.cmd
         if get_platform() == 'win':
             output = sys.stdout
         else:
             output = PIPE
-        temp_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
+        self.output_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
         timeout_counter = 0
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
-        os.mkdir(temp_dir)
+        if os.path.exists(self.output_dir):
+            shutil.rmtree(self.output_dir)
+        os.mkdir(self.output_dir)
         # execution should live inside of a 'with'
-        sout = open(os.path.join(temp_dir, 'sout'), 'w+')
-        serr = open(os.path.join(temp_dir, 'serr'), 'w+')
+        sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
+        serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
         self.proc = Popen(self.args, stdout=sout, stderr=serr, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
@@ -192,6 +195,8 @@ class PeachTest:
         output.close()
 
     def clean_up(self):
+        if "proc" in self.__dict__ and self.proc.poll():
+            self.proc.terminate()
         if "stderr" in self.__dict__:
             del(self.stderr)
         if "stdout" in self.__dict__:
