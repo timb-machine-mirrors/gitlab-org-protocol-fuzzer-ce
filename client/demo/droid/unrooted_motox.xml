@@ -65,9 +65,57 @@
 		</Monitor>
 	</Agent>
 
-	<Test name="Default">
+	<Agent name="RebootOnFault">
+		<Monitor class="Android">
+			<Param name="ApplicationName" value="com.android.chrome" />
+			<Param name="ActivityName" value=".Main" />
+			<Param name="DeviceSerial" value="##Serial##" />
+		</Monitor>
+
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="ssh" />
+			<Param name="Arguments" value="##PushPowerButton##" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="sleep"/>
+			<Param name="Arguments" value="10" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="adb"/>
+			<Param name="Arguments" value="-s ##Serial## shell input tap 240 380" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="adb"/>
+			<Param name="Arguments" value="-s ##Serial## shell input tap 400 550" />
+		</Monitor>
+		<Monitor class="FaultingMonitor">
+			<Param name="FaultAlways" value="true" />
+		</Monitor>
+	</Agent>
+
+	<Test name="Default" controlIteration="1">
 		<StateModel ref="BrowserState"/>
 		<Agent ref="Default" />
+
+		<!--Publisher class="Null" /-->
+		<Publisher class="AndroidMonkey">
+			<Param name="Target" value="com.android.chrome" />
+			<Param name="DeviceSerial" value="##Serial##" />
+			<Param name="NumActions" value="20" />
+			<Param name="Sleep" value="0" />
+		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+	<Test name="WithReboot" controlIteration="1">
+		<StateModel ref="BrowserState"/>
+		<Agent ref="RebootOnFault" />
 
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
