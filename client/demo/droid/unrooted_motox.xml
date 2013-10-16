@@ -87,14 +87,8 @@
 			<Param name="Command" value="adb"/>
 			<Param name="Arguments" value="-s ##Serial## shell input tap 400 550" />
 		</Monitor>
-		<Monitor class="RunCommand">
-			<Param name="When" value="OnFault" />
-			<Param name="Command" value="sleep"/>
-			<Param name="Arguments" value="10" />
-		</Monitor>
-		<Monitor class="FaultingMonitor">
-			<Param name="FaultAlways" value="true" />
-		</Monitor>
+		<!-- <Monitor class="FaultingMonitor"> -->
+		<!-- </Monitor> -->
 	</Agent>
 
 	<Test name="Default" controlIteration="1">
@@ -113,7 +107,7 @@
 		</Logger>
 	</Test>
 
-	<Test name="WithReboot" controlIteration="1">
+	<Test name="WithReboot" controlIteration="1"> <!-- We're seeing the cache corrupted at some point, control iters will detect this -->
 		<StateModel ref="BrowserState"/>
 		<Agent ref="RebootOnFault" />
 
