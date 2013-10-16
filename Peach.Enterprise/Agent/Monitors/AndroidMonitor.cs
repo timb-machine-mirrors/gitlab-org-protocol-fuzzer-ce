@@ -300,12 +300,40 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _fault != null && _fault.type == FaultType.Fault;
+			_fault = null;
+			try
+			{
+				string response = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
+
+
+				if (!string.IsNullOrEmpty(response))
+				{
+					// Filter out lines that look like:
+					// --------- beginning of /dev/log/main
+					var filtered = logFilter.Replace(response, "");
+					if (!string.IsNullOrEmpty(filtered))
+					{
+						logger.Debug("Fault detected, logcat returned after regex: " + filtered);
+						_fault = new Fault();
+						_fault.type = FaultType.Fault;
+						_fault.detectionSource = "AndroidMonitor";
+						_fault.exploitability = "Unknown";
+						_fault.title = "Response";
+						_fault.description = filtered;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex.ToString());
+			}
+			return _fault != null; // && _fault.type == FaultType.Fault;
 		}
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			// needs to check if the system is booted
+			logger.Debug("Making sure the device is alive...");
 			SafeExec("echo hello android..."); // if this works, the system is booted. I'd like a better check
 			bool fault = _fault != null && (_fault.type == FaultType.Fault);
 			bool restart = false;
@@ -346,36 +374,6 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool IterationFinished()
 		{
-			logger.Debug(">> IterationFinished");
-			_fault = null;
-			
-			try
-			{
-				string response = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
-
-
-				if (!string.IsNullOrEmpty(response))
-				{
-					// Filter out lines that look like:
-					// --------- beginning of /dev/log/main
-					var filtered = logFilter.Replace(response, "");
-					if (!string.IsNullOrEmpty(filtered))
-					{
-						_fault = new Fault();
-						_fault.type = FaultType.Fault;
-						_fault.detectionSource = "AndroidMonitor";
-						_fault.exploitability = "Unknown";
-						_fault.title = "Response";
-						_fault.description = filtered;
-
-						logger.Debug("logcat returned after regex: " + filtered);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new SoftException(ex.ToString());
-			}
 			return true;
 		}
 
@@ -386,7 +384,8 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-
+			if (_fault == null)
+				_fault = new Fault();
 
 			// STEP 1: Get 1st Screenshot
 			try
