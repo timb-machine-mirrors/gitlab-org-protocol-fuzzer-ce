@@ -95,7 +95,9 @@ class PeachTest:
 
     def build_cmd(self):
         #lets store args in self so args can be analyzed for each test
-        self.args = [self.peach]
+        if get_platform() == 'osx':
+            self.args.append('mono')
+        self.args.append(self.peach)
         opts = copy(self.base_opts)
         if self.extra_opts:
             opts.extend(self.extra_opts)
