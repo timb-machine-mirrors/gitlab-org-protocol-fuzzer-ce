@@ -79,11 +79,6 @@
 		</Monitor>
 		<Monitor class="RunCommand">
 			<Param name="When" value="OnFault" />
-			<Param name="Command" value="sleep"/>
-			<Param name="Arguments" value="10" />
-		</Monitor>
-		<Monitor class="RunCommand">
-			<Param name="When" value="OnFault" />
 			<Param name="Command" value="adb"/>
 			<Param name="Arguments" value="-s ##Serial## shell input tap 240 380" />
 		</Monitor>
@@ -91,6 +86,11 @@
 			<Param name="When" value="OnFault" />
 			<Param name="Command" value="adb"/>
 			<Param name="Arguments" value="-s ##Serial## shell input tap 400 550" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="sleep"/>
+			<Param name="Arguments" value="10" />
 		</Monitor>
 		<Monitor class="FaultingMonitor">
 			<Param name="FaultAlways" value="true" />
