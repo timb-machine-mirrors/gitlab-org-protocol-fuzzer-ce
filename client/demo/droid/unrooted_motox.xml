@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+
+	<DataModel name="X">
+		<Number size="10" mutable="false" value="75" />
+	</DataModel>
+
+	<DataModel name="Y">
+		<Number size="10" mutable="false" value="75" />
+	</DataModel>
+
+	<DataModel name="Enter">
+		<Number size="16" mutable="false" value="66" />
+	</DataModel>
+
+	<DataModel name="Url">
+		<String value="http://google.com/m?hl=en&amp;source=android-browser-type&amp;q=foo">
+			<Analyzer class="StringToken"/>
+		</String>
+	</DataModel>
+
+	<DataModel name="Sleep">
+		<String value="sleep 1" mutable="false"/>
+	</DataModel>
+
+
+	<StateModel name="BrowserState" initialState="EnterURL" >
+		<State name="EnterURL"  >
+
+			<Action type="setProperty" property="x">
+				<DataModel ref="X" />
+			</Action>
+			<Action type="setProperty" property="y">
+				<DataModel ref="Y" />
+			</Action>
+			<Action type="call" method="tap" />
+
+			<Action type="call" method="text">
+				<Param>
+					<DataModel ref="Url"/>
+				</Param>
+			</Action>
+
+			<!-- <Action type="call" method="exec"> -->
+			<!-- 	<Param> -->
+			<!-- 		<DataModel ref="Sleep"/> -->
+			<!-- 	</Param> -->
+			<!-- </Action> -->
+
+			<Action type="setProperty" property="keycode">
+				<DataModel ref="Enter" />
+			</Action>
+			<Action type="call" method="keyevent"/>
+		</State>
+	</StateModel>
+
+	<Agent name="Default">
+		<Monitor class="Android">
+			<Param name="ApplicationName" value="com.android.chrome" />
+			<Param name="ActivityName" value=".Main" />
+			<Param name="DeviceSerial" value="##Serial##" />
+			<!--Param name="AdbPath" value="/path/to/adb"/-->
+		</Monitor>
+	</Agent>
+
+	<Agent name="RebootOnFault">
+		<Monitor class="Android">
+			<Param name="ApplicationName" value="com.android.chrome" />
+			<Param name="ActivityName" value=".Main" />
+			<Param name="DeviceSerial" value="##Serial##" />
+		</Monitor>
+
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="ssh" />
+			<Param name="Arguments" value="##PushPowerButton##" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="sleep"/>
+			<Param name="Arguments" value="10" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="adb"/>
+			<Param name="Arguments" value="-s ##Serial## shell input tap 240 380" />
+		</Monitor>
+		<Monitor class="RunCommand">
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="adb"/>
+			<Param name="Arguments" value="-s ##Serial## shell input tap 400 550" />
+		</Monitor>
+		<Monitor class="FaultingMonitor">
+			<Param name="FaultAlways" value="true" />
+		</Monitor>
+	</Agent>
+
+	<Test name="Default" controlIteration="1">
+		<StateModel ref="BrowserState"/>
+		<Agent ref="Default" />
+
+		<!--Publisher class="Null" /-->
+		<Publisher class="AndroidMonkey">
+			<Param name="Target" value="com.android.chrome" />
+			<Param name="DeviceSerial" value="##Serial##" />
+			<Param name="NumActions" value="20" />
+			<Param name="Sleep" value="0" />
+		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+	<Test name="WithReboot" controlIteration="1">
+		<StateModel ref="BrowserState"/>
+		<Agent ref="RebootOnFault" />
+
+		<!--Publisher class="Null" /-->
+		<Publisher class="AndroidMonkey">
+			<Param name="Target" value="com.android.chrome" />
+			<Param name="DeviceSerial" value="##Serial##" />
+			<Param name="NumActions" value="20" />
+			<Param name="Sleep" value="0" />
+		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+</Peach>
+<!-- end -->
