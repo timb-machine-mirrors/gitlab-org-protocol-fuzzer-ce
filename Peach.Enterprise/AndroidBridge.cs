@@ -35,7 +35,13 @@ namespace Peach.Enterprise
 				}
 				private set {}
 			}
-			
+
+			public static Device GetRefreshedDevice(string DeviceSerial)
+			{
+				_devices = null;
+				return GetDevice(DeviceSerial);
+			}
+
 			public static Device GetDevice(string DeviceSerial)
 			{
 				if (string.IsNullOrEmpty(DeviceSerial))

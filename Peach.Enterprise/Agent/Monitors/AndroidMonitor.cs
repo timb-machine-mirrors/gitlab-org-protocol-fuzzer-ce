@@ -17,9 +17,11 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("AdbPath", typeof(string), "Directory Path to Adb", "")]
 	[Parameter("DeviceSerial", typeof(string), "The Serial of the device to fuzz", "")]
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
-	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration (defaults to true)", "true")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults (defaults to true)", "true")]
-	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations (defaults to false)", "false")]
+	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "true")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults", "true")]
+	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
+	//	[Parameter("CommandTimout", typeof(int), "Time to wait for completion of commands sent to device, fault on timeout", "10")]
+	[Parameter("DeviceRetryCount", typeof(int), "Number of times to try to connect to the device before failing", "50")]
 
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
@@ -33,15 +35,13 @@ namespace Peach.Enterprise.Agent.Monitors
 		private Regex pmProcessSuccess = new Regex(@"^Success$\r?\n?");
 		private Regex pmProcessFailure = new Regex(@"^Failed$\r?\n?");
 
-		// private Regex bmgrProcessSuccess = new Regex(@"^Wiped backup data for .*\r?\n?");
-		// private Regex bmgrProcessFailure = new Regex(@"^Failed$\r?\n?");
+		private Regex bmgrProcessSuccess = new Regex(@"^Wiped backup data for .*\r?\n?");
+		private Regex bmgrProcessFailure = new Regex(@"^Failed$\r?\n?");
 
 		private Fault _fault = null;
 		private Device _dev = null;
 		private FileEntry _tombs = null;
-		private int _retries = 200;
 		private bool _muststop = false;
-		private ConsoleOutputReceiver _creciever = null;
 		private CommandResultReceiver _cmdreciever = null;
 
 		public string ApplicationName { get; private set; }
@@ -51,7 +51,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		public bool RestartEveryIteration { get; private set; }
 		public bool RestartAfterFault { get; private set; }
 		public bool ClearAppDataOnFault { get; private set; }
-
+		//		public int CommandTimout {get; private set; }
+		public int DeviceRetryCount {get; private set; }
 
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
@@ -59,10 +60,107 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			ParameterParser.Parse(this, args);
 			AndroidBridge.SetAdbPath(AdbPath);
-			_creciever = new ConsoleOutputReceiver();
 			_cmdreciever = new CommandResultReceiver();
 		}
 
+
+		public string SafeExec(string cmd, bool failHard)
+		{
+			logger.Debug("Executing on device " + _dev.SerialNumber + " command: " +  cmd);
+			try
+			{
+				//_dev.ExecuteShellCommand(cmd, _cmdreciever, CommandTimout);
+				_dev.ExecuteShellCommand(cmd, _cmdreciever); //timout code is broken on the mad bee side
+			}
+			//!!FIXME!! could also fail with adb missing
+			catch (Managed.Adb.Exceptions.DeviceNotFoundException)
+			{
+				string msg = "Device connection lost";
+				if (failHard)
+				{
+					throw new PeachException(msg);
+				}
+				else
+				{
+					// more error handling
+					// We can't actually do much more than this right now...
+					try
+					{
+						devRestarted();
+					}
+					catch (Exception ex)
+					{
+						throw new SoftException(ex);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex);
+			}
+			return _cmdreciever.Result;
+		}
+
+		public byte [] BinSafeExec(string cmd)
+		{
+			CommandResultBinaryReceiver breciever = new CommandResultBinaryReceiver();;
+			// need to merge this with SafeExec, handle different types
+			logger.Debug("Executing on device " + _dev.SerialNumber + " command: " +  cmd);
+			try
+			{
+				//_dev.ExecuteShellCommand(cmd, _cmdreciever, CommandTimout);
+				_dev.ExecuteShellCommand(cmd, breciever); //timout code is broken on the mad bee side
+			}
+			//!!FIXME!! could also fail with adb missing
+			catch (Managed.Adb.Exceptions.DeviceNotFoundException)
+			{
+				try
+				{
+					devRestarted();
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException(ex);
+				}
+			}
+			//catch (Managed.Adb.Exceptions.ShellCommandUnresponsiveException ex)
+			catch (Managed.Adb.Exceptions.ShellCommandUnresponsiveException)
+			{
+				logger.Debug("Lost Connection to ADB, restarting");
+				AndroidBridge.RestartADB();
+				//throw new SoftException(ex);
+			}
+			return breciever.Result;
+		}
+
+		public string SafeExec(string cmd)
+		{
+			return SafeExec(cmd, false);
+		}
+
+		public void SafeExec(string cmd, Regex success, Regex failure, bool failHard)
+		{
+			var ExecException = (failHard ? typeof(PeachException) : typeof(SoftException));
+			string response = SafeExec(cmd, failHard);
+			if (!string.IsNullOrEmpty(response))
+			{
+				if (!success.Match(response).Success)
+				{
+					Match m = failure.Match(response);
+					if (m.Success)
+						throw (Exception)Activator.CreateInstance(ExecException, "Command `" + cmd + "` failed to execute: \n" + m);
+					else
+						throw (Exception)Activator.CreateInstance(ExecException, "Command output for `" + cmd + "` could not be parsed: \n" + response);
+				}
+			}
+			else
+				throw (Exception)Activator.CreateInstance(ExecException, "Shell command `" + cmd +"` had no output");
+		}
+
+		public void SafeExec(string cmd, Regex success, Regex failure)
+		{
+			SafeExec(cmd, success, failure, false);
+		}
 
 		private void CleanTombs(){
 			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
@@ -75,7 +173,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		private void CleanLogs()
 		{
 			// this can fail, add exception handling
-			_dev.ExecuteShellCommand("logcat -c", _creciever);
+			SafeExec("logcat -c");
 		}
 
 		private void CleanUI(string type)
@@ -84,47 +182,29 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (type.Equals("dismiss"))
 			{
 				logger.Debug("Clearing UI running 2x " + _cmd);
-				_cmd = "input keyevent 66";
-				// this can fail, add exception handling
-				_dev.ExecuteShellCommand(_cmd, _creciever); //Enter
+				_cmd = "input keyevent 66"; //Enter
+				SafeExec(_cmd);
 				Thread.Sleep(250);
 				// this can fail, add exception handling
-				_dev.ExecuteShellCommand(_cmd, _creciever); //Enter
+				SafeExec(_cmd);
 			}
 			else if (type.Equals("unlock"))
 			{
 				_cmd = "input keyevent 82";
 				// this can fail, add exception handling
-				_dev.ExecuteShellCommand(_cmd, _creciever); //Menu
+				SafeExec(_cmd); //Menu
 			}
 		}
 
 		private void StartApp()
 		{
+			//check _dev.State; to make sure it's online?
 			string cmd = "am start -W -S -n " + ApplicationName;
 			if (!string.IsNullOrEmpty(ActivityName))
 			{
 				cmd = cmd + "/" + ActivityName;
 			}
-			// this can fail, add exception handling.
-			// ways it could fail
-			// 1. no device
-			// 2. adb not there
-			// ..
-			_dev.ExecuteShellCommand(cmd, _cmdreciever);
-			if (!string.IsNullOrEmpty(_cmdreciever.Result))
-			{
-				if (!amProcessSuccess.Match(_cmdreciever.Result).Success)
-				{
-					Match m = amProcessFailure.Match(_cmdreciever.Result);
-					if (m.Success)
-						throw new PeachException("Activity Manager failed to start application: \n" + m);
-					else
-						throw new PeachException("Peach failed to parse response output of Activity manager: \n" + _cmdreciever.Result);
-				}
-			}
-			else
-				throw new PeachException("Shell command `" + cmd +"` had no output");
+			SafeExec(cmd, amProcessSuccess, amProcessFailure, true);
 		}
 
 
@@ -133,10 +213,12 @@ namespace Peach.Enterprise.Agent.Monitors
 			// what? This doesn't do what it says it does....
 			bool restarted = false;
 			int i = 0;
-			while (i < _retries)
+			while (i < DeviceRetryCount)
 			{
 				try
 				{
+					// this could be called from SafeExec so it can't be used in SafeExec
+					// also, there's already error handling around this one
 					_dev.ExecuteShellCommand("getprop init.svc.bootanim", _cmdreciever);
 				}
 				catch
@@ -223,53 +305,20 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			// needs to check if the system is booted and unlocked
-			bool fault = _fault.type == FaultType.Fault;
+			// needs to check if the system is booted
+			SafeExec("echo hello android..."); // if this works, the system is booted. I'd like a better check
+			bool fault = _fault != null && (_fault.type == FaultType.Fault);
 			bool restart = false;
-			string cmd = "pm clear " + ApplicationName;
-			if (RestartEveryIteration || (_fault != null && fault && RestartAfterFault))
+			if (RestartEveryIteration || ( fault && RestartAfterFault))
 			{
 				restart = true;
 			}
 
 			if (fault && ClearAppDataOnFault)
 			{
-
-				_dev.ExecuteShellCommand(cmd, _cmdreciever);
-				// this needs to get turned in to a method....
-				// ExecCheckReturn(cmd, fail_re, success_re)
-				if (!string.IsNullOrEmpty(_cmdreciever.Result))
-				{
-					if (!pmProcessSuccess.Match(_cmdreciever.Result).Success)
-					{
-						Match m = pmProcessFailure.Match(_cmdreciever.Result);
-						if (m.Success)
-							throw new PeachException("Package Manager failed to clear cache: \n" + m);
-						else
-							throw new PeachException("Peach failed to parse response output of Package Manager while trying to clear cache: \n" + _cmdreciever.Result);
-					}
-				}
-				else
-					throw new PeachException("Shell command `" + cmd +"` had no output");
-
-				cmd = "bmgr wipe " + ApplicationName;
-				_dev.ExecuteShellCommand(cmd, _cmdreciever);
-				if (!string.IsNullOrEmpty(_cmdreciever.Result))
-				{
-					// if (!pmProcessSuccess.Match(_cmdreciever.Result).Success)
-					// {
-					//	// need to put in fail check here.
-					// //		Match m = amProcessFailure.Match(_cmdreciever.Result);
-					// //		if (m.Success)
-					// //			throw new PeachException("Backup Manager failed to clear data: \n" + m);
-					// //		else
-					// //			throw new PeachException("Peach failed to parse response output of Package Manager while trying to clear cache: \n" + _cmdreciever.Result);
-					// // }
-				}
-				else
-					throw new PeachException("Shell command `" + cmd +"` had no output");
-
-				}
+				SafeExec("pm clear " + ApplicationName, pmProcessSuccess, pmProcessFailure);
+				SafeExec("bmgr wipe " + ApplicationName, bmgrProcessSuccess, bmgrProcessFailure);
+			}
 
 			_fault = null;
 
@@ -303,12 +352,9 @@ namespace Peach.Enterprise.Agent.Monitors
 			_fault.exploitability = "Unknown";
 			try
 			{
-				// this can fail
-				_dev.ExecuteShellCommand("logcat -s -d AndroidRuntime:e ActivityManager:e *:f", _cmdreciever);
-
 				_fault.type = FaultType.Data;
 				_fault.title = "Response";
-				_fault.description = _cmdreciever.Result;
+				_fault.description = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
 
 				if (!string.IsNullOrEmpty(_fault.description))
 				{
@@ -333,18 +379,15 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-			CommandResultBinaryReceiver breciever = new CommandResultBinaryReceiver();;
+
 
 			// STEP 1: Get 1st Screenshot
 			try
 			{
-				// this can fail, add exception handling
 				//Image img = _dev.Screenshot; // this is the faster way to do it, but we need a way to convert to an image in mono...
 				//_dev.Screenshot.ToImage().Save("test.bmp");
 
-				_dev.ExecuteShellCommand("screencap -p", breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(breciever.Result)));
-				breciever.Flush();
+				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(BinSafeExec("screencap -p"))));
 			}
 			catch (Exception ex)
 			{
@@ -378,8 +421,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
 					{
 						// also, this can fail, add exception handling
-						_dev.ExecuteShellCommand("cat " + tomb.FullPath, _cmdreciever);
-						string tombstr = _cmdreciever.Result;
+						string tombstr = SafeExec("cat " + tomb.FullPath);
 
 						var hash = reHash.Match(tombstr);
 						if (hash.Success)
@@ -415,9 +457,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			try
 			{
 				// also, this can fail, add exception handling
-				_dev.ExecuteShellCommand("screencap -p", breciever);
-				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(breciever.Result)));
-				breciever.Flush();
+				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(BinSafeExec("screencap - p"))));
 			}
 			catch (Exception ex)
 			{
