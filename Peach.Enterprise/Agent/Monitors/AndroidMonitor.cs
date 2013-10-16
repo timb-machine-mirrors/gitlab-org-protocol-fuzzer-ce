@@ -27,7 +27,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static Regex logFilter = new Regex(@"^-+ beginning of (/\w+)+(\r\n|\r|\n)?", RegexOptions.Multiline);
+		static Regex logFilter = new Regex(@"^-+ beginning of [^\r\n]*(\r\n|\r|\n)?", RegexOptions.Multiline);
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 		private Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
 		private Regex amProcessFailure = new Regex(@".*\Error: (.*?)\r?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
@@ -300,7 +300,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _fault.type == FaultType.Fault;
+			return _fault != null && _fault.type == FaultType.Fault;
 		}
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
@@ -333,10 +333,10 @@ namespace Peach.Enterprise.Agent.Monitors
 					restartAdb();
 					throw new SoftException(ex);
 				}
-				// We don't want to just swollow exceptions 
+				// We don't want to just swollow exceptions
 				// catch (Exception ex)
 				// {
-				// 	throw new SoftException("Unable to Restart Android Application:\n" + ex);
+				//	throw new SoftException("Unable to Restart Android Application:\n" + ex);
 				// }
 			}
 			if (_dev.CanSU())
@@ -346,23 +346,30 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool IterationFinished()
 		{
-			_fault = new Fault();
-			_fault.type = FaultType.Fault;
-			_fault.detectionSource = "AndroidMonitor";
-			_fault.exploitability = "Unknown";
+			logger.Debug(">> IterationFinished");
+			_fault = null;
+			
 			try
 			{
-				_fault.type = FaultType.Data;
-				_fault.title = "Response";
-				_fault.description = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
+				string response = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
 
-				if (!string.IsNullOrEmpty(_fault.description))
+
+				if (!string.IsNullOrEmpty(response))
 				{
 					// Filter out lines that look like:
 					// --------- beginning of /dev/log/main
-					var filtered = logFilter.Replace(_fault.description, "");
+					var filtered = logFilter.Replace(response, "");
 					if (!string.IsNullOrEmpty(filtered))
+					{
+						_fault = new Fault();
 						_fault.type = FaultType.Fault;
+						_fault.detectionSource = "AndroidMonitor";
+						_fault.exploitability = "Unknown";
+						_fault.title = "Response";
+						_fault.description = filtered;
+
+						logger.Debug("logcat returned after regex: " + filtered);
+					}
 				}
 			}
 			catch (Exception ex)

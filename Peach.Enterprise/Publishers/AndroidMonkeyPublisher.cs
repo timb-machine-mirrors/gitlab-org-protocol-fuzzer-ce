@@ -42,6 +42,7 @@ namespace Peach.Enterprise.Publishers
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			//need to check if screen is locked
+			//need to add SafeExec from monitor into shared classes
 			string _cmd = "";
 			try
 			{
@@ -49,6 +50,7 @@ namespace Peach.Enterprise.Publishers
 				{
 					_cmd = "input tap " + _x.ToString() + " " + _y.ToString();
 					logger.Debug("Executing \"tap\" command " + _cmd );
+					// !!FIXME!! exception handling
 					_dev.ExecuteShellCommand(_cmd,  _creciever);
 				}
 				else if (method.Equals("exec"))
