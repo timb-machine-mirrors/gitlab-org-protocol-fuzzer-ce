@@ -165,7 +165,7 @@
 			<!-- http://tools.ietf.org/html/rfc793#page-24 -->
 			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
 			<Flags name="DataOffset" size="4" endian="big">
-				<Flag name="Offset" position="0" size="4" valueType="hex" value="f">
+				<Flag name="Offset" position="0" size="4" valueType="hex" value="0f">
 					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
 				</Flag>
 			</Flags>
