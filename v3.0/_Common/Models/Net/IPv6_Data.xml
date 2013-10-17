@@ -17,7 +17,7 @@
 
 	<DataModel name="IPv6Header">
 		<Flags size="32" endian="big">
-			<Flag name="Version" position="0" size="4" valueType="hex" value="6"/>
+			<Flag name="Version" position="0" size="4" valueType="hex" value="06"/>
 			<Flag name="DSCP" position="4" size="6" valueType="hex" value="00"/>
 			<Flag name="ECN" position="10" size="2" valueType="hex" value="00"/>
 			<Flag name="FlowLabel" position="12" size="20" valueType="hex" value="000000"/>

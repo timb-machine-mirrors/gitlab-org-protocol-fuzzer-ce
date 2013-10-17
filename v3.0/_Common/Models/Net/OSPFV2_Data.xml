@@ -134,8 +134,8 @@
       <Block name="IPHeader">
 				<!--Number name="VerLenDSPECN" size="16" endian="big" value="0x4500" /-->
 				<Flags size="16" endian="big">
-					<Flag name="Version"      position="0"  size="4" valueType="hex" value="4"/>
-					<Flag name="HeaderLength" position="4"  size="4" valueType="hex" value="5"/>
+					<Flag name="Version"      position="0"  size="4" valueType="hex" value="04"/>
+					<Flag name="HeaderLength" position="4"  size="4" valueType="hex" value="05"/>
 					<Flag name="DSCP"         position="8"  size="6" valueType="hex" value="00"/>
 					<Flag name="ECN"          position="14" size="2" valueType="hex" value="00"/>
 				</Flags>
