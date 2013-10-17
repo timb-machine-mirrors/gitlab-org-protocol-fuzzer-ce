@@ -21,7 +21,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults", "true")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
 	//	[Parameter("CommandTimout", typeof(int), "Time to wait for completion of commands sent to device, fault on timeout", "10")]
-	[Parameter("DeviceRetryCount", typeof(int), "Number of times to try to connect to the device before failing", "50")]
+	[Parameter("DeviceRetryCount", typeof(int), "Number of times to try to connect to the device before failing", "20")]
 
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
@@ -123,12 +123,10 @@ namespace Peach.Enterprise.Agent.Monitors
 					throw new SoftException(ex);
 				}
 			}
-			//catch (Managed.Adb.Exceptions.ShellCommandUnresponsiveException ex)
 			catch (Managed.Adb.Exceptions.ShellCommandUnresponsiveException)
 			{
 				logger.Debug("Lost Connection to ADB, restarting");
 				AndroidBridge.RestartADB();
-				//throw new SoftException(ex);
 			}
 			return breciever.Result;
 		}
