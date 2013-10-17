@@ -13,7 +13,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="type">The type.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this Type type ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( type, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( type, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -23,7 +23,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="module">The module.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this Module module ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( module, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( module, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="mi">The mi.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this MemberInfo mi ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( mi, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( mi, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -43,7 +43,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="mi">The mi.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this MethodInfo mi ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( mi, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( mi, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="pi">The pi.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this PropertyInfo pi ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( pi, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( pi, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="pi">The pi.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this ParameterInfo pi ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( pi, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( pi, typeof ( T ) ).Cast<T>();
 		}
 
 		/// <summary>
@@ -73,7 +73,7 @@ namespace Managed.Adb.Extensions {
 		/// <param name="fi">The fi.</param>
 		/// <returns></returns>
 		public static IEnumerable<T> GetCustomAttributes<T> ( this FieldInfo fi ) where T : Attribute {
-			return (IEnumerable<T>)Attribute.GetCustomAttributes ( fi, typeof ( T ) );
+			return Attribute.GetCustomAttributes ( fi, typeof ( T ) ).Cast<T>();
 		}
 		/// <summary>
 		/// Gets the custom attribute.
