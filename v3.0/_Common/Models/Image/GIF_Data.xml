@@ -19,7 +19,7 @@
 
   <!-- Block Terminator -->
 	<DataModel name="BlockTerminator">
-		<Blob valueType="hex" value='0' length='1' token="true"/>
+		<Blob valueType="hex" value='00' length='1' token="true"/>
 	</DataModel>
 
 
