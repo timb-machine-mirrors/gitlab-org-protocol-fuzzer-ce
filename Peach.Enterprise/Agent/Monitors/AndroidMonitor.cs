@@ -30,7 +30,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		static Regex logFilter = new Regex(@"^-+ beginning of [^\r\n]*(\r\n|\r|\n)?", RegexOptions.Multiline);
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 		private Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
-		private Regex amProcessFailure = new Regex(@".*\Error: (.*?)\r?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
+		private Regex amProcessFailure = new Regex(@".*Error: (.*?)\r?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
 
 		private Regex pmProcessSuccess = new Regex(@"^Success$\r?\n?");
 		private Regex pmProcessFailure = new Regex(@"^Failed$\r?\n?");
