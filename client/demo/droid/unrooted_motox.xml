@@ -2,7 +2,6 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-
 	<DataModel name="X">
 		<Number size="10" mutable="false" value="75" />
 	</DataModel>
@@ -74,27 +73,29 @@
 
 		<Monitor class="RunCommand">
 			<Param name="When" value="OnFault" />
-			<Param name="Command" value="ssh" />
+			<Param name="Command" value="##SshCommand##" />
 			<Param name="Arguments" value="##PushPowerButton##" />
 		</Monitor>
 		<Monitor class="RunCommand">
 			<Param name="When" value="OnFault" />
-			<Param name="Command" value="sleep"/>
-			<Param name="Arguments" value="10" />
-		</Monitor>
-		<Monitor class="RunCommand">
-			<Param name="When" value="OnFault" />
-			<Param name="Command" value="adb"/>
+			<Param name="Command" value="##ADBCommand##"/>
 			<Param name="Arguments" value="-s ##Serial## shell input tap 240 380" />
 		</Monitor>
 		<Monitor class="RunCommand">
 			<Param name="When" value="OnFault" />
-			<Param name="Command" value="adb"/>
+			<Param name="Command" value="##ADBCommand##"/>
 			<Param name="Arguments" value="-s ##Serial## shell input tap 400 550" />
 		</Monitor>
-		<Monitor class="FaultingMonitor">
-			<Param name="FaultAlways" value="true" />
+		<Monitor class="RunCommand">
+			<!-- Wait for system to go down -->
+			<Param name="When" value="OnFault" />
+			<Param name="Command" value="##Sleep##"/>
+			<Param name="Arguments" value="10" />
 		</Monitor>
+		<!-- There are lots of faults, if we need to we can force a fault on a specific iter to demonstrate fault handling -->
+		<!-- <Monitor class="FaultingMonitor"> -->
+		<!-- 	<Param name="Iteraton" value="3"/> -->
+		<!-- </Monitor> -->
 	</Agent>
 
 	<Test name="Default" controlIteration="1">
@@ -113,7 +114,7 @@
 		</Logger>
 	</Test>
 
-	<Test name="WithReboot" controlIteration="1">
+	<Test name="WithReboot" controlIteration="1"> <!-- We're seeing the cache corrupted at some point, control iters will detect this -->
 		<StateModel ref="BrowserState"/>
 		<Agent ref="RebootOnFault" />
 
