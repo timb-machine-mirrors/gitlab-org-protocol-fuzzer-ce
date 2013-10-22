@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-			 author="Deja Vu Security, LLC" description="User Datagram Protocol PIT DataModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	<!--RFC768: Implements all features-->
-	<Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
-	
-	<DataModel name="UDP" ref="UDP:UDP">
-		<Number name="Header.Checksum" size="16" endian="big">
-			<Fixup class="UDPChecksumFixup">
-				<Param name="ref" value="Header"/>
-				<Param name="src" value="##SourceIPv4##"/>
-				<Param name="dst" value="##TargetIPv4##"/>
-			</Fixup>
-		</Number>
-	</DataModel>
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+        author="Deja Vu Security, LLC" description="User Datagram Protocol PIT DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!--RFC768: Implements all features-->
+  <Include ns="UDP" src="file:##Path##/_Common/Models/Net/UDP_Data.xml"/>
+
+  <DataModel name="Packet" ref="UDP:Packet">
+    <Number name="Header.Checksum" size="16" endian="big">
+      <Fixup class="UDPChecksumFixup">
+        <Param name="ref" value="Header"/>
+        <Param name="src" value="##SourceIPv4##"/>
+        <Param name="dst" value="##TargetIPv4##"/>
+      </Fixup>
+    </Number>
+  </DataModel>
 </Peach>
 <!-- end -->

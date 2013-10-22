@@ -5,13 +5,7 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
 	<!-- Link Layer Discovery Protocol Main DataModel -->
-  <DataModel name="LLDP">
-    <Block name="EtherHeader" mutable="false">
-      <Blob name="Dest" mutable="false" valueType="hex" value="##TargetMAC##"/> <!-- LLDP multicast address --> 
-      <Blob name="Src" mutable="false" valueType="hex" value="##SourceMAC##"/>
-      <Blob name="Type" mutable="false" valueType="hex" value="88cc"/>
-    </Block>
-
+  <DataModel name="Packet">
     <Block name="LLDPPayload" minOccurs="1">
       <Block name="ChasisTlv">
 				<Block name="ChasisTlvHeader">

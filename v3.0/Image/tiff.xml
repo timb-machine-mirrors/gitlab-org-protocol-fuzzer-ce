@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="TIFF PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+  <Defaults>
+    <Number endian="little" signed="false" />
+  </Defaults>
+
+  <!-- Base Entry Types -->
+  <Import import="code" />
+
+  <DataModel name="DirectoryEntry">
+    <Number name="Tag" size="16" signed="false" />
+    <Number name="Type" size="16" />
+    <Block name="Body">
+      <Number name="Count" size="32" signed="false" >
+        <Relation type="count" of="Value"/>
+      </Number> 
+      <Block name="ValueBlock" length="4">
+        <Block name="Value" minOccurs="1" constraint="True == False"/>     <!-- Overwrite -->
+        <Padding name="Pad" alignment="32" />
+      </Block>  
+    </Block>
+  </DataModel>
+
+  <DataModel name="DirectoryEntryPointer" ref="DirectoryEntry">
+    <Block name="Body">
+      <Number name="Count" size="32" signed="false">
+        <Relation type="count" of="Value"/>
+      </Number>
+      <Number name="Pointer" size="32" signed="false">
+        <Relation type="offset" of="ValueBlock" />
+      </Number>
+      <Block name="ValueBlock">
+        <Placement before="TailPlace" /> <!--TODO Should this matter that its after?-->
+        <Block name="Value" minOccurs="1" constraint="True == False"/> <!-- Overwrite -->
+      </Block>
+    </Block>  
+  </DataModel>
+
+  <!-- Entry Types -->
+  
+  <DataModel name="ByteEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="1" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="false" />
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="1" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="false" occurs="2" />
+      </Block>
+      <Block name="C3" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="1" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="3" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="false" occurs="3"/>
+      </Block>
+      <Block name="C4" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="1" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="4" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="false" occurs="4"/>
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="false" minOccurs="5" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="AsciiEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="2" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <String name="Body.ValueBlock.Value" length="1" nullTerminated="true"/>
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="2" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <String name="Body.ValueBlock.Value" length="2" nullTerminated="true"/>
+      </Block>
+      <Block name="C3" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="2" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="3" token="true" />
+        <String name="Body.ValueBlock.Value" length="3" nullTerminated="true"/>
+      </Block>
+      <Block name="C4" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="2" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="4" token="true" />
+        <String name="Body.ValueBlock.Value" length="4" nullTerminated="true"/>
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="2" token="true" />
+        <Number name="Count" size="16" signed="false">
+          <Relation type="size" of="Value"/>
+        </Number>
+        <String name="Body.ValueBlock.Value" nullTerminated="true" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="ShortEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="3" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="false" />
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="3" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="false" occurs="2" />
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="3" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="false" minOccurs="3" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="LongEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="4" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="false" />
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="4" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="false" minOccurs="2" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="RationalEntry">
+    <Block name="CX" ref="DirectoryEntryPointer">
+      <Number name="Type" size="16" value="5" token="true" />
+      <Block name="Body.ValueBlock.Value" minOccurs="1">
+        <Number name="Numerator" size="32" signed="false" />
+        <Number name="Denominator" size="32" signed="false" />
+      </Block>
+    </Block>
+  </DataModel>
+
+
+  <!-- TIFF 6.0 Entry Types -->
+  
+  <DataModel name="SByteEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="6" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="true" />
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="6" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="true" occurs="2" />
+      </Block>
+      <Block name="C3" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="6" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="3" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="true" occurs="3"/>
+      </Block>
+      <Block name="C4" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="6" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="4" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="true" occurs="4"/>
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="6" token="true" />
+        <Number name="Body.ValueBlock.Value" size="8" signed="true" minOccurs="5" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="UndefinedEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="7" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Blob name="Body.ValueBlock.Value" length="1" />
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="7" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <Blob name="Body.ValueBlock.Value" length="1" occurs="2" />
+      </Block>
+      <Block name="C3" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="7" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="3" token="true" />
+        <Blob name="Body.ValueBlock.Value" length="1" occurs="3"/>
+      </Block>
+      <Block name="C4" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="7" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="4" token="true" />
+        <Blob name="Body.ValueBlock.Value" length="1" occurs="4"/>
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="7" token="true" />
+        <Blob name="Body.ValueBlock.Value" length="1" minOccurs="5" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="SShortEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="8" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="true" />
+      </Block>
+      <Block name="C2" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="8" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="2" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="true" occurs="2" />
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="8" token="true" />
+        <Number name="Body.ValueBlock.Value" size="16" signed="true" minOccurs="3" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="SLongEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="9" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="true" />
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="9" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="true" minOccurs="2" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="SRationalEntry">
+    <Block name="CX" ref="DirectoryEntryPointer">
+      <Number name="Type" size="16" value="10" token="true" />
+      <Block name="Body.ValueBlock.Value" minOccurs="1">
+        <Number name="Numerator" size="32" signed="true" />
+        <Number name="Denominator" size="32" signed="true" />
+      </Block>
+    </Block>
+  </DataModel>
+
+
+  <DataModel name="FloatEntry">
+    <Choice name="CountN">
+      <Block name="C1" ref="DirectoryEntry">
+        <Number name="Type" size="16" value="11" token="true" />
+        <Number name="Body.Count" size="32" signed="false" value="1" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="false" />
+      </Block>
+      <Block name="CX" ref="DirectoryEntryPointer">
+        <Number name="Type" size="16" value="11" token="true" />
+        <Number name="Body.ValueBlock.Value" size="32" signed="true" minOccurs="2" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="DoubleEntry">
+    <Block name="CX" ref="DirectoryEntryPointer">
+      <Number name="Type" size="16" value="12" token="true" />
+      <Number name="Body.ValueBlock.Value" size="64" signed="false" minOccurs="1"/>
+    </Block>
+  </DataModel>
+
+  <!--      -->
+  <!-- Tags -->
+  <!--      -->
+
+  <DataModel name="PhotometricInterpretation">
+    <Block name="TheShortEntry" ref="ShortEntry">
+      <Number name="CountN.C1.Tag" size="16" value="262" token="true" signed="false"/>
+      <Block name="CountN.C1.Body.ValueBlock.Value">
+        <Choice>
+          <Number name="WhiteIsZero" size="16" signed="false" value="0" token="true"/>
+          <Number name="BlackIsZero" size="16" signed="false" value="1" token="true"/>
+          <Number name="RGB" size="16" signed="false" value="2" token="true"/>
+          <Number name="Palette" size="16" signed="false" value="3" token="true"/>
+          <Number name="TransparencyMask" size="16" signed="false" value="4" token="true"/>
+        </Choice>
+      </Block>
+      <Block name="CountN.C2" constraint="True == False"/>
+      <Block name="CountN.CX" constraint="True == False"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="Compression">
+    <Block name="TheShortEntry" ref="ShortEntry">
+      <Number name="CountN.C1.Tag" size="16" value="259" token="true" signed="false"/>
+      <Block name="CountN.C1.Body.ValueBlock.Value">
+        <Choice>
+          <Number name="NoCompression" size="16" signed="false" value="1" token="true"/>
+          <Number name="CCITT" size="16" signed="false" value="2" token="true"/>
+          <Number name="PackBits" size="16" signed="false" value="32773" token="true"/>
+        </Choice>
+      </Block>
+      <Block name="CountN.C2" constraint="True == False"/>
+      <Block name="CountN.CX" constraint="True == False"/>
+    </Block>
+  </DataModel>
+
+
+  <!--
+    TODO More to add
+
+
+imagewidth Short or long - 1
+imagelength SHORT or long - 1
+
+xres RATIONAL - 1 Not Req?
+yres RATIONAL - 1 not Req?
+resunit Short - 1 : 1/2/3 not Req?
+
+bitspersample SHORT - sample per pixle many??
+colormap SHORT - 3*(2^BitsPerSample)
+samplesperpixel SHORT - 1
+
+
+
+  -->
+
+
+  <DataModel name="RowsPerStrip">
+    <Choice>
+      <Block name="TheShortEntry" ref="ShortEntry">
+        <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
+        <Block name="CountN.C2" constraint="True == False"/>
+        <Block name="CountN.CX" constraint="True == False"/>
+      </Block>
+      <Block name="TheLongEntry" ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
+        <Block name="CountN.CX" constraint="True == False"/>
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="StripOffsets">
+    <Choice name="ShortOrLong">
+      <Block name="TheShortEntry" ref="ShortEntry">
+        <!-- TODO find a way to allow this option -->
+        <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" />
+        <Number name="CountN.C2.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C2.Body.ValueBlock.Value" /-->
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
+
+        <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripOffsetsContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock"/>
+      </Block>
+
+      <Block name="TheLongEntry" ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value">
+          <Block name="StripOffsetLongPlaceholder" />
+        </Block>
+        <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripOffsetsContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock"/>
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <DataModel name="StripByteCounts">
+    <Choice name="ShortOrLong">
+      <Block name="TheShortEntry" ref="ShortEntry">
+        <!-- TODO -->
+        <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value" />
+        <Number name="CountN.C2.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C2.Body.ValueBlock.Value" /-->
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
+
+        <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripSizesContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock"/>
+      </Block>
+
+      <Block name="TheLongEntry" ref="LongEntry">
+        <Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
+        <Block name="CountN.C1.Body.ValueBlock.Value">
+          <Block name="StripSizeLongPlaceholder" />
+        </Block>
+        <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
+        <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <Relation type="count" of="Strips"/>
+        </Number>
+        <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
+          <Relation type="offset" of="StripSizesContainer" />
+        </Number>
+        <Block name="CountN.CX.Body.ValueBlock"/>
+      </Block>
+    </Choice>
+  </DataModel>
+
+
+
+
+  
+  <!-- Entry Choices TODO Add More tag specific-->
+  <DataModel name="DirectoryEntryOptions">
+    <Choice name="EntryChoice">
+      <!--Specific Tags-->
+      <Block ref="StripOffsets" name="TheStripOffsets" />
+      <Block ref="StripByteCounts" name="TheStripByteCounts" />
+      <Block ref="RowsPerStrip" name="TheRowsPerStrip" />
+      <Block ref="PhotometricInterpretation" name="ThePhotometricInterpretation" />
+      <Block ref="Compression" name="TheCompression" />
+
+      <!--Catchall Types-->
+      <Block ref="ByteEntry" name="TheByteEntry" />
+      <Block ref="AsciiEntry" name="TheAsciiEntry" />
+      <Block ref="ShortEntry" name="TheShortEntry" />
+      <Block ref="LongEntry" name="TheLongEntry" />
+      <Block ref="RationalEntry" name="TheRationalEntry" />
+      <Block ref="SByteEntry" name="TheSByteEntry" />
+      <Block ref="UndefinedEntry" name="TheUndefinedEntry" />
+      <Block ref="SShortEntry" name="TheSShortEntry" />
+      <Block ref="SLongEntry" name="TheSLongEntry" />
+      <Block ref="SRationalEntry" name="TheSRationalEntry" />
+      <Block ref="FloatEntry" name="TheFloatEntry" />
+      <Block ref="DoubleEntry" name="TheDoubleEntry" />
+    </Choice>
+  </DataModel>
+
+
+  <DataModel name="ImageFileDirectoryChunk">
+    <Number name="EntryCount" size="16" signed="false">
+      <Relation type="count" of="IFDEntry"/>
+    </Number>
+    <Block name="IFDEntry" ref="DirectoryEntryOptions" minOccurs="1" />
+    <Choice name="ListChoice">
+      <Number name="EndofList" value="0" size="32" signed="false" token="true"/>
+      <Block name="NextItem">
+        <Number name="NextPointer" size="32" signed="false">
+          <Relation type="offset" of="NextImageFileDirectory" />
+        </Number>
+        <Block name="NextImageFileDirectory" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <!--TODO this only allows for one layer of recursion-->
+  <DataModel name="ImageFileDirectory" ref="ImageFileDirectoryChunk">
+    <!--Placement before="TailPlace" /--><!--TODO Why does this break it -->
+    <Block name="ListChoice.NextItem.NextImageFileDirectory" ref="ImageFileDirectoryChunk" />
+  </DataModel>
+
+
+
+  <!-- MAIN TIFF DATA MODEL -->
+  <DataModel name="TIFF">    
+    <Choice name="EndianessChoice">
+      <Blob name="LittleEndian" length="2" value="II" token="true"/>
+      <!--Blob name="BigEndian" length="2" value="MM" token="true"/-->
+    </Choice>
+    
+    <Number name="Magic" value="42" token="true" size="16"/>
+
+    <Number name="IFDOffset" size="32" >
+      <Relation type="offset" of="TheIFD" />
+    </Number>
+
+    <Block name="TheIFD" ref="ImageFileDirectory" />
+    
+
+
+    <Block name="Strips" minOccurs="1">
+      <!-- Image Data Strips-->
+      <Blob name="ImageData">
+        <Placement before="StripDataContainer.Holder" />
+      </Blob>
+      <!-- Strip Offsets -->
+      <Choice name="StripOffsetChoice">
+        <Block>
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheShortEntry.CountN.CX') != None"/>
+          <Number size="16" name="StripSize">
+            <Placement before="StripSizesContainer.Holder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheLongEntry.CountN.C1') != None"/>
+          <Number size="32" name="StripSize">
+            <Placement before="StripOffsetLongPlaceholder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+         <Block constraint="element.find('TheStripOffsets.ShortOrLong.TheLongEntry.CountN.CX') != None"/>
+          <Number size="32" name="StripSize">
+            <Placement before="StripSizesContainer.Holder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+
+      </Choice>
+      <!-- Strip Lengths -->
+      <Choice name="StripSizeChoice">
+        <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheShortEntry.CountN.CX') != None" />
+          <Number size="16" name="StripOffset">
+            <Placement before="StripOffsetsContainer.Holder" />
+            <Relation type="offset" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheLongEntry.CountN.C1') != None"/>
+          <Number size="32" name="StripSize">
+            <Placement before="StripSizeLongPlaceholder" />
+            <Relation type="size" of="ImageData" />
+          </Number>
+        </Block>
+        <Block>
+          <Block constraint="element.find('TheStripByteCounts.ShortOrLong.TheLongEntry.CountN.CX') != None"/>
+          <Number size="32" name="StripOffset">
+            <Placement before="StripOffsetsContainer.Holder" />
+            <Relation type="offset" of="ImageData" />
+          </Number>
+        </Block>
+      </Choice>
+    </Block>
+
+
+
+
+    <Block name="StripOffsetsContainer">
+      <Block name="Holder" />
+    </Block>
+
+    <Block name="StripSizesContainer">
+      <Block name="Holder" />
+    </Block>
+
+    <Block name="StripDataContainer">
+      <Block name="Holder" />
+    </Block>
+
+    <Block name="TailPlace" />
+
+  </DataModel>
+
+
+
+  <!-- STATE MODEL SECTION -->
+  <StateModel name="StateModel" initialState="Initial">
+    <State name="Initial">
+      <Action name="WriteFileFromSample" type="output" publisher="writer">
+        <DataModel name="Tiff" ref="TIFF" />
+        <Data name="data" fileName="##Path##/_Common/Samples/Image/##Seed##" />
+      </Action>
+
+      <Action name="CloseFile"  type="close" publisher="writer" />
+      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+
+  <!-- ***************
+       AGENT SECTION  
+      *************** -->
+
+   <Agent name="LinuxAgent">
+    <Monitor class="LinuxCrashMonitor"/>
+    <Monitor class="Process">
+      <Param name="Executable" value="##Target##"/>
+      <Param name="StartOnCall" value="FuzzMe"/>
+      <Param name="Arguments" value="fuzzed.tif"/>
+      <Param name="CpuKill" value="true"/>
+    </Monitor>
+  </Agent>
+  
+  <Agent name="WinAgent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="##Target## fuzzed.tif"/>
+      <Param name="StartOnCall" value="FuzzMe"/>
+      <Param name="CpuKill" value="true"/>
+    </Monitor>
+  </Agent>
+
+
+  <!-- **************
+        TEST SECTION  
+       ************** -->
+  <Test name="Default">
+
+    <Agent ref="##Agent##"/>
+    <StateModel ref="StateModel" />
+
+    <Publisher name="writer" class="file.FileWriter">
+      <Param name="FileName" value="fuzzed.tif" />
+    </Publisher>
+
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
+
+    <!-- GUI Launcher: WINDOWS ONLY -->
+    <!--
+     <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+      <Param name="WindowName" value="GUI Window Name" /> 
+     </Publisher> 
+     -->
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+
+  </Test>
+</Peach>

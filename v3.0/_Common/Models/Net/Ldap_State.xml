@@ -150,7 +150,7 @@
         <DataModel ref="DataModels:ServerResponse" />
 				<Data DataModel="DataModels:ServerResponse">
 					<Field name="Result.Code" valueType="hex" value="69"/>
-					<Field name="Result.ResultCode.Value" valueType="hex" value="0"/>
+					<Field name="Result.ResultCode.Value" valueType="hex" value="00"/>
 				</Data>
       </Action>
 			
@@ -174,7 +174,7 @@
         <DataModel ref="DataModels:ServerResponse" />
 				<Data DataModel="DataModels:ServerResponse">
 					<Field name="Result.Code" valueType="hex" value="6b"/>
-					<Field name="Result.ResultCode.Value" valueType="hex" value="0"/>
+					<Field name="Result.ResultCode.Value" valueType="hex" value="00"/>
 				</Data>
       </Action>
 			
@@ -229,7 +229,7 @@
         <DataModel ref="DataModels:ServerResponse" />
 				<Data DataModel="DataModels:ServerResponse">
 					<Field name="Result.Code" valueType="hex" value="65"/>
-					<Field name="Result.ResultCode.Value" valueType="hex" value="0"/>
+					<Field name="Result.ResultCode.Value" valueType="hex" value="00"/>
 				</Data>
       </Action>
 			

@@ -3,34 +3,40 @@
 from zlib import crc32 
 import time
 
+from code import InteractiveConsole
+
 import clr
 clr.AddReferenceByPartialName('Peach.Core')
 
 import Peach.Core
+
 
 def init_seq(ctx):
     # print "init running"
     seed = (int(ctx.parent.parent.parent.context.test.strategy.Iteration) + int(ctx.parent.parent.parent.context.test.strategy.Seed))
     # print "making CRC"
     seq = crc32(str(seed)) % (2**32)
+    print "seq = ", seq
     sport = seq % (65535 - 1024) + 1024 
+    print "sport = ", sport
     # print "Setting value" 
     if ctx.dataModel.find('SequenceNumber') and ctx.dataModel.find('SrcPort'):
         ctx.dataModel.find('SequenceNumber').DefaultValue = Peach.Core.Variant(seq)
         ctx.dataModel.find('SrcPort').DefaultValue = Peach.Core.Variant(sport)
-    ctx.dataModel.Value #this shouldn't need to be called in future
     # print "Storing value"
     try:
-        set_to_store(ctx, SequenceNumber=seq, SrcPort=sport)
+        set_to_store(ctx, SequenceNumber=seq, SrcPort=sport) #can sport just come from the data model??
     except Exception, e:
         print e
         raise e
 
 
 def set_next_seq(ctx):
+    env = globals()
+    env.update(locals())
     payload_size = 1
     if ctx.dataModel.find('TcpPayload'):
-        payload_size = len(ctx.dataModel.find('TcpPayload').Value.Value)
+        payload_size = ctx.dataModel.find('TcpPayload').Value.Length
     if ctx.dataModel.find('SequenceNumber'):
         ret = set_to_store(ctx, NextSequenceNumber=int(ctx.dataModel.find('SequenceNumber').InternalValue.ToString())+(payload_size or 1))
     else:
@@ -45,7 +51,6 @@ def sync_from_store(ctx):
         set_default_uint32_from_store(ctx, "AcknowledgmentNumber")
     if ctx.dataModel.find("SequenceNumber"):
         ctx.dataModel.find("SequenceNumber").DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, "NextSequenceNumber"))
-    ctx.dataModel.Value
 
 
 def store_next_acknum(ctx):
@@ -90,22 +95,24 @@ def set_default_uint32_from_store(ctx, name):
         ctx.dataModel.find(name).DefaultValue = Peach.Core.Variant(get_store_uint32(ctx, name))
     else:
         return False
-    ctx.dataModel.Value #this shouldn't need to be called in future
     return True
 
 
 def get_if_ack_for_me(ctx):
+    env = globals()
+    env.update(locals())
+    #InteractiveConsole(locals=env).interact()
     if ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber'):
         ret = int(ctx.parent.actions[0].dataModel.find('AcknowledgmentNumber').InternalValue.ToString()) == (get_store_uint32(ctx, 'NextSequenceNumber')) and bool(int(ctx.parent.actions[0].dataModel.find('ACK').InternalValue))
     else:
         ret = False
+    print "ret == ", ret
     return ret
 
 
 def set_timestamp(ctx):
     if ctx.dataModel.find('TimestampValue'):
         ctx.dataModel.find('TimestampValue').DefaultValue = Peach.Core.Variant(get_cur_timestamp())
-        ctx.dataModel.Value
         return True
     else:
         return False

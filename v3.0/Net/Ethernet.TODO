@@ -1,0 +1,7 @@
+* 802.3 Section 3.2.8 - Pad Field (cannot be implemented currently)
+		<!-- IEEE 802.3 Section  3.2.8 Pad field -->
+		<!-- The length of the Pad field required for MAC Client Data that is clientDatasize/8 octets long is -->
+		<!-- max [0, minFrameSize – (clientDatasize + 2 × addressSize + 48)] bits. -->
+		<!-- IEEE 802.3 Section 4.4.2 (MAC parameters) states that minFrameSize == 512 bits for all supported MAC -->
+* 802.3 Section 3.2.9 - FCS
+* Choices for types?

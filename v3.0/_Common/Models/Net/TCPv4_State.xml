@@ -17,7 +17,7 @@
 
 		<State name="SendSyn" >
 
-			<!-- http://tools.ietf.org/html/rfc793##section-3.4 -->
+			<!-- http://tools.ietf.org/html/rfc793#section-3.4 -->
 			<!-- Does not support sync connections or half-open recovery -->
 			<Action type="output"
 							onStart="TCP.init_seq(self)"
@@ -25,21 +25,46 @@
 				<Data ref="TCP:SYN"/>
 				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
-			<Action name="Read" type="changeState" ref="SynSent" />
+			<Action name="Read" type="changeState" ref="SynWait" />
+			<!-- Listener can respond with either a SYN or a SYN,ACK -->
 		</State>
 
-		<State name="SynSent">
+		<State name="SynWait">
 			<Action name="GetPacket" type="input"
 							onComplete="TCP.store_next_acknum(self)">
 				<DataModel name="Packet" ref="TCPv4:InIPv4Packet"/>
 			</Action>
-			<Action name="GoToSend"
+			<!-- If the listener responds to the inital SYN with a SYN,ACK
+			     then we're in SYN RCVD. We need to ACK the SYN,ACK.  -->
+			<Action name="GoToSynRecieved"
 							type="changeState" ref="SynRecieved"
 							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
-			<Action name="GoToSend"
+			<!-- If the listener responds to the inital SYN with a ACK then
+			     we're in SYN SENT. We need to ACK the SYN -->
+			<Action name="GoToSynSent"
+							type="changeState" ref="SynSent"
+							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+			<Action name="ReadMore" type="changeState" ref="SynWait" />
+		</State>
+		
+		<State name="SynSent" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_store(self)" >
+				<Data ref="TCP:SYNACK"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
+			</Action>
+			<Action type="changeState" ref="SynAckWait"/>
+		</State>
+
+		<State name="SynAckWait">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.store_next_acknum(self)">
+				<DataModel name="Packet" ref="TCPv4:InIPv4Packet"/>
+			</Action>
+			<Action name="GoToEstablished"
 							type="changeState" ref="Established"
 							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
-			<Action name="ReadMore" type="changeState" ref="SynSent" />
+			<Action name="ReadMore" type="changeState" ref="SynAckWait" />
 		</State>
 		
 		<State name="SynRecieved" >
@@ -51,9 +76,31 @@
 			<Action type="changeState" ref="Established"/>
 		</State>
 
+		<!-- <State name="EstablishedCheckForIncoming"> -->
+		<!-- 	<Action name="GetPacket" type="input" -->
+		<!-- 					onComplete="TCP.store_next_acknum(self)"> -->
+		<!-- 		<DataModel name="Packet" ref="TCPv4:InIPv4Packet"/> -->
+		<!-- 	</Action> -->
+		<!-- 	<Action name="GoToSendFinAck" -->
+		<!-- 					type="changeState" ref="SendFinAck" -->
+		<!-- 					when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/> -->
+		<!-- 	<Action name="GoToSendTestPayload" type="changeState" ref="SendTestPayload" /> -->
+		<!-- </State> -->
+
+		<State name="SendFinAck" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_store(self)">
+				<Data ref="TCP:ACK"/>
+				<DataModel name="Packet" ref="TCPv4:Packet"/>
+			</Action>
+			<Action type="changeState" ref="SendTestPayload"/>
+		</State>
+
 		<State name="Established" >
-			<Action type="changeState" ref="WaitServerClose"/>
-			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
+			<!-- Established needs to check for incoming state changes before attempting to send data -->
+			<!-- <Action type="changeState" ref="EstablishedCheckForIncoming"/> -->
+			<Action type="changeState" ref="SendTestPayload"/>
+			<!-- <Action type="changeState" ref="WaitServerClose"/> -->
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
@@ -104,6 +151,7 @@
 
 		<!-- http://tools.ietf.org/html/rfc793#section-3.5 -->
 		<State name="BeginClose" >
+			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 			<Action type="changeState" ref="Close"/>
 		</State>
 
@@ -129,6 +177,7 @@
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
+				<!-- <Data ref="TCP:FINACK"/> -->
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>

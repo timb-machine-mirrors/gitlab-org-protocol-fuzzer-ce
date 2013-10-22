@@ -3,7 +3,9 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
        author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
-	
+
+	<!-- http://tools.ietf.org/html/draft-mahalingam-dutt-dcops-vxlan-04 -->
+
 	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
 	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
 	<Include ns="VLAN" src="file:##Path##/_Common/Models/Net/VLAN_Data.xml"/>
@@ -22,39 +24,37 @@
 		<Number name="LargeReserve" size="24" endian="big"/>
 		<Number name="VNI" 	    size="24" value="7639335" endian="big"/>
 		<Number name="SmallReserve" size="8" endian="big"/>
-		<Block name="EtherHeader" ref="Ethernet:EtherHeader">
-			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="Dest" valueType="hex" value="##TargetMAC##"/>
-			<Blob name="Type" valueType="hex" value="0800"/>
+		<Block name="EtherHeader" ref="Ethernet:Frame">
+			<Blob name="TypeOrLen" valueType="hex" value="0800"/>
 		</Block>
 		<Block name="VXLANPayload"/>
 	</DataModel>
 
   <DataModel name="VXLAN">
-    <Block name="OuterEtherHeader" ref="Ethernet:EtherHeader">
-      <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
+    <Block name="OuterEtherHeader" ref="Ethernet:Frame">
+      <Blob name="Dest" valueType="hex" value="##OuterTargetMAC##"/>
       <Blob name="Src"  valueType="hex" value="##OuterSourceMAC##"/>
-      <Blob name="Type" valueType="hex" value="0800"/>
+      <Blob name="TypeOrLen" valueType="hex" value="0800"/>
     </Block>
-    <Block name="OuterIP" ref="IPv4:IPv4">
+    <Block name="OuterIP" ref="IPv4:Packet">
 			<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-			<String name="SrcBlock.Header.SrcIP" value="##OuterSourceIPv4##">
+			<String name="Header.SrcBlock.SrcIP" value="##OuterSourceIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
 			</String>
-			<String name="DstBlock.Header.DestIP" value="##OuterTargetIPv4##">
+			<String name="Header.DstBlock.DestIP" value="##OuterTargetIPv4##">
 				<Transformer class="Ipv4StringToOctet" />
 			</String>
-      <Block name="IPv4Payload" ref="UDPv4:UDP">
+      <Block name="IPv4Payload" ref="UDPv4:Packet">
 				<Number name="Header.SrcPort"  size="16" endian="big" value="9029"/>
-				<Number name="Header.DestPort" size="16" endian="big" value="9029"/>
+				<Number name="Header.DestPort" size="16" endian="big" value="4789"/>
 				<Number name="Header.Checksum" size="16" endian="big"/> <!-- VXLAN has no inner CRC -->
 				<Block name="UdpPayload">
 					<Block name="VXHeader" ref="VXLANHeader">
 						<Blob name="EtherHeader.Type" valueType="hex" value="0800"/>
 						<Block name="VXLANPayload">
-							<Block name="InnerIP" ref="IPv4:IPv4">
+							<Block name="InnerIP" ref="IPv4:Packet">
 								<Number name="Header.Protocol" size="8" endian="big" value="17"/>
-								<Block name="IPv4Payload" ref="UDPv4:UDP">
+								<Block name="IPv4Payload" ref="UDPv4:Packet">
 									<Number name="Header.SrcPort" size="16" endian="network" value="1234"/>
 									<Number name="Header.DestPort" size="16" endian="network" value="1234"/>
 									<Block name="UdpPayload">
@@ -100,7 +100,7 @@
 				<Relation type="size" of="IPv6Payload" />
 			</Number>
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="58"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:ICMPv6Header"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="ICMP:Packet"/>
 		</Block>
 	</DataModel>
 
@@ -220,7 +220,7 @@
 	<DataModel name="IPv4UDPInVxlan">
 		<Block name="VXLAN"  ref="IPv4EmptyPacketInVxlan">
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.Header.Protocol" size="8" endian="big" value="17"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDPv4:UDP"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv4Payload" ref="UDPv4:Packet"/>
 		</Block>
 	</DataModel>
 
@@ -232,7 +232,7 @@
 				<Relation type="size" of="IPv6Payload" />
 			</Number>
 			<Number name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.NextHeader" size="8" endian="big" value="17"/>
-			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDPv4:UDP"/>
+			<Block name="OuterIP.IPv4Payload.UdpPayload.VXHeader.VXLANPayload.InnerIP.IPv6Payload" ref="UDPv4:Packet"/>
 		</Block>
 	</DataModel>
 </Peach>

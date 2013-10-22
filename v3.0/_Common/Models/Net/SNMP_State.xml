@@ -47,8 +47,8 @@
 				<DataModel ref="DataModels:SNMPHeaderV2_"/>
 				<Data DataModel="DataModels:SNMPHeaderV2_">
 					<Field name="SnmpType.Value.PduType.Type" valueType="hex" value="a2"/>
-					<Field name="SnmpType.Value.PduType.Value.ErrorStatus.Value" valueType="hex" value="0"/>
-					<Field name="SnmpType.Value.PduType.Value.ErrorIndex.Value" valueType="hex" value="0"/>
+					<Field name="SnmpType.Value.PduType.Value.ErrorStatus.Value" valueType="hex" value="00"/>
+					<Field name="SnmpType.Value.PduType.Value.ErrorIndex.Value" valueType="hex" value="00"/>
 				</Data>
       </Action>
     </State>

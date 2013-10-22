@@ -78,7 +78,7 @@
       
       <!-- RECV DD(Seq = Y, I = 0, M = 1, MS = 0 ) -->
       <Action name="OSPFDBRecv1" type="input" publisher="RawOSPF">
-        <DataModel  ref="DDDump"/>
+        <DataModel  ref="DataModels:DDDump"/>
       </Action>
 
       <!-- SEND DD(Seq = Y + 1, I = 0, M = 1 MS = 1 --> 

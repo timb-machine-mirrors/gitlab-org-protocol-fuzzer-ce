@@ -10,14 +10,15 @@
 		<Define key="SourceMAC"  value="000c29b4f21c"/>
 		<!-- <Define key="SourceMAC"  value="000c2922b4df"/> -->
 		<!-- <Define key="SourceIPv4" value="192.168.2.10"/> -->
-		<Define key="SourceIPv4" value="127.0.0.1"/>
+		<Define key="SourceIPv4" value="10.6.66.2"/>
 		<Define key="SourceIPv6" value="fe80::20c:29ff:fe22:b4df"/>
 		<!-- <Define key="SourceIPv6" value="fe80::20c:29ff:feb4:f21c"/> -->
 
 		<!-- Target interface information -->
 		<!-- This is the Target VM in most cases, and the ESXi target when ESXi guests aren't used -->
-		<Define key="TargetMAC"  value="000c29cdd6b0"/>
-		<Define key="TargetIPv4" value="192.168.2.11"/>
+		<Define key="TargetMAC"  value="5254008733a2"/>
+		<Define key="TargetIPv4" value="10.6.66.52"/>
+
 		<Define key="TargetPort" value="1337"/>
 
 		<Define key="TargetIPv6" value="fe80::250:56ff:fe69:584"/>
@@ -25,12 +26,14 @@
 
 		<!-- Interface on Agent VM we will send data from -->
 		<Define key="Interface" value="eth1"/>
+		<!-- <Define key="Interface" value="virbr1"/> -->
 
 		<!-- Fuzzing strategy to use -->
 		<Define key="Strategy" value="Random"/>
 
 		<!-- Path to current working folder -->
-		<Define key="Path"     value="/home/pentest/definitions" />
+		<!-- <Define key="Path"     value="/home/pentest/definitions" /> -->
+		<Define key="Path"     value="./" />
 
 		<!-- IP Address of remote agent -->
 		<Define key="RemoteAgentIP"  value="192.168.2.10"/>

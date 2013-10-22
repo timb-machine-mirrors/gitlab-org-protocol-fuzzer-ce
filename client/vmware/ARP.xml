@@ -13,6 +13,28 @@
 		<Number size="32" value="1281" signed="false"/>
 	</DataModel>
 
+	<DataModel name="ARPPayload">
+		<Number name="HTYPE" size="16" value="01" endian="big" signed="true"/>
+		<Number name="PTYPE" size="16" valueType="hex" value="0800" endian="big" signed="true"/>
+		<Number name="HLEN" size="8">
+			<Relation type="size" of="SHA"/>
+			<Relation type="size" of="THA"/>
+		</Number>
+		<Number name="PLEN" size="8">
+			<Relation type="size" of="SPA"/>
+			<Relation type="size" of="TPA"/>
+		</Number>
+		<Number name="OPER" size="16" value="1" endian="big"/>
+		<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
+		<Blob name="SPA" value="##SourceIPv4##">
+			<Transformer class="Ipv4StringToNetworkOctet"/>
+		</Blob>
+		<Blob name="THA" valueType="hex" value="##TargetMAC##"/>
+		<Blob name="TPA" value="##TargetIPv4##">
+			<Transformer class="Ipv4StringToNetworkOctet"/>
+		</Blob>
+	</DataModel>
+
 	<!-- Main data mdoe to send an ARP request -->
 	<DataModel name="ARP">
 		<Block name="EtherHeader">
@@ -20,27 +42,7 @@
 			<Blob name="Src" valueType="hex" value="##SourceMAC##"/>
 			<Blob name="Type" token="true" valueType="hex" value="0806"/>
 		</Block>
-		<Block name="ARPPayload">
-			<Number name="HTYPE" size="16" value="01" endian="big" signed="true"/>
-			<Number name="PTYPE" size="16" valueType="hex" value="0800" endian="big" signed="true"/>
-			<Number name="HLEN" size="8">
-				<Relation type="size" of="SHA"/>
-				<Relation type="size" of="THA"/>
-			</Number>
-			<Number name="PLEN" size="8">
-				<Relation type="size" of="SPA"/>
-				<Relation type="size" of="TPA"/>
-			</Number>
-			<Number name="OPER" size="16" value="1" endian="big"/>
-			<Blob name="SHA" valueType="hex" value="##SourceMAC##"/>
-			<Blob name="SPA" value="##SourceIPv4##">
-				<Transformer class="Ipv4StringToNetworkOctet"/>
-			</Blob>
-			<Blob name="THA" valueType="hex" value="##TargetMAC##"/>
-			<Blob name="TPA" value="##TargetIPv4##">
-				<Transformer class="Ipv4StringToNetworkOctet"/>
-			</Blob>
-		</Block>
+		<Block name="ARPPayload" ref="ARPPayload"/>
 		<Blob name="Trailer"/>
 	</DataModel>
 

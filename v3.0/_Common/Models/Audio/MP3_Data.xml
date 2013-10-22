@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="Mp3 PIT DataModels" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<PythonPath path="##Path##/_Common/Models/Audio/"/>
+	<Import import="mp3" />
+
+	<DataModel name="AudioTag">
+		<String name="TagID" length="3" value="TAG" token="true" />
+		<String name="Title" length="30"/>
+		<String name="Artist" length="30"/>
+		<String name="Album" length="30"/>
+		<String name="Year" length="4"/>
+		<String name="Comment" length="30"/>
+		<Number name="Genre" size="8" signed="false"/>
+	</DataModel>
+
+	<DataModel name="FrameHeaderProtection">
+		<Number name="ProtectionBit" size="1" signed="false"/>
+		<Number name="BitrateIndex" size="4" signed="false"/>
+		<Number name="SampleRateFreqIndex" size="2" signed="false" />
+		<Number name="PaddingBit" size="1" signed="false">
+			<Relation type="size" of="FrameContainer" expressionGet="mp3.calcFrameLength(self.find('MpegID'), self.find('LayerDescription'), self.find('BitrateIndex'), self.find('SampleRateFreqIndex'), size)" expressionSet="mp3.getPaddingBit(3,96000,32000, size)" /><!--TODO ExpressionSet, and set for others too?-->
+			<!--TODO try catch finding the values? -->
+		</Number>
+		<Number name="PrivateBit" size="1" signed="false"/>		
+		<Number name="ChannelMode" size="2" signed="false"/>		
+		<Number name="ModeExtension" size="2" signed="false" />
+		<Number name="Copyright" size="1" signed="false" />
+		<Number name="Original" size="1" signed="false" />
+		<Number name="Emphasis" size="2" signed="false" />
+	</DataModel>
+
+	<DataModel name="Frame">
+		<Block name="FrameContainer">
+			<Number name="FrameSync" size="11" signed="false" value="2047" token="true"/>
+			<Number name="MpegID" size="2" />
+			<Number name="LayerDescription" size="2" signed="false" value="1" token="true"/> <!--TODO allow other layers-->
+			<Choice name="ProtectedChoice">
+				<Block name="Protected" ref="FrameHeaderProtection">
+					<Number name="ProtectionBit" size="1" signed="false" token="true" value="0"/>
+					<Number name="Crc" size="16">
+						<Fixup class="CrcFixup">
+							<Param name="ref" value="FrameContainer" />
+							<Param name="type" value="CRC16" />
+						</Fixup>
+					</Number>
+				</Block>
+				<Block name="NotProtected" ref="FrameHeaderProtection" />
+			</Choice>
+			<Choice name="TagChoice">
+				<!--TODO BUG fix extreme slowdown-->
+				<!--Block name="WithTag">
+					<Blob name="Data" />
+					<Block name="Tag" ref="AudioTag"/> 
+				</Block-->
+				<Blob name="Data" />
+			</Choice>
+		</Block>
+		<!--Block name="Tag" ref="AudioTag" minOccurs="0" maxOccurs="1"/--> 
+	</DataModel>
+
+	<DataModel name="Mp3">
+		<!--Blob name="ExtraStart" /--> <!--TODO maybe constraint not FrameSync? -->
+		<Block name="Frames" ref="Frame" minOccurs="1" />
+	</DataModel>
+</Peach>
+<!--END-->

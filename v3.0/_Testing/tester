@@ -1,0 +1,222 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import shutil
+import platform
+import traceback
+import subprocess
+
+sys.path.append(os.path.join('.', '_Testing'))
+import dependency
+import testlib
+
+if testlib.get_platform() == "win":
+    from win32com.shell import shell
+
+
+LOGDIR = os.environ.get('PEACH_LOGDIR') or \
+    os.path.join(os.getcwd(), 'test_logs')
+PEACH_RUN_COUNT = os.environ.get('PEACH_RUN_COUNT') or 1
+FULL_TARGET_PATH = os.getcwd()
+TIMEOUT_MINUTES = os.environ.get('PEACH_TIMEOUT_MINUTES') or 10
+ARCH, OS = platform.architecture()
+IS_64_BIT = '64' in ARCH
+IS_WINDOWS = 'windows' in OS.lower()
+IS_LINUX   = 'elf'     in OS.lower()
+# '' was as seen on peach farm mac mini for arch -> op. sys.
+IS_OSX     = '' == OS or 'darwin' in OS.lower() or 'osx' in OS.lower()
+IS_INTERACTIVE = sys.stdout.isatty()
+USE_COLOR = IS_INTERACTIVE and (not IS_WINDOWS)
+
+
+################################################################################
+# Buildbot stuff is down under
+# DETERMINE WHICH PEACH TO FIND
+
+
+def find_peach():
+    if IS_INTERACTIVE:
+        return "peach"
+    # split the current path by othe os seperator and jump to top of build dir
+    _path = os.getcwd().split(os.sep)
+    # this index _could_ turn into a bug over long run. nothing better a.t.m.
+    _test_build_idx = _path.index('build')
+    _path = _path[ : _test_build_idx + 1]
+    # figure out which epeach we want, it should be under the 'v3.0' directory
+    # debug has better info
+    ls = os.listdir(os.sep.join(_path))
+    peach_dir = ''
+    if IS_WINDOWS:
+        for f in ls:
+            if 'win' not in f                : continue
+            elif not f.startswith('epeach-') : continue
+            elif not f.endswith('-debug')    : continue
+            elif IS_64_BIT and 'x64' not in f: continue
+            elif not IS_64_BIT and 'x64' in f: continue
+            else                             : peach_dir = f
+    elif IS_LINUX:
+        for f in ls:
+            if 'linux' not in f              : continue
+            elif not f.startswith('epeach-') : continue
+            elif not f.endswith('-debug')    : continue
+            elif IS_64_BIT and '_64' not in f: continue
+            elif not IS_64_BIT and '_64' in f: continue
+            else                            : peach_dir = f
+    elif IS_OSX:
+        for f in ls:
+            if 'osx' not in f               : continue
+            elif not f.startswith('epeach-'): continue
+            elif not f.endswith('-debug')   : continue
+            else                            : peach_dir = f
+    else:
+        assert False, "Unknown os"
+    if peach_dir == '':
+	raise Exception('no peach dir found')
+    _path.extend([peach_dir, 'peach.exe'])
+    PEACH_PATH = os.sep.join(_path)
+
+    # make sure peach.exe is actully executable on *nix after extraction
+    # this isn't the greatest place for it but hey
+    if IS_OSX or IS_LINUX:
+        p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+
+    return PEACH_PATH
+
+
+###############################################################################
+
+
+def get_targets(target_path):
+    for w in os.walk(target_path):
+        w[1].sort()
+        curpath = w[0]
+        if "_Common" in curpath:
+            continue
+        file_list = w[2]
+        for fn in file_list:
+            if fn[-4:].lower() == '.xml':
+                yield {"path": curpath, "file": fn}
+
+
+def user_is_admin():
+    if testlib.get_platform() == "win":
+        return shell.IsUserAnAdmin()
+    else:
+        return os.getuid() == 0
+
+
+###############################################################################
+# main
+###############################################################################
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Test peach pits (this must be run as root)')
+    parser.add_argument('-i', '--iterations', dest='iterations',
+                        type=int, help='The number of iterations to run',
+                        default=PEACH_RUN_COUNT)
+    parser.add_argument('-p', '--peach', type=str,
+                        help='The location of the peach binary',
+                        default=find_peach())
+    parser.add_argument('targets', type=str, metavar="target", nargs='*',
+                        help=('The the specific targets to test, '
+                              'e.g.: Net/TCPv4.xml'))
+    parser.add_argument('-l', '--logdir',type=str,
+                        help='location to log test output',
+                        default=LOGDIR)
+    parser.add_argument('-d', '--dependency', action='store_true',
+                        required=False, help=('Used to test pit dependencies'))
+    parser.add_argument('-c', '--color', type=bool,
+                        required=False, default=USE_COLOR,
+                        help=('Turns off color codes in output'))
+    parser.add_argument('-t', '--timeout', type=int,
+                        default=TIMEOUT_MINUTES,required=False,
+                        help=('Time to let pits run before killing them. '
+                              'Defaults to 10 minutes.'))
+    config = parser.parse_args()
+    if not user_is_admin():
+        print "You must be root or admin to run this"
+        exit(1)
+    tests = []
+    assert config.timeout >= 0, "timeout cannot be negative"
+    if not os.path.isdir(config.logdir):
+        os.mkdir(config.logdir)
+    test_log = open(os.path.join(config.logdir, "test_status.log"), 'w')
+    if config.targets:
+        targets = []
+        for target in config.targets:
+            path = os.path.dirname(target)
+            fn = os.path.basename(target)
+            if config.dependency:
+                pits = dependency.GetPits(path, fn)
+                for pit in pits:
+                    targets.append(pit)
+            targets.append({"path": path, "file": fn})
+    else:
+        targets = get_targets(FULL_TARGET_PATH)
+    for target in targets:
+        pit_tests = testlib.get_tests(target, config)
+        for test in pit_tests:
+            try:
+                test.run()
+            except Exception:
+                traceback.print_exception(*sys.exc_info())
+                test.status = "except"
+                test.clean_up()
+            if   test.status == "pass" and     IS_INTERACTIVE:
+                print "Ran: ", test.args
+                print test.color_text("green", "SUCCESS!")
+            elif test.status == "pass" and not IS_INTERACTIVE:
+                pass
+            elif test.status == "skip":
+                print "%s was %s " % (test.pit, test.color_text('yellow', "SKIPPED!"))
+            elif test.status == "fail" or test.status == "except":
+                print "Ran: ", test.args
+                print "...and it " + test.color_text("red", "FAILED!")
+                had_pre_exe_err = not hasattr(test, 'output_dir')
+                if had_pre_exe_err:
+                    print 'Threw an exception before making output dir and' \
+                        + ' running Popen for this test'
+                else:
+                    with open(os.path.join(test.output_dir, 'sout')) as f:
+                        for line in f: print line
+                    with open(os.path.join(test.output_dir, 'serr')) as f:
+                        for line in f: print line
+                print ''
+            elif test.status == "timeout":
+                print "...and it " + test.color_text("yellow", "TIMEDOUT!")
+            else:
+                print test.color_text("red", "UNKNOWN FAILURE!")
+            tests.append(test)
+    tests.sort(key = lambda obj: obj.name)
+    return_code = 0
+    for test in tests:
+        status = test.status
+        if test.hasrun:
+            status += " after running %s" % test.hasrun
+        if test.status in ["pass", "fail"]:
+            if test.status == "pass" and IS_INTERACTIVE == False:
+                continue #for non interactive we can silently succede.
+            test_log.write(
+                "{0:<20} {1:<5} returned {2} for command {3}{4}".format(
+                    test.name + " " + status,
+                    test.pid,
+                    test.returncode,
+                    test.cmd,
+                    os.linesep))
+            return_code |= test.returncode #any failure should cause build failure
+            if test.status != "pass":
+                return_code += 1
+        elif test.status == "skip":
+            test_log.write("{0:<20}{1}".format(
+                    test.name + " was " + status, os.linesep))
+        elif test.status == "except":
+            return_code += 1
+            test_log.write("{0:<20}{1}".format(
+                    test.name + " failed with exception", os.linesep))
+    test_log.close()
+    exit(return_code) # exit w/ code equal to num of pit test failures
+
