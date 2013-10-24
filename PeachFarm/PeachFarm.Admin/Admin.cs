@@ -234,7 +234,7 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target)
 		{
 			List<string> tempfiles = new List<string>();
 			string zipfilepath = String.Empty;
@@ -251,6 +251,16 @@ namespace PeachFarm.Admin
 			}
 
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
+
+			if (String.IsNullOrEmpty(target))
+			{
+				request.Target = request.PitFileName;
+			}
+			else
+			{
+				request.Target = target;
+			}
+
 			string newdefinesfilepath = String.Empty;
 			if (Path.GetExtension(pitFilePath) == xmlext)
 			{
@@ -547,11 +557,11 @@ namespace PeachFarm.Admin
 #if DEBUG
 		public void Report(string jobid)
 		{
-			GenerateReportRequest request = new GenerateReportRequest();
+			GenerateFaultReportRequest request = new GenerateFaultReportRequest();
 			request.JobID = jobid;
 			request.ReportFormat = ReportFormat.PDF;
 
-			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, request.Serialize(), Actions.GenerateReport, this.controllerQueueName);
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, request.Serialize(), Actions.GenerateFaultReport, this.controllerQueueName);
 		}
 
 		public void TruncateAllCollections()

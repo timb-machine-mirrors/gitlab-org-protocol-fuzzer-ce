@@ -10,6 +10,7 @@ namespace PeachFarm.Loggers
 	[Peach.Core.Logger("logger.PeachFarm.Mongo")]
 	[Peach.Core.Parameter("MongoDbConnectionString", typeof(string), "Connection string to Mongo database")]
 	[Peach.Core.Parameter("JobID", typeof(string), "")]
+	[Peach.Core.Parameter("Target", typeof(string), "")]
 	[Peach.Core.Parameter("NodeName", typeof(string), "")]
 	[Peach.Core.Parameter("PitFileName", typeof(string), "")]
 	[Peach.Core.Parameter("Path", typeof(string),"")]
@@ -26,7 +27,7 @@ namespace PeachFarm.Loggers
 			JobID = (string)args["JobID"];
 			NodeName = (string)args["NodeName"];
 			PitFileName = (string)args["PitFileName"];
-			
+			Target = (string)args["Target"];
 		}
 
 		#region Properties
@@ -47,6 +48,8 @@ namespace PeachFarm.Loggers
 		public string PitFileName { get; private set; }
 
 		public uint IterationCount { get; private set; }
+
+		public string Target { get; private set; }
 		#endregion
 
 		#region Logger overrides

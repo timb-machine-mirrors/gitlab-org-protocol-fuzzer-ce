@@ -414,8 +414,20 @@ namespace PeachFarm.Node
 				mongoargs.Add("PitFileName", new Peach.Core.Variant(nodeState.StartPeachRequest.PitFileName));
 				mongoargs.Add("Path", new Peach.Core.Variant(String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueueName)[0])));
 
-				loggers.Add(new Loggers.MongoLogger(mongoargs));
+				loggers.Add(new PeachFarm.Loggers.MongoLogger(mongoargs));
 			}
+
+			Dictionary<string, Peach.Core.Variant> metricsargs = new Dictionary<string, Peach.Core.Variant>();
+			metricsargs.Add("JobID", new Peach.Core.Variant(nodeState.StartPeachRequest.JobID));
+			//TODO Path
+			metricsargs.Add("RabbitHost", new Peach.Core.Variant(nodeState.RabbitMq.HostName));
+			metricsargs.Add("RabbitPort", new Peach.Core.Variant(nodeState.RabbitMq.Port));
+			metricsargs.Add("RabbitUser", new Peach.Core.Variant(nodeState.RabbitMq.UserName));
+			metricsargs.Add("RabbitPassword", new Peach.Core.Variant(nodeState.RabbitMq.Password));
+			metricsargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL.ToString()));
+			metricsargs.Add("Target", new Peach.Core.Variant(nodeState.StartPeachRequest.Target));
+			loggers.Add(new PeachFarm.Loggers.MetricsRabbitLogger(metricsargs));
+
 
 
 			foreach (var test in dom.tests.Values)

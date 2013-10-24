@@ -18,7 +18,8 @@ namespace PeachFarm.Common.Messages
 	using System.Runtime.Serialization;
 
 
-	[System.Xml.Serialization.XmlIncludeAttribute(typeof(GenerateReportResponse))]
+	[System.Xml.Serialization.XmlIncludeAttribute(typeof(GenerateMetricsReportResponse))]
+	[System.Xml.Serialization.XmlIncludeAttribute(typeof(GenerateFaultReportResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(MonitorResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(ListJobsResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(JobInfoResponse))]
@@ -1221,8 +1222,269 @@ namespace PeachFarm.Common.Messages
 	[System.ComponentModel.DesignerCategoryAttribute("code")]
 	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
 	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
-	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateReportResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
-	public partial class GenerateReportResponse : ResponseBase
+	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateMetricsReportResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class GenerateMetricsReportResponse : ResponseBase
+	{
+
+		private string jobIDField;
+
+		private string targetField;
+
+		private ReportGenerationStatus statusField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public ReportGenerationStatus Status
+		{
+			get
+			{
+				return this.statusField;
+			}
+			set
+			{
+				this.statusField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateMetricsReportResponse));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current GenerateMetricsReportResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an GenerateMetricsReportResponse object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output GenerateMetricsReportResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out GenerateMetricsReportResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(GenerateMetricsReportResponse);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out GenerateMetricsReportResponse obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static GenerateMetricsReportResponse Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((GenerateMetricsReportResponse)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current GenerateMetricsReportResponse object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an GenerateMetricsReportResponse object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output GenerateMetricsReportResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out GenerateMetricsReportResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(GenerateMetricsReportResponse);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out GenerateMetricsReportResponse obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static GenerateMetricsReportResponse LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public enum ReportGenerationStatus
+	{
+
+		/// <remarks/>
+		Generating,
+
+		/// <remarks/>
+		Complete,
+
+		/// <remarks/>
+		Error,
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateFaultReportResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class GenerateFaultReportResponse : ResponseBase
 	{
 
 		private string jobIDField;
@@ -1265,7 +1527,7 @@ namespace PeachFarm.Common.Messages
 			{
 				if ((serializer == null))
 				{
-					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateReportResponse));
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateFaultReportResponse));
 				}
 				return serializer;
 			}
@@ -1273,7 +1535,7 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
-		/// Serializes current GenerateReportResponse object into an XML document
+		/// Serializes current GenerateFaultReportResponse object into an XML document
 		/// </summary>
 		/// <returns>string XML value</returns>
 		public virtual string Serialize()
@@ -1302,16 +1564,16 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Deserializes workflow markup into an GenerateReportResponse object
+		/// Deserializes workflow markup into an GenerateFaultReportResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
-		/// <param name="obj">Output GenerateReportResponse object</param>
+		/// <param name="obj">Output GenerateFaultReportResponse object</param>
 		/// <param name="exception">output Exception value if deserialize failed</param>
 		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-		public static bool Deserialize(string xml, out GenerateReportResponse obj, out System.Exception exception)
+		public static bool Deserialize(string xml, out GenerateFaultReportResponse obj, out System.Exception exception)
 		{
 			exception = null;
-			obj = default(GenerateReportResponse);
+			obj = default(GenerateFaultReportResponse);
 			try
 			{
 				obj = Deserialize(xml);
@@ -1324,19 +1586,19 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public static bool Deserialize(string xml, out GenerateReportResponse obj)
+		public static bool Deserialize(string xml, out GenerateFaultReportResponse obj)
 		{
 			System.Exception exception = null;
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static GenerateReportResponse Deserialize(string xml)
+		public static GenerateFaultReportResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
 			{
 				stringReader = new System.IO.StringReader(xml);
-				return ((GenerateReportResponse)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+				return ((GenerateFaultReportResponse)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
 			}
 			finally
 			{
@@ -1348,7 +1610,7 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Serializes current GenerateReportResponse object into file
+		/// Serializes current GenerateFaultReportResponse object into file
 		/// </summary>
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
@@ -1389,16 +1651,16 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Deserializes xml markup from file into an GenerateReportResponse object
+		/// Deserializes xml markup from file into an GenerateFaultReportResponse object
 		/// </summary>
 		/// <param name="fileName">string xml file to load and deserialize</param>
-		/// <param name="obj">Output GenerateReportResponse object</param>
+		/// <param name="obj">Output GenerateFaultReportResponse object</param>
 		/// <param name="exception">output Exception value if deserialize failed</param>
 		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-		public static bool LoadFromFile(string fileName, out GenerateReportResponse obj, out System.Exception exception)
+		public static bool LoadFromFile(string fileName, out GenerateFaultReportResponse obj, out System.Exception exception)
 		{
 			exception = null;
-			obj = default(GenerateReportResponse);
+			obj = default(GenerateFaultReportResponse);
 			try
 			{
 				obj = LoadFromFile(fileName);
@@ -1411,13 +1673,13 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public static bool LoadFromFile(string fileName, out GenerateReportResponse obj)
+		public static bool LoadFromFile(string fileName, out GenerateFaultReportResponse obj)
 		{
 			System.Exception exception = null;
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static GenerateReportResponse LoadFromFile(string fileName)
+		public static GenerateFaultReportResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1443,22 +1705,6 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 		#endregion
-	}
-
-	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
-	[System.SerializableAttribute()]
-	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
-	public enum ReportGenerationStatus
-	{
-
-		/// <remarks/>
-		Generating,
-
-		/// <remarks/>
-		Complete,
-
-		/// <remarks/>
-		Error,
 	}
 
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
@@ -3407,6 +3653,8 @@ namespace PeachFarm.Common.Messages
 	public partial class CreateJobRequest
 	{
 
+		private byte[] zipFileField;
+
 		private int clientCountField;
 
 		private string iPAddressField;
@@ -3417,9 +3665,23 @@ namespace PeachFarm.Common.Messages
 
 		private string tagsField;
 
-		private byte[] zipFileField;
+		private string targetField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlElementAttribute(DataType = "base64Binary", Order = 0)]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public byte[] ZipFile
+		{
+			get
+			{
+				return this.zipFileField;
+			}
+			set
+			{
+				this.zipFileField = value;
+			}
+		}
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
 		[System.Runtime.Serialization.DataMemberAttribute()]
@@ -3491,17 +3753,17 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		[System.Xml.Serialization.XmlAttributeAttribute(DataType = "base64Binary")]
+		[System.Xml.Serialization.XmlAttributeAttribute()]
 		[System.Runtime.Serialization.DataMemberAttribute()]
-		public byte[] ZipFile
+		public string Target
 		{
 			get
 			{
-				return this.zipFileField;
+				return this.targetField;
 			}
 			set
 			{
-				this.zipFileField = value;
+				this.targetField = value;
 			}
 		}
 
@@ -3722,6 +3984,8 @@ namespace PeachFarm.Common.Messages
 
 		private string pitVersionField;
 
+		private string targetField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
@@ -3875,6 +4139,20 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.pitVersionField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
 			}
 		}
 
@@ -5331,8 +5609,8 @@ namespace PeachFarm.Common.Messages
 	[System.ComponentModel.DesignerCategoryAttribute("code")]
 	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
 	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
-	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateReportRequest", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
-	public partial class GenerateReportRequest
+	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateFaultReportRequest", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class GenerateFaultReportRequest
 	{
 
 		private string jobIDField;
@@ -5375,7 +5653,7 @@ namespace PeachFarm.Common.Messages
 			{
 				if ((serializer == null))
 				{
-					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateReportRequest));
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateFaultReportRequest));
 				}
 				return serializer;
 			}
@@ -5383,7 +5661,7 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
-		/// Serializes current GenerateReportRequest object into an XML document
+		/// Serializes current GenerateFaultReportRequest object into an XML document
 		/// </summary>
 		/// <returns>string XML value</returns>
 		public virtual string Serialize()
@@ -5412,16 +5690,16 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Deserializes workflow markup into an GenerateReportRequest object
+		/// Deserializes workflow markup into an GenerateFaultReportRequest object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
-		/// <param name="obj">Output GenerateReportRequest object</param>
+		/// <param name="obj">Output GenerateFaultReportRequest object</param>
 		/// <param name="exception">output Exception value if deserialize failed</param>
 		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-		public static bool Deserialize(string xml, out GenerateReportRequest obj, out System.Exception exception)
+		public static bool Deserialize(string xml, out GenerateFaultReportRequest obj, out System.Exception exception)
 		{
 			exception = null;
-			obj = default(GenerateReportRequest);
+			obj = default(GenerateFaultReportRequest);
 			try
 			{
 				obj = Deserialize(xml);
@@ -5434,19 +5712,19 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public static bool Deserialize(string xml, out GenerateReportRequest obj)
+		public static bool Deserialize(string xml, out GenerateFaultReportRequest obj)
 		{
 			System.Exception exception = null;
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static GenerateReportRequest Deserialize(string xml)
+		public static GenerateFaultReportRequest Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
 			{
 				stringReader = new System.IO.StringReader(xml);
-				return ((GenerateReportRequest)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+				return ((GenerateFaultReportRequest)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
 			}
 			finally
 			{
@@ -5458,7 +5736,7 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Serializes current GenerateReportRequest object into file
+		/// Serializes current GenerateFaultReportRequest object into file
 		/// </summary>
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
@@ -5499,16 +5777,16 @@ namespace PeachFarm.Common.Messages
 		}
 
 		/// <summary>
-		/// Deserializes xml markup from file into an GenerateReportRequest object
+		/// Deserializes xml markup from file into an GenerateFaultReportRequest object
 		/// </summary>
 		/// <param name="fileName">string xml file to load and deserialize</param>
-		/// <param name="obj">Output GenerateReportRequest object</param>
+		/// <param name="obj">Output GenerateFaultReportRequest object</param>
 		/// <param name="exception">output Exception value if deserialize failed</param>
 		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
-		public static bool LoadFromFile(string fileName, out GenerateReportRequest obj, out System.Exception exception)
+		public static bool LoadFromFile(string fileName, out GenerateFaultReportRequest obj, out System.Exception exception)
 		{
 			exception = null;
-			obj = default(GenerateReportRequest);
+			obj = default(GenerateFaultReportRequest);
 			try
 			{
 				obj = LoadFromFile(fileName);
@@ -5521,13 +5799,13 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public static bool LoadFromFile(string fileName, out GenerateReportRequest obj)
+		public static bool LoadFromFile(string fileName, out GenerateFaultReportRequest obj)
 		{
 			System.Exception exception = null;
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static GenerateReportRequest LoadFromFile(string fileName)
+		public static GenerateFaultReportRequest LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -5563,5 +5841,1185 @@ namespace PeachFarm.Common.Messages
 
 		/// <remarks/>
 		PDF,
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateMetricsReportRequest", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class GenerateMetricsReportRequest
+	{
+
+		private string jobIDField;
+
+		private string targetField;
+
+		private ReportFormat reportFormatField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public ReportFormat ReportFormat
+		{
+			get
+			{
+				return this.reportFormatField;
+			}
+			set
+			{
+				this.reportFormatField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(GenerateMetricsReportRequest));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current GenerateMetricsReportRequest object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an GenerateMetricsReportRequest object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output GenerateMetricsReportRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out GenerateMetricsReportRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(GenerateMetricsReportRequest);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out GenerateMetricsReportRequest obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static GenerateMetricsReportRequest Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((GenerateMetricsReportRequest)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current GenerateMetricsReportRequest object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an GenerateMetricsReportRequest object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output GenerateMetricsReportRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out GenerateMetricsReportRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(GenerateMetricsReportRequest);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out GenerateMetricsReportRequest obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static GenerateMetricsReportRequest LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "JobProgressNotification", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class JobProgressNotification
+	{
+
+		private List<IterationMetric> iterationMetricsField;
+
+		private List<FaultMetric> faultMetricsField;
+
+		private string jobIDField;
+
+		private string targetField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		public JobProgressNotification()
+		{
+			this.faultMetricsField = new List<FaultMetric>();
+			this.iterationMetricsField = new List<IterationMetric>();
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 0)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public List<IterationMetric> IterationMetrics
+		{
+			get
+			{
+				return this.iterationMetricsField;
+			}
+			set
+			{
+				this.iterationMetricsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlArrayAttribute(Order = 1)]
+		[System.Xml.Serialization.XmlArrayItemAttribute(IsNullable = false)]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public List<FaultMetric> FaultMetrics
+		{
+			get
+			{
+				return this.faultMetricsField;
+			}
+			set
+			{
+				this.faultMetricsField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(JobProgressNotification));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current JobProgressNotification object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an JobProgressNotification object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output JobProgressNotification object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out JobProgressNotification obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(JobProgressNotification);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out JobProgressNotification obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static JobProgressNotification Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((JobProgressNotification)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current JobProgressNotification object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an JobProgressNotification object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output JobProgressNotification object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out JobProgressNotification obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(JobProgressNotification);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out JobProgressNotification obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static JobProgressNotification LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = true)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "IterationMetric", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class IterationMetric
+	{
+
+		private string jobIDField;
+
+		private string targetField;
+
+		private string stateField;
+
+		private string actionField;
+
+		private string dataElementField;
+
+		private string mutatorField;
+
+		private string dataSetField;
+
+		private uint iterationCountField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string State
+		{
+			get
+			{
+				return this.stateField;
+			}
+			set
+			{
+				this.stateField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Action
+		{
+			get
+			{
+				return this.actionField;
+			}
+			set
+			{
+				this.actionField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string DataElement
+		{
+			get
+			{
+				return this.dataElementField;
+			}
+			set
+			{
+				this.dataElementField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Mutator
+		{
+			get
+			{
+				return this.mutatorField;
+			}
+			set
+			{
+				this.mutatorField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string DataSet
+		{
+			get
+			{
+				return this.dataSetField;
+			}
+			set
+			{
+				this.dataSetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public uint IterationCount
+		{
+			get
+			{
+				return this.iterationCountField;
+			}
+			set
+			{
+				this.iterationCountField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(IterationMetric));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current IterationMetric object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an IterationMetric object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output IterationMetric object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out IterationMetric obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(IterationMetric);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out IterationMetric obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static IterationMetric Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((IterationMetric)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current IterationMetric object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an IterationMetric object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output IterationMetric object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out IterationMetric obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(IterationMetric);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out IterationMetric obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static IterationMetric LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = true)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "FaultMetric", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class FaultMetric
+	{
+
+		private string jobIDField;
+
+		private string targetField;
+
+		private uint iterationField;
+
+		private string bucketField;
+
+		private string stateField;
+
+		private string actionField;
+
+		private string dataElementField;
+
+		private string mutatorField;
+
+		private string dataSetField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string JobID
+		{
+			get
+			{
+				return this.jobIDField;
+			}
+			set
+			{
+				this.jobIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public uint Iteration
+		{
+			get
+			{
+				return this.iterationField;
+			}
+			set
+			{
+				this.iterationField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Bucket
+		{
+			get
+			{
+				return this.bucketField;
+			}
+			set
+			{
+				this.bucketField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string State
+		{
+			get
+			{
+				return this.stateField;
+			}
+			set
+			{
+				this.stateField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Action
+		{
+			get
+			{
+				return this.actionField;
+			}
+			set
+			{
+				this.actionField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string DataElement
+		{
+			get
+			{
+				return this.dataElementField;
+			}
+			set
+			{
+				this.dataElementField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Mutator
+		{
+			get
+			{
+				return this.mutatorField;
+			}
+			set
+			{
+				this.mutatorField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string DataSet
+		{
+			get
+			{
+				return this.dataSetField;
+			}
+			set
+			{
+				this.dataSetField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(FaultMetric));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current FaultMetric object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an FaultMetric object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output FaultMetric object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out FaultMetric obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(FaultMetric);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out FaultMetric obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static FaultMetric Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((FaultMetric)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current FaultMetric object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an FaultMetric object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output FaultMetric object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out FaultMetric obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(FaultMetric);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out FaultMetric obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static FaultMetric LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
 	}
 }

@@ -31,7 +31,7 @@ namespace PeachFarm.Test
 		public static bool __test_use_base_UpdateNode = false;
 		public static List<Heartbeat> __test_removed_nodes = new List<Heartbeat>();
 		public static List<Heartbeat> __test_updated_nodes = new List<Heartbeat>();
-		public static List<GenerateReportRequest> __test_pushed_out_reports = new List<GenerateReportRequest>();
+		public static List<GenerateFaultReportRequest> __test_pushed_out_reports = new List<GenerateFaultReportRequest>();
 
 		// map ip addresses (as strings) to HeartBeats (aka nodes)
 		public static Dictionary<string, Heartbeat> __test_GetNodeByName_nodes = new Dictionary<string,Heartbeat>();
@@ -183,7 +183,7 @@ namespace PeachFarm.Test
 			base.HeartbeatReceived(hb);
 		}
 
-		protected override void PushReportToQueue(GenerateReportRequest grr)
+		protected override void PushReportToQueue(GenerateFaultReportRequest grr)
 		{
 			__test_pushed_out_reports.Add(grr);
 		}
@@ -208,7 +208,7 @@ namespace PeachFarm.Test
 			TestController.__test_use_base_UpdateNode = false;
 			TestController.__test_removed_nodes = new List<Heartbeat>();
 			TestController.__test_updated_nodes = new List<Heartbeat>();
-			TestController.__test_pushed_out_reports = new List<GenerateReportRequest>();
+			TestController.__test_pushed_out_reports = new List<GenerateFaultReportRequest>();
 
 			// map ip addresses (as strings) to HeartBeats (aka nodes)
 			TestController.__test_GetNodeByName_nodes = new Dictionary<string,Heartbeat>();

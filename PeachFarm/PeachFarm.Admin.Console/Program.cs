@@ -111,10 +111,25 @@ namespace PeachFarm.Admin
 					string pitFilePath = extra[0];
 
 					string definesFilePath = String.Empty;
-					if (extra.Count >= 2)
+					string target = String.Empty;
+					if(extra.Count >= 3)
+					{
 						definesFilePath = extra[1];
+						target = extra[2];
+					}
+					else if (extra.Count == 2)
+					{
+						if(pitFilePath.EndsWith(".zip") && File.Exists(extra[1]))
+						{
+							definesFilePath = extra[1];
+						}
+						else
+						{
+							target = extra[1];
+						}
+					}
 
-					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip);
+					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target);
 				}
 				#endregion
 
