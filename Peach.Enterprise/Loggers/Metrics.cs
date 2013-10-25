@@ -5,12 +5,6 @@ using System.Data.SQLite;
 
 namespace Peach.Enterprise.Loggers
 {
-	public class Sample
-	{
-		public int Id { get; set; }
-
-	}
-
 	/// <summary>
 	/// Logs fuzzing metrics to a SQLite database.
 	/// </summary>
@@ -91,10 +85,59 @@ CREATE UNIQUE INDEX metrics_index ON metrics (
  dataset
 );";
 
-		private SQLiteConnection db;
-		private SQLiteCommand add_cmd;
-		private Sample sample;
-		private bool reproducingFault;
+		static string create_view = @"
+CREATE VIEW all_metrics AS SELECT * FROM metrics;
+";
+
+		static string select_foreign_key = @"
+SELECT id FROM {0}s WHERE name = :name;";
+
+		static string insert_foreign_key = @"
+INSERT INTO {0}s (name) VALUES (:name); SELECT last_insert_rowid();";
+
+		static string select_metric = @"
+SELECT id FROM metrics WHERE
+ state = :state AND
+ action = :action AND
+ parameter = :parameter AND
+ element = :element AND
+ mutator = :mutator AND
+ dataset = :dataset;
+";
+
+		static string insert_metric = @"
+INSERT INTO metrics (
+ state,
+ action,
+ parameter,
+ element,
+ mutator,
+ dataset,
+ count
+) VALUES (
+ :state,
+ :action,
+ :parameter,
+ :element,
+ :mutator,
+ :dataset,
+ 1
+);";
+
+		static string update_metric = @"
+UPDATE metrics SET count = count + 1 WHERE id = :id;";
+
+		static string[] foreignKeys = { "state", "action", "parameter", "element", "mutator", "dataset" };
+
+		SQLiteConnection db;
+		Sample sample;
+		bool reproducingFault;
+
+		Dictionary<string, KeyTracker> keyTracker = new Dictionary<string, KeyTracker>();
+
+		SQLiteCommand select_metric_cmd;
+		SQLiteCommand insert_metric_cmd;
+		SQLiteCommand update_metric_cmd;
 
 		protected class Sample
 		{
@@ -104,6 +147,41 @@ CREATE UNIQUE INDEX metrics_index ON metrics (
 			public string Element { get; set; }
 			public string Mutator { get; set; }
 			public string DataSet { get; set; }
+		}
+
+		class KeyTracker : IDisposable
+		{
+			public KeyTracker(SQLiteConnection db, string table)
+			{
+				select_cmd = new SQLiteCommand(db);
+				select_cmd.CommandText = select_foreign_key.Fmt(table);
+				select_cmd.Parameters.Add("name", System.Data.DbType.String);
+
+				insert_cmd = new SQLiteCommand(db);
+				insert_cmd.CommandText = insert_foreign_key.Fmt(table);
+				insert_cmd.Parameters.Add("name", System.Data.DbType.String);
+			}
+
+			public void Dispose()
+			{
+				select_cmd.Dispose();
+				insert_cmd.Dispose();
+			}
+
+			public object Get(string name)
+			{
+				select_cmd.Parameters[0].Value = name;
+				object id = select_cmd.ExecuteScalar();
+				if (id == null)
+				{
+					insert_cmd.Parameters[0].Value = name;
+					id = insert_cmd.ExecuteScalar();
+				}
+				return id;
+			}
+
+			SQLiteCommand select_cmd;
+			SQLiteCommand insert_cmd;
 		}
 
 		public MetricsLogger(Dictionary<string, Variant> args)
@@ -128,28 +206,72 @@ CREATE UNIQUE INDEX metrics_index ON metrics (
 			db = new SQLiteConnection("Data Source=\"" + path + "\";Foreign Keys=True");
 			db.Open();
 
-			var cmd = new SQLiteCommand(db);
+			using (var trans = db.BeginTransaction())
+			{
+				using (var cmd = new SQLiteCommand(db))
+				{
+					cmd.CommandText = create_table;
+					cmd.ExecuteNonQuery();
 
-			cmd.CommandText = create_table;
-			cmd.ExecuteNonQuery();
+					cmd.CommandText = create_index;
+					cmd.ExecuteNonQuery();
 
-			cmd.CommandText = create_index;
-			cmd.ExecuteNonQuery();
+					cmd.CommandText = create_view;
+					cmd.ExecuteNonQuery();
+				}
 
-			add_cmd = new SQLiteCommand(db);
-			add_cmd.Parameters.Add(new SQLiteParameter("state"));
-			add_cmd.Parameters.Add(new SQLiteParameter("action"));
-			add_cmd.Parameters.Add(new SQLiteParameter("parameter"));
-			add_cmd.Parameters.Add(new SQLiteParameter("element"));
-			add_cmd.Parameters.Add(new SQLiteParameter("mutator"));
-			add_cmd.Parameters.Add(new SQLiteParameter("dataset"));
-			add_cmd.Parameters.Add(new SQLiteParameter("id"));
+				trans.Commit();
+			}
+
+			select_metric_cmd = new SQLiteCommand(db);
+			select_metric_cmd.CommandText = select_metric;
+
+			insert_metric_cmd = new SQLiteCommand(db);
+			insert_metric_cmd.CommandText = insert_metric;
+
+			foreach (var item in foreignKeys)
+			{
+				keyTracker.Add(item, new KeyTracker(db, item));
+
+				select_metric_cmd.Parameters.Add(new SQLiteParameter(item));
+				insert_metric_cmd.Parameters.Add(new SQLiteParameter(item));
+			}
+
+			update_metric_cmd = new SQLiteCommand(db);
+			update_metric_cmd.CommandText = update_metric;
+			update_metric_cmd.Parameters.Add(new SQLiteParameter("id"));
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			db.Close();
-			db = null;
+			if (update_metric_cmd != null)
+			{
+				update_metric_cmd.Dispose();
+				update_metric_cmd = null;
+			}
+
+			if (insert_metric_cmd != null)
+			{
+				insert_metric_cmd.Dispose();
+				insert_metric_cmd = null;
+			}
+
+			if (select_metric_cmd != null)
+			{
+				select_metric_cmd.Dispose();
+				select_metric_cmd = null;
+			}
+
+			foreach (var kv in keyTracker)
+				kv.Value.Dispose();
+
+			keyTracker.Clear();
+
+			if (db != null)
+			{
+				db.Close();
+				db = null;
+			}
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -182,44 +304,48 @@ CREATE UNIQUE INDEX metrics_index ON metrics (
 				OnSample(sample);
 		}
 
-		protected object GetForeignKey(string table, string name)
-		{
-			var cmd = new SQLiteCommand(db);
-			cmd.Parameters.AddWithValue("name", name);
-			cmd.CommandText = "select id from {0} where name = :name;".Fmt(table);
-			object id = cmd.ExecuteScalar();
-			if (id == null)
-			{
-				cmd.CommandText = "insert into {0} (name) values (:name); select last_insert_rowid();".Fmt(table);
-				id = cmd.ExecuteScalar();
-			}
-			return id;
-		}
-
 		protected virtual void OnSample(Sample s)
 		{
-			add_cmd.CommandText = "BEGIN;";
-			add_cmd.ExecuteNonQuery();
-
-			add_cmd.Parameters["state"].Value = GetForeignKey("states", s.State);
-			add_cmd.Parameters["action"].Value =  GetForeignKey("actions", s.Action);
-			add_cmd.Parameters["parameter"].Value =  GetForeignKey("parameters", s.Parameter ?? "");
-			add_cmd.Parameters["element"].Value =  GetForeignKey("elements", s.Element);
-			add_cmd.Parameters["mutator"].Value =  GetForeignKey("mutators", s.Mutator);
-			add_cmd.Parameters["dataset"].Value =  GetForeignKey("datasets", s.DataSet ?? "");
-
-			add_cmd.CommandText = "select id from metrics where state = :state and action = :action and parameter = :parameter and element = :element and mutator = :mutator and dataset = :dataset";
-			object sample_id = add_cmd.ExecuteScalar();
-			if (sample_id == null)
+			using (var trans = db.BeginTransaction())
 			{
-				add_cmd.CommandText = "insert into metrics (state, action, parameter, element, mutator, dataset, count) values (:state, :action, :parameter, :element, :mutator, :dataset, 1); COMMIT;";
-				add_cmd.ExecuteNonQuery();
-			}
-			else
-			{
-				add_cmd.Parameters["id"].Value = sample_id;
-				add_cmd.CommandText = "update metrics set count = count + 1 where id = :id; COMMIT;";
-				add_cmd.ExecuteNonQuery();
+				object id;
+
+				id = keyTracker["state"].Get(s.State);
+				select_metric_cmd.Parameters["state"].Value = id;
+				insert_metric_cmd.Parameters["state"].Value = id;
+
+				id = keyTracker["action"].Get(s.Action);
+				select_metric_cmd.Parameters["action"].Value = id;
+				insert_metric_cmd.Parameters["action"].Value = id;
+
+				id = keyTracker["parameter"].Get(s.Parameter ?? "");
+				select_metric_cmd.Parameters["parameter"].Value = id;
+				insert_metric_cmd.Parameters["parameter"].Value = id;
+
+				id = keyTracker["element"].Get(s.Element);
+				select_metric_cmd.Parameters["element"].Value = id;
+				insert_metric_cmd.Parameters["element"].Value = id;
+
+				id = keyTracker["mutator"].Get(s.Mutator);
+				select_metric_cmd.Parameters["mutator"].Value = id;
+				insert_metric_cmd.Parameters["mutator"].Value = id;
+
+				id = keyTracker["dataset"].Get(s.DataSet ?? "");
+				select_metric_cmd.Parameters["dataset"].Value = id;
+				insert_metric_cmd.Parameters["dataset"].Value = id;
+
+				id = select_metric_cmd.ExecuteScalar();
+				if (id == null)
+				{
+					insert_metric_cmd.ExecuteNonQuery();
+				}
+				else
+				{
+					update_metric_cmd.Parameters["id"].Value = id;
+					update_metric_cmd.ExecuteNonQuery();
+				}
+
+				trans.Commit();
 			}
 		}
 	}
