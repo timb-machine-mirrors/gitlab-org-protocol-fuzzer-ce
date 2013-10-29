@@ -12,7 +12,6 @@ namespace Peach.Enterprise.Loggers
 	[Parameter("Path", typeof(string), "Log folder")]
 	public class MetricsLogger : Logger
 	{
-		private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 		private static string fileName = "metrics.sqlite";
 
 		static string create_table = @"
