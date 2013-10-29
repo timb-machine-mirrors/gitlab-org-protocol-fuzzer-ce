@@ -16,12 +16,15 @@
 
 	<xs:element name="CreateJobRequest" type="CreateJobRequest" />
 	<xs:complexType name="CreateJobRequest">
+		<xs:sequence>
+			<xs:element name="ZipFile" type="xs:base64Binary" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
 		<xs:attribute name="ClientCount" type="xs:int" use="required" />
 		<xs:attribute name="IPAddress" type="xs:string" use="required" />
 		<xs:attribute name="PitFileName" type="xs:string" use="required" />
 		<xs:attribute name="UserName" type="xs:string" use="required" />
 		<xs:attribute name="Tags" type="xs:string" use="required" />
-		<xs:attribute name="ZipFile" type="xs:base64Binary" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:element name="CreateJobResponse" type="CreateJobResponse" />
@@ -52,6 +55,7 @@
 		<xs:attribute name="ZipFile" type="xs:string" use="required" />
 		<xs:attribute name="HasDefines" type="xs:boolean" use="required" />
 		<xs:attribute name="PitVersion" type="xs:string" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
@@ -253,17 +257,35 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:element name="GenerateReportRequest" type="GenerateReportRequest" />
-	<xs:complexType name="GenerateReportRequest">
+	<xs:element name="GenerateFaultReportRequest" type="GenerateFaultReportRequest" />
+	<xs:complexType name="GenerateFaultReportRequest">
 		<xs:attribute name="JobID" type="xs:string" use="required" />
 		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
 	</xs:complexType>
 
-	<xs:element name="GenerateReportResponse" type="GenerateReportResponse" />
-	<xs:complexType name="GenerateReportResponse">
+	<xs:element name="GenerateFaultReportResponse" type="GenerateFaultReportResponse" />
+	<xs:complexType name="GenerateFaultReportResponse">
 		<xs:complexContent>
 			<xs:extension base="ResponseBase">
 				<xs:attribute name="JobID" type="xs:string" use="required" />
+				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="GenerateMetricsReportRequest" type="GenerateMetricsReportRequest" />
+	<xs:complexType name="GenerateMetricsReportRequest">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
+		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
+	</xs:complexType>
+
+	<xs:element name="GenerateMetricsReportResponse" type="GenerateMetricsReportResponse" />
+	<xs:complexType name="GenerateMetricsReportResponse">
+		<xs:complexContent>
+			<xs:extension base="ResponseBase">
+				<xs:attribute name="JobID" type="xs:string" use="required" />
+				<xs:attribute name="Target" type="xs:string" use="required" />
 				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
 			</xs:extension>
 		</xs:complexContent>
@@ -305,4 +327,50 @@
 			<xs:enumeration value="Error" />
 		</xs:restriction>
 	</xs:simpleType>
+
+	<xs:element name="JobProgressNotification" type="JobProgressNotification" />
+	
+	<xs:complexType name="JobProgressNotification">
+		<xs:sequence>
+			<xs:element name="IterationMetrics" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="IterationMetric" type="IterationMetric" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="FaultMetrics" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="FaultMetric" type="FaultMetric" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="IterationMetric">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
+		<xs:attribute name="State" type="xs:string" use="required" />
+		<xs:attribute name="Action" type="xs:string" use="required" />
+		<xs:attribute name="DataElement" type="xs:string" use="required" />
+		<xs:attribute name="Mutator" type="xs:string" use="required" />
+		<xs:attribute name="DataSet" type="xs:string" use="required" />
+		<xs:attribute name="IterationCount" type="xs:unsignedInt" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="FaultMetric">
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Target" type="xs:string" use="required" />
+		<xs:attribute name="Iteration" type="xs:unsignedInt" use="required" />
+		<xs:attribute name="Bucket" type="xs:string" use="required" />
+		<xs:attribute name="State" type="xs:string" use="required" />
+		<xs:attribute name="Action" type="xs:string" use="required" />
+		<xs:attribute name="DataElement" type="xs:string" use="required" />
+		<xs:attribute name="Mutator" type="xs:string" use="required" />
+		<xs:attribute name="DataSet" type="xs:string" use="required" />
+	</xs:complexType>
 </xs:schema>

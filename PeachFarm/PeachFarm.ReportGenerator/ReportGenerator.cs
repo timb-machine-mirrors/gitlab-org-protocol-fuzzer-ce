@@ -11,12 +11,14 @@ using System.ComponentModel;
 using PeachFarm.Common;
 using Telerik.Reporting.Drawing;
 using Telerik.Reporting.Processing;
+using MySql.Data.MySqlClient;
 
 namespace PeachFarm.Reporting
 {
 	public class ReportGenerator
 	{
 		ReportGeneratorSection config = null;
+		RabbitMqHelper rabbitProcessOne = null;
 		RabbitMqHelper rabbit = null;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -28,9 +30,13 @@ namespace PeachFarm.Reporting
 
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
 
+			rabbitProcessOne = GetRabbitMqHelper();
+			rabbitProcessOne.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbitProcessOne_MessageReceived);
+			rabbitProcessOne.StartListener(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, 1000, false, true);
+
 			rabbit = GetRabbitMqHelper();
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR, 1000, false, true);
+			rabbit.StartListener(QueueNames.QUEUE_REPORTGENERATOR, 100, false, false);
 		}
 
 		protected RabbitMqHelper GetRabbitMqHelper()
@@ -40,40 +46,61 @@ namespace PeachFarm.Reporting
 
 		public void Close()
 		{
-			if (rabbit.IsListening)
+			if (rabbitProcessOne.IsListening)
 			{
-				rabbit.StopListener(false);
+				rabbitProcessOne.StopListener(false);
 			}
+		}
+
+		void rabbitProcessOne_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
+		{
+			rabbit_MessageReceived(sender, e);
+			rabbitProcessOne.ResumeListening();
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
 		{
-			if(e.Action != Actions.GenerateReport)
-				return;
 
-			GenerateReportRequest request = GenerateReportRequest.Deserialize(e.Body);
-
-			GenerateReportResponse response = new GenerateReportResponse();
-
-			logger.Info("Report generator: Received report request " + request.JobID);
+			ResponseBase response = null;
 
 			try
 			{
-				response = GenerateReport(request);
+				response = ProcessAction(e.Action, e.Body);
 			}
 			catch (Exception ex)
 			{
-				response = ErrorResponse(request.JobID, ex.Message);
+				//TODO
+				response = ErrorResponse("", ex.Message);
 			}
 
-			rabbit.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
-
-			rabbit.ResumeListening();
+			if (response != null)
+			{
+				rabbitProcessOne.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
+			}
 		}
 
-		public GenerateReportResponse GenerateReport(GenerateReportRequest request)
+		private ResponseBase ProcessAction(string action, string body)
 		{
-			GenerateReportResponse response = new GenerateReportResponse();
+			switch(action)
+			{
+				case Actions.GenerateFaultReport:
+					return GenerateFaultReport(GenerateFaultReportRequest.Deserialize(body));
+				case Actions.GenerateMetricsReport:
+					return GenerateMetricsReport(GenerateMetricsReportRequest.Deserialize(body));
+				case Actions.NotifyJobProgress:
+					LogJobProgress(JobProgressNotification.Deserialize(body));
+					break;
+			}
+
+			return null;
+		}
+
+		#region GenerateFaultReport
+		public GenerateFaultReportResponse GenerateFaultReport(GenerateFaultReportRequest request)
+		{
+			logger.Info("Report generator: Received report request " + request.JobID);
+
+			GenerateFaultReportResponse response = new GenerateFaultReportResponse();
 			response.JobID = request.JobID;
 
 			#region validate
@@ -140,7 +167,7 @@ namespace PeachFarm.Reporting
 
 		}
 
-		private void ConfigureInstanceReportSource(GenerateReportRequest request, Telerik.Reporting.InstanceReportSource irs)
+		private void ConfigureInstanceReportSource(GenerateFaultReportRequest request, Telerik.Reporting.InstanceReportSource irs)
 		{
 			Unit margin = new Unit(0.5, UnitType.Inch);
 			irs.ReportDocument.PageSettings = new PageSettings();
@@ -155,9 +182,9 @@ namespace PeachFarm.Reporting
 			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 		}
 
-		private GenerateReportResponse ErrorResponse(string jobid, string message)
+		private GenerateFaultReportResponse ErrorResponse(string jobid, string message)
 		{
-			GenerateReportResponse response = new GenerateReportResponse();
+			GenerateFaultReportResponse response = new GenerateFaultReportResponse();
 			response.JobID = jobid;
 			response.ErrorMessage = message;
 			response.Success = false;
@@ -170,6 +197,92 @@ namespace PeachFarm.Reporting
 		{
 			eventArgs.Cancel = false;
 		}
+		#endregion
 
+		#region LogJobProgress
+		private void LogJobProgress(JobProgressNotification notification)
+		{
+			MySqlCommand cmd;
+
+			var conn = new MySqlConnection(config.MySql.ConnectionString);
+			conn.Open();
+
+			var transaction = conn.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
+			try
+			{
+				foreach (var i in notification.IterationMetrics)
+				{
+					cmd = conn.CreateCommand();
+					cmd.Connection = conn;
+					cmd.Transaction = transaction;
+					cmd.CommandText = "metrics_iterations_insert";
+					cmd.Parameters.AddWithValue("jobid", i.JobID);
+					cmd.Parameters.AddWithValue("target", i.Target);
+					cmd.Parameters.AddWithValue("state", i.State);
+					cmd.Parameters.AddWithValue("actionname", i.Action);
+					cmd.Parameters.AddWithValue("dataelement", i.DataElement);
+					cmd.Parameters.AddWithValue("mutator", i.Mutator);
+					cmd.Parameters.AddWithValue("dataset", i.DataSet);
+					cmd.Parameters.AddWithValue("iterationcount", i.IterationCount);
+					cmd.CommandType = System.Data.CommandType.StoredProcedure;
+					cmd.ExecuteNonQuery();
+				}
+
+				foreach (var f in notification.FaultMetrics)
+				{
+					cmd = conn.CreateCommand();
+					cmd.Connection = conn;
+					cmd.Transaction = transaction;
+					cmd.CommandText = "metrics_faults_insert";
+					cmd.Parameters.AddWithValue("jobid", f.JobID);
+					cmd.Parameters.AddWithValue("target", f.Target);
+					cmd.Parameters.AddWithValue("bucket", f.Bucket);
+					cmd.Parameters.AddWithValue("iteration", f.Iteration);
+					cmd.Parameters.AddWithValue("state", f.State);
+					cmd.Parameters.AddWithValue("actionname", f.Action);
+					cmd.Parameters.AddWithValue("dataelement", f.DataElement);
+					cmd.Parameters.AddWithValue("mutator", f.Mutator);
+					cmd.Parameters.AddWithValue("dataset", f.DataSet);
+					cmd.CommandType = System.Data.CommandType.StoredProcedure;
+					cmd.ExecuteNonQuery();
+				}
+				transaction.Commit();
+			}
+			catch (Exception)
+			{
+				transaction.Rollback();
+			}
+
+			conn.Close();
+		}
+		#endregion
+
+		#region GenerateMetricsReport
+		private GenerateMetricsReportResponse GenerateMetricsReport(GenerateMetricsReportRequest request)
+		{
+			var response = new GenerateMetricsReportResponse();
+			
+
+			bool isJobIDSpecified = !String.IsNullOrEmpty(request.JobID);
+			bool isTargetSpecified = !String.IsNullOrEmpty(request.Target);
+
+			if (isJobIDSpecified)
+			{
+
+			}
+			else if (isTargetSpecified)
+			{
+
+			}
+			else
+			{
+				response.Success = false;
+				response.ErrorMessage = "Not enough information specified.";
+			}
+
+			//TODO
+			return response;
+		}
+		#endregion
 	}
 }

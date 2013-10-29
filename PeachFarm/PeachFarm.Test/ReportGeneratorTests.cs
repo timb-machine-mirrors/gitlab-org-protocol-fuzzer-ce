@@ -44,11 +44,11 @@ namespace PeachFarm.Test
 		public void Test()
 		{
 			var rg = new PeachFarm.Reporting.ReportGenerator();
-			GenerateReportRequest request = new GenerateReportRequest();
+			GenerateFaultReportRequest request = new GenerateFaultReportRequest();
 			request.JobID = "9CB41D020E39";
 			request.ReportFormat = ReportFormat.PDF;
 
-			var response = rg.GenerateReport(request);
+			var response = rg.GenerateFaultReport(request);
 
 			Assert.IsTrue(response.Success);
 		}

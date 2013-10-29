@@ -169,6 +169,8 @@ namespace PeachFarm.Common.Messages
 		public const string ListErrors = "ListErrors";
 		public const string Monitor = "Monitor";
 		public const string Heartbeat = "Heartbeat";
-		public const string GenerateReport = "GenerateReport";
+		public const string GenerateFaultReport = "GenerateFaultReport";
+		public const string GenerateMetricsReport = "GenerateMetricsReport";
+		public const string NotifyJobProgress = "NotifyJobProgress";
 	}
 }

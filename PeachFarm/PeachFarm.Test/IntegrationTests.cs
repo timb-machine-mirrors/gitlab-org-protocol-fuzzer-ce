@@ -99,7 +99,7 @@ namespace PeachFarm.Test
 				done = true;
 			};
 			admin.StartPeachCompleted += startHandler;
-			admin.StartPeachAsync("HelloWorld.xml", null, 1, null, null);
+			admin.StartPeachAsync("HelloWorld.xml", null, 1, null, null, null);
 			while (!done) { }
 			admin.StartPeachCompleted -= startHandler;
 
@@ -123,7 +123,7 @@ namespace PeachFarm.Test
 				done = true;
 			};
 			admin.StartPeachCompleted += startHandler;
-			admin.StartPeachAsync("DebuggerWindows.xml", null, 1, null, null);
+			admin.StartPeachAsync("DebuggerWindows.xml", null, 1, null, null, null);
 			while (!done) { }
 			admin.StartPeachCompleted -= startHandler;
 
