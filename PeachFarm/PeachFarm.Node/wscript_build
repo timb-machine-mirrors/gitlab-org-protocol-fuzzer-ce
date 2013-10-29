@@ -5,13 +5,17 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Configuration.dll',
+	'System.Data.dll',
 	'System.Xml.dll',
 	'Peach.Core.dll',
+	'Peach.Enterprise.dll',
 	'PeachFarm.Common.dll',
 	'RabbitMQ.Client.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
 	'Ionic.Zip.Reduced.dll',
+	'System.Data.SQLite.dll',
+	'System.Data.SQLite.Linq.dll',
 ]
 
 bld(
