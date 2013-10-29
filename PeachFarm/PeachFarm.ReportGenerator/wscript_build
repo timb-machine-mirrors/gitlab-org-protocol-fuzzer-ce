@@ -4,6 +4,7 @@ deps = [
 	'System.dll',
 	'System.Configuration.dll',
 	'System.Core.dll',
+	'System.Data.dll',
 	'System.Drawing.dll',
 	'System.Windows.Forms.dll',
 	'Telerik.Reporting.dll',
@@ -12,6 +13,7 @@ deps = [
 	'NLog.dll',
 	'PeachFarm.Common.dll',
 	'PeachFarm.Reporting.Reports.dll',
+	'MySql.Data.dll',
 ]
 
 bld(
