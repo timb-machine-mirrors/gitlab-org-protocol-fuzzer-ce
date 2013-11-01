@@ -23,8 +23,8 @@ namespace PeachFarmMonitor
     private static PeachFarmMonitorSection monitorconfig = null;
     private string jobid;
     private bool jobfound;
-	  private string faultid;
-	  private bool faultfound;
+	  //private string faultid;
+	  //private bool faultfound;
 
     private static string[] dataFields = new string[]
 		{

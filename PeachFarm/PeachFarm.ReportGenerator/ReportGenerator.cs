@@ -202,58 +202,87 @@ namespace PeachFarm.Reporting
 		#region LogJobProgress
 		private void LogJobProgress(JobProgressNotification notification)
 		{
+			var mongoJob = DatabaseHelper.GetJob(notification.JobID, config.MongoDb.ConnectionString);
+
 			MySqlCommand cmd;
 
-			var conn = new MySqlConnection(config.MySql.ConnectionString);
-			conn.Open();
-
-			var transaction = conn.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
-			try
+			using (var conn = new MySqlConnection(config.MySql.ConnectionString))
 			{
-				foreach (var i in notification.IterationMetrics)
+				conn.Open();
+
+				cmd = conn.CreateCommand();
+				cmd.Connection = conn;
+				cmd.CommandText = "metrics_job_insert";
+				cmd.CommandType = System.Data.CommandType.StoredProcedure;
+				cmd.Parameters.AddWithValue("jobid", notification.JobID);
+				cmd.Parameters.AddWithValue("target", mongoJob.Target);
+				cmd.Parameters.AddWithValue("startdate", mongoJob.StartDate);
+				cmd.Parameters.AddWithValue("mongoid", mongoJob.ID);
+				cmd.Parameters.AddWithValue("pitfilename", mongoJob.Pit.FileName);
+
+				var mysqljobid = cmd.ExecuteScalar();
+
+				var transaction = conn.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
+				try
 				{
-					cmd = conn.CreateCommand();
-					cmd.Connection = conn;
-					cmd.Transaction = transaction;
-					cmd.CommandText = "metrics_iterations_insert";
-					cmd.Parameters.AddWithValue("jobid", i.JobID);
-					cmd.Parameters.AddWithValue("target", i.Target);
-					cmd.Parameters.AddWithValue("state", i.State);
-					cmd.Parameters.AddWithValue("actionname", i.Action);
-					cmd.Parameters.AddWithValue("dataelement", i.DataElement);
-					cmd.Parameters.AddWithValue("mutator", i.Mutator);
-					cmd.Parameters.AddWithValue("dataset", i.DataSet);
-					cmd.Parameters.AddWithValue("iterationcount", i.IterationCount);
-					cmd.CommandType = System.Data.CommandType.StoredProcedure;
-					cmd.ExecuteNonQuery();
+					foreach (var i in notification.IterationMetrics)
+					{
+						cmd = conn.CreateCommand();
+						cmd.Connection = conn;
+						cmd.Transaction = transaction;
+						cmd.CommandText = "metrics_iterations_insert";
+						cmd.Parameters.AddWithValue("jobs_id", mysqljobid);
+						cmd.Parameters.AddWithValue("state", i.State);
+						cmd.Parameters.AddWithValue("actionname", i.Action);
+						cmd.Parameters.AddWithValue("dataelement", i.DataElement);
+						cmd.Parameters.AddWithValue("mutator", i.Mutator);
+						cmd.Parameters.AddWithValue("dataset", i.DataSet);
+						cmd.Parameters.AddWithValue("iterationcount", i.IterationCount);
+						cmd.CommandType = System.Data.CommandType.StoredProcedure;
+						cmd.ExecuteNonQuery();
+					}
+
+					foreach (var f in notification.FaultMetrics)
+					{
+						cmd = conn.CreateCommand();
+						cmd.Connection = conn;
+						cmd.Transaction = transaction;
+						cmd.CommandText = "metrics_faults_insert";
+						cmd.Parameters.AddWithValue("jobs_id", mysqljobid);
+						cmd.Parameters.AddWithValue("bucket", f.Bucket);
+						cmd.Parameters.AddWithValue("iteration", f.Iteration);
+						cmd.Parameters.AddWithValue("state", f.State);
+						cmd.Parameters.AddWithValue("actionname", f.Action);
+						cmd.Parameters.AddWithValue("dataelement", f.DataElement);
+						cmd.Parameters.AddWithValue("mutator", f.Mutator);
+						cmd.Parameters.AddWithValue("dataset", f.DataSet);
+						cmd.Parameters.AddWithValue("mongoid", f.MongoID);
+
+						cmd.CommandType = System.Data.CommandType.StoredProcedure;
+						cmd.ExecuteNonQuery();
+					}
+
+					foreach (var s in notification.StateMetrics)
+					{
+						cmd = conn.CreateCommand();
+						cmd.Connection = conn;
+						cmd.Transaction = transaction;
+						cmd.CommandText = "metrics_states_insert";
+						cmd.CommandType = System.Data.CommandType.StoredProcedure;
+						cmd.Parameters.AddWithValue("jobs_id", mysqljobid);
+						cmd.Parameters.AddWithValue("state", s.State);
+						cmd.Parameters.AddWithValue("executioncount", s.ExecutionCount);
+						cmd.ExecuteNonQuery();
+					}
+					transaction.Commit();
+				}
+				catch (Exception)
+				{
+					transaction.Rollback();
 				}
 
-				foreach (var f in notification.FaultMetrics)
-				{
-					cmd = conn.CreateCommand();
-					cmd.Connection = conn;
-					cmd.Transaction = transaction;
-					cmd.CommandText = "metrics_faults_insert";
-					cmd.Parameters.AddWithValue("jobid", f.JobID);
-					cmd.Parameters.AddWithValue("target", f.Target);
-					cmd.Parameters.AddWithValue("bucket", f.Bucket);
-					cmd.Parameters.AddWithValue("iteration", f.Iteration);
-					cmd.Parameters.AddWithValue("state", f.State);
-					cmd.Parameters.AddWithValue("actionname", f.Action);
-					cmd.Parameters.AddWithValue("dataelement", f.DataElement);
-					cmd.Parameters.AddWithValue("mutator", f.Mutator);
-					cmd.Parameters.AddWithValue("dataset", f.DataSet);
-					cmd.CommandType = System.Data.CommandType.StoredProcedure;
-					cmd.ExecuteNonQuery();
-				}
-				transaction.Commit();
+				conn.Close();
 			}
-			catch (Exception)
-			{
-				transaction.Rollback();
-			}
-
-			conn.Close();
 		}
 		#endregion
 
@@ -263,22 +292,6 @@ namespace PeachFarm.Reporting
 			var response = new GenerateMetricsReportResponse();
 			
 
-			bool isJobIDSpecified = !String.IsNullOrEmpty(request.JobID);
-			bool isTargetSpecified = !String.IsNullOrEmpty(request.Target);
-
-			if (isJobIDSpecified)
-			{
-
-			}
-			else if (isTargetSpecified)
-			{
-
-			}
-			else
-			{
-				response.Success = false;
-				response.ErrorMessage = "Not enough information specified.";
-			}
 
 			//TODO
 			return response;

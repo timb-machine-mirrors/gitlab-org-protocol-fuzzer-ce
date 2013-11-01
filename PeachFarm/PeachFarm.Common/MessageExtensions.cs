@@ -159,6 +159,18 @@ namespace PeachFarm.Common.Messages
 		}
 	}
 
+	public partial class JobProgressNotification
+	{
+		public JobProgressNotification(string jobid)
+		{
+			this.FaultMetrics = new List<FaultMetric>();
+			this.IterationMetrics = new List<IterationMetric>();
+			this.StateMetrics = new List<StateMetric>();
+
+			this.JobID = jobid;
+		}
+	}
+
 	public static class Actions
 	{
 		public const string CreateJob = "CreateJob";

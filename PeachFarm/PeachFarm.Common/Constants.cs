@@ -27,9 +27,20 @@ namespace PeachFarm.Common
 
 	public static class Formats
 	{
+		/// <summary>
+		/// 0: JobID, 1: PitFileName
+		/// </summary>
 		public static readonly string JobFolder = "Job_{0}_{1}";
+
+		/// <summary>
+		/// 0: Node IP or Name
+		/// </summary>
 		public static readonly string NodeFolder = "Node_{0}";
-		public static readonly string JobNodeFolder = "Job_{0}_{1}/Node_{2}";
+
+		/// <summary>
+		/// 0: JobID, 1: PitFileName, 2: Node Name
+		/// </summary>
+		public static readonly string JobNodeFolder = JobFolder + "/Node_{2}";
 	}
 
 	public static class ApiUrls

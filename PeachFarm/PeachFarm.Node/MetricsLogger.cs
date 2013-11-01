@@ -13,7 +13,6 @@ namespace PeachFarm.Loggers
 	[Logger("MetricsRabbit", true)]
 	[Parameter("Path", typeof(string), "Log folder")]
 	[Parameter("JobID", typeof(string), "JobID")]
-	[Parameter("Target", typeof(string), "Target")]
 	[Parameter("RabbitHost", typeof(string), "RabbitHost")]
 	[Parameter("RabbitPort", typeof(int), " RabbitPort")]
 	[Parameter("RabbitUser", typeof(string), "RabbitUser")]
@@ -31,7 +30,6 @@ namespace PeachFarm.Loggers
 		string rabbitpassword;
 		bool rabbitusessl;
 		string jobid;
-		string target;
 
 		public MetricsRabbitLogger(Dictionary<string, Peach.Core.Variant> args)
 			:base(args)
@@ -43,29 +41,44 @@ namespace PeachFarm.Loggers
 			rabbitpassword = (string)args["RabbitPassword"];
 			rabbitusessl = (bool)args["RabbitUseSSL"];
 			jobid = (string)args["JobID"];
-			target = (string)args["Target"];
 		}
 
 		//TODO override methods and call SendRows
+		protected override void Engine_TestFinished(RunContext context)
+		{
+			base.Engine_TestFinished(context);
+			SendRows();
+		}
 
 		private void SendRows()
 		{
 			DataTable dt = SelectAllFrom(filepath, "metrics");
 			
-			JobProgressNotification notification = new JobProgressNotification();
+			JobProgressNotification notification = new JobProgressNotification(jobid);
+			notification.JobID = jobid;
 
 			foreach(DataRow row in dt.Rows)
 			{
-				IterationMetric i = new IterationMetric();
-				i.Action = (string)row["action"];
-				i.DataElement = (string)row["element"];
-				i.DataSet = (string)row["dataset"];
-				i.IterationCount = (uint)row["count"];
-				i.JobID = jobid;
-				i.Mutator = (string)row["mutator"];
-				i.State = (string)row["state"];
-				i.Target = target;
-				notification.IterationMetrics.Add(i);
+				notification.IterationMetrics.Add(new IterationMetric()
+				{
+					Action = (string)row["action"],
+					DataElement = (string)row["element"],
+					DataSet = (string)row["dataset"],
+					IterationCount = (uint)row["count"],
+					Mutator = (string)row["mutator"],
+					State = (string)row["state"]
+				});
+			}
+
+			dt = SelectAllFrom(filepath, "metrics_states");
+
+			foreach (DataRow row in dt.Rows)
+			{
+				notification.StateMetrics.Add(new StateMetric()
+				{
+					ExecutionCount = (uint)row["count"],
+					State = (string)row["state"]
+				});
 			}
 
 			RabbitMqHelper rabbit = new RabbitMqHelper(rabbithost, rabbitport, rabbituser, rabbitpassword, rabbitusessl);
