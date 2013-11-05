@@ -39,6 +39,8 @@ namespace PeachFarm.Admin
 				int launchCount = 0;
 				string ip = String.Empty;
 
+				string range = String.Empty;
+
 				#region Parse & Validate Console Input
 				var p = new OptionSet()
 					{
@@ -59,7 +61,8 @@ namespace PeachFarm.Admin
 						// Command parameters
 						{ "n|count=", v => launchCount = int.Parse(v)},
 						{ "i|ip=", v => ip = v},
-						{ "t|tags=", v => tagsString = v}
+						{ "t|tags=", v => tagsString = v},
+						{ "r|range=", v => range = v}
 					};
 
 				List<string> extra = p.Parse(args);
@@ -106,7 +109,10 @@ namespace PeachFarm.Admin
 				if (start)
 				{
 					if (launchCount < 0)
+					{
 						System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
+						return;
+					}
 
 					string pitFilePath = extra[0];
 
@@ -129,7 +135,35 @@ namespace PeachFarm.Admin
 						}
 					}
 
-					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target);
+					#region range
+					uint? rangestart = null;
+					uint? rangeend = null;
+
+					if(String.IsNullOrEmpty(range) == false)
+					{
+						try
+						{
+							var rangeparsed = range.Split('-');
+							if (rangeparsed.Length == 2)
+							{
+								rangestart = uint.Parse(rangeparsed[0]);
+								rangeend = uint.Parse(rangeparsed[1]);
+								if (rangeend < rangestart)
+								{
+									rangestart = null;
+									rangeend = null;
+								}
+							}
+						}
+						catch
+						{
+							Program.syntax();
+							return;
+						}
+					}
+					#endregion
+
+					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend);
 				}
 				#endregion
 
@@ -486,13 +520,15 @@ Syntax:
 Commands:
 
  start   - Start one or more instances of Peach.
-   clientCount - Number of instances to start
-   tags        - Comma delimited list of tags to match nodes with
+   clientCount			- Number of instances to start
+   tags							- Comma delimited list of tags to match nodes with
 
-   ipAddress   - Address of specific node to launch on
+   ipAddress				- Address of specific node to launch on
 
-   pitFilePath - Full path to Pit File or Zip File
-   definesFilePath - Full path to Defines File (optional)
+   pitFilePath			- Full path to Pit File or Zip File
+   definesFilePath	- Full path to Defines File (optional)
+
+	 range						- Iteration range (optional), format is <start>-<end> example: 1000-2000
 
  stop   - Stop some instances of Peach
    jobID - Job ID

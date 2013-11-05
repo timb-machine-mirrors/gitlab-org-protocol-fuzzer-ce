@@ -56,6 +56,8 @@
 		<xs:attribute name="HasDefines" type="xs:boolean" use="required" />
 		<xs:attribute name="PitVersion" type="xs:string" use="required" />
 		<xs:attribute name="Target" type="xs:string" use="required" />
+		<xs:attribute name="RangeStart" type="xs:unsignedInt" />
+		<xs:attribute name="RangeEnd" type="xs:unsignedInt" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
@@ -276,7 +278,6 @@
 	<xs:element name="GenerateMetricsReportRequest" type="GenerateMetricsReportRequest" />
 	<xs:complexType name="GenerateMetricsReportRequest">
 		<xs:attribute name="JobID" type="xs:string" use="required" />
-		<xs:attribute name="Target" type="xs:string" use="required" />
 		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
 	</xs:complexType>
 
@@ -285,7 +286,6 @@
 		<xs:complexContent>
 			<xs:extension base="ResponseBase">
 				<xs:attribute name="JobID" type="xs:string" use="required" />
-				<xs:attribute name="Target" type="xs:string" use="required" />
 				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
 			</xs:extension>
 		</xs:complexContent>
@@ -346,14 +346,19 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
+			<xs:element name="StateMetrics" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="StateMetric" type="StateMetric" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="JobID" type="xs:string" use="required" />
-		<xs:attribute name="Target" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="IterationMetric">
-		<xs:attribute name="JobID" type="xs:string" use="required" />
-		<xs:attribute name="Target" type="xs:string" use="required" />
+		<xs:attribute name="JobStartDate" type="xs:string" use="required" />
 		<xs:attribute name="State" type="xs:string" use="required" />
 		<xs:attribute name="Action" type="xs:string" use="required" />
 		<xs:attribute name="DataElement" type="xs:string" use="required" />
@@ -363,8 +368,6 @@
 	</xs:complexType>
 
 	<xs:complexType name="FaultMetric">
-		<xs:attribute name="JobID" type="xs:string" use="required" />
-		<xs:attribute name="Target" type="xs:string" use="required" />
 		<xs:attribute name="Iteration" type="xs:unsignedInt" use="required" />
 		<xs:attribute name="Bucket" type="xs:string" use="required" />
 		<xs:attribute name="State" type="xs:string" use="required" />
@@ -372,5 +375,11 @@
 		<xs:attribute name="DataElement" type="xs:string" use="required" />
 		<xs:attribute name="Mutator" type="xs:string" use="required" />
 		<xs:attribute name="DataSet" type="xs:string" use="required" />
+		<xs:attribute name="MongoID" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="StateMetric">
+		<xs:attribute name="State" type="xs:string" use="required" />
+		<xs:attribute name="ExecutionCount" type="xs:unsignedInt" use="required" />
 	</xs:complexType>
 </xs:schema>

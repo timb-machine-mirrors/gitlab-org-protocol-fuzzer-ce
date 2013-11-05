@@ -28,7 +28,7 @@ bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #Newtonsoft.Json.dll is already provided in Peach/3rdParty
 
-bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q2 2013/Bin'])
+bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 
 bld.read_csshlib('MySql.Data.dll',			paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
 bld.read_csshlib('MySql.Data.Entity.dll',   paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])

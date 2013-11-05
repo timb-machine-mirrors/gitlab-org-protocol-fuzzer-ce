@@ -36,6 +36,8 @@ namespace PeachFarm.Common.Mongo
 
 		private string reportLocationField;
 
+		private string targetField;
+
 		public Job()
 		{
 			this.pitField = new Pit();
@@ -142,6 +144,19 @@ namespace PeachFarm.Common.Mongo
 			set
 			{
 				this.reportLocationField = value;
+			}
+		}
+
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Target
+		{
+			get
+			{
+				return this.targetField;
+			}
+			set
+			{
+				this.targetField = value;
 			}
 		}
 	}

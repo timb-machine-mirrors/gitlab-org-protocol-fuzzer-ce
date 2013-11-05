@@ -123,12 +123,13 @@ namespace PeachFarm.Common.Mongo
 			collection.Database.Server.Disconnect();
 		}
 
-		public static void SaveToDatabase(this Fault fault, string connectionString)
+		public static string SaveToDatabase(this Fault fault, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			//fault.Description = System.Web.HttpUtility.HtmlEncode(fault.Description);
 			collection.Save(fault);
 			collection.Database.Server.Disconnect();
+			return fault.ID;
 		}
 
 		public static void UpdateNode(this Node node, string jobid, string connectionString)

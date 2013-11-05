@@ -234,7 +234,7 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target, uint? rangestart = null, uint? rangeend = null)
 		{
 			List<string> tempfiles = new List<string>();
 			string zipfilepath = String.Empty;
@@ -327,6 +327,14 @@ namespace PeachFarm.Admin
 				request.IPAddress = String.Empty;
 				request.ClientCount = clientCount;
 				request.Tags = tagsString;
+			}
+
+			if((rangestart != null) && (rangeend != null))
+			{
+				request.RangeStart = (uint)rangestart;
+				request.RangeStartSpecified = true;
+				request.RangeEnd = (uint)rangeend;
+				request.RangeEndSpecified = true;
 			}
 
 
