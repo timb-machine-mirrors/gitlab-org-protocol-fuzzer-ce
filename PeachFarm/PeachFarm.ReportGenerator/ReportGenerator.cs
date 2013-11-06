@@ -83,10 +83,8 @@ namespace PeachFarm.Reporting
 		{
 			switch(action)
 			{
-				case Actions.GenerateFaultReport:
-					return GenerateFaultReport(GenerateFaultReportRequest.Deserialize(body));
-				case Actions.GenerateMetricsReport:
-					return GenerateMetricsReport(GenerateMetricsReportRequest.Deserialize(body));
+				case Actions.GenerateJobReport:
+					return GenerateJobReport(GenerateJobReportRequest.Deserialize(body));
 				case Actions.NotifyJobProgress:
 					LogJobProgress(JobProgressNotification.Deserialize(body));
 					break;
@@ -95,12 +93,12 @@ namespace PeachFarm.Reporting
 			return null;
 		}
 
-		#region GenerateFaultReport
-		public GenerateFaultReportResponse GenerateFaultReport(GenerateFaultReportRequest request)
+		#region GenerateJobReport
+		public GenerateJobReportResponse GenerateJobReport(GenerateJobReportRequest request)
 		{
 			logger.Info("Report generator: Received report request " + request.JobID);
 
-			GenerateFaultReportResponse response = new GenerateFaultReportResponse();
+			GenerateJobReportResponse response = new GenerateJobReportResponse();
 			response.JobID = request.JobID;
 
 			#region validate
@@ -167,7 +165,7 @@ namespace PeachFarm.Reporting
 
 		}
 
-		private void ConfigureInstanceReportSource(GenerateFaultReportRequest request, Telerik.Reporting.InstanceReportSource irs)
+		private void ConfigureInstanceReportSource(GenerateJobReportRequest request, Telerik.Reporting.InstanceReportSource irs)
 		{
 			Unit margin = new Unit(0.5, UnitType.Inch);
 			irs.ReportDocument.PageSettings = new PageSettings();
@@ -182,9 +180,9 @@ namespace PeachFarm.Reporting
 			irs.Parameters.Add("hostURL", config.Monitor.BaseURL);
 		}
 
-		private GenerateFaultReportResponse ErrorResponse(string jobid, string message)
+		private GenerateJobReportResponse ErrorResponse(string jobid, string message)
 		{
-			GenerateFaultReportResponse response = new GenerateFaultReportResponse();
+			GenerateJobReportResponse response = new GenerateJobReportResponse();
 			response.JobID = jobid;
 			response.ErrorMessage = message;
 			response.Success = false;
@@ -293,16 +291,5 @@ namespace PeachFarm.Reporting
 		}
 		#endregion
 
-		#region GenerateMetricsReport
-		private GenerateMetricsReportResponse GenerateMetricsReport(GenerateMetricsReportRequest request)
-		{
-			var response = new GenerateMetricsReportResponse();
-			
-
-
-			//TODO
-			return response;
-		}
-		#endregion
 	}
 }

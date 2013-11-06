@@ -54,7 +54,7 @@ namespace PeachFarm.Admin
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(adminQueueName);
+			rabbit.StartListener(adminQueueName, 1000, true, true);
 			this.IsListening = true;
 		}
 
@@ -565,11 +565,11 @@ namespace PeachFarm.Admin
 #if DEBUG
 		public void Report(string jobid)
 		{
-			GenerateFaultReportRequest request = new GenerateFaultReportRequest();
+			GenerateJobReportRequest request = new GenerateJobReportRequest();
 			request.JobID = jobid;
 			request.ReportFormat = ReportFormat.PDF;
 
-			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, request.Serialize(), Actions.GenerateFaultReport, this.controllerQueueName);
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, request.Serialize(), Actions.GenerateJobReport, this.controllerQueueName);
 		}
 
 		public void TruncateAllCollections()

@@ -210,8 +210,8 @@ namespace PeachFarm.Controller
 				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
 					break;
-				case Actions.GenerateFaultReport:
-					GenerateReportComplete(GenerateFaultReportResponse.Deserialize(body));
+				case Actions.GenerateJobReport:
+					GenerateReportComplete(GenerateJobReportResponse.Deserialize(body));
 					break;
 				#region deprecated
 				/*
@@ -520,7 +520,7 @@ namespace PeachFarm.Controller
 				if (isJobFinished)
 				{
 					#region Generate Report, send request to Reporting Service.
-					GenerateFaultReportRequest grr = new GenerateFaultReportRequest();
+					GenerateJobReportRequest grr = new GenerateJobReportRequest();
 					grr.JobID = lastHeartbeat.JobID;
 					grr.ReportFormat = ReportFormat.PDF;
 					PushReportToQueue(grr);
@@ -550,7 +550,7 @@ namespace PeachFarm.Controller
 			#endregion
 		}
 
-		private void GenerateReportComplete(GenerateFaultReportResponse response)
+		private void GenerateReportComplete(GenerateJobReportResponse response)
 		{
 			// do nothing when report complete response is received
 		}
@@ -615,9 +615,9 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		protected virtual void PushReportToQueue(GenerateFaultReportRequest grr)
+		protected virtual void PushReportToQueue(GenerateJobReportRequest grr)
 		{
-			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, grr.Serialize(), Actions.GenerateFaultReport, this.controllerQueueName);
+			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, grr.Serialize(), Actions.GenerateJobReport, this.controllerQueueName);
 		}
 
 		protected virtual void RemoveNode(Heartbeat heartbeat)

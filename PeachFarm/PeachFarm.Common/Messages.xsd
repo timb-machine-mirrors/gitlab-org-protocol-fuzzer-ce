@@ -259,30 +259,14 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:element name="GenerateFaultReportRequest" type="GenerateFaultReportRequest" />
-	<xs:complexType name="GenerateFaultReportRequest">
+	<xs:element name="GenerateJobReportRequest" type="GenerateJobReportRequest" />
+	<xs:complexType name="GenerateJobReportRequest">
 		<xs:attribute name="JobID" type="xs:string" use="required" />
 		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
 	</xs:complexType>
 
-	<xs:element name="GenerateFaultReportResponse" type="GenerateFaultReportResponse" />
-	<xs:complexType name="GenerateFaultReportResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="JobID" type="xs:string" use="required" />
-				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-
-	<xs:element name="GenerateMetricsReportRequest" type="GenerateMetricsReportRequest" />
-	<xs:complexType name="GenerateMetricsReportRequest">
-		<xs:attribute name="JobID" type="xs:string" use="required" />
-		<xs:attribute name="ReportFormat" type="ReportFormat" use="required" />
-	</xs:complexType>
-
-	<xs:element name="GenerateMetricsReportResponse" type="GenerateMetricsReportResponse" />
-	<xs:complexType name="GenerateMetricsReportResponse">
+	<xs:element name="GenerateJobReportResponse" type="GenerateJobReportResponse" />
+	<xs:complexType name="GenerateJobReportResponse">
 		<xs:complexContent>
 			<xs:extension base="ResponseBase">
 				<xs:attribute name="JobID" type="xs:string" use="required" />
