@@ -310,14 +310,14 @@ UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 		protected override void Action_Starting(Core.Dom.Action action)
 		{
 			sample.Action = action.name;
-			//sample.DataSet = action.dataSet.Selected.name;
 		}
 
-		protected override void MutationStrategy_Mutating(string elementName, string mutatorName)
+		protected override void MutationStrategy_DataMutating(Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
 		{
-			//sample.Parameter = "";
-			sample.Element = elementName;
-			sample.Mutator = mutatorName;
+			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
+			sample.Parameter = actionData.name ?? "";
+			sample.Element = element.name;
+			sample.Mutator = mutator.name;
 
 			if (!reproducingFault)
 				OnSample(sample);

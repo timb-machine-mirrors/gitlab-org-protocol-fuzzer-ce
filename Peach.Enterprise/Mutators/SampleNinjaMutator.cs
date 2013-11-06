@@ -29,7 +29,7 @@ namespace Peach.Enterprise.Mutators
         {
             name = "SampleNinja";
 
-			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
+			var pitFile = GetPitFile(obj);
 			NinjaDB = Path.Combine(
 				Path.GetFullPath(pitFile),
 				Path.GetFileName(pitFile) + ".ninja");
@@ -53,7 +53,7 @@ select from count('x'), se.elementid
 
                     cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
                     cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-					cmd.Parameters[0].Value = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
+					cmd.Parameters[0].Value = GetPitFile(obj);
                     cmd.Parameters[1].Value = obj.fullName;
 
 					using (var reader = cmd.ExecuteReader())
@@ -79,7 +79,7 @@ select from count('x'), se.elementid
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var pitFile = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
+			var pitFile = GetPitFile(obj);
 			var ninjaDb = Path.Combine(
 				Path.GetFullPath(pitFile),
 				Path.GetFileName(pitFile) + ".ninja");
@@ -109,7 +109,7 @@ select from count('x'), se.elementid
 
 						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
 						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-						cmd.Parameters[0].Value = ((DataModel)obj.getRoot()).action.Context.config.pitFile;
+						cmd.Parameters[0].Value = GetPitFile(obj);
 						cmd.Parameters[1].Value = obj.fullName;
 
 						if((int)cmd.ExecuteScalar() > 0)
@@ -160,6 +160,13 @@ select from count('x'), se.elementid
 			obj.MutatedValue = new Variant(GetAt((uint)index));
 			obj.mutationFlags = MutateOverride.Default;
 			obj.mutationFlags |= MutateOverride.TypeTransform;
+		}
+
+		private static string GetPitFile(DataElement elem)
+		{
+			var root = elem.getRoot() as DataModel;
+			var dom = root.action.parent.parent.parent as Peach.Core.Dom.Dom;
+			return dom.context.config.pitFile;
 		}
 	}
 }

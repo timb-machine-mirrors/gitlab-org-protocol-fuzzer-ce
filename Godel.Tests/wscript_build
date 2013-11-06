@@ -13,6 +13,7 @@ deps = [
 	'Microsoft.CSharp.dll',
 
 	'Peach.Core.dll',
+	'Peach.Core.Test.dll',
 
 	'Irony.dll',
 	'Irony.Interpreter.dll',

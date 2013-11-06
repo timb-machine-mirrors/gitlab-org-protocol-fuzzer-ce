@@ -121,10 +121,10 @@ namespace Peach.Enterprise.Runtime
 		    httpListener.Close(); 
 		}
 
-        protected override void MutationStrategy_Mutating(string elementName, string mutatorName)
+        protected override void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
         {
-            _elementName = elementName;
-            _mutatorName = mutatorName; 
+            _elementName = element.name;
+            _mutatorName = mutator.name; 
         }
 
         protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)

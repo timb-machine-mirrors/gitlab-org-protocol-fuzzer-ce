@@ -163,7 +163,11 @@ namespace Peach.Enterprise.Runtime
 			RefreshScreen();
 		}
 
-		protected override void MutationStrategy_Mutating(string elementName, string mutatorName)
+		protected override void MutationStrategy_DataMutating(Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
+		{
+		}
+
+		protected override void MutationStrategy_StateMutating(Core.Dom.State state, Mutator mutator)
 		{
 		}
 

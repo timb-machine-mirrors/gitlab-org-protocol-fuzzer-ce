@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Reflection;
 using System.Linq;
@@ -19,26 +20,31 @@ namespace Peach.Enterprise.MutationStrategies
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{
-		class DataSetTracker
+		protected class DataSetTracker
 		{
-			public List<Data> options = new List<Data>();
-			public uint iteration = 1;
-		};
-
-		protected class ElementId : Tuple<string, string>
-		{
-			public ElementId(string modelName, string elementName)
-				: base(modelName, elementName)
+			public DataSetTracker(string ModelName, List<Data> Options)
 			{
+				this.ModelName = ModelName;
+				this.Options = Options;
+				this.Iteration = 1;
 			}
 
-			public string ModelName { get { return Item1; } }
-			public string ElementName { get { return Item2; } }
+			public string ModelName { get; private set; }
+			public List<Data> Options { get; private set; }
+			public uint Iteration { get; set; }
+		}
+
+		protected class DataSets : KeyedCollection<string, DataSetTracker>
+		{
+			protected override string GetKeyForItem(DataSetTracker item)
+			{
+				return item.ModelName;
+			}
 		}
 
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		OrderedDictionary<string, DataSetTracker> _dataSets;
+		DataSets _dataSets;
 
 		int _dataSetsIndex = 0;
 		int _optionsIndex = 0;
@@ -64,7 +70,7 @@ namespace Peach.Enterprise.MutationStrategies
 		{
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				_dataSets = new OrderedDictionary<string, DataSetTracker>();
+				_dataSets = new DataSets();
 			}
 			else
 			{
@@ -122,7 +128,7 @@ namespace Peach.Enterprise.MutationStrategies
 					{
 						_optionsIndex++;
 
-						if (_optionsIndex >= _dataSets[_dataSetsIndex].options.Count)
+						if (_optionsIndex >= _dataSets[_dataSetsIndex].Options.Count)
 						{
 							_dataSetsIndex++;
 							_optionsIndex = 0;
@@ -138,7 +144,7 @@ namespace Peach.Enterprise.MutationStrategies
 		void Action_Starting(Core.Dom.Action action)
 		{
 			// Is this a supported action?
-			if (!(action.type == ActionType.Output || action.type == ActionType.SetProperty || action.type == ActionType.Call))
+			if (!(action.outputData.Any()))
 				return;
 
 			if(Context.controlRecordingIteration)
@@ -151,161 +157,68 @@ namespace Peach.Enterprise.MutationStrategies
 		{
 		}
 
-		private DataModel ApplyFileData(Peach.Core.Dom.Action action, Data data)
-		{
-			byte[] fileBytes = null;
-
-			for (int i = 0; i < 5 && fileBytes == null; ++i)
-			{
-				try
-				{
-					fileBytes = File.ReadAllBytes(data.FileName);
-				}
-				catch (Exception ex)
-				{
-					logger.Debug("Failed to open '{0}'. {1}", data.FileName, ex.Message);
-				}
-			}
-
-			if (fileBytes == null)
-				throw new CrackingFailure(null, null);
-
-			// Note: We need to find the origional data model to use.  Re-using
-			// a data model that has been cracked into will fail in odd ways.
-			var dataModel = GetNewDataModel(action);
-
-			dataModel.MutatedValue = new Variant(fileBytes);
-			dataModel.mutationFlags = MutateOverride.TypeTransform;
-
-			return dataModel;
-		}
-
-		private DataModel ApplyFieldData(Peach.Core.Dom.Action action, Data data)
-		{
-			// Note: We need to find the origional data model to use.  Re-using
-			// a data model that has been cracked into will fail in odd ways.
-			var dataModel = GetNewDataModel(action);
-
-			// Apply the fields
-			data.ApplyFields(dataModel);
-
-			return dataModel;
-		}
-
-		private DataModel GetNewDataModel(Peach.Core.Dom.Action action)
-		{
-			var referenceName = action.dataModel.referenceName;
-			if (referenceName == null)
-				referenceName = action.dataModel.name;
-
-			var sm = action.parent.parent;
-			var dom = _context.dom;
-
-			int i = sm.name.IndexOf(':');
-			if (i > -1)
-			{
-				string prefix = sm.name.Substring(0, i);
-
-				Peach.Core.Dom.Dom other;
-				if (!_context.dom.ns.TryGetValue(prefix, out other))
-					throw new PeachException("Unable to locate namespace '" + prefix + "' in state model '" + sm.name + "'.");
-
-				dom = other;
-			}
-
-			// Need to take namespaces into account when searching for the model
-			var baseModel = dom.getRef<DataModel>(referenceName, a => a.dataModels);
-
-			var dataModel = baseModel.Clone() as DataModel;
-			dataModel.isReference = true;
-			dataModel.referenceName = referenceName;
-
-			return dataModel;
-		}
-
 		private void SyncDataSet(Peach.Core.Dom.Action action)
 		{
 			System.Diagnostics.Debug.Assert(_iteration != 0);
 
-			// Only sync <Data> elements if the action has a data model
-			if (action.dataModel == null)
-				return;
-
-			string key = GetDataModelName(action);
-
-			if (_dataSets.IndexOfKey(key) != _dataSetsIndex)
-				return;
-
-			DataSetTracker val = null;
-			if (!_dataSets.TryGetValue(key, out val))
-				return;
-
-			DataModel dataModel = null;
-			Data option = val.options[_optionsIndex];
-
-			if (option.DataType == DataType.File)
+			foreach (var item in action.outputData)
 			{
-				dataModel = ApplyFileData(action, option);
-			}
-			else if (option.DataType == DataType.Fields)
-			{
-				try
+				// Note: use the model name, not the instance name so
+				// we only set the data set once for re-enterant states.
+				var modelName = item.modelName;
+
+				if (!_dataSets.Contains(modelName))
+					return;
+
+				var val = _dataSets[modelName];
+				var opt = val.Options[_optionsIndex];
+
+				// Don't try cracking files, just overwrite the entire data model
+				var fileOpt = opt as DataFile;
+				if (fileOpt != null)
 				{
-					dataModel = ApplyFieldData(action, option);
+					try
+					{
+						var bs = new BitStream(File.OpenRead(fileOpt.FileName));
+
+						item.dataModel.MutatedValue = new Variant(bs);
+						item.dataModel.mutationFlags = MutateOverride.TypeTransform;
+					}
+					catch (IOException ex)
+					{
+						logger.Debug(ex.Message);
+						logger.Debug("Unable to apply data from '{0}', ignoring.", fileOpt.FileName);
+					}
 				}
-				catch (PeachException)
+				else
 				{
-					logger.Debug("Removing " + option.name + " from sample list.  Unable to apply fields.");
-					val.options.Remove(option);
+					try
+					{
+						item.Apply(opt);
+					}
+					catch (PeachException ex)
+					{
+						logger.Debug(ex.Message);
+						logger.Debug("Unable to apply data '{0}', ignoring.", opt.name);
+					}
 				}
 			}
-
-			if (dataModel == null)
-				return;
-
-			// Set new data model
-			action.dataModel = dataModel;
-
-			// Generate all values;
-			var ret = action.dataModel.Value;
-			System.Diagnostics.Debug.Assert(ret != null);
-
-			// Store copy of new origional data model
-			action.origionalDataModel = action.dataModel.Clone() as DataModel;
 		}
 
 		private void RecordDataSet(Core.Dom.Action action)
 		{
-			if (action.dataSet != null)
+			foreach (var item in action.outputData)
 			{
-				DataSetTracker val = new DataSetTracker();
-				foreach (var item in action.dataSet.Datas)
-				{
-					switch (item.DataType)
-					{
-						case DataType.File:
-							val.options.Add(item);
-							_count++;
-							break;
-						case DataType.Files:
-							val.options.AddRange(item.Files.Select(a => new Data() { DataType = DataType.File, FileName = a }));
-							_count += (uint) item.Files.Count;
-							break;
-						case DataType.Fields:
-							val.options.Add(item);
-							_count++;
-							break;
-						default:
-							throw new PeachException("Unexpected DataType: " + item.DataType.ToString());
-					}
-				}
+				var options = item.allData.ToList();
 
-				if (val.options.Count > 0)
+				if (options.Count > 0)
 				{
-					// Need to properly support more than one action that are unnamed
-					string key = GetDataModelName(action);
-					System.Diagnostics.Debug.Assert(!_dataSets.ContainsKey(key));
-					_dataSets.Add(key, val);
+					// Don't use the instance name here, we only pick the data set
+					// once per state, not each time the state is re-entered.
+					var rec = new DataSetTracker(item.modelName, options);
+
+					if (!_dataSets.Contains(item.modelName))
+						_dataSets.Add(rec);
 				}
 			}
 		}
