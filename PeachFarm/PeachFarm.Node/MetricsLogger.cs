@@ -10,52 +10,52 @@ using Peach.Core;
 
 namespace PeachFarm.Loggers
 {
-	[Logger("MetricsRabbit", true)]
+	[Peach.Core.Logger("MetricsRabbit", true)]
 	[Parameter("Path", typeof(string), "Log folder")]
-	[Parameter("JobID", typeof(string), "JobID")]
-	[Parameter("RabbitHost", typeof(string), "RabbitHost")]
-	[Parameter("RabbitPort", typeof(int), " RabbitPort")]
-	[Parameter("RabbitUser", typeof(string), "RabbitUser")]
-	[Parameter("RabbitPassword", typeof(string), "RabbitPassword")]
-	[Parameter("RabbitUseSSL", typeof(bool), "RabbitUseSSL")]
+	[Peach.Core.Parameter("JobID", typeof(string), "JobID")]
+	[Peach.Core.Parameter("RabbitHost", typeof(string), "RabbitHost")]
+	[Peach.Core.Parameter("RabbitPort", typeof(int), " RabbitPort")]
+	[Peach.Core.Parameter("RabbitUser", typeof(string), "RabbitUser")]
+	[Peach.Core.Parameter("RabbitPassword", typeof(string), "RabbitPassword")]
+	[Peach.Core.Parameter("RabbitUseSSL", typeof(bool), "RabbitUseSSL")]
 	class MetricsRabbitLogger : Peach.Enterprise.Loggers.MetricsLogger
 	{
-		//int samplecount = 0;
-		const int samplecountmax = 1000;
+		int samplecount = 0;
+		const int samplecountmax = 10;
 
-		string filepath;
-		string rabbithost;
-		int rabbitport;
-		string rabbituser;
-		string rabbitpassword;
-		bool rabbitusessl;
-		string jobid;
+		public string RabbitHost { get; private set; }
+		public int RabbitPort { get; private set; }
+		public string RabbitUser { get; private set; }
+		public string RabbitPassword { get; private set; }
+		public bool RabbitUseSSL { get; private set; }
+		public string JobID { get; private set; }
+
 
 		public MetricsRabbitLogger(Dictionary<string, Peach.Core.Variant> args)
 			:base(args)
 		{
-			filepath = (string)args["Path"];
-			rabbithost = (string)args["RabbitHost"];
-			rabbitport = (int)args["RabbitPort"];
-			rabbituser = (string)args["RabbitUser"];
-			rabbitpassword = (string)args["RabbitPassword"];
-			rabbitusessl = (bool)args["RabbitUseSSL"];
-			jobid = (string)args["JobID"];
+			//JobID = (string)args["JobID"];
+			//RabbitHost = (string)args["RabbitHost"];
+			//RabbitPort = (int)args["RabbitPort"];
+			//RabbitUser = (string)args["RabbitUser"];
+			//RabbitPassword = (string)args["RabbitPassword"];
+			//RabbitUseSSL = (bool)args["RabbitUseSSL"];
 		}
 
 		//TODO override methods and call SendRows
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			base.Engine_TestFinished(context);
 			SendRows();
+			base.Engine_TestFinished(context);
 		}
 
 		private void SendRows()
 		{
-			DataTable dt = SelectAllFrom(filepath, "metrics");
+			DataTable dt = SelectAllFrom("view_metrics_iterations");
+			Truncate("metrics_iterations");
 			
-			JobProgressNotification notification = new JobProgressNotification(jobid);
-			notification.JobID = jobid;
+			JobProgressNotification notification = new JobProgressNotification(JobID);
+			notification.JobID = JobID;
 
 			foreach(DataRow row in dt.Rows)
 			{
@@ -64,57 +64,71 @@ namespace PeachFarm.Loggers
 					Action = (string)row["action"],
 					DataElement = (string)row["element"],
 					DataSet = (string)row["dataset"],
-					IterationCount = (uint)row["count"],
+					IterationCount = Convert.ToUInt32(row["count"]),
 					Mutator = (string)row["mutator"],
-					State = (string)row["state"]
+					State = (string)row["state"],
+					Parameter = (string)row["parameter"]
 				});
 			}
 
-			dt = SelectAllFrom(filepath, "metrics_states");
+			//dt = SelectAllFrom("metrics_states");
+			//Truncate("view_metrics_states");
 
-			foreach (DataRow row in dt.Rows)
+			//foreach (DataRow row in dt.Rows)
+			//{
+			//  notification.StateMetrics.Add(new StateMetric()
+			//  {
+			//    ExecutionCount = (uint)row["count"],
+			//    State = (string)row["state"]
+			//  });
+			//}
+
+			if ((notification.IterationMetrics.Count > 0) || (notification.StateMetrics.Count > 0))
 			{
-				notification.StateMetrics.Add(new StateMetric()
-				{
-					ExecutionCount = (uint)row["count"],
-					State = (string)row["state"]
-				});
+				RabbitMqHelper rabbit = new RabbitMqHelper(RabbitHost, RabbitPort, RabbitUser, RabbitPassword, RabbitUseSSL);
+				rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, notification.Serialize(), Actions.NotifyJobProgress);
+				rabbit.CloseConnection();
+				rabbit = null;
 			}
-
-			RabbitMqHelper rabbit = new RabbitMqHelper(rabbithost, rabbitport, rabbituser, rabbitpassword, rabbitusessl);
-			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR, notification.Serialize(), Actions.NotifyJobProgress);
-			rabbit.CloseConnection();
-			rabbit = null;
 		}
 
-		private static DataTable SelectAllFrom(string file, string table, bool truncate = false)
+		protected override void OnSample(Sample s)
+		{
+			base.OnSample(s);
+			samplecount++;
+			if (samplecount == samplecountmax)
+			{
+				SendRows();
+				samplecount = 0;
+			}
+		}
+
+		private DataTable SelectAllFrom(string table)
 		{
 			var dt = new DataTable();
-			var sqliteconnstr = String.Format("Data Source={0}", file);
 			SQLiteCommand sqlitecmd;
 
-			using (var sqliteconn = new SQLiteConnection(sqliteconnstr))
-			{
-				sqliteconn.Open();
-				using (sqlitecmd = sqliteconn.CreateCommand())
-				{
-					sqlitecmd.CommandText = String.Format("select * from {0}", table);
-					using (var reader = sqlitecmd.ExecuteReader())
-					{
-						dt.Load(reader);
-					}
-				}
 
-				if (truncate)
+			using (sqlitecmd = db.CreateCommand())
+			{
+				sqlitecmd.CommandText = String.Format("select * from {0}", table);
+				using (var reader = sqlitecmd.ExecuteReader())
 				{
-					using (sqlitecmd = sqliteconn.CreateCommand())
-					{
-						sqlitecmd.CommandText = String.Format("truncate table {0}", table);
-						sqlitecmd.ExecuteNonQuery();
-					}
+					dt.Load(reader);
 				}
 			}
+
 			return dt;
+		}
+
+		private void Truncate(string table)
+		{
+			SQLiteCommand sqlitecmd;
+			using (sqlitecmd = db.CreateCommand())
+			{
+				sqlitecmd.CommandText = String.Format("delete from {0}", table);
+				sqlitecmd.ExecuteNonQuery();
+			}
 		}
 	}
 }

@@ -6412,6 +6412,8 @@ namespace PeachFarm.Common.Messages
 
 		private string dataSetField;
 
+		private string parameterField;
+
 		private uint iterationCountField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
@@ -6497,6 +6499,20 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.dataSetField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Parameter
+		{
+			get
+			{
+				return this.parameterField;
+			}
+			set
+			{
+				this.parameterField = value;
 			}
 		}
 
@@ -6723,7 +6739,11 @@ namespace PeachFarm.Common.Messages
 
 		private string dataSetField;
 
+		private string dataModelField;
+
 		private string mongoIDField;
+
+		private string parameterField;
 
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
@@ -6827,6 +6847,20 @@ namespace PeachFarm.Common.Messages
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
 		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string DataModel
+		{
+			get
+			{
+				return this.dataModelField;
+			}
+			set
+			{
+				this.dataModelField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
 		public string MongoID
 		{
 			get
@@ -6836,6 +6870,20 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.mongoIDField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Parameter
+		{
+			get
+			{
+				return this.parameterField;
+			}
+			set
+			{
+				this.parameterField = value;
 			}
 		}
 

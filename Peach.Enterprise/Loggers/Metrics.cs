@@ -45,7 +45,7 @@ CREATE TABLE datasets (
  name TEXT NOT NULL
 );
 
-CREATE TABLE metrics (
+CREATE TABLE metrics_iterations (
  id INTEGER PRIMARY KEY,
  state INTEGER,
  action INTEGER,
@@ -75,7 +75,7 @@ CREATE UNIQUE INDEX mutators_index on mutators ( name );
 
 CREATE UNIQUE INDEX datasets_index on datasets ( name );
 
-CREATE UNIQUE INDEX metrics_index ON metrics (
+CREATE UNIQUE INDEX metrics_index ON metrics_iterations (
  state,
  action,
  parameter,
@@ -85,8 +85,28 @@ CREATE UNIQUE INDEX metrics_index ON metrics (
 );";
 
 		static string create_view = @"
-CREATE VIEW all_metrics AS SELECT * FROM metrics;
-";
+CREATE VIEW view_metrics_iterations AS 
+SELECT
+	s.name as state,
+	a.name as action,
+	p.name as parameter,
+	e.name as element,
+	m.name as mutator,
+	ds.name as dataset,
+	mi.count
+FROM metrics_iterations AS mi
+JOIN states AS s
+on s.id = mi.state
+JOIN actions AS a
+on a.id = mi.action
+JOIN parameters AS p
+on p.id = mi.state
+JOIN elements AS e
+on e.id = mi.element
+JOIN mutators AS m
+on m.id = mi.mutator
+JOIN datasets AS ds
+on ds.id = mi.dataset;";
 
 		static string select_foreign_key = @"
 SELECT id FROM {0}s WHERE name = :name;";
@@ -95,7 +115,7 @@ SELECT id FROM {0}s WHERE name = :name;";
 INSERT INTO {0}s (name) VALUES (:name); SELECT last_insert_rowid();";
 
 		static string select_metric = @"
-SELECT id FROM metrics WHERE
+SELECT id FROM metrics_iterations WHERE
  state = :state AND
  action = :action AND
  parameter = :parameter AND
@@ -105,7 +125,7 @@ SELECT id FROM metrics WHERE
 ";
 
 		static string insert_metric = @"
-INSERT INTO metrics (
+INSERT INTO metrics_iterations (
  state,
  action,
  parameter,
@@ -124,11 +144,11 @@ INSERT INTO metrics (
 );";
 
 		static string update_metric = @"
-UPDATE metrics SET count = count + 1 WHERE id = :id;";
+UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 
 		static string[] foreignKeys = { "state", "action", "parameter", "element", "mutator", "dataset" };
 
-		SQLiteConnection db;
+		protected SQLiteConnection db;
 		Sample sample;
 		bool reproducingFault;
 
@@ -193,7 +213,7 @@ UPDATE metrics SET count = count + 1 WHERE id = :id;";
 		public string Path
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		protected override void Engine_TestStarting(RunContext context)

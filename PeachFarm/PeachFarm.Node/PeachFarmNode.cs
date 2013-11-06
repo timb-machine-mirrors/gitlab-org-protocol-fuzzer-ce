@@ -289,6 +289,11 @@ namespace PeachFarm.Node
 					return;
 
 				StopFuzzer();
+
+				if (nodeState.Status == Status.Running)
+				{
+					StartPeachCleanUp(request.JobID);
+				}
 			}
 		}
 
@@ -417,7 +422,7 @@ namespace PeachFarm.Node
 				mongoargs.Add("RabbitPort", new Peach.Core.Variant(nodeState.RabbitMq.Port));
 				mongoargs.Add("RabbitUser", new Peach.Core.Variant(nodeState.RabbitMq.UserName));
 				mongoargs.Add("RabbitPassword", new Peach.Core.Variant(nodeState.RabbitMq.Password));
-				mongoargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL.ToString()));
+				mongoargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL));
 				loggers.Add(new PeachFarm.Loggers.PeachFarmLogger(mongoargs));
 			}
 
@@ -428,7 +433,7 @@ namespace PeachFarm.Node
 			metricsargs.Add("RabbitPort", new Peach.Core.Variant(nodeState.RabbitMq.Port));
 			metricsargs.Add("RabbitUser", new Peach.Core.Variant(nodeState.RabbitMq.UserName));
 			metricsargs.Add("RabbitPassword", new Peach.Core.Variant(nodeState.RabbitMq.Password));
-			metricsargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL.ToString()));
+			metricsargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL));
 			loggers.Add(new PeachFarm.Loggers.MetricsRabbitLogger(metricsargs));
 
 

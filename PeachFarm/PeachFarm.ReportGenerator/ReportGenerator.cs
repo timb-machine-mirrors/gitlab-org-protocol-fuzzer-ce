@@ -212,15 +212,18 @@ namespace PeachFarm.Reporting
 
 				cmd = conn.CreateCommand();
 				cmd.Connection = conn;
-				cmd.CommandText = "metrics_job_insert";
+				cmd.CommandText = "jobs_insert";
 				cmd.CommandType = System.Data.CommandType.StoredProcedure;
 				cmd.Parameters.AddWithValue("jobid", notification.JobID);
 				cmd.Parameters.AddWithValue("target", mongoJob.Target);
 				cmd.Parameters.AddWithValue("startdate", mongoJob.StartDate);
 				cmd.Parameters.AddWithValue("mongoid", mongoJob.ID);
 				cmd.Parameters.AddWithValue("pitfilename", mongoJob.Pit.FileName);
+				cmd.Parameters.Add("rowid", MySqlDbType.UInt32);
+				cmd.Parameters["rowid"].Direction = System.Data.ParameterDirection.Output;
 
-				var mysqljobid = cmd.ExecuteScalar();
+				cmd.ExecuteNonQuery();
+				var mysqljobid = (uint)cmd.Parameters["rowid"].Value;
 
 				var transaction = conn.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
 				try
@@ -234,6 +237,7 @@ namespace PeachFarm.Reporting
 						cmd.Parameters.AddWithValue("jobs_id", mysqljobid);
 						cmd.Parameters.AddWithValue("state", i.State);
 						cmd.Parameters.AddWithValue("actionname", i.Action);
+						cmd.Parameters.AddWithValue("parameter", i.Parameter);
 						cmd.Parameters.AddWithValue("dataelement", i.DataElement);
 						cmd.Parameters.AddWithValue("mutator", i.Mutator);
 						cmd.Parameters.AddWithValue("dataset", i.DataSet);
@@ -256,6 +260,8 @@ namespace PeachFarm.Reporting
 						cmd.Parameters.AddWithValue("dataelement", f.DataElement);
 						cmd.Parameters.AddWithValue("mutator", f.Mutator);
 						cmd.Parameters.AddWithValue("dataset", f.DataSet);
+						cmd.Parameters.AddWithValue("parameter", f.Parameter);
+						cmd.Parameters.AddWithValue("datamodel", f.DataModel);
 						cmd.Parameters.AddWithValue("mongoid", f.MongoID);
 
 						cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -276,8 +282,9 @@ namespace PeachFarm.Reporting
 					}
 					transaction.Commit();
 				}
-				catch (Exception)
+				catch (Exception ex)
 				{
+					System.Diagnostics.Debug.WriteLine(ex.ToString());
 					transaction.Rollback();
 				}
 

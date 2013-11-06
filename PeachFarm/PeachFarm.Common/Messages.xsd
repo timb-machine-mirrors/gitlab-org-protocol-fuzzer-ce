@@ -364,6 +364,7 @@
 		<xs:attribute name="DataElement" type="xs:string" use="required" />
 		<xs:attribute name="Mutator" type="xs:string" use="required" />
 		<xs:attribute name="DataSet" type="xs:string" use="required" />
+		<xs:attribute name="Parameter" type="xs:string" use="required" />
 		<xs:attribute name="IterationCount" type="xs:unsignedInt" use="required" />
 	</xs:complexType>
 
@@ -375,7 +376,9 @@
 		<xs:attribute name="DataElement" type="xs:string" use="required" />
 		<xs:attribute name="Mutator" type="xs:string" use="required" />
 		<xs:attribute name="DataSet" type="xs:string" use="required" />
+		<xs:attribute name="DataModel" type="xs:string" use="required" />
 		<xs:attribute name="MongoID" type="xs:string" use="required" />
+		<xs:attribute name="Parameter" type="xs:string" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="StateMetric">

@@ -24,5 +24,10 @@ namespace PeachFarm.Common
 
 			return ret;
 		}
+
+		private static bool HasAny<T>(IEnumerable<T> collection)
+		{
+			return collection != null && collection.Any();
+		}
 	}
 }

@@ -159,25 +159,71 @@ namespace PeachFarm.Loggers
 
 			foreach (var state in fault.states)
 			{
-				foreach (var action in state.actions)
+				if (HasAny(state.actions))
 				{
-					foreach (var model in action.models)
+					foreach (var action in state.actions)
 					{
-						foreach (var mutation in model.mutations)
+						if (HasAny(action.models))
 						{
+							foreach (var model in action.models)
+							{
+								if (HasAny(model.mutations))
+								{
+									foreach (var mutation in model.mutations)
+									{
+										notification.FaultMetrics.Add(new FaultMetric()
+										{
+											Iteration = fault.iteration,
+											Bucket = fault.folderName,
+											State = state.name,
+											Action = action.name,
+											DataSet = model.dataSet,
+											DataElement = mutation.element,
+											DataModel = model.name,
+											Parameter = model.parameter,
+											Mutator = mutation.mutator,
+											MongoID = mongoid
+										});
+									}
+								}
+								else
+								{	// model with no mutations
+									notification.FaultMetrics.Add(new FaultMetric()
+									{
+										Iteration = fault.iteration,
+										Bucket = fault.folderName,
+										State = state.name,
+										Action = action.name,
+										DataSet = model.dataSet,
+										DataModel = model.name,
+										Parameter = model.parameter,
+										MongoID = mongoid
+									});
+								}
+							}
+						}
+						else
+						{	//action with no models
 							notification.FaultMetrics.Add(new FaultMetric()
 							{
-								Action = action.name,
-								Bucket = fault.folderName,
-								DataElement = mutation.element,
-								DataSet = model.dataSet,
 								Iteration = fault.iteration,
-								MongoID = mongoid,
-								Mutator = mutation.mutator,
-								State = state.name
+								Bucket = fault.folderName,
+								State = state.name,
+								Action = action.name,
+								MongoID = mongoid
 							});
 						}
 					}
+				}
+				else
+				{	//state with no actions
+					notification.FaultMetrics.Add(new FaultMetric()
+					{
+						Iteration = fault.iteration,
+						Bucket = fault.folderName,
+						State = state.name,
+						MongoID = mongoid
+					});
 				}
 			}
 
@@ -191,5 +237,11 @@ namespace PeachFarm.Loggers
 			}
 		}
 		#endregion
+
+		private bool HasAny<T>(IEnumerable<T> collection)
+		{
+			return collection != null && collection.Any();
+		}
 	}
+
 }
