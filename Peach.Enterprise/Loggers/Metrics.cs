@@ -45,6 +45,13 @@ CREATE TABLE datasets (
  name TEXT NOT NULL
 );
 
+CREATE TABLE metrics_states (
+ id INTEGER PRIMARY KEY,
+ state INTEGER,
+ count INTEGER,
+ FOREIGN KEY(state) REFERENCES states(id)
+);
+
 CREATE TABLE metrics_iterations (
  id INTEGER PRIMARY KEY,
  state INTEGER,
@@ -85,6 +92,14 @@ CREATE UNIQUE INDEX metrics_index ON metrics_iterations (
 );";
 
 		static string create_view = @"
+CREATE VIEW view_metrics_states AS 
+SELECT
+	s.name as state,
+	mi.count
+FROM metrics_states AS mi
+JOIN states AS s
+on s.id = mi.state;
+
 CREATE VIEW view_metrics_iterations AS 
 SELECT
 	s.name as state,
@@ -114,7 +129,7 @@ SELECT id FROM {0}s WHERE name = :name;";
 		static string insert_foreign_key = @"
 INSERT INTO {0}s (name) VALUES (:name); SELECT last_insert_rowid();";
 
-		static string select_metric = @"
+		static string select_iteration = @"
 SELECT id FROM metrics_iterations WHERE
  state = :state AND
  action = :action AND
@@ -124,7 +139,7 @@ SELECT id FROM metrics_iterations WHERE
  dataset = :dataset;
 ";
 
-		static string insert_metric = @"
+		static string insert_iteration = @"
 INSERT INTO metrics_iterations (
  state,
  action,
@@ -143,8 +158,18 @@ INSERT INTO metrics_iterations (
  1
 );";
 
-		static string update_metric = @"
+		static string update_iteration = @"
 UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
+
+		static string select_state = @"
+SELECT id FROM metrics_states WHERE state = :state";
+
+		static string insert_state = @"
+INSERT INTO metrics_states ( state, count ) VALUES ( :state, 1 );
+";
+
+		static string update_state = @"
+UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		static string[] foreignKeys = { "state", "action", "parameter", "element", "mutator", "dataset" };
 
@@ -154,9 +179,12 @@ UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 
 		Dictionary<string, KeyTracker> keyTracker = new Dictionary<string, KeyTracker>();
 
-		SQLiteCommand select_metric_cmd;
-		SQLiteCommand insert_metric_cmd;
-		SQLiteCommand update_metric_cmd;
+		SQLiteCommand select_iteration_cmd;
+		SQLiteCommand insert_iteration_cmd;
+		SQLiteCommand update_iteration_cmd;
+		SQLiteCommand select_state_cmd;
+		SQLiteCommand insert_state_cmd;
+		SQLiteCommand update_state_cmd;
 
 		protected class Sample
 		{
@@ -242,43 +270,73 @@ UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 				trans.Commit();
 			}
 
-			select_metric_cmd = new SQLiteCommand(db);
-			select_metric_cmd.CommandText = select_metric;
+			select_iteration_cmd = new SQLiteCommand(db);
+			select_iteration_cmd.CommandText = select_iteration;
 
-			insert_metric_cmd = new SQLiteCommand(db);
-			insert_metric_cmd.CommandText = insert_metric;
+			insert_iteration_cmd = new SQLiteCommand(db);
+			insert_iteration_cmd.CommandText = insert_iteration;
 
 			foreach (var item in foreignKeys)
 			{
 				keyTracker.Add(item, new KeyTracker(db, item));
 
-				select_metric_cmd.Parameters.Add(new SQLiteParameter(item));
-				insert_metric_cmd.Parameters.Add(new SQLiteParameter(item));
+				select_iteration_cmd.Parameters.Add(new SQLiteParameter(item));
+				insert_iteration_cmd.Parameters.Add(new SQLiteParameter(item));
 			}
 
-			update_metric_cmd = new SQLiteCommand(db);
-			update_metric_cmd.CommandText = update_metric;
-			update_metric_cmd.Parameters.Add(new SQLiteParameter("id"));
+			update_iteration_cmd = new SQLiteCommand(db);
+			update_iteration_cmd.CommandText = update_iteration;
+			update_iteration_cmd.Parameters.Add(new SQLiteParameter("id"));
+
+			select_state_cmd = new SQLiteCommand(db);
+			select_state_cmd.CommandText = select_state;
+			select_state_cmd.Parameters.Add(new SQLiteParameter("state"));
+
+			insert_state_cmd = new SQLiteCommand(db);
+			insert_state_cmd.CommandText = insert_state;
+			insert_state_cmd.Parameters.Add(new SQLiteParameter("state"));
+
+			update_state_cmd = new SQLiteCommand(db);
+			update_state_cmd.CommandText = update_state;
+			update_state_cmd.Parameters.Add(new SQLiteParameter("id"));
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			if (update_metric_cmd != null)
+			if (update_iteration_cmd != null)
 			{
-				update_metric_cmd.Dispose();
-				update_metric_cmd = null;
+				update_iteration_cmd.Dispose();
+				update_iteration_cmd = null;
 			}
 
-			if (insert_metric_cmd != null)
+			if (insert_iteration_cmd != null)
 			{
-				insert_metric_cmd.Dispose();
-				insert_metric_cmd = null;
+				insert_iteration_cmd.Dispose();
+				insert_iteration_cmd = null;
 			}
 
-			if (select_metric_cmd != null)
+			if (select_iteration_cmd != null)
 			{
-				select_metric_cmd.Dispose();
-				select_metric_cmd = null;
+				select_iteration_cmd.Dispose();
+				select_iteration_cmd = null;
+			}
+
+			if (update_state_cmd != null)
+			{
+				update_state_cmd.Dispose();
+				update_state_cmd = null;
+			}
+
+			if (insert_state_cmd != null)
+			{
+				insert_state_cmd.Dispose();
+				insert_state_cmd = null;
+			}
+
+			if (insert_state_cmd != null)
+			{
+				insert_state_cmd.Dispose();
+				insert_state_cmd = null;
 			}
 
 			foreach (var kv in keyTracker)
@@ -305,6 +363,11 @@ UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 		protected override void State_Starting(Core.Dom.State state)
 		{
 			sample.State = state.name;
+
+			var dom = state.parent.parent as Peach.Core.Dom.Dom;
+
+			if (!reproducingFault && !dom.context.controlIteration && !dom.context.controlRecordingIteration)
+				OnStateSample(sample.State);
 		}
 
 		protected override void Action_Starting(Core.Dom.Action action)
@@ -320,48 +383,73 @@ UPDATE metrics_iterations SET count = count + 1 WHERE id = :id;";
 			sample.Mutator = mutator.name;
 
 			if (!reproducingFault)
-				OnSample(sample);
+				OnIterationSample(sample);
 		}
 
-		protected virtual void OnSample(Sample s)
+		protected virtual void OnStateSample(string state)
+		{
+			using (var trans = db.BeginTransaction())
+			{
+				object id;
+
+				id = keyTracker["state"].Get(state);
+				select_state_cmd.Parameters["state"].Value = id;
+				insert_state_cmd.Parameters["state"].Value = id;
+
+				id = select_state_cmd.ExecuteScalar();
+				if (id == null)
+				{
+					insert_state_cmd.ExecuteNonQuery();
+				}
+				else
+				{
+					update_state_cmd.Parameters["id"].Value = id;
+					update_state_cmd.ExecuteNonQuery();
+				}
+
+				trans.Commit();
+			}
+		}
+
+		protected virtual void OnIterationSample(Sample s)
 		{
 			using (var trans = db.BeginTransaction())
 			{
 				object id;
 
 				id = keyTracker["state"].Get(s.State);
-				select_metric_cmd.Parameters["state"].Value = id;
-				insert_metric_cmd.Parameters["state"].Value = id;
+				select_iteration_cmd.Parameters["state"].Value = id;
+				insert_iteration_cmd.Parameters["state"].Value = id;
 
 				id = keyTracker["action"].Get(s.Action);
-				select_metric_cmd.Parameters["action"].Value = id;
-				insert_metric_cmd.Parameters["action"].Value = id;
+				select_iteration_cmd.Parameters["action"].Value = id;
+				insert_iteration_cmd.Parameters["action"].Value = id;
 
 				id = keyTracker["parameter"].Get(s.Parameter ?? "");
-				select_metric_cmd.Parameters["parameter"].Value = id;
-				insert_metric_cmd.Parameters["parameter"].Value = id;
+				select_iteration_cmd.Parameters["parameter"].Value = id;
+				insert_iteration_cmd.Parameters["parameter"].Value = id;
 
 				id = keyTracker["element"].Get(s.Element);
-				select_metric_cmd.Parameters["element"].Value = id;
-				insert_metric_cmd.Parameters["element"].Value = id;
+				select_iteration_cmd.Parameters["element"].Value = id;
+				insert_iteration_cmd.Parameters["element"].Value = id;
 
 				id = keyTracker["mutator"].Get(s.Mutator);
-				select_metric_cmd.Parameters["mutator"].Value = id;
-				insert_metric_cmd.Parameters["mutator"].Value = id;
+				select_iteration_cmd.Parameters["mutator"].Value = id;
+				insert_iteration_cmd.Parameters["mutator"].Value = id;
 
 				id = keyTracker["dataset"].Get(s.DataSet ?? "");
-				select_metric_cmd.Parameters["dataset"].Value = id;
-				insert_metric_cmd.Parameters["dataset"].Value = id;
+				select_iteration_cmd.Parameters["dataset"].Value = id;
+				insert_iteration_cmd.Parameters["dataset"].Value = id;
 
-				id = select_metric_cmd.ExecuteScalar();
+				id = select_iteration_cmd.ExecuteScalar();
 				if (id == null)
 				{
-					insert_metric_cmd.ExecuteNonQuery();
+					insert_iteration_cmd.ExecuteNonQuery();
 				}
 				else
 				{
-					update_metric_cmd.Parameters["id"].Value = id;
-					update_metric_cmd.ExecuteNonQuery();
+					update_iteration_cmd.Parameters["id"].Value = id;
+					update_iteration_cmd.ExecuteNonQuery();
 				}
 
 				trans.Commit();
