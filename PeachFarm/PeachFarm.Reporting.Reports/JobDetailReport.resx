@@ -119,32 +119,32 @@
   </resheader>
   <metadata name="peachFarmMongo.DefaultValues" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
-        AAEAAAD/////AQAAAAAAAAAMAgAAAFdUZWxlcmlrLlJlcG9ydGluZywgVmVyc2lvbj03LjEuMTMuNjEy
-        LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWE5ZDc5ODNkZmNjMjYxYmUMAwAAAKYBVGVs
-        ZXJpay5SZXBvcnRpbmcsIFZlcnNpb249Ny4xLjEzLjYxMiwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNL
-        ZXlUb2tlbj1hOWQ3OTgzZGZjYzI2MWJlXV0sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1
-        cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQUBAAAANVRlbGVyaWsuUmVw
-        b3J0aW5nLk9iamVjdERhdGFTb3VyY2VQYXJhbWV0ZXJDb2xsZWN0aW9uAQAAABJDb2xsZWN0aW9uYDEr
-        aXRlbXMETlN5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbVGVsZXJpay5SZXBvcnRpbmcu
-        T2JqZWN0RGF0YVNvdXJjZVBhcmFtZXRlcgMAAAACAAAACQQAAAAFBAAAAE5TeXN0ZW0uQ29sbGVjdGlv
-        bnMuR2VuZXJpYy5MaXN0YDFbW1RlbGVyaWsuUmVwb3J0aW5nLk9iamVjdERhdGFTb3VyY2VQYXJhbWV0
-        ZXIDAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgQAAC1UZWxlcmlrLlJlcG9ydGluZy5PYmplY3REYXRh
-        U291cmNlUGFyYW1ldGVyW10CAAAACAgDAAAACQUAAAACAAAABgAAAAcFAAAAAAEAAAAEAAAABCtUZWxl
-        cmlrLlJlcG9ydGluZy5PYmplY3REYXRhU291cmNlUGFyYW1ldGVyAgAAAAkGAAAACQcAAAANAgwIAAAA
-        SVN5c3RlbSwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3
-        N2E1YzU2MTkzNGUwODkFBgAAACtUZWxlcmlrLlJlcG9ydGluZy5PYmplY3REYXRhU291cmNlUGFyYW1l
-        dGVyBAAAAAxkYXRhVHlwZU5hbWUYRGF0YVNvdXJjZVBhcmFtZXRlcituYW1lGURhdGFTb3VyY2VQYXJh
-        bWV0ZXIrdmFsdWUjRGF0YVNvdXJjZVBhcmFtZXRlcitQcm9wZXJ0eUNoYW5nZWQBAQIEMVN5c3RlbS5D
-        b21wb25lbnRNb2RlbC5Qcm9wZXJ0eUNoYW5nZWRFdmVudEhhbmRsZXIIAAAAAgAAAAYJAAAAWlN5c3Rl
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFhUZWxlcmlrLlJlcG9ydGluZywgVmVyc2lvbj03LjIuMTMuMTAx
+        NiwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1hOWQ3OTgzZGZjYzI2MWJlDAMAAACnAVRl
+        bGVyaWsuUmVwb3J0aW5nLCBWZXJzaW9uPTcuMi4xMy4xMDE2LCBDdWx0dXJlPW5ldXRyYWwsIFB1Ymxp
+        Y0tleVRva2VuPWE5ZDc5ODNkZmNjMjYxYmVdXSwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3Vs
+        dHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BQEAAAA1VGVsZXJpay5S
+        ZXBvcnRpbmcuT2JqZWN0RGF0YVNvdXJjZVBhcmFtZXRlckNvbGxlY3Rpb24BAAAAEkNvbGxlY3Rpb25g
+        MStpdGVtcwROU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tUZWxlcmlrLlJlcG9ydGlu
+        Zy5PYmplY3REYXRhU291cmNlUGFyYW1ldGVyAwAAAAIAAAAJBAAAAAUEAAAATlN5c3RlbS5Db2xsZWN0
+        aW9ucy5HZW5lcmljLkxpc3RgMVtbVGVsZXJpay5SZXBvcnRpbmcuT2JqZWN0RGF0YVNvdXJjZVBhcmFt
+        ZXRlcgMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBAAALVRlbGVyaWsuUmVwb3J0aW5nLk9iamVjdERh
+        dGFTb3VyY2VQYXJhbWV0ZXJbXQIAAAAICAMAAAAJBQAAAAIAAAADAAAABwUAAAAAAQAAAAQAAAAEK1Rl
+        bGVyaWsuUmVwb3J0aW5nLk9iamVjdERhdGFTb3VyY2VQYXJhbWV0ZXICAAAACQYAAAAJBwAAAA0CDAgA
+        AABJU3lzdGVtLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49
+        Yjc3YTVjNTYxOTM0ZTA4OQUGAAAAK1RlbGVyaWsuUmVwb3J0aW5nLk9iamVjdERhdGFTb3VyY2VQYXJh
+        bWV0ZXIEAAAADGRhdGFUeXBlTmFtZRhEYXRhU291cmNlUGFyYW1ldGVyK25hbWUZRGF0YVNvdXJjZVBh
+        cmFtZXRlcit2YWx1ZSNEYXRhU291cmNlUGFyYW1ldGVyK1Byb3BlcnR5Q2hhbmdlZAEBAgQxU3lzdGVt
+        LkNvbXBvbmVudE1vZGVsLlByb3BlcnR5Q2hhbmdlZEV2ZW50SGFuZGxlcggAAAACAAAABgkAAABaU3lz
+        dGVtLlN0cmluZywgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJs
+        aWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BgoAAAAFam9iSUQKCgEHAAAABgAAAAYLAAAAWlN5c3Rl
         bS5TdHJpbmcsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGlj
-        S2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQYKAAAABWpvYklECgoBBwAAAAYAAAAGCwAAAFpTeXN0ZW0u
-        U3RyaW5nLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tl
-        eVRva2VuPWI3N2E1YzU2MTkzNGUwODkGDAAAABBjb25uZWN0aW9uU3RyaW5nBg0AAAAebW9uZ29kYjov
-        LzEwLjAuMS4zOS8/c2FmZT10cnVlCgs=
+        S2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQYMAAAAEGNvbm5lY3Rpb25TdHJpbmcGDQAAAB9tb25nb2Ri
+        Oi8vMTAuMC4xLjEwNC8/c2FmZT10cnVlCgs=
 </value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing" />
-  <data name="pictureBox1.Value" type="System.Drawing.Bitmap" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="pictureBox1.Value" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         /9j/4AAQSkZJRgABAgEASABIAAD/7gAOQWRvYmUAZAAAAAAB/+EASkV4aWYAAE1NACoAAAAIAAMBGgAF
         AAAAAQAAADIBGwAFAAAAAQAAADoBKAADAAAAAQACAAAAAAAAAEgAAAABAAAASAAAAAEAAP/tACxQaG90
@@ -700,7 +700,4 @@
         691737r3Xvfuvdf/2Q==
 </value>
   </data>
-  <metadata name="$this.SnapGridSize" type="Telerik.Reporting.Drawing.Unit">
-    <value>0.1in</value>
-  </metadata>
 </root>

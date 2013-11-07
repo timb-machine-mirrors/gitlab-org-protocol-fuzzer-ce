@@ -16,7 +16,7 @@ namespace PeachFarm.Reporting.Reports
 		public static List<ReportJob> GetJobDetailReport(string jobID, string connectionString)
 		{
 			Job mongojob = DatabaseHelper.GetJob(jobID, connectionString);
-
+			
 			var collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 
 			var buckets = collection.Distinct("FolderName", Query.EQ("JobID", jobID));
@@ -44,7 +44,7 @@ namespace PeachFarm.Reporting.Reports
 					UserName = mongojob.UserName,
 					Faults = faultBuckets
 				};
-
+			
 			return new List<ReportJob>() { job };
 		}
 
