@@ -92,9 +92,9 @@ namespace PeachFarm.Loggers
 			}
 		}
 
-		protected override void OnSample(Sample s)
+		protected override void OnIterationSample(Sample s)
 		{
-			base.OnSample(s);
+			base.OnIterationSample(s);
 			samplecount++;
 			if (samplecount == samplecountmax)
 			{
