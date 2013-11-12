@@ -82,6 +82,7 @@
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
 			<Param name="Target" value="com.android.development" />
+			<Param name="DeviceSerial" value="##Serial##" />
 			<Param name="NumActions" value="20" />
 			<Param name="Sleep" value="0" />
 		</Publisher>
@@ -97,6 +98,7 @@
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
 			<Param name="Target" value="com.android.browser" />
+			<Param name="DeviceSerial" value="##Serial##" />
 			<Param name="NumActions" value="20" />
 			<Param name="Sleep" value="0" />
 		</Publisher>
