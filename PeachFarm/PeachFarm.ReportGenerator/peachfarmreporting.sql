@@ -32,7 +32,7 @@ CREATE TABLE `jobs` (
   `mongoid` varchar(100) DEFAULT NULL,
   `pitfilename` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,8 +55,18 @@ CREATE TABLE `metrics_faults` (
   `jobs_id` int(10) unsigned DEFAULT NULL,
   `datamodel` varchar(100) DEFAULT NULL,
   `parameter` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`metrics_faults_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=521 DEFAULT CHARSET=utf8 PACK_KEYS=1;
+  PRIMARY KEY (`metrics_faults_id`),
+  KEY `bucket_idx` (`bucket`),
+  KEY `state_idx` (`state`),
+  KEY `action_idx` (`actionname`),
+  KEY `element_idx` (`dataelement`),
+  KEY `mutator_idx` (`mutator`),
+  KEY `dataset_idx` (`dataset`),
+  KEY `datamodel_idx` (`datamodel`),
+  KEY `parameter_idx` (`parameter`),
+  KEY `jobs_idx` (`jobs_id`),
+  CONSTRAINT `faults_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=21641 DEFAULT CHARSET=utf8 PACK_KEYS=1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -76,8 +86,17 @@ CREATE TABLE `metrics_iterations` (
   `iterationcount` int(10) unsigned DEFAULT NULL,
   `parameter` varchar(100) DEFAULT NULL,
   `jobs_id` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`metrics_iterations_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`metrics_iterations_id`),
+  UNIQUE KEY `unique_idx` (`state`,`actionname`,`dataelement`,`mutator`,`dataset`,`parameter`,`jobs_id`),
+  KEY `state_idx` (`state`),
+  KEY `action_idx` (`actionname`),
+  KEY `element_idx` (`dataelement`),
+  KEY `mutator_idx` (`mutator`),
+  KEY `dataset_idx` (`dataset`),
+  KEY `parameter_idx` (`parameter`),
+  KEY `jobs_idx` (`jobs_id`),
+  CONSTRAINT `iterations_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,10 +108,13 @@ DROP TABLE IF EXISTS `metrics_states`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `metrics_states` (
   `metrics_states_id` int(11) NOT NULL AUTO_INCREMENT,
-  `state` varchar(100) DEFAULT NULL,
+  `state` varchar(100) NOT NULL,
   `executioncount` int(10) unsigned NOT NULL,
-  `jobs_id` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`metrics_states_id`)
+  `jobs_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`metrics_states_id`),
+  KEY `state_idx` (`state`),
+  KEY `states_jobs_idx` (`jobs_id`),
+  CONSTRAINT `states_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -504,4 +526,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-11-05 18:23:17
+-- Dump completed on 2013-11-07 16:45:17

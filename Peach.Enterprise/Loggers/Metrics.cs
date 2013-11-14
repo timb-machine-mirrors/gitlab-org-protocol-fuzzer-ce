@@ -333,10 +333,10 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				insert_state_cmd = null;
 			}
 
-			if (insert_state_cmd != null)
+			if (update_state_cmd != null)
 			{
-				insert_state_cmd.Dispose();
-				insert_state_cmd = null;
+				update_state_cmd.Dispose();
+				update_state_cmd = null;
 			}
 
 			foreach (var kv in keyTracker)
@@ -344,6 +344,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 			keyTracker.Clear();
 
+			
 			if (db != null)
 			{
 				db.Close();
@@ -379,7 +380,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		{
 			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
 			sample.Parameter = actionData.name ?? "";
-			sample.Element = element.name;
+			sample.Element = element.fullName;
 			sample.Mutator = mutator.name;
 
 			if (!reproducingFault)

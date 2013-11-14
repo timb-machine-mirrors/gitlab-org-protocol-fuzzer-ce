@@ -24,6 +24,8 @@ namespace PeachFarm.Loggers
 		private Common.Mongo.Job mongoJob = null;
 		private Common.Mongo.Node mongoNode = null;
 
+		private const int faultmax = 1;
+
 		public PeachFarmLogger(Dictionary<string, Peach.Core.Variant> args)
 			:base(args)
 		{
@@ -84,8 +86,11 @@ namespace PeachFarm.Loggers
 		{
 			base.Engine_IterationStarting(context, currentIteration, totalIterations);
 
-			mongoNode.IterationCount = currentIteration;
-			mongoNode.SaveToDatabase(MongoConnectionString);
+			if (currentIteration > mongoNode.IterationCount)
+			{
+				mongoNode.IterationCount = currentIteration;
+				mongoNode.SaveToDatabase(MongoConnectionString);
+			}
 		}
 
 		protected override string GetBasePath(Peach.Core.RunContext context)
@@ -188,46 +193,46 @@ namespace PeachFarm.Loggers
 								}
 								else
 								{	// model with no mutations
-									notification.FaultMetrics.Add(new FaultMetric()
-									{
-										Iteration = fault.iteration,
-										Bucket = fault.folderName,
-										State = state.name,
-										Action = action.name,
-										DataSet = model.dataSet,
-										DataModel = model.name,
-										Parameter = model.parameter,
-										MongoID = mongoid
-									});
+								//  notification.FaultMetrics.Add(new FaultMetric()
+								//  {
+								//    Iteration = fault.iteration,
+								//    Bucket = fault.folderName,
+								//    State = state.name,
+								//    Action = action.name,
+								//    DataSet = model.dataSet,
+								//    DataModel = model.name,
+								//    Parameter = model.parameter,
+								//    MongoID = mongoid
+								//  });
 								}
 							}
 						}
 						else
 						{	//action with no models
-							notification.FaultMetrics.Add(new FaultMetric()
-							{
-								Iteration = fault.iteration,
-								Bucket = fault.folderName,
-								State = state.name,
-								Action = action.name,
-								MongoID = mongoid
-							});
+							//notification.FaultMetrics.Add(new FaultMetric()
+							//{
+							//  Iteration = fault.iteration,
+							//  Bucket = fault.folderName,
+							//  State = state.name,
+							//  Action = action.name,
+							//  MongoID = mongoid
+							//});
 						}
 					}
 				}
 				else
 				{	//state with no actions
-					notification.FaultMetrics.Add(new FaultMetric()
-					{
-						Iteration = fault.iteration,
-						Bucket = fault.folderName,
-						State = state.name,
-						MongoID = mongoid
-					});
+					//notification.FaultMetrics.Add(new FaultMetric()
+					//{
+					//  Iteration = fault.iteration,
+					//  Bucket = fault.folderName,
+					//  State = state.name,
+					//  MongoID = mongoid
+					//});
 				}
 			}
 
-			if (notification.FaultMetrics.Count >= 40)
+			if (notification.FaultMetrics.Count >= faultmax)
 			{
 				PeachFarm.Common.RabbitMqHelper rabbit = new Common.RabbitMqHelper(RabbitHost, RabbitPort, RabbitUser, RabbitPassword, RabbitUseSSL);
 				rabbit.PublishToQueue(PeachFarm.Common.QueueNames.QUEUE_REPORTGENERATOR, notification.Serialize(), Actions.NotifyJobProgress);

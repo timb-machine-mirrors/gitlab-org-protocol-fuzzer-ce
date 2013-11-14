@@ -642,6 +642,11 @@ namespace PeachFarm.Controller
 			mongoJob.StartDate = DateTime.Now;
 			mongoJob.Tags = request.Tags;
 
+			if (String.IsNullOrEmpty(mongoJob.Target))
+			{
+				mongoJob.Target = mongoJob.Pit.FileName;
+			}
+
 			//TODO Peach Version
 
 			mongoJob = mongoJob.SaveToDatabase(request.MongoDbConnectionString);

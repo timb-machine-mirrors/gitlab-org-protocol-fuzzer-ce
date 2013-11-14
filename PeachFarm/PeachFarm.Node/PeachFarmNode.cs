@@ -289,11 +289,6 @@ namespace PeachFarm.Node
 					return;
 
 				StopFuzzer();
-
-				if (nodeState.Status == Status.Running)
-				{
-					StartPeachCleanUp(request.JobID);
-				}
 			}
 		}
 
@@ -505,12 +500,26 @@ namespace PeachFarm.Node
 
 		void peach_TestFinished(Peach.Core.RunContext context)
 		{
-			nlog.Info("Test Finished: " + nodeState.StartPeachRequest.JobID);
+			if (nodeState.StartPeachRequest == null)
+			{
+				nlog.Info("Test Finished, though I don't know the JobID");
+			}
+			else
+			{
+				nlog.Info("Test Finished: " + nodeState.StartPeachRequest.JobID);
+			}
 		}
 
 		void peach_TestError(Peach.Core.RunContext context, Exception e)
 		{
-			nlog.Error("Test Error: {0}\n{1}", nodeState.StartPeachRequest.JobID, e.Message);
+			if (nodeState.StartPeachRequest == null)
+			{
+				nlog.Error("Test Error: {0}\n{1}", "Job ID unknown", e.Message);
+			}
+			else
+			{
+				nlog.Error("Test Error: {0}\n{1}", nodeState.StartPeachRequest.JobID, e.Message);
+			}
 		}
 		#endregion
 
@@ -525,15 +534,8 @@ namespace PeachFarm.Node
 				heartbeat.JobID = nodeState.StartPeachRequest.JobID;
 				heartbeat.UserName = nodeState.StartPeachRequest.UserName;
 				heartbeat.PitFileName = nodeState.StartPeachRequest.PitFileName;
-				if (nodeState.RunContext != null)
-				{
-					if (nodeState.RunContext.config != null)
-						heartbeat.Seed = nodeState.RunContext.config.randomSeed;
-
-					if(nodeState.RunContext.test != null)
-						if(nodeState.RunContext.test.strategy != null)
-							heartbeat.Iteration = nodeState.RunContext.test.strategy.Iteration;
-				}
+				heartbeat.Seed = nodeState.Seed;
+				heartbeat.Iteration = nodeState.Iteration;
 			}
 			heartbeat.Tags = nodeState.Tags;
 			heartbeat.QueueName = nodeState.NodeQueueName;
@@ -652,12 +654,50 @@ namespace PeachFarm.Node
 
 		internal string Version { get; private set; }
 
+		private uint iteration = 0;
+
+		internal uint Iteration
+		{
+			get
+			{
+				if ((RunContext != null) && (RunContext.test != null) && (RunContext.test.strategy != null))
+				{
+					if (RunContext.test.strategy.Iteration > iteration)
+					{
+						iteration = RunContext.test.strategy.Iteration;
+					}
+				}
+				else
+				{
+					return 0;
+				}
+				return iteration; 
+			}
+		}
+
+		internal uint Seed
+		{
+			get
+			{
+				if ((RunContext != null) && (RunContext.config != null))
+				{
+					return RunContext.config.randomSeed;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+		}
+
+
 		public void Reset()
 		{
 			RunContext = null;
 			PitFilePath = String.Empty;
 			DefinesFilePath = String.Empty;
 			StartPeachRequest = null;
+			iteration = 0;
 		}
 	}
 
