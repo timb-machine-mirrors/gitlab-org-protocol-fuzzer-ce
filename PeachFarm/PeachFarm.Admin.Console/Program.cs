@@ -39,7 +39,6 @@ namespace PeachFarm.Admin
 				int launchCount = 0;
 				string ip = String.Empty;
 				string range = String.Empty;
-				string defines = String.Empty;
 				string target = String.Empty;
 				string definesFilePath = String.Empty;
 
