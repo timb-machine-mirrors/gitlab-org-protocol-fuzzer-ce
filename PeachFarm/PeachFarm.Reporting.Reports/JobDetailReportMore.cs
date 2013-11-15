@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace PeachFarm.Reporting.Reports
 {
-	/*
+	//*
 	partial class JobDetailReport
 	{
 		public object LogoBoxValue
@@ -21,5 +21,5 @@ namespace PeachFarm.Reporting.Reports
 			set { pictureBox1.MimeType = value; }
 		}
 	}
-	 */
+	 //*/
 }
