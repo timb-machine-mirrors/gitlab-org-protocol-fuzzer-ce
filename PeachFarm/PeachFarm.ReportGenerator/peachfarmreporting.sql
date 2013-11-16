@@ -31,8 +31,9 @@ CREATE TABLE `jobs` (
   `startdate` datetime DEFAULT NULL,
   `mongoid` varchar(100) DEFAULT NULL,
   `pitfilename` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`jobs_id`),
+  UNIQUE KEY `unique_idx` (`jobid`)
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,8 +66,8 @@ CREATE TABLE `metrics_faults` (
   KEY `datamodel_idx` (`datamodel`),
   KEY `parameter_idx` (`parameter`),
   KEY `jobs_idx` (`jobs_id`),
-  CONSTRAINT `faults_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=21641 DEFAULT CHARSET=utf8 PACK_KEYS=1;
+  CONSTRAINT `faults_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=25523 DEFAULT CHARSET=utf8 PACK_KEYS=1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,8 +96,8 @@ CREATE TABLE `metrics_iterations` (
   KEY `dataset_idx` (`dataset`),
   KEY `parameter_idx` (`parameter`),
   KEY `jobs_idx` (`jobs_id`),
-  CONSTRAINT `iterations_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8;
+  CONSTRAINT `iterations_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=347 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +116,7 @@ CREATE TABLE `metrics_states` (
   KEY `state_idx` (`state`),
   KEY `states_jobs_idx` (`jobs_id`),
   CONSTRAINT `states_jobs` FOREIGN KEY (`jobs_id`) REFERENCES `jobs` (`jobs_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,11 +161,49 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 /*!50001 CREATE TABLE `viewmetricsbybucket` (
   `jobid` tinyint NOT NULL,
-  `target` tinyint NOT NULL,
-  `pitfilename` tinyint NOT NULL,
   `startdate` tinyint NOT NULL,
+  `bucket` tinyint NOT NULL,
   `mutator` tinyint NOT NULL,
-  `dataelementcount` tinyint NOT NULL,
+  `state` tinyint NOT NULL,
+  `actionname` tinyint NOT NULL,
+  `parameter` tinyint NOT NULL,
+  `dataelement` tinyint NOT NULL,
+  `iterationcount` tinyint NOT NULL,
+  `faultcount` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `viewmetricsbydataset`
+--
+
+DROP TABLE IF EXISTS `viewmetricsbydataset`;
+/*!50001 DROP VIEW IF EXISTS `viewmetricsbydataset`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `viewmetricsbydataset` (
+  `jobid` tinyint NOT NULL,
+  `startdate` tinyint NOT NULL,
+  `dataset` tinyint NOT NULL,
+  `iterationcount` tinyint NOT NULL,
+  `bucketcount` tinyint NOT NULL,
+  `faultcount` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `viewmetricsbyelement`
+--
+
+DROP TABLE IF EXISTS `viewmetricsbyelement`;
+/*!50001 DROP VIEW IF EXISTS `viewmetricsbyelement`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `viewmetricsbyelement` (
+  `jobid` tinyint NOT NULL,
+  `startdate` tinyint NOT NULL,
+  `dataelement` tinyint NOT NULL,
+  `mutatorcount` tinyint NOT NULL,
   `iterationcount` tinyint NOT NULL,
   `bucketcount` tinyint NOT NULL,
   `faultcount` tinyint NOT NULL
@@ -191,8 +230,61 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary table structure for view `viewstatemetrics`
+--
+
+DROP TABLE IF EXISTS `viewstatemetrics`;
+/*!50001 DROP VIEW IF EXISTS `viewstatemetrics`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `viewstatemetrics` (
+  `jobid` tinyint NOT NULL,
+  `startdate` tinyint NOT NULL,
+  `state` tinyint NOT NULL,
+  `executioncount` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Dumping routines for database 'peachfarmreporting'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `getpreviousjobid` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `getpreviousjobid`(
+in jobid VARCHAR(12),
+out previousjobid VARCHAR(12)
+)
+BEGIN
+DECLARE target varchar(100);
+DECLARE startdate datetime;
+
+SELECT j.target, j.startdate
+INTO target, startdate
+FROM jobs as j
+WHERE j.jobid = jobid;
+
+SELECT j.jobid
+INTO previousjobid
+FROM jobs as j
+WHERE 
+	j.startdate < startdate
+	AND target = target
+ORDER BY j.startdate DESC
+LIMIT 1;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `jobs_insert` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -225,8 +317,10 @@ IF rowid IS NULL THEN
 	(jobid, target, startdate, mongoid, pitfilename)
 	VALUES(jobid, target, startdate, mongoid, pitfilename);
 
-	SELECT LAST_INSERT_ID()
-	INTO rowid;
+	SELECT j.jobs_id
+	INTO rowid
+	FROM jobs as j
+	WHERE j.jobid = jobid;
 END IF;
 
 END ;;
@@ -254,13 +348,14 @@ actionname varchar(100),
 dataelement varchar(100),
 mutator varchar(100),
 dataset varchar(100),
+parameter varchar(100),
 datamodel varchar(100),
-parameter varchar(100)
+mongoid varchar(100)
 )
 BEGIN
 	INSERT INTO metrics_faults
-	(jobs_id,iteration,bucket,state,actionname,dataelement,mutator,dataset,datamodel,parameter)
-	VALUES(jobs_id,iteration,bucket,state,actionname,dataelement,mutator,dataset,datamodel,parameter);
+	(jobs_id,iteration,bucket,state,actionname,dataelement,mutator,dataset,datamodel,parameter,mongoid)
+	VALUES(jobs_id,iteration,bucket,state,actionname,dataelement,mutator,dataset,datamodel,parameter,mongoid);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -285,17 +380,16 @@ in parameter varchar(100),
 in dataelement varchar(100),
 in mutator varchar(100),
 in dataset varchar(100),
-in iterationcount int unsigned
+in iterationcount int
 )
 BEGIN
-	DECLARE rowid, oldcount int unsigned;
-	SET rowid = NULL;
-	SET oldcount = NULL;
+	DECLARE rowid int unsigned;
+	SET rowid = 0;
 
 	SELECT 
-		metrics_iterations_id,iterationcount
+		metrics_iterations_id
 	INTO
-		rowid,oldcount
+		rowid
 	FROM metrics_iterations AS mi
 	WHERE
 		mi.jobs_id = jobs_id
@@ -306,10 +400,10 @@ BEGIN
 		AND mi.mutator = mutator
 		AND mi.dataset = dataset;
 
-	IF rowid IS NOT NULL THEN
+	IF rowid > 0 THEN
 		UPDATE metrics_iterations mi
 		SET
-			mi.iterationcount = oldcount + iterationcount
+			mi.iterationcount = mi.iterationcount + iterationcount
 		where
 			mi.metrics_iterations_id = rowid;
 	ELSE
@@ -317,6 +411,52 @@ BEGIN
 			  (jobs_id,state,actionname,parameter,dataelement,mutator,dataset,iterationcount)
 		VALUES(jobs_id,state,actionname,parameter,dataelement,mutator,dataset,iterationcount);
 	END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `metrics_states_insert` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `metrics_states_insert`(
+in jobs_id int unsigned,
+in state varchar(100),
+in executioncount int unsigned
+)
+BEGIN
+	DECLARE rowid int unsigned;
+	SET rowid = 0;
+
+	SELECT 
+		metrics_states_id
+	INTO
+		rowid
+	FROM metrics_states AS ms
+	WHERE
+		ms.jobs_id = jobs_id
+		AND ms.state = state;
+
+	IF rowid > 0 THEN
+		UPDATE metrics_states as ms
+		SET
+			ms.executioncount = ms.executioncount + executioncount
+		where
+			ms.metrics_states_id = rowid;
+	ELSE
+		INSERT INTO metrics_states
+			  (jobs_id,state,executioncount)
+		VALUES(jobs_id,state,executioncount);
+	END IF;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -389,6 +529,114 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `selectmetricsbydataset` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `selectmetricsbydataset`(
+in jobid varchar(12)
+)
+BEGIN
+
+DECLARE previousjobid varchar(12);
+call getpreviousjobid(jobid, previousjobid);
+
+if previousjobid IS NULL then
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.dataset,
+		v1.iterationcount,
+		v1.bucketcount,
+		v1.bucketcount as buckettrend,
+		v1.faultcount,
+		v1.faultcount as faulttrend
+	from viewmetricsbydataset as v1
+	where v1.jobid = jobid;
+else
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.dataset,
+		v1.iterationcount,
+		v1.bucketcount,
+		(v1.bucketcount - v2.bucketcount) as buckettrend,
+		v1.faultcount,
+		(v1.faultcount - v2.faultcount) as faulttrend
+	from viewmetricsbydataset as v1
+	join viewmetricsbydataset as v2
+	on v2.jobid = previousjobid
+	and v2.dataset = v1.dataset
+	where v1.jobid = jobid;
+end if;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `selectmetricsbyelement` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `selectmetricsbyelement`(
+in jobid varchar(12)
+)
+BEGIN
+
+DECLARE previousjobid varchar(12);
+call getpreviousjobid(jobid, previousjobid);
+
+if previousjobid IS NULL then
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.dataelement,
+		v1.mutatorcount,
+		v1.iterationcount,
+		v1.bucketcount,
+		v1.bucketcount as buckettrend,
+		v1.faultcount,
+		v1.faultcount as faulttrend
+	from viewmetricsbyelement as v1
+	where v1.jobid = jobid;
+else
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.dataelement,
+		v1.mutatorcount,
+		v1.iterationcount,
+		v1.bucketcount,
+		(v1.bucketcount - v2.bucketcount) as buckettrend,
+		v1.faultcount,
+		(v1.faultcount - v2.faultcount) as faulttrend
+	from viewmetricsbyelement as v1
+	join viewmetricsbyelement as v2
+	on v2.jobid = previousjobid
+	and v2.dataelement = v1.dataelement
+	where v1.jobid = jobid;
+end if;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `selectmetricsbymutator` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -403,37 +651,84 @@ CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `selectmetricsbymutator`(
 in jobid varchar(12)
 )
 BEGIN
+/*
+DECLARE target varchar(100);
+DECLARE startdate datetime;
+DECLARE previousjobid varchar(12);
+
+SET previousjobid = NULL;
 
 SELECT j.target, j.startdate
-INTO @target, @startdate
+INTO target, startdate
 FROM jobs as j
 WHERE j.jobid = jobid;
 
 SELECT j.jobid
-INTO @previousjobid
+INTO previousjobid
 FROM jobs as j
 WHERE 
-	j.startdate < @startdate
-	AND target = @target
+	j.startdate < startdate
+	AND target = target
 ORDER BY j.startdate DESC
 LIMIT 1;
+*/
+DECLARE previousjobid varchar(12);
+call getpreviousjobid(jobid, previousjobid);
 
-select
-	v1.jobid,
-	v1.startdate,
-	v1.mutator,
-	v1.dataelementcount,
-	v1.iterationcount,
-	v1.bucketcount,
-	(v1.bucketcount - v2.bucketcount) as buckettrend,
-	v1.faultcount,
-	(v1.faultcount - v2.faultcount) as faulttrend
-from viewmetricsbymutator as v1
-join viewmetricsbymutator as v2
-on v2.jobid = @previousjobid
-and v2.mutator = v1.mutator
-where v1.jobid = jobid;
+if previousjobid IS NULL then
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.mutator,
+		v1.dataelementcount,
+		v1.iterationcount,
+		v1.bucketcount,
+		v1.bucketcount as buckettrend,
+		v1.faultcount,
+		v1.faultcount as faulttrend
+	from viewmetricsbymutator as v1
+	where v1.jobid = jobid;
+else
+	select
+		v1.jobid,
+		v1.startdate,
+		v1.mutator,
+		v1.dataelementcount,
+		v1.iterationcount,
+		v1.bucketcount,
+		(v1.bucketcount - v2.bucketcount) as buckettrend,
+		v1.faultcount,
+		(v1.faultcount - v2.faultcount) as faulttrend
+	from viewmetricsbymutator as v1
+	join viewmetricsbymutator as v2
+	on v2.jobid = previousjobid
+	and v2.mutator = v1.mutator
+	where v1.jobid = jobid;
+end if;
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `selectstatemetrics` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`matt`@`10.0.1.%` PROCEDURE `selectstatemetrics`(
+in jobid varchar(12)
+)
+BEGIN
+select * from viewstatemetrics as v
+where v.jobid = jobid
+order by executioncount desc;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -493,7 +788,45 @@ DELIMITER ;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`matt`@`10.0.1.%` SQL SECURITY DEFINER */
-/*!50001 VIEW `viewmetricsbybucket` AS select `j`.`jobid` AS `jobid`,`j`.`target` AS `target`,`j`.`pitfilename` AS `pitfilename`,`j`.`startdate` AS `startdate`,`i`.`mutator` AS `mutator`,count(distinct `i`.`dataelement`) AS `dataelementcount`,sum(`i`.`iterationcount`) AS `iterationcount`,count(distinct `f`.`bucket`) AS `bucketcount`,count(`f`.`metrics_faults_id`) AS `faultcount` from ((`jobs` `j` join `metrics_iterations` `i` on((`i`.`jobs_id` = `j`.`jobs_id`))) left join `metrics_faults` `f` on((`f`.`jobs_id` = `i`.`jobs_id`))) group by `j`.`jobid`,`j`.`target`,`j`.`pitfilename`,`j`.`startdate`,`i`.`mutator` */;
+/*!50001 VIEW `viewmetricsbybucket` AS select `j`.`jobid` AS `jobid`,`j`.`startdate` AS `startdate`,`f`.`bucket` AS `bucket`,`f`.`mutator` AS `mutator`,`f`.`state` AS `state`,`f`.`actionname` AS `actionname`,`f`.`parameter` AS `parameter`,`f`.`dataelement` AS `dataelement`,sum(`i`.`iterationcount`) AS `iterationcount`,count(`f`.`metrics_faults_id`) AS `faultcount` from ((`jobs` `j` join `metrics_faults` `f` on((`f`.`jobs_id` = `j`.`jobs_id`))) left join `metrics_iterations` `i` on(((`i`.`jobs_id` = `j`.`jobs_id`) and (`i`.`mutator` = `f`.`mutator`) and (`i`.`state` = `f`.`state`) and (`i`.`actionname` = `f`.`actionname`) and (`i`.`parameter` = `f`.`parameter`) and (`i`.`dataelement` = `f`.`dataelement`)))) group by `j`.`jobid`,`j`.`startdate`,`f`.`bucket`,`f`.`mutator`,`f`.`state`,`f`.`actionname`,`f`.`parameter`,`f`.`dataelement` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `viewmetricsbydataset`
+--
+
+/*!50001 DROP TABLE IF EXISTS `viewmetricsbydataset`*/;
+/*!50001 DROP VIEW IF EXISTS `viewmetricsbydataset`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`matt`@`10.0.1.%` SQL SECURITY DEFINER */
+/*!50001 VIEW `viewmetricsbydataset` AS select `j`.`jobid` AS `jobid`,`j`.`startdate` AS `startdate`,`i`.`dataset` AS `dataset`,sum(`i`.`iterationcount`) AS `iterationcount`,count(distinct `f`.`bucket`) AS `bucketcount`,count(`f`.`metrics_faults_id`) AS `faultcount` from ((`jobs` `j` join `metrics_iterations` `i` on((`i`.`jobs_id` = `j`.`jobs_id`))) left join `metrics_faults` `f` on(((`f`.`jobs_id` = `j`.`jobs_id`) and (`f`.`dataelement` = `i`.`dataelement`)))) group by `j`.`jobid`,`j`.`startdate`,`i`.`dataset` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `viewmetricsbyelement`
+--
+
+/*!50001 DROP TABLE IF EXISTS `viewmetricsbyelement`*/;
+/*!50001 DROP VIEW IF EXISTS `viewmetricsbyelement`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`matt`@`10.0.1.%` SQL SECURITY DEFINER */
+/*!50001 VIEW `viewmetricsbyelement` AS select `j`.`jobid` AS `jobid`,`j`.`startdate` AS `startdate`,`i`.`dataelement` AS `dataelement`,count(distinct `i`.`mutator`) AS `mutatorcount`,sum(`i`.`iterationcount`) AS `iterationcount`,count(distinct `f`.`bucket`) AS `bucketcount`,count(`f`.`metrics_faults_id`) AS `faultcount` from ((`jobs` `j` join `metrics_iterations` `i` on((`i`.`jobs_id` = `j`.`jobs_id`))) left join `metrics_faults` `f` on(((`f`.`jobs_id` = `j`.`jobs_id`) and (`f`.`dataelement` = `i`.`dataelement`)))) group by `j`.`jobid`,`j`.`startdate`,`i`.`dataelement` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -516,6 +849,25 @@ DELIMITER ;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `viewstatemetrics`
+--
+
+/*!50001 DROP TABLE IF EXISTS `viewstatemetrics`*/;
+/*!50001 DROP VIEW IF EXISTS `viewstatemetrics`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`matt`@`10.0.1.%` SQL SECURITY DEFINER */
+/*!50001 VIEW `viewstatemetrics` AS select `j`.`jobid` AS `jobid`,`j`.`startdate` AS `startdate`,`ms`.`state` AS `state`,`ms`.`executioncount` AS `executioncount` from (`jobs` `j` join `metrics_states` `ms` on((`ms`.`jobs_id` = `j`.`jobs_id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -526,4 +878,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-11-07 16:45:17
+-- Dump completed on 2013-11-15 18:02:13

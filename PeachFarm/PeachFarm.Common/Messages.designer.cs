@@ -117,7 +117,6 @@ namespace PeachFarm.Common.Messages
 				}
 			}
 		}
-		/*
 
 		/// <summary>
 		/// Deserializes workflow markup into an ResponseBase object
@@ -260,7 +259,6 @@ namespace PeachFarm.Common.Messages
 				}
 			}
 		}
-		//*/
 		#endregion
 	}
 
@@ -1275,6 +1273,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current GenerateJobReportResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an GenerateJobReportResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -1303,7 +1330,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static GenerateJobReportResponse Deserialize(string xml)
+		public new static GenerateJobReportResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1326,7 +1353,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1341,7 +1368,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1390,7 +1417,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static GenerateJobReportResponse LoadFromFile(string fileName)
+		public new static GenerateJobReportResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1551,6 +1578,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current MonitorResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an MonitorResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -1579,7 +1635,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static MonitorResponse Deserialize(string xml)
+		public new static MonitorResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1602,7 +1658,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1617,7 +1673,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1666,7 +1722,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static MonitorResponse LoadFromFile(string fileName)
+		public new static MonitorResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1793,6 +1849,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current ListJobsResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an ListJobsResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -1821,7 +1906,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListJobsResponse Deserialize(string xml)
+		public new static ListJobsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1844,7 +1929,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1859,7 +1944,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1908,7 +1993,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListJobsResponse LoadFromFile(string fileName)
+		public new static ListJobsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2000,6 +2085,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current JobInfoResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an JobInfoResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -2028,7 +2142,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static JobInfoResponse Deserialize(string xml)
+		public new static JobInfoResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2051,7 +2165,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2066,7 +2180,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2115,7 +2229,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static JobInfoResponse LoadFromFile(string fileName)
+		public new static JobInfoResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2190,6 +2304,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current ListErrorsResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an ListErrorsResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -2218,7 +2361,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListErrorsResponse Deserialize(string xml)
+		public new static ListErrorsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2241,7 +2384,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2256,7 +2399,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2305,7 +2448,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListErrorsResponse LoadFromFile(string fileName)
+		public new static ListErrorsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2380,6 +2523,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current ListNodesResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an ListNodesResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -2408,7 +2580,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListNodesResponse Deserialize(string xml)
+		public new static ListNodesResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2431,7 +2603,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2446,7 +2618,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2495,7 +2667,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListNodesResponse LoadFromFile(string fileName)
+		public new static ListNodesResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2596,6 +2768,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current StopPeachResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an StopPeachResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -2624,7 +2825,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static StopPeachResponse Deserialize(string xml)
+		public new static StopPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2647,7 +2848,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2662,7 +2863,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2711,7 +2912,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static StopPeachResponse LoadFromFile(string fileName)
+		public new static StopPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2812,6 +3013,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current StartPeachResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an StartPeachResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -2840,7 +3070,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static StartPeachResponse Deserialize(string xml)
+		public new static StartPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2863,7 +3093,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2878,7 +3108,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2927,7 +3157,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static StartPeachResponse LoadFromFile(string fileName)
+		public new static StartPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2996,6 +3226,35 @@ namespace PeachFarm.Common.Messages
 
 		#region Serialize/Deserialize
 		/// <summary>
+		/// Serializes current CreateJobResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deserializes workflow markup into an CreateJobResponse object
 		/// </summary>
 		/// <param name="xml">string workflow markup to deserialize</param>
@@ -3024,7 +3283,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static CreateJobResponse Deserialize(string xml)
+		public new static CreateJobResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -3047,7 +3306,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		public override bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -3062,7 +3321,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public virtual void SaveToFile(string fileName)
+		public override void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -3111,7 +3370,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static CreateJobResponse LoadFromFile(string fileName)
+		public new static CreateJobResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
