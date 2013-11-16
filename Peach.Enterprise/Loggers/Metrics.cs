@@ -333,10 +333,10 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				insert_state_cmd = null;
 			}
 
-			if (insert_state_cmd != null)
+			if (select_state_cmd != null)
 			{
-				insert_state_cmd.Dispose();
-				insert_state_cmd = null;
+				select_state_cmd.Dispose();
+				select_state_cmd = null;
 			}
 
 			foreach (var kv in keyTracker)
