@@ -27,18 +27,14 @@
 
 	<StateModel name="State" initialState="State1" >
 		<State name="State1"  >
-			<!--Action type="call" method="monkey" >
-				<Param type="in">
-					<DataModel ref="TheDataModel"/>
+			<Action type="call" method="tap">
+				<Param>
+					<DataModel ref="X"/>
 				</Param>
-			</Action-->
-			<Action type="setProperty" property="x">
-				<DataModel ref="X" />
+				<Param>
+					<DataModel ref="Y"/>
+				</Param>
 			</Action>
-			<Action type="setProperty" property="y">
-				<DataModel ref="Y" />
-			</Action>
-			<Action type="call" method="tap" />
 		</State>
 	</StateModel>
 
@@ -50,17 +46,16 @@
 				</Param>
 			</Action>
 
-			<Action type="setProperty" property="keycode">
-				<DataModel ref="Enter" />
+			<Action type="call" method="keyevent">
+				<Param>
+					<DataModel name="Enter"/>
+				</Param>
 			</Action>
-
-			<Action type="call" method="keyevent"/>
 		</State>
 	</StateModel>
 
 	<Agent name="Ag">
 		<Monitor class="Android">
-			<!--Param name="CmdOnStart" value="am start -S -n com.android.development/.BadBehaviorActivity &amp;&amp; sleep 2" /-->
 			<Param name="ApplicationName" value="com.android.development" />
 			<Param name="ActivityName" value=".BadBehaviorActivity" />
 			<!--Param name="AdbPath" value="/path/to/adb"/-->
@@ -81,10 +76,7 @@
 
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
-			<Param name="Target" value="com.android.development" />
-			<Param name="DeviceSerial" value="##Serial##" />
-			<Param name="NumActions" value="20" />
-			<Param name="Sleep" value="0" />
+			<!--<Param name="DeviceSerial" value="##Serial##" />-->
 		</Publisher>
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
@@ -97,10 +89,7 @@
 
 		<!--Publisher class="Null" /-->
 		<Publisher class="AndroidMonkey">
-			<Param name="Target" value="com.android.browser" />
-			<Param name="DeviceSerial" value="##Serial##" />
-			<Param name="NumActions" value="20" />
-			<Param name="Sleep" value="0" />
+			<!--Param name="DeviceSerial" value="##Serial##" /-->
 		</Publisher>
 		<Logger class="File">
 			<Param name="Path" value="logs"/>

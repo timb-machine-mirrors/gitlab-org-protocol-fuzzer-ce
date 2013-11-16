@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NLog;
 using Peach.Core.IO;
 using Peach.Core.Dom;
-using Managed.Adb;
 using System.IO;
 using Peach.Core;
 using Peach.Enterprise;
@@ -13,129 +11,159 @@ using Peach.Enterprise;
 namespace Peach.Enterprise.Publishers
 {
 	[Publisher("AndroidMonkey", true)]
-	[Parameter("Target", typeof(string), "Name of Android Application to Fuzz")] 
-	[Parameter("DeviceSerial", typeof(string), "The Serial of the device to fuzz", "")]
-	[Parameter("NumActions", typeof(int), "How many actions Monkey should preform on this iteration (default 10)", "10")]
-	[Parameter("Sleep", typeof(int), "How much sleep time should be given after an iteration (default 3s)", "3")]
+	[Parameter("AdbPath", typeof(string), "Directory containing adb", "")]
+	[Parameter("DeviceSerial", typeof(string), "The serial of the device to fuzz", "")]
+	[Parameter("DeviceMonitor", typeof(string), "Android monitor to get device serial from", "")]
+	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
+	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 5)", "5")]
 	public class AndroidMonkeyPublisher : Publisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string Target { get; set; }
-		public string DeviceSerial { get; set; }
-		public int NumActions { get; set; }
-		public int Sleep { get; set; }
-		private Device _dev = null;
-		private ConsoleOutputReceiver _creciever = null;
-		private uint _x = 0;
-		private uint _y = 0;
-		private uint _keycode = 0;
+		public int ConnectTimeout { get; protected set; }
+		public int CommandTimeout { get; protected set; }
+		public string AdbPath { get; protected set; }
+		public string DeviceSerial { get; protected set; }
+		public string DeviceMonitor { get; protected set; }
+
+		AndroidDevice dev = null;
+		bool adbInit = false;
 
 		public AndroidMonkeyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			_creciever = new ConsoleOutputReceiver();
-			_dev = AndroidBridge.GetDevice(DeviceSerial);
+			if (!(string.IsNullOrEmpty(DeviceSerial) ^ string.IsNullOrEmpty(DeviceMonitor)))
+				throw new PeachException("Either DeviceSerial parameter or DeviceMonitor parameter is required.");
+		}
+
+		void SyncDevice()
+		{
+			// If the serial came from a monitor, it might change across iterations
+			// so we need to make sure out dev member is always correct
+
+			var serial = DeviceSerial;
+
+			if (string.IsNullOrEmpty(serial))
+			{
+				var dom = this.Test.parent as Peach.Core.Dom.Dom;
+				var val = dom.context.agentManager.Message(DeviceMonitor, new Variant("DeviceSerial"));
+				if (val == null)
+					throw new PeachException("Could not resolve device serial from monitor '" + DeviceMonitor + "'.");
+
+				serial = (string)val;
+			}
+
+			if (dev != null && dev.SerialNumber == serial)
+				return;
+
+			if (dev == null && DeviceSerial == null)
+				logger.Debug("Resolved device '{0}' from monitor '{1}'.", serial, DeviceMonitor);
+
+			if (dev != null)
+			{
+				logger.Debug("Updating device from old serial '{0}' to new serial '{1}'.", dev.SerialNumber, serial);
+
+				dev.Dispose();
+				dev = null;
+			}
+
+			dev = AndroidDevice.Get(serial, ConnectTimeout, 0 /* ReadyTimeout */, CommandTimeout);
+		}
+
+		protected override void OnStart()
+		{
+			adbInit = true;
+			AndroidBridge.Initialize(AdbPath);
+		}
+
+		protected override void OnStop()
+		{
+			if (dev != null)
+			{
+				dev.Dispose();
+				dev = null;
+			}
+
+			if (adbInit)
+			{
+				adbInit = false;
+				AndroidBridge.Terminate();
+			}
+		}
+
+		static string GetString(BitwiseStream bs)
+		{
+			return new BitReader(bs).ReadString(Encoding.ISOLatin1);
+		}
+
+		static uint GetUInt(BitwiseStream bs)
+		{
+			ulong bits;
+			int len = bs.ReadBits(out bits, 32);
+			return Endian.Little.GetUInt32(bits, len);
+		}
+
+		static T[] ParseArgs<T>(string method, int numParams, List<ActionParameter> args, Func<BitwiseStream, T> readFunc)
+		{
+			if (args.Count != numParams)
+				throw new SoftException("Error, '{0}' method requires {1} DataModel parameter{2} but {3} {4} provided.".Fmt(
+					method, numParams, numParams == 1 ? "s" : "", args.Count, numParams == 1 ? "was" : "were"));
+
+			var ret = new T[numParams];
+
+			for (int i = 0; i < args.Count; ++i)
+			{
+				var bs = args[i].dataModel.Value;
+				bs.Seek(0, SeekOrigin.Begin);
+				ret[i] = readFunc(bs);
+			}
+
+			return ret;
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
-			//need to check if screen is locked
-			//need to add SafeExec from monitor into shared classes
-			string _cmd = "";
 			try
 			{
+				// Defer obtaining of device handle until needed.  This way
+				// we support android monitors that use StartOnCall.
+
 				if (method.Equals("tap"))
 				{
-					_cmd = "input tap " + _x.ToString() + " " + _y.ToString();
-					logger.Debug("Executing \"tap\" command " + _cmd );
-					// !!FIXME!! exception handling
-					_dev.ExecuteShellCommand(_cmd,  _creciever);
+					var items = ParseArgs<uint>("tap", 2, args, bs => GetUInt(bs));
+					SyncDevice();
+					dev.Input("tap", items[0].ToString(), items[1].ToString());
 				}
-				else if (method.Equals("exec"))
-				{
-					if (args.Count != 1)
-						throw new SoftException("Invalid Pit, 'exec' method takes one DataModel as an argument.");
-					var bs = args[0].dataModel[0].Value;
-					bs.Seek(0, SeekOrigin.Begin);
-					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
-					_cmd = val;
-					logger.Debug("Executing command " + _cmd );
-					_dev.ExecuteShellCommand(_cmd,  _creciever);
-				}
-
 				else if (method.Equals("keyevent"))
 				{
-					_cmd = "input keyevent " + _keycode.ToString();
-					logger.Debug("Executing \"keyevent\" command " + _cmd);
-					_dev.ExecuteShellCommand(_cmd, _creciever);
+					var items = ParseArgs<uint>("keyevent", 1, args, bs => GetUInt(bs));
+					SyncDevice();
+					dev.Input("keyevent", items[0].ToString());
 				}
 				else if (method.Equals("text"))
 				{
-					if (args.Count != 1)
-						throw new SoftException("Invalid Pit, 'text' method takes one DataModel as an argument.");
-
-					var bs = args[0].dataModel[0].Value;
-					bs.Seek(0, SeekOrigin.Begin);
-					var val = new BitReader(bs).ReadString(Peach.Core.Encoding.ISOLatin1);
-					// this is definitely not escaped
-					var escaped = val.Replace("\"", "\\\"");
-					_cmd = "input text \"" + escaped + "\"";
-					logger.Debug("Sending text with command " + _cmd);
-					_dev.ExecuteShellCommand(_cmd, _creciever);
+					var items = ParseArgs<string>("text", 1, args, bs => GetString(bs));
+					SyncDevice();
+					dev.Input("text", items[0].ToString());
 				}
-				else if (method.Equals("monkey"))
-				{
-					if (IsControlIteration)
-					{
-						return null;
-					}
-					if (args.Count != 1)
-						throw new SoftException("Invalid Pit, monkey method takes one DataModel as an argument.");
-
-					int seed = (int)args[0].dataModel[0].InternalValue;
-					_dev.ExecuteShellCommand("monkey -s " + seed.ToString() + " -p " + Target + " " + NumActions.ToString() + " && sleep " + Sleep.ToString(), _creciever);
-				}
+			}
+			catch (SoftException sex)
+			{
+				logger.Debug("SoftException: {0}", sex.Message);
+				throw;
 			}
 			catch (Exception ex)
 			{
-				// Why would any of these fail? Lets make sure ADB is still running
-				try 
-				{
-					AdbHelper.Instance.GetAdbVersion(AndroidDebugBridge.SocketAddress); 
-				}
-				catch (System.Net.Sockets.SocketException)
-				{
-					//adb is down
-					AndroidBridge.StartADB();
-				}
+				// Can fail if adb doesn't like the values we give it, or
+				// if something causes the device to crash.  Treat all exceptions
+				// as SoftExceptions and let the engine decide what to do.
+				logger.Debug("Exception: {0}", ex.Message);
 				throw new SoftException(ex);
 			}
+
 			return null;
-		}
-
-		protected override void OnSetProperty(string property, Variant value)
-		{
-			System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
-			var bs = (BitwiseStream)value;
-			bs.SeekBits(0, SeekOrigin.Begin);
-			ulong bits;
-			int len = bs.ReadBits(out bits, 32);
-			uint prop = Endian.Little.GetUInt32(bits, len);
-
-			if (property.Equals("x"))
-			{
-				_x = prop;
-			}
-			else if (property.Equals("y"))
-			{
-				_y = prop;
-			}
-			else if (property.Equals("keycode"))
-			{
-				_keycode = prop;
-			}
 		}
 	}
 }

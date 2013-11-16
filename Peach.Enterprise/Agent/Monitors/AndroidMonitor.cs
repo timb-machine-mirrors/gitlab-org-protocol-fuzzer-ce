@@ -1,373 +1,233 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Peach.Core.Agent;
 using Peach.Enterprise;
-using Managed.Adb;
 using Peach.Core;
 using System.Text.RegularExpressions;
 using NLog;
+using System.IO;
 
 namespace Peach.Enterprise.Agent.Monitors
 {
 	[Monitor("Android", true)]
 	[Parameter("ApplicationName", typeof(string), "Android Application")]
-	[Parameter("AdbPath", typeof(string), "Directory Path to Adb", "")]
-	[Parameter("DeviceSerial", typeof(string), "The Serial of the device to fuzz", "")]
 	[Parameter("ActivityName", typeof(string), "Application Activity", "")]
+	[Parameter("AdbPath", typeof(string), "Directory Path to Adb", "")]
+	[Parameter("DeviceSerial", typeof(string), "The serial of the device to monitor", "")]
+	[Parameter("DeviceMonitor", typeof(string), "Android monitor to get device serial from", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "true")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart Application after Faults", "true")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
-	//	[Parameter("CommandTimout", typeof(int), "Time to wait for completion of commands sent to device, fault on timeout", "10")]
-	[Parameter("DeviceRetryCount", typeof(int), "Number of times to try to connect to the device before failing", "20")]
-
+	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
+	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
+	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 180)", "180")]
+	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 5)", "5")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static Regex logFilter = new Regex(@"^-+ beginning of [^\r\n]*(\r\n|\r|\n)?", RegexOptions.Multiline);
 		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
-		private Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
-		private Regex amProcessFailure = new Regex(@".*Error: (.*?)\r?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
 
-		private Regex pmProcessSuccess = new Regex(@"^Success$\r?\n?");
-		private Regex pmProcessFailure = new Regex(@"^Failed$\r?\n?");
+		bool adbInit = false;
+		Fault fault = null;
+		AndroidDevice dev = null;
 
-		private Regex bmgrProcessSuccess = new Regex(@"^Wiped backup data for .*\r?\n?");
-		private Regex bmgrProcessFailure = new Regex(@"^Failed$\r?\n?");
-
-		private Fault _fault = null;
-		private Device _dev = null;
-		private FileEntry _tombs = null;
-		private bool _muststop = false;
-		private CommandResultReceiver _cmdreciever = null;
-
-		public string ApplicationName { get; private set; }
-		public string AdbPath { get; private set; }
-		public string ActivityName { get; private set; }
-		public string DeviceSerial { get; set; }
-		public bool RestartEveryIteration { get; private set; }
-		public bool RestartAfterFault { get; private set; }
-		public bool ClearAppDataOnFault { get; private set; }
-		//		public int CommandTimout {get; private set; }
-		public int DeviceRetryCount {get; private set; }
-
+		public string ApplicationName { get; protected set; }
+		public string AdbPath { get; protected set; }
+		public string ActivityName { get; protected set; }
+		public string DeviceSerial { get; protected set; }
+		public string DeviceMonitor { get; protected set; }
+		public string StartOnCall { get; protected set; }
+		public bool RestartEveryIteration { get; protected set; }
+		public bool ClearAppDataOnFault { get; protected set; }
+		public int ConnectTimeout { get; protected set; }
+		public int ReadyTimeout { get; protected set; }
+		public int CommandTimeout { get; protected set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
 			ParameterParser.Parse(this, args);
-			AndroidBridge.SetAdbPath(AdbPath);
-			_cmdreciever = new CommandResultReceiver();
+
+			if (!(string.IsNullOrEmpty(DeviceSerial) ^ string.IsNullOrEmpty(DeviceMonitor)))
+				throw new PeachException("Either DeviceSerial parameter or DeviceMonitor parameter is required.");
 		}
 
-
-		public string SafeExec(string cmd, bool failHard)
+		Fault MakeFault(string errorLog)
 		{
-			logger.Debug("Executing on device " + _dev.SerialNumber + " command: " +  cmd);
-			try
-			{
-				//_dev.ExecuteShellCommand(cmd, _cmdreciever, CommandTimout);
-				_dev.ExecuteShellCommand(cmd, _cmdreciever); //timout code is broken on the mad bee side
-			}
-			//!!FIXME!! could also fail with adb missing
-			catch (Managed.Adb.Exceptions.DeviceNotFoundException)
-			{
-				string msg = "Device connection lost";
-				if (failHard)
-				{
-					throw new PeachException(msg);
-				}
-				else
-				{
-					// more error handling
-					// We can't actually do much more than this right now...
-					try
-					{
-						devRestarted();
-					}
-					catch (Exception ex)
-					{
-						throw new SoftException(ex);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new SoftException(ex);
-			}
-			return _cmdreciever.Result;
-		}
+			var sb = new System.Text.StringBuilder();
 
-		public byte [] BinSafeExec(string cmd)
-		{
-			CommandResultBinaryReceiver breciever = new CommandResultBinaryReceiver();;
-			// need to merge this with SafeExec, handle different types
-			logger.Debug("Executing on device " + _dev.SerialNumber + " command: " +  cmd);
-			try
-			{
-				//_dev.ExecuteShellCommand(cmd, _cmdreciever, CommandTimout);
-				_dev.ExecuteShellCommand(cmd, breciever); //timout code is broken on the mad bee side
-			}
-			//!!FIXME!! could also fail with adb missing
-			catch (Managed.Adb.Exceptions.DeviceNotFoundException)
+			Action<string, Action> guard = (what, action) =>
 			{
 				try
 				{
-					devRestarted();
+					action();
 				}
 				catch (Exception ex)
 				{
-					throw new SoftException(ex);
+					var msg = "Unable to {0}:{1}{2}".Fmt(what, Environment.NewLine, ex);
+					logger.Debug(msg);
+					sb.AppendLine(msg);
 				}
-			}
-			catch (Managed.Adb.Exceptions.ShellCommandUnresponsiveException)
+			};
+
+			var ret = new Fault()
 			{
-				logger.Debug("Lost Connection to ADB, restarting");
-				AndroidBridge.RestartADB();
-			}
-			return breciever.Result;
-		}
+				title = "Device '{0}' Log".Fmt(DeviceSerial ?? DeviceMonitor),
+				description = errorLog ?? "",
+				detectionSource = "AndroidMonitor",
+				type = string.IsNullOrEmpty(errorLog) ? FaultType.Data : FaultType.Fault,
+			};
 
-		public string SafeExec(string cmd)
-		{
-			return SafeExec(cmd, false);
-		}
-
-		public void SafeExec(string cmd, Regex success, Regex failure, bool failHard)
-		{
-			var ExecException = (failHard ? typeof(PeachException) : typeof(SoftException));
-			string response = SafeExec(cmd, failHard);
-			if (!string.IsNullOrEmpty(response))
+			// Step 1: Wait for device to be ready
+			guard("wait for device read", () =>
 			{
-				if (!success.Match(response).Success)
-				{
-					Match m = failure.Match(response);
-					if (m.Success)
-						throw (Exception)Activator.CreateInstance(ExecException, "Command `" + cmd + "` failed to execute: \n" + m);
-					else
-						throw (Exception)Activator.CreateInstance(ExecException, "Command output for `" + cmd + "` could not be parsed: \n" + response);
-				}
-			}
-			else
-				throw (Exception)Activator.CreateInstance(ExecException, "Shell command `" + cmd +"` had no output");
-		}
+				dev.WaitForReady();
+			});
 
-		public void SafeExec(string cmd, Regex success, Regex failure)
-		{
-			SafeExec(cmd, success, failure, false);
-		}
-
-		private void CleanTombs(){
-			foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
+			// Step 2: Try and get a creenshot
+			guard("capture screenshot", () =>
 			{
-				// this can fail, add exception handling
-				_dev.FileSystem.Delete(tomb);
-			}
-		}
+				var bytes = dev.TakeScreenshot();
+				ret.collectedData.Add(new Fault.Data("{0}_screenshot.png".Fmt(DeviceSerial ?? DeviceMonitor), bytes));
+			});
 
-		private void CleanLogs()
-		{
-			// this can fail, add exception handling
-			SafeExec("logcat -c");
-		}
-
-		private void CleanUI(string type)
-		{
-			string _cmd = "";
-			if (type.Equals("dismiss"))
+			// Step 3: Grab full logcat
+			guard("capture device logs", () =>
 			{
-				logger.Debug("Clearing UI running 2x " + _cmd);
-				_cmd = "input keyevent 66"; //Enter
-				SafeExec(_cmd);
-				Thread.Sleep(250);
-				// this can fail, add exception handling
-				SafeExec(_cmd);
-			}
-			else if (type.Equals("unlock"))
-			{
-				_cmd = "input keyevent 82";
-				// this can fail, add exception handling
-				SafeExec(_cmd); //Menu
-			}
-		}
+				var log = dev.ReadAllLogs();
+				var bytes = Encoding.UTF8.GetBytes(log);
+				ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceSerial ?? DeviceMonitor), bytes));
+			});
 
-		private void StartApp()
-		{
-			//check _dev.State; to make sure it's online?
-			string cmd = "am start -W -S -n " + ApplicationName;
-			if (!string.IsNullOrEmpty(ActivityName))
+			// Step 4: Grab tombs
+			guard("capture tombs", () =>
 			{
-				cmd = cmd + "/" + ActivityName;
-			}
-			SafeExec(cmd, amProcessSuccess, amProcessFailure, true);
-		}
+				var tmp = Path.GetTempFileName();
 
-
-		private bool devRestarted()
-		{
-			// what? This doesn't do what it says it does....
-			bool restarted = false;
-			int i = 0;
-			while (i < DeviceRetryCount)
-			{
 				try
 				{
-					// this could be called from SafeExec so it can't be used in SafeExec
-					// also, there's already error handling around this one
-					_dev.ExecuteShellCommand("getprop init.svc.bootanim", _cmdreciever);
-				}
-				catch
-				{
-					try
+					foreach (var tomb in dev.CrashDumps())
 					{
-						if (!string.Equals(_dev.State,"Online"))
-							Thread.Sleep(1000);
+						// TODO: Hash bucketing!
+						dev.PullFile(tomb, tmp);
+						ret.collectedData.Add(new Fault.Data("{0}_{1}".Fmt(DeviceSerial ?? DeviceMonitor, tomb.Name), System.IO.File.ReadAllBytes(tmp)));
 					}
-					catch
-					{
-					}
-					continue;
 				}
-
-				if (!_cmdreciever.Result.Equals("running"))
+				finally
 				{
-					return restarted;
+					File.Delete(tmp);
 				}
-				else
-				{
-					restarted = true;
-					Thread.Sleep(1000);
-					i += 1;
-				}
-			}
-			throw new Exception("Unable to Communicate with Android Device after " + i.ToString() + " attempts.");
-		}
+			});
 
-		private byte[] imageClean(byte[] unclean)
-		{
-			List<byte> clean = new List<byte>();
-			int i = 0;
-			while (i < unclean.Length - 1)
+			// Step 5: Save any exceptions that might have occured
+			if (sb.Length > 0)
 			{
-				if (unclean[i] != '\r' || unclean[i + 1] != '\n')
-				{
-					clean.Add(unclean[i]);
-					i += 1;
-				}
-				else
-				{
-					clean.Add(unclean[i+1]);
-					i += 2;
-				}
+				var errors = sb.ToString();
+				var bytes = Encoding.UTF8.GetBytes(errors);
+				ret.collectedData.Add(new Fault.Data("{0}_exceptions".Fmt(DeviceSerial ?? DeviceMonitor), bytes));
 			}
-			return clean.ToArray();
+
+			return ret;
 		}
 
-
-		private void restartAdb()
+		void SyncDevice()
 		{
-			// this didn't actually perform the function that was stated by the function name. fixed -JD
-			AndroidBridge.RestartADB();
+			// If the serial came from a monitor, it might change across iterations
+			// so we need to make sure out dev member is always correct
+
+			var serial = DeviceSerial;
+
+			if (string.IsNullOrEmpty(serial))
+			{
+				serial = Agent.QueryMonitors(DeviceMonitor + ".DeviceSerial") as string;
+				if (serial == null)
+					throw new PeachException("Could not resolve device serial from monitor '" + DeviceMonitor + "'.");
+			}
+
+			if (dev != null && dev.SerialNumber == serial)
+				return;
+
+			if (dev == null && DeviceSerial == null)
+				logger.Debug("Resolved device '{0}' from monitor '{1}'.", serial, DeviceMonitor);
+
+			if (dev != null)
+			{
+				logger.Debug("Updating device from old serial '{0}' to new serial '{1}'.", dev.SerialNumber, serial);
+
+				dev.Dispose();
+				dev = null;
+			}
+
+			dev = AndroidDevice.Get(serial, ConnectTimeout, ReadyTimeout, CommandTimeout);
+		}
+
+		public override object ProcessQueryMonitors(string query)
+		{
+			if (query == Name + ".DeviceSerial" && dev != null)
+				return dev.SerialNumber;
+
+			return null;
 		}
 
 		public override void SessionStarting()
 		{
-			_dev = AndroidBridge.GetDevice(DeviceSerial);
-			if (_dev.CanSU())
-			{
-				var path = "/data/tombstones/";
-				_tombs = FileEntry.FindOrCreate(_dev, path);
-				if (!_tombs.IsDirectory)
-					throw new PeachException("Tomb path " + _tombs + " could not be found or created");
-				CleanTombs();
-			}
-			// file creation can silently fail
-			CleanLogs();
+			adbInit = true;
+
+			// Initialize adb stuff
+			AndroidBridge.Initialize(AdbPath);
+
+			// Grab device by serial or from a monitor
+			SyncDevice();
+
+			// Ensure app is not running and clear app data
+
+			// Start the application if we are not running it every iteration
 			if (!RestartEveryIteration)
 			{
-				StartApp();
+				dev.WaitForReady();
+				dev.StartApp(ApplicationName, ActivityName);
 			}
 		}
 
 		public override void SessionFinished()
 		{
-		}
-
-		public override bool DetectedFault()
-		{
-			_fault = null;
-			try
+			if (dev != null)
 			{
-				string response = SafeExec("logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
-
-
-				if (!string.IsNullOrEmpty(response))
-				{
-					// Filter out lines that look like:
-					// --------- beginning of /dev/log/main
-					var filtered = logFilter.Replace(response, "");
-					if (!string.IsNullOrEmpty(filtered))
-					{
-						logger.Debug("Fault detected, logcat returned after regex: " + filtered);
-						_fault = new Fault();
-						_fault.type = FaultType.Fault;
-						_fault.detectionSource = "AndroidMonitor";
-						_fault.exploitability = "Unknown";
-						_fault.title = "Response";
-						_fault.description = filtered;
-					}
-				}
+				dev.Dispose();
+				dev = null;
 			}
-			catch (Exception ex)
+
+
+			if (adbInit)
 			{
-				throw new SoftException(ex.ToString());
+				adbInit = false;
+				AndroidBridge.Terminate();
 			}
-			return _fault != null; // && _fault.type == FaultType.Fault;
 		}
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			// needs to check if the system is booted
-			logger.Debug("Making sure the device is alive...");
-			SafeExec("echo hello android..."); // if this works, the system is booted. I'd like a better check
-			bool fault = _fault != null && (_fault.type == FaultType.Fault);
-			bool restart = false;
-			if (RestartEveryIteration || ( fault && RestartAfterFault))
-			{
-				restart = true;
-			}
+			bool hasFault = fault != null;
 
-			if (fault && ClearAppDataOnFault)
-			{
-				SafeExec("pm clear " + ApplicationName, pmProcessSuccess, pmProcessFailure);
-				SafeExec("bmgr wipe " + ApplicationName, bmgrProcessSuccess, bmgrProcessFailure);
-			}
+			fault = null;
 
-			_fault = null;
+			// The device can change across iterations, especially if we are using multiple emulators
+			SyncDevice();
 
-			if (restart)
-			{
-				try
-				{
-					StartApp();
-				}
-				catch (Managed.Adb.Exceptions.DeviceNotFoundException ex)
-				{
-					restartAdb();
-					throw new SoftException(ex);
-				}
-				// We don't want to just swollow exceptions
-				// catch (Exception ex)
-				// {
-				//	throw new SoftException("Unable to Restart Android Application:\n" + ex);
-				// }
-			}
-			if (_dev.CanSU())
-				CleanTombs();
-			CleanLogs();
+			// If we just faulted, or are supposed to start the app every iteration
+			// make sure the device is ready before continuing
+			if (hasFault || RestartEveryIteration)
+				dev.WaitForReady();
+
+			if (hasFault && ClearAppDataOnFault)
+				dev.ClearAppData(ApplicationName);
+
+			dev.ClearLogs();
+
+			if (hasFault || RestartEveryIteration)
+				dev.StartApp(ApplicationName, ActivityName);
 		}
 
 		public override bool IterationFinished()
@@ -375,109 +235,58 @@ namespace Peach.Enterprise.Agent.Monitors
 			return true;
 		}
 
+		public override bool DetectedFault()
+		{
+			System.Diagnostics.Debug.Assert(fault == null);
+
+			string errors = dev.CheckForErrors();
+
+			if (string.IsNullOrEmpty(errors))
+				return false;
+
+			logger.Debug("Detected errors on device '{0}', building fault record", dev.SerialNumber);
+
+			// Error log contains messages, capture device state
+			// Note: MakeFault does not throw an exception
+			fault = MakeFault(errors);
+
+			System.Diagnostics.Debug.Assert(fault != null);
+			System.Diagnostics.Debug.Assert(fault.type == FaultType.Fault);
+
+			logger.Debug("Fault detected!");
+
+			return true;
+		}
+
+		public override Fault GetMonitorData()
+		{
+			// If fault is null, make a data fault that contains full logcat and screenshots
+			if (fault == null)
+				fault = MakeFault(null);
+
+			return fault;
+		}
+
 		public override void StopMonitor()
 		{
 			SessionFinished();
 		}
 
-		public override Fault GetMonitorData()
-		{
-			if (_fault == null)
-				_fault = new Fault();
-
-			// STEP 1: Get 1st Screenshot
-			try
-			{
-				//Image img = _dev.Screenshot; // this is the faster way to do it, but we need a way to convert to an image in mono...
-				//_dev.Screenshot.ToImage().Save("test.bmp");
-
-				_fault.collectedData.Add(new Fault.Data("screenshot1.png", imageClean(BinSafeExec("screencap -p"))));
-			}
-			catch (Exception ex)
-			{
-				logger.Warn("AndroidScreenshot: Warn, Unable to capture first screenshot:\n" + ex);
-			}
-
-			// STEP 2: Wait for boot if system crashed.
-			// Make sure the device is ready
-			logger.Debug("Checking for restart");
-			bool restarted = false;
-			try
-			{
-				if (restarted = devRestarted())
-				{
-					Thread.Sleep(2000); //Boot Animation is finished, give it two seconds before unlocking
-					CleanUI("unlock");
-				}
-			}
-			catch (Exception ex)
-			{
-				logger.Error(ex.Message);
-				_muststop = true;
-			}
-
-			// STEP 3: Grab Tomb
-			try
-			{
-				if (_dev.CanSU())
-				{
-					logger.Debug("Getting tombstones");
-					foreach (var tomb in _dev.FileListingService.GetChildren(_tombs, false, null))
-					{
-						// also, this can fail, add exception handling
-						string tombstr = SafeExec("cat " + tomb.FullPath);
-
-						var hash = reHash.Match(tombstr);
-						if (hash.Success)
-						{
-							// TODO not real major minor hashes
-							// Also these wont bucket when from a linux and windows node
-							// Since it will have different newlines and thus different hashcodes
-							_fault.majorHash = hash.Groups[0].Value.GetHashCode().ToString();
-							_fault.minorHash = hash.Groups[0].Value.GetHashCode().ToString();
-						}
-						_fault.collectedData.Add(new Fault.Data(tomb.FullPath, System.Text.Encoding.ASCII.GetBytes(tombstr)));
-						// TODO: this might be ok, since a core dump implies it was a native crash
-						// And native crashes are the only crashes that need to physically dismiss the message
-						if (!restarted)
-						{
-							Thread.Sleep(1000);
-							CleanUI("dismiss");
-						}
-					}
-				}
-				// This should happen on each iteration start, not after we
-				// collect data. This would not properly clean up exceptions that may happen elsewhere
-
-				//CleanTombs();
-				//CleanLogs();
-			}
-			catch (Exception ex)
-			{
-				logger.Warn(ex.Message);
-			}
-			logger.Debug("Taking screenshots");
-			// STEP 4: Get 2nd ScreenShot
-			try
-			{
-				// also, this can fail, add exception handling
-				_fault.collectedData.Add(new Fault.Data("screenshot2.png", imageClean(BinSafeExec("screencap - p"))));
-			}
-			catch (Exception ex)
-			{
-				logger.Warn("AndroidScreenshot: Warn, Unable to capture second screenshot:\n" + ex.Message);
-			}
-
-			return _fault;
-		}
-
 		public override bool MustStop()
 		{
-			return _muststop;
+			return false;
 		}
 
 		public override Variant Message(string name, Variant data)
 		{
+			if (this.Name == name && (string)data == "DeviceSerial")
+				return new Variant(dev.SerialNumber);
+
+			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			{
+				// TODO: Implement me!
+			}
+
 			return null;
 		}
 	}
