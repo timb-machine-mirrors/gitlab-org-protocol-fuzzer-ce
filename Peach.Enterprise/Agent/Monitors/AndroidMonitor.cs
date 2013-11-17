@@ -23,6 +23,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
 	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 180)", "180")]
 	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 5)", "5")]
+	[Parameter("FaultWaitTime", typeof(int), "Milliseconds to wait when checking for a fault (default 0)", "0")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -44,6 +45,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public int ConnectTimeout { get; protected set; }
 		public int ReadyTimeout { get; protected set; }
 		public int CommandTimeout { get; protected set; }
+		public int FaultWaitTime { get; protected set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -238,6 +240,9 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override bool DetectedFault()
 		{
 			System.Diagnostics.Debug.Assert(fault == null);
+
+			if (FaultWaitTime > 0)
+				Thread.Sleep(FaultWaitTime);
 
 			string errors = dev.CheckForErrors();
 
