@@ -465,7 +465,7 @@ namespace PeachFarm.Node
 
 			Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
 			config.pitFile = nodeState.PitFilePath;
-			config.debug = false;
+			config.debug = 0;
 
 			if (nodeState.StartPeachRequest.RangeStartSpecified && nodeState.StartPeachRequest.RangeEndSpecified)
 			{
