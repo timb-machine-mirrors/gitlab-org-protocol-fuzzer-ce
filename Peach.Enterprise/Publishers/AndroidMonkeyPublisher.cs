@@ -15,7 +15,7 @@ namespace Peach.Enterprise.Publishers
 	[Parameter("DeviceSerial", typeof(string), "The serial of the device to fuzz", "")]
 	[Parameter("DeviceMonitor", typeof(string), "Android monitor to get device serial from", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
-	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 5)", "5")]
+	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 10)", "10")]
 	public class AndroidMonkeyPublisher : Publisher
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

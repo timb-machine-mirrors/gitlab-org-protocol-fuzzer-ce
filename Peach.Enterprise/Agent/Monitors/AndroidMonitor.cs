@@ -21,8 +21,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
-	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 180)", "180")]
-	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 5)", "5")]
+	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 600)", "600")]
+	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 10)", "10")]
 	[Parameter("FaultWaitTime", typeof(int), "Milliseconds to wait when checking for a fault (default 0)", "0")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
