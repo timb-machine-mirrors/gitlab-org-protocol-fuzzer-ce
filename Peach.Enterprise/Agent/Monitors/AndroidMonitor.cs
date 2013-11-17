@@ -30,6 +30,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		//static Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
+		bool firstRun = false;
 		bool adbInit = false;
 		Fault fault = null;
 		AndroidDevice dev = null;
@@ -123,7 +124,16 @@ namespace Peach.Enterprise.Agent.Monitors
 				}
 			});
 
-			// Step 5: Save any exceptions that might have occured
+			// Step 5: Clear device logs on fault
+			if (ret.type == FaultType.Fault)
+			{
+				guard("clear device logs", () =>
+				{
+					dev.ClearLogs();
+				});
+			}
+
+			// Step 6: Save any exceptions that might have occured
 			if (sb.Length > 0)
 			{
 				var errors = sb.ToString();
@@ -189,7 +199,12 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (!RestartEveryIteration)
 			{
 				dev.WaitForReady();
+				dev.ClearLogs(); // clear logs at the start of the world
 				dev.StartApp(ApplicationName, ActivityName);
+			}
+			else
+			{
+				firstRun = true;
 			}
 		}
 
@@ -200,7 +215,6 @@ namespace Peach.Enterprise.Agent.Monitors
 				dev.Dispose();
 				dev = null;
 			}
-
 
 			if (adbInit)
 			{
@@ -221,7 +235,16 @@ namespace Peach.Enterprise.Agent.Monitors
 			// If we just faulted, or are supposed to start the app every iteration
 			// make sure the device is ready before continuing
 			if (hasFault || RestartEveryIteration)
+			{
 				dev.WaitForReady();
+
+				// If this is the first time, clear the device logs
+				if (firstRun)
+				{
+					dev.ClearLogs();
+					firstRun = false;
+				}
+			}
 
 			if (hasFault && ClearAppDataOnFault)
 				dev.ClearAppData(ApplicationName);
