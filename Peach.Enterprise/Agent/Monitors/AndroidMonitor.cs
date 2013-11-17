@@ -80,6 +80,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				title = "Device '{0}' Log".Fmt(DeviceSerial ?? DeviceMonitor),
 				description = errorLog ?? "",
 				detectionSource = "AndroidMonitor",
+				folderName = "AndroidMonitor",
 				type = string.IsNullOrEmpty(errorLog) ? FaultType.Data : FaultType.Fault,
 			};
 
@@ -139,6 +140,24 @@ namespace Peach.Enterprise.Agent.Monitors
 				var errors = sb.ToString();
 				var bytes = Encoding.UTF8.GetBytes(errors);
 				ret.collectedData.Add(new Fault.Data("{0}_exceptions".Fmt(DeviceSerial ?? DeviceMonitor), bytes));
+			}
+
+			// Step 7: Update bucketing information
+			if (errorLog != null && ret.majorHash == null)
+			{
+				var match = Regex.Match(errorLog, @"\[\s+\d+-\d+\s+[^EF]+\s+([EF])/([^\]\s]+)");
+
+				if (match.Success)
+				{
+					if (match.Groups[1].Value == "E")
+						ret.exploitability = "Error";
+					else if (match.Groups[1].Value == "F")
+						ret.exploitability = "Fatal";
+
+					ret.majorHash = match.Groups[2].Value;
+					ret.minorHash = "";
+					ret.folderName = string.Format("{0}_{1}", ret.exploitability, ret.majorHash);
+				}
 			}
 
 			return ret;
