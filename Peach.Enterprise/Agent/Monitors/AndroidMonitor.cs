@@ -27,7 +27,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		private Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
+		//static Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
 
 		bool adbInit = false;
 		Fault fault = null;

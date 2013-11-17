@@ -34,7 +34,7 @@ namespace Peach.Enterprise
 		private bool disposed;
 		private Device handle;
 		private long readyTimeout;
-		private long commandTimeout;
+		private int commandTimeout;
 
 		private Device dev
 		{
@@ -239,7 +239,7 @@ namespace Peach.Enterprise
 					throw new DeviceNotFoundException(dev.SerialNumber);
 
 				var rx = new CommandResultReceiver();
-				AdbHelper.Instance.ExecuteRemoteCommand(AndroidDebugBridge.SocketAddress, cmd, dev, rx, int.MaxValue);
+				AdbHelper.Instance.ExecuteRemoteCommand(AndroidDebugBridge.SocketAddress, cmd, dev, rx, commandTimeout);
 				return rx.Result ?? "";
 			}
 		}

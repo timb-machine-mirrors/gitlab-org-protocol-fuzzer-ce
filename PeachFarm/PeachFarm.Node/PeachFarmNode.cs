@@ -352,8 +352,9 @@ namespace PeachFarm.Node
 
 			#region initialize Peach Engine
 
+			peach = new Peach.Core.Engine(null);
 			//// Create
-			var domain = System.AppDomain.CreateDomain(request.JobID);
+			//var domain = System.AppDomain.CreateDomain(request.JobID);
 			//domain.UnhandledException += new UnhandledExceptionEventHandler(domain_UnhandledException);
 			//var holder = (PeachHolder)domain.CreateInstanceFrom("Peaches/3.1.20/PeachFrarm.Node.dll", "PeachFarm.Node.PeachHolder").Unwrap();
 			//peach = holder.engine;
