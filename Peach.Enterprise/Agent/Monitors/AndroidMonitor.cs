@@ -53,8 +53,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			ParameterParser.Parse(this, args);
 
-			if (!(string.IsNullOrEmpty(DeviceSerial) ^ string.IsNullOrEmpty(DeviceMonitor)))
-				throw new PeachException("Either DeviceSerial parameter or DeviceMonitor parameter is required.");
+			if (!string.IsNullOrEmpty(DeviceSerial) && !string.IsNullOrEmpty(DeviceMonitor))
+				throw new PeachException("Can't specify both DeviceSerial parameter and DeviceMonitor parameter.");
 		}
 
 		Fault MakeFault(string errorLog)
@@ -145,6 +145,8 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Step 7: Update bucketing information
 			if (errorLog != null && ret.majorHash == null)
 			{
+				//"F/libc    (  995): Fatal signal 11 (SIGSEGV) at 0x000003e3 (code=0), thread 995 (oid.development)\r\nE/AndroidRuntime(  995): FATAL EXCEPTION: Thread-69\r\nE/AndroidRuntime(  995): com.android.development.BadBehaviorActivity$BadBehaviorException: Whatcha gonna do, whatcha gonna do\r\nE/AndroidRuntime(  995): \tat com.android.development.BadBehaviorActivity$3$1.run(BadBehaviorActivity.java:155)\r\nE/AndroidRuntime(  995): Caused by: java.lang.IllegalStateException: When they come for you\r\nE/AndroidRuntime(  995): \t... 1 more"	string
+				//"E/AndroidRuntime(  987): FATAL EXCEPTION: Thread-69\r\nE/AndroidRuntime(  987): com.android.development.BadBehaviorActivity$BadBehaviorException: Whatcha gonna do, whatcha gonna do\r\nE/AndroidRuntime(  987): \tat com.android.development.BadBehaviorActivity$3$1.run(BadBehaviorActivity.java:155)\r\nE/AndroidRuntime(  987): Caused by: java.lang.IllegalStateException: When they come for you\r\nE/AndroidRuntime(  987): \t... 1 more"
 				var match = Regex.Match(errorLog, @"\[\s+\d+-\d+\s+[^EF]+\s+([EF])/([^\]\s]+)");
 
 				if (match.Success)
@@ -170,17 +172,17 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			var serial = DeviceSerial;
 
-			if (string.IsNullOrEmpty(serial))
+			if (!string.IsNullOrEmpty(DeviceMonitor))
 			{
 				serial = Agent.QueryMonitors(DeviceMonitor + ".DeviceSerial") as string;
 				if (serial == null)
 					throw new PeachException("Could not resolve device serial from monitor '" + DeviceMonitor + "'.");
 			}
 
-			if (dev != null && dev.SerialNumber == serial)
+			if (dev != null && (serial == null || dev.SerialNumber == serial))
 				return;
 
-			if (dev == null && DeviceSerial == null)
+			if (dev == null && DeviceMonitor != null)
 				logger.Debug("Resolved device '{0}' from monitor '{1}'.", serial, DeviceMonitor);
 
 			if (dev != null)

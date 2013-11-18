@@ -34,8 +34,8 @@ namespace Peach.Enterprise.Publishers
 		public AndroidMonkeyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			if (!(string.IsNullOrEmpty(DeviceSerial) ^ string.IsNullOrEmpty(DeviceMonitor)))
-				throw new PeachException("Either DeviceSerial parameter or DeviceMonitor parameter is required.");
+			if (!string.IsNullOrEmpty(DeviceSerial) && !string.IsNullOrEmpty(DeviceMonitor))
+				throw new PeachException("Can't specify both DeviceSerial parameter and DeviceMonitor parameter.");
 		}
 
 		void SyncDevice()
@@ -45,7 +45,7 @@ namespace Peach.Enterprise.Publishers
 
 			var serial = DeviceSerial;
 
-			if (string.IsNullOrEmpty(serial))
+			if (!string.IsNullOrEmpty(DeviceMonitor))
 			{
 				var dom = this.Test.parent as Peach.Core.Dom.Dom;
 				var val = dom.context.agentManager.Message(DeviceMonitor, new Variant("DeviceSerial"));
@@ -55,10 +55,10 @@ namespace Peach.Enterprise.Publishers
 				serial = (string)val;
 			}
 
-			if (dev != null && dev.SerialNumber == serial)
+			if (dev != null && (serial == null || dev.SerialNumber == serial))
 				return;
 
-			if (dev == null && DeviceSerial == null)
+			if (dev == null && DeviceMonitor != null)
 				logger.Debug("Resolved device '{0}' from monitor '{1}'.", serial, DeviceMonitor);
 
 			if (dev != null)
