@@ -17,7 +17,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("AdbPath", typeof(string), "Directory Path to Adb", "")]
 	[Parameter("DeviceSerial", typeof(string), "The serial of the device to monitor", "")]
 	[Parameter("DeviceMonitor", typeof(string), "Android monitor to get device serial from", "")]
-	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "true")]
+	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "false")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
@@ -217,7 +217,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Ensure app is not running and clear app data
 
 			// Start the application if we are not running it every iteration
-			if (!RestartEveryIteration)
+			if (StartOnCall == null && !RestartEveryIteration)
 			{
 				dev.WaitForReady();
 				dev.ClearLogs(); // clear logs at the start of the world
@@ -255,7 +255,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			// If we just faulted, or are supposed to start the app every iteration
 			// make sure the device is ready before continuing
-			if (hasFault || RestartEveryIteration)
+			if (hasFault || RestartEveryIteration || StartOnCall != null)
 			{
 				dev.WaitForReady();
 
@@ -272,7 +272,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			dev.ClearLogs();
 
-			if (hasFault || RestartEveryIteration)
+			if (StartOnCall == null && (hasFault || RestartEveryIteration))
 				dev.StartApp(ApplicationName, ActivityName);
 		}
 
@@ -333,7 +333,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
-				// TODO: Implement me!
+				dev.StartApp(ApplicationName, ActivityName);
 			}
 
 			return null;
