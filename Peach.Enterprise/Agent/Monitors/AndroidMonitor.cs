@@ -270,8 +270,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (hasFault && ClearAppDataOnFault)
 				dev.ClearAppData(ApplicationName);
 
-			dev.ClearLogs();
-
 			if (StartOnCall == null && (hasFault || RestartEveryIteration))
 				dev.StartApp(ApplicationName, ActivityName);
 		}
