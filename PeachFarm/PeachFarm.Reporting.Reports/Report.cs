@@ -47,20 +47,6 @@ namespace PeachFarm.Reporting.Reports
 			
 			return new List<ReportJob>() { job };
 		}
-
-		internal static System.Drawing.Bitmap GetEmbeddedImage(string p)
-		{
-			var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-			var file = assembly.GetManifestResourceStream("PeachFarm.Reporting.Reports." + p);
-			if (file == null)
-			{
-				return null;
-			}
-			else
-			{
-				return new System.Drawing.Bitmap(file);
-			}
-		}
 	}
 
 	public class ReportJob

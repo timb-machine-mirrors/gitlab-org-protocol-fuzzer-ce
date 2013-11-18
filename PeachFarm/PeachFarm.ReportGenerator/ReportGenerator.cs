@@ -120,8 +120,15 @@ namespace PeachFarm.Reporting
 			}
 			if (DatabaseHelper.GridFSFileExists(job.ReportLocation, config.MongoDb.ConnectionString))
 			{
-				response.Status = ReportGenerationStatus.Complete;
-				return response;
+				if (request.Reprocess)
+				{
+					DatabaseHelper.DeleteGridFSFile(job.ReportLocation, config.MongoDb.ConnectionString);
+				}
+				else
+				{
+					response.Status = ReportGenerationStatus.Complete;
+					return response;
+				}
 			}
 			#endregion
 
@@ -131,7 +138,11 @@ namespace PeachFarm.Reporting
 
 			try
 			{
-				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
+				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport()
+				{
+					LogoBoxMimeType = "image/jpeg",
+					LogoBoxValue = GetEmbeddedImage("dejavulogo.jpg")
+				};
 			}
 			catch(Exception ex)
 			{
@@ -290,6 +301,20 @@ namespace PeachFarm.Reporting
 			}
 		}
 		#endregion
+
+		private System.Drawing.Bitmap GetEmbeddedImage(string p)
+		{
+			var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+			var file = assembly.GetManifestResourceStream("PeachFarm.Reporting.Reports." + p);
+			if (file == null)
+			{
+				return null;
+			}
+			else
+			{
+				return new System.Drawing.Bitmap(file);
+			}
+		}
 
 	}
 }

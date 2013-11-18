@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 deps = [
+	'MySql.Data.dll',
+	'NLog.dll',
+	'PeachFarm.Common.dll',
+	'PeachFarm.Reporting.Reports.dll',
 	'System.dll',
 	'System.Configuration.dll',
 	'System.Core.dll',
 	'System.Data.dll',
 	'System.Drawing.dll',
-	'System.Windows.Forms.dll',
 	'Telerik.Reporting.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
-	'NLog.dll',
-	'PeachFarm.Common.dll',
-	'PeachFarm.Reporting.Reports.dll',
-	'MySql.Data.dll',
 ]
 
 bld(

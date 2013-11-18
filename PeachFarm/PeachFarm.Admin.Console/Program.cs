@@ -38,8 +38,9 @@ namespace PeachFarm.Admin
 				string tagsString = String.Empty;
 				int launchCount = 0;
 				string ip = String.Empty;
-
 				string range = String.Empty;
+				string target = String.Empty;
+				string definesFilePath = String.Empty;
 
 				#region Parse & Validate Console Input
 				var p = new OptionSet()
@@ -62,7 +63,9 @@ namespace PeachFarm.Admin
 						{ "n|count=", v => launchCount = int.Parse(v)},
 						{ "i|ip=", v => ip = v},
 						{ "t|tags=", v => tagsString = v},
-						{ "r|range=", v => range = v}
+						{ "r|range=", v => range = v},
+						{ "d|defines=", v => definesFilePath = v},
+						{ "a|target=", v => target = v}
 					};
 
 				List<string> extra = p.Parse(args);
@@ -116,24 +119,7 @@ namespace PeachFarm.Admin
 
 					string pitFilePath = extra[0];
 
-					string definesFilePath = String.Empty;
-					string target = String.Empty;
-					if(extra.Count >= 3)
-					{
-						definesFilePath = extra[1];
-						target = extra[2];
-					}
-					else if (extra.Count == 2)
-					{
-						if(pitFilePath.EndsWith(".zip") && File.Exists(extra[1]))
-						{
-							definesFilePath = extra[1];
-						}
-						else
-						{
-							target = extra[1];
-						}
-					}
+
 
 					#region range
 					uint? rangestart = null;
@@ -268,7 +254,12 @@ namespace PeachFarm.Admin
 				if (report)
 				{
 					string jobid = extra[0];
-					admin.Report(jobid);
+					bool reprocess = false;
+					if ((extra.Count > 1) && ((extra[1].ToLower() == "reprocess") || (extra[1].ToLower() == "true")))
+					{
+						reprocess = true;
+					}
+					admin.Report(jobid, reprocess);
 					mustwait = false;
 				}
 
@@ -484,17 +475,28 @@ Syntax Guide
 ------------
 
 Syntax: 
+			Start Peach full syntax:
+				pf_admin.exe -start <pitFilePath> -n <clientCount> -t <tags> -i <ipAddress> -d <definesFile> -a <targetName>
+
       Start Peach on the first <clientCount> number of Alive Nodes:
-        pf_admin.exe -start -n clientCount pitFilePath <definesFilePath>
+        pf_admin.exe -start -n clientCount pitFile.xml
       
       Start Peach on the first <clientCount> number of Alive Nodes with matching <tags>:
-        pf_admin.exe -start -n clientCount -t tags pitFilePath <definesFilePath>
+        pf_admin.exe -start -n clientCount -t tags pitFile.xml
 
       Start Peach on a single specific Node:
-        pf_admin.exe -start --ip ipAddress pitFilePath <definesFilePath>
+        pf_admin.exe -start -ip ipAddress pitFile.xml
 
       Start Peach on all Alive nodes matching <tags>:
-        pf_admin.exe -start -t tags pitFilePath <definesFilePath>
+        pf_admin.exe -start -t tags pitFile.xml
+
+			Start Peach with a defines file
+				pf_admin.exe -start -n 1 pitFile.xml -d definesFile.xml
+
+			Start Peach with pit, defines, and sample data in a zip file
+				pf_admin.exe -start -n 1 zipPackage.zip
+
+			Start Peach
     
       Stop Peach on Nodes matching <jobID>:
         pf_admin.exe -stop jobID
@@ -520,15 +522,16 @@ Syntax:
 Commands:
 
  start   - Start one or more instances of Peach.
-   clientCount			- Number of instances to start
-   tags							- Comma delimited list of tags to match nodes with
+   count(n)					- Number of instances to start
+   tags(t)					- Comma delimited list of tags to match nodes with
 
-   ipAddress				- Address of specific node to launch on
+   ip(i)						- Address of specific node to launch on
 
    pitFilePath			- Full path to Pit File or Zip File
-   definesFilePath	- Full path to Defines File (optional)
 
-	 range						- Iteration range (optional), format is <start>-<end> example: 1000-2000
+   defines(d)				- Full path to Defines File (optional)
+	 range(r)					- Iteration range (optional), format is <start>-<end> example: 1000-2000
+	 target(a)				- target application name (optional)
 
  stop   - Stop some instances of Peach
    jobID - Job ID

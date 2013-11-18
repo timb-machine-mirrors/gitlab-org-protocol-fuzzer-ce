@@ -563,11 +563,12 @@ namespace PeachFarm.Admin
 		}
 
 #if DEBUG
-		public void Report(string jobid)
+		public void Report(string jobid, bool reprocess = false)
 		{
 			GenerateJobReportRequest request = new GenerateJobReportRequest();
 			request.JobID = jobid;
 			request.ReportFormat = ReportFormat.PDF;
+			request.Reprocess = reprocess;
 
 			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, request.Serialize(), Actions.GenerateJobReport, this.controllerQueueName);
 		}

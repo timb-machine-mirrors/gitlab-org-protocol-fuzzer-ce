@@ -51,37 +51,42 @@ namespace PeachFarm.Loggers
 
 		private void SendRows()
 		{
-			DataTable dt = SelectAllFrom("view_metrics_iterations");
-			Truncate("metrics_iterations");
-			
 			JobProgressNotification notification = new JobProgressNotification(JobID);
 			notification.JobID = JobID;
 
-			foreach(DataRow row in dt.Rows)
+			using (DataTable dt = SelectAllFrom("view_metrics_iterations"))
 			{
-				notification.IterationMetrics.Add(new IterationMetric()
+				Truncate("metrics_iterations");
+
+				foreach (DataRow row in dt.Rows)
 				{
-					Action = (string)row["action"],
-					DataElement = (string)row["element"],
-					DataSet = (string)row["dataset"],
-					IterationCount = Convert.ToUInt32(row["count"]),
-					Mutator = (string)row["mutator"],
-					State = (string)row["state"],
-					Parameter = (string)row["parameter"]
-				});
+					notification.IterationMetrics.Add(new IterationMetric()
+					{
+						Action = (string)row["action"],
+						DataElement = (string)row["element"],
+						DataSet = (string)row["dataset"],
+						IterationCount = Convert.ToUInt32(row["count"]),
+						Mutator = (string)row["mutator"],
+						State = (string)row["state"],
+						Parameter = (string)row["parameter"]
+					});
+				}
 			}
 
-			//dt = SelectAllFrom("metrics_states");
-			//Truncate("view_metrics_states");
+			using (DataTable dt = SelectAllFrom("view_metrics_states"))
+			{
+				Truncate("metrics_states");
 
-			//foreach (DataRow row in dt.Rows)
-			//{
-			//  notification.StateMetrics.Add(new StateMetric()
-			//  {
-			//    ExecutionCount = (uint)row["count"],
-			//    State = (string)row["state"]
-			//  });
-			//}
+				foreach (DataRow row in dt.Rows)
+				{
+					notification.StateMetrics.Add(new StateMetric()
+					{
+						ExecutionCount = Convert.ToUInt32(row["count"]),
+						State = (string)row["state"]
+					});
+				}
+			}
+			
 
 			if ((notification.IterationMetrics.Count > 0) || (notification.StateMetrics.Count > 0))
 			{
@@ -106,10 +111,9 @@ namespace PeachFarm.Loggers
 		private DataTable SelectAllFrom(string table)
 		{
 			var dt = new DataTable();
-			SQLiteCommand sqlitecmd;
 
 
-			using (sqlitecmd = db.CreateCommand())
+			using (SQLiteCommand sqlitecmd = db.CreateCommand())
 			{
 				sqlitecmd.CommandText = String.Format("select * from {0}", table);
 				using (var reader = sqlitecmd.ExecuteReader())
@@ -123,8 +127,7 @@ namespace PeachFarm.Loggers
 
 		private void Truncate(string table)
 		{
-			SQLiteCommand sqlitecmd;
-			using (sqlitecmd = db.CreateCommand())
+			using (SQLiteCommand sqlitecmd = db.CreateCommand())
 			{
 				sqlitecmd.CommandText = String.Format("delete from {0}", table);
 				sqlitecmd.ExecuteNonQuery();

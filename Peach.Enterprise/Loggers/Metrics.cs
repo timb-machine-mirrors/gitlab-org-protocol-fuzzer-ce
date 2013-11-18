@@ -344,6 +344,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 			keyTracker.Clear();
 
+			
 			if (db != null)
 			{
 				db.Close();
@@ -379,7 +380,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		{
 			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
 			sample.Parameter = actionData.name ?? "";
-			sample.Element = element.name;
+			sample.Element = element.fullName;
 			sample.Mutator = mutator.name;
 
 			if (!reproducingFault)

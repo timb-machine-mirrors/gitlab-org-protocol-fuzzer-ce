@@ -1330,7 +1330,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static GenerateJobReportResponse Deserialize(string xml)
+		public new static GenerateJobReportResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1417,7 +1417,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static GenerateJobReportResponse LoadFromFile(string fileName)
+		public new static GenerateJobReportResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1635,7 +1635,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static MonitorResponse Deserialize(string xml)
+		public new static MonitorResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1722,7 +1722,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static MonitorResponse LoadFromFile(string fileName)
+		public new static MonitorResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1906,7 +1906,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListJobsResponse Deserialize(string xml)
+		public new static ListJobsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1993,7 +1993,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListJobsResponse LoadFromFile(string fileName)
+		public new static ListJobsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2142,7 +2142,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static JobInfoResponse Deserialize(string xml)
+		public new static JobInfoResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2229,7 +2229,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static JobInfoResponse LoadFromFile(string fileName)
+		public new static JobInfoResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2361,7 +2361,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListErrorsResponse Deserialize(string xml)
+		public new static ListErrorsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2448,7 +2448,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListErrorsResponse LoadFromFile(string fileName)
+		public new static ListErrorsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2580,7 +2580,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static ListNodesResponse Deserialize(string xml)
+		public new static ListNodesResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2667,7 +2667,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static ListNodesResponse LoadFromFile(string fileName)
+		public new static ListNodesResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2825,7 +2825,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static StopPeachResponse Deserialize(string xml)
+		public new static StopPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2912,7 +2912,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static StopPeachResponse LoadFromFile(string fileName)
+		public new static StopPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -3070,7 +3070,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static StartPeachResponse Deserialize(string xml)
+		public new static StartPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -3157,7 +3157,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static StartPeachResponse LoadFromFile(string fileName)
+		public new static StartPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -3283,7 +3283,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public static CreateJobResponse Deserialize(string xml)
+		public new static CreateJobResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -3370,7 +3370,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public static CreateJobResponse LoadFromFile(string fileName)
+		public new static CreateJobResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -5435,6 +5435,8 @@ namespace PeachFarm.Common.Messages
 
 		private ReportFormat reportFormatField;
 
+		private bool reprocessField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
@@ -5462,6 +5464,20 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.reportFormatField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public bool Reprocess
+		{
+			get
+			{
+				return this.reprocessField;
+			}
+			set
+			{
+				this.reprocessField = value;
 			}
 		}
 

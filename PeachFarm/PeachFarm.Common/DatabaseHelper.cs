@@ -321,6 +321,17 @@ namespace PeachFarm.Common.Mongo
 			}
 		}
 
+		public static void DeleteGridFSFile(string remoteFile, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			if (db.GridFS.Exists(remoteFile))
+			{
+				db.GridFS.Delete(remoteFile);
+			}
+			server.Disconnect();
+		}
+
 #if DEBUG
 		public static void TruncateAllCollections(string connectionString)
 		{
@@ -371,16 +382,6 @@ namespace PeachFarm.Common.Mongo
 			server.Disconnect();
 		}
 
-		public static void DeleteGridFSFile(string remoteFile, string connectionString)
-		{
-			MongoServer server = new MongoClient(connectionString).GetServer();
-			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			if (db.GridFS.Exists(remoteFile))
-			{
-				db.GridFS.Delete(remoteFile);
-			}
-			server.Disconnect();
-		}
 #endif
 	}
 
