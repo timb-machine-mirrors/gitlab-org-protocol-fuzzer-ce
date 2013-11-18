@@ -265,11 +265,52 @@ namespace Peach.Enterprise
 			}
 		}
 
+		static byte[] PixelConvTable(int len)
+		{
+			var ret = new byte[len];
+
+			for (int i = 0; i < len; ++i)
+				ret[i] = (byte)(Math.Floor(i * 255.0 / (len - 1) + 0.5));
+
+			return ret;
+		}
+
+		static byte[] pixels_5 = PixelConvTable(32);
+		static byte[] pixels_6 = PixelConvTable(64);
+
 		public byte[] TakeScreenshot()
 		{
 			var ms = new MemoryStream();
-			var image = dev.Screenshot.ToImage();
-			image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+			var rawImage = dev.Screenshot;
+
+			if (rawImage.Bpp == 16)
+			{
+				// Mono doesn't support 16bit RGB565 bitmaps, so convert to 24bit RGB
+				var src = rawImage.Data;
+				int cnt = src.Length / 2;
+				var dst = new byte[3 * cnt];
+
+				for (int i = 0; i < cnt; ++i)
+				{
+					int pixel = src[2 * i] | (src[2 * i + 1] << 8);
+
+					dst[3 * i + 2] = pixels_5[(pixel >> 11) & 0x1f];
+					dst[3 * i + 1] = pixels_6[(pixel >> 5) & 0x3f];
+					dst[3 * i + 0] = pixels_5[(pixel >> 0) & 0x1f];
+				}
+
+				rawImage.Bpp = 24;
+				rawImage.Size = dst.Length;
+				rawImage.Data = dst;
+
+				var img = rawImage.ToImage(System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+				img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+			}
+			else
+			{
+				rawImage.ToImage().Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+			}
+
 			return ms.ToArray();
 		}
 
