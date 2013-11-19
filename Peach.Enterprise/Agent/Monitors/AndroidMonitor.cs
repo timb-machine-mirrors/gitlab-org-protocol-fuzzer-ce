@@ -67,6 +67,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				try
 				{
+					logger.Trace("Making fault '{0}': {1}", dev.SerialNumber, what);
 					action();
 				}
 				catch (Exception ex)
@@ -87,7 +88,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			};
 
 			// Step 1: Wait for device to be ready
-			guard("wait for device read", () =>
+			guard("wait for device ready", () =>
 			{
 				dev.WaitForReady();
 			});
