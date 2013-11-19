@@ -37,7 +37,6 @@ namespace PeachFarm.Admin
 			config.Validate();
 
 			ServerHostName = config.Controller.IpAddress;
-			MongoDbConnectionString = config.MongoDb.ConnectionString;
 
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
@@ -56,6 +55,7 @@ namespace PeachFarm.Admin
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(adminQueueName, 1000, true, true);
 			this.IsListening = true;
+
 		}
 
 		#region Properties
@@ -64,10 +64,37 @@ namespace PeachFarm.Admin
 		public bool IsListening { get; private set; }
 
 		public string MongoDbConnectionString { get; private set; }
+
+		public string UserName
+		{
+			get { return string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName); }
+		}
 		#endregion
 
 		#region AsyncCompletes
 
+		#region RegisterCompleted
+		public event EventHandler<RegisterCompletedEventArgs> RegisterCompleted;
+
+		private void OnRegisterCompleted(RegisterResponse result)
+		{
+			if (RegisterCompleted != null)
+			{
+				RegisterCompleted(this, new RegisterCompletedEventArgs(result));
+			}
+		}
+
+		public class RegisterCompletedEventArgs : EventArgs
+		{
+			public RegisterCompletedEventArgs(RegisterResponse result)
+			{
+				this.Result = result;
+			}
+
+			public RegisterResponse Result { get; private set; }
+		}
+		#endregion
+				
 		#region StartPeachCompleted
 		public class StartPeachCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
 		{
@@ -206,6 +233,31 @@ namespace PeachFarm.Admin
 				MonitorCompleted(this, new MonitorCompletedEventArgs(result));
 		}
 		#endregion
+
+		#region DeleteDataCompleted
+		public event EventHandler<DeleteDataCompletedEventArgs> DeleteDataCompleted;
+
+		private void OnDeleteDataCompleted(DeleteDataResponse result)
+		{
+			if (DeleteDataCompleted != null)
+			{
+				DeleteDataCompleted(this, new DeleteDataCompletedEventArgs(result));
+			}
+		}
+
+		public class DeleteDataCompletedEventArgs : EventArgs
+		{
+			public DeleteDataCompletedEventArgs(DeleteDataResponse result)
+			{
+				this.Result = result;
+			}
+
+			public DeleteDataResponse Result { get; private set; }
+		}
+		#endregion
+
+
+
 		#endregion
 
 		#region AdminException
@@ -231,11 +283,49 @@ namespace PeachFarm.Admin
 		#endregion
 
 		#region Sends
+		#region Register
+		public void Register()
+		{
+			if (String.IsNullOrEmpty(MongoDbConnectionString))
+			{
+				bool responseReceived = false;
+
+				var request = new RegisterRequest();
+				request.UserName = UserName;
+
+				rabbit.MessageReceived += (o, e) =>
+				{
+					if (e.Action == "Register")
+					{
+						var response = RegisterResponse.Deserialize(e.Body);
+						if (response.Success)
+						{
+							MongoDbConnectionString = response.MongoDbConnectionString;
+						}
+						else
+						{
+							throw new ApplicationException(response.ErrorMessage);
+						}
+						responseReceived = true;
+					}
+				};
+
+				PublishToServer(request.Serialize(), Actions.Register);
+
+				while (responseReceived == false)
+				{
+
+				}
+			}
+		}
+		#endregion
 
 		#region StartPeach
 
 		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target, uint? rangestart = null, uint? rangeend = null)
 		{
+			Register();
+
 			List<string> tempfiles = new List<string>();
 			string zipfilepath = String.Empty;
 			StartPeachRequest request = new StartPeachRequest();
@@ -343,7 +433,7 @@ namespace PeachFarm.Admin
 			request.ZipFile = String.Format(Formats.JobFolder + "/{1}.zip", request.JobID, request.PitFileName);
 			DatabaseHelper.SaveFileToGridFS(zipfilepath, request.ZipFile, MongoDbConnectionString);
 
-			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+			request.UserName = UserName;
 			PublishToServer(request.Serialize(), Actions.StartPeach);
 
 			foreach (string tempfile in tempfiles)
@@ -361,25 +451,16 @@ namespace PeachFarm.Admin
 		#region StopPeachAsync
 		public void StopPeachAsync(string jobGuid)
 		{
-			var job = DatabaseHelper.GetJob(jobGuid, MongoDbConnectionString);
-			if (job == null)
-			{
-				throw new ApplicationException("Job does not exist: " + jobGuid);
-			}
-			else
-			{
-				StopPeachRequest request = new StopPeachRequest();
-				request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
-				request.JobID = jobGuid;
-				PublishToServer(request.Serialize(), Actions.StopPeach);
-			}
+			StopPeachRequest request = new StopPeachRequest();
+			request.UserName = string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName);
+			request.JobID = jobGuid;
+			PublishToServer(request.Serialize(), Actions.StopPeach);
 		}
 		#endregion
 
 		public ListNodesResponse ListNodes()
 		{
-			//ListNodesRequest request = new ListNodesRequest();
-			//PublishToServer(request.Serialize(), Actions.ListNodes);
+			Register();
 
 			ListNodesResponse response = new ListNodesResponse();
 			response.Nodes = DatabaseHelper.GetAllNodes(MongoDbConnectionString).ToList();
@@ -388,6 +469,8 @@ namespace PeachFarm.Admin
 
 		public ListErrorsResponse ListErrors(string jobID = "")
 		{
+			Register();
+
 			//ListErrorsRequest request = new ListErrorsRequest();
 			//request.JobID = jobID;
 			//PublishToServer(request.Serialize(), Actions.ListErrors);
@@ -408,6 +491,8 @@ namespace PeachFarm.Admin
 
 		public JobInfoResponse JobInfo(string jobID)
 		{
+			Register();
+
 			//JobInfoRequest request = new JobInfoRequest();
 			//request.JobID = jobID;
 			//PublishToServer(request.Serialize(), Actions.JobInfo);
@@ -434,6 +519,8 @@ namespace PeachFarm.Admin
 
 		public MonitorResponse Monitor()
 		{
+			Register();
+
 			//PublishToServer(new MonitorRequest().Serialize(), Actions.Monitor);
 
 			MonitorResponse response = new MonitorResponse();
@@ -450,7 +537,15 @@ namespace PeachFarm.Admin
 			return response;
 		}
 
-
+		public void DeleteDataAsync(DeleteDataType type, string parameter)
+		{
+			var request = new DeleteDataRequest()
+			{
+				Type = type,
+				Parameter = parameter
+			};
+			PublishToServer(request.Serialize(), Actions.DeleteData);
+		}
 		#endregion
 
 		#region MQ functions
@@ -488,6 +583,12 @@ namespace PeachFarm.Admin
 					break;
 				case Actions.Monitor:
 					RaiseMonitorCompleted(MonitorResponse.Deserialize(body));
+					break;
+				case Actions.DeleteData:
+					OnDeleteDataCompleted(DeleteDataResponse.Deserialize(body));
+					break;
+				case Actions.Register:
+					//Do nothing
 					break;
 				default:
 					string message = String.Format("Could not process message\nAction: {0}\nBody:\n{1}", action, body);

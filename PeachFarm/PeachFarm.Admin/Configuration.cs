@@ -22,12 +22,14 @@ namespace PeachFarm.Admin.Configuration
 			set { this[Constants.RabbitMq] = value; }
 		}
 
+		/*
 		[ConfigurationProperty(Constants.MongoDb, IsRequired = false)]
 		public MongoDbElement MongoDb
 		{
 			get { return (MongoDbElement)this[Constants.MongoDb]; }
 			set { this[Constants.MongoDb] = value; }
 		}
+		//*/
 
 		public void Validate()
 		{
@@ -39,11 +41,13 @@ namespace PeachFarm.Admin.Configuration
 				message.AppendLine("\t<Controller ipAddress=\"0.0.0.0\" />");
 			}
 
+			/*
 			if (String.IsNullOrEmpty(this.MongoDb.ConnectionString))
 			{
 				message.AppendLine(") MongoDB Connection String is required.");
 				message.AppendLine("\t<MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
 			}
+			//*/
 
 			if (String.IsNullOrEmpty(this.RabbitMq.HostName))
 			{

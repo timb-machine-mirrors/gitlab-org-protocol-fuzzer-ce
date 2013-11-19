@@ -183,5 +183,7 @@ namespace PeachFarm.Common.Messages
 		public const string Heartbeat = "Heartbeat";
 		public const string GenerateJobReport = "GenerateJobReport";
 		public const string NotifyJobProgress = "NotifyJobProgress";
+		public const string DeleteData = "DeleteData";
+		public const string Register = "Register";
 	}
 }

@@ -3,6 +3,7 @@
 deps = [
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
+	'mscorlib.dll',
 	'PeachFarm.Common.dll',
 	'System.dll',
 	'System.Core.dll',
@@ -15,7 +16,6 @@ deps = [
 bld(
 	features = 'cs',
 	use = deps,
-	source = bld.path.ant_glob('**/*.cs'),
-	resource = 'dejavulogo.jpg Resources/pfreportstyle.xml',
+	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name='PeachFarm.Reporting.Reports.dll',
 )

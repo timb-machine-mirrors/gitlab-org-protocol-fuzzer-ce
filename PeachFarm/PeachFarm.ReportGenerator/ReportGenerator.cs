@@ -138,11 +138,11 @@ namespace PeachFarm.Reporting
 
 			try
 			{
-				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport()
-				{
-					LogoBoxMimeType = "image/jpeg",
-					LogoBoxValue = GetEmbeddedImage("dejavulogo.jpg")
-				};
+				irs.ReportDocument = new PeachFarm.Reporting.Reports.JobDetailReport();
+				//{
+				//  LogoBoxMimeType = "image/jpeg",
+				//  LogoBoxValue = GetEmbeddedImage("dejavulogo.jpg")
+				//};
 			}
 			catch(Exception ex)
 			{

@@ -18,6 +18,8 @@ namespace PeachFarm.Common.Messages
 	using System.Runtime.Serialization;
 
 
+	[System.Xml.Serialization.XmlIncludeAttribute(typeof(RegisterResponse))]
+	[System.Xml.Serialization.XmlIncludeAttribute(typeof(DeleteDataResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(GenerateJobReportResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(MonitorResponse))]
 	[System.Xml.Serialization.XmlIncludeAttribute(typeof(ListJobsResponse))]
@@ -117,6 +119,7 @@ namespace PeachFarm.Common.Messages
 				}
 			}
 		}
+		//*/
 
 		/// <summary>
 		/// Deserializes workflow markup into an ResponseBase object
@@ -1220,6 +1223,432 @@ namespace PeachFarm.Common.Messages
 	[System.SerializableAttribute()]
 	[System.ComponentModel.DesignerCategoryAttribute("code")]
 	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = true)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "RegisterResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class RegisterResponse : ResponseBase
+	{
+
+		private string mongoDbConnectionStringField;
+
+		private string mySqlConnectionStringField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string MongoDbConnectionString
+		{
+			get
+			{
+				return this.mongoDbConnectionStringField;
+			}
+			set
+			{
+				this.mongoDbConnectionStringField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string MySqlConnectionString
+		{
+			get
+			{
+				return this.mySqlConnectionStringField;
+			}
+			set
+			{
+				this.mySqlConnectionStringField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(RegisterResponse));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current RegisterResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an RegisterResponse object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output RegisterResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out RegisterResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(RegisterResponse);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out RegisterResponse obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static RegisterResponse Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((RegisterResponse)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current RegisterResponse object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an RegisterResponse object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output RegisterResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out RegisterResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(RegisterResponse);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out RegisterResponse obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static RegisterResponse LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "DeleteDataResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class DeleteDataResponse : ResponseBase
+	{
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(DeleteDataResponse));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current DeleteDataResponse object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public override string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an DeleteDataResponse object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output DeleteDataResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out DeleteDataResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(DeleteDataResponse);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out DeleteDataResponse obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static DeleteDataResponse Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((DeleteDataResponse)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current DeleteDataResponse object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an DeleteDataResponse object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output DeleteDataResponse object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out DeleteDataResponse obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(DeleteDataResponse);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out DeleteDataResponse obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static DeleteDataResponse LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
 	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
 	[System.Runtime.Serialization.DataContractAttribute(Name = "GenerateJobReportResponse", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
 	public partial class GenerateJobReportResponse : ResponseBase
@@ -1330,7 +1759,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static GenerateJobReportResponse Deserialize(string xml)
+		public static GenerateJobReportResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1353,7 +1782,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1368,7 +1797,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1417,7 +1846,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static GenerateJobReportResponse LoadFromFile(string fileName)
+		public static GenerateJobReportResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1635,7 +2064,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static MonitorResponse Deserialize(string xml)
+		public static MonitorResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1658,7 +2087,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1673,7 +2102,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1722,7 +2151,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static MonitorResponse LoadFromFile(string fileName)
+		public static MonitorResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -1906,7 +2335,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static ListJobsResponse Deserialize(string xml)
+		public static ListJobsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -1929,7 +2358,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -1944,7 +2373,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -1993,7 +2422,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static ListJobsResponse LoadFromFile(string fileName)
+		public static ListJobsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2142,7 +2571,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static JobInfoResponse Deserialize(string xml)
+		public static JobInfoResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2165,7 +2594,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2180,7 +2609,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2229,7 +2658,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static JobInfoResponse LoadFromFile(string fileName)
+		public static JobInfoResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2361,7 +2790,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static ListErrorsResponse Deserialize(string xml)
+		public static ListErrorsResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2384,7 +2813,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2399,7 +2828,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2448,7 +2877,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static ListErrorsResponse LoadFromFile(string fileName)
+		public static ListErrorsResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2580,7 +3009,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static ListNodesResponse Deserialize(string xml)
+		public static ListNodesResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2603,7 +3032,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2618,7 +3047,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2667,7 +3096,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static ListNodesResponse LoadFromFile(string fileName)
+		public static ListNodesResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -2825,7 +3254,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static StopPeachResponse Deserialize(string xml)
+		public static StopPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -2848,7 +3277,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -2863,7 +3292,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -2912,7 +3341,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static StopPeachResponse LoadFromFile(string fileName)
+		public static StopPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -3070,7 +3499,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static StartPeachResponse Deserialize(string xml)
+		public static StartPeachResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -3093,7 +3522,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -3108,7 +3537,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -3157,7 +3586,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static StartPeachResponse LoadFromFile(string fileName)
+		public static StartPeachResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -3283,7 +3712,7 @@ namespace PeachFarm.Common.Messages
 			return Deserialize(xml, out obj, out exception);
 		}
 
-		public new static CreateJobResponse Deserialize(string xml)
+		public static CreateJobResponse Deserialize(string xml)
 		{
 			System.IO.StringReader stringReader = null;
 			try
@@ -3306,7 +3735,7 @@ namespace PeachFarm.Common.Messages
 		/// <param name="fileName">full path of outupt xml file</param>
 		/// <param name="exception">output Exception value if failed</param>
 		/// <returns>true if can serialize and save into file; otherwise, false</returns>
-		public override bool SaveToFile(string fileName, out System.Exception exception)
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
 		{
 			exception = null;
 			try
@@ -3321,7 +3750,7 @@ namespace PeachFarm.Common.Messages
 			}
 		}
 
-		public override void SaveToFile(string fileName)
+		public virtual void SaveToFile(string fileName)
 		{
 			System.IO.StreamWriter streamWriter = null;
 			try
@@ -3370,7 +3799,7 @@ namespace PeachFarm.Common.Messages
 			return LoadFromFile(fileName, out obj, out exception);
 		}
 
-		public new static CreateJobResponse LoadFromFile(string fileName)
+		public static CreateJobResponse LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;
@@ -6832,6 +7261,464 @@ namespace PeachFarm.Common.Messages
 		}
 
 		public static StateMetric LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "DeleteDataRequest", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class DeleteDataRequest
+	{
+
+		private DeleteDataType typeField;
+
+		private string parameterField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public DeleteDataType Type
+		{
+			get
+			{
+				return this.typeField;
+			}
+			set
+			{
+				this.typeField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string Parameter
+		{
+			get
+			{
+				return this.parameterField;
+			}
+			set
+			{
+				this.parameterField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(DeleteDataRequest));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current DeleteDataRequest object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an DeleteDataRequest object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output DeleteDataRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out DeleteDataRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(DeleteDataRequest);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out DeleteDataRequest obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static DeleteDataRequest Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((DeleteDataRequest)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current DeleteDataRequest object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an DeleteDataRequest object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output DeleteDataRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out DeleteDataRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(DeleteDataRequest);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out DeleteDataRequest obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static DeleteDataRequest LoadFromFile(string fileName)
+		{
+			System.IO.FileStream file = null;
+			System.IO.StreamReader sr = null;
+			try
+			{
+				file = new System.IO.FileStream(fileName, FileMode.Open, FileAccess.Read);
+				sr = new System.IO.StreamReader(file);
+				string xmlString = sr.ReadToEnd();
+				sr.Close();
+				file.Close();
+				return Deserialize(xmlString);
+			}
+			finally
+			{
+				if ((file != null))
+				{
+					file.Dispose();
+				}
+				if ((sr != null))
+				{
+					sr.Dispose();
+				}
+			}
+		}
+		#endregion
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public enum DeleteDataType
+	{
+
+		/// <remarks/>
+		All,
+
+		/// <remarks/>
+		Job,
+
+		/// <remarks/>
+		Target,
+	}
+
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18060")]
+	[System.SerializableAttribute()]
+	[System.ComponentModel.DesignerCategoryAttribute("code")]
+	[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://phed.org/2012/PeachFarm/Messages", IsNullable = false)]
+	[System.Runtime.Serialization.DataContractAttribute(Name = "RegisterRequest", Namespace = "http://phed.org/2012/PeachFarm/Messages")]
+	public partial class RegisterRequest
+	{
+
+		private string userNameField;
+
+		private static System.Xml.Serialization.XmlSerializer serializer;
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string UserName
+		{
+			get
+			{
+				return this.userNameField;
+			}
+			set
+			{
+				this.userNameField = value;
+			}
+		}
+
+		private static System.Xml.Serialization.XmlSerializer Serializer
+		{
+			get
+			{
+				if ((serializer == null))
+				{
+					serializer = new System.Xml.Serialization.XmlSerializer(typeof(RegisterRequest));
+				}
+				return serializer;
+			}
+		}
+
+		#region Serialize/Deserialize
+		/// <summary>
+		/// Serializes current RegisterRequest object into an XML document
+		/// </summary>
+		/// <returns>string XML value</returns>
+		public virtual string Serialize()
+		{
+			System.IO.StreamReader streamReader = null;
+			System.IO.MemoryStream memoryStream = null;
+			try
+			{
+				memoryStream = new System.IO.MemoryStream();
+				Serializer.Serialize(memoryStream, this);
+				memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+				streamReader = new System.IO.StreamReader(memoryStream);
+				return streamReader.ReadToEnd();
+			}
+			finally
+			{
+				if ((streamReader != null))
+				{
+					streamReader.Dispose();
+				}
+				if ((memoryStream != null))
+				{
+					memoryStream.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes workflow markup into an RegisterRequest object
+		/// </summary>
+		/// <param name="xml">string workflow markup to deserialize</param>
+		/// <param name="obj">Output RegisterRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool Deserialize(string xml, out RegisterRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(RegisterRequest);
+			try
+			{
+				obj = Deserialize(xml);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool Deserialize(string xml, out RegisterRequest obj)
+		{
+			System.Exception exception = null;
+			return Deserialize(xml, out obj, out exception);
+		}
+
+		public static RegisterRequest Deserialize(string xml)
+		{
+			System.IO.StringReader stringReader = null;
+			try
+			{
+				stringReader = new System.IO.StringReader(xml);
+				return ((RegisterRequest)(Serializer.Deserialize(System.Xml.XmlReader.Create(stringReader))));
+			}
+			finally
+			{
+				if ((stringReader != null))
+				{
+					stringReader.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Serializes current RegisterRequest object into file
+		/// </summary>
+		/// <param name="fileName">full path of outupt xml file</param>
+		/// <param name="exception">output Exception value if failed</param>
+		/// <returns>true if can serialize and save into file; otherwise, false</returns>
+		public virtual bool SaveToFile(string fileName, out System.Exception exception)
+		{
+			exception = null;
+			try
+			{
+				SaveToFile(fileName);
+				return true;
+			}
+			catch (System.Exception e)
+			{
+				exception = e;
+				return false;
+			}
+		}
+
+		public virtual void SaveToFile(string fileName)
+		{
+			System.IO.StreamWriter streamWriter = null;
+			try
+			{
+				string xmlString = Serialize();
+				System.IO.FileInfo xmlFile = new System.IO.FileInfo(fileName);
+				streamWriter = xmlFile.CreateText();
+				streamWriter.WriteLine(xmlString);
+				streamWriter.Close();
+			}
+			finally
+			{
+				if ((streamWriter != null))
+				{
+					streamWriter.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes xml markup from file into an RegisterRequest object
+		/// </summary>
+		/// <param name="fileName">string xml file to load and deserialize</param>
+		/// <param name="obj">Output RegisterRequest object</param>
+		/// <param name="exception">output Exception value if deserialize failed</param>
+		/// <returns>true if this XmlSerializer can deserialize the object; otherwise, false</returns>
+		public static bool LoadFromFile(string fileName, out RegisterRequest obj, out System.Exception exception)
+		{
+			exception = null;
+			obj = default(RegisterRequest);
+			try
+			{
+				obj = LoadFromFile(fileName);
+				return true;
+			}
+			catch (System.Exception ex)
+			{
+				exception = ex;
+				return false;
+			}
+		}
+
+		public static bool LoadFromFile(string fileName, out RegisterRequest obj)
+		{
+			System.Exception exception = null;
+			return LoadFromFile(fileName, out obj, out exception);
+		}
+
+		public static RegisterRequest LoadFromFile(string fileName)
 		{
 			System.IO.FileStream file = null;
 			System.IO.StreamReader sr = null;

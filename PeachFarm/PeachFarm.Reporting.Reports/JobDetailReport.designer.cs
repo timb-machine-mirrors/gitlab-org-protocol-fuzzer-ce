@@ -10,6 +10,7 @@ namespace PeachFarm.Reporting.Reports
 		private void InitializeComponent()
 		{
 			Telerik.Reporting.NavigateToUrlAction navigateToUrlAction1 = new Telerik.Reporting.NavigateToUrlAction();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(JobDetailReport));
 			Telerik.Reporting.TableGroup tableGroup3 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup4 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup1 = new Telerik.Reporting.TableGroup();
@@ -94,7 +95,10 @@ namespace PeachFarm.Reporting.Reports
 			this.jobIDCaptionTextBox = new Telerik.Reporting.TextBox();
 			this.titleTextBox = new Telerik.Reporting.TextBox();
 			this.pictureBox1 = new Telerik.Reporting.PictureBox();
+			this.textBox68 = new Telerik.Reporting.TextBox();
+			this.textBox69 = new Telerik.Reporting.TextBox();
 			this.reportFooter = new Telerik.Reporting.ReportFooterSection();
+			this.pictureBox2 = new Telerik.Reporting.PictureBox();
 			this.detail = new Telerik.Reporting.DetailSection();
 			this.faultsList = new Telerik.Reporting.List();
 			this.panel2 = new Telerik.Reporting.Panel();
@@ -472,7 +476,7 @@ namespace PeachFarm.Reporting.Reports
 			// 
 			// reportHeader
 			// 
-			this.reportHeader.Height = Telerik.Reporting.Drawing.Unit.Inch(2.5999999046325684D);
+			this.reportHeader.Height = Telerik.Reporting.Drawing.Unit.Inch(3D);
 			this.reportHeader.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.jobOutputLink,
             this.startDateDataTextBox,
@@ -484,7 +488,9 @@ namespace PeachFarm.Reporting.Reports
             this.jobIDDataTextBox,
             this.jobIDCaptionTextBox,
             this.titleTextBox,
-            this.pictureBox1});
+            this.pictureBox1,
+            this.textBox68,
+            this.textBox69});
 			this.reportHeader.Name = "reportHeader";
 			// 
 			// jobOutputLink
@@ -531,7 +537,7 @@ namespace PeachFarm.Reporting.Reports
 			this.userNameDataTextBox.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.39996075630188D), Telerik.Reporting.Drawing.Unit.Inch(0.38958334922790527D));
 			this.userNameDataTextBox.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.userNameDataTextBox.StyleName = "Data";
-			this.userNameDataTextBox.Value = "=Fields.UserName";
+			this.userNameDataTextBox.Value = "=Fields.Target";
 			// 
 			// userNameCaptionTextBox
 			// 
@@ -545,7 +551,7 @@ namespace PeachFarm.Reporting.Reports
 			this.userNameCaptionTextBox.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
 			this.userNameCaptionTextBox.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.userNameCaptionTextBox.StyleName = "Caption";
-			this.userNameCaptionTextBox.Value = "User Name:";
+			this.userNameCaptionTextBox.Value = "Target:";
 			// 
 			// pitFileNameDataTextBox
 			// 
@@ -610,16 +616,51 @@ namespace PeachFarm.Reporting.Reports
 			// pictureBox1
 			// 
 			this.pictureBox1.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0D), Telerik.Reporting.Drawing.Unit.Inch(0D));
-			this.pictureBox1.MimeType = "";
+			this.pictureBox1.MimeType = "image/jpeg";
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.5D), Telerik.Reporting.Drawing.Unit.Inch(1D));
 			this.pictureBox1.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox1.Value = "";
+			this.pictureBox1.Value = ((object)(resources.GetObject("pictureBox1.Value")));
+			// 
+			// textBox68
+			// 
+			this.textBox68.CanGrow = true;
+			this.textBox68.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0D), Telerik.Reporting.Drawing.Unit.Inch(2.4938681125640869D));
+			this.textBox68.Name = "textBox68";
+			this.textBox68.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1D), Telerik.Reporting.Drawing.Unit.Inch(0.38958334922790527D));
+			this.textBox68.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
+			this.textBox68.Style.Color = System.Drawing.Color.White;
+			this.textBox68.Style.Font.Bold = true;
+			this.textBox68.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox68.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox68.StyleName = "Caption";
+			this.textBox68.Value = "User Name:";
+			// 
+			// textBox69
+			// 
+			this.textBox69.CanGrow = true;
+			this.textBox69.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(1.0937894582748413D), Telerik.Reporting.Drawing.Unit.Inch(2.4938681125640869D));
+			this.textBox69.Name = "textBox69";
+			this.textBox69.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.39996075630188D), Telerik.Reporting.Drawing.Unit.Inch(0.38958334922790527D));
+			this.textBox69.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox69.StyleName = "Data";
+			this.textBox69.Value = "=Fields.UserName";
 			// 
 			// reportFooter
 			// 
-			this.reportFooter.Height = Telerik.Reporting.Drawing.Unit.Inch(0D);
+			this.reportFooter.Height = Telerik.Reporting.Drawing.Unit.Inch(0.5D);
+			this.reportFooter.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.pictureBox2});
 			this.reportFooter.Name = "reportFooter";
+			// 
+			// pictureBox2
+			// 
+			this.pictureBox2.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.pictureBox2.MimeType = "image/jpeg";
+			this.pictureBox2.Name = "pictureBox2";
+			this.pictureBox2.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.5D), Telerik.Reporting.Drawing.Unit.Inch(0.5D));
+			this.pictureBox2.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
+			this.pictureBox2.Value = ((object)(resources.GetObject("pictureBox2.Value")));
 			// 
 			// detail
 			// 
@@ -1076,9 +1117,8 @@ namespace PeachFarm.Reporting.Reports
 			this.metricsbymutator.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.metricsbymutator.Name = "metricsbymutator";
 			this.metricsbymutator.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.metricsbymutator.SelectCommand = "peachfarmreporting.selectmetricsbymutator";
-			this.metricsbymutator.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.metricsbymutator.SelectCommand = "call peachfarmreporting.selectmetricsbymutator(@jobID)";
 			// 
 			// elementtable
 			// 
@@ -1202,16 +1242,15 @@ namespace PeachFarm.Reporting.Reports
 			this.metricsbyelement.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.metricsbyelement.Name = "metricsbyelement";
 			this.metricsbyelement.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.metricsbyelement.SelectCommand = "peachfarmreporting.selectmetricsbyelement";
-			this.metricsbyelement.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.metricsbyelement.SelectCommand = "call peachfarmreporting.selectmetricsbyelement(@jobID)";
 			// 
 			// datasettable
 			// 
 			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(2.6041667461395264D)));
 			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0208336114883423D)));
 			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0729172229766846D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0520837306976318D)));
+			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0520836114883423D)));
 			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.97916692495346069D)));
 			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.76041674613952637D)));
 			this.datasettable.Body.Rows.Add(new Telerik.Reporting.TableBodyRow(Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D)));
@@ -1313,9 +1352,8 @@ namespace PeachFarm.Reporting.Reports
 			this.metricsbydataset.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.metricsbydataset.Name = "metricsbydataset";
 			this.metricsbydataset.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.metricsbydataset.SelectCommand = "peachfarmreporting.selectmetricsbydataset";
-			this.metricsbydataset.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.metricsbydataset.SelectCommand = "call peachfarmreporting.selectmetricsbydataset(@jobID)";
 			// 
 			// statetable
 			// 
@@ -1364,9 +1402,8 @@ namespace PeachFarm.Reporting.Reports
 			this.statemetrics.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.statemetrics.Name = "statemetrics";
 			this.statemetrics.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.statemetrics.SelectCommand = "peachfarmreporting.selectstatemetrics";
-			this.statemetrics.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.statemetrics.SelectCommand = "call peachfarmreporting.selectstatemetrics(@jobID)";
 			// 
 			// bucketsgraph
 			// 
@@ -1431,9 +1468,8 @@ namespace PeachFarm.Reporting.Reports
 			this.buckettrend.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.buckettrend.Name = "buckettrend";
 			this.buckettrend.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.buckettrend.SelectCommand = "peachfarmreporting.selectbuckettrend";
-			this.buckettrend.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.buckettrend.SelectCommand = "call peachfarmreporting.selectbuckettrend(@jobID)";
 			// 
 			// lineSeries1
 			// 
@@ -1518,9 +1554,8 @@ namespace PeachFarm.Reporting.Reports
 			this.faulttrend.ConnectionString = "PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting";
 			this.faulttrend.Name = "faulttrend";
 			this.faulttrend.Parameters.AddRange(new Telerik.Reporting.SqlDataSourceParameter[] {
-            new Telerik.Reporting.SqlDataSourceParameter("@jobid", System.Data.DbType.String, "=Parameters.jobID.Value")});
-			this.faulttrend.SelectCommand = "peachfarmreporting.selectfaulttrend";
-			this.faulttrend.SelectCommandType = Telerik.Reporting.SqlDataSourceCommandType.StoredProcedure;
+            new Telerik.Reporting.SqlDataSourceParameter("@jobID", System.Data.DbType.String, "=Parameters.jobID.Value")});
+			this.faulttrend.SelectCommand = "call peachfarmreporting.selectfaulttrend(@jobID)";
 			// 
 			// lineSeries2
 			// 
@@ -1724,6 +1759,9 @@ namespace PeachFarm.Reporting.Reports
 		private Telerik.Reporting.TextBox textBox66;
 		private Telerik.Reporting.TextBox textBox67;
 		private Telerik.Reporting.PictureBox pictureBox1;
+		private Telerik.Reporting.PictureBox pictureBox2;
+		private Telerik.Reporting.TextBox textBox68;
+		private Telerik.Reporting.TextBox textBox69;
 
 	}
 }

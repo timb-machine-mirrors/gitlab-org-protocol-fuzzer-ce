@@ -3,10 +3,12 @@
 deps = [
 	'System.dll',
 	'System.Core.dll',
+	'System.Data.dll',
 	'System.Xml.dll',
 	'RabbitMQ.Client.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
+	'MySql.Data.dll',
 	'System.Runtime.Serialization.dll'
 ]
 

@@ -370,4 +370,39 @@
 		<xs:attribute name="State" type="xs:string" use="required" />
 		<xs:attribute name="ExecutionCount" type="xs:unsignedInt" use="required" />
 	</xs:complexType>
+
+	<xs:element name="DeleteDataRequest" type="DeleteDataRequest" />
+	<xs:complexType name="DeleteDataRequest">
+		<xs:attribute name="Type" type="DeleteDataType" use="required" />
+		<xs:attribute name="Parameter" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:simpleType name="DeleteDataType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="All" />
+			<xs:enumeration value="Job" />
+			<xs:enumeration value="Target" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="DeleteDataResponse" type="DeleteDataResponse" />
+	<xs:complexType name="DeleteDataResponse">
+		<xs:complexContent>
+			<xs:extension base="ResponseBase" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="RegisterRequest" type="RegisterRequest" />
+	<xs:complexType name="RegisterRequest">
+		<xs:attribute name="UserName" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="RegisterResponse">
+		<xs:complexContent>
+			<xs:extension base="ResponseBase">
+				<xs:attribute name="MongoDbConnectionString" type="xs:string" />
+				<xs:attribute name="MySqlConnectionString" type="xs:string" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 </xs:schema>

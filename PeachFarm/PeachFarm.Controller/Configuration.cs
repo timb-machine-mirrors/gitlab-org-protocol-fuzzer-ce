@@ -30,6 +30,13 @@ namespace PeachFarm.Controller.Configuration
       set { this[Constants.RabbitMq] = value; }
     }
 
+		[ConfigurationProperty(Constants.MySql)]
+		public MySqlElement MySql
+		{
+			get { return (MySqlElement)this[Constants.MySql]; }
+			set { this[Constants.MySql] = value; }
+		}
+
 		[ConfigurationProperty(Constants.NodeExpirationRules, IsRequired = false)]
 		public NodeExpirationRulesElement NodeExpirationRules
 		{
@@ -147,6 +154,16 @@ namespace PeachFarm.Controller.Configuration
 		}
 	}
 
+	public class MySqlElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.ConnectionString)]
+		public string ConnectionString
+		{
+			get { return (string)this[Constants.ConnectionString]; }
+			set { this[Constants.ConnectionString] = value; }
+		}
+	}
+
   public static class Constants
   {
     public const string MongoDb = "MongoDb";
@@ -165,5 +182,7 @@ namespace PeachFarm.Controller.Configuration
 		public const string NodeExpirationRules = "NodeExpirationRules";
 		public const string Late = "lateMinutes";
 		public const string Expired = "expiredMinutes";
+
+		public const string MySql = "MySql";
   }
 }

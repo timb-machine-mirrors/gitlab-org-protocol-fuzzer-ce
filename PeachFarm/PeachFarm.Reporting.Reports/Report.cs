@@ -42,7 +42,8 @@ namespace PeachFarm.Reporting.Reports
 					Pit = mongojob.Pit.FileName,
 					StartDate = mongojob.StartDate,
 					UserName = mongojob.UserName,
-					Faults = faultBuckets
+					Faults = faultBuckets,
+					Target = mongojob.Target
 				};
 			
 			return new List<ReportJob>() { job };
@@ -56,6 +57,7 @@ namespace PeachFarm.Reporting.Reports
 		public string UserName { get; set; }
 		public string Pit { get; set; }
 		public List<FaultBucket> Faults { get; set; }
+		public string Target { get; set; }
 	}
 
 	public class FaultBucket : Fault

@@ -213,6 +213,12 @@ namespace PeachFarm.Controller
 				case Actions.GenerateJobReport:
 					GenerateReportComplete(GenerateJobReportResponse.Deserialize(body));
 					break;
+				case Actions.Register:
+					response = Register(RegisterRequest.Deserialize(body));
+					break;
+				case Actions.DeleteData:
+					response = DeleteData(DeleteDataRequest.Deserialize(body));
+					break;
 				#region deprecated
 				/*
 				case Actions.ListNodes:
@@ -265,6 +271,12 @@ namespace PeachFarm.Controller
 				case Actions.Monitor:
 					response = new MonitorResponse();
 					break;
+				case Actions.Register:
+					response = new RegisterResponse();
+					break;
+				case Actions.DeleteData:
+					response = new DeleteDataResponse();
+					break;
 				default:
 					string error = String.Format("Error while processing {0} message from {1}:\n{2}", action, replyQueue, ex.Message);
 					logger.Error(error);
@@ -283,6 +295,17 @@ namespace PeachFarm.Controller
 		#endregion
 
 		#region Process Action functions
+		protected virtual RegisterResponse Register(RegisterRequest request)
+		{
+			//TODO Add permissions support
+
+			var response = new RegisterResponse();
+			response.MongoDbConnectionString = config.MongoDb.ConnectionString;
+			response.MySqlConnectionString = String.Empty;
+
+			response.Success = true;
+			return response;
+		}
 
 		internal virtual CreateJobResponse CreateJob(CreateJobRequest request)
 		{
@@ -356,7 +379,6 @@ namespace PeachFarm.Controller
 
 			return response;
 		}
-
 
 		protected virtual void StartPeach(StartPeachRequest request, string replyQueue)
 		{
@@ -555,6 +577,54 @@ namespace PeachFarm.Controller
 			// do nothing when report complete response is received
 		}
 
+		protected virtual DeleteDataResponse DeleteData(DeleteDataRequest request)
+		{
+			var response = new DeleteDataResponse();
+
+			//TODO: Check permissions
+
+			var nodes = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString);
+			var runningjobs = (from n in nodes where n.Status == Status.Running select n.JobID).Distinct();
+
+			if (runningjobs.Count() > 0)
+			{
+				response.Success = false;
+				response.ErrorMessage = "The following Running jobs must be stopped before deleting data:\n";
+				foreach (var job in runningjobs)
+				{
+					response.ErrorMessage += job + "\n";
+				}
+			}
+			else
+			{
+				try
+				{
+					switch (request.Type)
+					{
+						case DeleteDataType.All:
+							DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+							DatabaseHelper.TruncateAllMetrics(config.MySql.ConnectionString);
+							break;
+						case DeleteDataType.Job:
+							DatabaseHelper.DeleteFaultsForJob(request.Parameter, config.MongoDb.ConnectionString);
+							break;
+						case DeleteDataType.Target:
+							DatabaseHelper.DeleteFaultsForTarget(request.Parameter, config.MongoDb.ConnectionString);
+							break;
+						default:
+							throw new NotSupportedException(String.Format("DeleteData Type {0} not supported.", request.Type.ToString()));
+					}
+					response.Success = true;
+				}
+				catch (Exception ex)
+				{
+					response.Success = false;
+					response.ErrorMessage = ex.ToString();
+				}
+			}
+
+			return response;
+		}
 		#endregion
 
 		protected virtual Common.Mongo.Job GetJob(StopPeachRequest request)

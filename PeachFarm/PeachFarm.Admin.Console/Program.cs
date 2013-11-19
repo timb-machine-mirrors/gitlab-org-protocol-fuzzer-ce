@@ -31,9 +31,9 @@ namespace PeachFarm.Admin
 				bool jobInfo = false;
 				bool jobs = false;
 				bool output = false;
-				bool truncate = false;
 				bool report = false;
 				bool web = false;
+				bool clear = false;
 
 				string tagsString = String.Empty;
 				int launchCount = 0;
@@ -41,6 +41,9 @@ namespace PeachFarm.Admin
 				string range = String.Empty;
 				string target = String.Empty;
 				string definesFilePath = String.Empty;
+
+				DeleteDataType cleartype = DeleteDataType.Job;
+				string clearparameter = String.Empty;
 
 				#region Parse & Validate Console Input
 				var p = new OptionSet()
@@ -52,11 +55,11 @@ namespace PeachFarm.Admin
 						{ "stop", v => stop = true },
 						{ "nodes", v => nodes = true},
 						{ "errors", v => errors = true },
-						{ "info", v => jobInfo = true },
+						{ "jobinfo", v => jobInfo = true },
 						{ "jobs", v => jobs = true },
 						{ "output", v => output = true},
-						{ "truncate", v => truncate = true},
 						{ "report", v => report = true},
+						{ "clear", v => clear = true},
 						{ "web", v => web = true},
 
 						// Command parameters
@@ -65,12 +68,29 @@ namespace PeachFarm.Admin
 						{ "t|tags=", v => tagsString = v},
 						{ "r|range=", v => range = v},
 						{ "d|defines=", v => definesFilePath = v},
-						{ "a|target=", v => target = v}
+						{ "a|target=", v => target = v},
+						{ "type=", v => {
+							switch(v)
+							{
+								case "all":
+									cleartype = DeleteDataType.All;
+									break;
+								case "job":
+									cleartype = DeleteDataType.Job;
+									break;
+								case "target":
+									cleartype = DeleteDataType.Target;
+									break;
+								default:
+									Program.syntax();
+									break;
+							}
+						}}
 					};
 
 				List<string> extra = p.Parse(args);
 
-				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !truncate && !report && !web)
+				if (!stop && !start && !nodes && !errors && !jobInfo && !jobs && !output && !report && !clear && !web)
 					Program.syntax();
 
 				if (start && launchCount == 0 && String.IsNullOrEmpty(tagsString) && String.IsNullOrEmpty(ip))
@@ -93,6 +113,9 @@ namespace PeachFarm.Admin
 					//
 				}
 
+				if(clear && (cleartype == DeleteDataType.Job || cleartype == DeleteDataType.Target) && extra.Count == 0)
+					Program.syntax();
+
 				#endregion
 
 				bool mustwait = true;
@@ -104,6 +127,7 @@ namespace PeachFarm.Admin
 
 				admin.StartPeachCompleted += admin_StartPeachCompleted;
 				admin.StopPeachCompleted += admin_StopPeachCompleted;
+				admin.DeleteDataCompleted += new EventHandler<PeachFarmAdmin.DeleteDataCompletedEventArgs>(admin_DeleteDataCompleted);
 
 				admin.AdminException += new EventHandler<PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs>(admin_AdminException);
 				#endregion
@@ -174,7 +198,6 @@ namespace PeachFarm.Admin
 				#region List
 				if (nodes)
 				{
-					mustwait = false;
 					PrintListNodes(admin.ListNodes());
 				}
 				#endregion
@@ -232,23 +255,18 @@ namespace PeachFarm.Admin
 					System.Console.WriteLine("Done!");
 				}
 				#endregion
-#if DEBUG
-				#region Truncate
-				if (truncate)
+
+				#region Clear
+				if(clear)
 				{
-					mustwait = false;
-					try
+					if (extra.Count > 0)
 					{
-						admin.TruncateAllCollections();
+						clearparameter = extra[0];
 					}
-					catch (Exception ex)
-					{
-						System.Console.WriteLine("Error truncating tables:\n" + ex.ToString());
-						return;
-					}
-					System.Console.WriteLine("Done!");
+					admin.DeleteDataAsync(cleartype, clearparameter);
 				}
 				#endregion
+
 
 				#region Report
 				if (report)
@@ -265,6 +283,7 @@ namespace PeachFarm.Admin
 
 				#endregion
 
+#if DEBUG
 				#region Listen
 				if (web)
 				{
@@ -303,6 +322,7 @@ namespace PeachFarm.Admin
 
 
 		#region Peach Farm Admin message completion handlers
+
 		static void admin_StopPeachCompleted(object sender, PeachFarm.Admin.PeachFarmAdmin.StopPeachCompletedEventArgs e)
 		{
 			if (e.Result.Success)
@@ -324,6 +344,18 @@ namespace PeachFarm.Admin
 			else
 			{
 				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.ErrorMessage));
+			}
+		}
+
+		static void admin_DeleteDataCompleted(object sender, PeachFarmAdmin.DeleteDataCompletedEventArgs e)
+		{
+			if (e.Result.Success)
+			{
+				System.Console.WriteLine("Delete Data Success");
+			}
+			else
+			{
+				System.Console.WriteLine(String.Format("Delete Data Failure\n{0}", e.Result.ErrorMessage));
 			}
 		}
 
@@ -518,6 +550,18 @@ Syntax:
 
 			Get generated files for a Job
 				pf_admin.exe -output jobID destinationFolder
+
+			Force a (re)processing of a report
+				pf_admin -report jobID [reprocess]
+
+			Delete all stored data
+				pf_admin.exe -clear -all
+
+			Delete fault detail for job
+				pf_admin.exe -clear -job <jobID>
+
+			Delete fault detail for all jobs matching target
+				pf_admin.exe -clear -target <target>
 
 Commands:
 

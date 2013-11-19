@@ -54,14 +54,14 @@ namespace PeachFarm.Common.Mongo
 		    "StateModel.Data"
 		};
 
-		public static void FillFaults(this Job job, string connectionString, bool excludeData = false)
+		public static void FillFaults(this Job job, string connectionString)
 		{
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
-			if(excludeData)
-				job.Faults = collection.Find(query).SetSortOrder("Group").SetFields(Fields.Exclude(dataFields)).ToList();
-			else
-				job.Faults = collection.Find(query).SetSortOrder("Group").ToList();
+			//if(excludeData)
+			//  job.Faults = collection.Find(query).SetSortOrder("Group").SetFields(Fields.Exclude(dataFields)).ToList();
+			//else
+				job.Faults = collection.Find(query).SetSortOrder("FolderName").ToList();
 
 			foreach (var fault in job.Faults)
 			{

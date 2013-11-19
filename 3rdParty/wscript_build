@@ -28,7 +28,6 @@ bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #Newtonsoft.Json.dll is already provided in Peach/3rdParty
 
-bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 
 bld.read_csshlib('MySql.Data.dll',			paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
 bld.read_csshlib('MySql.Data.Entity.dll',   paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
@@ -53,6 +52,19 @@ if bld.env.TARGET == 'win':
 	bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 	bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 	bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+
+	bld.read_csshlib('Telerik.Reporting.Adomd.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.Cache.Database.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.OpenXmlRendering.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.Service.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.Services.WebApi.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.Reporting.XpsRendering.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.ReportViewer.Mvc.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.ReportViewer.Silverlight.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.ReportViewer.WebForms.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.ReportViewer.WinForms.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+	bld.read_csshlib('Telerik.ReportViewer.Wpf.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 
 	bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                   paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 	bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])

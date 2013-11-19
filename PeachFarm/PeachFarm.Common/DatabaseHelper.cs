@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using MongoDB.Driver;
 using PeachFarm.Common.Messages;
 using System.IO;
 using MongoDB.Driver.Builders;
+using My = MySql.Data.MySqlClient;
 
 namespace PeachFarm.Common.Mongo
 {
@@ -332,7 +334,20 @@ namespace PeachFarm.Common.Mongo
 			server.Disconnect();
 		}
 
-#if DEBUG
+		public static void DeleteGridFSFiles(string[] remoteFiles, string connectionString)
+		{
+			MongoServer server = new MongoClient(connectionString).GetServer();
+			MongoDatabase db = server.GetDatabase(MongoNames.Database);
+			foreach (var remoteFile in remoteFiles)
+			{
+				if (db.GridFS.Exists(remoteFile))
+				{
+					db.GridFS.Delete(remoteFile);
+				}
+			}
+			server.Disconnect();
+		}
+
 		public static void TruncateAllCollections(string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
@@ -353,36 +368,69 @@ namespace PeachFarm.Common.Mongo
 			var faults = GetCollection<Fault>(MongoNames.Faults, connectionString);
 			faults.RemoveAll(WriteConcern.Acknowledged);
 
-			var files = db.GridFS.FindAll();
-			foreach (var file in files)
-			{
-				file.Delete();
-			}
+			db.GridFS.Delete(Query.Matches("filename", new MongoDB.Bson.BsonRegularExpression(".")));
+			//foreach (var file in files)
+			//{
+			//  file.Delete();
+			//}
 
 			server.Disconnect();
 		}
 
-		public static void DeleteAllPDFs(string connectionString)
+		public static void TruncateAllMetrics(string mySqlConnectionString)
+		{
+			using (var conn = new My.MySqlConnection(mySqlConnectionString))
+			{
+				conn.Open();
+				using (var cmd = new My.MySqlCommand("deleteall", conn))
+				{
+					cmd.CommandType = CommandType.StoredProcedure;
+					cmd.ExecuteNonQuery();
+				}
+			}
+		}
+
+		public static void DeleteFaultsForJob(string jobID, string connectionString)
+		{
+			var job = DatabaseHelper.GetJob(jobID, connectionString);
+			if (job == null)
+			{
+				throw new ApplicationException(String.Format("Job {0} does not exist", jobID));
+			}
+			else
+			{
+				job.FillFaults(connectionString);
+				foreach (var fault in job.Faults)
+				{
+					foreach (var file in fault.GeneratedFiles)
+					{
+						DatabaseHelper.DeleteGridFSFile(file.GridFsLocation, connectionString);
+					}
+				}
+				job.Faults = null;
+				var faults = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
+				faults.Remove(Query.EQ("JobID", job.JobID));
+				faults.Database.Server.Disconnect();
+			}
+		}
+
+		public static void DeleteFaultsForTarget(string target, string connectionString)
+		{
+			var jobs = DatabaseHelper.GetAllJobs(connectionString);
+			var targetjobs = (from j in jobs where j.Target == target select j.JobID);
+			foreach (var jobid in targetjobs)
+			{
+				DatabaseHelper.DeleteFaultsForJob(jobid, connectionString);
+			}
+		}
+
+		public static void DeleteAllFiles(string connectionString)
 		{
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
-			var pdfs = db.GridFS.Find(Query.Matches("filename", ".pdf"));
-			foreach (var mongoGridFsFileInfo in pdfs)
-			{
-				mongoGridFsFileInfo.Delete();
-			}
-
-			var jobs = DatabaseHelper.GetAllJobs(connectionString);
-			foreach (var job in jobs)
-			{
-				job.ReportLocation = "";
-				job.SaveToDatabase(connectionString);
-			}
-
+			db.GridFS.Delete("*");
 			server.Disconnect();
 		}
-
-#endif
 	}
 
 	public static class MongoNames

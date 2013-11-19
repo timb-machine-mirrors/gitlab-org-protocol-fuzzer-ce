@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace PeachFarm.Reporting.Reports
 {
-	//*
+	/*
 	partial class JobDetailReport
 	{
 		public object LogoBoxValue

@@ -23,16 +23,20 @@ namespace PeachFarm.Test
 		private static Node.PeachFarmNode node;
 		private const string testName = "localhost";
 
+		private const string MongoDbConnectionString = "";
+
 		#region setup
 		
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp()
 		{
+			
+
 			config = (Admin.Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
+			DatabaseHelper.TestConnection(MongoDbConnectionString);
 
-			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+			DatabaseHelper.TruncateAllCollections(MongoDbConnectionString);
 
 			controller = new Controller.PeachFarmController();
 			while (controller.IsListening == false) { }
@@ -64,7 +68,7 @@ namespace PeachFarm.Test
 		public void TearDown()
 		{
 			admin = null;
-			DatabaseHelper.TruncateAllCollections(config.MongoDb.ConnectionString);
+			DatabaseHelper.TruncateAllCollections(MongoDbConnectionString);
 			Sleep(2000);
 		}
 		#endregion
@@ -107,7 +111,7 @@ namespace PeachFarm.Test
 			WaitForNode(100, n => n.Status == Common.Messages.Status.Alive);
 
 			Assert.AreEqual(Common.Messages.Status.Alive, node.Status);
-			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString).Count);
+			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(MongoDbConnectionString).Count);
 		}
 
 
@@ -142,11 +146,11 @@ namespace PeachFarm.Test
 
 			WaitForNode(30, n => n.Status == Common.Messages.Status.Alive);
 
-			var job = DatabaseHelper.GetJob(jobid, config.MongoDb.ConnectionString);
-			job.FillNodes(config.MongoDb.ConnectionString);
+			var job = DatabaseHelper.GetJob(jobid, MongoDbConnectionString);
+			job.FillNodes(MongoDbConnectionString);
 			Assert.AreEqual(1, job.Nodes.Count);
 			Assert.Less(0, job.Nodes[0].IterationCount);
-			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(config.MongoDb.ConnectionString).Count);
+			Assert.AreEqual(0, DatabaseHelper.GetAllErrors(MongoDbConnectionString).Count);
 		}
 		#endregion
 
@@ -162,11 +166,11 @@ namespace PeachFarm.Test
 			PeachFarm.Common.Messages.Heartbeat node = null;
 			if(condition == null)
 			{
-				node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault();
+				node = DatabaseHelper.GetAllNodes(MongoDbConnectionString).FirstOrDefault();
 			}
 			else
 			{
-				node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault(condition);
+				node = DatabaseHelper.GetAllNodes(MongoDbConnectionString).FirstOrDefault(condition);
 			}
 			while (node == null)
 			{
@@ -180,11 +184,11 @@ namespace PeachFarm.Test
 				Sleep(100);
 				if (condition == null)
 				{
-					node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault();
+					node = DatabaseHelper.GetAllNodes(MongoDbConnectionString).FirstOrDefault();
 				}
 				else
 				{
-					node = DatabaseHelper.GetAllNodes(config.MongoDb.ConnectionString).FirstOrDefault(condition);
+					node = DatabaseHelper.GetAllNodes(MongoDbConnectionString).FirstOrDefault(condition);
 				}
 			}
 			return node;
