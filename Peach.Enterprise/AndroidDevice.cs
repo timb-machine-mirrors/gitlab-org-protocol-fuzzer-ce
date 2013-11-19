@@ -13,9 +13,12 @@ using Managed.Adb.Exceptions;
 
 namespace Peach.Enterprise
 {
-	// shell dumpsys display
-	//   mAllDisplayBlankStateFromPowerManager = 1 => Blanked
-	//   mAllDisplayBlankStateFromPowerManager = 2 => Unblanked
+	// shell dumpsys power android 4.1
+	//   mPowerState=!0 => Powered on
+	//   mPowerState=0 => Powered off
+	// shell dumpsys power android 4.3
+	//   mScreenOn=true => Powered on
+	//   mScreenOn=false => Powered off
 
 	// shell dumpsys window
 	//   mCurrentFocus=Window{40f0fb38 u0 Keyguard} => Locked
@@ -157,11 +160,11 @@ namespace Peach.Enterprise
 			try
 			{
 				// Check if we need to turn on the display
-				var screenState = QueryShellCommand(NLog.LogLevel.Trace, "dumpsys display", rePower);
+				var screenState = QueryShellCommand(NLog.LogLevel.Trace, "dumpsys power", rePower);
 				if (screenState == null)
 					throw new PeachException("Failed to query the current screen state.");
 
-				if (screenState != "2")
+				if (screenState == "0" || screenState == "false")
 					RunShellCommand(NLog.LogLevel.Trace, "input keyevent KEYCODE_POWER");
 			}
 			catch (Exception ex)
@@ -248,7 +251,7 @@ namespace Peach.Enterprise
 		{
 			var s = RunShellCommand(level, cmd);
 			var m = regex.Match(s);
-			return m.Success ? m.Groups[1].Value : null;
+			return m.Success ? m.Groups["Query"].Value : null;
 		}
 
 		public IEnumerable<FileEntry> CrashDumps()
@@ -356,8 +359,8 @@ namespace Peach.Enterprise
 		}
 
 		static Regex reLogFilter = new Regex(@"^-+ beginning of [^\r\n]*(\r\n|\r|\n)?", RegexOptions.Multiline);
-		static Regex rePower = new Regex("mAllDisplayBlankStateFromPowerManager=(\\d)\\r?$", RegexOptions.Multiline);
-		static Regex reFocus = new Regex("mCurrentFocus=(.*?)\\r?$", RegexOptions.Multiline);
+		static Regex rePower = new Regex("(?:mPowerState=(?<Query>\\d+))|(?:mScreenOn=(?<Query>\\w+))", RegexOptions.Multiline);
+		static Regex reFocus = new Regex("mCurrentFocus=(?<Query>.*?)\\r?$", RegexOptions.Multiline);
 		static Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
 		static Regex pmProcessSuccess = new Regex(@"^Success$\r?\n?");
 		static Regex bmgrProcessSuccess = new Regex(@"^Wiped backup data for .*\r?\n?");
