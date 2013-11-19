@@ -18,6 +18,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("DeviceSerial", typeof(string), "The serial of the device to monitor", "")]
 	[Parameter("DeviceMonitor", typeof(string), "Android monitor to get device serial from", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "false")]
+	[Parameter("ClearAppData", typeof(bool), "Remove Application data and cache on every iteration", "false")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
@@ -43,6 +44,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public string StartOnCall { get; protected set; }
 		public bool RestartEveryIteration { get; protected set; }
 		public bool ClearAppDataOnFault { get; protected set; }
+		public bool ClearAppData { get; protected set; }
 		public int ConnectTimeout { get; protected set; }
 		public int ReadyTimeout { get; protected set; }
 		public int CommandTimeout { get; protected set; }
@@ -218,6 +220,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (StartOnCall == null && !RestartEveryIteration)
 			{
 				dev.WaitForReady();
+
+				if (ClearAppData)
+					dev.ClearAppData(ApplicationName);
+
 				dev.ClearLogs(); // clear logs at the start of the world
 				dev.StartApp(ApplicationName, ActivityName);
 			}
@@ -257,6 +263,9 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				dev.WaitForReady();
 
+				if (ClearAppData || (hasFault && ClearAppDataOnFault))
+					dev.ClearAppData(ApplicationName);
+				
 				// If this is the first time, clear the device logs
 				if (firstRun)
 				{
@@ -264,9 +273,6 @@ namespace Peach.Enterprise.Agent.Monitors
 					firstRun = false;
 				}
 			}
-
-			if (hasFault && ClearAppDataOnFault)
-				dev.ClearAppData(ApplicationName);
 
 			if (StartOnCall == null && (hasFault || RestartEveryIteration))
 				dev.StartApp(ApplicationName, ActivityName);
