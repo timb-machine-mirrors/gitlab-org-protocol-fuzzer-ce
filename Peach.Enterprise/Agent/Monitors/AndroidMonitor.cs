@@ -28,7 +28,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		//static Regex reHash = new Regex(@"^backtrace:((\r)?\n    #([^\r\n])*)*", RegexOptions.Multiline);
+		static Regex reHash = new Regex(@"\[\s+\d+-\d+\s+[^EF]+\s+([EF])/([^\]\s]+)");
 
 		bool firstRun = false;
 		bool adbInit = false;
@@ -114,7 +114,6 @@ namespace Peach.Enterprise.Agent.Monitors
 				{
 					foreach (var tomb in dev.CrashDumps())
 					{
-						// TODO: Hash bucketing!
 						dev.PullFile(tomb, tmp);
 						ret.collectedData.Add(new Fault.Data("{0}_{1}".Fmt(DeviceSerial ?? DeviceMonitor, tomb.Name), System.IO.File.ReadAllBytes(tmp)));
 					}
@@ -143,11 +142,9 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 
 			// Step 7: Update bucketing information
-			if (errorLog != null && ret.majorHash == null)
+			if (errorLog != null)
 			{
-				//"F/libc    (  995): Fatal signal 11 (SIGSEGV) at 0x000003e3 (code=0), thread 995 (oid.development)\r\nE/AndroidRuntime(  995): FATAL EXCEPTION: Thread-69\r\nE/AndroidRuntime(  995): com.android.development.BadBehaviorActivity$BadBehaviorException: Whatcha gonna do, whatcha gonna do\r\nE/AndroidRuntime(  995): \tat com.android.development.BadBehaviorActivity$3$1.run(BadBehaviorActivity.java:155)\r\nE/AndroidRuntime(  995): Caused by: java.lang.IllegalStateException: When they come for you\r\nE/AndroidRuntime(  995): \t... 1 more"	string
-				//"E/AndroidRuntime(  987): FATAL EXCEPTION: Thread-69\r\nE/AndroidRuntime(  987): com.android.development.BadBehaviorActivity$BadBehaviorException: Whatcha gonna do, whatcha gonna do\r\nE/AndroidRuntime(  987): \tat com.android.development.BadBehaviorActivity$3$1.run(BadBehaviorActivity.java:155)\r\nE/AndroidRuntime(  987): Caused by: java.lang.IllegalStateException: When they come for you\r\nE/AndroidRuntime(  987): \t... 1 more"
-				var match = Regex.Match(errorLog, @"\[\s+\d+-\d+\s+[^EF]+\s+([EF])/([^\]\s]+)");
+				var match = reHash.Match(errorLog);
 
 				if (match.Success)
 				{
@@ -214,7 +211,8 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Grab device by serial or from a monitor
 			SyncDevice();
 
-			// Ensure app is not running and clear app data
+			// Don't need to ensure app is not running, calling
+			// dev.StartApp() will restart the application if needed
 
 			// Start the application if we are not running it every iteration
 			if (StartOnCall == null && !RestartEveryIteration)

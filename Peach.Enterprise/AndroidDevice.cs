@@ -197,7 +197,7 @@ namespace Peach.Enterprise
 			try
 			{
 				// Check for errors in the log, throws on error
-				var log = RunShellCommand(NLog.LogLevel.Debug, "logcat -s -d AndroidRuntime:e ActivityManager:e *:f");
+				var log = RunShellCommand(NLog.LogLevel.Debug, "logcat -v long -s -d AndroidRuntime:e ActivityManager:e *:f");
 
 				// Filter out log lines added by logcat
 				var filtered = reLogFilter.Replace(log, "");
