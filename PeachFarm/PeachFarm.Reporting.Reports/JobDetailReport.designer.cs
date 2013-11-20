@@ -438,7 +438,8 @@ namespace PeachFarm.Reporting.Reports
 			// peachFarmMongo
 			// 
 			this.peachFarmMongo.DataMember = "GetJobDetailReport";
-			this.peachFarmMongo.DataSource = typeof(PeachFarm.Reporting.Reports.ReportData);
+			this.peachFarmMongo.DataSource = "PeachFarm.Reporting.Reports.ReportData, PeachFarm.Reporting.Reports, Version=1.0." +
+    "0.0, Culture=neutral, PublicKeyToken=null";
 			this.peachFarmMongo.Name = "peachFarmMongo";
 			this.peachFarmMongo.Parameters.AddRange(new Telerik.Reporting.ObjectDataSourceParameter[] {
             new Telerik.Reporting.ObjectDataSourceParameter("jobID", typeof(string), "=Parameters.jobID.Value"),

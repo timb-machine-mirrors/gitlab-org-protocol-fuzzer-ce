@@ -13,7 +13,7 @@ namespace PeachFarm.Reporting.Reports
 {
 	public class ReportData
 	{
-		public static List<ReportJob> GetJobDetailReport(string jobID, string connectionString)
+		public static ReportJob[] GetJobDetailReport(string jobID, string connectionString)
 		{
 			Job mongojob = DatabaseHelper.GetJob(jobID, connectionString);
 			
@@ -46,7 +46,7 @@ namespace PeachFarm.Reporting.Reports
 					Target = mongojob.Target
 				};
 			
-			return new List<ReportJob>() { job };
+			return new ReportJob[]{job};
 		}
 	}
 
