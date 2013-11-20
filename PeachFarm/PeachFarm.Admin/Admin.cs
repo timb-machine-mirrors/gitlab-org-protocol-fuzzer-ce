@@ -663,7 +663,6 @@ namespace PeachFarm.Admin
 			FileWriter.DumpFiles(MongoDbConnectionString, destinationFolder, jobID);
 		}
 
-#if DEBUG
 		public void Report(string jobid, bool reprocess = false)
 		{
 			GenerateJobReportRequest request = new GenerateJobReportRequest();
@@ -673,6 +672,8 @@ namespace PeachFarm.Admin
 
 			rabbit.PublishToQueue(QueueNames.QUEUE_REPORTGENERATOR_PROCESSONE, request.Serialize(), Actions.GenerateJobReport, this.controllerQueueName);
 		}
+
+#if DEBUG
 
 		public void TruncateAllCollections()
 		{
