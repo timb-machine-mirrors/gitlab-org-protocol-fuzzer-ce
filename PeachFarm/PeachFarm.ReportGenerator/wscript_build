@@ -16,7 +16,7 @@ deps = [
 ]
 
 bld(
-	features = 'cs',
+	features = 'cs win',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachFarm.Reporting.dll',
