@@ -288,33 +288,44 @@ namespace PeachFarm.Admin
 		{
 			if (String.IsNullOrEmpty(MongoDbConnectionString))
 			{
-				bool responseReceived = false;
-
-				var request = new RegisterRequest();
-				request.UserName = UserName;
-
-				rabbit.MessageReceived += (o, e) =>
+				using (var evt = new AutoResetEvent(false))
 				{
-					if (e.Action == "Register")
+					Exception error = null;
+
+					var request = new RegisterRequest();
+					request.UserName = UserName;
+
+					rabbit.MessageReceived += (o, e) =>
 					{
-						var response = RegisterResponse.Deserialize(e.Body);
-						if (response.Success)
+						if (e.Action == "Register")
 						{
-							MongoDbConnectionString = response.MongoDbConnectionString;
+							try
+							{
+								var response = RegisterResponse.Deserialize(e.Body);
+								if (response.Success)
+								{
+									MongoDbConnectionString = response.MongoDbConnectionString;
+								}
+								else
+								{
+									error = new ApplicationException(response.ErrorMessage);
+								}
+							}
+							catch (Exception ex)
+							{
+								error = ex;
+							}
+
+							evt.Set();
 						}
-						else
-						{
-							throw new ApplicationException(response.ErrorMessage);
-						}
-						responseReceived = true;
-					}
-				};
+					};
 
-				PublishToServer(request.Serialize(), Actions.Register);
+					PublishToServer(request.Serialize(), Actions.Register);
 
-				while (responseReceived == false)
-				{
+					evt.WaitOne();
 
+					if (error != null)
+						throw new ApplicationException(error.Message, error);
 				}
 			}
 		}
