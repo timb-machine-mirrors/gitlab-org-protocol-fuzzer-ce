@@ -165,7 +165,7 @@
         XTesb3QPLh88M+QwdP6m681Lt7xuXbu94vbgcOjwnZHokdE77DtTd1PuvriXeW/h/sYH6AdFD6UeVjxS
         fNTws+7PbaOWo6fHXMf6Hwc/vj/OGn/2S8Yv7ycKnpCfVEyqTDZPmU2dmnafvvF05dOJZ+nPFmYKf5X+
         tfa5zvMffnP8rX82YnbiBf/Fp99LXsq/PPRq2aueuYC5R69TXy/MF72Rf3P4LeNt37vwd5MLWe+x7ys/
-        6H7o/ujz8cGn1E+f/gUDmPP8usTo0wAAAAlwSFlzAAAPXwAAD18B14rayQAA9UFJREFUeF7s3Qd4VFX6
+        6H7o/ujz8cGn1E+f/gUDmPP8usTo0wAAAAlwSFlzAAAPXgAAD14BBc04LQAA9UFJREFUeF7s3Qd4VFX6
         x/EXe1l1d10FUVroLTRFXcXuWlfXsmtbu2uD0EFpgmJXLCgogvReQoCE9N5773QFpKb3cv7vOzD+MRyR
         kpncO/fn83yehJvJ3DI3uTJfzrmklAIAAAAAAAAAAAAAAABwGO1CAAAAAAAAAAAAAAAAgOaiXQgAAAAA
         AAAAAAAAAADQXLQLAQAAAAAAAAAAAAAAAJqLdiEAAAAAAAAAAAAAAABAc9EuBAAAAAAAAAAAAAAAAGgu
@@ -2476,23 +2476,5 @@
         7r3Xvfuvde9+691737r3Xvfuvde9+691737r3Xvfuvde9+691737r3Xvfuvde9+691737r3Xvfuvde9+
         691737r3Xvfuvdf/2Q==
 </value>
-  </data>
-  <data name="pictureBox3.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
-  </data>
-  <data name="pictureBox4.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
-  </data>
-  <data name="pictureBox5.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
-  </data>
-  <data name="pictureBox7.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
-  </data>
-  <data name="pictureBox6.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
-  </data>
-  <data name="pictureBox8.Value" xml:space="preserve">
-    <value>= IIf(Fields.faulttrend = 0,Parameters.hostURL.Value + "/Images/trendsame.png",IIf(Fields.faulttrend &gt; 0,Parameters.hostURL.Value + "/Images/trendup.png",Parameters.hostURL.Value + "/Images/trenddown.png"))</value>
   </data>
 </root>

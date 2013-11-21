@@ -36,12 +36,6 @@ namespace PeachFarm.Reporting.Reports
 			Telerik.Reporting.TableGroup tableGroup22 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup23 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.TableGroup tableGroup24 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup25 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup26 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup27 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup28 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup29 = new Telerik.Reporting.TableGroup();
-			Telerik.Reporting.TableGroup tableGroup30 = new Telerik.Reporting.TableGroup();
 			Telerik.Reporting.GraphGroup graphGroup1 = new Telerik.Reporting.GraphGroup();
 			Telerik.Reporting.GraphTitle graphTitle1 = new Telerik.Reporting.GraphTitle();
 			Telerik.Reporting.CategoryScale categoryScale1 = new Telerik.Reporting.CategoryScale();
@@ -52,6 +46,42 @@ namespace PeachFarm.Reporting.Reports
 			Telerik.Reporting.CategoryScale categoryScale2 = new Telerik.Reporting.CategoryScale();
 			Telerik.Reporting.NumericalScale numericalScale2 = new Telerik.Reporting.NumericalScale();
 			Telerik.Reporting.GraphGroup graphGroup4 = new Telerik.Reporting.GraphGroup();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule1 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule2 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule3 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule4 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule5 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule6 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule7 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule8 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule9 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule10 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule11 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule12 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule13 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule14 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule15 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule16 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule17 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule18 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule25 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule26 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule27 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule28 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule29 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule30 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule19 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule20 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule21 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule22 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule23 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule24 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule31 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule32 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule33 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule34 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule35 = new Telerik.Reporting.Drawing.FormattingRule();
+			Telerik.Reporting.Drawing.FormattingRule formattingRule36 = new Telerik.Reporting.Drawing.FormattingRule();
 			Telerik.Reporting.ReportParameter reportParameter1 = new Telerik.Reporting.ReportParameter();
 			Telerik.Reporting.ReportParameter reportParameter2 = new Telerik.Reporting.ReportParameter();
 			Telerik.Reporting.ReportParameter reportParameter3 = new Telerik.Reporting.ReportParameter();
@@ -60,22 +90,16 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox6 = new Telerik.Reporting.TextBox();
 			this.textBox7 = new Telerik.Reporting.TextBox();
 			this.textBox8 = new Telerik.Reporting.TextBox();
-			this.textBox10 = new Telerik.Reporting.TextBox();
 			this.textBox22 = new Telerik.Reporting.TextBox();
-			this.textBox24 = new Telerik.Reporting.TextBox();
 			this.textBox32 = new Telerik.Reporting.TextBox();
 			this.textBox33 = new Telerik.Reporting.TextBox();
 			this.textBox34 = new Telerik.Reporting.TextBox();
 			this.textBox35 = new Telerik.Reporting.TextBox();
-			this.textBox36 = new Telerik.Reporting.TextBox();
 			this.textBox38 = new Telerik.Reporting.TextBox();
-			this.textBox39 = new Telerik.Reporting.TextBox();
 			this.textBox48 = new Telerik.Reporting.TextBox();
 			this.textBox49 = new Telerik.Reporting.TextBox();
 			this.textBox50 = new Telerik.Reporting.TextBox();
-			this.textBox51 = new Telerik.Reporting.TextBox();
 			this.textBox52 = new Telerik.Reporting.TextBox();
-			this.textBox53 = new Telerik.Reporting.TextBox();
 			this.textBox60 = new Telerik.Reporting.TextBox();
 			this.textBox61 = new Telerik.Reporting.TextBox();
 			this.peachFarmMongo = new Telerik.Reporting.ObjectDataSource();
@@ -128,22 +152,15 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox26 = new Telerik.Reporting.TextBox();
 			this.textBox27 = new Telerik.Reporting.TextBox();
 			this.textBox28 = new Telerik.Reporting.TextBox();
-			this.textBox30 = new Telerik.Reporting.TextBox();
-			this.textBox31 = new Telerik.Reporting.TextBox();
-			this.pictureBox3 = new Telerik.Reporting.PictureBox();
 			this.metricsbymutator = new Telerik.Reporting.SqlDataSource();
 			this.elementtable = new Telerik.Reporting.Table();
 			this.textBox40 = new Telerik.Reporting.TextBox();
 			this.textBox42 = new Telerik.Reporting.TextBox();
 			this.textBox43 = new Telerik.Reporting.TextBox();
-			this.textBox44 = new Telerik.Reporting.TextBox();
-			this.textBox46 = new Telerik.Reporting.TextBox();
 			this.metricsbyelement = new Telerik.Reporting.SqlDataSource();
 			this.datasettable = new Telerik.Reporting.Table();
 			this.textBox54 = new Telerik.Reporting.TextBox();
 			this.textBox55 = new Telerik.Reporting.TextBox();
-			this.textBox56 = new Telerik.Reporting.TextBox();
-			this.textBox58 = new Telerik.Reporting.TextBox();
 			this.metricsbydataset = new Telerik.Reporting.SqlDataSource();
 			this.statetable = new Telerik.Reporting.Table();
 			this.textBox62 = new Telerik.Reporting.TextBox();
@@ -165,18 +182,41 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox65 = new Telerik.Reporting.TextBox();
 			this.textBox66 = new Telerik.Reporting.TextBox();
 			this.textBox67 = new Telerik.Reporting.TextBox();
+			this.textBox31 = new Telerik.Reporting.TextBox();
 			this.textBox29 = new Telerik.Reporting.TextBox();
-			this.pictureBox4 = new Telerik.Reporting.PictureBox();
-			this.pictureBox5 = new Telerik.Reporting.PictureBox();
-			this.pictureBox6 = new Telerik.Reporting.PictureBox();
-			this.pictureBox7 = new Telerik.Reporting.PictureBox();
-			this.pictureBox8 = new Telerik.Reporting.PictureBox();
+			this.panel1 = new Telerik.Reporting.Panel();
+			this.textBox10 = new Telerik.Reporting.TextBox();
+			this.textBox24 = new Telerik.Reporting.TextBox();
+			this.textBox45 = new Telerik.Reporting.TextBox();
+			this.panel3 = new Telerik.Reporting.Panel();
+			this.panel4 = new Telerik.Reporting.Panel();
+			this.textBox47 = new Telerik.Reporting.TextBox();
+			this.textBox57 = new Telerik.Reporting.TextBox();
+			this.textBox59 = new Telerik.Reporting.TextBox();
+			this.panel5 = new Telerik.Reporting.Panel();
+			this.textBox30 = new Telerik.Reporting.TextBox();
+			this.textBox36 = new Telerik.Reporting.TextBox();
+			this.textBox39 = new Telerik.Reporting.TextBox();
+			this.panel6 = new Telerik.Reporting.Panel();
+			this.panel7 = new Telerik.Reporting.Panel();
+			this.textBox46 = new Telerik.Reporting.TextBox();
+			this.textBox51 = new Telerik.Reporting.TextBox();
+			this.textBox53 = new Telerik.Reporting.TextBox();
+			this.panel8 = new Telerik.Reporting.Panel();
+			this.panel9 = new Telerik.Reporting.Panel();
+			this.textBox58 = new Telerik.Reporting.TextBox();
+			this.textBox70 = new Telerik.Reporting.TextBox();
+			this.textBox71 = new Telerik.Reporting.TextBox();
+			this.panel10 = new Telerik.Reporting.Panel();
+			this.textBox44 = new Telerik.Reporting.TextBox();
+			this.textBox72 = new Telerik.Reporting.TextBox();
+			this.textBox73 = new Telerik.Reporting.TextBox();
 			((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
 			// 
 			// textBox5
 			// 
 			this.textBox5.Name = "textBox5";
-			this.textBox5.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.1149201393127441D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox5.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.8024208545684814D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox5.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox5.Style.Color = System.Drawing.Color.White;
 			this.textBox5.Style.Font.Bold = true;
@@ -188,7 +228,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox6
 			// 
 			this.textBox6.Name = "textBox6";
-			this.textBox6.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97078335285186768D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox6.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.83536714315414429D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox6.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox6.Style.Color = System.Drawing.Color.White;
 			this.textBox6.Style.Font.Bold = true;
@@ -212,7 +252,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox8
 			// 
 			this.textBox8.Name = "textBox8";
-			this.textBox8.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.98124456405639648D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox8.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.345828652381897D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox8.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox8.Style.Color = System.Drawing.Color.White;
 			this.textBox8.Style.Font.Bold = true;
@@ -221,22 +261,10 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox8.StyleName = "Corporate.TableHeader";
 			this.textBox8.Value = "faults";
 			// 
-			// textBox10
-			// 
-			this.textBox10.Name = "textBox10";
-			this.textBox10.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.31527838110923767D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox10.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox10.Style.Color = System.Drawing.Color.White;
-			this.textBox10.Style.Font.Bold = true;
-			this.textBox10.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox10.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox10.StyleName = "Corporate.TableHeader";
-			this.textBox10.Value = "";
-			// 
 			// textBox22
 			// 
 			this.textBox22.Name = "textBox22";
-			this.textBox22.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.66743862628936768D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox22.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3665527105331421D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox22.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox22.Style.Color = System.Drawing.Color.White;
 			this.textBox22.Style.Font.Bold = true;
@@ -245,22 +273,10 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox22.StyleName = "Corporate.TableHeader";
 			this.textBox22.Value = "buckets";
 			// 
-			// textBox24
-			// 
-			this.textBox24.Name = "textBox24";
-			this.textBox24.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30075585842132568D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox24.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox24.Style.Color = System.Drawing.Color.White;
-			this.textBox24.Style.Font.Bold = true;
-			this.textBox24.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox24.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox24.StyleName = "Corporate.TableHeader";
-			this.textBox24.Value = "";
-			// 
 			// textBox32
 			// 
 			this.textBox32.Name = "textBox32";
-			this.textBox32.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.1578829288482666D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox32.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.7932991981506348D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox32.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox32.Style.Color = System.Drawing.Color.White;
 			this.textBox32.Style.Font.Bold = true;
@@ -272,7 +288,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox33
 			// 
 			this.textBox33.Name = "textBox33";
-			this.textBox33.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.96186548471450806D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox33.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.82913362979888916D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox33.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox33.Style.Color = System.Drawing.Color.White;
 			this.textBox33.Style.Font.Bold = true;
@@ -284,7 +300,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox34
 			// 
 			this.textBox34.Name = "textBox34";
-			this.textBox34.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.94114810228347778D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox34.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97502559423446655D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox34.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox34.Style.Color = System.Drawing.Color.White;
 			this.textBox34.Style.Font.Bold = true;
@@ -296,7 +312,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox35
 			// 
 			this.textBox35.Name = "textBox35";
-			this.textBox35.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.98258227109909058D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox35.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox35.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox35.Style.Color = System.Drawing.Color.White;
 			this.textBox35.Style.Font.Bold = true;
@@ -305,22 +321,10 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox35.StyleName = "Corporate.TableHeader";
 			this.textBox35.Value = "faults";
 			// 
-			// textBox36
-			// 
-			this.textBox36.Name = "textBox36";
-			this.textBox36.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.28784734010696411D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox36.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox36.Style.Color = System.Drawing.Color.White;
-			this.textBox36.Style.Font.Bold = true;
-			this.textBox36.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox36.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox36.StyleName = "Corporate.TableHeader";
-			this.textBox36.Value = "";
-			// 
 			// textBox38
 			// 
 			this.textBox38.Name = "textBox38";
-			this.textBox38.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.66146713495254517D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox38.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox38.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox38.Style.Color = System.Drawing.Color.White;
 			this.textBox38.Style.Font.Bold = true;
@@ -329,22 +333,10 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox38.StyleName = "Corporate.TableHeader";
 			this.textBox38.Value = "buckets";
 			// 
-			// textBox39
-			// 
-			this.textBox39.Name = "textBox39";
-			this.textBox39.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.27839380502700806D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox39.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox39.Style.Color = System.Drawing.Color.White;
-			this.textBox39.Style.Font.Bold = true;
-			this.textBox39.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox39.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox39.StyleName = "Corporate.TableHeader";
-			this.textBox39.Value = "";
-			// 
 			// textBox48
 			// 
 			this.textBox48.Name = "textBox48";
-			this.textBox48.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.6145837306976318D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox48.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.5937509536743164D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox48.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox48.Style.Color = System.Drawing.Color.White;
 			this.textBox48.Style.Font.Bold = true;
@@ -368,7 +360,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox50
 			// 
 			this.textBox50.Name = "textBox50";
-			this.textBox50.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.0729169845581055D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox50.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox50.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox50.Style.Color = System.Drawing.Color.White;
 			this.textBox50.Style.Font.Bold = true;
@@ -377,22 +369,10 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox50.StyleName = "Corporate.TableHeader";
 			this.textBox50.Value = "faults";
 			// 
-			// textBox51
-			// 
-			this.textBox51.Name = "textBox51";
-			this.textBox51.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30208352208137512D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox51.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox51.Style.Color = System.Drawing.Color.White;
-			this.textBox51.Style.Font.Bold = true;
-			this.textBox51.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox51.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox51.StyleName = "Corporate.TableHeader";
-			this.textBox51.Value = "";
-			// 
 			// textBox52
 			// 
 			this.textBox52.Name = "textBox52";
-			this.textBox52.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97916662693023682D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox52.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox52.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
 			this.textBox52.Style.Color = System.Drawing.Color.White;
 			this.textBox52.Style.Font.Bold = true;
@@ -400,18 +380,6 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox52.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox52.StyleName = "Corporate.TableHeader";
 			this.textBox52.Value = "buckets";
-			// 
-			// textBox53
-			// 
-			this.textBox53.Name = "textBox53";
-			this.textBox53.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30208346247673035D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox53.Style.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(94)))), ((int)(((byte)(6)))));
-			this.textBox53.Style.Color = System.Drawing.Color.White;
-			this.textBox53.Style.Font.Bold = true;
-			this.textBox53.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox53.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox53.StyleName = "Corporate.TableHeader";
-			this.textBox53.Value = "";
 			// 
 			// textBox60
 			// 
@@ -996,67 +964,55 @@ namespace PeachFarm.Reporting.Reports
             this.textBox67});
 			this.metrics.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0D), Telerik.Reporting.Drawing.Unit.Inch(0D));
 			this.metrics.Name = "metrics";
-			this.metrics.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.6790890693664551D), Telerik.Reporting.Drawing.Unit.Inch(12D));
+			this.metrics.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.5D), Telerik.Reporting.Drawing.Unit.Inch(12D));
 			// 
 			// mutatortable
 			// 
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(3.1149201393127441D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.970783531665802D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.96032285690307617D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.98124474287033081D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.31615602970123291D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.66743868589401245D)));
-			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.30159324407577515D)));
+			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(2.8024208545684814D)));
+			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.83536696434021D)));
+			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.96032321453094482D)));
+			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.3458287715911865D)));
+			this.mutatortable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.366552472114563D)));
 			this.mutatortable.Body.Rows.Add(new Telerik.Reporting.TableBodyRow(Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D)));
 			this.mutatortable.Body.SetCellContent(0, 0, this.textBox25);
 			this.mutatortable.Body.SetCellContent(0, 1, this.textBox26);
 			this.mutatortable.Body.SetCellContent(0, 2, this.textBox27);
-			this.mutatortable.Body.SetCellContent(0, 3, this.textBox28);
-			this.mutatortable.Body.SetCellContent(0, 5, this.textBox30);
-			this.mutatortable.Body.SetCellContent(0, 4, this.pictureBox3);
-			this.mutatortable.Body.SetCellContent(0, 6, this.pictureBox4);
+			this.mutatortable.Body.SetCellContent(0, 3, this.panel1);
+			this.mutatortable.Body.SetCellContent(0, 4, this.panel4);
 			tableGroup5.ReportItem = this.textBox5;
 			tableGroup6.ReportItem = this.textBox6;
 			tableGroup7.ReportItem = this.textBox7;
 			tableGroup8.ReportItem = this.textBox8;
-			tableGroup9.ReportItem = this.textBox10;
-			tableGroup10.ReportItem = this.textBox22;
-			tableGroup11.ReportItem = this.textBox24;
+			tableGroup9.ReportItem = this.textBox22;
 			this.mutatortable.ColumnGroups.Add(tableGroup5);
 			this.mutatortable.ColumnGroups.Add(tableGroup6);
 			this.mutatortable.ColumnGroups.Add(tableGroup7);
 			this.mutatortable.ColumnGroups.Add(tableGroup8);
 			this.mutatortable.ColumnGroups.Add(tableGroup9);
-			this.mutatortable.ColumnGroups.Add(tableGroup10);
-			this.mutatortable.ColumnGroups.Add(tableGroup11);
 			this.mutatortable.DataSource = this.metricsbymutator;
 			this.mutatortable.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.textBox25,
             this.textBox26,
             this.textBox27,
-            this.textBox28,
-            this.textBox30,
-            this.pictureBox3,
             this.textBox5,
             this.textBox6,
             this.textBox7,
             this.textBox8,
-            this.textBox10,
             this.textBox22,
-            this.textBox24,
-            this.pictureBox4});
+            this.panel1,
+            this.panel4});
 			this.mutatortable.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.1790873259305954D), Telerik.Reporting.Drawing.Unit.Inch(8.7000007629394531D));
 			this.mutatortable.Name = "mutatortable";
-			tableGroup12.Groupings.Add(new Telerik.Reporting.Grouping(null));
-			tableGroup12.Name = "Detail";
-			this.mutatortable.RowGroups.Add(tableGroup12);
-			this.mutatortable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.3124589920043945D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
+			tableGroup10.Groupings.Add(new Telerik.Reporting.Grouping(null));
+			tableGroup10.Name = "Detail";
+			this.mutatortable.RowGroups.Add(tableGroup10);
+			this.mutatortable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.3104925155639648D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
 			this.mutatortable.StyleName = "Corporate.TableNormal";
 			// 
 			// textBox25
 			// 
 			this.textBox25.Name = "textBox25";
-			this.textBox25.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.1149201393127441D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox25.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.8024208545684814D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox25.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox25.StyleName = "Corporate.TableBody";
 			this.textBox25.Value = "=Fields.mutator";
@@ -1064,7 +1020,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox26
 			// 
 			this.textBox26.Name = "textBox26";
-			this.textBox26.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97078335285186768D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox26.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.83536714315414429D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox26.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
 			this.textBox26.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox26.StyleName = "Corporate.TableBody";
@@ -1086,32 +1042,6 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox28.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
 			this.textBox28.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox28.StyleName = "Corporate.TableBody";
-			this.textBox28.Value = "=Fields.faultcount";
-			// 
-			// textBox30
-			// 
-			this.textBox30.Name = "textBox30";
-			this.textBox30.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.66743862628936768D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox30.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox30.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox30.StyleName = "Corporate.TableBody";
-			this.textBox30.Value = "=Fields.bucketcount";
-			// 
-			// textBox31
-			// 
-			this.textBox31.Name = "textBox31";
-			this.textBox31.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.24867257475852966D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox31.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox31.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox31.StyleName = "Corporate.TableBody";
-			// 
-			// pictureBox3
-			// 
-			this.pictureBox3.MimeType = "";
-			this.pictureBox3.Name = "pictureBox3";
-			this.pictureBox3.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.31527838110923767D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox3.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox3.Value = resources.GetString("pictureBox3.Value");
 			// 
 			// metricsbymutator
 			// 
@@ -1123,63 +1053,51 @@ namespace PeachFarm.Reporting.Reports
 			// 
 			// elementtable
 			// 
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(3.1578831672668457D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.96455091238021851D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.94377624988555908D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.98532575368881226D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.28784748911857605D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.66331428289413452D)));
-			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.27839395403862D)));
+			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(2.7932994365692139D)));
+			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.82913351058959961D)));
+			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.9750257134437561D)));
+			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D)));
+			this.elementtable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D)));
 			this.elementtable.Body.Rows.Add(new Telerik.Reporting.TableBodyRow(Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D)));
 			this.elementtable.Body.SetCellContent(0, 0, this.textBox40);
 			this.elementtable.Body.SetCellContent(0, 1, this.textBox42);
 			this.elementtable.Body.SetCellContent(0, 2, this.textBox43);
-			this.elementtable.Body.SetCellContent(0, 3, this.textBox44);
-			this.elementtable.Body.SetCellContent(0, 5, this.textBox46);
-			this.elementtable.Body.SetCellContent(0, 4, this.pictureBox5);
-			this.elementtable.Body.SetCellContent(0, 6, this.pictureBox7);
-			tableGroup13.ReportItem = this.textBox32;
-			tableGroup14.ReportItem = this.textBox33;
-			tableGroup15.ReportItem = this.textBox34;
-			tableGroup16.ReportItem = this.textBox35;
-			tableGroup17.ReportItem = this.textBox36;
-			tableGroup18.ReportItem = this.textBox38;
-			tableGroup19.ReportItem = this.textBox39;
+			this.elementtable.Body.SetCellContent(0, 3, this.panel5);
+			this.elementtable.Body.SetCellContent(0, 4, this.panel9);
+			tableGroup11.ReportItem = this.textBox32;
+			tableGroup12.ReportItem = this.textBox33;
+			tableGroup13.ReportItem = this.textBox34;
+			tableGroup14.ReportItem = this.textBox35;
+			tableGroup15.ReportItem = this.textBox38;
+			this.elementtable.ColumnGroups.Add(tableGroup11);
+			this.elementtable.ColumnGroups.Add(tableGroup12);
 			this.elementtable.ColumnGroups.Add(tableGroup13);
 			this.elementtable.ColumnGroups.Add(tableGroup14);
 			this.elementtable.ColumnGroups.Add(tableGroup15);
-			this.elementtable.ColumnGroups.Add(tableGroup16);
-			this.elementtable.ColumnGroups.Add(tableGroup17);
-			this.elementtable.ColumnGroups.Add(tableGroup18);
-			this.elementtable.ColumnGroups.Add(tableGroup19);
 			this.elementtable.DataSource = this.metricsbyelement;
 			this.elementtable.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.textBox40,
             this.textBox42,
             this.textBox43,
-            this.textBox44,
-            this.textBox46,
             this.textBox32,
             this.textBox33,
             this.textBox34,
             this.textBox35,
-            this.textBox36,
             this.textBox38,
-            this.textBox39,
-            this.pictureBox5,
-            this.pictureBox7});
+            this.panel5,
+            this.panel9});
 			this.elementtable.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.20003898441791534D), Telerik.Reporting.Drawing.Unit.Inch(9.600001335144043D));
 			this.elementtable.Name = "elementtable";
-			tableGroup20.Groupings.Add(new Telerik.Reporting.Grouping(null));
-			tableGroup20.Name = "Detail";
-			this.elementtable.RowGroups.Add(tableGroup20);
-			this.elementtable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.2810916900634766D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
+			tableGroup16.Groupings.Add(new Telerik.Reporting.Grouping(null));
+			tableGroup16.Name = "Detail";
+			this.elementtable.RowGroups.Add(tableGroup16);
+			this.elementtable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.2847280502319336D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
 			this.elementtable.StyleName = "Corporate.TableNormal";
 			// 
 			// textBox40
 			// 
 			this.textBox40.Name = "textBox40";
-			this.textBox40.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.1578829288482666D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox40.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(2.7932991981506348D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox40.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox40.StyleName = "Corporate.TableBody";
 			this.textBox40.Value = "=Fields.dataelement";
@@ -1187,7 +1105,7 @@ namespace PeachFarm.Reporting.Reports
 			// textBox42
 			// 
 			this.textBox42.Name = "textBox42";
-			this.textBox42.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.96186548471450806D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox42.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.82913362979888916D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox42.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
 			this.textBox42.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox42.StyleName = "Corporate.TableBody";
@@ -1196,29 +1114,11 @@ namespace PeachFarm.Reporting.Reports
 			// textBox43
 			// 
 			this.textBox43.Name = "textBox43";
-			this.textBox43.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.94114810228347778D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox43.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97502559423446655D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox43.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
 			this.textBox43.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox43.StyleName = "Corporate.TableBody";
 			this.textBox43.Value = "=Fields.mutatorcount";
-			// 
-			// textBox44
-			// 
-			this.textBox44.Name = "textBox44";
-			this.textBox44.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.98258227109909058D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox44.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox44.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox44.StyleName = "Corporate.TableBody";
-			this.textBox44.Value = "=Fields.faultcount";
-			// 
-			// textBox46
-			// 
-			this.textBox46.Name = "textBox46";
-			this.textBox46.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.66146713495254517D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox46.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox46.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox46.StyleName = "Corporate.TableBody";
-			this.textBox46.Value = "=Fields.bucketcount";
 			// 
 			// metricsbyelement
 			// 
@@ -1230,57 +1130,45 @@ namespace PeachFarm.Reporting.Reports
 			// 
 			// datasettable
 			// 
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(3.6145837306976318D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0208336114883423D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0729167461395264D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.30208352208137512D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.97916650772094727D)));
-			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(0.30208337306976318D)));
+			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(3.5937511920928955D)));
+			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.0208332538604736D)));
+			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.3436347246170044D)));
+			this.datasettable.Body.Columns.Add(new Telerik.Reporting.TableBodyColumn(Telerik.Reporting.Drawing.Unit.Inch(1.3436347246170044D)));
 			this.datasettable.Body.Rows.Add(new Telerik.Reporting.TableBodyRow(Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D)));
 			this.datasettable.Body.SetCellContent(0, 0, this.textBox54);
 			this.datasettable.Body.SetCellContent(0, 1, this.textBox55);
-			this.datasettable.Body.SetCellContent(0, 2, this.textBox56);
-			this.datasettable.Body.SetCellContent(0, 4, this.textBox58);
-			this.datasettable.Body.SetCellContent(0, 3, this.pictureBox6);
-			this.datasettable.Body.SetCellContent(0, 5, this.pictureBox8);
-			tableGroup21.ReportItem = this.textBox48;
-			tableGroup22.ReportItem = this.textBox49;
-			tableGroup23.ReportItem = this.textBox50;
-			tableGroup24.ReportItem = this.textBox51;
-			tableGroup25.ReportItem = this.textBox52;
-			tableGroup26.ReportItem = this.textBox53;
-			this.datasettable.ColumnGroups.Add(tableGroup21);
-			this.datasettable.ColumnGroups.Add(tableGroup22);
-			this.datasettable.ColumnGroups.Add(tableGroup23);
-			this.datasettable.ColumnGroups.Add(tableGroup24);
-			this.datasettable.ColumnGroups.Add(tableGroup25);
-			this.datasettable.ColumnGroups.Add(tableGroup26);
+			this.datasettable.Body.SetCellContent(0, 2, this.panel7);
+			this.datasettable.Body.SetCellContent(0, 3, this.panel10);
+			tableGroup17.ReportItem = this.textBox48;
+			tableGroup18.ReportItem = this.textBox49;
+			tableGroup19.ReportItem = this.textBox50;
+			tableGroup20.ReportItem = this.textBox52;
+			this.datasettable.ColumnGroups.Add(tableGroup17);
+			this.datasettable.ColumnGroups.Add(tableGroup18);
+			this.datasettable.ColumnGroups.Add(tableGroup19);
+			this.datasettable.ColumnGroups.Add(tableGroup20);
 			this.datasettable.DataSource = this.metricsbydataset;
 			this.datasettable.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.textBox54,
             this.textBox55,
-            this.textBox56,
-            this.textBox58,
             this.textBox48,
             this.textBox49,
             this.textBox50,
-            this.textBox51,
             this.textBox52,
-            this.textBox53,
-            this.pictureBox6,
-            this.pictureBox8});
+            this.panel7,
+            this.panel10});
 			this.datasettable.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.18950462341308594D), Telerik.Reporting.Drawing.Unit.Inch(10.500000953674316D));
 			this.datasettable.Name = "datasettable";
-			tableGroup27.Groupings.Add(new Telerik.Reporting.Grouping(null));
-			tableGroup27.Name = "Detail";
-			this.datasettable.RowGroups.Add(tableGroup27);
-			this.datasettable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.2916674613952637D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
+			tableGroup21.Groupings.Add(new Telerik.Reporting.Grouping(null));
+			tableGroup21.Name = "Detail";
+			this.datasettable.RowGroups.Add(tableGroup21);
+			this.datasettable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(7.3018531799316406D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
 			this.datasettable.StyleName = "Corporate.TableNormal";
 			// 
 			// textBox54
 			// 
 			this.textBox54.Name = "textBox54";
-			this.textBox54.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.6145837306976318D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox54.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.5937509536743164D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			this.textBox54.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox54.StyleName = "Corporate.TableBody";
 			this.textBox54.Value = "=Fields.dataset";
@@ -1293,24 +1181,6 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox55.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox55.StyleName = "Corporate.TableBody";
 			this.textBox55.Value = "=Fields.iterationcount";
-			// 
-			// textBox56
-			// 
-			this.textBox56.Name = "textBox56";
-			this.textBox56.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.0729169845581055D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox56.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox56.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox56.StyleName = "Corporate.TableBody";
-			this.textBox56.Value = "=Fields.faultcount";
-			// 
-			// textBox58
-			// 
-			this.textBox58.Name = "textBox58";
-			this.textBox58.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.97916662693023682D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.textBox58.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
-			this.textBox58.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
-			this.textBox58.StyleName = "Corporate.TableBody";
-			this.textBox58.Value = "=Fields.bucketcount";
 			// 
 			// metricsbydataset
 			// 
@@ -1327,10 +1197,10 @@ namespace PeachFarm.Reporting.Reports
 			this.statetable.Body.Rows.Add(new Telerik.Reporting.TableBodyRow(Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D)));
 			this.statetable.Body.SetCellContent(0, 0, this.textBox62);
 			this.statetable.Body.SetCellContent(0, 1, this.textBox63);
-			tableGroup28.ReportItem = this.textBox60;
-			tableGroup29.ReportItem = this.textBox61;
-			this.statetable.ColumnGroups.Add(tableGroup28);
-			this.statetable.ColumnGroups.Add(tableGroup29);
+			tableGroup22.ReportItem = this.textBox60;
+			tableGroup23.ReportItem = this.textBox61;
+			this.statetable.ColumnGroups.Add(tableGroup22);
+			this.statetable.ColumnGroups.Add(tableGroup23);
 			this.statetable.DataSource = this.statemetrics;
 			this.statetable.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
             this.textBox62,
@@ -1339,9 +1209,9 @@ namespace PeachFarm.Reporting.Reports
             this.textBox61});
 			this.statetable.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.1790873259305954D), Telerik.Reporting.Drawing.Unit.Inch(11.400001525878906D));
 			this.statetable.Name = "statetable";
-			tableGroup30.Groupings.Add(new Telerik.Reporting.Grouping(null));
-			tableGroup30.Name = "Detail";
-			this.statetable.RowGroups.Add(tableGroup30);
+			tableGroup24.Groupings.Add(new Telerik.Reporting.Grouping(null));
+			tableGroup24.Name = "Detail";
+			this.statetable.RowGroups.Add(tableGroup24);
 			this.statetable.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(3.5104165077209473D), Telerik.Reporting.Drawing.Unit.Inch(0.40000000596046448D));
 			this.statetable.StyleName = "Corporate.TableNormal";
 			// 
@@ -1582,6 +1452,14 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox67.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
 			this.textBox67.Value = "States";
 			// 
+			// textBox31
+			// 
+			this.textBox31.Name = "textBox31";
+			this.textBox31.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.24867257475852966D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox31.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox31.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox31.StyleName = "Corporate.TableBody";
+			// 
 			// textBox29
 			// 
 			this.textBox29.Name = "textBox29";
@@ -1590,45 +1468,470 @@ namespace PeachFarm.Reporting.Reports
 			this.textBox29.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
 			this.textBox29.StyleName = "Corporate.TableBody";
 			// 
-			// pictureBox4
+			// panel1
 			// 
-			this.pictureBox4.MimeType = "";
-			this.pictureBox4.Name = "pictureBox4";
-			this.pictureBox4.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30075585842132568D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox4.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox4.Value = resources.GetString("pictureBox4.Value");
+			this.panel1.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox10,
+            this.textBox24,
+            this.textBox45});
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.345828652381897D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
 			// 
-			// pictureBox5
+			// textBox10
 			// 
-			this.pictureBox5.MimeType = "";
-			this.pictureBox5.Name = "pictureBox5";
-			this.pictureBox5.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.28784734010696411D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox5.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox5.Value = resources.GetString("pictureBox5.Value");
+			formattingRule1.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule1.Style.Color = System.Drawing.Color.Red;
+			formattingRule1.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule1.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule2.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule2.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule2.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule2.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox10.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule1,
+            formattingRule2});
+			this.textBox10.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox10.Name = "textBox10";
+			this.textBox10.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox10.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox10.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox10.Value = "=Fields.faultcount";
 			// 
-			// pictureBox6
+			// textBox24
 			// 
-			this.pictureBox6.MimeType = "";
-			this.pictureBox6.Name = "pictureBox6";
-			this.pictureBox6.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30208352208137512D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox6.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox6.Value = resources.GetString("pictureBox6.Value");
+			formattingRule3.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule3.Style.Color = System.Drawing.Color.Red;
+			formattingRule3.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule3.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule4.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule4.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule4.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule4.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox24.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule3,
+            formattingRule4});
+			this.textBox24.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox24.Name = "textBox24";
+			this.textBox24.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox24.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox24.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox24.Value = "= IIf(Fields.faulttrend=0,\"\",Abs(Fields.faulttrend))";
 			// 
-			// pictureBox7
+			// textBox45
 			// 
-			this.pictureBox7.MimeType = "";
-			this.pictureBox7.Name = "pictureBox7";
-			this.pictureBox7.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.27839380502700806D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox7.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox7.Value = resources.GetString("pictureBox7.Value");
+			formattingRule5.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule5.Style.Color = System.Drawing.Color.Red;
+			formattingRule5.Style.Font.Name = "Webdings";
+			formattingRule5.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule5.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule5.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule6.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule6.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule6.Style.Font.Name = "Webdings";
+			formattingRule6.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule6.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule6.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox45.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule5,
+            formattingRule6});
+			this.textBox45.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox45.Name = "textBox45";
+			this.textBox45.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox45.Style.Font.Name = "Webdings";
+			this.textBox45.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox45.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox45.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox45.Value = "=IIf(Fields.faulttrend>0,5,IIf(Fields.faulttrend<0,6,\"\"))";
 			// 
-			// pictureBox8
+			// panel3
 			// 
-			this.pictureBox8.MimeType = "";
-			this.pictureBox8.Name = "pictureBox8";
-			this.pictureBox8.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.30208346247673035D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
-			this.pictureBox8.Sizing = Telerik.Reporting.Drawing.ImageSizeMode.ScaleProportional;
-			this.pictureBox8.Value = resources.GetString("pictureBox8.Value");
+			this.panel3.Name = "panel3";
+			this.panel3.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.8873859643936157D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// panel4
+			// 
+			this.panel4.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox47,
+            this.textBox57,
+            this.textBox59});
+			this.panel4.Name = "panel4";
+			this.panel4.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3665527105331421D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// textBox47
+			// 
+			formattingRule7.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule7.Style.Color = System.Drawing.Color.Red;
+			formattingRule7.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule7.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule8.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule8.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule8.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule8.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox47.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule7,
+            formattingRule8});
+			this.textBox47.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox47.Name = "textBox47";
+			this.textBox47.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox47.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox47.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox47.Value = "=Fields.bucketcount";
+			// 
+			// textBox57
+			// 
+			formattingRule9.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule9.Style.Color = System.Drawing.Color.Red;
+			formattingRule9.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule9.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule10.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule10.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule10.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule10.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox57.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule9,
+            formattingRule10});
+			this.textBox57.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox57.Name = "textBox57";
+			this.textBox57.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox57.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox57.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox57.Value = "= IIf(Fields.buckettrend=0,\"\",Abs(Fields.buckettrend))";
+			// 
+			// textBox59
+			// 
+			formattingRule11.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule11.Style.Color = System.Drawing.Color.Red;
+			formattingRule11.Style.Font.Name = "Webdings";
+			formattingRule11.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule11.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule11.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule12.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule12.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule12.Style.Font.Name = "Webdings";
+			formattingRule12.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule12.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule12.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox59.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule11,
+            formattingRule12});
+			this.textBox59.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox59.Name = "textBox59";
+			this.textBox59.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox59.Style.Font.Name = "Webdings";
+			this.textBox59.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox59.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox59.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox59.Value = "=IIf(Fields.buckettrend>0,5,IIf(Fields.buckettrend<0,6,\"\"))";
+			// 
+			// panel5
+			// 
+			this.panel5.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox30,
+            this.textBox36,
+            this.textBox39});
+			this.panel5.Name = "panel5";
+			this.panel5.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// textBox30
+			// 
+			formattingRule13.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule13.Style.Color = System.Drawing.Color.Red;
+			formattingRule13.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule13.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule14.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule14.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule14.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule14.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox30.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule13,
+            formattingRule14});
+			this.textBox30.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox30.Name = "textBox30";
+			this.textBox30.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox30.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox30.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox30.Value = "=Fields.faultcount";
+			// 
+			// textBox36
+			// 
+			formattingRule15.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule15.Style.Color = System.Drawing.Color.Red;
+			formattingRule15.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule15.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule16.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule16.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule16.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule16.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox36.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule15,
+            formattingRule16});
+			this.textBox36.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox36.Name = "textBox36";
+			this.textBox36.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox36.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox36.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox36.Value = "= IIf(Fields.faulttrend=0,\"\",Abs(Fields.faulttrend))";
+			// 
+			// textBox39
+			// 
+			formattingRule17.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule17.Style.Color = System.Drawing.Color.Red;
+			formattingRule17.Style.Font.Name = "Webdings";
+			formattingRule17.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule17.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule17.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule18.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule18.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule18.Style.Font.Name = "Webdings";
+			formattingRule18.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule18.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule18.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox39.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule17,
+            formattingRule18});
+			this.textBox39.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox39.Name = "textBox39";
+			this.textBox39.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox39.Style.Font.Name = "Webdings";
+			this.textBox39.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox39.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox39.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox39.Value = "=IIf(Fields.faulttrend>0,5,IIf(Fields.faulttrend<0,6,\"\"))";
+			// 
+			// panel6
+			// 
+			this.panel6.Name = "panel6";
+			this.panel6.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// panel7
+			// 
+			this.panel7.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox46,
+            this.textBox51,
+            this.textBox53});
+			this.panel7.Name = "panel7";
+			this.panel7.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// textBox46
+			// 
+			formattingRule25.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule25.Style.Color = System.Drawing.Color.Red;
+			formattingRule25.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule25.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule26.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule26.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule26.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule26.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox46.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule25,
+            formattingRule26});
+			this.textBox46.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox46.Name = "textBox46";
+			this.textBox46.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox46.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox46.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox46.Value = "=Fields.faultcount";
+			// 
+			// textBox51
+			// 
+			formattingRule27.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule27.Style.Color = System.Drawing.Color.Red;
+			formattingRule27.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule27.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule28.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule28.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule28.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule28.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox51.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule27,
+            formattingRule28});
+			this.textBox51.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox51.Name = "textBox51";
+			this.textBox51.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox51.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox51.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox51.Value = "= IIf(Fields.faulttrend=0,\"\",Abs(Fields.faulttrend))";
+			// 
+			// textBox53
+			// 
+			formattingRule29.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule29.Style.Color = System.Drawing.Color.Red;
+			formattingRule29.Style.Font.Name = "Webdings";
+			formattingRule29.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule29.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule29.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule30.Filters.Add(new Telerik.Reporting.Filter("=Fields.faulttrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule30.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule30.Style.Font.Name = "Webdings";
+			formattingRule30.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule30.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule30.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox53.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule29,
+            formattingRule30});
+			this.textBox53.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox53.Name = "textBox53";
+			this.textBox53.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox53.Style.Font.Name = "Webdings";
+			this.textBox53.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox53.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox53.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox53.Value = "=IIf(Fields.faulttrend>0,5,IIf(Fields.faulttrend<0,6,\"\"))";
+			// 
+			// panel8
+			// 
+			this.panel8.Name = "panel8";
+			this.panel8.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// panel9
+			// 
+			this.panel9.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox58,
+            this.textBox70,
+            this.textBox71});
+			this.panel9.Name = "panel9";
+			this.panel9.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.3436346054077148D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// textBox58
+			// 
+			formattingRule19.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule19.Style.Color = System.Drawing.Color.Red;
+			formattingRule19.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule19.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule20.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule20.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule20.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule20.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox58.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule19,
+            formattingRule20});
+			this.textBox58.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox58.Name = "textBox58";
+			this.textBox58.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox58.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox58.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox58.Value = "=Fields.bucketcount";
+			// 
+			// textBox70
+			// 
+			formattingRule21.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule21.Style.Color = System.Drawing.Color.Red;
+			formattingRule21.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule21.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule22.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule22.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule22.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule22.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox70.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule21,
+            formattingRule22});
+			this.textBox70.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox70.Name = "textBox70";
+			this.textBox70.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox70.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox70.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox70.Value = "= IIf(Fields.buckettrend=0,\"\",Abs(Fields.buckettrend))";
+			// 
+			// textBox71
+			// 
+			formattingRule23.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule23.Style.Color = System.Drawing.Color.Red;
+			formattingRule23.Style.Font.Name = "Webdings";
+			formattingRule23.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule23.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule23.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule24.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule24.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule24.Style.Font.Name = "Webdings";
+			formattingRule24.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule24.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule24.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox71.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule23,
+            formattingRule24});
+			this.textBox71.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox71.Name = "textBox71";
+			this.textBox71.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox71.Style.Font.Name = "Webdings";
+			this.textBox71.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox71.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox71.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox71.Value = "=IIf(Fields.buckettrend>0,5,IIf(Fields.buckettrend<0,6,\"\"))";
+			// 
+			// panel10
+			// 
+			this.panel10.Items.AddRange(new Telerik.Reporting.ReportItemBase[] {
+            this.textBox44,
+            this.textBox72,
+            this.textBox73});
+			this.panel10.Name = "panel10";
+			this.panel10.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(1.343634843826294D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			// 
+			// textBox44
+			// 
+			formattingRule31.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule31.Style.Color = System.Drawing.Color.Red;
+			formattingRule31.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule31.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule32.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule32.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule32.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			formattingRule32.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox44.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule31,
+            formattingRule32});
+			this.textBox44.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D), Telerik.Reporting.Drawing.Unit.Inch(0D));
+			this.textBox44.Name = "textBox44";
+			this.textBox44.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.60817813873291016D), Telerik.Reporting.Drawing.Unit.Inch(0.20000000298023224D));
+			this.textBox44.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Right;
+			this.textBox44.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox44.Value = "=Fields.bucketcount";
+			// 
+			// textBox72
+			// 
+			formattingRule33.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule33.Style.Color = System.Drawing.Color.Red;
+			formattingRule33.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule33.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule34.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule34.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule34.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			formattingRule34.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox72.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule33,
+            formattingRule34});
+			this.textBox72.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.82079726457595825D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox72.Name = "textBox72";
+			this.textBox72.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.52283734083175659D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox72.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Left;
+			this.textBox72.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox72.Value = "= IIf(Fields.buckettrend=0,\"\",Abs(Fields.buckettrend))";
+			// 
+			// textBox73
+			// 
+			formattingRule35.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.LessThan, "=0"));
+			formattingRule35.Style.Color = System.Drawing.Color.Red;
+			formattingRule35.Style.Font.Name = "Webdings";
+			formattingRule35.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule35.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule35.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			formattingRule36.Filters.Add(new Telerik.Reporting.Filter("=Fields.buckettrend", Telerik.Reporting.FilterOperator.GreaterThan, "=0"));
+			formattingRule36.Style.Color = System.Drawing.Color.DarkGreen;
+			formattingRule36.Style.Font.Name = "Webdings";
+			formattingRule36.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			formattingRule36.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			formattingRule36.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox73.ConditionalFormatting.AddRange(new Telerik.Reporting.Drawing.FormattingRule[] {
+            formattingRule35,
+            formattingRule36});
+			this.textBox73.Location = new Telerik.Reporting.Drawing.PointU(Telerik.Reporting.Drawing.Unit.Inch(0.60829669237136841D), Telerik.Reporting.Drawing.Unit.Inch(3.9418537198798731E-05D));
+			this.textBox73.Name = "textBox73";
+			this.textBox73.Size = new Telerik.Reporting.Drawing.SizeU(Telerik.Reporting.Drawing.Unit.Inch(0.21242205798625946D), Telerik.Reporting.Drawing.Unit.Inch(0.199920654296875D));
+			this.textBox73.Style.Font.Name = "Webdings";
+			this.textBox73.Style.Font.Size = Telerik.Reporting.Drawing.Unit.Point(12D);
+			this.textBox73.Style.TextAlign = Telerik.Reporting.Drawing.HorizontalAlign.Center;
+			this.textBox73.Style.VerticalAlign = Telerik.Reporting.Drawing.VerticalAlign.Middle;
+			this.textBox73.Value = "=IIf(Fields.buckettrend>0,5,IIf(Fields.buckettrend<0,6,\"\"))";
 			// 
 			// JobDetailReport
 			// 
@@ -1656,7 +1959,7 @@ namespace PeachFarm.Reporting.Reports
 			this.ReportParameters.Add(reportParameter3);
 			this.ReportParameters.Add(reportParameter4);
 			this.Style.BackgroundColor = System.Drawing.Color.White;
-			this.Width = Telerik.Reporting.Drawing.Unit.Inch(7.6790890693664551D);
+			this.Width = Telerik.Reporting.Drawing.Unit.Inch(7.5D);
 			((System.ComponentModel.ISupportInitialize)(this)).EndInit();
 
 		}
@@ -1710,40 +2013,29 @@ namespace PeachFarm.Reporting.Reports
 		private Telerik.Reporting.TextBox textBox27;
 		private Telerik.Reporting.TextBox textBox28;
 		private Telerik.Reporting.TextBox textBox29;
-		private Telerik.Reporting.TextBox textBox30;
 		private Telerik.Reporting.TextBox textBox31;
 		private Telerik.Reporting.TextBox textBox5;
 		private Telerik.Reporting.TextBox textBox6;
 		private Telerik.Reporting.TextBox textBox7;
 		private Telerik.Reporting.TextBox textBox8;
-		private Telerik.Reporting.TextBox textBox10;
 		private Telerik.Reporting.TextBox textBox22;
-		private Telerik.Reporting.TextBox textBox24;
 		private Telerik.Reporting.Table elementtable;
 		private Telerik.Reporting.TextBox textBox40;
 		private Telerik.Reporting.TextBox textBox42;
 		private Telerik.Reporting.TextBox textBox43;
-		private Telerik.Reporting.TextBox textBox44;
-		private Telerik.Reporting.TextBox textBox46;
 		private Telerik.Reporting.TextBox textBox32;
 		private Telerik.Reporting.TextBox textBox33;
 		private Telerik.Reporting.TextBox textBox34;
 		private Telerik.Reporting.TextBox textBox35;
-		private Telerik.Reporting.TextBox textBox36;
 		private Telerik.Reporting.TextBox textBox38;
-		private Telerik.Reporting.TextBox textBox39;
 		private Telerik.Reporting.SqlDataSource metricsbyelement;
 		private Telerik.Reporting.Table datasettable;
 		private Telerik.Reporting.TextBox textBox54;
 		private Telerik.Reporting.TextBox textBox55;
-		private Telerik.Reporting.TextBox textBox56;
-		private Telerik.Reporting.TextBox textBox58;
 		private Telerik.Reporting.TextBox textBox48;
 		private Telerik.Reporting.TextBox textBox49;
 		private Telerik.Reporting.TextBox textBox50;
-		private Telerik.Reporting.TextBox textBox51;
 		private Telerik.Reporting.TextBox textBox52;
-		private Telerik.Reporting.TextBox textBox53;
 		private Telerik.Reporting.SqlDataSource metricsbydataset;
 		private Telerik.Reporting.Table statetable;
 		private Telerik.Reporting.TextBox textBox62;
@@ -1771,12 +2063,33 @@ namespace PeachFarm.Reporting.Reports
 		private Telerik.Reporting.PictureBox pictureBox2;
 		private Telerik.Reporting.TextBox textBox68;
 		private Telerik.Reporting.TextBox textBox69;
-		private Telerik.Reporting.PictureBox pictureBox3;
-		private Telerik.Reporting.PictureBox pictureBox4;
-		private Telerik.Reporting.PictureBox pictureBox5;
-		private Telerik.Reporting.PictureBox pictureBox7;
-		private Telerik.Reporting.PictureBox pictureBox6;
-		private Telerik.Reporting.PictureBox pictureBox8;
+		private Telerik.Reporting.Panel panel1;
+		private Telerik.Reporting.TextBox textBox10;
+		private Telerik.Reporting.TextBox textBox24;
+		private Telerik.Reporting.TextBox textBox45;
+		private Telerik.Reporting.Panel panel4;
+		private Telerik.Reporting.TextBox textBox47;
+		private Telerik.Reporting.TextBox textBox57;
+		private Telerik.Reporting.TextBox textBox59;
+		private Telerik.Reporting.Panel panel3;
+		private Telerik.Reporting.Panel panel5;
+		private Telerik.Reporting.TextBox textBox30;
+		private Telerik.Reporting.TextBox textBox36;
+		private Telerik.Reporting.TextBox textBox39;
+		private Telerik.Reporting.Panel panel6;
+		private Telerik.Reporting.Panel panel7;
+		private Telerik.Reporting.TextBox textBox46;
+		private Telerik.Reporting.TextBox textBox51;
+		private Telerik.Reporting.TextBox textBox53;
+		private Telerik.Reporting.Panel panel8;
+		private Telerik.Reporting.Panel panel9;
+		private Telerik.Reporting.TextBox textBox58;
+		private Telerik.Reporting.TextBox textBox70;
+		private Telerik.Reporting.TextBox textBox71;
+		private Telerik.Reporting.Panel panel10;
+		private Telerik.Reporting.TextBox textBox44;
+		private Telerik.Reporting.TextBox textBox72;
+		private Telerik.Reporting.TextBox textBox73;
 
 	}
 }

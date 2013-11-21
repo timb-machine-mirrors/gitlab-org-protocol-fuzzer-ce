@@ -198,6 +198,7 @@ namespace PeachFarm.Admin
 				#region List
 				if (nodes)
 				{
+					mustwait = false;
 					PrintListNodes(admin.ListNodes());
 				}
 				#endregion
