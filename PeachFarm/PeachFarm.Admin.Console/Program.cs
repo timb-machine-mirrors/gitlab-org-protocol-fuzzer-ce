@@ -39,7 +39,7 @@ namespace PeachFarm.Admin
 				int launchCount = 0;
 				string ip = String.Empty;
 				string range = String.Empty;
-				string target = String.Empty;
+				string target = null;
 				string definesFilePath = String.Empty;
 
 				DeleteDataType cleartype = DeleteDataType.Job;

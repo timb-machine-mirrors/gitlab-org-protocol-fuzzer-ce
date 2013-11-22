@@ -30,7 +30,7 @@ namespace PeachFarm.Admin
 		private const string xmlext = ".xml";
 		private const string zipext = ".zip";
 
-		public PeachFarmAdmin(string adminName = "")
+		public PeachFarmAdmin(string adminName = null)
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
 
@@ -42,14 +42,8 @@ namespace PeachFarm.Admin
 			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
-			if (String.IsNullOrEmpty(adminName))
-			{
-				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, ipAddress);
-			}
-			else
-			{
-				adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName);
-			}
+
+			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName ?? ipAddress);
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
@@ -322,7 +316,10 @@ namespace PeachFarm.Admin
 
 					PublishToServer(request.Serialize(), Actions.Register);
 
-					evt.WaitOne();
+					bool received = evt.WaitOne(TimeSpan.FromSeconds(10));
+
+					if (!received)
+						throw new ApplicationException("Registration with Controller failed, communication timed out. Check Admin tool config and status of Controller");
 
 					if (error != null)
 						throw new ApplicationException(error.Message, error);
@@ -333,7 +330,7 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target, uint? rangestart = null, uint? rangeend = null)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target = null, uint? rangestart = null, uint? rangeend = null)
 		{
 			Register();
 
@@ -353,14 +350,7 @@ namespace PeachFarm.Admin
 
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
 
-			if (String.IsNullOrEmpty(target))
-			{
-				request.Target = request.PitFileName;
-			}
-			else
-			{
-				request.Target = target;
-			}
+			request.Target = target ?? request.PitFileName;
 
 			string newdefinesfilepath = String.Empty;
 			if (Path.GetExtension(pitFilePath) == xmlext)
