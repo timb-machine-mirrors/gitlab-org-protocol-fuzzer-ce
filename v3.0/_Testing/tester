@@ -207,7 +207,8 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
-            return_code |= test.returncode #any failure should cause build failure
+            # any failure should cause build failure
+            return_code += 1 if test.returncode != 0 else 0
             if test.status != "pass":
                 return_code += 1
         elif test.status == "skip":
