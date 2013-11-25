@@ -40,7 +40,7 @@ namespace PeachFarm.Test
 
 			controller = new Controller.PeachFarmController();
 			while (controller.IsListening == false) { }
-			node = new Node.PeachFarmNode(testName);
+			node = new Node.PeachFarmNode();
 			while (node.IsListening == false) { }
 			Debug.WriteLine("Waiting for node to register with controller...");
 			WaitForNode(200);
