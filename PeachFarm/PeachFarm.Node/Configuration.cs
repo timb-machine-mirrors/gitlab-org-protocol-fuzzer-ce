@@ -8,10 +8,11 @@ namespace PeachFarm.Node.Configuration
 {
   public class NodeSection : ConfigurationSection
   {
+
 		[ConfigurationProperty(Constants.Controller, IsRequired = false)]
-    public Controller Controller
+    public ControllerElement Controller
     {
-      get { return (Controller)this[Constants.Controller]; }
+      get { return (ControllerElement)this[Constants.Controller]; }
       set { this[Constants.Controller] = value; }
     }
 
@@ -28,6 +29,14 @@ namespace PeachFarm.Node.Configuration
 			get { return (RabbitMqElement)this[Constants.RabbitMq]; }
 			set { this[Constants.RabbitMq] = value; }
 		}
+
+		[ConfigurationProperty(Constants.Node, IsRequired = false)]
+		public NodeElement Node
+		{
+			get { return (NodeElement)this[Constants.Node]; }
+			set { this[Constants.Node] = value; }
+		}
+
 
 		public void Validate()
 		{
@@ -60,7 +69,17 @@ namespace PeachFarm.Node.Configuration
 
 	}
 
-  public class Controller : ConfigurationElement
+	public class NodeElement : ConfigurationElement
+	{
+		[ConfigurationProperty(Constants.NameOverride, IsRequired = false)]
+		public string NameOverride
+		{
+			get { return (string)this[Constants.NameOverride]; }
+			set { this[Constants.NameOverride] = value; }
+		}
+	}
+
+  public class ControllerElement : ConfigurationElement
   {
 		[ConfigurationProperty(Constants.IPAddress, IsRequired = false)]
     public string IpAddress
@@ -178,5 +197,9 @@ namespace PeachFarm.Node.Configuration
     public const string Tags = "Tags";
     public const string Tag = "Tag";
     public const string Name = "name";
+
+		public const string Node = "Node";
+		public const string NameOverride = "nameOverride";
+
   }
 }

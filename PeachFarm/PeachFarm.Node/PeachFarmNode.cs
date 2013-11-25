@@ -37,7 +37,7 @@ namespace PeachFarm.Node
 
 		private RabbitMqHelper rabbit;
 
-		public PeachFarmNode(string nodeName = "")
+		public PeachFarmNode()
 		{
 			#region trap unhandled exceptions and Ctrl-C
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
@@ -58,21 +58,19 @@ namespace PeachFarm.Node
 			var nodeconfig = (Configuration.NodeSection) System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
 			nodeconfig.Validate();
 			nodeState = new NodeState(nodeconfig);
-			if (String.IsNullOrEmpty(nodeName) == false)
-				nodeState.NodeQueueName = String.Format(QueueNames.QUEUE_NODE, nodeName);
 
 			#endregion
 
 			
 			rabbit = new RabbitMqHelper(nodeState.RabbitMq.HostName, nodeState.RabbitMq.Port, nodeState.RabbitMq.UserName, nodeState.RabbitMq.Password, nodeState.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(nodeState.NodeQueueName);
+			rabbit.StartListener(nodeState.NodeQueue);
 
 			heartbeat = new System.Timers.Timer(10000);
 			heartbeat.Elapsed += (o, e) => { SendHeartbeat(); };
 			heartbeat.Start();
 
-			nlog.Info("Peach Farm Node connected.\nController: {0}\nRabbitMQ: {1}\nDirectory: {2}", nodeState.ControllerQueueName, nodeState.RabbitMq.HostName, Environment.CurrentDirectory);
+			nlog.Info("Peach Farm Node connected.\nController: {0}\nRabbitMQ: {1}\nDirectory: {2}", nodeState.ControllerQueue, nodeState.RabbitMq.HostName, Environment.CurrentDirectory);
 		}
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
@@ -99,7 +97,7 @@ namespace PeachFarm.Node
 
 		public string ServerQueue
 		{
-			get { return nodeState.ControllerQueueName; }
+			get { return nodeState.ControllerQueue; }
 		}
 
 		public bool IsListening
@@ -306,7 +304,7 @@ namespace PeachFarm.Node
 		{
 			if (nodeState.Status == Status.Running)
 			{
-				SendHeartbeat(CreateHeartbeat(String.Format("Node {0} is already running Job {1}", nodeState.IPAddress, nodeState.StartPeachRequest.JobID)));
+				SendHeartbeat(CreateHeartbeat(String.Format("Node {0} is already running Job {1}", nodeState.NodeName, nodeState.StartPeachRequest.JobID)));
 				return;
 			}
 
@@ -418,11 +416,11 @@ namespace PeachFarm.Node
 
 			List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
 
-			var jobnodefolder = String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueueName)[0]);
+			var jobnodefolder = String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueue)[0]);
 			if (String.IsNullOrEmpty(nodeState.StartPeachRequest.MongoDbConnectionString) == false)
 			{
-				string nodeName = nodeState.NodeQueueName;
-				var ret = nodeState.NodeQueueName.ReverseFormatString(QueueNames.QUEUE_NODE);
+				string nodeName = nodeState.NodeQueue;
+				var ret = nodeState.NodeQueue.ReverseFormatString(QueueNames.QUEUE_NODE);
 				if (ret.Count == 1)
 				{
 					nodeName = ret[0];
@@ -546,7 +544,7 @@ namespace PeachFarm.Node
 		private Heartbeat CreateHeartbeat()
 		{
 			Heartbeat heartbeat = new Heartbeat();
-			heartbeat.NodeName = nodeState.IPAddress;
+			heartbeat.NodeName = nodeState.NodeName;
 			heartbeat.Version = nodeState.Version;
 			
 			if (nodeState.Status == Common.Messages.Status.Running)
@@ -558,7 +556,7 @@ namespace PeachFarm.Node
 				heartbeat.Iteration = nodeState.Iteration;
 			}
 			heartbeat.Tags = nodeState.Tags;
-			heartbeat.QueueName = nodeState.NodeQueueName;
+			heartbeat.QueueName = nodeState.NodeQueue;
 
 			// Nodes shouldn't set their own stamp, system time/date could be incorrect.
 			// Really it shouldn't be necessary for a node to set its own stamp,
@@ -616,7 +614,7 @@ namespace PeachFarm.Node
 
 			Status = Common.Messages.Status.Alive;
 
-			ControllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);
+			ControllerQueue = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.IpAddress);
 			
 			if ((config.Tags != null) && (config.Tags.Count > 0))
 			{
@@ -625,10 +623,17 @@ namespace PeachFarm.Node
 
 			#region get ip address, used for client name
 			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			IPAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
+			var ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 			#endregion
 
-			NodeQueueName = String.Format(QueueNames.QUEUE_NODE, IPAddress);
+			if (String.IsNullOrEmpty(config.Node.NameOverride))
+			{
+				NodeName = ipaddress;
+			}
+			else
+			{
+				NodeName = config.Node.NameOverride;
+			}
 
 			RabbitMq = config.RabbitMq;
 
@@ -660,10 +665,14 @@ namespace PeachFarm.Node
 
 		internal StartPeachRequest StartPeachRequest { get; set; }
 
-		internal string IPAddress { get; private set; }
+		internal string NodeName { get; private set; }
 
-		internal string NodeQueueName { get; set; }
-		internal string ControllerQueueName { get; private set; }
+		internal string NodeQueue 
+		{
+			get { return String.Format(QueueNames.QUEUE_NODE, NodeName); }
+		}
+
+		internal string ControllerQueue { get; private set; }
 
 		internal Peach.Core.RunContext RunContext { get; set; }
 
