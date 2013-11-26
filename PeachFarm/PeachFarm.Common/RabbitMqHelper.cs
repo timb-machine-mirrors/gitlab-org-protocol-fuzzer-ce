@@ -42,7 +42,22 @@ namespace PeachFarm.Common
 			this.password = password;
 			this.ssl = ssl;
 
-			OpenConnection();
+			// TODO: Investigate a better strategy for dealing with connection failures.
+			for (int i = 0; ; ++i)
+			{
+				try
+				{
+					OpenConnection();
+					return;
+				}
+				catch (Exception)
+				{
+					if (i >= 9)
+						throw;
+
+					System.Threading.Thread.Sleep(1000);
+				}
+			}
 		}
 
 		public bool IsListening { get; private set; }
