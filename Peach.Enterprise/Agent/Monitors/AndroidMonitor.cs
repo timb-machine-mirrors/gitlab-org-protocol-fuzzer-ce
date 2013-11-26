@@ -207,31 +207,14 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void SessionStarting()
 		{
 			adbInit = true;
+			firstRun = true;
 
 			// Initialize adb stuff
 			AndroidBridge.Initialize(AdbPath);
 
-			// Grab device by serial or from a monitor
-			SyncDevice();
-
-			// Don't need to ensure app is not running, calling
-			// dev.StartApp() will restart the application if needed
-
 			// Start the application if we are not running it every iteration
 			if (StartOnCall == null && !RestartEveryIteration)
-			{
-				dev.WaitForReady();
-
-				if (ClearAppData)
-					dev.ClearAppData(ApplicationName);
-
-				dev.ClearLogs(); // clear logs at the start of the world
-				dev.StartApp(ApplicationName, ActivityName);
-			}
-			else
-			{
-				firstRun = true;
-			}
+				LaunchApp(false);
 		}
 
 		public override void SessionFinished()
@@ -255,28 +238,33 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			fault = null;
 
-			// The device can change across iterations, especially if we are using multiple emulators
-			SyncDevice();
+			if (StartOnCall != null)
+				return;
 
 			// If we just faulted, or are supposed to start the app every iteration
 			// make sure the device is ready before continuing
-			if (hasFault || RestartEveryIteration || StartOnCall != null)
-			{
-				dev.WaitForReady();
+			if (hasFault || RestartEveryIteration)
+				LaunchApp(hasFault);
+		}
 
-				if (ClearAppData || (hasFault && ClearAppDataOnFault))
-					dev.ClearAppData(ApplicationName);
+		private void LaunchApp(bool hasFault)
+		{
+			// The device can change across iterations, especially if we are using multiple emulators
+			SyncDevice();
+
+			dev.WaitForReady();
+
+			if (ClearAppData || (hasFault && ClearAppDataOnFault))
+				dev.ClearAppData(ApplicationName);
 				
-				// If this is the first time, clear the device logs
-				if (firstRun)
-				{
-					dev.ClearLogs();
-					firstRun = false;
-				}
+			// If this is the first time, clear the device logs
+			if (firstRun)
+			{
+				dev.ClearLogs();
+				firstRun = false;
 			}
 
-			if (StartOnCall == null && (hasFault || RestartEveryIteration))
-				dev.StartApp(ApplicationName, ActivityName);
+			dev.StartApp(ApplicationName, ActivityName);
 		}
 
 		public override bool IterationFinished()
@@ -336,7 +324,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
-				dev.StartApp(ApplicationName, ActivityName);
+				LaunchApp(false);
 			}
 
 			return null;

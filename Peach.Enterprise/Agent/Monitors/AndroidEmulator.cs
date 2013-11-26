@@ -63,7 +63,8 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Must run emulator in session starting so base class can capture the device
 			firstRun = true;
 
-			StartEmulator();
+			if (StartOnCall == null)
+				StartEmulator();
 		}
 
 		public override void SessionFinished()
@@ -92,10 +93,12 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			try
 			{
-				if (!firstRun && (RestartEveryIteration || (fault && RestartAfterFault)))
+				if (!firstRun && (RestartEveryIteration || StartOnCall != null || (fault && RestartAfterFault)))
 				{
 					StopEmulator();
-					StartEmulator();
+
+					if (StartOnCall == null)
+						StartEmulator();
 				}
 			}
 			finally
@@ -139,7 +142,8 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
-				// TODO: Implement me!
+				if (thread == null)
+					StartEmulator();
 			}
 
 			return null;
