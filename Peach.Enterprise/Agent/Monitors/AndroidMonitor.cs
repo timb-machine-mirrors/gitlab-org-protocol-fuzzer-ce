@@ -21,6 +21,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ClearAppData", typeof(bool), "Remove Application data and cache on every iteration", "false")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
+	[Parameter("WaitForReadyOnCall", typeof(string), "Waits for the device to be ready when notified by the state machine", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
 	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 600)", "600")]
 	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 10)", "10")]
@@ -42,6 +43,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public string DeviceSerial { get; protected set; }
 		public string DeviceMonitor { get; protected set; }
 		public string StartOnCall { get; protected set; }
+		public string WaitForReadyOnCall { get; protected set; }
 		public bool RestartEveryIteration { get; protected set; }
 		public bool ClearAppDataOnFault { get; protected set; }
 		public bool ClearAppData { get; protected set; }
@@ -325,6 +327,11 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
 				LaunchApp(false);
+			}
+			else if (name == "Action.Call" && ((string)data) == WaitForReadyOnCall)
+			{
+				SyncDevice();
+				dev.WaitForReady();
 			}
 
 			return null;
