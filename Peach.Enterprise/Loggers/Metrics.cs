@@ -236,6 +236,15 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			ParameterParser.Parse(this, args);
 
 			sample = new Sample();
+
+			try
+			{
+				SQLiteLog.Initialize();
+			}
+			catch (MissingMethodException)
+			{
+				throw new PeachException("Error, could not find native sqlite library.");
+			}
 		}
 
 		public string Path

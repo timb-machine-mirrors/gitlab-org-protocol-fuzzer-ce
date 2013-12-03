@@ -45,7 +45,8 @@ namespace PeachFarm.Loggers
 		//TODO override methods and call SendRows
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			SendRows();
+			if (db != null)
+				SendRows();
 			base.Engine_TestFinished(context);
 		}
 
