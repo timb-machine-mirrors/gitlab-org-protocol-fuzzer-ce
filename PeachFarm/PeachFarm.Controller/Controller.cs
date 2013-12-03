@@ -29,8 +29,6 @@ namespace PeachFarm.Controller
 
 		private string controllerQueueName;
 
-		List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts;
-
 		#region testing
 		// these are here for testing purposes and shouldn't be mucked with in prod
 		// everything _should_ function normally if left alone
@@ -51,7 +49,6 @@ namespace PeachFarm.Controller
 
 			RabbitInitializer();
 			MongoDBInitializer();
-			hosts = RestInitializer();
 
 			if (statusCheck == null)
 			{
@@ -100,13 +97,13 @@ namespace PeachFarm.Controller
 				rabbit = null;
 			}
 
-			if (hosts != null)
-			{
-				foreach (var host in hosts)
-				{
-					host.Stop();
-				}
-			}
+			//if (hosts != null)
+			//{
+			//  foreach (var host in hosts)
+			//  {
+			//    host.Stop();
+			//  }
+			//}
 		}
 
 		protected void StatusCheck(object state)
@@ -782,20 +779,6 @@ namespace PeachFarm.Controller
 				string error = String.Format("No connection can be made to MongoDB at:\n{0}", config.MongoDb.ConnectionString);
 				throw new ApplicationException(error);
 			}
-		}
-
-		private List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> RestInitializer()
-		{
-			List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase> hosts = new List<ServiceStack.WebHost.Endpoints.AppHostHttpListenerBase>();
-
-			var listeningOn = "http://*:1337/";
-
-			var appHost = new AppHost();
-			appHost.Init();
-			appHost.Start(listeningOn);
-			hosts.Add(appHost);
-
-			return hosts;
 		}
 
 		protected virtual IPAddress[] LocalIPs()
