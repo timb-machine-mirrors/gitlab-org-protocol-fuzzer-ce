@@ -22,9 +22,6 @@ bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
 bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
 bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
 
-bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
-bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
-
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #Newtonsoft.Json.dll is already provided in Peach/3rdParty
 
@@ -46,6 +43,10 @@ bld.read_csshlib('ServiceStack.Api.Swagger.dll',         paths=['ServiceStack'])
 bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 
 if bld.env.TARGET == 'win':
+	# Use binary dist of sqlite on windows
+	bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
+	#bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
+
 	bld.read_csshlib('Telerik.Reporting.Adomd.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 	bld.read_csshlib('Telerik.Reporting.Cache.Database.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
 	bld.read_csshlib('Telerik.Reporting.OpenXmlRendering.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
@@ -80,5 +81,7 @@ if bld.env.TARGET == 'win':
 	bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 	bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 	bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-
+else:
+	# Build sqlite from source on linux
+	bld.recurse('sqlite-netFx-source-1.0.89.0')
 

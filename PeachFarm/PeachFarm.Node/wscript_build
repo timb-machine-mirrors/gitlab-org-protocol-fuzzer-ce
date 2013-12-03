@@ -15,7 +15,6 @@ deps = [
 	'MongoDB.Bson.dll',
 	'Ionic.Zip.Reduced.dll',
 	'System.Data.SQLite.dll',
-	'System.Data.SQLite.Linq.dll',
 ]
 
 bld(
