@@ -523,8 +523,15 @@ namespace PeachFarm.Controller
 			}
 
 			//&& lastHeartbeat.Status == Status.Running
-			bool isNodeFinished = heartbeat.Status != Status.Running
-			                   && String.IsNullOrEmpty(lastHeartbeat.JobID) == false;
+			bool isNodeFinished = false;
+			if(heartbeat.Status != Status.Running)
+			{
+				if ((lastHeartbeat != null) && (String.IsNullOrEmpty(lastHeartbeat.JobID) == false))
+				{
+					isNodeFinished = true;
+				}
+			}
+
 			if (isNodeFinished)
 			{
 				#region Stuff that gets executed when the Controller determines that all Nodes running a Job have completed
