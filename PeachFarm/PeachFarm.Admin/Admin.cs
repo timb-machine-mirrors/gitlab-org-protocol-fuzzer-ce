@@ -14,6 +14,7 @@ using System.IO;
 using System.Xml;
 using System.Configuration;
 using PeachFarm.Common.Mongo;
+using System.Diagnostics;
 
 namespace PeachFarm.Admin
 {
@@ -47,7 +48,7 @@ namespace PeachFarm.Admin
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
-			rabbit.StartListener(adminQueueName, 1000, true, true);
+			rabbit.StartListener(adminQueueName, 1000, true, false);
 			this.IsListening = true;
 
 		}
@@ -557,10 +558,13 @@ namespace PeachFarm.Admin
 
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
 		{
+			Debug.WriteLine(e.Body);
 			ProcessAction(e.Action, e.Body);
-			rabbit.StopListener();
-			//rabbit.CloseConnection();
-			this.IsListening = false;
+			if (e.Action != Actions.Register)
+			{
+				rabbit.StopListener();
+				this.IsListening = false;
+			}
 		}
 
 		private void ProcessAction(string action, string body)
