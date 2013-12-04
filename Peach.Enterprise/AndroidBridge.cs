@@ -86,6 +86,83 @@ namespace Peach.Enterprise
 			Log.Level = LogLevel.Verbose;
 		}
 
+		static void RunBridge(string fullAdbPath)
+		{
+			// Disable ClientSupport, we are not using JDWP
+			AndroidDebugBridge.Initialize(false);
+
+			// Always force the creation of a new bridge
+			AndroidDebugBridge.CreateBridge(fullAdbPath, true);
+
+			AndroidDebugBridge.Instance.BridgeChanged += OnBridgechanged;
+			AndroidDebugBridge.Instance.DeviceChanged += OnDeviceChanged;
+			AndroidDebugBridge.Instance.DeviceConnected += OnDeviceConnected;
+			AndroidDebugBridge.Instance.DeviceDisconnected += OnDeviceDisconnected;
+			AndroidDebugBridge.Instance.ClientChanged += OnClientChanged;
+
+			// Make sure the device monitor is running
+			if (AndroidDebugBridge.Instance.DeviceMonitor == null)
+			{
+				var errors = adbLogger.GetLastError();
+
+				if (string.IsNullOrEmpty(errors))
+					errors = "Error, could not start android device monitor.";
+
+				throw new PeachException(errors);
+			}
+		}
+
+		static void OnBridgechanged(object sender, AndroidDebugBridgeEventArgs e)
+		{
+			if (BridgeChanged != null)
+				BridgeChanged(sender, e);
+		}
+
+		static void OnDeviceChanged(object sender, DeviceEventArgs e)
+		{
+			if (DeviceChanged != null)
+				DeviceChanged(sender, e);
+		}
+
+		static void OnDeviceConnected(object sender, DeviceEventArgs e)
+		{
+			if (DeviceConnected != null)
+				DeviceConnected(sender, e);
+		}
+
+		static void OnDeviceDisconnected(object sender, DeviceEventArgs e)
+		{
+			if (DeviceDisconnected != null)
+				DeviceDisconnected(sender, e);
+		}
+
+		static void OnClientChanged(object sender, ClientEventArgs e)
+		{
+			if (ClientChanged != null)
+				ClientChanged(sender, e);
+		}
+
+		/// <summary>
+		/// Occurs when [bridge changed].
+		/// </summary>
+		public static event EventHandler<AndroidDebugBridgeEventArgs> BridgeChanged;
+		/// <summary>
+		/// Occurs when [device changed].
+		/// </summary>
+		public static event EventHandler<DeviceEventArgs> DeviceChanged;
+		/// <summary>
+		/// Occurs when [device connected].
+		/// </summary>
+		public static event EventHandler<DeviceEventArgs> DeviceConnected;
+		/// <summary>
+		/// Occurs when [device disconnected].
+		/// </summary>
+		public static event EventHandler<DeviceEventArgs> DeviceDisconnected;
+		/// <summary>
+		/// Occurs when [client changed].
+		/// </summary>
+		public static event EventHandler<ClientEventArgs> ClientChanged;
+
 		public static void Initialize(string adbPath)
 		{
 			if (0 == refCount++)
@@ -100,29 +177,31 @@ namespace Peach.Enterprise
 					throw new PeachException("Error, unable to locate {0}{1} 'AdbPath' parameter.".Fmt(
 						adb, adbPath != null ? " in specified" : ", please specify using"));
 
-				// Disable ClientSupport, we are not using JDWP
-				AndroidDebugBridge.Initialize(false);
+				DeviceChanged += adbLogger.OnDeviceChanged;
+				DeviceConnected += adbLogger.OnDeviceConnected;
+				DeviceDisconnected += adbLogger.OnDeviceDisconnected;
 
-				// Always force the creation of a new bridge
-				AndroidDebugBridge.CreateBridge(file, true);
-
-				AndroidDebugBridge.Instance.DeviceChanged += adbLogger.OnDeviceChanged;
-				AndroidDebugBridge.Instance.DeviceConnected += adbLogger.OnDeviceConnected;
-				AndroidDebugBridge.Instance.DeviceDisconnected += adbLogger.OnDeviceDisconnected;
-
-				// Make sure the device monitor is running
-				if (AndroidDebugBridge.Instance.DeviceMonitor == null)
-				{
-					var errors = adbLogger.GetLastError();
-
-					if (string.IsNullOrEmpty(errors))
-						errors = "Error, could not start android device monitor.";
-
-					throw new PeachException(errors);
-				}
+				RunBridge(file);
 
 				logger.Debug("Android debug bridge initialized.");
 			}
+		}
+
+		public static void Restart()
+		{
+			if (0 == refCount)
+				throw new NotSupportedException("Bridge has not been initialized.");
+
+			lock (AndroidDebugBridge.GetLock())
+			{
+				AndroidDebugBridge.Instance.BridgeChanged -= OnBridgechanged;
+				AndroidDebugBridge.Instance.DeviceChanged -= OnDeviceChanged;
+				AndroidDebugBridge.Instance.DeviceConnected -= OnDeviceConnected;
+				AndroidDebugBridge.Instance.DeviceDisconnected -= OnDeviceDisconnected;
+				AndroidDebugBridge.Instance.ClientChanged -= OnClientChanged;
+			}
+
+			RunBridge(AndroidDebugBridge.AdbOsLocation);
 		}
 
 		public static void Terminate()

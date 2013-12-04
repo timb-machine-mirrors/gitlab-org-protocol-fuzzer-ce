@@ -58,7 +58,7 @@ namespace Peach.Enterprise
 			this.readyTimeout = readyTimeout * 1000;
 			this.commandTimeout = commandTimeout * 1000;
 
-			AndroidDebugBridge.Instance.DeviceConnected += OnDeviceConnected;
+			AndroidBridge.DeviceConnected += OnDeviceConnected;
 
 		}
 
@@ -78,7 +78,7 @@ namespace Peach.Enterprise
 			{
 				lock (AndroidDebugBridge.GetLock())
 				{
-					AndroidDebugBridge.Instance.DeviceConnected -= OnDeviceConnected;
+					AndroidBridge.DeviceConnected -= OnDeviceConnected;
 				}
 
 				disposed = true;
@@ -130,6 +130,8 @@ namespace Peach.Enterprise
 			sw.Start();
 
 			var remain = readyTimeout;
+			var restart = false;
+
 			while (remain > 0)
 			{
 				if (dev.IsOnline)
@@ -151,6 +153,14 @@ namespace Peach.Enterprise
 				}
 
 				remain = Math.Max(readyTimeout - sw.ElapsedMilliseconds, 0);
+
+				// If the device is not online for half the wait time, bounce adb server
+				if (!restart && !dev.IsOnline && remain < (readyTimeout / 2))
+				{
+					restart = true;
+					logger.Debug("Device '{0}' not online after {1}ms, restarting adb server.", dev.SerialNumber, sw.ElapsedMilliseconds);
+					AndroidBridge.Restart();
+				}
 
 				long sleepTime = Math.Min(remain, 1000);
 				Thread.Sleep((int)sleepTime);
