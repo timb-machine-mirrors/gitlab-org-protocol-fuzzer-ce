@@ -233,7 +233,9 @@ namespace Peach.Enterprise.Agent.Monitors
 							var line = sr.ReadLine();
 							if (!string.IsNullOrEmpty(line))
 							{
-								logger.Trace(line);
+								if (logger.IsTraceEnabled)
+									logger.Trace("{0}: {1}", Name, line);
+
 								errors.Add(line);
 							}
 						}
@@ -256,7 +258,8 @@ namespace Peach.Enterprise.Agent.Monitors
 							string line = sr.ReadLine();
 							if (!string.IsNullOrEmpty(line))
 							{
-								logger.Trace(line);
+								if (logger.IsTraceEnabled)
+									logger.Trace("{0}: {1}", Name, line);
 
 								var m = reDevice.Match(line);
 								if (m.Success)

@@ -145,6 +145,10 @@ namespace Peach.Enterprise
 						logger.Trace("Exception waiting for device '{0}': {1}", dev.SerialNumber, ex.Message);
 					}
 				}
+				else
+				{
+					logger.Trace("Device '{0}' is offline, can't run adb command.", dev.SerialNumber);
+				}
 
 				remain = Math.Max(readyTimeout - sw.ElapsedMilliseconds, 0);
 
@@ -243,7 +247,10 @@ namespace Peach.Enterprise
 
 				var rx = new CommandResultReceiver();
 				AdbHelper.Instance.ExecuteRemoteCommand(AndroidDebugBridge.SocketAddress, cmd, dev, rx, commandTimeout);
-				return rx.Result ?? "";
+				var ret = rx.Result ?? "";
+				if (logger.IsTraceEnabled)
+					logger.Trace("Command result: {0}", ret);
+				return ret;
 			}
 		}
 
