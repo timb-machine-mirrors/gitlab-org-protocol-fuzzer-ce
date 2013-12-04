@@ -157,6 +157,7 @@ if __name__ == "__main__":
             targets.append({"path": path, "file": fn})
     else:
         targets = get_targets(FULL_TARGET_PATH)
+    borked_tests = []
     for target in targets:
         pit_tests = testlib.get_tests(target, config)
         for test in pit_tests:
@@ -166,6 +167,9 @@ if __name__ == "__main__":
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
                 test.clean_up()
+            has_test_borked = test.status != "pass"
+            if has_test_borked:
+                borked_tests.append(test)
             if   test.status == "pass" and     IS_INTERACTIVE:
                 print "Ran: ", test.args
                 print test.color_text("green", "SUCCESS!")
@@ -191,6 +195,7 @@ if __name__ == "__main__":
             else:
                 print test.color_text("red", "UNKNOWN FAILURE!")
             tests.append(test)
+    print "\nProblem tests: %s\n" % " ".join(sorted([test.name for test in borked_tests]))
     tests.sort(key = lambda obj: obj.name)
     return_code = 0
     for test in tests:
