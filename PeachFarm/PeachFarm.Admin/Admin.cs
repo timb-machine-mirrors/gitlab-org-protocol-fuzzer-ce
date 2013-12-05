@@ -39,14 +39,13 @@ namespace PeachFarm.Admin
 
 			ServerHostName = config.Controller.IpAddress;
 
-			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			string ipAddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
-
 			controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ServerHostName);
 
-			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName ?? ipAddress);
 			
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
+
+			adminQueueName = String.Format(QueueNames.QUEUE_ADMIN, adminName ?? rabbit.LocalIP);
+		
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(adminQueueName, 1000, true, false);
 			this.IsListening = true;

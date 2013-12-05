@@ -621,14 +621,9 @@ namespace PeachFarm.Node
 				Tags = config.Tags.ToString();
 			}
 
-			#region get ip address, used for client name
-			IPAddress[] ipaddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
-			var ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
-			#endregion
-
 			if (String.IsNullOrEmpty(config.Node.NameOverride))
 			{
-				NodeName = ipaddress;
+				NodeName = RabbitMqHelper.GetLocalIP(config.RabbitMq.HostName).ToString();
 			}
 			else
 			{
