@@ -107,6 +107,12 @@ namespace Managed.Adb.Logs {
 			}
 		}
 
+		DateTime DateTimeFromTimeT(int sec)
+		{
+			// http://msdn.microsoft.com/en-us/library/ms724228
+			long fileTime = (((long)sec) * 10000000) + 116444736000000000;
+			return DateTime.FromFileTimeUtc(fileTime);
+		}
 
 		private LogEntry CreateEntry ( byte[] data, int offset ) {
 			if ( data.Length < offset + ENTRY_HEADER_SIZE ) {
@@ -125,11 +131,13 @@ namespace Managed.Adb.Logs {
 			offset += 4;
 			entry.ThreadId = data.Swap32bitFromArray ( offset );
 			offset += 4;
-			/*var sec =*/ data.Swap32bitFromArray ( offset );
+			var sec = data.Swap32bitFromArray ( offset );
 
 			offset += 4;
 			entry.NanoSeconds = data.Swap32bitFromArray ( offset );
 			offset += 4;
+
+			entry.TimeStamp = DateTimeFromTimeT(sec);
 
 			// allocate the data
 			entry.Data = new byte[entry.Length];

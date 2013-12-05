@@ -907,33 +907,17 @@ namespace Managed.Adb {
 						throw new AdbCommandRejectedException ( resp.Message );
 					}
 
-					byte[] data = new byte[16384];
-					using ( var ms = new MemoryStream ( data ) ) {
-						int offset = 0;
+					var buffer = new byte[4 * 1024];
 
-						while ( true ) {
-							int count;
-							if ( rcvr != null && rcvr.IsCancelled ) {
-								break;
-							}
-							var buffer = new byte[4 * 1024];
+					while ( rcvr != null && !rcvr.IsCancelled ) {
+						int count = adbChan.Receive ( buffer );
 
-							count = adbChan.Receive ( buffer );
-							if ( count < 0 ) {
-								break;
-							} else if ( count == 0 ) {
-								try {
-									Thread.Sleep ( WAIT_TIME * 5 );
-								} catch ( ThreadInterruptedException ) {
-								}
-							} else {
-								ms.Write ( buffer, offset, count );
-								offset += count;
-								if ( rcvr != null ) {
-									var d = ms.ToArray ( );
-									rcvr.ParseNewData ( d, 0, d.Length );
-								}
-							}
+						if ( count < 0 ) {
+							break; // Error
+						} else if ( count == 0 ) {
+							break; // EOF
+						} else {
+							rcvr.ParseNewData(buffer, 0, count);
 						}
 					}
 				}
