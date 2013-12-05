@@ -863,7 +863,7 @@ namespace Managed.Adb {
 					if ( String.Compare ( "device not found", resp.Message, true ) == 0 ) {
 						throw new DeviceNotFoundException ( device.SerialNumber );
 					} else {
-						throw new AdbException ( "device (" + device + ") request rejected: " + resp.Message );
+						throw new AdbException ( "device (" + device.SerialNumber + ") request rejected: " + resp.Message );
 					}
 				}
 			}
