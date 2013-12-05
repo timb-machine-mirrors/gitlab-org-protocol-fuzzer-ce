@@ -202,6 +202,9 @@ if __name__ == "__main__":
         status = test.status
         if test.hasrun:
             status += " after running %s" % test.hasrun
+        # any failure should cause build failure
+        if test.status not in ["pass", "skip"]:
+            return_code += 1
         if test.status in ["pass", "fail"]:
             if test.status == "pass" and IS_INTERACTIVE == False:
                 continue #for non interactive we can silently succede.
@@ -212,15 +215,10 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
-            # any failure should cause build failure
-            return_code += 1 if test.returncode != 0 else 0
-            if test.status != "pass":
-                return_code += 1
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
         elif test.status == "except":
-            return_code += 1
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
     test_log.close()
