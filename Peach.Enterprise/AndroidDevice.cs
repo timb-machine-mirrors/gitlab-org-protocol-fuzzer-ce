@@ -469,7 +469,6 @@ namespace Peach.Enterprise
 			dev.SyncService.PullFile(remote, local, SyncService.NullProgressMonitor);
 		}
 
-		static Regex reLogFilter = new Regex(@"^-+ beginning of [^\r\n]*(\r\n|\r|\n)?", RegexOptions.Multiline);
 		static Regex rePower = new Regex("(?:mPowerState=(?<Query>\\d+))|(?:mScreenOn=(?<Query>\\w+))", RegexOptions.Multiline);
 		static Regex reFocus = new Regex("mCurrentFocus=(?<Query>.*?)\\r?$", RegexOptions.Multiline);
 		static Regex amProcessSuccess = new Regex(@".*\n(Status: ok)\r?\n.*\nComplete(\r)?\n?", RegexOptions.Multiline | RegexOptions.Singleline);
