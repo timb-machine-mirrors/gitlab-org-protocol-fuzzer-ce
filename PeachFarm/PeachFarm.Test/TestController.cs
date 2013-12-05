@@ -92,11 +92,11 @@ namespace PeachFarm.Test
 
 		public NLog.Logger getLogger() { return PeachFarmController.logger; }
 
-		protected override IPAddress[] LocalIPs()
-		{
-			if (__test_LocalIPs != null) return __test_LocalIPs;
-			else                         return base.LocalIPs();
-		}
+		//protected override IPAddress[] LocalIPs()
+		//{
+		//  if (__test_LocalIPs != null) return __test_LocalIPs;
+		//  else                         return base.LocalIPs();
+		//}
 
 		protected override List<Common.Messages.Heartbeat> NodeList(Controller.Configuration.ControllerSection config)
 		{

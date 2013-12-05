@@ -6,6 +6,8 @@ using RabbitMQ.Client;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Security;
+using System.Net;
+using System.Net.Sockets;
 
 namespace PeachFarm.Common
 {
@@ -42,6 +44,8 @@ namespace PeachFarm.Common
 			this.password = password;
 			this.ssl = ssl;
 
+			this.LocalIP = GetLocalIP(this.hostName).ToString();
+
 			// TODO: Investigate a better strategy for dealing with connection failures.
 			for (int i = 0; ; ++i)
 			{
@@ -59,6 +63,8 @@ namespace PeachFarm.Common
 				}
 			}
 		}
+
+		public string LocalIP { get; private set; }
 
 		public bool IsListening { get; private set; }
 
@@ -586,6 +592,19 @@ namespace PeachFarm.Common
 			catch (Exception ex)
 			{
 				throw new RabbitMqException(ex, hostName);
+			}
+		}
+
+		#endregion
+
+		#region IP Helpers
+
+		public static IPAddress GetLocalIP(string hostName)
+		{
+			using (var u = new UdpClient(hostName, 1))
+			{
+				var local = u.Client.LocalEndPoint as IPEndPoint;
+				return local.Address;
 			}
 		}
 

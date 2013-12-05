@@ -18,7 +18,6 @@ namespace PeachFarm.Controller
 	public class PeachFarmController : IDisposable
 	{
 
-		private static string ipaddress;
 		protected Configuration.ControllerSection config;
 
 		protected static Logger logger = LogManager.GetCurrentClassLogger();
@@ -40,9 +39,6 @@ namespace PeachFarm.Controller
 
 		public PeachFarmController()
 		{
-			// Startup as application
-			IPAddress[] ipaddresses = LocalIPs();
-			ipaddress = (from i in ipaddresses where i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork select i).First().ToString();
 
 			this.config = this.ControllerConfigSection();
 			this.config.Validate();
@@ -759,9 +755,9 @@ namespace PeachFarm.Controller
 			if (__test_should_rabbitmq_init == false) return;
 
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
-			if ((config.Controller == null) || (String.IsNullOrEmpty(config.Controller.Name)))
+			if (String.IsNullOrEmpty(config.Controller.Name))
 			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, ipaddress);
+				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, rabbit.LocalIP);
 			}
 			else
 			{
