@@ -98,7 +98,7 @@ namespace Peach.Enterprise
 
 			public string ToStringLong()
 			{
-				return string.Format("[ {0}.{1} {2}: {3} {4}/{5} ]{6}{7}{6}{6}",
+				return string.Format("[ {0}.{1} {2}: {3} {4}/{5} ]{6}{7}",
 					TimeStamp.ToUniversalTime().ToString("M-dd HH:mm:ss"),
 					NanoSeconds / 1000000,
 					ProcessId,
