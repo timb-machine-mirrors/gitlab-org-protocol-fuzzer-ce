@@ -26,16 +26,20 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("ReadyTimeout", typeof(int), "Max seconds to wait for device to be ready (default 600)", "600")]
 	[Parameter("CommandTimeout", typeof(int), "Max seconds to wait for adb command to complete (default 10)", "10")]
 	[Parameter("FaultWaitTime", typeof(int), "Milliseconds to wait when checking for a fault (default 0)", "0")]
+	[Parameter("FaultRegex", typeof(string), "Regex to determine if a log entry triggers a fault", "(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)")]
+	[Parameter("IgnoreRegex", typeof(string), "Regex to ignore potential false positive fault matches", "")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		static Regex reHash = new Regex(@"\[\s+\d+-\d+\s+[^EF]+\s+([EF])/([^\]\s]+)");
 
-		bool firstRun = false;
 		bool adbInit = false;
 		Fault fault = null;
 		AndroidDevice dev = null;
+		Regex reFault;
+		Regex reIgnore;
+		List<AndroidDevice.LogEntry> logs;
 
 		public string ApplicationName { get; protected set; }
 		public string AdbPath { get; protected set; }
@@ -51,6 +55,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		public int ReadyTimeout { get; protected set; }
 		public int CommandTimeout { get; protected set; }
 		public int FaultWaitTime { get; protected set; }
+		public string FaultRegex { get; protected set; }
+		public string IgnoreRegex { get; protected set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -59,10 +65,30 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (!string.IsNullOrEmpty(DeviceSerial) && !string.IsNullOrEmpty(DeviceMonitor))
 				throw new PeachException("Can't specify both DeviceSerial parameter and DeviceMonitor parameter.");
+
+			reFault = new Regex(FaultRegex, RegexOptions.Multiline);
+
+			if (!string.IsNullOrEmpty(IgnoreRegex))
+				reIgnore = new Regex(IgnoreRegex, RegexOptions.Multiline);
+		}
+
+		string CheckForErrors()
+		{
+			foreach (var log in logs)
+			{
+				var line = log.ToString();
+
+				if (reFault.Match(line).Success && (reIgnore == null || !reIgnore.Match(line).Success))
+					return log.ToStringLong();
+			}
+
+			return null;
 		}
 
 		Fault MakeFault(string errorLog)
 		{
+			System.Diagnostics.Debug.Assert(logs != null);
+
 			var sb = new System.Text.StringBuilder();
 
 			Action<string, Action> guard = (what, action) =>
@@ -105,9 +131,16 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Step 3: Grab full logcat
 			guard("capture device logs", () =>
 			{
-				var log = dev.ReadAllLogs();
-				var bytes = Encoding.UTF8.GetBytes(log);
-				ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+				using (var ms = new MemoryStream())
+				{
+					foreach (var msg in logs)
+					{
+						var bytes = Encoding.ISOLatin1.GetBytes(msg.ToStringLong());
+						ms.Write(bytes, 0, bytes.Length);
+					}
+
+					ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceMonitor ?? dev.SerialNumber), ms.ToArray()));
+				}
 			});
 
 			// Step 4: Grab tombs
@@ -121,6 +154,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					{
 						dev.PullFile(tomb, tmp);
 						ret.collectedData.Add(new Fault.Data("{0}_{1}".Fmt(DeviceMonitor ?? dev.SerialNumber, tomb.Name), System.IO.File.ReadAllBytes(tmp)));
+						dev.DeleteFile(tomb);
 					}
 				}
 				finally
@@ -129,16 +163,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				}
 			});
 
-			// Step 5: Clear device logs on fault
-			if (ret.type == FaultType.Fault)
-			{
-				guard("clear device logs", () =>
-				{
-					dev.ClearLogs();
-				});
-			}
-
-			// Step 6: Save any exceptions that might have occured
+			// Step 5: Save any exceptions that might have occured
 			if (sb.Length > 0)
 			{
 				var errors = sb.ToString();
@@ -146,7 +171,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				ret.collectedData.Add(new Fault.Data("{0}_exceptions".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
 			}
 
-			// Step 7: Update bucketing information
+			// Step 6: Update bucketing information
 			if (errorLog != null)
 			{
 				var match = reHash.Match(errorLog);
@@ -209,7 +234,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		public override void SessionStarting()
 		{
 			adbInit = true;
-			firstRun = true;
 
 			// Initialize adb stuff
 			AndroidBridge.Initialize(AdbPath);
@@ -239,6 +263,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			bool hasFault = fault != null;
 
 			fault = null;
+			logs = null;
 
 			if (StartOnCall != null)
 				return;
@@ -259,13 +284,6 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (ClearAppData || (hasFault && ClearAppDataOnFault))
 				dev.ClearAppData(ApplicationName);
 				
-			// If this is the first time, clear the device logs
-			if (firstRun)
-			{
-				dev.ClearLogs();
-				firstRun = false;
-			}
-
 			dev.StartApp(ApplicationName, ActivityName);
 		}
 
@@ -281,7 +299,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			if (FaultWaitTime > 0)
 				Thread.Sleep(FaultWaitTime);
 
-			string errors = dev.CheckForErrors();
+			// Store off all logs we have gotten until now
+			logs = dev.GetAndClearLogs();
+
+			string errors = CheckForErrors();
 
 			if (string.IsNullOrEmpty(errors))
 				return false;

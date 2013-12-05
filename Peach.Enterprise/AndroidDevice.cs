@@ -10,6 +10,7 @@ using System.Text;
 using Peach.Core;
 using Managed.Adb;
 using Managed.Adb.Exceptions;
+using Managed.Adb.Logs;
 
 namespace Peach.Enterprise
 {
@@ -38,6 +39,8 @@ namespace Peach.Enterprise
 		private Device handle;
 		private long readyTimeout;
 		private int commandTimeout;
+		private Thread thread;
+		private List<LogEntry> logs;
 
 		private Device dev
 		{
@@ -57,9 +60,120 @@ namespace Peach.Enterprise
 			this.handle = dev;
 			this.readyTimeout = readyTimeout * 1000;
 			this.commandTimeout = commandTimeout * 1000;
+			this.logs = new List<LogEntry>();
 
 			AndroidBridge.DeviceConnected += OnDeviceConnected;
 
+			thread = new Thread(GetLogs);
+			thread.Start();
+		}
+
+		public class LogEntry
+		{
+			public enum LogLevel : byte
+			{
+				U = 0, // Unknown
+				T = 1, // Default/Trace
+				V = 2, // Verbose
+				D = 3, // Debug
+				I = 4, // Info
+				W = 5, // Warn
+				E = 6, // Error
+				F = 7, // Assert/Fatal
+				S = 8, // Silent
+			}
+
+			public LogLevel Level { get; set; }
+			public int ProcessId { get; set; }
+			public int ThreadId { get; set; }
+			public DateTime TimeStamp { get; set; }
+			public int NanoSeconds { get; set; }
+			public string Name { get; set; }
+			public string Message { get; set; }
+
+			public override string ToString()
+			{
+				return string.Format("{0}/{1}({2}): {3}", Level, Name, ProcessId, Message);
+			}
+
+			public string ToStringLong()
+			{
+				return string.Format("[ {0}.{1} {2}: {3} {4}/{5} ]{6}{7}{6}{6}",
+					TimeStamp.ToUniversalTime().ToString("M-dd HH:mm:ss"),
+					NanoSeconds / 1000000,
+					ProcessId,
+					ThreadId,
+					Level,
+					Name,
+					Environment.NewLine,
+					Message);
+			}
+		}
+
+		class LogListener : ILogListener
+		{
+			AndroidDevice dev;
+			string prefix;
+
+			public LogListener(AndroidDevice dev, string prefix)
+			{
+				this.dev = dev;
+				this.prefix = prefix;
+			}
+
+			public void NewEntry(Managed.Adb.Logs.LogEntry entry)
+			{
+				if (entry.Data.Length == 0)
+					return;
+
+				var level = (LogEntry.LogLevel)entry.Data[0];
+				var line = entry.Data.GetString(1, entry.Data.Length - 1, AdbHelper.DEFAULT_ENCODING);
+				var parts = line.Split('\0');
+
+				if (parts.Length != 3 || parts[2] != "")
+					parts = new[] { "", line };
+
+				var msg = new LogEntry()
+				{
+					 Level = level,
+					 ProcessId = entry.ProcessId,
+					 ThreadId = entry.ThreadId,
+					 TimeStamp = entry.TimeStamp,
+					 NanoSeconds = entry.NanoSeconds,
+					 Name = parts[0],
+					 Message = parts[1],
+				};
+
+				if (logger.IsTraceEnabled)
+					logger.Trace("{0}: {1}", prefix, msg.ToString());
+
+				lock (dev)
+				{
+					dev.logs.Add(msg);
+				}
+			}
+
+			public void  NewData(byte[] data, int offset, int length)
+			{
+			}
+		}
+
+		private void GetLogs()
+		{
+			while (true)
+			{
+				Device safeDev = dev;
+
+				try
+				{
+					safeDev.RunLogService("main", new LogReceiver(new LogListener(this, safeDev.SerialNumber)));
+				}
+				catch
+				{
+				}
+
+				Thread.Sleep(1000);
+			}
 		}
 
 		private void OnDeviceConnected(object sender, DeviceEventArgs e)
@@ -76,6 +190,13 @@ namespace Peach.Enterprise
 		{
 			if (!disposed)
 			{
+				if (thread != null)
+				{
+					thread.Abort();
+					thread.Join();
+					thread = null;
+				}
+
 				lock (AndroidDebugBridge.GetLock())
 				{
 					AndroidBridge.DeviceConnected -= OnDeviceConnected;
@@ -204,30 +325,13 @@ namespace Peach.Enterprise
 			logger.Debug("Device '{0}' is now ready", dev.SerialNumber);
 		}
 
-		/// <summary>
-		/// Reads the error log and returns it as a string.
-		/// If an error occurs reading the log, the error message is returned instead.
-		/// </summary>
-		/// <returns>An empty string if no error occurs, otherwise a string containing the errors.</returns>
-		public string CheckForErrors()
+		public List<LogEntry> GetAndClearLogs()
 		{
-			try
+			lock (this)
 			{
-				// Check for errors in the log, throws on error
-				var log = RunShellCommand(NLog.LogLevel.Debug, "logcat -v long -s -d AndroidRuntime:e ActivityManager:e *:f");
-
-				// Filter out log lines added by logcat
-				var filtered = reLogFilter.Replace(log, "");
-
-				// If filtered is not empty, return the non-filtered log
-				return string.IsNullOrEmpty(filtered) ? filtered : log;
-			}
-			catch (Exception ex)
-			{
-				// Error running logcat most likely means the device rebooted
-				// We still call MakeFault, which will wait for the device to be ready
-				// and grab logs and tombs
-				return ex.Message;
+				var ret = logs;
+				logs = new List<LogEntry>();
+				return ret;
 			}
 		}
 
@@ -239,11 +343,6 @@ namespace Peach.Enterprise
 
 			var cmd = "input " + how + " " + string.Join(" ", args);
 			RunShellCommand(NLog.LogLevel.Debug, cmd);
-		}
-
-		public string ReadAllLogs()
-		{
-			return RunShellCommand(NLog.LogLevel.Debug, "logcat -d -v long");
 		}
 
 		private string RunShellCommand(NLog.LogLevel level, string cmd)
@@ -360,14 +459,9 @@ namespace Peach.Enterprise
 				throw new PeachException("Backup manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
 		}
 
-		public void ClearLogs()
+		public void DeleteFile(FileEntry entry)
 		{
-			foreach (var tomb in CrashDumps())
-			{
-				dev.FileSystem.Delete(tomb);
-			}
-
-			RunShellCommand(NLog.LogLevel.Debug, "logcat -c");
+			dev.FileSystem.Delete(entry);
 		}
 
 		public void PullFile(FileEntry remote, string local)
