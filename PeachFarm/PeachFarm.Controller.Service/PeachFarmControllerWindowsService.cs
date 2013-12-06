@@ -39,7 +39,12 @@ namespace PeachFarm.Controller
         server = new PeachFarmController();
         logger.Info("Peach Farm Controller Started.");
       }
-      catch (ApplicationException aex)
+			catch (System.Configuration.ConfigurationErrorsException ceex)
+			{
+				logger.Fatal(ceex.Message);
+				Stop();
+			}
+			catch (ApplicationException aex)
       {
         logger.Fatal("Application Exception:\n{0}", aex.Message);
         Stop();
@@ -57,7 +62,8 @@ namespace PeachFarm.Controller
       {
         server.Close();
         logger.Info("Peach Farm Controller Stopped.");
-      } 
+      }
+			base.OnStop();
     }
   }
 }

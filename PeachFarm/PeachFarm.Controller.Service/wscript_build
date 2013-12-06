@@ -16,5 +16,6 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs **/*.resx'),
-	name='PeachFarm.Controller.Service.exe',
+	name='pf_controller.exe',
+	install = 'controller.config.template',
 )

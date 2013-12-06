@@ -4,53 +4,65 @@ using System.ServiceProcess;
 using System.Text;
 using System.Diagnostics;
 using NLog;
+using System.Threading;
+using PeachFarm.Common;
 
 namespace PeachFarm.Controller
 {
   static class Program
   {
-
+		private static EventWaitHandle waitHandle;
     private static Logger logger = LogManager.GetCurrentClassLogger();
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
     static void Main()
     {
+
       if (Environment.UserInteractive)
       {
-        System.Console.WriteLine();
-        System.Console.WriteLine("] Peach Farm - Controller");
-        System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
-        System.Console.WriteLine();
+				waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+				System.Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
 
-        PeachFarmController server = null;
-        try
-        {
-					using (server = new PeachFarmController())
+
+				System.Console.WriteLine();
+				System.Console.WriteLine("] Peach Farm - Controller");
+				System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
+				System.Console.WriteLine();
+
+				try
+				{
+					using (var server = new PeachFarmController())
 					{
 						if (server.IsListening)
 						{
 							System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
-							System.Console.ReadLine();
+							waitHandle.WaitOne();
 						}
-						server.Close();
 					}
-        }
-        catch (ApplicationException aex)
-        {
-          logger.Fatal("Application Exception:\n{0}", aex.Message);
-        }
-        catch (Exception ex)
-        {
-          logger.Fatal("Unknown/Unhandled Exception\n{0}", ex.Message);
-        }
-        finally
-        {
-          if ((server != null))
-          {
-            server.Close();
-          }
-        }
+				}
+				catch (System.Configuration.ConfigurationErrorsException ceex)
+				{
+					Console.WriteLine(ceex.Message);
+					Environment.Exit(1);
+				}
+				catch (RabbitMqException rex)
+				{
+					Console.WriteLine("Could not communicate with RabbitMQ server at {0}, quitting.", rex.RabbitMqHost);
+					Environment.Exit(1);
+				}
+				catch (ApplicationException aex)
+				{
+					Console.WriteLine("Application Exception:\n{0}", aex.Message);
+					Environment.Exit(1);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Unknown/Unhandled Exception\n{0}", ex.Message);
+					Environment.Exit(1);
+				}
+
+				Environment.Exit(0);
       }
       else
       {
@@ -67,5 +79,15 @@ namespace PeachFarm.Controller
 	      }
       }
     }
+
+		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+		{
+			if (waitHandle != null)
+			{
+				waitHandle.Set();
+				e.Cancel = true;
+			}
+		}
+
   }
 }
