@@ -20,6 +20,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart Application on Every Iteration", "false")]
 	[Parameter("ClearAppData", typeof(bool), "Remove Application data and cache on every iteration", "false")]
 	[Parameter("ClearAppDataOnFault", typeof(bool), "Remove Application data and cache on fault iterations", "false")]
+	[Parameter("RebootEveryN", typeof(uint), "Reboot device every N iterations", "0")]
+	[Parameter("RebootOnFault", typeof(bool), "Reboot device on fault", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start the application when notified by the state machine", "")]
 	[Parameter("WaitForReadyOnCall", typeof(string), "Waits for the device to be ready when notified by the state machine", "")]
 	[Parameter("ConnectTimeout", typeof(int), "Max seconds to wait for adb connection (default 5)", "5")]
@@ -40,6 +42,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		Regex reFault;
 		Regex reIgnore;
 		List<AndroidDevice.LogEntry> logs;
+		bool reboot;
 
 		public string ApplicationName { get; protected set; }
 		public string AdbPath { get; protected set; }
@@ -55,6 +58,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		public int ReadyTimeout { get; protected set; }
 		public int CommandTimeout { get; protected set; }
 		public int FaultWaitTime { get; protected set; }
+		public uint RebootEveryN { get; protected set; }
+		public bool RebootOnFault { get; protected set; }
 		public string FaultRegex { get; protected set; }
 		public string IgnoreRegex { get; protected set; }
 
@@ -264,6 +269,9 @@ namespace Peach.Enterprise.Agent.Monitors
 			fault = null;
 			logs = null;
 
+			reboot = hasFault && RebootOnFault;
+			reboot |= RebootEveryN > 0 && (iterationCount % RebootEveryN) == 0;
+
 			if (StartOnCall != null)
 				return;
 
@@ -273,12 +281,23 @@ namespace Peach.Enterprise.Agent.Monitors
 				LaunchApp(hasFault);
 		}
 
-		private void LaunchApp(bool hasFault)
+		private void WaitForReady()
 		{
 			// The device can change across iterations, especially if we are using multiple emulators
 			SyncDevice();
 
+			if (reboot)
+			{
+				dev.Reboot();
+				reboot = false;
+			}
+
 			dev.WaitForReady();
+		}
+
+		private void LaunchApp(bool hasFault)
+		{
+			WaitForReady();
 
 			if (ClearAppData || (hasFault && ClearAppDataOnFault))
 				dev.ClearAppData(ApplicationName);
@@ -350,8 +369,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 			else if (name == "Action.Call" && ((string)data) == WaitForReadyOnCall)
 			{
-				SyncDevice();
-				dev.WaitForReady();
+				WaitForReady();
 			}
 
 			return null;

@@ -238,6 +238,48 @@ namespace Peach.Enterprise
 			}
 		}
 
+		public void Reboot()
+		{
+			logger.Debug("Attempting to reboot device '{0}'", dev.SerialNumber);
+
+			var sw = new Stopwatch();
+			sw.Start();
+
+			var reboot = true;
+			var remain = readyTimeout;
+
+			while (remain > 0)
+			{
+				try
+				{
+					if (reboot)
+					{
+						dev.Reboot();
+						reboot = false;
+					}
+					else if (dev.IsOnline)
+					{
+						// Wait for the boot animation to start up again
+						var res = RunShellCommand(NLog.LogLevel.Trace, "getprop init.svc.bootanim");
+						if (res != "stopped")
+							break;
+					}
+				}
+				catch (Exception ex)
+				{
+					logger.Trace("Exception rebooting device '{0}': {1}", dev.SerialNumber, ex.Message);
+				}
+
+				remain = Math.Max(readyTimeout - sw.ElapsedMilliseconds, 0);
+
+				long sleepTime = Math.Min(remain, 1000);
+				Thread.Sleep((int)sleepTime);
+			}
+
+			if (remain == 0)
+				throw new SoftException("Error, timed out trying to reboot android device '" + dev.SerialNumber + "'.");
+		}
+
 		/// <summary>
 		/// Waits until the device is booted, and ensures the screen is turned on
 		/// and the lock screen is bypassed.
