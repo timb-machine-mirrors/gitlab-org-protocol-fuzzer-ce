@@ -133,11 +133,10 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				using (var ms = new MemoryStream())
 				{
+					var writer = new StreamWriter(ms, System.Text.Encoding.GetEncoding(Managed.Adb.AdbHelper.DEFAULT_ENCODING));
+
 					foreach (var msg in logs)
-					{
-						var bytes = Encoding.ISOLatin1.GetBytes(msg.ToStringLong());
-						ms.Write(bytes, 0, bytes.Length);
-					}
+						writer.WriteLine(msg.ToStringLong());
 
 					ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceMonitor ?? dev.SerialNumber), ms.ToArray()));
 				}
