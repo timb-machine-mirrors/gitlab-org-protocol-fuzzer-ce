@@ -225,9 +225,9 @@ namespace Peach.Enterprise
 			}
 
 			if (serialNumber == null)
-				throw new PeachException("No available android devices were found.");
+				throw new SoftException("No available android devices were found.");
 			else
-				throw new PeachException("Device '" + serialNumber + "' was not found. Use `adb devices` to verify it's plugged in.");
+				throw new SoftException("Device '" + serialNumber + "' was not found. Use `adb devices` to verify it's plugged in.");
 		}
 
 		public string SerialNumber
@@ -242,7 +242,7 @@ namespace Peach.Enterprise
 		/// Waits until the device is booted, and ensures the screen is turned on
 		/// and the lock screen is bypassed.
 		/// </summary>
-		/// <returns>Throws a PeachException if an error occurs</returns>
+		/// <returns>Throws a SoftException if an error occurs</returns>
 		public void WaitForReady()
 		{
 			logger.Debug("Waiting for device '{0}' to become ready", dev.SerialNumber);
@@ -270,7 +270,7 @@ namespace Peach.Enterprise
 				}
 				else
 				{
-					logger.Trace("Device '{0}' is offline, can't run adb command.", dev.SerialNumber);
+					logger.Trace("Device '{0}' is offline, can't run adb commands.", dev.SerialNumber);
 				}
 
 				remain = Math.Max(readyTimeout - sw.ElapsedMilliseconds, 0);
@@ -290,21 +290,21 @@ namespace Peach.Enterprise
 			sw.Stop();
 
 			if (remain == 0)
-				throw new PeachException("Error, timed out waiting for android device '" + dev.SerialNumber + "' to become ready.");
+				throw new SoftException("Error, timed out waiting for android device '" + dev.SerialNumber + "' to become ready.");
 
 			try
 			{
 				// Check if we need to turn on the display
 				var screenState = QueryShellCommand(NLog.LogLevel.Trace, "dumpsys power", rePower);
 				if (screenState == null)
-					throw new PeachException("Failed to query the current screen state.");
+					throw new SoftException("Failed to query the current screen state.");
 
 				if (screenState == "0" || screenState == "false")
 					RunShellCommand(NLog.LogLevel.Trace, "input keyevent KEYCODE_POWER");
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Unable to turn the display on. " + ex.Message, ex);
+				throw new SoftException("Unable to turn the display on. " + ex.Message, ex);
 			}
 
 			try
@@ -312,14 +312,14 @@ namespace Peach.Enterprise
 				// Check if we need to unlock
 				var currFocus = QueryShellCommand(NLog.LogLevel.Trace, "dumpsys window", reFocus);
 				if (currFocus == null)
-					throw new PeachException("Failed to query the current foreground window.");
+					throw new SoftException("Failed to query the current foreground window.");
 
 				if (currFocus.Contains("Keyguard"))
 					RunShellCommand(NLog.LogLevel.Trace, "input keyevent KEYCODE_MENU");
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Unable to unlock the device. " + ex.Message, ex);
+				throw new SoftException("Unable to unlock the device. " + ex.Message, ex);
 			}
 
 			logger.Debug("Device '{0}' is now ready", dev.SerialNumber);
@@ -443,7 +443,7 @@ namespace Peach.Enterprise
 			var ret = RunShellCommand(NLog.LogLevel.Debug, cmd);
 
 			if (!amProcessSuccess.Match(ret).Success)
-				throw new PeachException("Activity manager failed to start '{0}'. {1}".Fmt(tgt, ret));
+				throw new SoftException("Activity manager failed to start '{0}'. {1}".Fmt(tgt, ret));
 		}
 
 		public void ClearAppData(string application)
@@ -452,11 +452,11 @@ namespace Peach.Enterprise
 
 			ret = RunShellCommand(NLog.LogLevel.Debug, "pm clear " + application);
 			if (!pmProcessSuccess.Match(ret).Success)
-				throw new PeachException("Package manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
+				throw new SoftException("Package manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
 
 			ret = RunShellCommand(NLog.LogLevel.Debug, "bmgr wipe " + application);
 			if (!bmgrProcessSuccess.Match(ret).Success)
-				throw new PeachException("Backup manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
+				throw new SoftException("Backup manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
 		}
 
 		public void DeleteFile(FileEntry entry)
