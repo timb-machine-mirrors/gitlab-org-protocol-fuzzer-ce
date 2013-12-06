@@ -127,11 +127,11 @@ namespace Peach.Enterprise.Agent.Monitors
 			});
 
 			// Step 2: Try and get a creenshot
-			guard("capture screenshot", () =>
-			{
-				var bytes = dev.TakeScreenshot();
-				ret.collectedData.Add(new Fault.Data("{0}_screenshot.png".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
-			});
+			//guard("capture screenshot", () =>
+			//{
+			//    var bytes = dev.TakeScreenshot();
+			//    ret.collectedData.Add(new Fault.Data("{0}_screenshot.png".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+			//});
 
 			// Step 3: Grab full logcat
 			guard("capture device logs", () =>
