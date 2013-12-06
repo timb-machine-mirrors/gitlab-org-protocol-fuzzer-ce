@@ -4,6 +4,7 @@ deps = [
 	'NLog.dll',
 	'System.dll',
 	'System.Core.dll',
+	'System.Configuration.dll',
 	'System.Configuration.Install.dll',
 	'System.ServiceProcess.dll',
 	'System.Data.dll',
@@ -15,5 +16,6 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='PeachFarm.Node.Service.exe',
+	name='pf_node.exe',
+	install = 'node.config.template',
 )

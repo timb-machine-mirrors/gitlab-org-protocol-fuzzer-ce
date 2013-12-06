@@ -41,7 +41,12 @@ namespace PeachFarm.Node.Service
         node.StatusChanged += new EventHandler<StatusChangedEventArgs>(node_StatusChanged);
         logger.Info("Peach Farm Node Started. Version: " + node.Version);
       }
-      catch (ApplicationException aex)
+			catch (System.Configuration.ConfigurationErrorsException ceex)
+			{
+				logger.Fatal(ceex.Message);
+				Stop();
+			}
+			catch (ApplicationException aex)
       {
         logger.Fatal("Application Exception:\n{0}", aex.Message);
         Stop();

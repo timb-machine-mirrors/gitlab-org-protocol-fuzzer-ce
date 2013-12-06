@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<peachfarm.controller>
+	<MongoDb connectionString="mongodb://10.0.1.39/?safe=true"/>
+	<RabbitMq hostName="10.0.1.39" port="-1" userName="guest" password="guest" useSSL="false"/>
+	<NodeExpirationRules lateMinutes="5" expiredMinutes="30"/>
+</peachfarm.controller>

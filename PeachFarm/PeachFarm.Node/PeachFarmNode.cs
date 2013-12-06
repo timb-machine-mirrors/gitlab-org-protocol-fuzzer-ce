@@ -27,7 +27,7 @@ namespace PeachFarm.Node
 		public Peach.Core.Engine engine { get; private set; }
 	}
 
-	public class PeachFarmNode
+	public class PeachFarmNode : IDisposable
 	{
  		private static System.Timers.Timer heartbeat;
 		private static NodeState nodeState;
@@ -603,6 +603,11 @@ namespace PeachFarm.Node
 			}
 
 			return ret;
+		}
+
+		public void Dispose()
+		{
+			this.Close();
 		}
 	}
 
