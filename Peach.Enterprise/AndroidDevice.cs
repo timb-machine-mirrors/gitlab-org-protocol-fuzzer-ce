@@ -441,6 +441,8 @@ namespace Peach.Enterprise
 
 		public byte[] TakeScreenshot()
 		{
+			logger.Debug("Taking screenshot of device '{0}'.", dev.SerialNumber);
+
 			var ms = new MemoryStream();
 			var rawImage = dev.Screenshot;
 
