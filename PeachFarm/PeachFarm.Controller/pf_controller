@@ -16,11 +16,11 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="pf_controller Service"
-NAME=PeachFarm.Controller.Service.exe
+NAME=pf_controller.exe
 DAEMON=/usr/bin/mono-service
 DAEMON_ARGS="/opt/peachfarm/$NAME"
 SCRIPTNAME=/etc/init.d/pf_controller
-OPTIONS="MONO_GC_PARAMS=max-heap-size=1g"
+OPTIONS="--gc=sgen"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0

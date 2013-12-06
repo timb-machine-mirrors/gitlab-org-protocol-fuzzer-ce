@@ -16,11 +16,11 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="pf_node Service"
-NAME=PeachFarm.Node.Service.exe
+NAME=pf_node.exe
 DAEMON=/usr/bin/mono-service
 DAEMON_ARGS="/opt/peachfarm/$NAME"
 SCRIPTNAME=/etc/init.d/pf_node
-OPTIONS="--gc=sgen --debug"
+OPTIONS="--gc=sgen"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
