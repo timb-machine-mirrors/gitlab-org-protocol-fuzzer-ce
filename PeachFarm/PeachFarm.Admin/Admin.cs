@@ -18,7 +18,7 @@ using System.Diagnostics;
 
 namespace PeachFarm.Admin
 {
-	public class PeachFarmAdmin
+	public class PeachFarmAdmin : IDisposable
 	{
 		Configuration.AdminSection config;
 
@@ -559,11 +559,11 @@ namespace PeachFarm.Admin
 		{
 			Debug.WriteLine(e.Body);
 			ProcessAction(e.Action, e.Body);
-			if (e.Action != Actions.Register)
-			{
-				rabbit.StopListener();
-				this.IsListening = false;
-			}
+			//if (e.Action != Actions.Register)
+			//{
+			//  rabbit.StopListener();
+			//  this.IsListening = false;
+			//}
 		}
 
 		private void ProcessAction(string action, string body)
@@ -684,5 +684,14 @@ namespace PeachFarm.Admin
 			DatabaseHelper.TruncateAllCollections(MongoDbConnectionString);
 		}
 #endif
+
+		public void Dispose()
+		{
+			if (this.IsListening)
+			{
+				rabbit.StopListener();
+			}
+			rabbit.CloseConnection();
+		}
 	}
 }

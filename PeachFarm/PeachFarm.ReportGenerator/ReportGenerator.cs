@@ -61,36 +61,27 @@ namespace PeachFarm.Reporting
 		void rabbit_MessageReceived(object sender, RabbitMqHelper.MessageReceivedEventArgs e)
 		{
 
-			ResponseBase response = null;
-
 			try
 			{
-				response = ProcessAction(e.Action, e.Body);
+				ProcessAction(e.Action, e.Body, e.ReplyQueue);
 			}
 			catch (Exception ex)
 			{
-				//TODO
-				response = ErrorResponse("", ex.Message);
-			}
-
-			if (response != null)
-			{
-				rabbitProcessOne.PublishToQueue(e.ReplyQueue, response.Serialize(), e.Action);
+				rabbitProcessOne.PublishToQueue(e.ReplyQueue, ErrorResponse("", ex.Message).Serialize(), e.Action);
 			}
 		}
 
-		private ResponseBase ProcessAction(string action, string body)
+		private void ProcessAction(string action, string body, string replyQueue)
 		{
 			switch(action)
 			{
 				case Actions.GenerateJobReport:
-					return GenerateJobReport(GenerateJobReportRequest.Deserialize(body));
+					rabbitProcessOne.PublishToQueue(replyQueue, GenerateJobReport(GenerateJobReportRequest.Deserialize(body)).Serialize(), action);
+					break;
 				case Actions.NotifyJobProgress:
 					LogJobProgress(JobProgressNotification.Deserialize(body));
 					break;
 			}
-
-			return null;
 		}
 
 		#region GenerateJobReport

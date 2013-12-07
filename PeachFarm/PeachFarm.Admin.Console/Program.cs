@@ -5,12 +5,13 @@ using System.Text;
 using PeachFarm.Common;
 using System.IO;
 using PeachFarm.Common.Messages;
+using System.Threading;
 
 namespace PeachFarm.Admin
 {
 	public class Program
 	{
-		private static PeachFarmAdmin admin = null;
+		private static EventWaitHandle waitHandle;
 
 		static void syntax() { throw new SyntaxException(); }
 
@@ -118,190 +119,184 @@ namespace PeachFarm.Admin
 
 				#endregion
 
-				bool mustwait = true;
+				waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+				System.Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
 
-				#region Set up Admin listener
-
-				admin = new PeachFarmAdmin();
-				//ServiceHost host = null;
-
-				admin.StartPeachCompleted += admin_StartPeachCompleted;
-				admin.StopPeachCompleted += admin_StopPeachCompleted;
-				admin.DeleteDataCompleted += new EventHandler<PeachFarmAdmin.DeleteDataCompletedEventArgs>(admin_DeleteDataCompleted);
-
-				admin.AdminException += new EventHandler<PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs>(admin_AdminException);
-				#endregion
-
-				#region Start
-				if (start)
+				// Set up Admin listener
+				using (var admin = new PeachFarmAdmin())
 				{
-					if (launchCount < 0)
+					bool mustwait = false;
+
+					admin.StartPeachCompleted += admin_StartPeachCompleted;
+					admin.StopPeachCompleted += admin_StopPeachCompleted;
+					admin.DeleteDataCompleted += new EventHandler<PeachFarmAdmin.DeleteDataCompletedEventArgs>(admin_DeleteDataCompleted);
+					admin.AdminException += new EventHandler<PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs>(admin_AdminException);
+
+					#region Start
+					if (start)
 					{
-						System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
-						return;
-					}
-
-					string pitFilePath = extra[0];
-
-
-
-					#region range
-					uint? rangestart = null;
-					uint? rangeend = null;
-
-					if(String.IsNullOrEmpty(range) == false)
-					{
-						try
+						if (launchCount < 0)
 						{
-							var rangeparsed = range.Split('-');
-							if (rangeparsed.Length == 2)
+							System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
+							return;
+						}
+						string pitFilePath = extra[0];
+
+
+
+						#region range
+						uint? rangestart = null;
+						uint? rangeend = null;
+
+						if (String.IsNullOrEmpty(range) == false)
+						{
+							try
 							{
-								rangestart = uint.Parse(rangeparsed[0]);
-								rangeend = uint.Parse(rangeparsed[1]);
-								if (rangeend < rangestart)
+								var rangeparsed = range.Split('-');
+								if (rangeparsed.Length == 2)
 								{
-									rangestart = null;
-									rangeend = null;
+									rangestart = uint.Parse(rangeparsed[0]);
+									rangeend = uint.Parse(rangeparsed[1]);
+									if (rangeend < rangestart)
+									{
+										rangestart = null;
+										rangeend = null;
+									}
 								}
 							}
+							catch
+							{
+								Program.syntax();
+								return;
+							}
 						}
-						catch
+						#endregion
+
+						mustwait = true;
+
+						admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend);
+					}
+					#endregion
+
+					#region Stop
+					if (stop)
+					{
+						mustwait = true;
+						admin.StopPeachAsync(extra[0]);
+
+						/*
+						if (extra.Count > 0)
 						{
-							Program.syntax();
-							return;
+							admin.StopPeachAsync(extra[0]);
+						}
+						else
+						{
+							admin.StopPeachAsync();
+						}
+						//*/
+					}
+					#endregion
+
+					#region List
+					if (nodes)
+					{
+						PrintListNodes(admin.ListNodes());
+					}
+					#endregion
+
+					#region Errors
+					if (errors)
+					{
+						if (extra.Count > 0)
+						{
+							string jobID = extra[0];
+							PrintListErrors(admin.ListErrors(jobID));
+						}
+						else
+						{
+							PrintListErrors(admin.ListErrors());
 						}
 					}
 					#endregion
 
-					admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend);
-				}
-				#endregion
-
-				#region Stop
-				if (stop)
-				{
-					admin.StopPeachAsync(extra[0]);
-
-					/*
-					if (extra.Count > 0)
-					{
-						admin.StopPeachAsync(extra[0]);
-					}
-					else
-					{
-						admin.StopPeachAsync();
-					}
-					//*/
-				}
-				#endregion
-
-				#region List
-				if (nodes)
-				{
-					mustwait = false;
-					PrintListNodes(admin.ListNodes());
-				}
-				#endregion
-
-				#region Errors
-				if (errors)
-				{
-					mustwait = false;
-					if (extra.Count > 0)
+					#region Job Info
+					if (jobInfo)
 					{
 						string jobID = extra[0];
-						PrintListErrors(admin.ListErrors(jobID));
+						PrintJobInfo(admin.JobInfo(jobID));
 					}
-					else
+					#endregion
+
+					#region Jobs
+					if (jobs)
 					{
-						PrintListErrors(admin.ListErrors());
+						mustwait = true;
+						PrintMonitor(admin.Monitor());
 					}
-				}
-				#endregion
+					#endregion
 
-				#region Job Info
-				if (jobInfo)
-				{
-					mustwait = false;
-					string jobID = extra[0];
-					PrintJobInfo(admin.JobInfo(jobID));
-				}
-				#endregion
-
-				#region Jobs
-				if (jobs)
-				{
-					mustwait = false;
-					PrintMonitor(admin.Monitor());
-				}
-				#endregion
-
-				#region Job Output
-				if (output)
-				{
-					mustwait = false;
-
-					string jobID = extra[0];
-					string destinationFolder = extra[1];
-
-					try
+					#region Job Output
+					if (output)
 					{
-						admin.DumpFiles(jobID, destinationFolder);
+						string jobID = extra[0];
+						string destinationFolder = extra[1];
+
+						try
+						{
+							admin.DumpFiles(jobID, destinationFolder);
+						}
+						catch (Exception ex)
+						{
+							System.Console.WriteLine("Error getting files:\n" + ex.Message);
+							return;
+						}
+						System.Console.WriteLine("Done!");
 					}
-					catch (Exception ex)
+					#endregion
+
+					#region Clear
+					if (clear)
 					{
-						System.Console.WriteLine("Error getting files:\n" + ex.Message);
-						return;
+						if (extra.Count > 0)
+						{
+							clearparameter = extra[0];
+						}
+						admin.DeleteDataAsync(cleartype, clearparameter);
+						System.Console.WriteLine("Done!");
 					}
-					System.Console.WriteLine("Done!");
-				}
-				#endregion
+					#endregion
 
-				#region Clear
-				if(clear)
-				{
-					if (extra.Count > 0)
+
+					#region Report
+					if (report)
 					{
-						clearparameter = extra[0];
+						string jobid = extra[0];
+						bool reprocess = false;
+						if ((extra.Count > 1) && ((extra[1].ToLower() == "reprocess") || (extra[1].ToLower() == "true")))
+						{
+							reprocess = true;
+						}
+						admin.Report(jobid, reprocess);
+						System.Console.WriteLine("Report request sent.");
 					}
-					admin.DeleteDataAsync(cleartype, clearparameter);
-				}
-				#endregion
 
-
-				#region Report
-				if (report)
-				{
-					string jobid = extra[0];
-					bool reprocess = false;
-					if ((extra.Count > 1) && ((extra[1].ToLower() == "reprocess") || (extra[1].ToLower() == "true")))
-					{
-						reprocess = true;
-					}
-					admin.Report(jobid, reprocess);
-					mustwait = false;
-				}
-
-				#endregion
+					#endregion
 
 #if DEBUG
-				#region Listen
-				if (web)
-				{
+					#region Listen
+					if (web)
+					{
 
-				}
-				#endregion
+					}
+					#endregion
 #endif
-				if (mustwait)
-				{
-					System.Console.WriteLine("waiting for result...");
-					System.Console.ReadLine();
+					if (mustwait)
+					{
+						System.Console.WriteLine("Waiting for response...");
+						waitHandle.WaitOne();
+					}
 				}
 
-				//if ((host != null) && (host.State == CommunicationState.Opened))
-				//{
-				//  host.Close();
-				//}
 			}
 			catch (RabbitMqException rex)
 			{
@@ -320,7 +315,14 @@ namespace PeachFarm.Admin
 			Environment.Exit(0);
 		}
 
-
+		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+		{
+			if (waitHandle != null)
+			{
+				waitHandle.Set();
+				e.Cancel = true;
+			}
+		}
 
 		#region Peach Farm Admin message completion handlers
 
@@ -334,6 +336,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
+			waitHandle.Set();
 		}
 
 		static void admin_StartPeachCompleted(object sender, PeachFarm.Admin.PeachFarmAdmin.StartPeachCompletedEventArgs e)
@@ -346,6 +349,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.ErrorMessage));
 			}
+			waitHandle.Set();
 		}
 
 		static void admin_DeleteDataCompleted(object sender, PeachFarmAdmin.DeleteDataCompletedEventArgs e)
@@ -358,6 +362,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine(String.Format("Delete Data Failure\n{0}", e.Result.ErrorMessage));
 			}
+			waitHandle.Set();
 		}
 
 		private static void PrintListErrors(ListErrorsResponse e)
@@ -373,6 +378,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine("Response: No errors recorded.");
 			}
+			waitHandle.Set();
 		}
 
 		private static void PrintListNodes(ListNodesResponse e)
@@ -414,6 +420,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine("Response: No nodes online");
 			}
+			waitHandle.Set();
 		}
 
 		private static void PrintJobInfo(JobInfoResponse e)
@@ -441,6 +448,7 @@ namespace PeachFarm.Admin
 			{
 				System.Console.WriteLine("Job not found: " + e.Job.JobID);
 			}
+			waitHandle.Set();
 		}
 
 		static void PrintMonitor(MonitorResponse e)
@@ -478,11 +486,13 @@ namespace PeachFarm.Admin
 						job.JobID, job.UserName, job.Pit.FileName, job.StartDate));
 				}
 			}
+			waitHandle.Set();
 		}
 
 		static void admin_AdminException(object sender, PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs e)
 		{
 			System.Console.WriteLine(e.Exception.ToString());
+			waitHandle.Set();
 		}
 
 		#endregion
