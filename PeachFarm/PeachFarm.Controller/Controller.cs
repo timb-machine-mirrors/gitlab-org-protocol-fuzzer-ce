@@ -184,21 +184,20 @@ namespace PeachFarm.Controller
 
 		private void ProcessAction(string action, string body, string replyQueue)
 		{
-			Debug.WriteLine("action: " + action);
-			Debug.WriteLine("reply: " + replyQueue);
-			Debug.WriteLine(body);
+			logger.Trace("action: " + action);
+			logger.Trace("reply: " + replyQueue);
+			logger.Trace(body);
 
-			ResponseBase response = null;
 			switch (action)
 			{
-				case Actions.CreateJob:
-					response = CreateJob(CreateJobRequest.Deserialize(body));
-					break;
+				//case Actions.CreateJob:
+				//  response = CreateJob(CreateJobRequest.Deserialize(body));
+				//  break;
 				case Actions.StartPeach:
-					response = StartPeach(StartPeachRequest.Deserialize(body));
+					Reply(StartPeach(StartPeachRequest.Deserialize(body)).Serialize(), action, replyQueue);
 					break;
 				case Actions.StopPeach:
-					response = StopPeach(StopPeachRequest.Deserialize(body));
+					Reply(StopPeach(StopPeachRequest.Deserialize(body)).Serialize(), action, replyQueue);
 					break;
 				case Actions.Heartbeat:
 					HeartbeatReceived(Heartbeat.Deserialize(body));
@@ -207,10 +206,10 @@ namespace PeachFarm.Controller
 					GenerateReportComplete(GenerateJobReportResponse.Deserialize(body));
 					break;
 				case Actions.Register:
-					response = Register(RegisterRequest.Deserialize(body));
+					Reply(Register(RegisterRequest.Deserialize(body)).Serialize(), action, replyQueue);
 					break;
 				case Actions.DeleteData:
-					response = DeleteData(DeleteDataRequest.Deserialize(body));
+					Reply(DeleteData(DeleteDataRequest.Deserialize(body)).Serialize(), action, replyQueue);
 					break;
 				#region deprecated
 				/*
@@ -233,54 +232,41 @@ namespace PeachFarm.Controller
 					logger.Error(error);
 					break;
 			}
-
-			if (response != null)
-			{
-				Reply(response.Serialize(), action, replyQueue);
-			}
 		}
 
 
 		protected void ProcessException(Exception ex, string action, string replyQueue)
 		{
-			ResponseBase response = null;
 			switch (action)
 			{
 				case Actions.StartPeach:
-					response = new StartPeachResponse();
+					Reply(new StartPeachResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.StopPeach:
-					response = new StopPeachResponse();
+					Reply(new StopPeachResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.ListNodes:
-					response = new ListNodesResponse();
+					Reply(new ListNodesResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.ListErrors:
-					response = new ListErrorsResponse();
+					Reply(new ListErrorsResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.JobInfo:
-					response = new JobInfoResponse();
+					Reply(new JobInfoResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.Monitor:
-					response = new MonitorResponse();
+					Reply(new MonitorResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.Register:
-					response = new RegisterResponse();
+					Reply(new RegisterResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				case Actions.DeleteData:
-					response = new DeleteDataResponse();
+					Reply(new DeleteDataResponse() { Success = false, ErrorMessage = ex.Message }.Serialize(), action, replyQueue);
 					break;
 				default:
 					string error = String.Format("Error while processing {0} message from {1}:\n{2}", action, replyQueue, ex.Message);
 					logger.Error(error);
 					return;
-			}
-
-			if (response != null)
-			{
-				response.Success = false;
-				response.ErrorMessage = ex.Message;
-				Reply(response.ToString(), action, replyQueue);
 			}
 		}
 
@@ -300,6 +286,8 @@ namespace PeachFarm.Controller
 			return response;
 		}
 
+		#region Create Job
+		/*
 		internal virtual CreateJobResponse CreateJob(CreateJobRequest request)
 		{
 			PeachFarm.Common.Mongo.Job mongojob = new Common.Mongo.Job();
@@ -321,6 +309,8 @@ namespace PeachFarm.Controller
 			response.JobID = mongojob.JobID;
 			return response;
 		}
+		//*/
+		#endregion
 
 		protected virtual void StopPeach(StopPeachRequest request, string replyQueue)
 		{

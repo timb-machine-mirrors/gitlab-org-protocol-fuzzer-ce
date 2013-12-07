@@ -296,7 +296,9 @@ namespace PeachFarm.Node
 				if ((request != null) && (request.JobID != nodeState.StartPeachRequest.JobID))
 					return;
 
-				StopFuzzer();
+				StopFuzzer(request.JobID);
+
+				
 			}
 		}
 
@@ -577,7 +579,7 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
-		private void StopFuzzer()
+		private void StopFuzzer(string jobid = null)
 		{
 			if (nodeState.RunContext != null)
 			{
@@ -585,6 +587,10 @@ namespace PeachFarm.Node
 				{
 					nodeState.RunContext.continueFuzzing = false;
 				}
+			}
+			else
+			{
+				StartPeachCleanUp(jobid);
 			}
 		}
 

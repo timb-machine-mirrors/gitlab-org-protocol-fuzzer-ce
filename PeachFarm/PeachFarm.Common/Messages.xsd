@@ -6,14 +6,8 @@
     xmlns:mstns="http://phed.org/2012/PeachFarm/Messages"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
-	<xs:element name="ResponseBase" type="ResponseBase" />
-	<xs:complexType name="ResponseBase">
-		<xs:sequence>
-			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
-		</xs:sequence>
-		<xs:attribute name="Success" type="xs:boolean" default="true" />
-	</xs:complexType>
-
+	
+	<!--
 	<xs:element name="CreateJobRequest" type="CreateJobRequest" />
 	<xs:complexType name="CreateJobRequest">
 		<xs:sequence>
@@ -29,13 +23,14 @@
 
 	<xs:element name="CreateJobResponse" type="CreateJobResponse" />
 	<xs:complexType name="CreateJobResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="JobID" type="xs:string" use="required" />
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
 	</xs:complexType>
-	
+	-->
+
 	<xs:element name="StartPeachRequest" type="StartPeachRequest" />
   <xs:complexType name="StartPeachRequest">
 		<!--
@@ -58,18 +53,19 @@
 		<xs:attribute name="Target" type="xs:string" use="required" />
 		<xs:attribute name="RangeStart" type="xs:unsignedInt" />
 		<xs:attribute name="RangeEnd" type="xs:unsignedInt" />
+		<xs:attribute name="JobLogging" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />
   <xs:complexType name="StartPeachResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="JobID" type="xs:string" use="required" />
-				<xs:attribute name="PitFileName" type="xs:string" use="required" />
-				<xs:attribute name="UserName" type="xs:string" use="required" />
-			</xs:extension>
-		</xs:complexContent>
-  </xs:complexType>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="PitFileName" type="xs:string" use="required" />
+		<xs:attribute name="UserName" type="xs:string" use="required" />
+	</xs:complexType>
   
   <xs:element name="StopPeachRequest" type="StopPeachRequest" />
   <xs:complexType name="StopPeachRequest">
@@ -80,14 +76,14 @@
 
   <xs:element name="StopPeachResponse" type="StartPeachResponse" final="#all" block="#all"/>
   <xs:complexType name="StopPeachResponse" >
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="JobID" type="xs:string" use="required" />
-				<xs:attribute name="PitFileName" type="xs:string" use="required" />
-				<xs:attribute name="UserName" type="xs:string" use="required" />
-			</xs:extension>
-		</xs:complexContent>
-  </xs:complexType>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="PitFileName" type="xs:string" use="required" />
+		<xs:attribute name="UserName" type="xs:string" use="required" />
+	</xs:complexType>
 
   <xs:element name="Heartbeat" type="Heartbeat" />
   <xs:complexType name="Heartbeat">
@@ -122,20 +118,18 @@
 
   <xs:element name="ListNodesResponse" type="ListNodesResponse" />
   <xs:complexType name="ListNodesResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:sequence>
-					<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-  </xs:complexType>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+	</xs:complexType>
 
   <xs:element name="ListErrorsRequest" type="ListErrorsRequest" />
 	<xs:complexType name="ListErrorsRequest">
@@ -144,20 +138,18 @@
 
   <xs:element name="ListErrorsResponse" type="ListErrorsResponse" />
   <xs:complexType name="ListErrorsResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:sequence>
-					<xs:element name="Errors" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-  </xs:complexType>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Errors" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+	</xs:complexType>
 
 	<xs:element name="JobInfoRequest" type="JobInfoRequest" />
 	<xs:complexType name="JobInfoRequest">
@@ -166,20 +158,18 @@
 
 	<xs:element name="JobInfoResponse" type="JobInfoResponse" />
 	<xs:complexType name="JobInfoResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:sequence>
-					<xs:element name="Job" type="Job" maxOccurs="1" minOccurs="1"/>
-					<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="Job" type="Job" maxOccurs="1" minOccurs="1"/>
+			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
 	</xs:complexType>
 
 	<xs:element name="ListJobsRequest" type="ListJobsRequest" />
@@ -187,34 +177,32 @@
 
 	<xs:element name="ListJobsResponse" type="ListJobsResponse" />
 	<xs:complexType name="ListJobsResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:sequence>
-					<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="Jobs" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="Count" type="xs:int" maxOccurs="1" minOccurs="1" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Jobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Count" type="xs:int" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
 	</xs:complexType>
 
 	<xs:element name="MonitorRequest" type="MonitorRequest" />
@@ -222,41 +210,39 @@
 
 	<xs:element name="MonitorResponse" type="MonitorResponse" />
 	<xs:complexType name="MonitorResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:sequence>
-					<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="Errors" maxOccurs="1" minOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-				</xs:sequence>
-				<xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+			<xs:element name="ActiveJobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="InactiveJobs" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Job" type="Job" maxOccurs="unbounded" minOccurs="1" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Nodes" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Errors" maxOccurs="1" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Heartbeat" type="Heartbeat" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="MongoDbConnectionString" type="xs:string" use="required" />
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
 	</xs:complexType>
 
 	<xs:element name="GenerateJobReportRequest" type="GenerateJobReportRequest" />
@@ -268,12 +254,12 @@
 
 	<xs:element name="GenerateJobReportResponse" type="GenerateJobReportResponse" />
 	<xs:complexType name="GenerateJobReportResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="JobID" type="xs:string" use="required" />
-				<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="JobID" type="xs:string" use="required" />
+		<xs:attribute name="Status" type="ReportGenerationStatus" use="required" />
 	</xs:complexType>
 
 	<xs:complexType name="Job">
@@ -387,9 +373,10 @@
 
 	<xs:element name="DeleteDataResponse" type="DeleteDataResponse" />
 	<xs:complexType name="DeleteDataResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase" />
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
 	</xs:complexType>
 
 	<xs:element name="RegisterRequest" type="RegisterRequest" />
@@ -397,12 +384,27 @@
 		<xs:attribute name="UserName" type="xs:string" use="required" />
 	</xs:complexType>
 
+	<xs:element name="RegisterResponse" type="RegisterResponse" />
 	<xs:complexType name="RegisterResponse">
-		<xs:complexContent>
-			<xs:extension base="ResponseBase">
-				<xs:attribute name="MongoDbConnectionString" type="xs:string" />
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="MongoDbConnectionString" type="xs:string" />
 				<xs:attribute name="MySqlConnectionString" type="xs:string" />
-			</xs:extension>
-		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="StopNodeRequest" type="StopNodeRequest" />
+	<xs:complexType name="StopNodeRequest">
+		<xs:attribute name="NodeName" type="xs:string" />
+	</xs:complexType>
+
+	<xs:element name="StopNodeResponse" type="StopNodeResponse" />
+	<xs:complexType name="StopNodeResponse">
+		<xs:sequence>
+			<xs:element name="ErrorMessage" type="xs:string" maxOccurs="1" minOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="Success" type="xs:boolean" default="true" />
+		<xs:attribute name="NodeName" type="xs:string" />
 	</xs:complexType>
 </xs:schema>
