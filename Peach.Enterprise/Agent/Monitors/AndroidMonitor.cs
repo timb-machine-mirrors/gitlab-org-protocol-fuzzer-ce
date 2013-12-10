@@ -79,15 +79,17 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		string CheckForErrors()
 		{
+			var sb = new System.Text.StringBuilder();
+
 			foreach (var log in logs)
 			{
 				var line = log.ToString();
 
 				if (reFault.Match(line).Success && (reIgnore == null || !reIgnore.Match(line).Success))
-					return log.ToStringLong();
+					sb.AppendLine(log.ToStringLong());
 			}
 
-			return null;
+			return sb.ToString();
 		}
 
 		Fault MakeFault(string errorLog)
@@ -176,7 +178,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 
 			// Step 6: Update bucketing information
-			if (errorLog != null)
+			if (!string.IsNullOrEmpty(errorLog))
 			{
 				var match = reHash.Match(errorLog);
 
