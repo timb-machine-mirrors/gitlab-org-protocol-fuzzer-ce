@@ -30,6 +30,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("FaultWaitTime", typeof(int), "Milliseconds to wait when checking for a fault (default 0)", "0")]
 	[Parameter("FaultRegex", typeof(string), "Regex to determine if a log entry triggers a fault", "(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)")]
 	[Parameter("IgnoreRegex", typeof(string), "Regex to ignore potential false positive fault matches", "")]
+	[Parameter("MustStopRegex", typeof(string), "Trigger a fault and stop fuzzing when regex matches", "")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -41,8 +42,10 @@ namespace Peach.Enterprise.Agent.Monitors
 		AndroidDevice dev = null;
 		Regex reFault;
 		Regex reIgnore;
+		Regex reStop;
 		List<AndroidDevice.LogEntry> logs;
 		bool reboot;
+		bool stop;
 
 		public string ApplicationName { get; protected set; }
 		public string AdbPath { get; protected set; }
@@ -62,6 +65,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public bool RebootOnFault { get; protected set; }
 		public string FaultRegex { get; protected set; }
 		public string IgnoreRegex { get; protected set; }
+		public string MustStopRegex { get; protected set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -75,6 +79,9 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (!string.IsNullOrEmpty(IgnoreRegex))
 				reIgnore = new Regex(IgnoreRegex, RegexOptions.Multiline);
+
+			if (!string.IsNullOrEmpty(MustStopRegex))
+				reStop = new Regex(MustStopRegex, RegexOptions.Multiline);
 		}
 
 		string CheckForErrors()
@@ -85,8 +92,21 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				var line = log.ToString();
 
-				if (reFault.Match(line).Success && (reIgnore == null || !reIgnore.Match(line).Success))
-					sb.AppendLine(log.ToStringLong());
+				if (reFault.Match(line).Success)
+				{
+					if (reIgnore == null || !reIgnore.Match(line).Success)
+					{
+						sb.AppendLine(log.ToStringLong());
+					}
+				}
+				else if (reStop != null && reStop.Match(line).Success)
+				{
+					if (reIgnore == null || !reIgnore.Match(line).Success)
+					{
+						sb.AppendLine(log.ToStringLong());
+						stop = true;
+					}
+				}
 			}
 
 			return sb.ToString();
@@ -357,7 +377,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool MustStop()
 		{
-			return false;
+			return stop;
 		}
 
 		public override Variant Message(string name, Variant data)
