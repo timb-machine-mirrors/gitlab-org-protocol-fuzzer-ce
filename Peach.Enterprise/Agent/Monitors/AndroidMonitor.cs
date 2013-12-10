@@ -152,7 +152,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			//guard("capture screenshot", () =>
 			//{
 			//    var bytes = dev.TakeScreenshot();
-			//    ret.collectedData.Add(new Fault.Data("{0}_screenshot.png".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+			//    ret.collectedData.Add(new Fault.Data("screenshot.png", bytes));
 			//});
 
 			// Step 3: Grab full logcat
@@ -165,7 +165,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					foreach (var msg in logs)
 						writer.WriteLine(msg.ToStringLong());
 
-					ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceMonitor ?? dev.SerialNumber), ms.ToArray()));
+					ret.collectedData.Add(new Fault.Data("logcat", ms.ToArray()));
 				}
 			});
 
@@ -179,7 +179,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					foreach (var tomb in dev.CrashDumps())
 					{
 						dev.PullFile(tomb, tmp);
-						ret.collectedData.Add(new Fault.Data("{0}_{1}".Fmt(DeviceMonitor ?? dev.SerialNumber, tomb.Name), System.IO.File.ReadAllBytes(tmp)));
+						ret.collectedData.Add(new Fault.Data(tomb.Name, System.IO.File.ReadAllBytes(tmp)));
 						dev.DeleteFile(tomb);
 					}
 				}
@@ -194,7 +194,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				var errors = sb.ToString();
 				var bytes = Encoding.UTF8.GetBytes(errors);
-				ret.collectedData.Add(new Fault.Data("{0}_exceptions".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+				ret.collectedData.Add(new Fault.Data("exceptions", bytes));
 			}
 
 			// Step 6: Update bucketing information
