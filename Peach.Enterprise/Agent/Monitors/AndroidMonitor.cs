@@ -30,6 +30,7 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("FaultWaitTime", typeof(int), "Milliseconds to wait when checking for a fault (default 0)", "0")]
 	[Parameter("FaultRegex", typeof(string), "Regex to determine if a log entry triggers a fault", "(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)")]
 	[Parameter("IgnoreRegex", typeof(string), "Regex to ignore potential false positive fault matches", "")]
+	[Parameter("MustStopRegex", typeof(string), "Trigger a fault and stop fuzzing when regex matches", "")]
 	public class AndroidMonitor : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -41,8 +42,10 @@ namespace Peach.Enterprise.Agent.Monitors
 		AndroidDevice dev = null;
 		Regex reFault;
 		Regex reIgnore;
+		Regex reStop;
 		List<AndroidDevice.LogEntry> logs;
 		bool reboot;
+		bool stop;
 
 		public string ApplicationName { get; protected set; }
 		public string AdbPath { get; protected set; }
@@ -62,6 +65,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		public bool RebootOnFault { get; protected set; }
 		public string FaultRegex { get; protected set; }
 		public string IgnoreRegex { get; protected set; }
+		public string MustStopRegex { get; protected set; }
 
 		public AndroidMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -75,19 +79,37 @@ namespace Peach.Enterprise.Agent.Monitors
 
 			if (!string.IsNullOrEmpty(IgnoreRegex))
 				reIgnore = new Regex(IgnoreRegex, RegexOptions.Multiline);
+
+			if (!string.IsNullOrEmpty(MustStopRegex))
+				reStop = new Regex(MustStopRegex, RegexOptions.Multiline);
 		}
 
 		string CheckForErrors()
 		{
+			var sb = new System.Text.StringBuilder();
+
 			foreach (var log in logs)
 			{
 				var line = log.ToString();
 
-				if (reFault.Match(line).Success && (reIgnore == null || !reIgnore.Match(line).Success))
-					return log.ToStringLong();
+				if (reFault.Match(line).Success)
+				{
+					if (reIgnore == null || !reIgnore.Match(line).Success)
+					{
+						sb.AppendLine(log.ToStringLong());
+					}
+				}
+				else if (reStop != null && reStop.Match(line).Success)
+				{
+					if (reIgnore == null || !reIgnore.Match(line).Success)
+					{
+						sb.AppendLine(log.ToStringLong());
+						stop = true;
+					}
+				}
 			}
 
-			return null;
+			return sb.ToString();
 		}
 
 		Fault MakeFault(string errorLog)
@@ -130,7 +152,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			//guard("capture screenshot", () =>
 			//{
 			//    var bytes = dev.TakeScreenshot();
-			//    ret.collectedData.Add(new Fault.Data("{0}_screenshot.png".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+			//    ret.collectedData.Add(new Fault.Data("screenshot.png", bytes));
 			//});
 
 			// Step 3: Grab full logcat
@@ -143,7 +165,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					foreach (var msg in logs)
 						writer.WriteLine(msg.ToStringLong());
 
-					ret.collectedData.Add(new Fault.Data("{0}_logcat".Fmt(DeviceMonitor ?? dev.SerialNumber), ms.ToArray()));
+					ret.collectedData.Add(new Fault.Data("logcat", ms.ToArray()));
 				}
 			});
 
@@ -157,7 +179,7 @@ namespace Peach.Enterprise.Agent.Monitors
 					foreach (var tomb in dev.CrashDumps())
 					{
 						dev.PullFile(tomb, tmp);
-						ret.collectedData.Add(new Fault.Data("{0}_{1}".Fmt(DeviceMonitor ?? dev.SerialNumber, tomb.Name), System.IO.File.ReadAllBytes(tmp)));
+						ret.collectedData.Add(new Fault.Data(tomb.Name, System.IO.File.ReadAllBytes(tmp)));
 						dev.DeleteFile(tomb);
 					}
 				}
@@ -172,11 +194,11 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				var errors = sb.ToString();
 				var bytes = Encoding.UTF8.GetBytes(errors);
-				ret.collectedData.Add(new Fault.Data("{0}_exceptions".Fmt(DeviceMonitor ?? dev.SerialNumber), bytes));
+				ret.collectedData.Add(new Fault.Data("exceptions", bytes));
 			}
 
 			// Step 6: Update bucketing information
-			if (errorLog != null)
+			if (!string.IsNullOrEmpty(errorLog))
 			{
 				var match = reHash.Match(errorLog);
 
@@ -355,7 +377,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 		public override bool MustStop()
 		{
-			return false;
+			return stop;
 		}
 
 		public override Variant Message(string name, Variant data)

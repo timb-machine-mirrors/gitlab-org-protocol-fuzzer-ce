@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from waflib import Utils
 
 deps = [
 	'NLog.dll',
@@ -21,4 +22,4 @@ bld(
 )
 
 if bld.env.MCS and bld.env.DEST_OS != "win32":
-	bld.install_files('${BINDIR}','pf_controller')
+	bld.install_files('${BINDIR}','pf_controller', chmod=Utils.O755)
