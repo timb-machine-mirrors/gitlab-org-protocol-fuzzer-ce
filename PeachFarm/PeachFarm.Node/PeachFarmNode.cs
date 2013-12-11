@@ -395,7 +395,6 @@ namespace PeachFarm.Node
 			Peach.Core.Dom.Dom dom = null;
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
-			string jobid = nodeState.StartPeachRequest.JobID;
 			Dictionary<string, object> parserArgs = new Dictionary<string, object>();
 			Dictionary<string, string> defines = new Dictionary<string, string>();
 
