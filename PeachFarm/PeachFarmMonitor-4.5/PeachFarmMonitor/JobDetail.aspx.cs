@@ -156,7 +156,7 @@ namespace PeachFarmMonitor
 			{
 				string settings = (string)Session[key];
 				loadPersister.LoadSettings(settings);
-				faultsGrid.Rebind();
+				//faultsGrid.Rebind();
 			}
     }
 
@@ -189,10 +189,8 @@ namespace PeachFarmMonitor
           var group = ((GridDataItem)e.Item)["FolderName"].Text;
 					ViewState[ViewStateNames.CurrentGroup] = group;
 
-          var faults = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
-
-          faultsGrid.DataSource = faults;
-          faultsGrid.MasterTableView.VirtualItemCount = Convert.ToInt32(((GridDataItem)e.Item)["FaultCount"].Text);
+					faultsGrid.DataSource = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
+					faultsGrid.VirtualItemCount = Convert.ToInt32(((GridDataItem)e.Item)["FaultCount"].Text);
           faultsGrid.DataBind();
 
           break;
@@ -204,22 +202,13 @@ namespace PeachFarmMonitor
     void faultsGrid_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
     {
       string currentGroup = ViewState[ViewStateNames.CurrentGroup] as string;
-      if ((e.IsFromDetailTable == false) && (String.IsNullOrEmpty(currentGroup) == false))
-      {
-        int pagesize = faultsGrid.MasterTableView.PageSize;
-        int pageindex = faultsGrid.MasterTableView.CurrentPageIndex;
-        var faults = JobDetailData.GetFaults(jobid, currentGroup, pagesize, pageindex);
-        faultsGrid.DataSource = faults;
-        //faultsGrid.DataBind();
-
-        //if (faults.Count < pagesize)
-        //{
-        //  int totalpages = pageindex + 1;
-        //  int totalrecords = ((totalpages - 1) * pagesize) + faults.Count;
-        //  faultsGrid.MasterTableView.VirtualItemCount = totalrecords;
-        //}
-      }
-			//faultsGrid.NeedDataSource -= faultsGrid_NeedDataSource;
+			if ((e.IsFromDetailTable == false) && (String.IsNullOrEmpty(currentGroup) == false))
+			{
+				int pagesize = faultsGrid.PageSize;
+				int pageindex = faultsGrid.CurrentPageIndex;
+				var faults = JobDetailData.GetFaults(jobid, currentGroup, pagesize, pageindex);
+				faultsGrid.DataSource = faults;
+			}
 		}
     
     protected void faultsGrid_DetailTableDataBind(object sender, Telerik.Web.UI.GridDetailTableDataBindEventArgs e)
@@ -313,12 +302,12 @@ namespace PeachFarmMonitor
         List<Fault> faults = null;
         if (pageSize == 0)
         {
-          faults = collection.Find(query).ToList();
+					faults = collection.Find(query).SetSortOrder(SortBy.Ascending("Iteration")).OrderBy((f) => f.Iteration).ToList();
         }
         else
         {
           int skip = pageIndex * pageSize;
-          faults = collection.Find(query).SetSkip(skip).SetLimit(pageSize).ToList();
+					faults = collection.Find(query).SetSortOrder(SortBy.Ascending("Iteration")).SetSkip(skip).SetLimit(pageSize).ToList();
         }
 
         foreach (var fault in faults)

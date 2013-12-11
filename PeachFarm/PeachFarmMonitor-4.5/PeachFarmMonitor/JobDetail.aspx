@@ -164,19 +164,18 @@
 	        </div>
           <telerik:RadGrid 
             ID="faultsGrid" runat="server" 
-            Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid"
+            Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid" 
+						AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
             AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None" AllowFilteringByColumn="False">
             <ClientSettings>
               <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
+            <PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
             <MasterTableView
-							
-              AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
               Caption="Faults"
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
-              <PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
               <ExpandCollapseColumn Visible="True" Resizable="true" />
               <Columns>
                 <telerik:GridBoundColumn DataField="Title" AllowFiltering="False" HeaderText="Title" />
