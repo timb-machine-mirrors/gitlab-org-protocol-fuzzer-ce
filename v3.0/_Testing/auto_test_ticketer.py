@@ -1,0 +1,157 @@
+import requests
+import json
+import os
+
+from getpass import getpass
+
+# This is for internal use at deja vu only. It points at our enterprise installation.
+BASE_URL = "https://github/api/v3"
+HEADERS  = {'Content-Type': 'application/json'}
+# Our enterprise installation ssl cert isn't registered. Need to set auth here.
+REQKWARGS = { 'auth':(None, None), 'headers':HEADERS, 'verify':False}
+_PREV_RUN_NUMS = {} # this is the only nasty thing I don't like about this script :(
+
+################################################################################
+################################################################################
+
+def get_open_tickets(repo_owner, repo_name):
+    tickets = requests.get(
+        "%s/repos/%s/%s/issues" % (BASE_URL, repo_owner, repo_name),
+        **REQKWARGS
+    )
+    return json.loads(tickets.content)
+
+def get_prev_run_num(pit_os):
+    # cache that crap b/c i forgot to think about it while designing this
+    global _PREV_RUN_NUMS
+    if pit_os in _PREV_RUN_NUMS:
+        return _PREV_RUN_NUMS[pit_os]
+    # if the formatting here changes, there be trouble (work to do b/c teh bugz)
+    import re
+    reg = re.compile('#\d+')
+    g = requests.get('http://10.0.1.76:8011/builders/%s_pits' % pit_os)
+    recent_runs = sorted(map(lambda x: int(x.strip('#')), reg.findall(g.content)))
+    previous_run = recent_runs.pop() # last item
+    _PREV_RUN_NUMS[pit_os] = previous_run
+    return previous_run
+
+def get_problem_tests(pit_os, run_num):
+    assert pit_os in ['osx', 'win', 'lin'], "not a valid operating system abbrev"
+    ptests_indicator = 'Problem tests: '
+    url = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num)
+    run_info_raw = requests.get(url)
+    problem_tests_line = next(n for n in run_info_raw.content.split('\n') if n.startswith(ptests_indicator))
+    problem_tests = problem_tests_line.lstrip(ptests_indicator).split(' ')
+    return list(set(problem_tests))
+
+def format_ticket_name(pit, os):
+    return "Test run : %s : %s" % (os, pit)
+
+def reverse_ticket_format(ticket_title):
+    _junk, pit_os, pit = ticket_title.split(' : ')
+    return pit.strip(), pit_os.strip() # strip just in case
+
+def open_new_ticket(repo_owner, repo_name, pit, pit_os, run_num):
+    print "Opening ticket for %s on %s" % (pit, pit_os)
+    ticket_data = {
+        'title'     :  format_ticket_name(pit, pit_os),
+        'body'      :  'Nightly automated test failing as of run #%s' % (run_num),
+        #'assignee'  :  '', # can be empty
+        'labels'    : ['automated'],
+    }
+
+    r = requests.post(
+        "%s/repos/%s/%s/issues" % (BASE_URL, repo_owner, repo_name),
+        data=json.dumps(ticket_data),
+        **REQKWARGS
+    )
+    if 200 >= int(r.status_code) > 300:
+        raise Exception("Received non 200 statuscode (%s) when opening ticket" % str(r.status_code))
+
+def close_ticket(t):
+    # self explanitory
+    print "Closing ticket: \"%s\"" % (t['title'])
+
+    t['state'] = 'closed'
+
+    r = requests.post(
+        t['url'],
+        data=json.dumps(t),
+        **REQKWARGS
+    )
+    if 200 >= int(r.status_code) > 300:
+        raise Exception("Received non 200 statuscode (%s) when closing ticket" % str(r.status_code))
+
+def is_auto_ticket(t):
+    # is this an automated ticket??
+    # ticket is a dict serialized in from the github api
+    ticket_labels = [ b['name'] for b in t['labels'] ]
+    return (    t['title'].startswith('Test run : ')
+            and t['title'].count(' : ') == 2
+            and 'automated' in ticket_labels)
+
+def close_resolved_tickets(problem_tests, all_tickets):
+    # close open tickets that are now resolved
+    # all_tickets = dict serialized from our enterprise github's API
+
+    # format of ticket_test_combos = [(<pit name>, <pit_os>)*]
+    ticket_test_combos = [reverse_ticket_format(t['title']) for t in all_tickets if is_auto_ticket(t) ]
+    for ptest, pit_os in ticket_test_combos:
+        if ptest not in problem_tests[pit_os]:
+            ticket_for_ptest = next(t for t in all_tickets if t['title'] == format_ticket_name(ptest, pit_os))
+            close_ticket(ticket_for_ptest)
+
+def universal_failures(*ptest_lists):
+    """
+    @param ptests: a list of problem tests per operating system
+    if a test is in bad on all op sys add it to the list
+    """
+    fails = []
+    assert(len(ptest_lists) != 0)
+    for test in ptest_lists[0]:
+        # does every list contain this item?
+        if all([ test in test_list for test_list in ptest_lists]):
+            fails.append(test)
+    return fails
+
+################################################################################
+################################################################################
+
+if __name__ == '__main__':
+    username = os.environ.get('GH_API_USER') or getpass('Github User: ')
+    password_or_token = os.environ.get('GH_API_TOKEN') or getpass('Github Token or Password: ')
+
+    REQKWARGS['auth'] = (username, password_or_token)
+
+    lin_ptests = get_problem_tests("lin", get_prev_run_num('lin'))
+    osx_ptests = get_problem_tests("osx", get_prev_run_num('osx'))
+    win_ptests = get_problem_tests("win", get_prev_run_num('win'))
+
+    # only open ONE ticket if a test fails on all operating systems. it is
+    # likely the same problem in all places (but not necessarily)
+    failed_all = universal_failures(lin_ptests, osx_ptests, win_ptests)
+
+    lin_ptests = filter(lambda test: test not in failed_all, lin_ptests)
+    osx_ptests = filter(lambda test: test not in failed_all, osx_ptests)
+    win_ptests = filter(lambda test: test not in failed_all, win_ptests)
+
+    all_ptests = {
+        'lin': lin_ptests,
+        'osx': osx_ptests,
+        'win': win_ptests,
+        'all': failed_all,
+    }
+
+    tickets = get_open_tickets('dejavu', 'pits')
+
+    for pit_os, ptests in all_ptests.items():
+        for pit in ptests:
+            ticket_title = format_ticket_name(pit, pit_os)
+            does_ticket_exist = ticket_title in [ t['title'] for t in tickets ]
+            if not does_ticket_exist:
+                open_new_ticket('dejavu', 'pits', pit, pit_os, get_prev_run_num(pit_os))
+            else:
+                print "Ticket already exists for %s on %s" % (pit, pit_os)
+    close_resolved_tickets(all_ptests, tickets)
+
+
