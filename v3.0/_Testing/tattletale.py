@@ -9,7 +9,7 @@ BASE_URL = "https://github/api/v3"
 HEADERS  = {'Content-Type': 'application/json'}
 # Our enterprise installation ssl cert isn't registered. Need to set auth here.
 REQKWARGS = { 'auth':(None, None), 'headers':HEADERS, 'verify':False}
-_PREV_RUN_NUMS = {} # this is the only nasty thing I don't like about this script :(
+_PREV_RUN_NUMS = { 'all': 'n/a' } # this is the only nasty thing I don't like about this script :(
 
 ################################################################################
 ################################################################################
