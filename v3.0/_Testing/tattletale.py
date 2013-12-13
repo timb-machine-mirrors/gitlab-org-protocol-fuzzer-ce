@@ -1,8 +1,23 @@
+'''
+General Notes:
+
+- rate limiting (should be) disabled by default on enterprise installations.
+this should not cause a problem for you.
+
+- api calls generally paginate results if there are more than 30 entries.
+examine the link header values and parse out some rel's to get the rest of
+what you're after
+
+'''
+
 import requests
 import json
 import os
+try:    import ipdb as pdb
+except: import  pdb
 
 from getpass import getpass
+from copy    import deepcopy
 
 # This is for internal use at deja vu only. It points at our enterprise installation.
 BASE_URL = "https://github/api/v3"
@@ -10,16 +25,42 @@ HEADERS  = {'Content-Type': 'application/json'}
 # Our enterprise installation ssl cert isn't registered. Need to set auth here.
 REQKWARGS = { 'auth':(None, None), 'headers':HEADERS, 'verify':False}
 _PREV_RUN_NUMS = { 'all': 'n/a' } # this is the only nasty thing I don't like about this script :(
+_NEUTER = False
+_dbg = None
 
 ################################################################################
 ################################################################################
 
 def get_open_tickets(repo_owner, repo_name):
-    tickets = requests.get(
-        "%s/repos/%s/%s/issues" % (BASE_URL, repo_owner, repo_name),
-        **REQKWARGS
-    )
-    return json.loads(tickets.content)
+    issues_url = "%s/repos/%s/%s/issues" % (BASE_URL, repo_owner, repo_name)
+    all_the_tickets = []
+    has_next_link = False
+    req = None
+
+    print "Getting issues from: " + issues_url
+
+    while req is None or has_next_link:
+        if has_next_link: get_url = next_link
+        else:             get_url = issues_url
+
+        req = requests.get(get_url, **REQKWARGS)
+        if not (200 <= int(r.status_code) < 300):
+            global dbg
+            dbg = r
+            raise Exception("Received non 200 statuscode (%s) when opening ticket" % str(r.status_code))
+
+        all_the_tickets.extend(json.loads(req.content))
+        # link should be there if there's more than one 'page' of items
+        if 'link' in req.headers and 'next' in req.headers['link']:
+            has_next_link = True
+            links = req.headers['link'].split(',')
+            next_link = next(k for k in links if 'rel="next"' in k)
+            next_link = next_link.split(';')[0]
+            next_link = next_link.strip(' <>')
+        else:
+            has_next_link = False
+
+    return all_the_tickets
 
 def get_prev_run_num(pit_os):
     # cache that crap b/c i forgot to think about it while designing this
@@ -35,14 +76,20 @@ def get_prev_run_num(pit_os):
     _PREV_RUN_NUMS[pit_os] = previous_run
     return previous_run
 
+def get_link_to_test_run(pit_os, run_num):
+    return "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num) 
+
 def get_problem_tests(pit_os, run_num):
     assert pit_os in ['osx', 'win', 'lin'], "not a valid operating system abbrev"
     ptests_indicator = 'Problem tests: '
-    url = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num)
+    url = get_link_to_test_run(pit_os, run_num)
     run_info_raw = requests.get(url)
     problem_tests_line = next(n for n in run_info_raw.content.split('\n') if n.startswith(ptests_indicator))
     problem_tests = problem_tests_line.lstrip(ptests_indicator).split(' ')
-    return list(set(problem_tests))
+    # the last test from win ptestline will have a '\r' on it :/ so strip
+    problem_tests = map(lambda s: s.strip(), problem_tests)
+    problem_tests = list(set(problem_tests))
+    return problem_tests
 
 def format_ticket_name(pit, os):
     return "Test run : %s : %s" % (os, pit)
@@ -53,6 +100,12 @@ def reverse_ticket_format(ticket_title):
 
 def open_new_ticket(repo_owner, repo_name, pit, pit_os, run_num):
     print "Opening ticket for %s on %s" % (pit, pit_os)
+    if '\r' in t['title']:
+        print "Funny Business ticket title ticket:"
+        print t['title'], '\n'
+        t['title'] = t['title'].replace('\r', '')
+    if _NEUTER: return
+
     ticket_data = {
         'title'     :  format_ticket_name(pit, pit_os),
         'body'      :  'Nightly automated test failing as of run #%s' % (run_num),
@@ -65,21 +118,30 @@ def open_new_ticket(repo_owner, repo_name, pit, pit_os, run_num):
         data=json.dumps(ticket_data),
         **REQKWARGS
     )
-    if 200 >= int(r.status_code) > 300:
+    if not (200 <= int(r.status_code) < 300):
+        global dbg
+        dbg = r
         raise Exception("Received non 200 statuscode (%s) when opening ticket" % str(r.status_code))
 
 def close_ticket(t):
-    # self explanitory
+    if '\r' in t['title']:
+        print "Funny Business ticket title ticket:"
+        print t['title'], '\n'
     print "Closing ticket: \"%s\"" % (t['title'])
+    if _NEUTER: return
 
-    t['state'] = 'closed'
+    allowed_fields = ['title', 'body', 'url', 'state', 'milestone', 'labels']
+    copyt = dict( (k, t[k]) for k in t.keys() if k in allowed_fields )
+    copyt['state'] = 'closed'
 
     r = requests.post(
-        t['url'],
-        data=json.dumps(t),
+        copyt['url'],
+        data=json.dumps(copyt),
         **REQKWARGS
     )
-    if 200 >= int(r.status_code) > 300:
+    if not (200 <= int(r.status_code) < 300):
+        global dbg
+        dbg = { 'request': r, 'ticket': copyt }
         raise Exception("Received non 200 statuscode (%s) when closing ticket" % str(r.status_code))
 
 def is_auto_ticket(t):
@@ -95,10 +157,10 @@ def close_resolved_tickets(problem_tests, all_tickets):
     # all_tickets = dict serialized from our enterprise github's API
 
     # format of ticket_test_combos = [(<pit name>, <pit_os>)*]
-    ticket_test_combos = [reverse_ticket_format(t['title']) for t in all_tickets if is_auto_ticket(t) ]
+    ticket_test_combos = [reverse_ticket_format(t['title'].strip()) for t in all_tickets if is_auto_ticket(t) ]
     for ptest, pit_os in ticket_test_combos:
         if ptest not in problem_tests[pit_os]:
-            ticket_for_ptest = next(t for t in all_tickets if t['title'] == format_ticket_name(ptest, pit_os))
+            ticket_for_ptest = next(t for t in all_tickets if t['title'].strip() == format_ticket_name(ptest, pit_os))
             close_ticket(ticket_for_ptest)
 
 def universal_failures(*ptest_lists):
@@ -117,7 +179,7 @@ def universal_failures(*ptest_lists):
 ################################################################################
 ################################################################################
 
-if __name__ == '__main__':
+def main():
     username = os.environ.get('GH_API_USER') or getpass('Github User: ')
     password_or_token = os.environ.get('GH_API_TOKEN') or getpass('Github Token or Password: ')
 
@@ -155,3 +217,5 @@ if __name__ == '__main__':
     close_resolved_tickets(all_ptests, tickets)
 
 
+if __name__ == '__main__':
+    main()
