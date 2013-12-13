@@ -23,6 +23,14 @@
 			<Param name="CpuKill" value="true"/>
 		</Monitor>
 	</Agent>
+	
+	<Agent name="OsxAgent">
+		<Monitor class="CrashWrangler">
+			<Param name="Command" value="##Target##"/>
+			<Param name="Arguments" value="fuzzed.ico"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+		</Monitor>
+	</Agent>
 
 	<Test name="Default">
 		<Agent ref="##Agent##"/>
