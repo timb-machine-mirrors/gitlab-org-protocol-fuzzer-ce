@@ -268,7 +268,7 @@ namespace PeachFarm.Node
 					{
 						if (request != null)
 						{
-							StartPeachCleanUp(request.JobID);
+							StartPeachCleanUp();
 						}
 						throw ex;
 					}
@@ -296,7 +296,7 @@ namespace PeachFarm.Node
 				if ((request != null) && (request.JobID != nodeState.StartPeachRequest.JobID))
 					return;
 
-				StopFuzzer(request.JobID);
+				StopFuzzer();
 
 				
 			}
@@ -369,7 +369,20 @@ namespace PeachFarm.Node
 
 			BackgroundWorker peachWorker = new BackgroundWorker();
 			peachWorker.DoWork += new DoWorkEventHandler(peachWorker_DoWork);
+			peachWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(peachWorker_RunWorkerCompleted);
 			peachWorker.RunWorkerAsync();
+		}
+
+		void peachWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			if (e.Result != null)
+			{
+				if (e.Result is Heartbeat)
+				{
+					SendHeartbeat((Heartbeat)e.Result);
+				}
+			}
+			StartPeachCleanUp();
 		}
 
 		#endregion
@@ -382,7 +395,6 @@ namespace PeachFarm.Node
 			Peach.Core.Dom.Dom dom = null;
 
 			Environment.CurrentDirectory = Path.GetDirectoryName(nodeState.PitFilePath);
-			string jobid = nodeState.StartPeachRequest.JobID;
 			Dictionary<string, object> parserArgs = new Dictionary<string, object>();
 			Dictionary<string, string> defines = new Dictionary<string, string>();
 
@@ -395,8 +407,7 @@ namespace PeachFarm.Node
 				catch (Exception ex)
 				{
 					string message = "Exception on Defines parse:\n" + ex.ToString();
-					StopPeach(message);
-					StartPeachCleanUp(jobid);
+					e.Result = CreateHeartbeat(message);
 					return;
 				}
 			}
@@ -411,11 +422,10 @@ namespace PeachFarm.Node
 			catch (Peach.Core.PeachException ex)
 			{
 				string message = "Exception on Pit parse:\n" + ex.ToString();
-				StopPeach(message);
-				StartPeachCleanUp(jobid);
+				e.Result = CreateHeartbeat(message);
 				return;
 			}
-
+			//*
 			List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
 
 			var jobnodefolder = String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueue)[0]);
@@ -438,7 +448,16 @@ namespace PeachFarm.Node
 				mongoargs.Add("RabbitUser", new Peach.Core.Variant(nodeState.RabbitMq.UserName));
 				mongoargs.Add("RabbitPassword", new Peach.Core.Variant(nodeState.RabbitMq.Password));
 				mongoargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL.ToString(), "system.boolean"));
-				loggers.Add(new PeachFarm.Loggers.PeachFarmLogger(mongoargs));
+				try
+				{
+					loggers.Add(new PeachFarm.Loggers.PeachFarmLogger(mongoargs));
+				}
+				catch (Exception ex)
+				{
+					var message = String.Format("Error Starting Peach ({0}):\n{1}", nodeState.StartPeachRequest.JobID, ex.Message);
+					e.Result = CreateHeartbeat(message);
+					return;
+				}
 			}
 
 			Dictionary<string, Peach.Core.Variant> metricsargs = new Dictionary<string, Peach.Core.Variant>();
@@ -449,7 +468,16 @@ namespace PeachFarm.Node
 			metricsargs.Add("RabbitUser", new Peach.Core.Variant(nodeState.RabbitMq.UserName));
 			metricsargs.Add("RabbitPassword", new Peach.Core.Variant(nodeState.RabbitMq.Password));
 			metricsargs.Add("RabbitUseSSL", new Peach.Core.Variant(nodeState.RabbitMq.SSL.ToString(), "system.boolean"));
-			loggers.Add(new PeachFarm.Loggers.MetricsRabbitLogger(metricsargs));
+			try
+			{
+				loggers.Add(new PeachFarm.Loggers.MetricsRabbitLogger(metricsargs));
+			}
+			catch (Exception ex)
+			{
+				var message = String.Format("Error Starting Peach ({0}):\n{1}", nodeState.StartPeachRequest.JobID, ex.Message);
+				e.Result = CreateHeartbeat(message);
+				return;
+			}
 
 
 
@@ -480,31 +508,31 @@ namespace PeachFarm.Node
 			}
 			catch (Peach.Core.PeachException pex)
 			{
-				string message = "PeachException:\n" + pex.ToString();
-				SendHeartbeat(CreateHeartbeat(message));
+				string message = String.Format("Peach Exception during job ({0}):\n{1}", nodeState.StartPeachRequest.JobID, pex.ToString());
+				e.Result = CreateHeartbeat(message);
 			}
 			catch (Exception ex)
 			{
-				string message = String.Format("Unknown Exception from Peach:\n{0}", ex.ToString());
-				SendHeartbeat(CreateHeartbeat(message));
+				string message = String.Format("Unknown Exception from Peach during job {0}:\n{1}", nodeState.StartPeachRequest.JobID, ex.ToString());
+				e.Result = CreateHeartbeat(message);
 			}
-			finally
-			{
-				StartPeachCleanUp(jobid);
-			}
+			//*/
 		}
 
-		private void StartPeachCleanUp(string jobid)
+		private void StartPeachCleanUp()
 		{
 			Environment.CurrentDirectory = nodeState.RootDirectory;
-			string temppath = Path.Combine(nodeState.RootDirectory, "jobtmp", jobid);
-			if (Directory.Exists(temppath))
+			if (nodeState.StartPeachRequest != null)
 			{
-				try
+				string temppath = Path.Combine(nodeState.RootDirectory, "jobtmp", nodeState.StartPeachRequest.JobID);
+				if (Directory.Exists(temppath))
 				{
-					Directory.Delete(temppath, true);
+					try
+					{
+						Directory.Delete(temppath, true);
+					}
+					catch { }
 				}
-				catch { }
 			}
 			ChangeStatus(Common.Messages.Status.Alive);
 			nodeState.Reset();
@@ -579,7 +607,7 @@ namespace PeachFarm.Node
 			return heartbeat;
 		}
 
-		private void StopFuzzer(string jobid = null)
+		private void StopFuzzer()
 		{
 			if (nodeState.RunContext != null)
 			{
@@ -590,7 +618,7 @@ namespace PeachFarm.Node
 			}
 			else
 			{
-				StartPeachCleanUp(jobid);
+				StartPeachCleanUp();
 			}
 		}
 

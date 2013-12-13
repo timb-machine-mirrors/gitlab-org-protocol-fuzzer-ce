@@ -184,30 +184,38 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				System.Diagnostics.Debug.Assert(port != 0);
 
-				using (var cli = new TcpClient("127.0.0.1", port))
+				try
 				{
-					logger.Debug("Sending stop command to emulator '{0}'", deviceSerial);
-					var cmd = Encoding.ASCII.GetBytes("kill\n");
-
-					cli.Client.Send(cmd);
-					cli.Client.Shutdown(SocketShutdown.Send);
-
-					int len;
-					do
+					using (var cli = new TcpClient("127.0.0.1", port))
 					{
-						try
-						{
-							len = cli.Client.Receive(cmd);
-						}
-						catch (SocketException)
-						{
-							len = 0;
-						}
-					}
-					while (len > 0);
-				}
+						logger.Debug("Sending stop command to emulator '{0}'", deviceSerial);
+						var cmd = Encoding.ASCII.GetBytes("kill\n");
 
-				logger.Debug("Waiting for emulator '{0}' to exit", deviceSerial);
+						cli.Client.Send(cmd);
+						cli.Client.Shutdown(SocketShutdown.Send);
+
+						int len;
+						do
+						{
+							try
+							{
+								len = cli.Client.Receive(cmd);
+							}
+							catch (SocketException)
+							{
+								len = 0;
+							}
+						}
+						while (len > 0);
+
+						logger.Debug("Waiting for emulator '{0}' to exit", deviceSerial);
+					}
+				}
+				catch (Exception ex)
+				{
+					logger.Debug("Error when trying to gracefully stop emulator '{0}'. {1}", deviceSerial, ex.Message);
+					thread.Abort();
+				}
 
 				thread.Join();
 				thread = null;
