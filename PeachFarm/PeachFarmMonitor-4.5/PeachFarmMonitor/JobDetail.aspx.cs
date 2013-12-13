@@ -190,7 +190,7 @@ namespace PeachFarmMonitor
 					ViewState[ViewStateNames.CurrentGroup] = group;
 
 					faultsGrid.DataSource = JobDetailData.GetFaults(jobid, group, pagesize, pageindex);
-					faultsGrid.VirtualItemCount = Convert.ToInt32(((GridDataItem)e.Item)["FaultCount"].Text);
+					faultsGrid.MasterTableView.VirtualItemCount = Convert.ToInt32(((GridDataItem)e.Item)["FaultCount"].Text);
           faultsGrid.DataBind();
 
           break;
@@ -204,8 +204,8 @@ namespace PeachFarmMonitor
       string currentGroup = ViewState[ViewStateNames.CurrentGroup] as string;
 			if ((e.IsFromDetailTable == false) && (String.IsNullOrEmpty(currentGroup) == false))
 			{
-				int pagesize = faultsGrid.PageSize;
-				int pageindex = faultsGrid.CurrentPageIndex;
+				int pagesize = faultsGrid.MasterTableView.PageSize;
+				int pageindex = faultsGrid.MasterTableView.CurrentPageIndex;
 				var faults = JobDetailData.GetFaults(jobid, currentGroup, pagesize, pageindex);
 				faultsGrid.DataSource = faults;
 			}

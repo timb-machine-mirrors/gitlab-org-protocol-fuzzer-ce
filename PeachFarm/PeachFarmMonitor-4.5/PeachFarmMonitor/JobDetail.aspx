@@ -165,18 +165,18 @@
           <telerik:RadGrid 
             ID="faultsGrid" runat="server" 
             Width="100%" Height="100%" ImagesPath="~/App_Themes/DejaVu/Grid" 
-						AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
             AutoGenerateColumns="False" AutoGenerateHierarchy="False" CellSpacing="0" GridLines="None" AllowFilteringByColumn="False">
             <ClientSettings>
               <Resizing AllowColumnResize="false" />
               <Scrolling AllowScroll="true" SaveScrollPosition="true" UseStaticHeaders="true" />
             </ClientSettings>
-            <PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
             <MasterTableView
               Caption="Faults"
+							AllowPaging="true" PageSize="15" AllowCustomPaging="true" VirtualItemCount="1000000"
               NoDetailRecordsText="No faults for this group."
               HierarchyLoadMode="ServerBind">
               <ExpandCollapseColumn Visible="True" Resizable="true" />
+							<PagerStyle PageSizeControlType="None" Mode="NextPrevNumericAndAdvanced" AlwaysVisible="true"  />
               <Columns>
                 <telerik:GridBoundColumn DataField="Title" AllowFiltering="False" HeaderText="Title" />
                 <telerik:GridBoundColumn DataField="Exploitability" AllowFiltering="False" HeaderText="Exploitability" />
@@ -188,7 +188,7 @@
 								<telerik:GridHyperLinkColumn Text="Link/Print" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="~/FaultDetail.aspx?faultid={0}"/>
               </Columns>
               <DetailTables>
-                <telerik:GridTableView  BorderColor="#f57e20" BorderWidth="2"
+                <telerik:GridTableView  BorderColor="#f57e20" BorderWidth="2" AllowPaging="false"
 									Caption="Description" DataMember="Description" HierarchyLoadMode="ServerBind" ShowHeader="false">
                   <Columns>
                     <telerik:GridTemplateColumn DataField="Description">
@@ -198,7 +198,7 @@
                     </telerik:GridTemplateColumn>
                   </Columns>
                 </telerik:GridTableView>
-                <telerik:GridTableView BorderColor="#f57e20" BorderWidth="2"
+                <telerik:GridTableView BorderColor="#f57e20" BorderWidth="2" AllowPaging="false"
                   Caption="Generated Files" DataMember="GeneratedFileViewModels" 
                   HierarchyLoadMode="ServerBind"
                   NoDetailRecordsText="No generated files for this fault.">
