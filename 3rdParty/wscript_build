@@ -25,10 +25,13 @@ bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12
 #Iconic.Zip.dll is already provided in Peach/3rdParty
 #Newtonsoft.Json.dll is already provided in Peach/3rdParty
 
+bld.read_csshlib('Nancy.dll',						paths=['Nancy.0.21.1/lib/net40'])
+bld.read_csshlib('Nancy.Hosting.Self.dll',			paths=['Nancy.Hosting.Self.0.21.1/lib/net40'])
+bld.read_csshlib('Nancy.Serialization.JsonNet.dll',	paths=['Nancy.Serialization.JsonNet.0.21.1/lib/net40'])
 
-bld.read_csshlib('MySql.Data.dll',			paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
-bld.read_csshlib('MySql.Data.Entity.dll',   paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
-bld.read_csshlib('MySql.Web.dll',      paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
+bld.read_csshlib('MySql.Data.dll',					paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
+bld.read_csshlib('MySql.Data.Entity.dll',			paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
+bld.read_csshlib('MySql.Web.dll',					paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
 
 bld.read_csshlib('ServiceStack.Common.dll',              paths=['ServiceStack'])
 bld.read_csshlib('ServiceStack.dll',                     paths=['ServiceStack'])
