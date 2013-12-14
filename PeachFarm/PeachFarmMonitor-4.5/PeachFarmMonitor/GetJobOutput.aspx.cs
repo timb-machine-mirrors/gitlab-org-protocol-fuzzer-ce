@@ -17,6 +17,8 @@ namespace PeachFarmMonitor
   {
     private static PeachFarmMonitorSection monitorconfig = null;
 
+		public static string[] ignoreextensions = new string[] { ".zip", ".pdf" };
+
     protected void Page_Load(object sender, EventArgs e)
     {
       if (!IsPostBack)
@@ -39,15 +41,12 @@ namespace PeachFarmMonitor
             if (String.IsNullOrEmpty(filepath))
             {
               string temppath = Path.GetTempPath();
-
-              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job);
+              FileWriter.DumpFiles(monitorconfig.MongoDb.ConnectionString, temppath, job, ignoreextensions);
               string zippath = ZipWriter.GetZip(job, temppath);
               ((List<string>)Session["tempfiles"]).Add(zippath);
 							((List<string>)Session["tempfiles"]).Add(Path.Combine(temppath, job.JobFolder));
 
-              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}.zip", job.JobFolder));
-              Response.ContentType = "application/zip";
-              Response.WriteFile(zippath);
+							WriteFileToResponse(zippath, job.JobFolder + ".zip");
             }
             else
             {
@@ -59,13 +58,84 @@ namespace PeachFarmMonitor
               DatabaseHelper.DownloadFromGridFS(temppath, filepath, monitorconfig.MongoDb.ConnectionString);
               string filename = Path.GetFileName(filepath);
 
-              Response.AppendHeader("content-disposition", String.Format("attachment; filename={0}", filename));
-              Response.ContentType = "text/plain";
-              Response.WriteFile(temppath);
+							WriteFileToResponse(temppath, filename, "text/plain");
             }
           }
         }
       }
     }
+
+		private void WriteFileToResponse(string filepath, string pathtobrowser, string contentType = "application/octet-stream")
+		{
+			System.IO.Stream iStream = null;
+
+			// Buffer to read 10K bytes in chunk:
+			byte[] buffer = new Byte[10000];
+
+			// Length of the file:
+			int length;
+
+			// Total bytes to read:
+			long dataToRead;
+
+			// Identify the file to download including its path.
+			//string filepath = "DownloadFileName";
+
+			// Identify the file name.
+			string filename = System.IO.Path.GetFileName(filepath);
+
+			try
+			{
+				// Open the file.
+				iStream = new System.IO.FileStream(filepath, System.IO.FileMode.Open,
+							System.IO.FileAccess.Read, System.IO.FileShare.Read);
+
+
+				// Total bytes to read:
+				dataToRead = iStream.Length;
+
+				Response.ContentType = contentType;
+				Response.AddHeader("Content-Disposition", "attachment; filename=" + pathtobrowser);
+
+				// Read the bytes.
+				while (dataToRead > 0)
+				{
+					// Verify that the client is connected.
+					if (Response.IsClientConnected)
+					{
+						// Read the data in buffer.
+						length = iStream.Read(buffer, 0, 10000);
+
+						// Write the data to the current output stream.
+						Response.OutputStream.Write(buffer, 0, length);
+
+						// Flush the data to the HTML output.
+						Response.Flush();
+
+						buffer = new Byte[10000];
+						dataToRead = dataToRead - length;
+					}
+					else
+					{
+						//prevent infinite loop if user disconnects
+						dataToRead = -1;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				// Trap the error, if any.
+				Response.Write("Error : " + ex.Message);
+			}
+			finally
+			{
+				if (iStream != null)
+				{
+					//Close the file.
+					iStream.Close();
+				}
+				Response.Close();
+			}
+		}
   }
 }

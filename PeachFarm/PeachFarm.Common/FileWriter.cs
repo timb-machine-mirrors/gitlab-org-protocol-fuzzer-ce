@@ -15,21 +15,21 @@ namespace PeachFarm.Common
   public class FileWriter
   {
 
-		public static void DumpFiles(string mongoDbConnectionString, string destinationFolder)
+		public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, string[] ignoreextensions = null)
 		{
 			List<Job> jobs = DatabaseHelper.GetAllJobs(mongoDbConnectionString);
 			foreach (Job job in jobs)
 			{
-				ProcessJob(job, mongoDbConnectionString, destinationFolder);
+				ProcessJob(job, mongoDbConnectionString, destinationFolder, ignoreextensions);
 			}
 		}
 
-		public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, string jobID)
+		public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, string jobID, string[] ignoreextensions = null)
 		{
 			Job job = DatabaseHelper.GetJob(jobID, mongoDbConnectionString);
 			if (job != null)
 			{
-				ProcessJob(job, mongoDbConnectionString, destinationFolder);
+				ProcessJob(job, mongoDbConnectionString, destinationFolder, ignoreextensions);
 			}
 			else
 			{
@@ -44,12 +44,12 @@ namespace PeachFarm.Common
     /// <param name="destinationFolder">Where the jobs get stored</param>
     /// <param name="job">The job to write</param>
     /// <returns>Returns zip file path if getZip is true, otherwise empty</returns>
-    public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, Job job)
+		public static void DumpFiles(string mongoDbConnectionString, string destinationFolder, Job job, string[] ignoreextensions = null)
     {
-      ProcessJob(job, mongoDbConnectionString, destinationFolder);
+      ProcessJob(job, mongoDbConnectionString, destinationFolder, ignoreextensions);
     }
 
-		private static void ProcessJob(Job job, string mongoDbConnectionString, string destinationFolder)
+		private static void ProcessJob(Job job, string mongoDbConnectionString, string destinationFolder, string[] ignoreextensions = null)
     {
 			MongoServer server = new MongoClient(mongoDbConnectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
@@ -58,13 +58,17 @@ namespace PeachFarm.Common
 			var files = db.GridFS.Find(query);
 			foreach(var file in files)
 			{
-				string localFile = Path.Combine(destinationFolder, file.Name);
-				CreateDirectory(Path.GetDirectoryName(localFile));
-				try
+				bool ignore = ((ignoreextensions != null) && (ignoreextensions.Contains(Path.GetExtension(file.Name))));
+				if(!ignore)
 				{
-					db.GridFS.Download(localFile, file.Name);
+					string localFile = Path.Combine(destinationFolder, file.Name);
+					CreateDirectory(Path.GetDirectoryName(localFile));
+					try
+					{
+						db.GridFS.Download(localFile, file.Name);
+					}
+					catch { }
 				}
-				catch { }
 			}
 			server.Disconnect();
 		}
