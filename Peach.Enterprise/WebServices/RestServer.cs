@@ -18,7 +18,7 @@ namespace Peach.Enterprise.WebServices
 	{
 		NancyHost _host = null;
 		public int port = 8888;
-		Peach.Core.Engine _engine;
+		Peach.Core.Engine _engine { get; set; }
 
 		public RestServer(Peach.Core.Engine engine)
 		{
@@ -78,7 +78,7 @@ namespace Peach.Enterprise.WebServices
 	public class PeachBootstrapper : DefaultNancyBootstrapper
 	{
 		Peach.Core.Engine _engine = null;
-		RestService _service;
+		RestService _service { get; set; }
 
 		public PeachBootstrapper(Peach.Core.Engine engine) : base()
 		{

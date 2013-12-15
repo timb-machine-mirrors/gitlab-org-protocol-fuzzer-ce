@@ -19,7 +19,7 @@ namespace Peach.Enterprise.WebServices
 
 	public class RestService : Nancy.NancyModule
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+//		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		static RestContext _context = new RestContext();
 
 		public RestService()
