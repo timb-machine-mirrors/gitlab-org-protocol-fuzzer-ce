@@ -17,6 +17,8 @@ namespace Peach.Enterprise.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start the emulator when notified by the state machine", "")]
 	[Parameter("RestartEveryIteration", typeof(bool), "Restart emulator on every iteration", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart emulator after a fault", "true")]
+	[Parameter("StartTimeout", typeof(int), "How many seconds to wait for emulator to start running", "30")]
+	[Parameter("StopTimeout", typeof(int), "How many seconds to wait for emulator to exit", "30")]
 	public class AndroidEmulator : Peach.Core.Agent.Monitor
 	{
 		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -28,6 +30,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		public string StartOnCall { get; protected set; }
 		public bool RestartEveryIteration { get; protected set; }
 		public bool RestartAfterFault { get; protected set; }
+		public int StartTimeout { get; protected set; }
+		public int StopTimeout { get; protected set; }
 
 		bool firstRun;
 		bool fault;
@@ -158,13 +162,30 @@ namespace Peach.Enterprise.Agent.Monitors
 			// Ensure last error is cleared
 			lastError = null;
 
+			// Ensure our wait events are cleared
+			errorEvt.Reset();
+			readyEvt.Reset();
+
+			port = 0;
+			deviceSerial = null;
+
 			thread = new Thread(EmulatorThread);
 			thread.Start();
 
 			var handles = new[] { readyEvt, errorEvt };
-			int idx = WaitHandle.WaitAny(handles);
+			int idx = WaitHandle.WaitAny(handles, StartTimeout * 1000);
 
-			if (handles[idx] == errorEvt)
+			if (idx == WaitHandle.WaitTimeout)
+			{
+				logger.Debug("Timed out waiting for emulator device serial number.");
+
+				thread.Abort();
+				thread.Join();
+				thread = null;
+
+				throw new SoftException("Timed out waiting for emulator device serial number.");
+			}
+			else if (handles[idx] == errorEvt)
 			{
 				thread.Join();
 				thread = null;
@@ -219,9 +240,8 @@ namespace Peach.Enterprise.Agent.Monitors
 
 				thread.Join();
 				thread = null;
-				port = 0;
 
-				logger.Debug("Emulator '{0}' to exited", deviceSerial);
+				logger.Debug("Emulator '{0}' exited", deviceSerial);
 			}
 		}
 
@@ -311,12 +331,20 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 
 			// get the return code from the process
-			proc.WaitForExit();
+			if (!proc.WaitForExit(StopTimeout * 30))
+			{
+				logger.Debug("Timed out waiting for emulator '{0}' to exit, forcibly terminating", deviceSerial ?? "<unknown>");
+				proc.Kill();
+				proc.WaitForExit();
+			}
 
 			// If the exit code is non-zero, signal an error occured
 			var ret = proc.ExitCode;
 			if (ret != 0)
 				errorEvt.Set();
+
+			logger.Debug("Emulator '{0}' exited with code: {1}", deviceSerial ?? "<unknown>", ret);
+
 			return ret;
 		}
 
@@ -335,22 +363,44 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				using (Process proc = Process.Start(psi))
 				{
-					int exitCode = WaitForExit(proc, errorOutput);
-					if (exitCode != 0)
+					try
 					{
-						var sb = new System.Text.StringBuilder();
-						sb.AppendLine("An error occurred running the android emulator.");
-						foreach (var error in errorOutput)
+						int exitCode = WaitForExit(proc, errorOutput);
+						if (exitCode != 0)
 						{
-							sb.AppendLine(error);
+							var sb = new System.Text.StringBuilder();
+							sb.AppendLine("An error occurred running the android emulator.");
+							foreach (var error in errorOutput)
+							{
+								sb.AppendLine(error);
+							}
+							lastError = new SoftException(sb.ToString());
 						}
-						lastError = new PeachException(sb.ToString());
+					}
+					catch (ThreadAbortException)
+					{
+						logger.Debug("Abort while waiting for emulator to exit, killing.");
+
+						try
+						{
+							proc.Kill();
+						}
+						catch (InvalidOperationException)
+						{
+							// Process has alread exited
+						}
+
+						proc.WaitForExit();
 					}
 				}
 			}
+			catch (ThreadAbortException)
+			{
+				// Don't set errorEvt on Thread.Abort()
+			}
 			catch (Exception ex)
 			{
-				lastError = new PeachException("Failed to start the android emulator.", ex);
+				lastError = new SoftException("Failed to start the android emulator.", ex);
 				errorEvt.Set();
 			}
 		}
