@@ -261,8 +261,8 @@ namespace PeachFarm.Admin
 						{
 							clearparameter = extra[0];
 						}
+						mustwait = true;
 						admin.DeleteDataAsync(cleartype, clearparameter);
-						System.Console.WriteLine("Done!");
 					}
 					#endregion
 
@@ -566,13 +566,13 @@ Syntax:
 				pf_admin -report jobID [reprocess]
 
 			Delete all stored data
-				pf_admin.exe -clear -all
+				pf_admin.exe -clear -type=all
 
 			Delete fault detail for job
-				pf_admin.exe -clear -job <jobID>
+				pf_admin.exe -clear -type=job <jobID>
 
 			Delete fault detail for all jobs matching target
-				pf_admin.exe -clear -target <target>
+				pf_admin.exe -clear -type=target <target>
 
 Commands:
 
