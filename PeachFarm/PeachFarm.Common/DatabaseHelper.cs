@@ -35,7 +35,7 @@ namespace PeachFarm.Common.Mongo
 				MongoServer server = new MongoClient(connectionString).GetServer();
 				server.Connect();
 				CreateCollections(server);
-				server.Disconnect();
+				//server.Disconnect();
 			}
 			catch
 			{
@@ -107,7 +107,7 @@ namespace PeachFarm.Common.Mongo
 				var nodesQuery = Query.EQ("JobID", job.JobID);
 				nodesCollection.Remove(nodesQuery);
 			}
-			jobsCollection.Database.Server.Disconnect();
+			//jobsCollection.Database.Server.Disconnect();
 		}
 
 		public static List<Messages.Heartbeat> GetErrors(string jobID, string connectionString)
@@ -160,7 +160,7 @@ namespace PeachFarm.Common.Mongo
 			{
 				node.Stamp = node.Stamp.ToLocalTime();
 			}
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 			return allnodes;
 		}
 
@@ -202,7 +202,7 @@ namespace PeachFarm.Common.Mongo
 				var gridFsInfo = db.GridFS.Upload(stream, remoteFileName);
 				System.Diagnostics.Debug.Assert(gridFsInfo != null);
 			}
-			server.Disconnect();
+			//server.Disconnect();
 		}
 
 		#region unused
@@ -229,7 +229,7 @@ namespace PeachFarm.Common.Mongo
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 			var gridFsInfo = db.GridFS.Upload(localFileName, remoteFileName);
-			server.Disconnect();
+			//server.Disconnect();
 			return gridFsInfo.Id.ToString();
 		}
 
@@ -268,7 +268,7 @@ namespace PeachFarm.Common.Mongo
 				}
 			}
 
-			server.Disconnect();
+			//server.Disconnect();
 			return;
 		}
 
@@ -298,7 +298,7 @@ namespace PeachFarm.Common.Mongo
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 			bool result = db.GridFS.Exists(remoteFile);
-			server.Disconnect();
+			//server.Disconnect();
 			return result;
 		}
 
@@ -331,7 +331,7 @@ namespace PeachFarm.Common.Mongo
 			{
 				db.GridFS.Delete(remoteFile);
 			}
-			server.Disconnect();
+			//server.Disconnect();
 		}
 
 		public static void DeleteGridFSFiles(string[] remoteFiles, string connectionString)
@@ -345,7 +345,7 @@ namespace PeachFarm.Common.Mongo
 					db.GridFS.Delete(remoteFile);
 				}
 			}
-			server.Disconnect();
+			//server.Disconnect();
 		}
 
 		public static void TruncateAllCollections(string connectionString)
@@ -374,7 +374,7 @@ namespace PeachFarm.Common.Mongo
 			//  file.Delete();
 			//}
 
-			server.Disconnect();
+			//server.Disconnect();
 		}
 
 		public static void TruncateAllMetrics(string mySqlConnectionString)
@@ -410,7 +410,7 @@ namespace PeachFarm.Common.Mongo
 				job.Faults = null;
 				var faults = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 				faults.Remove(Query.EQ("JobID", job.JobID));
-				faults.Database.Server.Disconnect();
+				//faults.Database.Server.Disconnect();
 			}
 		}
 
@@ -429,7 +429,7 @@ namespace PeachFarm.Common.Mongo
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 			db.GridFS.Delete("*");
-			server.Disconnect();
+			//server.Disconnect();
 		}
 	}
 

@@ -58,7 +58,7 @@ namespace PeachFarm.Common.Messages
 				storedHeartbeat.Version = this.Version;
 				collection.Save(storedHeartbeat);
 			}
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 
 			return storedHeartbeat;
 		}
@@ -71,7 +71,7 @@ namespace PeachFarm.Common.Messages
 			{
 				collection.Remove(query);
 			}
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 
 			return;
 		}
@@ -81,7 +81,7 @@ namespace PeachFarm.Common.Messages
 			MongoCollection<Messages.Heartbeat> collection = DatabaseHelper.GetCollection<Messages.Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
 			this._id = BsonObjectId.Empty;
 			collection.Save(this);
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 
 			return this;
 		}

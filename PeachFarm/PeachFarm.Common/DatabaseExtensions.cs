@@ -21,7 +21,7 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
 
 			collection.Save(job);
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 
 			return job;
 		}
@@ -45,7 +45,7 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Node> collection = DatabaseHelper.GetCollection<Node>(MongoNames.JobNodes, connectionString);
 			var query = Query.EQ("JobID", job.JobID);
 			job.Nodes = collection.Find(query).ToList();
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 		}
 
 		private static string[] dataFields = new string[]
@@ -67,7 +67,7 @@ namespace PeachFarm.Common.Mongo
 			{
 				fault.Stamp = fault.Stamp.ToLocalTime();
 			}
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 		}
 
 		public static void FillFaults(this Node node, string connectionString, bool excludeData = false)
@@ -83,7 +83,7 @@ namespace PeachFarm.Common.Mongo
 			{
 				fault.Stamp = fault.Stamp.ToLocalTime();
 			} 
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 		}
 
 		public static List<Messages.Job> ToMessagesJobs(this IEnumerable<Mongo.Job> mongoJobs)
@@ -108,7 +108,7 @@ namespace PeachFarm.Common.Mongo
 		{
 			MongoCollection<Node> collection = DatabaseHelper.GetCollection<Node>(MongoNames.JobNodes, connectionString);
 			collection.Save(node);
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 			return node;
 		}
 
@@ -120,7 +120,7 @@ namespace PeachFarm.Common.Mongo
 				//var updatedfault = fault.UpdateDataPaths(connectionString);
 				collection.Save(fault);
 			}
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 		}
 
 		public static string SaveToDatabase(this Fault fault, string connectionString)
@@ -128,7 +128,7 @@ namespace PeachFarm.Common.Mongo
 			MongoCollection<Fault> collection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, connectionString);
 			//fault.Description = System.Web.HttpUtility.HtmlEncode(fault.Description);
 			collection.Save(fault);
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 			return fault.ID;
 		}
 
@@ -139,7 +139,7 @@ namespace PeachFarm.Common.Mongo
 			var query = Query.EQ("JobID", jobid);
 			System.Diagnostics.Debug.Assert(query != null);
 
-			collection.Database.Server.Disconnect();
+			//collection.Database.Server.Disconnect();
 		}
 
 		#region old code
