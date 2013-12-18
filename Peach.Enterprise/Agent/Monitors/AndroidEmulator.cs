@@ -214,6 +214,7 @@ namespace Peach.Enterprise.Agent.Monitors
 
 						cli.Client.Send(cmd);
 						cli.Client.Shutdown(SocketShutdown.Send);
+						cli.Client.ReceiveTimeout = StopTimeout * 1000; 
 
 						int len;
 						do
@@ -230,15 +231,18 @@ namespace Peach.Enterprise.Agent.Monitors
 						while (len > 0);
 
 						logger.Debug("Waiting for emulator '{0}' to exit", deviceSerial);
+
+						if (!thread.Join(StopTimeout * 1000))
+							throw new TimeoutException("Emulator thread did not exit within specified time.");
 					}
 				}
 				catch (Exception ex)
 				{
 					logger.Debug("Error when trying to gracefully stop emulator '{0}'. {1}", deviceSerial, ex.Message);
 					thread.Abort();
+					thread.Join();
 				}
 
-				thread.Join();
 				thread = null;
 
 				logger.Debug("Emulator '{0}' exited", deviceSerial);
