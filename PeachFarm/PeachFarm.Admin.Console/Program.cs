@@ -41,6 +41,7 @@ namespace PeachFarm.Admin
 				string ip = String.Empty;
 				string range = String.Empty;
 				string target = null;
+				string testname = null;
 				string definesFilePath = String.Empty;
 
 				DeleteDataType cleartype = DeleteDataType.Job;
@@ -70,6 +71,7 @@ namespace PeachFarm.Admin
 						{ "r|range=", v => range = v},
 						{ "d|defines=", v => definesFilePath = v},
 						{ "a|target=", v => target = v},
+						{ "test=", v => testname = v},
 						{ "type=", v => {
 							switch(v)
 							{
@@ -174,7 +176,7 @@ namespace PeachFarm.Admin
 
 						mustwait = true;
 
-						admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend);
+						admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend, testname);
 					}
 					#endregion
 
@@ -519,7 +521,8 @@ Syntax Guide
 
 Syntax: 
 			Start Peach full syntax:
-				pf_admin.exe -start <pitFilePath> -n <clientCount> -t <tags> -i <ipAddress> -d <definesFile> -a <targetName>
+				pf_admin.exe -start <pitFilePath> -n <clientCount> -t <tags> -i <ipAddress> -d <definesFile> -a <targetName> -test=<testName>
+			
 
       Start Peach on the first <clientCount> number of Alive Nodes:
         pf_admin.exe -start -n clientCount pitFile.xml
@@ -587,6 +590,7 @@ Commands:
    defines(d)				- Full path to Defines File (optional)
 	 range(r)					- Iteration range (optional), format is <start>-<end> example: 1000-2000
 	 target(a)				- target application name (optional)
+	 test							- test name in Pit to run
 
  stop   - Stop some instances of Peach
    jobID - Job ID

@@ -61,6 +61,8 @@ namespace PeachFarm.Common.Messages
 
 		private bool jobLoggingField;
 
+		private string testNameField;
+
 		private static System.Xml.Serialization.XmlSerializer serializer;
 
 		[System.Xml.Serialization.XmlAttributeAttribute()]
@@ -298,6 +300,20 @@ namespace PeachFarm.Common.Messages
 			set
 			{
 				this.jobLoggingField = value;
+			}
+		}
+
+		[System.Xml.Serialization.XmlAttributeAttribute()]
+		[System.Runtime.Serialization.DataMemberAttribute()]
+		public string TestName
+		{
+			get
+			{
+				return this.testNameField;
+			}
+			set
+			{
+				this.testNameField = value;
 			}
 		}
 
