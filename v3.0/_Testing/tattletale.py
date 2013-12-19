@@ -11,6 +11,7 @@ what you're after
 '''
 
 import requests
+import datetime
 import json
 import os
 try:    import ipdb as pdb
@@ -44,10 +45,10 @@ def get_open_tickets(repo_owner, repo_name):
         else:             get_url = issues_url
 
         req = requests.get(get_url, **REQKWARGS)
-        if not (200 <= int(r.status_code) < 300):
+        if not (200 <= int(req.status_code) < 300):
             global dbg
-            dbg = r
-            raise Exception("Received non 200 statuscode (%s) when opening ticket" % str(r.status_code))
+            dbg = req
+            raise Exception("Received non 200 statuscode (%s) when opening ticket" % str(req.status_code))
 
         all_the_tickets.extend(json.loads(req.content))
         # link should be there if there's more than one 'page' of items
@@ -100,15 +101,17 @@ def reverse_ticket_format(ticket_title):
 
 def open_new_ticket(repo_owner, repo_name, pit, pit_os, run_num):
     print "Opening ticket for %s on %s" % (pit, pit_os)
-    if '\r' in t['title']:
+    if '\r' in pit:
         print "Funny Business ticket title ticket:"
-        print t['title'], '\n'
-        t['title'] = t['title'].replace('\r', '')
+        print pit, '\n'
+        pit = pit.replace('\r', '')
     if _NEUTER: return
 
+    run_link = get_link_to_test_run(pit_os, run_num)
+    date_string = datetime.datetime.now().strftime('%m/%d/%Y')
     ticket_data = {
         'title'     :  format_ticket_name(pit, pit_os),
-        'body'      :  'Nightly automated test failing as of run #%s' % (run_num),
+        'body'      :  'Nightly automated test failing as of run #%s (on %s)\n\n%s' % (run_num, date_string, run_link),
         #'assignee'  :  '', # can be empty
         'labels'    : ['automated'],
     }
@@ -127,7 +130,7 @@ def close_ticket(t):
     if '\r' in t['title']:
         print "Funny Business ticket title ticket:"
         print t['title'], '\n'
-    print "Closing ticket: \"%s\"" % (t['title'])
+    print "Closing ticket: \"%s\" #%s" % (t['title'], t['number'])
     if _NEUTER: return
 
     allowed_fields = ['title', 'body', 'url', 'state', 'milestone', 'labels']
@@ -180,6 +183,8 @@ def universal_failures(*ptest_lists):
 ################################################################################
 
 def main():
+    global REQKWARGS
+
     username = os.environ.get('GH_API_USER') or getpass('Github User: ')
     password_or_token = os.environ.get('GH_API_TOKEN') or getpass('Github Token or Password: ')
 
@@ -215,6 +220,29 @@ def main():
             else:
                 print "Ticket already exists for %s on %s" % (pit, pit_os)
     close_resolved_tickets(all_ptests, tickets)
+
+def remove_dupe_tickets(tickets):
+    for t in tickets:
+        t['labels'] = [ b['name'] for b in t['labels'] ]
+    autos = [ t for t in tickets if
+            'Test run' in t['title'] and t['state'] == 'open' and 'automated' in t['labels'] ]
+
+    all_titles   = [t['title'] for t in autos]
+    uniq_titles  = set(all_titles)
+    duped_titles = [t for t in uniq_titles if all_titles.count(t) > 1]
+
+    for dtitle in duped_titles:
+        print '\n'
+        dtickets = [ t for t in autos if t['title'] == dtitle ]
+        earliest_ticket_num = next(iter(sorted(t['number'] for t in dtickets)))
+        print "Earliest: ", dtitle, earliest_ticket_num
+        for dtick in dtickets:
+            if dtick['number'] != earliest_ticket_num:
+                print "Closing:  ", dtick['title'], dtick['number']
+                close_ticket(dtick)
+            else:
+                print "Skip:     ", dtick['title'], dtick['number']
+
 
 
 if __name__ == '__main__':
