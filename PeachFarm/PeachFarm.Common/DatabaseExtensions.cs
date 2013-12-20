@@ -132,15 +132,6 @@ namespace PeachFarm.Common.Mongo
 			return fault.ID;
 		}
 
-		public static void UpdateNode(this Node node, string jobid, string connectionString)
-		{
-			MongoCollection<Job> collection = DatabaseHelper.GetCollection<Job>(MongoNames.Jobs, connectionString);
-
-			var query = Query.EQ("JobID", jobid);
-			System.Diagnostics.Debug.Assert(query != null);
-
-			//collection.Database.Server.Disconnect();
-		}
 
 		#region old code
 		/*
