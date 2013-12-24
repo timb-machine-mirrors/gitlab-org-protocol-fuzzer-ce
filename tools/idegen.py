@@ -17,7 +17,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     ${for k, v in project.globals.iteritems()}
-    <${k}>${v}</${k}>
+    <${k}>${str(v)}</${k}>
     ${endfor}
   </PropertyGroup>
 
@@ -56,32 +56,38 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 
   ${if project.source_files}
   <ItemGroup>
-    ${for src in project.source_files}
-    <Compile Include="${src}" />
+    ${for src in project.source_files.itervalues()}
+    <${src.how} Include="${src.name}"${if not src.attrs} />${else}>
+      ${for k,v in src.attrs.iteritems()}
+      <${k}>${str(v)}</${k}>
+      ${endfor}
+    </${src.how}>${endif}
     ${endfor}
-  </ItemGroup>
-  ${endif}
-
-  ${if project.linked_files}
-  <ItemGroup>
-    ${for name,src in project.linked_files}
-    <Compile Include="${src}">
-      <Link>${name}</Link>
-    </Compile>
-    ${endfor}
-  </ItemGroup>
-  ${endif}
-
-  ${if project.app_config}
-  <ItemGroup>
-    <None Include="${project.app_config.name}"/>
   </ItemGroup>
   ${endif}
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
-</Project>
-'''
+</Project>'''
+
+# Note, no newline at end of template file!
+
+class source_file(object):
+	def __init__(self, how, ctx, node):
+		self.how = how
+		self.node = node
+		self.attrs = OrderedDict()
+
+		proj_path = node.path_from(ctx.tg.path)
+		rel_path = node.path_from(ctx.base)
+
+		if not node.is_child_of(ctx.tg.path):
+			proj_path = node.name
+
+		self.name = rel_path
+
+		if proj_path != rel_path:
+			self.attrs['Link'] = proj_path
 
 class vsnode_cs_target(msvs.vsnode_project):
 	VS_GUID_CSPROJ = "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC"
@@ -90,7 +96,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 	def __init__(self, ctx, tg):
 		self.base = getattr(ctx, 'projects_dir', None) or tg.path
-		self.base = tg.path
+		if getattr(ctx, 'csproj_in_tree', True):
+			self.base = tg.path
 		node = self.base.make_node(os.path.splitext(tg.name)[0] + '.csproj') # the project file as a Node
 		msvs.vsnode_project.__init__(self, ctx, node)
 		self.name = os.path.splitext(tg.gen)[0]
@@ -103,16 +110,16 @@ class vsnode_cs_target(msvs.vsnode_project):
 		# Mark this project as active if the features are all supported
 		self.is_active = intersect == features
 
+		# Note: Must use ordered dict so order is preserved
 		self.globals      = OrderedDict()
 		self.properties   = OrderedDict()
-		self.references   = {} # Name -> HintPath
-		self.source_files = [] # Name
-		self.linked_files = [] # (Name, HintPath)
+		self.references   = OrderedDict() # Name -> HintPath
+		self.source_files = OrderedDict() # Node -> Record
 		self.project_refs = [] # uuid
 
 	def combine_flags(self, flag):
 		tg = self.tg
-		final = {}
+		final = OrderedDict()
 		for item in tg.env.CSFLAGS:
 			if item.startswith(flag):
 				opt = item[len(flag):]
@@ -145,8 +152,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				self.references[asm_name] = y.link_task.outputs[0].path_from(self.base)
 				continue
 
-			base = getattr(self.ctx, 'projects_dir', None) or y.path
-			base = y.path
+			base = self.base == tg.path and y.path or self.base
 			other = base.make_node(os.path.splitext(y.name)[0] + '.csproj')
 			
 			dep = msvs.build_property()
@@ -158,32 +164,89 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 	def collect_source(self):
 		tg = self.tg
+		lst = self.source_files
+
+		# Process compiled sources
 		srcs = tg.to_nodes(tg.cs_task.inputs, [])
-
-		#todo: resx, install files, embedded resources, keyfile
 		for x in srcs:
-			proj_path = x.path_from(tg.path)
-			rel_path = x.path_from(self.base)
+			lst[x] = source_file('Compile', self, x)
 
-			if not x.is_child_of(tg.path):
-				self.linked_files.append((x.name, rel_path))
-			elif proj_path == rel_path:
-				self.source_files.append(rel_path)
-			else:
-				self.linked_files.append((proj_path, rel_path))
+		# Process compiled resx files
+		for tsk in filter(lambda x: x.__class__.__name__ is 'resgen', tg.tasks):
+			r = source_file('EmbeddedResource', self, tsk.inputs[0])
+			lst[r.node] = r
 
-		# If exe, epect app.config, if dll it is optional
-		if 'exe' in tg.cs_task.env.CSTYPE:
-			# if this is an exe, require app.config and install to ${BINDIR}
-			self.app_config = tg.path.find_or_declare('app.config')
-		else:
-			# if this is an assembly, app.config is optional
-			self.app_config = tg.path.find_resource('app.config')
+		# Process embedded resources
+		srcs = tg.to_nodes(getattr(tg, 'resource', []))
+		for x in srcs:
+			r = source_file('EmbeddedResource', self, x)
+			r.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
+			lst[x] = r
+
+		# Process installed files
+		srcs = tg.to_nodes(getattr(tg, 'install', []))
+		for x in srcs:
+			r = source_file('Content', self, x)
+			r.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
+			lst[x] = r
+
+		# Add app.config
+		cfg = getattr(tg, 'app_config', None)
+		if cfg:
+			lst[cfg] = source_file('None', self, cfg)
+
+		settings = []
+
+		# Try and glue up Designer files
+		for k,v in lst.iteritems():
+			if not k.name.endswith('.Designer.cs'):
+				continue
+
+			name = k.name[:-12]
+
+			cs      = lst.get(k.parent.find_resource(name + '.cs'), None)
+			resx    = lst.get(k.parent.find_resource(name + '.resx'), None)
+			setting = k.parent.find_resource(name + '.settings')
+
+			if cs and resx:
+				# If cs & resx, 's' & 'resx' are dependent upon 'cs'
+				#print 'Designer: cs & resx - %s' % k.abspath()
+				v.attrs['DependentUpon'] = cs.node.name
+				cs.attrs['SubType'] = 'Form'
+				resx.attrs['DependentUpon'] = cs.node.name
+			elif cs:
+				# If cs only, 's' is dependent upon 'cs'
+				#print 'Designer: cs - %s' % k.abspath()
+				v.attrs['DependentUpon'] = cs.node.name
+				cs.attrs['SubType'] = 'Form'
+			elif resx:
+				# If resx only, 's' is autogen
+				#print 'Designer: resx - %s' % k.abspath()
+				v.attrs['AutoGen'] = True
+				v.attrs['DependentUpon'] = resx.node.name
+				v.attrs['DesignTime'] = True
+				resx.attrs['Generator'] = 'ResXFileCodeGenerator'
+				resx.attrs['LastGenOutput'] = k.name
+			elif setting:
+				# If settings, add to source file list
+				#print 'Designer: settings - %s' % k.abspath()
+				f = source_file('None', self, setting)
+				f.attrs['Generator'] = 'SettingsSingleFileGenerator'
+				f.attrs['LastGenOutput'] = k.name
+				v.attrs['AutoGen'] = True
+				v.attrs['DependentUpon'] = f.node.name
+				v.attrs['DesignTimeSharedInput'] = True
+
+				# Defer adding until we are done iterating
+				settings.append(f)
+
+		for x in settings:
+			lst[x.node] = x
 
 		self.collect_use()
 
 	def write(self):
-		#print('msvs: creating %r' % self.path)
+		Logs.debug('msvs: creating %r' % self.path)
 
 		# first write the project file
 		template1 = msvs.compile_template(CS_PROJECT_TEMPLATE)
@@ -215,6 +278,13 @@ class vsnode_cs_target(msvs.vsnode_project):
 		g['TargetFrameworkProfile'] = os.linesep + '    '
 		g['FileAlignment'] = '512'
 
+		keyfile = tg.to_nodes(getattr(tg, 'keyfile', []))
+		if keyfile:
+			f = source_file('None', self, keyfile[0])
+			g['SignAssembly'] = True
+			g['AssemblyOriginatorKeyFile'] = f.name
+			self.source_files[f.node] = f
+
 		p = self.properties
 
 		# Order matters!
@@ -231,8 +301,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p['DocumentationFile'] = getattr(tg, 'csdoc', tg.env.CSDOC) and out + os.sep + asm_name + '.xml'
 		p['AllowUnsafeBlocks'] = False
 
+
 class idegen(msvs.msvs_generator):
-	all_projs = {}
+	all_projs = OrderedDict()
 	is_idegen = True
 	depth = 0
 
@@ -240,6 +311,7 @@ class idegen(msvs.msvs_generator):
 		msvs.msvs_generator.init(self)
 
 		#self.projects_dir = None
+		#self.csproj_in_tree = False
 		self.solution_name = self.env.APPNAME + '.sln'
 
 		if not getattr(self, 'vsnode_cs_target', None):
@@ -271,9 +343,9 @@ class idegen(msvs.msvs_generator):
 			msvs.msvs_generator.write_files(self)
 
 	def flatten_projects(self):
-		ret = {}
-		configs = {}
-		platforms = {}
+		ret = OrderedDict()
+		configs = OrderedDict()
+		platforms = OrderedDict()
 
 		# TODO: Might need to implement conditional project refereces
 		# as well as assembly references based on the selected
