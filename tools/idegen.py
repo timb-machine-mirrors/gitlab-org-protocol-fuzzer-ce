@@ -90,8 +90,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 	def __init__(self, ctx, tg):
 		self.base = getattr(ctx, 'projects_dir', None) or tg.path
 		self.base = tg.path
-		self.node = self.base.make_node(os.path.splitext(tg.name)[0] + '.csproj') # the project file as a Node
-		msvs.vsnode_project.__init__(self, ctx, self.node)
+		node = self.base.make_node(os.path.splitext(tg.name)[0] + '.csproj') # the project file as a Node
+		msvs.vsnode_project.__init__(self, ctx, node)
 		self.name = os.path.splitext(tg.gen)[0]
 		self.tg = tg # task generators
 
@@ -122,10 +122,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 		get = tg.bld.get_tgen_by_name
 
 		for x in names:
+			asm_name = os.path.splitext(x)[0]
 			try:
 				y = get(x)
 			except Errors.WafError:
-				self.references.setdefault(os.path.splitext(x)[0])
+				self.references.setdefault(asm_name)
 				continue
 			y.post()
 
@@ -133,14 +134,16 @@ class vsnode_cs_target(msvs.vsnode_project):
 			if not tsk:
 				self.bld.fatal('cs task has no link task for use %r' % self)
 
-			# todo: fake_csshlib
+			if 'fake_lib' in y.features:
+				self.references[asm_name] = y.link_task.outputs[0].path_from(self.base)
+				continue
 
 			base = getattr(self.ctx, 'projects_dir', None) or y.path
 			base = y.path
 			other = base.make_node(os.path.splitext(y.name)[0] + '.csproj')
 			
 			dep = msvs.build_property()
-			dep.path = other.path_from(self.node.parent)
+			dep.path = other.path_from(self.base)
 			dep.uuid = msvs.make_uuid(other.abspath())
 			dep.name = y.name
 
@@ -153,8 +156,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 		#todo: resx, install files, embedded resources, keyfile
 		for x in srcs:
 			proj_path = x.path_from(tg.path)
-			rel_path = x.path_from(self.node.parent)
-			
+			rel_path = x.path_from(self.base)
+
 			if not x.is_child_of(tg.path):
 				self.linked_files.append((x.name, rel_path))
 			elif proj_path == rel_path:
@@ -192,12 +195,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 		platform = getattr(tg, 'platform', 'AnyCPU')
 		config = '%s_%s' % (env.TARGET, env.VARIANT)
 
-		out = base.make_node(['bin', platform, config]).path_from(self.node.parent)
+		out = base.make_node(['bin', platform, config]).path_from(self.base)
 
 		# Order matters!
 		g['ProjectGuid'] = '{%s}' % self.uuid
 		g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
-		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.node.parent)
+		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.base)
 		g['AppDesignerFolder'] = 'Properties'
 		g['RootNamespace'] = getattr(tg, 'namespace', self.name)
 		g['AssemblyName'] = asm_name
@@ -247,7 +250,7 @@ class idegen(msvs.msvs_generator):
 				if hasattr(p, 'tg'):
 					remove.setdefault(p.parent)
 					p.parent = p.parent.parent
-			
+
 			idegen.all_projs[self.variant] = [ p for p in self.all_projects if p not in remove ]
 
 		idegen.depth -= 1
@@ -259,7 +262,7 @@ class idegen(msvs.msvs_generator):
 		ret = {}
 		configs = {}
 		platforms = {}
-		
+
 		for k,v in idegen.all_projs.iteritems():
 			for p in v:
 				p.ctx = self
