@@ -180,7 +180,7 @@ def configure(conf):
 	])
 
 	env.append_value('CSFLAGS_debug', [
-		'/define:DEBUG,TRACE',
+		'/define:DEBUG;TRACE',
 	])
 
 	env.append_value('CSFLAGS_release', [
