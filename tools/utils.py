@@ -122,6 +122,7 @@ def cs_resource(self):
 		cfg = self.path.find_resource('app.config')
 
 	if cfg:
+		setattr(self, 'app_config', cfg)
 		inst_to = getattr(self, 'install_path', '${BINDIR}')
 		self.bld.install_as('%s/%s.config' % (inst_to, self.gen), cfg, env=self.env, chmod=Utils.O755)
 
