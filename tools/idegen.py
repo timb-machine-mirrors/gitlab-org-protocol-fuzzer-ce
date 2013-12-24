@@ -83,6 +83,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 	def __init__(self, ctx, tg):
 		self.base = getattr(ctx, 'projects_dir', None) or tg.path
+		self.base = tg.path
 		self.node = self.base.make_node(os.path.splitext(tg.name)[0] + '.csproj') # the project file as a Node
 		msvs.vsnode_project.__init__(self, ctx, self.node)
 		self.name = os.path.splitext(tg.gen)[0]
@@ -127,6 +128,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				self.bld.fatal('cs task has no link task for use %r' % self)
 
 			base = getattr(self.ctx, 'projects_dir', None) or y.path
+			base = y.path
 			other = base.make_node(os.path.splitext(y.name)[0] + '.csproj')
 			
 			dep = msvs.build_property()
@@ -140,6 +142,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		tg = self.tg
 		srcs = tg.to_nodes(tg.cs_task.inputs, [])
 
+		#todo: resx, install files, app icon, embedded resources, keyfile
 		for x in srcs:
 			proj_path = x.path_from(tg.path)
 			rel_path = x.path_from(self.node.parent)
@@ -167,11 +170,18 @@ class vsnode_cs_target(msvs.vsnode_project):
 		g = self.globals
 
 		asm_name = os.path.splitext(tg.cs_task.outputs[0].name)[0]
-		out = os.path.join('bin', self.ctx.variant)
+		base = getattr(self.ctx, 'projects_dir', None) or tg.path
+
+		env = tg.bld.env
+		platform = getattr(tg, 'platform', 'AnyCPU')
+		config = '%s_%s' % (env.TARGET, env.VARIANT)
+
+		out = base.make_node(['bin', platform, config]).path_from(self.node.parent)
 
 		# Order matters!
 		g['ProjectGuid'] = '{%s}' % self.uuid
 		g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
+		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.node.parent)
 		g['AppDesignerFolder'] = 'Properties'
 		g['RootNamespace'] = getattr(tg, 'namespace', self.name)
 		g['AssemblyName'] = asm_name
@@ -182,7 +192,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p = self.properties
 
 		# Order matters!
-		p['PlatformTarget'] = getattr(tg, 'platform', 'AnyCPU')
+		p['PlatformTarget'] = platform
 		p['DebugSymbols'] = getattr(tg, 'csdebug', tg.env.CSDEBUG) and True or False
 		p['DebugType'] = getattr(tg, 'csdebug', tg.env.CSDEBUG)
 		p['Optimize'] = '/optimize+' in tg.env.CSFLAGS
