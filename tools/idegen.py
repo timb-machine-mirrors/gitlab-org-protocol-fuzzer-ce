@@ -215,7 +215,14 @@ class idegen(msvs.msvs_generator):
 
 	def write_files(self):
 		if self.all_projects:
-			idegen.all_projs[self.variant] = self.all_projects
+			# Move up all the projects one level
+			remove = {}
+			for p in self.all_projects:
+				if hasattr(p, 'tg'):
+					remove.setdefault(p.parent)
+					p.parent = p.parent.parent
+			
+			idegen.all_projs[self.variant] = [ p for p in self.all_projects if p not in remove ]
 
 		idegen.depth -= 1
 		if idegen.depth == 0:
