@@ -4,6 +4,7 @@ import os.path
 from collections import OrderedDict
 
 from waflib.extras import msvs
+from waflib.Build import BuildContext
 from waflib import Utils, TaskGen, Logs, Task, Context, Node, Options, Errors
 
 msvs.msvs_generator.cmd = 'msvs2010'
@@ -95,7 +96,13 @@ class vsnode_cs_target(msvs.vsnode_project):
 		self.name = os.path.splitext(tg.gen)[0]
 		self.tg = tg # task generators
 
-		self.is_active = True
+		features = set(Utils.to_list(getattr(tg, 'features', [])))
+		available = set(Utils.to_list(tg.env['supported_features']))
+		intersect = features & available
+
+		# Mark this project as active if the features are all supported
+		self.is_active = intersect == features
+
 		self.globals      = OrderedDict()
 		self.properties   = OrderedDict()
 		self.references   = {} # Name -> HintPath
@@ -191,7 +198,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		asm_name = os.path.splitext(tg.cs_task.outputs[0].name)[0]
 		base = getattr(self.ctx, 'projects_dir', None) or tg.path
 
-		env = tg.bld.env
+		env = tg.env
 		platform = getattr(tg, 'platform', 'AnyCPU')
 		config = '%s_%s' % (env.TARGET, env.VARIANT)
 
@@ -238,6 +245,11 @@ class idegen(msvs.msvs_generator):
 		if not getattr(self, 'vsnode_cs_target', None):
 			self.vsnode_cs_target = vsnode_cs_target
 
+	# Defer filtering of features vs supported_features
+	# until we generate the project and then set the is_active member
+	def add_to_group(self, tgen, group=None):
+		BuildContext.base_add_to_group(self, tgen, group)
+
 	def execute(self):
 		idegen.depth += 1
 		msvs.msvs_generator.execute(self)
@@ -263,6 +275,9 @@ class idegen(msvs.msvs_generator):
 		configs = {}
 		platforms = {}
 
+		# TODO: Might need to implement conditional project refereces
+		# as well as assembly references based on the selected
+		# configuration/platform
 		for k,v in idegen.all_projs.iteritems():
 			for p in v:
 				p.ctx = self
@@ -273,7 +288,7 @@ class idegen(msvs.msvs_generator):
 
 				main = ret[p.uuid]
 
-				env = p.tg.bld.env
+				env = p.tg.env
 
 				prop = msvs.build_property()
 				prop.configuration = '%s_%s' % (env.TARGET, env.VARIANT)
@@ -301,6 +316,8 @@ class idegen(msvs.msvs_generator):
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
+
+				# TODO: Look for c/c++ link_task and add vcxproj
 
 				tg.post()
 				if not getattr(tg, 'cs_task', None):
