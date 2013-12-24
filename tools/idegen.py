@@ -271,6 +271,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 		g['ProjectGuid'] = '{%s}' % self.uuid
 		g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
 		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.base)
+
+		# This should get rid of the obj/<arch>/<cfg>/TempPE folder
+		# but it still exists.  More info available here:
+		# http://social.msdn.microsoft.com/Forums/vstudio/en-US/eb1b5a4c-7348-4926-89eb-b57a9d811863/vs-inproc-compiler-msbuild-and-the-obj-subdir
+		# g['UseHostCompilerIfAvailable'] = base == tg.path
+
 		g['AppDesignerFolder'] = 'Properties'
 		g['RootNamespace'] = getattr(tg, 'namespace', self.name)
 		g['AssemblyName'] = asm_name
