@@ -9,6 +9,20 @@ from tools import pkg, hooks
 
 targets = [ 'win', 'linux', 'osx', 'doc' ]
 
+"""
+Variables:
+
+BASENAME = 'win_x64'
+TARGET = 'win'
+SUBARCH = 'x64'
+VARIANT = 'release'
+PREFIX = 'output\\win_x64_release'
+BINDIR = 'output\\win_x64_release\\bin'
+LIBDIR = 'output\\win_x64_release\\bin'
+DOCDIR = 'output\\win_x64_release\\doc'
+
+"""
+
 class TestContext(InstallContext):
 	'''runs the unit tests'''
 
@@ -33,6 +47,8 @@ def store_version(option, opt, value, parser):
 	setattr(parser.values, option.dest, value)
 
 def options(opt):
+	opt.load('tools.idegen')
+
 	opt.add_option('--variant',
 	               action = 'store',
 	               default = None,
