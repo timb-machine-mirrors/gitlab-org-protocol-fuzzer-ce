@@ -71,6 +71,12 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   </ItemGroup>
   ${endif}
 
+  ${if project.app_config}
+  <ItemGroup>
+    <None Include="${project.app_config.name}"/>
+  </ItemGroup>
+  ${endif}
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
 </Project>
@@ -127,6 +133,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 			if not tsk:
 				self.bld.fatal('cs task has no link task for use %r' % self)
 
+			# todo: fake_csshlib
+
 			base = getattr(self.ctx, 'projects_dir', None) or y.path
 			base = y.path
 			other = base.make_node(os.path.splitext(y.name)[0] + '.csproj')
@@ -142,7 +150,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		tg = self.tg
 		srcs = tg.to_nodes(tg.cs_task.inputs, [])
 
-		#todo: resx, install files, app icon, embedded resources, keyfile
+		#todo: resx, install files, embedded resources, keyfile
 		for x in srcs:
 			proj_path = x.path_from(tg.path)
 			rel_path = x.path_from(self.node.parent)
@@ -154,10 +162,18 @@ class vsnode_cs_target(msvs.vsnode_project):
 			else:
 				self.linked_files.append((proj_path, rel_path))
 
+		# If exe, epect app.config, if dll it is optional
+		if 'exe' in tg.cs_task.env.CSTYPE:
+			# if this is an exe, require app.config and install to ${BINDIR}
+			self.app_config = tg.path.find_or_declare('app.config')
+		else:
+			# if this is an assembly, app.config is optional
+			self.app_config = tg.path.find_resource('app.config')
+
 		self.collect_use()
 
 	def write(self):
-		print('msvs: creating %r' % self.path)
+		#print('msvs: creating %r' % self.path)
 
 		# first write the project file
 		template1 = msvs.compile_template(CS_PROJECT_TEMPLATE)
@@ -244,7 +260,6 @@ class idegen(msvs.msvs_generator):
 		configs = {}
 		platforms = {}
 		
-		print 'Flatten!'
 		for k,v in idegen.all_projs.iteritems():
 			for p in v:
 				p.ctx = self
