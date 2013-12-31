@@ -530,8 +530,9 @@ class idegen(msvs.msvs_generator):
 
 					prop.platform_tgt = env.CSPLATFORM
 					prop.platform_sln = prop.platform_tgt.replace('AnyCPU', 'Any CPU')
+					prop.platform = Utils.unversioned_sys_platform() != 'win32' and 'Win32' or env.SUBARCH
 					# Project needs 'Win32' not 'x86'
-					prop.platform = prop.platform_tgt.replace('x86', 'Win32')
+					prop.platform = prop.platform.replace('x86', 'Win32')
 					p.build_properties = []
 
 				prop.configuration = config
