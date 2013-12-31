@@ -67,6 +67,20 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   </ItemGroup>
   ${endif}
 
+  ${if getattr(project, 'cond_source', False)}
+  <ItemGroup>
+    ${for p in project.build_properties}
+    ${for src in p.sources}
+    <${src.how} Condition=" '$(Configuration)|$(Platform)' == '${p.configuration}|${p.platform}' " Include="${src.name}"${if not src.attrs} />${else}>
+      ${for k,v in src.attrs.iteritems()}
+      <${k}>${str(v)}</${k}>
+      ${endfor}
+    </${src.how}>${endif}
+    ${endfor}
+    ${endfor}
+  </ItemGroup>
+  ${endif}
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
 </Project>'''
@@ -428,6 +442,30 @@ class idegen(msvs.msvs_generator):
 					# Solution needs 'Any CPU' not 'AnyCPU'
 					prop.platform_sln = prop.platform.replace('AnyCPU', 'Any CPU')
 					prop.properties = p.properties
+					prop.sources = []
+
+					if main != p:
+						cur_src = set( main.source_files.iterkeys())
+						new_src = set(p.source_files.iterkeys())
+
+						in_both = new_src & cur_src
+						from_old = cur_src.difference(in_both)
+						from_new = new_src.difference(in_both)
+
+						for item in from_old:
+							# Item's in from_old need to be removed from source_list
+							# and tracked per variant
+							main.cond_source = True
+							rec = main.source_files.pop(item)
+							for other_prop in main.build_properties:
+								other_prop.sources.append(rec)
+
+						for item in from_new:
+							# Item's in from_new need to be tracked per variant
+							main.cond_source = True
+							prop.sources.append(p.source_files[item])
+
+
 				else:
 					prop = p.build_properties[0]
 					# Project needs 'Win32' not 'x86'
