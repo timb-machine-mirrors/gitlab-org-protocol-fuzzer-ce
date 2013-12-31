@@ -155,11 +155,20 @@ class vsnode_target(msvs.vsnode_target):
 		msvs.vsnode_target.collect_properties(self)
 		self.is_active = True
 
+	def get_mono_key(self, node):
+		"""
+		required for writing the source files
+		"""
+		name = node.name
+		if name.endswith('.cpp') or name.endswith('.c'):
+			return 'Compile'
+		return 'None'
+
 	def get_waf(self):
-		"""
-		Override in subclasses...
-		"""
-		return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+		if (Utils.unversioned_sys_platform() != 'win32'):
+			return '%s %s' % (sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+		else:
+			return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
 
 	def get_build_params(self, props):
 		(waf, opt) = msvs.vsnode_target.get_build_params(self, props)
@@ -423,6 +432,12 @@ class idegen(msvs.msvs_generator):
 		#self.csproj_in_tree = False
 		self.solution_name = self.env.APPNAME + '.sln'
 
+		# Make monodevelop csproj
+		if (Utils.unversioned_sys_platform() != 'win32'):
+			msvs.PROJECT_TEMPLATE = MONO_PROJECT_TEMPLATE
+			msvs.vsnode_project.VS_GUID_VCPROJ = '2857B73E-F847-4B02-9238-064979017E93'
+			self.project_extension = '.cproj'
+
 		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_target = vsnode_target
 
@@ -512,9 +527,11 @@ class idegen(msvs.msvs_generator):
 
 				else:
 					prop = p.build_properties[0]
+
+					prop.platform_tgt = env.CSPLATFORM
+					prop.platform_sln = prop.platform_tgt.replace('AnyCPU', 'Any CPU')
 					# Project needs 'Win32' not 'x86'
-					prop.platform = env.SUBARCH.replace('x86', 'Win32')
-					prop.platform_sln = env.SUBARCH
+					prop.platform = prop.platform_tgt.replace('x86', 'Win32')
 					p.build_properties = []
 
 				prop.configuration = config
