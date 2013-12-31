@@ -150,11 +150,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 	def collect_use(self):
 		tg = self.tg
-
-		self.other_tgen = []
+		get = tg.bld.get_tgen_by_name
 
 		names = tg.to_list(getattr(tg, 'use', []))
-		get = tg.bld.get_tgen_by_name
 
 		for x in names:
 			asm_name = os.path.splitext(x)[0]
@@ -182,6 +180,21 @@ class vsnode_cs_target(msvs.vsnode_project):
 			dep.name = os.path.splitext(y.name)[0]
 
 			self.project_refs.append(dep)
+
+		# Add ide_use task generator outputs as Content to the csproj
+		names = tg.to_list(getattr(tg, 'ide_use', []))
+
+		for x in names:
+			y = get(x)
+			y.post()
+			tsk = getattr(y, 'link_task', None)
+			if not tsk:
+				self.bld.fatal('cs task has no link task for ide_use %r' % self)
+
+			o = y.link_task.outputs[0]
+			r = source_file('Content', self, o)
+			r.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
+			self.source_files[o] = r
 
 	def collect_source(self):
 		tg = self.tg
