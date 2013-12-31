@@ -165,10 +165,10 @@ class vsnode_target(msvs.vsnode_target):
 		return 'None'
 
 	def get_waf(self):
-		if (Utils.unversioned_sys_platform() != 'win32'):
-			return '%s %s' % (sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
-		else:
-			return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+		return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+
+	def get_waf_mono(self):
+		return '%s %s' % (sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
 
 	def get_build_params(self, props):
 		(waf, opt) = msvs.vsnode_target.get_build_params(self, props)
@@ -374,7 +374,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 		env = tg.env
 		platform = getattr(tg, 'platform', 'AnyCPU')
-		config = '%s_%s' % (env.TARGET, env.VARIANT)
+		config = self.ctx.get_config(tg)
 
 		out = base.make_node(['bin', platform, config]).path_from(self.base)
 
@@ -436,11 +436,25 @@ class idegen(msvs.msvs_generator):
 		if (Utils.unversioned_sys_platform() != 'win32'):
 			msvs.PROJECT_TEMPLATE = MONO_PROJECT_TEMPLATE
 			msvs.vsnode_project.VS_GUID_VCPROJ = '2857B73E-F847-4B02-9238-064979017E93'
+			vsnode_target.get_waf = vsnode_target.get_waf_mono
 			self.project_extension = '.cproj'
+			self.get_platform = self.get_platform_mono
+			self.get_config = self.get_config_mono
 
 		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_target = vsnode_target
 
+	def get_config(self, tg):
+		return '%s_%s' % (tg.env.TARGET, tg.env.VARIANT)
+
+	def get_config_mono(self, tg):
+		return tg.bld.variant
+
+	def get_platform(self, env):
+		return env.SUBARCH.replace('x86', 'Win32')
+
+	def get_platform_mono(self, env):
+		return 'Win32'
 
 	def execute(self):
 		idegen.depth += 1
@@ -492,7 +506,7 @@ class idegen(msvs.msvs_generator):
 				main = ret[p.uuid]
 
 				env = p.tg.env
-				config = '%s_%s' % (env.TARGET, env.VARIANT)
+				config = self.get_config(p.tg)
 
 				if isinstance(p, vsnode_cs_target):
 					prop = msvs.build_property()
@@ -527,12 +541,9 @@ class idegen(msvs.msvs_generator):
 
 				else:
 					prop = p.build_properties[0]
-
 					prop.platform_tgt = env.CSPLATFORM
+					prop.platform = self.get_platform(env)
 					prop.platform_sln = prop.platform_tgt.replace('AnyCPU', 'Any CPU')
-					prop.platform = Utils.unversioned_sys_platform() != 'win32' and 'Win32' or env.SUBARCH
-					# Project needs 'Win32' not 'x86'
-					prop.platform = prop.platform.replace('x86', 'Win32')
 					p.build_properties = []
 
 				prop.configuration = config
