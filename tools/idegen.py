@@ -10,11 +10,54 @@ from waflib import Utils, TaskGen, Logs, Task, Context, Node, Options, Errors
 
 msvs.msvs_generator.cmd = 'msvs2010'
 
+MONO_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">${project.build_properties[0].configuration}</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">${project.build_properties[0].platform_tgt}</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{${project.uuid}}</ProjectGuid>
+    <Compiler>
+      <Compiler ctype="GppCompiler" />
+    </Compiler>
+    <Language>CPP</Language>
+    <Target>Bin</Target>
+  </PropertyGroup>
+
+
+  ${for b in project.build_properties}
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '${b.configuration}|${b.platform}' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>${b.outdir}</OutputPath>
+    <OutputName>${b.output_file}</OutputName>
+    <CompileTarget>Bin</CompileTarget>
+    <DefineSymbols>${xml:b.preprocessor_definitions}</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Clean" command="${xml:project.get_clean_command(b)}" workingdir="${project.ctx.path.abspath()}" />
+        <Command type="Build" command="${xml:project.get_build_command(b)}" workingdir="${project.ctx.path.abspath()}" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+  ${endfor}
+
+  <ItemGroup>
+    ${for x in project.source}
+    <${project.get_mono_key(x)} Include='${x.path_from(project.ctx.path)}'>
+      <Link>${x.path_from(project.tg.path)}</Link>
+    </${project.get_mono_key(x)}>
+    ${endfor}
+  </ItemGroup>
+
+</Project>'''
+
 CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">${project.build_properties[0].configuration}</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">${project.build_properties[0].platform}</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">${project.build_properties[0].platform_tgt}</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     ${for k, v in project.globals.iteritems()}
@@ -23,7 +66,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   </PropertyGroup>
 
   ${for props in project.build_properties}
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform}' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_tgt}' ">
     ${for k, v in props.properties.iteritems()}
     <${k}>${str(v)}</${k}>
     ${endfor}
@@ -71,7 +114,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   <ItemGroup>
     ${for p in project.build_properties}
     ${for src in p.sources}
-    <${src.how} Condition=" '$(Configuration)|$(Platform)' == '${p.configuration}|${p.platform}' " Include="${src.name}"${if not src.attrs} />${else}>
+    <${src.how} Include="${src.name}" Condition=" '$(Configuration)|$(Platform)' == '${p.configuration}|${p.platform_tgt}' "${if not src.attrs} />${else}>
       ${for k,v in src.attrs.iteritems()}
       <${k}>${str(v)}</${k}>
       ${endfor}
@@ -438,9 +481,10 @@ class idegen(msvs.msvs_generator):
 
 				if isinstance(p, vsnode_cs_target):
 					prop = msvs.build_property()
-					prop.platform = p.properties['PlatformTarget']
+					prop.platform_tgt = p.properties['PlatformTarget']
 					# Solution needs 'Any CPU' not 'AnyCPU'
-					prop.platform_sln = prop.platform.replace('AnyCPU', 'Any CPU')
+					prop.platform = prop.platform_tgt.replace('AnyCPU', 'Any CPU')
+					prop.platform_sln = prop.platform
 					prop.properties = p.properties
 					prop.sources = []
 
