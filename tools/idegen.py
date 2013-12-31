@@ -14,7 +14,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">${project.build_properties[0].configuration}</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">${project.build_properties[0].platform_target}</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">${project.build_properties[0].platform}</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     ${for k, v in project.globals.iteritems()}
@@ -23,7 +23,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   </PropertyGroup>
 
   ${for props in project.build_properties}
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_target}' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform}' ">
     ${for k, v in props.properties.iteritems()}
     <${k}>${str(v)}</${k}>
     ${endfor}
@@ -89,6 +89,26 @@ class source_file(object):
 
 		if proj_path != rel_path:
 			self.attrs['Link'] = proj_path
+
+class vsnode_target(msvs.vsnode_target):
+	def __init__(self, ctx, tg):
+		msvs.vsnode_target.__init__(self, ctx, tg)
+
+	def collect_properties(self):
+		msvs.vsnode_target.collect_properties(self)
+		self.is_active = True
+
+	def get_waf(self):
+		"""
+		Override in subclasses...
+		"""
+		return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+
+	def get_build_params(self, props):
+		(waf, opt) = msvs.vsnode_target.get_build_params(self, props)
+		opt += " --variant=%s" % props.variant
+		return (waf, opt)
+
 
 class vsnode_cs_target(msvs.vsnode_project):
 	VS_GUID_CSPROJ = "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC"
@@ -329,8 +349,9 @@ class idegen(msvs.msvs_generator):
 		#self.csproj_in_tree = False
 		self.solution_name = self.env.APPNAME + '.sln'
 
-		if not getattr(self, 'vsnode_cs_target', None):
-			self.vsnode_cs_target = vsnode_cs_target
+		self.vsnode_cs_target = vsnode_cs_target
+		self.vsnode_target = vsnode_target
+
 
 	def execute(self):
 		idegen.depth += 1
@@ -382,21 +403,32 @@ class idegen(msvs.msvs_generator):
 				main = ret[p.uuid]
 
 				env = p.tg.env
+				config = '%s_%s' % (env.TARGET, env.VARIANT)
 
-				prop = msvs.build_property()
-				prop.configuration = '%s_%s' % (env.TARGET, env.VARIANT)
-				prop.platform_target = p.properties['PlatformTarget']
-				prop.platform = prop.platform_target.replace('AnyCPU', 'Any CPU')
-				prop.properties = p.properties
+				if isinstance(p, vsnode_cs_target):
+					prop = msvs.build_property()
+					prop.platform = p.properties['PlatformTarget']
+					# Solution needs 'Any CPU' not 'AnyCPU'
+					prop.platform_sln = prop.platform.replace('AnyCPU', 'Any CPU')
+					prop.properties = p.properties
+				else:
+					prop = p.build_properties[0]
+					# Project needs 'Win32' not 'x86'
+					prop.platform = env.SUBARCH.replace('x86', 'Win32')
+					prop.platform_sln = env.SUBARCH
+					p.build_properties = []
 
+				prop.configuration = config
+				prop.variant = k
+
+				platforms.setdefault(prop.platform_sln)
 				configs.setdefault(prop.configuration)
-				platforms.setdefault(prop.platform)
 
 				main.build_properties.append(prop)
 
 		self.configurations = configs.keys()
 		self.platforms = platforms.keys()
-		
+
 		return ret.values()
 
 	def add_aliases(self):
@@ -411,13 +443,20 @@ class idegen(msvs.msvs_generator):
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 
-				# TODO: Look for c/c++ link_task and add vcxproj
+				if not hasattr(tg, 'msvs_includes'):
+					tg.msvs_includes = tg.to_list(getattr(tg, 'includes', [])) + tg.to_list(getattr(tg, 'export_includes', []))
 
 				tg.post()
-				if not getattr(tg, 'cs_task', None):
+
+				if 'fake_lib' in getattr(tg, 'features', ''):
+					continue
+				elif hasattr(tg, 'link_task'):
+					p = self.vsnode_target(self, tg)
+				elif hasattr(tg, 'cs_task'):
+					p = self.vsnode_cs_target(self, tg)
+				else:
 					continue
 
-				p = self.vsnode_cs_target(self, tg)
 				p.collect_source() # delegate this processing
 				p.collect_properties()
 				self.all_projects.append(p)
@@ -425,3 +464,35 @@ class idegen(msvs.msvs_generator):
 				if Logs.verbose == 0:
 					sys.stderr.write('.')
 					sys.stderr.flush()
+
+def options(ctx):
+	"""
+	If the msvs option is used, try to detect if the build is made from visual studio
+	"""
+	ctx.add_option('--execsolution', action='store', help='when building with visual studio, use a build state file')
+
+	old = BuildContext.execute
+	def override_build_state(ctx):
+		def lock(rm, add):
+			uns = ctx.options.execsolution.replace('.sln', rm)
+			uns = ctx.root.make_node(uns)
+			try:
+				uns.delete()
+			except:
+				pass
+
+			uns = ctx.options.execsolution.replace('.sln', add)
+			uns = ctx.root.make_node(uns)
+			try:
+				uns.write('')
+			except:
+				pass
+
+		if ctx.options.execsolution:
+			ctx.launch_dir = Context.top_dir # force a build for the whole project (invalid cwd when called by visual studio)
+			lock('.lastbuildstate', '.unsuccessfulbuild')
+			old(ctx)
+			lock('.unsuccessfulbuild', '.lastbuildstate')
+		else:
+			old(ctx)
+	BuildContext.execute = override_build_state
