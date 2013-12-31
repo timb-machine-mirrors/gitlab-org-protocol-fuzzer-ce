@@ -462,21 +462,7 @@ class idegen(msvs.msvs_generator):
 
 	def write_files(self):
 		if self.all_projects:
-			# Move up all the projects one level
-			remove = {}
-			for p in self.all_projects:
-				if not hasattr(p, 'tg'):
-					continue
-
-				parent = getattr(p.tg, 'ide_path', p.tg.path).parent
-				path = p.tg.path
-
-				while path != parent:
-					remove.setdefault(p.parent)
-					p.parent = p.parent.parent
-					path = path.parent
-
-			idegen.all_projs[self.variant] = [ p for p in self.all_projects if p not in remove ]
+			idegen.all_projs[self.variant] = self.all_projects
 
 		idegen.depth -= 1
 		if idegen.depth == 0:
@@ -486,6 +472,47 @@ class idegen(msvs.msvs_generator):
 				sys.stderr.write('\n')
 
 			msvs.msvs_generator.write_files(self)
+
+	def collect_dirs(self):
+		"""
+		Create the folder structure in the Visual studio project view
+		"""
+		seen = {}
+		def make_parents(proj):
+			# look at a project, try to make a parent
+			if getattr(proj, 'parent', None):
+				# aliases already have parents
+				return
+			x = proj.iter_path
+			if x in seen:
+				proj.parent = seen[x]
+				return
+
+			# There is not vsnode_vsdir for x.
+			# So create a project representing the folder "x"
+			n = proj.parent = seen[x] = self.vsnode_vsdir(self, msvs.make_uuid(x.abspath()), x.name)
+			n.iter_path = x.parent
+			self.all_projects.append(n)
+
+			# recurse up to the project directory
+			if x.height() > self.srcnode.height() + 1:
+				make_parents(n)
+
+		for p in self.all_projects[:]: # iterate over a copy of all projects
+			if not getattr(p, 'tg', None):
+				# but only projects that have a task generator
+				continue
+
+			# make a folder for each task generator
+			path = p.tg.path.parent
+			ide_path = getattr(p.tg, 'ide_path', '.')
+			if os.path.isabs(ide_path):
+				p.iter_path = self.path.make_node(ide_path)
+			else:
+				p.iter_path = path.make_node(ide_path)
+
+			if p.iter_path.height() > self.srcnode.height():
+				make_parents(p)
 
 	def flatten_projects(self):
 		ret = OrderedDict()
