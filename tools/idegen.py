@@ -135,7 +135,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		self.globals      = OrderedDict()
 		self.properties   = OrderedDict()
 		self.references   = OrderedDict() # Name -> HintPath
-		self.source_files = OrderedDict() # Node -> Record
+		self.source_files = OrderedDict() # Abspath -> Record
 		self.project_refs = [] # uuid
 
 	def combine_flags(self, flag):
@@ -194,7 +194,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 			o = y.link_task.outputs[0]
 			r = source_file('Content', self, o)
 			r.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
-			self.source_files[o] = r
+			self.source_files[o.abspath()] = r
 
 	def collect_source(self):
 		tg = self.tg
@@ -203,77 +203,81 @@ class vsnode_cs_target(msvs.vsnode_project):
 		# Process compiled sources
 		srcs = tg.to_nodes(tg.cs_task.inputs, [])
 		for x in srcs:
-			lst[x] = source_file('Compile', self, x)
+			lst[x.abspath()] = source_file('Compile', self, x)
 
 		# Process compiled resx files
 		for tsk in filter(lambda x: x.__class__.__name__ is 'resgen', tg.tasks):
 			r = source_file('EmbeddedResource', self, tsk.inputs[0])
-			lst[r.node] = r
+			lst[r.node.abspath()] = r
 
 		# Process embedded resources
 		srcs = tg.to_nodes(getattr(tg, 'resource', []))
 		for x in srcs:
 			r = source_file('EmbeddedResource', self, x)
-			lst[x] = r
+			lst[x.abspath()] = r
 
 		# Process installed files
 		srcs = []
 		srcs.extend(tg.to_nodes(getattr(tg, 'install_644', [])))
 		srcs.extend(tg.to_nodes(getattr(tg, 'install_755', [])))
 		for x in srcs:
-			r = lst.get(x, None)
+			r = lst.get(x.abspath(), None)
 			if not r:
 				r = source_file('Content', self, x)
 			r.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
-			lst[x] = r
+			lst[x.abspath()] = r
 
 		# Add app.config
 		cfg = getattr(tg, 'app_config', None)
 		if cfg:
-			lst[cfg] = source_file('None', self, cfg)
+			lst[cfg.abspath()] = source_file('None', self, cfg)
 
 		settings = []
 
 		# Try and glue up Designer files
 		for k,v in lst.iteritems():
-			if not k.name.endswith('.Designer.cs'):
+			n = v.node
+
+			if not n.name.endswith('.Designer.cs'):
 				continue
 
-			name = k.name[:-12]
+			name = n.name[:-12]
 
-			cs      = lst.get(k.parent.find_resource(name + '.cs'), None)
-			resx    = lst.get(k.parent.find_resource(name + '.resx'), None)
-			setting = k.parent.find_resource(name + '.settings')
+			cs = n.parent.find_resource(name + '.cs')
+			if cs: cs = lst.get(cs.abspath(), None)
+			resx = lst.get(n.parent.find_resource(name + '.resx'), None)
+			if resx: resx = lst.get(resx.abspath(), None)
+			setting = n.parent.find_resource(name + '.settings')
 
 			if cs and resx:
 				# If cs & resx, 's' & 'resx' are dependent upon 'cs'
 				if Logs.verbose > 0:
-					print 'Designer: cs & resx - %s' % k.abspath()
+					print 'Designer: cs & resx - %s' % k
 				v.attrs['DependentUpon'] = cs.node.name
 				cs.attrs['SubType'] = 'Form'
 				resx.attrs['DependentUpon'] = cs.node.name
 			elif cs:
 				# If cs only, 's' is dependent upon 'cs'
 				if Logs.verbose > 0:
-					print 'Designer: cs - %s' % k.abspath()
+					print 'Designer: cs - %s' % k
 				v.attrs['DependentUpon'] = cs.node.name
 				cs.attrs['SubType'] = 'Form'
 			elif resx:
 				# If resx only, 's' is autogen
 				if Logs.verbose > 0:
-					print 'Designer: resx - %s' % k.abspath()
+					print 'Designer: resx - %s' % k
 				v.attrs['AutoGen'] = True
 				v.attrs['DependentUpon'] = resx.node.name
 				v.attrs['DesignTime'] = True
 				resx.attrs['Generator'] = 'ResXFileCodeGenerator'
-				resx.attrs['LastGenOutput'] = k.name
+				resx.attrs['LastGenOutput'] = n.name
 			elif setting:
 				# If settings, add to source file list
 				if Logs.verbose > 0:
-					print 'Designer: settings - %s' % k.abspath()
+					print 'Designer: settings - %s' % k
 				f = source_file('None', self, setting)
 				f.attrs['Generator'] = 'SettingsSingleFileGenerator'
-				f.attrs['LastGenOutput'] = k.name
+				f.attrs['LastGenOutput'] = n.name
 				v.attrs['AutoGen'] = True
 				v.attrs['DependentUpon'] = f.node.name
 				v.attrs['DesignTimeSharedInput'] = True
@@ -282,7 +286,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				settings.append(f)
 
 		for x in settings:
-			lst[x.node] = x
+			lst[x.node.abspath()] = x
 
 		self.collect_use()
 
@@ -331,7 +335,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 			f = source_file('None', self, keyfile[0])
 			g['SignAssembly'] = True
 			g['AssemblyOriginatorKeyFile'] = f.name
-			self.source_files[f.node] = f
+			self.source_files[f.node.abspath()] = f
 
 		p = self.properties
 
