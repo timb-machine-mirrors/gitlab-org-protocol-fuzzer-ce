@@ -372,24 +372,12 @@ namespace PeachFarm.Node
 			peachWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(peachWorker_RunWorkerCompleted);
 			peachWorker.RunWorkerAsync();
 		}
-
-		void peachWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-		{
-			if (e.Result != null)
-			{
-				if (e.Result is Heartbeat)
-				{
-					SendHeartbeat((Heartbeat)e.Result);
-				}
-			}
-			StartPeachCleanUp();
-		}
-
 		#endregion
 
 		#region Peach Background Worker
 		void peachWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
+			#region Parse Pit and Defines
 			Peach.Core.Analyzers.PitParser pitParser = new Peach.Core.Analyzers.PitParser();
 
 			Peach.Core.Dom.Dom dom = null;
@@ -425,7 +413,9 @@ namespace PeachFarm.Node
 				e.Result = CreateHeartbeat(message);
 				return;
 			}
-			//*
+			#endregion
+
+			#region Create Loggers
 			List<Peach.Core.Logger> loggers = new List<Peach.Core.Logger>();
 
 			var jobnodefolder = String.Format(Formats.JobNodeFolder, nodeState.StartPeachRequest.JobID, nodeState.StartPeachRequest.PitFileName, reverseStringFormat(QueueNames.QUEUE_NODE, nodeState.NodeQueue)[0]);
@@ -479,16 +469,17 @@ namespace PeachFarm.Node
 				return;
 			}
 
-
-
 			foreach (var test in dom.tests.Values)
 			{
 				test.loggers = loggers;
 			}
+			#endregion
 
+			#region Configure Run
 			Peach.Core.RunConfiguration config = new Peach.Core.RunConfiguration();
 			config.pitFile = nodeState.PitFilePath;
 			config.debug = 0;
+			config.runName = nodeState.StartPeachRequest.TestName;
 
 			if (nodeState.StartPeachRequest.RangeStartSpecified && nodeState.StartPeachRequest.RangeEndSpecified)
 			{
@@ -501,7 +492,9 @@ namespace PeachFarm.Node
 			{
 				config.randomSeed = nodeState.StartPeachRequest.Seed;
 			}
+			#endregion
 
+			#region Run Peach
 			try
 			{
 				peach.startFuzzing(dom, config);
@@ -516,7 +509,19 @@ namespace PeachFarm.Node
 				string message = String.Format("Unknown Exception from Peach during job {0}:\n{1}", nodeState.StartPeachRequest.JobID, ex.ToString());
 				e.Result = CreateHeartbeat(message);
 			}
-			//*/
+			#endregion
+		}
+
+		void peachWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			if (e.Result != null)
+			{
+				if (e.Result is Heartbeat)
+				{
+					SendHeartbeat((Heartbeat)e.Result);
+				}
+			}
+			StartPeachCleanUp();
 		}
 
 		private void StartPeachCleanUp()

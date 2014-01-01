@@ -54,6 +54,7 @@
 		<xs:attribute name="RangeStart" type="xs:unsignedInt" />
 		<xs:attribute name="RangeEnd" type="xs:unsignedInt" />
 		<xs:attribute name="JobLogging" type="xs:boolean" use="required"/>
+		<xs:attribute name="TestName" type="xs:string" use="required" />
   </xs:complexType>
 
   <xs:element name="StartPeachResponse" type="StartPeachResponse" />

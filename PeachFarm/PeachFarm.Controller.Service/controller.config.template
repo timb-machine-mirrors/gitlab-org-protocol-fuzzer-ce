@@ -4,4 +4,5 @@
 	<MongoDb connectionString="mongodb://10.0.1.39/?safe=true"/>
 	<RabbitMq hostName="10.0.1.39" port="-1" userName="guest" password="guest" useSSL="false"/>
 	<NodeExpirationRules lateMinutes="5" expiredMinutes="30"/>
+	<MySql connectionString="Server=dejaapps;Port=3307;Database=peachfarmreporting;Uid=apps;Pwd=dejaapps;" />
 </peachfarm.controller>

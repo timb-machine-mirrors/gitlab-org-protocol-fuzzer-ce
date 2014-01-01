@@ -279,7 +279,7 @@ namespace PeachFarmMonitor
 				fbvm.FaultCount = collection.Distinct("_id", Query.And(Query.EQ("JobID", jobID), Query.EQ("FolderName", faultBucket.FolderName))).Count();
         faultBuckets.Add(fbvm);
       }
-      collection.Database.Server.Disconnect();
+      //collection.Database.Server.Disconnect();
 
       return faultBuckets;
     }

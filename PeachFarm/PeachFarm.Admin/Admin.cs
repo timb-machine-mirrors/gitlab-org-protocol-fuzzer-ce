@@ -330,7 +330,7 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target = null, uint? rangestart = null, uint? rangeend = null)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target = null, uint? rangestart = null, uint? rangeend = null, string testname = null)
 		{
 			Register();
 
@@ -351,6 +351,7 @@ namespace PeachFarm.Admin
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
 
 			request.Target = target ?? request.PitFileName;
+			request.TestName = testname ?? "Default";
 
 			string newdefinesfilepath = String.Empty;
 			if (Path.GetExtension(pitFilePath) == xmlext)
