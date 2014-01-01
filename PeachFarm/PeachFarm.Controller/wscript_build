@@ -14,7 +14,7 @@ deps = [
 	'System.Xml.Linq.dll',
 ]
 
-bld(
+app = bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
@@ -22,4 +22,4 @@ bld(
 )
 
 if bld.env.MCS and bld.env.DEST_OS != "win32":
-	bld.install_files('${BINDIR}','pf_controller', chmod=Utils.O755)
+	app.install_755 = 'pf_controller'

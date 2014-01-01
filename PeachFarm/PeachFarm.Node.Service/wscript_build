@@ -17,5 +17,6 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name='pf_node.exe',
-	install = 'node.config.template',
+	namespace = 'PeachFarm.Node.Service',
+	install_644 = 'node.config.template',
 )
