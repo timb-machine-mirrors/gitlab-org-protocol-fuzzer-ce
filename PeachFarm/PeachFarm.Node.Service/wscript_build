@@ -19,4 +19,5 @@ bld(
 	name='pf_node.exe',
 	namespace = 'PeachFarm.Node.Service',
 	install_644 = 'node.config.template',
+	ide_path = '../Peach Farm',
 )

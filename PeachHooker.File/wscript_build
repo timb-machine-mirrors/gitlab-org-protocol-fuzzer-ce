@@ -12,4 +12,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PeachHooker.File.dll',
 	keyfile = 'PeachHooker.File.snk',
+	ide_path='Peach Hooker',
 )

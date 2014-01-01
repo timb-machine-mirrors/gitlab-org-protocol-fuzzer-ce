@@ -12,6 +12,7 @@ bld(
 	use = [ 'System.dll', ],
 	source = 'aardvark.cs',
 	name = 'aardvark_net.dll',
+	namespace = 'aardvark',
 	version = False,
 	csdoc = False,
 )

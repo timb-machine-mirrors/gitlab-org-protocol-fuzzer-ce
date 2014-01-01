@@ -17,6 +17,7 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PeachFarm.Common.dll',
+	ide_path = '../Peach Farm',
 
 	# xsd2code generated classes have warnings in them
 	# http://xsd2code.codeplex.com/workitem/10041

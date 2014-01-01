@@ -19,4 +19,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	namespace = 'PeachFarm.Admin.Console',
 	name = 'pf_admin.exe',
+	ide_path = '../Peach Farm',
 )

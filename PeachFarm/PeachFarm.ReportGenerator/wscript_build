@@ -20,4 +20,5 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachFarm.Reporting.dll',
+	ide_path = '../Peach Farm',
 )

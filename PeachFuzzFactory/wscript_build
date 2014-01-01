@@ -43,5 +43,6 @@ bld(
 	main = 'App.xaml',
 	icon = 'peach20x20.ico',
 	bintype = 'winexe',
+	ide_path = 'Peach Fuzz Factory',
 )
 

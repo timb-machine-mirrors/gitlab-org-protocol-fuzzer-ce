@@ -12,7 +12,8 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='PeachAssemblyFuzzer.exe',
+	name = 'PeachAssemblyFuzzer.exe',
+	ide_path = 'Peach Enterprise',
 )
 
 

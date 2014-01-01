@@ -19,6 +19,7 @@ app = bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachFarm.Controller.dll',
+	ide_path = '../Peach Farm',
 )
 
 if bld.env.MCS and bld.env.DEST_OS != "win32":

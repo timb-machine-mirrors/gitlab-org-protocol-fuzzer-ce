@@ -35,4 +35,5 @@ bld(
 	name = 'PeachSampleNinja.exe',
 	resource = 'SampleNinja.db',
 	ver_product = 'Peach Enterprise',
+	ide_path = 'Peach Enterprise',
 )

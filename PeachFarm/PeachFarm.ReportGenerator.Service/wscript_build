@@ -15,4 +15,5 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachFarm.Reporting.Service.exe',
+	ide_path = '../Peach Farm',
 )

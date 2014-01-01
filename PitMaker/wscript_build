@@ -27,5 +27,6 @@ bld(
 	resource = bld.path.ant_glob('Images/*'),
 	name = 'PitMakerControl.dll',
 	namespace = 'PitMaker',
+	ide_path = 'Peach Fuzz Factory',
 )
 
