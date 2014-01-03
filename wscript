@@ -9,6 +9,7 @@ out = 'slag'
 inst = 'output'
 appname = 'EPeach'
 maxdepth = 2
+# Path to peach community
 peach = 'Peach'
 
 def supported_variant(name):
