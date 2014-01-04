@@ -19,6 +19,10 @@ bld(
 	name = 'PeachFarm.Common.dll',
 	ide_path = '../Peach Farm',
 
+	# Needs to be AnyCPU since it is used by PeachFarmMonitor
+	# And ASP.NET won't load x64 assemblies
+	platform = 'AnyCPU',
+
 	# xsd2code generated classes have warnings in them
 	# http://xsd2code.codeplex.com/workitem/10041
 	# http://xsd2code.codeplex.com/discussions/73398
