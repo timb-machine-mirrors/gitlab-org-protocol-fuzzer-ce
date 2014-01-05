@@ -1,88 +1,49 @@
 #!/usr/bin/env python
 
-import os
-
 subdirs = [
-	'Irony_2013_03_10',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
 ]
 
 bld.recurse(subdirs)
 
-bld.read_csshlib('BouncyCastle.Crypto.dll',                 paths=['BouncyCastle-1.7'])
-bld.read_csshlib('EasyHook.dll',                            paths=['EasyHook-2.6'])
-bld.read_csshlib('RabbitMQ.Client.dll',                     paths=['rabbitmq-dotnet-client-3.0.2-dotnet-2.0/bin'])
-bld.read_csshlib('MongoDB.Bson.dll',                        paths=['CSharpDriver-1.7.0.4714'])
-bld.read_csshlib('MongoDB.Driver.dll',                      paths=['CSharpDriver-1.7.0.4714'])
-bld.read_csshlib('Telerik.OpenAccess.dll',                  paths=['OpenAccess ORM/bin'])
-bld.read_csshlib('Telerik.OpenAccess.35.Extensions.dll',    paths=['OpenAccess ORM/bin'])
-bld.read_csshlib('Microsoft.Practices.Prism.dll',           paths=['Prism4.1'])
-bld.read_csshlib('Microsoft.Practices.ServiceLocation.dll', paths=['Prism4.1'])
-bld.read_csshlib('Npgsql.dll',                              paths=['Npgsql2.0.12.0-bin-ms.net4.0'])
+bld.read_nuget('packages.config')
 
-#Iconic.Zip.dll is already provided in Peach/3rdParty
-#Newtonsoft.Json.dll is already provided in Peach/3rdParty
+bld.read_csshlib('EasyHook.dll', paths=['EasyHook-2.6'])
 
-bld.read_csshlib('Nancy.dll',						paths=['Nancy.0.21.1/lib/net40'])
-bld.read_csshlib('Nancy.Hosting.Self.dll',			paths=['Nancy.Hosting.Self.0.21.1/lib/net40'])
-bld.read_csshlib('Nancy.Serialization.JsonNet.dll',	paths=['Nancy.Serialization.JsonNet.0.21.1/lib/net40'])
+bld.read_csshlib('Telerik.Reporting.dll', paths=['Telerik Reporting Q3 2013/Bin'])
 
-bld.read_csshlib('MySql.Data.dll',					paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
-bld.read_csshlib('MySql.Data.Entity.dll',			paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
-bld.read_csshlib('MySql.Web.dll',					paths=['MySql Connector NET 6.7.4/Assemblies/v4.0'])
+bld.read_csshlib('Telerik.Web.Design.dll',   paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
+bld.read_csshlib('Telerik.Web.UI.dll',       paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
+bld.read_csshlib('Telerik.Web.UI.Skins.dll', paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
 
-bld.read_csshlib('ServiceStack.Common.dll',              paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.dll',                     paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.Interfaces.dll',          paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.OrmLite.dll',             paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.OrmLite.SqlServer.dll',   paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.Redis.dll',               paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.ServiceInterface.dll',    paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.Text.dll',                paths=['ServiceStack'])
-bld.read_csshlib('ServiceStack.Api.Swagger.dll',         paths=['ServiceStack'])
+bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
+bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
 
-bld.read_csshlib('Telerik.Reporting.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
+bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.PropertyGrid.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Shared.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll', paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf.dll',    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.SyntaxEditor.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Text.Addons.DotNet.Wpf.dll',         paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Text.Addons.Xml.Wpf.dll',            paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Text.LLParser.Wpf.dll',              paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 
 if bld.env.TARGET == 'win':
 	# Use binary dist of sqlite on windows
 	bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
 	#bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
 
-	bld.read_csshlib('Telerik.Reporting.Adomd.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.Reporting.Cache.Database.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.Reporting.OpenXmlRendering.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.Reporting.Service.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.Reporting.Services.WebApi.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.Reporting.XpsRendering.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.ReportViewer.Mvc.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.ReportViewer.Silverlight.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.ReportViewer.WebForms.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.ReportViewer.WinForms.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-	bld.read_csshlib('Telerik.ReportViewer.Wpf.dll',					paths=['Telerik Reporting Q3 2013/Bin'])
-
 	# Install the x86/x64 sql interop dll
 	bld.read_shlib('SQLite.Interop', paths=['sqlite-netFx40-static-binary-2010-1.0.88.0/%s' % bld.env.SUBARCH])
-
-	bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-	bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-	bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-	bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-	bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-
-	bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                   paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.PropertyGrid.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Shared.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll', paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf.dll',    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.SyntaxEditor.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Text.Addons.DotNet.Wpf.dll',         paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Text.Addons.Xml.Wpf.dll',            paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Text.LLParser.Wpf.dll',              paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-	bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
 else:
 	# Build sqlite from source on linux
 	bld.recurse('sqlite-netFx-source-1.0.89.0')
