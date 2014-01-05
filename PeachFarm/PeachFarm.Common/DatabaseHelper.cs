@@ -55,7 +55,7 @@ namespace PeachFarm.Common.Mongo
 				{
 					db.CreateCollection(kvp.Key);
 					collection = db.GetCollection<Job>(kvp.Key);
-					collection.CreateIndex(kvp.Value.ToArray());
+					collection.EnsureIndex(kvp.Value.ToArray());
 				}
 			}
 		}
@@ -248,8 +248,8 @@ namespace PeachFarm.Common.Mongo
 			MongoServer server = new MongoClient(connectionString).GetServer();
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 
-			MongoDB.Bson.BsonObjectId remoteFileID = MongoDB.Bson.BsonObjectId.Empty;
-			bool isid = MongoDB.Bson.BsonObjectId.TryParse(remoteFile, out remoteFileID);
+			MongoDB.Bson.ObjectId remoteFileID = MongoDB.Bson.ObjectId.Empty;
+			bool isid = MongoDB.Bson.ObjectId.TryParse(remoteFile, out remoteFileID);
 
 			if (isid)
 			{

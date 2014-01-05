@@ -440,9 +440,11 @@ namespace PeachFarm.Common
 						string body = encoding.GetString(result.Body);
 						string action = encoding.GetString((byte[])result.BasicProperties.Headers["Action"]);
 						string replyQueue = String.Empty;
-						if (result.BasicProperties.Headers.Contains("ReplyQueue"))
+
+						object value;
+						if (result.BasicProperties.Headers.TryGetValue("ReplyQueue", out value))
 						{
-							replyQueue = encoding.GetString((byte[])result.BasicProperties.Headers["ReplyQueue"]);
+							replyQueue = encoding.GetString((byte[])value);
 						}
 
 						OnMessageReceived(action, body, replyQueue);
@@ -533,7 +535,7 @@ namespace PeachFarm.Common
 		{
 			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
 			properties.DeliveryMode = 2;
-			properties.Headers = new Dictionary<string, string>();
+			properties.Headers = new Dictionary<string, object>();
 			properties.Headers.Add("Action", action);
 			if (String.IsNullOrEmpty(replyQueue) == false)
 			{
@@ -546,7 +548,7 @@ namespace PeachFarm.Common
 		{
 			RabbitMQ.Client.Framing.v0_9_1.BasicProperties properties = new RabbitMQ.Client.Framing.v0_9_1.BasicProperties();
 			properties.DeliveryMode = 2;
-			properties.Headers = new Dictionary<string, string>();
+			properties.Headers = new Dictionary<string, object>();
 			properties.Headers.Add("Action", action);
 			model.BasicPublish(exchange, "", properties, encoding.GetBytes(message));
 		}
