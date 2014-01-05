@@ -11,31 +11,10 @@ bld.read_nuget('packages.config')
 
 bld.read_csshlib('EasyHook.dll', paths=['EasyHook-2.6'])
 
-bld.read_csshlib('Telerik.Reporting.dll', paths=['Telerik Reporting Q3 2013/Bin'])
-
-bld.read_csshlib('Telerik.Web.Design.dll',   paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
-bld.read_csshlib('Telerik.Web.UI.dll',       paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
-bld.read_csshlib('Telerik.Web.UI.Skins.dll', paths=['RadControls for ASP.NET AJAX Q3 2013/Bin40'])
-
-bld.read_csshlib('Telerik.Windows.Controls.dll',            paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-bld.read_csshlib('Telerik.Windows.Controls.Data.dll',       paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-bld.read_csshlib('Telerik.Windows.Controls.Input.dll',      paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-bld.read_csshlib('Telerik.Windows.Controls.Navigation.dll', paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-bld.read_csshlib('Telerik.Windows.Data.dll',                paths=['RadControls for WPF Q3 2012/Binaries/WPF40'])
-
-bld.read_csshlib('ActiproSoftware.Docking.Wpf.dll',                    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Navigation.Wpf.dll',                 paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.PropertyGrid.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Shared.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll', paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.SyntaxEditor.Addons.Xml.Wpf.dll',    paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.SyntaxEditor.Wpf.dll',               paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Text.Addons.DotNet.Wpf.dll',         paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Text.Addons.Xml.Wpf.dll',            paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Text.LLParser.Wpf.dll',              paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Text.Wpf.dll',                       paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Views.Wpf.dll',                      paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
-bld.read_csshlib('ActiproSoftware.Wizard.Wpf.dll',                     paths=['Actipro-WPF-Controls-12.2.0570/Assemblies'])
+bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
+bld.read_all_csshlibs('RadControls for ASP.NET AJAX Q3 2013/Bin40')
+bld.read_all_csshlibs('RadControls for WPF Q3 2012/Binaries/WPF40')
+bld.read_all_csshlibs('Actipro-WPF-Controls-12.2.0570/Assemblies')
 
 if bld.env.TARGET == 'win':
 	# Use binary dist of sqlite on windows
