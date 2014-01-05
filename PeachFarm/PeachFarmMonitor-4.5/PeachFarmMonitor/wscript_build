@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Configuration.dll',
+	'System.Data.dll',
+	'System.Drawing.dll',
+	'System.Web.dll',
+	'System.Web.Extensions.dll',
+	'System.Xml.dll',
+
+	#'Telerik.Web.Design.dll',
+	'Telerik.Web.UI.dll',
+	#'Telerik.Web.UI.Skins.dll',
+
+	'NLog.dll',
+	'Ionic.Zip.dll',
+
+	'PeachFarm.Common.dll',
+
+	'RabbitMQ.Client.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
+
+	'MySql.Data.dll',
+	'System.Runtime.Serialization.dll'
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs', excl='ReportViewer.*'),
+	name = 'PeachFarmMonitor.dll',
+	platform = 'AnyCPU', # ASP.NET needs AnyCPU
+	ide_path = '../../Peach Farm',
+	ide_content = bld.path.ant_glob('dejavulogo.jpg **/*.aspx **/*.asax App_Themes/**/*'),
+	ide_aspnet = True
+)

@@ -29,7 +29,7 @@
 		/// and a collection GridSettingsType values
 		/// </summary>
 		/// <param name="grid">The RadGrid instance to import and exports settings</param>
-		/// <param name="persistedSettings">
+        /// <param name="persistedSettingFlags">
 		/// A collection of GridSettingType values specifying the type of grid settings
 		/// to import or export
 		/// </param>

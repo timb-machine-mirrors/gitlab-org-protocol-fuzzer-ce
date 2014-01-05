@@ -17,7 +17,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class GetJobOutput : BasePage
+  public partial class GetJobOutput : System.Web.UI.Page
   {
     private static PeachFarmMonitorSection monitorconfig = null;
 

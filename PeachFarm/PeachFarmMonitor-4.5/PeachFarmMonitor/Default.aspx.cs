@@ -20,7 +20,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class Home : BasePage
+  public partial class Home : System.Web.UI.Page
   {
     private static PeachFarmMonitorSection monitorconfig = null;
 
