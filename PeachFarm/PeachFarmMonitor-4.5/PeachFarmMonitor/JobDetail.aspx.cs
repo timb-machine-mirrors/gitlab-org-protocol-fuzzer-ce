@@ -26,17 +26,17 @@ namespace PeachFarmMonitor
 	  //private string faultid;
 	  //private bool faultfound;
 
-    private static string[] dataFields = new string[]
-		{
-		    "CollectedData.Data",
-		    "StateModel.Data"
-		};
+	//private static string[] dataFields = new string[]
+	//	{
+	//		"CollectedData.Data",
+	//		"StateModel.Data"
+	//	};
 
-    private static string[] collectionFields = new string[]
-    {
-      "CollectedData",
-      "StateModel"
-    };
+	//private static string[] collectionFields = new string[]
+	//{
+	//  "CollectedData",
+	//  "StateModel"
+	//};
     #endregion
 
     #region Ctor
