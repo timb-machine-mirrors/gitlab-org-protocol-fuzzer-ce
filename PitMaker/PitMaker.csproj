@@ -80,10 +80,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Practices.Prism">
-      <HintPath>..\3rdParty\Prism4.1\Microsoft.Practices.Prism.dll</HintPath>
+      <HintPath>..\3rdParty\Prism.4.1.0.0\lib\NET40\Microsoft.Practices.Prism.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation">
-      <HintPath>..\3rdParty\Prism4.1\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <HintPath>..\3rdParty\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
