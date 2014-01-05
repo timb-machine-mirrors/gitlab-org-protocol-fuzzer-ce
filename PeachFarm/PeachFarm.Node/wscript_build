@@ -15,8 +15,12 @@ deps = [
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
 	'Ionic.Zip.dll',
-	'System.Data.SQLite.dll',
 ]
+
+if bld.env.TARGET == 'win':
+	deps.append('System.Data.SQLite.dll')
+else:
+	deps.append('Mono.Data.Sqlite.dll')
 
 app = bld(
 	features = 'cs',

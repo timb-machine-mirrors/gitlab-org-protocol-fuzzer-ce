@@ -5,7 +5,6 @@ using System.Text;
 using PeachFarm.Common.Messages;
 using PeachFarm.Common;
 using System.Data;
-using System.Data.SQLite;
 using Peach.Core;
 
 namespace PeachFarm.Loggers
@@ -114,7 +113,7 @@ namespace PeachFarm.Loggers
 			var dt = new DataTable();
 
 
-			using (SQLiteCommand sqlitecmd = db.CreateCommand())
+			using (var sqlitecmd = db.CreateCommand())
 			{
 				sqlitecmd.CommandText = String.Format("select * from {0}", table);
 				using (var reader = sqlitecmd.ExecuteReader())
@@ -128,7 +127,7 @@ namespace PeachFarm.Loggers
 
 		private void Truncate(string table)
 		{
-			using (SQLiteCommand sqlitecmd = db.CreateCommand())
+			using (var sqlitecmd = db.CreateCommand())
 			{
 				sqlitecmd.CommandText = String.Format("delete from {0}", table);
 				sqlitecmd.ExecuteNonQuery();

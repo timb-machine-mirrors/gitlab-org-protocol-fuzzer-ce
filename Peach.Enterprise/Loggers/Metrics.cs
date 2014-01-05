@@ -1,7 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Peach.Core;
+
+#if MONO
+using Mono.Data.Sqlite;
+
+using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
+#else
 using System.Data.SQLite;
+#endif
 
 namespace Peach.Enterprise.Loggers
 {
@@ -237,14 +246,14 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 			sample = new Sample();
 
-			try
-			{
-				SQLiteLog.Initialize();
-			}
-			catch (MissingMethodException)
-			{
-				throw new PeachException("Error, could not find native sqlite library.");
-			}
+			//try
+			//{
+			//	SQLiteLog.Initialize();
+			//}
+			//catch (MissingMethodException)
+			//{
+			//	throw new PeachException("Error, could not find native sqlite library.");
+			//}
 		}
 
 		public string Path

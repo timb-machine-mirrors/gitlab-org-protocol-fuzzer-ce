@@ -21,12 +21,15 @@ deps = [
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 
-	'System.Data.SQLite.dll',
 	'System.Data.DataSetExtensions.dll',
 	'System.Data.dll',
 	'System.Data.DataSetExtensions.dll',
-	
 	]
+
+if bld.env.TARGET == 'win':
+	deps.append('System.Data.SQLite.dll')
+else:
+	deps.append('Mono.Data.Sqlite.dll')
 
 bld(
 	features = 'cs',

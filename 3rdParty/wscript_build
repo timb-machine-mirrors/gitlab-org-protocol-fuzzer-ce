@@ -7,7 +7,12 @@ subdirs = [
 
 bld.recurse(subdirs)
 
-bld.read_nuget('packages.config')
+mapping = {
+	'System.Data.SQLite.x86' : 'win_x86',
+	'System.Data.SQLite.x64' : 'win_x64',
+}
+
+bld.read_nuget('packages.config', mapping=mapping)
 
 bld.read_csshlib('EasyHook.dll', paths=['EasyHook-2.6'])
 
@@ -15,15 +20,3 @@ bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
 bld.read_all_csshlibs('RadControls for ASP.NET AJAX Q3 2013/Bin40')
 bld.read_all_csshlibs('RadControls for WPF Q3 2012/Binaries/WPF40')
 bld.read_all_csshlibs('Actipro-WPF-Controls-12.2.0570/Assemblies')
-
-if bld.env.TARGET == 'win':
-	# Use binary dist of sqlite on windows
-	bld.read_csshlib('System.Data.SQLite.dll',                  paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
-	#bld.read_csshlib('System.Data.SQLite.Linq.dll',             paths=['sqlite-netFx40-static-binary-2010-1.0.88.0'])
-
-	# Install the x86/x64 sql interop dll
-	bld.read_shlib('SQLite.Interop', paths=['sqlite-netFx40-static-binary-2010-1.0.88.0/%s' % bld.env.SUBARCH])
-else:
-	# Build sqlite from source on linux
-	bld.recurse('sqlite-netFx-source-1.0.89.0')
-

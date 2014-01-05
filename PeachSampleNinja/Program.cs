@@ -3,9 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Data.Sql;
-using System.Data.SQLite;
-using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Reflection;
 
@@ -14,6 +11,16 @@ using Peach.Core.IO;
 using Peach.Core.Dom;
 using Peach.Core.Cracker;
 using Peach.Core.Analyzers;
+
+#if MONO
+using Mono.Data.Sqlite;
+
+using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
+#else
+using System.Data.SQLite;
+#endif
 
 namespace PeachSampleNinja
 {

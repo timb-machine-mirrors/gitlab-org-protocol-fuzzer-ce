@@ -3,10 +3,17 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
-using System.Data.Sql;
-using System.Data.SQLite;
-using System.Data.SqlClient;
 using System.Security.Cryptography;
+
+#if MONO
+using Mono.Data.Sqlite;
+
+using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
+#else
+using System.Data.SQLite;
+#endif
 
 using Peach.Core.Dom;
 using Peach.Core;
