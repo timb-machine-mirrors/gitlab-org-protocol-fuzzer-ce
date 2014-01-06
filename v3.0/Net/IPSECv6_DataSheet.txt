@@ -1,14 +1,14 @@
-Protocol
---------
+:Doctitle: IPsecV6 Peach Pit Data Sheet
+:Description: Internet Protocol Security version 6 (IPsecV6)
 
- * Test Suite: IPsec
+ * Test Suite: IPsecV6
  * Direction: Client
  
  Protocol suite for securing Internet Protocol (IP) communications
  by authenticating and encrypting each IP packet of a communication session.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -38,19 +38,14 @@ Used Specifications
 |RFC5996 | Internet Key Exchange Protocol Version 2 (IKEv2)
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
 |Messages | Specification
 |Encapsulating Security Payload Packet Format | RFC4303 2
 |Authentication Header (AH) | RFC4302
-|========
-
-[options="header"]
-|========
-|Supported Features | Specification
 |Transport Mode Processing | RFC4303 3.1.1
 |Tunnel Mode Processing | RFC4303 3.1.2
 |Separate Confidentiality and Integrity Algorithms | RFC4303 3.4.4.1
@@ -70,14 +65,3 @@ Detailed Use Cases
 |Combined Confidentiality and Integrity Algorithms (TODO) | RFC4303 3.4.4.2
 |Sequence Number Generation (Partial TODO) | RFC4303 3.3.3, 3.4.3
 |========
-
-[options="header"]
-|========
-|Supported Payloads | Specification
-|
-|========
-
---Doesn't support anti-replay (reestablishing the SA when Sequence number will cycle 
---Doesn't support Fragmentation (Cracking) processing (fragmentation reassembly should probably be done by the publisher/might already be done by publisher)
---Doesn't support Fragmentented sending RFC4303 3.3.4-3.4.2
---Doesn't support randomly generated IV's

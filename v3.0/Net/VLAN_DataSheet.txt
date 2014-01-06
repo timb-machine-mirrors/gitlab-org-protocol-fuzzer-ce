@@ -1,0 +1,27 @@
+:Doctitle: VLAN Peach Pit Data Sheet
+:Description: Virtual Local Area Network (VLAN)
+
+ * Test Suite: VLAN
+ * Direction: Client
+ 
+In computer networking, a single layer-2 network may be partitioned to create multiple distinct broadcast
+domains, which are mutually isolated so that packets can only pass between them via one or more routers; 
+such a domain is referred to as a virtual local area network, virtual LAN or VLAN.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|IEEE 802.1Q  | IEEE Standard for Local and metropolitan area networks
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|VLAN Header | IEEE 802.1Q
+|========

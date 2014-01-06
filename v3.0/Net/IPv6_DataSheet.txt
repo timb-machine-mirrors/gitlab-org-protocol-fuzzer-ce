@@ -1,15 +1,15 @@
-Protocol
---------
+:Doctitle: IPv6 Peach Pit Data Sheet
+:Description: Internet Protocol version 6 (IPv6)
 
- * Test Suite: PROTOCOL
+ * Test Suite: IPv6
  * Direction: Client
  
 Internet Protocol version 6 (IPv6) is the the communications protocol that 
 provides an identification and location system for computers on networks and 
-routes traffic across the Internet
+routes traffic across the Internet.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Used Specifications
 |RFC3775 | Mobility Support in IPv6
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
@@ -40,11 +40,6 @@ Detailed Use Cases
 |IPv6 Moblity ICMP Home Agent Address Discovery Reply Message | RFC 3775 6.6
 |IPv6 Moblity ICMP Mobile Prefix Soliciation Message Format | RFC 3775 6.7
 |IPv6 Moblity ICMP Mobile Prefix Advertisement Message Format | RFC 3775 6.8
-|========
-
-[options="header"]
-|========
-|Supported Features | Specification
 |IPv6 Header Hop-by-Hop Options| RFC2460 4.3
 |IPv6 Header Routing Options | RFC2460 4.4
 |IPv6 Header Fragment Options | RFC2460 4.5
@@ -56,10 +51,4 @@ Detailed Use Cases
 |IPv6 Moblity Home Address Option | RFC3775 6.3
 |IPv6 Moblity Binding Authorization Data Option (TODO)| RFC3775 6.2.7
 |IPv6 Mobility Home/Care of Keygen (TODO) | RFC3775 5.2.5
-|========
-
-[options="header"]
-|========
-|Supported Payloads | Specification
-| 
 |========
