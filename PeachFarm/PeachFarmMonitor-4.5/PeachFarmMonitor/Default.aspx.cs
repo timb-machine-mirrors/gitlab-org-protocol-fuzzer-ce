@@ -20,7 +20,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class Home : BasePage
+  public partial class Home : System.Web.UI.Page
   {
     private static PeachFarmMonitorSection monitorconfig = null;
 
@@ -223,7 +223,7 @@ namespace PeachFarmMonitor
 					{
 						case JobStatus.Running:
 							item.Style.Add("background-color", "lightgreen");
-							var button = item["StopJobButton"].Controls[0];
+							//var button = item["StopJobButton"].Controls[0];
 							break;
 						case JobStatus.Error:
 							item.Style.Add("background-color", "#FF8080");

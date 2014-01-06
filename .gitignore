@@ -39,18 +39,18 @@ test-results/
 # This allows bin/obj folders to not be ignored in 3rdParty
 /*/[Bb]in/
 /*/[Oo]bj/
+/PeachFarm/*/*/[Bb]in/
+/PeachFarm/*/*/[Oo]bj/
 /PeachFarm/*/[Bb]in/
 /PeachFarm/*/[Oo]bj/
-/3rdParty/Irony*/*/[Bb]in/
-/3rdParty/Irony*/*/[Oo]bj/
-/3rdParty/TotalPhase-5.13/[Bb]in/
-/3rdParty/TotalPhase-5.13/[Oo]bj/
-/3rdParty/Managed.AndroidDebugBridge/*/[Oo]bj/
-/3rdParty/Managed.AndroidDebugBridge/*/[Bb]in/
 
 # User-specific files
 *.user
-PeachFarm/PeachFarmMonitor-4.5/PeachFarmMonitor/logfile.txt
 *.cache
 
 _Resharper*
+
+*.csproj
+*.sln
+*.lastbuildstate
+.depproj/

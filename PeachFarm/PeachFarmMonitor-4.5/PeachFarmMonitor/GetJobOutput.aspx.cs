@@ -17,7 +17,7 @@ using MongoDB.Driver.Builders;
 
 namespace PeachFarmMonitor
 {
-  public partial class GetJobOutput : BasePage
+  public partial class GetJobOutput : System.Web.UI.Page
   {
     private static PeachFarmMonitorSection monitorconfig = null;
 
@@ -44,9 +44,6 @@ namespace PeachFarmMonitor
           {
             if (String.IsNullOrEmpty(filepath))
             {
-              string temppath = Path.GetTempPath();
-
-
 							MongoServer server = new MongoClient(monitorconfig.MongoDb.ConnectionString).GetServer();
 							MongoDatabase db = server.GetDatabase(MongoNames.Database);
 							string jobfolder = job.JobFolder + "*";
@@ -196,9 +193,6 @@ namespace PeachFarmMonitor
 
 			// Identify the file to download including its path.
 			//string filepath = "DownloadFileName";
-
-			// Identify the file name.
-			string filename = System.IO.Path.GetFileName(filepath);
 
 			try
 			{

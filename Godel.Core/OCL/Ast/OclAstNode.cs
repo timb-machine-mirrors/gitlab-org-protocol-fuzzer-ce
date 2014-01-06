@@ -21,18 +21,6 @@ namespace Godel.Core.OCL.Ast
 {
 	public class OclAstNode : AstNode
 	{
-		public AstNode RecursiveAddChild(AstNode parent, ParseTreeNode treeNode)
-		{
-			var parentNode = parent.AddChild(string.Empty, treeNode);
-
-			foreach (ParseTreeNode node in treeNode.ChildNodes)
-			{
-				RecursiveAddChild(parentNode, node);
-			}
-
-			return parentNode;
-		}
-
 		public void RecursiveSetNoAstNode(ParseTreeNode treeNode)
 		{
 			treeNode.Term.Flags |= TermFlags.NoAstNode;

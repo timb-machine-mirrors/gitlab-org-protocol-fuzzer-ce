@@ -30,7 +30,7 @@ namespace PeachFarmMonitor
 		{
 			PeachFarmMonitorSection monitorconfig = (PeachFarmMonitorSection)ConfigurationManager.GetSection("peachfarmmonitor");
 			var faultscollection = DatabaseHelper.GetCollection<Fault>(MongoNames.Faults, monitorconfig.MongoDb.ConnectionString);
-			var fault = faultscollection.FindOneById(new BsonObjectId(faultid));
+			var fault = faultscollection.FindOneById(faultid);
 			//faultscollection.Database.Server.Disconnect();
 			FaultViewModel fvm = new FaultViewModel(fault);
 			fvm.GetFullTextForGeneratedFiles();
