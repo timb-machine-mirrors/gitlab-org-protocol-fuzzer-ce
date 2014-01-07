@@ -2,16 +2,16 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Telnet Command Protocol PIT" version="0.0.2">
-  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
 	
 	<Include ns="TELNET" src="file:##Path##/_Common/Models/Net/TELNET_State.xml"/>
 	
-  <Agent name="TheAgent">
-  </Agent> 
+      <Agent name="TheAgent">
+      </Agent> 
 	
 	<Agent name="ServerAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="..\..\..\..\Downloads\putty.exe telnet://##LocalIPv4##:23" />
+			<Param name="CommandLine" value="..\..\..\..\Downloads\##Program## telnet://##LocalIPv4##:23" />
 			<Param name="NoCpuKill" value="true" />
 			<Param name="FaultOnEarlyExit" value="false" />
 			<Param name="WaitForExitTimeout" value="250" />
@@ -20,8 +20,19 @@
 		</Monitor>
 	</Agent>
 	
-  <!-- Default test case -->
-  <Test name="Default">
+    <Agent name="Linux">
+        <Monitor class="LinuxCrashMonitor"/>
+
+		<Monitor class="Process">
+            <Param name="Executable" value="##Program##" />
+            <Param name="Arguments" value="##LocalIPv4##"/>
+			<Param name="StartOnCall" value="launchProgram" />
+			<Param name="WaitForExitOnCall" value="exitProgram"/>
+		</Monitor>
+    </Agent>
+
+    <!-- Client Test-->
+    <Test name="Default">
 		<StateModel ref="TELNET:AgentToHost"/>
 		
 		<Agent ref="TheAgent"/>
@@ -37,9 +48,10 @@
 		<Logger class="File" >
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>	
-  </Test>
-	
-	<Test name="Server">
+    </Test>
+
+    <!-- Server Test -->
+    <Test name="Server">
 		<StateModel ref="TELNET:HostToAgent"/>
 		
 		<Agent ref="ServerAgent"/>
@@ -53,7 +65,7 @@
 		
 		<Logger class="File" >
 			<Param name="Path" value="##LoggerPath##"/>
-		</Logger>	
-  </Test>
+        </Logger>	
+    </Test>
 </Peach>
 <!--END-->

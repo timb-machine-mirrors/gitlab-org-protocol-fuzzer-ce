@@ -173,15 +173,15 @@
 				<DataModel ref="DataModels:TelnetSingleOptionCrack"/>
 			</Action>
 			
-			<Action name="TelnetSendPayload" type="output" publisher="TcpHandler">
+			<Action name="TelnetSendPayload2" type="output" publisher="TcpHandler">
 				<DataModel ref="DataModels:TelnetSendPayload2"/>
 			</Action>
 			
-			<Action name="TelnetReceive" type="input" publisher="TcpHandler">
+			<Action name="TelnetReceive2" type="input" publisher="TcpHandler">
 				<DataModel ref="DataModels:TelnetSingleOptionCrack"/>
 			</Action>
 			
-			<Action name="TelnetSendPayload" type="output" publisher="TcpHandler">
+			<Action name="TelnetSendPayload3" type="output" publisher="TcpHandler">
 				<DataModel ref="DataModels:TelnetSendPayload3"/>
 			</Action>
 		</State>
