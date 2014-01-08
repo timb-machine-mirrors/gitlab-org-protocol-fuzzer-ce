@@ -30,10 +30,9 @@
 
     <Property Id="VIRTUAL_DIR" Value="pfmonitor"/>
 
-    <!-- These are created & set via UI.wxs -->
-    <!--<Property Id="CONTROLLER_IP"/>-->
-    <!--<Property Id="RABBIT_IP"/>-->
-    <!--<Property Id="MONGO_IP"/>-->
+    <Property Id="CONTROLLER_IP" Value="127.0.0.1"/>
+    <Property Id="RABBIT_IP" Value="127.0.0.1"/>
+    <Property Id="MONGO_IP" Value="127.0.0.1"/>
 
     <Property Id="LAMEDIR" Value="TESTFILEPRODUCTDIR" />
 
