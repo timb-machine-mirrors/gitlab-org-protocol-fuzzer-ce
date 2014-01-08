@@ -37,11 +37,11 @@ Configuration
 |========
 |UDPv6.xml.config
 |
-|Requried Fields to configure 
+|Requried Fields| Description
 |TargetIPv6 | IP address of the host machine
 |SourceIPv6 | IP address of the interface on the local machine
 |
-|Optional Fields to configure
+|Optional Fields | Description
 |Interface | Name of local interface (used for monitoring)
 |Strategy | Fuzzing strategy to use for test
 |
