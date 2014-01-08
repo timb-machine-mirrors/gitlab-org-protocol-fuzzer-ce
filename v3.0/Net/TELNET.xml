@@ -9,9 +9,9 @@
       <Agent name="TheAgent">
       </Agent> 
 	
-	<Agent name="ServerAgent">
+	<Agent name="Windows">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="..\..\..\..\Downloads\##Program## telnet://##LocalIPv4##:23" />
+			<Param name="CommandLine" value="..\..\..\..\Downloads\##Program## telnet://##LocalIPv4##:##HostPort##" />
 			<Param name="NoCpuKill" value="true" />
 			<Param name="FaultOnEarlyExit" value="false" />
 			<Param name="WaitForExitTimeout" value="250" />
@@ -25,7 +25,7 @@
 
 		<Monitor class="Process">
             <Param name="Executable" value="##Program##" />
-            <Param name="Arguments" value="##LocalIPv4##"/>
+            <Param name="Arguments" value="##LocalIPv4## ##HostPort##"/>
 			<Param name="StartOnCall" value="launchProgram" />
 			<Param name="WaitForExitOnCall" value="exitProgram"/>
 		</Monitor>
@@ -54,11 +54,11 @@
     <Test name="Server">
 		<StateModel ref="TELNET:HostToAgent"/>
 		
-		<Agent ref="ServerAgent"/>
+		<Agent ref="##Agent##"/>
 		
 		<Publisher name="TcpHandler" class="TcpListener">
 			<Param name="Interface" value="##LocalIPv4##" />
-			<Param name="Port" value="23" />
+			<Param name="Port" value="##HostPort##" />
 		</Publisher>
 		
 		<Strategy class="##Strategy##"/>
