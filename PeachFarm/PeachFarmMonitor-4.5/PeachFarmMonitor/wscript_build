@@ -32,7 +32,7 @@ bld(
 	name = 'PeachFarmMonitor.dll',
 	platform = 'AnyCPU', # ASP.NET needs AnyCPU
 	ide_path = '../../Peach Farm',
-	ide_content = bld.path.ant_glob('dejavulogo.jpg **/*.aspx **/*.asax App_Themes/**/*'),
+	ide_content = bld.path.ant_glob('dejavulogo.jpg **/*.aspx **/*.asax App_Themes/**/* *.wxs license.rtf'),
 	ide_aspnet = True
 )
 
