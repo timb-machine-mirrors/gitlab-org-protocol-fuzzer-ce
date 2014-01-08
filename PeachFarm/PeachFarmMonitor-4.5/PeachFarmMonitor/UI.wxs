@@ -3,6 +3,19 @@
   <Fragment>
     <UI>
       <Dialog Id="WebConfigDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configuration" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Enter configuration options and click Next to install." />
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <Control Id="ControllerText" Type="Text" X="20" Y="83" Width="85" Height="18" NoPrefix="yes" Text="Controller IP Address:" />
+        <Control Id="ControllerEdit" Type="Edit" X="105" Y="80" Width="235" Height="18" Property="CONTROLLER_IP" Text="{80}" />
+        <Control Id="RabbitText" Type="Text" X="20" Y="123" Width="85" Height="18" NoPrefix="yes" Text="RabbitMQ IP Address:" />
+        <Control Id="RabbitEdit" Type="Edit" X="105" Y="120" Width="235" Height="18" Property="RABBIT_IP" Text="{80}" />
+        <Control Id="MongoText" Type="Text" X="20" Y="163" Width="80" Height="18" NoPrefix="yes" Text="MongoDB IP Address:" />
+        <Control Id="MongoEdit" Type="Edit" X="105" Y="160" Width="235" Height="18" Property="MONGO_IP" Text="{80}" />
+
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
           <Condition Action="disable">
             <![CDATA[RABBIT_IP = "" OR CONTROLLER_IP = "" OR MONGO_IP = ""]]>
@@ -16,18 +29,6 @@
           <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
         </Control>
 
-        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configuration" />
-        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Enter configuration options and click Next to install." />
-        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-
-        <Control Id="ControllerText" Type="Text" X="20" Y="83" Width="85" Height="18" NoPrefix="yes" Text="Controller IP Address:" />
-        <Control Id="ControllerEdit" Type="Edit" X="105" Y="80" Width="235" Height="18" Property="CONTROLLER_IP" Text="{80}" />
-        <Control Id="RabbitText" Type="Text" X="20" Y="123" Width="85" Height="18" NoPrefix="yes" Text="RabbitMQ IP Address:" />
-        <Control Id="RabbitEdit" Type="Edit" X="105" Y="120" Width="235" Height="18" Property="RABBIT_IP" Text="{80}" />
-        <Control Id="MongoText" Type="Text" X="20" Y="163" Width="80" Height="18" NoPrefix="yes" Text="MongoDB IP Address:" />
-        <Control Id="MongoEdit" Type="Edit" X="105" Y="160" Width="235" Height="18" Property="MONGO_IP" Text="{80}" />
       </Dialog>
 
     </UI>
