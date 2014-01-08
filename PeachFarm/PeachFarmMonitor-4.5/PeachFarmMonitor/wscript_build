@@ -52,6 +52,7 @@ msi = bld(
 	target = 'PeachFarmMonitor',
 	features = 'msi',
 	use = msi_deps,
+	ide = False,
 	source = 'WebSite.wxs UI.wxs',
 	defines = [ 'WixUILicenseRtf=license.rtf' ],
 	extensions = 'WixUIExtension WixIISExtension WixNetfxExtension WixUtilExtension',
