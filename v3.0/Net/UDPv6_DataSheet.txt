@@ -29,3 +29,34 @@ Use Cases
 |Messages | Specification
 |UDP Header | RFC768
 |========
+
+Configuration
+-------------
+
+[options="header"]
+|========
+|UDPv6.xml.config
+|
+|Requried Fields to configure 
+|TargetIPv6 | IP address of the host machine
+|SourceIPv6 | IP address of the interface on the local machine
+|
+|Optional Fields to configure
+|Interface | Name of local interface (used for monitoring)
+|Strategy | Fuzzing strategy to use for test
+|
+|Configure Additional Monitors
+|Add monitors to agent as needed 
+|========
+
+Running
+-------
+
+[options="header"]
+|========
+|Single Test debug run
+|peach -1 -debug UDPv4.xml
+|
+|Full test run
+|peach UDPv4.xml
+|========
