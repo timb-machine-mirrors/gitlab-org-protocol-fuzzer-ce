@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:iis="http://schemas.microsoft.com/wix/IIsExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+     >
+  <Product Name="Peach Farm Monitor $(var.BUILDTAG)"
+           Id="*"
+           UpgradeCode="{F853C205-3567-4CB0-B8CC-22CC47965192}"
+           Manufacturer="Déjà vu Security"
+           Language="1033"
+           Codepage="1252"
+           Version="$(var.BUILDTAG)">
+
+    <Package InstallerVersion="200" InstallScope="perMachine" Compressed="yes"/>
+
+    <PropertyRef Id="NETFRAMEWORK40FULL"/>
+
+    <Condition Message="This application requires .NET Framework 4. Please install the .NET Framework then run this installer again.">
+      <![CDATA[Installed OR NETFRAMEWORK40FULL]]>
+    </Condition>
+
+    <!-- Reference WixIIsExtension in project and pull in property by ref -->
+    <PropertyRef Id="IISMAJORVERSION"/>
+
+    <Condition Message="This application requires IIS. Please install IIS then run this installer again.">
+      <![CDATA[Installed OR IISMAJORVERSION]]>
+    </Condition>
+
+    <PropertyRef Id="NETFRAMEWORK40FULLINSTALLROOTDIR"/>
+
+    <Property Id="VIRTUAL_DIR" Value="pfmonitor"/>
+
+    <!-- These are created & set via UI.wxs -->
+    <!--<Property Id="CONTROLLER_IP"/>-->
+    <!--<Property Id="RABBIT_IP"/>-->
+    <!--<Property Id="MONGO_IP"/>-->
+
+    <Property Id="LAMEDIR" Value="TESTFILEPRODUCTDIR" />
+
+    <SetProperty Id="ASPNETISAPIDLL" Sequence="execute" Before="ConfigureIIs" Value="[NETFRAMEWORK40FULLINSTALLROOTDIR]aspnet_isapi.dll" />
+    <SetProperty Id="ASPNETREGIIS" Sequence="execute" Before="ConfigureIIs" Value="[NETFRAMEWORK40FULLINSTALLROOTDIR]aspnet_regiis.exe" />
+    <SetProperty Id="WINDOWSVOLUME" Value="[WindowsVolume]" Before="CostInitialize"/>
+
+    <MediaTemplate EmbedCab="yes"/>
+
+    <Feature Id="WebSiteFeature">
+      <ComponentGroupRef Id="AppThemeComponents"/>
+      <ComponentGroupRef Id="ProductComponents"/>
+      <ComponentGroupRef Id="BinComponents"/>
+      <ComponentGroupRef Id="PeachFarmMonitorConfiguration"/>
+    </Feature>
+
+    <UIRef Id="WixUI_WebSite"/>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="WINDOWSVOLUME" Name="WinVol">
+        <Directory Id="INETPUB" Name="inetpub">
+          <Directory Id="WWWROOT" Name="wwwroot">
+            <Directory Id="INSTALLFOLDER" Name="pfmonitor">
+              <Directory Id="BIN" Name="bin" />
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ProductComponent" Guid="{210646E9-06A7-4B3C-81E0-1E43ADB45379}">
+        <File Id="Default.aspx"      Source="Default.aspx"/>
+        <File Id="dejavulogo.jpg"    Source="dejavulogo.jpg"/>
+        <File Id="FaultDetail.aspx"  Source="FaultDetail.aspx"/>
+        <File Id="GetJobOutput.aspx" Source="GetJobOutput.aspx"/>
+        <File Id="Global.asax"       Source="Global.asax"/>
+        <File Id="JobDetail.aspx"    Source="JobDetail.aspx"/>
+        <File Id="Web.config"        Source="Web.config"/>
+
+        <util:XmlFile Id="SetControllerIP"
+                      Action="setValue"
+                      Permanent="yes"
+                      File="[INSTALLFOLDER]Web.config"
+                      ElementPath="/configuration/peachfarm.admin/Controller"
+                      Name="ipAddress"
+                      Value="[CONTROLLER_IP]"
+                      Sequence="1"/>
+
+        <util:XmlFile Id="SetRabbitIP"
+                      Action="setValue"
+                      Permanent="yes"
+                      File="[INSTALLFOLDER]Web.config"
+                      ElementPath="/configuration/peachfarm.admin/RabbitMq"
+                      Name="hostName"
+                      Value="[RABBIT_IP]"
+                      Sequence="2"/>
+
+        <util:XmlFile Id="SetMongoIP"
+                      Action="setValue"
+                      Permanent="yes"
+                      File="[INSTALLFOLDER]Web.config"
+                      ElementPath="/configuration/peachfarmmonitor/MongoDb"
+                      Name="connectionString"
+                      Value="mongodb://[MONGO_IP]/"
+                      Sequence="3"/>
+
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="BinComponents" Directory="BIN">
+      <Component Id="BinComponent" Guid="{4FAE75CE-95D6-4614-B92A-9384883FA278}">
+        <File Id="PeachFarmMonitor.dll" Source="PeachFarmMonitor.dll"/>
+        <File Id="Ionic.Zip.dll"        Source="Ionic.Zip.dll"/>
+        <File Id="MongoDB.Bson.dll"     Source="MongoDB.Bson.dll"/>
+        <File Id="MongoDB.Driver.dll"   Source="MongoDB.Driver.dll"/>
+        <File Id="MySql.Data.dll"       Source="MySql.Data.dll"/>
+        <File Id="NLog.dll"             Source="NLog.dll"/>
+        <File Id="PeachFarm.Common.dll" Source="PeachFarm.Common.dll"/>
+        <File Id="RabbitMQ.Client.dll"  Source="RabbitMQ.Client.dll"/>
+        <File Id="Telerik.Web.UI.dll"   Source="Telerik.Web.UI.dll"/>
+      </Component>
+    </ComponentGroup>
+
+    <!-- Install to default web site, don't make a component since we want to use existing -->
+    <iis:WebSite Id="DefaultWebSite" Description='Default Web Site'>
+      <iis:WebAddress Id="AllUnassigned" Port="80" />
+    </iis:WebSite>
+
+    <ComponentGroup Id="PeachFarmMonitorConfiguration" Directory="INSTALLFOLDER">
+      <Component Id="WebsiteComponent" Guid="{FCCCA268-9679-4C4C-81F9-8BCE5FB0A155}" KeyPath="yes">
+        <iis:WebAppPool Id="PeachFarmMonitorAppPool"
+                        Name="Peach Farm Monitor AppPool"
+                        Identity="applicationPoolIdentity"
+                        IdleTimeout="0"
+                        RecycleMinutes="0"
+                        ManagedPipelineMode="Integrated"
+                        ManagedRuntimeVersion="v4.0" />
+
+        <iis:WebVirtualDir Id="PeachFarmMonitorVirtualDir"
+                           Alias="[VIRTUAL_DIR]"
+                           Directory="INSTALLFOLDER"
+                           WebSite="DefaultWebSite">
+
+          <iis:WebApplication Id="PeachFarmMonitorApplication"
+                              Name="Peach Farm Monitor"
+                              WebAppPool="PeachFarmMonitorAppPool"/>
+
+          <iis:WebDirProperties Id="PeachFarmMonitorProps"
+                                AnonymousAccess="yes"
+                                WindowsAuthentication="no"
+                                DefaultDocuments="Default.aspx"/>
+        </iis:WebVirtualDir>
+      </Component>
+
+      <Component Id="EnableASPNet4Extension" Permanent="yes" Guid="{17878555-166A-45CC-ADBE-4C8C6DFF61F7}">
+        <!--/Need to have to make sure this is created-->
+        <CreateFolder/>
+
+        <iis:WebServiceExtension Id="ASPNet4Extension"
+                                 Group="ASP.NET v4.0.30319"
+                                 Allow="yes"
+                                 File="[ASPNETISAPIDLL]"
+                                 Description="ASP.NET v4.0.30319"
+                                 UIDeletable="no"/>
+      </Component>
+    </ComponentGroup>
+
+    <CustomAction Id="EnsureAspNetInstalled"
+                  Directory="INSTALLFOLDER"
+                  Return="asyncWait"
+                  ExeCommand='[ASPNETREGIIS] -ir' />
+
+    <CustomAction Id="UpdateWebAppMapping"
+                  Directory="INSTALLFOLDER"
+                  Return="asyncWait"
+                  ExeCommand='[ASPNETREGIIS] -norestart -s "W3SVC/1/ROOT/[VIRTUAL_DIR]"' />
+
+    <InstallExecuteSequence>
+      <Custom Action="UpdateWebAppMapping" After="InstallFinalize">ASPNETREGIIS AND NOT Installed</Custom>
+    </InstallExecuteSequence>
+
+  </Fragment>
+
+</Wix>
