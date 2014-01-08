@@ -84,7 +84,7 @@
 			<Action type="output" publisher="TcpHandler">
 				<DataModel ref="FTP:ServerReadyForUser"/>
 				<Data DataModel="FTP:ServerReadyForUser">
-					<Field name="LineModes.OneLine.Explaination" value="vsFTPd 2.3.5"/>
+					<Field name="LineModes.OneLine.Explaination" value="Peach 3.0"/>
 				</Data>
 			</Action>
 			<Action name="Read" type="input" publisher="TcpHandler">
