@@ -2,22 +2,11 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
-  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-  <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+  <!-- Requires Peach 3.0 and RawEther publisher -->
 	
 	<Include ns="IPSECv6" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
 	
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##"/>
-			<Param name="Arguments" value="-i ##tsharkInterface##"/>
-			<Param name="FaultOnEarlyExit" value="true"/>
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##"/>
-		</Monitor>
-	</Agent>
-
   <Agent name="LocalAgent">
     <Monitor class="Pcap">
       <Param name="Device" value="##Interface##"/>
@@ -62,3 +51,4 @@
     </Logger>
   </Test>
 </Peach>
+<!-- end -->
