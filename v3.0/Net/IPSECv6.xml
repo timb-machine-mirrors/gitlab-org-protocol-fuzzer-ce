@@ -3,7 +3,6 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
-  <!-- Requires Peach 3.0 and RawEther publisher -->
 	
 	<Include ns="IPSECv6" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
 	
