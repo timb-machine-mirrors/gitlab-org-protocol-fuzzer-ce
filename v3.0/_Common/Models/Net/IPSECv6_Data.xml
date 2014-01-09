@@ -18,7 +18,7 @@
 	<!--Data model for IPSECv6 w/ ESP Transport-->
 	<DataModel name="IPSECv6Transport">
 		<Block name="ESPHeader">
-			<Blob name="SPI" valueType="hex" length="4" value="00 00 02 01" />
+			<Number name="SPI" size="32" endian="big" value="##SPI##"/>
 			<Number name="Sequence" size="32" value="1" endian="big">
 				<Fixup class="SequenceIncrementFixup"/>
 			</Number>	
@@ -62,7 +62,7 @@
 					<Relation type="size" of="inner" expressionGet="(size + 2) * 4" expressionSet="(size / 4) - 2"/>
 				</Number>
 				<Number name="Reservered" size="16"/>
-				<Number name="SPI" size="32" endian="big" value="0x00000201"/>
+				<Number name="SPI" size="32" endian="big" value="##SPI##"/>
 				<Number name="Sequence" size="32" value="0" endian="big">
 					<Fixup class="SequenceIncrementFixup"/>
 				</Number>	
@@ -920,7 +920,7 @@
 					<Relation type="size" of="inner" expressionGet="(size + 2) * 4" expressionSet="(size / 4) - 2"/>
 				</Number>
 				<Number name="Reservered" size="16"/>
-				<Number name="SPI" size="32" endian="big" value="0x00000201"/>
+				<Number name="SPI" size="32" endian="big" value="##SPI##"/>
 				<Number name="Sequence" size="32" value="0" endian="big">
 					<Fixup class="SequenceIncrementFixup"/>
 				</Number>	
