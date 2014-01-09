@@ -5,7 +5,7 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 	
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
+	<Include ns="IPSECv6" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
 	
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
@@ -24,9 +24,9 @@
     </Monitor>
   </Agent>
   
-  <!-- Default test for fuzzing IPSECv6 ESP-->
+  <!-- ESP Header Test -->
   <Test name="Default">
-    <StateModel ref="States:ESP"/>
+    <StateModel ref="IPSECv6:ESP"/>
 		
 		<Agent ref="LocalAgent"/>
 		
@@ -38,6 +38,25 @@
     
     <Strategy class="##Strategy##"/>
 		
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+  
+  <!-- Authentication Header Test -->
+  <Test name="AH">
+    <StateModel ref="IPSECv6:AH"/>
+
+    <Agent ref="LocalAgent"/>
+
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="51"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
     <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
