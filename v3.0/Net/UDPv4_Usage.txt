@@ -30,7 +30,7 @@ LoggerPath:: Path to folder where logs will be stored
 <PitDefines>
   <All>
     <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="logs/udpV6/"/>
+    <Define key="LoggerPath" value="logs/udpV4/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="SrcPort" value="12345"/>
     <Define key="DestPort" value="12345"/>
