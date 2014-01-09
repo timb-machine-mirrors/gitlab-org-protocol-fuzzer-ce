@@ -1,11 +1,15 @@
-:Doctitle: IPsecV6 Peach Pit Data Sheet
-:Description: Internet Protocol Security version 6 (IPsecV6)
+:Doctitle: IPsec Peach Pit Data Sheet
+:Description: Internet Protocol Security
 
- * Test Suite: IPsecV6
+ * Test Suite: IPsec
  * Direction: Client
  
- Protocol suite for securing Internet Protocol (IP) communications
- by authenticating and encrypting each IP packet of a communication session.
+ Internet Protocol Security (IPsec) is a protocol suite for securing Internet Protocol (IP) 
+ communications by authenticating and encrypting each IP packet of a communication session. 
+ IPsec includes protocols for establishing mutual authentication between agents at the beginning 
+ of the session and negotiation of cryptographic keys to be used during the session. IPsec can 
+ be used in protecting data flows between a pair of hosts (host-to-host), between a pair of 
+ security gateways (network-to-network), or between a security gateway and a host (network-to-host).
 
 Specifications
 --------------
@@ -19,23 +23,8 @@ Specifications
 |RFC2410 | The NULL Encryption Algorithm and Its Use With IPsec
 |RFC2451 | The ESP CBC-Mode Cipher Algorithms
 |RFC2857 | The Use of HMAC-RIPEMD-160-96 within ESP and AH
-|RFC3526 | More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE) (Might not be relevant)
-|RFC3947 | Negotiation of NAT-Traversal in the IKE
-|RFC3948 | UDP Encapsulation of IPsec ESP Packets
-|RFC4106 | The Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security Payload (ESP)
-|RFC4301 | Security Architecture for the Internet Protocol
 |RFC4302 | IP Authentication Header
 |RFC4303 | IP Encapsulating Security Payload
-|RFC4304 | Extended Sequence Number (ESN) Addendum to IPsec Domain of Interpretation (DOI) for Internet Security Association and Key Management Protocol (ISAKMP)
-|RFC4307 | Cryptographic Algorithms for Use in the Internet Key Exchange Version 2
-|RFC4308 | Cryptographic Suites for IPsec
-|RFC4309 | Using Advanced Encryption Standard (AES) CCM Mode with IPsec Encapsulating Security Payload (ESP)
-|RFC4543 | The Use of Galois Message Authentication Code (GMAC) in IPsec ESP and AH
-|RFC4555 | IKEv2 Mobility and Multihoming Protocol (MOBIKE)
-|RFC4806 | Online Certificate Status Protocol (OCSP) Extensions to IKEv2
-|RFC4835 | Cryptographic Algorithm Implementation Requirements for Encapsulating Security Payload (ESP) and Authentication Header (AH)
-|RFC4945 | The Internet IP Security PKI Profile of IKEv1/ISAKMP, IKEv2, and PKIX
-|RFC5996 | Internet Key Exchange Protocol Version 2 (IKEv2)
 |========
 
 Use Cases
@@ -52,16 +41,6 @@ Use Cases
 |ICV HMAC-MD5-96 | RFC2403
 |ICV HMAC-SHA-1-96 | RFC2404
 |ICV HMAC-RIPEMD-160-96 | RFC2857
-|3DES-CBC Cipher Encryption | RFC2405, RFC2451 
+|3DES-CBC Cipher Encryption | RFC2405, RFC2451
 |Null Encryption | RFC2410
-|ESP Encapsulated in UDP (TODO IKE) | RFC3948
-|Encryption Algs: CAST-128, RC5, IDEA, Blowfish (TODO) | RFC2451
-|IKE Support (TODO) | RFC3947, RFC4555, RFC4307, RFC4806, RFC4835, RFC4945, RFC5996
-|Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security Payload (ESP) (TODO) | RFC4106
-|Extened Sequence Numbers (TODO) | RFC4304
-|Crypto Suites (TODO IKE) | RFC4308
-|AES CCM with ESP (TODO) | RFC4309
-|AES GCM (GMAC) (TODO) | RFC4543
-|Combined Confidentiality and Integrity Algorithms (TODO) | RFC4303 3.4.4.2
-|Sequence Number Generation (Partial TODO) | RFC4303 3.3.3, 3.4.3
 |========
