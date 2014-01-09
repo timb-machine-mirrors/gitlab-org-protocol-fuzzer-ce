@@ -1,0 +1,68 @@
+include::UDPv6_DataSheet.txt[]
+
+Configuration
+-------------
+
+.Target Configuration
+Program listening on UDPv6 port defined in configuration file. The network tool socat can be used.
+
+_Example of using socat to listen on UDPv6 port:_
+
+----
+socat STDIO udp6-listen:12345
+----
+
+.Requried Pit Configuration Changes
+TargetIPv6:: IP address of the target host machine
+SourceIPv6:: IP address of the interface on the local machine
+SrcPort:: UDPv6 port number of the local machine
+DestPort:: UDPv6 port number of the target host machine
+Interface:: Name of local interface (used for monitoring)
+
+.Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+
+.Sample UDPv6 Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="LoggerPath" value="logs/udpV6/"/>
+    <Define key="SourceIPv6" value="::1"/>
+    <Define key="SrcPort" value="12345"/>
+    <Define key="DestPort" value="12345"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="em0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+peach -1 -debug UDPv4.xml
+----
+.Full test run
+----
+peach UDPv4.xml
+----
