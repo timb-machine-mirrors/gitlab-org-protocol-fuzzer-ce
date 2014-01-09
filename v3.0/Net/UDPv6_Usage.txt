@@ -15,8 +15,8 @@ socat STDIO udp6-listen:12345
 .Requried Pit Configuration Changes
 TargetIPv6:: IP address of the target host machine
 SourceIPv6:: IP address of the interface on the local machine
-SrcPort:: UDPv6 port number of the local machine
-DestPort:: UDPv6 port number of the target host machine
+SourcePort:: UDPv6 port number of the local machine
+TargetPort:: UDPv6 port number of the target host machine
 Interface:: Name of local interface (used for monitoring)
 
 .Optional Pit Configuration Changes
@@ -32,8 +32,8 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="TargetIPv6" value="::1"/>
     <Define key="LoggerPath" value="logs/udpV6/"/>
     <Define key="SourceIPv6" value="::1"/>
-    <Define key="SrcPort" value="12345"/>
-    <Define key="DestPort" value="12345"/>
+    <Define key="SourcePort" value="12345"/>
+    <Define key="TargetPort" value="12345"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="Path" value="."/>
   </All>

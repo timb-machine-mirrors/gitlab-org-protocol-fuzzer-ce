@@ -6,8 +6,8 @@
   <!--RFC768: Implements all features-->
   <DataModel name="Packet">
     <Block name="Header">
-      <Number name="SrcPort"  size="16" endian="big" value="##SrcPort##"/>
-      <Number name="DestPort" size="16" endian="big" value="##DestPort##"/>
+      <Number name="SrcPort"  size="16" endian="big" value="##SourcePort##"/>
+      <Number name="DestPort" size="16" endian="big" value="##TargetPort##"/>
       <Number name="Length"   size="16" endian="big">
         <Relation type="size" of="Packet"/>
       </Number>
