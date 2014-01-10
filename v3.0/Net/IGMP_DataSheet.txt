@@ -1,13 +1,14 @@
-Protocol
---------
+
+:Doctitle: IGMP Peach Pit Data Sheet
+:Description: Internet Group Management Protocol (IGMP)
 
  * Test Suite: IGMPv4
- * Direction: Client, Server (TODO)
+ * Direction: Client
  
-IGMPv4 is a Network Configuration protocol on top of IPv4.
+IGMP is a Network Configuration protocol on top of IPv4.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -18,8 +19,8 @@ Used Specifications
 |RFC1112| Host Extensions for IP Multicasting
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
@@ -41,5 +42,4 @@ Detailed Use Cases
 |Filter-Mode-Change Record (TODO) | RFC3376 (Section 4.2.12)
 |Source-List-Change Record (TODO) | RFC3376 (Section 4.2.12)
 |Group-and-Source-Specific Query (TODO) | RFC3376 (Section 4.1.11)
-
 |========
