@@ -36,12 +36,12 @@ namespace PeachFarm.Reporting.Configuration
 			set { this[Constants.Monitor] = value; }
 		}
 
-		[ConfigurationProperty(Constants.MySql)]
-		public MySqlElement MySql
-		{
-			get { return (MySqlElement)this[Constants.MySql]; }
-			set { this[Constants.MySql] = value; }
-		}
+		//[ConfigurationProperty(Constants.MySql)]
+		//public MySqlElement MySql
+		//{
+		//	get { return (MySqlElement)this[Constants.MySql]; }
+		//	set { this[Constants.MySql] = value; }
+		//}
 
 		public void Validate()
 		{
@@ -60,11 +60,11 @@ namespace PeachFarm.Reporting.Configuration
 				message.AppendLine("\t<MongoDb connectionString=\"mongodb://0.0.0.0/?safe=true\" />");
 			}
 
-			if (String.IsNullOrEmpty(this.MySql.ConnectionString))
-			{
-				message.AppendLine(") MySql Connection String is required.");
-				message.AppendLine("\t<MySql connectionString=\"Server=myServerAddress;Port=1234;Database=myDataBase;Uid=myUsername;Pwd=myPassword;\" />");
-			}
+			//if (String.IsNullOrEmpty(this.MySql.ConnectionString))
+			//{
+			//	message.AppendLine(") MySql Connection String is required.");
+			//	message.AppendLine("\t<MySql connectionString=\"Server=myServerAddress;Port=1234;Database=myDataBase;Uid=myUsername;Pwd=myPassword;\" />");
+			//}
 
 			if (String.IsNullOrEmpty(this.RabbitMq.HostName))
 			{

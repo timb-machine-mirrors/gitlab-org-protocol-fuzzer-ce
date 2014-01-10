@@ -12,6 +12,7 @@ using PeachFarm.Common;
 using Telerik.Reporting.Drawing;
 using Telerik.Reporting.Processing;
 using MySql.Data.MySqlClient;
+using System.Configuration;
 
 namespace PeachFarm.Reporting
 {
@@ -205,8 +206,8 @@ namespace PeachFarm.Reporting
 			var mongoJob = DatabaseHelper.GetJob(notification.JobID, config.MongoDb.ConnectionString);
 
 			MySqlCommand cmd;
-
-			using (var conn = new MySqlConnection(config.MySql.ConnectionString))
+			var mysql = ConfigurationManager.ConnectionStrings["PeachFarm.Reporting.Reports.Properties.Settings.peachfarmreporting"].ConnectionString;
+			using (var conn = new MySqlConnection(mysql))
 			{
 				conn.Open();
 
