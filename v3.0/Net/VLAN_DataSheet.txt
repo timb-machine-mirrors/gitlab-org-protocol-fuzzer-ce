@@ -14,7 +14,8 @@ Specifications
 [options="header"]
 |========
 |Specification | Title
-|IEEE 802.1Q  | IEEE Standard for Local and metropolitan area networks
+|IEEE 802.1Q  | Media Access Control Bridges and Virtual Bridge Local Area Networks
+|IEEE 802.1ad | Virtual Bridged Local Area Networks Amendment 4: Provider Bridges
 |========
 
 Use Cases
@@ -24,4 +25,5 @@ Use Cases
 |========
 |Messages | Specification
 |VLAN Header | IEEE 802.1Q
+|VLAN Double Tagging | IEEE 802.1ad
 |========
