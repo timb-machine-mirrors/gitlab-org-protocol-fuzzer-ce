@@ -14,7 +14,7 @@ _Example of of setting up ipsec-tools on target machine:_
 
 sudo apt-get install ipsec-tools
 
-#Create the following ipsec.config file
+#Create the following ipsec.config file chaning the encryption keys, algorthimns and IP address to match the pit config
 
 ## Start ipsec.config ##
 flush;
