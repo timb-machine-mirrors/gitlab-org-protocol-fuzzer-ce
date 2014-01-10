@@ -1,16 +1,14 @@
-Protocol
---------
+
+:Doctitle: ICMPv4 Peach Pit Data Sheet
+:Description: Internet Control Message Protocol version 4 (ICMPv4)
 
  * Test Suite: ICMPv4
- * Direction: Client, Server(TODO)
+ * Direction: Client
  
-ICMPv4 protocol is message relay protocol on top of IPv4.
-It provides error responses for the IPv4 protocol as well as simple
-data transmision. It is commonly used in the ping application for 
-testing network response and connectivity.
+Internet Control Message Protocol version 4 (ICMPv4) is the implementation of a message relay protocol on top of IPv4. It provides error responses for the IPv4 protocol as well as simple data transmision. It is commonly used in the ping application for testing network response and connectivity.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -23,8 +21,8 @@ Used Specifications
 |RFC6633 | Deprecation of ICMP Source Quench Messages
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
@@ -42,9 +40,6 @@ Detailed Use Cases
 |16)Information Reply | RFC792
 |9)Router Advertisement (INCOMPLETE) | RFC1256 (Section 3)
 |10)Router Solicitation (INCOMPLETE) | RFC1256 (Section 3)
-
-
-
 |========
 
 [options="header"]
@@ -56,7 +51,5 @@ Detailed Use Cases
 [options="header"]
 |========
 |Supported Payloads | Specification
-| IPv4 in Error Responses | RFC1122
+|IPv4 in Error Responses | RFC1122
 |========
-
- --Doesn't support response to ip packets defined in RFC1122
