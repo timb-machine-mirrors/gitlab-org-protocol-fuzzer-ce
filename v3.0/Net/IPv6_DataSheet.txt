@@ -6,7 +6,8 @@
  
 Internet Protocol version 6 (IPv6) is the the communications protocol that 
 provides an identification and location system for computers on networks and 
-routes traffic across the Internet.
+routes traffic across the Internet. IPv6 was developed to deal with the long-anticipated
+problem of IPv4 address exhaustion and will eventually replace IPv4.
 
 Specifications
 --------------
@@ -49,6 +50,4 @@ Use Cases
 |IPv6 Moblity Alternate Care-of Address Option | RFC3775 6.2.5
 |IPv6 Moblity Nonce Indices Option | RFC3775 6.2.6
 |IPv6 Moblity Home Address Option | RFC3775 6.3
-|IPv6 Moblity Binding Authorization Data Option (TODO)| RFC3775 6.2.7
-|IPv6 Mobility Home/Care of Keygen (TODO) | RFC3775 5.2.5
 |========
