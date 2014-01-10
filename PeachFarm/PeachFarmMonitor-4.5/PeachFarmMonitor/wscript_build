@@ -10,9 +10,7 @@ deps = [
 	'System.Web.Extensions.dll',
 	'System.Xml.dll',
 
-	#'Telerik.Web.Design.dll',
 	'Telerik.Web.UI.dll',
-	#'Telerik.Web.UI.Skins.dll',
 
 	'NLog.dll',
 	'Ionic.Zip.dll',
@@ -34,6 +32,31 @@ bld(
 	name = 'PeachFarmMonitor.dll',
 	platform = 'AnyCPU', # ASP.NET needs AnyCPU
 	ide_path = '../../Peach Farm',
-	ide_content = bld.path.ant_glob('dejavulogo.jpg **/*.aspx **/*.asax App_Themes/**/*'),
+	ide_content = bld.path.ant_glob('dejavulogo.jpg **/*.aspx **/*.asax App_Themes/**/* *.wxs license.rtf'),
 	ide_aspnet = True
+)
+
+msi_deps = [
+	'PeachFarmMonitor.dll',
+	'Telerik.Web.UI.dll',
+	'NLog.dll',
+	'Ionic.Zip.dll',
+	'PeachFarm.Common.dll',
+	'RabbitMQ.Client.dll',
+	'MongoDB.Driver.dll',
+	'MongoDB.Bson.dll',
+	'MySql.Data.dll',
+]
+
+msi = bld(
+	target = 'PeachFarmMonitor',
+	features = 'msi',
+	use = msi_deps,
+	ide = False,
+	source = 'WebSite.wxs UI.wxs',
+	defines = [ 'WixUILicenseRtf=license.rtf' ],
+	extensions = 'WixUIExtension WixIISExtension WixNetfxExtension WixUtilExtension',
+	heat = {
+		'AppThemeComponents' : 'App_Themes',
+	},
 )
