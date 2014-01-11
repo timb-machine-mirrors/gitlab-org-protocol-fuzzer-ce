@@ -73,12 +73,10 @@ def find_peach():
     else:
         assert False, "Unknown os"
     if peach_dir == '':
-	raise Exception('no peach dir found')
+        raise Exception('no peach dir found')
 
-    _path.extend(      [peach_dir, 'peach.exe'])
-    _other_path.extend([peach_dir, 'Peach.exe'])
-    PEACH_PATH = os.sep.join(_path)
-    OTHER_PEACH_PATH = os.sep.join(_other_path)
+    PEACH_PATH       = os.sep.join(_path + [peach_dir, 'peach.exe'])
+    OTHER_PEACH_PATH = os.sep.join(_path + [peach_dir, 'Peach.exe'])
 
     # make sure peach.exe is actully executable on *nix after extraction
     # this isn't the greatest place for it but hey
