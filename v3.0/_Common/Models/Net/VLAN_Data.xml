@@ -18,7 +18,7 @@
 		<Flags size="16" endian="big">
 			<Flag name="Priority"  position="0" size="3"/>
 			<Flag name="CFI"  position="3" size="1" value="0"/>
-			<Flag name="VID"  position="4" size="12" value="1"/>
+			<Flag name="VID"  position="4" size="12" value="##Tag##"/>
 		</Flags>
 	</DataModel>
 
