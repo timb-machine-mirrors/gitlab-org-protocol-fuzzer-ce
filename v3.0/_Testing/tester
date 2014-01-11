@@ -74,15 +74,21 @@ def find_peach():
         assert False, "Unknown os"
     if peach_dir == '':
 	raise Exception('no peach dir found')
-    _path.extend([peach_dir, 'peach.exe'])
+
+    _path.extend(      [peach_dir, 'peach.exe'])
+    _other_path.extend([peach_dir, 'Peach.exe'])
     PEACH_PATH = os.sep.join(_path)
+    OTHER_PEACH_PATH = os.sep.join(_other_path)
 
     # make sure peach.exe is actully executable on *nix after extraction
     # this isn't the greatest place for it but hey
     if IS_OSX or IS_LINUX:
-        p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+        if os.path.exists(PEACH_PATH):
+            p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+        if os.path.exists(OTHER_PEACH_PATH):
+            p = subprocess.Popen(['chmod', '0760', OTHER_PEACH_PATH])
 
-    return PEACH_PATH
+    return PEACH_PATH if os.path.exists(PEACH_PATH) else OTHER_PEACH_PATH
 
 
 ###############################################################################
