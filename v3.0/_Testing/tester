@@ -51,7 +51,7 @@ def find_peach():
     if IS_WINDOWS:
         for f in ls:
             if 'win' not in f                : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and 'x64' not in f: continue
             elif not IS_64_BIT and 'x64' in f: continue
@@ -59,7 +59,7 @@ def find_peach():
     elif IS_LINUX:
         for f in ls:
             if 'linux' not in f              : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and '_64' not in f: continue
             elif not IS_64_BIT and '_64' in f: continue
@@ -67,7 +67,7 @@ def find_peach():
     elif IS_OSX:
         for f in ls:
             if 'osx' not in f               : continue
-            elif not f.startswith('epeach-'): continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')   : continue
             else                            : peach_dir = f
     else:
