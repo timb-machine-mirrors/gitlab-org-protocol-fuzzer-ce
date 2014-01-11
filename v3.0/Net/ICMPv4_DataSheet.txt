@@ -29,7 +29,7 @@ Use Cases
 |Messages | Specification
 |8)Echo | RFC792
 |0)Echo Reply | RFC792
-|3)Destination Unreachable (INCOMPLETE) | RFC792
+|3)Destination Unreachable | RFC792
 |4)Source Quench | RFC792
 |5)Redirect | RFC792
 |11)Time Exeeded | RFC792
@@ -38,8 +38,8 @@ Use Cases
 |14)Timestamp Reply Problem | RFC792 
 |15)Information Request | RFC792
 |16)Information Reply | RFC792
-|9)Router Advertisement (INCOMPLETE) | RFC1256 (Section 3)
-|10)Router Solicitation (INCOMPLETE) | RFC1256 (Section 3)
+|9)Router Advertisement | RFC1256 (Section 3)
+|10)Router Solicitation | RFC1256 (Section 3)
 |========
 
 [options="header"]

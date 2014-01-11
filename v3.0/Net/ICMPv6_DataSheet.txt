@@ -5,13 +5,12 @@
  * Peach Pit: ICMPv6
  * Direction: Client
 
-Internet Control Message Protocol version 6 (ICMPv6) is the implementation of the Internet Control Message Protocol (ICMP) 
-for Internet Protocol version 6 (IPv6) defined in RFC 4443. ICMPv6 is an integral part of IPv6 and performs error reporting, 
-diagnostic functions (e.g., ping), and a framework for extensions to implement future changes.
-Several extensions have been published, defining new ICMPv6 message types as well as new options for existing ICMPv6 message 
-types. Neighbor Discovery Protocol (NDP) is a node discovery protocol in IPv6 which replaces and enhances functions of ARP. Secure 
-Neighbor Discovery Protocol (SEND) is an extension of NDP with extra security. Multicast Router Discovery (MRD) allows discovery 
-of multicast routers.
+Internet Control Message Protocol version 6 (ICMPv6) is the implementation of the Internet Control Message Protocol (ICMP) for Internet Protocol version 6 (IPv6) defined in RFC 4443.
+ICMPv6 is an integral part of IPv6 and performs error reporting, diagnostic functions (e.g., ping), and a framework for extensions to implement future changes.
+Several extensions have been published, defining new ICMPv6 message types as well as new options for existing ICMPv6 message types.
+Neighbor Discovery Protocol (NDP) is a node discovery protocol in IPv6 which replaces and enhances functions of ARP.
+Secure Neighbor Discovery Protocol (SEND) is an extension of NDP with extra security.
+Multicast Router Discovery (MRD) allows discovery of multicast routers.
 
 Specifications
 --------------
@@ -41,18 +40,12 @@ Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|Path MTU Discovery (TODO) | RFCXXXX
-|Neighbor Discovery (TODO) | RFCXXXX
-
-|Destination Unreachable (TODO) | RFC4443 (Section 3.1)
-|Packet Too Big (TODO) | RFC4443 (Section 3.2)
-|Time Exceeded (TODO) | RFC4443 (Section 3.3)
-|Parameter Problem (TODO) | RFC4443 (Section 3.4)
-|Echo Request (TODO) | RFC4443 (Section 4.1)
-|Echo Reply (TODO) | RFC4443 (Section 4.2)
-
-|MLDv2 (Currently seperate pit) | RFC 3810
-|ETC |(TODO)
+|Destination Unreachable | RFC4443 (Section 3.1)
+|Packet Too Big | RFC4443 (Section 3.2)
+|Time Exceeded | RFC4443 (Section 3.3)
+|Parameter Problem | RFC4443 (Section 3.4)
+|Echo Request | RFC4443 (Section 4.1)
+|Echo Reply | RFC4443 (Section 4.2)
 |========
 
 [options="header"]

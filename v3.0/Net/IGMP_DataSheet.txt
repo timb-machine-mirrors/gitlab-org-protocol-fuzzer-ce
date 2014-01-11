@@ -5,7 +5,11 @@
  * Test Suite: IGMPv4
  * Direction: Client
  
-IGMP is a Network Configuration protocol on top of IPv4.
+Internet Group Management Protocol (IGMP) is used to declare and manage group membership for multicast addresses in IPv6.
+Multicast IP Addresses allow machines to subscribe to IP address groups. 
+This way packets addressed to a group IP Address are distributed amongst all members.
+IGMP is protocol over IPv4 that allows machines to manage their group subscriptions.
+
 
 Specifications
 --------------
@@ -27,9 +31,6 @@ Use Cases
 |Messages | Specification
 |Membership Query | RFC3376 (Section 4.0)
 |Version 3 Membership Report | RFC3376 (Section 4.0)
-|Version 1 Membership Report (TODO) | RFC1112
-|Version 2 Membership Report (TODO) | RFC2236
-|Version 2 Leave Group (TODO) | RFC2236
 |========
 
 [options="header"]
@@ -38,8 +39,4 @@ Use Cases
 |General Query | RFC3376 (Section 4.1.11)
 |Group-Specific Query | RFC3376 (Section 4.1.11)
 |Group-and-Source-Specific Query | RFC3376 (Section 4.1.11)
-|Current-State Record (TODO) | RFC3376 (Section 4.2.12)
-|Filter-Mode-Change Record (TODO) | RFC3376 (Section 4.2.12)
-|Source-List-Change Record (TODO) | RFC3376 (Section 4.2.12)
-|Group-and-Source-Specific Query (TODO) | RFC3376 (Section 4.1.11)
 |========
