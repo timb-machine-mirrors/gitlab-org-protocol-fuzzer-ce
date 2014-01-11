@@ -1,13 +1,14 @@
-Protocol
---------
+
+:Doctitle: IPv4 Peach Pit Data Sheet
+:Description: Internet Protocol version 4 (IPv4)
 
  * Test Suite: IPv4
- * Direction: Client, Server (TODO)
+ * Direction: Client
  
 One way Network layer protocol.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -20,22 +21,26 @@ Used Specifications
 
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
 |Messages | Specification
-|MSG 1 | RFCXXXXX
+|Packet | RFC791
 |========
 
 [options="header"]
 |========
 |Supported Features | Specification
 |Internet Checksum | RFC1071
-|Fragmentation (TODO, add in state) | RFC791
 |Padding | RFC791 (Section 3.1)
-|Option Blocks (TODO) | RFC791 (Section 3.1)
+|Option Blocks | RFC791 (Section 3.1)
 |Explicit Confestion Notification | RFC3168
 |========
 
+[options="header"]
+|========
+|Supported Payloads | Specification
+|ICMPv4 Echo Request | RFC792
+|========
