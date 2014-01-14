@@ -167,7 +167,7 @@ if __name__ == "__main__":
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
                 test.clean_up()
-            has_test_borked = test.status != "pass"
+            has_test_borked = test.status not in ["pass", "skip"]
             if has_test_borked:
                 borked_tests.append(test)
             if   test.status == "pass" and     IS_INTERACTIVE:
