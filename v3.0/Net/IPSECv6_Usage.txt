@@ -4,17 +4,19 @@ Configuration
 -------------
 
 .Target Configuration
-An IPsec target configured for manual keying using the keys defined in the configureation file is required.
-IP-tools on Linux can be used.
+An IPsec target configured for manual keying using the keys defined in the configuration file is required.
+IP-tools on Linux can be used. I
+n order to run all tests both a UDP and TCP listener are required. 
+The networking tool socat can be used for this.
 
 _Example of of setting up ipsec-tools on target machine:_
 
 ----
-#This will enable to the target machince to both send and recieve ipsec traffic from the specified IP addresses
+#This will enable to the target machine to both send and receive ipsec traffic from the specified IP addresses
 
 sudo apt-get install ipsec-tools
 
-#Create the following ipsec.config file chaning the encryption keys, algorthimns and IP address to match the pit config
+#Create the following ipsec.config file changing the encryption keys, algorithms and IP address to match the pit config
 
 ## Start ipsec.config ##
 flush;
@@ -38,9 +40,17 @@ spdadd 10.0.1.1 10.0.1.2 any -P in ipsec
 #Run setkey to enable changes
 
 sudo setkey -f ipsec.config
+
+#Setting up socat listener for UDP
+
+sudo socat STDIO udp-listen:12345
+
+#Setting up socat listener for TCP
+
+sudo socat STDIO tcp-listen:12345
 ----
 
-.Requried Pit Configuration Changes
+.Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine
 SourceIPv6:: IPv6 address of the interface on the local machine
 TargetIPv4:: IPv4 address of the target host machine (used for encapsulating IPv4 in IPv6)
@@ -48,13 +58,15 @@ SourceIPv4:: IPv4 address of the interface on the local machine (used for encaps
 SourceMAC:: MAC address on local machine
 TargetMAC:: MAC address of target machine
 Mode:: Processing mode for IPsec can either be Tunnel or Transport
-EncryptionAlg:: Encryption algorthmn used when encrypting packets
+EncryptionAlg:: Encryption algorithm used when encrypting packets
 CryptoKey:: Shared key used to encrypt packets
-HashAlg:: Hashing algorthmn used to provide data integrity
+HashAlg:: Hashing algorithm used to provide data integrity
 AuthKey:: Shared key used for HMAC hashing
-IV:: Initialization vector used with the encryption algorthmn
+IV:: Initialization vector used with the encryption algorithm
 SPI:: Security parameter index used assigned to the local machine
 Interface:: Name of local interface (used for monitoring)
+SourcePort:: UDPv6 and/or TCPv6 port number of the local machine
+TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine
 
 .Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing
@@ -82,6 +94,9 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
     <Define key="SPI" value="201"/>
     <Define key="Path" value="."/>
+
+    <Define key="SourcePort" value="12345"/>
+    <Define key="TargetPort" value="12345"/>
   </All>
 		
   <Linux platform="linux">
