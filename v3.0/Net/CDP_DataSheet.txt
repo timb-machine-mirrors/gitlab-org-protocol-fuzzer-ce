@@ -4,33 +4,27 @@
  * Test Suite: CDP
  * Direction: Announce
  
-The Cisco Discovery Protocol (CDP) is a proprietary Data Link Layer and Network Layer protocol developed by Cisco Systems. Cisco's multicast announce based protocol is used for neighbor device discovery. It is supported on numerous Cisco devices as well as many devices designed to inter-operate with Cisco hardware (primarily routers and switches). This protocol provides similar functionality to vendor-neutral IEEE 802.1AB Link Layer Discovery Protocol designed to replace .
+The Cisco Discovery Protocol (CDP) is a proprietary Data Link Layer and Network Layer protocol developed by Cisco Systems. Cisco's multicast announce based protocol is used for neighbor device discovery. 
+It is supported on numerous Cisco devices as well as many devices designed to inter-operate with Cisco hardware (primarily routers and switches). 
+This protocol provides similar functionality to vendor-neutral IEEE 802.1AB Link Layer Discovery Protocol designed to replace.
 
 
 Cisco documentation (once found at the url http://www.cisco.com/univercd/cc/td/doc/product/lan/trsrb/frames.htm) was used to create this pit. Documentation has since been removed, however functionality will be described within this data sheet where possible.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
 |Specification | Title
-| http://www.cisco.com/univercd/cc/td/doc/product/lan/trsrb/frames.htm | CDP Packet Format
+|http://www.cisco.com/univercd/cc/td/doc/product/lan/trsrb/frames.htm | CDP Packet Format
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
 |Messages | Specification
-| Announce | http://www.cisco.com/univercd/cc/td/doc/product/lan/trsrb/frames.htm
+|Announce | http://www.cisco.com/univercd/cc/td/doc/product/lan/trsrb/frames.htm
 |========
-
-[options="header"]
-|========
-|Supported Features | Specification
-|  |  
-|========
-
-

@@ -32,4 +32,3 @@ Use Cases
 |Length/Type Fields (Partial) | 802.3 Section 3.2.6
 |MAC Client Data field | 802.3 Section 3.2.7
 |========
-
