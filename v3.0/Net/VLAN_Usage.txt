@@ -15,7 +15,7 @@ sudo apt-get install vlan
 sudo vconfig add eth0 1
 
 #Config the vlan interface
-ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
+sudo ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
 ----
 
 .Requried Pit Configuration Changes
