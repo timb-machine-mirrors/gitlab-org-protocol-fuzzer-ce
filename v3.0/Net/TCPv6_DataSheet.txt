@@ -2,7 +2,7 @@ Protocol
 --------
 
  * Test Suite: TCPv6
- * Direction: Client, Server (TODO)
+ * Direction: Client
  
 DoD Standard Transmission Control Protocol for stateful host-to-host communication.
 
