@@ -1,13 +1,13 @@
-Protocol
---------
+:Doctitle: TCPv4 Peach Pit Data Sheet
+:Description: Transmission Control Protocol Version 4 (TCPv4)
 
  * Test Suite: TCPv4
- * Direction: Client, Server (TODO)
+ * Direction: Client
  
 DoD Standard Transmission Control Protocol for stateful host-to-host communication.
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -15,20 +15,20 @@ Used Specifications
 |RFC793 | Transmission Control Protocol
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
 |Messages | Specification
-| MaximumSegmentSize | RFC793 Section 3.1 page 17
+|MaximumSegmentSize | RFC793 Section 3.1 page 17
 |========
 
 [options="header"]
 |========
 |Supported Features | Specification
-| Establishing a connection (Async, Client) | RFC793 Section 3.4
-| Closing a Connection (Async) | RFC793 Section 3.5 Case 2
-| Data Communication |  RFC793 Section 3.7 
+|Establishing a connection (Async, Client) | RFC793 Section 3.4
+|Closing a Connection (Async) | RFC793 Section 3.5 Case 2
+|Data Communication |  RFC793 Section 3.7 
 |========
 

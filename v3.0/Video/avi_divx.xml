@@ -6,8 +6,9 @@
 	
 	<Include ns="AviDivx" src="file:##Path##/_Common/Models/Video/avi_divx_State.xml"/>
 	
-	<Agent name="LinuxAgent">
+	<Agent name="Linux">
 		<Monitor class="LinuxCrashMonitor"/>
+		
 		<Monitor class="Process">
 			<Param name="Executable" value="##Target##"/>
 			<Param name="StartOnCall" value="LaunchMplayer"/>
@@ -16,7 +17,15 @@
 		</Monitor>
 	</Agent>
 	
-	<Agent name="WinAgent">
+	<Agent name="OSX">
+		<Monitor class="CrashWrangler">
+			<Param name="Command" value="##Target##"/>
+			<Param name="Arguments" value="fuzzed.avi"/>
+			<Param name="StartOnCall" value="LaunchMplayer"/>
+		</Monitor>
+	</Agent>
+	
+	<Agent name="Win">
 		<Monitor class="WindowsDebugger">
 			<Param name="CommandLine" value="##Target## fuzzed.avi"/>
 			<Param name="StartOnCall" value="LaunchMplayer"/>

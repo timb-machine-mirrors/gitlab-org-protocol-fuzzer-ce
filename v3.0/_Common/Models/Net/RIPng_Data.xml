@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+        author="Deja Vu Security, LLC" description="Routing Information Protocol NG DataModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+  <!--RFC1058: Implements all features-->
+
+  <DataModel name="Packet">
+    <Block name="Header">
+		<Number name="Command" size="8" value="2"  />
+		<Number name="Version" size="8" value="1" token="true" />
+		<Number name="Mustbezero" size="16" token="true" /> 
+
+    </Block>
+
+	
+    <Block name="RIPngPayload" minOccurs="1" maxOccurs="20" >
+		<Number name="IPv6p1" size="64" />
+		<Number name="IPv6p2" value="1" size="64" />
+		<Number name="RouteTag" size="16"  />
+		<Number name="Prefix" size="8"  />
+		<Number name="Metric" value="4" size="16"  />
+      </Block>
+    
+  </DataModel>
+</Peach>
+<!-- end -->

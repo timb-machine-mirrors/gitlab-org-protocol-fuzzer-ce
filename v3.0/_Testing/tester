@@ -51,7 +51,7 @@ def find_peach():
     if IS_WINDOWS:
         for f in ls:
             if 'win' not in f                : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and 'x64' not in f: continue
             elif not IS_64_BIT and 'x64' in f: continue
@@ -59,7 +59,7 @@ def find_peach():
     elif IS_LINUX:
         for f in ls:
             if 'linux' not in f              : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and '_64' not in f: continue
             elif not IS_64_BIT and '_64' in f: continue
@@ -67,22 +67,26 @@ def find_peach():
     elif IS_OSX:
         for f in ls:
             if 'osx' not in f               : continue
-            elif not f.startswith('epeach-'): continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')   : continue
             else                            : peach_dir = f
     else:
         assert False, "Unknown os"
     if peach_dir == '':
-	raise Exception('no peach dir found')
-    _path.extend([peach_dir, 'peach.exe'])
-    PEACH_PATH = os.sep.join(_path)
+        raise Exception('no peach dir found')
+
+    PEACH_PATH       = os.sep.join(_path + [peach_dir, 'peach.exe'])
+    OTHER_PEACH_PATH = os.sep.join(_path + [peach_dir, 'Peach.exe'])
 
     # make sure peach.exe is actully executable on *nix after extraction
     # this isn't the greatest place for it but hey
     if IS_OSX or IS_LINUX:
-        p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+        if os.path.exists(PEACH_PATH):
+            p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+        if os.path.exists(OTHER_PEACH_PATH):
+            p = subprocess.Popen(['chmod', '0760', OTHER_PEACH_PATH])
 
-    return PEACH_PATH
+    return PEACH_PATH if os.path.exists(PEACH_PATH) else OTHER_PEACH_PATH
 
 
 ###############################################################################

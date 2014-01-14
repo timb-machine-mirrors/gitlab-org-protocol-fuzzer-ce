@@ -5,3 +5,5 @@
 		<!-- IEEE 802.3 Section 4.4.2 (MAC parameters) states that minFrameSize == 512 bits for all supported MAC -->
 * 802.3 Section 3.2.9 - FCS
 * Choices for types?
+
+* Direction: Listen (TODO)

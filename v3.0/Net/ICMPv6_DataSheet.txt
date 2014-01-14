@@ -1,13 +1,19 @@
-Protocol
---------
 
- * Test Suite: ICMPv6
- * Direction: Client, Server(TODO)
- 
-ICMPv6 protocol is message relay protocol on top of IPv6.
+:Doctitle: ICMPv6 Peach Pit Data Sheet
+:Description: Internet Control Message Protocol version 6 (ICMPv6)
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+ * Peach Pit: ICMPv6
+ * Direction: Client
+
+Internet Control Message Protocol version 6 (ICMPv6) is the implementation of the Internet Control Message Protocol (ICMP) for Internet Protocol version 6 (IPv6) defined in RFC 4443.
+ICMPv6 is an integral part of IPv6 and performs error reporting, diagnostic functions (e.g., ping), and a framework for extensions to implement future changes.
+Several extensions have been published, defining new ICMPv6 message types as well as new options for existing ICMPv6 message types.
+Neighbor Discovery Protocol (NDP) is a node discovery protocol in IPv6 which replaces and enhances functions of ARP.
+Secure Neighbor Discovery Protocol (SEND) is an extension of NDP with extra security.
+Multicast Router Discovery (MRD) allows discovery of multicast routers.
+
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -26,69 +32,23 @@ Used Specifications
 |RFC3971 | SEcure Neighbor Discovery (SEND)
 |RFC6550 | RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks
 |RFC6743 | ICMP Locator Update Message for the Identifier-Locator Network Protocol for IPv6 (ILNPv6)
-
-
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
 |Messages | Specification
-
-|1)Destination Unreachable (INCOMPLETE) | RFC4443 (Section 3.1)
-|2)Packet Too Big (TODO) | RFC4443 (Section 3.2)
-|3)Time Exceeded (TODO) | RFC4443 (Section 3.3)
-|4)Parameter Problem (INCOMPLETE) | RFC4443 (Section 3.4)
-|128)Echo Request | RFC4443 (Section 4.1)
-|129)Echo Reply | RFC4443 (Section 4.2)
-
-|130)Multicast Listener Query (MLD Pit) | RFC2710
-
-|131)Multicast Listener Report (TODO) | RFC2710
-|132)Multicast Listener Done (TODO) | [RFC2710]
-|133)Router Solicitation (TODO) | [RFC4861]
-|134)Router Advertisement (INCOMPLETE) | [RFC4861]
-|135)Neighbor Solicitation (TODO) | [RFC4861]
-|136)Neighbor Advertisement (TODO) | [RFC4861]
-|137)Redirect Message (TODO) | [RFC4861]
-|138)Router Renumbering (TODO) | [Matt_Crawford]
-|139)ICMP Node Information Query (TODO) | [RFC4620]
-|140)ICMP Node Information Response (TODO) | [RFC4620]
-|141)Inverse Neighbor Discovery Solicitation Message (TODO) | [RFC3122]
-|142)Inverse Neighbor Discovery Advertisement Message (TODO) | [RFC3122]
-
-|143)Version 2 Multicast Listener Report (MLD Pit) | RFC3810
-
-|144)Home Agent Address Discovery Request Message (INCOMPLETE) | [RFC6275]
-|145)Home Agent Address Discovery Reply Message (INCOMPLETE) | [RFC6275]
-|146)Mobile Prefix Solicitation (INCOMPLETE) | [RFC6275]
-|147)Mobile Prefix Advertisement (INCOMPLETE) | [RFC6275]
-|148)Certification Path Solicitation Message (TODO) | [RFC3971]
-|149)Certification Path Advertisement Message (TODO) | [RFC3971]
-|150)ICMP messages utilized by experimental mobility protocols such as Seamoby (TODO) | [RFC4065]
-|151)Multicast Router Advertisement (TODO) | [RFC4286]
-|152)Multicast Router Solicitation (TODO) | [RFC4286]
-|153)Multicast Router Termination (TODO) | [RFC4286]
-|154)FMIPv6 Messages (TODO) | [RFC5568]
-|155)RPL Control Message (TODO) | [RFC6550]
-|156)ILNPv6 Locator Update Message (TODO) | [RFC6743]
-|157)Duplicate Address Request (TODO) | [RFC-ietf-6lowpan-nd-21]
-|158)Duplicate Address Confirmation (TODO) | [RFC-ietf-6lowpan-nd-21]
-
+|Destination Unreachable | RFC4443 (Section 3.1)
+|Packet Too Big | RFC4443 (Section 3.2)
+|Time Exceeded | RFC4443 (Section 3.3)
+|Parameter Problem | RFC4443 (Section 3.4)
+|Echo Request | RFC4443 (Section 4.1)
+|Echo Reply | RFC4443 (Section 4.2)
 |========
 
 [options="header"]
 |========
-|Supported Features | Specification
-|Internet Checksum | RFC2460 (Section 8.1)
-|========
-
-[options="Payloads"]
-|========
 |Supported Payloads | Specification
-
-
-TODO: has a bunch of mobile datamodels not used in state
-tons of messages here: http://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xml
+|========
