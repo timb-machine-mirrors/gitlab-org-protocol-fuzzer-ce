@@ -4,13 +4,10 @@
  * Test Suite: UDPv6
  * Direction: Client
  
-The User Datagram Protocol (UDP) is one of the core members of the Internet protocol suite, 
-which allows computer applications to send messages, in this case referred to as datagrams, 
-to other hosts on an Internet Protocol (IP) network without prior communications to set up 
-special transmission channels or data paths. UDP uses a simple transmission model with a 
-minimum of protocol mechanism. It has no handshaking dialogues, and thus exposes any 
-unreliability of the underlying network protocol to the user's program. As this is normally
-IP over unreliable media, there is no guarantee of delivery, ordering, or duplicate protection.
+The User Datagram Protocol (UDP) is one of the core members of the Internet protocol suite, which allows computer applications to send messages, in this case referred to as datagrams, to other hosts on an Internet Protocol (IP) network without prior communications to set up special transmission channels or data paths. 
+UDP uses a simple transmission model with a minimum of protocol mechanism. 
+It has no handshaking dialogs, and thus exposes any unreliability of the underlying network protocol to the user's program.
+As this is normally IP over unreliable media, there is no guarantee of delivery, ordering, or duplicate protection.
 
 Specifications
 --------------
