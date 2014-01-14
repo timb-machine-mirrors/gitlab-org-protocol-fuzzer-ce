@@ -5,8 +5,8 @@ Configuration
 
 .Target Configuration
 An IPsec target configured for manual keying using the keys defined in the configuration file is required.
-IP-tools on Linux can be used. I
-n order to run all tests both a UDP and TCP listener are required. 
+IP-tools on Linux can be used. 
+In order to run all tests both a UDP and TCP listener are required. 
 The networking tool socat can be used for this.
 
 _Example of of setting up ipsec-tools on target machine:_

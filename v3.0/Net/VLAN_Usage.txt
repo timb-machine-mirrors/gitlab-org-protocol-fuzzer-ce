@@ -4,7 +4,10 @@ Configuration
 -------------
 
 .Target Configuration
-A VLAN interface or VLAN enabled switch is required. A VLAN interface can be added on Linux using vconfig.
+A VLAN interface or VLAN enabled switch is required. 
+A VLAN interface can be added on Linux using vconfig.
+In order to run all tests both a UDP and TCP listener are required. 
+The networking tool socat can be used for this.
 
 _Example of using adding a VLAN interface:_
 
@@ -16,9 +19,17 @@ sudo vconfig add eth0 1
 
 #Config the vlan interface
 sudo ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
+
+#Setting up socat listener for UDP
+
+sudo socat STDIO udp-listen:12345
+
+#Setting up socat listener for TCP
+
+sudo socat STDIO tcp-listen:12345
 ----
 
-.Requried Pit Configuration Changes
+.Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine
 SourceIPv6:: IPv6 address of the interface on the local machine
 TargetIPv4:: IPv4 address of the target host machine
@@ -27,6 +38,8 @@ SourceMAC:: MAC address on local machine
 TargetMAC:: MAC address of target machine
 Tag:: VLAN identifier specifying the VLAN to which the frames belong
 Interface:: Name of local interface (used for monitoring)
+SourcePort:: UDPv6 and/or TCPv6 port number of the local machine
+TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine
 
 .Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing
@@ -47,6 +60,9 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="SourceIPv6" value="::1"/>
     <Define key="Tag" value="1"/>
     <Define key="Path" value="."/>
+    
+    <Define key="SourcePort" value="12345"/>
+    <Define key="TargetPort" value="12345"/>
   </All>
 
   <Linux platform="linux">
