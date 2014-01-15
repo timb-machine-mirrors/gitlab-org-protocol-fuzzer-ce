@@ -47,8 +47,6 @@ using Peach.Core.IO;
 namespace Peach.Core.Publishers
 {
 	[Publisher("Ssl", true)]
-	[Publisher("SslClient")]
-	[Publisher("ssl.Ssl")]
     [Parameter("Host", typeof(string), "Hostname to connect to")]
     [Parameter("Port", typeof(ushort), "Port to connect to")]
     [Parameter("VerifyServer", typeof(bool), "Verify the server certificate", "false")] 

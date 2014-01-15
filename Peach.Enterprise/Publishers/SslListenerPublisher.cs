@@ -15,7 +15,6 @@ using NLog;
 namespace Peach.Core.Publishers
 {
 	[Publisher("SslListener", true)]
-	[Publisher("ssl.SslListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
     [Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]
