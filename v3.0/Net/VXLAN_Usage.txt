@@ -1,0 +1,98 @@
+include::VXLAN_DataSheet.txt[]
+
+Configuration
+-------------
+
+.Target Configuration
+
+
+In order to run all tests both a UDP and TCP listener are required.
+The networking tool socat can be used for this.
+
+_Example of using adding a VXLAN interface:_
+
+----
+
+
+#Setting up socat listener for UDP
+
+sudo socat STDIO udp-listen:12345
+
+#Setting up socat listener for TCP
+
+sudo socat STDIO tcp-listen:12345
+----
+
+.Required Pit Configuration Changes
+TargetIPv6:: IPv6 address of the target host machine
+SourceIPv6:: IPv6 address of the interface on the local machine
+TargetIPv4:: IPv4 address of the target host machine
+SourceIPv4:: IPv4 address of the interface on the local machine
+SourceMAC:: MAC address on local machine
+TargetMAC:: MAC address of target machine
+OuterTargetIPv4:: IPv4 address of the target host machine
+OuterSourceIPv4:: IPv4 address of the interface on the local machine
+OuterSourceMAC:: MAC address on local machine
+OuterTargetMAC:: MAC address of target machine
+Tag:: VXLAN identifier specifying the VXLAN to which the frames belong
+Interface:: Name of local interface (used for monitoring)
+SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
+TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
+
+.Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+
+.Sample VXLAN Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="OuterSourceMAC" value="5254005335d3"/>
+    <Define key="OuterSourceIPv4" value="10.6.66.51" />
+    <Define key="OuterTargetMAC"   value="000000000000"/>
+    <Define key="OuterTargetIPv4" value="10.6.66.52"/>
+    <Define key="LoggerPath"  value="logs/vxlan/"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="SourceMAC" value="6805ca0589fe" />
+    <Define key="TargetMAC" value="2233ca00ff0f"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="SourceIPv6" value="::1"/>
+    <Define key="Tag" value="1"/>
+    <Define key="Path" value="."/>
+
+    <Define key="SourcePort" value="12345"/>
+    <Define key="TargetPort" value="12345"/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+peach -1 -debug VXLAN.xml
+----
+.Full test run
+----
+peach VXLAN.xml
+----
