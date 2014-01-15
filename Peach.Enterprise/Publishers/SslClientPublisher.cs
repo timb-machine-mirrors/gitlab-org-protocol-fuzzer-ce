@@ -51,19 +51,15 @@ namespace Peach.Core.Publishers
 	[Publisher("ssl.Ssl")]
     [Parameter("Host", typeof(string), "Hostname to connect to")]
     [Parameter("Port", typeof(ushort), "Port to connect to")]
-    [Parameter("ClientCertPath", typeof(string), "Path to client certification file","")]
-    [Parameter("ClientKeyPath", typeof(string), "Path to client key file","")]
     [Parameter("VerifyServer", typeof(bool), "Verify the server certificate", "false")] 
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data (default 3000)", "3000")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
-	[Parameter("Sni", typeof(string), "Sni to us for SSL connection. Will use Host by default","")]
+	[Parameter("Sni", typeof(string), "Sni to use for SSL connection. Will use Host by default","")]
 	public class SslClientPublisher : BufferedStreamPublisher 
 	{
         private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
         protected override NLog.Logger Logger { get { return logger; } }
 
-        public string ClientCertPath { get; set; }
-        public string ClientKeyPath { get; set; }
         public bool VerifyServer { get; set; }
         public string Host { get; set; }
 		public string Sni { get; set; }
