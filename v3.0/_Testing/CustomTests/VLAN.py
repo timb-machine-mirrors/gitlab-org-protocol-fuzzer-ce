@@ -2,3 +2,6 @@
 
 test(name="VLAN",
 		platform="linux")
+
+test(name="VLAN",
+		platform="osx")
