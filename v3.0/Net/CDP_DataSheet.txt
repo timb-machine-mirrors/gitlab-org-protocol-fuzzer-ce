@@ -1,7 +1,7 @@
 :Doctitle: CDP Peach Pit Data Sheet
 :Description: Cisco Discovery Protocol
 
- * Test Suite: CDP
+ * Peach Pit: CDP
  * Direction: Announce
  
 The Cisco Discovery Protocol (CDP) is a proprietary Data Link Layer and Network Layer protocol developed by Cisco Systems. Cisco's multicast announce based protocol is used for neighbor device discovery. 

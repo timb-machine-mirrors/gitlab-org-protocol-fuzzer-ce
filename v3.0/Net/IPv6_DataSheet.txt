@@ -1,7 +1,7 @@
 :Doctitle: IPv6 Peach Pit Data Sheet
 :Description: Internet Protocol version 6 (IPv6)
 
- * Test Suite: IPv6
+ * Peach Pit: IPv6
  * Direction: Client
  
 Internet Protocol version 6 (IPv6) is the the communications protocol that 

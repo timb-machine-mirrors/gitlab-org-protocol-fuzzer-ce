@@ -2,7 +2,7 @@
 :Doctitle: IGMP Peach Pit Data Sheet
 :Description: Internet Group Management Protocol (IGMP)
 
- * Test Suite: IGMPv4
+ * Peach Pit: IGMPv4
  * Direction: Client
  
 Internet Group Management Protocol (IGMP) is used to declare and manage group membership for multicast addresses in IPv6.

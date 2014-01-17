@@ -1,7 +1,7 @@
 :Doctitle: IPsec Peach Pit Data Sheet
 :Description: Internet Protocol Security
 
- * Test Suite: IPsec
+ * Peach Pit: IPsec
  * Direction: Client
  
  Internet Protocol Security (IPsec) is a protocol suite for securing Internet Protocol (IP) communications by authenticating and encrypting each IP packet of a communication session. 

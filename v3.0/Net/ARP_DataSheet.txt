@@ -1,7 +1,7 @@
 :Doctitle: ARP Peach Pit Data Sheet
 :Description: Address Resolution Protocol (ARP)
 
- * Test Suite: ARP
+ * Peach Pit: ARP
  * Direction: Broadcast, Listen
  
 The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 

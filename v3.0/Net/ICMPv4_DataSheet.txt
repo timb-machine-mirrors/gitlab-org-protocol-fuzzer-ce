@@ -2,7 +2,7 @@
 :Doctitle: ICMPv4 Peach Pit Data Sheet
 :Description: Internet Control Message Protocol version 4 (ICMPv4)
 
- * Test Suite: ICMPv4
+ * Peach Pit: ICMPv4
  * Direction: Client
  
 Internet Control Message Protocol version 4 (ICMPv4) is the implementation of a message relay protocol on top of IPv4. It provides error responses for the IPv4 protocol as well as simple data transmision. It is commonly used in the ping application for testing network response and connectivity.
