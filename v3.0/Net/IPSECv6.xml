@@ -2,31 +2,19 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
-  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-  <!-- Requires Linux Peach 3.0 and RawEther publisher -->
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
 	
-	<Include ns="States" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
+	<Include ns="IPSECv6" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
 	
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##"/>
-			<Param name="Arguments" value="-i ##tsharkInterface##"/>
-			<Param name="FaultOnEarlyExit" value="true"/>
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##"/>
-		</Monitor>
-	</Agent>
-
   <Agent name="LocalAgent">
     <Monitor class="Pcap">
       <Param name="Device" value="##Interface##"/>
     </Monitor>
   </Agent>
   
-  <!-- Default test for fuzzing IPSECv6 ESP-->
+  <!-- ESP Header Test -->
   <Test name="Default">
-    <StateModel ref="States:ESP"/>
+    <StateModel ref="IPSECv6:ESP"/>
 		
 		<Agent ref="LocalAgent"/>
 		
@@ -42,4 +30,24 @@
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
+  
+  <!-- Authentication Header Test -->
+  <Test name="AH">
+    <StateModel ref="IPSECv6:AH"/>
+
+    <Agent ref="LocalAgent"/>
+
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="51"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
 </Peach>
+<!-- end -->

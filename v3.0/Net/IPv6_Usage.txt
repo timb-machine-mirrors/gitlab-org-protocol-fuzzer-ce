@@ -1,0 +1,76 @@
+include::IPv6_DataSheet.txt[]
+
+Configuration
+-------------
+
+.Target Configuration
+An IPv6 and UDPv6 listeners are required to run all tests. The network tool socat can be used.
+
+_Example of using socat to listen IPv6:_
+
+----
+# Used to listen for ipv6 traffic
+socat STDIO ip-recv:ipv6
+
+#Used to listen for UDPv6
+socat STDIO udp6-listen:12345
+----
+
+.Required Pit Configuration Changes
+TargetIPv6:: IP address of the target host machine
+SourceIPv6:: IP address of the interface on the local machine
+SourceMAC:: MAC address on local machine
+TargetMAC:: MAC address of target machine
+Interface:: Name of local interface (used for monitoring)
+SourcePort:: UDPv6 port number of the local machine
+TargetPort:: UDPv6 port number of the target host machine
+
+.Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+
+.Sample IPv6 Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="SourceIPv6" value="::1"/>
+    <Define key="LoggerPath" value="logs/IPv6/"/>
+    <Define key="SourceMAC" value="000c29ef2a1b" />
+    <Define key="TargetMAC" value="000c29ef2a1b" />
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="SourcePort" value="12345"/>
+    <Define key="TargetPort" value="12345"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+peach -1 -debug IPv6.xml
+----
+.Full test run
+----
+peach IPv6.xml
+----

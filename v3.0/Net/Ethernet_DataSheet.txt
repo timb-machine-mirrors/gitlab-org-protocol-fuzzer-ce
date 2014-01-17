@@ -1,13 +1,13 @@
-Protocol
---------
+:Doctitle: Ethernet Peach Pit Data Sheet
+:Description: Ethernet
 
  * Test Suite: Ethernet
- * Direction: Broadcast, Listen (TODO)
+ * Direction: Broadcast
  
 The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
 
-Used Specifications
-~~~~~~~~~~~~~~~~~~~
+Specifications
+--------------
 
 [options="header"]
 |========
@@ -16,8 +16,8 @@ Used Specifications
 |802.1Q | VLAN Tagging
 |========
 
-Detailed Use Cases
-~~~~~~~~~~~~~~~~~~
+Use Cases
+---------
 
 [options="header"]
 |========
@@ -28,8 +28,7 @@ Detailed Use Cases
 [options="header"]
 |========
 |Supported Features | Specification
-| Address Fields | 802.3 Section 3.2.3
-| Length/Type Fields (Partial) | 802.3 Section 3.2.6
-| MAC Client Data field | 802.3 Section 3.2.7
+|Address Fields | 802.3 Section 3.2.3
+|Length/Type Fields (Partial) | 802.3 Section 3.2.6
+|MAC Client Data field | 802.3 Section 3.2.7
 |========
-

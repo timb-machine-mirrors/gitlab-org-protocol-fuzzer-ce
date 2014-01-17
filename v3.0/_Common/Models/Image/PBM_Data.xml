@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd" 
+	   version="1.0" author="Deja vu Security" description="PBM Graphics File Pit DataModels">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+
+
+  <!-- ********************************** -->
+	<DataModel name="PBM">
+		<Block name="PBMHeader">
+			<String value="P1\n" token="true" />
+			<Block name="Desc" minOccurs="0">
+				<String value="#" token="true" />
+				<String value= "Description" />
+				<String value= "\n" token="true" />
+			</Block>
+		</Block>
+		<Block name="PBMdata" >
+			<String value="250">
+				<Hint name="NumericalString" value="true" />
+			</String>
+			<String value=" " token="true" />
+			<String value="250">
+				<Hint name="NumericalString" value="true" />
+			</String>
+			<String value= "\n" token="true" />
+		</Block>
+		<Block name="Data" minOccurs="1" >
+			<String constraint="int(len(str(element.DefaultValue))) &lt; 71" />
+			<String value= "\n" token="true" />
+		</Block>
+		<Blob />
+		
+	</DataModel>
+</Peach>
+<!--END-->

@@ -51,7 +51,7 @@ def find_peach():
     if IS_WINDOWS:
         for f in ls:
             if 'win' not in f                : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and 'x64' not in f: continue
             elif not IS_64_BIT and 'x64' in f: continue
@@ -59,7 +59,7 @@ def find_peach():
     elif IS_LINUX:
         for f in ls:
             if 'linux' not in f              : continue
-            elif not f.startswith('epeach-') : continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')    : continue
             elif IS_64_BIT and '_64' not in f: continue
             elif not IS_64_BIT and '_64' in f: continue
@@ -67,20 +67,24 @@ def find_peach():
     elif IS_OSX:
         for f in ls:
             if 'osx' not in f               : continue
-            elif not f.startswith('epeach-'): continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
             elif not f.endswith('-debug')   : continue
             else                            : peach_dir = f
     else:
         assert False, "Unknown os"
     if peach_dir == '':
         raise Exception('no peach dir found')
-    _path.extend([peach_dir, 'peach.exe'])
-    PEACH_PATH = os.sep.join(_path)
+    PEACH_PATH = os.sep.join(_path + [peach_dir, 'peach.exe'])
+    if not os.path.exists(PEACH_PATH):
+        PEACH_PATH = os.sep.join(_path + [peach_dir, 'Peach.exe'])
+    if not os.path.exists(PEACH_PATH):
+        raise Exception('peach not found')
 
     # make sure peach.exe is actully executable on *nix after extraction
     # this isn't the greatest place for it but hey
+    # ... Uh, yeah. This should go in the intaller. -JD
     if IS_OSX or IS_LINUX:
-        p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
+        os.chmod(PEACH_PATH, 0760)
 
     return PEACH_PATH
 
@@ -157,6 +161,7 @@ if __name__ == "__main__":
             targets.append({"path": path, "file": fn})
     else:
         targets = get_targets(FULL_TARGET_PATH)
+    borked_tests = []
     for target in targets:
         pit_tests = testlib.get_tests(target, config)
         for test in pit_tests:
@@ -166,6 +171,9 @@ if __name__ == "__main__":
                 traceback.print_exception(*sys.exc_info())
                 test.status = "except"
                 test.clean_up()
+            has_test_borked = test.status not in ["pass", "skip"]
+            if has_test_borked:
+                borked_tests.append(test)
             if   test.status == "pass" and     IS_INTERACTIVE:
                 print "Ran: ", test.args
                 print test.color_text("green", "SUCCESS!")
@@ -191,12 +199,16 @@ if __name__ == "__main__":
             else:
                 print test.color_text("red", "UNKNOWN FAILURE!")
             tests.append(test)
+    print "\nProblem tests: %s\n" % " ".join(sorted([test.name for test in borked_tests]))
     tests.sort(key = lambda obj: obj.name)
     return_code = 0
     for test in tests:
         status = test.status
         if test.hasrun:
             status += " after running %s" % test.hasrun
+        # any failure should cause build failure
+        if test.status not in ["pass", "skip"]:
+            return_code += 1
         if test.status in ["pass", "fail"]:
             if test.status == "pass" and IS_INTERACTIVE == False:
                 continue #for non interactive we can silently succede.
@@ -207,14 +219,10 @@ if __name__ == "__main__":
                     test.returncode,
                     test.cmd,
                     os.linesep))
-            return_code |= test.returncode #any failure should cause build failure
-            if test.status != "pass":
-                return_code += 1
         elif test.status == "skip":
             test_log.write("{0:<20}{1}".format(
                     test.name + " was " + status, os.linesep))
         elif test.status == "except":
-            return_code += 1
             test_log.write("{0:<20}{1}".format(
                     test.name + " failed with exception", os.linesep))
     test_log.close()

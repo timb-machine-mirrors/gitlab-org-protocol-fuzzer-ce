@@ -28,6 +28,7 @@ COLOR_CODES = {'red': 31,
 
 all_tests = {}
 all_defines = {}
+skip_tests = []
 
 #Switch to using unittest
 #top level dirs should be test suites (Net, Image)
@@ -242,18 +243,25 @@ def define(**kw):
 
 
 def get_tests(target, base_config):
+    '''
+    this gets all tests for a _particular_ format or protocol. if there is only
+    the pit the likely there will be only one test, otherwise there may be more
+    '''
     #this is horrible and should die in a fire...
     name = target["file"][:-4]
     pit = os.path.join(target["path"], target["file"])
     my_tests = []
-    if name in all_tests:
-        for test_def in all_tests[name]:
-            my_tests.append(PeachTest(pit, base_config, **test_def))
+    if name not in skip_tests:
+        if name in all_tests:
+            for test_def in all_tests[name]:
+                my_tests.append(PeachTest(pit, base_config, **test_def))
+        else:
+            my_tests.append(PeachTest(pit, base_config))
+        if name in all_defines:
+            for test in my_tests:
+                test.update_defines(**all_defines[name])
     else:
-        my_tests.append(PeachTest(pit, base_config))
-    if name in all_defines:
-        for test in my_tests:
-            test.update_defines(**all_defines[name])
+        print "Skipping tests for: ", name
     return my_tests
 
 

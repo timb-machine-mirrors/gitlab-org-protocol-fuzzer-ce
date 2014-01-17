@@ -372,7 +372,7 @@
 			<Number name="AssociationId" size="16" value="2"/>
 			
 			<Block name="IE_SupportedRates">
-				<Number name="ElementId" size="8" valueType="hex" value="1" />
+				<Number name="ElementId" size="8" valueType="hex" value="01" />
 				<Number name="Length" size="8">
 					<Relation type="size" of="Body" />
 				</Number>

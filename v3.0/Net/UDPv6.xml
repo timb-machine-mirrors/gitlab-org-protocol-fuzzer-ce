@@ -6,17 +6,6 @@
 
   <Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_State.xml"/>
 
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##"/>
-      <Param name="Arguments" value="-i ##tsharkInterface##"/>
-      <Param name="FaultOnEarlyExit" value="true"/>
-    </Monitor>
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-  
   <Agent name="LocalAgent">
     <Monitor class="Pcap">
       <Param name="Device" value="##Interface##"/>
@@ -36,7 +25,7 @@
     
     <Strategy class="##Strategy##"/>
 
-    <Logger class="File" >
+    <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
