@@ -73,7 +73,7 @@ def find_peach():
     else:
         assert False, "Unknown os"
     if peach_dir == '':
-	raise Exception('no peach dir found')
+        raise Exception('no peach dir found')
     _path.extend([peach_dir, 'peach.exe'])
     PEACH_PATH = os.sep.join(_path)
 
