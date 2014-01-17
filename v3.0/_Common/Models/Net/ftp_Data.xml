@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="File Transfer Protocol PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
+
 	<!-- Helper Models -->
 	<DataModel name="ArgBlock">
 		<String name="Break" token="true" value=" "/>
@@ -62,7 +62,7 @@
 			<Block name="MultiLine2" ref="MultiLineExplainV2"/>
 		</Choice>
 	</DataModel>
-	
+
 	<!-- 4.2.  FTP REPLIES -->
 	<DataModel name="ServerOk" ref="ResponseTemplate">
 		<String name="Status" value="200" token="true"/>
@@ -87,24 +87,24 @@
 	<DataModel name="ServerSendDirectory" ref="ResponseTemplate">
 		<String name="Status" value="150" token="true"/>
 	</DataModel>
-	
+
 	<DataModel name="ServerDirectorySendOk" ref="ResponseTemplate">
 		<String name="Status" value="226" token="true"/>
 	</DataModel>
-	
+
 	<DataModel name="DirectoryData">
 		<String name="Data" value="Desktop\r\nDocuments\r\nDownloads\r\nSecrets\r\nPublic\r\nPictures\r\n"/>
 		<String name="Data2" value="file1.png\r\nfile2.xml\r\nmy_ssn.txt\r\nVideos\r\n"/>
 	</DataModel>
-	
+
 	<DataModel name="DirectoryList">
 		<String name="Data" value="-rw-------    1 1000     1000           11 Apr 29 16:55 2\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Desktop\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Documents\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 clients.sh\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 File.txt\r\n"/>
 	</DataModel>
-	
+
 	<DataModel name="FileData">
 		<Blob name="Data" valueType="hex" value="7B 5C 72 74 66 31 5C 61 6E 73 69 5C 61 6E 73 69 63 70 67 31 32 35 32 5C 64 65 66 66 30 5C 64 65 66 6C 61 6E 67 31 30 33 33 7B 5C 66 6F 6E 74 74 62 6C 7B 5C 66 30 5C 66 6E 69 6C 5C 66 63 68 61 72 73 65 74 30 20 43 61 6C 69 62 72 69 3B 7D 7D 0D 0A 7B 5C 2A 5C 67 65 6E 65 72 61 74 6F 72 20 4D 73 66 74 65 64 69 74 20 35 2E 34 31 2E 32 31 2E 32 35 31 30 3B 7D 5C 76 69 65 77 6B 69 6E 64 34 5C 75 63 31 5C 70 61 72 64 5C 73 61 32 30 30 5C 73 6C 32 37 36 5C 73 6C 6D 75 6C 74 31 5C 6C 61 6E 67 39 5C 66 30 5C 66 73 32 32 20 57 68 6F 61 2E 20 44 5C 27 65 39 6A 5C 27 65 30 20 76 75 2E 5C 70 61 72 0D 0A 7D 0D 0A 00"/>
 	</DataModel>
-	
+
 	<DataModel name="ServerLoggedIn" ref="ResponseTemplate">
 		<String name="Status" value="230" token="true"/>
 	</DataModel>
@@ -120,9 +120,9 @@
 		<String name="Terminator" length="2" mutable="false" token="true" value="\r\n"/>
 	</DataModel>
 
-	
+
 	<!-- 4.1.  FTP COMMANDS -->
-	
+
 	<!--      USER <SP> <username> <CRLF> -->
 	<DataModel name="USER" ref="RequestTemplate">
 		<String name="Command" value="USER" token="true"/>
@@ -361,6 +361,10 @@
 		<String name="Command" value="SYST" token="true"/>
 	</DataModel>
 
+	<!--      SYST - System -->
+	<DataModel name="UNSU" ref="RequestTemplate">
+	</DataModel>
+
 	<!-- 4.1.  FTP COMMANDS -->
 	<DataModel name="Request">
 		<Choice>
@@ -404,6 +408,7 @@
 			<Block name="MKDChoice" ref="MKD" />
 			<Block name="PWDChoice" ref="PWD" />
 			<Block name="SYSTChoice" ref="SYST" />
+			<Block name="Unsupported" ref="UNSU"/>
 			<Blob name="EmptyPacket" length="0"/>
 		</Choice>
 	</DataModel>

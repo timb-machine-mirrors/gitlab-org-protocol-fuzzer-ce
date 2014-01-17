@@ -1,206 +1,436 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
-			 author="Deja Vu Security, LLC" description="File Transfer Protocol PIT StateModels" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="File Transfer Protocol PIT StateModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
-	<Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
-	<PythonPath path="##Path##/_Common/Models/Net/"/>
-	<Import import="FTP"/>
+  <Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
 
-	<!-- FTP simple state model -->
-	<StateModel name="AgentToHost" initialState="InputUserName">
-		<State name="InputUserName">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerReadyForUser" />
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:USER" />
-			</Action>
-			<Action type="changeState" ref="InputPasswd"/>
-		</State>
+  <!-- FTP simple state model -->
+  <StateModel name="AgentToHost" initialState="InputUserName">
+    <State name="InputUserName">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerReadyForUser" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:USER" />
+      </Action>
+      <Action type="changeState" ref="InputPasswd"/>
+    </State>
 
-		<State name="InputPasswd">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerUserNeedsPass" />
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:PASS" />
-			</Action>
-			<Action type="changeState" ref="TestConnection"/>
-		</State>
+    <State name="InputPasswd">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerUserNeedsPass" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:PASS" />
+      </Action>
+      <Action type="changeState" ref="TestConnection"/>
+    </State>
 
-		<State name="TestConnection">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerLoggedIn" />
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:NOOP" />
-			</Action>
-			<Action type="changeState" ref="MakeDir"/>
-		</State>
+    <State name="TestConnection">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerLoggedIn" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:NOOP" />
+      </Action>
+      <Action type="changeState" ref="MakeDir"/>
+    </State>
 
-		<State name="MakeDir">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerOk" />
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:MKD" />
-			</Action>
-			<Action type="changeState" ref="DelDir"/>
-		</State>
+    <State name="MakeDir">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerOk" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:MKD" />
+      </Action>
+      <Action type="changeState" ref="DelDir"/>
+    </State>
 
-		<State name="DelDir">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:DirCreated" />
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:RMD" />
-			</Action>
-			<Action type="changeState" ref="Ready"/>
-		</State>
+    <State name="DelDir">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:DirCreated" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:RMD" />
+      </Action>
+      <Action type="changeState" ref="Ready"/>
+    </State>
 
-		<State name="Ready">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:ResponseTemplate" />
-				<!-- <DataModel ref="Response" /> -->
-			</Action>
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:Request" />
-			</Action>
-		</State>
-	</StateModel>
+    <State name="Ready">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ResponseTemplate" />
+        <!-- <DataModel ref="Response" /> -->
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:Request" />
+      </Action>
+    </State>
+  </StateModel>
 
-	<StateModel name="HostToAgent" initialState="StartServer">
-		<State name="StartServer">
-			<Action type="start" publisher="TcpHandler"/>
-			<Action type="call" method="launchProgram" publisher="Peach.Agent"/>
-			<Action type="accept" publisher="TcpHandler"/>
-			<Action name="Next" type="changeState" ref="PreAuth"/>
-		</State>
+  <StateModel name="HostToAgent" initialState="StartServer">
+    <State name="StartServer">
+      <Action type="start" publisher="TcpHandler"/>
+      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="accept" publisher="TcpHandler"/>
+      <Action name="Next" type="changeState" ref="PreAuth"/>
+    </State>
 
-		<!-- This needs to be changed to support any set of client interactions. -->
-		<State name="PreAuth">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerReadyForUser"/>
-				<Data DataModel="FTP:ServerReadyForUser">
-					<Field name="LineModes.OneLine.Explaination" value="Peach 3.0"/>
-				</Data>
-			</Action>
-			<Action name="Read" type="input" publisher="TcpHandler">
-				<DataModel name="PreauthCommand">
-					<Choice name="Command">
-						<Block name="SYST" ref="FTP:SYST"/>
-						<Block name="USER" ref="FTP:USER"/>
-					</Choice>
-				</DataModel>
-			</Action>
-			<Action type="changeState" ref="PreAuth" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'SYST'"/>
-			<Action type="changeState" ref="InputPasswd" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'USER'"/>
-		</State>
+    <!-- This needs to be changed to support any set of client interactions. -->
+    <State name="PreAuth">
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerReadyForUser"/>
+        <Data DataModel="FTP:ServerReadyForUser">
+          <Field name="LineModes.OneLine.Explaination" value="Peach 3.0"/>
+        </Data>
+      </Action>
+      <Action name="Read" type="input" publisher="TcpHandler">
+        <DataModel name="PreauthCommand">
+          <Choice name="Command">
+            <Block name="SYST" ref="FTP:SYST"/>
+            <Block name="USER" ref="FTP:USER"/>
+          </Choice>
+        </DataModel>
+      </Action>
+      <Action type="changeState" ref="PreAuth" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'SYST'"/>
+      <Action type="changeState" ref="InputPasswd" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'USER'"/>
+    </State>
 
-		<State name="InputPasswd">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerUserNeedsPass"/>
-				<Data DataModel="FTP:ServerUserNeedsPass">
-					<Field name="LineModes.OneLine.Explaination" value="Please specify the password"/>
-				</Data>
-			</Action>
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:PASS"/>
-			</Action>
+    <State name="InputPasswd">
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerUserNeedsPass"/>
+        <Data DataModel="FTP:ServerUserNeedsPass">
+          <Field name="LineModes.OneLine.Explaination" value="Please specify the password"/>
+        </Data>
+      </Action>
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:PASS"/>
+      </Action>
 
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerLoggedIn"/>
-			</Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerLoggedIn"/>
+      </Action>
 
-			<Action type="changeState" ref="Ready"/>
-		</State>
+      <Action type="changeState" ref="Ready"/>
+    </State>
 
-		<State name="Ready">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:Request"/>
-			</Action>
+    <State name="Ready">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:Request"/>
+      </Action>
 
-			<Action name="Done" type="changeState" ref="Done" when="StateModel.states['Ready'].actions[0].dataModel.find('EmptyPacket') != None"/>
+      <Action name="Done" type="changeState" ref="Done" when="StateModel.states['Ready'].actions[0].dataModel.find('EmptyPacket') != None"/>
 
-			<Action type="output" publisher="TcpHandler" onStart="FTP.set_response(self)">
-				<DataModel ref="FTP:ResponseTemplate"/>
-			</Action>
+      <Action  name="UNSU" type="output" publisher="TcpHandler" when="StateModel.states['Ready'].actions[0].dataModel.find('Unsupported') != None">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="202"/>
+          <Field name="LineModes.OneLine.Explaination" value="Command not implemented, superfluous at this site"/>
+        </Data>
+      </Action>
 
-			<Action name="GetFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOR'"/>
-			<Action name="AppenFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'APPE'"/>
-			<Action name="STOUFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOU'"/>
-			<Action name="SendFile" type="changeState" ref="SendFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'"/>
-			<Action name="SendDirectory" type="changeState" ref="SendDirectory" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NLST'"/>
-			<Action name="ListDirectory" type="changeState" ref="ListDir" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'LIST'"/>
-			<Action name="Relogin" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'USER'"/>
-			<Action name="Relogin2" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'REIN'"/>
-			<Action name="Quit" type="changeState" ref="Done" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'QUIT'"/>
+       <Action name="Unsupported" type="changeState" ref="Ready" when="StateModel.states['Ready'].actions[0].dataModel.find('Unsupported') != None"/>
 
-			<Action name="ReadNext" type="changeState" ref="Ready"/>
-		</State>
+      <!-- Begin command checks -->
+      <Action  name="Noop" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NOOP'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="NOOP ok."/>
+        </Data>
+      </Action>
 
-		<State name="GetFile">
-			<Action type="input" publisher="TcpHandler">
-				<DataModel ref="FTP:FileData"/>
-			</Action>
+      <Action  name="ACCT" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'ACCT'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="230"/>
+          <Field name="LineModes.OneLine.Explaination" value="User logged in, proceed."/>
+        </Data>
+      </Action>
 
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerDirectorySendOk"/>
-				<Data DataModel="FTP:ServerDirectorySendOk">
-					<Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
-				</Data>
-			</Action>
+      <Action  name="ALLO" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'ALLO'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="ALLO ok"/>
+        </Data>
+      </Action>
 
-			<Action name="ReadNext" type="changeState" ref="Ready"/>
-		</State>
+      <Action  name="ABOR" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'ABOR'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="226"/>
+          <Field name="LineModes.OneLine.Explaination" value="Closing data connection"/>
+        </Data>
+      </Action>
 
-		<State name="ListDir">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:DirectoryList"/>
-			</Action>
+      <Action  name="MKD" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'MKD' or str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'XMKD'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="257"/>
+          <Field name="LineModes.OneLine.Explaination" value="/home/peach/foobarbaz"/>
+        </Data>
+      </Action>
 
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerDirectorySendOk"/>
-				<Data DataModel="FTP:ServerDirectorySendOk">
-					<Field name="LineModes.OneLine.Explaination" value="Directory send OK."/>
-				</Data>
-			</Action>
+      <Action  name="RMD" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RMD' or str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'XRMD'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="250"/>
+          <Field name="LineModes.OneLine.Explaination" value="Remove directory operation successful."/>
+        </Data>
+      </Action>
 
-			<Action name="ReadNext" type="changeState" ref="Ready"/>
-		</State>
+      <Action  name="QUIT" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'QUIT'">
+      	<DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="221"/>
+          <Field name="LineModes.OneLine.Explaination" value="Goodbye."/>
+        </Data>
+      </Action>
 
-		<State name="SendFile">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:FileData"/>
-			</Action>
+      <Action  name="NLST" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NLST'">
+      	<DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="150"/>
+          <Field name="LineModes.OneLine.Explaination" value="Here comes the directory listing."/>
+        </Data>
+      </Action>
 
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerDirectorySendOk"/>
-				<Data DataModel="FTP:ServerDirectorySendOk">
-					<Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
-				</Data>
-			</Action>
+      <Action  name="PWD" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PWD' or str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'XPWD'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="257"/>
+          <Field name="LineModes.OneLine.Explaination" value="/home/peach"/>
+        </Data>
+      </Action>
 
-			<Action name="ReadNext" type="changeState" ref="Ready"/>
-		</State>
+      <Action  name="RNFR" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RNFR'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="350"/>
+          <Field name="LineModes.OneLine.Explaination" value="Ready for RNTO"/>
+        </Data>
+      </Action>
 
-		<State name="SendDirectory">
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:DirectoryData"/>
-			</Action>
+      <Action  name="RNTO" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RNTO'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="250"/>
+          <Field name="LineModes.OneLine.Explaination" value="Rename successful"/>
+        </Data>
+      </Action>
 
-			<Action type="output" publisher="TcpHandler">
-				<DataModel ref="FTP:ServerDirectorySendOk"/>
-				<Data DataModel="FTP:ServerDirectorySendOk">
-					<Field name="LineModes.OneLine.Explaination" value="Directory Send OK."/>
-				</Data>
-			</Action>
+      <Action  name="DELE" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'DELE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="250"/>
+          <Field name="LineModes.OneLine.Explaination" value="Delete operation successful."/>
+        </Data>
+      </Action>
 
-			<Action name="ReadNext" type="changeState" ref="Ready"/>
-		</State>
+      <Action  name="RETR" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="150"/>
+          <Field name="LineModes.OneLine.Explaination" value="Opening BINARY mode data connection for file"/>
+        </Data>
+      </Action>
 
-		<State name="Done"/>
-	</StateModel>
+      <Action  name="STOR" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOR'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="150"/>
+          <Field name="LineModes.OneLine.Explaination" value="ok to send data."/>
+        </Data>
+      </Action>
+
+      <Action  name="PORT" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PORT'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="PORT command secuessful"/>
+        </Data>
+      </Action>
+
+      <Action  name="TYPE" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'TYPE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="Switching Modes"/>
+        </Data>
+      </Action>
+
+      <Action  name="LIST" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'LIST'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="150"/>
+          <Field name="LineModes.OneLine.Explaination" value="Here comes the directory listing"/>
+        </Data>
+      </Action>
+
+      <Action  name="SYST" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'SYST'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="215"/>
+          <Field name="LineModes.OneLine.Explaination" value="UNIX Type: L8"/>
+        </Data>
+      </Action>
+
+      <Action  name="STAT" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STAT'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="211"/>
+          <Field name="LineModes.OneLine.Explaination" value="a.ftp.server FTP server status:
+          Version 6.00
+          Connected to a.ftp.server
+          Logged in anonymously
+          TYPE: ASCII, FORM: Nonprint; STRUcture: File; transfer MODE: Stream
+          No data connection"/>
+        </Data>
+      </Action>
+
+      <Action  name="CDUP" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'CDUP' or str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'XCUP'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="250"/>
+          <Field name="LineModes.OneLine.Explaination" value="Directory successfully changed"/>
+        </Data>
+      </Action>
+
+      <Action  name="CWD" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'CWD' or str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'XCWD'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="250"/>
+          <Field name="LineModes.OneLine.Explaination" value="Directory successfully changed"/>
+        </Data>
+      </Action>
+
+      <Action  name="USER" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'USER'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="331"/>
+          <Field name="LineModes.OneLine.Explaination" value="Any password will do."/>
+        </Data>
+      </Action>
+
+      <Action  name="PASS" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PASS'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="230"/>
+          <Field name="LineModes.OneLine.Explaination" value="Login successful"/>
+        </Data>
+      </Action>
+
+      <Action  name="HELP" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'HELP'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="Login successful"/>
+        </Data>
+      </Action>
+
+      <Action  name="SITE" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'SITE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="200"/>
+          <Field name="LineModes.OneLine.Explaination" value="No special commands here"/>
+        </Data>
+      </Action>
+
+      <Action  name="MODE" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'MODE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Did you miss something?"/>
+        </Data>
+      </Action>
+
+      <Action  name="PASV" type="output" publisher="TcpHandler" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PASV'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Did you miss something?"/>
+        </Data>
+      </Action>
+
+      <!-- End command checks -->
+
+      <!-- Begin sub paths -->
+      <Action name="GetFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOR'"/>
+      <Action name="AppenFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'APPE'"/>
+      <Action name="STOUFile" type="changeState" ref="GetFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'STOU'"/>
+      <Action name="SendFile" type="changeState" ref="SendFile" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'"/>
+      <Action name="SendDirectory" type="changeState" ref="SendDirectory" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'NLST'"/>
+      <Action name="ListDirectory" type="changeState" ref="ListDir" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'LIST'"/>
+      <Action name="Relogin" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'USER'"/>
+      <Action name="Relogin2" type="changeState" ref="InputUserName" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'REIN'"/>
+      <Action name="Quit" type="changeState" ref="Done" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'QUIT'"/>
+      <!-- End sub paths-->
+
+      <Action name="ReadNext" type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="GetFile">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:FileData"/>
+      </Action>
+
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerDirectorySendOk"/>
+        <Data DataModel="FTP:ServerDirectorySendOk">
+          <Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
+        </Data>
+      </Action>
+
+      <Action name="ReadNext" type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="ListDir">
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:DirectoryList"/>
+      </Action>
+
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerDirectorySendOk"/>
+        <Data DataModel="FTP:ServerDirectorySendOk">
+          <Field name="LineModes.OneLine.Explaination" value="Directory send OK."/>
+        </Data>
+      </Action>
+
+      <Action name="ReadNext" type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="SendFile">
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:FileData"/>
+      </Action>
+
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerDirectorySendOk"/>
+        <Data DataModel="FTP:ServerDirectorySendOk">
+          <Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
+        </Data>
+      </Action>
+
+      <Action name="ReadNext" type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="SendDirectory">
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:DirectoryData"/>
+      </Action>
+
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerDirectorySendOk"/>
+        <Data DataModel="FTP:ServerDirectorySendOk">
+          <Field name="LineModes.OneLine.Explaination" value="Directory Send OK."/>
+        </Data>
+      </Action>
+
+      <Action name="ReadNext" type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="Done"/>
+  </StateModel>
 </Peach>
