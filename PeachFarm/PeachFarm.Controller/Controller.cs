@@ -76,13 +76,7 @@ namespace PeachFarm.Controller
 			}
 		}
 
-		public string QueueName
-		{
-			get
-			{
-				return controllerQueueName;
-			}
-		}
+		public string Name { get; private set; }
 		#endregion
 
 		public void Close()
@@ -747,12 +741,13 @@ namespace PeachFarm.Controller
 			rabbit = new RabbitMqHelper(config.RabbitMq.HostName, config.RabbitMq.Port, config.RabbitMq.UserName, config.RabbitMq.Password, config.RabbitMq.SSL);
 			if (String.IsNullOrEmpty(config.Controller.Name))
 			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, rabbit.LocalIP);
+				this.Name = rabbit.LocalIP;
 			}
 			else
 			{
-				this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, config.Controller.Name);
+				this.Name = config.Controller.Name;
 			}
+			this.controllerQueueName = String.Format(QueueNames.QUEUE_CONTROLLER, this.Name);
 			rabbit.MessageReceived += new EventHandler<RabbitMqHelper.MessageReceivedEventArgs>(rabbit_MessageReceived);
 			rabbit.StartListener(this.controllerQueueName);
 		}

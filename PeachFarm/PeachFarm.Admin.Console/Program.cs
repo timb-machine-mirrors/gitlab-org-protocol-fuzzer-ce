@@ -71,7 +71,7 @@ namespace PeachFarm.Admin
 						{ "r|range=", v => range = v},
 						{ "d|defines=", v => definesFilePath = v},
 						{ "a|target=", v => target = v},
-						{ "test=", v => testname = v},
+						{ "e|test=", v => testname = v},
 						{ "type=", v => {
 							switch(v)
 							{

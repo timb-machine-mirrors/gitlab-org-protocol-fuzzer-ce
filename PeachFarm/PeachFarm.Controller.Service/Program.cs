@@ -27,6 +27,7 @@ namespace PeachFarm.Controller
 
 				System.Console.WriteLine();
 				System.Console.WriteLine("] Peach Farm - Controller");
+				System.Console.WriteLine("] Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
 				System.Console.WriteLine("] Copyright (c) Deja vu Security\n");
 				System.Console.WriteLine();
 
@@ -36,7 +37,7 @@ namespace PeachFarm.Controller
 					{
 						if (server.IsListening)
 						{
-							System.Console.WriteLine(String.Format("Peach Farm Server ({0}) waiting for messages", server.QueueName));
+							System.Console.WriteLine(String.Format("Peach Farm Controller ({0}) waiting for messages", server.Name));
 							waitHandle.WaitOne();
 						}
 					}
