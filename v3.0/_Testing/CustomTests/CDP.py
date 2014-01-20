@@ -1,5 +1,5 @@
 test(name="CDP",
-		platform="linux")
+     platform="linux")
 
 test(name="CDP",
-		platform="osx")
+     platform="osx")

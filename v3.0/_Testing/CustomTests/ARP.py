@@ -1,5 +1,5 @@
 test(name="ARP",
-		platform="linux")
+     platform="linux")
 
 test(name="ARP",
-		platform="osx")
+     platform="osx")
