@@ -4,12 +4,19 @@ Configuration
 -------------
 
 .Target Configuration
-A TCP listener listening on the TCPv4 port defined in configuration file is required. The network tool socat can be used.
+A TCP listener listening on the TCPv4 port defined in configuration
+file is required. The network tool socat can be used. Using this pit,
+Peach manages TCP state outside of the context of the kernel. Because
+of this it is necessary to also disable outgoing RST packets.
 
-_Example of using socat to listen on TCPv4 port:_
-
+_Example of setting up TCPv4:_
+[source,bash]
 ----
-socat STDIO tcp4-listen:12345
+#Disable outgoing RST on the node running Peach
+sudo iptables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
+
+#Set up TCPv4 listener
+socat tcp4-l:12345,fork,reuseaddr STDIO
 ----
 
 .Required Pit Configuration Changes
@@ -35,7 +42,7 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="LoggerPath" value="logs/tcp/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="TargetPort" value="0"/>
+    <Define key="TargetPort" value="12345"/>
     <Define key="SourcePort" value="52080"/>
     <Define key="Path" value="."/>
     <Define key="TargetIPBytes" value="C0A89280"/>

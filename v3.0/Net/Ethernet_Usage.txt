@@ -4,13 +4,8 @@ Configuration
 -------------
 
 .Target Configuration
- 
+This pit sends raw Ethernet frames, no extra applications are required.
 
-_Example of using adding a Ethernet interface:_
-
-----
-
-----
 
 .Required Pit Configuration Changes
 TargetIPv4:: IPv4 address of the target host machine
