@@ -1,0 +1,44 @@
+
+:Doctitle: DHCPv6 Peach Pit Data Sheet
+:Description: Dynamic Host Configuration Protocol version 6 (DHCPv6)
+
+ * Peach Pit: DHCPv6
+ * Direction: Client
+ 
+Dynamic Host Configuration Protocol Version 6 (DHCPv6) is  TODO
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC3315 | Dynamic Host Configuration Protocol for IPv6 (DHCPv6)
+|RFC6221 | Lightweight DHCPv6 Relay Agent
+|RFC6422 | Relay-Supplied DHCP Options
+|RFC6644 | Rebind Capability in DHCPv6 Reconfigure Messages
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|Packet | RFC791
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Internet Checksum | RFC1071
+|Padding | RFC791 (Section 3.1)
+|Option Blocks | RFC791 (Section 3.1)
+|Explicit Congestion Notification | RFC3168
+|========
+
+[options="header"]
+|========
+|Supported Payloads | Specification
+|ICMPv4 Echo Request | RFC792
+|========
