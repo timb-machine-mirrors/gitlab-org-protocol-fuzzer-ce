@@ -25,20 +25,12 @@ Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|Packet | RFC791
+|DHCP Message | RFC2131 (Section 2)
 |========
 
 [options="header"]
 |========
 |Supported Features | Specification
-|Internet Checksum | RFC1071
-|Padding | RFC791 (Section 3.1)
-|Option Blocks | RFC791 (Section 3.1)
-|Explicit Congestion Notification | RFC3168
-|========
-
-[options="header"]
-|========
-|Supported Payloads | Specification
-|ICMPv4 Echo Request | RFC792
+|DHCPREQUEST | RFC2131 (Section 4.3.2)
+|DHCPACK | RFC2131 (Section 4.4)
 |========

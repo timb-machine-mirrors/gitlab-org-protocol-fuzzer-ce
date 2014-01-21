@@ -14,6 +14,8 @@ Specifications
 |========
 |Specification | Title
 |RFC3315 | Dynamic Host Configuration Protocol for IPv6 (DHCPv6)
+|RFC3633 | IPv6 Prefix Options for Dynamic Host Configuration Protocol (DHCP) version 6
+|RFC3736 | Stateless Dynamic Host Configuration Protocol (DHCP) Service for IPv6
 |RFC6221 | Lightweight DHCPv6 Relay Agent
 |RFC6422 | Relay-Supplied DHCP Options
 |RFC6644 | Rebind Capability in DHCPv6 Reconfigure Messages
@@ -25,20 +27,24 @@ Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|Packet | RFC791
+|DHCPv6 Message | RFC3315 (Section 6)
+|Relay Agent Message | RFC3315 (Section 7)
 |========
 
 [options="header"]
 |========
 |Supported Features | Specification
-|Internet Checksum | RFC1071
-|Padding | RFC791 (Section 3.1)
-|Option Blocks | RFC791 (Section 3.1)
-|Explicit Congestion Notification | RFC3168
-|========
-
-[options="header"]
-|========
-|Supported Payloads | Specification
-|ICMPv4 Echo Request | RFC792
+|SOLICIT | RFC3315 (Section 5.3)
+|ADVERTISE | RFC3315 (Section 5.3)
+|REQUEST | RFC3315 (Section 5.3)
+|CONFIRM | RFC3315 (Section 5.3)
+|RENEW | RFC3315 (Section 5.3)
+|REBIND | RFC3315 (Section 5.3)
+|REPLY | RFC3315 (Section 5.3)
+|RELEASE | RFC3315 (Section 5.3)
+|DECLINE | RFC3315 (Section 5.3)
+|RECONFIGURE | RFC3315 (Section 5.3)
+|INFORMATION-REQUEST | RFC3315 (Section 5.3)
+|RELAY-FORW | RFC3315 (Section 5.3)
+|RELAY-REPL | RFC3315 (Section 5.3)
 |========
