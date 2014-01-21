@@ -1,0 +1,102 @@
+include::LDAP_DataSheet.txt[]
+
+Configuration
+-------------
+
+.Target Configuration
+Description of Target Configuration
+
+_Example of setting up openLdap:_
+
+----
+
+----
+
+.Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine
+SourceIPv4:: IP address of the interface on the local machine
+TargetPort:: LDAP port number of the target host machine
+Interface:: Name of local interface (used for monitoring)
+Username:: Username used to login to the Ldap service
+Password:: Password for the user logging into the Ldap service
+
+.Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+
+.Sample LDAP Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="LoggerPath"  value="./logs/ldap"/>
+    <Define key="Strategy"  value="Random"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="TargetPort" value="389"/>
+    <Define key="Password" value="password"/>
+    <Define key="UserName" value="cn=admin,dc=example,dc=com"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+#Ldap Search Test
+peach -1 -debug LDAP.xml
+
+#Ldap Server Side Test
+peach -1 -debug LDAP.xml Server
+
+#Ldap Add Test
+peach -1 -debug LDAP.xml Add
+
+#Ldap Comopre Test
+peach -1 -debug LDAP.xml Compare
+
+#Ldap Delete Test
+peach -1 -debug LDAP.xml Delete
+
+#Ldap ExtendOp Test
+peach -1 -debug LDAP.xml ExtendOp
+----
+.Full test run
+----
+#Ldap Search Test
+peach LDAP.xml
+
+#Ldap Server Side Test
+peach LDAP.xml Server
+
+#Ldap Add Test
+peach LDAP.xml Add
+
+#Ldap Comopre Test
+peach LDAP.xml Compare
+
+#Ldap Delete Test
+peach LDAP.xml Delete
+
+#Ldap ExtendOp Test
+peach LDAP.xml ExtendOp
+----
