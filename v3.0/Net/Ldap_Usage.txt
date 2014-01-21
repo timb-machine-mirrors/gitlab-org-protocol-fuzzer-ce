@@ -1,4 +1,4 @@
-include::LDAP_DataSheet.txt[]
+include::Ldap_DataSheet.txt[]
 
 Configuration
 -------------
