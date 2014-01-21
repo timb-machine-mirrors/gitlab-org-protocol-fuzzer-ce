@@ -43,50 +43,66 @@ def find_peach():
     _path = os.getcwd().split(os.sep)
     # this index _could_ turn into a bug over long run. nothing better a.t.m.
     _test_build_idx = _path.index('build')
-    _path = _path[ : _test_build_idx + 1]
+    _path = _path[:_test_build_idx + 1]
     # figure out which epeach we want, it should be under the 'v3.0' directory
     # debug has better info
     ls = os.listdir(os.sep.join(_path))
     peach_dir = ''
     if IS_WINDOWS:
         for f in ls:
-            if 'win' not in f                : continue
-            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
-            elif not f.endswith('-debug')    : continue
-            elif IS_64_BIT and 'x64' not in f: continue
-            elif not IS_64_BIT and 'x64' in f: continue
-            else                             : peach_dir = f
+            if 'win' not in f:
+                continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-'):
+                continue
+            elif not f.endswith('-debug'):
+                continue
+            elif IS_64_BIT and 'x64' not in f:
+                continue
+            elif not IS_64_BIT and 'x64' in f:
+                continue
+            else:
+                peach_dir = f
     elif IS_LINUX:
         for f in ls:
-            if 'linux' not in f              : continue
-            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
-            elif not f.endswith('-debug')    : continue
-            elif IS_64_BIT and '_64' not in f: continue
-            elif not IS_64_BIT and '_64' in f: continue
-            else                            : peach_dir = f
+            if 'linux' not in f:
+                continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-'):
+                continue
+            elif not f.endswith('-debug'):
+                continue
+            elif IS_64_BIT and '_64' not in f:
+                continue
+            elif not IS_64_BIT and '_64' in f:
+                continue
+            else:
+                peach_dir = f
     elif IS_OSX:
         for f in ls:
-            if 'osx' not in f               : continue
-            elif not f.startswith('epeach-') and not f.startswith('EPeach-') : continue
-            elif not f.endswith('-debug')   : continue
-            else                            : peach_dir = f
+            if 'osx' not in f:
+                continue
+            elif not f.startswith('epeach-') and not f.startswith('EPeach-'):
+                continue
+            elif not f.endswith('-debug'):
+                continue
+            else:
+                peach_dir = f
     else:
         assert False, "Unknown os"
     if peach_dir == '':
         raise Exception('no peach dir found')
-
-    PEACH_PATH       = os.sep.join(_path + [peach_dir, 'peach.exe'])
-    OTHER_PEACH_PATH = os.sep.join(_path + [peach_dir, 'Peach.exe'])
+    PEACH_PATH = os.sep.join(_path + [peach_dir, 'peach.exe'])
+    if not os.path.exists(PEACH_PATH):
+        PEACH_PATH = os.sep.join(_path + [peach_dir, 'Peach.exe'])
+    if not os.path.exists(PEACH_PATH):
+        raise Exception('peach not found')
 
     # make sure peach.exe is actully executable on *nix after extraction
     # this isn't the greatest place for it but hey
+    # ... Uh, yeah. This should go in the intaller. -JD
     if IS_OSX or IS_LINUX:
-        if os.path.exists(PEACH_PATH):
-            p = subprocess.Popen(['chmod', '0760', PEACH_PATH])
-        if os.path.exists(OTHER_PEACH_PATH):
-            p = subprocess.Popen(['chmod', '0760', OTHER_PEACH_PATH])
+        os.chmod(PEACH_PATH, 0760)
 
-    return PEACH_PATH if os.path.exists(PEACH_PATH) else OTHER_PEACH_PATH
+    return PEACH_PATH
 
 
 ###############################################################################
@@ -227,4 +243,3 @@ if __name__ == "__main__":
                     test.name + " failed with exception", os.linesep))
     test_log.close()
     exit(return_code) # exit w/ code equal to num of pit test failures
-

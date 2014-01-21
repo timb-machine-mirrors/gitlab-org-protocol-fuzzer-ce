@@ -1,14 +1,13 @@
+
 :Doctitle: VXLAN Peach Pit Data Sheet
 :Description: Virtual Extensible Local Area Network (VXLAN)
 
- * Test Suite: VXLAN
+ * Peach Pit: VXLAN
  * Direction: Client
 
 VXLAN (Virtual eXtensible Local Area Network) runs over the existing networking infrastructure and provides a means to "stretch" a Layer 2 network.
-In short, VXLAN is a Layer 2 overlay scheme over a Layer 3 network. Each overlay is termed a VXLAN segment.
-Only VMs within the same VXLAN segment can communicate with each other.
-Each VXLAN segment is scoped through a 24 bit segment ID, hereafter termed the VXLAN Network Identifier (VNI).
-This allows up to 16M VXLAN segments to coexist within the same administrative domain.
+
+In short, VXLAN is a Layer 2 overlay scheme over a Layer 3 network. Each overlay is termed a VXLAN segment. Only VMs within the same VXLAN segment can communicate with each other. Each VXLAN segment is scoped through a 24 bit segment ID, hereafter termed the VXLAN Network Identifier (VNI). This allows up to 16M VXLAN segments to coexist within the same administrative domain.
 
 Specifications
 --------------

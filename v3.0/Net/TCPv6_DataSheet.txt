@@ -1,7 +1,8 @@
+
 :Doctitle: TCPv6 Peach Pit Data Sheet
 :Description: Transmission Control Protocol Version 6 (TCPv6)
 
- * Test Suite: TCPv6
+ * Peach Pit: TCPv6
  * Direction: Client
  
 DoD Standard Transmission Control Protocol for stateful host-to-host communication.

@@ -4,12 +4,23 @@ Configuration
 -------------
 
 .Target Configuration
-A TCP listener listening on the TCPv6 port defined in configuration file is required. The network tool socat can be used.
+An application must be listening on the TCP port defined in the
+configuration file. The network tool socat can be used as the target
+application. Using this pit, Peach manages TCP state outside of the
+context of the kernel. Because of this it is necessary to also disable
+outgoing RST packets. 
 
-_Example of using socat to listen on TCPv6 port:_
-
+_Example of setting up TCPv6:_
+[source,bash]
 ----
-socat STDIO tcp6-listen:12345
+#Disable outgoing RST on the node running Peach
+ip6tables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
+
+#Add a local IPv6 interface, this becomes your source ip
+ip addr add ::2 dev lo
+
+#Set up TCPv4 listener
+socat tcp6-l:4321,fork,reuseaddr STDIO
 ----
 
 .Required Pit Configuration Changes
@@ -32,7 +43,7 @@ LoggerPath:: Path to folder where logs will be stored
 <PitDefines>
   <All>
     <Define key="TargetIPv6" value="::1"/>
-    <Define key="SourceIPv6" value="::1"/>
+    <Define key="SourceIPv6" value="::2"/>
     <Define key="TargetPort" value="4321"/>
     <Define key="SourcePort" value="5280"/>
     <Define key="Strategy"  value="Sequential"/>

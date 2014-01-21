@@ -1,10 +1,11 @@
+
 :Doctitle: Ethernet Peach Pit Data Sheet
 :Description: Ethernet
 
- * Test Suite: Ethernet
+ * Peach Pit: Ethernet
  * Direction: Broadcast
  
-The Address Resolution Protocol is a protocol that allows for translation between hardware and protocol addresses. 
+An Ethernet Frame is a link layer data packet, as described in IEEE 802.3. It encapsulates all layers above it. The simplicity of the protocol suggests that this pit would not be used alone, but would likely be used in the construction of pits for encapsulated protocols. 
 
 Specifications
 --------------

@@ -1,7 +1,8 @@
+
 :Doctitle: VLAN Peach Pit Data Sheet
 :Description: Virtual Local Area Network (VLAN)
 
- * Test Suite: VLAN
+ * Peach Pit: VLAN
  * Direction: Client
  
 In computer networking, a single layer-2 network may be partitioned to create multiple distinct broadcast domains, which are mutually isolated so that packets can only pass between them via one or more routers; such a domain is referred to as a virtual local area network, virtual LAN or VLAN.

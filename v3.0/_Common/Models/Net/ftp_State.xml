@@ -17,6 +17,15 @@
         <DataModel ref="FTP:USER" />
       </Action>
 
+  <!-- FTP simple state model -->
+  <StateModel name="AgentToHost" initialState="InputUserName">
+    <State name="InputUserName">
+      <Action type="input" publisher="TcpHandler">
+        <DataModel ref="FTP:ServerReadyForUser" />
+      </Action>
+      <Action type="output" publisher="TcpHandler">
+        <DataModel ref="FTP:USER" />
+      </Action>
       <Action type="changeState" ref="InputPasswd"/>
     </State>
 
@@ -270,6 +279,7 @@
           <Field name="LineModes.OneLine.Explaination" value="Delete operation successful."/>
         </Data>
       </Action>
+
 
       <Action  name="RETR" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'RETR'">
         <DataModel ref="FTP:ResponseTemplate"/>

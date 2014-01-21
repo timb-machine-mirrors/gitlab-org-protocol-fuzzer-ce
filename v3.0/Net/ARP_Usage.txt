@@ -4,13 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
- 
-
-_Example of using adding a ARP interface:_
-
-----
-
-----
+This pit sends ARP packets, no extra applications are required. 
 
 .Required Pit Configuration Changes
 TargetIPv4:: IPv4 address of the target host machine
