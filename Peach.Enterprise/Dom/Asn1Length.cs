@@ -11,8 +11,12 @@ using System.IO;
 namespace Peach.Enterprise.Dom
 {
 	[PitParsable("Asn1Length")]
-	[DataElement("Asn1Length")]
+	[DataElement("Asn1Length", DataElementTypes.NonDataElements)]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("indefiniteLength", typeof(bool), "Use indefinite form encoding", "false")]
+	[Parameter("longLength", typeof(bool), "Always use long form encoding", "false")]
+	[Parameter("value", typeof(string), "Default value", "")]
+	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
 	[Serializable]
 	public class Asn1Length : Number
 	{

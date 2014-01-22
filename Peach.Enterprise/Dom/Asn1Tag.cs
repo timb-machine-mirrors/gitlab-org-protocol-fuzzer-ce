@@ -11,7 +11,11 @@ using System.IO;
 namespace Peach.Enterprise.Dom
 {
 	[PitParsable("Asn1Tag")]
-	[DataElement("Asn1Tag")]
+	[DataElement("Asn1Tag", DataElementTypes.NonDataElements)]
+	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("forceMultiByteIdentifier", typeof(bool), "Use multibyte encoding", "false")]
+	[Parameter("value", typeof(string), "Default value", "")]
+	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
 	[Serializable]
 	public class Asn1Tag : Number
 	{
