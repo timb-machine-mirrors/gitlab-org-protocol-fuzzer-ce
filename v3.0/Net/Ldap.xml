@@ -15,7 +15,7 @@
 
 	<Agent name="ServerAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="..\..\..\..\Downloads\LdapAdmin.exe ldap://##SourceIP##/"/>
+			<Param name="CommandLine" value="..\..\..\..\Downloads\LdapAdmin.exe ldap://##SourceIPv4##/"/>
 			<Param name="NoCpuKill" value="true"/>
 			<Param name="FaultOnEarlyExit" value="true"/>
 			<Param name="WaitForExitTimeout" value="500"/>
@@ -30,7 +30,7 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIP##" />
+			<Param name="Host" value="##TargetIPv4##" />
 			<Param name="Port" value="##TargetPort##" />
 	    </Publisher>
 
@@ -47,7 +47,7 @@
 		<Strategy class="##Strategy##"/>
 
 		<Publisher name="TcpHandler" class="TcpListener">
-			<Param name="Interface" value="##SourceIP##" />
+			<Param name="Interface" value="##SourceIPv4##" />
 			<Param name="Port" value="##TargetPort##"/>
 		</Publisher>
 
@@ -63,7 +63,7 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIP##" />
+				<Param name="Host" value="##TargetIPv4##" />
 				<Param name="Port" value="##TargetPort##" />
 	    </Publisher>
 
@@ -79,7 +79,7 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIP##" />
+				<Param name="Host" value="##TargetIPv4##" />
 				<Param name="Port" value="##TargetPort##" />
 	    </Publisher>
 
@@ -95,7 +95,7 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIP##" />
+				<Param name="Host" value="##TargetIPv4##" />
 				<Param name="Port" value="##TargetPort##" />
 	    </Publisher>
 
@@ -111,7 +111,7 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-				<Param name="Host" value="##TargetIP##" />
+				<Param name="Host" value="##TargetIPv4##" />
 				<Param name="Port" value="##TargetPort##" />
 	    </Publisher>
 
