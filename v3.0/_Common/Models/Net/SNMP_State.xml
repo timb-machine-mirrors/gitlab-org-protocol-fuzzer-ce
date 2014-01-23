@@ -45,7 +45,7 @@
 
 			<Action name="SnmpResponse" type="output" publisher="UdpHandler" onStart="SNMP.set_variables(self)">
 				<DataModel ref="DataModels:SNMPHeaderV2_"/>
-				<Data DataModel="DataModels:SNMPHeaderV2_">
+				<Data>
 					<Field name="SnmpType.Value.PduType.Type" valueType="hex" value="a2"/>
 					<Field name="SnmpType.Value.PduType.Value.ErrorStatus.Value" valueType="hex" value="00"/>
 					<Field name="SnmpType.Value.PduType.Value.ErrorIndex.Value" valueType="hex" value="00"/>
