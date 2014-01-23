@@ -3,7 +3,7 @@
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Telnet Command Protocol PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
+
   <!--
       Telnet Command Protocol
   -->
@@ -48,7 +48,7 @@
 
   <!-- Telnet Option ID Choice -->
   <DataModel name="Options">
-    <Choice> 
+    <Choice>
 			<!-- Binary Xmit - Allows transmission of binary data. -->
 			<Number name="BinXmit" size="8" valueType="hex" value="00" token="true"/>
 			<!-- Echo Date - Causes server to echo back all keystrokes. -->
@@ -120,7 +120,7 @@
 			<!-- Linemode - Provides linemode bulk character transactions. -->
 			<Number name="Linemode" size="8" valueType="hex" value="22" token="true"/>
 			<!-- Location - ... -->
-			<Number name="Location" size="8" valueType="hex" value="23" token="true"/>		
+			<Number name="Location" size="8" valueType="hex" value="23" token="true"/>
 			<!-- Extended - Extended options list. -->
 			<Number name="Ext" size="8" valueType="hex" value="ff" token="true"/>
 			<!-- Generic catch-all for custom/unknown options. -->
@@ -137,19 +137,19 @@
 		<Number name="iac2" size="8" valueType="hex" value="ff" token="true"/>
 		<Number name="EndSubNeg" size="8" valueType="hex" value="f0" token="true"/>
   </DataModel>
-	
+
 	<!-- Telnet OptCode Block -->
 	<DataModel name="optCode">
     <Number name="iac" size="8" valueType="hex" value="ff" token="true"/>
 		<Number name="command" size="8"/>
 		<Number name="optionIds" size="8"/>
   </DataModel>
-	
+
 	<DataModel name="OneBytePlusRest">
 		<Blob name="Text" length="1"/>
 		<Blob name="Rest"/>
 	</DataModel>
-	
+
 	<DataModel name="TelnetSingleOptionCrack">
 		<Choice>
 			<Block name="negOpt" ref="optCodeWithOptData"/>
@@ -158,7 +158,7 @@
 			<Blob name="EmptyPacket" length="0"/>
 		</Choice>
   </DataModel>
-	
+
 	<DataModel name="TelnetClientReply">
 		<Block name="optCodes">
 			<Block>
@@ -169,61 +169,72 @@
 		</Block>
 	</DataModel>
 
+	<DataModel name="SendPassword">
+		<String name="Payload" value="##Password##"/>
+		<Blob name="return" valueType="hex" value="0d" token="true"/>
+	</DataModel>
+
+	<DataModel name="SendUsername">
+		<String name="Payload" value="##Username##"/>
+		<Blob name="return" valueType="hex" value="0d" token="true"/>
+	</DataModel>
+
 	<DataModel name="TelnetSendPayload">
 		<String name="Payload" value="sudo su"/>
 		<Blob name="return" valueType="hex" value="0d" token="true"/>
 	</DataModel>
-	
+
 	<DataModel name="TelnetSendPayload2">
 		<String name="Payload2" value="mkdir temp"/>
 		<Blob name="return2" valueType="hex" value="0d" token="true"/>
 	</DataModel>
-	
+
 	<DataModel name="TelnetSendPayload3">
 		<String name="Payload3" value="nc -l 31337"/>
 		<Blob name="return3" valueType="hex" value="0d" token="true"/>
 	</DataModel>
-	
+
 	<DataModel name="SendWindowNegtiate" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x1f"/>
 		<Blob name="data" valueType="hex" value="00500018"/>
 	</DataModel>
-	
+
 	<DataModel name="SendTermSpeed" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x20"/>
 		<Blob name="data" valueType="hex" value="0033383430302c3338343030"/>
 	</DataModel>
-	
+
 	<DataModel name="SendNewEnvirOpt" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x27"/>
 		<Blob name="data" valueType="hex" value="00"/>
 	</DataModel>
-	
+
 	<DataModel name="SendTermType" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x18"/>
 		<Blob name="data" valueType="hex" value="00585445524d"/>
 	</DataModel>
-	
+
 	<DataModel name="SendLineMode" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x22"/>
 		<Blob name="data" valueType="hex" value="0301000003620304020f05000007621c08020409421a0a027f0b02150f0211100213110000120000"/>
 	</DataModel>
-	
+
 	<DataModel name="SendTermSpeedInit" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x20"/>
 		<Blob name="data" valueType="hex" value="01"/>
 	</DataModel>
-	
+
 	<DataModel name="SendNewEnvirOptInit" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x27"/>
 		<Blob name="data" valueType="hex" value="01"/>
 	</DataModel>
-	
+
 	<DataModel name="SendTermTypeInit" ref="optCodeWithOptData">
 		<Number name="optionIds" size="8" value="0x18"/>
 		<Blob name="data" valueType="hex" value="01"/>
 	</DataModel>
-	
+
+
 	<DataModel name="SendPrompt">
 		<String value="Ubuntu 12.04.2 LTS\r\n"/>
 		<String value="ubuntu login: \r\n"/>
