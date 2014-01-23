@@ -22,7 +22,8 @@ using NLog;
 
 namespace Peach.Enterprise.Mutators
 {
-	[Mutator("Will use existing samples to generate mutated files.")]
+	[Mutator("SampleNinjaMutator")]
+	[Description("Will use existing samples to generate mutated files.")]
 	public class SampleNinjaMutator : Mutator
 	{
 		int _count = 0;
