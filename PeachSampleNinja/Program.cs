@@ -68,6 +68,7 @@ run.
 
 			if (File.Exists(config))
 			{
+				Console.WriteLine("Using configuration file \"" + config + "\".");
 				var defs = PitParser.parseDefines(config);
 
 				foreach (var kv in defs)
