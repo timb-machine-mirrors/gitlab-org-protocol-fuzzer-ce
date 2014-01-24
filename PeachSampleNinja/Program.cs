@@ -47,17 +47,57 @@ run.
 			new Program(args[0], args[1], args[2]);
 		}
 
+		public DataModel FindDataModel(string name, Dom dom)
+		{
+			if (!name.Contains(':'))
+			{
+				if (!dom.dataModels.ContainsKey(name))
+				{
+					Console.WriteLine("\nError: Unable to find data model \"" + name + "\"!");
+					Console.WriteLine("\nThe following data models were found:");
+
+					throw new ApplicationException();
+				}
+
+				return dom.dataModels[name];
+			}
+
+			string [] parts = name.Split(':');
+
+			for (int cnt = 0; cnt < parts.Length; cnt++)
+			{
+				if (dom.ns.ContainsKey(parts[cnt]))
+				{
+					dom = dom.ns[parts[cnt]];
+					continue;
+				}
+				else if ((cnt + 1) != parts.Length)
+				{
+					Console.WriteLine("\nError: Unable to find namespace \"" + parts[0] + "\"!");
+
+					throw new ApplicationException();
+				}
+
+				return FindDataModel(parts[cnt], dom);
+			}
+
+			return null;
+		}
+
+		public void PrintAllDataModels(Dom dom, string prefix = "")
+		{
+			foreach (string model in dom.dataModels.Keys)
+				Console.WriteLine("\t" + prefix + model);
+
+			foreach (string key in dom.ns.Keys)
+				PrintAllDataModels(dom.ns[key], prefix + key + ":");
+		}
+
 		public Program(string pitfile, string datamodel, string samplefolder)
 		{
 			if (!File.Exists(pitfile))
 			{
 				Console.WriteLine("Error: Unable to find pit file.");
-				return;
-			}
-
-			if (!Directory.Exists(samplefolder))
-			{
-				Console.WriteLine("Error: Unable to find samples folder.");
 				return;
 			}
 
@@ -79,7 +119,6 @@ run.
 				}
 			}
 
-			string ns = null;
 			var parser = new PitParser();
 			var parserArgs = new Dictionary<string, object>();
 			parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
@@ -88,47 +127,11 @@ run.
 
 			try
 			{
-				if (datamodel.Contains(':'))
-				{
-					string[] parts = datamodel.Split(':');
-
-					if (!dom.ns.Keys.Contains(parts[0]))
-					{
-						Console.WriteLine("\nError: Unable to find namespace \"" + parts[0] + "\"!");
-
-						throw new ApplicationException();
-					}
-					else if (!dom.ns[parts[0]].dataModels.ContainsKey(parts[1]))
-					{
-						Console.WriteLine("\nError: Unable to find datamodel \"" + datamodel + "\"!");
-
-						throw new ApplicationException();
-					}
-
-					Model = dom.ns[parts[0]].dataModels[parts[1]];
-					ns = parts[0];
-					datamodel = parts[1];
-				}
-				else if (!dom.dataModels.ContainsKey(datamodel))
-				{
-					Console.WriteLine("\nError: Unable to find data model \"" + datamodel + "\"!");
-					Console.WriteLine("The following data models were found:");
-
-					throw new ApplicationException();
-				}
-
-				Model = dom.dataModels[datamodel];
+				Model = FindDataModel(datamodel, dom);
 			}
 			catch (Exception)
 			{
-				foreach (string model in dom.dataModels.Keys)
-					Console.WriteLine("\t" + model);
-				foreach (string key in dom.ns.Keys)
-				{
-					foreach (string model in dom.ns[key].dataModels.Keys)
-						Console.WriteLine("\t" + key + ":" + model);
-				}
-
+				PrintAllDataModels(dom);
 				return;
 			}
 
@@ -168,9 +171,19 @@ run.
 				cmd.ExecuteNonQuery();
 			}
 
-			foreach (var file in Directory.EnumerateFiles(samplefolder))
+			if (samplefolder.Contains('*'))
 			{
-				ProcessSample(file);
+				foreach (var file in Directory.GetFiles(Path.GetDirectoryName(samplefolder), Path.GetFileName(samplefolder)))
+				{
+					ProcessSample(file);
+				}
+			}
+			else
+			{
+				foreach (var file in Directory.EnumerateFiles(samplefolder))
+				{
+					ProcessSample(file);
+				}
 			}
 
 			Connection.Close();
