@@ -40,8 +40,7 @@ namespace Peach.Enterprise.Mutators
             name = "SampleNinja";
 
 			var pitFile = GetPitFile(obj);
-			NinjaDB = Path.Combine(
-				Path.GetFullPath(pitFile) + ".ninja");
+			NinjaDB = Path.GetFullPath(pitFile) + ".ninja";
 
             using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
             {
