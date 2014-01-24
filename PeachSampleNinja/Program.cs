@@ -79,23 +79,58 @@ run.
 				}
 			}
 
+			string ns = null;
 			var parser = new PitParser();
 			var parserArgs = new Dictionary<string, object>();
 			parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
 
 			var dom = parser.asParser(parserArgs, pitfile);
 
-			if (!dom.dataModels.ContainsKey(datamodel))
+			try
 			{
-				Console.WriteLine("\nError: Unable to find data model \"" + datamodel + "\"!");
-				Console.WriteLine("The following data models were found:");
+				if (datamodel.Contains(':'))
+				{
+					string[] parts = datamodel.Split(':');
+
+					if (!dom.ns.Keys.Contains(parts[0]))
+					{
+						Console.WriteLine("\nError: Unable to find namespace \"" + parts[0] + "\"!");
+
+						throw new ApplicationException();
+					}
+					else if (!dom.ns[parts[0]].dataModels.ContainsKey(parts[1]))
+					{
+						Console.WriteLine("\nError: Unable to find datamodel \"" + datamodel + "\"!");
+
+						throw new ApplicationException();
+					}
+
+					Model = dom.ns[parts[0]].dataModels[parts[1]];
+					ns = parts[0];
+					datamodel = parts[1];
+				}
+				else if (!dom.dataModels.ContainsKey(datamodel))
+				{
+					Console.WriteLine("\nError: Unable to find data model \"" + datamodel + "\"!");
+					Console.WriteLine("The following data models were found:");
+
+					throw new ApplicationException();
+				}
+
+				Model = dom.dataModels[datamodel];
+			}
+			catch (Exception)
+			{
 				foreach (string model in dom.dataModels.Keys)
 					Console.WriteLine("\t" + model);
+				foreach (string key in dom.ns.Keys)
+				{
+					foreach (string model in dom.ns[key].dataModels.Keys)
+						Console.WriteLine("\t" + key + ":" + model);
+				}
 
 				return;
 			}
-
-			Model = dom.dataModels[datamodel];
 
 			var database = Path.Combine(
 				Path.GetDirectoryName(pitfile),
