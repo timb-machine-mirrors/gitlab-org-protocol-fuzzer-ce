@@ -16,14 +16,26 @@
         <DataModel ref="DataModels:SnmpGet"/>
       </Action>
 
+      <Action name="SnmpResponse1" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpReponse"/>
+      </Action>
+
       <!-- generate snmp next request packet -->
       <Action name="SnmpGetNextRequest" type="output" publisher="UdpHandler">
         <DataModel ref="DataModels:SnmpNext"/>
       </Action>
 
+      <Action name="SnmpResponse2" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpReponse"/>
+      </Action>
+
       <!-- generate snmp bulk request packet -->
       <Action name="SnmpGetBulkRequest" type="output" publisher="UdpHandler">
         <DataModel ref="DataModels:SnmpBulk"/>
+      </Action>
+
+      <Action name="SnmpResponse3" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpReponse"/>
       </Action>
     </State>
   </StateModel>
