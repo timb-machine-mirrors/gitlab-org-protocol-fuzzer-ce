@@ -49,6 +49,18 @@ run.
 
 		public Program(string pitfile, string datamodel, string samplefolder)
 		{
+			if (!File.Exists(pitfile))
+			{
+				Console.WriteLine("Error: Unable to find pit file.");
+				return;
+			}
+
+			if (!Directory.Exists(samplefolder))
+			{
+				Console.WriteLine("Error: Unable to find samples folder.");
+				return;
+			}
+
 			var config = Path.Combine(
 				Path.GetDirectoryName(pitfile),
 				Path.GetFileName(pitfile) + ".config");
@@ -56,6 +68,7 @@ run.
 
 			if (File.Exists(config))
 			{
+				Console.WriteLine("Using configuration file \"" + config + "\".");
 				var defs = PitParser.parseDefines(config);
 
 				foreach (var kv in defs)
@@ -71,6 +84,16 @@ run.
 			parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
 
 			var dom = parser.asParser(parserArgs, pitfile);
+
+			if (!dom.dataModels.ContainsKey(datamodel))
+			{
+				Console.WriteLine("\nError: Unable to find data model \"" + datamodel + "\"!");
+				Console.WriteLine("The following data models were found:");
+				foreach (string model in dom.dataModels.Keys)
+					Console.WriteLine("\t" + model);
+
+				return;
+			}
 
 			Model = dom.dataModels[datamodel];
 

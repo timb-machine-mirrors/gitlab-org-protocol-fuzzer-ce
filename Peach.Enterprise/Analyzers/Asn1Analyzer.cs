@@ -18,7 +18,7 @@ using Peach.Enterprise.Dom;
 namespace Peach.Enterprise.Analyzers
 {
 	[Analyzer("Asn1", true)]
-	[Description("Convert BER encoded ASN.1 into Peach Data model")]
+	[Description("Converts ASN.1 data in Blobs into a full data model.")]
 	[Serializable]
 	public class Asn1Analyzer : Analyzer
 	{
