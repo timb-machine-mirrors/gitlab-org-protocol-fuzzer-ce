@@ -26,6 +26,8 @@ namespace Peach.Enterprise.Mutators
 	[Description("Will use existing samples to generate mutated files.")]
 	public class SampleNinjaMutator : Mutator
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		int _count = 0;
 		uint pos = 0;
 		Guid ElementId = Guid.Empty;
@@ -94,7 +96,10 @@ select from count('x'), se.elementid
 
 			// If our database doesn't exist JETTISON!
 			if (!File.Exists(ninjaDb))
+			{
+				logger.Trace("ninja database not found, disabling mutator. \"" + ninjaDb + "\".");
 				return false;
+			}
 
 			if (obj.isMutable)
 			{
@@ -120,8 +125,11 @@ select from count('x'), se.elementid
 						cmd.Parameters[0].Value = GetPitFile(obj);
 						cmd.Parameters[1].Value = obj.fullName;
 
-						if((int)cmd.ExecuteScalar() > 0)
+						if ((int)cmd.ExecuteScalar() > 0)
+						{
+							logger.Trace("element \"" + obj.fullName + "\" not found in ninja db, not enabling.");
 							return true;
+						}
 					}
 				}
 			}
