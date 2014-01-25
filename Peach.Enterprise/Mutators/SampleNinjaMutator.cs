@@ -107,10 +107,10 @@ select from count('x'), se.elementid
 					using (var cmd = new SQLiteCommand(Connection))
 					{
 						cmd.CommandText = @"
-	select from count('x') 
-		from definition d, sample s, samplelement se, element e
-		where d.Name = ?
-		and e.name = ?
+select count('x')
+		from definition d, sample s, sampleelement se, element e
+		where d.Name = ''
+		and e.name = ''
 		and s.definitionid = d.definitionid
 		and se.sampleid = s.sampleid
 		and se.elementid = e.elementid
@@ -143,7 +143,7 @@ select from count('x'), se.elementid
 				using (var cmd = new SQLiteCommand(Connection))
 				{
 					cmd.CommandText = 
-						"select from se.data from samplelement se "+
+						"select from se.data from sampleelement se "+
 						"where se.elementid = ? LIMIT 1 OFFSET " + pos + ";";
 
 					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
