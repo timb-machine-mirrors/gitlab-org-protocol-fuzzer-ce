@@ -3,21 +3,21 @@
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Simple Network Management Protocol PIT" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-  
+
   <!--
       Simple Network Management Protocol v2c
-      
+
       getRequest		- done
       getNextRequest	- done
       getBulkRequest	- done
   -->
 
 	<Include ns="SNMP" src="file:##Path##/_Common/Models/Net/SNMP_State.xml"/>
-	
+
   <!-- Agent conifuration to monitor for crashes -->
   <Agent name="TheAgent">
-  </Agent> 
-	
+  </Agent>
+
 	<Agent name="ServerAgent">
 		<Monitor class="WindowsDebugger">
 			<Param name="CommandLine" value="..\..\..\..\Downloads\SnmpWalk.exe -r:##SnmpHost## -c:public -v:2c"/>
@@ -31,36 +31,35 @@
   <!-- Default test case -->
   <Test name="Default">
     <StateModel ref="SNMP:ManagerToAgent"/>
-    
+
     <Agent ref="TheAgent"/>
-    
+
     <Publisher class="Udp" name="UdpHandler">
-      <Param name="SrcPort" value="##SnmpSrcPort##"/>
-      <Param name="Host" value="##SnmpHost##"/>
-      <Param name="Port" value="##SnmpPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
     </Publisher>
-    
+
     <Strategy class="##Strategy##"/>
-		
+
     <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
-	
+
 	<Test name="Server">
     <StateModel ref="SNMP:AgentToManager"/>
-    
-    <Agent ref="ServerAgent"/>
-    
+
+   <!-- <Agent ref="ServerAgent"/> -->
+
     <Publisher class="Udp" name="UdpHandler">
-      <Param name="SrcPort" value="##SnmpSrcPort##"/>
-      <Param name="Host" value="##SnmpHost##"/>
-      <Param name="Port" value="##SnmpPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Host" value="##TargetIPv4##"/>
 			<Param name="Timeout" value="5000"/>
     </Publisher>
-    
+
     <Strategy class="##Strategy##"/>
-		
+
     <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>

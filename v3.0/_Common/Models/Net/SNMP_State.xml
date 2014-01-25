@@ -16,14 +16,26 @@
         <DataModel ref="DataModels:SnmpGet"/>
       </Action>
 
+      <Action name="SnmpResponse1" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpResponse"/>
+      </Action>
+
       <!-- generate snmp next request packet -->
       <Action name="SnmpGetNextRequest" type="output" publisher="UdpHandler">
         <DataModel ref="DataModels:SnmpNext"/>
       </Action>
 
+      <Action name="SnmpResponse2" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpResponse"/>
+      </Action>
+
       <!-- generate snmp bulk request packet -->
       <Action name="SnmpGetBulkRequest" type="output" publisher="UdpHandler">
         <DataModel ref="DataModels:SnmpBulk"/>
+      </Action>
+
+      <Action name="SnmpResponse3" type="input" publisher="UdpHandler">
+        <DataModel ref="DataModels:SnmpResponse"/>
       </Action>
     </State>
   </StateModel>
@@ -40,16 +52,12 @@
         <DataModel ref="DataModels:SNMPHeaderV2_"/>
       </Action>
 
-			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpGetRequest//RequestId//Value" setXpath="//SnmpResponse//RequestId//Value"/>
-			<Action name="ConnHandleSlurp2" type="slurp" valueXpath="//SnmpGetRequest//Community//Value" setXpath="//SnmpResponse//Community//Value"/>
+			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//SnmpGetRequest//RequestId//Value" setXpath="//SnmpResponse//RequestId"/>
+			<Action name="ConnHandleSlurp2" type="slurp" valueXpath="//SnmpGetRequest//Community//Value" setXpath="//SnmpResponse//SnmpCommunity"/>
 
-			<Action name="SnmpResponse" type="output" publisher="UdpHandler" onStart="SNMP.set_variables(self)">
-				<DataModel ref="DataModels:SNMPHeaderV2_"/>
-				<Data>
-					<Field name="SnmpType.Value.PduType.Type" valueType="hex" value="a2"/>
-					<Field name="SnmpType.Value.PduType.Value.ErrorStatus.Value" valueType="hex" value="00"/>
-					<Field name="SnmpType.Value.PduType.Value.ErrorIndex.Value" valueType="hex" value="00"/>
-				</Data>
+			<Action name="SnmpResponse" type="output" publisher="UdpHandler">
+				<DataModel ref="DataModels:SnmpResponse"/>
+
       </Action>
     </State>
 
