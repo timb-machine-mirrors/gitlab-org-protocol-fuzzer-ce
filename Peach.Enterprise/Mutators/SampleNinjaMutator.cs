@@ -88,9 +88,7 @@ select from count('x'), se.elementid
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			var pitFile = GetPitFile(obj);
-			var ninjaDb = Path.Combine(
-				Path.GetFullPath(pitFile),
-				Path.GetFileName(pitFile) + ".ninja");
+			var ninjaDb = Path.GetFullPath(pitFile) + ".ninja";
 
 			// If our database doesn't exist JETTISON!
 			if (!File.Exists(ninjaDb))
