@@ -189,7 +189,7 @@
         <Number size="8" name="RequestIDLen">
           <Relation type="size" of="RequestId"/>
         </Number>
-        <Number name="RequestId" size="32" value="0x72a020a6"/> <!--ValueShouldBeSlurped-->
+        <Blob name="RequestId" value="72a020a6"/> <!--ValueShouldBeSlurped-->
         <Blob name="SnmpErrorStatusType" valueType="hex" length="1" value="02"/>
         <Number size="8" name="SnmpErrorStatusLen">
           <Relation type="size" of="SnmpErrorStatus"/>

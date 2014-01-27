@@ -14,13 +14,13 @@
   </Agent>
 
 	<Agent name="Windows">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="C:\SnmpWalk.exe -r:##SourceIPv4## -c:##CommString## -v:2c"/>
-			<Param name="NoCpuKill" value="true"/>
-			<Param name="FaultOnEarlyExit" value="true"/>
-			<Param name="StartOnCall" value="launchProgram"/>
+    <Monitor class="Process">
+      <Param name="Executable" value="_Common/Models/Net/SNMP.bat" />
+      <Param name="FaultOnEarlyExit" value="true"/>
+      <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
-		</Monitor>
+      <Param name="WaitForExitTimeout" value="2000"/>
+    </Monitor>
 	</Agent>
 
   <Agent name="Linux">
