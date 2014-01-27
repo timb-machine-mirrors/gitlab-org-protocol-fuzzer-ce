@@ -7,7 +7,7 @@
   <Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
 
   <!-- Client state model Active Mode -->
-  <StateModel name="AgentToHost" initialState="InputUserName">
+  <StateModel name="AgentToHostActive" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
@@ -16,6 +16,8 @@
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:USER" />
       </Action>
+    </State>
+  </StateModel>
 
   <!-- FTP simple state model -->
   <StateModel name="AgentToHost" initialState="InputUserName">
