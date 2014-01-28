@@ -6,20 +6,97 @@
 
   <Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
 
-  <!-- Client state model Passive Mode -->
-  <StateModel name="AgentToHostActive" initialState="InputUserName">
+  <!-- FTP Passive Mode-->
+  <StateModel name="AgentToHostPassive" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
       </Action>
-
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:USER" />
+      </Action>
+      <Action type="changeState" ref="InputPasswd"/>
+    </State>
+
+    <State name="InputPasswd">
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ServerUserNeedsPass" />
+      </Action>
+
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:PASS" />
+      </Action>
+
+      <Action type="changeState" ref="TestConnection"/>
+    </State>
+
+    <State name="TestConnection">
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ServerLoggedIn" />
+      </Action>
+
+      <Action type="changeState" ref="EnterPassiveMode"/>
+    </State>
+
+    <State name="EnterPassiveMode">
+
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:PasvRequest" />
+      </Action>
+
+      <Action type="changeState" ref="ListDir"/>
+    </State>
+
+    <State name="ListDir">
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:LIST" />
+      </Action>
+
+      <Action type="accept" publisher="DataListner"/>
+
+      <Action type="input" publisher="DataListner">
+        <DataModel ref="FTP:FTPDataCatch"/>
+      </Action>
+
+      <Action type="changeState" ref="MakeDir"/>
+    </State>
+
+    <State name="MakeDir">
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ServerOk" />
+      </Action>
+
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:MKD" />
+      </Action>
+
+      <Action type="changeState" ref="DelDir"/>
+    </State>
+
+    <State name="DelDir">
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:DirCreated" />
+      </Action>
+
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:RMD" />
+      </Action>
+
+      <Action type="changeState" ref="Ready"/>
+    </State>
+
+    <State name="Ready">
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ResponseTemplate" />
+      </Action>
+
+      <Action type="output" publisher="CommandPublisher">
+        <DataModel ref="FTP:Request" />
       </Action>
     </State>
   </StateModel>
 
-  <!-- FTP simple state model Active-->
+  <!-- FTP Active Mode-->
   <StateModel name="AgentToHost" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
@@ -101,7 +178,6 @@
     <State name="Ready">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ResponseTemplate" />
-        <!-- <DataModel ref="Response" /> -->
       </Action>
 
       <Action type="output" publisher="CommandPublisher">

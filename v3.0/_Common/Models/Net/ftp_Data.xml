@@ -152,11 +152,15 @@
 		<Block name="ReqArgBlock" ref="ArgBlock">
 			<String name="Argument" value="##SourceIPv4##,##DataPort##">
 				<Fixup class="ScriptFixup">
-				<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
-				<Param name="ref" value="Argument" />
-			</Fixup>
+					<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
+					<Param name="ref" value="Argument" />
+				</Fixup>
 			</String>
 		</Block>
+	</DataModel>
+
+	<DataModel name="PasvRequest" ref="RequestTemplate">
+		<String name="Command" value="PASV" token="true"/>
 	</DataModel>
 
   <!--      ACCT <SP> <account information> <CRLF> -->
