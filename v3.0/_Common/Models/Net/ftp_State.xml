@@ -6,7 +6,7 @@
 
   <Include ns="FTP" src="file:##Path##/_Common/Models/Net/ftp_Data.xml"/>
 
-  <!-- Client state model Active Mode -->
+  <!-- Client state model Passive Mode -->
   <StateModel name="AgentToHostActive" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
@@ -19,13 +19,13 @@
     </State>
   </StateModel>
 
-  <!-- FTP simple state model -->
+  <!-- FTP simple state model Active-->
   <StateModel name="AgentToHost" initialState="InputUserName">
     <State name="InputUserName">
-      <Action type="input" publisher="TcpHandler">
+      <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
       </Action>
-      <Action type="output" publisher="TcpHandler">
+      <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:USER" />
       </Action>
       <Action type="changeState" ref="InputPasswd"/>
@@ -52,11 +52,10 @@
     </State>
 
     <State name="EnterActiveMode">
+
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:PortRequest" />
       </Action>
-
-      <Action type="accept" publisher="DataListner"/>
 
       <Action type="changeState" ref="ListDir"/>
     </State>
@@ -65,6 +64,8 @@
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:LIST" />
       </Action>
+
+      <Action type="accept" publisher="DataListner"/>
 
       <Action type="input" publisher="DataListner">
         <DataModel ref="FTP:FTPDataCatch"/>
@@ -121,7 +122,7 @@
     <State name="PreAuth">
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser"/>
-        <Data DataModel="FTP:ServerReadyForUser">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Peach 3.0"/>
         </Data>
       </Action>
@@ -153,7 +154,7 @@
     <State name="InputPasswd">
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerUserNeedsPass"/>
-        <Data DataModel="FTP:ServerUserNeedsPass">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Please specify the password"/>
         </Data>
       </Action>
@@ -308,7 +309,7 @@
       </Action>
 
       <!-- Change state to PortConnect-->
-      <Action  name="PORT" type="changeState" ref="PortConnect" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PORT'"/>
+      <Action  name="ActiveMode" type="changeState" ref="PortConnect" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PORT'"/>
 
       <Action  name="TYPE" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'TYPE'">
         <DataModel ref="FTP:ResponseTemplate"/>
@@ -412,8 +413,8 @@
         </Data>
       </Action>
 
-      <!-- Change state to PortConnect-->
-      <Action  name="PASV" type="changeState" ref="PassiveAccept" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PASV'"/>
+      <!-- Change state to PassiveAccept -->
+      <Action  name="PasiveMode" type="changeState" ref="PassiveAccept" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command')) == 'PASV'"/>
 
       <!-- End command checks -->
 
@@ -452,7 +453,7 @@
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerDirectorySendOk"/>
-        <Data DataModel="FTP:ServerDirectorySendOk">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
         </Data>
       </Action>
@@ -467,7 +468,7 @@
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerDirectorySendOk"/>
-        <Data DataModel="FTP:ServerDirectorySendOk">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Directory send OK."/>
         </Data>
       </Action>
@@ -482,7 +483,7 @@
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerDirectorySendOk"/>
-        <Data DataModel="FTP:ServerDirectorySendOk">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Transfer complete."/>
         </Data>
       </Action>
@@ -497,7 +498,7 @@
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerDirectorySendOk"/>
-        <Data DataModel="FTP:ServerDirectorySendOk">
+        <Data>
           <Field name="LineModes.OneLine.Explaination" value="Directory Send OK."/>
         </Data>
       </Action>

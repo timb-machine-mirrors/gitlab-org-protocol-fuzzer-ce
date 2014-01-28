@@ -11,13 +11,13 @@
 
     <Monitor class="Process">
       <Param name="Executable" value="##LinuxFTPCmd##" />
-      <Param name="Arguments" value="##LocalIPv4##" />
+      <Param name="Arguments" value="##SourceIPv4##" />
     </Monitor>
 	</Agent>
 
 	<Agent name="WinServerAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="ftp.bat ##LocalIPv4##"/>
+			<Param name="CommandLine" value="ftp.bat ##SourceIPv4##"/>
 			<Param name="NoCpuKill" value="true"/>
 			<Param name="FaultOnEarlyExit" value="false"/>
 			<Param name="WaitForExitTimeout" value="250"/>
@@ -39,12 +39,14 @@
 		<Publisher class="Tcp" name="CommandPublisher">
 			<Param name="Host" value="##TargetIPv4##"/>
 			<Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
 		</Publisher>
 
     <!-- Used by client state for data port in active mode -->
     <Publisher name="DataListner" class="TcpListener">
-      <Param name="Interface" value="##LocalIPv4##"/>
-      <Param name="Port" value="31337"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="##DataPort##"/>
+      <Param name="AcceptTimeout" value="10000"/>
     </Publisher>
 
 		<Strategy class="##Strategy##"/>
@@ -62,7 +64,7 @@
 		<StateModel ref="FTP:HostToAgent"/>
 
 		<Publisher name="CommandPublisher" class="TcpListener">
-			<Param name="Interface" value="##LocalIPv4##"/>
+			<Param name="Interface" value="##SourceIPv4##"/>
 			<Param name="Port" value="21"/>
 		</Publisher>
 
@@ -73,7 +75,7 @@
 
     <!-- Used by server state for data port in pasv mode -->
     <Publisher name="DataListner" class="TcpListener">
-      <Param name="Interface" value="##LocalIPv4##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Port" value="31337"/>
     </Publisher>
 
