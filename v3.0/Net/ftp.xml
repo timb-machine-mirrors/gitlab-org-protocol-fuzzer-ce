@@ -10,25 +10,27 @@
     <Monitor class="LinuxCrashMonitor"/>
 
     <Monitor class="Process">
-      <Param name="Executable" value="##LinuxFTPCmd##" />
+      <Param name="Executable" value="##Program##" />
       <Param name="Arguments" value="##SourceIPv4##" />
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
 	</Agent>
 
-	<Agent name="WinServerAgent">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="ftp.bat ##SourceIPv4##"/>
-			<Param name="NoCpuKill" value="true"/>
-			<Param name="FaultOnEarlyExit" value="false"/>
-			<Param name="WaitForExitTimeout" value="250"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-			<Param name="WaitForExitOnCall" value="exitProgram"/>
-			<Param name="WinDbgPath" value="C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64"/>
-		</Monitor>
+  <Agent name="OsxServerAgent">
+    <Monitor class="Process">
+      <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="##SourceIPv4##" />
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
+    </Monitor>
+  </Agent>
 
+	<Agent name="WinServerAgent">
 		<Monitor class="Process">
-      <Param name="Executable" value="ftp.bat" />
-      <Param name="Arguments" value="StartBatScript" />
+      <Param name="Executable" value="##Program##" />
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
 	</Agent>
 
@@ -58,16 +60,20 @@
 	<!--Server side test-->
 	<Test name="Server">
 
-		<Agent ref="WinServerAgent" platform="windows"/>
+		<!--<Agent ref="WinServerAgent" platform="windows"/>-->
 		<Agent ref="LinServerAgent" platform="linux"/>
+    <Agent ref="OsxServerAgent" platform="osx"/>
 
 		<StateModel ref="FTP:HostToAgent"/>
 
 		<Publisher name="CommandPublisher" class="TcpListener">
 			<Param name="Interface" value="##SourceIPv4##"/>
 			<Param name="Port" value="21"/>
+      <Param name="AcceptTimeout" value="10000"/>
+      <Param name="Timeout" value="5000"/>
 		</Publisher>
 
+    <!-- Used by server state for data port in active mode -->
     <Publisher name="DataPublisher" class="Tcp">
       <Param name="Host" value="##TargetIPv4##"/>
       <Param name="Port" value="##TargetPort##"/>
@@ -77,6 +83,7 @@
     <Publisher name="DataListner" class="TcpListener">
       <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Port" value="31337"/>
+      <Param name="AcceptTimeout" value="10000"/>
     </Publisher>
 
 		<Strategy class="##Strategy##"/>

@@ -98,10 +98,12 @@
 	<DataModel name="DirectoryData">
 		<String name="Data" value="Desktop\r\nDocuments\r\nDownloads\r\nSecrets\r\nPublic\r\nPictures\r\n"/>
 		<String name="Data2" value="file1.png\r\nfile2.xml\r\nmy_ssn.txt\r\nVideos\r\n"/>
+		<Blob valueType="hex" value="0d0a"/>
 	</DataModel>
 
 	<DataModel name="DirectoryList">
 		<String name="Data" value="-rw-------    1 1000     1000           11 Apr 29 16:55 2\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Desktop\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Documents\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 clients.sh\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 File.txt\r\n"/>
+		<Blob valueType="hex" value="0d0a"/>
 	</DataModel>
 
 	<DataModel name="FileData">
@@ -385,7 +387,7 @@
 		<String name="Command" value="SYST" token="true"/>
 	</DataModel>
 
-	<!--      SYST - System -->
+	<!-- Unsupported command -->
 	<DataModel name="UNSU" ref="RequestTemplate">
 	</DataModel>
 
