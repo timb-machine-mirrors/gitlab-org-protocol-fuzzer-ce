@@ -451,6 +451,22 @@
         </Data>
       </Action>
 
+      <Action  name="STRU" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'STRU'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Only binary is supported"/>
+        </Data>
+      </Action>
+
+      <Action  name="MODE" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'MODE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Only binary is supported"/>
+        </Data>
+      </Action>
+
       <Action  name="USER" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'USER'">
         <DataModel ref="FTP:ResponseTemplate"/>
         <Data>
@@ -834,6 +850,22 @@
         <Data>
           <Field name="Status" value="250"/>
           <Field name="LineModes.OneLine.Explaination" value="Directory successfully changed"/>
+        </Data>
+      </Action>
+
+      <Action  name="STRU" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'STRU'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Only binary is supported"/>
+        </Data>
+      </Action>
+
+      <Action  name="MODE" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'MODE'">
+        <DataModel ref="FTP:ResponseTemplate"/>
+        <Data>
+          <Field name="Status" value="500"/>
+          <Field name="LineModes.OneLine.Explaination" value="Only binary is supported"/>
         </Data>
       </Action>
 
