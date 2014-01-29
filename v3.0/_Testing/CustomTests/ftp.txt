@@ -1,0 +1,5 @@
+open 10.0.1.23
+telnetuser
+telnetuserp455
+ls
+quit

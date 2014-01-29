@@ -29,6 +29,7 @@
 	<Agent name="WinServerAgent">
 		<Monitor class="Process">
       <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="-s:_Testing/CustomTests/ftp.txt" />
       <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
