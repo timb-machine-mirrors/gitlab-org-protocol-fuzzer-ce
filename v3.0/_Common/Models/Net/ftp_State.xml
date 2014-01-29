@@ -39,22 +39,25 @@
     </State>
 
     <State name="EnterPassiveMode">
-
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:PasvRequest" />
       </Action>
 
-      <Action type="changeState" ref="ListDir"/>
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:PassiveResponse"/>
+      </Action>
+
+      <Action type="changeState" ref="ListDir" onStart="setattr(self.parent.parent.parent.tests['Passive'].publishers[1],'Port',int(('0x'+''.join([hex(int(x)).split('0x')[1] for x in str(self.parent.parent.states['EnterPassiveMode'].actions[1].dataModel.find('Argument').DefaultValue).split(',')[4:]])),16))"/>
     </State>
 
     <State name="ListDir">
+      <Action type="open" publisher="DataPublisher"/>
+
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:LIST" />
       </Action>
 
-      <Action type="accept" publisher="DataListner"/>
-
-      <Action type="input" publisher="DataListner">
+      <Action type="input" publisher="DataPublisher">
         <DataModel ref="FTP:FTPDataCatch"/>
       </Action>
 
@@ -63,7 +66,7 @@
 
     <State name="MakeDir">
       <Action type="input" publisher="CommandPublisher">
-        <DataModel ref="FTP:ServerOk" />
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
@@ -75,23 +78,27 @@
 
     <State name="DelDir">
       <Action type="input" publisher="CommandPublisher">
-        <DataModel ref="FTP:DirCreated" />
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:RMD" />
       </Action>
 
-      <Action type="changeState" ref="Ready"/>
+      <Action type="changeState" ref="Close"/>
     </State>
 
-    <State name="Ready">
+    <State name="Close">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
-        <DataModel ref="FTP:Request" />
+        <DataModel ref="FTP:QUIT" />
+      </Action>
+
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
     </State>
   </StateModel>
@@ -153,7 +160,7 @@
 
     <State name="MakeDir">
       <Action type="input" publisher="CommandPublisher">
-        <DataModel ref="FTP:ServerOk" />
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
@@ -165,23 +172,27 @@
 
     <State name="DelDir">
       <Action type="input" publisher="CommandPublisher">
-        <DataModel ref="FTP:DirCreated" />
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:RMD" />
       </Action>
 
-      <Action type="changeState" ref="Ready"/>
+      <Action type="changeState" ref="Close"/>
     </State>
 
-    <State name="Ready">
+    <State name="Close">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ResponseTemplate" />
       </Action>
 
       <Action type="output" publisher="CommandPublisher">
-        <DataModel ref="FTP:Request" />
+        <DataModel ref="FTP:QUIT" />
+      </Action>
+
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ResponseTemplate" />
       </Action>
     </State>
   </StateModel>

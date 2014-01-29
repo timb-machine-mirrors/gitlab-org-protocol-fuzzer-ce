@@ -92,5 +92,28 @@
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>
   </Test>
+
+  <!-- Client test case -->
+  <Test name="Passive">
+    <StateModel ref="FTP:AgentToHostPassive"/>
+
+    <Publisher class="Tcp" name="CommandPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <!-- Used by client state for data port in passive mode -->
+    <Publisher class="Tcp" name="DataPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
 </Peach>
 <!--END-->

@@ -95,6 +95,17 @@
 		<String name="Status" value="226" token="true"/>
 	</DataModel>
 
+	<DataModel name="PassiveResponse">
+		<String name="Status" value="227" token="true"/>
+		<String name="Break" token="true" value=" "/>
+		<String name="Explaination" value="Entering Passive Mode" token="true"/>
+		<String name="Break2" token="true" value=" "/>
+		<String name="Open" token="true" value="("/>
+		<String name="Argument"/>
+		<String name="Close" token="true" value=")"/>
+		<String name="Terminator" token="true" value="\r\n"/>
+	</DataModel>
+
 	<DataModel name="DirectoryData">
 		<String name="Data" value="Desktop\r\nDocuments\r\nDownloads\r\nSecrets\r\nPublic\r\nPictures\r\n"/>
 		<String name="Data2" value="file1.png\r\nfile2.xml\r\nmy_ssn.txt\r\nVideos\r\n"/>
