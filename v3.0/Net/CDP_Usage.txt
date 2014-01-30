@@ -4,13 +4,8 @@ Configuration
 -------------
 
 .Target Configuration
- 
+This pit broadcasts CDP packets, no extra applications are required. 
 
-_Example of using adding a CDP interface:_
-
-----
-
-----
 
 .Required Pit Configuration Changes
 SourceIPv4:: IPv4 address of the interface on the local machine

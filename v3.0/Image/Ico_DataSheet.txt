@@ -1,0 +1,13 @@
+:Doctitle: ICO Peach Pit Data Sheet
+:Description: ICO Image Format
+
+ *Peach Pit: ICO
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://msdn.microsoft.com/en-us/library/ms997538.aspx | Icons
+|========

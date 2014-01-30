@@ -4,6 +4,9 @@
        author="Deja Vu Security, LLC" description="File Transfer Protocol PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
+	<PythonPath path="##Path##/_Common/Models/Net/"/>
+	<Import import="ftpFixup" />
+
 	<!-- Helper Models -->
 	<DataModel name="ArgBlock">
 		<String name="Break" token="true" value=" "/>
@@ -73,7 +76,7 @@
 	</DataModel>
 
 	<DataModel name="DirCreated" ref="ResponseTemplate">
-		<String name="Status" value="257" token="true"/>
+		<String name="Status" value="257" length="3"/>
 	</DataModel>
 
 	<DataModel name="DirDeleted" ref="ResponseTemplate">
@@ -92,13 +95,42 @@
 		<String name="Status" value="226" token="true"/>
 	</DataModel>
 
+	<DataModel name="PassiveResponse">
+		<String name="Status" value="227" token="true"/>
+		<String name="Break" token="true" value=" "/>
+		<String name="Explaination" value="Entering Passive Mode" token="true"/>
+		<String name="Break2" token="true" value=" "/>
+		<String name="Open" token="true" value="("/>
+		<String name="Argument" value="##SourceIPv4##,##DataPort##">
+			<Fixup class="ScriptFixup">
+				<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
+				<Param name="ref" value="Argument" />
+			</Fixup>
+		</String>
+		<String name="Close" token="true" value=")"/>
+		<String name="Terminator" token="true" value="\r\n"/>
+	</DataModel>
+
+	<DataModel name="PassiveInputResponse">
+		<String name="Status" value="227" token="true"/>
+		<String name="Break" token="true" value=" "/>
+		<String name="Explaination" value="Entering Passive Mode" token="true"/>
+		<String name="Break2" token="true" value=" "/>
+		<String name="Open" token="true" value="("/>
+		<String name="Argument" value="##SourceIPv4##,##DataPort##"/>
+		<String name="Close" token="true" value=")"/>
+		<String name="Terminator" token="true" value="\r\n"/>
+	</DataModel>
+
 	<DataModel name="DirectoryData">
 		<String name="Data" value="Desktop\r\nDocuments\r\nDownloads\r\nSecrets\r\nPublic\r\nPictures\r\n"/>
 		<String name="Data2" value="file1.png\r\nfile2.xml\r\nmy_ssn.txt\r\nVideos\r\n"/>
+		<Blob valueType="hex" value="0d0a"/>
 	</DataModel>
 
 	<DataModel name="DirectoryList">
 		<String name="Data" value="-rw-------    1 1000     1000           11 Apr 29 16:55 2\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Desktop\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 Documents\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 clients.sh\r\ndrwxr-xr-x    2 1000     1000         4096 Oct 11  2012 File.txt\r\n"/>
+		<Blob valueType="hex" value="0d0a"/>
 	</DataModel>
 
 	<DataModel name="FileData">
@@ -120,6 +152,11 @@
 		<String name="Terminator" length="2" mutable="false" token="true" value="\r\n"/>
 	</DataModel>
 
+	<!-- FTP Data Catch -->
+	<DataModel name="FTPDataCatch">
+		<Blob name="Data"/>
+	</DataModel>
+
 
 	<!-- 4.1.  FTP COMMANDS -->
 
@@ -137,6 +174,22 @@
 		<Block name="ReqArgBlock" ref="ArgBlock">
 			<String name="Argument" value="##FtpPass##"/>
 		</Block>
+	</DataModel>
+
+	<DataModel name="PortRequest" ref="RequestTemplate">
+		<String name="Command" value="PORT" token="true"/>
+		<Block name="ReqArgBlock" ref="ArgBlock">
+			<String name="Argument" value="##SourceIPv4##,##DataPort##">
+				<Fixup class="ScriptFixup">
+					<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
+					<Param name="ref" value="Argument" />
+				</Fixup>
+			</String>
+		</Block>
+	</DataModel>
+
+	<DataModel name="PasvRequest" ref="RequestTemplate">
+		<String name="Command" value="PASV" token="true"/>
 	</DataModel>
 
   <!--      ACCT <SP> <account information> <CRLF> -->
@@ -361,7 +414,7 @@
 		<String name="Command" value="SYST" token="true"/>
 	</DataModel>
 
-	<!--      SYST - System -->
+	<!-- Unsupported command -->
 	<DataModel name="UNSU" ref="RequestTemplate">
 	</DataModel>
 

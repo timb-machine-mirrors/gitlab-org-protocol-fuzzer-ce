@@ -1,0 +1,82 @@
+include::Ico_DataSheet.txt[]
+
+Configuration
+-------------
+
+.Target Configuration
+Any number of image viewing programs may be used with the ICO file format. When fuzzing ICO on Linux the program feh is used and while on Windows the program paint is used. The target program can be set in the Ico.xml.config file by defining the Target program for each operating system.
+
+_Example setting up feh on linux and configuring defines:_
+
+----
+#Installing feh on linux
+sudo apt-get install feh
+
+#Configuring Ico.xml.config
+  #The following two lines need to be set to the location of where the sample Icos are stored
+  #The configuration below tells peach to look in the current directory for the folder _Common
+    <Define key="SamplePath" value="/_Common/Samples/Image/"/>
+    <Define key="Path" value="."/>
+
+   #If Peach isn't running from the directory that contains the _Common folder set Path to point to the directory that contains the _Common directory
+   #The configuration below tells peach to look in the previous directory for the folder _Common
+    <Define key="SamplePath" value="/_Common/Samples/Image/"/>
+    <Define key="Path" value=".."/>
+
+----
+
+.Required Pit Configuration Changes
+Seed:: Name of a valid avi file located in the SamplePath directory. An empty string indicates use all files in the directory.
+SamplePath:: Direcotry path to the directory which the Ico sample files are stored.
+Target:: The program that will open the fuzzed Ico files
+
+.Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Directory path to folder where logs will be stored
+Agent:: The agent that will be ran to open the target program. This is generally OS dependent
+Path:: Path to the relative base directory where all pits are located
+
+.Sample Ico Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="Seed" value="ico_sample_1.ico"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="LoggerPath"  value="./logs/ico/"/>
+    <Define key="SamplePath" value="/_Common/Samples/Image/"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Agent" value="LinuxAgent"/>
+    <Define key="Target" value="feh" />
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Agent" value="OsxAgent"/>
+    <Define key="Target" value="/Applications/Preview.app/Contents/MacOS/Preview" />
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Agent" value="WinAgent"/>
+    <Define key="Target" value="C:\\windows\\system32\\mspaint.exe" />
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+peach -1 -debug Ico.xml
+----
+.Full test run
+----
+peach Ico.xml
+----

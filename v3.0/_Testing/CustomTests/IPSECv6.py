@@ -2,6 +2,6 @@
 
 test(name="IPSECv6",
 		test="Default")
-    
+
 test(name="IPSECv6",
 		test="AH")
