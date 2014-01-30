@@ -43,8 +43,11 @@
 	<!-- Server State Model -->
   <StateModel name="AgentToManager" initialState="LaunchClient">
     <State name="LaunchClient">
+      <Action type="open" publisher="UdpHandler"/>
+
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
-			<Action type="changeState" ref="ServerStart"/>
+
+      <Action type="changeState" ref="ServerStart"/>
 		</State>
 
 		<State name="ServerStart">

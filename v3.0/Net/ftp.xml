@@ -29,6 +29,7 @@
 	<Agent name="WinServerAgent">
 		<Monitor class="Process">
       <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="-s:_Testing/CustomTests/ftp.txt" />
       <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
@@ -79,18 +80,64 @@
       <Param name="Port" value="##TargetPort##"/>
     </Publisher>
 
-    <!-- Used by server state for data port in pasv mode -->
-    <Publisher name="DataListner" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="31337"/>
-      <Param name="AcceptTimeout" value="10000"/>
-    </Publisher>
-
 		<Strategy class="##Strategy##"/>
 
 		<Logger class="File" >
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>
+  </Test>
+
+  <!-- Client test case -->
+  <Test name="Passive">
+    <StateModel ref="FTP:AgentToHostPassive"/>
+
+    <Publisher class="Tcp" name="CommandPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <!-- Used by client state for data port in passive mode -->
+    <Publisher class="Tcp" name="DataPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+
+  <!--Server side test-->
+  <Test name="ServerPassive">
+
+    <!--<Agent ref="WinServerAgent" platform="windows"/>-->
+    <Agent ref="LinServerAgent" platform="linux"/>
+    <Agent ref="OsxServerAgent" platform="osx"/>
+
+    <StateModel ref="FTP:PassiveHostToAgent"/>
+
+    <Publisher name="CommandPublisher" class="TcpListener">
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="21"/>
+      <Param name="AcceptTimeout" value="10000"/>
+      <Param name="Timeout" value="5000"/>
+    </Publisher>
+
+    <!-- Used by server state for data port in pasv mode -->
+    <Publisher name="DataPublisher" class="TcpListener">
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="##DataPort##"/>
+      <Param name="AcceptTimeout" value="10000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
   </Test>
 </Peach>
 <!--END-->

@@ -15,11 +15,11 @@
 
 	<Agent name="Windows">
     <Monitor class="Process">
-      <Param name="Executable" value="_Common/Models/Net/SNMP.bat" />
+      <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="-r:##SourceIPv4## -c: ##CommString## -v:2c ##SourceIPv4##"/>
       <Param name="FaultOnEarlyExit" value="true"/>
       <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
-      <Param name="WaitForExitTimeout" value="2000"/>
     </Monitor>
 	</Agent>
 
