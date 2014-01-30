@@ -26,6 +26,7 @@ Program:: The client program to test when fuzzing as the server
 .Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing
 LoggerPath:: Path to folder where logs will be stored
+Agent:: Agent to run depending on the target OS. This value shouldn't be changed.
 
 .Sample ftp Configuration File
 [source,xml]
