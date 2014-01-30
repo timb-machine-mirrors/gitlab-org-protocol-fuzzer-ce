@@ -101,7 +101,7 @@
 		<String name="Explaination" value="Entering Passive Mode" token="true"/>
 		<String name="Break2" token="true" value=" "/>
 		<String name="Open" token="true" value="("/>
-		<String name="Argument" value="##SourceIPv4##,##DataPort##">
+		<String name="Argument" value="##SourceIPv4##,##DataPort##" mutable="false">
 			<Fixup class="ScriptFixup">
 				<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
 				<Param name="ref" value="Argument" />
@@ -117,7 +117,7 @@
 		<String name="Explaination" value="Entering Passive Mode" token="true"/>
 		<String name="Break2" token="true" value=" "/>
 		<String name="Open" token="true" value="("/>
-		<String name="Argument" value="##SourceIPv4##,##DataPort##"/>
+		<String name="Argument" value="##SourceIPv4##,##DataPort##" mutable="false"/>
 		<String name="Close" token="true" value=")"/>
 		<String name="Terminator" token="true" value="\r\n"/>
 	</DataModel>
@@ -179,7 +179,7 @@
 	<DataModel name="PortRequest" ref="RequestTemplate">
 		<String name="Command" value="PORT" token="true"/>
 		<Block name="ReqArgBlock" ref="ArgBlock">
-			<String name="Argument" value="##SourceIPv4##,##DataPort##">
+			<String name="Argument" value="##SourceIPv4##,##DataPort##" mutable="false">
 				<Fixup class="ScriptFixup">
 					<Param name="class" value="ftpFixup.FtpPortToHexFixup"/>
 					<Param name="ref" value="Argument" />
