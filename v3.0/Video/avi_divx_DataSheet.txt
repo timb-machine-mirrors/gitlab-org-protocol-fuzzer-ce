@@ -15,12 +15,3 @@ Specifications
 |Specification | Title
 |http://msdn.microsoft.com/en-us/library/windows/desktop/dd318189(v=vs.85).aspx  | AVI RIFF File Reference
 |========
-
-Supported Codecs
-----------------
-
-[options="header"]
-|========
-|Messages | Specification
-|Divx |
-|========
