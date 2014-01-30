@@ -499,14 +499,6 @@
         </Data>
       </Action>
 
-      <Action  name="MODE" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'MODE'">
-        <DataModel ref="FTP:ResponseTemplate"/>
-        <Data>
-          <Field name="Status" value="500"/>
-          <Field name="LineModes.OneLine.Explaination" value="Did you miss something?"/>
-        </Data>
-      </Action>
-
       <Action  name="PASV" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'PASV'">
         <DataModel ref="FTP:ResponseTemplate"/>
         <Data>
@@ -906,14 +898,6 @@
         <Data>
           <Field name="Status" value="200"/>
           <Field name="LineModes.OneLine.Explaination" value="No special commands here"/>
-        </Data>
-      </Action>
-
-      <Action  name="MODE" type="output" publisher="CommandPublisher" when="str(StateModel.states['Ready'].actions[0].dataModel.find('Command').DefaultValue) == 'MODE'">
-        <DataModel ref="FTP:ResponseTemplate"/>
-        <Data>
-          <Field name="Status" value="500"/>
-          <Field name="LineModes.OneLine.Explaination" value="Did you miss something?"/>
         </Data>
       </Action>
 
