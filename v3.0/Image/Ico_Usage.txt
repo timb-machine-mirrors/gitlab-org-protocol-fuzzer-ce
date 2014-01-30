@@ -26,7 +26,7 @@ sudo apt-get install feh
 ----
 
 .Required Pit Configuration Changes
-Seed:: IP address of the target host machine
+Seed:: Name of a valid avi file located in the SamplePath directory. An empty string indicates use all files in the directory.
 SamplePath:: Direcotry path to the directory which the Ico sample files are stored.
 Target:: The program that will open the fuzzed Ico files
 
