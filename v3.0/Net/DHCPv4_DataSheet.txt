@@ -1,0 +1,36 @@
+
+:Doctitle: DHCPv4 Peach Pit Data Sheet
+:Description: Dynamic Host Configuration Protocol version 4 (DHCPv4)
+
+ * Peach Pit: DHCPv4
+ * Direction: Client
+ 
+Dynamic Host Configuration Protocol Version 4 (DHCPv4) is  TODO
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC1531 | Dynamic Host Configuration Protocol
+|RFC1541 | Dynamic Host Configuration Protocol
+|RFC2131 | Dynamic Host Configuration Protocol
+|RFC3396 | Encoding Long Options in the Dynamic Host Configuration Protocol (DHCPv4)
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|DHCP Message | RFC2131 (Section 2)
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|DHCPREQUEST | RFC2131 (Section 4.3.2)
+|DHCPACK | RFC2131 (Section 4.4)
+|========
