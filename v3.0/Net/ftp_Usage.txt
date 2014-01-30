@@ -57,7 +57,7 @@ LoggerPath:: Path to folder where logs will be stored
 
    <Windows platform="windows">
      <Define key="Interface" value="Local Area Connection"/>
-     <Define key="Program"  value="fpt"/>
+     <Define key="Program"  value="ftp"/>
      <Define key="SourceIPv4" value="10.0.1.82"/>
    </Windows>
 </PitDefines>
