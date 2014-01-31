@@ -1,0 +1,43 @@
+:Doctitle: Telnet Peach Pit Data Sheet
+:Description: Telnet
+
+ * Peach Pit: Telnet
+ * Direction: Client, Server
+
+Telnet is a network protocol used on the Internet or local area networks to provide a bidirectional interactive text-oriented communication facility using a virtual terminal connection.
+User data is interspersed in-band with Telnet control information in an 8-bit byte oriented data connection over the Transmission Control Protocol (TCP).
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC137 | Telnet protocol specification
+|RFC139 | Telnet protocol specification
+|RFC854 | Telnet protocol specification
+|RFC855 | Telnet option specifications
+|RFC857 | Telnet echo option
+|RFC858 | Telnet suppress Go Ahead option
+|RFC859 | Telnet status option
+|RFC860 | Telnet timing mark option
+|RFC885 | Telnet end of record option
+|RFC1041 | Telnet 3270 regime option
+|RFC1073 | Telnet Window Size Option
+|RFC1079 | Telnet terminal speed option
+|RFC1091 | Telnet terminal-type option
+|RFC1096 | Telnet X display location option
+|RFC1116 | Telnet Linemode Option
+|RFC1184 | Telnet Linemode option
+|RFC1372 | Telnet remote flow control option
+|RFC1572 | Telnet Environment Option
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|Telnet data | RFC137
+|========
