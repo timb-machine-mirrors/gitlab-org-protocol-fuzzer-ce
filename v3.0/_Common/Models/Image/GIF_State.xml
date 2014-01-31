@@ -11,7 +11,7 @@
 
       <Action name="WriteFileFromSample" type="output" publisher="writer">
         <DataModel name="Gif" ref="DataModels:GIF"/>
-        <Data name="data" fileName="##Path##/_Common/Samples/Image/##Seed##"/>
+        <Data name="data" fileName="##Path##/##SamplePath##/##Seed##"/>
       </Action>
 
       <Action name="CloseFile"  type="close" publisher="writer"/>

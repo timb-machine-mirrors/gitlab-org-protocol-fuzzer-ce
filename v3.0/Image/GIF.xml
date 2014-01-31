@@ -21,7 +21,6 @@
 			<Param name="CommandLine" value="##Target## fuzzed.gif"/>
 			<Param name="StartOnCall" value="FuzzMe"/>
 			<Param name="CpuKill" value="true"/>
-			<Param name="WinDbgPath" value=""/>
 		</Monitor>
 	</Agent>
 

@@ -1,0 +1,29 @@
+:Doctitle: BMP Peach Pit Data Sheet
+:Description: BMP Image Format
+
+ *Peach Pit: BMP
+
+
+
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://msdn.microsoft.com/en-us/library/dd183386%28VS.85%29.aspx | Bitmap Header Types
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Supported Headers | Specification
+|BITMAPCOREHEADER | 
+|BITMAPINFOHEADER | 
+|BITMAPV4HEADER | 
+|BITMAPV5HEADER | 
+|========
+
