@@ -23,6 +23,13 @@ Use Cases
 
 [options="header"]
 |========
+|Supported Versions | Specification
+|GIF87 | Graphics Interchange Format Version
+|GIF89a | Graphics Interchange Format Version 89a
+|========
+
+[options="header"]
+|========
 |Supported Blocks | Specification
 |Header | Graphics Interchange Format Version 89a (17.0)
 |Logical Screen Descriptor | Graphics Interchange Format Version 89a (18.0)
