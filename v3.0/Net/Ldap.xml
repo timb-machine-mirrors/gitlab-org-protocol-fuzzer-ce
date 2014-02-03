@@ -30,8 +30,9 @@
 			<Strategy class="##Strategy##"/>
 
 	    <Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
-			<Param name="Port" value="##TargetPort##" />
+				<Param name="Host" value="##TargetIPv4##" />
+				<Param name="Port" value="##TargetPort##" />
+				<Param name="Timeout" value="10000"/>
 	    </Publisher>
 
 	    <Logger class="File">
