@@ -20,7 +20,6 @@ class FtpPortToHexFixup:
       port = str(int(p1,16))+","+str(int(p2,16))
     else:
       port = str(int(p1,16))
-    print port
     return ip + "," + port
 
 # --------------------------------------------
