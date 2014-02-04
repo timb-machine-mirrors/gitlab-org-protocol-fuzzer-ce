@@ -2,3 +2,14 @@
 
 |RFC2217 | Telnet Com Port Control Option
 |RFC4248 | The Telnet URI Scheme
+
+RFC1205
+RFC2946
+RFC2941
+RFC2942
+RFC2943
+RFC2944
+RFC4777
+
+-----------
+Rewrite Telnet state to replace the telnet.py script
