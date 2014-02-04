@@ -11,7 +11,7 @@
 
     <Monitor class="Process">
       <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="##SourceIPv4##" />
+      <Param name="Arguments" value="127.0.0.1" /> <!--##SourceIPv4##-->
       <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
@@ -20,7 +20,7 @@
   <Agent name="OsxServerAgent">
     <Monitor class="Process">
       <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="##SourceIPv4##" />
+      <Param name="Arguments" value="127.0.0.1" /> <!--##SourceIPv4##-->
       <Param name="StartOnCall" value="launchProgram"/>
       <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
@@ -61,14 +61,14 @@
 	<!--Server side test-->
 	<Test name="Server">
 
-		<!--<Agent ref="WinServerAgent" platform="windows"/>-->
+		<Agent ref="WinServerAgent" platform="windows"/>
 		<Agent ref="LinServerAgent" platform="linux"/>
     <Agent ref="OsxServerAgent" platform="osx"/>
 
 		<StateModel ref="FTP:HostToAgent"/>
 
 		<Publisher name="CommandPublisher" class="TcpListener">
-			<Param name="Interface" value="##SourceIPv4##"/>
+			<Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
 			<Param name="Port" value="21"/>
       <Param name="AcceptTimeout" value="10000"/>
       <Param name="Timeout" value="5000"/>
@@ -76,7 +76,7 @@
 
     <!-- Used by server state for data port in active mode -->
     <Publisher name="DataPublisher" class="Tcp">
-      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Host" value="127.0.0.1"/> <!--##TargetIPv4## -->
       <Param name="Port" value="##TargetPort##"/>
     </Publisher>
 
@@ -113,14 +113,14 @@
   <!--Server side test-->
   <Test name="ServerPassive">
 
-    <!--<Agent ref="WinServerAgent" platform="windows"/>-->
+    <Agent ref="WinServerAgent" platform="windows"/>
     <Agent ref="LinServerAgent" platform="linux"/>
     <Agent ref="OsxServerAgent" platform="osx"/>
 
     <StateModel ref="FTP:PassiveHostToAgent"/>
 
     <Publisher name="CommandPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
       <Param name="Port" value="21"/>
       <Param name="AcceptTimeout" value="10000"/>
       <Param name="Timeout" value="5000"/>
@@ -128,7 +128,7 @@
 
     <!-- Used by server state for data port in pasv mode -->
     <Publisher name="DataPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
       <Param name="Port" value="##DataPort##"/>
       <Param name="AcceptTimeout" value="10000"/>
     </Publisher>

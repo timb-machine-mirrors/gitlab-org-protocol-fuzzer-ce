@@ -1,4 +1,4 @@
-open 10.0.1.23
+open 127.0.0.1
 telnetuser
 telnetuserp455
 ls

@@ -1,0 +1,46 @@
+:Doctitle: GIF Peach Pit Data Sheet
+:Description: GIF Image Format
+
+ *Peach Pit: GIF
+
+Graphics Interchange Format (GIF) is an image format based on formerly pantented compression techniques.  It is very common on the web inspite of its licensing restraints.
+The format uses LZW lossless encryption for packing and can support animated images.
+It is comprised a short header and collection of recursive, null-terminated blocks.
+Blocks can contain information such as graphic settings, color tables, comments, and pixel data.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://www.w3.org/Graphics/GIF/spec-gif87.txt | Graphics Interchange Format Version
+|http://www.w3.org/Graphics/GIF/spec-gif89a.txt | Graphics Interchange Format Version 89a
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Supported Versions | Specification
+|GIF87 | Graphics Interchange Format Version
+|GIF89a | Graphics Interchange Format Version 89a
+|========
+
+[options="header"]
+|========
+|Supported Blocks | Specification
+|Header | Graphics Interchange Format Version 89a (17.0)
+|Logical Screen Descriptor | Graphics Interchange Format Version 89a (18.0)
+|Global Color Table | Graphics Interchange Format Version 89a (19.0)
+|Image Descriptor | Graphics Interchange Format Version 89a (20.0)
+|Local Color Table | Graphics Interchange Format Version 89a (21.0)
+|Table Based Image Data | Graphics Interchange Format Version 89a (22.0)
+|Graphic Control Extension | Graphics Interchange Format Version 89a (23.0)
+|Comment Extension | Graphics Interchange Format Version 89a (24.0)
+|Plain Text Extension | Graphics Interchange Format Version 89a (25.0)
+|Application Extension | Graphics Interchange Format Version 89a (26.0)
+|Trailer | Graphics Interchange Format Version 89a (27.0)
+|========
+

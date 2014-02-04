@@ -1,0 +1,33 @@
+:Doctitle: BMP Peach Pit Data Sheet
+:Description: BMP Image Format
+
+ *Peach Pit: BMP
+
+Bitmap is a Microsoft defined file format to contain raster graphic images.
+The file contains fixed sized headers and a variable length pixel array.
+The BMP header varies by a variety versions and each version successivly appends fields to its previous version.
+The file format is closely tied to the DIB internal data structure in the Windows API.
+
+
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://msdn.microsoft.com/en-us/library/dd183386%28VS.85%29.aspx | Bitmap Header Types
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Supported Headers | Specification
+|BITMAPCOREHEADER | Bitmap Header Types
+|BITMAPINFOHEADER | Bitmap Header Types
+|BITMAPV4HEADER | Bitmap Header Types
+|BITMAPV5HEADER | Bitmap Header Types
+|========
+

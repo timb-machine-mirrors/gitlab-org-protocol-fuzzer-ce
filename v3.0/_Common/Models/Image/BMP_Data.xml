@@ -4,6 +4,11 @@
        author="Deja Vu Security, LLC" description="Bmp PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 	
+	<Defaults>
+		<Number endian="little" signed="false" />
+	</Defaults>
+
+
 	<DataModel name="CIEXYZTRIPLE">
 		<Block name="CIEXYZ1">
 			<Block name="FXPT2DOT301">
@@ -44,7 +49,7 @@
 		<Block name="BMPHeader">
 			<String name="Magic" length="2" value="BM">
 				<Hint name="ValidValues" value="BM;BA;CI;CP;IC;PT" />
-				</String>
+			</String>
 			<Number name="Size" size="32">
 				<Relation type="size" of="BMP" />
 			</Number>
@@ -52,14 +57,14 @@
 			<Number name="DataOffset" size="32">
 				<Relation type="offset" of="TheBitmapData" />
 			</Number>
-  	</Block>
+  		</Block>
 
 		<Block name="BitmapInfo">
 			<Number name="Size" size="32">
 				<Relation type="size" of="FormatChoice" expressionGet="size - 4" expressionSet="size + 4"/>
 			</Number>
 			<Choice name="FormatChoice">
-				<Block name="BITMAPV5HEADER">
+				<Block name="BITMAPV5HEADER" length="120" >
 					<Number name="bV5Width" size="32"/>
 					<Number name="bV5Height" size="32"/>
 					<Number name="bV5Planes" size="16"/>
@@ -84,7 +89,7 @@
 					<Number name="bV5ProfileSize" size="32"/>
 					<Number name="bV5Reserved" size="32"/>
 				</Block>
-				<Block name="BITMAPV4HEADER"> 
+				<Block name="BITMAPV4HEADER" length="104" > 
 					<Number name="bV4Width" size="32"/>   
 					<Number name="bV4Height" size="32"/>   
 					<Number name="bV4Planes" size="16" /> 
@@ -105,7 +110,7 @@
 					<Number name="bV4GammaGreen" size="32"/>
 					<Number name="bV4GammaBlue" size="32"/>
 				</Block>
-				<Block name="BITMAPINFOHEADER"> 
+				<Block name="BITMAPINFOHEADER" length="36" > 
 					<Number name="biWidth" size="32"/>
 					<Number name="biHeight" size="32"/>
 					<Number name="biPlanes" size="16" />
@@ -117,14 +122,14 @@
 					<Number name="biClrUsed" size="32" />
 					<Number name="biClrImportant" size="32" />
 				</Block>
-				<Block name="BITMAPCOREHEADER"> 
+				<Block name="BITMAPCOREHEADER" length="8"> 
 					<Number name="bcWidth" size="16"/>
 					<Number name="bcHeight" size="16"/>
 					<Number name="bcPlanes" size="16"/>
 					<Number name="bcBitCount" size="16"/>
 				</Block>
 			</Choice>
-  	</Block>
+  		</Block>
 		<Blob name="TheColorPallete" />
 		<Blob name="TheBitmapData" />
   </DataModel>

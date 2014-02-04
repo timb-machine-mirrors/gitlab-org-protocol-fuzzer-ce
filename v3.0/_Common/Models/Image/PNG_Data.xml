@@ -6,7 +6,7 @@
 	
 	<!-- DEFAULTS SECTION -->
 	<Defaults>
-		<Number endian="network" signed="false" />
+		<Number endian="big" signed="false" />
 	</Defaults>
 	
   <!-- Abstract Chunk Data Model -->
