@@ -52,7 +52,6 @@ SamplePath:: Path to the directory in which the JPEG2000 sample files are stored
   </Windows>
 
 </PitDefines>
-
 ----
 
 .Configure Additional Monitors
