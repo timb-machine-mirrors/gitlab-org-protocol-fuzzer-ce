@@ -200,7 +200,7 @@
   <!-- ################### Begin Active Mode Server State Model ################### -->
   <StateModel name="HostToAgent" initialState="StartServer">
     <State name="StartServer">
-      <Action type="start" publisher="CommandPublisher"/>
+      <Action type="open" publisher="CommandPublisher"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
       <Action type="accept" publisher="CommandPublisher"/>
       <Action name="Next" type="changeState" ref="PreAuth"/>
@@ -602,10 +602,10 @@
     </State>
   </StateModel>
 
-  <!-- ################### Begin Active Mode Server State Model ################### -->
+  <!-- ################### Begin Passive Mode Server State Model ################### -->
   <StateModel name="PassiveHostToAgent" initialState="StartServer">
     <State name="StartServer">
-      <Action type="start" publisher="CommandPublisher"/>
+      <Action type="open" publisher="CommandPublisher"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
       <Action type="accept" publisher="CommandPublisher"/>
       <Action name="Next" type="changeState" ref="PreAuth"/>
