@@ -145,6 +145,8 @@
     </State>
 
     <State name="ListDir">
+      <Action type="open" publisher="DataListner"/>
+
       <Action type="output" publisher="CommandPublisher">
         <DataModel ref="FTP:LIST" />
       </Action>
