@@ -35,6 +35,11 @@
         <DataModel ref="FTP:ServerLoggedIn" />
       </Action>
 
+      <!-- finish consuming ServerLoggedIn if need be, see ftp_Data comment -->
+      <Action type="input" publisher="CommandPublisher">
+        <DataModel ref="FTP:ServerLoggedInHeaderMessage" />
+      </Action>
+
       <Action type="changeState" ref="EnterPassiveMode"/>
     </State>
 
