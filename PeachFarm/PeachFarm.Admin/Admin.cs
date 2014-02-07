@@ -330,7 +330,7 @@ namespace PeachFarm.Admin
 
 		#region StartPeach
 
-		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target = null, uint? rangestart = null, uint? rangeend = null, string testname = null)
+		public void StartPeachAsync(string pitFilePath, string definesFilePath, int clientCount, string tagsString, string ip, string target = null, uint? rangestart = null, uint? rangeend = null, string testname = null, uint seed = 0)
 		{
 			Register();
 
@@ -350,8 +350,17 @@ namespace PeachFarm.Admin
 
 			request.PitFileName = Path.GetFileNameWithoutExtension(pitFilePath);
 
-			request.Target = target ?? request.PitFileName;
-			request.TestName = testname ?? "Default";
+			if (string.IsNullOrEmpty(target))
+				request.Target = request.PitFileName;
+			else
+				request.Target = target;
+			
+			if (String.IsNullOrEmpty(testname))
+				request.TestName = "Default";
+			else
+				request.TestName = testname;
+
+			request.Seed = seed;
 
 			string newdefinesfilepath = String.Empty;
 			if (Path.GetExtension(pitFilePath) == xmlext)
@@ -665,6 +674,7 @@ namespace PeachFarm.Admin
 
 		public void DumpFiles(string jobID, string destinationFolder)
 		{
+			Register();
 			FileWriter.DumpFiles(MongoDbConnectionString, destinationFolder, jobID);
 		}
 
