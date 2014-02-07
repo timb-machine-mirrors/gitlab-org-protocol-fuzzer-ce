@@ -451,7 +451,7 @@ namespace PeachFarm.Controller
 					jobNodes = jobNodes.Take(request.ClientCount).ToList();
 					var jobQueues = (from Heartbeat h in jobNodes select h.QueueName).ToList();
 					DeclareJobExchange(request.JobID, jobQueues);
-					jobNodes = SeedNodes(jobNodes);
+					jobNodes = SeedNodes(jobNodes, request.Seed);
 					CommitJobToMongo(request, jobNodes);
 					SendToJobQueues(jobNodes, request);
 					//Reply(response.Serialize(), action, replyQueue);
@@ -642,12 +642,17 @@ namespace PeachFarm.Controller
 			return jobNodes;
 		}
 
-		protected virtual List<Heartbeat> SeedNodes(List<Heartbeat> nodes)
+		protected virtual List<Heartbeat> SeedNodes(List<Heartbeat> nodes, uint seed)
 		{
-			uint baseseed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
-			for (int i = 0; i < nodes.Count; i++)
+			if(seed == 0)
 			{
-				nodes[i].Seed = baseseed + Convert.ToUInt32(i);
+				seed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+			}
+
+			nodes[0].Seed = seed;
+			for (int i = 1; i < nodes.Count; i++)
+			{
+				nodes[i].Seed = seed + Convert.ToUInt32(i);
 			}
 			return nodes;
 		}
