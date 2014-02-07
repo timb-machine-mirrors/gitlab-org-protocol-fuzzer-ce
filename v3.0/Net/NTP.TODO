@@ -1,0 +1,7 @@
+#NTP TODO
+Add Server side support
+Add support for the following RFCS:
+  RFC5905 --Add Era support
+  RFC5906
+  RFC5907
+  RFC5908

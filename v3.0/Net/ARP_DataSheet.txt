@@ -4,7 +4,8 @@
 
  * Peach Pit: ARP
  * Direction: Broadcast, Listen
- 
+ * Supported Platorms: Linux
+
 The Address Resolution Protocol allows for translation between hardware and protocol addresses. It is most commonly used for translation between IPv4 and MAC addresses in Ethernet and Wireless networks.
 
 Specifications

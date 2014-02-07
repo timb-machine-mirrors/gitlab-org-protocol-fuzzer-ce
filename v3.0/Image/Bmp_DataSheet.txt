@@ -1,7 +1,8 @@
 :Doctitle: BMP Peach Pit Data Sheet
 :Description: BMP Image Format
 
- *Peach Pit: BMP
+ * Peach Pit: BMP
+ * Supported Platorms: Windows, Linux, OS X
 
 Bitmap is a Microsoft defined file format to contain raster graphic images.
 The file contains fixed sized headers and a variable length pixel array.

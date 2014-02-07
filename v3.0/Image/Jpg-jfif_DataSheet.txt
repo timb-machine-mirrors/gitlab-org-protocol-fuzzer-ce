@@ -1,7 +1,8 @@
 :Doctitle: JPG-JFIF Peach Pit Data Sheet
 :Description: JPG-JFIF Image Format
 
- *Peach Pit: JPG-JFIF
+ * Peach Pit: JPG-JFIF
+ * Supported Platorms: Windows, Linux, OS X
 
 JPEG File Interchange Format (JFIF) is an image format built on a TLV segment structure.
 It is built to be an extensible format and supports a variety of compressions and encodings.

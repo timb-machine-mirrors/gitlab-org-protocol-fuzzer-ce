@@ -4,7 +4,8 @@
 
  * Peach Pit: DHCPv4
  * Direction: Client
- 
+ * Supported Platorms: Windows, Linux, OS X
+
 Dynamic Host Configuration Protocol Version 4 (DHCPv4) is network configuration protocol over IPv4.
 DHCP provides a way for devices on a network to request an available IP address from a central server.
 Requesting IP addresses with DHCP reduces the changes of address collisions and allows hosts to become addressable without needing previous details of the network configuration.

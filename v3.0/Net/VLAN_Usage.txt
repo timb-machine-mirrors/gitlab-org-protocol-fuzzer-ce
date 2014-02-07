@@ -4,9 +4,9 @@ Configuration
 -------------
 
 .Target Configuration
-A VLAN interface or VLAN enabled switch is required. 
+A VLAN interface or VLAN enabled switch is required.
 A VLAN interface can be added on Linux using vconfig.
-In order to run all tests both a UDP and TCP listener are required. 
+In order to run all tests both a UDP and TCP listener are required.
 The networking tool socat can be used for this.
 
 _Example of using adding a VLAN interface:_
@@ -52,7 +52,7 @@ LoggerPath:: Path to folder where logs will be stored
 <PitDefines>
   <All>
     <Define key="SourceMAC" value="000000000000" />
-    <Define key="TargetMAC" value="000000000000"/> 
+    <Define key="TargetMAC" value="000000000000"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
@@ -60,7 +60,7 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="SourceIPv6" value="::1"/>
     <Define key="Tag" value="1"/>
     <Define key="Path" value="."/>
-    
+
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
   </All>
@@ -70,7 +70,7 @@ LoggerPath:: Path to folder where logs will be stored
   </Linux>
 
   <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
   <Windows platform="windows">

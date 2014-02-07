@@ -4,8 +4,9 @@
 
  * Peach Pit: Ethernet
  * Direction: Broadcast
- 
-An Ethernet Frame is a link layer data packet, as described in IEEE 802.3. It encapsulates all layers above it. The simplicity of the protocol suggests that this pit would not be used alone, but would likely be used in the construction of pits for encapsulated protocols. 
+ * Supported Platorms: Linux
+
+An Ethernet Frame is a link layer data packet, as described in IEEE 802.3. It encapsulates all layers above it. The simplicity of the protocol suggests that this pit would not be used alone, but would likely be used in the construction of pits for encapsulated protocols.
 
 Specifications
 --------------
