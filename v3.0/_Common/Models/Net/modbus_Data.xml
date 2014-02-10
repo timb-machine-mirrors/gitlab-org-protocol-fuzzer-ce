@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+  author="Deja Vu Security, LLC" description="Modbus PIT DataModels" version="0.0.1">
+
+  <Defaults>
+    <Number endian="network" />
+  </Defaults>
+
+  <DataModel name="TCPFunctions">
+    <Choice name="Function">
+      <Block name="ReadCoils">
+        <Number name="FunctionCode" size="8" value="1" token="true"/>
+        <Number name="StartingAddress" size="16" value="100" />
+        <Number name="QuantityofCoils" size="16" value="1" />
+      </Block>
+      <Block name="ReadDiscreteInputs">
+        <Number name="FunctionCode" size="8" value="2" token="true"/>
+        <Number name="StartingAddress" size="16" value="100" />
+        <Number name="QuantityofInputs" size="16" value="1" />
+      </Block>
+      <Block name="ReadHoldingRegisters">
+        <Number name="FunctionCode" size="8" value="3" token="true"/>
+        <Number name="StartingAddress" size="16" value="101" />
+        <Number name="QuantityofRegisters" size="16" value="1" />
+      </Block>
+      <Block name="ReadInputRegisters">
+        <Number name="FunctionCode" size="8" value="4" token="true"/>
+        <Number name="StartingAddress" size="16" value="101" />
+        <Number name="QuantityofInputRegisters" size="16" value="1" />
+      </Block>
+      <Block name="WriteSingleCoil">
+        <Number name="FunctionCode" size="8" value="5" token="true"/>
+        <Number name="OutputAddress" size="16" value="101" />
+        <Number name="OutputValue" size="16" value="0" />
+      </Block>
+      <Block name="WriteSingleRegister">
+        <Number name="FunctionCode" size="8" value="6" token="true"/>
+        <Number name="Register" size="16" value="101" />
+        <Number name="CoordinatesHi" size="8" valueType="hex" value="00" />
+        <Number name="CoordinatesLo" size="8" valueType="hex" value="65" />
+      </Block>
+      <Block name="WriteMultipleCoils">
+        <Number name="FunctionCode" size="8" value="15" token="true"/>
+        <Number name="StartingAddress" size="16" value="101" />
+        <Number name="Quantity" size="16" >
+          <Relation type="count" of="Values" /> <!--TODO divide by 8 -->
+        </Number>
+        <Number name="Count" size="8">
+          <Relation type="size" of="Values" />
+        </Number>
+        <Block name="Values" minOccurs="1">
+          <Blob length="1" valueType="hex" value="00" />
+        </Block>
+      </Block>
+      <Block name="WriteMultipleRegisters">
+        <Number name="FunctionCode" size="8" value="16" token="true"/>
+        <Number name="StartingRegister" size="16" value="101" />
+        <Number name="Quantity" size="16" >
+          <Relation type="count" of="Values" />
+        </Number>
+        <Number name="Count" size="8">
+          <Relation type="size" of="Values" />
+        </Number>
+        <Block name="Values" minOccurs="1">
+          <Blob length="1" valueType="hex" value="00" />
+          <Blob length="1" valueType="hex" value="10" />
+        </Block>
+      </Block>
+      <Block name="ReadFileRecord">
+        <Number name="FunctionCode" size="8" value="20" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+      <Block name="WriteFileRecord">
+        <Number name="FunctionCode" size="8" value="21" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+      <Block name="MaskWriteRegister">
+        <Number name="FunctionCode" size="8" value="22" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+      <Block name="ReadWriteMultipleRegisters">
+        <Number name="FunctionCode" size="8" value="23" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+      <Block name="ReadFifoQueue">
+        <Number name="FunctionCode" size="8" value="24" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+      <Block name="EncapsulatedInterfaceTransport">
+        <Number name="FunctionCode" size="8" value="43" token="true"/>
+        <Blob name="TODO" />
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <DataModel name="RTUFunctions" ref="TCPFunctions">
+    <Block name="Function.ReadHoldingRegisters"/>
+    <Block name="Function.WriteSingleRegister"/>
+    <Block name="Function.ReadExceptionStatus">
+      <Number name="FunctionCode" size="8" value="7" token="true"/>
+    </Block>
+    <Block name="Function.Diagnostics">
+      <Number name="FunctionCode" size="8" value="8" token="true"/>
+      <Number name="SubFunction" size="16" value="0" />
+    </Block>
+    <Block name="Function.GetCommEventCounter">
+      <Number name="FunctionCode" size="8" value="11" token="true"/>
+    </Block>
+    <Block name="Function.GetCommEventLog">
+      <Number name="FunctionCode" size="8" value="12" token="true"/>
+    </Block>
+    <Block name="Function.ReportServerID">
+      <Number name="FunctionCode" size="8" value="17" token="true"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="AsciiFrameFormat"> <!--Data is the hex value given as a string-->
+    <String name="Start" length="1" value=":" token="true" />
+    <Block name="LrcBlock">
+      <String name="Address" length="2"  value="65"/> <!--0x65 == 101-->
+      <String name="Function" length="2" value="03"/>
+      <String name="Data" value="0065aaaaaaaa"/>
+      <String name="LRC" length="2">
+        <Fixup class="LRCFixup">
+          <Param name="ref" value="LrcBlock"/>
+        </Fixup>
+      </String>
+    </Block>
+    <String name="End" length="2" valueType="hex" value="0D 0A" token="true"/>
+  </DataModel>
+
+  <DataModel name="RTUFrameFormat">
+    <Number name="Start" size="28" />
+    <Block name="CrcBlock">
+      <Blob name="Address" valueType="hex" length="1" value="65" />
+      <Block name="FunctionChoices" ref="RTUFunctions" />
+    </Block>
+    <Number name="CRC" size="16">
+      <Fixup class="CrcFixup" >
+        <Param name="type" value="CRC16" />
+        <Param name="ref" value="CrcBlock"/>
+      </Fixup>
+    </Number>
+    <Number name="End" size="28" />
+  </DataModel>
+
+  <DataModel name="TcpFrameFormat">
+    <Number name="TransactionID" size="16" valueType="hex" value="00 01"/>
+    <Number name="ProtocolID" size="16" value="0" token="true" />
+    <Number name="LengthField" size="16">
+      <Relation type="size" of="Remaining" />
+    </Number>
+    <Block name="Remaining">
+      <Number name="UnitID" size="8" value="1"/>
+      <Block name="FunctionChoices" ref="TCPFunctions" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="CatchInput">
+    <Blob />
+  </DataModel>
+</Peach>
+<!--End-->
