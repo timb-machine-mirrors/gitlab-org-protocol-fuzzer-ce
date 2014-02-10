@@ -52,8 +52,8 @@
 		</State>
 
 		<State name="Established" >
-			<Action type="changeState" ref="WaitServerClose"/>
-			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
+            <!--<Action type="changeState" ref="WaitServerClose"/>-->
+			 <Action type="changeState" ref="SendTestPayload"/> 
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
