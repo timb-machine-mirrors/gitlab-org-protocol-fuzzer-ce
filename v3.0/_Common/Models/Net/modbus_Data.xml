@@ -43,9 +43,7 @@
       <Block name="WriteMultipleCoils">
         <Number name="FunctionCode" size="8" value="15" token="true"/>
         <Number name="StartingAddress" size="16" value="101" />
-        <Number name="Quantity" size="16" >
-          <Relation type="count" of="Values" /> <!--TODO divide by 8 -->
-        </Number>
+        <Number name="Quantity" size="16" value="6"/>
         <Number name="Count" size="8">
           <Relation type="size" of="Values" />
         </Number>
@@ -56,9 +54,7 @@
       <Block name="WriteMultipleRegisters">
         <Number name="FunctionCode" size="8" value="16" token="true"/>
         <Number name="StartingRegister" size="16" value="101" />
-        <Number name="Quantity" size="16" >
-          <Relation type="count" of="Values" />
-        </Number>
+        <Number name="Quantity" size="16" value="10"/>
         <Number name="Count" size="8">
           <Relation type="size" of="Values" />
         </Number>
@@ -69,27 +65,58 @@
       </Block>
       <Block name="ReadFileRecord">
         <Number name="FunctionCode" size="8" value="20" token="true"/>
-        <Blob name="TODO" />
+        <Number name="Count" size="8">
+          <Relation type="size" of="SubBlock"/>
+        </Number>
+        <Block name="SubBlock" minOccurs="1" maxOccurs="-1">
+          <Number name="ReferenceType" size="8" value="6"/>
+          <Number name="FileNumber" size="16" value="1"/>
+          <Number name="RecordNumber" size="16" value="0"/>
+          <Number name="RecordLength" size="16" value="2"/>
+        </Block>
       </Block>
       <Block name="WriteFileRecord">
         <Number name="FunctionCode" size="8" value="21" token="true"/>
-        <Blob name="TODO" />
+        <Number name="Count" size="8">
+          <Relation type="size" of="SubBlock"/>
+        </Number>
+        <Block name="SubBlock" minOccurs="1" maxOccurs="-1">
+          <Number name="ReferenceType" size="8" value="6"/>
+          <Number name="FileNumber" size="16" value="1"/>
+          <Number name="RecordNumber" size="16" value="0"/>
+          <Number name="RecordLength" size="16" value="2"/>
+          <Blob name="RecordData" valueType="hex" value="01010204"/>
+        </Block>
       </Block>
       <Block name="MaskWriteRegister">
         <Number name="FunctionCode" size="8" value="22" token="true"/>
-        <Blob name="TODO" />
+        <Number name="ReferenceAddress" size="16" value="0"/>
+        <Number name="And_Mask" size="16" value="0"/>
+        <Number name="Or_Mask" size="16" value="0"/>
       </Block>
       <Block name="ReadWriteMultipleRegisters">
         <Number name="FunctionCode" size="8" value="23" token="true"/>
-        <Blob name="TODO" />
+        <Number name="ReadStartingAddress" size="16" value="101" />
+        <Number name="QuantityToRead" size="16" value="10"/>
+        <Number name="WriteStartingAddress" size="16" value="101" />
+        <Number name="QuantityToWrite" size="16" value="10"/>
+        <Number name="Count" size="8">
+          <Relation type="size" of="Values" />
+        </Number>
+        <Block name="Values" minOccurs="1">
+          <Blob length="1" valueType="hex" value="00" />
+          <Blob length="1" valueType="hex" value="10" />
+        </Block>
       </Block>
       <Block name="ReadFifoQueue">
         <Number name="FunctionCode" size="8" value="24" token="true"/>
-        <Blob name="TODO" />
+        <Number name="FIFOPointerAddress" size="16" value="0"/>
       </Block>
       <Block name="EncapsulatedInterfaceTransport">
         <Number name="FunctionCode" size="8" value="43" token="true"/>
-        <Blob name="TODO" />
+        <Number name="MEIType" size="8" value="14"/>
+        <Number name="ReadDeviceId" size="8" value="1"/>
+        <Number name="ObjectId" size="8" value="0"/>
       </Block>
     </Choice>
   </DataModel>
