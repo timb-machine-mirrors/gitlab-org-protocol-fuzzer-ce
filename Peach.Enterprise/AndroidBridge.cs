@@ -201,6 +201,9 @@ namespace Peach.Enterprise
 				AndroidDebugBridge.Instance.ClientChanged -= OnClientChanged;
 			}
 
+			// Ensure adb is fully stopped before starting the bridge again
+			Stop();
+
 			RunBridge(AndroidDebugBridge.AdbOsLocation);
 		}
 
@@ -212,11 +215,52 @@ namespace Peach.Enterprise
 			if (refCount == 1)
 			{
 				logger.Debug("Terminating android debug bridge.");
-				AndroidDebugBridge.Instance.Stop();
-				AndroidDebugBridge.Terminate();
+				Stop();
 			}
 
 			--refCount;
+		}
+
+		private static void Stop()
+		{
+			if (!AndroidDebugBridge.Instance.Stop())
+			{
+				logger.Debug("Failed to gracefully stop adb server, terminating adb process.");
+
+				var adb = Path.GetFileName(AndroidDebugBridge.AdbOsLocation);
+				var procs = System.Diagnostics.Process.GetProcesses();
+
+				foreach (var p in procs)
+				{
+					try
+					{
+						if (p.ProcessName == adb || p.MainModule.FileName == AndroidDebugBridge.AdbOsLocation)
+						{
+							try
+							{
+								p.Kill();
+								p.WaitForExit();
+								logger.Debug("Killed adb server process '{0}' (pid: {1})", p.ProcessName, p.Id);
+							}
+							catch (Exception ex)
+							{
+								logger.Debug("Unable to kill adb server process '{0}' (pid: {1}). {2}", p.ProcessName, p.Id, ex.Message);
+							}
+						}
+					}
+					catch
+					{
+					}
+					finally
+					{
+						p.Close();
+					}
+				}
+
+			}
+
+			AndroidDebugBridge.DisconnectBridge();
+			AndroidDebugBridge.Terminate();
 		}
 	}
 }

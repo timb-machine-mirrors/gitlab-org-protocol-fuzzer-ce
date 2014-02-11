@@ -305,6 +305,17 @@ namespace Peach.Enterprise
 						if (res == "stopped")
 							break;
 					}
+					catch (AdbException ex)
+					{
+						logger.Trace("AdbException waiting for device '{0}': {1}", dev.SerialNumber, ex.Message);
+
+						if (ex.Message.Contains("sad result from adb"))
+						{
+							logger.Trace("Attempting to restart adb server.");
+							AndroidBridge.Restart();
+							restart = true;
+						}
+					}
 					catch (Exception ex)
 					{
 						logger.Trace("Exception waiting for device '{0}': {1}", dev.SerialNumber, ex.Message);

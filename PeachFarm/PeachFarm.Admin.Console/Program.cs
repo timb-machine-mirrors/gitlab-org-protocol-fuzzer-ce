@@ -43,6 +43,7 @@ namespace PeachFarm.Admin
 				string target = null;
 				string testname = null;
 				string definesFilePath = String.Empty;
+				uint seed = 0;
 
 				DeleteDataType cleartype = DeleteDataType.Job;
 				string clearparameter = String.Empty;
@@ -72,6 +73,7 @@ namespace PeachFarm.Admin
 						{ "d|defines=", v => definesFilePath = v},
 						{ "a|target=", v => target = v},
 						{ "e|test=", v => testname = v},
+						{ "s|seed=", v => seed = uint.Parse(v)},
 						{ "type=", v => {
 							switch(v)
 							{
@@ -176,7 +178,7 @@ namespace PeachFarm.Admin
 
 						mustwait = true;
 
-						admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend, testname);
+						admin.StartPeachAsync(pitFilePath, definesFilePath, launchCount, tagsString, ip, target, rangestart, rangeend, testname, seed);
 					}
 					#endregion
 
