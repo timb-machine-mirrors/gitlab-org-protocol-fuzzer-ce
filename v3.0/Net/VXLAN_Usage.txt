@@ -5,23 +5,7 @@ Configuration
 
 .Target Configuration
 
-
-In order to run all tests both a UDP and TCP listener are required.
-The networking tool socat can be used for this.
-
-_Example of using adding a VXLAN interface:_
-
-----
-
-
-#Setting up socat listener for UDP
-
-sudo socat STDIO udp-listen:12345
-
-#Setting up socat listener for TCP
-
-sudo socat STDIO tcp-listen:12345
-----
+Setting up VXLAN can be a long multistep process. In order to simplify the setup please refer to to VMware's official VLXAN deployment guide which is located here: http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
 
 .Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine
