@@ -152,6 +152,16 @@
 		</Block>
 	</DataModel>
 
+        <!-- this is here to read in the rest of the data if our client consumes all
+             data sent for a response message before the server is done sending
+             back the response. basically, this repeats/finishes "ServerLoggedIn"
+             -->
+	<DataModel name="ServerLoggedInHeaderMessage">
+		<Block ref="ResponseTemplate" minOccurs="0" maxOccurs="-1">
+			<String name="Status" value="230" token="true"/>
+		</Block>
+	</DataModel>
+
 	<DataModel name="ServerQuit" ref="ResponseTemplate">
 		<String name="Status" value="221" token="true"/>
 	</DataModel>
