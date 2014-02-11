@@ -10,13 +10,14 @@ def setup(ctx):
     ctx.testip = "::%d" % randint(2,9)
     os.system('ip addr add %s dev lo'  % ctx.testip)
     port = randint(1024,65535)
-    ctx.socat_proc = Popen(['socat', 
-                            'tcp6-l:%d,fork,reuseaddr' % port,
-                            'READLINE'],
+    ctx.socat_proc = Popen(['socat',
+        'tcp6-l:%d,fork,reuseaddr,bind=[::1]' % port,
+                            'STDOUT'],
                            stdin=null, stdout=null, stderr=null)
     ctx.update_defines(TargetPort=port,
+                       TargetIPv6="::1",
                        SourceIPv6=ctx.testip)
-    
+
 
 def teardown(ctx):
     ctx.socat_proc.kill()
@@ -26,5 +27,5 @@ def teardown(ctx):
 
 test(name="TCPv6",
      platform="linux",
-     setup=setup, 
+     setup=setup,
      teardown=teardown)

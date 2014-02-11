@@ -3,7 +3,7 @@
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
 			 author="Deja Vu Security, LLC" description="Transport Control Protocol Version 6 PIT StateModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
+
 	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
 	<Include ns="TCPv6" src="file:##Path##/_Common/Models/Net/TCPv6_Data.xml"/>
 	<PythonPath path="##Path##/_Common/Models/Net/"/>
@@ -12,7 +12,7 @@
 
 	<!-- Implements: RFC 793 (http://tools.ietf.org/html/rfc793) -->
 	<!-- Currenlty supports fuzzing a listener, not acting as a listener -->
-		
+
 	<StateModel name="Listener" initialState="SendSyn">
 
 		<State name="SendSyn" >
@@ -36,12 +36,12 @@
 			<Action name="GoToSend"
 							type="changeState" ref="SynRecieved"
 							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
-			<Action name="GoToSend"
+			<Action name="GoToSend2"
 							type="changeState" ref="Established"
 							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
 			<Action name="ReadMore" type="changeState" ref="SynSent" />
 		</State>
-		
+
 		<State name="SynRecieved" >
 			<Action name="SendAck" type="output"
 							onStart="TCP.sync_from_store(self)" >
@@ -52,13 +52,13 @@
 		</State>
 
 		<State name="Established" >
-			<Action type="changeState" ref="WaitServerClose"/>
-			<!-- <Action type="changeState" ref="SendTestPayload"/> -->
+            <!--<Action type="changeState" ref="WaitServerClose"/>-->
+			 <Action type="changeState" ref="SendTestPayload"/> 
 			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 		</State>
 
 		<State name="WaitServerClose">
-			<Action name="GetPacket" type="input" 
+			<Action name="GetPacket" type="input"
 							onComplete="TCP.store_next_acknum(self)">
 				<DataModel name="Packet" ref="TCPv6:Packet"/>
 			</Action>
@@ -87,7 +87,7 @@
 			</Action>
 			<Action name="Read" type="changeState" ref="WaitForAck" />
 		</State>
-		
+
 		<State name="WaitForAck">
 			<Action name="GetPacket" type="input" >
 							<!-- onComplete="TCP.store_next_acknum(self)"> -->
@@ -125,7 +125,7 @@
 			</Action>
 			<Action name="GoToWaitForAck" type="changeState" ref="WaitForAck"/>
 		</State>
-		
+
 		<State name="Close">
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)"
@@ -146,7 +146,7 @@
 							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
 		</State>
-		
+
 		<State name="SendFinalFinAck">
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)">
@@ -171,7 +171,7 @@
 			</Action>
 			<Action name="TryAgain" type="changeState" ref="SendSyn"/>
 		</State>
-		
+
 	</StateModel>
 
 	</Peach>
