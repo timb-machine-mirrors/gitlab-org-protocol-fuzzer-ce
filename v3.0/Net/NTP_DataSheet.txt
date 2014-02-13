@@ -1,0 +1,29 @@
+
+:Doctitle: NTP Peach Pit Data Sheet
+:Description: Network Time Protocol (NTP)
+
+ * Peach Pit: NTP
+ * Direction: Client
+ * Supported Platorms: Windows, Linux, OS X
+
+Network Time Protocol (NTP) is a networking protocol for clock synchronization between computer systems over packet-switched, variable-latency data networks.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC5905 | Network Time Protocol Version 4: Protocol and Algorithms Specification
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|List Peers | RFC5905
+|Read List | RFC5905
+|Monlist | RFC5905
+|========
