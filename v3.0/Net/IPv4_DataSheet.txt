@@ -4,8 +4,9 @@
 
  * Peach Pit: IPv4
  * Direction: Client
- 
-Internet Protocol Version 4 (IPv4) is the Layer 3 Backbone of the internet.  It is built on top of Ethernet and offers configurable addressing and routing capabilities to computer networks. IPv4 is inherently an unreliable protocol in that packets are not expected to reach its destination.  Layer 4 protocols like TCP are designed to provide reliable and ordered transmission of data over an IP network. 
+ * Supported Platforms: Windows, Linux, OS X
+
+Internet Protocol Version 4 (IPv4) is the Layer 3 Backbone of the internet.  It is built on top of Ethernet and offers configurable addressing and routing capabilities to computer networks. IPv4 is inherently an unreliable protocol in that packets are not expected to reach its destination.  Layer 4 protocols like TCP are designed to provide reliable and ordered transmission of data over an IP network.
 
 Specifications
 --------------

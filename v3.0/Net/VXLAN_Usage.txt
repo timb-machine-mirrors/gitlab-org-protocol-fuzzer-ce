@@ -57,7 +57,7 @@ LoggerPath:: Path to folder where logs will be stored
   </Linux>
 
   <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
   <Windows platform="windows">

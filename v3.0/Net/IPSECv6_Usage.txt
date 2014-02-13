@@ -5,8 +5,8 @@ Configuration
 
 .Target Configuration
 An IPsec target configured for manual keying using the keys defined in the configuration file is required.
-IP-tools on Linux can be used. 
-In order to run all tests both a UDP and TCP listener are required. 
+IP-tools on Linux can be used.
+In order to run all tests both a UDP and TCP listener are required.
 The networking tool socat can be used for this.
 
 _Example of of setting up ipsec-tools on target machine:_
@@ -35,8 +35,8 @@ spdadd 10.0.1.2 10.0.1.2 any -P out ipsec
 spdadd 10.0.1.1 10.0.1.2 any -P in ipsec
     esp/transport//require
     ah/transport//require;
-## End ipsec.config ##           
-  
+## End ipsec.config ##
+
 #Run setkey to enable changes
 
 sudo setkey -f ipsec.config
@@ -78,7 +78,7 @@ LoggerPath:: Path to folder where logs will be stored
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="LoggerPath"  value="./logs/ipsec/"/> 
+    <Define key="LoggerPath"  value="./logs/ipsec/"/>
     <Define key="SourceMAC" value="ffffffffffff" />
     <Define key="TargetMAC" value="000000000000"/>
     <Define key="Mode" value="Transport"/>
@@ -89,7 +89,7 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="SourceIPv6" value="::1"/>
     <Define key="EncryptionAlg" value="Aes128"/>
     <Define key="CryptoKey" value="41414141414141414141414141414141"/>
-    <Define key="IV" value="baae9ef59ff1ee56211769bd91da50ed"/> 
+    <Define key="IV" value="baae9ef59ff1ee56211769bd91da50ed"/>
     <Define key="HashAlg" value="HMACSHA1"/>
     <Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
     <Define key="SPI" value="201"/>
@@ -98,15 +98,15 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
   </All>
-		
+
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
   </Linux>
-  
+
   <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+    <!-- OS X doesn't support raw ESP or AH packets -->
   </OSX>
-  
+
   <Windows platform="windows">
     <Define key="Interface" value="Local Area Connection"/>
   </Windows>

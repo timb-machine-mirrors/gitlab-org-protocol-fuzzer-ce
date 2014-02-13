@@ -3,6 +3,7 @@
 
  * Peach Pit: LDAP
  * Direction: Client, Server
+ * Supported Platforms: Windows, Linux, OS X
 
 The Lightweight Directory Access Protocol (LDAP) is an application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network.
 
