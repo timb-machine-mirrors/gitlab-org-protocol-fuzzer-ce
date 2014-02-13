@@ -6,7 +6,7 @@
 	
 	<!-- DEFAULTS SECTION -->
 	<Defaults>
-		<Number endian="network" signed="false" />
+		<Number endian="big" signed="false" />
 	</Defaults>
 	
   <!-- Abstract Chunk Data Model -->
@@ -36,8 +36,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="IHDR" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
-
 						<Number name="Width" size="32" />
 						<Number name="Height" size="32" />
 						<Number name="BitDepth" size="8" />
@@ -53,9 +51,7 @@
 			<Block name="PLTE" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="PLTE" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -64,7 +60,6 @@
         <Block name="Core">
           <String name="Type" token="true" value="oFFs"/>
           <Block name="Data">
-            <Relation type="size" from="Length" />
             <Number name="ImgPosX" size="32" value="4"/>
             <Number name="ImgPosY" size="32" value="4"/>
             <Number name="UnitSpec" size="8" value="0"/>
@@ -77,8 +72,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="IDAT" />
 					<Blob name="Data">
-						<Relation type="size" from="Length" />
-
 						<Hint name="BitFlipperMutator-N" value="1"/>
 						<Hint name="DWORDSliderMutator" value="off"/>
 					</Blob>
@@ -90,8 +83,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="pHYs" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
-
 						<Number name="PixlesPerUnitX" size="32" />
 						<Number name="PixlesPerUnitY" size="32" />
 						<Number name="Unit" size="8" />
@@ -103,9 +94,7 @@
 			<Block name="IEND" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="IEND" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -113,9 +102,7 @@
 			<Block name="tRNS" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="tRNS" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -124,8 +111,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="cHRM" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
-
 						<Number name="WhitePointX" size="32" />
 						<Number name="WhitePointY" size="32" />
 						<Number name="RedX" size="32" />
@@ -142,9 +127,7 @@
 			<Block name="gAMA" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="gAMA" />
-					<Number name="Data" size="32">
-						<Relation type="size" from="Length" />
-					</Number>
+					<Number name="Data" size="32" />
 				</Block>
 			</Block>
       
@@ -153,7 +136,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="iCCP" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
 						<String name="ProfileName" nullTerminated="true" />
 						<Number name="CompressionMethod" size="8" />
 						<Blob name="CompressionProfile" />
@@ -165,9 +147,7 @@
 			<Block name="sBIT" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="sBIT" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -175,9 +155,7 @@
 			<Block name="sRGB" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="sRGB" />
-					<Number name="Data" size="8">
-						<Relation type="size" from="Length" />
-					</Number>
+					<Number name="Data" size="8" />
 				</Block>
 			</Block>
       
@@ -186,7 +164,6 @@
 	        <Block name="Core">
           	<String name="Type" token="true" value="tEXt" />
           		<Block name="Data">
-            			<Relation type="size" from="Length" />
             			<String name="keyword" nullTerminated="false" />
             			<Number name="nullTerm" size="8" value="00" valueType="hex" token="true" />
             			<String name="text" nullTerminated="false"/>
@@ -199,7 +176,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="zTXt" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
 						<String name="Keyword" nullTerminated="true" />
 						<Number name="CompressionMethod" size="8" />
 						<String name="CompressedValue">
@@ -214,8 +190,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="iTXt" />
 					<Choice name="Data">
-						<Relation type="size" from="Length" />
-
 						<Block name="NoCompression">
 							<String name="Keyword" nullTerminated="true" />
 							<Number name="CompressionFlag" size="8" value="0" token="true" />
@@ -242,9 +216,7 @@
 			<Block name="bKGD" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="bKGD" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -252,9 +224,7 @@
 			<Block name="sPLT" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" token="true" value="sPLT" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       
@@ -263,7 +233,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="hIST" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
 						<Number size="16" signed="false" endian="big" minOccurs="1" maxOccurs="20000" />
 					</Block>
 				</Block>
@@ -274,7 +243,6 @@
 				<Block name="Core">
 					<String name="Type" token="true" value="tIME" />
 					<Block name="Data">
-						<Relation type="size" from="Length" />
 						<Number size="16" signed="false" endian="big" />
 						<Number size="8" signed="false" endian="big" />
 						<Number size="8" signed="false" endian="big" />
@@ -290,7 +258,6 @@
 				<Block name="Core">
 					<String name="Type" value="cpIp" token="true" />
 					<Blob name="Data">
-						<Relation type="size" from="Length" />
 						<Hint name="BitFlipperMutator-N" value="0"/>
 					</Blob>
 				</Block>
@@ -300,9 +267,7 @@
 			<Block name="CatchAll" ref="Chunk">
 				<Block name="Core">
 					<String name="Type" length="4" />
-					<Blob name="Data">
-						<Relation type="size" from="Length" />
-					</Blob>
+					<Blob name="Data" />
 				</Block>
 			</Block>
       

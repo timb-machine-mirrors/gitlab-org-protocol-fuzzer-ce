@@ -4,6 +4,7 @@
 
  * Peach Pit: VXLAN
  * Direction: Client
+ * Supported Platorms: Linux
 
 VXLAN (Virtual eXtensible Local Area Network) runs over the existing networking infrastructure and provides a means to "stretch" a Layer 2 network.
 

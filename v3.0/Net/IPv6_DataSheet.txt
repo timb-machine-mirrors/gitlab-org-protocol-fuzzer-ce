@@ -4,7 +4,8 @@
 
  * Peach Pit: IPv6
  * Direction: Client
- 
+ * Supported Platforms: Linux
+
 Internet Protocol version 6 (IPv6) is the the communications protocol that provides an identification and location system for computers on networks and routes traffic across the Internet. IPv6 was developed to deal with the long-anticipated problem of IPv4 address exhaustion and will eventually replace IPv4.
 
 Specifications

@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Dynamic Host Configuration Protocol v6 PIT StateModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-		
+
 	<!-- Implements: RFC3315 [Dynamic Host Configuration Protocol for IPv6 (DHCPv6)](http://tools.ietf.org/html/rfc3315) -->
 	<!-- Implementation notes: Supports the minimum necessary for server side of 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
@@ -21,9 +21,9 @@
 
 		<!-- Needs: -->
 		<!-- all other client requests -->
-		
+
 		<!-- Does not support Rapid Commit (22.14) -->
-		
+
 		<!-- "The client sends a Solicit message to the All_DHCP_Relay_Agents_and_Servers address to find available DHCP servers." -->
 		<State name="Listening">
 
@@ -34,7 +34,7 @@
 				<DataModel name="LastSendIP"/> <!-- Needed for ip address storage -->
 			</Action>
 			<Action name="GoToQuit" type="changeState" ref="Quit"
-							when="DHCPv6.too_many_tries(self, ##MaxTries##)"/>  
+							when="DHCPv6.too_many_tries(self, ##MaxTries##)"/>
 			<Action name="GoToListen" type="changeState" ref="Listening"
 							when="DHCPv6.not_from_target(self,'##TargetIPv6##')"/>
 			<!-- !!TODO!! -->
@@ -44,10 +44,10 @@
 			<Action name="GoToReply" type="changeState" ref="Reply"
 							when="DHCPv6.is_request(self)" />
 		</State>
-		
+
 		<!-- "Any server that can meet the client's requirements responds with an Advertise message." -->
 		<!-- 17.2.2. Creation and Transmission of Advertise Messages -->
-		<State name="Advertising"> 
+		<State name="Advertising">
 			<!-- The server sets the "msg-type" field to ADVERTISE and copies the -->
 			<!-- contents of the transaction-id field from the Solicit message -->
 			<!-- received from the client to the Advertise message. -->
@@ -103,23 +103,14 @@
 			</Action>
 		</State>
 
-		<State name="Testing">
-			<Action type="output">
-				<DataModel ref="DHCP:Packet" name="test"/>
-				<Data name="DataSet">
-				</Data>
-			</Action>
-			<Action type="changeState" ref="Advertising"/>
-		</State>
-		
 		<State name="Quit">
 			<!-- This is a state that exists to exit after a given number of unmatched packets -->
 		</State>
-		
-		
+
+
 	</StateModel>
 
-	
+
 
 </Peach>
 <!-- end -->

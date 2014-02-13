@@ -10,35 +10,47 @@
     <Monitor class="LinuxCrashMonitor"/>
 
     <Monitor class="Process">
-      <Param name="Executable" value="##LinuxFTPCmd##" />
-      <Param name="Arguments" value="##LocalIPv4##" />
+      <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="127.0.0.1" /> <!--##SourceIPv4##-->
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
 	</Agent>
 
-	<Agent name="WinServerAgent">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="ftp.bat ##LocalIPv4##"/>
-			<Param name="NoCpuKill" value="true"/>
-			<Param name="FaultOnEarlyExit" value="false"/>
-			<Param name="WaitForExitTimeout" value="250"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-			<Param name="WaitForExitOnCall" value="exitProgram"/>
-			<Param name="WinDbgPath" value="C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64"/>
-		</Monitor>
+  <Agent name="OsxServerAgent">
+    <Monitor class="Process">
+      <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="127.0.0.1" /> <!--##SourceIPv4##-->
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
+    </Monitor>
+  </Agent>
 
+	<Agent name="WinServerAgent">
 		<Monitor class="Process">
-      <Param name="Executable" value="ftp.bat" />
-      <Param name="Arguments" value="StartBatScript" />
+      <Param name="Executable" value="##Program##" />
+      <Param name="Arguments" value="-s:_Testing/CustomTests/ftp.txt" />
+      <Param name="StartOnCall" value="launchProgram"/>
+      <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
 	</Agent>
 
 	<!-- Client test case -->
 	<Test name="Default">
 		<StateModel ref="FTP:AgentToHost"/>
-		<Publisher class="Tcp" name="TcpHandler">
+
+		<Publisher class="Tcp" name="CommandPublisher">
 			<Param name="Host" value="##TargetIPv4##"/>
 			<Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
 		</Publisher>
+
+    <!-- Used by client state for data port in active mode -->
+    <Publisher name="DataListner" class="TcpListener">
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="##DataPort##"/>
+      <Param name="AcceptTimeout" value="10000"/>
+    </Publisher>
 
 		<Strategy class="##Strategy##"/>
 		<Logger class="File" >
@@ -51,19 +63,81 @@
 
 		<Agent ref="WinServerAgent" platform="windows"/>
 		<Agent ref="LinServerAgent" platform="linux"/>
+    <Agent ref="OsxServerAgent" platform="osx"/>
 
 		<StateModel ref="FTP:HostToAgent"/>
 
-		<Publisher name="TcpHandler" class="TcpListener">
-			<Param name="Interface" value="##LocalIPv4##"/>
+		<Publisher name="CommandPublisher" class="TcpListener">
+			<Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
 			<Param name="Port" value="21"/>
+      <Param name="AcceptTimeout" value="10000"/>
+      <Param name="Timeout" value="5000"/>
 		</Publisher>
+
+    <!-- Used by server state for data port in active mode -->
+    <Publisher name="DataPublisher" class="Tcp">
+      <Param name="Host" value="127.0.0.1"/> <!--##TargetIPv4## -->
+      <Param name="Port" value="##TargetPort##"/>
+    </Publisher>
 
 		<Strategy class="##Strategy##"/>
 
 		<Logger class="File" >
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>
+  </Test>
+
+  <!-- Client test case -->
+  <Test name="Passive">
+    <StateModel ref="FTP:AgentToHostPassive"/>
+
+    <Publisher class="Tcp" name="CommandPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <!-- Used by client state for data port in passive mode -->
+    <Publisher class="Tcp" name="DataPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+
+  <!--Server side test-->
+  <Test name="ServerPassive">
+
+    <Agent ref="WinServerAgent" platform="windows"/>
+    <Agent ref="LinServerAgent" platform="linux"/>
+    <Agent ref="OsxServerAgent" platform="osx"/>
+
+    <StateModel ref="FTP:PassiveHostToAgent"/>
+
+    <Publisher name="CommandPublisher" class="TcpListener">
+      <Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
+      <Param name="Port" value="21"/>
+      <Param name="AcceptTimeout" value="10000"/>
+      <Param name="Timeout" value="5000"/>
+    </Publisher>
+
+    <!-- Used by server state for data port in pasv mode -->
+    <Publisher name="DataPublisher" class="TcpListener">
+      <Param name="Interface" value="127.0.0.1"/> <!--##SourceIPv4##-->
+      <Param name="Port" value="##DataPort##"/>
+      <Param name="AcceptTimeout" value="10000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
   </Test>
 </Peach>
 <!--END-->

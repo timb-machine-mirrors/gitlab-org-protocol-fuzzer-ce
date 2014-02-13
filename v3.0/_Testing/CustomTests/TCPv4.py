@@ -10,7 +10,7 @@ def setup(ctx):
     port = randint(1024,65535)
     ctx.socat_proc = Popen(['socat',
                             'tcp4-l:%d,fork,reuseaddr' % port,
-                            'READLINE'],
+                            'STDOUT'],
                            stdin=ctx.null, stdout=ctx.null, stderr=ctx.null)
     ctx.update_defines(TargetPort=port)
 

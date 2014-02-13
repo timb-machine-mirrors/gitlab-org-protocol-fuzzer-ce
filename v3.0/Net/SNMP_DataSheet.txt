@@ -1,0 +1,32 @@
+
+:Doctitle: SNMP Peach Pit Data Sheet
+:Description: Simple Network Management Protocol Version 2c (SNMP)
+
+ * Peach Pit: SNMP
+ * Direction: Client, Server
+ * Supported Platforms: Windows, Linux, OS X
+
+Simple Network Management Protocol (SNMP) is a protocol for network management. It is used for collecting information from, and configuring, network devices, such as servers, printers, hubs, switches, and routers on an Internet Protocol (IP) network.
+
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC1901 | Introduction to Community-based SNMPv2
+|RFC1907 | Management Information Base for Version 2 of the Simple Network Management Protocol (SNMPv2)
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|GetRequest | RFC1907
+|GetNextRequest | RFC1907
+|GetBulkRequest | RFC1907
+|GetResponse | RFC1907
+|========

@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-ftp -inv $@ <<EOF
-user hello world
-cd /test/test/test
-bye
-EOF
+ftp -n $1 <<END_SCRIPT
+quote USER telnetuser
+quote PASS telnetuserp455
+ls
+quit
+END_SCRIPT
+exit 0

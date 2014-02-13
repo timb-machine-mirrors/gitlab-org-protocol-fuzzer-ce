@@ -2,6 +2,3 @@
 
 test(name="VXLAN",
 		platform="linux")
-
-test(name="VXLAN",
-		platform="osx")

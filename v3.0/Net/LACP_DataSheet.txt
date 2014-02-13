@@ -1,0 +1,27 @@
+
+:Doctitle: LACP Peach Pit Data Sheet
+:Description: Link Aggregation Control Protocol (LACP)
+
+ * Peach Pit: LACP
+ * Direction: Client
+ * Supported Platorms: Linux
+
+Link aggregation is a computer networking term to describe various methods of combining (aggregating) multiple network connections in parallel to increase throughput beyond what a single connection could sustain, and to provide redundancy in case one of the links fail.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|IEEE 802.1AX | Link Aggregation (5.2)
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|Link Aggregation | IEE 802.1AX
+|========

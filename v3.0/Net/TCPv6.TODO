@@ -1,1 +1,1 @@
- * Direction: Server (TODO)
+ * Direction: Server (TODO) Fix Established state so that it accounts for all cases     *Immedicate Close    *Send payload    *WaitServerClose

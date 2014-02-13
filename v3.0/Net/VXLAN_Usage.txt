@@ -5,23 +5,7 @@ Configuration
 
 .Target Configuration
 
-
-In order to run all tests both a UDP and TCP listener are required.
-The networking tool socat can be used for this.
-
-_Example of using adding a VXLAN interface:_
-
-----
-
-
-#Setting up socat listener for UDP
-
-sudo socat STDIO udp-listen:12345
-
-#Setting up socat listener for TCP
-
-sudo socat STDIO tcp-listen:12345
-----
+Setting up VXLAN can be a long multistep process. In order to simplify the setup please refer to to VMware's official VLXAN deployment guide which is located here: http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
 
 .Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine
@@ -49,14 +33,14 @@ LoggerPath:: Path to folder where logs will be stored
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="OuterSourceMAC" value="5254005335d3"/>
+    <Define key="OuterSourceMAC" value="000000000000"/>
     <Define key="OuterSourceIPv4" value="10.6.66.51" />
     <Define key="OuterTargetMAC"   value="000000000000"/>
     <Define key="OuterTargetIPv4" value="10.6.66.52"/>
     <Define key="LoggerPath"  value="logs/vxlan/"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="SourceMAC" value="6805ca0589fe" />
-    <Define key="TargetMAC" value="2233ca00ff0f"/>
+    <Define key="SourceMAC" value="000000000000" />
+    <Define key="TargetMAC" value="000000000000"/>
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="TargetIPv6" value="::1"/>
@@ -73,7 +57,7 @@ LoggerPath:: Path to folder where logs will be stored
   </Linux>
 
   <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
   <Windows platform="windows">

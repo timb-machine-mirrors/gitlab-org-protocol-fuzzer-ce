@@ -1,5 +1,5 @@
+'''
 test(name="OSPFV2",
 		platform="linux")
-
-test(name="OSPFV2",
-		platform="osx")
+'''
+skip_tests.append('OSPFV2')
