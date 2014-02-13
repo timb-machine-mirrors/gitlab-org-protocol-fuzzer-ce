@@ -14,8 +14,26 @@
 	</DataModel>
 
 	<DataModel name="OneLineExplain">
-		<String name="Break" token="true" value=" "/>
+		<Choice name="Break">
+			<String token="true" value=" "/>
+			<String token="true" value="-"/>
+		</Choice>
 		<String name="Explaination"/>
+		<String name="Terminator" token="true" value="\r\n"/>
+	</DataModel>
+
+	<DataModel name="MultiLineExplain">
+		<String name="Break" token="true" value="-"/>
+		<Block name="ExplainLineBlock">
+			<String name="Explaination"/>
+			<String name="Terminator" token="true" value="\r\n"/>
+		</Block>
+		<String name="LastLineMarker" token="true">
+			<Fixup class="CopyValue">
+				<Param name="ref" value="Status"/>
+			</Fixup>
+		</String>
+		<String name="ExplainationLastLine"/>
 		<String name="Terminator" token="true" value="\r\n"/>
 	</DataModel>
 
@@ -46,6 +64,7 @@
 		<String name="Status" length="3"/>
 		<Choice name="LineModes">
 			<Block name="OneLine" ref="OneLineExplain"/>
+			<!-- <Block name="MultiLine" ref="MultiLineExplain"/> -->
 			<Block name="MultiLine2" ref="MultiLineExplainV2"/>
 		</Choice>
 	</DataModel>
