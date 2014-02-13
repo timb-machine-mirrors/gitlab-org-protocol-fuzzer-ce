@@ -205,35 +205,55 @@ namespace Peach.Enterprise.Agent.Monitors
 			{
 				System.Diagnostics.Debug.Assert(port != 0);
 
+				var stopper = new Thread(new ThreadStart(delegate
+				{
+					try
+					{
+						using (var cli = new TcpClient("127.0.0.1", port))
+						{
+							logger.Debug("Sending stop command to emulator '{0}'", deviceSerial);
+							var cmd = Encoding.ASCII.GetBytes("kill\n");
+
+							cli.Client.Send(cmd);
+							cli.Client.Shutdown(SocketShutdown.Send);
+
+							int len;
+							do
+							{
+								try
+								{
+									len = cli.Client.Receive(cmd);
+								}
+								catch (SocketException)
+								{
+									len = 0;
+								}
+							}
+							while (len > 0);
+
+							logger.Debug("Waiting for emulator '{0}' to exit", deviceSerial);
+
+							// Join the emulator thread to ensure it is all cleaned up
+							thread.Join();
+						}
+					}
+					catch
+					{
+						// do nothing.
+					}
+				}));
+
 				try
 				{
-					using (var cli = new TcpClient("127.0.0.1", port))
+					stopper.Start();
+
+					if (!stopper.Join(StopTimeout * 1000))
 					{
-						logger.Debug("Sending stop command to emulator '{0}'", deviceSerial);
-						var cmd = Encoding.ASCII.GetBytes("kill\n");
+						logger.Debug("Aborting stopper thread for emulator '{0}'.", deviceSerial);
 
-						cli.Client.Send(cmd);
-						cli.Client.Shutdown(SocketShutdown.Send);
-						cli.Client.ReceiveTimeout = StopTimeout * 1000; 
-
-						int len;
-						do
-						{
-							try
-							{
-								len = cli.Client.Receive(cmd);
-							}
-							catch (SocketException)
-							{
-								len = 0;
-							}
-						}
-						while (len > 0);
-
-						logger.Debug("Waiting for emulator '{0}' to exit", deviceSerial);
-
-						if (!thread.Join(StopTimeout * 1000))
-							throw new TimeoutException("Emulator thread did not exit within specified time.");
+						stopper.Abort();
+						stopper.Join();
+						throw new TimeoutException("Emulator thread did not exit within specified time.");
 					}
 				}
 				catch (Exception ex)
@@ -335,7 +355,7 @@ namespace Peach.Enterprise.Agent.Monitors
 			}
 
 			// get the return code from the process
-			if (!proc.WaitForExit(StopTimeout * 30))
+			if (!proc.WaitForExit(StopTimeout * 1000))
 			{
 				logger.Debug("Timed out waiting for emulator '{0}' to exit, forcibly terminating", deviceSerial ?? "<unknown>");
 				proc.Kill();
