@@ -1,2 +1,2 @@
 test(name="Ethernet",
-		platform="linux")
+     platform="linux")
