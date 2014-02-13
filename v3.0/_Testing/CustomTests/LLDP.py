@@ -1,2 +1,2 @@
 test(name="LLDP",
-		platform="linux")
+     platform="linux")

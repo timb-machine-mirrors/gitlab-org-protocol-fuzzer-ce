@@ -9,10 +9,11 @@ def setup(ctx):
         ctx.disabler = Popen(['systemsetup', '-setusingnetworktime', 'off'],
                            stdin=ctx.null, stdout=ctx.null, stderr=ctx.null)
         ctx.disabler.wait()
-        
+
 
 def teardown(ctx):
     pass
+
 
 test(name="NTP",
      setup=setup,
