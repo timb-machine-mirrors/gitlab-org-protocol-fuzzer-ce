@@ -200,20 +200,6 @@
 		</div>
     <telerik:RadMultiPage runat="server" SelectedIndex="0" id="toplevel">
       <telerik:RadPageView ID="jobsPage" runat="server" Height="100%">
-        <asp:Panel ID="jobActionPanel" runat="server" Visible="false">
-          <asp:Table ID="Table2" runat="server" CellPadding="2" CellSpacing="4">
-            <asp:TableRow>
-              <asp:TableCell>
-                <telerik:RadButton Text="Start New Job" ID="btnOpenStartJobWindow" runat="server"/>
-              </asp:TableCell>
-              <asp:TableCell>
-                <telerik:RadButton Text="Stop Job" ID="btnStopJob" runat="server"/>
-              </asp:TableCell>
-              <asp:TableCell>
-              </asp:TableCell>
-            </asp:TableRow>
-          </asp:Table>
-        </asp:Panel>
 				<telerik:RadGrid ID="jobsGrid" runat="server" 
           AutoGenerateColumns="false" AllowSorting="true"
 					AllowFilteringByColumn="false" 

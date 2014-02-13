@@ -212,6 +212,7 @@ namespace Peach.Enterprise.Agent.Monitors
 						logger.Debug("Sending stop command to emulator '{0}'", deviceSerial);
 						var cmd = Encoding.ASCII.GetBytes("kill\n");
 
+						cli.Client.SendTimeout = StopTimeout * 1000;
 						cli.Client.Send(cmd);
 						cli.Client.Shutdown(SocketShutdown.Send);
 						cli.Client.ReceiveTimeout = StopTimeout * 1000; 
