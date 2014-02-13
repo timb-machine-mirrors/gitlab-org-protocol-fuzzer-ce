@@ -4,13 +4,11 @@
 
  * Peach Pit: LLDP
  * Direction: Announce
+ * Supported Platforms: Linux
 
-The Link Layer Discovery Protocol is a vendor-neutral protocol
-designed to allow advertisement of information about network
-infrastructure hardware by said hardware. It is formally described in IEEE
-802.1AB as _Station and Media Access Control Connectivity
-Discovery_. It is designed to replace proprietary protocols such as
-EDP, CDP, LLTD, and SONMP. 
+The Link Layer Discovery Protocol is a vendor-neutral protocol designed to allow advertisement of information about network infrastructure hardware by said hardware.
+It is formally described in IEEE 802.1AB as _Station and Media Access Control Connectivity Discovery_.
+It is designed to replace proprietary protocols such as EDP, CDP, LLTD, and SONMP.
 
 
 Specifications
@@ -19,7 +17,7 @@ Specifications
 [options="header"]
 |========
 |Specification | Title
-| | 
+|IEEE 802.1AB | Station and Media Access Control Connectivity Discovery
 |========
 
 Use Cases
@@ -28,9 +26,5 @@ Use Cases
 [options="header"]
 |========
 |Messages | Specification
-|========
-
-[options="header"]
-|========
-|Supported Payloads | Specification
+|LLDP Announce | IEE 802.1AB
 |========
