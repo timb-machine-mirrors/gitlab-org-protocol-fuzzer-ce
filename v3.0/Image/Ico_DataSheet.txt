@@ -1,7 +1,8 @@
 :Doctitle: ICO Peach Pit Data Sheet
 :Description: ICO Image Format
 
- *Peach Pit: ICO
+ * Peach Pit: ICO
+ * Supported Platorms: Windows, Linux, OS X
 
 Specifications
 --------------
