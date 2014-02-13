@@ -17,7 +17,7 @@ PartnerPort:: Port number of the target host machine
 Strategy:: Fuzzing strategy Peach will use for testing
 LoggerPath:: Path to folder where logs will be stored
 
-.Sample NTP Configuration File
+.Sample LACP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
