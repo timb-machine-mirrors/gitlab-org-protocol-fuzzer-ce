@@ -78,7 +78,13 @@ def get_prev_run_num(pit_os):
     return previous_run
 
 def get_link_to_test_run(pit_os, run_num):
-    return "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num) 
+    if pit_os == 'all':
+        link  = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('win', _PREV_RUN_NUMS['win'])
+        link += "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('lin', _PREV_RUN_NUMS['lin'])
+        link += "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('osx', _PREV_RUN_NUMS['osx'])
+    else:
+        link = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num)
+    return link
 
 def get_problem_tests(pit_os, run_num):
     assert pit_os in ['osx', 'win', 'lin'], "not a valid operating system abbrev"
