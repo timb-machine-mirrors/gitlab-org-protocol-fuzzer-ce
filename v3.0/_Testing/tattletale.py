@@ -95,7 +95,7 @@ def get_problem_tests(pit_os, run_num):
     problem_tests = problem_tests_line.lstrip(ptests_indicator).split(' ')
     # the last test from win ptestline will have a '\r' on it :/ so strip
     problem_tests = map(lambda s: s.strip(), problem_tests)
-    problem_tests = list(set(problem_tests))
+    problem_tests = list(t for t in set(problem_tests) if t != '')
     return problem_tests
 
 def format_ticket_name(pit, os):
