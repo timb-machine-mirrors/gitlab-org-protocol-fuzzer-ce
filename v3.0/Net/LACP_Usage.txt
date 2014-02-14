@@ -25,7 +25,7 @@ LoggerPath:: Path to folder where logs will be stored
   <All>
     <Define key="SourceMAC"     value="000000000000"/>
     <Define key="TargetMAC"     value="000000000000"/>
-    <Define key="LoggerPath"    value="./logs/arp/"/>
+    <Define key="LoggerPath"    value="./logs/lacp/"/>
     <Define key="ActorPort"     value="0012"/>
     <Define key="PartnerPort"   value="0000"/>
     <Define key="Strategy"      value="Sequential"/>
