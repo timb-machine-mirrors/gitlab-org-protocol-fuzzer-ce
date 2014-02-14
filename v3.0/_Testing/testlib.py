@@ -14,8 +14,7 @@ IS_INTERACTIVE = sys.stdout.isatty()
 #resolution order is ./peach, last arg, PEACH env var
 PEACH_OPTS = []
 BASE_DEFINES = {"Path": "."}
-if not __name__ == "__main__":
-    EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
+if not __name__ == "__main__": EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
 COLOR_CODES = {'red': 31,
                'green': 32,
@@ -112,7 +111,8 @@ class PeachTest:
             else:
                 opts.append('--range=1,%d' % self.iterations)
         self.args.extend(opts)
-        self.args.extend(['--definedvalues', self.pit + '.config'])
+        if os.path.exists(self.pit + '.config'):
+            self.args.extend(['--definedvalues', self.pit + '.config'])
         self.args.append(self.pit)
         self.args.append(self.test)
 
