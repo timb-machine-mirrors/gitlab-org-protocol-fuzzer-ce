@@ -9,7 +9,7 @@
   <DataModel name="Packet" ref="UDP:Packet">
     <Number name="Header.Checksum" size="16" endian="big">
       <Fixup class="UDPChecksumFixup">
-        <Param name="ref" value="Header"/>
+        <Param name="ref" value="Packet"/>
         <Param name="src" value="##SourceIPv4##"/>
         <Param name="dst" value="##TargetIPv4##"/>
       </Fixup>
