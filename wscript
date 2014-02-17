@@ -2,7 +2,7 @@
 
 # Import wscript contents from Peach/build/tools/wscript.py
 
-import os.path
+import os.path, sys
 from tools import wscript
 
 out = 'slag'
@@ -11,6 +11,12 @@ appname = 'EPeach'
 maxdepth = 2
 # Path to peach community
 peach = 'Peach'
+
+def add_tools(tools):
+	for i in ['win', 'linux', 'osx']:
+		__import__('config.%s' % i)
+		mod = sys.modules['config.%s' % i]
+		mod.tools.extend(tools)
 
 def supported_variant(name):
 	return True
@@ -22,6 +28,8 @@ def options(opt):
 	wscript.options(opt)
 
 def configure(ctx):
+	add_tools(['sign'])
+
 	wscript.configure(ctx)
 
 def build(ctx):
