@@ -583,7 +583,7 @@ samplesperpixel SHORT - 1
     <State name="Initial">
       <Action name="WriteFileFromSample" type="output" publisher="writer">
         <DataModel name="Tiff" ref="TIFF" />
-        <Data name="data" fileName="##Path##/_Common/Samples/Image/##Seed##" />
+        <Data name="data" fileName="##Path##/##SamplePath##/##Seed##" />
       </Action>
 
       <Action name="CloseFile"  type="close" publisher="writer" />
