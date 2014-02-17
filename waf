@@ -13,9 +13,10 @@ if os.getenv('DevEnvDir'):
         sys.exit(1)
 
 cwd = os.getcwd()
-build = os.path.join(cwd, 'Peach', 'build')
+build = os.path.join(cwd, 'build')
+peach = os.path.join(cwd, 'Peach', 'build')
 wafdir = os.path.join(cwd, 'Peach', '3rdParty', 'waf')
-sys.path = [ build, wafdir ] + sys.path
+sys.path = [ build, peach, wafdir ] + sys.path
 
 if __name__ == '__main__':
 	from waflib import Scripting
