@@ -1,11 +1,6 @@
 #!/usr/bin/env python
-from waflib import Utils
 
-# Only install native library if environment supports C#
-if 'cs' in bld.env['supported_features']:
-	base = bld.env['BASENAME']
-	ext = base[0:3] == 'win' and 'dll' or 'so'
-	bld.install_files('${BINDIR}', '%s/aardvark.%s' % (base, ext), chmod=Utils.O755)
+subdir = bld.path.find_dir(bld.env['BASENAME']) or bld.path
 
 bld(
 	features = 'cs',
@@ -13,6 +8,7 @@ bld(
 	source = 'aardvark.cs',
 	name = 'aardvark_net.dll',
 	namespace = 'aardvark',
+	install_755 = { subdir : subdir.ant_glob('**/*') },
 	version = False,
 	csdoc = False,
 )
