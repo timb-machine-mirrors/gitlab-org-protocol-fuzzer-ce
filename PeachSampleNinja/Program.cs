@@ -29,7 +29,7 @@ namespace PeachSampleNinja
 		static void Main(string[] args)
 		{
 			Console.WriteLine();
-			Console.WriteLine(">> Peach Enterprise Sample Ninja -- Sample Scanner");
+			Console.WriteLine(">> Peach Pro Sample Ninja -- Sample Scanner");
 			Console.WriteLine(">> Copyright (c) Deja vu Security\n");
 
 			if (args.Length < 2)
