@@ -5,6 +5,7 @@ deps = [
 	'System.Core.dll',
 	'System.Data.dll',
 	'System.Xml.dll',
+	'System.ServiceProcess.dll',
 	'RabbitMQ.Client.dll',
 	'MongoDB.Driver.dll',
 	'MongoDB.Bson.dll',
