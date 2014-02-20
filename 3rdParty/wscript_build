@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 subdirs = [
+	'Portable.Licensing',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
 ]
