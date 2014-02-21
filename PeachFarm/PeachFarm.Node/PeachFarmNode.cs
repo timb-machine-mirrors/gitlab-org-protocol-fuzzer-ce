@@ -56,6 +56,10 @@ namespace PeachFarm.Node
 			#region node state
 
 			var nodeconfig = (Configuration.NodeSection) System.Configuration.ConfigurationManager.GetSection("peachfarm.node");
+			if(nodeconfig == null)
+			{
+				throw new ApplicationException("Node configuration not found. Confirm that pf_node.exe.config and node.config exists or check your working directory.");
+			}
 			nodeconfig.Validate();
 			nodeState = new NodeState(nodeconfig);
 

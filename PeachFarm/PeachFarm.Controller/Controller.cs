@@ -41,6 +41,10 @@ namespace PeachFarm.Controller
 		{
 
 			this.config = this.ControllerConfigSection();
+			if (this.config == null)
+			{
+				throw new ApplicationException("Controller configuration not found. Confirm that pf_controller.exe.config and controller.config exists or check your working directory.");
+			}
 			this.config.Validate();
 
 			RabbitInitializer();
