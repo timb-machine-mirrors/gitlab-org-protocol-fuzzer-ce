@@ -27,6 +27,10 @@ namespace PeachFarm.Reporting
 		public ReportGenerator()
 		{
 			config = (ReportGeneratorSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.reporting");
+			if (config == null)
+			{
+				throw new ApplicationException("Reporting Service configuration not found. Confirm that PeachFarm.Reporting.Service.exe.config exists or check your working directory.");
+			}
 			config.Validate();
 
 			DatabaseHelper.TestConnection(config.MongoDb.ConnectionString);
