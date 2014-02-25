@@ -34,7 +34,10 @@ namespace PeachFarm.Admin
 		public PeachFarmAdmin(string adminName = null)
 		{
 			config = (Configuration.AdminSection)System.Configuration.ConfigurationManager.GetSection("peachfarm.admin");
-
+			if(config == null)
+			{
+				throw new ApplicationException("Admin configuration not found. Confirm that pf_admin.exe.config exists or check your working directory.");
+			}
 			config.Validate();
 
 			ServerHostName = config.Controller.IpAddress;

@@ -14,7 +14,7 @@ namespace Peach.Enterprise.Runtime
 {
 	public class ConsoleWatcher : Watcher
 	{
-		string _title = "Peach Enterprise v";
+		string _title = "Peach Pro v";
 		string _copyright = "Copyright (c) Deja vu Security";
 
 		Stopwatch timer = new Stopwatch();
