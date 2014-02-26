@@ -19,7 +19,7 @@ namespace PeachFarm.Controller
     static void Main()
     {
 
-      if (Environment.UserInteractive)
+			if (!PeachFarm.Common.Utilities.IsService)
       {
 				waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
 				System.Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);

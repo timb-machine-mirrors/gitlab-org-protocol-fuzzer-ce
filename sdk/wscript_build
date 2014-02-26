@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+bld(
+	name='peach-sdk',
+	install_path = '${BINDIR}/sdk',
+	install_644 = bld.path.ant_glob('**/*', excl='wscript_build')
+)
