@@ -2,6 +2,7 @@ import os
 import shutil
 import zipfile
 import xml.etree.ElementTree as ET
+import copy
 
 # as it is seen in the xml elements representation (not necessarily repr)
 PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
@@ -68,20 +69,22 @@ def included_files(base_files):
 		includes tags w/ includes attrs??? maybe...
 		everything else should be good
 	'''
-	ifiles_sources = []
-	for bf in base_files:
-		t = ET.parse(bf)
+	pit_files = copy.deepcopy(base_files)
+	include_files = []
+	for pf in pit_files:
+		t = ET.parse(pf)
 		includes = t.findall(PEACH_SCHEMA_LOCATION + 'Include')
 		for include in includes:
 			# includes that have xpaths don't refer to files
+			# '.keys()' is how you get the elements attributes
 			if 'xpath' in include.keys():
 				continue
 			assert 'src' in include.keys()
-			ifiles_sources.append(include.get('src'))
-	print "xml sources: ", ifiles_sources
-	ifiles = map(actual_include_location, ifiles_sources)
-	print ifiles
-	return map(actual_include_location, ifiles_sources)
+			include_files.append(include.get('src'))
+			pit_files.append(
+			    actual_include_location(include.get('src')))
+
+	return map(actual_include_location, include_files)
 
 
 def collect_pit_files(pit_name, tmp_dir):
