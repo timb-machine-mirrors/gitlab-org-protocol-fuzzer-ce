@@ -8,6 +8,7 @@ import copy
 PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
 OTHER_OS_SEP = {'/': '\\', '\\': '/'} # *nix to win, and vice versa
 
+
 def base_path():
 	# find the 'v3.0' directory. this is what ##Path## should be most times
 	d = os.path.abspath(__file__)
@@ -17,10 +18,12 @@ def base_path():
 		d = os.path.dirname(d)
 	return d
 
+
 def temp_dir_name(pit_name):
 	pid = os.getpid()
 	tmp_dir = 'tmp_%s_%s' % (pit_name, pid)
 	return os.path.abspath(os.path.join('.', tmp_dir))
+
 
 def base_pit_files(pit_name):
 	# returns fullpaths to basefiles
@@ -39,6 +42,7 @@ def base_pit_files(pit_name):
 			cf_path = os.path.abspath(cf_path)
 			files.append(cf_path)
 	return files
+
 
 def actual_include_location(ifile_src):
 	# pop up the current path until we find a directory corresponding
@@ -70,12 +74,6 @@ def included_files(base_files):
 	# base files are base pit files. '.xml' and '.xml.config'
 	# we search these for includes of other files
 	# returns fullpaths to included files
-	'''
-	look at includes!!! see notes! mostly:
-		no xpath attrs, this is different
-		includes tags w/ includes attrs??? maybe...
-		everything else should be good
-	'''
 	pit_files = copy.deepcopy(base_files)
 	include_files = []
 	for pf in pit_files:
@@ -101,36 +99,41 @@ def collect_pit_files(pit_name, tmp_dir):
 
 	bpath = base_path()
 
-	print '######'
 	# all of our files are expected to sit below the bpath
 	for base_file in base_files:
 		assert base_file.startswith(bpath)
 		shutil.copy(base_file, tmp_dir)
 	for include in includes:
-		print "INCLUDE: ", include
-		## figure out zip dir sub dir
 		assert include.startswith(bpath)
 
 		sub_path = os.path.dirname(include)
 		sub_path = sub_path[len(bpath):]
-		sub_path = sub_path.strip('\\')
-		print 'SUBPATH: ', sub_path
+		sub_path = sub_path.strip(os.path.sep)
 
-		## make zip dir sub dir
 		tmp_sub_dir = os.path.join(tmp_dir, sub_path)
 		if not os.path.exists(tmp_sub_dir):
 			os.makedirs(tmp_sub_dir)
-
-		## put into that sub dir
 		shutil.copy(include, tmp_sub_dir)
-	assert False
+
 
 def create_pit_zip(pit_name, tmp_dir):
+	bpath = base_path()
+	with zipfile.ZipFile(pit_name + '.zip', 'w') as zf:
+		for root, dirs, files in os.walk(tmp_dir):
+			for f in files:
+				f = os.path.join(root, f)
+				assert f.startswith(tmp_dir)
+				# want local subpath from head of the temp dir down to file
+				zip_dest = f[len(tmp_dir):]
+				zip_dest.strip(os.path.sep)
+				zf.write(f, zip_dest)
 	assert False
+
 
 def get_os_tags(pit_name):
 	''' this will interact with pre-existing tester code'''
 	assert False
+
 
 def run_pit_zip(pit_name):
 	''' how will we detect failure??? '''
@@ -140,17 +143,12 @@ def run_pit_zip(pit_name):
 def mai_main():
 	pits = ['ftp'] # temporary shim
 
-	# zip up
 	# push out for one iteration
 	## what is success???
 	## complain on failure
 
-
 	# cleanup
-	print "cleaning..."
 	map(shutil.rmtree, temp_dirs)
-	print os.listdir('.')
-
 
 
 if __name__ == "__main__":
@@ -161,3 +159,6 @@ if __name__ == "__main__":
 	zip_pit_dir  = temp_dir_name(pit_name)
 	os.mkdir(zip_pit_dir)
 	collect_pit_files(pit_name, zip_pit_dir)
+	create_pit_zip(pit_name, zip_pit_dir)
+
+
