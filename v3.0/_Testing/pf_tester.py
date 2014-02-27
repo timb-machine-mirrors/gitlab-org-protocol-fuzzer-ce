@@ -4,18 +4,23 @@ import zipfile
 import xml.etree.ElementTree as ET
 import copy
 
-# as it is seen in the xml elements representation (not necessarily repr)
+# as it is seen in the xml element's representation (not necessarily repr)
 PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
 OTHER_OS_SEP = {'/': '\\', '\\': '/'} # *nix to win, and vice versa
+
+def base_path():
+	# find the 'v3.0' directory. this is what ##Path## should be most times
+	d = os.path.abspath(__file__)
+	while True:
+		if os.path.basename(d) == 'v3.0':
+			break
+		d = os.path.dirname(d)
+	return d
 
 def temp_dir_name(pit_name):
 	pid = os.getpid()
 	tmp_dir = 'tmp_%s_%s' % (pit_name, pid)
-	return tmp_dir
-
-def make_temp_dir(dir_name):
-	tmp_dir = os.path.join('.', dir_name) 
-	os.mkdir(tmp_dir)
+	return os.path.abspath(os.path.join('.', tmp_dir))
 
 def base_pit_files(pit_name):
 	# returns fullpaths to basefiles
@@ -56,7 +61,9 @@ def actual_include_location(ifile_src):
 		curdir = os.path.dirname(curdir)
 	actual_path = os.path.join(curdir, *ifile_src.split(os.path.sep))
 
-	return os.path.abspath(actual_path)
+	abspath = os.path.abspath(actual_path)
+	assert os.path.exists(abspath)
+	return abspath
 
 
 def included_files(base_files):
@@ -90,7 +97,32 @@ def included_files(base_files):
 def collect_pit_files(pit_name, tmp_dir):
 	base_files = base_pit_files(pit_name)
 
-	ifiles = included_files(base_files)
+	includes = included_files(base_files)
+
+	bpath = base_path()
+
+	print '######'
+	# all of our files are expected to sit below the bpath
+	for base_file in base_files:
+		assert base_file.startswith(bpath)
+		shutil.copy(base_file, tmp_dir)
+	for include in includes:
+		print "INCLUDE: ", include
+		## figure out zip dir sub dir
+		assert include.startswith(bpath)
+
+		sub_path = os.path.dirname(include)
+		sub_path = sub_path[len(bpath):]
+		sub_path = sub_path.strip('\\')
+		print 'SUBPATH: ', sub_path
+
+		## make zip dir sub dir
+		tmp_sub_dir = os.path.join(tmp_dir, sub_path)
+		if not os.path.exists(tmp_sub_dir):
+			os.makedirs(tmp_sub_dir)
+
+		## put into that sub dir
+		shutil.copy(include, tmp_sub_dir)
 	assert False
 
 def create_pit_zip(pit_name, tmp_dir):
@@ -107,16 +139,6 @@ def run_pit_zip(pit_name):
 
 def mai_main():
 	pits = ['ftp'] # temporary shim
-
-	# make temp dir
-	temp_dirs = map(temp_dir_name, pits)
-	map(make_temp_dir, temp_dirs)
-	print os.listdir('.')
-
-	# collect files
-	## detect inclusions
-	## make subdirs
-	## shove everything in
 
 	# zip up
 	# push out for one iteration
@@ -135,4 +157,7 @@ if __name__ == "__main__":
 	#mai_main()
 	# don't automatically close my win term bro!
 	# input("el fin....")
-	collect_pit_files('ftp', 'none')
+	pit_name = 'ftp'
+	zip_pit_dir  = temp_dir_name(pit_name)
+	os.mkdir(zip_pit_dir)
+	collect_pit_files(pit_name, zip_pit_dir)
