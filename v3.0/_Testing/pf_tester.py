@@ -3,10 +3,22 @@ import shutil
 import zipfile
 import xml.etree.ElementTree as ET
 import copy
+import testlib
+
+class DummyPeachTestConfig:
+	iterations = None
+	timeout    = None
+	logdir     = None
+	peach      = None
+	color      = None
+
+	def __init__(self):
+		pass
 
 # as it is seen in the xml element's representation (not necessarily repr)
 PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
 OTHER_OS_SEP = {'/': '\\', '\\': '/'} # *nix to win, and vice versa
+PIT_DIRS = ['Application', 'Audio', 'Image', 'Net', 'Video']
 
 
 def base_path():
@@ -27,9 +39,8 @@ def temp_dir_name(pit_name):
 
 def base_pit_files(pit_name):
 	# returns fullpaths to basefiles
-	pit_dirs = ['Application', 'Audio', 'Image', 'Net', 'Video']
 	files = []
-	for pd in pit_dirs:
+	for pd in PIT_DIRS:
 		listing = os.listdir(os.path.join('..', pd))
 		pfname = pit_name + '.xml'
 		cfname = pit_name + '.xml.config'
@@ -116,9 +127,9 @@ def collect_pit_files(pit_name, tmp_dir):
 		shutil.copy(include, tmp_sub_dir)
 
 
-def create_pit_zip(pit_name, tmp_dir):
+def create_pit_zip(zip_name, tmp_dir):
 	bpath = base_path()
-	with zipfile.ZipFile(pit_name + '.zip', 'w') as zf:
+	with zipfile.ZipFile(zip_name, 'w') as zf:
 		for root, dirs, files in os.walk(tmp_dir):
 			for f in files:
 				f = os.path.join(root, f)
@@ -127,17 +138,45 @@ def create_pit_zip(pit_name, tmp_dir):
 				zip_dest = f[len(tmp_dir):]
 				zip_dest.strip(os.path.sep)
 				zf.write(f, zip_dest)
-	assert False
 
 
 def get_os_tags(pit_name):
 	''' this will interact with pre-existing tester code'''
-	assert False
+	#######################################################
+	# assumption: right now everything is just running x64
+	#######################################################
+	platform_map = {
+		'all'  : ['Windows', 'Linux', 'Osx'],
+		'win'  : ['Windows'],
+		'osx'  : ['Osx'],
+		'linux': ['Linux']
+	}
+	bpath = base_path()
+	if not pit_name.endswith('.xml'):
+		pit_name += '.xml'
+	for d in PIT_DIRS:
+		fulld = os.path.join(bpath, d)
+		if pit_name in os.listdir(fulld):
+			pdir = fulld
+			break
+
+	target = {
+	    "path": pdir,
+	    "file": pit_name
+	}
+	tests = testlib.get_tests(target, DummyPeachTestConfig)
+	tags  = []
+	for t in tests:
+		assert t.platform in ['all', 'win', 'osx', 'linux']
+		tags.extend(platform_map[t.platform])
+	return list(set(tags))
 
 
-def run_pit_zip(pit_name):
+def run_pit_zip(pit_name, tags):
 	''' how will we detect failure??? '''
-	assert False
+	# assume pathing for windows. throw assertion if this script runs on linux
+	# `C:\pf\bin\pf_admin.exe -start -n1 -t Windows -t Linux -t Osx ftp.zip`
+	assert 42 == 'the answer'
 
 
 def mai_main():
@@ -149,16 +188,21 @@ def mai_main():
 
 	# cleanup
 	map(shutil.rmtree, temp_dirs)
+	assert False
+	os.remove('ftp.zip')
 
 
 if __name__ == "__main__":
 	#mai_main()
-	# don't automatically close my win term bro!
-	# input("el fin....")
+
 	pit_name = 'ftp'
+	zip_name = 'ftp.zip'
+
 	zip_pit_dir  = temp_dir_name(pit_name)
 	os.mkdir(zip_pit_dir)
 	collect_pit_files(pit_name, zip_pit_dir)
-	create_pit_zip(pit_name, zip_pit_dir)
+	create_pit_zip(zip_name, zip_pit_dir)
+	tags = get_os_tags(pit_name)
+	run_pit_zip(zip_name, tags)
 
 
