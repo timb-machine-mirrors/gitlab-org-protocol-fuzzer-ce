@@ -103,10 +103,46 @@ def included_files(base_files):
 	return map(actual_include_location, include_files)
 
 
+def file_location_under_path(fname, path):
+	# we're hoping there is only one file with that name under
+	# the given path. fail loudly when otherwise.
+	found_files = []
+	for dirpath, dirname, filenames in os.walk(path):
+		for fn in filenames:
+			if fname == fn:
+				fpath = os.path.join(dirpath, fname)
+				fpath = os.path.abspath(fpath)
+				found_files.append(fpath)
+	assert len(found_files) == 1
+	return found_files[0]
+
+
+
+def imported_files(base_files, includes):
+	'''the search for python modules imported into pit....'''
+	# starting at base path, walk down directory tree and find
+	# imports (they end in '.py')
+	bpath = base_path()
+	for f in base_files + includes:
+		print "F: ", f
+		t = ET.parse(f)
+		imports = t.findall(PEACH_SCHEMA_LOCATION + 'Import')
+		print "IMPORTS: ", imports
+		ifiles = []
+		for elem in imports:
+			assert 'import' in elem.keys()
+			ifile_name = elem.get('import') + '.py'
+			ifile = file_location_under_path(ifile_name, bpath)
+			ifiles.append(ifile)
+	return ifiles
+
+
 def collect_pit_files(pit_name, tmp_dir):
 	base_files = base_pit_files(pit_name)
 
 	includes = included_files(base_files)
+
+	imports = imported_files(base_files, includes)
 
 	bpath = base_path()
 
@@ -114,17 +150,17 @@ def collect_pit_files(pit_name, tmp_dir):
 	for base_file in base_files:
 		assert base_file.startswith(bpath)
 		shutil.copy(base_file, tmp_dir)
-	for include in includes:
-		assert include.startswith(bpath)
+	for i in includes + imports:
+		assert i.startswith(bpath)
 
-		sub_path = os.path.dirname(include)
+		sub_path = os.path.dirname(i)
 		sub_path = sub_path[len(bpath):]
 		sub_path = sub_path.strip(os.path.sep)
 
 		tmp_sub_dir = os.path.join(tmp_dir, sub_path)
 		if not os.path.exists(tmp_sub_dir):
 			os.makedirs(tmp_sub_dir)
-		shutil.copy(include, tmp_sub_dir)
+		shutil.copy(i, tmp_sub_dir)
 
 
 def create_pit_zip(zip_name, tmp_dir):
