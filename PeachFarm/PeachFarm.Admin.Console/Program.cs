@@ -515,103 +515,115 @@ namespace PeachFarm.Admin
 
 			System.Console.WriteLine(@"
 
- pf_admin.exe is the admin interface for Peach Farm.  All Peach Farm
- functions can be controlled via this tool.
+pf_admin.exe is the admin interface for Peach Farm.  All Peach Farm
+functions can be controlled via this tool.
 
 Syntax Guide
 ------------
 
-Syntax: 
-			Start Peach full syntax:
-				pf_admin.exe -start <pitFilePath> -n <clientCount> -t <tags> -i <ipAddress> -d <definesFile> -a <targetName> -test=<testName>
+Start Peach full syntax:
+pf_admin.exe -start <pitFilePath> 
+  -n <clientCount> 
+  -t <tags> 
+  -i <ipAddress> 
+  -d <definesFile> 
+  -a <targetName> 
+  -r=<range> 
+  -test=<testName>
 			
 
-      Start Peach on the first <clientCount> number of Alive Nodes:
-        pf_admin.exe -start -n clientCount pitFile.xml
+Start Peach on the first <clientCount> number of Alive Nodes:
+  pf_admin.exe -start -n clientCount pitFile.xml
       
-      Start Peach on the first <clientCount> number of Alive Nodes with matching <tags>:
-        pf_admin.exe -start -n clientCount -t tags pitFile.xml
+Start Peach on the first <clientCount> number of Alive Nodes 
+with matching <tags>:
+  pf_admin.exe -start -n clientCount -t tags pitFile.xml
 
-      Start Peach on a single specific Node:
-        pf_admin.exe -start -ip ipAddress pitFile.xml
+Start Peach on a single specific Node:
+  pf_admin.exe -start -ip ipAddress pitFile.xml
 
-      Start Peach on all Alive nodes matching <tags>:
-        pf_admin.exe -start -t tags pitFile.xml
+Start Peach on all Alive nodes matching <tags>:
+  pf_admin.exe -start -t tags pitFile.xml
 
-			Start Peach with a defines file
-				pf_admin.exe -start -n 1 pitFile.xml -d definesFile.xml
+Start Peach with a defines file
+  pf_admin.exe -start -n 1 pitFile.xml -d definesFile.xml
 
-			Start Peach with pit, defines, and sample data in a zip file
-				pf_admin.exe -start -n 1 zipPackage.zip
+Start Peach with pit, defines, and sample data in a zip file
+  pf_admin.exe -start -n 1 zipPackage.zip
 
-			Start Peach
+Start Peach
     
-      Stop Peach on Nodes matching <jobID>:
-        pf_admin.exe -stop jobID
+Stop Peach on Nodes matching <jobID>:
+  pf_admin.exe -stop jobID
       
-      Get list of all Nodes:
-        pf_admin.exe -nodes
+Get list of all Nodes:
+  pf_admin.exe -nodes
 
-      Get list of errors reported by Nodes:
-        pf_admin.exe -errors
+Get list of errors reported by Nodes:
+  pf_admin.exe -errors
 
-      Get list of errors reported by Nodes for Job <jobID>
-        pf_admin.exe -errors jobID
+Get list of errors reported by Nodes for Job <jobID>
+  pf_admin.exe -errors jobID
 
-			Get information for all Jobs
-				pf_admin.exe -jobs
+Get information for all Jobs
+  pf_admin.exe -jobs
 
-      Get information for a Job and a list of Running Nodes
-        pf_admin.exe -info jobID
+Get information for a Job and a list of Running Nodes
+  pf_admin.exe -info jobID
 
-			Get generated files for a Job
-				pf_admin.exe -output jobID destinationFolder
+Get generated files for a Job
+  pf_admin.exe -output jobID destinationFolder
 
-			Force a (re)processing of a report
-				pf_admin -report jobID [reprocess]
+Force a (re)processing of a report
+  pf_admin.exe -report jobID [reprocess]
 
-			Delete all stored data
-				pf_admin.exe -clear -type=all
+Delete all stored data
+  pf_admin.exe -clear -type=all
 
-			Delete fault detail for job
-				pf_admin.exe -clear -type=job <jobID>
+Delete fault detail for job
+  pf_admin.exe -clear -type=job <jobID>
 
-			Delete fault detail for all jobs matching target
-				pf_admin.exe -clear -type=target <target>
+Delete fault detail for all jobs matching target
+  pf_admin.exe -clear -type=target <target>
 
 Commands:
 
- start   - Start one or more instances of Peach.
-   count(n)					- Number of instances to start
-   tags(t)					- Comma delimited list of tags to match nodes with
+start   - Start one or more instances of Peach.
+  count(n) - Number of instances to start
+  tags(t) - Comma delimited list of tags to match nodes with
 
-   ip(i)						- Address of specific node to launch on
+  ip(i) - Address of specific node to launch on
 
-   pitFilePath			- Full path to Pit File or Zip File
+  pitFilePath - Full path to Pit File or Zip File
 
-   defines(d)				- Full path to Defines File (optional)
-	 range(r)					- Iteration range (optional), format is <start>-<end> example: 1000-2000
-	 target(a)				- target application name (optional)
-	 test							- test name in Pit to run
+  defines(d) - Full path to Defines File (optional)
+  range(r) - Iteration range (optional), 
+             format is <start>-<end> example: 1000-2000
+  target(a) - target application name (optional)
+  test - test name in Pit to run
 
- stop   - Stop some instances of Peach
-   jobID - Job ID
+stop   - Stop some instances of Peach
+  jobID - Job ID
 
- nodes   - List all nodes in the farm with status
+nodes   - List all nodes in the farm with status
 
- errors - List any logged node errors
-   jobID - Job ID
+errors - List any logged node errors
+  jobID - Job ID
 
- jobs - Get information for all Jobs
+jobs - Get information for all Jobs
 
- info - Get information for a Job and a list of Running Nodes
-   jobID - Job ID
+info - Get information for a Job and a list of Running Nodes
+  jobID - Job ID
 
- output - Get generated files for a Job
-	 jobID - Job ID
-   destinationFolder - Folder where files will be downloaded to
+output - Get generated files for a Job
+  jobID - Job ID
+  destinationFolder - Folder where files will be downloaded to
 
 ");
+			
+#if DEBUG
+			Console.ReadLine();
+#endif
 		}
 		#endregion
 
