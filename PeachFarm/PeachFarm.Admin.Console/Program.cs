@@ -12,6 +12,7 @@ namespace PeachFarm.Admin
 	public class Program
 	{
 		private static EventWaitHandle waitHandle;
+		private static int exitcode = 0;
 
 		static void syntax() { throw new SyntaxException(); }
 
@@ -47,6 +48,8 @@ namespace PeachFarm.Admin
 
 				DeleteDataType cleartype = DeleteDataType.Job;
 				string clearparameter = String.Empty;
+
+				
 
 				#region Parse & Validate Console Input
 				var p = new OptionSet()
@@ -299,24 +302,28 @@ namespace PeachFarm.Admin
 						System.Console.WriteLine("Waiting for response...");
 						waitHandle.WaitOne();
 					}
+
+
 				}
 
 			}
 			catch (RabbitMqException rex)
 			{
 				System.Console.WriteLine("Could not communicate with RabbitMQ server at " + rex.RabbitMqHost);
+				exitcode = 1;
 			}
 			catch (SyntaxException)
 			{
 				PrintHelp();
+				exitcode = 22;
 			}
 			catch (Exception ex)
 			{
 				System.Console.WriteLine(ex.Message);
+				exitcode = 1;
 			}
 
-
-			Environment.Exit(0);
+			Environment.Exit(exitcode);
 		}
 
 		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
@@ -496,6 +503,7 @@ namespace PeachFarm.Admin
 		static void admin_AdminException(object sender, PeachFarm.Admin.PeachFarmAdmin.ExceptionEventArgs e)
 		{
 			System.Console.WriteLine(e.Exception.ToString());
+			exitcode = 1;
 			waitHandle.Set();
 		}
 
