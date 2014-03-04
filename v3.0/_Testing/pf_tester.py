@@ -4,6 +4,9 @@ import zipfile
 import xml.etree.ElementTree as ET
 import copy
 import testlib
+import subprocess
+import re
+import socket
 
 class DummyPeachTestConfig:
 	iterations = None
@@ -19,6 +22,7 @@ class DummyPeachTestConfig:
 PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
 OTHER_OS_SEP = {'/': '\\', '\\': '/'} # *nix to win, and vice versa
 PIT_DIRS = ['Application', 'Audio', 'Image', 'Net', 'Video']
+PFADMIN_PATH = r'C:\pf\bin\pf_admin.exe'
 
 
 def base_path():
@@ -207,38 +211,96 @@ def get_os_tags(pit_name):
 		tags.extend(platform_map[t.platform])
 	return list(set(tags))
 
+def is_error_line_header(line):
+	# e.g.: '10.0.1.77       Error   2/24/2014 7:26:22 PM'
+	# assume it is, fail if it ain't
+	line_parts = filter(lambda x: len(x) != 0, re.split('\s', line))
 
-def run_pit_zip(pit_name, tags):
+	if len(line_parts) != 5:
+		return False
+	# first info in an error header is the IP of the originating node
+	try:
+		socket.inet_aton(line_parts[0])
+	except socket.error:
+		return False
+	if line_parts[1] != 'Error':
+		return False
+	# look for date
+	if line_parts[2].count('/') != 2:
+		return False
+	if line_parts[-1].lower() not in ['am', 'pm']:
+		return False
+	return True
+
+
+def peachfarm_errors():
+	assert  os.path.exists(PFADMIN_PATH)
+	sp = subprocess.Popen([PFADMIN_PATH, '-errors'],
+		                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	out, err = sp.communicate()
+	assert len(err) == 0 # dont want no standard error output
+
+	errors = {}
+	header = ''
+	content = []
+	for line in out.splitlines():
+		if is_error_line_header(line):
+			# toss out copyright info at beginning of output
+			if header != '':
+				errors[header] = "\n".join(content)
+			header  = line
+			content = []
+		else:
+			content.append(line)
+	return errors
+
+
+def run_pit_zip(zip_name, tags):
 	''' how will we detect failure??? '''
 	# assume pathing for windows. throw assertion if this script runs on linux
 	# `C:\pf\bin\pf_admin.exe -start -n1 -t Windows -t Linux -t Osx ftp.zip`
-	assert 42 == 'the answer'
+	assert  os.path.exists(PFADMIN_PATH)
+	admin_responses = {}
 
-
-def mai_main():
-	pits = ['ftp'] # temporary shim
-
-	# push out for one iteration
-	## what is success???
-	## complain on failure
-
-	# cleanup
-	map(shutil.rmtree, temp_dirs)
-	assert False
-	os.remove('ftp.zip')
+	node_oses = ['Osx', 'Linux', 'Windows']
+	for node_os in node_oses:
+		cmd = [PFADMIN_PATH, '-start', '-n1', '-t', node_os, zip_name]
+		print 'RUNNING: ', cmd
+		sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = sp.communicate()
+		print 'out', out
+		print 'err', err
+		if sp.returncode != 0:
+			admin_responses[node_os] = [out, err]
+	return admin_responses
 
 
 if __name__ == "__main__":
-	#mai_main()
+	temp_dirs = []
+	pits = ['BMP']
 
-	pit_name = 'ftp'
-	zip_name = 'ftp.zip'
+	for pit_name in pits:
+		zip_name = pit_name + '.zip'
 
-	zip_pit_dir  = temp_dir_name(pit_name)
-	os.mkdir(zip_pit_dir)
-	collect_pit_files(pit_name, zip_pit_dir)
-	create_pit_zip(zip_name, zip_pit_dir)
-	tags = get_os_tags(pit_name)
-	run_pit_zip(zip_name, tags)
+		temp_dir  = temp_dir_name(pit_name)
+		temp_dirs.append(temp_dir)
+		os.mkdir(temp_dir)
+
+		collect_pit_files(pit_name, temp_dir)
+		create_pit_zip(zip_name, temp_dir)
+		tags = get_os_tags(pit_name)
+
+		prerun_error_count = len(peachfarm_errors())
+		admin_responses = run_pit_zip(zip_name, tags)
+		print 'ADMIN_RESPONSES', admin_responses
+		postrun_error_count = len(peachfarm_errors())
+		if prerun_error_count != postrun_error_count:
+			# TODO fix this right and report the problem
+			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+			print admin_responses
+			assert prerun_error_count == postrun_error_count
+
+	map(shutil.rmtree, temp_dirs)
+
 
 
