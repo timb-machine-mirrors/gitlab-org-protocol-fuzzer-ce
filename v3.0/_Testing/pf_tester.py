@@ -111,7 +111,7 @@ def file_location_under_path(fname, path):
 	# we're hoping there is only one file with that name under
 	# the given path. fail loudly when otherwise.
 	found_files = []
-	for dirpath, dirname, filenames in os.walk(path):
+	for dirpath, dirnames, filenames in os.walk(path):
 		for fn in filenames:
 			if fname == fn:
 				fpath = os.path.join(dirpath, fname)
@@ -126,13 +126,11 @@ def imported_files(base_files, includes):
 	'''the search for python modules imported into pit....'''
 	# starting at base path, walk down directory tree and find
 	# imports (they end in '.py')
-	bpath = base_path()
+	bpath  = base_path()
+	ifiles = []
 	for f in base_files + includes:
-		print "F: ", f
 		t = ET.parse(f)
 		imports = t.findall(PEACH_SCHEMA_LOCATION + 'Import')
-		print "IMPORTS: ", imports
-		ifiles = []
 		for elem in imports:
 			assert 'import' in elem.keys()
 			ifile_name = elem.get('import') + '.py'
