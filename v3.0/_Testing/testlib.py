@@ -265,6 +265,27 @@ def get_tests(target, base_config):
     return my_tests
 
 
+def get_targets(target_path):
+    for w in os.walk(target_path):
+        w[1].sort()
+        curpath = w[0]
+        if "_Common" in curpath:
+            continue
+        file_list = w[2]
+        for fn in file_list:
+            if fn[-4:].lower() == '.xml':
+                yield {"path": curpath, "file": fn}
+
+
+def user_is_admin():
+    if testlib.get_platform() == "win":
+        return shell.IsUserAnAdmin()
+    else:
+        return os.getuid() == 0
+
+
+
+
 if not __name__ == "__main__":
     #this is not efficent
     for filename in os.listdir(EXECPATH):

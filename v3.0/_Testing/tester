@@ -104,29 +104,6 @@ def find_peach():
 
     return PEACH_PATH
 
-
-###############################################################################
-
-
-def get_targets(target_path):
-    for w in os.walk(target_path):
-        w[1].sort()
-        curpath = w[0]
-        if "_Common" in curpath:
-            continue
-        file_list = w[2]
-        for fn in file_list:
-            if fn[-4:].lower() == '.xml':
-                yield {"path": curpath, "file": fn}
-
-
-def user_is_admin():
-    if testlib.get_platform() == "win":
-        return shell.IsUserAnAdmin()
-    else:
-        return os.getuid() == 0
-
-
 ###############################################################################
 # main
 ###############################################################################
@@ -157,7 +134,7 @@ if __name__ == "__main__":
                         help=('Time to let pits run before killing them. '
                               'Defaults to 10 minutes.'))
     config = parser.parse_args()
-    if not user_is_admin():
+    if not testlib.user_is_admin():
         print "You must be root or admin to run this"
         exit(1)
     tests = []
@@ -176,7 +153,7 @@ if __name__ == "__main__":
                     targets.append(pit)
             targets.append({"path": path, "file": fn})
     else:
-        targets = get_targets(FULL_TARGET_PATH)
+        targets = testlib.get_targets(FULL_TARGET_PATH)
     borked_tests = []
     for target in targets:
         pit_tests = testlib.get_tests(target, config)
