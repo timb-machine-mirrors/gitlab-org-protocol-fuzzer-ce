@@ -139,20 +139,45 @@ def imported_files(base_files, includes):
 	return ifiles
 
 
+def sample_files(base_files, pit_name):
+	# in which dir under _Common/Samples should sample files reside?
+	# assumption: 3/3/14 one samplespath elem per pit & one config per pit
+	bpath  = base_path()
+	sfiles = []
+
+	# only one of the base files should be config/defines. be safe anyway
+	defines_files = [bf for bf in base_files if bf.endswith('.config')]
+	for df in defines_files:
+		t = ET.parse(df)
+		def_elems = t.findall('All//Define')
+		print def_elems
+		for de in def_elems:
+			assert 'key'   in de.keys()
+			assert 'value' in de.keys()
+			if de.get('key') == 'SamplePath':
+				spath = de.get('value')
+				spath = os.path.join(bpath, spath)
+				spath = os.path.abspath(spath)
+				dir_contents = os.listdir(spath)
+				# a little wide, but keep only/all files w/ pit name in them
+				samples = filter(lambda f: pit_name.lower() in f.lower(), dir_contents)
+				samples = map(lambda f: os.path.join(spath, f), samples)
+				sfiles.extend(samples)
+	return sfiles
+
+
 def collect_pit_files(pit_name, tmp_dir):
 	base_files = base_pit_files(pit_name)
-
 	includes = included_files(base_files)
-
 	imports = imported_files(base_files, includes)
-
+	samples = sample_files(base_files, pit_name)
 	bpath = base_path()
 
 	# all of our files are expected to sit below the bpath
 	for base_file in base_files:
 		assert base_file.startswith(bpath)
 		shutil.copy(base_file, tmp_dir)
-	for i in includes + imports:
+	for i in includes + imports + samples:
 		assert i.startswith(bpath)
 
 		sub_path = os.path.dirname(i)
