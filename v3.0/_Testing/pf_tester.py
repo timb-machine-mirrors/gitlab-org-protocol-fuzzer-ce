@@ -23,6 +23,9 @@ PEACH_SCHEMA_LOCATION = '{http://peachfuzzer.com/2012/Peach}'
 OTHER_OS_SEP = {'/': '\\', '\\': '/'} # *nix to win, and vice versa
 PIT_DIRS = ['Application', 'Audio', 'Image', 'Net', 'Video']
 PFADMIN_PATH = r'C:\pf\bin\pf_admin.exe'
+DUM_CONFIG = DummyPeachTestConfig()
+# platform (via testlib.get_platform()) to Os tag as seen be peachfarm
+PLATFORM_TAG_LOOKUP = {'win': 'Windows', 'osx': 'Osx', 'linux': 'Linux'}
 
 
 def base_path():
@@ -203,37 +206,6 @@ def create_pit_zip(zip_name, tmp_dir):
 				zf.write(f, zip_dest)
 
 
-def get_os_tags(pit_name):
-	''' this will interact with pre-existing tester code'''
-	#######################################################
-	# assumption: right now everything is just running x64
-	#######################################################
-	platform_map = {
-		'all'  : ['Windows', 'Linux', 'Osx'],
-		'win'  : ['Windows'],
-		'osx'  : ['Osx'],
-		'linux': ['Linux']
-	}
-	bpath = base_path()
-	if not pit_name.endswith('.xml'):
-		pit_name += '.xml'
-	for d in PIT_DIRS:
-		fulld = os.path.join(bpath, d)
-		if pit_name in os.listdir(fulld):
-			pdir = fulld
-			break
-
-	target = {
-	    "path": pdir,
-	    "file": pit_name
-	}
-	tests = testlib.get_tests(target, DummyPeachTestConfig)
-	tags  = []
-	for t in tests:
-		assert t.platform in ['all', 'win', 'osx', 'linux']
-		tags.extend(platform_map[t.platform])
-	return list(set(tags))
-
 def is_error_line_header(line):
 	# e.g.: '10.0.1.77       Error   2/24/2014 7:26:22 PM'
 	# assume it is, fail if it ain't
@@ -280,29 +252,61 @@ def peachfarm_errors():
 
 def run_pit_zip(zip_name, tags):
 	''' how will we detect failure??? '''
+	# tags = [{<os_tag>, <test_name>}]
 	# assume pathing for windows. throw assertion if this script runs on linux
-	# `C:\pf\bin\pf_admin.exe -start -n1 -t Windows -t Linux -t Osx ftp.zip`
+	# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
 	assert  os.path.exists(PFADMIN_PATH)
 	admin_responses = {}
 
-	node_oses = ['Osx', 'Linux', 'Windows']
-	for node_os in node_oses:
-		cmd = [PFADMIN_PATH, '-start', '-n1', '-t', node_os, zip_name]
-		print 'RUNNING: ', cmd
+	for tag_set in tags:
+		cmd = [PFADMIN_PATH, '-start', '-n1', '-t', tag_set['os_tag'],
+		       '-test', tag_set['test_name'], zip_name]
 		sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = sp.communicate()
-		print 'out', out
-		print 'err', err
 		if sp.returncode != 0:
-			admin_responses[node_os] = [out, err]
+			k = tag_set['os_tag'] + ' - ' + tag_set['test_name']
+			admin_responses[k] = [' '.join(cmd), out, err]
 	return admin_responses
+
+
+def all_pit_argument_info():
+	# this returns a dict of info concerning _all_ of the pits we know about
+	arg_info = {} # pit name -> (os, test name)
+	targets = list(testlib.get_targets(base_path())) # [{<stuff>}*]
+	for target in targets:
+		pit_name = target['file'].split('.')[0] # drop the file extension
+		if target in testlib.skip_tests:
+			continue
+		tests = testlib.get_tests(target, DUM_CONFIG)
+		target_info = []
+		if tests:
+			t = tests[0]
+			if t.platform == 'all':
+				target_info.append((t.test, 'Windows'))
+				target_info.append((t.test, 'Linux'))
+				target_info.append((t.test, 'Osx'))
+			else:
+				target_info.append((t.test, PLATFORM_TAG_LOOKUP[t.platform]))
+		if len(target_info) == 0:
+			print 'SKIPPING', target
+			testlib.skip_tests.append(target)
+		else:
+			# ensure no dupes
+			cleaned = list(set(target_info))
+			arg_info[pit_name] = []
+			for ti in target_info:
+				arg_info[pit_name].append({ 'test_name': ti[0], 'os_tag': ti[1] })
+	return arg_info
 
 
 if __name__ == "__main__":
 	temp_dirs = []
 	pits = ['BMP']
 
+	pit_argument_info = all_pit_argument_info()
+
 	for pit_name in pits:
+		arg_info = pit_argument_info[pit_name]
 		zip_name = pit_name + '.zip'
 
 		temp_dir  = temp_dir_name(pit_name)
@@ -311,10 +315,9 @@ if __name__ == "__main__":
 
 		collect_pit_files(pit_name, temp_dir)
 		create_pit_zip(zip_name, temp_dir)
-		tags = get_os_tags(pit_name)
 
 		prerun_error_count = len(peachfarm_errors())
-		admin_responses = run_pit_zip(zip_name, tags)
+		admin_responses = run_pit_zip(zip_name, arg_info)
 		print 'ADMIN_RESPONSES', admin_responses
 		postrun_error_count = len(peachfarm_errors())
 		if prerun_error_count != postrun_error_count:
@@ -324,6 +327,5 @@ if __name__ == "__main__":
 			assert prerun_error_count == postrun_error_count
 
 	map(shutil.rmtree, temp_dirs)
-
 
 
