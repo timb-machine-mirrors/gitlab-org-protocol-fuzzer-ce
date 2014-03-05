@@ -17,7 +17,7 @@ test(name="SNMP",
 
 test(name="SNMP",
     test="Server",
-    platform="windows")
+    platform="win")
 
 test(name="SNMP",
     test="Server",

@@ -10,8 +10,8 @@ test(name="IPSECv6",
 
 test(name="IPSECv6",
     test="Default",
-    platform="windows")
+    platform="win")
 
 test(name="IPSECv6",
     test="AH",
-    platform="windows")
+    platform="win")

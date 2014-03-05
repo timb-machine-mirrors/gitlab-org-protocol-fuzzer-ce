@@ -47,6 +47,7 @@ class PeachTest:
         self.env = os.environ #this emmulates the default behavor of
                               #Popen with a bit more flexibility
         self.status = None
+		assert platform in ['win', 'osx', 'linux'] # as seen in get_platform()
         self.platform = platform
         self.pit = pit
         self.name = os.path.basename(pit)[:-4]  # pit - '.xml'
