@@ -194,7 +194,7 @@ if __name__ == "__main__":
                 print "Ran: ", test.args
                 print test.color_text("green", "SUCCESS!")
             elif test.status == "pass" and not IS_INTERACTIVE:
-                pass
+                print "%s (test: %s) PASSED" % (test.pit, test.test)
             elif test.status == "skip":
                 print "%s (test: %s) was %s " % (
                     test.pit, test.test, test.color_text('yellow', "SKIPPED!"))
