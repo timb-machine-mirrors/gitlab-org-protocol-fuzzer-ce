@@ -9,6 +9,7 @@ out = 'slag'
 inst = 'output'
 appname = 'EPeach'
 maxdepth = 2
+branch = 1
 # Path to peach community
 peach = 'Peach'
 
