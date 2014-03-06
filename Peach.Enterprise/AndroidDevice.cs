@@ -419,15 +419,20 @@ namespace Peach.Enterprise
 
 		public void Input(string how, params string[] args)
 		{
-			// TODO: Escape "text" argument.
-			// "input text foo bar" => "input text foo%sbar"
-			// "input text foo%sbar" => "input text foo%" & "input text sbar"
-
 			if (how.Equals("text"))
 			{
-				var text = EscapeCommandLineChars(string.Join(" ", args));
-				text = text.Replace(" ", "%s");
-				RunShellCommand(NLog.LogLevel.Debug, "input text " + text);
+				var input = EscapeCommandLineChars(string.Join(" ", args));
+
+				var tokens = input.Split(new string[] { "%s" }, StringSplitOptions.None);
+				for (int i = 0; i < tokens.Length; i++)
+				{
+					RunShellCommand(NLog.LogLevel.Debug, "input text " + tokens[i].Replace(" ", "%s"));
+					if (i + 1 != tokens.Length)
+					{
+						RunShellCommand(NLog.LogLevel.Debug, "input text " + "%");
+						RunShellCommand(NLog.LogLevel.Debug, "input text " + "s");
+					}
+				}
 				
 			}
 			else
