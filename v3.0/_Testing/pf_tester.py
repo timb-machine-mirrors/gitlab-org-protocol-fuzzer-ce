@@ -260,12 +260,14 @@ def run_pit_zip(zip_name, tags):
 
 	for tag_set in tags:
 		cmd = [PFADMIN_PATH, '-start', '-n1', '-t', tag_set['os_tag'],
-		       '-test', tag_set['test_name'], zip_name]
+		       '-range', '1-1',
+		       '-test',  tag_set['test_name'],
+		       zip_name]
+		print 'Running: ', ' '.join(cmd)
 		sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = sp.communicate()
-		if sp.returncode != 0:
-			k = tag_set['os_tag'] + ' - ' + tag_set['test_name']
-			admin_responses[k] = [' '.join(cmd), out, err]
+		k = tag_set['os_tag'] + ' - ' + tag_set['test_name']
+		admin_responses[k] = [' '.join(cmd), out, err]
 	return admin_responses
 
 
@@ -301,10 +303,12 @@ def all_pit_argument_info():
 
 if __name__ == "__main__":
 	temp_dirs = []
+	failures = [] # [(pit, os, testname)]
 	pits = ['BMP']
 
 	pit_argument_info = all_pit_argument_info()
 
+	# TODO: turn pits into testlib.get_targets() instead
 	for pit_name in pits:
 		arg_info = pit_argument_info[pit_name]
 		zip_name = pit_name + '.zip'
@@ -317,15 +321,23 @@ if __name__ == "__main__":
 		create_pit_zip(zip_name, temp_dir)
 
 		prerun_error_count = len(peachfarm_errors())
+		# TODO: make run_pit_zip take the arg info for only one
+		# execution so that it is easier to deal with errors
 		admin_responses = run_pit_zip(zip_name, arg_info)
-		print 'ADMIN_RESPONSES', admin_responses
+		print 'ADMIN_RESPONSES: \n', admin_responses
 		postrun_error_count = len(peachfarm_errors())
 		if prerun_error_count != postrun_error_count:
 			# TODO fix this right and report the problem
-			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-			print admin_responses
-			assert prerun_error_count == postrun_error_count
+			implement_error_reporting = False
+			assert implement_error_reporting
 
 	map(shutil.rmtree, temp_dirs)
+
+	if failures != []:
+		failures.sort(key=lambda x: x[0]) # by pit name
+		for fail in failures:
+			print 'FAILED: '
+		print 'Failing Tests: ', '  '.join(map(lambda f: '-'.join(f), failures))
+		sys.exit(len(failures))
 
 
