@@ -366,7 +366,7 @@ namespace Managed.Adb {
 					len = int.Parse ( lenStr, System.Globalization.NumberStyles.HexNumber );
 
 				} catch ( FormatException ) {
-					Log.e ( TAG, "Expected digits, got '{0}' : {1} {2} {3} {4}", lenBuf[0], lenBuf[1], lenBuf[2], lenBuf[3] );
+					Log.e ( TAG, "Expected digits, got '{0}' : {1} {2} {3}", lenBuf[0], lenBuf[1], lenBuf[2], lenBuf[3] );
 					Log.e ( TAG, "reply was {0}", ReplyToString ( reply ) );
 					break;
 				}
