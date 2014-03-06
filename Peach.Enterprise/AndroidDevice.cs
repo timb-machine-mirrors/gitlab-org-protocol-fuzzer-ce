@@ -388,14 +388,53 @@ namespace Peach.Enterprise
 			}
 		}
 
+		private static string replaceSlash(Match m)
+		{
+			string s = m.ToString();
+
+			switch (s)
+			{
+				case "&": return "\\&";
+				case ";": return "\\;";
+				case "'": return "\\'";
+				case "\"": return "\\\"";
+				case "~": return "\\~";
+				case "`": return "\\`";
+				case "(": return "\\(";
+				case ")": return "\\)";
+				case "\\": return "\\\\";
+				case "<": return "\\<";
+				case ">": return "\\>";
+				case "|": return "\\|";
+				default: return s;
+			}
+		}
+
+		private string EscapeCommandLineChars(string cmd)
+		{
+			Regex _escapeSlash = new Regex("\\\\|&|;|'|~|`|\\(|\\)|<|>|\\\"|\\|");
+			cmd = _escapeSlash.Replace(cmd, new MatchEvaluator(replaceSlash));
+			return cmd;
+		}
+
 		public void Input(string how, params string[] args)
 		{
 			// TODO: Escape "text" argument.
 			// "input text foo bar" => "input text foo%sbar"
 			// "input text foo%sbar" => "input text foo%" & "input text sbar"
 
-			var cmd = "input " + how + " " + string.Join(" ", args);
-			RunShellCommand(NLog.LogLevel.Debug, cmd);
+			if (how.Equals("text"))
+			{
+				var text = EscapeCommandLineChars(string.Join(" ", args));
+				text = text.Replace(" ", "%s");
+				RunShellCommand(NLog.LogLevel.Debug, "input text " + text);
+				
+			}
+			else
+			{
+				var cmd = "input " + how + " " + string.Join(" ", args);
+				RunShellCommand(NLog.LogLevel.Debug, cmd);
+			}
 		}
 
 		private string RunShellCommand(NLog.LogLevel level, string cmd)
@@ -511,7 +550,9 @@ namespace Peach.Enterprise
 
 			ret = RunShellCommand(NLog.LogLevel.Debug, "bmgr wipe " + application);
 			if (!bmgrProcessSuccess.Match(ret).Success)
-				throw new SoftException("Backup manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
+				ret = RunShellCommand(NLog.LogLevel.Debug, "bmgr wipe transport " + application);
+				if (!bmgrProcessSuccess.Match(ret).Success)
+					throw new SoftException("Backup manager failed to delete data for '{0}'. {1}".Fmt(application, ret));
 		}
 
 		public void DeleteFile(FileEntry entry)
