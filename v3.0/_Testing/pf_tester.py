@@ -7,6 +7,9 @@ import testlib
 import subprocess
 import re
 import socket
+import time
+import datetime
+import sys
 
 class DummyPeachTestConfig:
 	iterations = None
@@ -228,6 +231,25 @@ def is_error_line_header(line):
 	return True
 
 
+def most_recent_error_header(error_headers):
+	# this is susceptible to a bug if/when errors occur in the same second
+	# while possible, it is highly unlikely in our testing environment
+	# fix it if it happens
+	if error_headers == []:
+		raise Exception('No errors to choose from!!')
+	dts_to_headers = {} # datetimes to
+	for hdr in error_headers:
+		line_parts = filter(lambda x: len(x) != 0, re.split('\s', hdr))
+		hdr_time_string = ' '.join(line_parts[-3:])
+		hdr_tstruct = time.strptime(hdr_time_string, '%m/%d/%Y %I:%M:%S %p')
+		hdr_dt =  datetime.datetime.fromtimestamp(time.mktime(hdr_tstruct))
+		if hdr_dt in dts_to_headers:
+			raise Exception('Multiple errors in same second.')
+		dts_to_headers[hdr_dt] = hdr
+	most_recent_dt = sorted(dts_to_headers.keys())[-1]
+	return dts_to_headers[most_recent_dt]
+
+
 def peachfarm_errors():
 	assert  os.path.exists(PFADMIN_PATH)
 	sp = subprocess.Popen([PFADMIN_PATH, '-errors'],
@@ -250,24 +272,22 @@ def peachfarm_errors():
 	return errors
 
 
-def run_pit_zip(zip_name, tags):
+def run_pit_zip(zip_name, args):
 	''' how will we detect failure??? '''
 	# tags = [{<os_tag>, <test_name>}]
 	# assume pathing for windows. throw assertion if this script runs on linux
 	# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
 	assert  os.path.exists(PFADMIN_PATH)
 	admin_responses = {}
-
-	for tag_set in tags:
-		cmd = [PFADMIN_PATH, '-start', '-n1', '-t', tag_set['os_tag'],
-		       '-range', '1-1',
-		       '-test',  tag_set['test_name'],
-		       zip_name]
-		print 'Running: ', ' '.join(cmd)
-		sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		out, err = sp.communicate()
-		k = tag_set['os_tag'] + ' - ' + tag_set['test_name']
-		admin_responses[k] = [' '.join(cmd), out, err]
+	cmd = [PFADMIN_PATH, '-start', '-n1', '-t', args['os_tag'],
+		   '-range', '1-1',
+		   '-test',  args['test_name'],
+		   zip_name]
+	print 'Running: ', ' '.join(cmd)
+	sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	out, err = sp.communicate()
+	k = args['os_tag'] + ' - ' + args['test_name']
+	admin_responses[k] = [' '.join(cmd), out, err]
 	return admin_responses
 
 
@@ -303,33 +323,44 @@ def all_pit_argument_info():
 
 if __name__ == "__main__":
 	temp_dirs = []
-	failures = [] # [(pit, os, testname)]
+	failures = [] # [(pit, os, testname, error_output)]
 	pits = ['BMP']
 
 	pit_argument_info = all_pit_argument_info()
 
 	# TODO: turn pits into testlib.get_targets() instead
-	for pit_name in pits:
-		arg_info = pit_argument_info[pit_name]
+	bpath = base_path()
+	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
+	pit_names = sorted(pit_names)
+	for pit_name in pit_names:
+		args_for_runs = pit_argument_info[pit_name]
 		zip_name = pit_name + '.zip'
 
-		temp_dir  = temp_dir_name(pit_name)
+		temp_dir = temp_dir_name(pit_name)
 		temp_dirs.append(temp_dir)
 		os.mkdir(temp_dir)
 
 		collect_pit_files(pit_name, temp_dir)
 		create_pit_zip(zip_name, temp_dir)
 
-		prerun_error_count = len(peachfarm_errors())
-		# TODO: make run_pit_zip take the arg info for only one
-		# execution so that it is easier to deal with errors
-		admin_responses = run_pit_zip(zip_name, arg_info)
-		print 'ADMIN_RESPONSES: \n', admin_responses
-		postrun_error_count = len(peachfarm_errors())
-		if prerun_error_count != postrun_error_count:
-			# TODO fix this right and report the problem
-			implement_error_reporting = False
-			assert implement_error_reporting
+		for run_args in args_for_runs:
+			prerun_error_count = len(peachfarm_errors())
+			admin_responses = run_pit_zip(zip_name, run_args)
+			print 'ADMIN_RESPONSES: \n', admin_responses
+			postrun_errors = peachfarm_errors()
+			postrun_error_count = len(postrun_errors)
+			if postrun_error_count != prerun_error_count:
+
+				prev_error_hdr  = most_recent_error_header(postrun_errors)
+				prev_error_info = postrun_errors[prev_error_hdr]
+				prev_error     = prev_error_hdr + '\n' + prev_error_info
+
+				failures.append((pit_name,
+								 run_args['os_tag'], run_args['test_name'],
+								 prev_error))
+				# TODO fix this right and report the problem
+				implement_error_reporting = False
+				assert implement_error_reporting
 
 	map(shutil.rmtree, temp_dirs)
 
