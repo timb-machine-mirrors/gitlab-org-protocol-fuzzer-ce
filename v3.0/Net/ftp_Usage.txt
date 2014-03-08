@@ -6,7 +6,7 @@ Configuration
 .Target Configuration
 An FTP server is required to test the client side of the FTP pit. On Linux ftpd can be downloaded using apt-get.
 
-_Example of installing on ftp port:_
+_Example of installing on ftp server:_
 
 ----
 sudo apt-get install ftpd
