@@ -140,7 +140,7 @@ class PeachTest:
         # execution should live inside of a 'with'
         sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
         serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
-        self.proc = Popen(self.args, stdout=sout, stderr=serr, env=self.env)
+        self.proc = Popen(self.arg, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
                     (timeout_counter < (self.timeout * 12)):
