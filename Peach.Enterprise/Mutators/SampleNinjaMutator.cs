@@ -88,6 +88,12 @@ select from count('x'), se.elementid
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			var pitFile = GetPitFile(obj);
+			if (pitFile == null)
+			{
+				logger.Debug("no pit file specified in run configuration, disabing mutator.");
+				return false;
+			}
+
 			var ninjaDb = Path.GetFullPath(pitFile) + ".ninja";
 
 			// If our database doesn't exist JETTISON!
