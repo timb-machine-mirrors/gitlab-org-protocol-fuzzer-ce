@@ -99,7 +99,7 @@ namespace Godel.Core
 
 			try
 			{
-				ret = invScript.Execute(globalScope);
+				ret = code.Execute(globalScope);
 			}
 			catch (Exception ex)
 			{

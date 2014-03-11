@@ -152,11 +152,112 @@ namespace Godel.Tests
 		}
 
 		[Test]
-		public void SimpleFault()
+		public void ErrorCompiling()
 		{
 			string xml = @"
 <Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
 
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<Godel inv='this is bad python'/>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+
+			try
+			{
+				e.startFuzzing(dom, config);
+				Assert.Fail("should throw");
+			}
+			catch (PeachException ex)
+			{
+				Assert.True(ex.Message.StartsWith("Error compiling Godel inv expression for Action 'SM.Initial.Action'."));
+			}
+		}
+
+		[Test]
+		public void ErrorExecuting()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<Godel inv='x.y == 1'/>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+
+			try
+			{
+				e.startFuzzing(dom, config);
+				Assert.Fail("should throw");
+			}
+			catch (PeachException ex)
+			{
+				Assert.True(ex.Message.StartsWith("Error, Godel failed to execute post-inv expression for Action 'SM.Initial.Action'."));
+			}
+		}
+
+		[Test]
+		public void SimpleActionFault()
+		{
+			string xml = @"
+<Peach>
 	<DataModel name='DM'>
 		<String name='str' value='Hello World'/>
 	</DataModel>
@@ -196,6 +297,242 @@ namespace Godel.Tests
 
 			Assert.AreEqual(1, faults.Count);
 			Assert.AreEqual("Godel post-inv expression for Action 'SM.Initial.Action' failed.", faults[0].description);
+		}
+
+		[Test]
+		public void SimpleStateFault()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Godel inv='str(self.actions[0].dataModel.find(""str"").InternalValue) == ""Hello World""'/>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, faults.Count);
+			Assert.AreEqual("Godel post-inv expression for State 'SM.Initial' failed.", faults[0].description);
+		}
+
+		[Test]
+		public void SimpleStateModelFault()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<Godel inv='str(self.states[0].actions[0].dataModel.find(""str"").InternalValue) == ""Hello World""'/>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, faults.Count);
+			Assert.AreEqual("Godel post-inv expression for StateModel 'SM' failed.", faults[0].description);
+		}
+
+		[Test]
+		public void SelfAndPreActionFault()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<Godel
+					pre='str(self.dataModel.find(""str"").InternalValue) == ""Hello World""'
+					post='str(self.dataModel.find(""str"").InternalValue) == str(pre.dataModel.find(""str"").InternalValue)'/>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, faults.Count);
+			Assert.AreEqual("Godel post expression for Action 'SM.Initial.Action' failed.", faults[0].description);
+		}
+
+		[Test]
+		public void SelfAndPreStateFault()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Godel
+				pre='str(self.actions[0].dataModel.find(""str"").InternalValue) == ""Hello World""'
+				post='str(self.actions[0].dataModel.find(""str"").InternalValue) == str(pre.actions[0].dataModel.find(""str"").InternalValue)'/>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, faults.Count);
+			Assert.AreEqual("Godel post expression for State 'SM.Initial' failed.", faults[0].description);
+		}
+
+		[Test]
+		public void SelfAndPreStateModelFault()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<Godel
+			pre='str(self.states[0].actions[0].dataModel.find(""str"").InternalValue) == ""Hello World""'
+			post='str(self.states[0].actions[0].dataModel.find(""str"").InternalValue) == str(pre.states[0].actions[0].dataModel.find(""str"").InternalValue)'/>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringMutator'/>
+		</Mutators>
+	</Test>
+</Peach>
+";
+			var faults = new List<Fault>();
+
+			var e = new Engine(null);
+			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
+
+			var epeach = new Godel.Core.ExtendPeach(e.context);
+			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 1;
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, faults.Count);
+			Assert.AreEqual("Godel post expression for StateModel 'SM' failed.", faults[0].description);
 		}
 	}
 }
