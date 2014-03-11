@@ -12,92 +12,153 @@ using Godel.Core.OCL;
 
 namespace Godel.Core
 {
+	[Serializable]
+	public class Dom : Peach.Core.Dom.Dom
+	{
+		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
+	}
+
 	/// <summary>
 	/// Extension of PitParser to add Ocl into the mix!
 	/// </summary>
 	public class GodelPitParser : PitParser
 	{
+		private class GodelNode : INamed
+		{
+			public GodelNode(Peach.Core.Dom.Action action, XmlNode node)
+				: this("Action", string.Join(".", action.parent.parent.name, action.parent.name, action.name), node)
+			{
+			}
+
+			public GodelNode(Peach.Core.Dom.State state, XmlNode node)
+				: this("State", string.Join(".", state.parent.name, state.name), node)
+			{
+			}
+
+			public GodelNode(Peach.Core.Dom.StateModel stateModel, XmlNode node)
+				: this("StateModel", stateModel.name, node)
+			{
+			}
+
+			public GodelNode(XmlNode node)
+			{
+				this.type = "top level";
+				this.name = null;
+				this.node = node;
+			}
+
+			private GodelNode(string type, string name, XmlNode node)
+			{
+				this.type = string.Format("{0} '{1}'", type, name);
+				this.name = name;
+				this.node = node;
+			}
+
+			public string type { get; private set; }
+			public string name { get; private set; }
+			public XmlNode node { get; private set; }
+
+		}
+
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public Dictionary<string, OCL.OclContext> OclContextsInstances { get; set; }
+		NamedCollection<GodelNode> godelNodes;
+		Dictionary<string, GodelContext> topLevel;
+
 		public ExtendPeach ExtendPeach { get; set; }
 
-		public bool ControlOnlyOclContexts { get; set; }
-
-		protected override void handlePeach(Dom dom, XmlNode node, Dictionary<string, object> args)
+		protected override Peach.Core.Dom.Dom getNewDom()
 		{
+			return new Dom();
+		}
+
+		protected override void handlePeach(Peach.Core.Dom.Dom dom, XmlNode node, Dictionary<string, object> args)
+		{
+			godelNodes = new NamedCollection<GodelNode>();
+			topLevel = new Dictionary<string, GodelContext>();
+
 			base.handlePeach(dom, node, args);
-
-			Dom newDom = dom;
-
-			OclContextsInstances = (Dictionary<string, OCL.OclContext>)this.ExtendPeach.Context.stateStore["OclContexts"];
-			newDom.context = this.ExtendPeach.Context;
 
 			foreach (XmlNode child in node)
 			{
-				if (child.Name == "Ocl")
+				if (child.Name == "Godel")
 				{
-					ControlOnlyOclContexts = false;
+					var name = child.getAttrString("name");
+					var godel = handleGodelNode(new GodelNode(child));
 
-					if (child.hasAttribute("controlOnly"))
-						ControlOnlyOclContexts = child.getAttrBool("controlOnly");
-
-					handleOcl(child);
+					try
+					{
+						topLevel.Add(name, godel);
+					}
+					catch (ArgumentException ex)
+					{
+						throw new PeachException("Error, a top level <Godel> element named '{0}' already exists.".Fmt(name), ex);
+					}
 				}
 			}
+
+			var godelDom = (Dom)dom;
+			foreach (var item in godelNodes)
+			{
+				var godel = handleGodelNode(item);
+				godelDom.godel.Add(godel);
+
+				logger.Debug("Attached godel node to {0}.", item.type);
+			}
+
+			godelNodes = null;
+			topLevel = null;
 		}
 
-		protected void handleOcl(XmlNode node)
+		private GodelContext handleGodelNode(GodelNode node)
 		{
-			string ocl = null;
+			GodelContext godel;
 
-			foreach (XmlNode child in node.ChildNodes)
+			if (node.node.hasAttr("ref"))
 			{
-				if (child.NodeType == XmlNodeType.CDATA)
-				{
-					ocl = child.InnerText.Trim();
-				}
+				string refName = node.node.getAttrString("ref");
+
+				GodelContext other;
+				if (!topLevel.TryGetValue(refName, out other))
+					throw new PeachException("Error, could not resolve " + node.type + " <Godel> element ref attribute value '" + refName + "'.");
+
+				godel = ObjectCopier.Clone(other);
+			}
+			else
+			{
+				godel = new GodelContext();
 			}
 
-			if (ocl == null)
-				throw new PeachException("Error, did not locate any OCL inside of Ocl element.  Make sure your using correct cdata syntax!");
+			godel.debugName = node.type;
+			godel.name = node.name;
+			godel.controlOnly = node.node.getAttr("controlOnly", godel.controlOnly);
+			godel.inv = node.node.getAttr("inv", godel.inv);
+			godel.pre = node.node.getAttr("pre", godel.pre);
+			godel.post = node.node.getAttr("post", godel.post);
 
-			// Compile ocl
-			List<OclContext> contexts;
+			return godel;
+		}
 
+		private void deferParse(GodelNode node)
+		{
 			try
 			{
-				contexts = Ocl.ParseOcl(ocl);
+				godelNodes.Add(node);
 			}
-			catch (Exception ex)
+			catch (ArgumentException ex)
 			{
-				throw new PeachException("Error, the OCL script provided did not compile: " + ex.Message);
-			}
-
-			foreach (var context in contexts)
-			{
-				logger.Debug("handleOcl: Adding new context: " + context.Name);
-
-				if (OclContextsInstances.ContainsKey(context.Name))
-					throw new PeachException("Error, duplicate OCL context specified named '" + context.Name + "'.");
-
-				OclContextsInstances[context.Name] = context;
+				throw new PeachException("Error, more than one <Godel> element specified on {0}.".Fmt(node.type), ex);
 			}
 		}
 
 		protected override Peach.Core.Dom.Action handleAction(System.Xml.XmlNode node, Peach.Core.Dom.State parent)
 		{
-			Peach.Core.Dom.Action action = base.handleAction(node, parent);
+			var action = base.handleAction(node, parent);
 
 			foreach (XmlNode child in node)
 			{
-				if (child.Name == "Ocl")
-				{
-					if (!child.hasAttribute("context"))
-						throw new PeachException("Error, Action->Ocl element must contain a 'context' attribute.");
-
-					this.ExtendPeach.ExtendAction.AttachToAction(action, child.getAttribute("context"));
-				}
+				if (child.Name == "Godel")
+					deferParse(new GodelNode(action, child));
 			}
 
 			return action;
@@ -105,17 +166,12 @@ namespace Godel.Core
 
 		protected override Peach.Core.Dom.State handleState(System.Xml.XmlNode node, Peach.Core.Dom.StateModel parent)
 		{
-			State state = base.handleState(node, parent);
+			var state = base.handleState(node, parent);
 
 			foreach (XmlNode child in node)
 			{
-				if (child.Name == "Ocl")
-				{
-					if (!child.hasAttribute("context"))
-						throw new PeachException("Error, State->Ocl element must contain a 'context' attribute.");
-
-					this.ExtendPeach.ExtendState.AttachToState(state, child.getAttribute("context"));
-				}
+				if (child.Name == "Godel")
+					deferParse(new GodelNode(state, child));
 			}
 
 			return state;
@@ -123,17 +179,12 @@ namespace Godel.Core
 
 		protected override Peach.Core.Dom.StateModel handleStateModel(System.Xml.XmlNode node, Peach.Core.Dom.Dom parent)
 		{
-			StateModel stateModel = base.handleStateModel(node, parent);
+			var stateModel = base.handleStateModel(node, parent);
 
 			foreach (XmlNode child in node)
 			{
-				if (child.Name == "Ocl")
-				{
-					if (!child.hasAttribute("context"))
-						throw new PeachException("Error, StateModel->Ocl element must contain a 'context' attribute.");
-
-					this.ExtendPeach.ExtendStateModel.AttachToStateModel(stateModel, child.getAttribute("context"));
-				}
+				if (child.Name == "Godel")
+					deferParse(new GodelNode(stateModel, child));
 			}
 
 			return stateModel;
