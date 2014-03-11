@@ -5,7 +5,7 @@
  * Direction: Client, Server
  * Supported Platforms: Windows, Linux, OS X
 
-Telnet is a network protocol used on the Internet or local area networks to provide a bidirectional interactive text-oriented communication facility using a virtual terminal connection.
+Telnet is a network protocol used on the Internet or on local area networks to provide a bidirectional interactive text-oriented communication facility using a virtual terminal connection.
 User data is interspersed in-band with Telnet control information in an 8-bit byte oriented data connection over the Transmission Control Protocol (TCP).
 
 Specifications

@@ -4,7 +4,9 @@ Configuration
 -------------
 
 .Target Configuration
-Any number of image viewing programs may be targeted with the Ico file format. Example targets for fuzzing Ico are "feh" on Linux and "mspaint.exe" on Windows. The target program can be set in the Ico.xml.config file by defining the Target program for each operating system.
+Any number of image viewing programs may be targeted with the Ico file format. Example targets for fuzzing Ico are "feh" on Linux and "mspaint.exe" on Windows. 
+In the Ico.xml.config pit file, you can set the target program that you are fuzzing, such as feh or mspaint.exe. Normally you would set different target programs for different operating systems.
+
 
 _Example setting up feh on linux and configuring defines:_
 
@@ -14,7 +16,7 @@ sudo apt-get install feh
 ----
 
 .Required Pit Configuration Changes
-Seed:: Name of a valid Ico file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together wtih an asterisk wildcard.
+Seed:: Name of a valid Ico file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together with an asterisk wildcard.
 Target:: The program that will open the fuzzed Ico files
 
 .Optional Pit Configuration Changes

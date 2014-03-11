@@ -6,7 +6,7 @@
  * Direction: Client, Server
  * Supported Platforms: Windows, Linux, OS X
 
-Simple Network Management Protocol (SNMP) is a protocol for network management. It is used for collecting information from, and configuring, network devices, such as servers, printers, hubs, switches, and routers on an Internet Protocol (IP) network.
+Simple Network Management Protocol (SNMP) is a protocol for network management. It is used for collecting information from, and configuring, network devices (such as servers, printers, hubs, switches, and routers) on an Internet Protocol (IP) network.
 
 
 Specifications

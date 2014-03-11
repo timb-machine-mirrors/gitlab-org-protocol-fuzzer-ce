@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-An IPv6 and UDPv6 listeners are required to run all tests. The network tool socat can be used.
+	 IPv6 and UDPv6 listeners are required to run all tests. The network tool socat can be used as a listener.
 
 _Example of using socat to listen IPv6:_
 
@@ -17,17 +17,17 @@ socat STDIO udp6-listen:12345
 ----
 
 .Required Pit Configuration Changes
-TargetIPv6:: IP address of the target host machine
-SourceIPv6:: IP address of the interface on the local machine
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-Interface:: Name of local interface (used for monitoring)
-SourcePort:: UDPv6 port number of the local machine
-TargetPort:: UDPv6 port number of the target host machine
+	TargetIPv6:: IP address of the target host machine
+	SourceIPv6:: IP address of the interface on the local machine
+	SourceMAC:: MAC address on local machine
+	TargetMAC:: MAC address of target machine
+	Interface:: Name of local interface (used for monitoring)
+	SourcePort:: UDPv6 port number of the local machine
+	TargetPort:: UDPv6 port number of the target host machine
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample IPv6 Configuration File
 [source,xml]

@@ -4,18 +4,18 @@ Configuration
 -------------
 
 .Target Configuration
-This pit broadcasts LLDP packets, no extra applications are required.
+	This pit broadcasts LLDP packets; no extra applications are required.
 
 
 .Required Pit Configuration Changes
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-Interface:: Name of local interface (used for monitoring)
-Hostname:: Hostname of the switch
+	SourceMAC:: MAC address on local machine
+	TargetMAC:: MAC address of target machine
+	Interface:: Name of local interface (used for monitoring)
+	Hostname:: Host name of the switch
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample LLDP Configuration File
 [source,xml]

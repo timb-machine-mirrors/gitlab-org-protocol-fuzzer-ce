@@ -4,7 +4,7 @@
  * Peach Pit: GIF
  * Supported Platorms: Windows, Linux, OS X
 
-Graphics Interchange Format (GIF) is an image format based on formerly pantented compression techniques.  It is very common on the web inspite of its licensing restraints.
+Graphics Interchange Format (GIF) is an image format based on formerly patented compression techniques.  It is very common on the web despite its licensing restraints.
 The format uses LZW lossless encryption for packing and can support animated images.
 It is comprised a short header and collection of recursive, null-terminated blocks.
 Blocks can contain information such as graphic settings, color tables, comments, and pixel data.

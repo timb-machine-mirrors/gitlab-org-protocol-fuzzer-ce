@@ -4,11 +4,11 @@
 
  * Peach Pit: IGMPv4
  * Direction: Client
- * Supported Platorms: Windows, Linux
+ * Supported Platforms: Windows, Linux
 
 Internet Group Management Protocol (IGMP) is used to declare and manage group membership for multicast addresses in IPv6.
 
-Multicast IP Addresses allow machines to subscribe to IP address groups. This way packets addressed to a group IP Address are distributed among all members. IGMP is protocol over IPv4 that allows machines to manage their group subscriptions.
+Multicast IP Addresses allow machines to subscribe to IP address groups. This way, packets addressed to a group IP Address are distributed among all members. IGMP is protocol over IPv4 that allows machines to manage their group subscriptions.
 
 
 Specifications

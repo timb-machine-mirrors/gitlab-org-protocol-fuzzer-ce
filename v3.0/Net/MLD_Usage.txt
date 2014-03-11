@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-A target machine with MLD enabled.  A firewall must not be blocking MLD messages.
+	A target machine with MLD enabled.  A firewall must not block MLD messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -15,14 +15,14 @@ Core Networking - Multicast Listener Report (ICMPv6-In)
 Core Networking - Multicast Listener Report v2 (ICMPv6-In)
 ----
 
-.Requried Pit Configuration Changes
-TargetIPv6:: IP address of the target host machine
-SourceIPv6:: IP address of the interface on the local machine
-Interface:: Name of local interface (used for monitoring)
+.Required Pit Configuration Changes
+	TargetIPv6:: IP address of the target host machine
+	SourceIPv6:: IP address of the interface on the local machine
+	Interface:: Name of local interface (used for monitoring)
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample MLD Configuration File
 [source,xml]
@@ -48,8 +48,8 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
   </OSX>
   <Windows platform="windows">
-    <!-- This can't run on windows anyway because it uses the RawEther publisher. -->
-    <!-- Platform independance is added as an example. -->
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+    <!-- Platform independence is added as an example. -->
     <Define key="Interface" value="Local Area Connection"/>
     <Define key="tsharkInterface" value="2"/>
     <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>

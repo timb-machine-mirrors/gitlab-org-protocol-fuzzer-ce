@@ -4,19 +4,19 @@ Configuration
 -------------
 
 .Target Configuration
-This pit sends raw Ethernet frames, no extra applications are required.
+	This pit sends raw Ethernet frames; no extra applications are required.
 
 
 .Required Pit Configuration Changes
-TargetIPv4:: IPv4 address of the target host machine
-SourceIPv4:: IPv4 address of the interface on the local machine
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-Interface:: Name of local interface (used for monitoring)
+	TargetIPv4:: IPv4 address of the target host machine
+	SourceIPv4:: IPv4 address of the interface on the local machine
+	SourceMAC:: MAC address on local machine
+	TargetMAC:: MAC address of target machine
+	Interface:: Name of local interface (used for monitoring)
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample Ethernet Configuration File
 [source,xml]

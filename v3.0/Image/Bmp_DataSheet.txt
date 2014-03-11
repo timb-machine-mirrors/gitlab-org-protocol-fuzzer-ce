@@ -4,9 +4,9 @@
  * Peach Pit: BMP
  * Supported Platorms: Windows, Linux, OS X
 
-Bitmap is a Microsoft defined file format to contain raster graphic images.
-The file contains fixed sized headers and a variable length pixel array.
-The BMP header varies by a variety versions and each version successivly appends fields to its previous version.
+Bitmap is a Microsoft defined file format containing raster graphic images.
+Bitmap files contain fixed sized headers and a variable length pixel array.
+The BMP header varies by a the version number; each subsequent version appends fields to end of the previous version. For example, v2 is the same header as v1 with additional data fields at the end of the header and v3 is the same header as v2 with still more data fields added at the end of the header.
 The file format is closely tied to the DIB internal data structure in the Windows API.
 
 
