@@ -3,7 +3,7 @@
 :Description: Audio Video Interleaved (AVI)
 
  * Peach Pit: avi_divx
- * Supported Platorms: Windows, Linux, OS X
+ * Supported Platforms: Windows, Linux, OS X
 
 Audio Video Interleaved, AVI, is a multimedia container format introduced by Microsoft part of its Video for Windows technology.
 AVI files can contain both audio and video data in a file container that allows synchronous audio-with-video playback.
