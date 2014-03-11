@@ -4,8 +4,8 @@ Configuration
 -------------
 
 .Target Configuration
-A target machine with DHCPv6 enabled.  The software tool bind6 can be targeted in a Linux environment.
-A firewall must not be blocking DHCPv6 messages.
+	A target machine with DHCPv6 enabled.  The software tool bind6 can be targeted in a Linux environment.
+	A firewall must not be blocking DHCPv6 messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -27,8 +27,8 @@ Core Networking - Dynamic Host Configuration Protocol for IPv6(DHCPV6-In)
 
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample DHCPv6 Configuration File
 [source,xml]

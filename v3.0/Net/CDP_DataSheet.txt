@@ -4,7 +4,7 @@
 
  * Peach Pit: CDP
  * Direction: Announce
- * Supported Platorms: Linux
+ * Supported Platforms: Linux
 
 The Cisco Discovery Protocol (CDP) is a proprietary Data Link Layer and Network Layer protocol developed by Cisco Systems. Cisco's multicast announce based protocol is used for neighbor device discovery.
 It is supported on numerous Cisco devices as well as many devices designed to inter-operate with Cisco hardware (primarily routers and switches).
