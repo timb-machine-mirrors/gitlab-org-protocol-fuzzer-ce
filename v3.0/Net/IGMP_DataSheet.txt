@@ -4,7 +4,7 @@
 
  * Peach Pit: IGMPv4
  * Direction: Client
- * Supported Platorms: Windows, Linux
+ * Supported Platforms: Windows, Linux
 
 Internet Group Management Protocol (IGMP) is used to declare and manage group membership for multicast addresses in IPv6.
 

@@ -13,13 +13,13 @@ socat STDIO udp4-listen:123
 ----
 
 .Required Pit Configuration Changes
-TargetIPv4:: IPv4 address of the target host machine
-SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
-TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
+	TargetIPv4:: IPv4 address of the target host machine
+	SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
+	TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample NTP Configuration File
 [source,xml]

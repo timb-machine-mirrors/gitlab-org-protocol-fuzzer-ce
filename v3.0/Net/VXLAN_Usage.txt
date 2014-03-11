@@ -5,7 +5,7 @@ Configuration
 
 .Target Configuration
 
-Setting up VXLAN can be a long multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide which is located here: http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
+Setting up VXLAN can be a long multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide at http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
 
 .Required Pit Configuration Changes
 	TargetIPv6:: IPv6 address of the target host machine

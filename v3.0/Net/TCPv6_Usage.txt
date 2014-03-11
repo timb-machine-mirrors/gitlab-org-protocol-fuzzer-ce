@@ -5,7 +5,7 @@ Configuration
 
 .Target Configuration
 	An application must be listening on the TCP port defined in the configuration file. The network tool socat can be used as the listener.
-	Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the context of the kernel.
+	Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
 
 _Example of setting up TCPv6:_
 [source,bash]
