@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-A target machine with DHCPv6 enabled.  The software tool bind6 can be targeted in a linux environment.
+A target machine with DHCPv6 enabled.  The software tool bind6 can be targeted in a Linux environment.
 A firewall must not be blocking DHCPv6 messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
@@ -13,17 +13,17 @@ _Windows Firewall Inbound Rules to enable on Target:_
 Core Networking - Dynamic Host Configuration Protocol for IPv6(DHCPV6-In)
 ----
 
-.Requried Pit Configuration Changes
-TargetIPv6:: IP address of the target host machine
-SourceIPv6:: IP address of the interface on the local machine
-SourcePort:: UDPv6 port number of the local machine
-TargetPort:: UDPv6 port number of the target host machine
-SourceMAC:: MAC Address of the local machine
-TargetInterface:: Network Interface to configure
-MulticastDHCP:: Multicast Address (fuzzed in DataModel)
-TargetIPv6Lease:: Target IPv6 Lease (fuzzed in DataModel)
-MaxTries:: Maximum number of packets to listen for before going to next iteration
-Interface:: Name of local interface (used for monitoring) (Must be set to ::1)
+.Required Pit Configuration Changes
+	TargetIPv6:: IP address of the target host machine
+	SourceIPv6:: IP address of the interface on the local machine
+	SourcePort:: UDPv6 port number of the local machine
+	TargetPort:: UDPv6 port number of the target host machine
+	SourceMAC:: MAC Address of the local machine
+	TargetInterface:: Network Interface to configure
+	MulticastDHCP:: Multicast Address (fuzzed in DataModel)
+	TargetIPv6Lease:: Target IPv6 Lease (fuzzed in DataModel)
+	MaxTries:: Maximum number of packets to listen for before going to next iteration
+	Interface:: Name of local interface (used for monitoring) (Must be set to ::1)
 
 
 .Optional Pit Configuration Changes
@@ -42,7 +42,7 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="TargetIPv6" value="fe80::5054:ff:fe02:c880"/>
     <Define key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
     <Define key="SourceIPv6" value="fe80::3e97:eff:fe47:524a%4"/>
-    <Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iter -->
+    <Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iteration -->
     <Define key="SourceMAC" value="000c291bf55d"/>
     <Define key="TargetPort" value="546"/>
     <Define key="TargetInterface" value="veth1"/>

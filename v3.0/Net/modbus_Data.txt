@@ -6,7 +6,8 @@
  * Direction: Client
  * Supported Platforms: Windows, Linux, OS X
 
-Modbus Protocol is a messaging structure developed by Modicon in 1979. It is used to establish master-slave/client-server communication between intelligent devices. It is a de facto standard, truly open and the most widely used network protocol in the industrial manufacturing environment.
+Modbus Protocol is a messaging structure developed by Modicon in 1979. It is used to establish master-slave/client-server communication between intelligent devices. 
+It is a de facto standard, truly open and the most widely used network protocol in the industrial manufacturing environment.
 
 Specifications
 --------------

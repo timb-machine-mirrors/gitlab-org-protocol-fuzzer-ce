@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-A UDP listener listening on the UDPv4 port defined in configuration file is required. The network tool socat can be used.
+A UDP listener listening on the UDPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
 
 _Example of using socat to listen for NTP:_
 

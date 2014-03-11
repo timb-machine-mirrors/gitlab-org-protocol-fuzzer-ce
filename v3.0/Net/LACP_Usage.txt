@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-In order to test the pit no extra applications are required. A LACP enabled switch is recommend for actual pit  testing.
+	No extra applications are required for pit tests but we recommend a LACP enabled switch.
 
 .Required Pit Configuration Changes
 SourceMAC:: MAC address on local machine

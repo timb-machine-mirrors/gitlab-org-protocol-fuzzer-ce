@@ -6,9 +6,9 @@
  * Direction: Announce
  * Supported Platforms: Linux
 
-The Link Layer Discovery Protocol is a vendor-neutral protocol designed to allow advertisement of information about network infrastructure hardware by said hardware.
+The Link Layer Discovery Protocol (LLDP) is a vendor-neutral protocol designed to allow advertisement of information about network infrastructure hardware by said hardware.
 It is formally described in IEEE 802.1AB as _Station and Media Access Control Connectivity Discovery_.
-It is designed to replace proprietary protocols such as EDP, CDP, LLTD, and SONMP.
+It replaces proprietary protocols such as EDP, CDP, LLTD, and SONMP.
 
 
 Specifications

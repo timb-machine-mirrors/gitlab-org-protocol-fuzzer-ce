@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used.
+	A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used as the listener..
 
 _Example of using socat to listen on SNMP port:_
 
@@ -28,18 +28,18 @@ sudo apt-get install snmp
 ----
 
 .Required Pit Configuration Changes
-TargetIPv4:: IP address of the target host machine
-SourceIPv4:: IP address of the interface on the local machine
-SourcePort:: SNMP port number of the local machine
-TargetPort:: SNMP port number of the target host machine
-Interface:: Name of local interface (used for monitoring)
-CommString:: Community string used for by the SNMP server
-Program:: The client program to test when fuzzing as the server
+	TargetIPv4:: IP address of the target host machine
+	SourceIPv4:: IP address of the interface on the local machine
+	SourcePort:: SNMP port number of the local machine
+	TargetPort:: SNMP port number of the target host machine
+	Interface:: Name of local interface (used for monitoring)
+	CommString:: Community string used for by the SNMP server
+	Program:: The client program to test when fuzzing as the server
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
-Agent:: Agent to run depending on the target OS. This value shouldn't be changed.
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
+	Agent:: Agent to run depending on the target OS. Do not change this value.
 
 .Sample SNMP Configuration File
 [source,xml]

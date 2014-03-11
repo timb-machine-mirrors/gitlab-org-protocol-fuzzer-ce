@@ -4,11 +4,11 @@
 
  * Peach Pit: DHCPv6
  * Direction: Client
- * Supported Platorms: Windows, Linux, OS X
+ * Supported Platforms: Windows, Linux, OS X
 
 Dynamic Host Configuration Protocol Version 6 (DHCPv6) is a variation of the DHCPv4 protocol for the IPv6 address space.
-Like its predecessor DHCPv6 allocates addresses from a central server and requests are broadcast across the link layer.
-Unlike in IPv4 hosts on an IPv6 network can automatically assign address without DHCP or a ceteral server with stateless address autoconfiguration.
+	Like DHCPv4, DHCPv6 allocates addresses from a central server and requests are broadcast across the link layer.
+	Unlike IPv4, hosts on an IPv6 network can automatically assign address without DHCP or a central server with stateless address auto-configuration.
 Hosts may still use DHCPv6 even if they are not requesting an address to configure other network parameters, such as DNS settings.
 
 Specifications

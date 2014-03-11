@@ -4,7 +4,7 @@
 
  * Peach Pit: ICMPv4
  * Direction: Client
- * Supported Platorms: Windows, Linux, OS X
+ * Supported Platforms: Windows, Linux, OS X
 
 Internet Control Message Protocol version 4 (ICMPv4) is the implementation of a message relay protocol on top of IPv4. It provides error responses for the IPv4 protocol as well as simple data transmission. It is commonly used in the ping application for testing network response and connectivity.
 
@@ -33,7 +33,7 @@ Use Cases
 |3) Destination Unreachable | RFC792
 |4) Source Quench | RFC792
 |5) Redirect | RFC792
-|11) Time Exeeded | RFC792
+|11) Time Exceeded | RFC792
 |12) Parameter Problem | RFC792
 |13) Timestamp | RFC792
 |14) Timestamp Reply Problem | RFC792

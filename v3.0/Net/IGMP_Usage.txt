@@ -4,7 +4,7 @@ Configuration
 -------------
 
 .Target Configuration
-A target machine with IGMP enabled.  A firewall must not be blocking IGMP messages.
+	A target machine with IGMP enabled.  A firewall must not block IGMP messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -12,14 +12,14 @@ _Windows Firewall Inbound Rules to enable on Target:_
 Core Networking - Internet Group Management Protocol (IGMP-In)
 ----
 
-.Requried Pit Configuration Changes
-TargetIPv4:: IP address of the target host machine
-SourceIPv4:: IP address of the interface on the local machine
-Interface:: Name of local interface (used for monitoring)
+.Required Pit Configuration Changes
+	TargetIPv4:: IP address of the target host machine
+	SourceIPv4:: IP address of the interface on the local machine
+	Interface:: Name of local interface (used for monitoring)
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing	
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample ICMPv6 Configuration File
 [source,xml]
