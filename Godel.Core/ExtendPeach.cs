@@ -24,6 +24,24 @@ namespace Godel.Core
 			Context = context;
 
 			Context.engine.TestStarting += engine_TestStarting;
+			Context.engine.TestFinished += engine_TestFinished;
+
+			Peach.Core.Dom.StateModel.Starting += StateModel_Starting;
+			Peach.Core.Dom.StateModel.Finished += StateModel_Finished;
+			Peach.Core.Dom.State.Starting += State_Starting;
+			Peach.Core.Dom.State.Finished += State_Finished;
+			Peach.Core.Dom.Action.Starting += Action_Starting;
+			Peach.Core.Dom.Action.Finished += Action_Finished;
+		}
+
+		void CleanupEvents()
+		{
+			Peach.Core.Dom.StateModel.Starting -= StateModel_Starting;
+			Peach.Core.Dom.StateModel.Finished -= StateModel_Finished;
+			Peach.Core.Dom.State.Starting -= State_Starting;
+			Peach.Core.Dom.State.Finished -= State_Finished;
+			Peach.Core.Dom.Action.Starting -= Action_Starting;
+			Peach.Core.Dom.Action.Finished -= Action_Finished;
 		}
 
 		GodelContext GetExpr(params string[] names)
@@ -39,10 +57,7 @@ namespace Godel.Core
 		{
 			var dom = context.dom as Godel.Core.Dom;
 			if (dom == null || dom.godel.Count == 0)
-			{
-				Context.engine.TestFinished -= engine_TestFinished;
 				return;
-			}
 
 			// Create the engine
 			Engine = IronPython.Hosting.Python.CreateEngine();
@@ -76,37 +91,33 @@ namespace Godel.Core
 			}
 
 			Expressions = dom.godel;
-
-			Peach.Core.Dom.StateModel.Starting += StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished += StateModel_Finished;
-			Peach.Core.Dom.State.Starting += State_Starting;
-			Peach.Core.Dom.State.Finished += State_Finished;
-			Peach.Core.Dom.Action.Starting += Action_Starting;
-			Peach.Core.Dom.Action.Finished += Action_Finished;
 		}
 
 
 		void engine_TestFinished(RunContext context)
 		{
-			foreach (var item in Expressions)
+			if (Expressions != null)
 			{
-				item.OnTestFinished();
+				foreach (var item in Expressions)
+					item.OnTestFinished();
 			}
 
 			OriginalStateModel = null;
 			Expressions = null;
 			Engine = null;
 
-			Peach.Core.Dom.StateModel.Starting -= StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished -= StateModel_Finished;
-			Peach.Core.Dom.State.Starting -= State_Starting;
-			Peach.Core.Dom.State.Finished -= State_Finished;
-			Peach.Core.Dom.Action.Starting -= Action_Starting;
-			Peach.Core.Dom.Action.Finished -= Action_Finished;
+			// Leave the events subscribed until we get a state model start with the wrong context
+			//CleanupEvents();
 		}
 
 		void StateModel_Starting(Peach.Core.Dom.StateModel model)
 		{
+			if (model.parent.context != Context)
+			{
+				CleanupEvents();
+				return;
+			}
+
 			// Keep a copy of the original for 'pre' variable in the post 
 			OriginalStateModel = ObjectCopier.Clone(model);
 
