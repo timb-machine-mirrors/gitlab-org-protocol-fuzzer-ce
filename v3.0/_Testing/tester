@@ -37,6 +37,9 @@ USE_COLOR = IS_INTERACTIVE and (not IS_WINDOWS)
 
 
 def find_peach():
+    # Buildbot tells this script where to find peach, no need to do all work
+    return "peach"
+
     if IS_INTERACTIVE:
         return "peach"
     # split the current path by othe os seperator and jump to top of build dir
