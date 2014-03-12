@@ -126,8 +126,7 @@ class PeachTest:
             self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
-        if IS_INTERACTIVE:
-            print "running %s" % self.cmd
+        print "running %s" % self.cmd
         if get_platform() == 'win':
             output = sys.stdout
         else:
@@ -140,7 +139,7 @@ class PeachTest:
         # execution should live inside of a 'with'
         sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
         serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
-        self.proc = Popen(self.arg, env=self.env)
+        self.proc = Popen(self.args, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
                     (timeout_counter < (self.timeout * 12)):
