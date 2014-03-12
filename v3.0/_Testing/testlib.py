@@ -12,7 +12,7 @@ from subprocess import Popen, PIPE
 IS_INTERACTIVE = sys.stdout.isatty()
 
 #resolution order is ./peach, last arg, PEACH env var
-PEACH_OPTS = []
+PEACH_OPTS = [ '--debug' ]
 BASE_DEFINES = {"Path": "."}
 if not __name__ == "__main__": EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
