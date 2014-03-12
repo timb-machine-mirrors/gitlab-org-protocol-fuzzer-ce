@@ -4,13 +4,24 @@ import os.path
 import sys
 import zipfile
 
+def do_extract(zf, dirname):
+    zf.extractall(dirname)
+    for i in zf.infolist():
+        dest = os.path.join(dirname, os.path.normpath(i.filename))
+        attr = i.external_attr >> 16;
+        if attr:
+            print 'chmod %s %s' % (oct(attr), dest)
+            os.chmod(dest, attr)
+
+
 if len(sys.argv) != 2:
     print "Please provide only one zipfile to extract"
 else:
     le_zip = sys.argv[1]
     filename = os.path.split(le_zip)[1]
     dirname = os.path.splitext(filename)[0]
+
     print "Extracting '%s' to '%s'" % (le_zip, dirname)
 
     zf = zipfile.ZipFile(le_zip)
-    zf.extractall(dirname)
+    do_extract(zf, dirname)
