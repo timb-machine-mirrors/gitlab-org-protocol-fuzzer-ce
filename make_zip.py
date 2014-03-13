@@ -4,7 +4,7 @@ import os, sys, argparse, fnmatch, zipfile
 
 
 outdir  = 'output'
-outfile = 'pits-%(buildtag)s.zip'
+outfile = 'peach-pits-%(buildtag)s.zip'
 
 manifest = [
 	{ 'root' : 'v3.0', 'incl' : '*', 'excl' : '_Testing/*' },
