@@ -68,6 +68,8 @@ class PeachTest:
 
     def _get_peach_bin(self, peach):
         if peach:
+            if get_platform() == 'win' and not peach.endswith('.exe'):
+                peach = '%s.exe' % peach
             return os.path.expanduser(peach)
         peach = os.environ.get('PEACH')
         if peach:
