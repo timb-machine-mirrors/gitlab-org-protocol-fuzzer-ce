@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+
+doc = bld(name='peach-userguide-pdf')
+
+doc.install_as(
+  '${BINDIR}/peach_pro_v${BUILDTAG}_userguide.pdf',
+  doc.path.find_resource('peach_professional.pdf'),
+  chmod=Utils.O644,
+)
+
 """
 bld(
 	features = 'asciidoc',

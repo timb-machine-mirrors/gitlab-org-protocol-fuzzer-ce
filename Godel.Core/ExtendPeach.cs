@@ -48,7 +48,7 @@ namespace Godel.Core
 		{
 			var name = string.Join(".", names);
 			GodelContext ret;
-			if (Expressions.TryGetValue(name, out ret))
+			if (Expressions != null && Expressions.TryGetValue(name, out ret))
 				return ret;
 			return null;
 		}
@@ -117,6 +117,9 @@ namespace Godel.Core
 				CleanupEvents();
 				return;
 			}
+
+			if (Expressions == null)
+				return;
 
 			// Keep a copy of the original for 'pre' variable in the post 
 			OriginalStateModel = ObjectCopier.Clone(model);

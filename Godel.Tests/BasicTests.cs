@@ -179,8 +179,6 @@ namespace Godel.Tests
 	</Test>
 </Peach>
 ";
-			var faults = new List<Fault>();
-
 			var e = new Engine(null);
 
 			var epeach = new Godel.Core.ExtendPeach(e.context);
@@ -230,8 +228,6 @@ namespace Godel.Tests
 	</Test>
 </Peach>
 ";
-			var faults = new List<Fault>();
-
 			var e = new Engine(null);
 
 			var epeach = new Godel.Core.ExtendPeach(e.context);
