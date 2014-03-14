@@ -7,8 +7,49 @@ outdir  = 'output'
 outfile = 'peach-pits-%(buildtag)s.zip'
 
 manifest = [
-	{ 'root' : 'v3.0', 'incl' : '*', 'excl' : '_Testing/*' },
+	{
+		'root' : 'v3.0',
+		'incl' : '*',
+		'excl' : '_Testing/* */README *.TODO *_DataSheet.txt *_Usage.txt' },
 ]
+
+'''
+For V0:
+
+ARP
+Ethernet
+IPv4
+IPv6
+TCPv4
+TCPv6
+UDPv4
+UDPv6
+DHCPv6
+IPSECv6
+ICMPv4
+ICMPv6
+MLD
+VLAN
+VXLAN
+LACP
+CDP
+LLDP
+IGMP
+ModBus 
+Video/avi_divx
+Net/NTP
+Net/SNMP
+Net/Ldap
+Net/ftp
+Net/DHCPv4
+Net/TELNET
+Image/jpg-jfif
+Image/BMP
+Image/Ico
+Image/JPEG2000
+Image/GIF
+Image/PNG
+'''
 
 def to_list(sth):
 	if isinstance(sth, str):
