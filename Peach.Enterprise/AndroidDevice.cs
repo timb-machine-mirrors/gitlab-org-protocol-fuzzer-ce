@@ -309,7 +309,7 @@ namespace Peach.Enterprise
 					{
 						logger.Trace("AdbException waiting for device '{0}': {1}", dev.SerialNumber, ex.Message);
 
-						if (ex.Message.Contains("sad result from adb"))
+						if (ex.Message.Contains("sad result from adb") || ex is ShellCommandUnresponsiveException)
 						{
 							logger.Trace("Attempting to restart adb server.");
 							AndroidBridge.Restart();
