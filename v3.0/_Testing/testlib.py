@@ -12,7 +12,7 @@ from subprocess import Popen, PIPE
 IS_INTERACTIVE = sys.stdout.isatty()
 
 #resolution order is ./peach, last arg, PEACH env var
-PEACH_OPTS = []
+PEACH_OPTS = [ '--debug' ]
 BASE_DEFINES = {"Path": "."}
 if not __name__ == "__main__": EXECPATH = os.path.join(os.path.dirname(__file__), 'CustomTests')
 
@@ -68,6 +68,8 @@ class PeachTest:
 
     def _get_peach_bin(self, peach):
         if peach:
+            if get_platform() == 'win' and not peach.endswith('.exe'):
+                peach = '%s.exe' % peach
             return os.path.expanduser(peach)
         peach = os.environ.get('PEACH')
         if peach:
@@ -95,8 +97,6 @@ class PeachTest:
 
     def build_cmd(self):
         #lets store args in self so args can be analyzed for each test
-        if get_platform() == 'osx':
-            self.args.append('mono')
         self.args.append(self.peach)
         opts = copy(self.base_opts)
         if self.extra_opts:
@@ -126,8 +126,7 @@ class PeachTest:
             self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
-        if IS_INTERACTIVE:
-            print "running %s" % self.cmd
+        print "running %s" % self.cmd
         if get_platform() == 'win':
             output = sys.stdout
         else:
@@ -140,7 +139,7 @@ class PeachTest:
         # execution should live inside of a 'with'
         sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
         serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
-        self.proc = Popen(self.args, stdout=sout, stderr=serr, env=self.env)
+        self.proc = Popen(self.args, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
                     (timeout_counter < (self.timeout * 12)):

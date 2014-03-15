@@ -5,7 +5,7 @@
  * Direction: Client, Server
  * Supported Platforms: Windows, Linux, OS X
 
-The Lightweight Directory Access Protocol (LDAP) is an application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network.
+Use the Lightweight Directory Access Protocol (LDAP) application protocol to access and maintain distributed directory information services over an Internet Protocol (IP) network.
 
 Specifications
 --------------

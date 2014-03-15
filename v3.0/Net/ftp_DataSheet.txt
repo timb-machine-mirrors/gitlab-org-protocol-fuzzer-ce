@@ -3,7 +3,7 @@
 
  * Peach Pit: FTP
  * Direction: Client, Server
- * Supported Platorms: Windows, Linux, OS X
+ * Supported Platforms: Windows, Linux, OS X
 
 File Transfer Protocol (FTP) is a standard network protocol used to transfer files from one host to another
 host over a TCP-based network, such as the Internet.

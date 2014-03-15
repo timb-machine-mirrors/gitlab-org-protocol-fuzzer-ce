@@ -5,27 +5,27 @@ Configuration
 
 .Target Configuration
 
-Setting up VXLAN can be a long multistep process. In order to simplify the setup please refer to to VMware's official VLXAN deployment guide which is located here: http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
+Setting up VXLAN can be a long multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide at http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf
 
 .Required Pit Configuration Changes
-TargetIPv6:: IPv6 address of the target host machine
-SourceIPv6:: IPv6 address of the interface on the local machine
-TargetIPv4:: IPv4 address of the target host machine
-SourceIPv4:: IPv4 address of the interface on the local machine
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-OuterTargetIPv4:: IPv4 address of the target host machine
-OuterSourceIPv4:: IPv4 address of the interface on the local machine
-OuterSourceMAC:: MAC address on local machine
-OuterTargetMAC:: MAC address of target machine
-Tag:: VXLAN identifier specifying the VXLAN to which the frames belong
-Interface:: Name of local interface (used for monitoring)
-SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
-TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
+	TargetIPv6:: IPv6 address of the target host machine
+	SourceIPv6:: IPv6 address of the interface on the local machine
+	TargetIPv4:: IPv4 address of the target host machine
+	SourceIPv4:: IPv4 address of the interface on the local machine
+	SourceMAC:: MAC address on local machine
+	TargetMAC:: MAC address of target machine
+	OuterTargetIPv4:: IPv4 address of the target host machine
+	OuterSourceIPv4:: IPv4 address of the interface on the local machine
+	OuterSourceMAC:: MAC address on local machine
+	OuterTargetMAC:: MAC address of target machine
+	Tag:: VXLAN identifier specifying the VXLAN to which the frames belong
+	Interface:: Name of local interface (used for monitoring)
+	SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
+	TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
 
 .Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
 
 .Sample VXLAN Configuration File
 [source,xml]
