@@ -15,12 +15,12 @@ Welcome to the file fuzzing tutorial, part of the Peach Quickstart.  In this tut
 
 :leveloffset: 1
 
-include::TutorialFileFuzzing/DevelopmentEnvironment.txt[]
-include::TutorialFileFuzzing/CreateDataModel.txt[]
-include::TutorialFileFuzzing/CreateStateModel.txt[]
-include::TutorialFileFuzzing/ConfigurePublisher.txt[]
-include::TutorialFileFuzzing/AgentAndMonitor.txt[]
-include::TutorialFileFuzzing/OptimizeTesting.txt[]
-include::TutorialFileFuzzing/RunningInParallel.txt[]
+include::TutorialFileFuzzing/DevelopmentEnvironment.adoc[]
+include::TutorialFileFuzzing/CreateDataModel.adoc[]
+include::TutorialFileFuzzing/CreateStateModel.adoc[]
+include::TutorialFileFuzzing/ConfigurePublisher.adoc[]
+include::TutorialFileFuzzing/AgentAndMonitor.adoc[]
+include::TutorialFileFuzzing/OptimizeTesting.adoc[]
+include::TutorialFileFuzzing/RunningInParallel.adoc[]
 
 :leveloffset: 0

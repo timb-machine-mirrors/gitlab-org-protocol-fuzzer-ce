@@ -121,18 +121,18 @@ xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel
 [[Action_Types]]
 == Action Types
 
-include::Actions/start.txt[start]
-include::Actions/stop.txt[stop]
-include::Actions/open.txt[open]
-include::Actions/close.txt[close]
-include::Actions/accept.txt[accept]
-include::Actions/input.txt[input]
-include::Actions/output.txt[output]
-include::Actions/call.txt[call]
-include::Actions/getProperty.txt[getProperty]
-include::Actions/setProperty.txt[setProperty]
-include::Actions/slurp.txt[slurp]
-include::Actions/changeState.txt[changeState]
+include::Actions/start.adoc[start]
+include::Actions/stop.adoc[stop]
+include::Actions/open.adoc[open]
+include::Actions/close.adoc[close]
+include::Actions/accept.adoc[accept]
+include::Actions/input.adoc[input]
+include::Actions/output.adoc[output]
+include::Actions/call.adoc[call]
+include::Actions/getProperty.adoc[getProperty]
+include::Actions/setProperty.adoc[setProperty]
+include::Actions/slurp.adoc[slurp]
+include::Actions/changeState.adoc[changeState]
 
 // When already exists in v3/when.txt
 //=== when
