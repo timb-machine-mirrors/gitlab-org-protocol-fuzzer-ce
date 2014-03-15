@@ -19,7 +19,7 @@ using Peach.Core.Publishers;
 namespace VisualStudio2012
 {
 	// Use the [Publisher] attribute to indicate the class can be used as a Publisher and
-	// provide the name used in the XML. (<Publisher class="Custom" />)
+	// provide the name used in the XML. (<Publisher class="CustomStream" />)
 	[Publisher("CustomStream", true)]
 	// Define zero or more parameters with name, type, descriptiom, and optional default value.
 	// parameters w/o a default value will be required.
@@ -46,6 +46,9 @@ namespace VisualStudio2012
 		public CustomStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
+			// Automatically populate properties from parameter args
+			ParameterParser.Parse(this, args);
+
 			// TODO - Validate parameters here
 		}
 
