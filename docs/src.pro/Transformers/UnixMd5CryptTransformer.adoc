@@ -1,0 +1,67 @@
+[[Transformers_UnixMd5CryptTransformer]]
+== UnixMd5CryptTransformer
+
+// Reviewed:
+//  - 02/19/2014: Seth & Adam: Outlined
+// TODO: 
+// Verify parameters expand parameter description 
+// Full pit example using hex console 
+// expand  general description 
+// Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
+// See AES for format 
+// Test output, input
+
+// Updated:
+// 2/19/14: Mick
+// verified params
+// added supported actions
+// expanded description
+// added full example
+
+=== Transformer type: Cryptography
+
+The _UnixMd5CryptTransformer_ will produce an MD5 crypt operation on the provided value in the parent xref:DataModel[DataModel].
+This is done using the first two bytes as the salt and pre pending the value "$1".  
+This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
+
+=== Parameters 
+
+No Parameters are supported by this element.
+
+=== Actions Supported 
+
+ * xref:Action_output[output]
+ * xref:Action_call[call]
+ * xref:Action_setProperty[setProperty] 
+
+=== Examples
+
+[source,xml]
+----
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Ex1">
+		<Block name="Main">
+			<String name="TransformMe" value="superdoopersecret">
+				<Transformer class="UnixMd5Crypt" />
+			</String>
+		</Block>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<!-- Encrypted Output -->
+			<Action type="output" publisher="ConsolePub">
+				<DataModel ref="Ex1" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" name="ConsolePub"/>
+	</Test>
+</Peach>
+----
+

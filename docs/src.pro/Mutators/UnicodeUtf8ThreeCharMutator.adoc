@@ -1,0 +1,13 @@
+<<<
+[[Mutators_UnicodeUtf8ThreeCharMutator]]
+== UnicodeUtf8ThreeCharMutator
+
+This mutator will generate a large list of long UTF-8 three byte strings that are useful for fuzzing.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

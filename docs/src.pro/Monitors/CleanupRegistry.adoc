@@ -1,0 +1,53 @@
+[[Monitors_CleanupRegistry]]
+== CleanupRegistry Monitor (Windows)
+
+The _CleanupRegistry_ monitor will remove a registry key or a key's children.
+The source code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
+
+The following key prefixes are used:
+
+ * _HKCU\_ -- Current user
+ * _HKCC\_ -- Current config
+ * _HKLM\_ -- Local machine
+ * _HKPD\_ -- Performance data
+ * _HKU\_ -- Users
+
+=== Parameters
+
+ * _Key_ -- Registry key to remove.
+ * _ChildrenOnly_ -- Only cleanup sub-keys. (optional, defaults false)
+
+=== Examples
+
+.Clean up after office
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="TheAgent">
+	<Monitor class="CleanupRegistry">
+		<Param name="Key" value="HKLM\SOFTWARE\Office13\Recovery" />
+	</Monitor>
+ </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="TheAgent" />
+
+    <Publisher class="ConsoleHex"/> 
+  </Test>
+</Peach>
+----

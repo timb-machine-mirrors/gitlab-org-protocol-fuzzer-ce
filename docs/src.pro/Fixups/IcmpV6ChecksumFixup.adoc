@@ -1,0 +1,73 @@
+[[Fixups_IcmpV6ChecksumFixup]]
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is used when fuzzing {0} protocols"
+// Give full pit to run using hex publisher, test works 
+// List Parent element types  
+// Number, String
+
+// Updated:
+// - 02/18/2014: Jordyn
+// Added full examples
+
+// Updated:
+// - 02/21/2014: Mick
+// Parent elements
+
+== IcmpV6ChecksumFixup
+
+The _IcmpV6ChecksumFixup_ _ will produce a checksum using the ICMPV6 algorithm used commonly in ICMP and IPv6. It is defined and documented in RFC 1071 and RFC 2460 and can be found in the Custom Peach implementation.
+
+=== Parent Elements
+
+ * xref:Number[Number]
+ * xref:String[String]
+ 
+=== Parameters
+
+ * xref:ref[ref] -- Reference to data element on which the checksum will be performed
+ * _src_ -- Source IPv6 address of the local machine
+ * _dst_ -- Destination IPv6 address of the remote machine
+
+=== Examples
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Data">
+    <Block name="Content">
+      <Number name="Type" size="8"/>
+      <Number name="Code" size="8"/>
+      <Number name="Checksum" endian="big" size="16">
+        <Fixup class="IcmpV6ChecksumFixup">
+          <Param name="ref" value="Content" />
+          <Param name="src" value="::1" />
+          <Param name="dst" value="::1" />
+        </Fixup>
+      </Number>
+      <Blob name="Payload" value="hello" />
+    </Block>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="Data" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+     <Publisher class="RawV6">
+      <Param name="Host" value="::1"/>
+      <Param name="Interface" value="::1"/>
+      <Param name="Protocol" value="1"/>
+    </Publisher>
+  </Test>
+</Peach>
+----

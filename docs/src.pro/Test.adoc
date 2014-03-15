@@ -1,0 +1,80 @@
+[[Test]]
+== Test
+
+// Reviewed:
+//  - 01/30/2014: Seth & Mike: Outlined
+// * Include/exclude
+// * Mutator include/exclude
+//  * Mention you can only have one (include specific set or exclude a specific set, not both)
+// * Use of Publishers (including multiple publishers)
+// * Agents including platform tag (may just link off to that?)
+// * Logging
+// * Mutation strategy
+//  * With parameters (probably this should just be done in the strategy docs)
+// * All attributes for Test
+// * Link to configuration files
+// * State model reference
+// * Use of multiple tests in a pit file
+
+
+The Test element is used to configure a specific fuzzing test that combines a StateModel with a Publisher and other configuration options such as including/excluding elements from being mutated, Agents, and fuzzing strategies.
+
+Multiple Test elements are supported, simply provide the name of the test element to use
+on the Peach command line.
+
+NOTE: When running Peach, the Test element named "Default" will be run if a test name is
+not provided on the command line.
+
+=== Syntax
+
+[source,xml]
+----
+<Test name="Default">
+
+  <!-- Optionally exclude some elements from mutation -->
+  <Exclude xpath="//Reserved" />
+  <Exclude xpath="//Magic" />
+
+  <!-- Optional agent references -->
+  <Agent ref="LocalWindowsAgent" platform="windows" />
+  <Agent ref="LocalOsxAgent" platform="osx" />
+  <Agent ref="LocalLinuxAgent" platform="linux" />
+  
+  <Agent ref="RemoteAgent" />
+
+  <!-- Indicate which state model to use (required) -->
+  <StateModel ref="TheState" />
+
+  <!-- Configure the publisher to use (required) -->
+  <Publisher class="Tcp">
+     <Param name="Host" value="127.0.0.1" />
+     <Param name="Port" value="9001" />
+  </Publisher>
+
+  <!-- Use a different fuzzing strategy -->
+  <Strategy class="Random" />
+  
+  <!-- Log output to disk -->
+  <Logger class="File">
+    <Param name="Path" value="logs" />
+  </Logger>
+</Test>
+----
+
+=== Attributes
+
+ * xref:name[name] -- Name of the test, use "Default" for default test [required]
+ * _waitTime_ -- Time to wait in between each test case (Defaults to zero (0))
+ * _faultWaitTime_ -- Time to wait for a fault to occur before starting next iteration (Defaults to 0)
+ * _controlIteration_ -- How often should we perform control iterations.  (Defaults to 0)
+
+=== Child-Elements
+
+ * xref:AgentsMonitors[Agent] (optional)
+ * xref:StateModel[StateModel] (required)
+ * xref:Publisher[Publisher] (required)
+ * xref:Include[Include] (optional)
+ * xref:Exclude[Exclude] (optional)
+ * xref:MutationStrategies[Strategy] (optional)
+ * xref:Logger[Logger] (optional, recommended)
+

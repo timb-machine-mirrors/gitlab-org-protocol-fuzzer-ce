@@ -1,0 +1,72 @@
+[[Param]]
+== Param
+
+// Reviewed:
+//  - 01/30/2014: Seth & Mike: Outlined
+
+// * valueType, value, name
+// * What are they used for
+// * cross link to things that take params
+// * examples
+//  * Different thigns using param
+//  * valueType
+
+The Param element is a common child-element used in Peach Pits.
+For many cases Param provides a key-value pair to the parent element, typically used for configuration settings.
+Params are common for various xref:AgentsMonitors[Monitors], xref:Publisher[Publishers], and xref:Fixup[Fixups].
+
+[source,xml]
+----
+<Publisher class="Tcp">
+  <Param name="Host" value="127.0.0.1" />
+  <Param name="Port" value="80" />
+</Publisher>
+
+<Fixup class="Crc32Fixup">
+  <Param name="ref" value="MyDataStuff" />
+</Fixup>
+
+<Monitor class="WindowsDebugger">
+    <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+</Monitor>
+----
+
+_Attributes:_
+
+ * xref:name[name] -- Name of parameter [required]
+ * xref:value[value]:: Default value.
+ * xref:valueType[valueType]:: Format of value attribute.
+
+_Valid Child-Elements:_
+
+This element has no valid child elements.
+
+=== Param in Call
+
+Param is also used as an argument to the xref:Action_call[call] Action.
+Call actions can have an array of parameters defined by param used in different ways by the Publisher
+In this usage of Param the element is solely a container for a DataModel and Data.
+The Data described in the Param will be fuzzed by Peach.
+
+=== Syntax
+
+[source,xml]
+----
+<Action type="call" method="Players[1].OpenUrl">
+  <Param name="P1">
+    <DataModel ref="TheDataModel" />
+    <Data>
+      <Field name="Value" value="video.mov"/>
+    </Data>
+  </Param>
+</Action>
+----
+
+_Attributes:_
+
+ * xref:name[name] -- Name of parameter [optional]
+
+_Valid Child-Elements:_
+
+xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
+xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing

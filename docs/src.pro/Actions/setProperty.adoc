@@ -1,0 +1,146 @@
+<<<<
+[[Action_setProperty]]
+== setProperty
+
+// 01/30/2014: Seth & Mike: Outlined
+//  * Talk about setting values on publishers
+//  * Talk about what properties are
+//  * Talk about some of the publishers that use them (COM)
+//  * Talk about data sets
+//  * Set property is mutated (data is going out from peach)
+//  Examples
+
+// 02/12/2014: Mick
+//  Added description of what setProperty does
+//  talked about publishers that use it
+//  Added attribute descriptions
+//  Added an example
+
+// 02/28/2014: Mike: Ready for tech review
+//  Made content match getProperty
+//  Ditto with examples
+
+// 03/05/2014: Lynn: 
+//  Edited text and corrected Apple QuickTime information
+
+The _setProperty_ Action allows Peach to modify parameters of a Publisher while fuzzing. These parameters are fuzzed as well in the same way an output action would be.
+Properties are used by Publishers like COM where a COM attribute is set and mutated by Peach (see example below).
+Another reason to set a property would be fuzzing the MTU attribute of the RawEther Publisher.
+This action is not supported by all Publishers.
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (accept, input, output, etc.)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
+
+=== Syntax
+
+[source,xml]
+----
+<StateModel name="TheStateModel" initialState="InitialState">
+	<State name="InitialState">
+		<Action type="setProperty" property="Name">
+			<DataModel ref="NameModel"/>
+		</Action>
+	</State>
+</StateModel>
+----
+
+=== Attributes
+
+_Required:_
+
+type:: Action type, must be set to "setProperty"
+
+_Optional:_
+
+name:: Name used to identify the action
+property:: Name of property to set in the publisher
+publisher:: Name of the publisher that this action should be called on
+xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
+xref:Action_onStart[onStart]:: Expression to run on start of an action.
+xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+
+=== Child-Elements
+
+xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
+xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
+
+=== Examples
+
+.Accessing a Property using Microsoft COM Publisher
+==========================
+This is an example of fuzzing property values with the QuickTime COM object.
+_setProperty_ is used to set the height of the player window.
+Since _setProperty_ is considered a data output, it is fuzzed.
+
+This example requires a Windows XP or newer machine with Apple QuickTime installed.
+
+. Start QuickTime
+. Save example to "example.xml"
+. Run "Peach.Core.ComContainer.exe"
+. Run "Peach.exe -1 --debug example.xml"
+. You should see the Quicktime movie start to play
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <!-- Import python module so we can sleep after saying play -->
+  <Import import="time"/>
+  
+  <DataModel name="TheDataModel">
+    <String name="Value" />
+  </DataModel>
+  
+  <StateModel name="TheState" initialState="Initial">
+    
+    <State name="Initial">
+
+      <Action type="call" method="Players[1].OpenURL">
+        <!-- This parameter will be fuzzed -->
+        <Param name="P1">
+          <DataModel ref="TheDataModel" />
+          
+          <Data>
+            <Field name="Value" value="https://archive.org/download/AppleComputersQuicktimeSample/sample.mp4"/>
+          </Data>
+        </Param>
+      </Action>
+      
+      <!-- This property will be fuzzed -->
+      <Action type="setProperty" property="Players[1].Height">
+        <DataModel ref="TheDataModel" />
+        <Data>
+          <Field name="Value" value="100" />
+        </Data>
+      </Action>
+      
+      <!-- The onComplete expression will pause the fuzzer to let
+           the video play for 6 seconds. -->
+      <Action type="call" method="Players[1].QTControl.Movie.Play" onComplete="time.sleep(6)"/>
+
+    </State>
+    
+  </StateModel>
+  
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="Com">
+      <Param name="clsid" value="QuickTimePlayerLib.QuickTimePlayerApp"/>
+    </Publisher>
+  </Test>
+  
+</Peach>
+----
+==========================

@@ -1,0 +1,48 @@
+[[Monitors_MemoryMonitor]]
+== Memory Monitor
+
+The _Memory_ monitor checks the memory usage of a process and throws a fault if it has gone over the set limit.  This is useful for detecting non-crashing extraneous memory usage.
+
+=== Parameters
+
+ * _Pid_ -- Process ID to monitor (optional)
+ * _ProcessName_ -- Name of process to monitor (optional)
+ * _MemoryLimit_ -- Fault when memory usage surpasses limit (optional, default 0 MB)
+ * _StopOnFault_ -- Stop fuzzing if a fault is triggered (optional, default false)
+
+=== Examples
+
+.Monitor memory via PID
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+	<Monitor class="Memory">
+		<Param name="ProcessName" value="notepad.exe"/> 
+		<Param name="MemoryLimit" value="1000" />
+	</Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>	
+
+----

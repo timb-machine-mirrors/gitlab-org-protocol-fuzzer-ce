@@ -1,0 +1,69 @@
+[[Fixups_FillValueFixup]]
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is used when fuzzing {0} protocols"
+// Show example of output
+// Give full pit to run using hex publisher
+// List Parent element types
+// Blob
+// Updated:
+// - 02/18/2014: Jordyn
+// Added full examples
+// Expanded description
+// listed parent elements types
+
+// Updated:
+// - 02/21/2014: Mick
+// Parent elements changed to match format
+
+== FillValueFixup
+
+The _FillValueFixup_ is used to fill a value with sequential numbers with the first number being the value of the start parameter and the end of the range being the value of the stop parameter. If the range of numbers is less than the size of the referenced element the sequence will repeat after it has reached the end of the given range. This is used when fuzzing the IPsec protocol, as the required padding in the encrypted portion of the data requires padding that is sequential numbers.
+
+=== Parent Elements
+
+ * xref:Number[Number]
+ * xref:Blob[Blob]
+ * xref:Padding[Padding]
+ 
+=== Parameters
+
+ * xref:ref[ref] -- Reference to data element the sequence will be added to
+ * start -- Inclusive start fill value
+ * stop -- Inclusive stop fill value
+
+=== Examples
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Data">
+    <String name="Start" value="Start"/>
+    <Blob name="Data" length="17">
+      <Fixup class="FillValue">
+        <Param name="ref" value="Data"/>
+        <Param name="start" value="0"/>
+        <Param name="stop" value="10"/>
+      </Fixup>
+    </Blob>
+    <String name="Stop" value="Stop"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="Data" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----

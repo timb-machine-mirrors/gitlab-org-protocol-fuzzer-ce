@@ -1,0 +1,66 @@
+[[Publisher]]
+== Publishers
+
+// Reviewed:
+//  - 02/20/2014: Seth & Mike: Outlined
+// * Multible Publishers
+// * Types of actions implemented by publishers
+// * Stream vs. Stream with end (Tcp vs. File)
+// * Stream vs. Call based (Tcp vs. Com)
+// * Remote publishers
+// * List all action types we utilize
+
+//Updated:
+//  - 03/04/2014: Lynn: Added additional Publishers and the note about changState
+
+Publishers are the I/O interfaces used by Peach to send and receive data.
+Publishers support both stream and call based operations.
+
+When the fuzzer is running, all xref:Action[Actions] with the exception of ChangeState and slurp use a publisher to
+perform the action. Different publishers support a different set of Action types.  For
+example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept.
+
+All fuzzing definitions must use at least one Publisher and can optionally use multiple
+Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
+
+=== Network Publishers
+
+When fuzzing network protocols, the publisher used is typically the protocol that encompasses the target protocol.
+For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuzzing TCP, the IPv4 or IPv6 publisher is used. When fuzzing IPv4 the Ethernet publisher is used.
+
+=== Custom Publishers
+
+Peach supports the creation of custom Publishers. It is recommended that the code for some
+of the existing Publishers be reviewed first to understand how Publishers are typically
+implemented.
+
+Creating a custom Publisher does not require changing the Peach source code.  Instead the
+code is placed in a new .NET assembly (dll) that is added to the Peach bin folder.  Peach
+will automatically use reflection to identify the new Publisher and make it available for
+use.
+
+=== Publishers
+
+ * xref:Publishers_AndroidMonkey[AndroidMonkey]
+ * xref:Publishers_Com[Com]
+ * xref:Publishers_Console[Console]
+ * xref:Publishers_ConsoleHex[ConsoleHex]
+ * xref:Publishers_File[File]
+ * xref:Publishers_FilePerIteration[FilePerIteration]
+ * xref:Publishers_Http[Http]
+ * xref:Publishers_I2C[I2C] 
+ * xref:Publishers_Null[Null]
+ * xref:Publishers_RawEther[RawEther]
+ * xref:Publishers_RawIPv4[RawIPv4]
+ * xref:Publishers_RawIPv6[RawIPv6]
+ * xref:Publishers_RawV4[RawV4]
+ * xref:Publishers_Remote[Remote]
+ * xref:Publishers_SerialPort[SerialPort] 
+ * xref:Publishers_SslClient[SslClient] 
+ * xref:Publishers_SslListener[SslListener] 
+ * xref:Publishers_TcpClient[TcpClient]
+ * xref:Publishers_TcpListener[TcpListener]
+ * xref:Publishers_Udp[Udp]
+ * xref:Publishers_WebService[WebService]
+ * xref:Publishers_WebSocket[WebSocket]
+ 

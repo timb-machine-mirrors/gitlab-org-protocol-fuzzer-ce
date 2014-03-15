@@ -1,0 +1,66 @@
+[[Transformers_ApacheMd5Crypt]]
+== ApacheMd5Crypt
+
+// Reviewed:
+//  - 02/19/2014: Seth & Adam: Outlined
+// TODO: 
+// Verify parameters expand parameter description 
+// Full pit example using hex console 
+// expand  general description 
+// Identify direction / action supported for (Input/Output/Call/setProperty/getProperty)
+// See AES for format 
+// Test output 
+
+// Updated:
+// 2/20/14: Mick
+// verified params
+// added supported actions
+// expanded description
+// added full example
+
+=== Transformer type: Cryptography
+
+The _ApacheMd5Crypt_ will MD5 Crypt the data using the method described in the Apache HTTP Server Documentation.
+The first two bytes will be used as the salt with the value $apr1$ prepended.
+This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
+
+=== Parameters 
+
+No Parameters are supported by this element.
+
+=== Actions Supported 
+
+ * xref:Action_output[output]
+ * xref:Action_call[call]
+ * xref:Action_setProperty[setProperty]
+
+=== Examples
+
+[source,xml]
+----
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Ex1">
+		<Block name="Main">
+			<String name="TransformMe" value="superdoopersecret">
+				<Transformer class="ApacheMd5Crypt" />
+			</String>
+		</Block>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<!-- Hashed Output -->
+			<Action type="output" publisher="ConsolePub">
+				<DataModel ref="Ex1" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" name="ConsolePub"/>
+	</Test>
+</Peach>
+----

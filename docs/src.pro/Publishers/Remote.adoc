@@ -1,0 +1,83 @@
+[[Publishers_Remote]]
+
+// Reviewed:
+//  - 02/13/2014: Seth & Adam: Outlined
+// Params are good
+// give full pit to run for example
+// Use RawEther publisher for example to show running from windows
+// - 02/18/2014: Jordyn
+// Added full example
+
+== Remote Publisher
+
+The _Remote_ publisher runs another publisher from a xref:Agent[Peach Agent] process.
+
+TIP: Remote publishing is only supported with TCP Remoting agent channel.
+
+=== Parameters
+
+ * _Agent_ -- Name of Agent to run the Publisher from
+ * _Class_ -- Name of Publisher to run
+ * _Other Parameters_ -- Parameters for Publisher being remoted
+
+=== Actions
+
+ * Any actions supported by remoted publisher
+
+=== Examples
+
+.Remoting TCP Publisher
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <Defaults>
+    <Number endian="big"/>
+  </Defaults>
+
+  <DataModel name="TheDataModel">
+    <Blob name="Dest" valueType="hex" mutable="false" length="6" value="FFFFFFFFFFFF"/>
+    <Blob name="Src" valueType="hex" mutable="false" length="6" value="FFFFFFFFFFFF"/>
+    <Number name="TypeOrLen" size="16" token="true"  valueType="hex" value="0806"/>
+    <Block name="Payload">
+      <String name="name" value="Deja vu"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="propertySize">
+    <Number size="32" value="1500"/>
+  </DataModel>
+
+  <Agent name="RemoteAgent" location="tcp://192.168.1.1:9001" />
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <Agent ref="RemoteAgent" />
+
+    <StateModel ref="TheState"/>
+
+   <Publisher class="Remote">
+    <Param name="Agent" value="RemoteAgent" />
+    <Param name="Class" value="RawEther"/>
+
+    <!-- Parameters for RawEther -->
+    <Param name="Interface" value="lo" />
+    <Param name="Protocol" value="ETH_P_ALL" />
+  </Publisher>
+  </Test>
+</Peach>
+----
+
+.Starting Peach Agent Process on Remote Machine
+----
+peach.exe -a tcp
+----

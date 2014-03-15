@@ -1,0 +1,13 @@
+<<<
+[[Mutators_UnicodeStringsMutator]]
+== UnicodeStringsMutator
+
+This mutator will cycle through a generated list of unicode strings. The length of the strings used vary.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

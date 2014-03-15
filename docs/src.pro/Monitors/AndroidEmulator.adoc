@@ -1,0 +1,78 @@
+[[Monitors_AndroidEmulator]]
+== AndroidEmulator Monitor
+
+The _AndroidEmulator_ handles setup and tear-down for Android Virtual Devices (AVDs) running within the Android Emulator. This requires the http://developer.android.com/tools/help/emulator.html[Android Emulator] and http://developer.android.com/sdk/index.html[Android Platform Tools].
+
+=== Parameters
+ * _Avd_ -- Android virtual device.
+ * _EmulatorPath_ -- Directory containing the emulator. (optional, will be determined automatically)
+ * _RestartAfterFault_ -- Restart emulator after a fault. (optional, defaults to true)
+ * _RestartEveryIteration_ -- Restart emulator on every iteration. (optional, defaults to false)
+ * _StartOnCall_ -- Start the emulator when notified by the state machine. (optional)
+ * _StartTimeout_ -- How many seconds to wait for emulator to start running. (optional, defaults to 30)
+ * _StopTimeout_ -- How many seconds to wait for emulator to exit. (optional, defaults to 30)
+
+=== Examples
+
+.Runs the BadBehaviorActivity, sending random taps
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+
+	<DataModel name="TheDataModel">
+		<Number size='32' signed="false" value="31337" />
+	</DataModel>
+
+	<DataModel name="X">
+		<Number size='32' signed="false" value="100" />
+	</DataModel>
+
+	<DataModel name="Y">
+		<Number size='32' signed="false" value="0" />
+	</DataModel>
+
+	<StateModel name="State" initialState="Initial" >
+		<State name="Initial"  >
+			<Action type="call" method="tap">
+				<Param>
+					<DataModel ref="X"/>
+				</Param>
+				<Param>
+					<DataModel ref="Y"/>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="TheAgent">
+		<Monitor name="Emu" class="AndroidEmulator">
+			<Param name="Avd" value="Nexus4" />
+			<!--Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\tools"/-->
+		</Monitor>
+
+		<Monitor name="App" class="Android">
+			<Param name="ApplicationName" value="com.android.development" />
+			<Param name="ActivityName" value=".BadBehaviorActivity" />
+			<!--Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\platform-tools"/-->
+			<Param name="DeviceMonitor" value="Emu" />
+		</Monitor>
+	</Agent>
+
+	<Test name="Default">
+		<StateModel ref="State"/>
+		<Agent ref="TheAgent" />
+
+		<Publisher class="AndroidMonkey">
+			<Param name="DeviceMonitor" value="App"/>
+		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+</Peach>
+----

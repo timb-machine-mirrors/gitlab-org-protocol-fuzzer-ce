@@ -1,0 +1,61 @@
+<<<
+[[Flag]]
+== Flag
+
+// Reviewed:
+//  - 03/06/2014: Lynn
+//   Added child elements and corrected spelling in other comments
+
+The Flag element defines a specific bit field in a Flags container.
+
+See also parent element xref:Flags[Flags].
+
+=== Syntax
+
+[source,xml]
+----
+<Flags name="options" size="16">
+  <Flag name="compression" position="0" size="1" />
+  <Flag name="compressionType" position="1" size="3" />
+  <Flag name="opcode" position="10" size="2" value="5" />
+</Flags>
+----
+
+=== Attributes
+
+_Required:_
+
+xref:size[size]:: Size in bits
+xref:position[position]:: Position (zero based) flag starts
+
+_Optional:_
+
+xref:name[name]:: Name of the element
+xref:value[value]:: The default value contained within the element
+xref:valueType[valueType]:: The format in which the default value is expressed. (i.e hex, string, or literal)
+xref:token[token]:: Is data element a token? Default is false.
+xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to true
+
+=== Child Elements
+
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighbouring each other
+xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]:: TODO
+xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]:: TODO
+xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]:: TODO
+
+=== Examples
+
+// TODO

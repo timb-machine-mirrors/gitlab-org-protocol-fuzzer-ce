@@ -1,0 +1,114 @@
+[[Fixups_ExpressionFixup]]
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is used when fuzzing {0} protocols"
+// Give full pit to run using hex publisher, test works 
+// Example 1 data returned as int
+// Example 2 data returned as string <- this doesn't work
+// Example 3 data returned as byte array 
+// List Parent element types  
+// Number, String, Blob 
+// Make unit test for all three cases !!!
+
+== ExpressionFixup
+
+The _ExpressionFixup_ will evaluate a scripting expression that produces the new value for our element.
+
+=== Parameters
+
+ * xref:ref[ref] -- Reference to the data element whose value is used in the given expression
+ * _expression_ -- Scripting expression to evaluate.  Must return a string or integer value. 
+
+=== Scripting Variables
+
+ * _self_ -- Fixup instance
+ * _ref_ -- Referenced element
+ * _data_ -- Referenced elements value as a byte array
+ 
+=== Examples
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<Import import="ExpressionFixup" />
+
+	<DataModel name="NumericExpressionData">
+		<Number name="NumericData" size="32" value="14"/>
+		<Number size="32">
+			<Fixup class="ExpressionFixup">
+				<Param name="ref" value="NumericData" />
+				<Param name="expression" value="ExpressionFixup.multiply_by_three(ref)" />
+			</Fixup>
+		</Number>
+	</DataModel>
+
+	<DataModel name="ByteArrayExpressionData">
+		<Blob>
+			<Fixup class="ExpressionFixup">
+				<Param name="ref" value="StringData" />
+				<Param name="expression" value="ExpressionFixup.rot13(ref)" />
+			</Fixup>
+		</Blob>
+		<String name="StringData" value="uryyb jbeyq"/>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="DumpNumeric">
+		<State name="DumpNumeric">
+			<Action type="output">
+				<DataModel ref="NumericExpressionData"/>
+			</Action>
+			<Action type="changeState" ref="DumpByteArray"/>
+		</State>
+
+		<State name="DumpByteArray">
+			<Action type="output">
+				<DataModel ref="ByteArrayExpressionData"/>
+			</Action>
+		</State>
+
+	</StateModel>
+
+	<Agent name="TheAgent"/>
+
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+</Peach>
+----
+
+[source,python]
+----
+from code import InteractiveConsole
+
+import clr
+clr.AddReferenceByPartialName('Peach.Core')
+import Peach.Core
+
+
+def multiply_by_three(ref):
+    return int(ref.DefaultValue) * 3
+
+
+def rot13(ref):
+    return str(ref.DefaultValue).encode('rot13')
+
+
+def debug(ctx, ref, data):
+    """Useful for basic debugging.
+    
+    <Param name="expression" value="debug(self, ref, data)" />
+    """
+    console = InteractiveConsole(locals=dict(globals().items()+locals().items()))
+    console.interact()
+
+----

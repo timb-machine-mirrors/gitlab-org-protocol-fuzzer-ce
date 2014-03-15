@@ -1,0 +1,15 @@
+:toc!:
+[[Mutators_DataElementSwapNearNodesMutator]]
+== DataElementSwapNearNodesMutator ==
+
+This mutator will swap two nodes in the data model that are neighboring each other.
+
+_Target Elements_
+
+ * xref:Blob[Blob]
+ * xref:Block[Block]
+ * xref:Choice[Choice]
+ * xref:DataModel[DataModel]
+ * xref:Flags[Flags]
+ * xref:Number[Number]
+ * xref:String[String]

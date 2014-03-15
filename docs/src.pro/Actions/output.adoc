@@ -1,0 +1,344 @@
+<<<<
+[[Action_output]]
+== output
+
+// 01/30/2014: Seth & Mike: Outlined
+//  * Implicit actions when performing output
+//  * Are multiple outputs different than single output?
+//   * Answer: Mostly, no. But depends on publisher (Eg. udp, different packets. TCP, none. File, None.)
+//  * Talk about multiple data sets
+//  * Link to data sets
+//  * Talk about single data model required
+//  * Talk about scripting (when, onstart/complete)
+//  * Talk about multiple publishers
+//  * Talk about defining data model in action
+//  * Name is optional
+//  Examples with input/output as needed.
+//  * Examples for talking points
+
+// 02/12/2014: Mick
+//  Added description of what Open does
+//  talked about multiple actions in a row
+//  talked about multiple data sets
+//  talked about multiple publishers
+//  Added attribute descriptions
+//  Added an example
+
+// 03/03/2014: Mike: Ready for tech writer
+//  Updated description
+//  Changed examples
+//  Changed formatting
+//  Reviewed output
+
+// 03/05/2014: Lynn: 
+//  Edited text
+
+The _output_ action is used to write/send in data using a xref:Publishers[Publisher].
+_output_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which produces the data to be sent.
+
+Along with a DataModel, data sets can be provided using the xref:Data[Data] element.
+Multiple Data elements can be provided which will be switched between during fuzzing depending on the fuzzing strategy used.
+_Output_ actions are fuzzed by Peach.
+
+When output is called, the fuzzer will implicitly call xref:Action_start[_start_] then xref:Action_open[_open_] if it has not already been called.
+If a Pit has multiple publishers defined, the _publisher_ attribute must be used to indicate which publisher should receive the write/send request.
+The exact behaviour of an _output_ action is Publisher dependent. Review the documentation for the specific Publisher for the details on specific implementation actions. For example, calling output multiple times in a row on a stream publisher such as xref:Publishers_Tcp[TCP] will appear as one output, whereas multiple outputs in the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets.
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (such as accept, input, and output)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
+
+=== Syntax
+
+[source,xml]
+----
+<StateModel name="TheStateModel" initialState="InitialState">
+  <State name="InitialState">
+    <Action type="output">
+       <DataModel ref="SomeDataModel" />
+    </Action>
+
+    <Action type="output">
+       <DataModel ref="SomeDataModel" />
+       <Data name="SomeSampleData" fileName="sample.bin" />
+    </Action>
+  </State>
+</StateModel>
+----
+
+=== Attributes
+
+_Required:_
+
+type:: Action type, must be set to "output"
+
+_Optional:_
+
+name:: Name used to identify the action
+publisher:: Name of the publisher that this action should be called on
+xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
+xref:Action_onStart[onStart]:: Expression to run on start of an action.
+xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+
+=== Child-Elements
+
+xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
+xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
+
+=== Examples
+
+.File fuzzing with _output_ action
+================================
+Example of using the _output_ action with multiple data sets to perform file fuzzing.
+This is a typical configuration for dumb file fuzzing.
+
+Notice the use of the special _Peach.Agent_ publisher name.
+This will cause the _call_ action to be sent out to any Agents which will then send to each of there Monitors.
+The method call will end up being handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
+For file fuzzing we must make sure the target is launched only after we write out the new fuzzed file.
+
+This example requires a Windows XP or newer machine with Windows Debugging Tools installed.
+
+. Save example Pit as "example.xml"
+. Run "Peach.exe --range 1,10 --debug example.xml"
+. You should see _mspaint.exe_ open and close several times.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+  
+  <DataModel name="DumbModel">
+    <Blob />
+  </DataModel>
+  
+  <StateModel name="State" initialState="Initial">
+    <State name="Initial">
+      
+      <Action type="output">
+        <DataModel ref="DumbModel" />
+
+		<!-- provide a folder of files to fuzz -->
+		<Data fileName="##Peach.Pwd##\samples_png" />
+      </Action>
+      
+      <!-- Close file -->
+      <Action type="close" />
+      
+      <!-- Launch the file consumer -->
+      <Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
+      
+    </State>
+  </StateModel>
+  
+  <Agent name="LocalAgent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="c:\windows\system32\mspaint.exe fuzzed.png" />
+      <Param name="StartOnCall" value="ScoobySnacks" />
+    </Monitor>
+  </Agent>
+  
+  <Test name="Default">
+    <Agent ref="LocalAgent" />
+    <StateModel ref="State"/>
+    
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzed.png" />
+    </Publisher>
+
+    <Logger class="Filesystem">
+      <Param name="Path" value="logtest" />
+    </Logger>
+  </Test>
+  
+</Peach>
+----
+================================
+
+.Sending Output with TCP Publisher
+==========================
+This is a simple example of using the _output_ action to send data. Netcat (nc) is used in this example as the client.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <!-- Marking the string as a token will imply a length of 4 characters -->
+  <DataModel name="Ping">
+    <String value="PING" token="true"/>
+  </DataModel>
+
+  <DataModel name="Pong">
+    <String value="PONG" />
+  </DataModel>
+
+  <StateModel name="TheStateModel" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="accept" />
+
+      <Action type="input">
+        <DataModel ref="Ping"/> 
+      </Action> 
+
+      <Action type="output">
+        <DataModel ref="Pong"/>
+      </Action> 
+    </State> 
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheStateModel"/>
+    
+    <Publisher class="TcpListener">
+      <Param name="Interface" value="0.0.0.0" />
+      <Param name="Port" value="31337" />
+      <Param name="AcceptTimeout" value="10000" />
+      <Param name="Timeout" value="10000" />
+    </Publisher>
+
+    <Logger class="File" >
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example. Once Peach is started, use the netcat command line found below to recreate output.
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 32331.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Accept
+Peach.Core.Publishers.TcpListenerPublisher start()
+Peach.Core.Publishers.TcpListenerPublisher open()
+Peach.Core.Publishers.TcpListenerPublisher accept()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.TcpListenerPublisher input()                           <1>
+Peach.Core.Publishers.TcpListenerPublisher Read 5 bytes from 127.0.0.1:62407
+Peach.Core.Publishers.TcpListenerPublisher
+
+00000000   50 49 4E 47 0A                                     PING.
+
+Peach.Core.Cracker.DataCracker ------------------------------------          <2>
+Peach.Core.Cracker.DataCracker DataModel 'Ping' Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'Ping'
+Peach.Core.Cracker.DataCracker scan: DataModel 'Ping'
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 32, Length: 32
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'Ping' Size: <null>, Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'Ping.DataElement_0' Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker getSize: -----> String 'Ping.DataElement_0'
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 32, Length: 32
+Peach.Core.Cracker.DataCracker getSize: <----- Size: 32
+Peach.Core.Cracker.DataCracker Crack: String 'Ping.DataElement_0' Size: 32, Bytes: 0/5, Bits: 0/40
+Peach.Core.Dom.DataElement String 'Ping.DataElement_0' value is: PING
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpListenerPublisher output(4 bytes)
+Peach.Core.Publishers.TcpListenerPublisher
+
+00000000   50 4F 4E 47                                        PONG
+
+Peach.Core.Publishers.TcpListenerPublisher close()
+Peach.Core.Publishers.TcpListenerPublisher Shutting down connection to 127.0.0.1:62407
+Peach.Core.Publishers.TcpListenerPublisher Read 0 bytes from 127.0.0.1:62407, closing client connection.
+Peach.Core.Publishers.TcpListenerPublisher Closing connection to 127.0.0.1:62407
+
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpListenerPublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> Data received by TCP publisher
+<2> Debugging output from the data cracker
+
+Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+
+----
+> nc -vv 127.0.0.1 31337
+Connection to 127.0.0.1 31337 port [tcp/*] succeeded!
+PING
+PONG
+----
+==========================
+
+.Mulitple Publishers with _output_ Action
+================================
+Example of using the _output_ action with multiple publishers to write two files out on every iteration.
+
+. Save example Pit as "example.xml"
+. Run "Peach.exe -1 --debug example.xml"
+. You should see two files, fuzzed1.txt and fuzzed2.txt, created.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+  
+  <DataModel name="File1Model">
+    <String value="I'm file #1" />
+  </DataModel>
+  
+  <DataModel name="File2Model">
+    <String value="I'm file #2" />
+  </DataModel>
+  
+  <StateModel name="State" initialState="Initial">
+    <State name="Initial">
+      
+      <Action type="output" publisher="File1">
+        <DataModel ref="File1Model" />
+      </Action>
+      
+      <Action type="output" publisher="File2">
+        <DataModel ref="File2Model" />
+      </Action>
+      
+    </State>
+  </StateModel>
+  
+  <Test name="Default">
+    <StateModel ref="State"/>
+    
+    <Publisher name="File1" class="File">
+      <Param name="FileName" value="fuzzed1.txt" />
+    </Publisher>
+
+    <Publisher name="File2" class="File">
+      <Param name="FileName" value="fuzzed2.txt" />
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logtest" />
+    </Logger>
+  </Test>
+  
+</Peach>
+----
+================================

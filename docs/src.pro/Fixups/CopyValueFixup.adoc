@@ -1,0 +1,105 @@
+[[Fixups_CopyValueFixup]]
+
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is useful when fuzzing {0} protocols"
+// Give full pit to run using hex publisher 
+// List Parent element types this can be applied to 
+// Blob 
+
+// Updated:
+// 2/21/14: Mick
+// expanded description
+// Added parent types
+// Added full example
+
+== CopyValueFixup
+
+The _CopyValueFixup_ will copy reference element (ref) value into ours.
+This is useful for situations where two element must be identical for redundancy checks
+
+=== Parent Elements
+
+ * xref:Number[Number]
+ * xref:String[String]
+ * xref:Blob[Blob]
+ * xref:Block[Block]
+
+=== Parameters
+
+ * xref:ref[_ref_] -- Reference to data element which contains the value that will be copied.
+ 
+=== Examples
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Packet">
+		<String name="Magic1" value="ABCD" />
+		<String name="Magic2">
+			<Fixup class="CopyValue">
+				<Param name="ref" value="Magic1" />
+			</Fixup>
+		</String>
+		<Number name="Length"   size="16" endian="big">
+			<Relation type="size" of="Packet"/>
+		</Number>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<Action type="output">
+				<DataModel ref="Packet" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+</Peach>
+----
+
+.Example with Block copy
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Packet">
+		<Block name="M1">
+			<Number size="32" value="1234" />
+			<String value="ASDF" />
+		</Block>
+		<Block name="M2">
+			<Number size="32"/>
+			<String />
+			<Fixup class="CopyValue">
+				<Param name="ref" value="M1" />
+			</Fixup>
+		</Block>
+		<Number name="Length"   size="16" endian="big">
+			<Relation type="size" of="Packet"/>
+		</Number>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<Action type="output">
+				<DataModel ref="Packet" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+</Peach>
+----

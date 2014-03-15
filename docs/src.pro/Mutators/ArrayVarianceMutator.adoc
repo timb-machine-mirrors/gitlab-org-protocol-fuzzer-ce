@@ -1,0 +1,13 @@
+:toc!:
+[[Mutators_ArrayVarianceMutator]]
+== ArrayVarianceMutator ==
+
+This mutator will change the length of arrays to count - N to count + N, where N defaults to 50.
+
+_Target Elements_
+
+ * xref:occurs[Array]
+
+_Hints_
+
+ * ArrayVarianceMutator-N -- Change the default +/- of 50 to a specified amount.

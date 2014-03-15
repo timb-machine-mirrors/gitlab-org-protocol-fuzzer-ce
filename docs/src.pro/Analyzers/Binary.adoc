@@ -1,0 +1,18 @@
+[[Analyzers_Binary]]
+
+== Binary Analyzer
+
+The Binary analyzer is applied to Blob data elements.  The analyzer will look for known types inside of the data such as strings and break up the Blob to expose found data types.  This is an easy way to improve fuzzing of unkown binary data.
+
+.Example
+[source,xml]
+----
+<DataModel name="TheModel">
+
+	<Blob>
+		<Analyzer class="Binary" />
+	</Blob>
+	
+</DataModel>
+----
+

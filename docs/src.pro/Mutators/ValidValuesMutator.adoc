@@ -1,0 +1,31 @@
+<<<
+[[Mutators_ValidValuesMutator]]
+== ValidValuesMutator
+
+This mutator will allow users to specify additional data for each data element through a hint. Each of these values must be separated with a semicolon.
+
+=== Supported Elements
+
+ * xref:String[String]
+ * xref:Number[Number]
+ * xref:Blob[Blob]
+
+=== Hints
+
+ValidValues:: Define additional values. Separate these values with a semicolon (;)
+
+=== Examples
+
+.ValidValues hint example
+=========================
+In this example, when the string is being mutated, the ValidValuesMutator will change the string to one of the provided values.
+
+[source,xml]
+----
+<DataModel name="TheDataModel">
+  <String value="Hello, World!">
+    <Hint name="ValidValues" value="one;two;three;four;five;abc;123"/>
+  </String>
+</DataModel>
+----
+=========================

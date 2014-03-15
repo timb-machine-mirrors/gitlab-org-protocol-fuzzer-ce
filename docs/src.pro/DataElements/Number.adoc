@@ -1,0 +1,688 @@
+<<<
+[[Number]]
+== Number
+
+// 01/30/2014: Seth & Mike: Outlined
+//  * bits
+//  * unaligned (1, 3, 5)
+//  * Speed of unaligned
+//  * little vs. big endian
+//  * valueType hex little vs. big
+//  * valueType string you can say 0xXXXXX
+//  * signed vs. unsigned
+//  * mutators
+//  * size not length
+//  * no variable length encoding supported
+//   * Implement yourself by making a custom data element that is a container with a number in it
+//     * So mutations still work
+
+// 03/06/2014: Josh: Updated
+//  * bits <- taken care of by size
+//  * unaligned (1, 3, 5) <- done
+//  * Speed of unaligned <- unclear on what to do here
+//  * little vs. big endian <- done
+//  * valueType hex little vs. big <- done
+//  * valueType string you can say 0xXXXXX <-done
+//  * signed vs. unsigned <- done
+//  * mutators  <- done
+//  * size not length <- done
+//  * no variable length encoding supported <- I don't know what any of this stuff is
+//   * Implement yourself by making a custom data element that is a container with a number in it
+//     * So mutations still work
+
+//  03/06/2014: Lynn
+//   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
+
+The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian. The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
+
+The Number element is a child element of xref:DataModel[DataModel], xref:Block[Block], or xref:Choice[Choice].
+
+NOTE: While Peach supports unaligned data structures, using unaligned data will incur a performance penalty. This is due to the bit slicing that must be performed behind the seen.
+
+TIP: In Peach two attributes are commonly used to indicate the size or length of an element, _length_ and _size_. The _size_ attribute is always a bit size while _length_ is byte or character.
+
+=== Syntax
+
+[source,xml]
+----
+<Number name="Length" size="32" endian="big" signed="false" />
+----
+
+=== Attributes
+
+_Required:_
+
+xref:size[size]::
+	Size of number in bits.  Valid options are 1 through 64.
+
+_Optional:_
+
+xref:name[name]::
+	Name of the number.
+xref:value[value]::
+	The default value to assign to the number.
+xref:valueType[valueType]::
+	The representation of the value.
+	Valid options are string and hex.
+xref:token[token]::
+	This element is treated as a token when parsing, defaults to false. Valid options true and false.
+xref:endian[endian]::
+	Byte order of the number, defaults to little. Valid options are big, little, and network.
+	Network is the same as big.
+xref:signed[signed]::
+	The number is signed or unsigned, defaults to true.
+	Valid options are true and false.
+xref:constraint[constraint]::
+	A constraint in the form of a python expression.
+	Used during data cracking.
+xref:mutable[mutable]::
+	Is data element changeable (should it be mutated during fuzzing), defaults to true.
+	Valid options true and false.
+xref:minOccurs[minOccurs]::
+	The minimum number of times this number must occur.
+	Defaults to 1.
+	Valid options are a positive integer value.
+xref:maxOccurs[maxOccurs]::
+	The maximum number of times this number can occur.
+	No default.
+	Valid options are a positive integer value.
+xref:occurs[occurs]::
+	The actual number of times this number occurs.
+	Defaults to 1.
+
+=== Child-Elements
+
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighbouring each other
+xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]:: TODO
+xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]:: TODO
+xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]:: TODO
+xref:Mutators_ValidValuesMutator[ValidValuesMutator]:: TODO
+xref:Mutators_WordListMutator[WordListMutator]:: TODO
+
+=== Examples
+
+.Size
+==========================
+Produce 32 bit (4 byte) number with a default value of 5:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<DataModel name="NumberExample1">
+		<Number name="Hi5" value="5" size="32"/>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberExample1"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberExample1.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 6226.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   05 00 00 00                                        ????            <1>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> The 32 bit little endian value 5
+
+To only use 16 bits (two byte) change the size to 16.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="NumberExample2">
+		<Number name="Hi5" value="5" size="16"/>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberExample2"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberExample2.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 51118.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   05 00                                              ??              <1>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> The 16 bit little endian value 5
+
+NOTE: Numbers use the `size` attribute which is, by default, the size in
+*bytes*. `Number` elements do not accept `length` attribute used by other elements.
+==========================
+
+.Byte Alignment
+==========================
+While many data structures are byte aligned, many are not. It's
+possible to arbitrarily define sizes that don't fall on byte
+boundaries.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="ByteAlignmentExample1">
+		<Number value="2" size="3" />
+		<Number value="12" size="5" />
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="ByteAlignmentExample1"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+This will produce the following output:
+----
+$ peach -1 --debug ByteAlignExample.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 41464.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(1 bytes)
+00000000   4C                                                 L               <1>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+----
+<1> Two numbers are compacted in to one byte
+
+The first number is three bits with the value `"2"`. This number
+becomes the first three bits of the byte. The remaining five bits are
+appended to the left. 
+
+In Python this could be written as the following:
+
+----
+>>> hex((2 << 5) + 12)
+'0x4c'
+----
+
+Input parsing is simply the inverse. 
+
+----
+>>> input_byte = 0x4C
+>>> offset = 5
+>>> (input_byte >> offset) 
+2																				<1>
+>>> input_byte & (-1 + (2**offset))
+12																			<2>
+----
+<1> The first byte is bitshifted the size of the second. 
+<2> Masking off the first number we get the second. 
+==========================
+
+
+.Endian
+==========================
+
+To change the endianness of the number set the endian attribute. Endianness defines in which order the bytes are the least or most significant. 
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="NumberExample6">
+		<Number name="abcd" value="52651" size="16" signed="false" endian="big" />
+	</DataModel>
+
+	<DataModel name="NumberExample7">
+		<Number name="abcd" value="52651" size="16" signed="false" endian="little" />
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberExample6"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="NumberExample7"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberEndianExample.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 16220.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   CD AB                                              ??              <1>
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   AB CD                                              ??              <2>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> Little endian outputs the bytes in the order  CD AB
+<2> Big endian outputs the bytes in the order  AB CD
+
+Note, however, that endianness doesn't have any impact on output if the `valuType`
+is `"hex"`:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="NumberExample6">
+		<Number name="abcd" valueType="hex" value="ABCD" size="16" signed="false" endian="little" />
+	</DataModel>
+
+	<DataModel name="NumberExample7">
+		<Number name="abcd" valueType="hex" value="ABCD" size="16" signed="false" endian="big" />
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberExample6"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="NumberExample7"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberEndianExample.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 37516.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   AB CD                                              ??              <1>
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   AB CD                                              ??							<2>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> For little we see the expected output
+<2> For big endian, nothing changes
+
+When the attribute `valueType` is set to `"hex"` this indicates that
+the ordering is exactly as specified. The `endian` attribute still
+impacts mutation and input parsing.
+==========================
+
+
+.Signed and Unsigned
+==========================
+
+To indicate value is signed, set the `signed` attribute equal to `"true"`. The default is false. 
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="UnsignedExample">
+		<Number name="UnsignedInt" value="4294967295" size="32"/>
+	</DataModel>
+
+	<DataModel name="SignedExample">
+		<Number name="SignedInt" value="-2147483648" size="32" signed="true"/>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="UnsignedExample"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="SignedExample"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberExample3.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 64304.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   FF FF FF FF                                        ????            <1>
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   FF FF FF FF                                        ????            <2>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> Output of unsigned 4294967295
+<2> Output of signed -1
+==========================
+
+.Value Type
+==========================
+The valueType defines how to interpret the value attribute. Valid options are string and hex. The default is string. 
+
+To assign a value of 1000 to MyValue we can explicitly use the default
+`valueType` of `"string"`. Using the `"string"` type we can assign
+both decimal and hexadecimal values. 
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="NumberTypeExample1">
+		<Number name="MyValue" value="1000" valueType="string" size="16" signed="false" />
+	</DataModel>
+
+	<DataModel name="NumberTypeExample2">
+		<Number name="MyValue" value="0x03e8" valueType="string" size="16" signed="false" />
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberTypeExample1"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="NumberTypeExample2"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberExample4.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 61690.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   E8 03                                              ??              <1>
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   E8 03                                              ??              <2>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> The value 1000
+<2> The value 1000, having been defined in hex as 0x03e8
+
+Notice that the `valuteType` of `"string"` represents a number. This
+number may be changed by endianness. Observe that the numeric value
+was entered as 0x03e8, but Peach output the bytes 0xE8 and 0x03. The
+value was converted to little endian before being output. 
+
+To assign a value as if copied directly from a hex editor we can use
+the `"hex"` `valueType`. Values entered in `"hex"` will be output
+exactly as input regardless of endianness as exampled in the section
+on the `endian` attribute above. 
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="NumberExample5">
+		<Number name="MyValue" value="AB CD" valueType="hex" size="16" signed="false" />
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="NumberExample5"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug NumberExample5.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 55408.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(2 bytes)
+00000000   AB CD                                              ??              <1>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> The value 43981
+==========================

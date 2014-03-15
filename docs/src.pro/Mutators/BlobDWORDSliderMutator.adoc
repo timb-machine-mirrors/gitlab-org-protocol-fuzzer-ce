@@ -1,0 +1,13 @@
+:toc!:
+[[Mutators_BlobDWORDSliderMutator]]
+== BlobDWORDSliderMutator ==
+
+This mutator will slide a DWORD through the blob.
+
+_Target Elements_
+
+ * xref:Blob[Blob]
+
+_Hints_
+
+ * BlobDWORDSliderMutator -- Ability to disable this mutator by setting the hint to "off".

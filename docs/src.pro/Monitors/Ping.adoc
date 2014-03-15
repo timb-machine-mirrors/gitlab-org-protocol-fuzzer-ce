@@ -1,0 +1,49 @@
+[[Monitors_Ping]]
+== Ping Monitor
+
+The _Ping_ monitor will block until the _Timeout_ occurs. This monitor is useful for validating a target is still up or waiting for a target to restart.
+
+=== Parameters
+
+ * _Host_ -- Host name or IP address to ping
+ * _Timeout_ -- Timeout in milliseconds (optional, defaults to 1,000)
+ * _Data_ -- Data to send in ping packet (optional)
+ * _FaultOnSuccess_ -- Fault if ping is successful (optional, defaults to false)
+
+=== Examples
+
+.Ping Host
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+  	<Monitor class="Ping">
+  		<Param name="Host" value="www.peachfuzzer.com" />
+  	</Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="TcpClient">
+      <Param name="Host" value="www.peachfuzzer.com"/>
+      <Param name="Port" value="80"/>
+    </Publisher>
+  </Test>
+</Peach>
+----

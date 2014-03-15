@@ -1,0 +1,94 @@
+[[Transformers_Base64EncodeTransformer]]
+== Base64EncodeTransformer
+
+// Reviewed:
+//  - 02/19/2014: Seth & Adam: Outlined
+// TODO: 
+// Verify parameters expand parameter description 
+// Full pit example using hex console 
+// expand  general description 
+// Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
+// See AES for format 
+// Test output, input
+
+// Updated:
+// 2/19/14: Mick
+// verified params
+// added supported actions
+// expanded description
+// added full example
+
+=== Transformer type: Encoder/Decoder
+
+The _Base64EncodeTransformer_ will base64 encode the value in the parent xref:DataModel[DataModel].  
+The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
+
+=== Parameters 
+
+No Parameters are supported by this element.
+
+=== Actions Supported 
+
+ * xref:Action_input[input]
+ * xref:Action_output[output]
+ * xref:Action_call[call]
+ * xref:Action_getProperty[getProperty] 
+ * xref:Action_setProperty[setProperty]
+
+=== Examples
+
+[source,xml]
+----
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Ex1">
+		<String value="Base64: " token="true"/>
+		<String name="TransformMe" value="ABCDEFGH">
+			<Transformer class="Base64Encode" />
+		</String>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<!-- Encoded Output -->
+			<Action type="output" publisher="ConsolePub">
+				<DataModel ref="Ex1" />
+			</Action>
+			
+			<!-- Write Encoded Output to File -->
+			<Action type="output" publisher="FilePubWrite">
+				<DataModel ref="Ex1" />
+				<Data>
+					<Field name="TransformMe" value="ABCDEFGH" />
+				</Data>
+			</Action>
+			<Action type="close" publisher="FilePubWrite" />
+			
+			<!-- Read and decode encoded file and slurp Base64 decoded string to output in console -->
+			<Action type="input" publisher="FilePubRead" >
+				<DataModel name="InputModel" ref="Ex1" />
+			</Action>
+			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+			<Action type="output" publisher="ConsolePub">
+				<DataModel name="OutputModel">
+					<String name="StringValue" />
+				</DataModel>
+			</Action>
+			
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" name="ConsolePub"/>
+		<Publisher class="File" name="FilePubWrite">
+			<Param name="FileName" value="encrypted.bin" />
+		</Publisher>
+		<Publisher class="File" name="FilePubRead">
+			<Param name="FileName" value="encrypted.bin" />
+			<Param name="Overwrite" value="false" />
+		</Publisher>
+	</Test>
+</Peach>
+----

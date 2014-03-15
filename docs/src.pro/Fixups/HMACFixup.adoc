@@ -1,0 +1,111 @@
+[[Fixups_HMACFixup]]
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is used when fuzzing {0} protocols"
+// Give full pit to run using hex publisher
+// List Parent element types
+// List enum for HMAC parameter
+// Expand length description
+// Example 1 length 0
+// Example 2 length set to 10
+
+// Updated:
+// - 02/18/2014: Jordyn
+// Added full examples
+// Expanded length description
+// Added enum list
+// Expanded description
+// Added parent elements
+
+// Updated:
+// - 02/21/2014: Mick
+// Parent elements changed to match format
+
+== HMACFixup
+
+The _HMACFixup_ will hash the _ref_ element's value using the one of the defined HMAC algorithms.This is used fuzzing IPsec protocol implementations.
+
+=== Parent Elements
+
+ * xref:String[String]
+ * xref:Blob[Blob]
+ 
+=== Parameters
+
+ * xref:ref[ref]_ -- Reference to data element which the HMAC calculation will be performed on
+ * Key -- Key to use for HMAC
+ * HMAC -- Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES)
+ * xref:Length[Length] -- Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
+
+=== Examples
+
+.SHA-1 HMAC returning all bytes
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Data">
+    <String name="Start" value="Start"/>
+    <Blob name="Data" valueType="hex" value="BEEFEA7E41">
+      <Fixup class="HMAC">
+        <Param name="ref" value="Data"/>
+        <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
+        <Param name="Hash" value="HMACSHA1"/>
+        <Param name="Length" value="0"/>
+      </Fixup>
+    </Blob>
+    <String name="Stop" value="Stop"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="Data" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----
+
+.SHA-512 HMAC returning 10 bytes of output
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Data">
+    <String name="Start" value="Start"/>
+    <Blob name="Data" valueType="hex" value="BEEFEA7E41">
+      <Fixup class="HMAC">
+        <Param name="ref" value="Data"/>
+        <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
+        <Param name="Hash" value="HMACSHA512"/>
+        <Param name="Length" value="10"/>
+      </Fixup>
+    </Blob>
+    <String name="Stop" value="Stop"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="Data" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----

@@ -1,0 +1,90 @@
+[[Monitors_Android]]
+== Android Monitor
+
+The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. Two expected use cases are maintaining state while fuzzing native code, or launching and monitor Android Java applications. This monitor can target both emulated and physical notes. The http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device are required.
+
+=== Parameters
+ * _ApplicationName_ -- Android Application.
+ * _ActivityName_ -- Application Activity. (optional)
+ * _AdbPath_ -- Directory Path to Adb. (optional)
+ * _ClearAppData_ -- Remove Application data and cache on every iteration. (optional, defaults to false)
+ * _ClearAppDataOnFault_ -- Remove Application data and cache on fault iterations. (optional, defaults to false)
+ * _CommandTimeout_ -- Max seconds to wait for adb command to complete (default 10). (optional, defaults to 10)
+ * _ConnectTimeout_ -- Max seconds to wait for adb connection (default 5). (optional, defaults to 5)
+ * _DeviceMonitor_ -- Android monitor to get device serial from. (optional)
+ * _DeviceSerial_ -- The serial of the device to monitor. (optional)
+ * _FaultRegex_ -- Regex to determine if a log entry triggers a fault. (optional, defaults to `(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)`)
+ * _FaultWaitTime_ -- Milliseconds to wait when checking for a fault. (optional, defaults to 0)
+ * _IgnoreRegex_ -- Regex to ignore potential false positive fault matches. (optional, defaults to )
+ * _MustStopRegex_ -- Trigger a fault and stop fuzzing when regex matches. (optional, defaults to )
+ * _ReadyTimeout_ -- Max seconds to wait for device to be ready. (optional, defaults to 600)
+ * _RebootEveryN_ -- Reboot device every N iterations. (optional)
+ * _RebootOnFault_ -- Reboot device on fault. (optional, defaults to false)
+ * _RestartEveryIteration_ -- Restart Application on Every Iteration. (optional, defaults to false)
+ * _StartOnCall_ -- Start the application when notified by the state machine. (optional)
+ * _WaitForReadyOnCall_ -- Waits for the device to be ready when notified by the state machine. (optional)
+
+=== Examples
+
+.Runs the BadBehaviorActivity, sending random taps
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+
+	<DataModel name="TheDataModel">
+		<Number size='32' signed="false" value="31337" />
+	</DataModel>
+
+	<DataModel name="X">
+		<Number size='32' signed="false" value="100" />
+	</DataModel>
+
+	<DataModel name="Y">
+		<Number size='32' signed="false" value="0" />
+	</DataModel>
+
+	<StateModel name="State" initialState="Initial" >
+		<State name="Initial"  >
+			<Action type="call" method="tap">
+				<Param>
+					<DataModel ref="X"/>
+				</Param>
+				<Param>
+					<DataModel ref="Y"/>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="TheAgent">
+		<Monitor name="Emu" class="AndroidEmulator">
+			<Param name="Avd" value="Nexus4" />
+			<!--Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\tools"/-->
+		</Monitor>
+
+		<Monitor name="App" class="Android">
+			<Param name="ApplicationName" value="com.android.development" />
+			<Param name="ActivityName" value=".BadBehaviorActivity" />
+			<!--Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\platform-tools"/-->
+			<Param name="DeviceMonitor" value="Emu" />
+		</Monitor>
+	</Agent>
+
+	<Test name="Default">
+		<StateModel ref="State"/>
+		<Agent ref="TheAgent" />
+
+		<Publisher class="AndroidMonkey">
+			<Param name="DeviceMonitor" value="App"/>
+		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+
+</Peach>
+----

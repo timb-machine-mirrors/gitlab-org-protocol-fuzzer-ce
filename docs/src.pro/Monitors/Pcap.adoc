@@ -1,0 +1,49 @@
+[[Monitors_Pcap]]
+== Pcap Monitor
+
+The _Pcap_ monitor performs a network capture during the fuzzing iteration. The captured data is discarded and re-captured on each iteration. If a fault occurs the captured data is logged as a pcap file and returned with the fault data. The Pcap file is compatible with Wireshark and tcpdump.
+
+=== Parameters
+
+ * _Device_ -- Device name for capturing
+ * _Filter_ -- PCAP style filter string (optional)
+
+=== Examples
+
+.Capture port 80
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+  <Monitor class="Pcap">
+    <Param name="Device" value="Local Area Connection" />
+    <Param name="Filter" value="port 80" />
+  </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="TcpClient">
+      <Param name="Host" value="www.peachfuzzer.com"/> 
+      <Param name="Port" value="80"/>
+    </Publisher>  
+  </Test>
+</Peach>
+
+----

@@ -1,0 +1,16 @@
+[[Mutators_DataElementDuplicateMutator]]
+== DataElementDuplicateMutator ==
+
+This mutator will duplicate a node's value from 2x - 50x.
+
+_Target Elements_
+
+ * xref:Blob[Blob]
+ * xref:Block[Block]
+ * xref:Choice[Choice]
+ * xref:DataModel[DataModel]
+ * xref:Flags[Flags]
+ * xref:Number[Number]
+ * xref:String[String]
+
+

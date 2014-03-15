@@ -1,0 +1,55 @@
+[[Publishers_WebSocket]]
+
+== WebSocket Publisher
+
+The _WebSocket_ publisher allows rapid delivery of fuzzing data to browsers using a web socket. 
+
+=== Parameters
+
+ * _Port_ -- Port to listen for connections on (optional, default 8080)
+ * _Template_ -- Data template for publishing"
+ * _Publish_ -- How to publish data, base64 or URL. (optional, default base64)
+ * _DataToken_ -- Token to replace with data in template (optional, default ##DATA##)
+ * _Timeout_ -- Time in milliseconds to wait for client response (optional, default 60000)
+
+=== Examples
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Blob/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="TheDataModel"/>
+        <Data fileName="samples_png" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="TheAgent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="C:\Program Files (x86)\Mozilla Firefox\firefox.exe peach_ws_client.html" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <Agent ref="TheAgent"/>
+    <StateModel ref="TheState"/>
+
+    <Publisher class="WebSocket">
+      <Param name="Port" value="8080"/>
+      <Param name="Template" value="peach_ws_template.html"/>
+      <Param name="Publish" value="base64"/>
+    </Publisher>
+  </Test>
+
+</Peach>
+----
+

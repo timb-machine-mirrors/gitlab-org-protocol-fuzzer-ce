@@ -1,0 +1,52 @@
+[[Monitors_CanaKitRelay]]
+== CanaKitRelay Monitor
+
+The _CanaKitRelay_ monitor controls a set of relays capable of turning on/off AC and DC lines.  This is useful for toggling power states or resetting a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay.
+
+http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay COntroller]
+
+=== Parameters
+
+ * _SerialPort_ -- Serial port for the board (e.g. COM2)
+ * _RelayNumber_ -- Relay to trigger (1..4)
+ * _ResetEveryIteration_ -- Reset power on every iteration (optional, default is false)
+ * _OnOffPause_ -- Pause in milliseconds between off/on (optional, default is 1/2 second)
+ * _ResetOnStart_ -- Reset device on start (optional, defaults to false)
+ * _ReverseSwitch_ -- Switches the order of the on off commands for when the NC port is used for power (optional, default false)
+ 
+=== Examples
+
+.Reset power on Relay 1
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="TheAgent">
+    <Monitor class="CanaKitRelay">
+		<Param name="SerialPort" value="COM5" />
+		<Param name="RelayNumber" value="1" />
+		<Param name="ResetEveryIteration" value="false"/> 
+	</Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="TheAgent" />
+
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----

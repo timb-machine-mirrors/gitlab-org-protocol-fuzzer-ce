@@ -1,0 +1,652 @@
+<<<
+[[String]]
+== String
+
+// 01/30/2014: Seth & Mike: Outlined
+//  * Verify all attributes
+//  * Verify child elements
+//  * Add mutators
+//  * Discuss
+//   * ASCII is latin-1 character set, not full 8 bit
+//   * Unicode
+//   * null termination (affect length?)
+//   * with and without length (setting value != setting length)
+//   * setting token == setting length
+//   * numerical strings
+//   * constraint not used in look a heads for unsized elements, only token can be
+//   * Numerical string
+//    * Relation ship on from size
+//    * Hint no longer matters (automatically added/removed)
+//    * Done every time default value is set (value=, slurp, etc.)
+//   * Escaping special characters \t, \n, \r, \\
+//  Examples:
+//   * ASCII (show output)
+//   * length with less content (pad, show output)
+//   * String with size-of relation
+//   * Numerical string
+//   * Numerical string relation to another element (size-of, count-of, offset-of)
+//   * token is case dependent, constraint doesn't have to be
+
+// 03/07/2014: Lynn
+//   * Added missing child elements and corrected spelling in comments
+
+A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length. All strings are encoded prior to output with the default encoding 7-bit ASCII (aka latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute). Strings are also used to hold numbers that will be in a string format. When strings contain a number, the numerical mutators will also be used to mutate the string.
+
+=== Syntax
+
+[source,xml]
+----
+<String value="Hello World!" />
+
+<String value="Null terminated string" nullTerminated="true" />
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+xref:name[name]:: Name of the data model
+
+xref:length[length]:: Length in characters of the string
+xref:lengthType[lengthType]:: Units of the length attribute (defaults to bytes)
+ 
+type::
+	Character encoding type, defaults to _ascii_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32.
+	+
+	When strings are outputted they are first encoded. The default encoding is 7-bit ASCII, also known as latin-1. Most common Unicode encodings are supported.
+
+xref:value[value]:: The default value, defaults to _Peach_.
+xref:valueType[valueType]:: Value attribute format, defaults to string.
+
+nullTerminated::
+	Is this string null terminated, defaults to false.
+	+
+	The _nullTerminated_ attribute indicates the produced string should be null terminated.
+	It should be noted that only the final value will have the null termination applied, if the value is accessed the internal value will not have the null attached.
+	+
+	When _nullTerminated_ attribute is provided the xref:String[String] must not specify a xref:length[length] as they are mutually exclusive.
+
+padCharacter::
+	Character to pad string with to _length_, defaults to null (0x00).
+	+
+	If the _length_ attribute is provided but the value contained in the string is shorter than the length it will be padded.
+	This attribute allows controlling the character used to pad the string.
+ 
+xref:token[token]::
+	This element should be treated as a token when parsing, defaults to false.
+	+
+	This attribute is primarily used to assist in cracking of strings when consuming input into a model.
+
+xref:constraint[constraint]::
+	A constraint in the form of a scripting expression that is used during data cracking.
+	+
+	This attribute is used typically in conjunction with the xref:Choice[Choice] element, or to control array expansion. It is only executed during data cracking.
+	+
+	NOTE: This expression will not control of affect mutated values in anyway.
+
+xref:mutable[mutable]:: Is data element changeable? (should it be mutated?), defaults to false.
+
+xref:minOccurs[minOccurs]:: The minimum number of times this block must occur, defaults to 1.
+xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur, defaults to 1.
+xref:occurs[occurs]:: Actual number of occurrences, defaults to 1.
+
+=== Child-Elements
+
+xref:Analyzers[Analyzer]:: Attach an analyzer to this element
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provide information to mutators. 
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]::
+	Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]::
+	Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: 
+	Swaps two nodes in the data model that are neighbouring each other
+xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]::
+	TODO
+xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]:: 
+	Produces values in a range of N - 50 through N + 50 for all numerical edge cases
+xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]:: TODO
+xref:Mutators_StringCaseMutator[StringCaseMutator]:: TODO
+xref:Mutators_StringMutator[StringMutator]:: TODO
+xref:Mutators_UnicodeBadUtf8Mutator[UnicodeBadUtf8Mutator]:: TODO
+xref:Mutators_UnicodeBomMutator[UnicodeBomMutator]:: TODO
+xref:Mutators_UnicodeStringsMutator[UnicodeStringsMutator]:: TODO
+xref:Mutators_UnicodeUtf8ThreeCharMutator[UnicodeUtf8ThreeCharMutator]:: TODO
+xref:Mutators_ValidValuesMutator[ValidValuesMutator]:: TODO
+xref:Mutators_WordListMutator[WordListMutator]:: TODO
+xref:Mutators_XmlW3CMutator[XmlW3CMutator]:: TODO
+
+=== Examples
+
+.Simple ASCII String
+====================
+
+This example will output a string with the default options. It will be encoded to 7-bit ASCII.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String value="Hello World!" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 25723.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(12 bytes)
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.String with UTF-16 Encoding
+====================
+
+This example will output a string with UTF-16 encoding. UTF-16 is a two byte encoding that is commonly used for in memory storage of Unicode strings. UTF-16 is also commonly known as the WCHAR type on Windows.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String type="utf16" value="Hello World!" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 57920.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(24 bytes)
+00000000   48 00 65 00 6C 00 6C 00  6F 00 20 00 57 00 6F 00   H?e?l?l?o? ?W?o?
+00000010   72 00 6C 00 64 00 21 00                            r?l?d?!?
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.Null Terminated String
+====================
+
+This example will output a string with null termination.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String nullTerminated="true" value="Hello World!" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 53517.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(13 bytes)
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21 00            Hello World!?
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.String Padded with Default Character
+====================
+
+This example will output a string that is shorter than the required length. The string will get padded out to the full length. The default pad character is null (0x00).
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String length="20" value="Hello World!" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 43832.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(20 bytes)
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21 00 00 00 00   Hello World!????
+00000010   00 00 00 00                                        ????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.String Padded with Specified Character
+====================
+
+This example will output a string that is shorter than the required length. The string will get padded out to the full length. Unlike the earlier example we will override the default pad character with '_'.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String length="20" padCharacter="_" value="Hello World!" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="ConsoleHex" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 62597.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(20 bytes)
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21 5F 5F 5F 5F   Hello World!____
+00000010   5F 5F 5F 5F                                        ____
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.String with Backslash Characters
+====================
+
+This example will output a string that contains returns and line feeds using the +\n+ and +\r+ notation. It will also include a +\+ character.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String value="This is the first line\nAnd this is the second line\n\rThis is backslash \\." />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="Console" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 29966.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(72 bytes)
+This is the first line
+And this is the second line
+This is backslash \.Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.String with Size-Of Relation
+====================
+
+In this example we use a String element to contain the ASCII length of some data. A size-of relation is used to allow the size to dynamically update during fuzzing.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String name="Length">
+			<Relation type="size" of="Data" />
+		</String>
+
+		<String value="\n" />
+
+		<Block name="Data">
+			<String value="This is some data!" />
+			<String value=" And this is even more data!" />
+		</Block>
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="Console" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 2887.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(49 bytes)
+46
+This is some data! And this is even more data!Peach.Core.Publishers.ConsolePubli
+sher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+====================
+
+.Using token Attribute to Crack Strings
+====================
+In this example we will parse a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string we are going to parse is comprised of three strings, the key, the token separator, and a value. The key and value could potentially be any arbitrary size, so cracking this sample string requiring knowing about the token separator. In our pit file we will mark our token string with the _token_ attribute to indicate it must be found in the incoming data stream. This will allow the data cracker to figure out the length of both key and value.
+
+Peach will still fuzz elements marked as _token_.
+
+.string.txt
+----
+Content-length: 10
+----
+
+[source,xml]
+.example.xml
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String name="Key"/>
+
+		<String value=":" token="true" />
+
+		<String name="Value"/>
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState" >
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel"/>
+				<Data fileName="string.txt" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher class="Console" />
+	</Test>
+
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 18622.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'TheDataModel' Bytes: 0/21, Bits: 0/168
+
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'TheDataModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'TheDataModel'
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.Key' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'TheDataModel' Size: <null>, Bytes: 0/21, Bits: 0/168
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'TheDataModel.Key' Bytes: 0/21, Bits: 0/168
+Peach.Core.Cracker.DataCracker getSize: -----> String 'TheDataModel.Key'
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.Key' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'TheDataModel.Key'
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.DataElement_0' -> Pos: 8, Length: 8
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.Value' -> Offset: 8, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Required Token: 112
+Peach.Core.Cracker.DataCracker Crack: String 'TheDataModel.Key' Size: 112, Bytes: 0/21, Bits: 0/168
+Peach.Core.Dom.DataElement String 'TheDataModel.Key' value is: Content-length <1>
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'TheDataModel.DataElement_0' Bytes: 14/21, Bits: 112/168
+Peach.Core.Cracker.DataCracker getSize: -----> String 'TheDataModel.DataElement_0'
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.DataElement_0' -> Pos: 8, Length: 8
+Peach.Core.Cracker.DataCracker getSize: <----- Size: 8
+Peach.Core.Cracker.DataCracker Crack: String 'TheDataModel.DataElement_0' Size:8, Bytes: 14/21, Bits: 112/168
+Peach.Core.Dom.DataElement String 'TheDataModel.DataElement_0' value is: : <2>
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'TheDataModel.Value' Bytes: 15/21, Bits: 120/168
+Peach.Core.Cracker.DataCracker getSize: -----> String 'TheDataModel.Value'
+Peach.Core.Cracker.DataCracker scan: String 'TheDataModel.Value' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'TheDataModel.Value'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 48
+Peach.Core.Cracker.DataCracker Crack: String 'TheDataModel.Value' Size: 48, Bytes: 15/21, Bits: 120/168
+Peach.Core.Dom.DataElement String 'TheDataModel.Value' value is:  10 <3>
+
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(21 bytes)
+Content-length: 10
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> Cracking "Content-length" into _Key_
+<2> Cracking ":" into token string
+<3> Cracking "10\n" into _Value_
+====================

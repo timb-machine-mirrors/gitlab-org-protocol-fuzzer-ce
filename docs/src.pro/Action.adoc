@@ -1,0 +1,184 @@
+[[Action]]
+== Action ==
+
+// TODO - Review with Seth
+
+// * Verify attributes
+// * Discuss actions for data input output
+// * Discuss actions for controlling environment
+// * Discuss multiple publisher usage
+// * Discuss control flow, switching to states, etc..
+// * Discuss implicit actions on publishers
+// * Probably move when section place else
+// * Scripting
+// * 
+
+// Updated:
+// 2/17/2014: Mick
+// described different types of actions
+// described different implicit actions
+// described scripting and showed an example of multiple publishers
+// fixed children and attributes
+
+Action elements perform various operations in the StateModel.
+Actions are primarily a way of sending commands to the xref:Publisher[Publisher].
+Actions can send output, receive input, open a connection, and much more.
+Actions can also control the Peach environment.
+Examples include changing to another state in the StateModel, moving data between DataModels, and calling custom methods defined by Agents.
+Actions are child elements of xref:State[State].
+
+Many Actions are called by Peach implicitly (without explicitly declaring it within a State).
+An example of which is the start action that is performed every iteration automatically or the open action which is called before any outputs or inputs.
+For the case of open or close explicitly declaring the actions may be useful in freeing up resources or initializing a listener.
+
+=== Syntax
+
+[source,xml]
+----
+<StateModel name="StateModel" initialState="InitialState">
+	<State name="InitialState"> 
+
+		<Action name="SendData" type="output">
+  			<DataModel ref="MyDataModel" />
+
+  			<!-- Optional data element -->
+  			<Data name="load defaults" fileName="template.bin" />
+		</Action>
+
+	</State>
+</StateModel>
+----
+
+Each Action supports various parameters that will execute scripts in certain times such as once an Action has completed or before it starts.
+This is useful for complicated StateModels that need the assistance of counters or other advanced operations.  
+
+Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to explicitly declare what Publisher the command is referring to.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="Ping">
+		<String value="PING" token="true"/>
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState">
+		<State name="InitialState">
+
+			<Action name="PingPacket" type="output" publisher="TheTCPPub">
+				<DataModel ref="Ping"/>
+			</Action>
+
+			<Action name="PingUDPPacket" type="output" publisher="TheUDPPub">
+				<DataModel ref="Ping"/>
+			</Action>
+
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel"/>
+		<Publisher name="TheTCPPub" class="Tcp">
+			<Param name="Host" value="127.0.0.1" />
+			<Param name="Port" value="31337" />
+		</Publisher>
+		<Publisher name="TheUDPPub" class="Udp">
+			<Param name="Host" value="127.0.0.1" />
+			<Param name="Port" value="1337" />
+		</Publisher>
+
+		<Strategy class="Random"/>
+
+		<Logger class="File" >
+			<Param name="Path" value="logs"/>
+	    </Logger>
+	</Test>
+</Peach>
+----
+
+=== Attributes
+
+xref:name[name]:: Name of the action [optional]
+xref:Action_Types[type]:: Action type [required], see list of action types
+publisher:: Name of the publisher that this action should be called on or Peach.Agent
+xref:Action_when[when]:: Only preform action if the expression provided evaluates to true
+xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+xref:Action_onStart[onStart]:: Expression to run on start of an action
+xref:xpath[valueXpath]:: Path to the source element defined using XPath notation [type=slurp]
+xref:xpath[setXpath]:: Path to the destination element defined using XPath notation [type=slurp]
+xref:ref[ref]:: Reference of state to change to [type=changeState]
+property:: Name of property to get/set in the publisher [type=setProperty or type=getProperty]
+
+=== Child-Elements
+
+xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
+xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
+xref:Param[Param]:: Argument to be passed with the call.  Will be fuzzed
+xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel
+
+[[Action_Types]]
+== Action Types
+
+include::Actions/start.txt[start]
+include::Actions/stop.txt[stop]
+include::Actions/open.txt[open]
+include::Actions/close.txt[close]
+include::Actions/accept.txt[accept]
+include::Actions/input.txt[input]
+include::Actions/output.txt[output]
+include::Actions/call.txt[call]
+include::Actions/getProperty.txt[getProperty]
+include::Actions/setProperty.txt[setProperty]
+include::Actions/slurp.txt[slurp]
+include::Actions/changeState.txt[changeState]
+
+// When already exists in v3/when.txt
+//=== when
+//
+//Perform an action based on an expression.
+//When the expression evaluates to true the action is performed.
+//This can be used to model choices based on input or to decide if certain input or output is performed next. 
+//
+//[source,xml]
+//----
+//<DataModel name="InputModel"> 
+//	<Number name="Type" size="32" /> 
+//</DataModel>
+//
+//<DataModel name="OutputModelA"> 
+//	<Number name="Type" size="32" value="11 22 33 44" valueType="hex" /> 
+//</DataModel>
+//
+//<DataModel name="OutputModelB"> 
+//	<Number name="Type" size="32" value="AA BB CC DD" valueType="hex" /> 
+//</DataModel>
+//
+//<StateModel name="StateModel" initialState="InitialState">
+//	<State name="InitialState">
+//		<Action type="input">
+//			<DataModel ref="InputModel" /> 
+//		</Action> 
+//					
+//		<Action type="changeState" ref="State2" when="int(StateModel.states['InitialState'].actions[0].dataModel['Type'].DefaultValue) == 2"/>
+//
+//		<Action type="changeState" ref="State3" when="int(StateModel.states['InitialState'].actions[0].dataModel['Type'].DefaultValue) == 3"/>
+//
+//	</State>
+//
+//	<State name="State2">
+//		<Action type="output">
+//			<DataModel ref="OutputModelA" /> 
+//		</Action> 
+//	</State>
+//
+//	<State name="State3">
+//		<Action type="output">
+//			<DataModel ref="OutputModelB" /> 
+//		</Action> 
+//	</State>
+//</TheStateModel>
+//----
+//
+//

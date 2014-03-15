@@ -1,0 +1,17 @@
+[[Analyzers_Asn1]]
+== ASN.1 Analyzer
+
+Converts ASN.1 data in Blobs into a full data model.
+
+.Example
+[source,xml]
+----
+<DataModel name="TheModel">
+
+	<Blob>
+		<Analyzer class="Asn1" />
+	</Blob>
+	
+</DataModel>
+----
+

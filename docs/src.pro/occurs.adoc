@@ -1,0 +1,33 @@
+[[occurs]]
+== Occurs Attribute
+
+// Reviewed:
+//  - 01/30/2014: Seth & Mike: Outlined
+
+// * How is it different than minOccurs/maxOccurs
+// * When to use
+// * occurs vs. relation count-of
+// * Example
+// * Mutation difference between array non array
+// * link to min/maxoccurs
+// * link to count-of
+// * Don't do occurs=1 unless you really get it
+// * link to discussion of arrays in book
+// * 
+
+A combination of xref:minOccurs[minOccurs] and xref:maxOccurs[maxOccurs]. This attribute creates exactly that number of the data element it is specified for. Internally Peach will treat this element as an array.
+
+=== Examples
+
+[source,xml]
+----
+<Block name="OccursBlock" occurs="5">
+  <String name="occurs" value="A"/>
+</Block>
+----
+
+Will produce the output:  
+
+---- 
+AAAAA
+----
