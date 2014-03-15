@@ -1,8 +1,13 @@
+<<<
 [[Mutators_StringMutator]]
-== StringMutator ==
+== StringMutator
 
 This mutator performs common string mutations. It will generate a large list of specific strings that are useful for fuzzing.
 
-_Target Elements_
+=== Supported Elements
 
  * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.
