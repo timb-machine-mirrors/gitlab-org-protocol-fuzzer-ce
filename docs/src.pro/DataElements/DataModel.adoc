@@ -25,20 +25,18 @@ xref:ref[ref]:: Reference to a DataModel to use as a template
 
 === Child Elements
 
-xref:Blob[Blob]:: TODO
-xref:Block[Block]:: TODO
-xref:Choice[Choice]:: TODO
-xref:Flag[Flag]:: TODO
-xref:Flags[Flags]:: TODO
-xref:Number[Number]:: TODO
-xref:Padding[Padding]:: TODO
-xref:String[String]:: TODO
-xref:XmlAttribute[XmlAttribute]:: TODO
-xref:XmlElement[XmlElement]:: TODO
-xref:Relation[Relation]:: TODO
-xref:Fixup[Fixup]:: TODO
-xref:Transformer[Transformer]:: TODO
-xref:Placement[Placement]:: TODO
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Block[Block]:: Group one or more data elements together into a logical structure.
+xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Flags[Flags]:: Defines a set of bit sized flags.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Number[Number]:: Defines a binary number of arbitrary bit size.
+xref:Padding[Padding]:: Pad out variably sized blocks or data models.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
 
 === Mutators
 
@@ -52,9 +50,9 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 .DataModel Example
 ===========================
-Any number of DataModels can be specified in a Peach Pit file. However, each must each have a unique name. Break complex formats into smaller models by split them into logical parts. This makes DataModels easier to read, debug, and re-use. 
+Any number of DataModels can be specified in a Peach Pit file. However, each must each have a unique name. Break complex formats into smaller models by split them into logical parts. This makes DataModels easier to read, debug, and re-use.
 
-A DataModel named "HelloWorld" contains a single string and outputs "Hello world!" 
+A DataModel named "HelloWorld" contains a single string and outputs "Hello world!"
 
 [source,xml]
 ----

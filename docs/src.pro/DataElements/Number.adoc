@@ -106,11 +106,27 @@ The following mutators will operate on this element type:
 xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
 xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
 xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighbouring each other
-xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]:: TODO
-xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]:: TODO
-xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]:: TODO
-xref:Mutators_ValidValuesMutator[ValidValuesMutator]:: TODO
-xref:Mutators_WordListMutator[WordListMutator]:: TODO
+
+xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]::
+	This mutator produces "random" numbers using a static seed so it will always produce the same random numbers.
+	By default 5,000 numbers are produced for each Number element that is found.
+
+xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]::
+	This mutator will produce values in a range of N - 50 through N + 50 for all numerical edge cases.
+	For example 16-bit numbers have the following edge cases: 0, signed byte (127), unsigned byte (255), signed short, unsigned short.
+
+xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]::
+	This mutator will produce values of default - N through default + N where N defaults to 50 but is controllable via a hint.
+	For example, if the default value of a Number field is 200, by default this mutator will produce all the values between 150 and 250.
+
+xref:Mutators_ValidValuesMutator[ValidValuesMutator]::
+	This mutator will allow users to specify additional data for each data element through a hint.
+	Each of these values must be separated with a semicolon.
+
+xref:Mutators_WordListMutator[WordListMutator]::
+	This mutator will allow users to specify additional data for each data element through a hint.
+	Each of these values must be separated by a newline in a file.
+
 
 === Examples
 
