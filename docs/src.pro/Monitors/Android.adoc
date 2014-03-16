@@ -1,38 +1,49 @@
+<<<
 [[Monitors_Android]]
 == Android Monitor
 
 The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. Two expected use cases are maintaining state while fuzzing native code, or launching and monitor Android Java applications. This monitor can target both emulated and physical notes. The http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device are required.
 
 === Parameters
+
+_Required:_
+
 ApplicationName:: Android Application.
-ActivityName:: Application Activity. (optional)
-AdbPath:: Directory Path to Adb. (optional)
-ClearAppData:: Remove Application data and cache on every iteration. (optional, defaults to false)
-ClearAppDataOnFault:: Remove Application data and cache on fault iterations. (optional, defaults to false)
-CommandTimeout:: Max seconds to wait for adb command to complete (default 10). (optional, defaults to 10)
-ConnectTimeout:: Max seconds to wait for adb connection (default 5). (optional, defaults to 5)
-DeviceMonitor:: Android monitor to get device serial from. (optional)
-DeviceSerial:: The serial of the device to monitor. (optional)
-FaultRegex:: Regex to determine if a log entry triggers a fault. (optional, defaults to `(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)`)
-FaultWaitTime:: Milliseconds to wait when checking for a fault. (optional, defaults to 0)
-IgnoreRegex:: Regex to ignore potential false positive fault matches. (optional, defaults to )
-MustStopRegex:: Trigger a fault and stop fuzzing when regex matches. (optional, defaults to )
-ReadyTimeout:: Max seconds to wait for device to be ready. (optional, defaults to 600)
-RebootEveryN:: Reboot device every N iterations. (optional)
-RebootOnFault:: Reboot device on fault. (optional, defaults to false)
-RestartEveryIteration:: Restart Application on Every Iteration. (optional, defaults to false)
-StartOnCall:: Start the application when notified by the state machine. (optional)
-WaitForReadyOnCall:: Waits for the device to be ready when notified by the state machine. (optional)
+
+_Optional:_
+
+ActivityName:: Application Activity.
+AdbPath:: Directory Path to Adb.
+ClearAppData:: Remove Application data and cache on every iteration. Defaults to false.
+ClearAppDataOnFault:: Remove Application data and cache on fault iterations. Defaults to false.
+CommandTimeout:: Max seconds to wait for adb command to complete (default 10). Defaults to 10.
+ConnectTimeout:: Max seconds to wait for adb connection (default 5). Defaults to 5.
+DeviceMonitor:: Android monitor to get device serial from.
+DeviceSerial:: The serial of the device to monitor.
+FaultRegex:: Regex to determine if a log entry triggers a fault. Defaults to `(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)`.
+FaultWaitTime:: Milliseconds to wait when checking for a fault. Defaults to 0.
+IgnoreRegex:: Regex to ignore potential false positive fault matches. Defaults to none.
+MustStopRegex:: Trigger a fault and stop fuzzing when regex matches. Defaults to none.
+ReadyTimeout:: Max seconds to wait for device to be ready. Defaults to 600.
+RebootEveryN:: Reboot device every N iterations.
+RebootOnFault:: Reboot device on fault. Defaults to false.
+RestartEveryIteration:: Restart Application on Every Iteration. Defaults to false.
+StartOnCall:: Start the application when notified by the state machine.
+WaitForReadyOnCall:: Waits for the device to be ready when notified by the state machine.
 
 === Examples
 
-.Runs the BadBehaviorActivity, sending random taps
+// TODO Expand examples.
+
+.Basic Usage Example
+======================
+Runs the BadBehaviorActivity, sending random taps
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
-
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="TheDataModel">
 		<Number size='32' signed="false" value="31337" />
@@ -88,3 +99,4 @@ WaitForReadyOnCall:: Waits for the device to be ready when notified by the state
 
 </Peach>
 ----
+======================

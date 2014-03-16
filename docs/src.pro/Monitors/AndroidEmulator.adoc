@@ -1,25 +1,35 @@
+<<<
 [[Monitors_AndroidEmulator]]
 == AndroidEmulator Monitor
 
 The _AndroidEmulator_ handles setup and tear-down for Android Virtual Devices (AVDs) running within the Android Emulator. This requires the http://developer.android.com/tools/help/emulator.html[Android Emulator] and http://developer.android.com/sdk/index.html[Android Platform Tools].
 
 === Parameters
+
+_Required:_
+
 Avd:: Android virtual device.
-EmulatorPath:: Directory containing the emulator. (optional, will be determined automatically)
-RestartAfterFault:: Restart emulator after a fault. (optional, defaults to true)
-RestartEveryIteration:: Restart emulator on every iteration. (optional, defaults to false)
-StartOnCall:: Start the emulator when notified by the state machine. (optional)
-StartTimeout:: How many seconds to wait for emulator to start running. (optional, defaults to 30)
-StopTimeout:: How many seconds to wait for emulator to exit. (optional, defaults to 30)
+
+_Optional:_
+
+EmulatorPath:: Directory containing the emulator. Will attempt to find automatically if not provided.
+RestartAfterFault:: Restart emulator after a fault. Defaults to true.
+RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
+StartOnCall:: Start the emulator when notified by the state machine.
+StartTimeout:: How many seconds to wait for emulator to start running. Defaults to 30.
+StopTimeout:: How many seconds to wait for emulator to exit. Defaults to 30.
 
 === Examples
 
-.Runs the BadBehaviorActivity, sending random taps
+.Basic Usage Example
+=======================
+Runs the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 
 	<DataModel name="TheDataModel">
@@ -76,3 +86,4 @@ StopTimeout:: How many seconds to wait for emulator to exit. (optional, defaults
 
 </Peach>
 ----
+=======================

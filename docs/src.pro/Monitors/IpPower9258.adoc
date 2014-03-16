@@ -1,24 +1,32 @@
+<<<
 [[Monitors_IpPower9258]]
 == IpPower9258 Monitor
 
-The _IpPower9258_ monitor controls a networked power switch.  This allows devices to be powered on/off during fuzzing. Currently only switching one port is supported. The model is "IP Power 9258" and available for purchase on eBay and Amazon.
+The _IpPower9258_ monitor controls a networked power switch.  This allows devices to be powered on/off during fuzzing. Currently only switching one port is supported per monitor instance. To control multiple ports use multiple instances of this monitor. The model is "IP Power 9258" and available for purchase on eBay and Amazon.
 
 === Parameters
+
+_Required:_
 
 Host:: Host or IP address (can include http interface port e.g. :8080)
 User:: Username
 Password:: Password
 Port:: Port to reset (1..4)
-ResetEveryIteration:: Reset power on every iteration (optional, default false)
-PowerOnOffPause:: Pause in milliseconds between power off/power on (optional, default is 500)
+
+_Optional:_
+
+ResetEveryIteration:: Reset power on every iteration, default false.
+PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 500.
 
 === Examples
 
 .Reset power on port 1
+========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -32,16 +40,16 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on (optional, de
     </State>
   </StateModel>
 
-<Agent name="Local">
-  <Monitor class="IpPower9258">
-    <Param name="Host" value="192.168.1.1:8080" />
-    <Param name="User" value="peach" />
-    <Param name="Password" value="power" />
-    <Param name="Port" value="1" />
-    <Param name="ResetEveryIteration" value="true" />
-  </Monitor>
-</Agent>
-
+  <Agent name="Local">
+ 	<Monitor class="IpPower9258">
+	<Param name="Host" value="192.168.1.1:8080" />
+	<Param name="User" value="peach" />
+	<Param name="Password" value="power" />
+	<Param name="Port" value="1" />
+	<Param name="ResetEveryIteration" value="true" />
+	</Monitor>
+  </Agent>
+ 
   <Test name="Default">
     <StateModel ref="State"/>
     <Agent ref="Local" />
@@ -50,3 +58,4 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on (optional, de
   </Test>
 </Peach>
 ----
+========================

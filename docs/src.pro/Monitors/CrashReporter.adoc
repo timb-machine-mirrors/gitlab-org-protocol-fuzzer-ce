@@ -1,20 +1,31 @@
+<<<
 [[Monitors_CrashReporter]]
 == CrashReporter Monitor (OS X)
 //needs better more fleshed out example pit 
 
 The _CrashReporter_ monitor will collect information from crashes detected by OS X System Crash Reporter.
 
+TIP: Make sure to disable the crash report dialog window. The following command can be used: +defaults write com.apple.CrashReporter DialogType none+. To reverse this change use: +defaults write com.apple.CrashReporter DialogType crashreport+.
+
 === Parameters
+
+_Required:_
+
+There are no required parameters for this monitor.
+
+_Optional:_
 
 ProcessName:: Process name to watch for (optional, defaults to all)
 
 === Examples
 
 .Catch all crashes
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -40,3 +51,4 @@ ProcessName:: Process name to watch for (optional, defaults to all)
   </Test>
 </Peach>	
 ----
+====================
