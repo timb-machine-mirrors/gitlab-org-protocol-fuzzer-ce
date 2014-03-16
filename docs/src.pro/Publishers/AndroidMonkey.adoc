@@ -12,11 +12,11 @@ The _AndroidMonkey_ publisher is used to communicate with both Android emulators
 
 === Parameters
 
-    * _AdbPath_ -- Directory containing adb.
-    * _DeviceSerial_ -- The serial of the device to fuzz.
-    * _DeviceMonitor_ -- Android monitor to get device serial from.
-    * _ConnectTimeout_ -- Max seconds to wait for adb connection (default 5).
-    * _CommandTimeout_ -- Max seconds to wait for adb command to complete (default 10).
+   AdbPath:: Directory containing adb.
+   DeviceSerial:: The serial of the device to fuzz.
+   DeviceMonitor:: Android monitor to get device serial from.
+   ConnectTimeout:: Max seconds to wait for adb connection (default 5).
+   CommandTimeout:: Max seconds to wait for adb command to complete (default 10).
 
 === Actions
 

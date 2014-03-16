@@ -9,8 +9,8 @@ TIP: Constraints are typicaly slower than using xref:Choice[Choice] or the _toke
 
 The following special variables are available to the expression:
 
- * _element_ -- The data element instance
- * _value_ -- The value of the data cracked into the data element.  This value will be cast
+element:: The data element instance
+value:: The value of the data cracked into the data element.  This value will be cast
 to a string or byte array.
 
 === Example ===

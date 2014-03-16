@@ -14,7 +14,7 @@ The _ConsoleHex_ publisher will output data to standard out.  The data will be d
 
 === Parameters
 
- * _BytesPerLine_ -- Number of bytes per row of text (optional, defaults to 16)
+BytesPerLine:: Number of bytes per row of text (optional, defaults to 16)
 
 === Actions
 

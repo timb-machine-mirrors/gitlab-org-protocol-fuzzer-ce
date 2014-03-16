@@ -1,3 +1,4 @@
+<<<
 [[Monitors_PageHeap]]
 == PageHeap Monitor (Windows)
 
@@ -6,16 +7,23 @@ The source code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
 
 === Parameters
 
- * _Executable_ -- Executable name (no path)
- * _WinDbgPath_ -- Path to windbg install (optional, will attempt to locate)
+_Required:_
+
+Executable:: Executable name (no path)
+
+_Optional:_
+
+WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not provided.
 
 === Examples
 
 .Enable for Notepad
+========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337" />
@@ -51,3 +59,4 @@ The source code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
   </Test>
 </Peach>
 ----
+========================

@@ -32,8 +32,8 @@ This strategy is most useful for larger data models or for use after performing 
 
 ==== Parameters
 
- * _MaxFieldsToMutate_ -- Maximum fields to mutate at once. default="6"
- * _SwitchCount_ -- Number of iterations to perform before switching xref:Data[Data] sets. default="200"
+MaxFieldsToMutate:: Maximum fields to mutate at once. default="6"
+SwitchCount:: Number of iterations to perform before switching xref:Data[Data] sets. default="200"
 
 *Examples*
 

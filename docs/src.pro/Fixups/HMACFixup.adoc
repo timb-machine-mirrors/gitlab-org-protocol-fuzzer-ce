@@ -1,4 +1,6 @@
+<<<
 [[Fixups_HMACFixup]]
+== Hmac
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -22,9 +24,8 @@
 // - 02/21/2014: Mick
 // Parent elements changed to match format
 
-== HMACFixup
 
-The _HMACFixup_ will hash the _ref_ element's value using the one of the defined HMAC algorithms.This is used fuzzing IPsec protocol implementations.
+The _Hmac_ fixup will hash the _ref_ element's value using the one of the defined HMAC algorithms.This is used fuzzing IPsec protocol implementations.
 
 === Parent Elements
 
@@ -33,24 +34,25 @@ The _HMACFixup_ will hash the _ref_ element's value using the one of the defined
  
 === Parameters
 
- * xref:ref[ref]_ -- Reference to data element which the HMAC calculation will be performed on
- * Key -- Key to use for HMAC
- * HMAC -- Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES)
- * xref:Length[Length] -- Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
+xref:ref[ref]:: Reference to data element which the HMAC calculation will be performed on
+Key:: Key to use for HMAC
+HMAC:: Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES)
+xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
 
 === Examples
 
 .SHA-1 HMAC returning all bytes
+===============================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="HMAC">
+      <Fixup class="Hmac">
         <Param name="ref" value="Data"/>
         <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
         <Param name="Hash" value="HMACSHA1"/>
@@ -74,18 +76,20 @@ The _HMACFixup_ will hash the _ref_ element's value using the one of the defined
   </Test>
 </Peach>
 ----
+===============================
 
 .SHA-512 HMAC returning 10 bytes of output
+===============================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="HMAC">
+      <Fixup class="Hmac">
         <Param name="ref" value="Data"/>
         <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
         <Param name="Hash" value="HMACSHA512"/>
@@ -109,3 +113,4 @@ The _HMACFixup_ will hash the _ref_ element's value using the one of the defined
   </Test>
 </Peach>
 ----
+===============================

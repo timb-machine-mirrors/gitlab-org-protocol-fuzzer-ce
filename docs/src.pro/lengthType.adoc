@@ -6,9 +6,9 @@ The _lengthType_ attribute defines the unit of length in use.
 
 A length must be defined to use this attribute. 
 
- * _bits_ -- Length is specified in units of bits
- * _bytes_ -- Length is specified in unites of bytes (default)
- * _chars_ -- Length is specified in unites of characters (only applies to xref:String[String])
+bits:: Length is specified in units of bits
+bytes:: Length is specified in unites of bytes (default)
+chars:: Length is specified in unites of characters (only applies to xref:String[String])
 
 === Examples ===
 

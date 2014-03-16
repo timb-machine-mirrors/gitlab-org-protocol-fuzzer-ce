@@ -1,4 +1,6 @@
+<<<
 [[Fixups_MD5Fixup]]
+== Md5
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -15,9 +17,7 @@
 // - 02/21/2014: Mick
 // Parent elements
 
-== MD5Fixup
-
-The _MD5Fixup_ will hash the _ref_ element's value using the MD5 algorithm.
+The _Md5_ fixup will hash the _ref_ element's value using the MD5 algorithm.
 The MD5 algorithm is defined in defined in RFC 1321 and can be found in the .Net Framework Implementation.
 
 === Parent Elements
@@ -27,20 +27,22 @@ The MD5 algorithm is defined in defined in RFC 1321 and can be found in the .Net
  
 === Parameters
 
- * xref:ref[ref] -- Reference to element whose value will be hashed
+xref:ref[ref]:: Reference to element whose value will be hashed
 
 === Examples
 
+.Basic Usage Example
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="MD5Fixup">
+      <Fixup class="Md5">
         <Param name="ref" value="Data"/>
       </Fixup>
     </Blob>
@@ -61,3 +63,4 @@ The MD5 algorithm is defined in defined in RFC 1321 and can be found in the .Net
   </Test>
 </Peach>
 ----
+====================

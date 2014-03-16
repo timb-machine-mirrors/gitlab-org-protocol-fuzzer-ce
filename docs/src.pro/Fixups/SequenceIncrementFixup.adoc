@@ -1,5 +1,6 @@
+<<<
 [[Fixups_SequenceIncrementFixup]]
-
+== SequenceIncrement
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -23,9 +24,7 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-== SequenceIncrementFixup
-
-The _SequenceIncrementFixup_ will increment each iteration starting at 1.
+The _SequenceIncrement_ will increment each iteration starting at 1.
 This is useful when a field must be a unique or sequential value every iteration.
 This checksum can be used when fuzzing protocols that contain a incrementing sequence numbers.
 The Fixup will produce numbers valid for the DataElement it modifies and is constrained to their size.
@@ -34,20 +33,23 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 
  * xref:Number[Number]
  * xref:String[String]
- 
+
 === Parameters
 
-	* _Offset_ -- Sets the initial value each iteration to Offset * (Iteration - 1). Default is null.
-	* _Once_ -- Only increment the value once per iteration. Default is false.
- 
+Offset:: Sets the initial value each iteration to Offset * (Iteration - 1). Default is null.
+Once:: Only increment the value once per iteration. Default is false.
+
 === Examples
 
-.Three outputs with Once set to false. The number is incremented before each action.
+.Basic SequencialIncrement Example
+==================================
+Three outputs with Once set to false. The number is incremented before each action.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -56,7 +58,7 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="IncrementingNumber" size="16"  endian="big">
-			<Fixup class="SequenceIncrementFixup"/>
+			<Fixup class="SequenceIncrement"/>
 		</Number>
 	</DataModel>
 
@@ -80,13 +82,17 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 	</Test>
 </Peach>
 ----
+==================================
 
-.Three outputs with Once set to false and Offset to 5. The number is incremented by 5 each iteration.
+.Non Default Offset
+==================================
+Three outputs with Once set to false and Offset to 5. The number is incremented by 5 each iteration.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -95,7 +101,7 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="IncrementingNumber" size="16"  endian="big">
-			<Fixup class="SequenceIncrementFixup">
+			<Fixup class="SequenceIncrement">
 				<Param name="Offset" value="5" />
 			</Fixup>
 		</Number>
@@ -115,13 +121,17 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 	</Test>
 </Peach>
 ----
+==================================
 
-.Three outputs with Once set to true. Each action outputs the same incremented number.
+.Non Default Once
+===============================
+Three outputs with Once set to true. Each action outputs the same incremented number.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -130,7 +140,7 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="IncrementingNumber" size="16"  endian="big">
-			<Fixup class="SequenceIncrementFixup">
+			<Fixup class="SequenceIncrement">
 				<Param name="Once" value="true" />
 			</Fixup>
 		</Number>
@@ -156,3 +166,4 @@ The Fixup will produce numbers valid for the DataElement it modifies and is cons
 	</Test>
 </Peach>
 ----
+===============================

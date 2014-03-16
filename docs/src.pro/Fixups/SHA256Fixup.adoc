@@ -1,4 +1,6 @@
+<<<
 [[Fixups_SHA256Fixup]]
+== Sha256
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -11,7 +13,6 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-== SHA256Fixup
 
 Performs a SHA-256 hash of _ref_ element's value and places it in the parent element.
 The SHA256 algorithm is defined in US Federal Information Processing Standard (FIPS) PUB 180-4 and is implemented in .Net Framework Implementation - System.Security.Cryptography.
@@ -21,14 +22,15 @@ This is used when fuzzing protocols that hash data with SHA-256.
 
  * xref:String[String]
  * xref:Blob[Blob]
- 
+
 === Parameters
 
- * xref:ref[ref] -- Reference to element whose value will be hashed
- 
+xref:ref[ref]:: Reference to element whose value will be hashed
  
 === Examples
 
+.Basic Sha256 Example
+==========================
 [source,xml]
 ----
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -43,7 +45,7 @@ This is used when fuzzing protocols that hash data with SHA-256.
 			</Number>
 		</Block>
 		<Blob name="Checksum">
-			<Fixup class="SHA256Fixup">
+			<Fixup class="Sha256">
 				<Param name="ref" value="Header" />
 			</Fixup>
 		</Blob>
@@ -63,3 +65,4 @@ This is used when fuzzing protocols that hash data with SHA-256.
 	</Test>
 </Peach>
 ----
+==========================

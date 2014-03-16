@@ -14,9 +14,9 @@ The _File_ publisher will open a file for reading or writing.
 
 === Parameters
 
- * _FileName_ -- Name of file to open
- * _Overwrite_ -- Overwrite existing files (optional, defaults to true)
- * _Append_ -- Append data to existing file (optional, defaults to false)
+FileName:: Name of file to open
+Overwrite:: Overwrite existing files (optional, defaults to true)
+Append:: Append data to existing file (optional, defaults to false)
 
 === Actions
 

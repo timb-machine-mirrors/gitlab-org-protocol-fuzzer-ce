@@ -24,12 +24,12 @@ NOTE: This publisher runs best on Linux and requires root privileges.
 
 === Parameters
 
- * _Host_ -- Hostname or IP address of remote host
- * _Interface_ -- IP of interface to bind too (optional)
- * _Protocol_ -- IP protocol to use (value must be between 0 and 255)
- * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
- * _MaxMTU_ -- Maximum allowable MTU property value (optional, default 131,070)
- * _MinMTU_ -- Minimum allowable MTU property value (optional, default 1,280)
+Host:: Hostname or IP address of remote host
+Interface:: IP of interface to bind too (optional)
+Protocol:: IP protocol to use (value must be between 0 and 255)
+Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
+MaxMTU:: Maximum allowable MTU property value (optional, default 131,070)
+MinMTU:: Minimum allowable MTU property value (optional, default 1,280)
 
 
 === Actions

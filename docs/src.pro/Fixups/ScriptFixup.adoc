@@ -1,4 +1,6 @@
+<<<
 [[Fixups_ScriptFixup]]
+== Script
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -13,9 +15,8 @@
 // Added full examples
 // Added description
 
-== ScriptFixup
 
-The _ScriptFixup_ is a proxy that allow you to write fixups in a scripting language like python or ruby.
+The _Script_ is a proxy that allow you to write fixups in a scripting language like python or ruby.
 The class parameter is required for python fixups. It has two arguments--self (a python construct inherent in the language) and element (the data element being "fixed up").
 The class parameter's returned argument must match the DataElement type of the Fixup's parent.
 
@@ -25,11 +26,13 @@ The class parameter's returned argument must match the DataElement type of the F
 
 === Parameters
 
- * xref:ref[ref] -- Reference to data element which the calculation will be performed on
- * _class_ -- Reference to Python class to call
+xref:ref[ref]:: Reference to data element which the calculation will be performed on
+class:: Reference to Python class to call
 
 === Examples
 
+.Basic Usage Example
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -41,7 +44,7 @@ The class parameter's returned argument must match the DataElement type of the F
 	<DataModel name="TheDataModel">
 		<Number name="FirstNumber"  size="16" endian="big" value="10"/>
 		<Number name="Log10Number" size="16"  endian="big">
-			<Fixup class="ScriptFixup">
+			<Fixup class="Script">
 				<Param name="ref" value="FirstNumber" />
 				<Param name="class" value="MathWrapperFile.MathWrapper" />
 			</Fixup>
@@ -73,3 +76,4 @@ class MathWrapper:
   def fixup(self, element):
     return int(math.log10(element.DefaultValue))
 ----
+====================

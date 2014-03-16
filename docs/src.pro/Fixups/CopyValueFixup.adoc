@@ -1,5 +1,6 @@
+<<<
 [[Fixups_CopyValueFixup]]
-
+== CopyValue
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -14,9 +15,7 @@
 // Added parent types
 // Added full example
 
-== CopyValueFixup
-
-The _CopyValueFixup_ will copy reference element (ref) value into ours.
+The _CopyValue_ will copy reference element (ref) value into ours.
 This is useful for situations where two element must be identical for redundancy checks
 
 === Parent Elements
@@ -28,15 +27,17 @@ This is useful for situations where two element must be identical for redundancy
 
 === Parameters
 
- * xref:ref[_ref_] -- Reference to data element which contains the value that will be copied.
+xref:ref[ref]:: Reference to data element which contains the value that will be copied.
  
 === Examples
 
+.Basic Usage Example
+======================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<String name="Magic1" value="ABCD" />
@@ -64,13 +65,15 @@ This is useful for situations where two element must be identical for redundancy
 	</Test>
 </Peach>
 ----
+======================
 
 .Example with Block copy
+======================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Block name="M1">
@@ -103,3 +106,4 @@ This is useful for situations where two element must be identical for redundancy
 	</Test>
 </Peach>
 ----
+======================

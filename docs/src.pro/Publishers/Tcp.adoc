@@ -12,10 +12,10 @@ The _Tcp_ publisher connects to a remote tcp service.
 
 === Parameters
 
- * _Host_ -- Hostname or IP address of remote host
- * _Port_ -- Destination port number
- * _Timeout_ -- How long to wait in milliseconds for data (optional, default 3,000)
- * _ConnectTimeout_ -- How long to wait in milliseconds for a new connection (optional, default 10,000)
+Host:: Hostname or IP address of remote host
+Port:: Destination port number
+Timeout:: How long to wait in milliseconds for data (optional, default 3,000)
+ConnectTimeout:: How long to wait in milliseconds for a new connection (optional, default 10,000)
 
 === Actions
 

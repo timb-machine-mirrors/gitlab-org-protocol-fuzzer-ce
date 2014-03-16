@@ -5,7 +5,7 @@ The _CleanupFolder_ monitor will remove the contents created by a target during 
 
 === Parameters
 
- * _Folder_ -- Folder to clean up
+Folder:: Folder to clean up
  
 === Examples
 

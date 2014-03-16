@@ -1,4 +1,5 @@
 [[Fixups_CrcFixup]]
+== Crc
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -14,9 +15,7 @@
 // Added parent types
 // Added full example
 
-== CrcFixup
-
-The _CrcFixup_ will produce a CRC using data from the reference element.
+The _Crc_ will produce a CRC using data from the reference element.
 It is defined in ISO 3309.
 This is used when fuzzing CRC checksum protocols.
 
@@ -27,20 +26,18 @@ This is used when fuzzing CRC checksum protocols.
  
 === Parameters
 
- * xref:ref[ref] -- Reference to data element which the CRC calculation will be performed on
- * _type_ -- Type of CRC to run [CRC32, CRC16, CRC_CCITT]. 
+xref:ref[ref]:: Reference to data element which the CRC calculation will be performed on
+type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32. 
  
-=== Supported Algorithms
- 
-CRC32,CRC16,CRC_CCITT
-
 === Examples
 
+.Basic Usage Example
+======================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -49,7 +46,7 @@ CRC32,CRC16,CRC_CCITT
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="checksum" size="16">
-			<Fixup class="CrcFixup">
+			<Fixup class="Crc">
 				<Param name="ref" value="Packet" />
 				<Param name="type" value="CRC16" />
 			</Fixup>
@@ -70,3 +67,4 @@ CRC32,CRC16,CRC_CCITT
 	</Test>
 </Peach>
 ----
+======================

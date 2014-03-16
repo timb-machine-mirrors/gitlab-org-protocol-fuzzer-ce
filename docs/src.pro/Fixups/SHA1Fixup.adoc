@@ -1,4 +1,6 @@
+<<<
 [[Fixups_SHA1Fixup]]
+== Sha1
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -11,8 +13,6 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-== SHAFixup
-
 Performs a SHA-1 hash of _ref_ element's value and places it in the parent element.
 The SHA1 algorithm is defined in US Federal Information Processing Standard (FIPS) PUB 180-4 and is implemented in .Net Framework Implementation - System.Security.Cryptography.
 This is used when fuzzing protocols that hash data with SHA-1.
@@ -24,14 +24,16 @@ This is used when fuzzing protocols that hash data with SHA-1.
  
 === Parameters
 
- * xref:ref[ref] -- Reference to element whose value will be hashed
+xref:ref[ref]:: Reference to element whose value will be hashed
  
 === Examples
 
+.Basic Sha1 Fixup Example
+=========================
 [source,xml]
 ----
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Block name="Header">
@@ -42,7 +44,7 @@ This is used when fuzzing protocols that hash data with SHA-1.
 			</Number>
 		</Block>
 		<Blob name="Checksum">
-			<Fixup class="SHA1Fixup">
+			<Fixup class="Sha1">
 				<Param name="ref" value="Header" />
 			</Fixup>
 		</Blob>
@@ -62,3 +64,4 @@ This is used when fuzzing protocols that hash data with SHA-1.
 	</Test>
 </Peach>
 ----
+=========================

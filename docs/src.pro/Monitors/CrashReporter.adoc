@@ -6,7 +6,7 @@ The _CrashReporter_ monitor will collect information from crashes detected by OS
 
 === Parameters
 
- * _ProcessName_ -- Process name to watch for (optional, defaults to all)
+ProcessName:: Process name to watch for (optional, defaults to all)
 
 === Examples
 

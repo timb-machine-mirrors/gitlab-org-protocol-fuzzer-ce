@@ -64,9 +64,9 @@ not provided on the command line.
 === Attributes
 
  * xref:name[name] -- Name of the test, use "Default" for default test [required]
- * _waitTime_ -- Time to wait in between each test case (Defaults to zero (0))
- * _faultWaitTime_ -- Time to wait for a fault to occur before starting next iteration (Defaults to 0)
- * _controlIteration_ -- How often should we perform control iterations.  (Defaults to 0)
+waitTime:: Time to wait in between each test case (Defaults to zero (0))
+faultWaitTime:: Time to wait for a fault to occur before starting next iteration (Defaults to 0)
+controlIteration:: How often should we perform control iterations.  (Defaults to 0)
 
 === Child-Elements
 

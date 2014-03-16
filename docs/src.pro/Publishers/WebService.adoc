@@ -14,12 +14,12 @@ The _WebService_ publisher is able to call SOAP and WCF based web services.  By 
 
 === Parameters
 
- * _Url_ -- WebService URL
- * _Service_ -- Service Name
- * _Wsdl_ -- Path or URL to WSDL for web service (optional)
- * _ErrorOnStatusCode_ -- Error when status code isn't 200 (optional, default true)
- * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
- * _Throttle_ -- Time in milliseconds to wait between connections (optional, default 0)
+Url:: WebService URL
+Service:: Service Name
+Wsdl:: Path or URL to WSDL for web service (optional)
+ErrorOnStatusCode:: Error when status code isn't 200 (optional, default true)
+Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
+Throttle:: Time in milliseconds to wait between connections (optional, default 0)
 
 === Actions
 

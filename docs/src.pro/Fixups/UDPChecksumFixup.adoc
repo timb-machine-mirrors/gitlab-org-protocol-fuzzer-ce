@@ -1,4 +1,6 @@
+<<<
 [[Fixups_UDPChecksumFixup]]
+== UDPChecksumFixup
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -11,8 +13,6 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-== UDPChecksumFixup
-
 The _UDPChecksumFixup_  will produce an internet checksum as defined in RFC 1071.
 A discussion on how to apply UDPChecksumFixup can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
 This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
@@ -24,17 +24,21 @@ This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
  
 === Parameters
 
- * xref:ref[ref] -- Reference to data element on which the checksum will be performed.
- * _src_ -- Source IP Address. IP address of the local machine. 
- * _dst_ -- Destination IP Address. IP address of the remote machine.
+xref:ref[ref]:: Reference to data element on which the checksum will be performed.
+src:: Source IP Address. IP address of the local machine. 
+dst:: Destination IP Address. IP address of the remote machine.
 
 === Examples
+
+.UDP Packet Example
+===================
+This example models a UDP packet which includes use of the UDPChecksumFixup.
 
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -65,3 +69,4 @@ This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
 	</Test>
 </Peach>
 ----
+===================

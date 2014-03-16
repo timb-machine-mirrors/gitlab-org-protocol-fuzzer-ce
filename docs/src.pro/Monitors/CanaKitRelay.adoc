@@ -7,12 +7,12 @@ http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller
 
 === Parameters
 
- * _SerialPort_ -- Serial port for the board (e.g. COM2)
- * _RelayNumber_ -- Relay to trigger (1..4)
- * _ResetEveryIteration_ -- Reset power on every iteration (optional, default is false)
- * _OnOffPause_ -- Pause in milliseconds between off/on (optional, default is 1/2 second)
- * _ResetOnStart_ -- Reset device on start (optional, defaults to false)
- * _ReverseSwitch_ -- Switches the order of the on off commands for when the NC port is used for power (optional, default false)
+SerialPort:: Serial port for the board (e.g. COM2)
+RelayNumber:: Relay to trigger (1..4)
+ResetEveryIteration:: Reset power on every iteration (optional, default is false)
+OnOffPause:: Pause in milliseconds between off/on (optional, default is 1/2 second)
+ResetOnStart:: Reset device on start (optional, defaults to false)
+ReverseSwitch:: Switches the order of the on off commands for when the NC port is used for power (optional, default false)
  
 === Examples
 

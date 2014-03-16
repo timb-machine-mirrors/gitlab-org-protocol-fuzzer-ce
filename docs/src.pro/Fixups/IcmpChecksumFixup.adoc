@@ -1,4 +1,6 @@
+<<<
 [[Fixups_IcmpChecksumFixup]]
+== IcmpChecksum
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -15,9 +17,7 @@
 // - 02/21/2014: Mick
 // Parent elements
 
-== IcmpChecksumFixup
-
-The _IcmpChecksumFixup_ will produce a checksum using the ICMP algorithm used commonly in ICMP and IPv4. It is defined and documented in RFC 1071 and RFC 2460 and can be found in the Custom Peach implementation.
+The _IcmpChecksum_ will produce a checksum using the ICMP algorithm used commonly in ICMP and IPv4. It is defined and documented in RFC 1071 and RFC 2460 and can be found in the Custom Peach implementation.
 
 === Parent Elements
 
@@ -26,22 +26,24 @@ The _IcmpChecksumFixup_ will produce a checksum using the ICMP algorithm used co
  
 === Parameters
 
- * xref:ref[ref] -- ref: The data element on which the checksum will be performed
+xref:ref[ref]:: The data element on which the checksum will be performed
 
 === Examples
 
+.Basic Usage Example
+=====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="Data">
     <Block name="Content">
       <Number name="Type" size="8"/>
       <Number name="Code" size="8"/>
       <Number name="Checksum" endian="big" size="16">
-        <Fixup class="IcmpChecksumFixup">
+        <Fixup class="IcmpChecksum">
           <Param name="ref" value="Content" />
         </Fixup>
       </Number>
@@ -67,3 +69,4 @@ The _IcmpChecksumFixup_ will produce a checksum using the ICMP algorithm used co
   </Test>
 </Peach>
 ----
+=====================

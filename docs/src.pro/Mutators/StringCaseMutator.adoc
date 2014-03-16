@@ -8,6 +8,10 @@ This mutator will change the case of a string three ways. First it will lower-ca
  * UpperCase -- "HELLO, WORLD!"
  * RandomCase -- "heLLo, WOrLd!" (or any random combination of lower/upper)
 
-_Target Elements_
+=== Supported Elements
 
  * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

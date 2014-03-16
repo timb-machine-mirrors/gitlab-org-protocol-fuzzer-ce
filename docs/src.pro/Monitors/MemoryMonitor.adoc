@@ -1,3 +1,4 @@
+<<<
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
@@ -5,14 +6,22 @@ The _Memory_ monitor checks the memory usage of a process and throws a fault if 
 
 === Parameters
 
- * _Pid_ -- Process ID to monitor (optional)
- * _ProcessName_ -- Name of process to monitor (optional)
- * _MemoryLimit_ -- Fault when memory usage surpasses limit (optional, default 0 MB)
- * _StopOnFault_ -- Stop fuzzing if a fault is triggered (optional, default false)
+_Required:_
+
+Must use one of _Pid_ or _ProcessName_ and also _MemoryLimit_.
+
+Pid:: Process ID to monitor
+ProcessName:: Name of process to monitor
+MemoryLimit:: Fault when memory usage surpasses limit
+
+_Optional:_
+
+StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false.
 
 === Examples
 
 .Monitor memory via PID
+========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -44,5 +53,5 @@ The _Memory_ monitor checks the memory usage of a process and throws a fault if 
     <Publisher class="ConsoleHex"/>
   </Test>
 </Peach>	
-
 ----
+========================

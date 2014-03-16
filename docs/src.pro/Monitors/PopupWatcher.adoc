@@ -1,3 +1,4 @@
+<<<
 [[Monitors_PopupWatcher]]
 == PopupWatcher Monitor (Windows)
 
@@ -6,16 +7,23 @@ Source code is located in peach\Peach.Core.Test.OS.Windows\Agent\Monitors
 
 === Parameters
 
- * _WindowNames_ -- Window names separated by a comma
- * _Fault_ -- Trigger fault when a window is found (optional, default false)
+_Required:_
+
+WindowNames:: Window names separated by a comma
+
+_Optional:_
+
+Fault:: Trigger fault when a window is found (optional, default false)
 
 === Examples
 
 .Close Notepad
+================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -43,12 +51,15 @@ Source code is located in peach\Peach.Core.Test.OS.Windows\Agent\Monitors
   </Test>
 </Peach>   
 ----
+================
 
 .Fault on Assert
+================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -76,3 +87,4 @@ Source code is located in peach\Peach.Core.Test.OS.Windows\Agent\Monitors
   </Test>
 </Peach>  
 ----
+================

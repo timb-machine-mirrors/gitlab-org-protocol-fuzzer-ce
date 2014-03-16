@@ -1,3 +1,4 @@
+<<<
 [[Monitors_ProcessKiller]]
 == ProcessKiller Monitor
 
@@ -5,15 +6,23 @@ The _ProcessKiller_ monitor will kill (terminate) specified processes after each
 
 === Parameters
 
- * _ProcessNames_ -- Comma separated list of process to kill.
+_Required:_
+
+ProcessNames:: Comma separated list of process to kill.
  
+_Optional:_
+
+There are no optional parameters for this monitor.
+
 === Examples
 
 .Terminate two processes
+========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -42,3 +51,4 @@ The _ProcessKiller_ monitor will kill (terminate) specified processes after each
   </Test>
 </Peach>  
 ----
+========================

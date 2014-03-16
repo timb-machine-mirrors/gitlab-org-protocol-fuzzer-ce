@@ -1,4 +1,6 @@
+<<<
 [[Fixups_ExpressionFixup]]
+== Expression
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -11,35 +13,37 @@
 // Number, String, Blob 
 // Make unit test for all three cases !!!
 
-== ExpressionFixup
 
-The _ExpressionFixup_ will evaluate a scripting expression that produces the new value for our element.
+The _Expression_ will evaluate a scripting expression that produces the new value for our element.
 
 === Parameters
 
- * xref:ref[ref] -- Reference to the data element whose value is used in the given expression
- * _expression_ -- Scripting expression to evaluate.  Must return a string or integer value. 
+xref:ref[ref]:: Reference to the data element whose value is used in the given expression
+expression:: Scripting expression to evaluate.  Must return a string or integer value. 
 
 === Scripting Variables
 
- * _self_ -- Fixup instance
- * _ref_ -- Referenced element
- * _data_ -- Referenced elements value as a byte array
+self:: Fixup instance
+ref:: Referenced element
+data:: Referenced elements value as a byte array
  
 === Examples
 
+.Basic Usage Example
+======================
 [source,xml]
+.example.xml
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<Import import="ExpressionFixup" />
 
 	<DataModel name="NumericExpressionData">
 		<Number name="NumericData" size="32" value="14"/>
 		<Number size="32">
-			<Fixup class="ExpressionFixup">
+			<Fixup class="Expression">
 				<Param name="ref" value="NumericData" />
 				<Param name="expression" value="ExpressionFixup.multiply_by_three(ref)" />
 			</Fixup>
@@ -87,6 +91,7 @@ The _ExpressionFixup_ will evaluate a scripting expression that produces the new
 ----
 
 [source,python]
+.ExpressionFixup.py
 ----
 from code import InteractiveConsole
 
@@ -112,3 +117,4 @@ def debug(ctx, ref, data):
     console.interact()
 
 ----
+======================

@@ -7,20 +7,20 @@ This is the preferred method of catching faults on OS X.
 
 === Parameters
 
- * _Command_ -- Command to execute
- * _Arguments_ -- Command line arguments (optional, default none)
- * _StartOnCall_ -- Start command on state model call (optional, default none)
- * _UseDebugMalloc_ -- Use OS X Debug Malloc (slower) (optional, default false)
- * _ExecHandler_ -- Crash Wrangler execution handler program (optional, default exc_handler)
- * _ExploitableReads_ -- Are read a/v's considered exploitable? (optional, default false)
- * _NoCpuKill_ -- Disable process killing by CPU usage (optional, default false)
- * _CwLogFile_ -- CrashWrangler Log file (optional, defaults to cw.log)
- * _CwLockFile_ -- CrashWrangler Lock file (optional, defaults to cw.lock)
- * _CwPidFile_ -- CrashWrangler PID file (optional, defaults to cw.pid)
- * _FaultOnEarlyExit_ -- Trigger fault if process exists (defaults to false)
- * _WaitForExitOnCall_ -- Wait for process to exit on state model call and fault if timeout is reached (optional, default none)
- * _WaitForExitTimeout_ -- "Wait for exit timeout value in milliseconds (optional, -1 is infinite, default 10000) 
- * _RestartOnEachTest_ -- "Restart process for each iteration (optional, default to false)"
+Command:: Command to execute
+Arguments:: Command line arguments (optional, default none)
+StartOnCall:: Start command on state model call (optional, default none)
+UseDebugMalloc:: Use OS X Debug Malloc (slower) (optional, default false)
+ExecHandler:: Crash Wrangler execution handler program (optional, default exc_handler)
+ExploitableReads:: Are read a/v's considered exploitable? (optional, default false)
+NoCpuKill:: Disable process killing by CPU usage (optional, default false)
+CwLogFile:: CrashWrangler Log file (optional, defaults to cw.log)
+CwLockFile:: CrashWrangler Lock file (optional, defaults to cw.lock)
+CwPidFile:: CrashWrangler PID file (optional, defaults to cw.pid)
+FaultOnEarlyExit:: Trigger fault if process exists (defaults to false)
+WaitForExitOnCall:: Wait for process to exit on state model call and fault if timeout is reached (optional, default none)
+WaitForExitTimeout:: "Wait for exit timeout value in milliseconds (optional, -1 is infinite, default 10000) 
+RestartOnEachTest:: "Restart process for each iteration (optional, default to false)"
 
 === Examples
 

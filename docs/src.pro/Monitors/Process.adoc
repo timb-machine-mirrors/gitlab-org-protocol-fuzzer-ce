@@ -1,3 +1,4 @@
+<<<
 [[Monitors_Process]]
 == Process Monitor
 
@@ -12,22 +13,29 @@ The _Process_ monitor controls a process during a fuzzing run.  It has a number 
 
 === Parameters
 
- * _Executable_ -- Executable to launch
- * _Arguments_ -- Command line arguments (optional)
- * _RestartOnEachTest_ -- Restart process on each iteration (optional, defaults to false)
- * _FaultOnEarlyExit_ -- Trigger fault if process exits (optional, defaults to false)
- * _NoCpuKill_ -- Disable process killing when CPU usage nears zero (optional, defaults to false)
- * _StartOnCall_ -- Start process on a call action from the StateModel (this value and the method value must match), (optional)
- * _WaitForExitOnCall_ -- Wait for process to exit on state model call (this value and the method value must match), (optional)
- * _WaitForExitTimeout_ -- Wait timeout value.  Triggers fault when timeout hit.  (optional, default 10000, -1 infinite)
+_Required:_
+
+Executable:: Executable to launch
+
+_Optional:_
+
+Arguments:: Command line arguments
+RestartOnEachTest:: Restart process on each iteration, defaults to false.
+FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
+NoCpuKill:: Disable process killing when CPU usage nears zero, defaults to false.
+StartOnCall:: Start process on a call action from the StateModel (this value and the method value must match)
+WaitForExitOnCall:: Wait for process to exit on state model call (this value and the method value must match)
+WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite.
 
 === Examples
 
 .Start Process
+=================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337"/>
@@ -60,12 +68,15 @@ The _Process_ monitor controls a process during a fuzzing run.  It has a number 
   </Test>
 </Peach>
 ----
+=================
 
 .Restart Process on Each Test
+=================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337" />
@@ -99,12 +110,15 @@ The _Process_ monitor controls a process during a fuzzing run.  It has a number 
   </Test>
 </Peach>
 ----
+=================
 
 .Start Process From State Model
+=================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337" />
@@ -134,12 +148,15 @@ The _Process_ monitor controls a process during a fuzzing run.  It has a number 
   </Test>
 </Peach>
 ----
+=================
 
 .Wait for process to exit in state model
+=================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337" />
@@ -171,3 +188,4 @@ The _Process_ monitor controls a process during a fuzzing run.  It has a number 
   </Test>
 </Peach>
 ----
+=================

@@ -14,8 +14,8 @@ The following key prefixes are used:
 
 === Parameters
 
- * _Key_ -- Registry key to remove.
- * _ChildrenOnly_ -- Only cleanup sub-keys. (optional, defaults false)
+Key:: Registry key to remove.
+ChildrenOnly:: Only cleanup sub-keys. (optional, defaults false)
 
 === Examples
 

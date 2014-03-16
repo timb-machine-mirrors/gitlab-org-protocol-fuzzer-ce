@@ -1,20 +1,71 @@
+<<<
 [[Monitors_Pcap]]
 == Pcap Monitor
 
 The _Pcap_ monitor performs a network capture during the fuzzing iteration. The captured data is discarded and re-captured on each iteration. If a fault occurs the captured data is logged as a pcap file and returned with the fault data. The Pcap file is compatible with Wireshark and tcpdump.
 
+.List Network Interfaces
+****
+The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. On Windows platforms the device name and also the more descriptive names shown by +ipconfig+ can be used.
+
+----
+> peach --showdevices
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+The following devices are available on this machine:
+----------------------------------------------------
+
+Name: rpcap://\Device\NPF_{1CAAEF1E-ED49-4F5B-A380-AA8F1AA9C2E0}
+Description: Network adapter 'VMware Virtual Ethernet Adapter' on local host
+
+
+Name: rpcap://\Device\NPF_{F2B8CB37-129B-4EE3-B38E-DA71EEE130A7}
+Description: Network adapter 'Microsoft' on local host
+
+
+Name: rpcap://\Device\NPF_{4A78FBB4-5032-48DD-BF95-CC8B7F8CCEDC}
+Description: Network adapter 'TAP-Win32 Adapter OAS' on local host
+
+
+Name: rpcap://\Device\NPF_{43F18B7C-42B6-4F5C-A70B-1E66C619B58C}
+Description: Network adapter 'Intel(R) 82579LM Gigabit Network Connection' on lo
+cal host
+
+
+Name: rpcap://\Device\NPF_{44E8AB1D-1FD1-4A15-83BA-9432D8E004DE}
+Description: Network adapter 'VMware Virtual Ethernet Adapter' on local host
+
+
+Name: rpcap://\Device\NPF_{67A186DE-0FAE-458B-AA3C-5DCE76774593}
+Description: Network adapter 'Microsoft' on local host
+
+
+Name: rpcap://\Device\NPF_{FCF894CF-B844-4085-84B0-6D956B092D4B}
+Description: Network adapter 'Microsoft' on local host
+----
+****
+
 === Parameters
 
- * _Device_ -- Device name for capturing
- * _Filter_ -- PCAP style filter string (optional)
+_Required:_
+
+Device:: Device name for capturing
+
+_Optional:_
+
+Filter:: PCAP style filter string (optional)
 
 === Examples
 
 .Capture port 80
+==================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -47,3 +98,4 @@ The _Pcap_ monitor performs a network capture during the fuzzing iteration. The 
 </Peach>
 
 ----
+==================

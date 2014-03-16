@@ -1,4 +1,6 @@
+<<<
 [[Fixups_LRCFixup]]
+== Lrc
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -15,9 +17,7 @@
 // - 02/21/2014: Mick
 // Parent elements
 
-== LRCFixup
-
-The _LRCFixup_ will produce a longitudinal redundancy check (LRC) using data from a single element.
+The _Lrc_ will produce a longitudinal redundancy check (LRC) using data from a single element.
 The longitudinal redundancy check is defined in ISO 1150:1978 and the algorithm is part of the custom Peach implementation.
 
 === Parent Elements
@@ -28,10 +28,12 @@ The longitudinal redundancy check is defined in ISO 1150:1978 and the algorithm 
  
 === Parameters
 
- * xref:ref[ref] -- Reference to data element on which the checksum will be performed.
+xref:ref[ref]:: Reference to data element on which the checksum will be performed.
 
 === Examples
 
+.Basic Usage Example
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -41,7 +43,7 @@ The longitudinal redundancy check is defined in ISO 1150:1978 and the algorithm 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="LRCFixup">
+      <Fixup class="Lrc">
         <Param name="ref" value="Data"/>
       </Fixup>
     </Blob>
@@ -62,3 +64,4 @@ The longitudinal redundancy check is defined in ISO 1150:1978 and the algorithm 
   </Test>
 </Peach>
 ----
+====================

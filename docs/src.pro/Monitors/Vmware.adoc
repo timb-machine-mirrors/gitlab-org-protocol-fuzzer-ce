@@ -1,5 +1,5 @@
+<<<
 [[Monitors_Vmware]]
-
 == Vmware Monitor
 
 The _Vmware_ monitor can control a vmware virtual machine.  The monitor is able to start a virtual machine 
@@ -9,28 +9,40 @@ TIP: When using with vSphere/ESXi prefix the image name with the storage locatio
 
 === Parameters
 
- * _Vmx_ -- Path to virtual machine
- * _Host_ -- Name of host machine (optional)
- * _Login_ -- Username for authentication on the remote machine (optional)
- * _Password_ -- Password for authentication on the remote machine (optional)
- * _HostType_ -- Type of remote host (optional, defaults to "Default")
- * _HostPort_ -- TCP/IP port on the remote host (optional)
- ** _Default_ -- Default
- ** _VIServer_ -- vCenter Server, ESX/ESXi hosts, VMWare Server 2.0
- ** _Workstation_ -- VMWare Workstation
- ** _WorkstationShared_ --  VMWare Workstation (Shared Mode)
- ** _Player_ -- VMWare Player
- ** _Server_ -- VMWare Server 1.0.x
- * _SnapshotIndex_ -- VM snapshot index (optional)
- * _SnapshotName_ -- VM Snapshot name (optional)
- * _ResetEveryIteration_ -- Reset VM to snapshot on every iteration (optional, default false)
- * _ResetOnFaultBeforeCollection_ -- Reset VM after we detect a Fault during data collection (optional, default false)
- * _WaitForToolsInGuest_ -- Wait for tools to start in guest (optional, default true)
- * _WaitTimeout_ -- How many seconds to wait for guest tools (optional, default 600)
+_Required:_
+
+Vmx:: Path to virtual machine
+
+_Optional:_
+
+Host:: Name of host machine
+Login:: Username for authentication on the remote machine
+Password:: Password for authentication on the remote machine
+HostType::
+	Type of remote host, defaults to _Default_
+	+
+	[horizontal]
+	Default;; Default
+	VIServer;; vCenter Server, ESX/ESXi hosts, VMWare Server 2.0
+	Workstation;; VMWare Workstation
+	WorkstationShared;;  VMWare Workstation (Shared Mode)
+	Player;; VMWare Player
+	Server;; VMWare Server 1.0.x
+
+HostPort::
+	TCP/IP port on the remote host
+
+SnapshotIndex:: VM snapshot index
+SnapshotName:: VM Snapshot name
+ResetEveryIteration:: Reset VM to snapshot on every iteration. Defaults to false.
+ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
+WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
+WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
 
 === Examples
 
 .Start Virtual Machine
+======================
 [source,xml]
 ----
 <Agent name="Local">
@@ -41,8 +53,10 @@ TIP: When using with vSphere/ESXi prefix the image name with the storage locatio
 	</Monitor>
 </Agent>
 ----
+======================
 
 .Start Virtual Machine hosted on ESXi
+======================
 [source,xml]
 ----
 <Agent name="Local">
@@ -52,3 +66,4 @@ TIP: When using with vSphere/ESXi prefix the image name with the storage locatio
 	</Monitor>
 </Agent>
 ----
+======================

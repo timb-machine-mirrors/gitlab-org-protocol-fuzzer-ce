@@ -1,24 +1,32 @@
+<<<
 [[Monitors_Socket]]
 == Socket Monitor
 
-The _Socket_ monitor waits for an incoming TCP or UDP connection.  If a connection is accepted a fault will be raised.
+The _Socket_ monitor waits for an incoming TCP or UDP connection. If a connection is accepted a fault will be raised.
 
 === Parameters
 
- * _Host_ -- IP address of remote host (optional, defaults to "")
- * _Interface_ -- IP address of interface to listen on (optional, defaults to 0.0.0.0)
- * _Port_ -- Port to listen on (optional, defaults to 8080)
- * _Protocol_ -- Protocol type to listen for (optional, defaults to tcp)
- * _Timeout_ -- Length of time to wait for incoming connection (optional, defaults to 1000 ms)
- * _FaultOnSuccess_ -- Fault if no connection is recorded (optional, defaults to false)
+_Required:_
+
+There are no required parameters for this monitor.
+
+_Optional:_
+
+Host:: IP address of remote host, defaults to "".
+Interface:: IP address of interface to listen on, defaults to 0.0.0.0.
+Port:: Port to listen on, defaults to 8080.
+Protocol:: Protocol type to listen for, defaults to tcp.
+Timeout:: Length of time to wait for incoming connection, defaults to 1000 ms.
+FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
  
 === Examples
 
 .Listen for Incoming Connection
+===============================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -47,3 +55,4 @@ The _Socket_ monitor waits for an incoming TCP or UDP connection.  If a connecti
   </Test>
 </Peach>  
 ----
+===============================

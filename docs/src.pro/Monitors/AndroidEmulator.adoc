@@ -4,13 +4,13 @@
 The _AndroidEmulator_ handles setup and tear-down for Android Virtual Devices (AVDs) running within the Android Emulator. This requires the http://developer.android.com/tools/help/emulator.html[Android Emulator] and http://developer.android.com/sdk/index.html[Android Platform Tools].
 
 === Parameters
- * _Avd_ -- Android virtual device.
- * _EmulatorPath_ -- Directory containing the emulator. (optional, will be determined automatically)
- * _RestartAfterFault_ -- Restart emulator after a fault. (optional, defaults to true)
- * _RestartEveryIteration_ -- Restart emulator on every iteration. (optional, defaults to false)
- * _StartOnCall_ -- Start the emulator when notified by the state machine. (optional)
- * _StartTimeout_ -- How many seconds to wait for emulator to start running. (optional, defaults to 30)
- * _StopTimeout_ -- How many seconds to wait for emulator to exit. (optional, defaults to 30)
+Avd:: Android virtual device.
+EmulatorPath:: Directory containing the emulator. (optional, will be determined automatically)
+RestartAfterFault:: Restart emulator after a fault. (optional, defaults to true)
+RestartEveryIteration:: Restart emulator on every iteration. (optional, defaults to false)
+StartOnCall:: Start the emulator when notified by the state machine. (optional)
+StartTimeout:: How many seconds to wait for emulator to start running. (optional, defaults to 30)
+StopTimeout:: How many seconds to wait for emulator to exit. (optional, defaults to 30)
 
 === Examples
 

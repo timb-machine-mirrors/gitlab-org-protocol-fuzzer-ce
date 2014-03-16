@@ -5,12 +5,12 @@ The _IpPower9258_ monitor controls a networked power switch.  This allows device
 
 === Parameters
 
- * _Host_ -- Host or IP address (can include http interface port e.g. :8080)
- * _User_ -- Username
- * _Password_ -- Password
- * _Port_ -- Port to reset (1..4)
- * _ResetEveryIteration_ -- Reset power on every iteration (optional, default false)
- * _PowerOnOffPause_ -- Pause in milliseconds between power off/power on (optional, default is 500)
+Host:: Host or IP address (can include http interface port e.g. :8080)
+User:: Username
+Password:: Password
+Port:: Port to reset (1..4)
+ResetEveryIteration:: Reset power on every iteration (optional, default false)
+PowerOnOffPause:: Pause in milliseconds between power off/power on (optional, default is 500)
 
 === Examples
 

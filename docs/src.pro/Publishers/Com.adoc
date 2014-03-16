@@ -23,7 +23,7 @@ NOTE: This Publisher only runs on Windows.  To use this Publisher, Peach.Core.Co
 
 === Parameters
 
- * _clsid_ -- COM CLSID
+clsid:: COM CLSID
 
 === Actions
 

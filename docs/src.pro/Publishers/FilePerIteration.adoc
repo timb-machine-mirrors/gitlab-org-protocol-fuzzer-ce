@@ -17,7 +17,7 @@ Peach will append the iteration number to the fuzzed files name when generating 
 
 === Parameters
 
-  * _FileName_ -- Name of file to create.  Filename must contain "\{0\}" which will be substituted with the iteration count.
+ FileName:: Name of file to create.  Filename must contain "\{0\}" which will be substituted with the iteration count.
 
 === Actions
 

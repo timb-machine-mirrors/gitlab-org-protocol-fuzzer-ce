@@ -93,11 +93,11 @@ NOTE: This publisher only runs on Linux with root privileges
 
 === Parameters
 
- * _Interface_ -- Name of interface to bind too (optional)
- * _Protocol_ -- Ethernet protocol to use (optional, default is ETH_P_ALL)
- * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
- * _MinMTU_ -- Minimum 1280 (optional, default 1280)
- * _MaxMTU_ -- Default: 131070 (optional, default 131070)
+Interface:: Name of interface to bind too (optional)
+Protocol:: Ethernet protocol to use (optional, default is ETH_P_ALL)
+Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
+MinMTU:: Minimum 1280 (optional, default 1280)
+MaxMTU:: Default: 131070 (optional, default 131070)
 
 === Actions
 

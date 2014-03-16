@@ -6,13 +6,13 @@ The _SerialPort_ publisher allows Peach to communicate with a Serial device.
 
 === Parameters
 
- * _PortName_ -- Com interface for the device to connect to.
- * _Baudrate_ -- The serial baud rate.
- * _Parity_ -- The parity-checking protocol.
- * _DataBits_ -- Standard length of data bits per byte.
- * _StopBits_ -- The standard number of stopbits per byte.
- * _Handshake_ -- The handshaking protocol for serial port transmission of data (optional, default None).
- * _Timeout_ -- How many milliseconds to wait for data (optional, default 3,000).
+PortName:: Com interface for the device to connect to.
+Baudrate:: The serial baud rate.
+Parity:: The parity-checking protocol.
+DataBits:: Standard length of data bits per byte.
+StopBits:: The standard number of stopbits per byte.
+Handshake:: The handshaking protocol for serial port transmission of data (optional, default None).
+Timeout:: How many milliseconds to wait for data (optional, default 3,000).
 
 === Actions
 

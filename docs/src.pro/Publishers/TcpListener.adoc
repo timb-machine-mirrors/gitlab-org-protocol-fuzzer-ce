@@ -12,10 +12,10 @@ The _TcpListener_ publisher is able to listen for incoming connections on a TCP 
 
 === Parameters
 
- * _Interface_ -- IP of interface to bind to
- * _Port_ -- Destination port number
- * _Timeout_ -- How long to wait in milliseconds for data once a connection has been established (optional, default 3,000)
- * _AcceptTimeout_ -- How long to wait in milliseconds for a new connection (optional, default 3,000)
+Interface:: IP of interface to bind to
+Port:: Destination port number
+Timeout:: How long to wait in milliseconds for data once a connection has been established (optional, default 3,000)
+AcceptTimeout:: How long to wait in milliseconds for a new connection (optional, default 3,000)
 
 === Actions
 

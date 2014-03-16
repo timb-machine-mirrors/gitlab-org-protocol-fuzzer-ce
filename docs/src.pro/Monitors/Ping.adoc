@@ -1,3 +1,4 @@
+<<<
 [[Monitors_Ping]]
 == Ping Monitor
 
@@ -5,18 +6,25 @@ The _Ping_ monitor will block until the _Timeout_ occurs. This monitor is useful
 
 === Parameters
 
- * _Host_ -- Host name or IP address to ping
- * _Timeout_ -- Timeout in milliseconds (optional, defaults to 1,000)
- * _Data_ -- Data to send in ping packet (optional)
- * _FaultOnSuccess_ -- Fault if ping is successful (optional, defaults to false)
+_Required:_
+
+Host:: Host name or IP address to ping
+
+_Optional:_
+
+Timeout:: Timeout in milliseconds, defaults to 1,000.
+Data:: Data to send in ping packet
+FaultOnSuccess:: Fault if ping is successful, defaults to false.
 
 === Examples
 
 .Ping Host
+==============
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -47,3 +55,4 @@ The _Ping_ monitor will block until the _Timeout_ occurs. This monitor is useful
   </Test>
 </Peach>
 ----
+==============

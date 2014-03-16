@@ -1,3 +1,4 @@
+<<<
 [[Monitors_SshDownloader]]
 == SshDownloader Monitor
 
@@ -7,17 +8,23 @@ to delete files it has downloaded.
 
 === Parameters
 
- * _Host_ -- Host to ssh too
- * _Username_ -- Username for ssh
- * _Password_ -- Password for ssh account (optional, default is "")
- * _KeyPath_ -- Path to ssh key (optional, default is "")
- * _File_ -- File to download (optional, default is "")
- * _Folder_ -- Folder to download (optional, default is "")
- * _Remove_ -- Remove the remote file after download (optional, defaults to true)
+_Required:_
+
+Host:: Host to ssh too
+Username:: Username for ssh
+
+_Optional:_
+
+Password:: Password for ssh account, defaults to "".
+KeyPath:: Path to ssh key, defaults to "".
+File:: File to download, defaults to "".
+Folder:: Folder to download, defaults to "".
+Remove:: Remove the remote file after download, defaults to true.
 
 === Examples
 
 .Example
+============
 [source,xml]
 ----
 <Agent name="LocalAgent">
@@ -30,3 +37,4 @@ to delete files it has downloaded.
 	</Monitor>
 </Agent>
 ----
+============

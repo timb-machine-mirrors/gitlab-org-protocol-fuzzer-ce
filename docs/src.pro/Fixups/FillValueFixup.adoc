@@ -1,4 +1,6 @@
+<<<
 [[Fixups_FillValueFixup]]
+== FillValue
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -17,9 +19,7 @@
 // - 02/21/2014: Mick
 // Parent elements changed to match format
 
-== FillValueFixup
-
-The _FillValueFixup_ is used to fill a value with sequential numbers with the first number being the value of the start parameter and the end of the range being the value of the stop parameter. If the range of numbers is less than the size of the referenced element the sequence will repeat after it has reached the end of the given range. This is used when fuzzing the IPsec protocol, as the required padding in the encrypted portion of the data requires padding that is sequential numbers.
+The _FillValue_ is used to fill a value with sequential numbers with the first number being the value of the start parameter and the end of the range being the value of the stop parameter. If the range of numbers is less than the size of the referenced element the sequence will repeat after it has reached the end of the given range. This is used when fuzzing the IPsec protocol, as the required padding in the encrypted portion of the data requires padding that is sequential numbers.
 
 === Parent Elements
 
@@ -29,17 +29,19 @@ The _FillValueFixup_ is used to fill a value with sequential numbers with the fi
  
 === Parameters
 
- * xref:ref[ref] -- Reference to data element the sequence will be added to
- * start -- Inclusive start fill value
- * stop -- Inclusive stop fill value
+xref:ref[ref]:: Reference to data element the sequence will be added to
+start:: Inclusive start fill value
+stop:: Inclusive stop fill value
 
 === Examples
 
+.Basic Usage Example
+=====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
@@ -67,3 +69,4 @@ The _FillValueFixup_ is used to fill a value with sequential numbers with the fi
   </Test>
 </Peach>
 ----
+=====================

@@ -1,4 +1,6 @@
+<<<
 [[Fixups_TCPChecksumFixup]]
+== TCPChecksumFixup
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -11,7 +13,6 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-== TCPChecksumFixup
 
 The _TCPChecksumFixup_ will produce an internet checksum as defined in RFC 1071.
 A discussion on how to apply TCPChecksumFixup can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
@@ -24,11 +25,15 @@ This checksum is primarily used when fuzzing the TCPv4 and TCPv6 Protocols.
  
 === Parameters
 
- * xref:ref[ref] -- Reference to data element on which the checksum will be performed.
- * _src_ -- Source IP Address. IP address of the local machine. 
- * _dst_ -- Destination IP Address. IP address of the remote machine
+xref:ref[ref]:: Reference to data element on which the checksum will be performed.
+src:: Source IP Address. IP address of the local machine. 
+dst:: Destination IP Address. IP address of the remote machine
 
 === Examples
+
+.Basic Usage Example
+====================
+This example shows the basic usage of TCPChecksumFixup.
 
 [source,xml]
 ----
@@ -70,3 +75,4 @@ This checksum is primarily used when fuzzing the TCPv4 and TCPv6 Protocols.
 	</Test>
 </Peach>
 ----
+====================

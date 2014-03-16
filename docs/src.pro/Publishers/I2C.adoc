@@ -14,10 +14,10 @@ The Publisher is designed to interface with the Aardvark I2C USB adapter.
 
 === Parameters
 
-    * _Address_ -- Address to write/read on target device.
-    * _Bitrate_ -- Bitrate supported by target device. default="100"
-    * _Port_ -- USB port connected to Aardvark device. default="0"
-    * _SleepTime_ -- Time to sleep between actions. default="100"
+   Address:: Address to write/read on target device.
+   Bitrate:: Bitrate supported by target device. default="100"
+   Port:: USB port connected to Aardvark device. default="0"
+   SleepTime:: Time to sleep between actions. default="100"
 
 === Actions
 

@@ -25,15 +25,15 @@ The _Http_ publisher sends data over HTTP via a method of your choice.  This pub
 
 === Parameters
 
- * _Method_ -- HTTP Method type (like GET and POST) *required*
- * _Url_ -- URL of target *required*
- * _BaseUrl_ -- Base URL is used by some authentication types (optional)
- * _Username_ -- Username for authentication (optional)
- * _Domain_ -- Domain for authentication (optional)
- * _Cookies_ -- Enable cookie support (optional, defaults to true)
- * _CookiesAcrossIterations_ -- Track cookies across iterations (optional, defaults to false)
- * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
- * _IgnoreCertErrors_ -- Allow HTTPS regardless of cert status (defaults to false)
+Method:: HTTP Method type (like GET and POST) *required*
+Url:: URL of target *required*
+BaseUrl:: Base URL is used by some authentication types (optional)
+Username:: Username for authentication (optional)
+Domain:: Domain for authentication (optional)
+Cookies:: Enable cookie support (optional, defaults to true)
+CookiesAcrossIterations:: Track cookies across iterations (optional, defaults to false)
+Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
+IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
 
 === Actions
 

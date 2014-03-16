@@ -1,3 +1,4 @@
+<<<
 [[Monitors_Ssh]]
 == Ssh Monitor
 
@@ -7,17 +8,23 @@ The Monitor holds a persistent connection open to the system over the course of 
 
 === Parameters
 
- * _Host_ -- Host to ssh too
- * _Username_ -- Username for ssh
- * _Command_ -- Command to check for fault 
- * _Password_ -- Password for ssh account (optional, default is "")
- * _KeyPath_ -- Path to ssh key (optional, default is "")
- * _CheckValue_ -- Regex to match command response (optional, default is "")
- * _FaultOnMatch_ -- Trigger a fault if the regex matches (optional, defaults to true)
- 
+_Required:_
+
+Host:: Host to ssh too
+Username:: Username for ssh
+Command:: Command to check for fault 
+
+_Optional:_
+
+Password:: Password for ssh account, defaults to "".
+KeyPath:: Path to ssh key, defaults to "".
+CheckValue:: Regex to match command response, defaults to "".
+FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
+
 === Examples
 
 .Example
+==========
 [source,xml]
 ----
 <Agent name="LocalAgent">
@@ -31,3 +38,4 @@ The Monitor holds a persistent connection open to the system over the course of 
 	</Monitor>
 </Agent>
 ----
+==========

@@ -15,11 +15,11 @@ This is used to fuzz protocol built inside an SSL encrypted channel, such as HTT
 === Parameters
 
 	* _Host_ -- Hostname to connect to.
-    * _Port_ -- Port to connect to.
-    * _ConnectTimeout_ -- Max milliseconds to wait for connection (default 10000). default="10000"
-    * _Sni_ -- Sni to use for SSL connection. Will use Host by default. default=""
-    * _Timeout_ -- How many milliseconds to wait for data (default 3000). default="3000"
-    * _VerifyServer_ -- Verify the server certificate. default="false"
+   Port:: Port to connect to.
+   ConnectTimeout:: Max milliseconds to wait for connection (default 10000). default="10000"
+   Sni:: Sni to use for SSL connection. Will use Host by default. default=""
+   Timeout:: How many milliseconds to wait for data (default 3000). default="3000"
+   VerifyServer:: Verify the server certificate. default="false"
 
 === Actions
 

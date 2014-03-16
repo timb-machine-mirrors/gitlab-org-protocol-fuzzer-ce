@@ -1,4 +1,6 @@
+<<<
 [[Fixups_CiscoFixup]]
+== CiscoCdpChecksum
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -13,9 +15,7 @@
 // Added parent types
 // Added full example
 
-== CiscoFixup
-
-The _CiscoFixup_ is a Custom Peach algorithm to fix  Cisco's one-off error in their CRC implementation (known feature).
+The _CiscoCdpChecksum_ is a Custom Peach algorithm to fix  Cisco's one-off error in their CRC implementation (known feature).
 It is defined in RFC1071.
 It can be found in the Open source CRCTool Library.
 This is used when fuzzing protocols that perform the Cisco implementation of CRC.
@@ -27,19 +27,17 @@ This is used when fuzzing protocols that perform the Cisco implementation of CRC
 
 === Parameters
 
- * xref:ref[_ref_] -- Reference to data element which the CRC calculation will be performed on.
-
-=== Supported Algorithms
- 
- Internet Checksum (with off-by-one Cisco bug) 
+xref:ref[ref]:: Reference to data element which the CRC calculation will be performed on.
 
 === Examples
 
+.Basic Usage Example
+======================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="Packet">
 		<Number name="SrcPort"  size="16" endian="big" value="1234"/>
@@ -48,7 +46,7 @@ This is used when fuzzing protocols that perform the Cisco implementation of CRC
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="checksum" size="16">
-			<Fixup class="CiscoFixup">
+			<Fixup class="CiscoCdpChecksum">
 				<Param name="ref" value="Packet" />
 			</Fixup>
 		</Number>
@@ -68,3 +66,4 @@ This is used when fuzzing protocols that perform the Cisco implementation of CRC
 	</Test>
 </Peach>
 ----
+======================

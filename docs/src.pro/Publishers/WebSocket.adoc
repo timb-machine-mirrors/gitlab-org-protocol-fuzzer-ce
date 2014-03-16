@@ -6,11 +6,11 @@ The _WebSocket_ publisher allows rapid delivery of fuzzing data to browsers usin
 
 === Parameters
 
- * _Port_ -- Port to listen for connections on (optional, default 8080)
- * _Template_ -- Data template for publishing"
- * _Publish_ -- How to publish data, base64 or URL. (optional, default base64)
- * _DataToken_ -- Token to replace with data in template (optional, default ##DATA##)
- * _Timeout_ -- Time in milliseconds to wait for client response (optional, default 60000)
+Port:: Port to listen for connections on (optional, default 8080)
+Template:: Data template for publishing"
+Publish:: How to publish data, base64 or URL. (optional, default base64)
+DataToken:: Token to replace with data in template (optional, default ##DATA##)
+Timeout:: Time in milliseconds to wait for client response (optional, default 60000)
 
 === Examples
 
