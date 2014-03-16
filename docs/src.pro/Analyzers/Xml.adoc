@@ -1,8 +1,22 @@
 [[Analyzers_Xml]]
-
 == Xml Analyzer
 
-The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. This analyzer can be attached to a string. For inline values Xml special characters must be encoded. (< = &lt;, > = &gt;, " = &quot;
+The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. This analyzer can be attached to a string. For inline values Xml special characters must be encoded. (< = &lt;, > = &gt;, " = &quot;, & = &amp;)
+
+=== Syntax
+
+[source,xml]
+----
+<String  value="&lt;Root&gt;HelloWorld!&lt;/Root&gt;">
+	<Analyzer class="Xml" />
+</String>
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
 
 
 ==== Examples
@@ -43,7 +57,6 @@ This example uses the Xml analyzer on an inline value.
 
 Output from this example.
 ----
-
 >peach -1 --debug example.xml 
 
 [[ Peach Pro v0.0.0.0
@@ -65,13 +78,12 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
-
 ----
 
 Output in Peach Validator 
-
+----
 image:../images/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
-
+----
 ==========================
 
 .Inline XML Inline Encoding Example 
@@ -108,12 +120,11 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 </Peach>
 ----
 
-Output in Peach Validator 
-
+Output from this example.
 ----
-> peach -1 --debug example.xml
+>peach -1 --debug example.xml 
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 44192.
@@ -135,7 +146,10 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
+Output in Peach Validator 
+----
 image:../images/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
+----
 ==========================
 
 .Load XML From File Example 
@@ -144,7 +158,40 @@ This example uses the Xml analyzer on itself.
 
 [source,xml]
 ----
-[[ Peach Pro v0.0.0.0
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="TheModel">
+		<String> 
+			<Analyzer class="Xml" />
+		</String>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<Action type="output">
+				<DataModel ref="TheModel" />
+				<Data name="TheData" fileName="example.xml"/> 
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
+	</Test>
+</Peach>
+----
+
+Output from this example.
+----
+>peach -1 --debug example.xml 
+
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 10150.
@@ -218,15 +265,10 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
-
 ----
 
 Output in Peach Validator 
-
 ----
-> peach -1 --debug example.xml
-
-----
-
 image:../images/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
+----
 ==========================
