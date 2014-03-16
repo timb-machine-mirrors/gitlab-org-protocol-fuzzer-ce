@@ -2,10 +2,6 @@
 [[Flags]]
 == Flags
 
-// Reviewed:
-//  - 03/06/2014: Lynn
-//   Added and edited child elements
-
 The Flags element defines a set of bit sized flags. The Flags element is largely provided for backwards compatibility with older versions of Peach that did not support arbitrary sized xref:Number[Number] elements.
 
 See also xref:Flag[Flag].
@@ -30,25 +26,26 @@ size:: Size of flag set in bits. Only 8-bit aligned values are supported: 8, 16,
 _Optional:_
 
 xref:name[name]:: Name of the element
-xref:endian[endian]:: Byte order of number. Default is 'little'.
-xref:token[token]:: Is data element a token? Default is "false"
-xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to true.
-xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
-xref:minOccurs[minOccurs]:: Minimum number of occurrences. Default is "1".
-xref:maxOccurs[maxOccurs]:: Maximum number of occurrences. Default is "1".
-xref:occurs[occurs]:: Actual number of occurrences. Default is "1".
+xref:endian[endian]:: Byte order of number. Defaults to _little_.
+xref:token[token]:: Is data element a token? Defaults to _false_.
+xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to _true_.
+xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Defaults to none.
+xref:minOccurs[minOccurs]:: Minimum number of occurrences. Defaults to _1_.
+xref:maxOccurs[maxOccurs]:: Maximum number of occurrences. Defaults to _1_.
+xref:occurs[occurs]:: Actual number of occurrences. Defaults to _1_.
 
-=== Child-Elements
+=== Child Elements
 
 _Required:_
 
-xref:Hint[Hint]:: Provide information to mutators.
+There are no required attributes.
 
 _Optional:_
 
 xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
 xref:Flag[Flag]:: defines a specific bit field in a Flags container.
+xref:Hint[Hint]:: Provide information to mutators.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
 
@@ -62,4 +59,99 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 === Examples
 
-// TODO
+.Example of Flags
+=================================
+
+This example shows a real world example of a flag set by modeling a TCP packet (without options). This example also shows using relations with the xref:Flag[Flag] element.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TcpPacket">
+		<Block name="Header">
+			<Number name="SrcPort" size="16" endian="big" value="1234"/>
+			<Number name="DestPort" size="16" endian="big" value="1234"/>
+			<Number name="SequenceNumber" size="32" endian="big" valueType="hex" value="0043a577"/>
+			<Number name="AcknowledgmentNumber" size="32" endian="big" value="0"/>
+
+			<Flags name="ControlBits" size="16" endian="big">
+				<Flag name="Offset" position="0" size="4" valueType="hex">
+					<Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+				</Flag>
+				<Flag name="Reserved" position="4" size="3"/>
+				<Flag name="NS" position="7" size="1"/>
+				<Flag name="CWR" position="8" size="1"/>
+				<Flag name="ECE" position="9" size="1"/>
+				<Flag name="URG" position="10" size="1"/>
+				<Flag name="ACK" position="11" size="1"/>
+				<Flag name="PSH" position="12" size="1"/>
+				<Flag name="RST" position="13" size="1"/>
+				<Flag name="SYN" position="14" size="1"/>
+				<Flag name="FIN" position="15" size="1"/>
+			</Flags>
+
+			<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
+			<Number name="CheckSum" size="16" endian="big">
+				<Fixup class="TCPChecksumFixup">
+					<Param name="ref" value="TcpPacket" />
+					<Param name="src" value="127.0.0.1" />
+					<Param name="dst" value="127.0.0.1" />
+				</Fixup>
+			</Number>
+			<Number name="UrgentPointer" size="16" endian="big"/>
+		</Block>
+
+		<Blob name="TcpPayload" value="this is a packet.\n"/>
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState">
+		<State name="InitialState">
+
+			<Action type="output">
+				<DataModel ref="TcpPacket" />
+			</Action>
+		</State>
+
+	</StateModel>
+
+	<Test name="Default">
+
+		<StateModel ref="TheStateModel" />
+
+		<Publisher class="ConsoleHex"/>
+
+	</Test>
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 17543.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(38 bytes)
+00000000   04 D2 04 D2 00 43 A5 77  00 00 00 00 50 00 AA AA   ?????C?w????P???
+00000010   1D F6 00 00 74 68 69 73  20 69 73 20 61 20 70 61   ????this is a pa
+00000020   63 6B 65 74 2E 0A                                  cket.?
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+
+=================================

@@ -1,20 +1,15 @@
 [[Mutators_SizedDataVarianceMutator]]
-== SizedDataVarianceMutator ==
+== SizedDataVarianceMutator
 
 This mutator will change the length of the size of a data element to a range of size - N to size + N. By default, N = 50. Even though the size of the data element will be manipulated, the size indicator in the relation will stay the same. This means the actual size of the data and the size reported by the relation will not be equal.
 
-_Target Elements_
+=== Supported Elements
 
 * xref:DataModeling[DataElement] with a xref:Relation[SizeRelation]
 * xref:Flag[Flag]
 * xref:Number[Number] 
 * xref:String[String]
 
-_Hints_
+=== Hints
 
-* SizedDataVarianceMutator-N -- Change the default +/- of 50 to a specified amount.
-
-_Notes_
-* Only works on String if the value is numerical
-* Variance mutators alter the size of the data to be fuzzed
-* SizedDataVarianceMutator is similar to NumericVarianceMutator. It uses the same variance logic.
+SizedDataVarianceMutator-N:: Change the default +/- of 50 to a specified amount.

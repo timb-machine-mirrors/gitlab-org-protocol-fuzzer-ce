@@ -1,13 +1,13 @@
-:toc!:
+<<<
 [[Mutators_ArrayRandomizeOrderMutator]]
-== ArrayRandomizeOrderMutator ==
+== ArrayRandomizeOrderMutator
 
 This mutator will randomize the order of an array. The default number of permutations that it produces is 50.
 
-_Target Elements_
+=== Supported Elements
 
  * xref:occurs[Array]
 
-_Hints_
+=== Hints
 
- * ArrayRandomizeOrderMutator-N -- Set number of random permutations produced for this array.
+ArrayRandomizeOrderMutator-N:: Set number of random permutations produced for this array.

@@ -109,24 +109,72 @@ The following mutators will operate on this element type:
 
 xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]::
 	Duplicates a node's value from 2x - 50x
+
 xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]::
 	Removes nodes from the data model
+
 xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: 
 	Swaps two nodes in the data model that are neighbouring each other
+
 xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]::
-	TODO
-xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]:: 
-	Produces values in a range of N - 50 through N + 50 for all numerical edge cases
-xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]:: TODO
-xref:Mutators_StringCaseMutator[StringCaseMutator]:: TODO
-xref:Mutators_StringMutator[StringMutator]:: TODO
-xref:Mutators_UnicodeBadUtf8Mutator[UnicodeBadUtf8Mutator]:: TODO
-xref:Mutators_UnicodeBomMutator[UnicodeBomMutator]:: TODO
-xref:Mutators_UnicodeStringsMutator[UnicodeStringsMutator]:: TODO
-xref:Mutators_UnicodeUtf8ThreeCharMutator[UnicodeUtf8ThreeCharMutator]:: TODO
-xref:Mutators_ValidValuesMutator[ValidValuesMutator]:: TODO
-xref:Mutators_WordListMutator[WordListMutator]:: TODO
-xref:Mutators_XmlW3CMutator[XmlW3CMutator]:: TODO
+	This mutator produces "random" numbers using a static seed so it will always produce the same random numbers.
+	By default 5,000 numbers are produced for each Number element that is found.
+
+xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]::
+	This mutator will produce values in a range of N - 50 through N + 50 for all numerical edge cases.
+	For example 16-bit numbers have the following edge cases: 0, signed byte (127), unsigned byte (255), signed short, unsigned short.
+
+xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]::
+	This mutator will produce values of default - N through default + N where N defaults to 50 but is controllable via a hint.
+	For example, if the default value of a Number field is 200, by default this mutator will produce all the values between 150 and 250.
+	
+xref:Mutators_StringCaseMutator[StringCaseMutator]::
+	This mutator will change the case of a string three ways.
+	First it will lower-case each character, then upper-case each character, and then randomly decide to upper-case or lower-case each character.
+
+
+xref:Mutators_StringMutator[StringMutator]::
+	This mutator performs common string mutations.
+	It will generate a large list of specific strings that are useful for fuzzing.
+
+xref:Mutators_UnicodeBadUtf8Mutator[UnicodeBadUtf8Mutator]::
+	The UTF8 Unicode encoding is a variable width, 7 bit ASCII-compatible encoding.
+	It is the most widely used Unicode encoding. 
+	+
+	Because of the variable width encoding, it's possible to encode characters with more bytes than is necessary.
+	Older Unicode specifications did not require the shortest encoding be used, leading to some of the largest early security worms such as code red.
+	Current versions of the Unicode specification require using the shortest character encoding.
+	There are also other restrictions on the bits used.
+	+
+	This mutator will generate strings with incorrectly encoded UTF8 characters in them.
+
+xref:Mutators_UnicodeBomMutator[UnicodeBomMutator]::
+	This mutator injects BOMs into the same list of useful fuzzing strings that xref:Mutators_StringMutator[StringMutator] generates. 
+	+
+	Unicode BOMs are byte order markers.
+	They are non-displayed byte sequences that indicate the byte order (endianness) of the data to the unicode encoder.
+	Because these elements do not display, they are not added to the character length of unicode strings.
+	A common security issue is to miscalculate buffer sizes with handling strings containing BOMs.
+	This can lead to memory overruns.
+
+xref:Mutators_UnicodeStringsMutator[UnicodeStringsMutator]::
+	This mutator will cycle through a generated list of unicode strings. The length of the strings used vary.
+
+xref:Mutators_UnicodeUtf8ThreeCharMutator[UnicodeUtf8ThreeCharMutator]::
+	This mutator will generate a large list of long UTF-8 three byte strings that are useful for fuzzing.
+
+xref:Mutators_ValidValuesMutator[ValidValuesMutator]::
+	This mutator will allow users to specify additional data for each data element through a hint.
+	Each of these values must be separated with a semicolon.
+
+xref:Mutators_WordListMutator[WordListMutator]::
+	This mutator will allow users to specify additional data for each data element through a hint.
+	Each of these values must be separated by a newline in a file.
+
+xref:Mutators_XmlW3CMutator[XmlW3CMutator]:: 
+	This mutator will perform the W3C parser test suite.
+	It targets the XML parser.
+	This mutator will only work on xref:String[String elements] with the _XMLhint_ hint.
 
 === Examples
 

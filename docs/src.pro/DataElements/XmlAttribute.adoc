@@ -44,13 +44,21 @@ ns:: XML namespace
 === Child Elements
 
 xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
-xref:Block[Block]:: Group one or more data elements together into a logical structure.  
+xref:Block[Block]:: Group one or more data elements together into a logical structure.
 xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
 xref:Flags[Flags]:: Defines a set of bit sized flags.
 xref:Hint[Hint]:: Provide information to mutators.
 xref:Number[Number]:: Defines a binary number of lengths 8, 16, 24, 32, or 64 bits.
 xref:String[String]:: Defines a single or double byte string.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighbouring each other
 
 === Examples
 

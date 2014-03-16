@@ -1,9 +1,13 @@
-:toc!:
+<<<
 [[Mutators_ArrayReverseOrderMutator]]
-== ArrayReverseOrderMutator ==
+== ArrayReverseOrderMutator
 
 This mutator will reverse the order of an array.
 
-_Target Elements_
+=== Supported Elements
 
  * xref:occurs[Array]
+
+=== Hints
+
+This mutator does not support any hints.
