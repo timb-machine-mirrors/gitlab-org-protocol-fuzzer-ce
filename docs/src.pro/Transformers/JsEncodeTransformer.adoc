@@ -1,3 +1,4 @@
+<<<
 [[Transformers_JsEncodeTransformer]]
 == JsEncodeTransformer
 
@@ -28,17 +29,25 @@ This xref:Transformer[Transformer] will only encode the output and not decode an
 
 No Parameters are supported by this element.
 
+=== Attributes
+
+No Attributes are supported by this transformer.
+
 === Actions Supported 
 
  * xref:Action_output[output]
  * xref:Action_call[call]
  * xref:Action_setProperty[setProperty]
 
-
 === Examples
+
+.Simple Encode Example  
+==========================
+This example uses the JsEncode transformer on an inline value and writes the transformed value to the console. 
 
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -61,6 +70,39 @@ No Parameters are supported by this element.
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 33041.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(81 bytes)
+00000000   4A 53 45 6E 63 6F 64 65  64 3A 20 5C 78 37 45 5C   JSEncoded: \x7E\
+00000010   78 32 31 5C 78 34 30 5C  78 32 33 5C 78 32 34 5C   x21\x40\x23\x24\
+00000020   78 32 35 5C 78 35 45 5C  78 32 36 5C 78 32 41 5C   x25\x5E\x26\x2A\
+00000030   78 32 38 5C 78 32 39 5C  78 35 46 5C 78 32 42 5C   x28\x29\x5F\x2B\
+00000040   78 32 44 5C 78 33 44 5C  78 36 30 5C 78 33 46 2E   x2D\x3D\x60\x3F.
+00000050   2C                                                 ,
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================

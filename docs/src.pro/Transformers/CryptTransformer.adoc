@@ -1,3 +1,4 @@
+<<<
 [[Transformers_CryptTransformer]]
 == CryptTransformer
 
@@ -21,12 +22,15 @@
 === Transformer type: Cryptography
 
 The _CryptTransformer_ will perform a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
-This is done using the first two bytes as the salt.  
-This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
+This is done using the first two bytes as the salt. This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
+
+=== Attributes
+
+No Attributes are supported by this transformer.
 
 === Actions Supported 
 
@@ -36,8 +40,13 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Simple Encrypt Example  
+==========================
+This example uses the Crypt transformer on an inline value and writes the transformed value to the console. 
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -61,6 +70,34 @@ No Parameters are supported by this element.
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 25971.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(13 bytes)
+00000000   73 75 52 42 76 6D 62 73  68 74 31 6F 6F            suRBvmbsht1oo
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================

@@ -1,3 +1,4 @@
+<<<
 [[Transformers_ApacheMd5Crypt]]
 == ApacheMd5Crypt
 
@@ -25,17 +26,11 @@ The first two bytes will be used as the salt with the value $apr1$ prepended. Th
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
 
 === Attributes
 
-_Required:_
-
-There are no required attributes.
-
-_Optional:_
-
-There are no optional attributes.
+No attributes are supported by this transformer. 
 
 === Actions Supported 
 
@@ -75,7 +70,6 @@ This example uses the ApacheMd5Crypt transformer on an inline value and writes t
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
-
 		<Logger class="File">
 			<Param name="Path" value="logs"/> 
 		</Logger>

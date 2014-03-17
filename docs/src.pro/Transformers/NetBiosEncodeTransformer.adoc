@@ -1,3 +1,4 @@
+<<<
 [[Transformers_NetBiosEncodeTransformer]]
 == NetBiosEncodeTransformer
 
@@ -25,7 +26,17 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 
 === Parameters 
 
+_Required:_
+
+There are no required parameters.
+
+_Optional:_
+
  * pad -- Boolean whether NetBios name should be padded/trimmed to 32 bytes. 
+
+=== Attributes
+
+No Attributes are supported by this transformer.
 
 === Actions Supported 
 
@@ -37,8 +48,14 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 
 === Examples
 
+.Encoding Value To and From File Example 
+==========================
+This example uses the NetBiosEncode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console. 
+
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -52,7 +69,7 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 
 	<StateModel name="TheState" initialState="initial">
 		<State name="initial">
-			<!-- Encoded XML Output -->
+			<!-- Encoded NetBios Output -->
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
@@ -76,7 +93,6 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-			
 		</State>
 	</StateModel>
 
@@ -84,12 +100,91 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
 		<Publisher class="File" name="FilePubWrite">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
 		<Publisher class="File" name="FilePubRead">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 14812.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(28 bytes)
+00000000   4E 65 74 42 69 6F 73 45  6E 63 6F 64 65 64 3A 20   NetBiosEncoded:
+00000010   45 4D 45 42 45 4F 45 4E  45 42 45 4F               EMEBEOENEBEO
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(28 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/28, Bits: 0/224
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 0 , Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 1 28, Length: 128
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes
+: 0/28, Bits: 0/224
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.DataElement_0' Bytes: 0/28, Bi ts: 0/224
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.DataElement_0'
+
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 0 , Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 1 28, Length: 128
+Peach.Core.Cracker.DataCracker getSize: <----- Size: 128
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.DataElement_0' Size: 12 8, Bytes: 0/28, Bits: 0/224
+Peach.Core.Dom.DataElement String 'InputModel.DataElement_0' value is: NetBiosEn coded:
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.TransformMe' Bytes: 16/28, Bit s: 128/224
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset:
+0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 96
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.TransformMe' Size: 48, Bytes: 0/6, Bits: 0/48
+Peach.Core.Dom.DataElement String 'InputModel.TransformMe' value is: LANMAN
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Slurp
+Peach.Core.Dom.Action Slurp, setting OutputModel.StringValue from InputModel.TransformMe
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(6 bytes)
+00000000   4C 41 4E 4D 41 4E                                  LANMAN
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================

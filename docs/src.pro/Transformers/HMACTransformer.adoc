@@ -1,3 +1,4 @@
+<<<
 [[Transformers_HMACTransformer]]
 == HMACTransformer
 
@@ -27,6 +28,10 @@ This xref:Transformer[Transformer] can only be applied to outgoing data as it is
 
 No Parameters are supported by this element.
 
+=== Attributes
+
+No attributes are supported by this transformer. 
+
 === Actions Supported 
 
  * xref:Action_output[output]
@@ -35,8 +40,13 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Simple Encode Example  
+==========================
+This example uses the HMAC transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console. 
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -60,7 +70,35 @@ No Parameters are supported by this element.
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
 
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 42451.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(20 bytes)
+00000000   DF 1B FE 8F 8A 44 D5 87  33 AE DD 18 2A 90 D2 34   ?????D??3???*??4
+00000010   7F 7E FD B9                                        ⌂~??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================

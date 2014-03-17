@@ -1,3 +1,4 @@
+<<<
 [[Transformers_Bz2CompressTransformer]]
 == Bz2CompressTransformer
 
@@ -25,7 +26,7 @@ The xref:Transformer[Transformer] can bidirectionally compress data as well as d
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
 
 === Attributes
 
@@ -102,6 +103,9 @@ This example uses the Bz2Compress Transformer to compress a value, write the val
 			<Param name="FileName" value="compressed.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----

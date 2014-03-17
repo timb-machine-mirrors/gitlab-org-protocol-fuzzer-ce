@@ -1,3 +1,4 @@
+<<<
 [[Transformers_HexTransformer]]
 == HexTransformer
 
@@ -25,7 +26,11 @@ The xref:Transformer[Transformer] can bidirectionally transform this data from h
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
+
+=== Attributes
+
+No attributes are supported by this transformer. 
 
 === Actions Supported 
 
@@ -37,8 +42,13 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Simple Console Example  
+==========================
+
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -74,7 +84,6 @@ No Parameters are supported by this element.
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-			
 		</State>
 	</StateModel>
 
@@ -82,13 +91,79 @@ No Parameters are supported by this element.
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
 		<Publisher class="File" name="FilePubWrite">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
 		<Publisher class="File" name="FilePubRead">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
 
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 47130.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(12 bytes)
+00000000   34 31 34 32 34 33 34 34  34 35 34 36               414243444546
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(12 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/12, Bits: 0/96
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes : 0/12, Bits: 0/96
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.TransformMe' Bytes: 0/12, Bits : 0/96
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 96
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.TransformMe' Size: 48, Bytes: 0/6, Bits: 0/48
+Peach.Core.Dom.DataElement String 'InputModel.TransformMe' value is: ABCDEF
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Slurp
+Peach.Core.Dom.Action Slurp, setting OutputModel.StringValue from InputModel.TransformMe
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(6 bytes)
+00000000   41 42 43 44 45 46                                  ABCDEF
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================
