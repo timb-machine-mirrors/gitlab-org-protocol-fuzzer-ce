@@ -1,4 +1,6 @@
+<<<
 [[Publishers_WebService]]
+== WebService Publisher
 
 // Reviewed:
 //  - 02/13/2014: Seth & Adam: Outlined
@@ -8,26 +10,40 @@
 //           - Udp "connect" w/host and port
 //           - Multicast example
 
-== WebService Publisher
-
 The _WebService_ publisher is able to call SOAP and WCF based web services.  By default the publisher will attempt to locate a service definition, or one can be provided.
+
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="WebService">
+    <Param name="Url" value="http://localhost:7789/TestService/Service.asmx" />
+    <Param name="Service" value="Service" />
+</Publisher>
+----
 
 === Parameters
 
+_Required:_
+
 Url:: WebService URL
 Service:: Service Name
-Wsdl:: Path or URL to WSDL for web service (optional)
-ErrorOnStatusCode:: Error when status code isn't 200 (optional, default true)
-Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
-Throttle:: Time in milliseconds to wait between connections (optional, default 0)
+
+_Optional:_
+
+Wsdl:: Path or URL to WSDL for web service
+ErrorOnStatusCode:: Error when status code isn't 200, defaults to true.
+Timeout:: How long to wait in milliseconds for data/connection, defaults to 3,000.
+Throttle:: Time in milliseconds to wait between connections, defaults to 0.
 
 === Actions
 
- * link:../Action.html#\_call[_call_] -- Method attribute is method on web service to call.
+xref:Action_call[call]:: Method attribute is method on web service to call.
  
 === Examples
 
 .Example calling web service
+============================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -40,20 +56,22 @@ Throttle:: Time in milliseconds to wait between connections (optional, default 0
 
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
+
       <Action type="call" method="Login">
-	<Param name="name">
-	  <DataModel ref="ArbitraryData"/>
-	  <Data>
-	    <Field name="value" value="mike" />
-	  </Data>
-	</Param>
-	<Param name="passwd">
-	  <DataModel ref="ArbitraryData"/>
-	  <Data>
-	    <Field name="value" value="Password!" />
-	  </Data>
-	</Param>
+        <Param name="name">
+          <DataModel ref="ArbitraryData"/>
+          <Data>
+            <Field name="value" value="mike" />
+          </Data>
+        </Param>
+        <Param name="passwd">
+          <DataModel ref="ArbitraryData"/>
+          <Data>
+            <Field name="value" value="Password!" />
+          </Data>
+        </Param>
       </Action>
+
     </State>
   </StateModel>
 
@@ -70,3 +88,4 @@ Throttle:: Time in milliseconds to wait between connections (optional, default 0
 
 </Peach>
 ----
+============================

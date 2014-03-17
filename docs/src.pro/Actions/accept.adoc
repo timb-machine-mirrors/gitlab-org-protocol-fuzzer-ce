@@ -1,4 +1,4 @@
-<<<<
+<<<
 [[Action_accept]]
 == accept
 

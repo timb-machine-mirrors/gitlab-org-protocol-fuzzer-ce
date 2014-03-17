@@ -1,20 +1,20 @@
+<<<
 [[Publishers_Http]]
-
-
-// Reviewed:
-//  - 02/13/2014: Seth & Adam: Outlined
-// Params are good
-// give full put to run for example
-// examples to show, fuzzing a get with an input action!
-// examples: setting cookies for a get
-// example: doing a post
-// Updated:
-// - 02/14/2014: Jordyn
-// Added full examples for post,cookie and input
-
 == Http Publisher
 
-The _Http_ publisher sends data over HTTP via a method of your choice.  This publisher supports the following features:
+// 02/13/2014: Seth & Adam: Outlined
+//  Params are good
+//  give full put to run for example
+//  examples to show, fuzzing a get with an input action!
+//  examples: setting cookies for a get
+//  example: doing a post
+
+// 02/14/2014: Jordyn
+//   Added full examples for post,cookie and input
+
+The _Http_ publisher sends data over HTTP via a method of your choice.
+
+This publisher supports the following features:
 
  * Authentication via Basic, Digest, or Windows integrated
  * Definable method type
@@ -23,38 +23,58 @@ The _Http_ publisher sends data over HTTP via a method of your choice.  This pub
  * Optional cookie support
  * SSL
 
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="Http">
+    <Param name="Method" value="POST" />
+    <Param name="Url" value="http://foo/user/create" />
+</Publisher>
+----
+
 === Parameters
 
-Method:: HTTP Method type (like GET and POST) *required*
-Url:: URL of target *required*
-BaseUrl:: Base URL is used by some authentication types (optional)
-Username:: Username for authentication (optional)
-Domain:: Domain for authentication (optional)
-Cookies:: Enable cookie support (optional, defaults to true)
-CookiesAcrossIterations:: Track cookies across iterations (optional, defaults to false)
-Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
-IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
+_Required:_
+
+Method:: HTTP Method type (like GET and POST)
+Url:: URL of target
+
+_Optional:_
+
+BaseUrl:: Base URL is used by some authentication types
+Username:: Username for authentication
+Domain:: Domain for authentication
+Cookies:: Enable cookie support. Defaults to true.
+CookiesAcrossIterations:: Track cookies across iterations. Defaults to false.
+Timeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
+IgnoreCertErrors:: Allow HTTPS regardless of cert status. Defaults to false.
 
 === Actions
 
-  * xref:Action_call[call] -- Call a method to fuzz the query string or headers
-  ** _Query_ -- Specify as the method name for a call action, the first parameter is the query string
-  ** _Header_ -- Specify as the method name for a call action, the first parameter is the header name, the second is the value
-  * xref:Action_start[start]  -- Implicit Action to start the Publisher.
-  * xref:Action_stop[stop]  -- Implicit Action to stop the Publisher.
-  * xref:Action_open[open]  -- Open and initialize the socket.
-  * xref:Action_close[close]  -- Close and clean up the socket.
-  * xref:Action_output[output]  -- Data sent via output is written to the open socket.
-  * xref:Action_input[input]  -- Data received via input is read from the open socket.
+xref:Action_call[call]::
+	Special method names used to fuzz the querystring or a specific header.
+	+
+	[horizontal]
+	Query;; Specify as the method name for a call action, the first parameter is the query string
+	Header;; Specify as the method name for a call action, the first parameter is the header name, the second is the value
+
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_open[open]:: Open and initialize the socket.
+xref:Action_close[close]:: Close and clean up the socket.
+xref:Action_output[output]:: Data sent via output is written to the open socket.
+xref:Action_input[input]:: Data received via input is read from the open socket.
 
 === Examples
 
 .HTTP POST Request
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="PostBody">
     <String name="Username" value="username=user"/>
@@ -79,13 +99,15 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
   </Test>
 </Peach>
 ----
+====================
 
 .HTTP GET Request
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
      <Blob/>
@@ -108,13 +130,15 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
   </Test>
 </Peach>
 ----
+====================
 
 .Fuzzing HTTP GET Request Query String
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
  <DataModel name="QueryModel">
    <String value="key"/>
@@ -149,13 +173,15 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
   </Test>
 </Peach>
 ----
+====================
 
 .Fuzzing Cookie Value in Header
+====================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="HeaderKey">
    <String value="Cookie" />
@@ -195,4 +221,4 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status (defaults to false)
   </Test>
 </Peach>
 ----
-
+====================

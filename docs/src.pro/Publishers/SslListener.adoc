@@ -1,4 +1,6 @@
+<<<
 [[Publishers_SslListener]]
+== SslListener Publisher
 
 // Updates:
 // 2/17/2014: Mick
@@ -6,36 +8,53 @@
 // added params and actions
 // added example
 
-== SslListener Publisher
-
 The _Ssl_ Publisher enables a pit to communicate via an SSL over TCP socket.
 This is used to fuzz protocol built inside an SSL encrypted channel, such as HTTPS.
 The SslListener is similar to the TcpListener because both will accept connections over a TCP port and block until a connection has been established.
 
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="SslListener">
+	<Param name="Interface" value="0.0.0.0"/>
+	<Param name="Port" value="31337"/>
+	<Param name="Timeout" value="3000"/>
+	<Param name="AcceptTimeout" value="3000"/>
+	<Param name="ServerCertPath" value="cert.pfx" />
+</Publisher>
+----
+
 === Parameters
 
-	* _Interface_ -- IP of interface to bind to.
-	* _Port_ -- Local port to listen on.
-	* _ServerCertPath_ -- Path to server certificate file.
-	* _AcceptTimeout_ -- How many milliseconds to wait for a connection (default 3000). default="3000"
-	* _CheckCertRevocation_ -- Check revocation of certificate. default="false"
-	* _ClientCertRequired_ -- Require client to auth via certificate. default="false"
-	* _ServerCertPass_ -- Password for cert file. default=""
-	* _Timeout_ -- How many milliseconds to wait for data. default="3000"
+_Required:_
+
+Interface:: IP of interface to bind to. Use +0.0.0.0+ for all interfaces.
+Port:: Local port to listen on.
+ServerCertPath:: Path to server certificate file.
+
+_Optional:_
+
+AcceptTimeout:: How many milliseconds to wait for a connection. Defaults to 3000.
+CheckCertRevocation:: Check revocation of certificate. Defaults to false.
+ClientCertRequired:: Require client to auth via certificate. Defaults to false.
+ServerCertPass:: Password for cert file. Defaults to none.
+Timeout:: How many milliseconds to wait for data. Defaults to 3000.
 
 === Actions
 
-	* xref:Action_start[start]  -- Implicit Action to start the Publisher.
-	* xref:Action_stop[stop]  -- Implicit Action to stop the Publisher.
-	* xref:Action_open[open]  -- Open and initialize the SSL connection.
-	* xref:Action_close[close]  -- Close and clean up the SSL connection.
-	* xref:Action_accept[accept] -- Block until an incoming SSL connection has been received.
-	* xref:Action_output[output]  -- Data sent via output is written to the SSL stream.
-	* xref:Action_input[input]  -- Data received via input is read from the SSL input buffer.
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_open[open]:: Open and initialize the SSL connection.
+xref:Action_close[close]:: Close and clean up the SSL connection.
+xref:Action_accept[accept]:: Block until an incoming SSL connection has been received.
+xref:Action_output[output]:: Data sent via output is written to the SSL stream.
+xref:Action_input[input]:: Data received via input is read from the SSL input buffer.
 
 === Examples
 
 .Sending and receiving data
+===========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -85,4 +104,4 @@ The SslListener is similar to the TcpListener because both will accept connectio
 	</Test>
 </Peach>
 ----
-
+===========================

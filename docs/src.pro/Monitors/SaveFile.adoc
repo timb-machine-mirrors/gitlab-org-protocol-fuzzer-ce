@@ -11,7 +11,11 @@ The _SaveFile_ monitor will save a specified file as part of the logged data whe
 _Required:_
 
 Filename:: File to save on fault. 
- 
+
+_Optional:_
+	
+There are no optional parameters for this monitor.
+	
 === Examples
 
 .Save a file when fault occurs

@@ -1,5 +1,6 @@
+<<<
 [[Publishers_RawEther]]
-
+== RawEther Publisher
 
 // Reviewed:
 //  - 02/13/2014: Seth & Adam: Outlined
@@ -14,110 +15,126 @@
 // Added full enum list for Ethernet protocol
 // Added short description about fuzzing mtu
 
-== RawEther Publisher
-
-The _RawEther_ publisher allows sending raw IPv6 packets with IP header. The maximum and minimum MTU size of the publisher can be fuzzed by using the _setProperty_ action on the publisher.
+The _RawEther_ publisher allows sending raw IPv6 packets with IP header.
 
 NOTE: This publisher only runs on Linux with root privileges
 
-* _Supported Ethernet Protocol Enum Values_
-** ETH_P_LOOP:: Ethernet Loopback
-** ETH_P_PUP:: Xerox PUP
-** ETH_P_PUPAT:: Xerox PUP Address Translation
-** ETH_P_IP:: Internet Protocol
-** ETH_P_X25:: CCITT X.25
-** ETH_P_ARP:: Address Resolution
-** ETH_P_BPQ:: G8BPQ AX.25 Ethernet
-** ETH_P_IEEEPUP:: Xerox IEEE802.3 PUP
-** ETH_P_IEEEPUPAT Xerox IEEE802.3 PUP Address Translation
-** ETH_P_DEC:: DEC Assigned
-** ETH_P_DNA_DL:: DEC DNA Dump/Load
-** ETH_P_DNA_RC:: DEC DNA Remote Console
-** ETH_P_DNA_RT:: DEC DNA Routing
-** ETH_P_LAT:: DEC LAT
-** ETH_P_DIAG:: DEC Diagnostics
-** ETH_P_CUST:: DEC Customer
-** ETH_P_SCA:: DEC Systems Comms Arch
-** ETH_P_TEB:: Trans Ether Bridging
-** ETH_P_RARP:: Reverse Address Resolution
-** ETH_P_ATALK:: AppleTalk DDP
-** ETH_P_AARP:: AppleTalk ARP
-** ETH_P_8021Q:: 802.1Q VLAN Extended Header
-** ETH_P_IPX:: IPX over DIX
-** ETH_P_IPV6:: IPv6 over bluebook
-** ETH_P_PAUSE:: IEEE Pause Frames
-** ETH_P_SLOW:: Slow Protocol
-** ETH_P_WCCP:: Web-cache Coordination Protocol
-** ETH_P_PPP_DISC:: PPPoE Discovery Messages
-** ETH_P_PPP_SES:: PPPoE Session Messages
-** ETH_P_MPLS_UC:: MPLS Unicast Traffic
-** ETH_P_MPLS_MC:: MPLS Multicast Traffic
-** ETH_P_ATMMPOA:: MuliProtocol Over ATM
-** ETH_P_LINK_CTL:: HPNA, WLan Link Local Tunnel
-** ETH_P_ATMFATE:: Frame based ATM Transport over Ethernet
-** ETH_P_PAE:: Port Access Entity (IEEE 802.1X)
-** ETH_P_AOE:: ATA over Ethernet
-** ETH_P_8021AD:: 802.1ad Service VLAN
-** ETH_P_1588:: IEEE 15888 Timesync
-** ETH_P_FCOE:: Fibre Channel over Ethernet
-** ETH_P_TDLS:: TDLS
-** ETH_P_FIP:: FCoE Initialization Protocol
-** ETH_P_QINQ1:: Depreciated QinQ VLAN
-** ETH_P_QUINQ2:: Depreciated QinQ VLAN
-** ETH_P_QINQ3:: Depreciated QinQ VLAN
-** ETH_P_EDSA:: Ethertype DSA
-** ETH_P_AF_IUCV:: IBM af_iucv
-** ETH_P_802_3:: Dummy type for 802.3 frames
-** ETH_P_AX25:: Dummy protocol ID for AX.25
-** ETH_P_ALL:: Every packet
-** ETH_P_802_2:: 802.2 Frames
-** ETH_P_SNAP:: Internal only
-** ETH_P_DDCMP:: DEC DDCMP: Internal only
-** ETH_P_WAN_PPP:: Dummy type for WAN PPP Frames
-** ETH_P_PPP_MP:: Dummy type for PPP MP Frames
-** ETH_P_LOCALTALK:: Localtalk pseudo type
-** ETH_P_CAN:: Controller Area Network
-** ETH_P_PPPTALK:: Dummy type for Atalk over PPP
-** ETH_P_TR_802_2:: IEEE 802.2 Frames
-** ETH_P_MOBITEX:: Mobitex
-** ETH_P_CONTROL:: Card Specific Control Frames
-** ETH_P_IRDA:: Linux-IrDA
-** ETH_P_ECONET:: Acorn Econet
-** ETH_P_HDLC:: HDLC Frames
-** ETH_P_ARCNET:: 1A for ArcNet
-** ETH_P_DSA:: Distributed Switch Arch.
-** ETH_P_TRAILER:: Trailer Switch Tagging
-** ETH_P_PHONET:: Nokia Phonet Frames
-** ETH_P_IEE802154:: IEEE 802.15.4 Frame
-** ETH_P_CAIF:: ST-Ericsson CAIF Protocol
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="RawEther">
+	<Param name="Interface" value="lo" />
+	<Param name="Protocol" value="ETH_P_ALL" />
+</Publisher>
+----
 
 === Parameters
 
-Interface:: Name of interface to bind too (optional)
-Protocol:: Ethernet protocol to use (optional, default is ETH_P_ALL)
-Timeout:: How long to wait in milliseconds for data/connection (optional, default 3,000)
-MinMTU:: Minimum 1280 (optional, default 1280)
-MaxMTU:: Default: 131070 (optional, default 131070)
+_Required:_
+
+Interface:: Name of interface to bind too
+
+_Optional:_
+
+Protocol::
+	Ethernet protocol to use. Default is ETH_P_ALL.
+	+
+	_Supported Ethernet Protocol Enum Values:_
+	+
+	[horizontal]
+	ETH_P_LOOP;; Ethernet Loopback
+	ETH_P_PUP;; Xerox PUP
+	ETH_P_PUPAT;; Xerox PUP Address Translation
+	ETH_P_IP;; Internet Protocol
+	ETH_P_X25;; CCITT X.25
+	ETH_P_ARP;; Address Resolution
+	ETH_P_BPQ;; G8BPQ AX.25 Ethernet
+	ETH_P_IEEEPUP;; Xerox IEEE802.3 PUP
+	ETH_P_IEEEPUPAT Xerox IEEE802.3 PUP Address Translation
+	ETH_P_DEC;; DEC Assigned
+	ETH_P_DNA_DL;; DEC DNA Dump/Load
+	ETH_P_DNA_RC;; DEC DNA Remote Console
+	ETH_P_DNA_RT;; DEC DNA Routing
+	ETH_P_LAT;; DEC LAT
+	ETH_P_DIAG;; DEC Diagnostics
+	ETH_P_CUST;; DEC Customer
+	ETH_P_SCA;; DEC Systems Comms Arch
+	ETH_P_TEB;; Trans Ether Bridging
+	ETH_P_RARP;; Reverse Address Resolution
+	ETH_P_ATALK;; AppleTalk DDP
+	ETH_P_AARP;; AppleTalk ARP
+	ETH_P_8021Q;; 802.1Q VLAN Extended Header
+	ETH_P_IPX;; IPX over DIX
+	ETH_P_IPV6;; IPv6 over bluebook
+	ETH_P_PAUSE;; IEEE Pause Frames
+	ETH_P_SLOW;; Slow Protocol
+	ETH_P_WCCP;; Web-cache Coordination Protocol
+	ETH_P_PPP_DISC;; PPPoE Discovery Messages
+	ETH_P_PPP_SES;; PPPoE Session Messages
+	ETH_P_MPLS_UC;; MPLS Unicast Traffic
+	ETH_P_MPLS_MC;; MPLS Multicast Traffic
+	ETH_P_ATMMPOA;; MuliProtocol Over ATM
+	ETH_P_LINK_CTL;; HPNA, WLan Link Local Tunnel
+	ETH_P_ATMFATE;; Frame based ATM Transport over Ethernet
+	ETH_P_PAE;; Port Access Entity (IEEE 802.1X)
+	ETH_P_AOE;; ATA over Ethernet
+	ETH_P_8021AD;; 802.1ad Service VLAN
+	ETH_P_1588;; IEEE 15888 Timesync
+	ETH_P_FCOE;; Fibre Channel over Ethernet
+	ETH_P_TDLS;; TDLS
+	ETH_P_FIP;; FCoE Initialization Protocol
+	ETH_P_QINQ1;; Depreciated QinQ VLAN
+	ETH_P_QUINQ2;; Depreciated QinQ VLAN
+	ETH_P_QINQ3;; Depreciated QinQ VLAN
+	ETH_P_EDSA;; Ethertype DSA
+	ETH_P_AF_IUCV;; IBM af_iucv
+	ETH_P_802_3;; Dummy type for 802.3 frames
+	ETH_P_AX25;; Dummy protocol ID for AX.25
+	ETH_P_ALL;; Every packet
+	ETH_P_802_2;; 802.2 Frames
+	ETH_P_SNAP;; Internal only
+	ETH_P_DDCMP;; DEC DDCMP: Internal only
+	ETH_P_WAN_PPP;; Dummy type for WAN PPP Frames
+	ETH_P_PPP_MP;; Dummy type for PPP MP Frames
+	ETH_P_LOCALTALK;; Localtalk pseudo type
+	ETH_P_CAN;; Controller Area Network
+	ETH_P_PPPTALK;; Dummy type for Atalk over PPP
+	ETH_P_TR_802_2;; IEEE 802.2 Frames
+	ETH_P_MOBITEX;; Mobitex
+	ETH_P_CONTROL;; Card Specific Control Frames
+	ETH_P_IRDA;; Linux-IrDA
+	ETH_P_ECONET;; Acorn Econet
+	ETH_P_HDLC;; HDLC Frames
+	ETH_P_ARCNET;; 1A for ArcNet
+	ETH_P_DSA;; Distributed Switch Arch.
+	ETH_P_TRAILER;; Trailer Switch Tagging
+	ETH_P_PHONET;; Nokia Phonet Frames
+	ETH_P_IEE802154;; IEEE 802.15.4 Frame
+	ETH_P_CAIF;; ST-Ericsson CAIF 
+
+ProtocolTimeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
+MinMTU:: Minimum 1280. Defaults to 1280.
+MaxMTU:: Default: 131070. Defaults to 131070.
 
 === Actions
 
-  * xref:Action_start[start]  -- Implicit Action to start the Publisher.
-  * xref:Action_stop[stop]  -- Implicit Action to stop the Publisher.
-  * xref:Action_open[open]  -- Open and initialize the socket.
-  * xref:Action_close[close]  -- Close and clean up the socket.
-  * xref:Action_output[output]  -- Data sent via output is written to the open socket.
-  * xref:Action_input[input]  -- Data received via input is read from the open socket.
-  * xref:Action_getProperty[getProperty] -- Get a property value
-  * xref:Action_setProperty[setProperty] -- Set a property value
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_open[open]:: Open and initialize the socket.
+xref:Action_close[close]:: Close and clean up the socket.
+xref:Action_output[output]:: Data sent via output is written to the open socket.
+xref:Action_input[input]:: Data received via input is read from the open socket.
 
 === Examples
 
 .Sending data
+===============
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <Defaults>
     <Number endian="big"/>
@@ -154,10 +171,11 @@ MaxMTU:: Default: 131070 (optional, default 131070)
 
   <Test name="Default">
     <StateModel ref="TheState"/>
-    <Publisher class="RawEther">
+  <Publisher class="RawEther">
     <Param name="Interface" value="lo" />
     <Param name="Protocol" value="ETH_P_ALL" />
   </Publisher>
   </Test>
 </Peach>
 ----
+===============

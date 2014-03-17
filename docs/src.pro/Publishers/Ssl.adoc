@@ -1,4 +1,6 @@
+<<<
 [[Publishers_Ssl]]
+== Ssl Publisher
 
 // Updates:
 // 2/17/2014: Mick
@@ -6,29 +8,32 @@
 // added params and actions
 // added example
 
-
-== Ssl Publisher
-
 The _Ssl_ Publisher enables a pit to communicate via an SSL over TCP socket.
 This is used to fuzz protocol built inside an SSL encrypted channel, such as HTTPS.
 
+=== Syntax
+
+[source,xml]
+----
+----
+
 === Parameters
 
-	* _Host_ -- Hostname to connect to.
-   Port:: Port to connect to.
-   ConnectTimeout:: Max milliseconds to wait for connection (default 10000). default="10000"
-   Sni:: Sni to use for SSL connection. Will use Host by default. default=""
-   Timeout:: How many milliseconds to wait for data (default 3000). default="3000"
-   VerifyServer:: Verify the server certificate. default="false"
+Host:: Hostname to connect to.
+Port:: Port to connect to.
+ConnectTimeout:: Max milliseconds to wait for connection (default 10000). default="10000"
+Sni:: Sni to use for SSL connection. Will use Host by default. default=""
+Timeout:: How many milliseconds to wait for data (default 3000). default="3000"
+VerifyServer:: Verify the server certificate. default="false"
 
 === Actions
 
-	* xref:Action_start[start]  -- Implicit Action to start the Publisher.
-	* xref:Action_stop[stop]  -- Implicit Action to stop the Publisher.
-	* xref:Action_open[open]  -- Open and initialize the SSL connection.
-	* xref:Action_close[close]  -- Close and clean up the SSL connection.
-	* xref:Action_output[output]  -- Data sent via output is written to the SSL stream.
-	* xref:Action_input[input]  -- Data received via input is read from the SSL input buffer.
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_open[open]:: Open and initialize the SSL connection.
+xref:Action_close[close]:: Close and clean up the SSL connection.
+xref:Action_output[output]:: Data sent via output is written to the SSL stream.
+xref:Action_input[input]:: Data received via input is read from the SSL input buffer.
 
 === Examples
 
