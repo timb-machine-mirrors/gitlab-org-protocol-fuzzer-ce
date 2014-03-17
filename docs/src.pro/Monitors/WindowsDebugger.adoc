@@ -1,0 +1,128 @@
+<<<
+[[Monitors_WindowsDebugger]]
+== WindowsDebugger Monitor (Windows)
+
+The _WindowsDebugger_ monitor controls a windows debugger instance. 
+Source code is located in peach\Peach.Core.Test.OS.Windows\Agent\Monitors
+
+*Main Usages*
+
+ * Process debugging
+ * Service debugging
+ * Kernel debugging
+
+=== Parameters
+
+_One of the following parameters is required:_
+
+CommandLine:: Window names separated by a comma
+ProcessName:: Trigger fault when a window is found (optional, default false)
+KernelConnectionString:: Connection string for kernel debugging.
+Service:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
+ 
+_Optional:_
+ 
+SymbolsPath:: Symbol path or server (optional, defaults to "SRV*http://msdl.microsoft.com/download/symbols")
+WinDbgPath:: Path to windbg install (optional, will attempt to locate)
+StartOnCall:: Debugger will not be attached until matching call is made from state model (optional)
+IgnoreFirstChanceGuardPage:: Ignore first chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false)
+IgnoreSecondChanceGuardPage:: Ignore second chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false)
+NoCpuKill:: Don't use process CPU usage to terminate early. (optional, defaults to false)
+FaultOnEarlyExit:: Trigger fault if process exists (optional, defaults to false)
+WaitForExitOnCall:: Wait for process to exit on state model call and fault if timeout is reached (optional)
+WaitForExitTimeout:: Wait for exit timeout value in milliseconds (-1 is infinite) (optional, defaults to 10000)
+RestartOnEachTest:: Restart process for each iteration (optional, defaults to false)
+
+=== Examples
+
+.Commandline Configuration
+==========================
+[source,xml]
+----
+<Agent name="Local">
+	<Monitor class="WindowsDebugger">
+		<Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+		<!--<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />-->
+	</Monitor>
+</Agent>
+----
+==========================
+
+.Kernel Configuration
+==========================
+[source,xml]
+----
+<Param name="KernelConnectionString" value="npipe:server=Server, pipe=PipeName [,password=Password]" />
+----
+==========================
+
+.Service Configuration
+==========================
+[source,xml]
+----
+<Param name="Service" value="WinDefend" />
+----
+==========================
+
+.Process Configuration
+==========================
+[source,xml]
+----
+<Param name="ProcessName" value="CrashableServer.exe" />
+----
+==========================
+
+.StartOnCall Configuration
+==========================
+[source,xml]
+----
+<StateModel name="TheState" initialState="initial">
+    <State name="initial">
+        <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+    </State>
+</StateModel>
+
+
+<Agent name="Local">
+    <Monitor class="WindowsDebugger">
+        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="StartOnCall" value="launchProgram"/>
+    </Monitor>
+</Agent>
+----
+==========================
+
+.Exit Configurations
+==========================
+[source,xml]
+----
+<Agent name="Local">
+    <Monitor class="WindowsDebugger">
+        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="NoCpuKill" value="true"/>
+        <Param name="FaultOnEarlyExit" value="false"/>
+        <Param name="WaitForExitTimeout" value="250"/>
+    </Monitor>
+</Agent>
+----
+==========================
+
+.WaitForExitOnCall Configuration
+==========================
+[source,xml]
+----
+<StateModel name="TheState" initialState="initial">
+    <State name="initial">
+        <Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+    </State>
+</StateModel>
+
+
+<Agent name="Local">
+    <Monitor class="WindowsDebugger">
+        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="WaitForExitOnCall" value="exitProgram"/>
+    </Monitor>
+</Agent>
+----
+==========================

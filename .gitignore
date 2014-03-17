@@ -47,6 +47,7 @@ test-results/
 # User-specific files
 *.user
 *.cache
+*.unsuccessfulbuild
 
 _Resharper*
 

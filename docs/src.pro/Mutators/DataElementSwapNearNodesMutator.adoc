@@ -1,0 +1,19 @@
+<<<
+[[Mutators_DataElementSwapNearNodesMutator]]
+== DataElementSwapNearNodesMutator
+
+This mutator will swap two nodes in the data model that are neighboring each other.
+
+=== Supported Elements
+
+ * xref:Blob[Blob]
+ * xref:Block[Block]
+ * xref:Choice[Choice]
+ * xref:DataModel[DataModel]
+ * xref:Flags[Flags]
+ * xref:Number[Number]
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

@@ -1,0 +1,10 @@
+[[Iteration_record]]
+== Record Iteration
+
+Record iterations occur when a new data set is loaded for use. As such it is always performed as the first iteration of the fuzzering session. During a record iteration, no mutations are made. The expectation is the state model should execute fully with no errors. During the execution of the state model the flow of states and actions are recorded. During a record iteration we will also identify the data models and data elements likely to be fuzzed during our fuzzing session and be capable on the next iteration of estimating the total iteration count required for a deterministic fuzzing run. If xref:Iteration_control[control iterations] have been configured, the control iterations will verify the fuzzer was able to execute the same set of actions to determine if the target is still operational.
+
+When running Peach with a range of just one test, you will actually see two iterations performed. A record iteration along with a single fuzzing iteration.
+
+The initial record iteration is often used to validate a Peach pit is operating correctly.
+
+See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].

@@ -1,0 +1,22 @@
+[[maxOccurs]]
+== Minimum Occurrence Attribute
+
+The occurrence attributes are used to define how often an element can occur.  The _maxOccurs_ attribute specifies the maximum number of times an element can occur.  The occurrence attributes _maxOccurs_ and xref:minOccurs[minOccurs] can be combined to provide the occurrence range of an element.  Occurrence attributes are used when cracking and producing_mutating data. Internally Peach will treat this element as an array.
+
+Related attributes: xref:minOccurs[minOccurs], xref:occurs[occurs].
+
+=== Examples
+
+[source,xml]
+----
+<!-- Can occur a maximum of two times -->
+<Block name="OtherThings" maxOccurs="2">
+  <String name="A" value="A" />
+  <String name="B" value="B" />
+  <String name="C" value="C" />
+</Block>
+
+<!-- Can occur a maximum of 1000 times -->
+<String name="OptionalValue" maxOccurs="1000" />
+----
+

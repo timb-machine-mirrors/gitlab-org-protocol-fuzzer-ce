@@ -10,7 +10,12 @@ deps = [
 	'System.Data.DataSetExtensions.dll',
 	'System.Xml.dll',
 
+	'IronPython.dll',
+
+	'Microsoft.Dynamic.dll',
 	'Microsoft.CSharp.dll',
+	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
 
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',

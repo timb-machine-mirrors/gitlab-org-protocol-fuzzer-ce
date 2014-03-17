@@ -1,0 +1,18 @@
+[[Iteration_control]]
+== Control Iteration
+
+Control iterations verify the correct operation of the target when the target is long running. A long running target is one that is operational across multiple iterations. An example of a long running target is a network service that is started once at the start of the fuzzing session, and monitored to see if it faults. For targets that are not long running, for example a process that is restarted on every iteration, control iterations not not nessisary. Control iterations must be explicitly enabled in the pit file.
+
+Control iterations work in conjunction with xref:Iteration_record[record iterations]. During a record iteration the sequence of state model execution is recorded. A control iteration will similarly perform an interation with no mutations occuring and compare the execution sequence with the recorded sequence. If the two do not match, a fault will be generated. For example, if 10 actions occur on the record iteration and only 6 occur on the control, it will be assumed that the target is in a bad state and a fault generated. A fault is generated as the bad state is likely interesting from a security standpoint as a denial of service vulnerability. Additionally, when a fault is triggered, actions can be taken to restart the system.
+
+// TODO insert visual images from slide deck
+
+Control iterations are configured on the xref:Test[_Test_ element] using the _controlIteration_ attribute. The value provided is a positive integer that defines how often to perform a control iteration. A value of 1 will cause control iterations to be performed after each iteration.
+
+.Syntax example
+[source,xml]
+----
+<Test name="TheTest" controlIterations="1"> .... </Test>
+----
+
+See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].

@@ -1,0 +1,70 @@
+[[Transformer]]
+
+//Updated:
+//  - 03/04/2014: Lynn: Added additional Transformers and deleted unused ones including all Type and Misc
+
+== Transformers ==
+
+Transformers perform static tranforms or encoding on the parent element. Transforms are typically, but not always, two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
+
+Transformers are different than Fixups:
+ * Transformers only operate on the parent element 
+ * Fixups reference another element's data.
+
+
+Example:
+
+[source,xml]
+----
+<DataModel name="Base64TLV">
+  <Number name="Type" size="8" signed="false" value="1" token="true" />
+  <Number name="Length" size="16" signed="false">
+    <Relation type="size" of="base64Block" />
+  </Number>
+
+  <Block name="base64Block">
+    <Transformer class="Base64Encode" />
+    <Blob name="Data" />
+  </Block>
+</DataModel>
+----
+
+The output of the above data model is 0x01<len(b64(Data))><b64(Data)>
+
+=== Default Transformers in Peach 3
+
+*Compression*
+
+ * xref:Transformers_Bz2CompressTransformer[Bz2CompressTransformer]
+ * xref:Transformers_Bz2DecompressTransformer[Bz2DecompressTransformer]
+ * xref:Transformers_GzipCompressTransformer[GzipCompressTransformer]
+ * xref:Transformers_GzipDecompressTransformer[GzipDecompressTransformer]
+
+*Crypto*
+
+ * xref:Transformers_Aes128Transformer[Aes128Transformer]
+ * xref:Transformers_ApacheMd5Crypt[ApacheMd5CryptTransformer]
+ * xref:Transformers_CryptTransformer[CryptTransformer]
+ * xref:Transformers_CvsScramble[CvsScrambleTransformer]
+ * xref:Transformers_HMACTransformer[HMACTransformer]
+ * xref:Transformers_MD5CryptTransformer[MD5CryptTransformer] 
+ * xref:Transformers_NullTransformer[NullTransformer]
+ * xref:Transformers_SHA1Transformer[SHA1Transformer]
+ * xref:Transformers_SHA256Transformer[SHA256Transformer] 
+ * xref:Transformers_TripleDesTransformer[TripleDesTransformer]
+
+*Encode*
+
+ * xref:Transformers_Base64EncodeTransformer[Base64EncodeTransformer]
+ * xref:Transformers_Base64DecodeTransformer[Base64DecodeTransformer]
+ * xref:Transformers_HexTransformer[HexTransformer]
+ * xref:Transformers_HtmlEncodeTransformer[HtmlEncodeTransformer]
+ * xref:Transformers_HtmlDecodeTransformer[HtmlDecodeTransformer]
+ * xref:Transformers_Ipv4StringToOctetTransformer[Ipv4StringToOctetTransformer]
+ * xref:Transformers_Ipv6StringToOctetTransformer[Ipv6StringToOctetTransformer]
+ * xref:Transformers_JsEncodeTransformer[JsEncodeTransformer]
+ * xref:Transformers_NetBiosEncodeTransformer[NetBiosEncodeTransformer]
+ * xref:Transformers_NetBiosDecodeTransformer[NetBiosDecodeTransformer]
+ * xref:Transformers_SidStringToBytesTransformer[SidStringToBytesTransformer]
+ * xref:Transformers_UrlEncodeTransformer[UrlEncodeTransformer]
+

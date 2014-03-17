@@ -1,0 +1,13 @@
+<<<
+[[Mutators_BlobBitFlipperMutator]]
+== BlobBitFlipperMutator
+
+This mutator will flip a percentage of the bits in a blob. The default percentage of bits flipped is 20%.
+
+=== Supported Elements
+
+ * xref:Blob[Blob]
+
+=== Hints
+
+BlobBitFlipperMutator-N:: Set percentage of total bits flipped for this blob.

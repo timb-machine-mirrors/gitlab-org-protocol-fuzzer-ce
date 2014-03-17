@@ -1,0 +1,41 @@
+<<<
+[[Mutators_WordListMutator]]
+== WordListMutator
+
+This mutator will allow users to specify additional data for each data element through a hint. Each of these values must be separated by a newline in a file.
+
+=== Supported Elements
+
+ * xref:String[String]
+ * xref:Number[Number]
+ * xref:Blob[Blob]
+
+=== Hints
+
+WordList:: Define additional values. Must be a path to a newline separated word list file.
+
+=== Examples
+
+.Simple word list example
+=========================
+In this example the words from _wordlist.txt_ will be used during mutations. During fuzzing our string element will be mutated to the value of Apple, Orange, Peach, Pear, Grapefruit and Grape. These changes will occur when Peach select both the string element and the WordListMutator mutator.
+
+_wordlist.txt_
+----
+Apple
+Orange
+Peach
+Pear
+Grapefruit
+Grape
+----
+
+[source,xml]
+----
+<DataModel name="TheDataModel">
+  <String value="Mango">
+    <Hint name="WordList" value="wordlist.txt"/>
+  </String>
+</DataModel>
+----
+=========================

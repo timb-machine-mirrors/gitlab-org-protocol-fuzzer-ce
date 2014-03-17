@@ -1,0 +1,28 @@
+<<<
+[[Monitors_WindowsService]]
+== WindowsService Monitor (Windows)
+
+The _WindowsService_ monitor controls a windows service
+The code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
+
+=== Parameters
+
+Service:: The name that identifies the service to the system. This can also be the display name for the service.
+MachineName:: The computer on which the service resides. (optional, defaults to local machine)
+FaultOnEarlyExit:: Fault if service exists early. (optional, defaults to false)
+Restart:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
+StartTimeout:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
+
+=== Examples
+
+.Start IIS
+==========
+[source,xml]
+----
+<Agent name="Local">
+	<Monitor class="WindowsService">
+		<Param name="Service" value="World Wide Web Publishing Service" />
+	</Monitor>
+</Agent>
+----
+==========

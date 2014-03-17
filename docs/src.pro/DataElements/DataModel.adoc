@@ -1,0 +1,119 @@
+<<<
+[[DataModel]]
+== DataModel
+
+The DataModel element is a child of the Peach root element.  A DataModel defines the structure of a data block by specifying additional child elements such as xref:Number[Number], xref:Blob[Blob], or xref:String[String].
+
+=== Syntax
+
+[source,xml]
+----
+<DataModel name="TheDataModel">
+	<String value="Hello World" />
+</DataModel>
+----
+
+=== Attributes
+
+_Required:_
+
+xref:name[name]:: Friendly name of the DataModel this is useful when referencing the model or debugging.
+
+_Optional:_
+
+xref:ref[ref]:: Reference to a DataModel to use as a template
+
+=== Child Elements
+
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Block[Block]:: Group one or more data elements together into a logical structure.
+xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Flags[Flags]:: Defines a set of bit sized flags.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Number[Number]:: Defines a binary number of arbitrary bit size.
+xref:Padding[Padding]:: Pad out variably sized blocks or data models.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighboring each other
+
+=== Examples
+
+.DataModel Example
+===========================
+Any number of DataModels can be specified in a Peach Pit file. However, each must each have a unique name. Break complex formats into smaller models by split them into logical parts. This makes DataModels easier to read, debug, and re-use.
+
+A DataModel named "HelloWorld" contains a single string and outputs "Hello world!"
+
+[source,xml]
+----
+<DataModel name="HelloWorld">
+  <String value="Hello world!" />
+</DataModel>
+----
+
+DataModels can reference other DataModels and inherit their child elements with the ref attribute. 
+
+[source,xml]
+----
+<DataModel name="ParentModel">
+  <String value="Hello " />
+</DataModel>
+
+<DataModel name="HelloWorldModel" ref="ParentModel" >
+  <String value=" world!" />
+</DataModel>
+----
+===========================
+
+.References (ref attribute)
+===========================
+
+When a reference (ref attribute) is supplied, the contents of the referenced DataModel are copied to create the base of the new DataModel.  Any child elements in the new DataModel will override elements from that base with the same name. In this example the child model Customized contains a String named Key. It's value will overwrite the parent's String "Key" which has no value. 
+
+[source,xml]
+----
+<DataModel name="Template">
+  <String name="Key" />
+  <String value=": " token="true" />
+  <String name="Value" />
+  <String value="\r\n" token="true" />
+</DataModel>
+
+<DataModel name="Customized" ref="Template">
+  <String name="Key" value="Content-Length" />
+  <String name="Value">
+    <Relation type="size" of="HttpBody" />
+  </String>
+  <Blob name="HttpBody" />
+</DataModel>
+----
+
+----
+The output of "Template"   is " : \r\n"
+The output of "Customized" is "Content-Length: 100\r\n"
+----
+
+When parsed into a DataModel, Customized will look like the combination of both data models.
+
+[source,xml]
+----
+<DataModel name="Customized" ref="Template">
+  <String name="Key" value="Content-Length" />
+  <String value=": " token="true" />
+  <String name="Value">
+    <Relation type="size" of="HttpBody" />
+  </String>
+  <String value="\r\n" token="true" />
+</DataModel>
+----
+===========================

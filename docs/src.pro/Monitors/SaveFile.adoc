@@ -1,0 +1,54 @@
+<<<
+[[Monitors_SaveFile]]
+== SaveFile Monitor
+
+//Example needs fleshed out more 
+
+The _SaveFile_ monitor will save a specified file as part of the logged data when a fault occurs. This is useful for collecting application specific logs. 
+
+=== Parameters
+
+_Required:_
+
+Filename:: File to save on fault. 
+
+_Optional:_
+	
+There are no optional parameters for this monitor.
+	
+=== Examples
+
+.Save a file when fault occurs
+==============================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="SaveFile">
+	  <Param name="Filename" value="c:\temp\output.log" />
+	</Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>	
+----
+==============================
