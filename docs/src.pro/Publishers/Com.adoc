@@ -1,4 +1,6 @@
+<<<
 [[Publishers_Com]]
+== Com Publisher
 
 // Reviewed:
 //  - 02/13/2014: Seth & Adam: Outlined
@@ -13,34 +15,49 @@
 // expanded explanation of COM
 // added call and prop examples
 
-== Com Publisher
+// TODO - Debugger example
 
 The _Com_ Publisher allows calling methods and properties on COM objects. Properties and Methods correlate directly to those in the corresponding COM definition. 
 The setProperty and getProperty Actions can only accept Strings or Numbers as binary arrays are incompatible with COM Properties.
 
+NOTE: This Publisher only runs on Windows. To use this Publisher, Peach.Core.ComContainer.exe must be running in a separate command prompt while the Peach is running. This side process will host the COM object. A debugger monitor can be configured to launch and monitor this process if wanted. See xref:Monitors_WindowsDebugger monitor for more information about configuring a debugger monitor.
 
-NOTE: This Publisher only runs on Windows.  To use this Publisher, Peach.Core.ComContainer.exe must be running in a separate command prompt while the Peach is running.
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="COM">
+	<Param name="clsid" value="{d20ea4e1-3957-11d2-a40b-0c5020524153}" />
+</Publisher>
+----
 
 === Parameters
 
+_Required:_
+
 clsid:: COM CLSID
+
+_Optional:_
+
+There are no optional parameters for this publisher.
 
 === Actions
 
-	* xref:Action_start[start]  -- Implicit Action to start the Publisher.
-	* xref:Action_stop[stop]  -- Implicit Action to stop the Publisher.
-	* xref:Action_call[call] -- Call a method
-	* xref:Action_getProperty[getProperty] -- Get a property value
-	* xref:Action_setProperty[setProperty] -- Set a property value
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_call[call]:: Call a method
+xref:Action_getProperty[getProperty]:: Get a property value
+xref:Action_setProperty[setProperty]:: Set a property value
 
 === Examples
 
 .Calling a method
+===================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 	<DataModel name="CoolThingsModel">
 		<String name="Username" value="username=user"/>
@@ -66,8 +83,10 @@ clsid:: COM CLSID
 	</Test>
 </Peach>
 ----
+===================
 
 .Setting/Getting Properties
+===================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -116,3 +135,4 @@ clsid:: COM CLSID
 	</Test>
 </Peach>
 ----
+===================

@@ -1,4 +1,6 @@
+<<<
 [[Publishers_File]]
+== File Publisher
 
 // Reviewed:
 //  - 02/13/2014: Seth & Adam: Outlined
@@ -7,27 +9,39 @@
 // - 02/14/2014: Jordyn
 // Added full example
 
-
-== File Publisher
-
 The _File_ publisher will open a file for reading or writing.
+
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="File">
+    <Param name="FileName" value="fuzzed.bin" />
+</Publisher>
+----
 
 === Parameters
 
+_Required:_
+
 FileName:: Name of file to open
-Overwrite:: Overwrite existing files (optional, defaults to true)
-Append:: Append data to existing file (optional, defaults to false)
+
+_Optional:_
+
+Overwrite:: Overwrite existing files, defaults to true.
+Append:: Append data to existing file, defaults to false.
 
 === Actions
 
-  * xref:Action_open[open]  -- Open file for reading/writing.
-  * xref:Action_close[close]  -- Close file stream.
-  * xref:Action_output[output]  -- Data to be written to file
-  * xref:Action_input[input]  -- Read data from file.
+xref:Action_open[open]:: Open file for reading/writing.
+xref:Action_close[close]:: Close file stream.
+xref:Action_output[output]:: Data to be written to file
+xref:Action_input[input]:: Read data from file.
 
 === Examples
 
 .Write to file
+===============
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -59,8 +73,10 @@ Append:: Append data to existing file (optional, defaults to false)
   </Test>
 </Peach>
 ----
+===============
 
 .Read from file
+===============
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -92,3 +108,4 @@ Append:: Append data to existing file (optional, defaults to false)
   </Test>
 </Peach>
 ----
+===============
