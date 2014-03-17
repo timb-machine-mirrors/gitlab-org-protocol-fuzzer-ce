@@ -1,3 +1,4 @@
+<<<
 [[Transformers_Bz2DecompressTransformer]]
 == Bz2DecompressTransformer
 
@@ -24,7 +25,7 @@ The _Bz2DecompressTransformer_ performs a bzip2 decompression on the value in th
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
 
 === Attributes
 
@@ -77,9 +78,7 @@ This example uses the Bz2Compress Transformer to decompress a value, write the v
 			
 			<!-- Read and decompress from file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
-				<DataModel name="InputModel" ref="Ex1" >
-				 
-				  </DataModel> 
+				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//BlobValue" />
 			<Action type="output" publisher="ConsolePub">
@@ -87,7 +86,6 @@ This example uses the Bz2Compress Transformer to decompress a value, write the v
 					<Blob name="BlobValue" />
 				</DataModel>
 			</Action>
-					
 		</State>
 	</StateModel>
 
@@ -109,11 +107,10 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
-[*] Test 'Default' starting with random seed 9115.
+[*] Test 'Default' starting with random seed 19925.
 
 [R1,-,-] Performing iteration
 Peach.Core.Engine runTest: Performing recording iteration.
@@ -141,20 +138,28 @@ Peach.Core.Cracker.DataCracker ------------------------------------
 Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/28, Bits: 0/224
 Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
 Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
-Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.TransformMe' -> Offset: 0,
+ Unsized element
 Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
-Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes : 0/28, Bits: 0/224
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes
+: 0/28, Bits: 0/224
 Peach.Core.Cracker.DataCracker ------------------------------------
-Peach.Core.Cracker.DataCracker Blob 'InputModel.TransformMe' Bytes: 0/28, Bits: 0/224
+Peach.Core.Cracker.DataCracker Blob 'InputModel.TransformMe' Bytes: 0/28, Bits:
+0/224
 Peach.Core.Cracker.DataCracker getSize: -----> Blob 'InputModel.TransformMe'
-Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.TransformMe' -> Offset: 0,
+ Unsized element
 Peach.Core.Cracker.DataCracker lookahead: Blob 'InputModel.TransformMe'
 Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 224
-Peach.Core.Cracker.DataCracker Crack: Blob 'InputModel.TransformMe' Size: 424, B ytes: 0/53, Bits: 0/424
-Peach.Core.Dom.DataElement Blob 'InputModel.TransformMe' value is: 42 5a 68 39 3 1 41 59 26 53 59 a7 83 53 78 00 00 0d 81 80 22 6f 58 00 20 00 31 00 d3 4d 01 55 03.. (Len: 53 bytes)
+Peach.Core.Cracker.DataCracker Crack: Blob 'InputModel.TransformMe' Size: 424, B
+ytes: 0/53, Bits: 0/424
+Peach.Core.Dom.DataElement Blob 'InputModel.TransformMe' value is: 42 5a 68 39 3
+1 41 59 26 53 59 a7 83 53 78 00 00 0d 81 80 22 6f 58 00 20 00 31 00 d3 4d 01 55
+03.. (Len: 53 bytes)
 Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
 Peach.Core.Dom.Action ActionType.Slurp
-Peach.Core.Dom.Action Slurp, setting OutputModel.BlobValue from InputModel.Trans formMe
+Peach.Core.Dom.Action Slurp, setting OutputModel.BlobValue from InputModel.Trans
+formMe
 Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
 Peach.Core.Dom.Action ActionType.Output
 Peach.Core.Publishers.ConsolePublisher output(53 bytes)

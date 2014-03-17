@@ -1,3 +1,4 @@
+<<<
 [[Transformers_Aes128Transformer]]
 == Aes128Transformer
 
@@ -23,18 +24,14 @@ The _Aes128Transformer_ will transform the parent xref:DataModel[DataModel] by e
 
 === Parameters 
 
+_Required:_
+
  Key:: User provided symmetric key that is used to encrypt the value. Must be a hex string representation of a 16 byte key.
  IV:: User provided initialization vector that is used as the first block for the AES128 operation. Must be a hex string representation of an 16 byte value.
 
-=== Attributes
-
-_Required:_
-
-There are no required attributes.
-
 _Optional:_
 
-There are no optional attributes.
+There are no optional parameters.
 
 === Actions Supported 
 
@@ -101,7 +98,6 @@ This example uses the Aes128 transformer on an inline value, writes the transfor
 			<Param name="FileName" value="encrypted.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
 		<Logger class="File">
 			<Param name="Path" value="logs"/> 
 		</Logger>
@@ -113,7 +109,7 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 7617.

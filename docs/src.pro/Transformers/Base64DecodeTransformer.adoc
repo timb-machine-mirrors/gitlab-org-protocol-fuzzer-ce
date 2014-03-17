@@ -1,3 +1,4 @@
+<<<
 [[Transformers_Base64DecodeTransformer]]
 == Base64DecodeTransformer
 
@@ -24,17 +25,11 @@ The _Base64DecodeTransformer_ will Base64 decode the value in the parent xref:Da
 
 === Parameters 
 
-No Parameters are supported by this element.
+No Parameters are supported by this transformer.
 
 === Attributes
 
-_Required:_
-
-There are no required attributes.
-
-_Optional:_
-
-There are no optional attributes.
+No Attributes are supported by this transformer.
 
 === Actions Supported 
 
@@ -46,8 +41,10 @@ There are no optional attributes.
 
 === Examples
 
-.Decoding Value To and From File Example
+.Decoding Value To and From File Example 
 ==========================
+This example uses the Base64Encode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console. 
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -101,7 +98,6 @@ There are no optional attributes.
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
 		<Logger class="File">
 			<Param name="Path" value="logs"/> 
 		</Logger>
@@ -114,6 +110,72 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
 
+[*] Test 'Default' starting with random seed 12661.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(19 bytes)
+00000000   50 6C 61 69 6E 74 65 78  74 3A 20 41 42 43 44 45   Plaintext: ABCDE
+00000010   46 47 48                                           FGH
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(19 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/19, Bits: 0/152
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 88, Length: 88
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes: 0/19, Bits: 0/152
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.DataElement_0' Bytes: 0/19, Bits: 0/152
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.DataElement_0'
+
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.DataElement_0' -> Pos: 88, Length: 88
+Peach.Core.Cracker.DataCracker getSize: <----- Size: 88
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.DataElement_0' Size: 88, Bytes: 0/19, Bits: 0/152
+Peach.Core.Dom.DataElement String 'InputModel.DataElement_0' value is: Plaintext :
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.TransformMe' Bytes: 11/19, Bits: 88/152
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 64
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.TransformMe' Size: 96, Bytes: 0/12, Bits: 0/96
+Peach.Core.Dom.DataElement String 'InputModel.TransformMe' value is: QUJDREVGR0g=
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Slurp
+Peach.Core.Dom.Action Slurp, setting OutputModel.StringValue from InputModel.TransformMe
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(12 bytes)
+00000000   51 55 4A 44 52 45 56 47  52 30 67 3D               QUJDREVGR0g=
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ==========================
