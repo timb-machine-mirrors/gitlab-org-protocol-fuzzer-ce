@@ -1,3 +1,4 @@
+:toc!:
 [[Publisher]]
 == Publishers
 
@@ -12,6 +13,17 @@
 
 //Updated:
 //  - 03/04/2014: Lynn: Added additional Publishers and the note about changState
+
+//Updated:
+//  - 03/04/2014: Josh: Added...
+// Syntax
+// Examples:
+// * Multible Publishers
+// * Types of actions implemented by publishers
+// * Stream vs. Stream with end (Tcp vs. File)
+// * Stream vs. Call based (Tcp vs. Com)
+// * Remote publishers
+// * List all action types we utilize
 
 Publishers are the I/O interfaces used by Peach to send and receive data.
 Publishers support both stream and call based operations.
@@ -64,3 +76,120 @@ use.
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  
+NOTE: A full list of publishers and parameter information for any
+specific version can be found in the output of `peach --showenv`
+
+=== Syntax
+
+[source,xml]
+----
+<Test name="Default">
+  <!-- ... -->
+	<Publisher class="ConsoleHex">
+	  <Param name="BytesPerLine" value="32"/>
+	</Publisher>
+  <!-- ... -->
+</Test>
+----
+
+ 
+=== Examples
+
+.Multiple Publishers
+====================
+
+Though many pits may use a single publisher there is no limit on the
+number of publishers that can be used. Multiple publishers can be
+defined and used. 
+
+This could be used, for example, to communicate with a network service
+that listens on multiple ports:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+	<DataModel name="Hello">
+		<Blob value="Hello Server"/>
+	</DataModel>
+
+	<DataModel name="Goodbye">
+		<Blob value="Goodbye Server"/>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output" publisher="FirstPort">
+				<DataModel ref="Hello"/>
+			</Action>
+			<Action type="output" publisher="SecondPort">
+				<DataModel  ref="Goodbye"/>
+			</Action>
+		</State>
+	</StateModel>
+	<Agent name="TheAgent" />
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+		<StateModel ref="TheState"/>
+		<Publisher class="Tcp" name="FirstPort">
+			<Param name="Host" value="localhost"/>
+			<Param name="Port" value="12345"/>
+		</Publisher>
+		<Publisher class="Tcp" name="SecondPort">
+			<Param name="Host" value="localhost"/>
+			<Param name="Port" value="54321"/>
+		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+----
+$ peach -1 --debug TwoPublisher.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 9324.
+Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Updating action to original data model
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher 
+
+00000000   48 65 6C 6C 6F 20 53 65  72 76 65 72               Hello Server    
+
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Peach.Core.Publishers.TcpClientPublisher output(14 bytes)
+Peach.Core.Publishers.TcpClientPublisher 
+
+00000000   47 6F 6F 64 62 79 65 20  53 65 72 76 65 72         Goodbye Server  
+
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:12345
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:12345, closing client connection.
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:12345
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:54321
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:54321, closing client connection.
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:54321
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Publishers.TcpClientPublisher stop()
+
+[*] Test 'Default' finished.
+----
