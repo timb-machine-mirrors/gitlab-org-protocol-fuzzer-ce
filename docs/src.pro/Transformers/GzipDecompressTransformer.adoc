@@ -20,13 +20,21 @@
 
 === Transformer type: Compress
 
-
-The _GzipDecompressTransformer_ performs a gzip decompression on the value in the parent xref:DataModel[DataModel].
-The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
+The _GzipDecompressTransformer_ performs a gzip decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters 
 
 No Parameters are supported by this element.
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+There are no optional attributes.
 
 === Actions Supported 
 
@@ -38,8 +46,13 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Compression To and From File Example 
+==========================
+This example uses the GzipCompress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file to the console. 
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -51,18 +64,18 @@ No Parameters are supported by this element.
 
 	<StateModel name="TheState" initialState="initial">
 		<State name="initial">
-			<!-- Encrypted Output -->
+			<!-- Decompressed Output -->
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
 			
-			<!-- Write Encrypted Output to File -->
+			<!-- Write Decompressed Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
 			</Action>
 			<Action type="close" publisher="FilePubWrite" />
 			
-			<!-- Read and decrypt encrypted file and slurp output to console -->
+			<!-- Read and decompress file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
@@ -80,12 +93,20 @@ No Parameters are supported by this element.
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
 		<Publisher class="File" name="FilePubWrite">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="decompressed.bin" />
 		</Publisher>
 		<Publisher class="File" name="FilePubRead">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="decompressed.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
 	</Test>
 </Peach>
 ----
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+
+----
+==========================

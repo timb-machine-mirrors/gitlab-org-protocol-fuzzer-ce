@@ -21,10 +21,14 @@ There are no required attributes.
 
 _Optional:_
 
-[Tokens]:: List of characters to pass to the StringToken analyzer. 
-[AnalyzeStrings]:: Call the StringToken analyzer on string elements. Default true. 
+There are no optional attributes.
 
-==== Examples
+=== Parameters
+
+Tokens:: List of characters to pass to the StringToken analyzer. 
+AnalyzeStrings:: Call the StringToken analyzer on string elements. Default true. 
+
+=== Examples
 
 .Simple Hello World Example
 ==========================

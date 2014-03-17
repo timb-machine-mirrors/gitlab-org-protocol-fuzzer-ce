@@ -23,7 +23,7 @@ _Optional:_
 
 There are no optional attributes.
 
-==== Examples
+=== Examples
 
 .Certificate Inline Example
 ==========================

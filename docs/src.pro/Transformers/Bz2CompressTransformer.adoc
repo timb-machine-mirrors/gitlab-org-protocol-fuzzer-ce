@@ -17,16 +17,25 @@
 // added supported actions
 // expanded description
 // added full example
-// ISSUE: example doesnt work because of Peach issue 497
 
 === Transformer type: Compress
 
-The _Bz2CompressTransformer_ performs a bzip2 compression on the value in the parent xref:DataModel[DataModel].  
+The _Bz2CompressTransformer_ performs a bzip2 compression on the value in the parent xref:DataModel[DataModel]. 
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters 
 
 No Parameters are supported by this element.
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+There are no optional attributes.
 
 === Actions Supported 
 
@@ -38,8 +47,13 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Compression To and From File Example 
+==========================
+This example uses the Bz2Compress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file.  
+
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -49,15 +63,14 @@ No Parameters are supported by this element.
 		</String>
 	</DataModel>
 
-
 	<StateModel name="TheState" initialState="initial">
 		<State name="initial">
-			<!-- Encrypted Output -->
+			<!-- Compressed Output -->
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
 			
-			<!-- Write Encrypted Output to File -->
+			<!-- Write Compressed Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
 				<Data>
@@ -66,7 +79,7 @@ No Parameters are supported by this element.
 			</Action>
 			<Action type="close" publisher="FilePubWrite" />
 			
-			<!-- Read and decrypt encrypted file and slurp output to console -->
+			<!-- Read and compress file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
@@ -76,7 +89,6 @@ No Parameters are supported by this element.
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-			
 		</State>
 	</StateModel>
 
@@ -84,12 +96,79 @@ No Parameters are supported by this element.
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
 		<Publisher class="File" name="FilePubWrite">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="compressed.bin" />
 		</Publisher>
 		<Publisher class="File" name="FilePubRead">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="compressed.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
 	</Test>
 </Peach>
 ----
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 8499.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(53 bytes)
+00000000   42 5A 68 39 31 41 59 26  53 59 A7 83 53 78 00 00   BZh91AY&SY??Sx??
+00000010   0D 81 80 22 6F 58 00 20  00 31 00 D3 4D 01 55 03   ???"oX? ?1??M?U?
+00000020   41 EA 5D 4D A1 1E 44 47  51 18 7C 5D C9 14 E1 42   A?]M??DGQ?|]???B
+00000030   42 9E 0D 4D E0                                     B??M?
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(53 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/53, Bits: 0/424
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes : 0/53, Bits: 0/424
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'InputModel.TransformMe' Bytes: 0/53, Bits : 0/424
+Peach.Core.Cracker.DataCracker getSize: -----> String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker scan: String 'InputModel.TransformMe' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'InputModel.TransformMe'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 424
+Peach.Core.Cracker.DataCracker Crack: String 'InputModel.TransformMe' Size: 224, Bytes: 0/28, Bits: 0/224
+Peach.Core.Dom.DataElement String 'InputModel.TransformMe' value is: shrinkmepleaseshrinkmeplease
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Slurp
+Peach.Core.Dom.Action Slurp, setting OutputModel.StringValue from InputModel.TransformMe
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher output(28 bytes)
+00000000   73 68 72 69 6E 6B 6D 65  70 6C 65 61 73 65 73 68   shrinkmepleasesh
+00000010   72 69 6E 6B 6D 65 70 6C  65 61 73 65               rinkmeplease
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================
