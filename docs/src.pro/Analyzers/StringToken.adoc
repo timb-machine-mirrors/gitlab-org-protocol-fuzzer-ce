@@ -40,9 +40,13 @@ There are no required attributes.
 
 _Optional:_
 
-[Tokens]:: List of characters to pass to the StringToken analyzer. 
+There are no optional attributes.
 
-==== Examples
+=== Parameters
+
+Tokens:: List of characters to pass to the StringToken analyzer. 
+
+=== Examples
 
 .Simple HTTP GET Url Example
 ==========================

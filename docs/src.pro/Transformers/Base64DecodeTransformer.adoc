@@ -20,12 +20,21 @@
 
 === Transformer type: Encoder/Decoder
 
-The _Base64DecodeTransformer_ will base64 decode the value in the parent xref:DataModel[DataModel].  
-The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
+The _Base64DecodeTransformer_ will Base64 decode the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data. Note an output operation 
 
 === Parameters 
 
 No Parameters are supported by this element.
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+There are no optional attributes.
 
 === Actions Supported 
 
@@ -37,8 +46,11 @@ No Parameters are supported by this element.
 
 === Examples
 
+.Decoding Value To and From File Example
+==========================
 [source,xml]
 ----
+<?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
@@ -83,13 +95,25 @@ No Parameters are supported by this element.
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
 		<Publisher class="File" name="FilePubWrite">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
 		<Publisher class="File" name="FilePubRead">
-			<Param name="FileName" value="encrypted.bin" />
+			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
 	</Test>
 </Peach>
 ----
 
+
+Output from this example.
+----
+> peach -1 --debug example.xml
+
+
+----
+==========================
