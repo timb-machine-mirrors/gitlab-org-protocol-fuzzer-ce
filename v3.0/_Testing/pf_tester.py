@@ -386,7 +386,6 @@ if __name__ == "__main__":
 	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
 	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
-		if 'DHCPv6' not in pit_name: continue
 		zip_name = pit_name + '.zip'
 
 		temp_dir = temp_dir_name(pit_name)
