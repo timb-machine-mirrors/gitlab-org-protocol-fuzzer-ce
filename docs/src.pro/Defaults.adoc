@@ -1,4 +1,73 @@
+<<<
 [[Defaults]]
 == Defaults
 
-TODO
+The _Defaults_ element is used to change defaults for data element attributes. 
+
+=== Syntax
+
+[source,xml]
+----
+<Defaults>
+	<Number endian="big" signed="false" />
+</Defaults>
+----
+
+=== Examples
+
+.Changing default Byte Order
+============================
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<Defaults>
+		<Number endian="big" signed="false" />
+	</Defaults>
+	
+	<DataModel name="TheDataModel">
+		<Number size="32" value="0xffff" />
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState">
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel" />
+		<Publisher class="ConsoleHex"/>
+	</Test>
+</Peach>
+----
+
+Produces the following output:
+
+[source,xml]
+----
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 54950.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   00 00 FF FF                                        ????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+============================

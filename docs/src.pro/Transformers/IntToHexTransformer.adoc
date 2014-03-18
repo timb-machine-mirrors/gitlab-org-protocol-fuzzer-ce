@@ -39,6 +39,8 @@ xref:Action_output[output]:: On output this transformer will convert an ascii nu
 
 === Examples
 
+.Basic Usage Example
+==========================
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -105,6 +107,7 @@ xref:Action_output[output]:: On output this transformer will convert an ascii nu
 ----
 
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 
@@ -166,3 +169,4 @@ Peach.Core.Publishers.FilePublisher stop()
 [*] Test 'Default' finished.
 ----
 ==========================
+

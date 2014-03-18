@@ -2,17 +2,15 @@
 [[Transformers_Ipv4StringToOctetTransformer]]
 == Ipv4StringToOctetTransformer
 
-// Reviewed:
-//  - 02/19/2014: Seth & Adam: Outlined
-// TODO:
-// Verify parameters expand parameter description
-// Full pit example using hex console
-// expand  general description
-// Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format
-// Test output, input
+// 02/19/2014: Seth & Adam: Outlined
+//  TODO:
+//  Verify parameters expand parameter description
+//  Full pit example using hex console
+//  expand  general description
+//  Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
+//  See AES for format
+//  Test output, input
 
-// Updated:
 // 2/19/14: Mick
 // verified params
 // added supported actions
@@ -172,3 +170,4 @@ Peach.Core.Publishers.FilePublisher stop()
 [*] Test 'Default' finished.
 ----
 ==========================
+

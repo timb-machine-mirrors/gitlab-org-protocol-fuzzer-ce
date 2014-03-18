@@ -1,21 +1,26 @@
+<<<
 [[PythonPath]]
-== PythonPath ==
+== PythonPath
 
-// Reviewed:
-//  - 01/30/2014: Seth & Mike: Outlined
+// 01/30/2014: Seth & Mike: Outlined
+//  * Adds a module path for python
+//  * Examples (better than we currently have :))
 
-// * Adds a module path for python
-// * Examples (better than we currently have :))
+The _PythonPath_ element is a top level element that adds a path to the paths searched by Python for modules. Its primary use is when extending Peach and including the location of custom code.
 
-
-The PythonPath element is a top level element that adds a path to the paths searched by Python for modules.  Its primary use is when extending Peach and including the location of custom code.
+=== Syntax
 
 [source,xml]
 ----
 <PythonPath path="c:/peach/mycode">
 ----
 
+=== Attributes
 
-_Attributes:_
+_Required:_
 
- * path -- The path to add [required]
+path:: The path to add
+
+_Optional:_
+
+No optional attributes are supported by this element.

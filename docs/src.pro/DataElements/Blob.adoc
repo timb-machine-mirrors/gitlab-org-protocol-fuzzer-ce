@@ -12,7 +12,7 @@ A Blob footnote:[Blob stands for "binary large object" a term used by databases 
 
 [source,xml]
 ----
-<Blob name="Unknown1" valueType="hex" value="01 06 22 03" />
+<Blob valueType="hex" value="01 06 22 03" />
 ----
 
 === Attributes
@@ -158,6 +158,7 @@ This is an example of dumb file fuzzing. The data from _sample.png_ will be crac
 	</Test>
 	
 </Peach>
+----
 ==========================
 
 .Defining a Blob with a default value

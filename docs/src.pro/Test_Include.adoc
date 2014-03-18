@@ -1,0 +1,85 @@
+<<<
+[[Test_Include]]
+== Include
+
+Includes all or a specific data element for fuzzing. The combination of this element and also the xref:Test_Exclude[Exclude] element allows for including or excluding various data elements from being mutated. By default all data elements are mutated.
+
+.XPath Further Reading
+****
+The following links provide additional information regarding XPaths.
+
+ * http://www.w3schools.com/xpath/[XPath Tutorial]
+ * http://www.w3schools.com/xpath/xpath_syntax.asp[XPath Syntax]
+ * http://www.w3.org/TR/xpath/.[XPath Specification]
+
+****
+
+=== Syntax
+
+[source,xml]
+----
+<Test>
+
+	<!-- Include all data elements -->
+	<Include />
+
+	<!-- Include specific elements -->
+	<Include xpath="//Value" />
+
+</Test>
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required parameters for this publisher.
+
+_Optional:_
+
+xpath:: Provide an xpath query to select elements to include. 
+
+=== Examples
+
+.Include via xpath
+====================
+This example will exclude all data elements, then include specific ones.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String value="1" />
+		<String value="2" />
+		<String value="3" />
+		<String value="4" />
+		<String value="5" />
+
+		<Block name="FuzzJustThese">
+			<String value="6" />
+			<String value="7" />
+			<String value="8" />
+		</Block>
+	</DataModel>
+
+	<StateModel name="TheStateModel" initialState="InitialState">
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="TheDataModel" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel" />
+		<Publisher class="ConsoleHex"/>
+
+		<Exclude />
+		<Include xpath="//FuzzJustThese" />
+	</Test>
+</Peach>
+----
+====================

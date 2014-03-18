@@ -1,20 +1,95 @@
+<<<
 [[Include]]
-== Include ==
+== Include
 
 The Include element allows for including other pit files into namespaces for 
 use in the current Pit file.  When referencing included Pit files prefix element 
 names with the namespace and a colon (:) _foo:datamodel_.
 
+=== Syntax
+
 [source,xml]
 ----
 <Include ns="foo" src="file:foo.xml" />
-
-<DataModel name="NewDataModel" ref="foo:TheDataModel">
-</DataModel>
 ----
 
+=== Attributes
 
-_Attributes:_
+_Required:_
 
- * ns -- Namespace prefix [required]
- * src -- Source URL, use "+file:+" prefix for filenames [required]
+ns:: Namespace prefix [required]
+src:: Source URL, use "+file:+" prefix for filenames [required]
+
+_Optional:_
+
+There are no optional attributes for this element.
+
+=== Examples
+
+.Basic Include Example
+======================
+This example will include and use a data model defined in a separate file.
+
+[source,xml]
+.example_include.xml
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<String value="Hello From Example_Include.xml!\n" />
+	</DataModel>
+</Peach>
+----
+
+[source,xml]
+.example.xml
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<Include ns="ex" src="example_include.xml" />
+
+	<StateModel name="TheStateModel" initialState="InitialState">
+		<State name="InitialState">
+			<Action type="output">
+				<DataModel ref="ex:TheDataModel" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheStateModel" />
+		<Publisher class="Console"/>
+	</Test>
+</Peach>
+----
+
+Produces the following output:
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 35703.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(32 bytes)
+Hello From Example_Include.xml!
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+======================
+
