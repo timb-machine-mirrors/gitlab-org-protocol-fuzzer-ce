@@ -1,4 +1,4 @@
-include::modbus_DataSheet.txt[]
+include::modbus_DataSheet.adoc[]
 
 Configuration
 -------------

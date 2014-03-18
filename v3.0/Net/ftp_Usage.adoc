@@ -1,4 +1,4 @@
-include::ftp_DataSheet.txt[]
+include::ftp_DataSheet.adoc[]
 
 Configuration
 -------------

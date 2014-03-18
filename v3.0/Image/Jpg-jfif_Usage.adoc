@@ -1,4 +1,4 @@
-include::Jpg-jfif_DataSheet.txt[]
+include::Jpg-jfif_DataSheet.adoc[]
 
 Configuration
 -------------

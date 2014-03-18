@@ -1,4 +1,4 @@
-include::DHCPv4_DataSheet.txt[]
+include::DHCPv4_DataSheet.adoc[]
 
 Configuration
 -------------

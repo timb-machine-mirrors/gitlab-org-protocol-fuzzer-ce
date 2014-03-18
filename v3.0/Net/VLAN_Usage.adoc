@@ -1,4 +1,4 @@
-include::VLAN_DataSheet.txt[]
+include::VLAN_DataSheet.adoc[]
 
 Configuration
 -------------

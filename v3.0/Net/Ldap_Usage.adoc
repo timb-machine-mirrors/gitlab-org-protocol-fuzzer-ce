@@ -1,4 +1,4 @@
-include::Ldap_DataSheet.txt[]
+include::Ldap_DataSheet.adoc[]
 
 Configuration
 -------------

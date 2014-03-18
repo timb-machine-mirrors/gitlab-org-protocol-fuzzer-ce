@@ -1,4 +1,4 @@
-include::IPv6_DataSheet.txt[]
+include::IPv6_DataSheet.adoc[]
 
 Configuration
 -------------

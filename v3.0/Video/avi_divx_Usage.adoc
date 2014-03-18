@@ -1,4 +1,4 @@
-include::avi_divx_DataSheet.txt[]
+include::avi_divx_DataSheet.adoc[]
 
 Configuration
 -------------

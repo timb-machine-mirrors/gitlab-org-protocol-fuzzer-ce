@@ -1,4 +1,4 @@
-include::Gif_DataSheet.txt[]
+include::Gif_DataSheet.adoc[]
 
 Configuration
 -------------

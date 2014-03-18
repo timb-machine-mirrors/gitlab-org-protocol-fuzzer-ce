@@ -1,4 +1,4 @@
-include::ICMPv4_DataSheet.txt[]
+include::ICMPv4_DataSheet.adoc[]
 
 Configuration
 -------------

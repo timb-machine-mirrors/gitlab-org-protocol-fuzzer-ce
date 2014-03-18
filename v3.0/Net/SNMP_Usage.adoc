@@ -1,4 +1,4 @@
-include::SNMP_DataSheet.txt[]
+include::SNMP_DataSheet.adoc[]
 
 Configuration
 -------------

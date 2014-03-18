@@ -1,4 +1,4 @@
-include::TELNET_DataSheet.txt[]
+include::TELNET_DataSheet.adoc[]
 
 Configuration
 -------------

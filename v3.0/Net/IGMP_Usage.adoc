@@ -1,4 +1,4 @@
-include::IGMP_DataSheet.txt[]
+include::IGMP_DataSheet.adoc[]
 
 Configuration
 -------------

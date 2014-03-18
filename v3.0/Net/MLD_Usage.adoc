@@ -1,4 +1,4 @@
-include::MLD_DataSheet.txt[]
+include::MLD_DataSheet.adoc[]
 
 Configuration
 -------------

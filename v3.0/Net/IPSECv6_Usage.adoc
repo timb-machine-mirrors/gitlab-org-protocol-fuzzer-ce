@@ -1,4 +1,4 @@
-include::IPSECv6_DataSheet.txt[]
+include::IPSECv6_DataSheet.adoc[]
 
 Configuration
 -------------

@@ -1,4 +1,4 @@
-include::Ico_DataSheet.txt[]
+include::Ico_DataSheet.adoc[]
 
 Configuration
 -------------

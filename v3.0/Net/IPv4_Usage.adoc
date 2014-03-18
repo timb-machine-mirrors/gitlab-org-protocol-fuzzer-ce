@@ -1,4 +1,4 @@
-include::IPv4_DataSheet.txt[]
+include::IPv4_DataSheet.adoc[]
 
 Configuration
 -------------

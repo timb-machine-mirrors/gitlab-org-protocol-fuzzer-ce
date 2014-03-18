@@ -1,4 +1,4 @@
-include::Bmp_DataSheet.txt[]
+include::Bmp_DataSheet.adoc[]
 
 Configuration
 -------------

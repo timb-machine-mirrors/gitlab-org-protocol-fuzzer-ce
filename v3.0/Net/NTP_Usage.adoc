@@ -1,4 +1,4 @@
-include::NTP_DataSheet.txt[]
+include::NTP_DataSheet.adoc[]
 
 Configuration
 -------------

@@ -1,4 +1,4 @@
-include::Png_DataSheet.txt[]
+include::Png_DataSheet.adoc[]
 
 Configuration
 -------------

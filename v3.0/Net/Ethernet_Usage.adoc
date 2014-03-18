@@ -1,4 +1,4 @@
-include::Ethernet_DataSheet.txt[]
+include::Ethernet_DataSheet.adoc[]
 
 Configuration
 -------------

@@ -1,4 +1,4 @@
-include::UDPv4_DataSheet.txt[]
+include::UDPv4_DataSheet.adoc[]
 
 Configuration
 -------------

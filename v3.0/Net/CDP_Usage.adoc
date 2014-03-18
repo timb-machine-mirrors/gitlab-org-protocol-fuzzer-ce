@@ -1,4 +1,4 @@
-include::CDP_DataSheet.txt[]
+include::CDP_DataSheet.adoc[]
 
 Configuration
 -------------

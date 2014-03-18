@@ -1,4 +1,4 @@
-include::Jpeg2000_DataSheet.txt[]
+include::Jpeg2000_DataSheet.adoc[]
 
 Configuration
 -------------

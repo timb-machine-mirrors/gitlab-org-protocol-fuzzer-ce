@@ -1,4 +1,4 @@
-include::DHCPv6_DataSheet.txt[]
+include::DHCPv6_DataSheet.adoc[]
 
 Configuration
 -------------

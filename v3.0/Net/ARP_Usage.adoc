@@ -1,4 +1,4 @@
-include::ARP_DataSheet.txt[]
+include::ARP_DataSheet.adoc[]
 
 Configuration
 -------------
