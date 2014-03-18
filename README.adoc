@@ -1,0 +1,8 @@
+
+This is our collection of fuzzing definitions for Peach. Each top level folder has a specific purpose as listed below.
+
+client:: Definitions written for specific clients. They cannot be sent to other customers, or included in our libraries without approval by Michael Eddington.
+pro:: Library of definitions for Peach Professional. ONLY SHIPING PITS GO HERE!!
+deja:: Interal pits that are not specifically for a client and are not currently shipping.
+v2.3:: Legacy pits that only work with Peach Community v2.3
+ 
