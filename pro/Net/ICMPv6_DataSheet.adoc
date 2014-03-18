@@ -46,7 +46,3 @@ Use Cases
 |Echo Reply | RFC4443 (Section 4.2)
 |========
 
-[options="header"]
-|========
-|Supported Payloads | Specification
-|========

@@ -18,7 +18,7 @@ Specifications
 [options="header"]
 |========
 |Specification | Title
-|RFC 959 –  File Transfer Protocol (FTP).
+|RFC 959 - File Transfer Protocol (FTP).
 |RFC 697 - CWD Command of FTP
 |RFC 775 - Directory Oriented FTP Commands
 |========
