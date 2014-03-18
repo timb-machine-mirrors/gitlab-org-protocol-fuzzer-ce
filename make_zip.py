@@ -8,9 +8,9 @@ outfile = 'peach-pits-%(buildtag)s.zip'
 
 manifest = [
 	{
-		'root' : 'v3.0',
+		'root' : 'pro',
 		'incl' : '*',
-		'excl' : '_Testing/* */README *.TODO *_DataSheet.txt *_Usage.txt' },
+		'excl' : '_Testing/* */.gitignore *.TODO *.adoc' },
 ]
 
 '''
