@@ -1,12 +1,11 @@
 include::IPSECv6_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	An IPsec target configured for manual keying using the keys defined in the configuration file is required.
-	IP-tools on Linux can be used.
-	Both a UDP and an TCP listener are required to run all the tests. The networking tool socat can be used as a listener.
+==== Target Configuration
+An IPsec target configured for manual keying using the keys defined in the configuration file is required.
+IP-tools on Linux can be used.
+Both a UDP and an TCP listener are required to run all the tests. The networking tool socat can be used as a listener.
 
 _Example of of setting up ipsec-tools on target machine:_
 
@@ -49,7 +48,7 @@ sudo socat STDIO udp-listen:12345
 sudo socat STDIO tcp-listen:12345
 ----
 
-.Required Pit Configuration Changes
+==== Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine
 SourceIPv6:: IPv6 address of the interface on the local machine
 TargetIPv4:: IPv4 address of the target host machine (used for encapsulating IPv4 in IPv6)
@@ -67,11 +66,12 @@ Interface:: Name of local interface (used for monitoring)
 SourcePort:: UDPv6 and/or TCPv6 port number of the local machine
 TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine
 
-.Optional Pit Configuration Changes
+==== Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing
 LoggerPath:: Path to folder where logs will be stored
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample IPsec Configuration File
+==== Sample IPsec Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -93,7 +93,6 @@ LoggerPath:: Path to folder where logs will be stored
     <Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
     <Define key="SPI" value="201"/>
     <Define key="Path" value="."/>
-
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
   </All>
@@ -112,21 +111,20 @@ LoggerPath:: Path to folder where logs will be stored
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 #ESP Header Test
-peach -1 -debug IPSECv6.xml
+peach -1 --debug IPSECv6.xml
 
 #Authentication Header Test
-peach -1 -debug IPSECv6.xml AH
+peach -1 --debug IPSECv6.xml AH
 ----
-.Full test run
+==== Full test run
 ----
 #ESP Header Test
 peach IPSECv6.xml

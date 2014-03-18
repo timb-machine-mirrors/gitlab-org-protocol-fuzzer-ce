@@ -1,10 +1,9 @@
 include::ftp_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	An FTP server is required to test the client side of the FTP pit. On Linux, ftpd can be downloaded using apt-get.
+==== Target Configuration
+An FTP server is required to test the client side of the FTP pit. On Linux, ftpd can be downloaded using apt-get.
 
 _Example of installing on ftp server:_
 
@@ -12,23 +11,25 @@ _Example of installing on ftp server:_
 sudo apt-get install ftpd
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	SourcePort:: ftp port number of the local machine
-	TargetPort:: ftp port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
-	FtpUser:: Username of the remote ftp account
-	FtpPass:: Password for the associated ftp user account
-	DataPort:: The port used to listen for incoming data connections
-	Program:: The client program to test when fuzzing as the server
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: ftp port number of the local machine.
+TargetPort:: ftp port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+FtpUser:: Username of the remote ftp account.
+FtpPass:: Password for the associated ftp user account.
+DataPort:: The port used to listen for incoming data connections.
+Program:: The client program to test when fuzzing as the server.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
-	Agent:: Agent to run depending on the target OS. Do not change this value.
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Agent:: Agent to run depending on the target OS. Do not change this value.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample ftp Configuration File
+
+==== Sample ftp Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -64,27 +65,26 @@ sudo apt-get install ftpd
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 #Test client in active mode
-peach -1 -debug ftp.xml
+peach -1 --debug ftp.xml
 
 #Test client in passive mode
-peach -1 -debug ftp.xml Passive
+peach -1 --debug ftp.xml Passive
 
 #Test server in active mode
-peach -1 -debug ftp.xml Server
+peach -1 --debug ftp.xml Server
 
 #Test server in passive mode
-peach -1 -debug ftp.xml ServerPassive
+peach -1 --debug ftp.xml ServerPassive
 ----
-.Full test run
+==== Full test run
 ----
 #Test client in active mode
 peach ftp.xml

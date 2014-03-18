@@ -1,23 +1,23 @@
 include::ARP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	This pit sends ARP packets; no extra applications are required.
+==== Target Configuration
+This pit sends ARP packets; no extra applications are required.
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IPv4 address of the target host machine
-	SourceIPv4:: IPv4 address of the interface on the local machine
-	SourceMAC:: MAC address on local machine
-	TargetMAC:: MAC address of target machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv4:: IPv4 address of the target host machine.
+SourceIPv4:: IPv4 address of the interface on the local machine.
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface (used for monitoring).
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample ARP Configuration File
+==== Sample ARP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -46,17 +46,16 @@ Configuration
 </PitDefines>
 ----
 
-.Configure Additional Monitors
-	Add monitors to agent as needed
+==== Configure Additional Monitors
+Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug ARP.xml
+peach -1 --debug ARP.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach ARP.xml
 ----

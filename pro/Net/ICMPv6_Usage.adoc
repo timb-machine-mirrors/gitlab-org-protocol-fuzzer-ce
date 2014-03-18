@@ -1,10 +1,9 @@
 include::ICMPv6_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A target machine with ICMPv6 enabled.  A firewall must not block ICMPv6 messages.
+==== Target Configuration
+A target machine with ICMPv6 enabled.  A firewall must not block ICMPv6 messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -24,16 +23,17 @@ Core Networking - Time Exceeded (ICMPv6-In)
 File and Printer Sharing (Echo Request - ICMPv6-In)
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv6:: IP address of the target host machine
-	SourceIPv6:: IP address of the interface on the local machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv6:: IP address of the target host machine
+SourceIPv6:: IP address of the interface on the local machine
+Interface:: Name of local interface (used for monitoring)
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample ICMPv6 Configuration File
+==== Sample ICMPv6 Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -67,17 +67,16 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug ICMPv6.xml
+peach -1 --debug ICMPv6.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach ICMPv6.xml
 ----

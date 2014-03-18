@@ -1,29 +1,28 @@
 include::avi_divx_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-A UDP listener listening on the avi_divx port defined in configuration file is required. The network tool socat can be used as a listener.
+==== Target Configuration
+A video player that supports the avi format is required. The program VLC can be used for this.
 
-_Example of using socat to listen on avi_divx port:_
+_Example of installing vlc player:_
 
 ----
-socat STDIO udp4-listen:12345
+sudo apt-get install vlc
 ----
 
-.Required Pit Configuration Changes
-	Seed:: Name of a valid avi file located in the SamplePath directory. An empty string indicates use all files in the directory.
-	SamplePath:: Directory path to the directory which the Avi sample files are stored.
-	Target:: The program that will open the fuzzed Avi files
+==== Required Pit Configuration Changes
+Seed:: Name of a valid avi file located in the SamplePath directory. An empty string indicates use all files in the directory.
+SamplePath:: Directory path to the directory which the Avi sample files are stored.
+Target:: The program that will open the fuzzed Avi files
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
-	Path:: Path to the relative base directory where all pits are located
-	Agent:: Agent to run depending on the target OS. This value shouldn't be changed.
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+Agent:: Agent to run depending on the target OS. This value shouldn't be changed.
 
-.Sample avi_divx Configuration File
+==== Sample avi_divx Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -51,17 +50,16 @@ socat STDIO udp4-listen:12345
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug avi_divx.xml
+peach -1 --debug avi_divx.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach avi_divx.xml
 ----

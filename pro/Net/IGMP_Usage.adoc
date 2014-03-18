@@ -1,10 +1,9 @@
 include::IGMP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A target machine with IGMP enabled.  A firewall must not block IGMP messages.
+==== Target Configuration
+A target machine with IGMP enabled.  A firewall must not block IGMP messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -12,16 +11,17 @@ _Windows Firewall Inbound Rules to enable on Target:_
 Core Networking - Internet Group Management Protocol (IGMP-In)
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine
+SourceIPv4:: IP address of the interface on the local machine
+Interface:: Name of local interface (used for monitoring)
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing	
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample ICMPv6 Configuration File
+==== Sample ICMPv6 Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -34,16 +34,19 @@ Core Networking - Internet Group Management Protocol (IGMP-In)
     <Define key="Strategy"  value="Sequential"/>
     <Define key="Path" value="."/>
   </All>
+
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>
     <Define key="tsharkBin" value="/usr/bin/tshark"/>
   </Linux>
+
   <OSX platform="osx">
     <Define key="Interface" value="em0"/>
     <Define key="tsharkInterface" value="em0"/>
     <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
   </OSX>
+
   <Windows platform="windows">
     <Define key="Interface" value="Local Area Connection"/>
     <Define key="tsharkInterface" value="2"/>
@@ -52,17 +55,16 @@ Core Networking - Internet Group Management Protocol (IGMP-In)
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug IGMP.xml
+peach -1 --debug IGMP.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach IGMP.xml
 ----
