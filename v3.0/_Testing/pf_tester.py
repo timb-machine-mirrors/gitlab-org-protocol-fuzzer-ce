@@ -123,9 +123,44 @@ def file_location_under_path(fname, path):
 				fpath = os.path.join(dirpath, fname)
 				fpath = os.path.abspath(fpath)
 				found_files.append(fpath)
-	assert len(found_files) == 1
-	return found_files[0]
+	if len(found_files) != 1:
+		print "Found dupes of: ", fname, found_files
 
+		print "Attempting to toss test configs and keep the import...."
+		# since we're probably looking for imported files here, go ahead
+		# and see if getting rid of py files under the _Testing dir get
+		# us back down to 1 file (these would just be test configs)
+		found_files = filter(lambda f: '_Testing' not in f, found_files)
+
+		print "Checking to see if import is default python lib...."
+		# check to see if the pit is importing a default python lib, in
+		# which case no worries. same goes for peach python shell builtins
+		is_default_python_module = False
+		is_peach_builtin = False
+		try:
+			if fname.endswith('.py'): module_name = fname[:-3]
+			else:                     module_name = fname
+
+			is_peach_builtin = module_name in ['code']
+
+			exec("import " + module_name)
+			is_default_python_module = True
+			if found_files == []:
+				found_files.append(None)
+		except:
+			pass
+
+		if len(found_files) != 1:
+			for ff in found_files:
+				print "\t", ff
+			# TODO: ideally this would be an exception. reorg later
+			assert len(found_files) == 1
+		elif len(found_files) == 0: # no files found
+			if   not is_default_python_module: assert is_default_python_module
+			elif not is_peach_builtin:         assert is_peach_builtin
+			else:                              assert 'no_idea' == True
+
+	return found_files[0]
 
 
 def imported_files(base_files, includes):
@@ -141,7 +176,8 @@ def imported_files(base_files, includes):
 			assert 'import' in elem.keys()
 			ifile_name = elem.get('import') + '.py'
 			ifile = file_location_under_path(ifile_name, bpath)
-			ifiles.append(ifile)
+			if ifile is not None:
+				ifiles.append(ifile)
 	return ifiles
 
 
