@@ -1,0 +1,31 @@
+
+:Doctitle: Modbus Peach Pit Data Sheet
+:Description: Modbus (Modbus)
+
+ * Peach Pit: Modbus
+ * Direction: Client
+ * Supported Platforms: Windows, Linux, OS X
+
+Modbus Protocol is a messaging structure developed by Modicon in 1979. It is used to establish master-slave/client-server communication between intelligent devices. 
+It is a de facto standard, truly open and the most widely used network protocol in the industrial manufacturing environment.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://www.modbus.org/docs/Modbus_Application_Protocol_V1_1b.pdf  | MODBUS APPLICATION PROTOCOL SPECIFICATION V1.1b
+|http://www.modbus.org/docs/Modbus_over_serial_line_V1.pdf | MODBUS over serial line specification and implementation guide V1.0
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|Modbus over TCP | http://www.modbus.org/docs/Modbus_Application_Protocol_V1_1b.pdf
+|RTU Transmission Mode | http://www.modbus.org/docs/Modbus_over_serial_line_V1.pdf (2.5.1)
+|ASCII Transmission Mode | http://www.modbus.org/docs/Modbus_over_serial_line_V1.pdf (2.5.2)
+|========

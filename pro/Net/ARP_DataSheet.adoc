@@ -1,0 +1,35 @@
+
+:Doctitle: ARP Peach Pit Data Sheet
+:Description: Address Resolution Protocol (ARP)
+
+ * Peach Pit: ARP
+ * Direction: Broadcast, Listen
+ * Supported Platforms: Linux
+
+The Address Resolution Protocol translates between hardware and protocol addresses. In Ethernet and Wireless networks, it usually translates between IPv4 and MAC addresses.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC826 | An Ethernet Address Resolution ProtocolS	
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|MSG 1 | RFC826
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Arp Request Packet Generation for IPv4 over Ether | RFC826
+|Arp Reply Packet Generation in response to a request for IPv4 over Ether | RFC826
+|========
+

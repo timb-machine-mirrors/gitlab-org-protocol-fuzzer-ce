@@ -1,0 +1,101 @@
+include::SNMP_DataSheet.adoc[]
+
+Configuration
+-------------
+
+.Target Configuration
+	A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used as the listener.
+
+_Example of using socat to listen on SNMP port:_
+
+----
+#Install SNMP daemon
+sudo apt-get install snmpd
+
+#Add the IP address you want snmpd to listen on into the configuration file
+sudo pico /etc/default/snmpd
+  #Add the IP address of the interface the service will be listening on to the end of this line
+  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid'
+  #IP address has been added to the end of the line
+  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid 192.168.222.130'
+  #Save and exit
+
+#Restart snmpd
+sudo /etc/init.d/snmpd restart
+
+#Install SNMP client
+sudo apt-get install snmp
+----
+
+.Required Pit Configuration Changes
+	TargetIPv4:: IP address of the target host machine
+	SourceIPv4:: IP address of the interface on the local machine
+	SourcePort:: SNMP port number of the local machine
+	TargetPort:: SNMP port number of the target host machine
+	Interface:: Name of local interface (used for monitoring)
+	CommString:: Community string used for by the SNMP server
+	Program:: The client program to test when fuzzing as the server
+
+.Optional Pit Configuration Changes
+	Strategy:: Fuzzing strategy Peach will use for testing
+	LoggerPath:: Path to folder where logs will be stored
+	Agent:: Agent to run depending on the target OS. Do not change this value.
+
+.Sample SNMP Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="SourcePort" value="161"/>
+    <Define key="TargetPort" value="161"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="CommString" value="public"/>
+    <Define key="LoggerPath" value="./logs/snmp/"/>
+    <Define key="Strategy"   value="Random"/>
+    <Define key="Path"       value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="Program" value="snmpwalk"/>
+    <Define key="Agent" value="Linux"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+    <Define key="Program" value="snmpwalk"/>
+    <Define key="Agent" value="OSX"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="Program" value="snmpwalk"/>
+    <Define key="Agent" value="Windows"/>
+  </Windows>
+</PitDefines>
+----
+
+.Configure Additional Monitors
+Add monitors to agent as needed
+
+Running
+-------
+
+.Single test debug run
+----
+#Run client test
+peach -1 -debug SNMP.xml
+
+#Run server test
+peach -1 -debug SNMP.xml Server
+----
+.Full test run
+----
+#Run client test
+peach SNMP.xml
+
+#Run server test
+peach -1 -debug SNMP.xml Server
+----

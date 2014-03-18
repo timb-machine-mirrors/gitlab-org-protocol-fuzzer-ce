@@ -1,0 +1,16 @@
+:Doctitle: ICO Peach Pit Data Sheet
+:Description: ICO Image Format
+
+ * Peach Pit: ICO
+ * Supported Platorms: Windows, Linux, OS X
+
+The ICO file format is an image file format for computer icons in Microsoft Windows. ICO files contain one or more small images at multiple sizes and color depths, such that they may be scaled appropriately.
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|http://msdn.microsoft.com/en-us/library/ms997538.aspx | Icons
+|========

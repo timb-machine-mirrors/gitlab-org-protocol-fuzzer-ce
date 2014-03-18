@@ -1,0 +1,93 @@
+include::DHCPv4_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A target machine with DHCPv4 enabled.  The software tool bind can be targeted in a Linux environment.
+A firewall must not be blocking DHCPv4 messages.
+
+_Windows Firewall Inbound Rules to enable on Target:_
+
+----
+Core Networking - Dynamic Host Configuration Protocol (DHCP-In)
+----
+
+==== Requried Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: UDPv4 port number of the local machine.
+TargetPort:: UDPv4 port number of the target host machine.
+SourceMAC:: MAC Address of the local machine.
+TargetMAC:: MAC Address of the target host machine.
+RouterIP:: Router IP Address (fuzzed in DataModel).
+BroadcastIP:: Broadcast IP Address (fuzzed in DataModel).
+DHCPServerIP:: DHCP Server IP Address (fuzzed in DataModel).
+SubnetMask:: Subnet Mask (fuzzed in DataModel).
+DomainName:: Domain Name (fuzzed in DataModel).
+DNS:: DNS Server IP Address (fuzzed in DataModel).
+NetBios:: NetBios Server IP Address (fuzzed in DataModel).
+Interface:: Name of local interface (used for monitoring).
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Sample DHCPv4 Configuration File
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="LoggerPath" value="logs/dhcp4/"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="SourcePort" value="68"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="TargetPort" value="67"/>
+    <Define key="SourceMAC" value="0800c0565000"/>
+    <Define key="TargetMAC" value="f8e71b290c00"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Path" value="."/>
+
+    <Define key="RouterIP" value="192.168.146.2"/>
+    <Define key="BroadcastIP" value="192.168.146.255"/>
+    <Define key="DHCPServerIP" value="192.168.146.254"/>
+    <Define key="SubnetMask" value="255.255.255.0"/>
+    <Define key="DomainName" value="localdomain"/>
+    <Define key="DNS" value="192.168.146.2"/>
+    <Define key="NetBios" value="192.168.146.2"/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+    <Define key="tsharkInterface" value="en0"/>
+    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="tsharkInterface" value="2"/>
+    <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+  </Windows>
+</PitDefines>
+----
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug DHCPv4.xml
+----
+==== Full test run
+----
+peach DHCPv4.xml
+----

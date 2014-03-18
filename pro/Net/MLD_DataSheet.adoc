@@ -1,0 +1,40 @@
+
+:Doctitle: MLD Peach Pit Data Sheet
+:Description: Multicast Listener Discovery Protocol (MLD)
+
+ * Peach Pit: MLD
+ * Direction: Client
+ * Supported Platforms: Windows, Linux, OS X
+
+Multicast Listener Discovery Protocol (MLD) is used to declare and manage group membership for multicast addresses in IPv6. The protocol is contained within IPv6 and its structure is similar to ICMPv6. It contains similar functionality to the Internet Group Management Protocol for IPv4. 
+
+Commands include adding and removing IP's from a group and querying servers for current group membership. 
+
+Specifications
+--------------
+
+[options="header"]
+|========
+|Specification | Title
+|RFC3810 | Multicast Listener Discovery Version 2 (MLDv2) for IPv6
+|RFC4604 | Using Internet Group Management Protocol Version 3 and Multicast Listener Discovery Protocol Version 2 for Source-Specific Multicast
+|RFC2710 | Multicast Listener Discovery (MLD) for IPv6
+|========
+
+Use Cases
+---------
+
+[options="header"]
+|========
+|Messages | Specification
+|Multicast Listener Query Message | RFC3810 (Section 5.1)
+|Version 2 Multicast Listener Report Message | RFC3810 (Section 5.2)
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|General Query | RFC3810 (Section 5.1.13)
+|Multicast Address Specific Query | RFC3810 (Section 5.1.13)
+|Multicast Address and Source Specific Query | RFC3810 (Section 5.1.13)
+|========
