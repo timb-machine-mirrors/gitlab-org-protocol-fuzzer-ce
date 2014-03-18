@@ -43,7 +43,7 @@ xref:Action_call[call]::
 	+
 	[horizontal]
 	tap;; Specify on an X,Y coordinate on the screen. Requires two parameters providing a numerical value for X and Y.
-	keyevent;; Send a key press to the target device. Requires a single string parameter.
+	keyevent;; Send a key press to the target device. Requires a single string parameter. The parameter corresponds to the keyevent byte code used to for android key mapping. The entire list of android keyevent codes can be found http://developer.android.com/reference/android/view/KeyEvent.html[here].
 	text;; Enter in text into a text field. Requires a single parameter with the text to enter.
 
 === Examples
