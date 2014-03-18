@@ -1,0 +1,30 @@
+[[signed]]
+== Signed Attribute ==
+
+// Reviewed:
+//  - 01/30/2014: Seth & Mike: Outlined
+
+// * Expand signed vs. unsigned description
+// * List output along with examples
+// * Mutation differences between signed and unsigned (edge case mutator)
+// * Only for Number
+// * Signed as default
+// * Whats the default value!
+
+// Examples:
+//  * Number
+//  * Setting default
+
+Defines if the number contains a signed value or not. Useful when parsing length data. 
+
+=== Examples: ===
+
+To indicate this is an unsigned data element set the signed attribute equal to "false". The default is true. 
+
+[source,xml]
+----
+<DataModel name="NumberExample3">
+ <Number name="Hi5" value="5" size="32" signed="false"/>
+</DataModel>
+----
+

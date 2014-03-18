@@ -1,0 +1,40 @@
+<<<
+[[Monitors_SshDownloader]]
+== SshDownloader Monitor
+
+The _SshDownloader_ monitor is able to download a file or folder from a remote host over SSH SFTP. The
+monitor supports password, keyboard, and private key authentication methods.  The monitor is also able 
+to delete files it has downloaded.
+
+=== Parameters
+
+_Required:_
+
+Host:: Host to ssh too
+Username:: Username for ssh
+
+_Optional:_
+
+Password:: Password for ssh account, defaults to "".
+KeyPath:: Path to ssh key, defaults to "".
+File:: File to download, defaults to "".
+Folder:: Folder to download, defaults to "".
+Remove:: Remove the remote file after download, defaults to true.
+
+=== Examples
+
+.Example
+============
+[source,xml]
+----
+<Agent name="LocalAgent">
+	<Monitor class="SshDownloader">
+		<Param name="Host" value="my.target.com" />
+		<Param name="Username" value="tester" />
+		<Param name="Password" value="Password!" />
+		<Param name="File" value="/var/cores/core" />
+		<Param name="Remove" value="false" />
+	</Monitor>
+</Agent>
+----
+============

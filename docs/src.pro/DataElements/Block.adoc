@@ -1,0 +1,214 @@
+<<<
+[[Block]]
+== Block
+
+// Reviewed:
+//  - 03/06/2014: Lynn
+//   Added and edited child elements
+
+The Block element is a child element of xref:DataModel[DataModel] or Block. Blocks are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. Blocks and DataModels are very similar, the only difference is their location. DataModels are a top level element, blocks are a child of xref:DataModel[DataModel]. Both Block and xref:DataModel[DataModel] elements can be used as the template for other Blocks or xref:DataModel[DataModels].
+
+== Syntax
+
+[source,xml]
+----
+<Block name="HelloWorld">
+  <String value="Hello world!" />
+</Block>
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+xref:name[name]:: Name of the block. 
+xref:ref[ref]:: Reference to a [DataModel_DataModel]] to use as a template.
+xref:length[length]:: Data element length.
+xref:lengthType[lengthType]:: The unit measure of length attribute. Default is bytes.
+xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
+xref:minOccurs[minOccurs]:: The minimum number of times this block must occur. 
+xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur.
+xref:occurs[occurs]:: The actual number of times this block occurs. 
+xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to false.
+
+=== Child-Elements
+
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Block[Block]:: Group one or more data elements together into a logical structure.  
+xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Flags[Flags]:: Defines a set of bit sized flags.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Number[Number]:: Defines a binary number of arbitrary bit size.
+xref:Padding[Padding]:: Pad out variably sized blocks or data models.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding. 
+xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents. 
+ 
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighboring each other
+
+=== Examples
+
+.Empty Block
+==========================
+The simplest block is an empty block. This definition will produce no output. 
+
+[source,xml]
+----
+<DataModel name="BlockExample1">
+ <Block> 
+ </Block> 
+</DataModel>
+----
+
+Produces the following output:
+
+----
+----
+==========================
+
+.Nested Blocks
+==========================
+Blocks can be nested as deep as required. Blocks help create logical structure and do not change the data contained within.
+
+[source,xml]
+----
+<DataModel name="BlockExample2">
+<Block>
+  <Block>
+    <Block>
+      <String value="1" />
+    </Block>
+   
+    <Block>
+      <String value="2" />
+    </Block>
+
+    <String value="3" />
+  </Block>
+  <String value="4" />
+</Block>
+</DataModel>
+----
+
+Produces the following output:
+
+----
+1234
+----
+==========================
+
+.Naming A Block
+==========================
+Assign blocks a friendly name to make them easier to understand and debug. 
+
+[source,xml]
+----
+<DataModel name="BlockExample2">
+ <Block name="HeaderDef">
+  <String name="Header" /> 
+  <String name="Colon" value=":"/>
+  <String name="Val"/> 
+ <Block>
+
+ <Block name="DataDef">
+   <Number name="Type"  size="8" value="4"/>
+   <Number name="Data" size="8" value="32"/>
+ </Block> 
+ </DataModel>
+----
+
+Produces the following output:
+
+----
+----
+==========================
+
+.Referencing A Block
+==========================
+A reference (ref attribute) supplied the contents of the reference are copied to create the base of the new Block.  Any child elements in the Block will override elements that already exist with the same name.
+
+[source,xml]
+----
+<DataModel name="OtherDataModel">
+   <String value="Hello World"/>
+ </DataModel>
+
+ <DataModel name="ThisDataModel">
+    <Block name="MyName" ref="OtherDataModel"/>
+ </DataModel> 
+----
+
+The Block "MyName" will be overwritten with the referenced block "OtherDataModel". When parsed it's data structure will look like this. 
+
+[source,xml]
+----
+ <DataModel name="ThisDataModel">
+   <Block name="MyName"> 
+    <String value="Hello World"/>
+   </Block> 
+ </DataModel> 
+----
+
+Referencing allows for powerful templates to be built. This is a template for a Key: Value\r\n. 
+
+[source,xml]
+----
+<DataModel name="Template">
+  <String name="Key" />
+  <String value=": " token="true" />
+  <String name="Value" />
+  <String value="\r\n" token="true" />
+</DataModel>
+----
+
+To use this template as a reference. 
+
+[source,xml]
+----
+<DataModel name="OtherModel">
+  <String value="Before Block\r\n" />
+
+  <Block name="Customized" ref="Template">
+    <String name="Key" value="Content-Length" />
+    <String name="Value" value="55"/>
+  </Block>
+</DataModel>
+----
+
+The output will be 
+
+----
+ Before Block\r\n
+ Content-Length: 55\r\n
+----
+
+Two key things happened here. When parsed the Customized Block will replace it's structure with the DataModel of Template. Adding the string values of ":" and "\r\n". 
+
+At the same time the "Customized" block overwrote the values of the String elements for Key and Value. Replacing them with "Content-Length" and 55. The final DataModel would be parsed as so. 
+
+[source,xml]
+----
+<DataModel name="OtherModel">
+  <String value="BeforeBlock" />
+
+  <Block name="Customized" ref="Template">
+    <String name="Key" value="Content-Length" />
+    <String value=": " token="true" />
+    <String name="Value" value="55" />
+    <String value="\r\n" token="true" />
+  </Block>
+</DataModel>
+----
+==========================

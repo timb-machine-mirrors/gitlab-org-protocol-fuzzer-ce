@@ -1,0 +1,53 @@
+<<<
+[[Monitors_CleanupFolder]]
+== CleanupFolder Monitor
+
+The _CleanupFolder_ monitor will remove the contents created by a target during runtime. The assets are remove prior to every iteration. When beginning a fuzzing run Peach will create a list of contents in the directory and remove any new files created. This is useful for cleaning up after target execution and not filling up hard drives with temporary, recovery, or scratch files.
+
+=== Parameters
+
+_Required:_
+
+Folder:: Folder to clean up
+
+_Optional:_
+
+No optional parameters are supported by this monitor.
+ 
+=== Examples
+
+.Remove contents of a folder
+==============================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/> 
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="TheAgent">
+    <Monitor class="CleanupFolder">
+      <Param name="Folder" value="C:\\cleanme"/> 
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="TheAgent" />
+
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----
+==============================

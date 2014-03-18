@@ -1,0 +1,67 @@
+<<<
+[[Fixups_LRCFixup]]
+== Lrc
+
+// Reviewed:
+//  - 02/18/2014: Seth & Adam: Outlined
+// Expand description to include use case "This is used when fuzzing {0} protocols"
+// Give full pit to run using hex publisher, test works 
+// List Parent element types  
+// Number, String, Blob
+
+// Updated:
+// - 02/18/2014: Jordyn
+// Added full examples
+
+// Updated:
+// - 02/21/2014: Mick
+// Parent elements
+
+The _Lrc_ will produce a longitudinal redundancy check (LRC) using data from a single element.
+The longitudinal redundancy check is defined in ISO 1150:1978 and the algorithm is part of the custom Peach implementation.
+
+=== Parent Elements
+
+ * xref:Number[Number]
+ * xref:String[String]
+ * xref:Blob[Blob]
+ 
+=== Parameters
+
+xref:ref[ref]:: Reference to data element on which the checksum will be performed.
+
+=== Examples
+
+.Basic Usage Example
+====================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Data">
+    <String name="Start" value="Start"/>
+    <Blob name="Data" valueType="hex" value="BEEFEA7E41">
+      <Fixup class="Lrc">
+        <Param name="ref" value="Data"/>
+      </Fixup>
+    </Blob>
+    <String name="Stop" value="Stop"/>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="Data" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="ConsoleHex"/>
+  </Test>
+</Peach>
+----
+====================

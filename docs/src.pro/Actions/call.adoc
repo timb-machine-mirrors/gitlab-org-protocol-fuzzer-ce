@@ -1,0 +1,266 @@
+<<<
+[[Action_call]]
+== call
+
+// 01/30/2014: Seth & Mike: Outlined
+
+//   * Expand on description
+//    * Talk about calling methods
+//    * Talk about sending messages to monitors/agents
+//    * Talk about which publishers use call
+//    * Talk about results and parsing of result into data model
+//    * Talk about parameters and supported parameter types
+//   Examples
+//    * publisher
+//    * monitor/agent
+
+// 02/12/2014: Mick
+//   Added description  of what Call does
+//   explained how call works similar to output
+//   explained how it can be used on Peach.Agent
+//   Added attribute descriptions
+//   Added an example
+
+// 02/27/2014: Mike: Ready for tech writer
+//   Reviewed and updated content
+//   Expanded examples
+//   Do any publishers support call?
+
+// 03/04/2014: Lynn: 
+//  Edited and re-wrote content and corrected QuickTIme information
+
+The _call_ action provide a method calling metaphor in Peach state models.
+Call actions support zero or multiple (user-defined and supplied) parameters along with capturing a resulting return value.    
+ * If there are no parameters, the _call_ action just performs the call.
+ * If there are user-supplied parameters, the the  _call_ action may use them as part of the fuzzing data. 
+
+.The Method _call_ action Metaphor
+****
+The _call_ action is useful when fuzzing targets interact with the method metaphor.
+In these instances the interesting data to fuzz is typically the parameters being sent as part of the call.
+Examples of interactions that use a method-call metaphor include Microsoft COM/DCOM, Web Services, and RPC.
+****
+
+When using a _call_ action, any data sent via parameters is considered output and is fuzzed accordingly.
+As with the xref:Action_output[_output_] action, a single data model can be provided for each parameter along with zero or more xref:Data[Data] sets.
+If the resulting return value is captured it is considered input and will be cracked into the provided DataModel.
+
+// 02/27/2014: Mike -- I don't think we do this currently. Only get/setProperty. Need to verify.
+//
+// .Interacting with Publishers
+// ****
+// Some Publishers may also expose special methods that can be called to set values on the Publisher that could be interesting to set.
+// If a Publisher supports this type of interaction it will be documented with the specific Publisher.
+// 
+// An example of this usage is provided in the examples section.
+// ****
+
+.Interacting with Agents and Monitors
+****
+Peach supports a specialized use of _call_ actions to interact with xref:Agent[Agents] and xref:Monitor[Monitors]. 
+A special Publisher called _Peach.Agent_ can be used that causes the call to be sent to all configured Agents.
+If a monitor supports interaction via the _call_ action it will be documented with that monitor.
+
+An instance of this usage is provided in the examples section.
+****
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (such as accept, input, and output)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
+
+
+=== Syntax
+
+[source,xml]
+----
+<StateModel name="TheStateModel" initialState="InitialState">
+	<State name="InitialState">
+		<Action type="call" method="openUrl">
+
+		  <Param name="p1">
+        <DataModel ref="Param1DataModel" />
+      </Param>
+
+      <Param name="p2">
+        <DataModel ref="Param2DataModel" />
+        <Data name="p2data">
+          <Field name="value" value="http://foo.com" />
+        </Data>
+			</Param>
+      
+      <Result>
+        <DataModel ref="ResultDataModel" />
+      </Result>
+        
+		</Action>
+	</State>
+</StateModel>
+----
+
+=== Attributes
+
+_Required:_
+
+type:: Action type, must be set to "call"
+
+_Optional:_
+
+name:: Name used to identify the action
+method:: String describing the method to execute
+publisher:: Name of the publisher that this action should be called on or Peach.Agent
+xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
+xref:Action_onStart[onStart]:: Expression to run on start of an action.
+xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+
+=== Child-Elements
+
+xref:Param[Param]::
+  Argument to be passed with the call.
+  Zero or more Param elements can be provided.
+  Param is considered an action that outputs data and as such the data will be fuzzed by default.
+  Each parameters contains a single xref:DataModel[DataModel] as a child element and zero or more xref:Data[Data sets].
+  
+xref:Result[Result]:: 
+  Captures result of the call Action.
+  Zero or one Result element can be provided.
+  The result data is cracked into the specified xref:DataModel[DataModel].
+  Result elements are treated as input and can be used with xref:Action_slurp[_slurp_] actions.
+
+=== Examples
+
+.Call action using Com Publisher
+================================
+In this example the name of the video file will be fuzzed, not the video file itself.
+
+A QuickTime movie is also required.
+
+. Start QuickTime
+. Verify QuickTime move with the file name "video.mov" exists in current folder
+. Save example to "example.xml"
+. Run "Peach.Core.ComContainer.exe"
+. Run "Peach.exe -1 --debug example.xml"
+. You should see the Quicktime movie start to play
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <!-- Import python module so we can sleep after saying play -->
+  <Import import="time"/>
+  
+  <DataModel name="TheDataModel">
+    <String name="Value" />
+  </DataModel>
+  
+  <StateModel name="TheState" initialState="Initial">
+    
+    <State name="Initial">
+
+      <Action type="call" method="Players[1].OpenURL">
+        <!-- This parameter will be fuzzed -->
+        <Param name="P1">
+          <DataModel ref="TheDataModel" />
+          
+          <Data>
+            <Field name="Value" value="https://archive.org/download/AppleComputersQuicktimeSample/sample.mp4"/>
+          </Data>
+        </Param>
+      </Action>
+      
+      <!-- The onComplete expression will pause the fuzzer to let
+           the video play for 6 seconds. -->
+      <Action type="call" method="Players[1].QTControl.Movie.Play" onComplete="time.sleep(6)"/>
+
+    </State>
+    
+  </StateModel>
+  
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="Com">
+      <Param name="clsid" value="QuickTimePlayerLib.QuickTimePlayerApp"/>
+    </Publisher>
+  </Test>
+  
+</Peach>
+----
+================================
+
+.Interacting with Agents and Monitors
+================================
+This is an example of controlling when the WindowsDebugger monitor will launch a target executable under a debugger.
+This is a typical configuration for file fuzzing.
+
+Notice the use of the special _Peach.Agent_ publisher name.
+This will cause the _call_ action to be sent out to any Agents which will then send to each of there Monitors.
+The method call will end up being handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
+For file fuzzing we must make sure the target is launched only after we write out the new fuzzed file.
+
+This example requires a Windows XP or newer machine with Windows Debugging Tools installed.
+
+. Save example Pit as "example.xml"
+. Run "Peach.exe --range 1,10 --debug example.xml"
+. You should see _notepad.exe_ open and close several times.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+  
+  <DataModel name="TestTemplate">
+    <String value="Hello World!" />
+  </DataModel>
+  
+  <StateModel name="State" initialState="Initial">
+    <State name="Initial">
+      
+      <Action type="output">
+        <DataModel ref="TestTemplate" />
+      </Action>
+      
+      <!-- Close file -->
+      <Action type="close" />
+      
+      <!-- Launch the file consumer -->
+      <Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
+      
+    </State>
+  </StateModel>
+  
+  <Agent name="LocalAgent">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="c:\windows\system32\notepad.exe fuzzfile.bin" />
+      <Param name="StartOnCall" value="ScoobySnacks" />
+    </Monitor>
+  </Agent>
+  
+  <Test name="Default">
+    <Agent ref="LocalAgent" />
+    <StateModel ref="State"/>
+    
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzfile.bin" />
+    </Publisher>
+
+    <Logger class="Filesystem">
+      <Param name="Path" value="logtest" />
+    </Logger>
+  </Test>
+  
+</Peach>
+----
+================================
+

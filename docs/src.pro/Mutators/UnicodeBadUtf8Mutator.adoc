@@ -1,0 +1,17 @@
+<<<
+[[Mutators_UnicodeBadUtf8Mutator]]
+== UnicodeBadUtf8Mutator
+
+The UTF8 Unicode encoding is a variable width, 7 bit ASCII-compatible encoding.  It is the most widely used Unicode encoding. 
+
+Because of the variable width encoding, it's possible to encode characters with more bytes than is necessary. Older Unicode specifications did not require the shortest encoding be used, leading to some of the largest early security worms such as code red. Current versions of the Unicode specification require using the shortest character encoding. There are also other restrictions on the bits used.
+
+This mutator will generate strings with incorrectly encoded UTF8 characters in them.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

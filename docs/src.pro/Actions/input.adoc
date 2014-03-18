@@ -1,0 +1,243 @@
+<<<
+[[Action_input]]
+== input
+
+// 01/30/2014: Seth & Mike: Outlined
+//  * How is input size determined (by data model)
+//  * Talk about handling out of order inputs (commands) and responses to them
+//   * Choice in data model for input
+//   * output actions with when (or state switch)
+//   * Can loop state until all commands are received
+//   * Jordyn had to do this for TELNET
+//  * Crack input into model.
+//   * How to debug cracking
+//  * Stream based publishers vs. datagram (TCP vs. UDP)
+//   * On UDP we get a full packet and only a single packet (implicit length max of packet size)
+//   * On TCP/FILE we get "no end" of data 
+
+// 02/12/2014: Mick
+//  Added description of what input does
+//  talked about differences in datagram vs stream
+//  talked how it receives input once opened
+//  talked about datamodeling to constrain data
+//  Added attribute descriptions
+//  Added an example
+
+// 02/28/2014: Mike: Ready for tech writer
+//  Reviewed and updated content
+//  Updated examples
+//  Added further information as needed
+
+// 03/05/2014: Lynn: 
+//  Edited text and created the stream/datagram table
+
+The _input_ Action is used to receive/read in data using a xref:Publishers[Publisher].
+The most common use for _input_ actions is to receive data that will be acted upon. 
+Once received and xref:Cracking[cracked] into a data model the data can be copied to
+xref:Action_output[_output_] actions, or referenced in conditional expressions such as with the
+xref:Action_when[_when_] attribute.
+
+_input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which drives how much data will be requested.
+For stream-based publishers that can read forever (such as TCP) the DataModel must limit the amount of data read. When creating protocols where this might happen, specify some way to prevent this.
+
+.Stream Publisher versus Datagram Publisher
+[options="header"]
+|====================================================================
+|Stream                              |Datagram 
+|TCP                                 |UDP
+|Number of packets unimportant       |Number of packets important
+|Implicit data length not included   |Includes implicit data length
+|====================================================================
+****
+
+With a stream based publisher, the number of underlying packets received is not important; the data is accessed as a continual stream of incoming data. This does not apply to non-stream based publishers such as the datagram protocol xref:Publishers_Udp[UDP]. Non-stream based publishers need to know the number of underlying packets received.
+In UDP, each input and output action will receive or send a single datagram. When cracking the UDP data into a DataModel only the data in the single packet can be used. There is an implicit length to the data that is not present in xref:Publishers_Tcp[TCP].
+
+
+****
+
+.Input Timeout
+****
+If the input time out is reached prior to all incoming data being received, Peach will behave as follows:
+
+xref:Iteration_record[record iteration]:: 
+  When a record iteration generates errors, Peach assumes either the environment is not working correctly or the pit is incorrect.   In both cases fuzzing cannot continue, causing Peach to stop.
+  Peach will exception and stop.
+
+xref:Iteration_control[control iteration]::
+  Control iterations must be enabled for this state to be reached.
+  Control iterations assume that any error is the result of the target entering an unwanted state. Such transitions are considered faults and logged as such.
+  Peach will trigger a fault.
+
+xref:Iteration_fuzzing[fuzzing iteration]::
+  Peach will continue to next iteration.
+  During normal fuzzing iterations, Peach assumes fuzzing will cause odd behaviours from the target which will be ignored unless they occur on a control iteration (an iteration without any mutations occurring).
+****
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (such as accept, input, and output)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
+
+=== Syntax
+
+[source,xml]
+----
+<StateModel name="TheStateModel" initialState="InitialState">
+  <State name="InitialState"> 
+
+    <Action type="input">
+      <DataModel ref="InputModel" />
+    </Action>
+
+  </State>
+</StateModel>
+----
+
+=== Attributes
+
+_Required:_
+
+type:: Action type, must be set to "input"
+
+_Optional:_
+
+name:: Name used to identify the action
+publisher:: Name of the publisher that this action should be called on
+xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
+xref:Action_onStart[onStart]:: Expression to run on start of an action.
+xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+
+=== Child-Elements
+
+xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be xref:Cracking[cracked]
+
+=== Examples
+
+.Receiving Input from TCP Publisher
+==========================
+This is a simple example of using the input action to receive data. Netcat (nc) is used in this example as the client.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <!-- Marking the string as a token will imply a length of 4 characters -->
+  <DataModel name="Ping">
+    <String value="PING" token="true"/>
+  </DataModel>
+
+  <DataModel name="Pong">
+    <String value="PONG" />
+  </DataModel>
+
+  <StateModel name="TheStateModel" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="accept" />
+
+      <Action type="input">
+        <DataModel ref="Ping"/> 
+      </Action> 
+
+      <Action type="output">
+        <DataModel ref="Pong"/>
+      </Action> 
+    </State> 
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheStateModel"/>
+    
+    <Publisher class="TcpListener">
+      <Param name="Interface" value="0.0.0.0" />
+      <Param name="Port" value="31337" />
+      <Param name="AcceptTimeout" value="10000" />
+      <Param name="Timeout" value="10000" />
+    </Publisher>
+
+    <Logger class="File" >
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example. Once Peach is started, use the netcat command line found below to recreate output.
+
+----
+> peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 32331.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Accept
+Peach.Core.Publishers.TcpListenerPublisher start()
+Peach.Core.Publishers.TcpListenerPublisher open()
+Peach.Core.Publishers.TcpListenerPublisher accept()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.TcpListenerPublisher input()                           <1>
+Peach.Core.Publishers.TcpListenerPublisher Read 5 bytes from 127.0.0.1:62407
+Peach.Core.Publishers.TcpListenerPublisher
+
+00000000   50 49 4E 47 0A                                     PING·
+
+Peach.Core.Cracker.DataCracker ------------------------------------          <2>
+Peach.Core.Cracker.DataCracker DataModel 'Ping' Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'Ping'
+Peach.Core.Cracker.DataCracker scan: DataModel 'Ping'
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 32, Length: 32
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'Ping' Size: <null>, Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'Ping.DataElement_0' Bytes: 0/5, Bits: 0/40
+Peach.Core.Cracker.DataCracker getSize: -----> String 'Ping.DataElement_0'
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 0, Saving Token
+Peach.Core.Cracker.DataCracker scan: String 'Ping.DataElement_0' -> Pos: 32, Length: 32
+Peach.Core.Cracker.DataCracker getSize: <----- Size: 32
+Peach.Core.Cracker.DataCracker Crack: String 'Ping.DataElement_0' Size: 32, Bytes: 0/5, Bits: 0/40
+Peach.Core.Dom.DataElement String 'Ping.DataElement_0' value is: PING
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpListenerPublisher output(4 bytes)
+Peach.Core.Publishers.TcpListenerPublisher
+
+00000000   50 4F 4E 47                                        PONG
+
+Peach.Core.Publishers.TcpListenerPublisher close()
+Peach.Core.Publishers.TcpListenerPublisher Shutting down connection to 127.0.0.1:62407
+Peach.Core.Publishers.TcpListenerPublisher Read 0 bytes from 127.0.0.1:62407, closing client connection.
+Peach.Core.Publishers.TcpListenerPublisher Closing connection to 127.0.0.1:62407
+
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpListenerPublisher stop()
+
+[*] Test 'Default' finished.
+----
+<1> Data received by TCP publisher
+<2> Debugging output from the data cracker
+
+Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+
+----
+> nc -vv 127.0.0.1 31337
+Connection to 127.0.0.1 31337 port [tcp/*] succeeded!
+PING
+PONG
+----
+==========================

@@ -1,0 +1,19 @@
+<<<
+[[Mutators_DataElementRemoveMutator]]
+== DataElementRemoveMutator
+
+This mutator will remove nodes from the data model.
+
+=== Supported Elements
+
+ * xref:Blob[Blob]
+ * xref:Block[Block]
+ * xref:Choice[Choice]
+ * xref:DataModel[DataModel]
+ * xref:Flags[Flags]
+ * xref:Number[Number]
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.
