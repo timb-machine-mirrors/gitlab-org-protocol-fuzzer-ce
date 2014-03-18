@@ -22,95 +22,67 @@ A PIT is NOT valid unless...
  * Monitoring is enabled
  * Monitoring has been tested and fault on a demo/test fault 
 
-What to do if the pit doesn't parse: 
+=== What to do if the pit doesn't parse
 
-----------------------------------
+----
 Peach.exe -t pit_file.xml 
-----------------------------------
+----
 
 If a stack trace prints, record the stack trace where improper error handling is happening.
 The pit doesn't run properly.
 During the testing and building phase run the first iteration only. 
 
-----------------------------------
+----
 Peach.exe -1 pit_file.xml
-----------------------------------
+----
 
 Reduce the pit to basic parts in order make sure the 
 
-1. Test
-	a. References have the right names
-2. Log Path
-	a. Has a valid folder 
-3. Publisher
-	a. Can correctly talk to or output data
-4. Agent
-	a. Monitor setup is correct and had connectivity
-5. State Machine
-	a. References data and Models correctly
-6. DataModel
+. Test
+.. References have the right names
+. Log Path
+.. Has a valid folder 
+. Publisher
+.. Can correctly talk to or output data
+. Agent
+.. Monitor setup is correct and had connectivity
+. State Machine
+.. References data and Models correctly
+. DataModel
 
-Add --debug for more verbose output.
+Add +--debug+ for more verbose output.
 
-----------------------------------
+----
 Peach.exe -1 --debug pit_file.xml
-----------------------------------
+----
 
+=== Debugging Peach
 
-Debugging Peach
----------------
-
-On a crash 
-~~~~~~~~~~
+==== On a crash 
 
 Windows use the debug build of Peach and capture the full trace. 
 
 Linux 
 
------------------------------------------
+----
 mono --debug Peach.exe --debug Peach.exe pit_file.xml 
------------------------------------------
+----
 
 Look at the stack track and find the offending code.
 
 Attempt to debug with the following.  
 
-1. Make sure peach is compiling in visual studio. 
-2. Update to the latest Peach git files
-3. Recompile peach in visual studio
-4. Reduce your pit until you isolate the part of the pit file that is causing the crash.
-5. Write a small test case pit of what is you believe is causing the crash.
-	a. The more specifically isolated the better. 
-6. Run the test pit in Visual studio 	
-7. Isolate the code that is causing the crash
-	a. Hover or add a watch to the variable to see what its current state is. 
-8. Set a break point on the line of code and walk back in the call stack Debug->Windows->Call Stack
-9. Single step as needed
+. Make sure peach is compiling in visual studio. 
+. Update to the latest Peach git files
+. Recompile peach in visual studio
+. Reduce your pit until you isolate the part of the pit file that is causing the crash.
+. Write a small test case pit of what is you believe is causing the crash.
+.. The more specifically isolated the better. 
+. Run the test pit in Visual studio 	
+. Isolate the code that is causing the crash
+.. Hover or add a watch to the variable to see what its current state is. 
+. Set a break point on the line of code and walk back in the call stack Debug->Windows->Call Stack
+. Single step as needed
 
 Create a patch and test case then submit via a pull request on github. 
-
-Reporting Bugs
---------------
-
-Can't find/figure out the bug? You can contact us via email. Include in you report: 
-
-1. The pit file, link to pit file, or isolated test XML 
-2. The stack trace with line numbers
-	a. Debug Peach.exe or mono --debug
-3. Peach debug output Peach.exe --debug
-4. The seed and iteration number if any. 
-5. A full command line to repro 
-	a. +Peach.exe  --skipto==1999 --seed=40000 pit_file.xml+
-
-Example
-~~~~~~~
-
-----------------------------------
-Full Command Line: 
-Pit File Link: 
-Seed: 
-Iteration: 
-Stack Trace Output:
-Debug Output:
-----------------------------------
 
