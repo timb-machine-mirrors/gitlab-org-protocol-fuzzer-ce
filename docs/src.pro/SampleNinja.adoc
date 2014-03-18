@@ -1,24 +1,22 @@
 [[SampleNinja]]
-== Sample Ninja ==
+== Sample Ninja
 
-// Reviewed:
-//  - 01/30/2014: Seth & Mike: Outlined
+// 01/30/2014: Seth & Mike: Outlined
+//  * Unittest please! - Peter
+//  * Review current docs - Peter
+//  * Target elements wrong
+//  * Hint is wrong
+//  * Expand description and how it works
 
-// * Unittest please! - Peter
-// * Review current docs - Peter
-// * Target elements wrong
-// * Hint is wrong
-// * Expand description and how it works
+The Sample Ninja mutation engine swaps elements between sample files to generate a new mutated file. Sample Ninja is made up of two components, a command line program that builds and maintains the database, and a mutator that is enabled when a sample ninja database exists.
 
-The Sample Ninja mutation engine swaps elements between sample files to generate a mutated file.
-
-_Process_
+=== Process
 
  . Generate a sample ninja database using the PeachSampleNinja.exe command line tool
  . The Sample Ninja Mutator will automatically use the database the next time Peach is run
  . As new sample files are added, re-run Sample Ninja to add the new files.
 
-_Creating Sample Ninja Database_
+=== Creating Sample Ninja Database
 
 To generate a new sample ninja database you will need a pit file (fuzzing definition), the name 
 of the data model that can crack the sample files and a folder of sample files.  These three items
@@ -34,7 +32,7 @@ will be the name of you sample ninja database.
 
 The next time you run Peach with this pit file the sample ninja database will automatically be used.
 
-_Adding new sample files to an existing database_
+=== Adding new sample files to an existing database
 
  . Open a new terminal window
  . Change directories to the location of your pit file
@@ -42,8 +40,7 @@ _Adding new sample files to an existing database_
 with the correct values.
  . New files will be added
 
-
-_Syntax_
+=== Syntax
 
 Syntax: PeachSampleNinja.exe <pitfile> <datamodel> <samplefolder>
 
@@ -55,12 +52,3 @@ samplefolder::
 	Folder containing sample files
 
 The generated database will be "pitfile.ninja", so if your pit file is "png.xml" you will get "png.xml.ninja".
-
-_Target Elements_
-
-// * xref:Array[Array]
-TODO
-
-_Hints_
-
- * ArrayRandomizeOrderMutator-N -- Set number of random permutations produced for this array. [Peach 2.2 / Peach 3.0]

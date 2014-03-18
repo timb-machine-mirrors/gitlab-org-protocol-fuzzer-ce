@@ -102,6 +102,7 @@ No Attributes are supported by this transformer.
 ----
 
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 

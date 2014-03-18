@@ -17,6 +17,8 @@
 
 The placement element tell the data cracker that specific elements should be moved after the input stream is parsed.  This, combined with xref:Relation[offset-of relation] are the ways Peach supports handling files that contain references to elements by offset.
 
+See also xref:DataModeling_Placement[Arrays of Offsets to Data] chapter.
+
 NOTE: Placement only works when data is being parsed into the DataModel via an input Action or a Data statement pointing to a file.
 
 === Syntax
@@ -51,3 +53,4 @@ There are no valid child elements for Placement element.
 === Examples
 
 // TODO
+	

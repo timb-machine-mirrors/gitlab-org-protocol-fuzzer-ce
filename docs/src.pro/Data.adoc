@@ -1,3 +1,4 @@
+<<<
 [[Data]]
 == Data
 
@@ -29,19 +30,27 @@ If multiple Data files xml blocks are specified, the attribute _switchCount_ wit
 
 ----
 
-_Attributes:_
+=== Attributes
 
- * xref:name[name] -- Name of the Data [optional]
- * xref:fileName[fileName] -- Name of file to load, or folder with files to cycle through [optional]
+_Required:_
 
-_Valid Child-Elements:_
+This element does not support any required attributes.
+
+_Optional:_
+
+xref:name[name]:: Name of the Data
+xref:fileName[fileName]:: Name of file to load, or folder with files to cycle through
+
+=== Child Elements
 
  * xref:Field[Field]
  
- 
-=== Examples ===
+=== Examples
 
-.Multiple Data elements switched after _switchCount_ iterations"
+.Basic Usage Example
+====================
+Multiple Data elements switched after _switchCount_ iterations
+
 [source,xml]
 ----
 
@@ -59,3 +68,4 @@ _Valid Child-Elements:_
   </State>
 </StateModel>
 ----
+====================

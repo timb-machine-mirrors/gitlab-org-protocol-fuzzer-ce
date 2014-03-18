@@ -1,15 +1,25 @@
+<<<
 [[Import]]
-== Import ==
+== Import
 
-This element allows importing custom Python modules for use in Pit file.  It works just like the Python _import_ keyword.
+This element allows importing custom Python modules for use in Pit file. _Import_ works like the Python import keyword.
 
-NOTE: Peach 3 currently does not support the from attribute.
+=== Syntax
 
 [source,xml]
 ----
 <Import import="MyCode" />
 ----
 
-_Attributes:_
+=== Attributes
 
- * import -- Same as python import keyword [required]
+_Required:_
+
+import:: Same as python import keyword. A file must exist with a +.py+ postfix.
+
+_Optional:_
+
+There are no optional attributes for this element.
+
+// == Examples
+// TODO Import examples
