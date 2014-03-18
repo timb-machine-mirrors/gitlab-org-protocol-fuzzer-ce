@@ -30,6 +30,23 @@ DUM_CONFIG = DummyPeachTestConfig()
 # platform (via testlib.get_platform()) to Os tag as seen be peachfarm
 PLATFORM_TAG_LOOKUP = {'win': 'Windows', 'osx': 'Osx', 'linux': 'Linux'}
 
+def clear_peachfarm_errors():
+	'''clean out the whole kit and kaboodle before testing'''
+	sp = subprocess.Popen([r'C:\pf\bin\pf_admin.exe', '-clear', '-type=all'],
+	                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	time.sleep(1.5) # give it time to do its thing
+	sp.communicate()
+	sp.wait()
+
+def report_error(pit_name, opsys, test_name, admin_response):
+	# admin_response is list like (cmd, out, err, rc)
+	cmd, out, err, rc = admin_response
+	print "Failed to start: ", pit_name, ' on ', opsys, " for test ", test_name
+	print "Running: "   , cmd
+	print "Stdout: \n\t", out
+	print "Stderr: \n\t", err
+	print "Return Code:", rc
+
 
 def base_path():
 	# find the 'v3.0' directory. this is what ##Path## should be most times
@@ -192,7 +209,6 @@ def sample_files(base_files, pit_name):
 	for df in defines_files:
 		t = ET.parse(df)
 		def_elems = t.findall('All//Define')
-		print def_elems
 		for de in def_elems:
 			assert 'key'   in de.keys()
 			assert 'value' in de.keys()
@@ -314,7 +330,6 @@ def run_pit_zip(zip_name, args):
 	# assume pathing for windows. throw assertion if this script runs on linux
 	# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
 	assert  os.path.exists(PFADMIN_PATH)
-	admin_responses = {}
 	cmd = [PFADMIN_PATH, '-start', '-n1', '-t', args['os_tag'],
 		   '-range', '1-1',
 		   '-test',  args['test_name'],
@@ -322,9 +337,10 @@ def run_pit_zip(zip_name, args):
 	print 'Running: ', ' '.join(cmd)
 	sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = sp.communicate()
+	sp.wait()
+	rc = sp.returncode
 	k = args['os_tag'] + ' - ' + args['test_name']
-	admin_responses[k] = [' '.join(cmd), out, err]
-	return admin_responses
+	return [' '.join(cmd), out, err, rc]
 
 
 def all_pit_argument_info():
@@ -346,7 +362,7 @@ def all_pit_argument_info():
 			else:
 				target_info.append((t.test, PLATFORM_TAG_LOOKUP[t.platform]))
 		if len(target_info) == 0:
-			print 'SKIPPING', target
+			# print 'SKIPPING', target
 			testlib.skip_tests.append(target)
 		else:
 			# ensure no dupes
@@ -362,14 +378,15 @@ if __name__ == "__main__":
 	failures = [] # [(pit, os, testname, error_output)]
 	pits = ['BMP']
 
+	clear_peachfarm_errors()
 	pit_argument_info = all_pit_argument_info()
 
 	# TODO: turn pits into testlib.get_targets() instead
 	bpath = base_path()
 	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
-	pit_names = sorted(pit_names)
+	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
-		args_for_runs = pit_argument_info[pit_name]
+		if 'DHCPv6' not in pit_name: continue
 		zip_name = pit_name + '.zip'
 
 		temp_dir = temp_dir_name(pit_name)
@@ -379,32 +396,30 @@ if __name__ == "__main__":
 		collect_pit_files(pit_name, temp_dir)
 		create_pit_zip(zip_name, temp_dir)
 
+		# the same pit can have multiple sets of run args, even within an os
+		args_for_runs = pit_argument_info[pit_name]
 		for run_args in args_for_runs:
+			print '\n' # space the output between runs
 			prerun_error_count = len(peachfarm_errors())
-			admin_responses = run_pit_zip(zip_name, run_args)
-			print 'ADMIN_RESPONSES: \n', admin_responses
+			admin_response = run_pit_zip(zip_name, run_args)
+			time.sleep(1.5) # allow errors to propogate, may need increase
 			postrun_errors = peachfarm_errors()
 			postrun_error_count = len(postrun_errors)
 			if postrun_error_count != prerun_error_count:
 
 				prev_error_hdr  = most_recent_error_header(postrun_errors)
 				prev_error_info = postrun_errors[prev_error_hdr]
-				prev_error     = prev_error_hdr + '\n' + prev_error_info
+				prev_error      = prev_error_hdr + '\n' + prev_error_info
 
-				failures.append((pit_name,
-								 run_args['os_tag'], run_args['test_name'],
-								 prev_error))
-				# TODO fix this right and report the problem
-				implement_error_reporting = False
-				assert implement_error_reporting
+				if pit_name not in failures:
+					failures.append(pit_name)
+				report_error(pit_name, run_args['os_tag'],
+				             run_args['test_name'], admin_response)
 
 	map(shutil.rmtree, temp_dirs)
 
 	if failures != []:
-		failures.sort(key=lambda x: x[0]) # by pit name
-		for fail in failures:
-			print 'FAILED: '
-		print 'Failing Tests: ', '  '.join(map(lambda f: '-'.join(f), failures))
+		print '\n\nFailing Tests: ', '  '.join(failures), '\n\n'
 		sys.exit(len(failures))
 
 
