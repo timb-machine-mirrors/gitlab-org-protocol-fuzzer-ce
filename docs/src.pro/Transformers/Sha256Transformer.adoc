@@ -4,13 +4,13 @@
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
-// TODO: 
-// Verify parameters expand parameter description 
-// Full pit example using hex console 
-// expand  general description 
+// TODO:
+// Verify parameters expand parameter description
+// Full pit example using hex console
+// expand  general description
 // Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format 
-// Test output 
+// See AES for format
+// Test output
 
 // Updated:
 // 2/19/14: Mick
@@ -21,24 +21,22 @@
 
 === Transformer type: Cryptography
 
-The _SHA256Transformer_ will produce a SHA256 hash of the value in the parent xref:DataModel[DataModel].  
+The _SHA256Transformer_ will produce a SHA256 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-=== Parameters 
+=== Parameters
 
 No Parameters are supported by this tranformer.
 
-=== Actions Supported 
+=== Actions Supported
 
- * xref:Action_output[output]
- * xref:Action_call[call]
- * xref:Action_setProperty[setProperty]
+xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
 === Examples
 
-.Simple Console Example  
+.Simple Console Example
 ==========================
-This example uses the Sha256 transformer on an inline value and writes the transformed value to the console. 
+This example uses the Sha256 transformer on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----
@@ -65,9 +63,11 @@ This example uses the Sha256 transformer on an inline value and writes the trans
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>

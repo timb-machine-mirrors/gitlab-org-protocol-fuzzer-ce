@@ -4,13 +4,13 @@
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
-// TODO: 
-// Verify parameters expand parameter description 
-// Full pit example using hex console 
-// expand  general description 
+// TODO:
+// Verify parameters expand parameter description
+// Full pit example using hex console
+// expand  general description
 // Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format 
-// Test output, input 
+// See AES for format
+// Test output, input
 
 // Updated:
 // 2/19/14: Mick
@@ -21,10 +21,10 @@
 
 === Transformer type: Encoder/Decoder
 
-The _NetBiosEncodeTransformer_ performs a NetBios decode of the value in the parent xref:DataModel[DataModel]. 
+The _NetBiosEncodeTransformer_ performs a NetBios decode of the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-=== Parameters 
+=== Parameters
 
 _Required:_
 
@@ -32,25 +32,22 @@ There are no required parameters.
 
 _Optional:_
 
- * pad -- Boolean whether NetBios name should be padded/trimmed to 32 bytes. 
+ * pad -- Boolean whether NetBios name should be padded/trimmed to 32 bytes.
 
 === Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported 
+=== Actions Supported
 
- * xref:Action_input[input]
- * xref:Action_output[output]
- * xref:Action_call[call]
- * xref:Action_getProperty[getProperty] 
- * xref:Action_setProperty[setProperty]
+xref:Action_input[input]:: On input this transformer will decode the incoming data.
+xref:Action_output[output]:: On output this transformer will encode the outgoing data.
 
 === Examples
 
-.Encoding Value To and From File Example 
+.Encoding Value To and From File Example
 ==========================
-This example uses the NetBiosEncode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console. 
+This example uses the NetBiosEncode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 
 [source,xml]
@@ -73,7 +70,7 @@ This example uses the NetBiosEncode transformer on an inline value, writes the t
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
-			
+
 			<!-- Write Encoded Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
@@ -81,13 +78,16 @@ This example uses the NetBiosEncode transformer on an inline value, writes the t
 					<Field name="TransformMe" value="LANMAN" />
 				</Data>
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
-			
+
 			<!-- Read and decode encoded file and slurp the XML body to output in console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
@@ -98,16 +98,20 @@ This example uses the NetBiosEncode transformer on an inline value, writes the t
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>

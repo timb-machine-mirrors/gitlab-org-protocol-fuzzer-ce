@@ -4,12 +4,12 @@
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
-// TODO: 
-// Verify parameters expand parameter description 
-// Full pit example using hex console 
-// expand general description 
+// TODO:
+// Verify parameters expand parameter description
+// Full pit example using hex console
+// expand general description
 // Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format 
+// See AES for format
 // Test output, input
 
 // Updated:
@@ -21,28 +21,25 @@
 
 === Transformer type: Encoder/Decoder
 
-The _HexTransformer_ takes the provided value and produces an ascii string of hex characters that represent the data.  
+The _HexTransformer_ takes the provided value and produces an ascii string of hex characters that represent the data.
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to string.
 
-=== Parameters 
+=== Parameters
 
 No Parameters are supported by this transformer.
 
 === Attributes
 
-No attributes are supported by this transformer. 
+No attributes are supported by this transformer.
 
-=== Actions Supported 
+=== Actions Supported
 
- * xref:Action_input[input]
- * xref:Action_output[output]
- * xref:Action_call[call]
- * xref:Action_getProperty[getProperty] 
- * xref:Action_setProperty[setProperty]
+xref:Action_input[input]:: On input this transformer will a hex string into ascii for the incoming data.
+xref:Action_output[output]:: On output this transformer will convert ascii into a hex string for the outgoing data.
 
 === Examples
 
-.Simple Console Example  
+.Simple Console Example
 ==========================
 
 
@@ -64,7 +61,7 @@ No attributes are supported by this transformer.
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
-			
+
 			<!-- Write Encoded Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
@@ -72,13 +69,16 @@ No attributes are supported by this transformer.
 					<Field name="TransformMe" value="ABCDEF" />
 				</Data>
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
-			
+
 			<!-- Read and decode encoded file and slurp decoded string to output in console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
@@ -89,16 +89,20 @@ No attributes are supported by this transformer.
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>

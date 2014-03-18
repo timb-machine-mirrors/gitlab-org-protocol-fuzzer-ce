@@ -3,12 +3,12 @@
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
-// TODO: 
-// Verify parameters expand parameter description 
-// Full pit example using hex console 
-// expand  general description 
+// TODO:
+// Verify parameters expand parameter description
+// Full pit example using hex console
+// expand  general description
 // Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format 
+// See AES for format
 // Test output, input
 
 // Updated:
@@ -23,7 +23,7 @@
 The _GzipCompressTransformer_ performs a Gzip compression on the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
-=== Parameters 
+=== Parameters
 
 No Parameters are supported by this element.
 
@@ -37,19 +37,16 @@ _Optional:_
 
 There are no optional attributes.
 
-=== Actions Supported 
+=== Actions Supported
 
- * xref:Action_input[input]
- * xref:Action_output[output]
- * xref:Action_call[call]
- * xref:Action_getProperty[getProperty] 
- * xref:Action_setProperty[setProperty] 
+xref:Action_input[input]:: On input this transformer will decompress incoming data.
+xref:Action_output[output]:: On output this transformer will compress all outgoing data.
 
 === Examples
 
-.Compression To and From File Example 
+.Compression To and From File Example
 ==========================
-This example uses the GzipCompress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file to the console. 
+This example uses the GzipCompress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file to the console.
 
 [source,xml]
 ----
@@ -70,7 +67,7 @@ This example uses the GzipCompress Transformer to compress a value, write the va
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
-			
+
 			<!-- Write Compressed Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
@@ -78,28 +75,33 @@ This example uses the GzipCompress Transformer to compress a value, write the va
 					<Field name="TransformMe" value="shrinkmepleaseshrinkmeplease" />
 				</Data>
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
-			
+
 			<!-- Read and comcompress file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-			
 		</State>
 	</StateModel>
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encrypted.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encrypted.bin" />
 			<Param name="Overwrite" value="false" />
