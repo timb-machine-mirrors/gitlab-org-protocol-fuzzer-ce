@@ -89,6 +89,9 @@ namespace PeachFarm.Admin
 								case "target":
 									cleartype = DeleteDataType.Target;
 									break;
+								case "errors":
+									cleartype = DeleteDataType.Errors;
+									break;
 								default:
 									Program.syntax();
 									break;
@@ -593,6 +596,9 @@ Delete fault detail for job
 
 Delete fault detail for all jobs matching target
   pf_admin.exe -clear -type=target <target>
+
+Delete all errors logged
+	pf_admin.exe -clear -type=errors
 
 Commands:
 

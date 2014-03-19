@@ -599,6 +599,9 @@ namespace PeachFarm.Controller
 						case DeleteDataType.Target:
 							DatabaseHelper.DeleteFaultsForTarget(request.Parameter, config.MongoDb.ConnectionString);
 							break;
+						case DeleteDataType.Errors:
+							DatabaseHelper.DeleteAllErrors(config.MongoDb.ConnectionString);
+							break;
 						default:
 							throw new NotSupportedException(String.Format("DeleteData Type {0} not supported.", request.Type.ToString()));
 					}

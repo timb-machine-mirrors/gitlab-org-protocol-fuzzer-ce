@@ -4,12 +4,12 @@
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
-// TODO: 
-// Verify parameters expand parameter description 
-// Full pit example using hex console 
-// expand  general description 
+// TODO:
+// Verify parameters expand parameter description
+// Full pit example using hex console
+// expand  general description
 // Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format 
+// See AES for format
 // Test output, input
 
 // Updated:
@@ -21,11 +21,11 @@
 
 === Transformer type: Encoder/Decoder
 
-The _JsEncodeTransformer_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].  
+The _JsEncodeTransformer_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].
 All characters will be encoded.
 This xref:Transformer[Transformer] will only encode the output and not decode any input.
 
-=== Parameters 
+=== Parameters
 
 No Parameters are supported by this element.
 
@@ -33,17 +33,15 @@ No Parameters are supported by this element.
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported 
+=== Actions Supported
 
- * xref:Action_output[output]
- * xref:Action_call[call]
- * xref:Action_setProperty[setProperty]
+xref:Action_output[output]:: On output this transformer will JS encode the outgoing data.
 
 === Examples
 
-.Simple Encode Example  
+.Simple Encode Example
 ==========================
-This example uses the JsEncode transformer on an inline value and writes the transformed value to the console. 
+This example uses the JsEncode transformer on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----
@@ -69,9 +67,11 @@ This example uses the JsEncode transformer on an inline value and writes the tra
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>

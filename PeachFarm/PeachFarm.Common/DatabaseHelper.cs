@@ -359,8 +359,7 @@ namespace PeachFarm.Common.Mongo
 			var nodes = GetCollection<Heartbeat>(MongoNames.PeachFarmNodes, connectionString);
 			nodes.RemoveAll(WriteConcern.Acknowledged);
 
-			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
-			errors.RemoveAll(WriteConcern.Acknowledged);
+			DeleteAllErrors(connectionString);
 
 			var jobnodes = GetCollection<Node>(MongoNames.JobNodes, connectionString);
 			jobnodes.RemoveAll(WriteConcern.Acknowledged);
@@ -430,6 +429,12 @@ namespace PeachFarm.Common.Mongo
 			MongoDatabase db = server.GetDatabase(MongoNames.Database);
 			db.GridFS.Delete("*");
 			//server.Disconnect();
+		}
+
+		public static void DeleteAllErrors(string connectionString)
+		{
+			var errors = GetCollection<Heartbeat>(MongoNames.PeachFarmErrors, connectionString);
+			errors.RemoveAll(WriteConcern.Acknowledged);
 		}
 	}
 

@@ -34,11 +34,8 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-* xref:Action_input[input]
-* xref:Action_output[output]
-* xref:Action_call[call]
-* xref:Action_getProperty[getProperty]
-* xref:Action_setProperty[setProperty]
+xref:Action_input[input]:: On input this transformer will convert a hex string representation of a number into ascii for the incoming data.
+xref:Action_output[output]:: On output this transformer will convert an ascii number into a hex string for the outgoing data.
 
 === Examples
 
@@ -62,7 +59,7 @@ No Attributes are supported by this transformer.
 			<Action type="output" publisher="ConsolePub">
 				<DataModel ref="Ex1" />
 			</Action>
-			
+
 			<!-- Write Encoded Output to File -->
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
@@ -70,34 +67,40 @@ No Attributes are supported by this transformer.
 					<Field name="TransformMe" value="1234" />
 				</Data>
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
-			
+
 			<!-- Read and decode encoded file and slurp decoded string to output in console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-			
 		</State>
 	</StateModel>
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encrypted.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encrypted.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
