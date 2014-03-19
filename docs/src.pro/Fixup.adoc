@@ -6,46 +6,71 @@
 
 It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to “fix up” certain header and checksum fields that may have been fuzzed.  
 
+=======================================================
+|Fixup|Checksum|Hashing|Utility|Sequencing
+|CiscoFixup|Y|||
+|CopyValueFixup|||Y|
+|CrcDualFixup|Y|||
+|CrcFixup|Y|||
+|ExpressionFixup|||Y|
+|FillValueFixup|||Y|
+|HMACFixup||Y||
+|IcmpChecksumFixup|Y|||
+|IcmpV6ChecksumFixup|Y|||
+|LRCFixup|Y|||
+|MD5Fixup||Y||
+|ScriptFixup|||Y|
+|SequenceIncrementFixup||||Y
+|SequenceRandomFixup||||Y
+|SHA1Fixup||Y||
+|SHA224Fixup||Y||
+|SHA256Fixup||Y||
+|SHA384Fixup||Y||
+|SHA512Fixup||Y||
+|TCPChecksumFixup|Y|||
+|UDPChecksumFixup|Y|||
+|=======================================================
+
 === Fixups
 
 The following fixups come with Peach by default.
 
 _Utility Fixups_
 
- * xref:Fixups_CopyValueFixup[CopyValueFixup]
- * xref:Fixups_ExpressionFixup[ExpressionFixup] 
- * xref:Fixups_FillValueFixup[FillValueFixup]
- * xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
+xref:Fixups_CopyValueFixup[CopyValueFixup]
+xref:Fixups_ExpressionFixup[ExpressionFixup] 
+xref:Fixups_FillValueFixup[FillValueFixup]
+xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
 
 _Checksum Fixups_
 
- * xref:Fixups_CiscoFixup[CiscoFixup]
- * xref:Fixups_CrcDualFixup[CrcDualFixup]
- * xref:Fixups_CrcFixup[CrcFixup]
- * xref:Fixups_IcmpChecksumFixup[IcmpChecksumFixup]
- * xref:Fixups_IcmpV6ChecksumFixup[IcmpV6ChecksumFixup]
- * xref:Fixups_LRCFixup[LRCFixup]
- * xref:Fixups_TCPChecksumFixup[TCPChecksumFixup] 
- * xref:Fixups_UDPChecksumFixup[UDPChecksumFixup]
+xref:Fixups_CiscoFixup[CiscoFixup]
+xref:Fixups_CrcDualFixup[CrcDualFixup]
+xref:Fixups_CrcFixup[CrcFixup]
+xref:Fixups_IcmpChecksumFixup[IcmpChecksumFixup]
+xref:Fixups_IcmpV6ChecksumFixup[IcmpV6ChecksumFixup]
+xref:Fixups_LRCFixup[LRCFixup]
+xref:Fixups_TCPChecksumFixup[TCPChecksumFixup] 
+xref:Fixups_UDPChecksumFixup[UDPChecksumFixup]
 
 _Hashing Fixups_
 
 HashFixup is the base class used by the other hashing fixups.
 
- * xref:Fixups_HMACFixup[MD5Fixup]
- * xref:Fixups_MD5Fixup[MD5Fixup] 
- * xref:Fixups_SHA1Fixup[SHA1Fixup]
- * xref:Fixups_SHA224Fixup[SHA224Fixup]
- * xref:Fixups_SHA256Fixup[SHA256Fixup]
- * xref:Fixups_SHA384Fixup[SHA384Fixup]
- * xref:Fixups_SHA512Fixup[SHA512Fixup]
+xref:Fixups_HMACFixup[MD5Fixup]
+xref:Fixups_MD5Fixup[MD5Fixup] 
+xref:Fixups_SHA1Fixup[SHA1Fixup]
+xref:Fixups_SHA224Fixup[SHA224Fixup]
+xref:Fixups_SHA256Fixup[SHA256Fixup]
+xref:Fixups_SHA384Fixup[SHA384Fixup]
+xref:Fixups_SHA512Fixup[SHA512Fixup]
  
  _Sequencing Fixups_
  
- * xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
- * xref:Fixups_SequenceRandomFixup[SequenceRandomFixup]
+xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
+xref:Fixups_SequenceRandomFixup[SequenceRandomFixup]
  
  _Note_
  
- Fixups should be run after fuzzing and before processing fuzzed data.
+Fixups should be run after fuzzing and before processing fuzzed data.
 
