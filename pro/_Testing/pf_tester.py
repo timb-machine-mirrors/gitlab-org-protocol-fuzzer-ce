@@ -52,7 +52,7 @@ def base_path():
 	# find the 'v3.0' directory. this is what ##Path## should be most times
 	d = os.path.abspath(__file__)
 	while True:
-		if os.path.basename(d) == 'v3.0':
+		if os.path.basename(d) == 'pro':
 			break
 		d = os.path.dirname(d)
 	return d
@@ -214,6 +214,9 @@ def sample_files(base_files, pit_name):
 			assert 'value' in de.keys()
 			if de.get('key') == 'SamplePath':
 				spath = de.get('value')
+				spath = spath.replace(OTHER_OS_SEP[os.path.sep], os.path.sep)
+				spath = spath.lstrip('/')
+				spath = spath.lstrip('\\')
 				spath = os.path.join(bpath, spath)
 				spath = os.path.abspath(spath)
 				dir_contents = os.listdir(spath)
@@ -376,18 +379,17 @@ def all_pit_argument_info():
 if __name__ == "__main__":
 	temp_dirs = []
 	failures = [] # [(pit, os, testname, error_output)]
-	pits = ['BMP']
 
 	clear_peachfarm_errors()
 	pit_argument_info = all_pit_argument_info()
 
-	# TODO: turn pits into testlib.get_targets() instead
 	bpath = base_path()
 	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
 	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
 		zip_name = pit_name + '.zip'
 
+		print '\nConstructing pit zip for ', pit_name
 		temp_dir = temp_dir_name(pit_name)
 		temp_dirs.append(temp_dir)
 		os.mkdir(temp_dir)
