@@ -6,7 +6,9 @@
 //  - 03/06/2014: Lynn
 //   Added and edited child elements
 
-The Choice element is a child element of xref:DataModel[DataModel] or xref:Block[Block].  Choice elements are used to indicate any of the sub-elements are valid but only one should be selected.  Much like a switch statement in programming languages.
+The Choice element is a child element of xref:DataModel[DataModel] or xref:Block[Block].  Choice elements are expected to have valid sub-elements; Peach will select a sub-element to fuzz.  
+
+Choice elements act like a switch statement in programming languages.
 
 === Syntax
 

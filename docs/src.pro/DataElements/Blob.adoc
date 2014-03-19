@@ -6,7 +6,11 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Blobs are always sized in bytes, never bits. By default Blobs will be dumb fuzzed (see list of mutators below), as the internal data is unknown. Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). 
+
+A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Blobs are always sized in bytes, never bits. By default Blobs will be dumb fuzzed (see list of mutators below), as the internal data is unknown. 
+
+Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
 
 === Syntax
 
@@ -29,22 +33,25 @@ xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes"
 xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
 xref:occurs[occurs]::
-	Actual occurrences of element. 
-	+
-	Used to define arrays with a static size. Adding this attribute, even with a value of 1 will
-	convert it to an array. Defaults to 1.
+	Actual occurrences of element. Defaults to 1.
+	
+	- Used to define arrays with a static size. 
+	- Adding this attribute, even with a value of 1 will
+	convert it to an array. 
+	
    
 xref:minOccurs[minOccurs]::
-	The minimum number of times this blob must occur.
-	+
-	Used to define arrays with a variable size. Arrays defined by min/maxOccurs will generally have a relation
-	defined. Adding this attribute, even with a value of 1 will convert it to an array. Defaults to 1.
+	The minimum number of times this blob must occur. Defaults to 1.
+	
+	- Used to define arrays with a variable size. Arrays defined by min/maxOccurs will generally have a relation
+	defined. 
+	- Adding this attribute, even with a value of 1 will convert it to an array. 
    
 xref:maxOccurs[maxOccurs]::
-	The maximum number of times this blob can occur.
-	+
-	Used to define arrays with a static size. Adding this attribute, even with a value of 1 will
-	convert it to an array. Defaults to 1.
+	The maximum number of times this blob can occur. Defaults to 1.
+	
+	- Used to define arrays with a static size. 
+	- Adding this attribute, even with a value of 1 will convert it to an array. 
 
 xref:constraint[constraint]::
 	A constraint in the form of an expression.  Used during data cracking.
@@ -71,7 +78,7 @@ xref:Mutators_BlobMutator[BlobMutator]:: Grows, shrinks, and performs complex ma
 xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
 xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
 xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
-	Swaps two nodes in the data model that are neighbouring each other
+	Swaps two nodes in the data model that are neighboring each other
 
 xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]::
 	Uses the xref:SampleNinja[Sample Ninja] database to swap elements between different sample files
