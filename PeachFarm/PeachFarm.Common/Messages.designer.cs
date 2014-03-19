@@ -6369,6 +6369,8 @@ namespace PeachFarm.Common.Messages
 
 		/// <remarks/>
 		Target,
+
+		Errors,
 	}
 
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.18408")]

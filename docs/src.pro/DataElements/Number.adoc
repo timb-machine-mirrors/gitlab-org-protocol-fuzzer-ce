@@ -33,7 +33,9 @@
 //  03/06/2014: Lynn
 //   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
 
-The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian. The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
+The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian. 
+
+The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
 
 The Number element is a child element of xref:DataModel[DataModel], xref:Block[Block], or xref:Choice[Choice].
 

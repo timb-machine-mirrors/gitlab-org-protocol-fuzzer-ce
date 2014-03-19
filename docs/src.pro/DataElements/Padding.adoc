@@ -2,7 +2,11 @@
 [[Padding]]
 == Padding
 
-The _Padding_ element is used to pad out variably sized blocks or data models. When padding out the data, padding is always 0. This is not customizable. When cracking data into a model that contains the padding element, the pad data will be skipped.
+The _Padding_ element is used to pad out variably sized blocks or data models. 
+
+When padding out the data, padding is always 0. This is not customizable. 
+
+When cracking data into a model that contains the padding element, the pad data will be skipped.
 
 === Syntax
 
