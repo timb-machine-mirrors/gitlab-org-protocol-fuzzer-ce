@@ -1,10 +1,9 @@
 include::Ldap_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	Description of Target Configuration
+==== Target Configuration
+Description of Target Configuration
 
 _Example of setting up OpenLDAP:_
 
@@ -49,19 +48,20 @@ ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f group.ldif
 ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f password.ldif
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	TargetPort:: LDAP port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
-	Username:: Username used to login to the Ldap service
-	Password:: Password for the user logging into the Ldap service
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine
+SourceIPv4:: IP address of the interface on the local machine
+TargetPort:: LDAP port number of the target host machine
+Interface:: Name of local interface (used for monitoring)
+Username:: Username used to login to the Ldap service
+Password:: Password for the user logging into the Ldap service
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample LDAP Configuration File
+==== Sample LDAP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -91,33 +91,32 @@ ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f password.ldif
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 #Ldap Search Test
-peach -1 -debug LDAP.xml
+peach -1 --debug LDAP.xml
 
 #Ldap Server Side Test
-peach -1 -debug LDAP.xml Server
+peach -1 --debug LDAP.xml Server
 
 #Ldap Add Test
-peach -1 -debug LDAP.xml Add
+peach -1 --debug LDAP.xml Add
 
 #Ldap Comopre Test
-peach -1 -debug LDAP.xml Compare
+peach -1 --debug LDAP.xml Compare
 
 #Ldap Delete Test
-peach -1 -debug LDAP.xml Delete
+peach -1 --debug LDAP.xml Delete
 
 #Ldap ExtendOp Test
-peach -1 -debug LDAP.xml ExtendOp
+peach -1 --debug LDAP.xml ExtendOp
 ----
-.Full test run
+==== Full test run
 ----
 #Ldap Search Test
 peach LDAP.xml

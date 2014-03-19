@@ -1,10 +1,9 @@
 include::MLD_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A target machine with MLD enabled.  A firewall must not block MLD messages.
+==== Target Configuration
+A target machine with MLD enabled.  A firewall must not block MLD messages.
 
 _Windows Firewall Inbound Rules to enable on Target:_
 
@@ -15,16 +14,17 @@ Core Networking - Multicast Listener Report (ICMPv6-In)
 Core Networking - Multicast Listener Report v2 (ICMPv6-In)
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv6:: IP address of the target host machine
-	SourceIPv6:: IP address of the interface on the local machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv6:: IP address of the target host machine.
+SourceIPv6:: IP address of the interface on the local machine.
+Interface:: Name of local interface (used for monitoring).
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample MLD Configuration File
+==== Sample MLD Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -37,16 +37,19 @@ Core Networking - Multicast Listener Report v2 (ICMPv6-In)
     <Define key="Strategy"  value="Sequential"/>
     <Define key="Path" value="."/>
   </All>
+
   <Linux platform="linux">
     <Define key="Interface" value="eth0"/>
     <Define key="tsharkInterface" value="eth0"/>
     <Define key="tsharkBin" value="/usr/bin/tshark"/>
   </Linux>
+
   <OSX platform="osx">
     <Define key="Interface" value="em0"/>
     <Define key="tsharkInterface" value="em0"/>
     <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
   </OSX>
+
   <Windows platform="windows">
     <!-- This can't run on windows because it uses the RawEther publisher. -->
     <!-- Platform independence is added as an example. -->
@@ -57,17 +60,16 @@ Core Networking - Multicast Listener Report v2 (ICMPv6-In)
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug MLD.xml
+peach -1 --debug MLD.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach MLD.xml
 ----

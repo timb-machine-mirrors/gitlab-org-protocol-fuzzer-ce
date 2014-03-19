@@ -1,9 +1,8 @@
 include::NTP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
+==== Target Configuration
 A UDP listener listening on the UDPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
 
 _Example of using socat to listen for NTP:_
@@ -12,16 +11,17 @@ _Example of using socat to listen for NTP:_
 socat STDIO udp4-listen:123
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IPv4 address of the target host machine
-	SourcePort:: UDPv4 and/or TCPv4 port number of the local machine
-	TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine
+==== Required Pit Configuration Changes
+TargetIPv4:: IPv4 address of the target host machine.
+SourcePort:: UDPv4 and/or TCPv4 port number of the local machine.
+TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample NTP Configuration File
+==== Sample NTP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -37,17 +37,16 @@ socat STDIO udp4-listen:123
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug NTP.xml
+peach -1 --debug NTP.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach NTP.xml
 ----

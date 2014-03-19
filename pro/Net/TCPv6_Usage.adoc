@@ -1,11 +1,10 @@
 include::TCPv6_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	An application must be listening on the TCP port defined in the configuration file. The network tool socat can be used as the listener.
-	Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
+==== Target Configuration
+An application must be listening on the TCP port defined in the configuration file. The network tool socat can be used as the listener.
+Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
 
 _Example of setting up TCPv6:_
 [source,bash]
@@ -20,20 +19,21 @@ ip addr add ::2 dev lo
 socat tcp6-l:4321,fork,reuseaddr STDIO
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	TargetIPBytes:: IP address of the target host machine in hexadecimal
-	SourceIPBytes:: IP address of the interface on the local machine in hexadecimal
-	SourcePort:: TCPv6 port number of the local machine
-	TargetPort:: TCPv6 port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+TargetIPBytes:: IP address of the target host machine in hexadecimal.
+SourceIPBytes:: IP address of the interface on the local machine in hexadecimal.
+SourcePort:: TCPv6 port number of the local machine.
+TargetPort:: TCPv6 port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample TCPv6 Configuration File
+==== Sample TCPv6 Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -63,17 +63,16 @@ socat tcp6-l:4321,fork,reuseaddr STDIO
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug TCPv6.xml
+peach -1 --debug TCPv6.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach TCPv6.xml
 ----
