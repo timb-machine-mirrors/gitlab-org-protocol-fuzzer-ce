@@ -6,9 +6,9 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). 
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes).
 
-A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Blobs are always sized in bytes, never bits. By default Blobs will be dumb fuzzed (see list of mutators below), as the internal data is unknown. 
+A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Blobs are always sized in bytes, never bits. By default Blobs will be dumb fuzzed (see list of mutators below), as the internal data is unknown.
 
 Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
 
@@ -34,24 +34,24 @@ xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
 xref:occurs[occurs]::
 	Actual occurrences of element. Defaults to 1.
-	
-	- Used to define arrays with a static size. 
+
+	- Used to define arrays with a static size.
 	- Adding this attribute, even with a value of 1 will
-	convert it to an array. 
-	
-   
+	convert it to an array.
+
+
 xref:minOccurs[minOccurs]::
 	The minimum number of times this blob must occur. Defaults to 1.
-	
+
 	- Used to define arrays with a variable size. Arrays defined by min/maxOccurs will generally have a relation
-	defined. 
-	- Adding this attribute, even with a value of 1 will convert it to an array. 
-   
+	defined.
+	- Adding this attribute, even with a value of 1 will convert it to an array.
+
 xref:maxOccurs[maxOccurs]::
 	The maximum number of times this blob can occur. Defaults to 1.
-	
-	- Used to define arrays with a static size. 
-	- Adding this attribute, even with a value of 1 will convert it to an array. 
+
+	- Used to define arrays with a static size.
+	- Adding this attribute, even with a value of 1 will convert it to an array.
 
 xref:constraint[constraint]::
 	A constraint in the form of an expression.  Used during data cracking.
@@ -104,55 +104,55 @@ This is an example of dumb file fuzzing. The data from _sample.png_ will be crac
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach>
-	
+
 	<DataModel name="TheDataModel">
 		<Blob />
 	</DataModel>
-	
-	<!-- Define a simple state machine that will write the file and 
+
+	<!-- Define a simple state machine that will write the file and
 		then launch a program using the FileWriter and DebuggerLaucher publishers -->
 	<StateModel name="State" initialState="Initial">
 		<State name="Initial">
-			
+
 			<!-- Write out contents of file. -->
 			<Action type="output">
 				<DataModel ref="TestTemplate" />
 				<Data fileName="sample.png" />
 			</Action>
-			
+
 			<!-- Close file -->
 			<Action type="close" />
-			
+
 			<!-- Launch the file consumer -->
 			<Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
-			
+
 		</State>
 	</StateModel>
-	
+
 	<!-- Setup a local agent that will monitor for faults -->
 	<Agent name="LocalAgent">
 		<Monitor class="WindowsDebugger">
-			
-			<!-- The command line to run.  Notice the filename provided matched up 
+
+			<!-- The command line to run.  Notice the filename provided matched up
 				to what is provided below in the Publisher configuration -->
 			<Param name="CommandLine" value="c:\windows\system32\mspaint.exe fuzzfile.bin" />
-			
+
 			<!-- This parameter will cause the debugger to wait for an action-call in
 				the state model with a method="ScoobySnacks" before running
 				program.
-				
+
 				Note: You will also need to add a parameter to the publisher called
 				    "debugger" and set it to "true"!
 				-->
 			<Param name="StartOnCall" value="ScoobySnacks" />
-			
+
 		</Monitor>
 	</Agent>
-	
+
 	<Test name="Default">
 		<Agent ref="LocalAgent" />
 		<StateModel ref="State"/>
-		
+
 		<!-- Configure our publisher with correct filename to write too -->
 		<Publisher class="File">
 			<Param name="FileName" value="fuzzfile.bin" />
@@ -163,7 +163,7 @@ This is an example of dumb file fuzzing. The data from _sample.png_ will be crac
 			<Param name="Path" value="logtest" />
 		</Logger>
 	</Test>
-	
+
 </Peach>
 ----
 ==========================
@@ -174,7 +174,32 @@ A blob with a default value. Providing a default value does not set a fixed leng
 
 [source,xml]
 ----
-<Blob name="Unknown1" valueType="hex" value="AA BB CC DD" />
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="Ex1">
+    <Blob name="Unknown1" valueType="hex" value="AA BB CC DD" />
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output" publisher="ConsolePub">
+        <DataModel ref="Ex1" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="ConsoleHex" name="ConsolePub"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
 ----
 
 .Using a Blob as part of a size relationship
@@ -183,10 +208,35 @@ A blob with size-of relationship:
 
 [source,xml]
 ----
-<Number name="LengthOfData" size="32">
-  <Relation type="size" of="Data" />
-</Number>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-<Blob name="Data" />
+  <DataModel name="Ex1">
+    <Number name="LengthOfData" size="32">
+      <Relation type="size" of="Data" />
+    </Number>
+
+    <Blob name="Data" valueType="hex" value="AA BB CC DD" />
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output" publisher="ConsolePub">
+        <DataModel ref="Ex1" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="ConsoleHex" name="ConsolePub"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
 ----
 ==========================
