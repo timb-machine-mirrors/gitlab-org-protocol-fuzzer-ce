@@ -1,23 +1,22 @@
 include::LLDP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	This pit broadcasts LLDP packets; no extra applications are required.
+==== Target Configuration
+This pit broadcasts LLDP packets; no extra applications are required.
 
+==== Required Pit Configuration Changes
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface (used for monitoring).
+Hostname:: Host name of the switch.
 
-.Required Pit Configuration Changes
-	SourceMAC:: MAC address on local machine
-	TargetMAC:: MAC address of target machine
-	Interface:: Name of local interface (used for monitoring)
-	Hostname:: Host name of the switch
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
-
-.Sample LLDP Configuration File
+==== Sample LLDP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -48,17 +47,16 @@ Configuration
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug LLDP.xml
+peach -1 --debug LLDP.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach LLDP.xml
 ----

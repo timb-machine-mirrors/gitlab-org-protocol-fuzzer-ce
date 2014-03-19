@@ -1,23 +1,23 @@
 include::LACP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	No extra applications are required for pit tests but we recommend a LACP enabled switch.
+==== Target Configuration
+No extra applications are required for pit tests but we recommend a LACP enabled switch.
 
-.Required Pit Configuration Changes
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-Interface:: Name of local interface
-ActorPort:: Port number of the local machine
-PartnerPort:: Port number of the target host machine
+==== Required Pit Configuration Changes
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface.
+ActorPort:: Port number of the local machine.
+PartnerPort:: Port number of the target host machine.
 
-.Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample LACP Configuration File
+==== Sample LACP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -49,17 +49,16 @@ LoggerPath:: Path to folder where logs will be stored
 
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 peach -1 -debug LACP.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach LACP.xml
 ----

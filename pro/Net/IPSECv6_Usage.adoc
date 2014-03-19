@@ -49,26 +49,26 @@ sudo socat STDIO tcp-listen:12345
 ----
 
 ==== Required Pit Configuration Changes
-TargetIPv6:: IPv6 address of the target host machine
-SourceIPv6:: IPv6 address of the interface on the local machine
-TargetIPv4:: IPv4 address of the target host machine (used for encapsulating IPv4 in IPv6)
-SourceIPv4:: IPv4 address of the interface on the local machine (used for encapsulating IPv4 in IPv6)
-SourceMAC:: MAC address on local machine
-TargetMAC:: MAC address of target machine
-Mode:: Processing mode for IPsec can either be Tunnel or Transport
-EncryptionAlg:: Encryption algorithm used when encrypting packets
-CryptoKey:: Shared key used to encrypt packets
-HashAlg:: Hashing algorithm used to provide data integrity
-AuthKey:: Shared key used for HMAC hashing
-IV:: Initialization vector used with the encryption algorithm
-SPI:: Security parameter index used assigned to the local machine
-Interface:: Name of local interface (used for monitoring)
-SourcePort:: UDPv6 and/or TCPv6 port number of the local machine
-TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine
+TargetIPv6:: IPv6 address of the target host machine.
+SourceIPv6:: IPv6 address of the interface on the local machine.
+TargetIPv4:: IPv4 address of the target host machine (used for encapsulating IPv4 in IPv6).
+SourceIPv4:: IPv4 address of the interface on the local machine (used for encapsulating IPv4 in IPv6).
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Mode:: Processing mode for IPsec can either be Tunnel or Transport.
+EncryptionAlg:: Encryption algorithm used when encrypting packets.
+CryptoKey:: Shared key used to encrypt packets.
+HashAlg:: Hashing algorithm used to provide data integrity.
+AuthKey:: Shared key used for HMAC hashing.
+IV:: Initialization vector used with the encryption algorithm.
+SPI:: Security parameter index used assigned to the local machine.
+Interface:: Name of local interface (used for monitoring).
+SourcePort:: UDPv6 and/or TCPv6 port number of the local machine.
+TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine.
 
 ==== Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
 ==== Sample IPsec Configuration File

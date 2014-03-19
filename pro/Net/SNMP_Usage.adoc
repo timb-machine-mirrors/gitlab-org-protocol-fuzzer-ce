@@ -1,10 +1,9 @@
 include::SNMP_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used as the listener.
+==== Target Configuration
+A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used as the listener.
 
 _Example of using socat to listen on SNMP port:_
 
@@ -27,19 +26,20 @@ sudo /etc/init.d/snmpd restart
 sudo apt-get install snmp
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	SourcePort:: SNMP port number of the local machine
-	TargetPort:: SNMP port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
-	CommString:: Community string used for by the SNMP server
-	Program:: The client program to test when fuzzing as the server
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: SNMP port number of the local machine.
+TargetPort:: SNMP port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+CommString:: Community string used for by the SNMP server.
+Program:: The client program to test when fuzzing as the server.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
-	Agent:: Agent to run depending on the target OS. Do not change this value.
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Agent:: Agent to run depending on the target OS. Do not change this value.
+Path:: Path to the relative base directory where all pits are located.
 
 .Sample SNMP Configuration File
 [source,xml]
@@ -77,25 +77,24 @@ sudo apt-get install snmp
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 #Run client test
-peach -1 -debug SNMP.xml
+peach -1 --debug SNMP.xml
 
 #Run server test
-peach -1 -debug SNMP.xml Server
+peach -1 --debug SNMP.xml Server
 ----
-.Full test run
+==== Full test run
 ----
 #Run client test
 peach SNMP.xml
 
 #Run server test
-peach -1 -debug SNMP.xml Server
+peach -1 --debug SNMP.xml Server
 ----

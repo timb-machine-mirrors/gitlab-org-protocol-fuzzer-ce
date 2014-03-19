@@ -24,13 +24,13 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
 ----
 
 ==== Required Pit Configuration Changes
-TargetIPv6:: IP address of the target host machine
-SourceIPv6:: IP address of the interface on the local machine
-Interface:: Name of local interface (used for monitoring)
+TargetIPv6:: IP address of the target host machine.
+SourceIPv6:: IP address of the interface on the local machine.
+Interface:: Name of local interface (used for monitoring).
 
-==== Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing
-LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes.
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
 ==== Sample ICMPv6 Configuration File

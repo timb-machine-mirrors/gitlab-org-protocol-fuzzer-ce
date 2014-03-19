@@ -1,11 +1,10 @@
 include::TCPv4_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A TCP listener listening on the TCPv4 port defined in configuration file is required. The network tool socat can be used as the listener. 
-	To use this pit, disable outgoing RST packets; Peach manages TCP states outside of the kernel context. 
+==== Target Configuration
+A TCP listener listening on the TCPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
+To use this pit, disable outgoing RST packets; Peach manages TCP states outside of the kernel context.
 
 _Example of setting up TCPv4:_
 [source,bash]
@@ -17,20 +16,21 @@ sudo iptables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
 socat tcp4-l:12345,fork,reuseaddr STDIO
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	TargetIPBytes:: IP address of the target host machine in hexadecimal
-	SourceIPBytes:: IP address of the interface on the local machine in hexadecimal
-	SourcePort:: TCPv4 port number of the local machine
-	TargetPort:: TCPv4 port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+TargetIPBytes:: IP address of the target host machine in hexadecimal.
+SourceIPBytes:: IP address of the interface on the local machine in hexadecimal.
+SourcePort:: TCPv4 port number of the local machine.
+TargetPort:: TCPv4 port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample TCPv4 Configuration File
+==== Sample TCPv4 Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -61,17 +61,16 @@ socat tcp4-l:12345,fork,reuseaddr STDIO
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug TCPv4.xml
+peach -1 --debug TCPv4.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach TCPv4.xml
 ----

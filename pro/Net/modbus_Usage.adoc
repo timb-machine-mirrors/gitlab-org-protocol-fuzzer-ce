@@ -1,10 +1,9 @@
 include::modbus_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A Modbus server listening on the Modbus port defined in configuration file is required. The network tool socat can be used as the listener.
+==== Target Configuration
+A Modbus server listening on the Modbus port defined in configuration file is required. The network tool socat can be used as the listener.
 
 _Example of using socat to listen on Modbus port:_
 
@@ -12,22 +11,23 @@ _Example of using socat to listen on Modbus port:_
 socat tcp-l:502,fork exec:'/bin/cat'
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	TargetPort:: Modbus port number of the target host machine
-	SerialPort:: The serial port of the local machine when using Modbus over serial
-	Baudrate:: The baud rate for the current serial port
-	Parity:: The parity bit value used for the current serial port
-	DataBits:: The number of data bits in each character for the current serial port
-	StopBits:: Number of bits sent at the end of every character for the current serial port
-	Handshake:: The current handshake protocol used by the current serial port
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+TargetPort:: Modbus port number of the target host machine.
+SerialPort:: The serial port of the local machine when using Modbus over serial.
+Baudrate:: The baud rate for the current serial port.
+Parity:: The parity bit value used for the current serial port.
+DataBits:: The number of data bits in each character for the current serial port.
+StopBits:: Number of bits sent at the end of every character for the current serial port.
+Handshake:: The current handshake protocol used by the current serial port.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
-	Timeout:: How long to wait for incoming data
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Timeout:: How long to wait for incoming data.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample Modbus Configuration File
+==== Sample Modbus Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -53,17 +53,16 @@ socat tcp-l:502,fork exec:'/bin/cat'
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
-peach -1 -debug modbus.xml
+peach -1 --debug modbus.xml
 ----
-.Full test run
+==== Full test run
 ----
 peach modbus.xml
 ----

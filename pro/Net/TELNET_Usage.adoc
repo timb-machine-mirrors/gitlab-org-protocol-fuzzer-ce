@@ -1,11 +1,10 @@
 include::TELNET_DataSheet.adoc[]
 
-Configuration
--------------
+=== Configuration
 
-.Target Configuration
-	A Telnet server is required to test the client side of the Telnet pit. 
-	On Linux, telnetd can be downloaded using apt-get.
+==== Target Configuration
+A Telnet server is required to test the client side of the Telnet pit.
+On Linux, telnetd can be downloaded using apt-get.
 
 _Example of installing on Telnet port:_
 
@@ -18,21 +17,22 @@ sudo apt-get install telnetd
 http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 ----
 
-.Required Pit Configuration Changes
-	TargetIPv4:: IP address of the target host machine
-	SourceIPv4:: IP address of the interface on the local machine
-	SourcePort:: Telnet port number of the local machine
-	TargetPort:: Telnet port number of the target host machine
-	Interface:: Name of local interface (used for monitoring)
-	Username:: User name of the remote Telnet account
-	Password:: Password for the associated Telnet user account
-	Program:: The client program to test when fuzzing as the server
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: Telnet port number of the local machine.
+TargetPort:: Telnet port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+Username:: User name of the remote Telnet account.
+Password:: Password for the associated Telnet user account.
+Program:: The client program to test when fuzzing as the server.
 
-.Optional Pit Configuration Changes
-	Strategy:: Fuzzing strategy Peach will use for testing
-	LoggerPath:: Path to folder where logs will be stored
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
 
-.Sample Telnet Configuration File
+==== Sample Telnet Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -71,22 +71,20 @@ http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 </PitDefines>
 ----
 
-.Configure Additional Monitors
+==== Configure Additional Monitors
 Add monitors to agent as needed
 
-Running
--------
+=== Running
 
-.Single test debug run
+==== Single test debug run
 ----
 #Test client
-peach -1 -debug TELNET.xml
+peach -1 --debug TELNET.xml
 
 #Test server
-peach -1 -debug TELNET.xml Server
-
+peach -1 --debug TELNET.xml Server
 ----
-.Full test run
+==== Full test run
 ----
 #Test client
 peach TELNET.xml
