@@ -154,10 +154,14 @@ Produce 32 bit (4 byte) number with a default value of 5:
 	</StateModel>
 
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -212,11 +216,16 @@ To only use 16 bits (two byte) change the size to 16.
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -280,11 +289,15 @@ boundaries.
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -373,11 +386,16 @@ To change the endianness of the number set the endian attribute. Endianness defi
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -446,11 +464,16 @@ is `"hex"`:
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -527,11 +550,16 @@ To indicate value is signed, set the `signed` attribute equal to `"true"`. The d
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -606,11 +634,16 @@ both decimal and hexadecimal values.
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -679,11 +712,16 @@ on the `endian` attribute above.
 			</Action>
 		</State>
 	</StateModel>
+
 	<Agent name="TheAgent" />
+
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
+
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>

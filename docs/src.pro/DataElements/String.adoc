@@ -30,9 +30,9 @@
 // 03/07/2014: Lynn
 //   * Added missing child elements and corrected spelling in comments
 
-A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length. 
+A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length.
 
-All strings are encoded prior to output with the default encoding 7-bit ASCII (aka Latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute). 
+All strings are encoded prior to output with the default encoding 7-bit ASCII (aka Latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute).
 
 Strings are also used to hold numbers that will be in a string format. When strings contain a number, the numerical mutators will also be used to mutate the string.
 
@@ -57,7 +57,7 @@ xref:name[name]:: Name of the data model
 
 xref:length[length]:: Length in characters of the string
 xref:lengthType[lengthType]:: Units of the length attribute (defaults to bytes)
- 
+
 type::
 	Character encoding type, defaults to _ascii_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32.
 	+
@@ -79,7 +79,7 @@ padCharacter::
 	+
 	If the _length_ attribute is provided but the value contained in the string is shorter than the length it will be padded.
 	This attribute allows controlling the character used to pad the string.
- 
+
 xref:token[token]::
 	This element should be treated as a token when parsing, defaults to false.
 	+
@@ -102,7 +102,7 @@ xref:occurs[occurs]:: Actual number of occurrences, defaults to 1.
 
 xref:Analyzers[Analyzer]:: Attach an analyzer to this element
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators. 
+xref:Hint[Hint]:: Provide information to mutators.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
 xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
@@ -117,7 +117,7 @@ xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]::
 xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]::
 	Removes nodes from the data model
 
-xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: 
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 	Swaps two nodes in the data model that are neighbouring each other
 
 xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]::
@@ -131,7 +131,7 @@ xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]::
 xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]::
 	This mutator will produce values of default - N through default + N where N defaults to 50 but is controllable via a hint.
 	For example, if the default value of a Number field is 200, by default this mutator will produce all the values between 150 and 250.
-	
+
 xref:Mutators_StringCaseMutator[StringCaseMutator]::
 	This mutator will change the case of a string three ways.
 	First it will lower-case each character, then upper-case each character, and then randomly decide to upper-case or lower-case each character.
@@ -143,7 +143,7 @@ xref:Mutators_StringMutator[StringMutator]::
 
 xref:Mutators_UnicodeBadUtf8Mutator[UnicodeBadUtf8Mutator]::
 	The UTF8 Unicode encoding is a variable width, 7 bit ASCII-compatible encoding.
-	It is the most widely used Unicode encoding. 
+	It is the most widely used Unicode encoding.
 	+
 	Because of the variable width encoding, it's possible to encode characters with more bytes than is necessary.
 	Older Unicode specifications did not require the shortest encoding be used, leading to some of the largest early security worms such as code red.
@@ -153,7 +153,7 @@ xref:Mutators_UnicodeBadUtf8Mutator[UnicodeBadUtf8Mutator]::
 	This mutator will generate strings with incorrectly encoded UTF8 characters in them.
 
 xref:Mutators_UnicodeBomMutator[UnicodeBomMutator]::
-	This mutator injects BOMs into the same list of useful fuzzing strings that xref:Mutators_StringMutator[StringMutator] generates. 
+	This mutator injects BOMs into the same list of useful fuzzing strings that xref:Mutators_StringMutator[StringMutator] generates.
 	+
 	Unicode BOMs are byte order markers.
 	They are non-displayed byte sequences that indicate the byte order (endianness) of the data to the unicode encoder.
@@ -175,7 +175,7 @@ xref:Mutators_WordListMutator[WordListMutator]::
 	This mutator will allow users to specify additional data for each data element through a hint.
 	Each of these values must be separated by a newline in a file.
 
-xref:Mutators_XmlW3CMutator[XmlW3CMutator]:: 
+xref:Mutators_XmlW3CMutator[XmlW3CMutator]::
 	This mutator will perform the W3C parser test suite.
 	It targets the XML parser.
 	This mutator will only work on xref:String[String elements] with the _XMLhint_ hint.
@@ -207,9 +207,13 @@ This example will output a string with the default options. It will be encoded t
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -264,9 +268,13 @@ This example will output a string with UTF-16 encoding. UTF-16 is a two byte enc
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -322,9 +330,13 @@ This example will output a string with null termination.
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -379,9 +391,13 @@ This example will output a string that is shorter than the required length. The 
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -437,9 +453,13 @@ This example will output a string that is shorter than the required length. The 
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -495,9 +515,13 @@ This example will output a string that contains returns and line feeds using the
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -562,9 +586,13 @@ In this example we use a String element to contain the ASCII length of some data
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -632,9 +660,13 @@ Content-length: 10
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 

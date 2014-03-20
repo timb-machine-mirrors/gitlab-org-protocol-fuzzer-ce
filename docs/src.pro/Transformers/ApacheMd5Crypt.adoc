@@ -67,7 +67,9 @@ This example uses the ApacheMd5Crypt transformer on an inline value and writes t
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>

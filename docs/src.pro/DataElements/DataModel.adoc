@@ -76,6 +76,10 @@ A DataModel named "HelloWorld" contains a single string and outputs "Hello world
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -85,7 +89,7 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 63002.
@@ -133,6 +137,10 @@ DataModels can reference other DataModels and inherit their child elements with 
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -142,7 +150,7 @@ Output from this example.
 ----
 >peach -1 --debug DocSample.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 35043.
@@ -201,6 +209,10 @@ When a reference (ref attribute) is supplied, the contents of the referenced Dat
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -210,7 +222,7 @@ Output from this example.
 ----
 >peach -1 --debug DocSample.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 *] Test 'Default' starting with random seed 3945.

@@ -93,12 +93,11 @@ data:: Referenced elements value as a byte array
 
   </StateModel>
 
-  <Agent name="TheAgent"/>
-
   <Test name="Default">
-    <Agent ref="TheAgent"/>
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex"/>
+
     <Logger class="File">
       <Param name="Path" value="logs"/>
     </Logger>
@@ -139,7 +138,7 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 25461.
