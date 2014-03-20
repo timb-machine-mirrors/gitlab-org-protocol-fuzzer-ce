@@ -110,9 +110,13 @@ The following example will model an XML snippet with namespaces.
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -173,9 +177,13 @@ The following example will load the +example.xml+ file into a xref:String[String
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -256,9 +264,13 @@ The following example will make use of binary data. The binary data is converted
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 

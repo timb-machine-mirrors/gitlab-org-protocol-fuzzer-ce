@@ -2,9 +2,9 @@
 [[Padding]]
 == Padding
 
-The _Padding_ element is used to pad out variably sized blocks or data models. 
+The _Padding_ element is used to pad out variably sized blocks or data models.
 
-When padding out the data, padding is always 0. This is not customizable. 
+When padding out the data, padding is always 0. This is not customizable.
 
 When cracking data into a model that contains the padding element, the pad data will be skipped.
 
@@ -14,7 +14,7 @@ When cracking data into a model that contains the padding element, the pad data 
 ----
 <DataModel name="NumberExample1">
  <String name="VariableSizeString" />
- 
+
  <Padding aligned="true"/>
 </DataModel>
 ----
@@ -60,7 +60,7 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 	<DataModel name="TheDataModel">
 		<Number size="1" value="0" />
 		<Number size="8" value="0xff" />
-		
+
 		<Padding />
 	</DataModel>
 
@@ -74,9 +74,13 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -118,7 +122,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 	<DataModel name="TheDataModel">
 		<Number size="1" value="0" />
 		<Number size="8" value="0xff" />
-		
+
 		<Padding alignment="32" />
 	</DataModel>
 
@@ -132,9 +136,13 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -178,7 +186,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 		<Number size="16" value="42" />
 		<Number size="2" value="1" />
-		
+
 		<Padding alignment="32" alignedTo="ToBeAligned" />
 
 		<Number size="6" value="42" />
@@ -194,9 +202,13 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
 
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 

@@ -5,8 +5,8 @@
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
-// Give full pit to run using hex publisher, test works 
-// List Parent element types  
+// Give full pit to run using hex publisher, test works
+// List Parent element types
 // Blob
 
 // Updated:
@@ -20,13 +20,13 @@ This is used when fuzzing protocols that hash data with SHA-256.
 
 === Parent Elements
 
- * xref:String[String]
- * xref:Blob[Blob]
+xref:String[String]
+xref:Blob[Blob]
 
 === Parameters
 
 xref:ref[ref]:: Reference to element whose value will be hashed
- 
+
 === Examples
 
 .Basic Sha256 Example
@@ -45,7 +45,7 @@ xref:ref[ref]:: Reference to element whose value will be hashed
 			</Number>
 		</Block>
 		<Blob name="Checksum">
-			<Fixup class="Sha256">
+			<Fixup class="SHA256Fixup">
 				<Param name="ref" value="Header" />
 			</Fixup>
 		</Blob>
@@ -61,8 +61,40 @@ xref:ref[ref]:: Reference to element whose value will be hashed
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
-		<Publisher class="ConsoleHex" />
+
+		<Publisher class="ConsoleHex"/>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
 	</Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 16510.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(38 bytes)
+00000000   04 D2 04 D3 00 26 77 C1  D9 9C D4 EC 59 14 A1 92   ?????&w?????Y???
+00000010   09 5D 9A A0 45 66 7C A4  14 80 DB A5 66 EC 53 3C   ?]??Ef|?????f?S<
+00000020   95 E4 34 CF 63 B9                                  ??4?c?
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ==========================

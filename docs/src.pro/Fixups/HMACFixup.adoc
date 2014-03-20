@@ -72,7 +72,12 @@ xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -82,7 +87,7 @@ Output from this example
 ----
 >peach -1 --debug DocSample.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 40206.
@@ -135,7 +140,12 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -145,7 +155,7 @@ Output from this example
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 27945.

@@ -61,7 +61,12 @@ class:: Reference to Python class to call
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex" />
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -80,14 +85,12 @@ class MathWrapper:
 
 ----
 
-----
-
 Output from this example.
 
 ----
 >peach -1 --debug DocSample.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 Peach.Core.Fixups.ScriptFixup ScriptFixup(): _pythonFixup != null
 

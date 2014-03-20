@@ -64,7 +64,7 @@ Filter:: PCAP style filter string (optional)
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -74,7 +74,7 @@ Filter:: PCAP style filter string (optional)
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
@@ -88,14 +88,52 @@ Filter:: PCAP style filter string (optional)
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="TcpClient">
-      <Param name="Host" value="www.peachfuzzer.com"/> 
+      <Param name="Host" value="www.peachfuzzer.com"/>
       <Param name="Port" value="80"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
+----
 
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 2988.
+Peach.Core.Agent.Agent StartMonitor: Monitor Pcap
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Peach.Core.Publishers.TcpClientPublisher output(4 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   69 7A 00 00                                        iz··
+
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 176.32.102.84:80
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 176.32.102.84:80, closing client connection.
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 176.32.102.84:80
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
 ----
 ==================

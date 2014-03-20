@@ -61,11 +61,16 @@ xref:ref[ref]:: The data element on which the checksum will be performed
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
      <Publisher class="RawV4">
       <Param name="Host" value="127.0.0.1"/>
       <Param name="Interface" value="127.0.0.1"/>
       <Param name="Protocol" value="1"/>
-    </Publisher>
+     </Publisher>
+
+     <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -75,7 +80,7 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 37625.

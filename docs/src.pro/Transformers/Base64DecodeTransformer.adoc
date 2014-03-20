@@ -69,32 +69,38 @@ This example uses the Base64Encode transformer on an inline value, writes the tr
 					<Field name="TransformMe" value="QUJDREVGR0g=" />
 				</Data>
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
 
 			<!-- Read and encode Plaintext file and slurp Base64 string to output in console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
 				</DataModel>
 			</Action>
-
 		</State>
 	</StateModel>
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encoded.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>
@@ -107,7 +113,7 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 12661.

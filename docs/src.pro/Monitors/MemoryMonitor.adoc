@@ -34,24 +34,57 @@ StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false.
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="Local">
-	<Monitor class="Memory">
-		<Param name="ProcessName" value="notepad.exe"/> 
-		<Param name="MemoryLimit" value="1000" />
-	</Monitor>
+    <Monitor class="Memory">
+      <Param name="ProcessName" value="Notepad"/>
+      <Param name="MemoryLimit" value="10000000" />
+    </Monitor>
   </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
-</Peach>	
+</Peach>
+----
+
+Output from example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 54974.
+Peach.Core.Agent.Agent StartMonitor: Monitor Memory
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
 ----
 ========================

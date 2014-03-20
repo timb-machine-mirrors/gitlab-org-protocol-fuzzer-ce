@@ -66,11 +66,16 @@ dst:: Destination IPv6 address of the remote machine
 
   <Test name="Default">
     <StateModel ref="TheState"/>
-     <Publisher class="RawV6">
+
+    <Publisher class="RawV6">
       <Param name="Host" value="::1"/>
       <Param name="Interface" value="::1"/>
       <Param name="Protocol" value="1"/>
     </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
@@ -80,7 +85,7 @@ Output from this example.
 ----
 >peach -1 --debug DocSample.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 43286.

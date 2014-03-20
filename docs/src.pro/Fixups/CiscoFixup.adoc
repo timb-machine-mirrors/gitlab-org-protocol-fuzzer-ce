@@ -76,7 +76,12 @@ xref:ref[ref]:: Reference to data element which the CRC calculation will be perf
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
 	</Test>
 </Peach>
 ----
@@ -86,7 +91,7 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0.0
 [[ Copyright (c) Deja vu Security
 
 [*] Test 'Default' starting with random seed 26396.

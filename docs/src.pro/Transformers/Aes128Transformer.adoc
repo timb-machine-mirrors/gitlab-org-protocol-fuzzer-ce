@@ -70,13 +70,16 @@ This example uses the Aes128 transformer on an inline value, writes the transfor
 			<Action type="output" publisher="FilePubWrite">
 				<DataModel ref="Ex1" />
 			</Action>
+
 			<Action type="close" publisher="FilePubWrite" />
 
 			<!-- Read and decrypt encrypted file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>
+
 			<Action type="slurp" valueXpath="//InputModel//TransformMe" setXpath="//OutputModel//StringValue" />
+
 			<Action type="output" publisher="ConsolePub">
 				<DataModel name="OutputModel">
 					<String name="StringValue" />
@@ -87,14 +90,18 @@ This example uses the Aes128 transformer on an inline value, writes the transfor
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
+
 		<Publisher class="File" name="FilePubWrite">
 			<Param name="FileName" value="encrypted.bin" />
 		</Publisher>
+
 		<Publisher class="File" name="FilePubRead">
 			<Param name="FileName" value="encrypted.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
+
 		<Logger class="File">
 			<Param name="Path" value="logs"/>
 		</Logger>

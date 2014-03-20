@@ -125,20 +125,20 @@ This example shows a real world example of a flag set by modeling a TCP packet (
 
 	<StateModel name="TheStateModel" initialState="InitialState">
 		<State name="InitialState">
-
 			<Action type="output">
 				<DataModel ref="TcpPacket" />
 			</Action>
 		</State>
-
 	</StateModel>
 
 	<Test name="Default">
-
 		<StateModel ref="TheStateModel" />
 
 		<Publisher class="ConsoleHex"/>
 
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
 	</Test>
 </Peach>
 ----
