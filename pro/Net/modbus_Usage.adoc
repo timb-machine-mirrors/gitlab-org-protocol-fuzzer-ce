@@ -5,12 +5,6 @@ include::modbus_DataSheet.adoc[]
 ==== Target Configuration
 A Modbus server listening on the Modbus port defined in configuration file is required. The network tool socat can be used as the listener.
 
-_Example of using socat to listen on Modbus port:_
-
-----
-socat tcp-l:502,fork exec:'/bin/cat'
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine.
 TargetPort:: Modbus port number of the target host machine.
@@ -27,7 +21,32 @@ LoggerPath:: Path to folder where logs will be stored.
 Timeout:: How long to wait for incoming data.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample Modbus Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug modbus.xml
+----
+==== Full test run
+----
+peach modbus.xml
+----
+
+=== Examples
+
+.Sample Modbus Configuration File
+==========================
+Example configuration using socat on linux.
+
+First we must install socat, for this example we assume you are running linux. For other platforms follow the platform specific installation instructions for socat.
+
+----
+socat tcp-l:502,fork exec:'/bin/cat'
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -52,17 +71,4 @@ Path:: Path to the relative base directory where all pits are located.
   </All>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug modbus.xml
-----
-==== Full test run
-----
-peach modbus.xml
-----
+==========================

@@ -5,12 +5,6 @@ include::ftp_DataSheet.adoc[]
 ==== Target Configuration
 An FTP server is required to test the client side of the FTP pit. On Linux, ftpd can be downloaded using apt-get.
 
-_Example of installing on ftp server:_
-
-----
-sudo apt-get install ftpd
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
@@ -27,43 +21,6 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Agent:: Agent to run depending on the target OS. Do not change this value.
 Path:: Path to the relative base directory where all pits are located.
-
-
-==== Sample ftp Configuration File
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<PitDefines>
-  <All>
-    <Define key="TargetIPv4" value="10.0.1.23"/>
-    <Define key="TargetPort" value="21"/>
-    <Define key="LoggerPath" value="logs/ftp/"/>
-    <Define key="Strategy"  value="Sequential"/>
-    <Define key="FtpUser" value="username"/>
-    <Define key="FtpPass" value="password"/>
-    <Define key="Path" value="."/>
-    <Define key="DataPort" value="31337"/>
-  </All>
-
-   <Linux platform="linux">
-     <Define key="Interface" value="eth0"/>
-     <Define key="Program"  value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.92"/>
-   </Linux>
-
-   <OSX platform="osx">
-     <Define key="Interface" value="en0"/>
-     <Define key="Program" value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.94"/>
-   </OSX>
-
-   <Windows platform="windows">
-     <Define key="Interface" value="Local Area Connection"/>
-     <Define key="Program"  value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.82"/>
-   </Windows>
-</PitDefines>
-----
 
 ==== Configure Additional Monitors
 Add monitors to agent as needed
@@ -98,3 +55,51 @@ peach ftp.xml Server
 #Test server in passive mode
 peach ftp.xml ServerPassive
 ----
+
+=== Examples
+
+.Sample ftp Configuration File
+==========================
+Example configuration targeting the ftpd server on linux.
+
+First we must install ftpd, for this example we assume  you are running on ubuntu or debian. For other platforms follow the platform specific installation instructions for ftpd._
+
+----
+sudo apt-get install ftpd
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetIPv4" value="10.0.1.23"/>
+    <Define key="TargetPort" value="21"/>
+    <Define key="LoggerPath" value="logs/ftp/"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="FtpUser" value="username"/>
+    <Define key="FtpPass" value="password"/>
+    <Define key="Path" value="."/>
+    <Define key="DataPort" value="31337"/>
+  </All>
+
+   <Linux platform="linux">
+     <Define key="Interface" value="eth0"/>
+     <Define key="Program"  value="ftp"/>
+     <Define key="SourceIPv4" value="10.0.1.92"/>
+   </Linux>
+
+   <OSX platform="osx">
+     <Define key="Interface" value="en0"/>
+     <Define key="Program" value="ftp"/>
+     <Define key="SourceIPv4" value="10.0.1.94"/>
+   </OSX>
+
+   <Windows platform="windows">
+     <Define key="Interface" value="Local Area Connection"/>
+     <Define key="Program"  value="ftp"/>
+     <Define key="SourceIPv4" value="10.0.1.82"/>
+   </Windows>
+</PitDefines>
+----
+==========================

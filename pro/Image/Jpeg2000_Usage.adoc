@@ -7,13 +7,6 @@ Any number of image viewing programs (like GIMP 2.8 on Linux and Windows) may be
 In the JPEG2000.xml.config pit file, you can set the target program that you are fuzzing, such as GIMP 2.8.
 If available, you can set different target programs for different operating systems.
 
-_Example setting up GIMP on linux and configuring defines:_
-
-----
-#Installing GIMP on linux
-sudo apt-get install gimp
-----
-
 ==== Required Pit Configuration Changes
 Seed:: Name of a valid JPEG2000 file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together with an asterisk wildcard.
 Target:: The program that will open the fuzzed JPEG2000 files
@@ -25,7 +18,33 @@ Agent:: The agent that will be ran to open the target program. This is generally
 Path:: Path to the relative base directory where all pits are located.
 SamplePath:: Path to the directory in which the JPEG2000 sample files are stored.  Relative to Path.
 
-==== Sample JPEG2000 Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug JPEG2000.xml
+----
+==== Full test run
+----
+peach JPEG2000.xml
+----
+
+=== Examples
+
+.Sample JPEG2000 Configuration File
+==========================
+Example configuration using feh on linux. The configuration file also contains settings for gimp on Windows and preview on OSX:
+
+First we must install feh, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for feh.
+
+----
+#Installing feh on linux
+sudo apt-get install feh
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -55,16 +74,6 @@ SamplePath:: Path to the directory in which the JPEG2000 sample files are stored
 </PitDefines>
 ----
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+When running this you will see feh repeatedly open and close.
 
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug JPEG2000.xml
-----
-==== Full test run
-----
-peach JPEG2000.xml
-----
+==========================

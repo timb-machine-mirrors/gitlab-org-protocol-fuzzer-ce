@@ -5,15 +5,6 @@ include::MLD_DataSheet.adoc[]
 ==== Target Configuration
 A target machine with MLD enabled.  A firewall must not block MLD messages.
 
-_Windows Firewall Inbound Rules to enable on Target:_
-
-----
-Core Networking - Multicast Listener Done (ICMPv6-In)
-Core Networking - Multicast Listener Query (ICMPv6-In)
-Core Networking - Multicast Listener Report (ICMPv6-In)
-Core Networking - Multicast Listener Report v2 (ICMPv6-In)
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv6:: IP address of the target host machine.
 SourceIPv6:: IP address of the interface on the local machine.
@@ -24,7 +15,37 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample MLD Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug MLD.xml
+----
+==== Full test run
+----
+peach MLD.xml
+----
+
+=== Examples
+
+.Sample MLD Configuration File
+==========================
+Example configuration sending MLD packets.
+
+For this example we assume you are running on Windows. For other platforms use the preferred way to configure the firewall.
+
+Windows Firewall Inbound Rules to enable on Target:
+
+----
+Core Networking - Multicast Listener Done (ICMPv6-In)
+Core Networking - Multicast Listener Query (ICMPv6-In)
+Core Networking - Multicast Listener Report (ICMPv6-In)
+Core Networking - Multicast Listener Report v2 (ICMPv6-In)
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -59,17 +80,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug MLD.xml
-----
-==== Full test run
-----
-peach MLD.xml
-----
+==========================

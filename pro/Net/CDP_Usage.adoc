@@ -17,14 +17,33 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample CDP Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 -debug CDP.xml
+----
+==== Full test run
+----
+peach CDP.xml
+----
+
+=== Examples
+
+.Sample CDP Configuration File
+==========================
+Example configuration to broadcast CDP packets.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="SourceMAC" value="000000000000"/>
-    <Define key="TargetMAC" value="000000000000"/>
+    <Define key="SourceMAC" value="5254005335d3"/>
+    <Define key="TargetMAC" value="ffffffffffff"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/cdp/"/>
@@ -45,17 +64,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 -debug CDP.xml
-----
-==== Full test run
-----
-peach CDP.xml
-----
+==========================

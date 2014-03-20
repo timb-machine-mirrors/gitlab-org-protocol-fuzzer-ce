@@ -3,9 +3,52 @@ include::SNMP_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
-A UDP listener listening on the SNMP port defined in configuration file is required. The network tool socat can be used as the listener.
+A UDP listener listening on the SNMP port defined in configuration file is required. The SNMP server snmpd on linux can be used.
 
-_Example of using socat to listen on SNMP port:_
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: SNMP port number of the local machine.
+TargetPort:: SNMP port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+CommString:: Community string used for by the SNMP server.
+Program:: The client program to test when fuzzing as the server.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Agent:: Agent to run depending on the target OS. Do not change this value.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+#Run client test
+peach -1 --debug SNMP.xml
+
+#Run server test
+peach -1 --debug SNMP.xml Server
+----
+==== Full test run
+----
+#Run client test
+peach SNMP.xml
+
+#Run server test
+peach -1 --debug SNMP.xml Server
+----
+
+=== Examples
+
+.Sample SNMP Configuration File
+==========================
+Example configuration using snmpd on linux.
+
+First we must install snmpd, for this example we assume you are running on ubuntu or debian. For other platforms follow the platform specific installation instructions for snmpd.
 
 ----
 #Install SNMP daemon
@@ -26,22 +69,6 @@ sudo /etc/init.d/snmpd restart
 sudo apt-get install snmp
 ----
 
-==== Required Pit Configuration Changes
-TargetIPv4:: IP address of the target host machine.
-SourceIPv4:: IP address of the interface on the local machine.
-SourcePort:: SNMP port number of the local machine.
-TargetPort:: SNMP port number of the target host machine.
-Interface:: Name of local interface (used for monitoring).
-CommString:: Community string used for by the SNMP server.
-Program:: The client program to test when fuzzing as the server.
-
-==== Optional Pit Configuration Changes
-Strategy:: Fuzzing strategy Peach will use for testing.
-LoggerPath:: Path to folder where logs will be stored.
-Agent:: Agent to run depending on the target OS. Do not change this value.
-Path:: Path to the relative base directory where all pits are located.
-
-.Sample SNMP Configuration File
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -76,25 +103,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-#Run client test
-peach -1 --debug SNMP.xml
-
-#Run server test
-peach -1 --debug SNMP.xml Server
-----
-==== Full test run
-----
-#Run client test
-peach SNMP.xml
-
-#Run server test
-peach -1 --debug SNMP.xml Server
-----
+==========================
