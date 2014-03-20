@@ -35,7 +35,7 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337"/>
@@ -44,18 +44,18 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
+
       <Action type="close"/>
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
     </State>
   </StateModel>
 
   <Agent name="Local">
-	<Monitor class="Process">
-		<Param name="Executable" value="notepad.exe" />
-		<Param name="Arguments" value="fuzzed.txt" />
-	</Monitor>
+  <Monitor class="Process">
+    <Param name="Executable" value="notepad.exe" />
+    <Param name="Arguments" value="fuzzed.txt" />
+  </Monitor>
   </Agent>
 
   <Test name="Default">
@@ -64,10 +64,51 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 20172.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(32 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Agent.AgentManager Message: Action.Call => launchProgram
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+
+[*] Test 'Default' finished.
+----
+
+When running this example notepad will open at session starting and close at session finished.
+
 =================
 
 .Restart Process on Each Test
@@ -85,10 +126,9 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
       <Action type="close"/>
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
     </State>
   </StateModel>
 
@@ -106,10 +146,51 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 40308.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(32 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Agent.AgentManager Message: Action.Call => launchProgram
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+When running this example notepad will repeatedly open and close.
+
 =================
 
 .Start Process From State Model
@@ -118,7 +199,7 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <String length="32" value="31337" />
@@ -144,18 +225,55 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 63117.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+Peach.Core.Agent.Monitors.Process Cpu is idle, stopping process.
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+When running this example notepad will repeatedly open and close.
+
 =================
 
 .Wait for process to exit in state model
 =================
+For this example to complete you must close notepad when it opens.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -184,8 +302,43 @@ WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defau
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output from this example
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 6946.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
+Peach.Core.Agent.Monitors.Process WaitForExit(10000)
+Peach.Core.Agent.Monitors.Process _Stop(): Closing process handle
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+Since notepad doesn't close automatically you must close notepad after each iteration. Using WaitForExitOnCall is useful when you want the process to block fuzzing until the process closes before continuing.
+
 =================

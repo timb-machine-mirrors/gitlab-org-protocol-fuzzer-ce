@@ -25,7 +25,7 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 5
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -35,26 +35,31 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 5
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="Local">
- 	<Monitor class="IpPower9258">
-	<Param name="Host" value="192.168.1.1:8080" />
-	<Param name="User" value="peach" />
-	<Param name="Password" value="power" />
-	<Param name="Port" value="1" />
-	<Param name="ResetEveryIteration" value="true" />
-	</Monitor>
+   	<Monitor class="IpPower9258">
+    	<Param name="Host" value="192.168.1.1:8080" />
+    	<Param name="User" value="peach" />
+    	<Param name="Password" value="power" />
+    	<Param name="Port" value="1" />
+    	<Param name="ResetEveryIteration" value="true" />
+  	</Monitor>
   </Agent>
- 
+
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----

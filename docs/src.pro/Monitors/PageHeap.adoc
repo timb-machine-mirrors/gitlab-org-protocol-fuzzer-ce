@@ -22,7 +22,7 @@ WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not pro
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -32,7 +32,7 @@ WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not pro
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
       <Action type="close"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
@@ -44,19 +44,72 @@ WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not pro
         <Param name="CommandLine" value="notepad.exe fuzzed.txt"/>
         <Param name="StartOnCall" value="launchProgram"/>
     </Monitor>
-  <Monitor class="PageHeap">
-    <Param name="Executable" value="notepad.exe" />
-  </Monitor>
+    <Monitor class="PageHeap">
+      <Param name="Executable" value="notepad.exe" />
+    </Monitor>
   </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>  
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 5090.
+Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger
+Peach.Core.Agent.Agent StartMonitor: Monitor_1 PageHeap
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionStarting
+Peach.Core.Agent.Agent SessionStarting: Monitor_1
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(32 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Agent.AgentManager Message: Action.Call => launchProgram
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid Cpu is idle, stopping process.
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault()
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault() - No fault detected
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor_1
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionFinished
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+
+[*] Test 'Default' finished.
 ----
 ========================

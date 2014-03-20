@@ -18,7 +18,7 @@ Port:: Port to listen on, defaults to 8080.
 Protocol:: Protocol type to listen for, defaults to tcp.
 Timeout:: Length of time to wait for incoming connection, defaults to 1000 ms.
 FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
- 
+
 === Examples
 
 .Listen for Incoming Connection
@@ -35,7 +35,7 @@ FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
@@ -49,10 +49,50 @@ FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
-</Peach>  
+</Peach>
 ----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 20168.
+Peach.Core.Agent.Agent StartMonitor: Monitor Socket
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+To simulator this monitor faulting, after starting peach run the following command:
+
+----
+nc -vv 127.0.0.1 53
+----
+
 ===============================
