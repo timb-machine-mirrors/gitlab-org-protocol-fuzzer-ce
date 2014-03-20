@@ -47,6 +47,7 @@ class PeachTest:
         self.env = os.environ #this emmulates the default behavor of
                               #Popen with a bit more flexibility
         self.status = None
+        assert platform in ['win', 'osx', 'linux', 'all'] # as seen in get_platform()
         self.platform = platform
         self.pit = pit
         self.name = os.path.basename(pit)[:-4]  # pit - '.xml'
@@ -262,6 +263,27 @@ def get_tests(target, base_config):
     else:
         print "Skipping tests for: ", name
     return my_tests
+
+
+def get_targets(target_path):
+    for w in os.walk(target_path):
+        w[1].sort()
+        curpath = w[0]
+        if "_Common" in curpath:
+            continue
+        file_list = w[2]
+        for fn in file_list:
+            if fn[-4:].lower() == '.xml':
+                yield {"path": curpath, "file": fn}
+
+
+def user_is_admin():
+    if testlib.get_platform() == "win":
+        return shell.IsUserAnAdmin()
+    else:
+        return os.getuid() == 0
+
+
 
 
 if not __name__ == "__main__":

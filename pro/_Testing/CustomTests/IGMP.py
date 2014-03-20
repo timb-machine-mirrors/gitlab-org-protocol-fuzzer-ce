@@ -1,6 +1,6 @@
 test(name="IGMP",
      test="Default",
-     platform="windows")
+     platform="win")
 
 test(name="IGMP",
      test="Default",
