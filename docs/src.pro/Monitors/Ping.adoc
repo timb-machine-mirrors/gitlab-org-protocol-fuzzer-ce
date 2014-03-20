@@ -23,8 +23,8 @@ FaultOnSuccess:: Fault if ping is successful, defaults to false.
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
     <Number size="32" signed="false" value="31337" />
@@ -39,20 +39,61 @@ FaultOnSuccess:: Fault if ping is successful, defaults to false.
   </StateModel>
 
   <Agent name="Local">
-  	<Monitor class="Ping">
-  		<Param name="Host" value="www.peachfuzzer.com" />
-  	</Monitor>
+    <Monitor class="Ping">
+      <Param name="Host" value="www.dejavusecurity.com" />
+      <Param name="Timeout" value="10000"/>
+    </Monitor>
   </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="TcpClient">
-      <Param name="Host" value="www.peachfuzzer.com"/>
+      <Param name="Host" value="www.dejavusecurity.com"/>
       <Param name="Port" value="80"/>
     </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 26777.
+Peach.Core.Agent.Agent StartMonitor: Monitor Ping
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Peach.Core.Publishers.TcpClientPublisher output(4 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   69 7A 00 00                                        iz··
+
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 198.185.159.135:80
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 198.185.159.135:80, closing client connection.
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 198.185.159.135:80
+Peach.Core.Agent.Monitors.PingMonitor DetectedFault(): www.dejavusecurity.com replied after 10000ms
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
 ----
 ==============

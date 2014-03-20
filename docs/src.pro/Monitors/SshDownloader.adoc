@@ -3,7 +3,7 @@
 == SshDownloader Monitor
 
 The _SshDownloader_ monitor is able to download a file or folder from a remote host over SSH SFTP. The
-monitor supports password, keyboard, and private key authentication methods.  The monitor is also able 
+monitor supports password, keyboard, and private key authentication methods.  The monitor is also able
 to delete files it has downloaded.
 
 === Parameters
@@ -23,18 +23,94 @@ Remove:: Remove the remote file after download, defaults to true.
 
 === Examples
 
-.Example
+.Grab core file
 ============
+This example will ssh into the Host machine and check for core files. If any core files exist a fault will be thrown and all core filles will be downloaded and saved as part of the fault record.
+
 [source,xml]
 ----
-<Agent name="LocalAgent">
-	<Monitor class="SshDownloader">
-		<Param name="Host" value="my.target.com" />
-		<Param name="Username" value="tester" />
-		<Param name="Password" value="Password!" />
-		<Param name="File" value="/var/cores/core" />
-		<Param name="Remove" value="false" />
-	</Monitor>
-</Agent>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Ssh">
+      <Param name="Host" value="my.target.com" />
+      <Param name="Username" value="tester" />
+      <Param name="Password" value="Password!" />
+      <Param name="Command" value="ls /var/cores/*.core" />
+      <Param name="CheckValue" value="target.*?.core" />
+      <Param name="FaultOnMatch" value="true" />
+    </Monitor>
+
+    <Monitor class="SshDownloader">
+      <Param name="Host" value="my.target.com" />
+      <Param name="Username" value="tester" />
+      <Param name="Password" value="Password!" />
+      <Param name="File" value="/var/cores/*.core" />
+      <Param name="Remove" value="false" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
 ----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 57730.
+Peach.Core.Agent.Agent StartMonitor: Monitor Ssh
+Peach.Core.Agent.Agent StartMonitor: Monitor_1 SshDownloader
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Agent SessionStarting: Monitor_1
+Peach.Core.Agent.Monitors.SshDownloaderMonitor >> SessionStarting()
+Peach.Core.Agent.Monitors.SshDownloaderMonitor Connecting with username/password
+Peach.Core.Agent.Monitors.SshDownloaderMonitor << SessionStarting()
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor_1
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+To see that Peach is actually checking for the file on the remote machine create a file named target.testing.core in /var/cores. When Peach logs in and finds the file a fault will occur and the file target.testing.core will be downloaded and added to the fault record.
+
 ============
