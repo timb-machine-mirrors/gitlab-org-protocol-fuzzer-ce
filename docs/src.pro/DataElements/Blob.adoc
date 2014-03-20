@@ -202,6 +202,31 @@ A blob with a default value. Providing a default value does not set a fixed leng
 </Peach>
 ----
 
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 46616.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   AA BB CC DD                                        ????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+
 .Using a Blob as part of a size relationship
 
 A blob with size-of relationship:
@@ -238,5 +263,30 @@ A blob with size-of relationship:
     </Logger>
   </Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 18508.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   04 00 00 00 AA BB CC DD                            ????????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ==========================

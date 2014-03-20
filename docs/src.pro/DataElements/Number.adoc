@@ -33,7 +33,7 @@
 //  03/06/2014: Lynn
 //   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
 
-The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian. 
+The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian.
 
 The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
 
@@ -165,8 +165,10 @@ Produce 32 bit (4 byte) number with a default value of 5:
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberExample1.xml
+>peach -1 --debug NumberExample1.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -222,8 +224,10 @@ To only use 16 bits (two byte) change the size to 16.
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberExample2.xml
+>peach -1 --debug NumberExample2.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -288,9 +292,10 @@ boundaries.
 </Peach>
 ----
 
-This will produce the following output:
+Output from this example.
+
 ----
-$ peach -1 --debug ByteAlignExample.xml
+>peach -1 --debug ByteAlignExample.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -315,7 +320,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 The first number is three bits with the value `"2"`. This number
 becomes the first three bits of the byte. The remaining five bits are
-appended to the left. 
+appended to the left.
 
 In Python this could be written as the following:
 
@@ -324,25 +329,25 @@ In Python this could be written as the following:
 '0x4c'
 ----
 
-Input parsing is simply the inverse. 
+Input parsing is simply the inverse.
 
 ----
 >>> input_byte = 0x4C
 >>> offset = 5
->>> (input_byte >> offset) 
+>>> (input_byte >> offset)
 2																				<1>
 >>> input_byte & (-1 + (2**offset))
 12																			<2>
 ----
-<1> The first byte is bitshifted the size of the second. 
-<2> Masking off the first number we get the second. 
+<1> The first byte is bitshifted the size of the second.
+<2> Masking off the first number we get the second.
 ==========================
 
 
 .Endian
 ==========================
 
-To change the endianness of the number set the endian attribute. Endianness defines in which order the bytes are the least or most significant. 
+To change the endianness of the number set the endian attribute. Endianness defines in which order the bytes are the least or most significant.
 
 [source,xml]
 ----
@@ -380,8 +385,10 @@ To change the endianness of the number set the endian attribute. Endianness defi
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberEndianExample.xml
+>peach -1 --debug NumberEndianExample.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -451,8 +458,10 @@ is `"hex"`:
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberEndianExample.xml
+>peach -1 --debug NumberEndianExample.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -492,7 +501,7 @@ impacts mutation and input parsing.
 .Signed and Unsigned
 ==========================
 
-To indicate value is signed, set the `signed` attribute equal to `"true"`. The default is false. 
+To indicate value is signed, set the `signed` attribute equal to `"true"`. The default is false.
 
 [source,xml]
 ----
@@ -530,8 +539,10 @@ To indicate value is signed, set the `signed` attribute equal to `"true"`. The d
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberExample3.xml
+>peach -1 --debug NumberExample3.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -565,11 +576,11 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Value Type
 ==========================
-The valueType defines how to interpret the value attribute. Valid options are string and hex. The default is string. 
+The valueType defines how to interpret the value attribute. Valid options are string and hex. The default is string.
 
 To assign a value of 1000 to MyValue we can explicitly use the default
 `valueType` of `"string"`. Using the `"string"` type we can assign
-both decimal and hexadecimal values. 
+both decimal and hexadecimal values.
 
 [source,xml]
 ----
@@ -607,8 +618,10 @@ both decimal and hexadecimal values.
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberExample4.xml
+>peach -1 --debug NumberExample4.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
@@ -642,12 +655,12 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Notice that the `valuteType` of `"string"` represents a number. This
 number may be changed by endianness. Observe that the numeric value
 was entered as 0x03e8, but Peach output the bytes 0xE8 and 0x03. The
-value was converted to little endian before being output. 
+value was converted to little endian before being output.
 
 To assign a value as if copied directly from a hex editor we can use
 the `"hex"` `valueType`. Values entered in `"hex"` will be output
 exactly as input regardless of endianness as exampled in the section
-on the `endian` attribute above. 
+on the `endian` attribute above.
 
 [source,xml]
 ----
@@ -678,8 +691,10 @@ on the `endian` attribute above.
 </Peach>
 ----
 
+Output from this example.
+
 ----
-$ peach -1 --debug NumberExample5.xml
+>peach -1 --debug NumberExample5.xml
 
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
