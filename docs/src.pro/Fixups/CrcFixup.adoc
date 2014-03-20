@@ -4,9 +4,9 @@
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
-// Give full pit to run using hex publisher, test works 
-// Exampel 1 crc ref on block that contains crc 
-// List Parent element types  
+// Give full pit to run using hex publisher, test works
+// Exampel 1 crc ref on block that contains crc
+// List Parent element types
 // Number, String
 
 // Updated:
@@ -21,14 +21,14 @@ This is used when fuzzing CRC checksum protocols.
 
 === Parent Elements
 
- * xref:Number[Number]
- * xref:String[String]
- 
+xref:Number[Number]
+xref:String[String]
+
 === Parameters
 
 xref:ref[ref]:: Reference to data element which the CRC calculation will be performed on
-type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32. 
- 
+type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32.
+
 === Examples
 
 .Basic Usage Example
@@ -66,5 +66,31 @@ type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32.
 		<Publisher class="ConsoleHex" />
 	</Test>
 </Peach>
+----
+
+
+Output from this example
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 52848.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   04 D2 04 D3 00 08 F6 6A                            ???????j
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ======================

@@ -5,10 +5,10 @@
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
-// Give full pit to run using hex publisher 
-// Example 1 Use peach sample python fixup 
+// Give full pit to run using hex publisher
+// Example 1 Use peach sample python fixup
 // List Parent element types
-//  Must match return value of fixup Explain in section 
+//  Must match return value of fixup Explain in section
 
 // Updated:
 // - 02/18/2014: Mick
@@ -22,7 +22,7 @@ The class parameter's returned argument must match the DataElement type of the F
 
 === Parent Elements
 
- * Parent type must match the DataElement type returned by the Fixup.
+Parent type must match the DataElement type returned by the Fixup.
 
 === Parameters
 
@@ -39,30 +39,30 @@ class:: Reference to Python class to call
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-	<Import import="MathWrapperFixup.py" />
+  <Import import="MathWrapperFixup" />
 
-	<DataModel name="TheDataModel">
-		<Number name="FirstNumber"  size="16" endian="big" value="10"/>
-		<Number name="Log10Number" size="16"  endian="big">
-			<Fixup class="Script">
-				<Param name="ref" value="FirstNumber" />
-				<Param name="class" value="MathWrapperFile.MathWrapper" />
-			</Fixup>
-		</Number>
-	</DataModel>
+  <DataModel name="TheDataModel">
+    <Number name="FirstNumber"  size="16" endian="big" value="10"/>
+    <Number name="Log10Number" size="16"  endian="big">
+      <Fixup class="ScriptFixup">
+        <Param name="class" value="MathWrapperFixup.MathWrapper" />
+        <Param name="ref" value="FirstNumber" />
+      </Fixup>
+    </Number>
+  </DataModel>
 
-	<StateModel name="TheState" initialState="initial">
-		<State name="initial">
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-		</State>
-	</StateModel>
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="TheDataModel" />
+      </Action>
+    </State>
+  </StateModel>
 
-	<Test name="Default">
-		<StateModel ref="TheState"/>
-		<Publisher class="ConsoleHex" />
-	</Test>
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+    <Publisher class="ConsoleHex" />
+  </Test>
 </Peach>
 ----
 
@@ -70,10 +70,42 @@ class:: Reference to Python class to call
 ----
 # MathWrapperFixup.py
 import math
+
 class MathWrapper:
   def __init__(self, parent):
     self._parent = parent
+
   def fixup(self, element):
     return int(math.log10(element.DefaultValue))
+
+----
+
+----
+
+Output from this example.
+
+----
+>peach -1 --debug DocSample.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+Peach.Core.Fixups.ScriptFixup ScriptFixup(): _pythonFixup != null
+
+[*] Test 'Default' starting with random seed 22619.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Fixups.ScriptFixup fixupImpl(): ref: 27449293
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   00 0A 00 01                                        ????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ====================
