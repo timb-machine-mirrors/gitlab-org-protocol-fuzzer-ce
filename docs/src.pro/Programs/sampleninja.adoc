@@ -1,0 +1,102 @@
+[[Program_SampleNinja]]
+== Sample Ninja
+
+The Sample Ninja command line tool produces and maintains the Sample Ninja database used by the Sample Ninja mutator.
+
+* Generate a sample ninja database using the PeachSampleNinja.exe command line tool
+* The Sample Ninja Mutator will automatically use the database the next time Peach is run
+* As new sample files are added, re-run Sample Ninja to add the new files.
+
+The generated database will be "pitfile.ninja", so if your pit file is "png.xml" you will get "png.xml.ninja".
+
+=== Syntax
+
+---
+PeachSampleNinja <pitfile> <datamodel> <samplefolder>
+---
+
+=== Parameters
+
+pitfile:: Fuzzing definition that uses the sample files
+datamodel:: The DataModel used to crack each sample
+samplefolder:: The folder containing the sample files to be used during fuzzing
+
+=== Examples
+
+.Creating Sample Ninja Database
+=================
+
+ . Open a new terminal window
+ . Change directories to the location of your pit file
+ . Run "PeachSampleNinja.exe PITFILE DATAMODEL SAMPLEFOLDER" replacing PITFILE, DATAMODEL, SAMPLEFODLER
+with the correct values.
+ . Database will be generated
+
+----
+> PeachSampleNinja.exe pits\_Common\Models\Image\PNG_Data.xml File samples_png
+
+>> Peach Pro Sample Ninja -- Sample Scanner
+>> Copyright (c) Deja vu Security
+
+Creating new sample database.
+Processing: samples_png\ajou_logo.png
+Processing: samples_png\apollonian_gasket.png
+Processing: samples_png\aquarium.png
+Processing: samples_png\baboon.png
+
+       . . .
+
+Processing: samples_png\z00n2c08.png
+Processing: samples_png\z03n2c08.png
+Processing: samples_png\z06n2c08.png
+Processing: samples_png\z09n2c08.png
+----
+
+Generated database:
+
+----
+03/17/2014  08:39 PM             9,035 PNG_Data.xml
+03/20/2014  03:52 PM         9,651,200 PNG_Data.xml.ninja
+----
+
+This command will generate +png.xml.ninja+.
+=================
+
+.Adding new Samples to Ninja Database
+=================
+
+ . Put new samples into your samples folder
+ . Open a terminal window
+ . Change directories to the location of your pit file
+ . Run "PeachSampleNinja.exe PITFILE DATAMODEL SAMPLEFOLDER" replacing PITFILE, DATAMODEL, SAMPLEFODLER
+with the correct values.
+ . New and modified files will be added
+
+----
+> PeachSampleNinja.exe pits\_Common\Models\Image\PNG_Data.xml File samples_png
+
+>> Peach Pro Sample Ninja -- Sample Scanner
+>> Copyright (c) Deja vu Security
+
+Creating new sample database.
+Processing: samples_png\ajou_logo.png
+Processing: samples_png\apollonian_gasket.png
+Processing: samples_png\aquarium.png
+Processing: samples_png\baboon.png
+
+       . . .
+
+Processing: samples_png\z00n2c08.png
+Processing: samples_png\z03n2c08.png
+Processing: samples_png\z06n2c08.png
+Processing: samples_png\z09n2c08.png
+----
+
+Generated database:
+
+----
+03/17/2014  08:39 PM             9,035 PNG_Data.xml
+03/20/2014  03:52 PM         9,651,200 PNG_Data.xml.ninja
+----
+=================
+

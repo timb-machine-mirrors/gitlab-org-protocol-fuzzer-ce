@@ -8,14 +8,13 @@ The _Pcap_ monitor performs a network capture during the fuzzing iteration. The 
 ****
 The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. On Windows platforms the device name and also the more descriptive names shown by +ipconfig+ can be used.
 
-----
+-----------------------------------------------------------------
 > peach --showdevices
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
 
 The following devices are available on this machine:
-----------------------------------------------------
 
 Name: rpcap://\Device\NPF_{1CAAEF1E-ED49-4F5B-A380-AA8F1AA9C2E0}
 Description: Network adapter 'VMware Virtual Ethernet Adapter' on local host
@@ -44,7 +43,7 @@ Description: Network adapter 'Microsoft' on local host
 
 Name: rpcap://\Device\NPF_{FCF894CF-B844-4085-84B0-6D956B092D4B}
 Description: Network adapter 'Microsoft' on local host
-----
+-----------------------------------------------------------------
 ****
 
 === Parameters

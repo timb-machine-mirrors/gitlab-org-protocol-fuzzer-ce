@@ -1,0 +1,105 @@
+[[Program_PeachMinset]]
+== Minset
+
+Peach Minset is used to locate the minimum set of sample data with the best code coverage metrics to use while fuzzing.
+This process can be distributed out across multiple machines to decrease the run time.
+
+There are two steps to the process:
+
+. Collect traces       [long process]
+. Compute minimum set  [short process]
+
+The first step, collecting traces, can be distributed and the results
+collected for analysis by step #2.
+
+=== Collect Traces
+
+Perform code coverage using all files in the 'samples' folder.  Collect the .trace files for later analysis. This process can be run in parallel across multiple machines or CPU cores.
+
+==== Syntax
+
+----
+PeachMinset [-k] -s samples -t traces command.exe args %s
+----
+
+-k:: Kill target when CPU usage drops to near zero. This is used when taking traces of GUI programs.
+-s samples:: Folder to load sample files from
+-t traces:: Folder to write traces to
+command.exe args %s:: Executable and arguments. +%s+ is replaced with the path and file name of a file from the samples folder.
+
+=== Compute Minimum Set
+
+Analyzes all .trace files to determin the minimum set of samples to use during fuzzing. This process cannot be parallelized.
+
+==== Syntax
+
+----
+PeachMinset -s samples -t traces -m minset
+----
+
+-s samples:: Folder to load sample files from
+-t traces:: Folder to write traces to
+-m minset:: Folder to write minimum set of files to
+
+=== All-In-One
+
+Both tracing and computing can be performed in a single step.
+
+==== Syntax
+
+----
+PeachMinset [-k] -s samples -m minset -t traces command.exe args %s
+----
+
+-k:: Kill target when CPU usage drops to near zero. This is used when taking traces of GUI programs.
+-s samples:: Folder to load sample files from
+-m minset:: Folder to write minimum set of files to
+-t traces:: Folder to write traces to
+command.exe args %s:: Executable and arguments. +%s+ is replaced with the path and file name of a file from the samples folder.
+
+
+=== Distributing Minset
+
+Minset can be distributed by splitting up the sample files and
+distributing the collecting of traces to multiple machines.  The
+final compute minimum set cannot be distributed.
+
+=== Examples
+
+.Example Run
+===============
+----
+> peachminset -s pinsamples -m minset -t traces bin\pngcheck.exe %%s
+
+] Peach 3 -- Minset
+] Copyright (c) Deja vu Security
+
+[*] Running both trace and coverage analysis
+[*] Running trace analysis on 15 samples...
+[1:15]   Coverage trace of pinsamples\basn0g01.png...done.
+[2:15]   Coverage trace of pinsamples\basn0g02.png...done.
+[3:15]   Coverage trace of pinsamples\basn0g04.png...done.
+[4:15]   Coverage trace of pinsamples\basn0g08.png...done.
+[5:15]   Coverage trace of pinsamples\basn0g16.png...done.
+[6:15]   Coverage trace of pinsamples\basn2c08.png...done.
+[7:15]   Coverage trace of pinsamples\basn2c16.png...done.
+[8:15]   Coverage trace of pinsamples\basn3p01.png...done.
+[9:15]   Coverage trace of pinsamples\basn3p02.png...done.
+[10:15]   Coverage trace of pinsamples\basn3p04.png...done.
+[11:15]   Coverage trace of pinsamples\basn3p08.png...done.
+[12:15]   Coverage trace of pinsamples\basn4a08.png...done.
+[13:15]   Coverage trace of pinsamples\basn4a16.png...done.
+[14:15]   Coverage trace of pinsamples\basn6a08.png...done.
+[15:15]   Coverage trace of pinsamples\basn6a16.png...done.
+
+[*] Finished
+[*] Running coverage analysis...
+[-]   3 files were selected from a total of 15.
+[*] Copying over selected files...
+[-]   pinsamples\basn3p08.png -> minset\basn3p08.png
+[-]   pinsamples\basn3p04.png -> minset\basn3p04.png
+[-]   pinsamples\basn2c16.png -> minset\basn2c16.png
+
+[*] Finished
+----
+===============
