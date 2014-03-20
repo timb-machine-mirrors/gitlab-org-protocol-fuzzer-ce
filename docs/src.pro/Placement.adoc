@@ -19,7 +19,7 @@ The placement element tell the data cracker that specific elements should be mov
 
 See also xref:DataModeling_Placement[Arrays of Offsets to Data] chapter.
 
-NOTE: Placement only works when data is being parsed into the DataModel via an input Action or a Data statement pointing to a file.
+NOTE: Placement only works when data is being parsed into the DataModel by an input Action or a Data statement pointing to a file.
 
 === Syntax
 

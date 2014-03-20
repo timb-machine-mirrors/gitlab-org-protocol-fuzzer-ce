@@ -30,7 +30,11 @@
 // 03/07/2014: Lynn
 //   * Added missing child elements and corrected spelling in comments
 
-A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length. All strings are encoded prior to output with the default encoding 7-bit ASCII (aka latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute). Strings are also used to hold numbers that will be in a string format. When strings contain a number, the numerical mutators will also be used to mutate the string.
+A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length. 
+
+All strings are encoded prior to output with the default encoding 7-bit ASCII (aka Latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute). 
+
+Strings are also used to hold numbers that will be in a string format. When strings contain a number, the numerical mutators will also be used to mutate the string.
 
 === Syntax
 
