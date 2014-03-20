@@ -3,8 +3,7 @@ include::VXLAN_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
-
-Setting up VXLAN can be a long multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here]
+Setting up VXLAN is a multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here]
 
 ==== Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine.
@@ -27,7 +26,25 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample VXLAN Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug VXLAN.xml
+----
+==== Full test run
+----
+peach VXLAN.xml
+----
+
+=== Examples
+
+.Sample VXLAN Configuration File
+==========================
+Example configuration for sending vxlan packets.
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -64,17 +81,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug VXLAN.xml
-----
-==== Full test run
-----
-peach VXLAN.xml
-----
+==========================

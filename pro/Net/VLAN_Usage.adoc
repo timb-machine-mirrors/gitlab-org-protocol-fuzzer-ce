@@ -7,26 +7,6 @@ A VLAN interface or VLAN enabled switch is required.
 A VLAN interface can be added on Linux using vconfig.
 In order to run all tests both a UDP and TCP listener are required. The networking tool socat can be used as the listener.
 
-_Example of using adding a VLAN interface:_
-
-----
-sudo apt-get install vlan
-
-#Add a new vlan interface with the tag of 1
-sudo vconfig add eth0 1
-
-#Config the vlan interface
-sudo ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
-
-#Setting up socat listener for UDP
-
-sudo socat STDIO udp-listen:12345
-
-#Setting up socat listener for TCP
-
-sudo socat STDIO tcp-listen:12345
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv6:: IPv6 address of the target host machine.
 SourceIPv6:: IPv6 address of the interface on the local machine.
@@ -44,7 +24,50 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample VLAN Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug VLAN.xml
+----
+==== Full test run
+----
+peach VLAN.xml
+----
+
+=== Examples
+
+.Sample VLAN Configuration File
+==========================
+Example configuration to send vlan packets
+
+First we must install vlan and configure vlan. Once that is done socat needs to be set up in different terminals to listen for incoming packets. For this example we assume you are running linux. For other platforms follow the platform specific installation instructions for vlan and socat.
+
+----
+sudo apt-get install vlan
+
+#Add a new vlan interface with the tag of 1
+sudo vconfig add eth0 1
+
+#Config the vlan interface
+sudo ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
+
+#Install socat
+
+sudo apt-get install socat
+
+#Setting up socat listener for UDP
+
+sudo socat STDIO udp-listen:12345
+
+#Setting up socat listener for TCP
+
+sudo socat STDIO tcp-listen:12345
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -76,17 +99,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug VLAN.xml
-----
-==== Full test run
-----
-peach VLAN.xml
-----
+==========================

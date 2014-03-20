@@ -6,19 +6,6 @@ include::TCPv6_DataSheet.adoc[]
 An application must be listening on the TCP port defined in the configuration file. The network tool socat can be used as the listener.
 Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
 
-_Example of setting up TCPv6:_
-[source,bash]
-----
-#Disable outgoing RST on the node running Peach
-ip6tables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
-
-#Add a local IPv6 interface, this becomes your source ip
-ip addr add ::2 dev lo
-
-#Set up TCPv4 listener
-socat tcp6-l:4321,fork,reuseaddr STDIO
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
@@ -33,7 +20,44 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample TCPv6 Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug TCPv6.xml
+----
+==== Full test run
+----
+peach TCPv6.xml
+----
+
+=== Examples
+
+.Sample TCPv6 Configuration File
+==========================
+Example configuration using socat on linux.
+
+First we must configure the firewall then install and run socat, for this example we assume you are running linux. For other platforms follow the platform specific installation instructions for socat and firewall configuration.
+
+[source,bash]
+----
+#Disable outgoing RST on the node running Peach
+ip6tables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
+
+#Add a local IPv6 interface, this becomes your source ip
+ip addr add ::2 dev lo
+
+#Install socat
+
+sudo apt-get install socat
+
+#Set up TCPv4 listener
+socat tcp6-l:4321,fork,reuseaddr STDIO
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -62,17 +86,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug TCPv6.xml
-----
-==== Full test run
-----
-peach TCPv6.xml
-----
+==========================
