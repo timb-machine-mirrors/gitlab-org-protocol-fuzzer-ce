@@ -339,6 +339,6 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-Since notepad doesn't close automatically you must close notepad after each iteration. Using WaitForExitOnCall is useful when you want the process to block fuzzing until the process closes before continuing.
+Since notepad doesn't close automatically you must close notepad after each iteration. Using WaitForExitOnCall is useful when you want halt fuzzing fuzzing until the process closes.
 
 =================
