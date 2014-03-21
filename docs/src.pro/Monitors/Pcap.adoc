@@ -136,4 +136,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+
+The PCAP monitor only provides extra data when a fault occurs. This is useful for capturing both incoming and outgoing data.
+
 ==================

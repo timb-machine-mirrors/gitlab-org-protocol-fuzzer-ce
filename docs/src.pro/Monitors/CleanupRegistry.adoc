@@ -80,7 +80,7 @@ Peach.Core.Agent.Agent SessionStarting: Monitor
 
 [R1,-,-] Performing iteration
 Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.OS.Windows.Agent.Monitors.CleanupRegistry Removing key: SOFTWARE\Office13\Recovery
+Peach.Core.OS.Windows.Agent.Monitors.CleanupRegistry Removing key: SOFTWARE\Office13\Recovery <1>
 Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
 Peach.Core.Dom.Action ActionType.Output
 Peach.Core.Publishers.ConsolePublisher start()
@@ -94,4 +94,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+
+<1> Deleting the registry key
+
 ========================

@@ -3,7 +3,6 @@
 == PageHeap Monitor (Windows)
 
 The _PageHeap_ monitor will enable page heap debugging options for an executable.
-The source code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
 
 === Parameters
 

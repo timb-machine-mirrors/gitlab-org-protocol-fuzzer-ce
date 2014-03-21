@@ -18,6 +18,8 @@ No optional parameters are supported by this monitor.
 
 .Remove contents of a folder
 ==============================
+This example should be ran from the folder defined in the CleanupFolder monitors folder parameter. During each iteration a file called fuzzed.txt will be created by the File publisher and deleted at the end of the iteration by the CleanupFolder monitor.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -31,6 +33,10 @@ No optional parameters are supported by this monitor.
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+
+      <Action type="output" publisher="FilePub">
           <DataModel ref="TheDataModel"/>
       </Action>
     </State>
@@ -48,6 +54,10 @@ No optional parameters are supported by this monitor.
     <Agent ref="TheAgent" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Publisher name="FilePub" class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
 
     <Logger class="File">
       <Param name="Path" value="logs"/>
