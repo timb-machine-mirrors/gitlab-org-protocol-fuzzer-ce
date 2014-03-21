@@ -33,6 +33,7 @@ class:: Reference to Python class to call
 
 .Basic Usage Example
 ====================
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
