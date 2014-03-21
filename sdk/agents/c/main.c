@@ -9,7 +9,7 @@ static int on_status_true(struct mg_connection *conn)
 {
 	printf("  Status: True\n");
 	mg_send_header(conn, "Content-Type", "application/json");
-	mg_printf_data(conn, "{status:true}");
+	mg_printf_data(conn, "{\"status\":true}");
 	return MG_TRUE;
 }
 
@@ -17,7 +17,7 @@ static int on_status_false(struct mg_connection *conn)
 {
 	printf("  Status: False\n");
 	mg_send_header(conn, "Content-Type", "application/json");
-	mg_printf_data(conn, "{status:false}");
+	mg_printf_data(conn, "{\"status\":false}");
 	return MG_TRUE;
 }
 
