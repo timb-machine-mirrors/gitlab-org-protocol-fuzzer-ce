@@ -30,6 +30,26 @@ DUM_CONFIG = DummyPeachTestConfig()
 # platform (via testlib.get_platform()) to Os tag as seen be peachfarm
 PLATFORM_TAG_LOOKUP = {'win': 'Windows', 'osx': 'Osx', 'linux': 'Linux'}
 
+class FarmJob:
+
+	def __init__(self):
+		pass
+
+def wait_for_all_jobs_to_finish():
+	print ''
+	is_done = False
+	finished_sign = 'Active Jobs\n-----------\n(no active jobs)'
+	finished_sign_ms = finished_sign.replace('\n', '\r\n')
+	while True:
+		sp = subprocess.Popen([PFADMIN_PATH, '-jobs'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = sp.communicate()
+		sp.wait()
+		if finished_sign in out or finished_sign_ms in out:
+			break
+		print 'Waiting for all jobs to finish....'
+		time.sleep(5)
+
+
 def clear_peachfarm_errors():
 	'''clean out the whole kit and kaboodle before testing'''
 	sp = subprocess.Popen([r'C:\pf\bin\pf_admin.exe', '-clear', '-type=all'],
@@ -40,12 +60,13 @@ def clear_peachfarm_errors():
 
 def report_error(pit_name, opsys, test_name, admin_response):
 	# admin_response is list like (cmd, out, err, rc)
-	cmd, out, err, rc = admin_response
+	cmd, out, err, rc, jobid = admin_response
 	print "Failed to start: ", pit_name, ' on ', opsys, " for test ", test_name
 	print "Running: "   , cmd
 	print "Stdout: \n\t", out
 	print "Stderr: \n\t", err
 	print "Return Code:", rc
+	print "Job Id:"     , jobid
 
 
 def base_path():
@@ -332,6 +353,13 @@ def run_pit_zip(zip_name, args):
 	# tags = [{<os_tag>, <test_name>}]
 	# assume pathing for windows. throw assertion if this script runs on linux
 	# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
+	def get_job_id(job_output):
+		for line in job_output:
+			if 'job id' in line.lower():
+				print 'job id: ', line.split(':')[2].strip()
+				return line.split(':')[2].strip()
+		return None
+
 	assert  os.path.exists(PFADMIN_PATH)
 	cmd = [PFADMIN_PATH, '-start', '-n1', '-t', args['os_tag'],
 		   '-range', '1-1',
@@ -342,8 +370,8 @@ def run_pit_zip(zip_name, args):
 	out, err = sp.communicate()
 	sp.wait()
 	rc = sp.returncode
-	k = args['os_tag'] + ' - ' + args['test_name']
-	return [' '.join(cmd), out, err, rc]
+	jobid = get_job_id(out)
+	return [' '.join(cmd), out, err, rc, jobid]
 
 
 def all_pit_argument_info():
@@ -379,6 +407,7 @@ def all_pit_argument_info():
 if __name__ == "__main__":
 	temp_dirs = []
 	failures = [] # [(pit, os, testname, error_output)]
+	running_jobs = [] # [<admin responses>]
 
 	clear_peachfarm_errors()
 	pit_argument_info = all_pit_argument_info()
@@ -387,6 +416,7 @@ if __name__ == "__main__":
 	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
 	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
+		if 'BMP' not in pit_name: continue #dbgByron
 		zip_name = pit_name + '.zip'
 
 		print '\nConstructing pit zip for ', pit_name
@@ -401,21 +431,52 @@ if __name__ == "__main__":
 		args_for_runs = pit_argument_info[pit_name]
 		for run_args in args_for_runs:
 			print '\n' # space the output between runs
-			prerun_error_count = len(peachfarm_errors())
 			admin_response = run_pit_zip(zip_name, run_args)
-			time.sleep(1.5) # allow errors to propogate, may need increase
-			postrun_errors = peachfarm_errors()
-			postrun_error_count = len(postrun_errors)
-			if postrun_error_count != prerun_error_count:
-
-				prev_error_hdr  = most_recent_error_header(postrun_errors)
-				prev_error_info = postrun_errors[prev_error_hdr]
-				prev_error      = prev_error_hdr + '\n' + prev_error_info
-
-				if pit_name not in failures:
-					failures.append(pit_name)
+			failed_to_start = admin_response[3] != 0 or admin_response[4] is None
+			if failed_to_start:
 				report_error(pit_name, run_args['os_tag'],
 				             run_args['test_name'], admin_response)
+			else:
+				job_id = admin_response[4]
+				running_jobs.append(admin_response)
+
+################################################################################
+	wait_for_all_jobs_to_finish()
+
+	print '\n\n', "#" * 80, '\n', "#" * 80
+	print '\t\tErrors from nodes'
+	print "#" * 80, '\n', "#" * 80, '\n\n'
+	farm_errors = peachfarm_errors()
+	for job in running_jobs:
+		cmd, out, err, rc, jobid = job
+		pit_name = cmd.split(' ')[-1].split('.')[0]
+		#if jobid is None: continue #dbgByron
+		if jobid is None: jobid = "None"
+
+		error_query_cmd = [PFADMIN_PATH, '-errors', jobid]
+		error_query = subprocess.Popen(error_query_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		eq_out, eq_err = error_query.communicate()
+		error_query.wait()
+		assert error_query.returncode == 0
+
+		print '#' * 80
+		print rc
+		print 'Job: ', jobid, ': ', cmd
+		print out
+		print err
+
+		################################################################################
+		#if postrun_error_count != prerun_error_count:
+		#
+		#	prev_error_hdr  = most_recent_error_header(postrun_errors)
+		#	prev_error_info = postrun_errors[prev_error_hdr]
+		#	prev_error      = prev_error_hdr + '\n' + prev_error_info
+		#
+		#	if pit_name not in failures:
+		#		failures.append(pit_name)
+		#	report_error(pit_name, run_args['os_tag'],
+		#				 run_args['test_name'], admin_response)
+		################################################################################
 
 	map(shutil.rmtree, temp_dirs)
 
