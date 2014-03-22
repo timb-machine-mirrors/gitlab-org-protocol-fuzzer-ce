@@ -31,61 +31,82 @@ DUM_CONFIG = DummyPeachTestConfig()
 PLATFORM_TAG_LOOKUP = {'win': 'Windows', 'osx': 'Osx', 'linux': 'Linux'}
 
 class FarmJob:
+	all_jobs = []
 
-	def __init__(self):
-		pass
+	def __init__(self, pit_name, run_args):
+		self.test_name = run_args['test_name']
+		self.pit_name  = pit_name
+		self.zip_name  = pit_name + '.zip'
+		self.run_args  = run_args
+		self.opsys     = run_args['os_tag']
 
-def wait_for_all_jobs_to_finish():
-	print ''
-	is_done = False
-	finished_sign = 'Active Jobs\n-----------\n(no active jobs)'
-	finished_sign_ms = finished_sign.replace('\n', '\r\n')
-	while True:
-		sp = subprocess.Popen([PFADMIN_PATH, '-jobs'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		out, err = sp.communicate()
+		self.has_started_succesfully = False
+		self.start_job_output = None
+		self.start_job_error  = None
+		self.start_job_rc     = None
+		self.command = None
+		self.job_id  = None # not an int, maybe a hex int, keep string anyway
+
+		self.error_query_error = None
+		self.error_query_out   = None
+
+		if self not in FarmJob.all_jobs:
+			FarmJob.all_jobs.append(self)
+
+	def report_error(self):
+		print "Failed to start: ", self.pit_name, ' on ', self.opsys, \
+			   " for test ", self.test_name
+		print "Running: "   , self.command
+		print "Stdout: \n\t", self.start_job_output
+		print "Stderr: \n\t", self.start_job_error
+		print "Return Code:", self.start_job_rc
+		print "Job Id:"     , self.job_id
+
+	def run(self):
+		''' how will we detect failure??? '''
+		# tags = [{<os_tag>, <test_name>}]
+		# assume pathing for windows. throw assertion if this script runs on linux
+		# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
+		def get_job_id(job_output):
+			# it looks like this mixes \r\n and just \n for line endings....
+			job_output = job_output.replace('\r\n', '\n')
+			for line in job_output.split('\n'):
+				if 'job id' in line.lower():
+					return line.split(':')[-1].strip()
+			return None
+
+		assert  os.path.exists(PFADMIN_PATH)
+		self.command = [PFADMIN_PATH, '-start', '-n1', '-t', self.run_args['os_tag'],
+			           '-range', '1-1',
+			           '-test',  self.run_args['test_name'],
+			           self.zip_name]
+		print 'Running: ', ' '.join(self.command)
+		sp = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		self.start_job_output, self.start_job_error = sp.communicate()
 		sp.wait()
-		if finished_sign in out or finished_sign_ms in out:
-			break
-		print 'Waiting for all jobs to finish....'
-		time.sleep(5)
+		self.start_job_rc = sp.returncode
+		self.job_id = get_job_id(self.start_job_output)
+		self.has_started_succesfully = self.job_id is not None and self.start_job_rc == 0
 
+	def get_error_info(self):
+		# does not mean that the job failed. just get info from `pf_admin -errors`
+		error_query_cmd = [PFADMIN_PATH, '-errors', self.job_id]
+		error_query = subprocess.Popen(error_query_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		eq_out, eq_err = error_query.communicate()
+		self.error_query_error = eq_err
+		self.error_query_out   = eq_out
+		error_query.wait()
+		assert error_query.returncode == 0
 
-def clear_peachfarm_errors():
-	'''clean out the whole kit and kaboodle before testing'''
-	sp = subprocess.Popen([r'C:\pf\bin\pf_admin.exe', '-clear', '-type=all'],
-	                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	time.sleep(1.5) # give it time to do its thing
-	sp.communicate()
-	sp.wait()
+	def print_error_info(self):
+		print '#' * 80
+		print 'Job: ', self.job_id, ': ', ' '.join(self.command)
+		print '---- stdout'
+		print self..error_query_out
+		print '---- stderr'
+		print self..error_query_error
 
-def report_error(pit_name, opsys, test_name, admin_response):
-	# admin_response is list like (cmd, out, err, rc)
-	cmd, out, err, rc, jobid = admin_response
-	print "Failed to start: ", pit_name, ' on ', opsys, " for test ", test_name
-	print "Running: "   , cmd
-	print "Stdout: \n\t", out
-	print "Stderr: \n\t", err
-	print "Return Code:", rc
-	print "Job Id:"     , jobid
-
-
-def base_path():
-	# find the 'v3.0' directory. this is what ##Path## should be most times
-	d = os.path.abspath(__file__)
-	while True:
-		if os.path.basename(d) == 'pro':
-			break
-		d = os.path.dirname(d)
-	return d
-
-
-def temp_dir_name(pit_name):
-	pid = os.getpid()
-	tmp_dir = 'tmp_%s_%s' % (pit_name, pid)
-	return os.path.abspath(os.path.join('.', tmp_dir))
-
-
-def base_pit_files(pit_name):
+def base_pit_files(self):
 	# returns fullpaths to basefiles
 	files = []
 	for pd in PIT_DIRS:
@@ -102,6 +123,41 @@ def base_pit_files(pit_name):
 			files.append(cf_path)
 	return files
 
+def wait_for_all_jobs_to_finish():
+	print ''
+	is_done = False
+	finished_sign = 'Active Jobs\n-----------\n(no active jobs)'
+	finished_sign_ms = finished_sign.replace('\n', '\r\n')
+	while True:
+		sp = subprocess.Popen([PFADMIN_PATH, '-jobs'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = sp.communicate()
+		sp.wait()
+		if finished_sign in out or finished_sign_ms in out:
+			break
+		print 'Waiting for all jobs to finish....'
+		time.sleep(5)
+
+def clear_peachfarm_errors():
+	'''clean out the whole kit and kaboodle before testing'''
+	sp = subprocess.Popen([r'C:\pf\bin\pf_admin.exe', '-clear', '-type=all'],
+	                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	time.sleep(1.5) # give it time to do its thing
+	sp.communicate()
+	sp.wait()
+
+def base_path():
+	# find the 'v3.0' directory. this is what ##Path## should be most times
+	d = os.path.abspath(__file__)
+	while True:
+		if os.path.basename(d) == 'pro':
+			break
+		d = os.path.dirname(d)
+	return d
+
+def temp_dir_name(pit_name):
+	pid = os.getpid()
+	tmp_dir = 'tmp_%s_%s' % (pit_name, pid)
+	return os.path.abspath(os.path.join('.', tmp_dir))
 
 def actual_include_location(ifile_src):
 	# pop up the current path until we find a directory corresponding
@@ -347,33 +403,6 @@ def peachfarm_errors():
 			content.append(line)
 	return errors
 
-
-def run_pit_zip(zip_name, args):
-	''' how will we detect failure??? '''
-	# tags = [{<os_tag>, <test_name>}]
-	# assume pathing for windows. throw assertion if this script runs on linux
-	# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
-	def get_job_id(job_output):
-		for line in job_output:
-			if 'job id' in line.lower():
-				print 'job id: ', line.split(':')[2].strip()
-				return line.split(':')[2].strip()
-		return None
-
-	assert  os.path.exists(PFADMIN_PATH)
-	cmd = [PFADMIN_PATH, '-start', '-n1', '-t', args['os_tag'],
-		   '-range', '1-1',
-		   '-test',  args['test_name'],
-		   zip_name]
-	print 'Running: ', ' '.join(cmd)
-	sp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	out, err = sp.communicate()
-	sp.wait()
-	rc = sp.returncode
-	jobid = get_job_id(out)
-	return [' '.join(cmd), out, err, rc, jobid]
-
-
 def all_pit_argument_info():
 	# this returns a dict of info concerning _all_ of the pits we know about
 	arg_info = {} # pit name -> (os, test name)
@@ -417,7 +446,6 @@ if __name__ == "__main__":
 	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
 		if 'BMP' not in pit_name: continue #dbgByron
-		zip_name = pit_name + '.zip'
 
 		print '\nConstructing pit zip for ', pit_name
 		temp_dir = temp_dir_name(pit_name)
@@ -425,22 +453,20 @@ if __name__ == "__main__":
 		os.mkdir(temp_dir)
 
 		collect_pit_files(pit_name, temp_dir)
-		create_pit_zip(zip_name, temp_dir)
+		create_pit_zip(pit_name + '.zip', temp_dir)
 
 		# the same pit can have multiple sets of run args, even within an os
 		args_for_runs = pit_argument_info[pit_name]
 		for run_args in args_for_runs:
 			print '\n' # space the output between runs
-			admin_response = run_pit_zip(zip_name, run_args)
-			failed_to_start = admin_response[3] != 0 or admin_response[4] is None
-			if failed_to_start:
-				report_error(pit_name, run_args['os_tag'],
-				             run_args['test_name'], admin_response)
+			fj = FarmJob(pit_name, run_args)
+			fj.run()
+			if fj.has_started_succesfully:
+				running_jobs.append(fj)
 			else:
-				job_id = admin_response[4]
-				running_jobs.append(admin_response)
+				fj.report_error()
 
-################################################################################
+	################################################################################
 	wait_for_all_jobs_to_finish()
 
 	print '\n\n', "#" * 80, '\n', "#" * 80
@@ -448,40 +474,14 @@ if __name__ == "__main__":
 	print "#" * 80, '\n', "#" * 80, '\n\n'
 	farm_errors = peachfarm_errors()
 	for job in running_jobs:
-		cmd, out, err, rc, jobid = job
-		pit_name = cmd.split(' ')[-1].split('.')[0]
-		#if jobid is None: continue #dbgByron
-		if jobid is None: jobid = "None"
-
-		error_query_cmd = [PFADMIN_PATH, '-errors', jobid]
-		error_query = subprocess.Popen(error_query_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		eq_out, eq_err = error_query.communicate()
-		error_query.wait()
-		assert error_query.returncode == 0
-
-		print '#' * 80
-		print rc
-		print 'Job: ', jobid, ': ', cmd
-		print out
-		print err
-
-		################################################################################
-		#if postrun_error_count != prerun_error_count:
-		#
-		#	prev_error_hdr  = most_recent_error_header(postrun_errors)
-		#	prev_error_info = postrun_errors[prev_error_hdr]
-		#	prev_error      = prev_error_hdr + '\n' + prev_error_info
-		#
-		#	if pit_name not in failures:
-		#		failures.append(pit_name)
-		#	report_error(pit_name, run_args['os_tag'],
-		#				 run_args['test_name'], admin_response)
-		################################################################################
+		job.get_error_info()
+		if job.has_error:
+			job.print_error_info()
 
 	map(shutil.rmtree, temp_dirs)
+	map(os.remove, set(j.zip_name for j in FarmJob.all_jobs))
 
 	if failures != []:
 		print '\n\nFailing Tests: ', '  '.join(failures), '\n\n'
 		sys.exit(len(failures))
-
 
