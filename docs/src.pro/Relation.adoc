@@ -11,7 +11,12 @@
 // Probably stick size-of/count-of/offset-of into separate files
 //
 
-Peach allows modeling of relationships in the data.  Relationships are things like "X is the size of Y", "X is the count of Y", or "X is the offset (in bytes) of Y".
+Peach allows data relationship modeling.  There are three Relation types: Size, Count and Offset.
+
+There are two required Relation attributes:
+
+Type::  Which relationship is being modeled (Size, Count, Offset)
+of:: Name of the relationship element in the data model  
 
 [[Relations_Size]]
 === Size-of Relation
@@ -22,11 +27,11 @@ Peach allows modeling of relationships in the data.  Relationships are things li
 // Unicode/wchar
 // Multiple relations on same elements
 
+The Size relationship type specifies "X is the size of Y."
+
+The Number element is the byte count of the relationship element. Unicode characters may be multi-byte and the Number value should reflect the additional size.
+
 In this example, the value of the number element will indicate the size of the string element named _TheValue_ in bytes. 
-
-This example is also true for multi-byte characters such as wchar.  
-
-In future versions of Peach either this will change or a new relation of type length will be included so as to better support UTF-8 and other Unicode encodings.
 
 [source,xml]
 ----
@@ -36,14 +41,15 @@ In future versions of Peach either this will change or a new relation of type le
 <String name="TheValue" />
 ----
 
-
 *With expressionGet/expressionSet*
 
-In this example we will provide two python expressions that allow us to modify the size when it is get or set.  
+Gets are applied during the cracking process and Sets are applied during the publishing process. 
 
-Peach has two variables, +self+ and +size+, that we use in these expressions.  Self is a reference to the Number element and size is an integer. 
+For the Size relation, expressionGet and expressionSet use the two variables, +self+ and +size+.  Self refers to the Number element and size is an integer. 
 
-Expression gets and sets should be each others mathematical inverse. Gets are applied during the cracking process and Sets are applied during the publishing process.
+Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
+
+In this example we will provide two python expressions that allow us to modify the size when it is get or set. 
 
 expressionGet:: The result of this expression is used internally and will end up determining how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
 expressionSet:: Produces a value for the publisher.  In the following example +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
@@ -66,6 +72,11 @@ expressionSet:: Produces a value for the publisher.  In the following example +s
 // * size-of works, but not when inside the array (need to verify)
 // * expressionGet/Set
 
+The Count-of relationship type specifies "X is the count of Y." It only applies to arrays.
+
+The Number element is the byte count of the relationship array. 
+Because Count-of applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.
+
 In this example the number will indicate the count of the array _Strings_.
 
 [source,xml]
@@ -79,12 +90,16 @@ In this example the number will indicate the count of the array _Strings_.
 
 *With expressionGet/expressionSet*
 
-In this example we will provide two python expressions that allow us to modify the size when it is get or set. 
+Gets are applied during the cracking process and Sets are applied during the publishing process. 
 
-Peach has two variables, +self+ and +count+ that we use in these expressions.  Self is a reference to the Number element and count is an integer.  Having +count+ available here is different than in the previous pair of expressions.  While +self+ is always made available in an expression pair, the name of the other variable available to us is the value of the +type+ attribute on our Relation element.
+For the Count-of relation, expressionGet and expressionSet use the two variables, +self+ and +count+.  Self refers to the Number element and count is an integer. 
+
+Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
 expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on our recurring strings the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
+
+In this example we will provide two python expressions that allow us to modify the size when it gets or sets. 
 
 [source,xml]
 ----
@@ -98,12 +113,18 @@ expressionSet:: Sets the value that will be produced.  In the following example 
 === Offset-of Relation
 
 // * Mention placement
-// * Default behaviour relative=false
+// * Default behavior relative=false
 // * expand descriptions
 // * show output with examples
 // * Placement
 
-Offset relations are the latest addition to peach and allow modeling formats that require changing of the offset and also outputting the offset of various elements.Here we have a series elements which are ascii representations of numeric values of the offset sizes to various string elements below.
+The Offset-of relationship type specifies "X is the offset (in bytes) of Y."
+
+Offset-of relations allow modeling formats that require changing of the offset and also outputting the offset of various elements.
+
+If there are no Relative attributes, Offset-of is measured from the beginning of the data model. If there is a Relative attribute, Offset-of is measured from the specified element. 
+
+Here we have a series elements which are ASCII representations of numeric values of the offset sizes to various string elements below.
 
 [source,xml]
 ----
@@ -155,9 +176,11 @@ Offset relations are the latest addition to peach and allow modeling formats tha
 
 *Relative Offset*
 
-Peach supports the concept of relative offsets.  A relative offset is from the data element the relation is attached to.  
+A relative offset is from the data element the relation is attached to.  
 
-Consider the following example.  When determining the offset of _StringData_ Peach will add/subtract the position of _OffsetToString_ to it's value as needed to determine the correct offset.
+If there is data that represents the distance (in bytes) to somewhere in target element, use the relative offset when you model your data. Peach will automatically calculate the location so you know exact where it is. 
+
+In this example, when determining the offset of _StringData_ Peach will add/subtract the position of _OffsetToString_ to it's value as needed to determine the correct offset.
 
 [source,xml]
 ----
@@ -171,9 +194,11 @@ Consider the following example.  When determining the offset of _StringData_ Pea
 <String name="StringData" nullTerminated="true"/>
 ----
 
-*Relative To Offset*
+*relativeTo Offset*
 
-Peach also supports offsets that are relative to another element.  This is used when an element contains the offset to another element from the start of a structure.  
+Offsets can also relate to another element.  This is used when an element contains the offset to another element from the start of a structure.  
+
+If there is data that represents the distance (in bytes) to another target element, use relativeTo Offset when you model your data. Peach will automatically calculate the location so you know exact where it is. This keeps the relationship intact when fuzzing.
 
 In the following example the offset of _StringData_ will be calculated by adding the value of _OffsetToString_ to the position of _Structure_.
 
@@ -192,6 +217,15 @@ In the following example the offset of _StringData_ will be calculated by adding
 
 
 *With expressionGet/expressionSet*
+
+Gets are applied during the cracking process and Sets are applied during the publishing process. 
+
+For the Offset-of relation, expressionGet and expressionSet use the two variables, +self+ and +offset+.  Self refers to the Parent element and offset is an integer. 
+
+Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
+
+expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on our recurring strings the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
+expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
 
 When using expressionGet/Set with offset relations two variables are provided: self, and offset.  self is a reference to the parent element of the reference, and offset is an integer.
 
