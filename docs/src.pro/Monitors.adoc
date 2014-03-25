@@ -1,12 +1,12 @@
 [[Monitors]]
 == Monitors ==
 
-Agents are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting Faults.
+xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
 
 xref:Agent[Agent]
  
 |==========================================================
-|Monitors|Enterprise|Linux|OSX|Windows
+|Monitor|Enterprise|Linux|OSX|Windows
 |Android|X|||
 |Android Emulator|X|||
 |CanaKitRelay|X|||
@@ -36,42 +36,42 @@ xref:Agent[Agent]
 
 === Monitor Families ===
 
-*Windows Monitors*
+*Windows Monitors
 
- xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]
- xref:Monitors_PageHeap[Page Heap Monitor]
- xref:Monitors_PopupWatcher[Popup Watcher Monitor]
- xref:Monitors_WindowsDebugger[Windows Debugger Monitor]
- xref:Monitors_WindowsService[Windows Service Monitor]
+xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]
+xref:Monitors_PageHeap[Page Heap Monitor]
+xref:Monitors_PopupWatcher[Popup Watcher Monitor]
+xref:Monitors_WindowsDebugger[Windows Debugger Monitor]
+xref:Monitors_WindowsService[Windows Service Monitor]
 
-*OS X Monitors*
+*OS X Monitors
  
- xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]
- xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]
+xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]
+xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]
 
-*Linux Monitors*
+*Linux Monitors
 
- xref:Monitors_LinuxCrash[Linux Crash Monitor]
- xref:Monitors_LinuxDebugger[Linux Debugger Monitor]
+xref:Monitors_LinuxCrash[Linux Crash Monitor]
+xref:Monitors_LinuxDebugger[Linux Debugger Monitor]
  
-*Cross Platform Monitors*
+*Cross Platform Monitors
 
- xref:Monitors_Android[Android Monitor]
- xref:Monitors_AndroidEmulator[Android Emulator Monitor]
- xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]
- xref:Monitors_CleanupFolder[Cleanup Folder Monitor]
- xref:Monitors_IpPower9258[IpPower9258 Monitor]
- xref:Monitors_MemoryMonitor[Memory Monitor]
- xref:Monitors_Pcap[Pcap Network Monitor]
- xref:Monitors_Ping[Ping Monitor]
- xref:Monitors_Process[Process Launcher Monitor]
- xref:Monitors_ProcessKiller[Process Killer Monitor]
- xref:Monitors_RunCommand[Run Command Monitor] 
- xref:Monitors_SaveFile[Save File Monitor]
- xref:Monitors_Socket[Socket Listener Monitor]
- xref:Monitors_Ssh[SSH Monitor]
- xref:Monitors_SshDownloader[SSH Downloader Monitor]
- xref:Monitors_Vmware[Vmware Control Monitor]
+xref:Monitors_Android[Android Monitor]
+xref:Monitors_AndroidEmulator[Android Emulator Monitor]
+xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]
+xref:Monitors_CleanupFolder[Cleanup Folder Monitor]
+xref:Monitors_IpPower9258[IpPower9258 Monitor]
+xref:Monitors_MemoryMonitor[Memory Monitor]
+xref:Monitors_Pcap[Pcap Network Monitor]
+xref:Monitors_Ping[Ping Monitor]
+xref:Monitors_Process[Process Launcher Monitor]
+xref:Monitors_ProcessKiller[Process Killer Monitor]
+xref:Monitors_RunCommand[Run Command Monitor] 
+xref:Monitors_SaveFile[Save File Monitor]
+xref:Monitors_Socket[Socket Listener Monitor]
+xref:Monitors_Ssh[SSH Monitor]
+xref:Monitors_SshDownloader[SSH Downloader Monitor]
+xref:Monitors_Vmware[Vmware Control Monitor]
 
 :leveloffset: 2
 
