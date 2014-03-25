@@ -32,4 +32,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Godel.Tests.dll',
 	ide_path = 'Peach Enterprise',
+	csdoc = False,
 )

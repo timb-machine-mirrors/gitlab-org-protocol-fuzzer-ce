@@ -23,4 +23,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PeachFarm.Test.dll',
 	ide_path = '../Peach Farm',
+	csdoc = False,
 )

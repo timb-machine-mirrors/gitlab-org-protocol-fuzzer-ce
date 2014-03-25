@@ -19,4 +19,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name='PeachFarm.Reporting.Reports.dll',
 	ide_path = '../Peach Farm',
+	csdoc = False,
 )

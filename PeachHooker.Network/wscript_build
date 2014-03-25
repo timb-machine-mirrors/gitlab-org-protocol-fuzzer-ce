@@ -13,4 +13,5 @@ bld(
 	name = 'PeachHooker.Network.dll',
 	keyfile = 'PeachHooker.Network.snk',
 	ide_path='Peach Hooker',
+	csdoc = False,
 )
