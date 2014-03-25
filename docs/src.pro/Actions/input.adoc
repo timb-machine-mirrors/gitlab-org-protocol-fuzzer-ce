@@ -13,7 +13,7 @@
 //   * How to debug cracking
 //  * Stream based publishers vs. datagram (TCP vs. UDP)
 //   * On UDP we get a full packet and only a single packet (implicit length max of packet size)
-//   * On TCP/FILE we get "no end" of data 
+//   * On TCP/FILE we get "no end" of data
 
 // 02/12/2014: Mick
 //  Added description of what input does
@@ -28,12 +28,13 @@
 //  Updated examples
 //  Added further information as needed
 
-// 03/05/2014: Lynn: 
+// 03/05/2014: Lynn:
 //  Edited text and created the stream/datagram table
 
 The _input_ Action is used to receive/read in data using a xref:Publisher[Publisher].
-The most common use for _input_ actions is to receive data that will be acted upon. 
-Once received and xref:Cracking[cracked] into a data model the data can be copied to
+The most common use for _input_ actions is to receive data that will be acted upon.
+// Once received and xref:Cracking[cracked] into a data model the data can be copied to
+Once received and cracked into a data model the data can be copied to
 xref:Action_output[_output_] actions, or referenced in conditional expressions such as with the
 xref:Action_when[_when_] attribute.
 
@@ -43,7 +44,7 @@ For stream-based publishers that can read forever (such as TCP) the DataModel mu
 .Stream Publisher versus Datagram Publisher
 [options="header"]
 |====================================================================
-|Stream                              |Datagram 
+|Stream                              |Datagram
 |TCP                                 |UDP
 |Number of packets unimportant       |Number of packets important
 |Implicit data length not included   |Includes implicit data length
@@ -60,18 +61,18 @@ In UDP, each input and output action will receive or send a single datagram. Whe
 ****
 If the input time out is reached prior to all incoming data being received, Peach will behave as follows:
 
-xref:Iteration_record[record iteration]:: 
-  When a record iteration generates errors, Peach assumes either the environment is not working correctly or the pit is incorrect.   In both cases fuzzing cannot continue, causing Peach to stop.
-  Peach will exception and stop.
+xref:Iteration_record[record iteration]::
+When a record iteration generates errors, Peach assumes either the environment is not working correctly or the pit is incorrect.   In both cases fuzzing cannot continue, causing Peach to stop.
+Peach will exception and stop.
 
 xref:Iteration_control[control iteration]::
-  Control iterations must be enabled for this state to be reached.
-  Control iterations assume that any error is the result of the target entering an unwanted state. Such transitions are considered faults and logged as such.
-  Peach will trigger a fault.
+Control iterations must be enabled for this state to be reached.
+Control iterations assume that any error is the result of the target entering an unwanted state. Such transitions are considered faults and logged as such.
+Peach will trigger a fault.
 
 xref:Iteration_fuzzing[fuzzing iteration]::
-  Peach will continue to next iteration.
-  During normal fuzzing iterations, Peach assumes fuzzing will cause odd behaviours from the target which will be ignored unless they occur on a control iteration (an iteration without any mutations occurring).
+Peach will continue to next iteration.
+During normal fuzzing iterations, Peach assumes fuzzing will cause odd behaviours from the target which will be ignored unless they occur on a control iteration (an iteration without any mutations occurring).
 ****
 
 .Default Order of Actions
@@ -116,7 +117,8 @@ xref:Action_onComplete[onComplete]:: Expression to run on completion of an actio
 
 === Child-Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be xref:Cracking[cracked]
+// TODO xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be xref:Cracking[cracked]
+xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be cracked
 
 === Examples
 
