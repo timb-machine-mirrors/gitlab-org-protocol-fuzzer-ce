@@ -19,12 +19,12 @@ Root XML Namespace:: XML namespace of root element.
 Sample XML Files:: Where to place generated files.
 Number of Output Files:: How many files to generate. Defaults to 100.
 
-=== Examples
-
-.Producing SVG Examples from DTD
-===================
-The default parameters in the GUI application are pre-filled with this example.
-
-
-
-===================
+// === Examples
+// 
+// .Producing SVG Examples from DTD
+// ===================
+// The default parameters in the GUI application are pre-filled with this example.
+// 
+// TODO - Provide example screen shots
+// 
+// ===================

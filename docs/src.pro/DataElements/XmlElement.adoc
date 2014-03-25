@@ -9,7 +9,7 @@ Defines an XML element, the basic building block of XML documents. This is used 
 
 NOTE: The XmlElement/XmlAttribute elements do not support cracking of data. If you need to crack XML content into XmlElement/XmlAttribute, use an xref:Analyzers_Xml[XmlAnalyzer] attached to a String element.
 
-NOTE: The resulting value produced by any child element must be a string. In the case of elements that produce binary output, a xref:Transformer[Transformer] must be used to convert the binary output to a string. An example of such a transformer is the xref:Transformers_Base64Encode[Base64Encode] transformer.
+NOTE: The resulting value produced by any child element must be a string. In the case of elements that produce binary output, a xref:Transformer[Transformer] must be used to convert the binary output to a string. An example of such a transformer is the xref:Transformers_Base64EncodeTransformer[Base64Encode] transformer.
 
 See also xref:Analyzers_Xml[XML] analyzer and xref:XmlAttribute[XmlAttribute] element.
 

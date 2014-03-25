@@ -1,10 +1,10 @@
+
 [[length]]
-== Length Attribute ==
+== Length Attribute
 
 The _length_ attribute defines the size of a Blob or String in bytes. 
 
-
-=== Examples ===
+=== Examples
 
 [source,xml]
 ----

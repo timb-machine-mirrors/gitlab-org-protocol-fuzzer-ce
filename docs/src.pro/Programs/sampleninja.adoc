@@ -1,4 +1,4 @@
-[[Program_SampleNinja]]
+[[Program_PeachSampleNinja]]
 == Sample Ninja
 
 The Sample Ninja command line tool produces and maintains the Sample Ninja database used by the Sample Ninja mutator.

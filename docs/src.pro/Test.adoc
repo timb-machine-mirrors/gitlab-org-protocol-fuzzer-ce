@@ -73,8 +73,8 @@ controlIteration:: How often should we perform control iterations.  (Defaults to
  * xref:AgentsMonitors[Agent] (optional)
  * xref:StateModel[StateModel] (required)
  * xref:Publisher[Publisher] (required)
- * xref:Include[Include] (optional)
- * xref:Exclude[Exclude] (optional)
+ * xref:Test_Include[Include] (optional)
+ * xref:Test_Exclude[Exclude] (optional)
  * xref:MutationStrategies[Strategy] (optional)
  * xref:Logger[Logger] (optional, recommended)
 
