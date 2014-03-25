@@ -89,7 +89,7 @@ xref:Mutators_SizedDataNumericalEdgeCasesMutator[SizedDataNumericalEdgeCasesMuta
 	This mutator is only applied when element is part of a size relationship.
 
 xref:Mutators_SizedDataVarianceMutator[SizedDataVarianceMutator]::
-	TODO
+	Change the length of the size of a data element that contains a size relation to a range around numerical edge cases and changes the data element that the relation points to size to match that value.
 	+
 	This mutator is only applied when element is part of a size relationship.
 
