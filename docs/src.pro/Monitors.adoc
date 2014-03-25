@@ -1,18 +1,18 @@
 [[Monitors]]
-== Monitors
+==Monitors==
 
 Agents are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting Faults.
 
- |xref:Agent[Agent]
+xref:Agent[Agent]
  
- |=========================================================
- |Monitor|Enterprise|Linux|OSX|Windows
- |Android|X||||
- |Android Emulator|X|||
- |CanaKitRelay||||
- |CleanupFolder||||
- |CleanupRegistry||||X
- |CrashReporter|||X|
+|===============================================================
+|Monitor|Enterprise|Linux|OSX|Windows
+|Android|X||||
+|Android Emulator|X|||
+|CanaKitRelay||||
+|CleanupFolder||||
+|CleanupRegistry||||X
+|CrashReporter|||X|
 |CrashWrangler|||X|
 |IpPower9258||||
 |LinuxCrash||X||
@@ -32,9 +32,9 @@ Agents are special Peach processes that can be run locally or remote. These proc
 |VmwareMonitor||||
 |WindowsDebugger||||X
 |WindowsService||||X
-|==========================================================
+|================================================================
 
-=== Monitors
+===Monitor Families===
 
 *Windows Monitors*
 
@@ -75,7 +75,7 @@ Agents are special Peach processes that can be run locally or remote. These proc
 
 :leveloffset: 2
 
-include::Monitors/Android.adoc[]
+include::Monitors/Android.adoc[Android]
 include::Monitors/AndroidEmulator.adoc[]
 include::Monitors/CanaKitRelay.adoc[]
 include::Monitors/CleanupFolder.adoc[]
