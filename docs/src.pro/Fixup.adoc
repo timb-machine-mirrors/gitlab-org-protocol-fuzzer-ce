@@ -41,12 +41,12 @@ xref:Fixups_SHA256Fixup[SHA256Fixup]
 xref:Fixups_SHA384Fixup[SHA384Fixup]
 xref:Fixups_SHA512Fixup[SHA512Fixup]
  
- _Sequencing Fixups_
+_Sequencing Fixups_
  
 xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
 xref:Fixups_SequenceRandomFixup[SequenceRandomFixup]
  
- _Note_
+_Note_
  
 Fixups should be run after fuzzing and before processing fuzzed data.
 
