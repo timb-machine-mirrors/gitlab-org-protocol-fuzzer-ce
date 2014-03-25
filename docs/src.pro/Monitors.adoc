@@ -1,40 +1,40 @@
 [[Monitors]]
-==Monitors==
+== Monitors ==
 
 Agents are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting Faults.
 
 xref:Agent[Agent]
  
-|===============================================================
-|Monitor|Enterprise|Linux|OSX|Windows
-|Android|X||||
+|==========================================================
+|Monitors|Enterprise|Linux|OSX|Windows
+|Android|X|||
 |Android Emulator|X|||
-|CanaKitRelay||||
-|CleanupFolder||||
+|CanaKitRelay|X|||
+|CleanupFolder|X|||
 |CleanupRegistry||||X
 |CrashReporter|||X|
 |CrashWrangler|||X|
-|IpPower9258||||
+|IpPower9258|X|||
 |LinuxCrash||X||
 |LinuxDebugger||X||
-|Memory||||
+|Memory|X|||
 |PageHeap||||X
-|PcapMonitor||||
-|PingMontor||||
+|PcapMonitor|X|||
+|PingMontor|X|||
 |PopupWatcher||||X
-|Process||||
-|ProcessKiller||||
-|RunCommand||||
-|SaveFile||||
-|Socket||||
-|SSH||||
-|SshDownloader||||
-|VmwareMonitor||||
+|Process|X|||
+|ProcessKiller|X|||
+|RunCommand|X|||
+|SaveFile|X|||
+|Socket|X|||
+|SSH|X|||
+|SshDownloader|X|||
+|VmwareMonitor|X|||
 |WindowsDebugger||||X
 |WindowsService||||X
-|================================================================
+|==========================================================
 
-===Monitor Families===
+=== Monitor Families ===
 
 *Windows Monitors*
 
