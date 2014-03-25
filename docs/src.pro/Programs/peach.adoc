@@ -5,14 +5,14 @@ Peach is normally run as a command line process with a console text based interf
 
 === Syntax
 
----
+----
 peach -a channel
 peach -c peach_xml_file [test_name]
 peach [--skipto #] peach_xml_flie [test_name]
 peach -p 10,2 [--skipto #] peach_xml_file [test_name]
 peach --range 100,200 peach_xml_file [test_name]
 peach -t peach_xml_file
----
+----
 
 === Parameters
 

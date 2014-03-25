@@ -15,8 +15,12 @@ The target of this fuzzer is +mspaint+ on Windows, +feh+ on Linux and +Safari+ o
  . xref:TutorialDumbFuzzing_ConfigurePublisher[Configuring a publisher]
  . xref:TutorialDumbFuzzing_AgentAndMonitor[Adding an agent and monitor]
 
+:leveloffset: 1
+
 include::TutorialDumbFuzzing/DevelopmentEnvironment.adoc[]
 include::TutorialDumbFuzzing/CreateDataModel.adoc[]
 include::TutorialDumbFuzzing/CreateStateModel.adoc[]
 include::TutorialDumbFuzzing/ConfigurePublisher.adoc[]
 include::TutorialDumbFuzzing/AgentAndMonitor.adoc[]
+
+:leveloffset: 0
