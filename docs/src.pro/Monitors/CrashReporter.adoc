@@ -1,7 +1,7 @@
 <<<
 [[Monitors_CrashReporter]]
 == CrashReporter Monitor (OS X)
-//needs better more fleshed out example pit 
+//needs better more fleshed out example pit
 
 The _CrashReporter_ monitor will collect information from crashes detected by OS X System Crash Reporter.
 
@@ -34,21 +34,26 @@ ProcessName:: Process name to watch for (optional, defaults to all)
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="TheAgent">
-	<Monitor class="CrashReporter"/>
- </Agent>
+    <Monitor class="CrashReporter"/>
+  </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="TheAgent" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
-</Peach>	
+</Peach>
 ----
 ====================

@@ -29,9 +29,9 @@ The _Hmac_ fixup will hash the _ref_ element's value using the one of the define
 
 === Parent Elements
 
- * xref:String[String]
- * xref:Blob[Blob]
- 
+xref:String[String]
+xref:Blob[Blob]
+
 === Parameters
 
 xref:ref[ref]:: Reference to data element which the HMAC calculation will be performed on
@@ -52,7 +52,7 @@ xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="Hmac">
+      <Fixup class="HMAC">
         <Param name="ref" value="Data"/>
         <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
         <Param name="Hash" value="HMACSHA1"/>
@@ -72,13 +72,44 @@ xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output from this example
+
+----
+>peach -1 --debug DocSample.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 40206.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(29 bytes)
+00000000   53 74 61 72 74 43 A0 3C  5D 3C 68 39 53 B4 55 B5   StartC?<]<h9S?U?
+00000010   07 E1 74 60 37 E9 72 D4  52 53 74 6F 70            ??t`7?r?RStop
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
 ===============================
 
-.SHA-512 HMAC returning 10 bytes of output
+.SHA-1 HMAC returning 10 bytes of output
 ===============================
 [source,xml]
 ----
@@ -89,10 +120,10 @@ xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 
   <DataModel name="Data">
     <String name="Start" value="Start"/>
     <Blob name="Data" valueType="hex" value="BEEFEA7E41">
-      <Fixup class="Hmac">
+      <Fixup class="HMAC">
         <Param name="ref" value="Data"/>
         <Param name="Key" value="aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae"/>
-        <Param name="Hash" value="HMACSHA512"/>
+        <Param name="Hash" value="HMACSHA1"/>
         <Param name="Length" value="10"/>
       </Fixup>
     </Blob>
@@ -109,8 +140,42 @@ xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 
 
   <Test name="Default">
     <StateModel ref="TheState"/>
+
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----
+
+Output from this example
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 27945.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(19 bytes)
+00000000   53 74 61 72 74 43 A0 3C  5D 3C 68 39 53 B4 55 53   StartC?<]<h9S?US <1>
+00000010   74 6F 70                                           top
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+
+<1> The output of the HMAC is truncated to 10 bytes
+
 ===============================

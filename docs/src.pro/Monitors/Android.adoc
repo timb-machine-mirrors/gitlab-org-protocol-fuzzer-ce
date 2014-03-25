@@ -33,11 +33,13 @@ WaitForReadyOnCall:: Waits for the device to be ready when notified by the state
 
 === Examples
 
-// TODO Expand examples.
-
 .Basic Usage Example
 ======================
 Runs the BadBehaviorActivity, sending random taps
+
+In order to run the android emulator you must set your AdbPath to the directory containing the adb platoform-tools directory. The EmulatorPath must also point to the adb tools directory.
+
+The Avd parameter must also be the name of a valid AVD. To create a new AVD open the 'android.bat' file lcoated in the tools directory of the adb sdk. From the GUI that opens up click on 'Tools' in the menu bar then 'Manage AVDS...'. From the window that opens up click 'New...' and create a new AVD.
 
 [source,xml]
 ----
@@ -73,13 +75,13 @@ Runs the BadBehaviorActivity, sending random taps
 	<Agent name="TheAgent">
 		<Monitor name="Emu" class="AndroidEmulator">
 			<Param name="Avd" value="Nexus4" />
-			<!--Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\tools"/-->
+			<Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20131030\sdk\tools"/>
 		</Monitor>
 
 		<Monitor name="App" class="Android">
 			<Param name="ApplicationName" value="com.android.development" />
 			<Param name="ActivityName" value=".BadBehaviorActivity" />
-			<!--Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\platform-tools"/-->
+			<Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools"/>
 			<Param name="DeviceMonitor" value="Emu" />
 		</Monitor>
 	</Agent>
@@ -96,7 +98,51 @@ Runs the BadBehaviorActivity, sending random taps
 			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
-
 </Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 3054.
+Peach.Core.Agent.Agent StartMonitor: Emu AndroidEmulator
+Peach.Core.Agent.Agent StartMonitor: App Android
+Peach.Core.Agent.Agent SessionStarting: Emu
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Starting android emulator
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Resolved emulator instance to android device 'emulator-5554'
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Android emulator 'emulator-5554' successfully started
+Peach.Core.Agent.Agent SessionStarting: App
+Peach.Enterprise.AndroidBridge Initializing android debug bridge.
+Peach.Enterprise.AndroidBridge Android debug bridge initialized.
+Peach.Enterprise.Agent.Monitors.AndroidMonitor Resolved device 'emulator-5554' from monitor 'Emu'.
+Peach.Enterprise.AndroidDevice Waiting for device 'emulator-5554' to become ready
+Peach.Enterprise.AndroidDevice Device 'emulator-5554' is now ready
+Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': am start -W -S -n com.android.development/.BadBehaviorActivity
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher start()
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher call(tap, System.Collections.Generic.List`1[Peach.Core.Dom.ActionParameter])
+Peach.Core.Agent.AgentManager Message: App => DeviceSerial
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher Resolved device 'emulator-5554' from monitor 'App'.
+Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': input tap 100 0
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: App
+Peach.Enterprise.AndroidBridge Terminating android debug bridge.
+Peach.Core.Agent.Agent SessionFinished: Emu
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Sending stop command to emulator 'emulator-5554'
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Waiting for emulator 'emulator-5554' to exit
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited with code: 0
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited
+
+[*] Test 'Default' finished.
 ----
 ======================

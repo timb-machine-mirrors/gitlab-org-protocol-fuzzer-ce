@@ -5,9 +5,9 @@
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
-// Give full pit to run using hex publisher, test example 
-// List Parent element types 
-// Number, Blob 
+// Give full pit to run using hex publisher, test example
+// List Parent element types
+// Number, Blob
 
 // Updated:
 // - 02/18/2014: Mick
@@ -19,13 +19,13 @@ This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
 
 === Parent Elements
 
- * xref:Number[Number]
- * xref:String[String]
- 
+xref:Number[Number]
+xref:String[String]
+
 === Parameters
 
 xref:ref[ref]:: Reference to data element on which the checksum will be performed.
-src:: Source IP Address. IP address of the local machine. 
+src:: Source IP Address. IP address of the local machine.
 dst:: Destination IP Address. IP address of the remote machine.
 
 === Examples
@@ -65,8 +65,38 @@ This example models a UDP packet which includes use of the UDPChecksumFixup.
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
 	</Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 60502.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   04 D2 04 D3 00 08 D3 72                            ???????r
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ===================

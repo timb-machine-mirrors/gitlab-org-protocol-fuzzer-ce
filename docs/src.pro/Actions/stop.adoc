@@ -20,13 +20,13 @@
 // 03/05/2014: Lynn: 
 //  Edited definition text 
 
-The stop action causes a xref:Publishers[Publisher] to perform any final clean that would otherwise occur at the end of a fuzzing session.
-This is one of the implicit actions that will be called by Peach and does not need to be included in the xref:StateModel unless there is a change in the default behaviour.
+The stop action causes a xref:Publisher[Publisher] to perform any final clean that would otherwise occur at the end of a fuzzing session.
+This is one of the implicit actions that will be called by Peach and does not need to be included in the xref:StateModel unless there is a change in the default behavior.
 
 By default, xref:Action_start[_start_] will occur once at the start of the fuzzing session, and _stop_ will occur once at the end of the fuzzing session.
 Including the _start_ or _stop_ action in the StateModel will cause them to run on every iteration instead of once per session. This should be avoided unless this is specifically required.
 
-Not all xref:Publishers make use of start/stop.
+Not all xref:Publisher[Publishers] make use of start/stop.
 
 .Default Order of Actions
 ****

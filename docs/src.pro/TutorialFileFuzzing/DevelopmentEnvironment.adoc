@@ -15,7 +15,7 @@ Always stay up to date on the version of Peach you are using to get the latest b
 
 There are several support tools that make things work a lot nicer.
 
- * On Windows you will want the following for this lab:
-   - http://msdl.microsoft.com/download/symbols/debuggers/dbg_x86_6.8.4.0.msi[Microsoft Debugging Tools] (pick the latest version available)
- * On OS X you will want the following for this lab:
-   - https://connect.apple.com/cgi-bin/WebObjects/MemberSite.woa/wa/getSoftware?bundleID=20390[CrashWrangler] (Apple Developer Connection account required)
+ * On Windows you will want the Microsoft Debugging Tools for Windows.
+ * On OS X you will want CrashWrangler.
+
+Both of these tools are covered in the installation chapter.

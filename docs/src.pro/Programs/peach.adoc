@@ -1,0 +1,179 @@
+[[Program_Peach]]
+== Peach Command Line
+
+Peach is normally run as a command line process with a console text based interface.
+
+=== Syntax
+
+----
+peach -a channel
+peach -c peach_xml_file [test_name]
+peach [--skipto #] peach_xml_flie [test_name]
+peach -p 10,2 [--skipto #] peach_xml_file [test_name]
+peach --range 100,200 peach_xml_file [test_name]
+peach -t peach_xml_file
+----
+
+=== Parameters
+
+-1:: Perform a single iteration. Used in debugging and validation. The iteration performed will not have any mutations.
+-a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. Default is +tcp+.
+-c --count _pit_:: For deterministic strategies this will return a total iteration count.
+-t --test _pit_:: Perform XML validation of pit
+-p --parallel _M_,_N_:: Setup for parallel fuzzing. This is only useful for deterministic strategies. _M_ is the total number of instances that will be running. _N_ is the current instance.
+--debug:: Enable debug messages. This is used to validate cracking and debugging of pit files.
+--trace:: Enable verbose trace messages. Primarily used when reporting potential bugs in Peach.
+--seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
+--parseonly:: Perform a simple parsing of the pit file, then exit.
+--makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intellisense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
+--showenv:: Display a list of all elements found along with parameters and basic documentation.
+--showdevices:: Show a list of network devices found on the system.
+--analyzer:: Run an analyzer from command line (if supported by analyzer)
+--skipto _N_:: Skip to a specific iteration number. _N_ is the iteration to skip to.
+--range _START_,_STOP_:: Perform a specific range of iterations. _START_ is starting iteration, _STOP_ is iteration to stop at.
+-D --define=_KEY_=_VALUE_:: Define a config value that will get replaced in the pit. This will override values loaded from the default config file (.config).
+--config=_CONFIG_:: Specify a configuration file to use. _CONFIG_ is the configuration file.
+
+=== Examples
+
+.Running a Pit
+======================
+This example shows how to run a fuzzing definition. The following command line will launch Peach and fuzz using +pit.xml+, and if it exists, +pit.xml.config+ as the configuration file.
+
+----
+> peach pit.xml
+----
+======================
+
+.Single Iteration with Debug Output
+======================
+When testing the definition, running a single non-mutating iteration with debug output can be very useful. The following command line will launch Peach and fuzz using +pit.xml+, and if it exists, +pit.xml.config+ as the configuration file. The command line will combine the +-1+ and +--debug+ arguments to run a single iteration with debugging information included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
+
+----
+> peach -1 --debug samples\DebuggerWindows.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 27886.
+Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger
+Peach.Core.Agent.Agent StartMonitor: Monitor_1 PageHeap
+Peach.Core.Agent.Agent StartMonitor: Monitor_2 Pcap
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionStarting
+Peach.Core.Agent.Agent SessionStarting: Monitor_1
+Establishing the listener...
+Waiting for a connection...
+Peach.Core.Agent.Agent SessionStarting: Monitor_2
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Accepted connection from 127.0.0.1:51466.
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+
+Received 12 bytes from client.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+
+Received 12 bytes from client.
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4
+244
+Connection closed by peer.
+Shutting connection down...
+Connection is down.
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:4244, closing client connection.
+Waiting for a connection...
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault()
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault() - No fault detected
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor_2
+Peach.Core.Agent.Agent SessionFinished: Monitor_1
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionFinished
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+
+[*] Test 'Default' finished.
+----
+======================
+
+.Replay Existing Test Sequence
+======================
+Once a faulting condition has been found it is common to want to reproduce the exact test, or sequence of tests to reproduce the issue. Peach can reproduce exact test sequences when the following is known:
+
+. Exact version of Peach. This is found in the log file +status.txt+.
+. Seed number used. This is also found in the log file +status.txt+.
+. Same/similar pit file. Data and state models must be the same.
+
+.status.txt
+----
+Peach Fuzzing Run
+=================
+
+Date of run: 3/20/2014 1:58:58 PM
+Peach Version: 3.1.40.1              <1>
+Seed: 51816                          <2>
+Command line: samples\DebuggerWindows.xml
+Pit File: samples\DebuggerWindows.xml
+. Test starting: Default
+
+----
+<1> Version of Peach used. Must match when reproducing.
+<2> Seed used. Must match when reproducing.
+
+The first command line we can use will skip directly to a specific iteration and start fuzzing. This is useful if you want to run a series of iterations starting from a certain point. Notice that our +--seed+ argument matches the value from our +status.txt+ file.
+
+----
+> peach --seed 51816 --skipto 37566
+----
+
+The second command line we can use will perform a range of iterations (1 or more). This is useful if only the exact iteration is wanted, or a short range of iterations.
+
+----
+> peach --seed 51816 --range 37566,37566
+----
+======================
+
+.Starting a Peach Agent Process
+======================
+Agents are considered long running processes that are utilized by the core Peach engine during a fuzzing session. The following will start a Peach agent using the _tcp_ channel protocol.
+
+----
+> peach -a tcp
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Deja vu Security
+[*] Starting agent server
+ -- Press ENTER to quit agent --
+----
+======================
+
+.Regenerating the Peach Schema File
+======================
+The Peach schema file, _peach.xsd_, provides intellisense in editors that support it such as Visual Studio and oxYgen XML Editor. When adding extensions to Peach, an new schema file can be generated that includes these extensions.
+
+----
+> peach --makexsd
+----
+
+The output of this command will be a new _peach.xsd_ file that contains any custom extensions.
+
+======================

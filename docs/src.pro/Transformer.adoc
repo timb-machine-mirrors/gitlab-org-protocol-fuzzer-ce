@@ -1,9 +1,10 @@
+
 [[Transformer]]
+== Transformers ==
 
 //Updated:
 //  - 03/04/2014: Lynn: Added additional Transformers and deleted unused ones including all Type and Misc
 
-== Transformers ==
 
 Transformers perform static tranforms or encoding on the parent element. Transforms are typically, but not always, two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
 

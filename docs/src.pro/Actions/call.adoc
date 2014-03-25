@@ -57,7 +57,7 @@ If the resulting return value is captured it is considered input and will be cra
 
 .Interacting with Agents and Monitors
 ****
-Peach supports a specialized use of _call_ actions to interact with xref:Agent[Agents] and xref:Monitor[Monitors]. 
+Peach supports a specialized use of _call_ actions to interact with xref:Agent[Agents] and xref:Monitors[Monitors]. 
 A special Publisher called _Peach.Agent_ can be used that causes the call to be sent to all configured Agents.
 If a monitor supports interaction via the _call_ action it will be documented with that monitor.
 

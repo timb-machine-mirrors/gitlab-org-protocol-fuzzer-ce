@@ -1,6 +1,8 @@
 [[DebuggingPitFiles]]
 == Debugging Pit Files
 
+// TODO - Expand on debugging pits, include validator. Debug output walkthrough
+
 // * "-1 --debug"
 // * --debug vs. --trace
 // * How to read debug output
@@ -55,34 +57,4 @@ Add +--debug+ for more verbose output.
 ----
 Peach.exe -1 --debug pit_file.xml
 ----
-
-=== Debugging Peach
-
-==== On a crash 
-
-Windows use the debug build of Peach and capture the full trace. 
-
-Linux 
-
-----
-mono --debug Peach.exe --debug Peach.exe pit_file.xml 
-----
-
-Look at the stack track and find the offending code.
-
-Attempt to debug with the following.  
-
-. Make sure peach is compiling in visual studio. 
-. Update to the latest Peach git files
-. Recompile peach in visual studio
-. Reduce your pit until you isolate the part of the pit file that is causing the crash.
-. Write a small test case pit of what is you believe is causing the crash.
-.. The more specifically isolated the better. 
-. Run the test pit in Visual studio 	
-. Isolate the code that is causing the crash
-.. Hover or add a watch to the variable to see what its current state is. 
-. Set a break point on the line of code and walk back in the call stack Debug->Windows->Call Stack
-. Single step as needed
-
-Create a patch and test case then submit via a pull request on github. 
 

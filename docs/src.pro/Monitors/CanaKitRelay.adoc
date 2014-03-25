@@ -19,7 +19,7 @@ ResetEveryIteration:: Reset power on every iteration, defaults to false.
 OnOffPause:: Pause in milliseconds between off/on, defaults to 1/2 second.
 ResetOnStart:: Reset device on start, defaults to false.
 ReverseSwitch:: Switches the order of the on off commands for when the NC port is used for power, defaults to false.
- 
+
 === Examples
 
 .Reset power on Relay 1
@@ -27,7 +27,7 @@ ReverseSwitch:: Switches the order of the on off commands for when the NC port i
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -37,7 +37,7 @@ ReverseSwitch:: Switches the order of the on off commands for when the NC port i
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
@@ -46,7 +46,7 @@ ReverseSwitch:: Switches the order of the on off commands for when the NC port i
     <Monitor class="CanaKitRelay">
 		<Param name="SerialPort" value="COM5" />
 		<Param name="RelayNumber" value="1" />
-		<Param name="ResetEveryIteration" value="false"/> 
+		<Param name="ResetEveryIteration" value="false"/>
 	</Monitor>
   </Agent>
 
@@ -55,6 +55,10 @@ ReverseSwitch:: Switches the order of the on off commands for when the NC port i
     <Agent ref="TheAgent" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
 ----

@@ -4,12 +4,12 @@
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
-// Expand description to include 
+// Expand description to include
 //   Use case "This is used when fuzzing {0} protocols"
-//   Will return number within valid range of parent number 
-// Give full pit to run using hex publisher, test works 
-// List Parent element types  
-// Number, String  
+//   Will return number within valid range of parent number
+// Give full pit to run using hex publisher, test works
+// List Parent element types
+// Number, String
 
 // Updated:
 // - 02/18/2014: Mick
@@ -24,9 +24,9 @@ NOTE: SequenceRandom does not protect against duplicate values occurring.
 
 === Parent Elements
 
- * xref:Number[Number]
- * xref:String[String]
- 
+xref:Number[Number]
+xref:String[String]
+
 === Parameters
 
 This fixup does not support any parameters.
@@ -48,7 +48,7 @@ This fixup does not support any parameters.
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="Nonce" size="16" endian="big">
-			<Fixup class="SequenceRandom" />
+			<Fixup class="SequenceRandomFixup" />
 		</Number>
 	</DataModel>
 
@@ -62,8 +62,38 @@ This fixup does not support any parameters.
 
 	<Test name="Default">
 		<StateModel ref="TheState"/>
+
 		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
 	</Test>
 </Peach>
+----
+
+Output of this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 24885.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   04 D2 04 D3 00 08 93 F9                            ????????
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 ================================

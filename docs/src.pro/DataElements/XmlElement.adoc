@@ -9,7 +9,7 @@ Defines an XML element, the basic building block of XML documents. This is used 
 
 NOTE: The XmlElement/XmlAttribute elements do not support cracking of data. If you need to crack XML content into XmlElement/XmlAttribute, use an xref:Analyzers_Xml[XmlAnalyzer] attached to a String element.
 
-NOTE: The resulting value produced by any child element must be a string. In the case of elements that produce binary output, a xref:Transformer[Transformer] must be used to convert the binary output to a string. An example of such a transformer is the xref:Transformers_Base64Encode[Base64Encode] transformer.
+NOTE: The resulting value produced by any child element must be a string. In the case of elements that produce binary output, a xref:Transformer[Transformer] must be used to convert the binary output to a string. An example of such a transformer is the xref:Transformers_Base64EncodeTransformer[Base64Encode] transformer.
 
 See also xref:Analyzers_Xml[XML] analyzer and xref:XmlAttribute[XmlAttribute] element.
 
@@ -110,9 +110,13 @@ The following example will model an XML snippet with namespaces.
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -173,9 +177,13 @@ The following example will load the +example.xml+ file into a xref:String[String
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 
@@ -256,9 +264,13 @@ The following example will make use of binary data. The binary data is converted
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel"/>
-		<Publisher class="Console" />
-	</Test>
 
+		<Publisher class="Console" />
+
+		<Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+	</Test>
 </Peach>
 ----
 

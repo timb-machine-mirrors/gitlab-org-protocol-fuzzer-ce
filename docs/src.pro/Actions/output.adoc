@@ -33,7 +33,7 @@
 // 03/05/2014: Lynn: 
 //  Edited text
 
-The _output_ action is used to write/send in data using a xref:Publishers[Publisher].
+The _output_ action is used to write/send in data using a xref:Publisher[Publisher].
 _output_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which produces the data to be sent.
 
 Along with a DataModel, data sets can be provided using the xref:Data[Data] element.
@@ -42,7 +42,7 @@ _Output_ actions are fuzzed by Peach.
 
 When output is called, the fuzzer will implicitly call xref:Action_start[_start_] then xref:Action_open[_open_] if it has not already been called.
 If a Pit has multiple publishers defined, the _publisher_ attribute must be used to indicate which publisher should receive the write/send request.
-The exact behaviour of an _output_ action is Publisher dependent. Review the documentation for the specific Publisher for the details on specific implementation actions. For example, calling output multiple times in a row on a stream publisher such as xref:Publishers_Tcp[TCP] will appear as one output, whereas multiple outputs in the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets.
+The exact behavior of an _output_ action is Publisher dependent. Review the documentation for the specific Publisher for the details on specific implementation actions. For example, calling output multiple times in a row on a stream publisher such as xref:Publishers_Tcp[TCP] will appear as one output, whereas multiple outputs in the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets.
 
 .Default Order of Actions
 ****

@@ -28,4 +28,6 @@ bld(
 	# http://xsd2code.codeplex.com/workitem/10041
 	# http://xsd2code.codeplex.com/discussions/73398
 	csflags = [ '/nowarn:0114,0108'],
+
+	csdoc = False,
 )

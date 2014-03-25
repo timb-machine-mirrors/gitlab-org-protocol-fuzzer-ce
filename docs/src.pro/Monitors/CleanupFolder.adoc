@@ -2,7 +2,7 @@
 [[Monitors_CleanupFolder]]
 == CleanupFolder Monitor
 
-The _CleanupFolder_ monitor will remove the contents created by a target during runtime. The assets are remove prior to every iteration. When beginning a fuzzing run Peach will create a list of contents in the directory and remove any new files created. This is useful for cleaning up after target execution and not filling up hard drives with temporary, recovery, or scratch files.
+The _CleanupFolder_ monitor will remove the contents created by a target during runtime. The assets are removed prior to every iteration. When beginning a fuzzing run Peach will create a list of contents in the directory and remove any new files created. This is useful for cleaning up after target execution and not filling up hard drives with temporary, recovery, or scratch files.
 
 === Parameters
 
@@ -13,15 +13,17 @@ Folder:: Folder to clean up
 _Optional:_
 
 No optional parameters are supported by this monitor.
- 
+
 === Examples
 
 .Remove contents of a folder
 ==============================
+This example should be ran from the folder defined in the CleanupFolder monitors folder parameter. During each iteration a file called fuzzed.txt will be created by the File publisher and deleted at the end of the iteration by the CleanupFolder monitor.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
@@ -31,23 +33,64 @@ No optional parameters are supported by this monitor.
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
+      </Action>
+
+      <Action type="output" publisher="FilePub">
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="TheAgent">
     <Monitor class="CleanupFolder">
-      <Param name="Folder" value="C:\\cleanme"/> 
+      <Param name="Folder" value="C:\\cleanme"/>
     </Monitor>
   </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="TheAgent" />
 
     <Publisher class="ConsoleHex"/>
+
+    <Publisher name="FilePub" class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 43073.
+Peach.Core.Agent.Agent StartMonitor: Monitor CleanupFolder
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
 ----
 ==============================

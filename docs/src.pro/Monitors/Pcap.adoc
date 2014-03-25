@@ -8,14 +8,13 @@ The _Pcap_ monitor performs a network capture during the fuzzing iteration. The 
 ****
 The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. On Windows platforms the device name and also the more descriptive names shown by +ipconfig+ can be used.
 
-----
+-----------------------------------------------------------------
 > peach --showdevices
 
-[[ Peach Pro v0.0.0.0
+[[ Peach Pro v3.0.0
 [[ Copyright (c) Deja vu Security
 
 The following devices are available on this machine:
-----------------------------------------------------
 
 Name: rpcap://\Device\NPF_{1CAAEF1E-ED49-4F5B-A380-AA8F1AA9C2E0}
 Description: Network adapter 'VMware Virtual Ethernet Adapter' on local host
@@ -44,7 +43,7 @@ Description: Network adapter 'Microsoft' on local host
 
 Name: rpcap://\Device\NPF_{FCF894CF-B844-4085-84B0-6D956B092D4B}
 Description: Network adapter 'Microsoft' on local host
-----
+-----------------------------------------------------------------
 ****
 
 === Parameters
@@ -59,43 +58,111 @@ Filter:: PCAP style filter string (optional)
 
 === Examples
 
-.Capture port 80
+.Capture output to CrashableServer on port 4244
 ==================
+This example will run CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. This example needs to point to the location of CrashableServer which is normally located in the Peach directory.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
+    <String value="Hello World!" />
   </DataModel>
 
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/> 
+          <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="Local">
-  <Monitor class="Pcap">
-    <Param name="Device" value="Local Area Connection" />
-    <Param name="Filter" value="port 80" />
-  </Monitor>
+    <Monitor class="Pcap">
+      <Param name="Device" value="Local Area Connection" />
+      <Param name="Filter" value="port 4244" />
+    </Monitor>
+
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+    </Monitor>
   </Agent>
 
   <Test name="Default">
     <StateModel ref="State"/>
+
     <Agent ref="Local" />
 
     <Publisher class="TcpClient">
-      <Param name="Host" value="www.peachfuzzer.com"/> 
-      <Param name="Port" value="80"/>
-    </Publisher>  
+      <Param name="Host" value="127.0.0.1"/>
+      <Param name="Port" value="4244"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
   </Test>
 </Peach>
+----
+
+Output from this example.
 
 ----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 10470.
+Peach.Core.Agent.Agent StartMonitor: Monitor Pcap
+Peach.Core.Agent.Agent StartMonitor: Monitor_1 WindowsDebugger
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Agent SessionStarting: Monitor_1
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionStarting
+Establishing the listener...
+
+[R1,-,-] Performing iteration
+Waiting for a connection...
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Accepted connection from 127.0.0.1:51784.
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+
+Received 12 bytes from client.
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4244
+Connection closed by peer.
+Shutting connection down...
+Connection is down.
+Waiting for a connection...
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:4244, closing client connection.
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault()
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault() - No fault detected
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor_1
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionFinished
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+
+[*] Test 'Default' finished.
+----
+
+Running this example for a few iterations will produce a crash. When Peach is logging the fault a pcap file will be created inside of the fault record.
+
 ==================

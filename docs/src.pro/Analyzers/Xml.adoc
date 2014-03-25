@@ -81,9 +81,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 
 Output in Peach Validator 
-----
-image:../images/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
-----
+
+image::../src.pro/images/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
+
 ==========================
 
 .Inline XML Inline Encoding Example 
@@ -147,9 +147,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 
 Output in Peach Validator 
-----
-image:../images/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
-----
+
+image::../src.pro/images/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
+
 ==========================
 
 .Load XML From File Example 
@@ -268,7 +268,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 
 Output in Peach Validator 
-----
-image:../images/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
-----
+
+image::../src.pro/images/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
+
 ==========================
