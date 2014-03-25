@@ -6,30 +6,6 @@
 
 It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to “fix up” certain header and checksum fields that may have been fuzzed.  
 
-=======================================================
-|Fixup|Checksum|Hashing|Utility|Sequencing
-|CiscoFixup|Y|||
-|CopyValueFixup|||Y|
-|CrcDualFixup|Y|||
-|CrcFixup|Y|||
-|ExpressionFixup|||Y|
-|FillValueFixup|||Y|
-|HMACFixup||Y||
-|IcmpChecksumFixup|Y|||
-|IcmpV6ChecksumFixup|Y|||
-|LRCFixup|Y|||
-|MD5Fixup||Y||
-|ScriptFixup|||Y|
-|SequenceIncrementFixup||||Y
-|SequenceRandomFixup||||Y
-|SHA1Fixup||Y||
-|SHA224Fixup||Y||
-|SHA256Fixup||Y||
-|SHA384Fixup||Y||
-|SHA512Fixup||Y||
-|TCPChecksumFixup|Y|||
-|UDPChecksumFixup|Y|||
-|=======================================================
 
 === Fixups
 
@@ -65,12 +41,36 @@ xref:Fixups_SHA256Fixup[SHA256Fixup]
 xref:Fixups_SHA384Fixup[SHA384Fixup]
 xref:Fixups_SHA512Fixup[SHA512Fixup]
  
- _Sequencing Fixups_
+_Sequencing Fixups_
  
 xref:Fixups_SequenceIncrementFixup[SequenceIncrementFixup]
 xref:Fixups_SequenceRandomFixup[SequenceRandomFixup]
  
- _Note_
+_Note_
  
 Fixups should be run after fuzzing and before processing fuzzed data.
 
+|=======================================================
+|Fixup|Checksum|Hashing|Utility|Sequencing
+|CiscoFixup|Y|||
+|CopyValueFixup|||Y|
+|CrcDualFixup|Y|||
+|CrcFixup|Y|||
+|ExpressionFixup|||Y|
+|FillValueFixup|||Y|
+|HMACFixup||Y||
+|IcmpChecksumFixup|Y|||
+|IcmpV6ChecksumFixup|Y|||
+|LRCFixup|Y|||
+|MD5Fixup||Y||
+|ScriptFixup|||Y|
+|SequenceIncrementFixup||||Y
+|SequenceRandomFixup||||Y
+|SHA1Fixup||Y||
+|SHA224Fixup||Y||
+|SHA256Fixup||Y||
+|SHA384Fixup||Y||
+|SHA512Fixup||Y||
+|TCPChecksumFixup|Y|||
+|UDPChecksumFixup|Y|||
+|=======================================================

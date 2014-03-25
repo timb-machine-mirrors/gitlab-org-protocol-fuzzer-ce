@@ -9,6 +9,7 @@
 Transformers perform static tranforms or encoding on the parent element. Transforms are typically, but not always, two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
 
 Transformers are different than Fixups:
+
  * Transformers only operate on the parent element 
  * Fixups reference another element's data.
 
@@ -31,38 +32,6 @@ Example:
 ----
 
 The output of the above data model is 0x01<len(b64(Data))><b64(Data)>
-
-|===================================================
-|Transformer|Compress|Crypto|Encode
-|AES128||X|
-|ApacheMd5||X|
-|Base64Decode|||X
-|Base64Encode|||X
-|Bz2Compress|X||
-|Bz2Decompress|X||
-|Crypt||X|
-|CvsScramble||X|
-|GzipCompress|X||
-|GzipDecompress|X||
-|Hex|||X
-|HMAC||X|
-|HtmlDecode|||X
-|HtmlEncode|||X
-|IntToHex|||X
-|Ipv4StringToOctet|||X
-|Ipv6StringToOctet|||X
-|JsEncode|||X
-|Md5||X|
-|NetBiosDecode|||X
-|NetBiosEncode|||X
-|Null||X|
-|Sha1||X|
-|Sha256||X|
-|SidStringToBytes|||X
-|TripleDes||X|
-|ulrEncode|||X
-|UnixMd5Crypt||X|
-|=================================================
 
 === Default Transformers in Peach 3
 
@@ -101,3 +70,35 @@ xref:Transformers_NetBiosDecodeTransformer[NetBiosDecodeTransformer]
 xref:Transformers_SidStringToBytesTransformer[SidStringToBytesTransformer]
 xref:Transformers_UrlEncodeTransformer[UrlEncodeTransformer]
 
+
+|===================================================
+|Transformer|Compress|Crypto|Encode
+|AES128||X|
+|ApacheMd5||X|
+|Base64Decode|||X
+|Base64Encode|||X
+|Bz2Compress|X||
+|Bz2Decompress|X||
+|Crypt||X|
+|CvsScramble||X|
+|GzipCompress|X||
+|GzipDecompress|X||
+|Hex|||X
+|HMAC||X|
+|HtmlDecode|||X
+|HtmlEncode|||X
+|IntToHex|||X
+|Ipv4StringToOctet|||X
+|Ipv6StringToOctet|||X
+|JsEncode|||X
+|Md5||X|
+|NetBiosDecode|||X
+|NetBiosEncode|||X
+|Null||X|
+|Sha1||X|
+|Sha256||X|
+|SidStringToBytes|||X
+|TripleDes||X|
+|ulrEncode|||X
+|UnixMd5Crypt||X|
+|=================================================
