@@ -11,6 +11,8 @@
 // Probably stick size-of/count-of/offset-of into separate files
 //
 
+// - 03/25/2014: Lynn: Major editing
+
 Peach allows data relationship modeling.  There are three Relation types: Size, Count and Offset.
 
 There are two required Relation attributes:
@@ -49,9 +51,9 @@ For the Size relation, expressionGet and expressionSet use the two variables, +s
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-In this example we will provide two python expressions that allow us to modify the size when it is get or set. 
+In this example we will provide two python expressions that allow us to modify the size when it is get or set:
 
-expressionGet:: The result of this expression is used internally and will end up determining how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
+expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
 expressionSet:: Produces a value for the publisher.  In the following example +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
 
 [source,xml]
@@ -72,7 +74,7 @@ expressionSet:: Produces a value for the publisher.  In the following example +s
 // * size-of works, but not when inside the array (need to verify)
 // * expressionGet/Set
 
-The Count-of relationship type specifies "X is the count of Y." It only applies to arrays.
+The Count relationship type specifies "X is the count of Y." It only applies to arrays.
 
 The Number element is the byte count of the relationship array. 
 Because Count-of applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.
@@ -96,7 +98,7 @@ For the Count-of relation, expressionGet and expressionSet use the two variables
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on our recurring strings the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
+expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
 
 In this example we will provide two python expressions that allow us to modify the size when it gets or sets. 
@@ -118,11 +120,11 @@ In this example we will provide two python expressions that allow us to modify t
 // * show output with examples
 // * Placement
 
-The Offset-of relationship type specifies "X is the offset (in bytes) of Y."
+The Offset relationship type specifies "X is the offset (in bytes) of Y."
 
-Offset-of relations allow modeling formats that require changing of the offset and also outputting the offset of various elements.
+Offset relations allow modeling formats that require changing the offset and also outputting the offset of various elements.
 
-If there are no Relative attributes, Offset-of is measured from the beginning of the data model. If there is a Relative attribute, Offset-of is measured from the specified element. 
+If there are no Relative attributes, Offset is measured from the beginning of the data model. If there is a Relative attribute, Offset is measured from the specified element. 
 
 Here we have a series elements which are ASCII representations of numeric values of the offset sizes to various string elements below.
 
@@ -224,10 +226,10 @@ For the Offset-of relation, expressionGet and expressionSet use the two variable
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on our recurring strings the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
+expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
 
-When using expressionGet/Set with offset relations two variables are provided: self, and offset.  self is a reference to the parent element of the reference, and offset is an integer.
+When using expressionGet/Set with offset relations, two variables are provided: self, and offset. Self is a reference to the parent element of the reference, and offset is an integer.
 
 *Offset Relation with Placement*
 
