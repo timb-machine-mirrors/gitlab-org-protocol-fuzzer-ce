@@ -77,7 +77,7 @@ expressionSet:: Produces a value for the publisher.  In the following example +s
 The Count relationship type specifies "X is the count of Y." It only applies to arrays.
 
 The Number element is the byte count of the relationship array. 
-Because Count-of applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.
+Because Count applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.
 
 In this example the number will indicate the count of the array _Strings_.
 
@@ -222,14 +222,12 @@ In the following example the offset of _StringData_ will be calculated by adding
 
 Gets are applied during the cracking process and Sets are applied during the publishing process. 
 
-For the Offset-of relation, expressionGet and expressionSet use the two variables, +self+ and +offset+.  Self refers to the Parent element and offset is an integer. 
+For the Offset relations, expressionGet and expressionSet use the two variables, +self+ and +offset+.  Self refers to the Parent element and offset is an integer. 
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
 expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
-
-When using expressionGet/Set with offset relations, two variables are provided: self, and offset. Self is a reference to the parent element of the reference, and offset is an integer.
 
 *Offset Relation with Placement*
 
