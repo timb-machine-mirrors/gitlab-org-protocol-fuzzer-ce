@@ -33,8 +33,6 @@ WaitForReadyOnCall:: Waits for the device to be ready when notified by the state
 
 === Examples
 
-// TODO Expand examples.
-
 .Basic Usage Example
 ======================
 Runs the BadBehaviorActivity, sending random taps
