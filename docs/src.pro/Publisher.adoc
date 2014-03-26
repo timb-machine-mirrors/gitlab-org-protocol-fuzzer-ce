@@ -32,7 +32,7 @@ When the fuzzer is running, all xref:Action[Actions] (except  ChangeState and sl
 perform the action. Different publishers support a different set of Action types.  For
 example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept. The below table may help you determine which publishers support which Action types.
 
-[halign=center}
+[halign=center]
 |=========================================================================================================
 |Publisher|accept|call|changeState|close|getProperty|input|open|setProperty|slurp|start|stop|output
 |COM||x|||x|||x||x|x|
