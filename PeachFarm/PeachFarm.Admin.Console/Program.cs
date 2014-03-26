@@ -14,6 +14,13 @@ namespace PeachFarm.Admin
 		private static EventWaitHandle waitHandle;
 		private static int exitcode = 0;
 
+		private static int ExitCode_GenericException  = 1;
+		private static int ExitCode_RabbitMqException = 2;
+		private static int ExitCode_SyntaxException   = 22;
+		private static int ExitCode_StartPeachFailure = 3;
+		private static int ExitCode_StopPeachFailure  = 4;
+		private static int ExitCode_DeleteDataFailure = 5;
+
 		static void syntax() { throw new SyntaxException(); }
 
 		static void Main(string[] args)
@@ -148,6 +155,7 @@ namespace PeachFarm.Admin
 						if (launchCount < 0)
 						{
 							System.Console.WriteLine(String.Format("{0} is not a quantity of machines. Try a positive number. 0 will be treated as All machines.", launchCount));
+							exitcode = ExitCode_GenericException;
 							return;
 						}
 						string pitFilePath = extra[0];
@@ -313,17 +321,17 @@ namespace PeachFarm.Admin
 			catch (RabbitMqException rex)
 			{
 				System.Console.WriteLine("Could not communicate with RabbitMQ server at " + rex.RabbitMqHost);
-				exitcode = 1;
+				exitcode = ExitCode_RabbitMqException;
 			}
 			catch (SyntaxException)
 			{
 				PrintHelp();
-				exitcode = 22;
+				exitcode = ExitCode_SyntaxException;
 			}
 			catch (Exception ex)
 			{
 				System.Console.WriteLine(ex.Message);
-				exitcode = 1;
+				exitcode = ExitCode_GenericException;
 			}
 
 			Environment.Exit(exitcode);
@@ -349,6 +357,7 @@ namespace PeachFarm.Admin
 			else
 			{
 				System.Console.WriteLine(String.Format("Stop Peach Failure\n{0}", e.Result.ErrorMessage));
+				exitcode = ExitCode_StopPeachFailure;
 			}
 			waitHandle.Set();
 		}
@@ -362,6 +371,7 @@ namespace PeachFarm.Admin
 			else
 			{
 				System.Console.WriteLine(String.Format("Start Peach Failure\n{0}", e.Result.ErrorMessage));
+				exitcode = ExitCode_StartPeachFailure;
 			}
 			waitHandle.Set();
 		}
@@ -375,6 +385,7 @@ namespace PeachFarm.Admin
 			else
 			{
 				System.Console.WriteLine(String.Format("Delete Data Failure\n{0}", e.Result.ErrorMessage));
+				exitcode = ExitCode_DeleteDataFailure;
 			}
 			waitHandle.Set();
 		}
