@@ -74,7 +74,7 @@ For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuz
 Peach supports the creation of custom Publishers. Before you create a custom publisher, first review the code for some
 of the existing Publishers to understand how they are typically implemented. 
 
-More information on creating a customer publisher  can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
+More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 
 === Publishers
 
