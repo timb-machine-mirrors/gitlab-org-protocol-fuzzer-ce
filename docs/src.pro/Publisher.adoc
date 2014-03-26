@@ -57,7 +57,8 @@ example, the File publisher supports input for reading from a file, output for w
 |WebService||x||||||||||
 |WebSocket||||||||||x|x|x
 |===========================================================================================================
-.NOTE changeState and slurp cannot be called by any publishers
+
+NOTE changeState and slurp cannot be called by any publishers
 
 All fuzzing definitions must use at least one Publisher and (optionally) can use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
