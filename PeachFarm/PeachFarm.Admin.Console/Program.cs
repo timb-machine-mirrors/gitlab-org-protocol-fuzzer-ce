@@ -637,7 +637,7 @@ errors - List any logged node errors
 
 jobs - Get information for all Jobs
 
-info - Get information for a Job and a list of Running Nodes
+jobinfo - Get information for a Job and a list of Running Nodes
   jobID - Job ID
 
 output - Get generated files for a Job
