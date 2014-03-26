@@ -49,6 +49,7 @@ class FarmJob:
 
 		self.error_query_error = None
 		self.error_query_out   = None
+		self.has_error = False
 
 		if self not in FarmJob.all_jobs:
 			FarmJob.all_jobs.append(self)
@@ -96,15 +97,16 @@ class FarmJob:
 		self.error_query_error = eq_err
 		self.error_query_out   = eq_out
 		error_query.wait()
+		self.has_error = 'Response: No errors recorded' not in eq_out
 		assert error_query.returncode == 0
 
 	def print_error_info(self):
 		print '#' * 80
 		print 'Job: ', self.job_id, ': ', ' '.join(self.command)
 		print '---- stdout'
-		print self..error_query_out
+		print self.error_query_out
 		print '---- stderr'
-		print self..error_query_error
+		print self.error_query_error
 
 def base_pit_files(self):
 	# returns fullpaths to basefiles
@@ -445,8 +447,6 @@ if __name__ == "__main__":
 	pit_names = map(lambda d: d['file'].split('.')[0], testlib.get_targets(bpath))
 	pit_names = sorted(list(set(pit_names)))
 	for pit_name in pit_names:
-		if 'BMP' not in pit_name: continue #dbgByron
-
 		print '\nConstructing pit zip for ', pit_name
 		temp_dir = temp_dir_name(pit_name)
 		temp_dirs.append(temp_dir)
@@ -466,7 +466,6 @@ if __name__ == "__main__":
 			else:
 				fj.report_error()
 
-	################################################################################
 	wait_for_all_jobs_to_finish()
 
 	print '\n\n', "#" * 80, '\n', "#" * 80
