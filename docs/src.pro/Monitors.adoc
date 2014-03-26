@@ -7,6 +7,7 @@
 
 xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
  
+[halign=center} 
 |==========================================================
 |Monitor|Enterprise|Linux|OSX|Windows
 |Android|X|||
