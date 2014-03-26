@@ -6,16 +6,7 @@ include::TELNET_DataSheet.adoc[]
 A Telnet server is required to test the client side of the Telnet pit.
 On Linux, telnetd can be downloaded using apt-get.
 
-_Example of installing on Telnet port:_
 
-----
-#Install telnet and telnet server on Linux
-sudo apt-get install telnet
-sudo apt-get install telnetd
-
-#Download Putty for Telnet windows. Putty can be downloaded using the link below
-http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
-----
 
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine.
@@ -32,7 +23,45 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample Telnet Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+#Test client
+peach -1 --debug TELNET.xml
+
+#Test server
+peach -1 --debug TELNET.xml Server
+----
+==== Full test run
+----
+#Test client
+peach TELNET.xml
+
+#Test server
+peach TELNET.xml Server
+----
+
+=== Examples
+
+.Sample Telnet Configuration File
+==========================
+Example configuration using telnetd on linux.
+
+First we must install telnet and telnetd, for this example we assume you are running on ubuntu or debian. For other platforms follow the platform specific installation instructions for telnet and telnetd.
+
+----
+#Install telnet and telnet server on Linux
+sudo apt-get install telnet
+sudo apt-get install telnetd
+
+#Download Putty for Telnet windows. Putty can be downloaded using the link below
+http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -70,25 +99,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-#Test client
-peach -1 --debug TELNET.xml
-
-#Test server
-peach -1 --debug TELNET.xml Server
-----
-==== Full test run
-----
-#Test client
-peach TELNET.xml
-
-#Test server
-peach TELNET.xml Server
-----
+==========================

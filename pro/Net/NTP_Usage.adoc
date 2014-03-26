@@ -5,12 +5,6 @@ include::NTP_DataSheet.adoc[]
 ==== Target Configuration
 A UDP listener listening on the UDPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
 
-_Example of using socat to listen for NTP:_
-
-----
-socat STDIO udp4-listen:123
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv4:: IPv4 address of the target host machine.
 SourcePort:: UDPv4 and/or TCPv4 port number of the local machine.
@@ -20,22 +14,6 @@ TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine.
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
-
-==== Sample NTP Configuration File
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<PitDefines>
-  <All>
-    <Define key="SourcePort" value="123"/>
-    <Define key="TargetPort" value="123"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="./logs/ntp/"/>
-    <Define key="Strategy" value="Sequential"/>
-    <Define key="Path" value="."/>
-  </All>
-</PitDefines>
-----
 
 ==== Configure Additional Monitors
 Add monitors to agent as needed
@@ -50,3 +28,33 @@ peach -1 --debug NTP.xml
 ----
 peach NTP.xml
 ----
+
+=== Examples
+
+.Sample NTP Configuration File
+==========================
+Example configuration using socat on linux.
+
+First we must install and run socat, for this example we assume you are running linux. For other platforms follow the platform specific installation instructions for socat.
+
+----
+sudo apt-get install socat
+
+socat STDIO udp4-listen:123
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="SourcePort" value="123"/>
+    <Define key="TargetPort" value="123"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="./logs/ntp/"/>
+    <Define key="Strategy" value="Sequential"/>
+    <Define key="Path" value="."/>
+  </All>
+</PitDefines>
+----
+==========================

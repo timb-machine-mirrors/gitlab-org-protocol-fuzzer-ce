@@ -16,7 +16,26 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample LLDP Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug LLDP.xml
+----
+==== Full test run
+----
+peach LLDP.xml
+----
+
+=== Examples
+
+.Sample LLDP Configuration File
+==========================
+Example configuration for sending LLDP packets.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -24,7 +43,7 @@ Path:: Path to the relative base directory where all pits are located.
   <All>
     <Define key="RemoteAgentIP" value="10.0.1.40"/>
     <Define key="SourceMAC" value="000000000000"/>
-    <Define key="TargetMAC" value="000000000000"/>
+    <Define key="TargetMAC" value="ffffffffffff"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="LoggerPath"  value="logs/lldp/"/>
     <Define key="Strategy"  value="Sequential"/>
@@ -46,17 +65,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug LLDP.xml
-----
-==== Full test run
-----
-peach LLDP.xml
-----
+==========================

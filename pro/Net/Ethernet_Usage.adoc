@@ -17,7 +17,26 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample Ethernet Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug Ethernet.xml
+----
+==== Full test run
+----
+peach Ethernet.xml
+----
+
+=== Examples
+
+.Sample Ethernet Configuration File
+==========================
+Example configuration for sending raw ethernet packets.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -47,17 +66,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug Ethernet.xml
-----
-==== Full test run
-----
-peach Ethernet.xml
-----
+==========================

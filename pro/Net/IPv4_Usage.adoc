@@ -5,12 +5,6 @@ include::IPv4_DataSheet.adoc[]
 ==== Target Configuration
 A target machine with ICMPv4 enabled.  A firewall must not block ICMPv4 messages.
 
-_Windows Firewall Inbound Rules to enable on Target:_
-
-----
-File and Printer Sharing (Echo Request - ICMPv4-In)
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
@@ -21,7 +15,34 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample IPv4 Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug IPv4.xml
+----
+==== Full test run
+----
+peach IPv4.xml
+----
+
+=== Examples
+
+.Sample IPv4 Configuration File
+==========================
+Example configuration sending IPv4 packets.
+
+For this example we assume you are running on Windows. For other platforms use the preferred way to configure the firewall.
+
+Windows Firewall Inbound Rules to enable on Target:
+
+----
+File and Printer Sharing (Echo Request - ICMPv4-In)
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -54,17 +75,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug IPv4.xml
-----
-==== Full test run
-----
-peach IPv4.xml
-----
+==========================

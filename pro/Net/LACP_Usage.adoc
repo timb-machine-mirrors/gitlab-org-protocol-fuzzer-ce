@@ -17,7 +17,26 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample LACP Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 -debug LACP.xml
+----
+==== Full test run
+----
+peach LACP.xml
+----
+
+=== Examples
+
+.Sample LACP Configuration File
+==========================
+Example configuration for sending LACP packets.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -46,19 +65,5 @@ Path:: Path to the relative base directory where all pits are located.
     <!-- This can't run on windows because it uses the RawEther publisher. -->
   </Windows>
 </PitDefines>
-
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 -debug LACP.xml
-----
-==== Full test run
-----
-peach LACP.xml
-----
+==========================

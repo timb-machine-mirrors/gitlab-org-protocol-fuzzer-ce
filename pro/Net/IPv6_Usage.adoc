@@ -5,16 +5,6 @@ include::IPv6_DataSheet.adoc[]
 ==== Target Configuration
 IPv6 and UDPv6 listeners are required to run all tests. The network tool socat can be used as a listener.
 
-_Example of using socat to listen IPv6:_
-
-----
-# Used to listen for ipv6 traffic
-socat STDIO ip-recv:ipv6
-
-#Used to listen for UDPv6
-socat STDIO udp6-listen:12345
-----
-
 ==== Required Pit Configuration Changes
 TargetIPv6:: IP address of the target host machine.
 SourceIPv6:: IP address of the interface on the local machine.
@@ -29,7 +19,39 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Sample IPv6 Configuration File
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug IPv6.xml
+----
+==== Full test run
+----
+peach IPv6.xml
+----
+
+=== Examples
+
+.Sample IPv6 Configuration File
+==========================
+Example configuration using socat on linux.
+
+First we must install and run socat, for this example we assume you are running linux. For other platforms follow the  platform specific installation instructions for socat.
+
+----
+#Install socat
+sudo apt-get install socat
+
+# Used to listen for ipv6 traffic
+socat STDIO ip-recv:ipv6
+
+#Used to listen for UDPv6
+socat STDIO udp6-listen:12345
+----
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -59,17 +81,4 @@ Path:: Path to the relative base directory where all pits are located.
   </Windows>
 </PitDefines>
 ----
-
-==== Configure Additional Monitors
-Add monitors to agent as needed
-
-=== Running
-
-==== Single test debug run
-----
-peach -1 --debug IPv6.xml
-----
-==== Full test run
-----
-peach IPv6.xml
-----
+==========================
