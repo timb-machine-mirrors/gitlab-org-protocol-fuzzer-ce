@@ -35,6 +35,33 @@ example, the File publisher supports input for reading from a file, output for w
 All fuzzing definitions must use at least one Publisher and can optionally use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
 
+|=========================================================================================================
+|Publisher|accept|call|changeState|close|getProperty|input|open|setProperty|slurp|start|stop|output
+|COM||x|||x|||x||x|x|
+|ConsoleHex||||x|||x|||||x
+|Console||||x|||x|||||x
+|FilePerIteration||||x||x|x|||||x
+|FilePublisher||||x||x|x|||||x
+|Http||x||x||x|x|||x|x|x
+|I2C||||x||x|x|||x|x|x
+|Null||x||||||||||x
+|RawEther||||x|x|x|x|x||x|x|x
+|RawIPv4||||x|x|x|x|x||x|x|x
+|RawIPv6||||x|x|x|x|x||x|x|x
+|RawV4||||x|x|x|x|x||x|x|x
+|Remote|x|x||x|x|x|x|x||x|x|x
+|SerialPort||||x||x|x|||x|x|x
+|SslClientPublisher||||||x|x|||x|x|x
+|SslListenerPublisher|x|||x||x|x|||x|x|x
+|Stream|Only base class|||||||||||
+|TcpListener|x|||x||x|x|||x|x|x
+|TcpClient||||x||x|x|||x|x|x
+|Udp||||x|x|x|x|x||x|x|x
+|WebService||x||||||||||
+|WebSocket||||||||||x|x|x
+|===========================================================================================================
+.NOTE changeState and slurp cannot be called by any publishers
+
 === Network Publishers
 
 When fuzzing network protocols, the publisher used is typically the protocol that encompasses the target protocol.
