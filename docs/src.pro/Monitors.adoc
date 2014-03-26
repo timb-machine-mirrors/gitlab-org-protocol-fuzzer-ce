@@ -1,5 +1,5 @@
 [[Monitors]]
-== Monitors ==
+== Monitors
 
 //Updated:
 //  - 03/04/2014: Lynn: Added Monitor table.
@@ -7,9 +7,10 @@
 
 xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
  
-[halign=center] 
+.Monitors and Operating Systems 
+[options="header",halign="center"] 
 |==========================================================
-|Monitor|Enterprise|Linux|OSX|Windows
+|Monitor    |Enterprise|Linux|OSX|Windows
 |Android|X|||
 |Android Emulator|X|||
 |CanaKitRelay|X|||
@@ -37,9 +38,8 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |WindowsService||||X
 |==========================================================
 
-=== Monitor Families ===
 
-==== Windows Monitors ====
+=== Windows Monitors 
 
  * xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]
  * xref:Monitors_PageHeap[Page Heap Monitor]
@@ -47,17 +47,17 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
  * xref:Monitors_WindowsDebugger[Windows Debugger Monitor]
  * xref:Monitors_WindowsService[Windows Service Monitor]
 
-==== OS X Monitors ====
+=== OS X Monitors 
  
  * xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]
  * xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]
 
-==== Linux Monitors ====
+=== Linux Monitors 
 
  * xref:Monitors_LinuxCrash[Linux Crash Monitor]
  * xref:Monitors_LinuxDebugger[Linux Debugger Monitor]
  
-==== Cross Platform Monitors ====
+=== Cross Platform Monitors 
 
  * xref:Monitors_Android[Android Monitor]
  * xref:Monitors_AndroidEmulator[Android Emulator Monitor]

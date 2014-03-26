@@ -32,7 +32,8 @@ When the fuzzer is running, all xref:Action[Actions] (except  ChangeState and sl
 perform the action. Different publishers support a different set of Action types.  For
 example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept. The below table may help you determine which publishers support which Action types.
 
-[halign=center]
+.Publishers and Associated Actions
+[options="header",halign="center"]
 |=========================================================================================================
 |Publisher|accept|call|changeState|close|getProperty|input|open|setProperty|slurp|start|stop|output
 |COM||x|||x|||x||x|x|
@@ -58,7 +59,7 @@ example, the File publisher supports input for reading from a file, output for w
 |WebSocket||||||||||x|x|x
 |===========================================================================================================
 
-NOTE changeState and slurp cannot be called by any publishers
+IMPORTANT: changeState and slurp cannot be called by any publishers
 
 All fuzzing definitions must use at least one Publisher and (optionally) can use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
@@ -71,12 +72,9 @@ For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuz
 === Custom Publishers
 
 Peach supports the creation of custom Publishers. Before you create a custom publisher, first review the code for some
-of the existing Publishers to understand how Publishers are typically implemented.
+of the existing Publishers to understand how they are typically implemented. 
 
-Creating a custom Publisher does not require changing the Peach source code.  Instead the
-code is placed in a new .NET assembly (dll) that is added to the Peach bin folder.  Peach
-will automatically use reflection to identify the new Publisher and make it available for
-use.
+More information on creating a customer publisher  can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 
 === Publishers
 
