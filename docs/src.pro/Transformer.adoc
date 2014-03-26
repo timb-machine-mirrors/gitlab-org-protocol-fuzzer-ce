@@ -1,6 +1,6 @@
 
 [[Transformer]]
-== Transformers ==
+== Transformers 
 
 //Updated:
 //  - 03/04/2014: Lynn: Added additional Transformers and deleted unused ones including all Type and Misc
@@ -33,7 +33,7 @@ Example:
 
 The output of the above data model is 0x01<len(b64(Data))><b64(Data)>
 
-=== Default Transformers in Peach 3
+=== Peach Default Transformers 
 
 *Compression*
 
