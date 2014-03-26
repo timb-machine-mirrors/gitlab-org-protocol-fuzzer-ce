@@ -591,7 +591,7 @@ Get information for all Jobs
   pf_admin.exe -jobs
 
 Get information for a Job and a list of Running Nodes
-  pf_admin.exe -info jobID
+  pf_admin.exe -jobinfo jobID
 
 Get generated files for a Job
   pf_admin.exe -output jobID destinationFolder
