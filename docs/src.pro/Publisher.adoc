@@ -42,14 +42,9 @@ For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuz
 
 === Custom Publishers
 
-Peach supports the creation of custom Publishers. It is recommended that the code for some
-of the existing Publishers be reviewed first to understand how Publishers are typically
-implemented.
+Peach supports the creation of custom Publishers. It is recommended that the code for some of the existing Publishers be reviewed first to understand how Publishers are typically implemented.
 
-Creating a custom Publisher does not require changing the Peach source code.  Instead the
-code is placed in a new .NET assembly (dll) that is added to the Peach bin folder.  Peach
-will automatically use reflection to identify the new Publisher and make it available for
-use.
+Creating a custom Publisher does not require changing the Peach source code.  Instead the code is placed in a new .NET assembly (dll) that is added to the Peach bin folder.  Peach will automatically use reflection to identify the new Publisher and make it available for use.
 
 === Publishers
 
