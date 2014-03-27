@@ -4,7 +4,7 @@
 // Reviewed:
 //  - 03/3/2014: Lynn: Added fixups and information about HashFixup
 
-It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to “fix up” certain header and checksum fields that may have been fuzzed.  
+It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to "fix up" certain header and checksum fields that may have been fuzzed.  
 
 
 === Fixups
