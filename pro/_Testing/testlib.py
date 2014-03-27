@@ -278,7 +278,7 @@ def get_targets(target_path):
 
 
 def user_is_admin():
-    if testlib.get_platform() == "win":
+    if get_platform() == "win":
         return shell.IsUserAnAdmin()
     else:
         return os.getuid() == 0
