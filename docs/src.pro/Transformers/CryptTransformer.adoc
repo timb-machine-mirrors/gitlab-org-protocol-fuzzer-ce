@@ -1,6 +1,6 @@
 <<<
 [[Transformers_CryptTransformer]]
-== CryptTransformer
+=== CryptTransformer
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,24 +19,24 @@
 // expanded description
 // added full example
 
-=== Transformer type: Cryptography
+==== Transformer type: Cryptography
 
 _CryptTransformer_ will perform a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
 This is done using the first two bytes as the salt. This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Encrypt Example
 ==========================

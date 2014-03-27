@@ -1,6 +1,6 @@
 <<<
 [[Transformers_HtmlEncodeTransformer]]
-== HtmlEncode
+=== HtmlEncode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -28,26 +28,26 @@
 // - 03/26/2014 Lynn
 //Corrected the transformer name 
 
-=== Transformer type: Encoder/Decoder
+==== Transformer type: Encoder/Decoder
 
 _HtmlEncode_ will produce an HTML/XML encoded string of the provided value in the parent xref:DataModel[DataModel].
 Only the characters < & ' and " will be encoded.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this element.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input, HtmlEncode will decode HTML encoded characters for the incoming data.
 xref:Action_output[output]:: On output, HtmlEncode will HTML encode certain characters for the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Encode Example
 ==========================

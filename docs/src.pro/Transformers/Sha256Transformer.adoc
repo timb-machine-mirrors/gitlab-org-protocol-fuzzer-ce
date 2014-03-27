@@ -1,6 +1,6 @@
 <<<
 [[Transformers_SHA256Transformer]]
-== Sha256
+=== Sha256
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -23,12 +23,12 @@
 // - 03/26/2014 Lynn
 //Corrected the transformer name 
 
-=== Transformer type: Cryptography
+==== Transformer type: Cryptography
 
 _Sha256_ will produce a SHA256 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
@@ -36,7 +36,7 @@ No Parameters are supported by this transformer.
 
 xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Console Example
 ==========================

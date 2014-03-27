@@ -5,72 +5,32 @@
 //  - 03/3/2014: Lynn: Added fixups and information about HashFixup
 
 It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to “fix up” certain header and checksum fields that may have been fuzzed.  
-
-
-The following fixups come with Peach by default.
-
-_Utility Fixups_
-
-xref:Fixups_CopyValueFixup[CopyValue]
-xref:Fixups_ExpressionFixup[Expression] 
-xref:Fixups_FillValueFixup[FillValue]
-xref:Fixups_Script[Script]
-
-_Checksum Fixups_
-
-
-xref:Fixups_CrcDualFixup[CrcDual]
-xref:Fixups_CrcFixup[Crc]
-xref:Fixups_IcmpChecksumFixup[IcmpChecksum]
-xref:Fixups_IcmpV6ChecksumFixup[IcmpV6Checksum]
-xref:Fixups_LRCFixup[Lrc]
-xref:Fixups_TCPChecksumFixup[TCPChecksumFixup] 
-xref:Fixups_UDPChecksumFixup[UDPChecksumFixup]
-
-_Hashing Fixups_
-
-HashFixup is the base class used by the other hashing fixups.
-
-xref:Fixups_HMACFixup[Hmac]
-xref:Fixups_MD5Fixup[Md5] 
-xref:Fixups_SHA1Fixup[Sha]
-xref:Fixups_SHA224Fixup[Sha224]
-xref:Fixups_SHA256Fixup[Sha256]
-xref:Fixups_SHA384Fixup[Sha384]
-xref:Fixups_SHA512Fixup[Sha512]
  
-_Sequencing Fixups_
- 
-xref:Fixups_SequenceIncrementFixup[SequenceIncrement]
-xref:Fixups_SequenceRandomFixup[SequenceRandom]
- 
-_Note_
- 
-Fixups should be run after fuzzing and before processing fuzzed data.
+Note: Fixups should be run after fuzzing and before processing fuzzed data.
 
 .Default Fixups
 [options="header",halign="center"] 
 |=======================================================
 |Fixup|Checksum|Hashing|Utility|Sequencing
-|xref:Fixups_CiscoFixup[CiscoCdpChecksum]|Y|||
+|xref:Fixups_CiscoFixup[CiscoCdp Checksum]|Y|||
 |xref:Fixups_CopyValueFixup[CopyValue]|||Y|
 |xref:Fixups_CrcDualFixup[CrcDual]|Y|||
 |xref:Fixups_CrcFixup[Crc]|Y|||
 |xref:Fixups_ExpressionFixup[Expression] |||Y|
 |xref:Fixups_CopyValueFixup[CopyValue]|||Y|
 |xref:Fixups_HMACFixup[Hmac]||Y||
-|xref:Fixups_IcmpChecksumFixup[IcmpChecksum]|Y|||
-|xref:Fixups_IcmpV6ChecksumFixup[IcmpV6Checksum]|Y|||
+|xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|Y|||
+|xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|Y|||
 |xref:Fixups_LRCFixup[Lrc]|Y|||
 |xref:Fixups_MD5Fixup[Md5] ||Y||
 |xref:Fixups_Script[Script]|||Y|
-|xref:Fixups_SequenceIncrementFixup[SequenceIncrement]||||Y
-|xref:Fixups_SequenceRandomFixup[SequenceRandom]||||Y
+|xref:Fixups_SequenceIncrementFixup[Sequence Increment]||||Y
+|xref:Fixups_SequenceRandomFixup[Sequence Random]||||Y
 |xref:Fixups_SHA1Fixup[Sha]||Y||
 |xref:Fixups_SHA224Fixup[Sha224]||Y||
 |xref:Fixups_SHA256Fixup[Sha256]||Y||
 |xref:Fixups_SHA384Fixup[Sha384]||Y||
 |xref:Fixups_SHA512Fixup[Sha512]||Y||
-|xref:Fixups_TCPChecksumFixup[TCPChecksumFixup] |Y|||
-|xref:Fixups_UDPChecksumFixup[UDPChecksumFixup]|Y|||
+|xref:Fixups_TCPChecksumFixup[TCP Checksum] |Y|||
+|xref:Fixups_UDPChecksumFixup[UDP Checksum]|Y|||
 |=======================================================

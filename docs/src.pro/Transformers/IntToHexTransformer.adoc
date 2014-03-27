@@ -1,6 +1,6 @@
 <<<
 [[Transformers_IntToHexTransformer]]
-== IntToHex
+=== IntToHex
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -23,20 +23,20 @@
 // - 03/26/2014 Lynn
 //Corrected the transformer name 
 
-=== Transformer type: Encoder/Decoder
+==== Transformer type: Encoder/Decoder
 
 _IntToHex_ takes a string representation of an integer and produces an ASCII string of hex characters that represent that integer.
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to integer.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input, IntToHex will convert a hex string representation of a number into ASCII for the incoming data.
 xref:Action_output[output]:: On output, IntToHex will convert an ASCII number into a hex string for the outgoing data.

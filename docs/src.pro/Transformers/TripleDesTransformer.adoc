@@ -1,6 +1,6 @@
 <<<
 [[Transformers_TripleDesTransformer]]
-== TripleDesTransformer
+=== TripleDesTransformer
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,16 +19,16 @@
 // expanded description
 // added full example
 
-=== Transformer type: Cryptography
+==== Transformer type: Cryptography
 
 The _TripleDesTransformer_ will produce the bytes from a Triple DES encryption of the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bi-directionally encrypt data as well as decrypt data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this element.
 
-=== Attributes
+==== Attributes
 
 _Required:_
 
@@ -39,12 +39,12 @@ _Optional:_
 
 No optional parameters are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will decrypt the incoming data.
 xref:Action_output[output]:: On output this transformer will encrypt the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Console Example
 ==========================

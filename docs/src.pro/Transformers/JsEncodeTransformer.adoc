@@ -1,6 +1,6 @@
 <<<
 [[Transformers_JsEncodeTransformer]]
-== JsEncode
+=== JsEncode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -23,17 +23,17 @@
 // - 03/26/2014 Lynn
 //Corrected the transformer name 
 
-=== Transformer type: Encoder/Decoder
+==== Transformer type: Encoder/Decoder
 
 _JsEncode_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].
 All characters will be encoded.
 This xref:Transformer[Transformer] will only encode the output and not decode any input.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this element.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
@@ -41,7 +41,7 @@ No Attributes are supported by this transformer.
 
 xref:Action_output[output]:: On output this transformer will JS encode the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Encode Example
 ==========================

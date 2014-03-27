@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Ipv6StringToOctetTransformer]]
-== Ipv6StringToOctet
+=== Ipv6StringToOctet
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -23,13 +23,13 @@
 // - 03/26/2014 Lynn
 //Corrected the transformer name 
 
-=== Transformer type: Encoder/Decoder
+==== Transformer type: Encoder/Decoder
 
 _Ipv6StringToOctet_ will produce the octet bytes from the string representation of an Internet Protocol version 6 address.
 An example would be transforming the string ::1 to 0x00000000000000000000000000000001.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this element.
 
@@ -37,12 +37,12 @@ No Parameters are supported by this element.
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input, Ipv6StringToOctet will convert bytes into an IP address string representation.
 xref:Action_output[output]:: On output, Ipv6StringToOctet will convert an IP address string representation into bytes.
 
-=== Examples
+==== Examples
 
 .Simple Encode Example
 ==========================
