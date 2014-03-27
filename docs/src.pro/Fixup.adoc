@@ -18,7 +18,7 @@ xref:Fixups_Script[Script]
 
 _Checksum Fixups_
 
-xref:Fixups_CiscoFixup[CiscoCdpChecksum]
+
 xref:Fixups_CrcDualFixup[CrcDual]
 xref:Fixups_CrcFixup[Crc]
 xref:Fixups_IcmpChecksumFixup[IcmpChecksum]
@@ -48,29 +48,29 @@ _Note_
  
 Fixups should be run after fuzzing and before processing fuzzed data.
 
-.Fixups
+.Default Fixups
 [options="header",halign="center"] 
 |=======================================================
 |Fixup|Checksum|Hashing|Utility|Sequencing
-|CiscoCdpChecksum|Y|||
-|CopyValue|||Y|
-|CrcDual|Y|||
-|Crc|Y|||
-|Expression|||Y|
-|FillValue|||Y|
-|Hmac||Y||
-|IcmpChecksum|Y|||
-|IcmpV6Checksum|Y|||
-|Lrc|Y|||
-|Md5||Y||
-|Script|||Y|
-|SequenceIncrement||||Y
-|SequenceRandom||||Y
-|Sha||Y||
-|Sha224||Y||
-|SSha256||Y||
-|Sha384||Y||
-|Sha512||Y||
-|TCPChecksumFixup|Y|||
-|UDPChecksumFixup|Y|||
+|xref:Fixups_CiscoFixup[CiscoCdpChecksum]|Y|||
+|xref:Fixups_CopyValueFixup[CopyValue]|||Y|
+|xref:Fixups_CrcDualFixup[CrcDual]|Y|||
+|xref:Fixups_CrcFixup[Crc]|Y|||
+|xref:Fixups_ExpressionFixup[Expression] |||Y|
+|xref:Fixups_CopyValueFixup[CopyValue]|||Y|
+|xref:Fixups_HMACFixup[Hmac]||Y||
+|xref:Fixups_IcmpChecksumFixup[IcmpChecksum]|Y|||
+|xref:Fixups_IcmpV6ChecksumFixup[IcmpV6Checksum]|Y|||
+|xref:Fixups_LRCFixup[Lrc]|Y|||
+|xref:Fixups_MD5Fixup[Md5] ||Y||
+|xref:Fixups_Script[Script]|||Y|
+|xref:Fixups_SequenceIncrementFixup[SequenceIncrement]||||Y
+|xref:Fixups_SequenceRandomFixup[SequenceRandom]||||Y
+|xref:Fixups_SHA1Fixup[Sha]||Y||
+|xref:Fixups_SHA224Fixup[Sha224]||Y||
+|xref:Fixups_SHA256Fixup[Sha256]||Y||
+|xref:Fixups_SHA384Fixup[Sha384]||Y||
+|xref:Fixups_SHA512Fixup[Sha512]||Y||
+|xref:Fixups_TCPChecksumFixup[TCPChecksumFixup] |Y|||
+|xref:Fixups_UDPChecksumFixup[UDPChecksumFixup]|Y|||
 |=======================================================
