@@ -1,5 +1,5 @@
 [[Agent]]
-== Agents
+=== Agents
 
 Agents are processes that host Monitors locally or remotely.  Monitors collect information and perform actions on behalf of the fuzzer.
 
@@ -14,7 +14,7 @@ TCP Remoting::
 REST JSON::
 	Agent protocol using REST style calls over HTTP. This channel is best suited for custom Peach agents. Example agents in C, C++, and Python are included in the Peach SDK.
  
-=== Local Agent
+==== Local Agent
 
 The peach runtime supports a local agent that runs in process.  Local Agent is the default agent unless another agent type is specified.
 
@@ -26,7 +26,7 @@ The peach runtime supports a local agent that runs in process.  Local Agent is t
 </Agent>
 ----
 
-=== TCP Remoting Agent
+==== TCP Remoting Agent
 
 This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
 
@@ -52,7 +52,7 @@ c:\peach3> peach.exe -a tcp
 
 ----
 
-=== REST JSON Agent
+==== REST JSON Agent
 
 // TODO - Document each rest call
 
