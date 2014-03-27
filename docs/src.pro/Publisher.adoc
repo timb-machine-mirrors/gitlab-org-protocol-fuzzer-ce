@@ -1,4 +1,3 @@
-:toc!:
 [[Publisher]]
 == Publishers
 
@@ -32,8 +31,6 @@ When the fuzzer is running, all xref:Action[Actions] (except  ChangeState and sl
 perform the action. Different publishers support a different set of Action types.  For
 example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept. 
 
-IMPORTANT: changeState and slurp cannot be called by any publishers
-
 All fuzzing definitions must use at least one Publisher and (optionally) can use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
 
@@ -44,8 +41,7 @@ For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuz
 
 === Custom Publishers
 
-Peach supports the creation of custom Publishers. Before you create a custom publisher, first review the code for some
-of the existing Publishers to understand how they are typically implemented. 
+Peach supports the creation of custom Publishers. It is recommended that the code for some of the existing Publishers be reviewed first to understand how Publishers are typically implemented.
 
 More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 
@@ -95,7 +91,6 @@ specific version can be found in the output of `peach --showenv`
 
 .Multiple Publishers
 ====================
-
 Though many pits may use a single publisher there is no limit on the
 number of publishers that can be used. Multiple publishers can be
 defined and used. 
@@ -191,3 +186,4 @@ Peach.Core.Publishers.TcpClientPublisher stop()
 
 [*] Test 'Default' finished.
 ----
+====================

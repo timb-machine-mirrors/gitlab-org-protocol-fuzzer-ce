@@ -59,7 +59,7 @@ The following links provide additional information regarding XPaths.
 
  * http://www.w3schools.com/xpath/[XPath Tutorial]
  * http://www.w3schools.com/xpath/xpath_syntax.asp[XPath Syntax]
- * http://www.w3.org/TR/xpath/.[XPath Specification]
+ * http://www.w3.org/TR/xpath/[XPath Specification]
 
 ****
 

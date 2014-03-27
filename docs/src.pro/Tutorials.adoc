@@ -30,5 +30,8 @@ The following tutorials provide information on how to get started fuzzing with P
  * Beginner: xref:TutorialFileFuzzing[File Fuzzing]
 // * Beginner: xref:TutorialNetworkServer[Network server Fuzzing]
 
+<<<
 include::TutorialDumbFuzzing.adoc[]
+
+<<<
 include::TutorialFileFuzzing.adoc[]

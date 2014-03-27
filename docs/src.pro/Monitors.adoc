@@ -78,30 +78,54 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 
 :leveloffset: 2
 
-include::Monitors/Android.adoc[Android]
+include::Monitors/Android.adoc[]
+
 include::Monitors/AndroidEmulator.adoc[]
+
 include::Monitors/CanaKitRelay.adoc[]
+
 include::Monitors/CleanupFolder.adoc[]
+
 include::Monitors/CleanupRegistry.adoc[]
+
 include::Monitors/CrashReporter.adoc[]
+
 include::Monitors/CrashWrangler.adoc[]
+
 include::Monitors/IpPower9258.adoc[]
+
 include::Monitors/LinuxCrash.adoc[]
+
 include::Monitors/LinuxDebugger.adoc[]
+
 include::Monitors/MemoryMonitor.adoc[]
+
 include::Monitors/PageHeap.adoc[]
+
 include::Monitors/Pcap.adoc[]
+
 include::Monitors/Ping.adoc[]
+
 include::Monitors/PopupWatcher.adoc[]
+
 include::Monitors/Process.adoc[]
+
 include::Monitors/ProcessKiller.adoc[]
+
 include::Monitors/RunCommand.adoc[]
+
 include::Monitors/SaveFile.adoc[]
+
 include::Monitors/Socket.adoc[]
+
 include::Monitors/Ssh.adoc[]
+
 include::Monitors/SshDownloader.adoc[]
+
 include::Monitors/Vmware.adoc[]
+
 include::Monitors/WindowsDebugger.adoc[]
+
 include::Monitors/WindowsService.adoc[]
 
 :leveloffset: 0
