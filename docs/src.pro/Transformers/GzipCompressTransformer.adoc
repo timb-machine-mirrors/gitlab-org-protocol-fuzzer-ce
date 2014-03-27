@@ -1,5 +1,5 @@
 [[Transformers_GzipCompressTransformer]]
-== GzipCompressTransformer
+== GzipCompress
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -18,9 +18,13 @@
 // expanded description
 // added full example
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the transformer name
+
 === Transformer type: Compress
 
-The _GzipCompressTransformer_ performs a Gzip compression on the value in the parent xref:DataModel[DataModel].
+_GzipCompress_ performs a Gzip compression on the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters
@@ -39,14 +43,14 @@ There are no optional attributes.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input this transformer will decompress incoming data.
-xref:Action_output[output]:: On output this transformer will compress all outgoing data.
+xref:Action_input[input]:: On input, GzipCompress will decompress incoming data.
+xref:Action_output[output]:: On output, GzipCompress will compress all outgoing data.
 
 === Examples
 
 .Compression To and From File Example
 ==========================
-This example uses the GzipCompress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file to the console.
+This example uses GzipCompress to compress a value, write the value to the console, write to a file, and then reads it from the file to the console.
 
 [source,xml]
 ----

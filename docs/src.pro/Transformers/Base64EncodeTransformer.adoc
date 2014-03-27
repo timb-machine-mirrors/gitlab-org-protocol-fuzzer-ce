@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Base64EncodeTransformer]]
-== Base64EncodeTransformer
+== Base64Encode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,9 +19,13 @@
 // expanded description
 // added full example
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the transformer name 
+
 === Transformer type: Encoder/Decoder
 
-The _Base64EncodeTransformer_ will Base64 encode the value in the parent xref:DataModel[DataModel].
+_Base64Encode_ will Base64 encode the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
@@ -41,7 +45,7 @@ xref:Action_output[output]:: On output this transformer will Base64 encode the o
 
 .Encoding Value To and From File Example
 ==========================
-This example uses the Base64Encode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
+This example uses  Base64Encode on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 [source,xml]
 ----

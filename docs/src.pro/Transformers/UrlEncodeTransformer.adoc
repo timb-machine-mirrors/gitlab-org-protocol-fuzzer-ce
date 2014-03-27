@@ -1,6 +1,6 @@
 <<<
 [[Transformers_UrlEncodeTransformer]]
-== UrlEncodeTransformer
+== UrlEncode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,9 +19,13 @@
 // expanded description
 // added full example
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the transformer name 
+
 === Transformer type: Encoder/Decoder
 
-The _UrlEncodeTransformer_ will produce a url encoded string of the provided value in the parent xref:DataModel[DataModel].
+_UrlEncode_ will produce a URL encoded string of the provided value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
@@ -34,14 +38,14 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input this transformer will decode a url encoded string.
-xref:Action_output[output]:: On output this transformer will encode a url encoded string.
+xref:Action_input[input]:: On input this transformer will decode a URL encoded string.
+xref:Action_output[output]:: On output this transformer will encode a URL encoded string.
 
 === Examples
 
 .Simple Encode Example
 ==========================
-This example uses the UrlEncode Tranform on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
+This example uses UrlEncode on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 
 [source,xml]

@@ -1,6 +1,6 @@
 <<<
 [[Transformers_MD5Transformer]]
-== MD5Transformer
+== MD5
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,9 +19,13 @@
 // expanded description
 // added full example
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the transformer name 
+
 === Transformer type: Cryptography
 
-The _MD5Transformer_ creates an MD5 hash of the value in the parent xref:DataModel[DataModel].
+_MD5_ creates an MD5 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
 === Parameters
@@ -40,7 +44,7 @@ No Attributes are supported by this transformer.
 
 .Simple Console Example
 ==========================
-This example uses the MD5 transformer on an inline value and writes the transformed value to the console.
+This example uses MD5 on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----

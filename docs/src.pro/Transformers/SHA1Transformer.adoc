@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Sha1Transformer]]
-== Sha1Transformer
+== Sha1
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -21,7 +21,7 @@
 
 === Transformer type: Cryptography
 
-The _Sha1Transformer_ will produce a SHA1 hash of the value in the parent xref:DataModel[DataModel].
+_Sha1_ will produce a SHA1 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
 === Parameters
@@ -40,7 +40,7 @@ xref:Action_output[output]:: On output this transformer will hash the outgoing d
 
 .Simple Console Example
 ==========================
-This example uses the Sha256 transformer on an inline value and writes the transformed value to the console.
+This example uses Sha256 on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----

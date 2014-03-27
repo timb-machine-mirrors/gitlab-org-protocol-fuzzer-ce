@@ -1,6 +1,6 @@
 <<<
 [[Transformers_HtmlDecodeTransformer]]
-== HtmlDecodeTransformer
+== HtmlDecode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -24,9 +24,13 @@
 // msdn says < & " is encoded
 // < & ' " is actually encoded
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the transformer name 
+
 === Transformer type: Encoder/Decoder
 
-The _HtmlDecodeTransformer_ will decode any html/xml encoded characters in the string in the parent xref:DataModel[DataModel].
+_HtmlDecode_ will decode any HTML/XML encoded characters in the string in the parent xref:DataModel[DataModel].
 Only the characters < & ' and " will be encoded on.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
@@ -40,14 +44,14 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input this transformer will html encode certain characters for the incoming data.
-xref:Action_output[output]:: On output this transformer will decode html encoded characters for the outgoing data.
+xref:Action_input[input]:: On input this transformer will HTML encode certain characters for the incoming data.
+xref:Action_output[output]:: On output this transformer will decode HTML encoded characters for the outgoing data.
 
 === Examples
 
 .Simple Encode Example
 ==========================
-This example uses the HtmlDecode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
+This example uses HtmlDecode on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 [source,xml]
 ----

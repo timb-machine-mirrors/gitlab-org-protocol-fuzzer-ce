@@ -37,40 +37,41 @@ The output of the above data model is 0x01<len(b64(Data))><b64(Data)>
 
 *Compression*
 
-xref:Transformers_Bz2CompressTransformer[Bz2CompressTransformer]
-xref:Transformers_Bz2DecompressTransformer[Bz2DecompressTransformer]
-xref:Transformers_GzipCompressTransformer[GzipCompressTransformer]
-xref:Transformers_GzipDecompressTransformer[GzipDecompressTransformer]
+xref:Transformers_Bz2CompressTransformer[Bz2Compress]
+xref:Transformers_Bz2DecompressTransformer[Bz2Decompress]
+xref:Transformers_GzipCompressTransformer[GzipCompress]
+xref:Transformers_GzipDecompressTransformer[GzipDecompress]
 
 *Crypto*
 
-xref:Transformers_Aes128Transformer[Aes128Transformer]
-xref:Transformers_ApacheMd5Crypt[ApacheMd5CryptTransformer]
-xref:Transformers_CryptTransformer[CryptTransformer]
-xref:Transformers_CvsScramble[CvsScrambleTransformer]
-xref:Transformers_HMACTransformer[HMACTransformer]
-xref:Transformers_MD5CryptTransformer[MD5CryptTransformer] 
-xref:Transformers_NullTransformer[NullTransformer]
-xref:Transformers_SHA1Transformer[SHA1Transformer]
-xref:Transformers_SHA256Transformer[SHA256Transformer] 
-xref:Transformers_TripleDesTransformer[TripleDesTransformer]
+xref:Transformers_Aes128Transformer[Aes128]
+xref:Transformers_ApacheMd5Crypt[ApacheMd5Crypt]
+xref:Transformers_CryptTransformer[Crypt]
+xref:Transformers_CvsScramble[CvsScramble]
+xref:Transformers_HMACTransformer[HMAC]
+xref:Transformers_MD5CryptTransformer[MD5Crypt] 
+xref:Transformers_NullTransformer[Null]
+xref:Transformers_SHA1Transformer[Sha1]
+xref:Transformers_SHA256Transformer[Sha256] 
+xref:Transformers_TripleDesTransformer[TripleDes]
+xref:Transformers_UrlEncodeTransformer[UrlEncode]
 
 *Encode*
 
-xref:Transformers_Base64EncodeTransformer[Base64EncodeTransformer]
-xref:Transformers_Base64DecodeTransformer[Base64DecodeTransformer]
-xref:Transformers_HexTransformer[HexTransformer]
-xref:Transformers_HtmlEncodeTransformer[HtmlEncodeTransformer]
-xref:Transformers_HtmlDecodeTransformer[HtmlDecodeTransformer]
-xref:Transformers_Ipv4StringToOctetTransformer[Ipv4StringToOctetTransformer]
-xref:Transformers_Ipv6StringToOctetTransformer[Ipv6StringToOctetTransformer]
-xref:Transformers_JsEncodeTransformer[JsEncodeTransformer]
-xref:Transformers_NetBiosEncodeTransformer[NetBiosEncodeTransformer]
-xref:Transformers_NetBiosDecodeTransformer[NetBiosDecodeTransformer]
-xref:Transformers_SidStringToBytesTransformer[SidStringToBytesTransformer]
-xref:Transformers_UrlEncodeTransformer[UrlEncodeTransformer]
+xref:Transformers_Base64EncodeTransformer[Base64Encode]
+xref:Transformers_Base64DecodeTransformer[Base64Decode]
+xref:Transformers_HexTransformer[Hex]
+xref:Transformers_HtmlEncodeTransformer[HtmlEncode]
+xref:Transformers_HtmlDecodeTransformer[HtmlDecode]
+xref:Transformers_Ipv4StringToOctetTransformer[Ipv4StringToOctet]
+xref:Transformers_Ipv6StringToOctetTransformer[Ipv6StringToOctet]
+xref:Transformers_JsEncodeTransformer[JsEncode]
+xref:Transformers_NetBiosEncodeTransformer[NetBiosEncode]
+xref:Transformers_NetBiosDecodeTransformer[NetBiosDecode]
+xref:Transformers_SidStringToBytesTransformer[SidStringToBytes]
+xref:Transformers_UnixMd5CryptTransformer[UnixMd5Crypt]
 
-
+[options="header"]
 |===================================================
 |Transformer|Compress|Crypto|Encode
 |AES128||X|
