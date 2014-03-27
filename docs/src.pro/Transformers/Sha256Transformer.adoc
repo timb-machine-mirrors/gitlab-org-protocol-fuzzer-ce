@@ -1,7 +1,6 @@
 <<<
 [[Transformers_SHA256Transformer]]
-== SHA256Transformer
-
+== Sha256
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
 The _SHA256Transformer_ will produce a SHA256 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.

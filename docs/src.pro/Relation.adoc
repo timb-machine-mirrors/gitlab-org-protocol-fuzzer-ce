@@ -233,7 +233,7 @@ expressionSet:: Sets the value that will be produced.  In the following example 
 
 In this model we will use a typical patter in which an array of offsets gives us the location of another element. We will use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
 
-NOTE: Placement only works when parsing data into a DataModel.  Read xref:Placement[Placement] for more information.
+*NOTE:* Placement only works when parsing data into a DataModel.  Read xref:Placement[Placement] for more information.
 
 [source,xml]
 ----

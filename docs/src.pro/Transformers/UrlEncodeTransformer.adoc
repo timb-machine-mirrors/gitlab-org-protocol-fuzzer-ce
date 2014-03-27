@@ -1,7 +1,6 @@
 <<<
 [[Transformers_UrlEncodeTransformer]]
-== UrlEncodeTransformer
-
+== UrlEncode
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 The _UrlEncodeTransformer_ will produce a url encoded string of the provided value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.

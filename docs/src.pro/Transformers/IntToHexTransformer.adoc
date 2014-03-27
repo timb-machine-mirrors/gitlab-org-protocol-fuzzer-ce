@@ -1,7 +1,6 @@
 <<<
 [[Transformers_IntToHexTransformer]]
-== IntToHexTransformer
-
+== IntToHex
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 The _IntToHexTransformer_ takes a string representation of an integer and produces an ascii string of hex characters that represent that integer.
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to integer.

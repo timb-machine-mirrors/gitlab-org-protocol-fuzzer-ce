@@ -1,7 +1,6 @@
 <<<
 [[Transformers_SidStringToBytesTransformer]]
-== SidStringToBytesTransformer
-
+== SidStringToBytes
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 The _SidStringToBytesTransformer_ will produce the byte representation from a security identifier string.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.

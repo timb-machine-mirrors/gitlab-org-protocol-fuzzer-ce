@@ -1,5 +1,5 @@
 [[StateModel]]
-== State Modeling
+== StateModel
 
 // 01/30/2014: Seth & Mike: Outlined
 //  * Attributes
@@ -53,7 +53,7 @@ _Required:_
 xref:name[name]:: The name of the StateModel
 initialState:: Name of the State to start executing first
 
-=== Child-Elements
+=== Child Elements
 
 xref:State[State]:: One or more State elements are required.
 

@@ -1,7 +1,6 @@
 <<<
 [[Transformers_Ipv6StringToOctetTransformer]]
-== Ipv6StringToOctetTransformer
-
+== Ipv6StringToOctet
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 The _Ipv6StringToOctetTransformer_ will produce the octet bytes from the string representation of an Internet Protocol version 6 address.
 An example would be transforming the string ::1 to 0x00000000000000000000000000000001.

@@ -1,7 +1,6 @@
 <<<
 [[Transformers_Base64EncodeTransformer]]
-== Base64EncodeTransformer
-
+== Base64Encode
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -19,7 +18,8 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 The _Base64EncodeTransformer_ will Base64 encode the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.

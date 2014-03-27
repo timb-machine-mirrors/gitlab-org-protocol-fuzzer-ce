@@ -30,9 +30,7 @@ Example:
 </DataModel>
 ----
 
-The output of the above data model is 0x01<len(b64(Data))><b64(Data)>
-
-=== Peach Default Transformers 
+The output of the above data model is 0x01<len(b64(Data))><b64(Data)>.
 
 *Compression*
 
@@ -49,7 +47,8 @@ xref:Transformers_CryptTransformer[CryptTransformer]
 xref:Transformers_CvsScramble[CvsScrambleTransformer]
 xref:Transformers_HMACTransformer[HMACTransformer]
 xref:Transformers_MD5CryptTransformer[MD5CryptTransformer] 
-xref:Transformers_NullTransformer[NullTransformer]
+// Not for public consumption, do not list.
+// xref:Transformers_NullTransformer[NullTransformer]
 xref:Transformers_SHA1Transformer[SHA1Transformer]
 xref:Transformers_SHA256Transformer[SHA256Transformer] 
 xref:Transformers_TripleDesTransformer[TripleDesTransformer]
@@ -93,7 +92,7 @@ xref:Transformers_UrlEncodeTransformer[UrlEncodeTransformer]
 |Md5||X|
 |NetBiosDecode|||X
 |NetBiosEncode|||X
-|Null||X|
+// |Null||X|
 |Sha1||X|
 |Sha256||X|
 |SidStringToBytes|||X

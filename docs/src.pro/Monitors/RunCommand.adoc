@@ -190,8 +190,9 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 <1> Command executed
-=========================================
 
+lalalalala
+=========================================
 
 .OnEnd Example
 =========================================

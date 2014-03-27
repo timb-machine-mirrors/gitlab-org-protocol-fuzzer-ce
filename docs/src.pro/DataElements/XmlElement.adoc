@@ -13,7 +13,7 @@ NOTE: The resulting value produced by any child element must be a string. In the
 
 See also xref:Analyzers_Xml[XML] analyzer and xref:XmlAttribute[XmlAttribute] element.
 
-== Syntax
+=== Syntax
 
 [source,xml]
 ----
