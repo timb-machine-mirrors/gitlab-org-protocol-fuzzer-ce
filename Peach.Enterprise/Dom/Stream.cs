@@ -124,7 +124,7 @@ namespace Peach.Enterprise.Dom
 		protected override Variant GenerateInternalValue()
 		{
 			if (!this.ContainsKey("Content"))
-				return new Variant();
+				return new Variant(new BitStream());
 
 			return this["Content"].InternalValue;
 		}
