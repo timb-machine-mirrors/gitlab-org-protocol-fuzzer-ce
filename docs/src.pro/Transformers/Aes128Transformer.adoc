@@ -23,7 +23,7 @@ Type:: Cryptography
 
 _Aes128_ will transform the parent xref:DataModel[DataModel] by encrypting the data using AES (Rijndael) with the provided Key and Initialization Vector. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 
-==== Parameters
+=== Parameters
 
 _Required:_
 
@@ -34,12 +34,12 @@ _Optional:_
 
 There are no optional parameters.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will decrypt the incoming data.
 xref:Action_output[output]:: On output this transformer will encrypt the outgoing data.
 
-==== Examples
+=== Examples
 
 .Simple Encrypt and Decrypt Example
 ==========================

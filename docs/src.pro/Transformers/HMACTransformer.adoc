@@ -25,19 +25,19 @@ Type:: Cryptography
 _HMAC_ will produce HMAC on the value in the parent xref:DataModel[DataModel] as described in RFC 2104.
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-==== Parameters
+=== Parameters
 
 No Parameters are supported by this element.
 
-==== Attributes
+=== Attributes
 
 No attributes are supported by this transformer.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
-==== Examples
+=== Examples
 
 .Simple Encode Example
 ==========================

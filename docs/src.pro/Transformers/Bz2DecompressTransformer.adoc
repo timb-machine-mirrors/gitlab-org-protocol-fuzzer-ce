@@ -24,11 +24,11 @@ Type:: Compress
 
 _Bz2Decompress_ performs a bzip2 decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
-==== Parameters
+=== Parameters
 
 No Parameters are supported by this transformer.
 
-==== Attributes
+=== Attributes
 
 _Required:_
 
@@ -38,12 +38,12 @@ _Optional:_
 
 There are no optional attributes.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will compress the incoming data.
 xref:Action_output[output]:: On output this transformer will decompress the outgoing data.
 
-==== Examples
+=== Examples
 
 .Decompress From a Value To a File
 ==========================

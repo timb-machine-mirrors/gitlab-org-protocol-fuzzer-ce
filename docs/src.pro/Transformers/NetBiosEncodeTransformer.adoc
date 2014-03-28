@@ -25,7 +25,7 @@ Type:: Encoder/Decoder
 _NetBiosEncode_ performs a NetBios encode of the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally encode data as well as encode data.
 
-==== Parameters
+=== Parameters
 
 _Required:_
 
@@ -35,7 +35,7 @@ _Optional:_
 
 pad:: Boolean whether NetBios name should be padded/trimmed to 32 bytes.
 
-==== Attributes
+=== Attributes
 
 No Attributes are supported by this transformer.
 
@@ -44,7 +44,7 @@ No Attributes are supported by this transformer.
 xref:Action_input[input]:: On input, NetBiosEncode will encode the incoming data.
 xref:Action_output[output]:: On output, NetBiosEncode will encode the outgoing data.
 
-==== Examples
+=== Examples
 
 .Encoding Value To and From File Example
 ==========================

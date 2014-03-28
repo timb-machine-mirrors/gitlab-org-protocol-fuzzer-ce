@@ -23,11 +23,11 @@ Type:: Compress
 
 _GzipDecompress_ performs a gzip decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
-==== Parameters
+=== Parameters
 
 No Parameters are supported by this element.
 
-==== Attributes
+=== Attributes
 
 _Required:_
 
@@ -37,12 +37,12 @@ _Optional:_
 
 There are no optional attributes.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_input[input]:: On input, GzipDecompress will compress incoming data.
 xref:Action_output[output]:: On output, GzipDecompress will decompress all outgoing data.
 
-==== Examples
+=== Examples
 
 .Compression To and From File Example
 ==========================

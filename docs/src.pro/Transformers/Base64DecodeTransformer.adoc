@@ -24,20 +24,20 @@ Type:: Encoder/Decoder
 
 _Base64Decode_ will Base64 decode the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-==== Parameters
+=== Parameters
 
 No Parameters are supported by this transformer.
 
-==== Attributes
+=== Attributes
 
 No Attributes are supported by this transformer.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will Base64 Encode the incoming data.
 xref:Action_output[output]:: On output this transformer will Base64 Decode this outgoing data.
 
-==== Examples
+=== Examples
 
 .Decoding Value To and From File Example
 ==========================
