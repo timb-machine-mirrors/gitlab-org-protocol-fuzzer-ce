@@ -1,6 +1,6 @@
 <<<
 [[Transformers_SidStringToBytesTransformer]]
-== SidStringToBytesTransformer
+== SidStringToBytes
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,9 +19,10 @@
 // expanded description
 // added full example
 
-=== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
-The _SidStringToBytesTransformer_ will produce the byte representation from a security identifier string.
+_SidStringToBytes_ will produce the byte representation from a security identifier string.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
@@ -41,7 +42,7 @@ xref:Action_output[output]:: On output this transformer will convert a sid strin
 
 .Simple Console Example
 ==========================
-This example uses the TripleDes transformer on an inline value and writes the transformed value to a file, reads the value from a file, and outputs it to the console.
+This example uses TripleDes on an inline value and writes the transformed value to a file, reads the value from a file, and outputs it to the console.
 
 [source,xml]
 ----

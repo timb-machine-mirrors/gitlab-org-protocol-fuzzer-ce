@@ -17,8 +17,8 @@ names with the namespace and a colon (:) _foo:datamodel_.
 
 _Required:_
 
-ns:: Namespace prefix [required]
-src:: Source URL, use "+file:+" prefix for filenames [required]
+ns:: Namespace prefix
+src:: Source URL, use "+file:+" prefix for filenames
 
 _Optional:_
 

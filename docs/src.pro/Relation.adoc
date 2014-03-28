@@ -17,7 +17,7 @@ Peach allows data relationship modeling.  There are three Relation types: Size, 
 
 There are two required Relation attributes:
 
-Type::  Which relationship is being modeled (Size, Count, Offset)
+type::  Which relationship is being modeled (Size, Count, Offset)
 of:: Name of the relationship element in the data model  
 
 [[Relations_Size]]
@@ -31,7 +31,7 @@ of:: Name of the relationship element in the data model
 
 The Size relationship type specifies "X is the size of Y."
 
-The Number element is the byte count of the relationship element. Unicode characters may be multi-byte and the Number value should reflect the additional size.
+The Number element is the byte count of the relationship element. Unicode characters may be multi-byte and the Number value reflects the additional size.
 
 In this example, the value of the number element will indicate the size of the string element named _TheValue_ in bytes. 
 
@@ -47,14 +47,11 @@ In this example, the value of the number element will indicate the size of the s
 
 Gets are applied during the cracking process and Sets are applied during the publishing process. 
 
-For the Size relation, expressionGet and expressionSet use the two variables, +self+ and +size+.  Self refers to the Number element and size is an integer. 
+For the Size relation, expressionGet and expressionSet use the two variables, +self+ and +size+.  Self refers to the parent element and size is an integer. 
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
 In this example we will provide two python expressions that allow us to modify the size when it is get or set:
-
-expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
-expressionSet:: Produces a value for the publisher.  In the following example +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
 
 [source,xml]
 ----
@@ -63,6 +60,10 @@ expressionSet:: Produces a value for the publisher.  In the following example +s
 </Number>
 <String name="TheValue" />
 ----
+
+expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
+expressionSet:: Produces a value for the publisher.  In the following example +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
+
 
 
 
@@ -94,14 +95,11 @@ In this example the number will indicate the count of the array _Strings_.
 
 Gets are applied during the cracking process and Sets are applied during the publishing process. 
 
-For the Count-of relation, expressionGet and expressionSet use the two variables, +self+ and +count+.  Self refers to the Number element and count is an integer. 
+For the Count-of relation, expressionGet and expressionSet use the two variables, +self+ and +count+.  Self refers to the parent element and count is an integer. 
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
-expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
-
-In this example we will provide two python expressions that allow us to modify the size when it gets or sets. 
+In this example we will provide two python expressions that allow us to modify the count when it is set or get. 
 
 [source,xml]
 ----
@@ -110,6 +108,11 @@ In this example we will provide two python expressions that allow us to modify t
 </Number>
 <String name="TheValue" nullTerminated="true" maxOccurs="1024" />
 ----
+
+expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
+expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
+
+
 
 [[Relations_Offset]]
 === Offset-of Relation
@@ -224,7 +227,7 @@ Gets are applied during the cracking process and Sets are applied during the pub
 
 For the Offset relations, expressionGet and expressionSet use the two variables, +self+ and +offset+.  Self refers to the Parent element and offset is an integer. 
 
-Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
+Expression gets and sets should be each other's mathematical inverse. The Get input and Set output should be the same. 
 
 expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
@@ -233,7 +236,7 @@ expressionSet:: Sets the value that will be produced.  In the following example 
 
 In this model we will use a typical patter in which an array of offsets gives us the location of another element. We will use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
 
-NOTE: Placement only works when parsing data into a DataModel.  Read xref:Placement[Placement] for more information.
+*NOTE:* Placement only works when parsing data into a DataModel.  Read xref:Placement[Placement] for more information.
 
 [source,xml]
 ----

@@ -1,6 +1,6 @@
 <<<
 [[Transformers_CvsScramble]]
-== CvsScramble
+=== CvsScramble
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,9 +19,10 @@
 // expanded description
 // added full example
 
-=== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
-The _CvsScramble_ transformer performs a pserver password scramble on the given value. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
+_CvsScramble_ performs a pserver password scramble on the given value. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 
 === Parameters
 
@@ -40,7 +41,7 @@ xref:Action_output[output]:: On output this transformer will encrypt the outgoin
 
 .Simple Encrypt Example
 ==========================
-This example uses the CvsScramble transformer on an inline value and writes the transformed value to a file, reads the value from a file, and outputs it to the console.
+This example uses CvsScramble on an inline value and writes the transformed value to a file, reads the value from a file, and outputs it to the console.
 
 [source,xml]
 ----

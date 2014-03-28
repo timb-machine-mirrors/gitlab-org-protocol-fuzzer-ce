@@ -1,5 +1,5 @@
 [[StateModel]]
-== State Modeling
+=== StateModel
 
 // 01/30/2014: Seth & Mike: Outlined
 //  * Attributes
@@ -34,7 +34,7 @@ Many interactions will be deterministic in their IO and will not need multiple S
 Actions inside a State will occur sequentially top to bottom and that is often enough control.
 
 Only one StateModel can be used for a given Test.
-If the interaction is non-deterministic, such as a target sending an unpredictable command and expecting a certain response from the fuzzer, more states must be used.
+If the interaction is non-deterministic (such as a target sending an unpredictable command and expecting a certain response from the fuzzer), more states must be used.
 In these situations the xref:Action_changeState[changeState] action can be coupled with a xref:Action_when[when] attribute to change to the correct state depending on the state and data of Peach.
 
 Recursion into States is allowed in Peach.
@@ -46,18 +46,18 @@ This is useful for complicated StateModels that need the assistance of counters 
 Advanced StateModels can utilize the Peach Statebag dictionaries from within these scripts to store data.
 These variables can be persisted throughout a single iteration with iterationStateStore or the entire fuzzing session with stateStore and are referable in all scripting environments. 
 
-=== Attributes
+==== Attributes
 
 _Required:_
 
 xref:name[name]:: The name of the StateModel
 initialState:: Name of the State to start executing first
 
-=== Child-Elements
+==== Child Elements
 
 xref:State[State]:: One or more State elements are required.
 
-=== Examples
+==== Examples
 
 // Current examples I think may be duplicated from another section. Probably should be removed and replaced with ones listed in the top comments.
 

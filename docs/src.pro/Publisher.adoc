@@ -1,6 +1,5 @@
-:toc!:
 [[Publisher]]
-== Publishers
+=== Publishers
 
 // Reviewed:
 //  - 02/20/2014: Seth & Mike: Outlined
@@ -28,30 +27,25 @@
 Publishers are the I/O interfaces used by Peach to send and receive data.
 Publishers support both stream and call based operations.
 
-When the fuzzer is running, all xref:Action[Actions] with the exception of ChangeState and slurp use a publisher to
+When the fuzzer is running, all xref:Action[Actions] (except  ChangeState and slurp) use a publisher to
 perform the action. Different publishers support a different set of Action types.  For
-example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept.
+example, the File publisher supports input for reading from a file, output for writing to a file, but does not support accept or call. This differs from the COM publisher which supports call, but not input, output, or accept. 
 
-All fuzzing definitions must use at least one Publisher and can optionally use multiple
+All fuzzing definitions must use at least one Publisher and (optionally) can use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
 
-=== Network Publishers
+==== Network Publishers
 
-When fuzzing network protocols, the publisher used is typically the protocol that encompasses the target protocol.
+When fuzzing network protocols, the publisher typically uses the protocol that encompasses the target protocol.
 For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuzzing TCP, the IPv4 or IPv6 publisher is used. When fuzzing IPv4 the Ethernet publisher is used.
 
-=== Custom Publishers
+==== Custom Publishers
 
-Peach supports the creation of custom Publishers. It is recommended that the code for some
-of the existing Publishers be reviewed first to understand how Publishers are typically
-implemented.
+Peach supports the creation of custom Publishers. It is recommended that the code for some of the existing Publishers be reviewed first to understand how Publishers are typically implemented.
 
-Creating a custom Publisher does not require changing the Peach source code.  Instead the
-code is placed in a new .NET assembly (dll) that is added to the Peach bin folder.  Peach
-will automatically use reflection to identify the new Publisher and make it available for
-use.
+More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 
-=== Publishers
+==== Publishers
 
  * xref:Publishers_AndroidMonkey[AndroidMonkey]
  * xref:Publishers_Com[Com]
@@ -61,7 +55,8 @@ use.
  * xref:Publishers_FilePerIteration[FilePerIteration]
  * xref:Publishers_Http[Http]
  * xref:Publishers_I2C[I2C] 
- * xref:Publishers_Null[Null]
+// MIKE: Do not include the null publisher in documentation.
+// * xref:Publishers_Null[Null]
  * xref:Publishers_RawEther[RawEther]
  * xref:Publishers_RawIPv4[RawIPv4]
  * xref:Publishers_RawIPv6[RawIPv6]
@@ -76,10 +71,12 @@ use.
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  
+// TODO
+
 NOTE: A full list of publishers and parameter information for any
 specific version can be found in the output of `peach --showenv`
 
-=== Syntax
+==== Syntax
 
 [source,xml]
 ----
@@ -93,11 +90,10 @@ specific version can be found in the output of `peach --showenv`
 ----
 
  
-=== Examples
+==== Examples
 
 .Multiple Publishers
 ====================
-
 Though many pits may use a single publisher there is no limit on the
 number of publishers that can be used. Multiple publishers can be
 defined and used. 
@@ -193,3 +189,4 @@ Peach.Core.Publishers.TcpClientPublisher stop()
 
 [*] Test 'Default' finished.
 ----
+====================

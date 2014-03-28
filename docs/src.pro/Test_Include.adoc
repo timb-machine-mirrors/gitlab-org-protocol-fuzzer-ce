@@ -2,6 +2,8 @@
 [[Test_Include]]
 == Include
 
+// TODO - Merge with Test/Include
+	
 Includes all or a specific data element for fuzzing. The combination of this element and also the xref:Test_Exclude[Exclude] element allows for including or excluding various data elements from being mutated. By default all data elements are mutated.
 
 .XPath Further Reading
@@ -10,7 +12,7 @@ The following links provide additional information regarding XPaths.
 
  * http://www.w3schools.com/xpath/[XPath Tutorial]
  * http://www.w3schools.com/xpath/xpath_syntax.asp[XPath Syntax]
- * http://www.w3.org/TR/xpath/.[XPath Specification]
+ * http://www.w3.org/TR/xpath/[XPath Specification]
 
 ****
 
