@@ -1,6 +1,6 @@
 <<<
 [[Transformers_ApacheMd5Crypt]]
-== ApacheMd5Crypt
+=== ApacheMd5Crypt
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -22,26 +22,26 @@
 [horizontal]
 Type:: Cryptography
 
-The _ApacheMd5Crypt_ will MD5 Crypt the data using the method described in the Apache HTTP Server Documentation.
+_ApacheMd5Crypt_ will MD5 Crypt the data using the method described in the Apache HTTP Server Documentation.
 The first two bytes will be used as the salt with the value $apr1$ prepended. This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Console Example
 ==========================
-This example uses the ApacheMd5Crypt transformer on an inline value and writes the transformed value to the console.
+This example uses ApacheMd5Crypt on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----
@@ -79,6 +79,7 @@ This example uses the ApacheMd5Crypt transformer on an inline value and writes t
 ----
 
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 

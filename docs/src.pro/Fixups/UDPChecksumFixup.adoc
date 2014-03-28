@@ -1,6 +1,6 @@
 <<<
 [[Fixups_UDPChecksumFixup]]
-== UDPChecksumFixup
+== UDPChecksum
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -13,8 +13,12 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-The _UDPChecksumFixup_  will produce an internet checksum as defined in RFC 1071.
-A discussion on how to apply UDPChecksumFixup can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the fixup name 
+
+The _UDPChecksum_  will produce an internet checksum as defined in RFC 1071.
+A discussion on how to apply UDPChecksum can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
 This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
 
 === Parent Elements
@@ -32,7 +36,7 @@ dst:: Destination IP Address. IP address of the remote machine.
 
 .UDP Packet Example
 ===================
-This example models a UDP packet which includes use of the UDPChecksumFixup.
+This example models a UDP packet which includes use of the UDPChecksum.
 
 [source,xml]
 ----
@@ -47,7 +51,7 @@ This example models a UDP packet which includes use of the UDPChecksumFixup.
 			<Relation type="size" of="Packet"/>
 		</Number>
 		<Number name="checksum" size="16">
-			<Fixup class="UDPChecksumFixup">
+			<Fixup class="UDPChecksum">
 				<Param name="ref" value="Packet" />
 				<Param name="src" value="192.168.1.10" />
 				<Param name="dst" value="192.168.1.11" />

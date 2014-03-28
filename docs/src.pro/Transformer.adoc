@@ -1,10 +1,6 @@
 [[Transformer]]
 == Transformers 
 
-//Updated:
-//  - 03/04/2014: Lynn: Added additional Transformers and deleted unused ones including all Type and Misc
-
-
 Transformers perform static tranforms or encoding on the parent element. Transforms are typically, but not always, two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
 
 Transformers are different than Fixups:
@@ -12,8 +8,7 @@ Transformers are different than Fixups:
  * Transformers only operate on the parent element 
  * Fixups reference another element's data.
 
-
-Example:
+=== Example
 
 [source,xml]
 ----
@@ -32,71 +27,34 @@ Example:
 
 The output of the above data model is 0x01<len(b64(Data))><b64(Data)>.
 
-*Compression*
-
-xref:Transformers_Bz2CompressTransformer[Bz2CompressTransformer]
-xref:Transformers_Bz2DecompressTransformer[Bz2DecompressTransformer]
-xref:Transformers_GzipCompressTransformer[GzipCompressTransformer]
-xref:Transformers_GzipDecompressTransformer[GzipDecompressTransformer]
-
-*Crypto*
-
-xref:Transformers_Aes128Transformer[Aes128Transformer]
-xref:Transformers_ApacheMd5Crypt[ApacheMd5CryptTransformer]
-xref:Transformers_CryptTransformer[CryptTransformer]
-xref:Transformers_CvsScramble[CvsScrambleTransformer]
-xref:Transformers_HMACTransformer[HMACTransformer]
-xref:Transformers_MD5CryptTransformer[MD5CryptTransformer] 
-// Not for public consumption, do not list.
-// xref:Transformers_NullTransformer[NullTransformer]
-xref:Transformers_SHA1Transformer[SHA1Transformer]
-xref:Transformers_SHA256Transformer[SHA256Transformer] 
-xref:Transformers_TripleDesTransformer[TripleDesTransformer]
-
-*Encode*
-
-xref:Transformers_Base64EncodeTransformer[Base64EncodeTransformer]
-xref:Transformers_Base64DecodeTransformer[Base64DecodeTransformer]
-xref:Transformers_HexTransformer[HexTransformer]
-xref:Transformers_HtmlEncodeTransformer[HtmlEncodeTransformer]
-xref:Transformers_HtmlDecodeTransformer[HtmlDecodeTransformer]
-xref:Transformers_Ipv4StringToOctetTransformer[Ipv4StringToOctetTransformer]
-xref:Transformers_Ipv6StringToOctetTransformer[Ipv6StringToOctetTransformer]
-xref:Transformers_JsEncodeTransformer[JsEncodeTransformer]
-xref:Transformers_NetBiosEncodeTransformer[NetBiosEncodeTransformer]
-xref:Transformers_NetBiosDecodeTransformer[NetBiosDecodeTransformer]
-xref:Transformers_SidStringToBytesTransformer[SidStringToBytesTransformer]
-xref:Transformers_UrlEncodeTransformer[UrlEncodeTransformer]
-
-
+.Peach Transformers 
+[options="header"]
 |===================================================
 |Transformer|Compress|Crypto|Encode
-|AES128||X|
-|ApacheMd5||X|
-|Base64Decode|||X
-|Base64Encode|||X
-|Bz2Compress|X||
-|Bz2Decompress|X||
-|Crypt||X|
-|CvsScramble||X|
-|GzipCompress|X||
-|GzipDecompress|X||
-|Hex|||X
-|HMAC||X|
-|HtmlDecode|||X
-|HtmlEncode|||X
-|IntToHex|||X
-|Ipv4StringToOctet|||X
-|Ipv6StringToOctet|||X
-|JsEncode|||X
-|Md5||X|
-|NetBiosDecode|||X
-|NetBiosEncode|||X
-// |Null||X|
-|Sha1||X|
-|Sha256||X|
-|SidStringToBytes|||X
-|TripleDes||X|
-|ulrEncode|||X
-|UnixMd5Crypt||X|
+|xref:Transformers_Aes128Transformer[Aes128]||X|
+|xref:Transformers_ApacheMd5Crypt[ApacheMd5 Crypt]||X|
+|xref:Transformers_Base64DecodeTransformer[Base64Decode]|||X
+|xref:Transformers_Base64EncodeTransformer[Base64Encode]|||X
+|xref:Transformers_Bz2CompressTransformer[Bz2Compress]|X||
+|xref:Transformers_Bz2DecompressTransformer[Bz2Decompress]|X||
+|xref:Transformers_CryptTransformer[Crypt]||X|
+|xref:Transformers_CvsScramble[CvsScramble]||X|
+|xref:Transformers_GzipCompressTransformer[GzipCompress]|X||
+|xref:Transformers_GzipDecompressTransformer[GzipDecompress]|X||
+|xref:Transformers_HexTransformer[Hex]|||X
+|xref:Transformers_HMACTransformer[HMAC]||X|
+|xref:Transformers_HtmlDecodeTransformer[HtmlDecode]|||X
+|xref:Transformers_HtmlEncodeTransformer[HtmlEncode]|||X
+|xref:Transformers_IntToHexTransformer[IntToHex]|||X
+|xref:Transformers_Ipv4StringToOctetTransformer[Ipv4StringToOctet]|||X
+|xref:Transformers_Ipv6StringToOctetTransformer[Ipv6StringToOctet]|||X
+|xref:Transformers_JsEncodeTransformer[JsEncode]|||X
+|xref:Transformers_MD5CryptTransformer[MD5Crypt] ||X|
+|xref:Transformers_NetBiosEncodeTransformer[NetBiosEncode]|||X
+|xref:Transformers_SHA1Transformer[Sha1]||X|
+|xref:Transformers_SHA256Transformer[Sha256] ||X|
+|xref:Transformers_SidStringToBytesTransformer[SidStringToBytes]|||X
+|xref:Transformers_TripleDesTransformer[TripleDes]||X|
+|xref:Transformers_UrlEncodeTransformer[UrlEncode]|||X
+|xref:Transformers_UnixMd5CryptTransformer[UnixMd5Crypt]||X|
 |===================================================

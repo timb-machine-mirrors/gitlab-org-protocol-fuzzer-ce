@@ -1,6 +1,7 @@
 <<<
 [[Transformers_Bz2CompressTransformer]]
 == Bz2Compress
+
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -21,14 +22,14 @@
 [horizontal]
 Type:: Compress
 
-The _Bz2CompressTransformer_ performs a bzip2 compression on the value in the parent xref:DataModel[DataModel].
+_Bz2Compress_ performs a bzip2 compression on the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 _Required:_
 
@@ -38,16 +39,16 @@ _Optional:_
 
 There are no optional attributes.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will decompress the incoming data.
 xref:Action_output[output]:: On output this transformer will compress the outgoing data.
 
-=== Examples
+==== Examples
 
 .Compression To and From File Example
 ==========================
-This example uses the Bz2Compress Transformer to compress a value, write the value to the console, write to a file, and then reads it from the file.
+This example uses Bz2Compress to compress a value, write the value to the console, write to a file, and then read it from the file.
 
 [source,xml]
 ----
@@ -131,4 +132,3 @@ Peach.Core.Publishers.FilePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-==========================

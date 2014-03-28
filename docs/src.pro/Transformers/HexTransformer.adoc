@@ -1,6 +1,7 @@
 <<<
 [[Transformers_HexTransformer]]
 == Hex
+
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -21,23 +22,23 @@
 [horizontal]
 Type:: Encoder/Decoder
 
-The _HexTransformer_ takes the provided value and produces an ascii string of hex characters that represent the data.
+_HexTransformer_ takes the provided value and produces an ASCII string of hex characters that represent the data.
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to string.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
-xref:Action_input[input]:: On input this transformer will a hex string into ascii for the incoming data.
-xref:Action_output[output]:: On output this transformer will convert ascii into a hex string for the outgoing data.
+xref:Action_input[input]:: On input, HexTransformer will convert a hex string into ASCII for the incoming data.
+xref:Action_output[output]:: On output, HexTransformer will convert ASCII into a hex string for the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Console Example
 ==========================

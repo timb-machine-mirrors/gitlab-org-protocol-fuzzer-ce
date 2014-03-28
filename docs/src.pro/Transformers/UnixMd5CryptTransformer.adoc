@@ -1,7 +1,8 @@
 <<<
 [[Transformers_UnixMd5CryptTransformer]]
 == UnixMd5Crypt
-// Reviewed:
+
+	// Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
 // Verify parameters expand parameter description
@@ -21,27 +22,27 @@
 [horizontal]
 Type:: Cryptography
 
-The _UnixMd5CryptTransformer_ will produce an MD5 crypt operation on the provided value in the parent xref:DataModel[DataModel].
+_UnixMd5Crypt_ will produce an MD5 crypt operation on the provided value in the parent xref:DataModel[DataModel].
 This is done using the first two bytes as the salt and pre pending the value "$1".
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_output[output]:: On output this transformer will hash the outgoing data.
 
-=== Examples
+==== Examples
 
 .Simple Console Example
 ==========================
-This example uses the UnixMd5Crypt transformer on an inline value and writes the transformed value to the console.
+This example uses  UnixMd5Crypt on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----

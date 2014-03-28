@@ -1,6 +1,7 @@
 <<<
 [[Transformers_Ipv4StringToOctetTransformer]]
 == Ipv4StringToOctet
+
 // 02/19/2014: Seth & Adam: Outlined
 //  TODO:
 //  Verify parameters expand parameter description
@@ -19,28 +20,30 @@
 [horizontal]
 Type:: Encoder/Decoder
 
-The _Ipv4StringToOctetTransformer_ will produce the bytes from the string representation of an Internet Protocol version 4 address.
+==== Transformer type: Encoder/Decoder
+
+_Ipv4StringToOctet_ will produce the bytes from the string representation of an Internet Protocol version 4 address.
 An example would be transforming the string 127.0.0.1 to 0x7F000001.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
-xref:Action_input[input]:: On input this transformer will convert bytes into an IP address string representation.
-xref:Action_output[output]:: On output this transformer will convert an IP address string representation into bytes.
+xref:Action_input[input]:: On input, Ipv4StringToOctet will convert bytes into an IP address string representation.
+xref:Action_output[output]:: On output, Ipv4StringToOctet will convert an IP address string representation into bytes.
 
-=== Examples
+==== Examples
 
 .Simple Encode Example
 ==========================
-This example uses the Ipv4StringToOctet transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
+This example uses Ipv4StringToOctet on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 [source,xml]
 ----

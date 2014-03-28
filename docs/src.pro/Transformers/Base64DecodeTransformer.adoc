@@ -1,6 +1,7 @@
 <<<
 [[Transformers_Base64DecodeTransformer]]
 == Base64Decode
+
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -21,26 +22,26 @@
 [horizontal]
 Type:: Encoder/Decoder
 
-The _Base64DecodeTransformer_ will Base64 decode the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
+_Base64Decode_ will Base64 decode the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 No Attributes are supported by this transformer.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will Base64 Encode the incoming data.
-xref:Action_output[output]:: On output this transfomer will Base64 Decode this outgoing data.
+xref:Action_output[output]:: On output this transformer will Base64 Decode this outgoing data.
 
-=== Examples
+==== Examples
 
 .Decoding Value To and From File Example
 ==========================
-This example uses the Base64Encode transformer on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
+This example uses  Base64Encode on an inline value, writes the transformed value to a file, and reads the value from the file to the console.
 
 [source,xml]
 ----
@@ -108,8 +109,8 @@ This example uses the Base64Encode transformer on an inline value, writes the tr
 </Peach>
 ----
 
-
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 

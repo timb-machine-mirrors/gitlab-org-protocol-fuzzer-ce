@@ -1,6 +1,7 @@
 <<<
 [[Transformers_Bz2DecompressTransformer]]
 == Bz2Decompress
+
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
@@ -21,13 +22,13 @@
 [horizontal]
 Type:: Compress
 
-The _Bz2DecompressTransformer_ performs a bzip2 decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
+_Bz2Decompress_ performs a bzip2 decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
-=== Parameters
+==== Parameters
 
 No Parameters are supported by this transformer.
 
-=== Attributes
+==== Attributes
 
 _Required:_
 
@@ -37,16 +38,16 @@ _Optional:_
 
 There are no optional attributes.
 
-=== Actions Supported
+==== Actions Supported
 
 xref:Action_input[input]:: On input this transformer will compress the incoming data.
 xref:Action_output[output]:: On output this transformer will decompress the outgoing data.
 
-=== Examples
+==== Examples
 
 .Decompress From a Value To a File
 ==========================
-This example uses the Bz2Compress Transformer to decompress a value, write the value to the console, write to a file, and then reads it from the file.
+This example uses Bz2Decompress to decompress a value, write the value to the console, write to a file, and then reads it from the file.
 
 [source,xml]
 ----
