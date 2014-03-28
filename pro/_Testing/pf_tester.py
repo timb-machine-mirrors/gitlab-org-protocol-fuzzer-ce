@@ -29,9 +29,11 @@ PFADMIN_PATH = r'C:\pf\bin\pf_admin.exe'
 DUM_CONFIG = DummyPeachTestConfig()
 # platform (via testlib.get_platform()) to Os tag as seen be peachfarm
 PLATFORM_TAG_LOOKUP = {'win': 'Windows', 'osx': 'Osx', 'linux': 'Linux'}
+_TOTAL_TESTS = 0 #dbgByron
 
 class FarmJob:
 	all_jobs = []
+	jobs_in_the_air = {}
 
 	def __init__(self, pit_name, run_args):
 		self.test_name = run_args['test_name']
@@ -54,6 +56,38 @@ class FarmJob:
 		if self not in FarmJob.all_jobs:
 			FarmJob.all_jobs.append(self)
 
+	@classmethod
+	def clean_old_jobs(cls):
+		# try and try again until we succeed (hit the return)
+		failure_count = 0
+		while True:
+			cmd = [PFADMIN_PATH, '-jobs']
+			p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			out, err = p.communicate()
+			p.wait()
+			has_command_failed = ("Registration with Controller failed" in out
+			                     or p.returncode != 0)
+			if failure_count > 30:
+				sys.exit(255)
+			if has_command_failed:
+				failure_count += 1
+				print 'Failed to get jobs info from pf_admin'
+				time.sleep(2)
+				continue
+
+			assert 'Inactive Jobs' in out
+			inactive_section = out.split('Inactive Jobs')[-1]
+			inactive_section = inactive_section.replace('\r', '')
+			inactive_sect_lines = inactive_section.split('\n')
+			for line in inactive_sect_lines:
+				maybe_id = re.split('\s', line)[0]
+				is_id = re.search('[\dABCDEF]{12}', maybe_id) is not None
+				if is_id:
+					if maybe_id in cls.jobs_in_the_air:
+						cls.jobs_in_the_air.pop(maybe_id)
+			return
+
+
 	def report_error(self):
 		print "Failed to start: ", self.pit_name, ' on ', self.opsys, \
 			   " for test ", self.test_name
@@ -63,11 +97,34 @@ class FarmJob:
 		print "Return Code:", self.start_job_rc
 		print "Job Id:"     , self.job_id
 
+	def wait_for_worker_node(self):
+		# make sure a node with the proper os is available to run this test
+		# TODO: _could_ split this out so different os's aren't blocking each
+		assert len(FarmJob.jobs_in_the_air) <= 3
+		has_shown_waiting = False
+		while True:
+			FarmJob.clean_old_jobs()
+			is_clear = True
+			for key, job in FarmJob.jobs_in_the_air.items():
+				print key, job.pit_name , job.run_args['os_tag'] , job.run_args['test_name'] #dbgByron
+				if job.run_args['os_tag'] == self.run_args['os_tag']:
+					is_clear = False
+			if is_clear:
+				if has_shown_waiting:
+					print '' # this deals w/ the no newline theme inside this loop
+				return
+			if not has_shown_waiting:
+				has_shown_waiting = True
+				print 'Waiting for ' + self.run_args['os_tag'] + ' node to become available ',
+			time.sleep(2)
+			print '.', # <- , == no newline
+
 	def run(self):
 		''' how will we detect failure??? '''
 		# tags = [{<os_tag>, <test_name>}]
 		# assume pathing for windows. throw assertion if this script runs on linux
 		# `C:\pf\bin\pf_admin.exe -start -n1 -t Osx -r 0-1 -test Default ftp.zip`
+		self.wait_for_worker_node()
 		def get_job_id(job_output):
 			# it looks like this mixes \r\n and just \n for line endings....
 			job_output = job_output.replace('\r\n', '\n')
@@ -85,9 +142,13 @@ class FarmJob:
 		sp = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		self.start_job_output, self.start_job_error = sp.communicate()
 		sp.wait()
+
 		self.start_job_rc = sp.returncode
 		self.job_id = get_job_id(self.start_job_output)
 		self.has_started_succesfully = self.job_id is not None and self.start_job_rc == 0
+		if self.has_started_succesfully:
+			FarmJob.jobs_in_the_air[self.job_id] = self
+
 
 	def get_error_info(self):
 		# does not mean that the job failed. just get info from `pf_admin -errors`
@@ -274,6 +335,7 @@ def imported_files(base_files, includes):
 			ifile = file_location_under_path(ifile_name, bpath)
 			if ifile is not None:
 				ifiles.append(ifile)
+
 	return ifiles
 
 
@@ -437,7 +499,6 @@ def all_pit_argument_info():
 
 if __name__ == "__main__":
 	temp_dirs = []
-	failures = [] # [(pit, os, testname, error_output)]
 	running_jobs = [] # [<admin responses>]
 
 	clear_peachfarm_errors()
@@ -479,8 +540,11 @@ if __name__ == "__main__":
 
 	map(shutil.rmtree, temp_dirs)
 	map(os.remove, set(j.zip_name for j in FarmJob.all_jobs))
+	print '\nFailed to start: ',   ' '.join(j.pit_name for j in FarmJob.all_jobs if j not in running_jobs)
+	print '\nTests with errors: ', ' '.join(j.pit_name for j in running_jobs if     j.has_error)
+	print '\nPassing Tests: ',     ' '.join(j.pit_name for j in running_jobs if not j.has_error)
+	print '\nPit Names: ', pit_names
 
-	if failures != []:
-		print '\n\nFailing Tests: ', '  '.join(failures), '\n\n'
-		sys.exit(len(failures))
+	problem_tests = [j.pit_name for j in FarmJob.all_jobs if j.has_error or not j.has_started_succesfully]
+	sys.exit(len(problem_tests))
 
