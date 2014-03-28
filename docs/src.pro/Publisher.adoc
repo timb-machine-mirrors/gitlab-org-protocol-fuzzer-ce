@@ -1,5 +1,5 @@
 [[Publisher]]
-== Publishers
+=== Publishers
 
 // Reviewed:
 //  - 02/20/2014: Seth & Mike: Outlined
@@ -34,18 +34,18 @@ example, the File publisher supports input for reading from a file, output for w
 All fuzzing definitions must use at least one Publisher and (optionally) can use multiple
 Publishers if needed.  When using multiple Publishers, each Action must specify which Publisher it is referencing by referencing to the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action will be performed on the first Publisher defined in the Test.
 
-=== Network Publishers
+==== Network Publishers
 
 When fuzzing network protocols, the publisher typically uses the protocol that encompasses the target protocol.
 For example, when fuzzing the HTTP protocol the TCP publisher is used.  When fuzzing TCP, the IPv4 or IPv6 publisher is used. When fuzzing IPv4 the Ethernet publisher is used.
 
-=== Custom Publishers
+==== Custom Publishers
 
 Peach supports the creation of custom Publishers. It is recommended that the code for some of the existing Publishers be reviewed first to understand how Publishers are typically implemented.
 
 More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 
-=== Publishers
+==== Publishers
 
  * xref:Publishers_AndroidMonkey[AndroidMonkey]
  * xref:Publishers_Com[Com]
@@ -71,10 +71,12 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  
+// TODO
+
 NOTE: A full list of publishers and parameter information for any
 specific version can be found in the output of `peach --showenv`
 
-=== Syntax
+==== Syntax
 
 [source,xml]
 ----
@@ -88,7 +90,7 @@ specific version can be found in the output of `peach --showenv`
 ----
 
  
-=== Examples
+==== Examples
 
 .Multiple Publishers
 ====================

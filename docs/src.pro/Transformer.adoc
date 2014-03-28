@@ -1,7 +1,7 @@
 [[Transformer]]
 == Transformers 
 
-Transformers perform static tranforms or encoding on the parent element. Transforms are typically, but not always, two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
+Transformers perform static transforms or encoding on the parent element. Transforms are typically two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
 
 Transformers are different than Fixups:
 
