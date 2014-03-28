@@ -26,7 +26,7 @@ _Ipv6StringToOctet_ will produce the octet bytes from the string representation 
 An example would be transforming the string ::1 to 0x00000000000000000000000000000001.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
-==== Parameters
+=== Parameters
 
 No Parameters are supported by this element.
 
@@ -34,12 +34,12 @@ No Parameters are supported by this element.
 
 No Attributes are supported by this transformer.
 
-==== Actions Supported
+=== Actions Supported
 
 xref:Action_input[input]:: On input, Ipv6StringToOctet will convert bytes into an IP address string representation.
 xref:Action_output[output]:: On output, Ipv6StringToOctet will convert an IP address string representation into bytes.
 
-==== Examples
+=== Examples
 
 .Simple Encode Example
 ==========================
