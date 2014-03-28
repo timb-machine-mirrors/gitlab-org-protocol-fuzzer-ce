@@ -1,6 +1,8 @@
 [[Transformer]]
 == Transformers 
 
+// - 03/27/2014 All transformer links are now in the table
+
 Transformers perform static transforms or encoding on the parent element. Transforms are typically two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
 
 Transformers are different than Fixups:
@@ -8,7 +10,7 @@ Transformers are different than Fixups:
  * Transformers only operate on the parent element 
  * Fixups reference another element's data.
 
-=== Example
+==== Example
 
 [source,xml]
 ----
