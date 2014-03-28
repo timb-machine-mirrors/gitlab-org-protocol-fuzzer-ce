@@ -9,8 +9,8 @@ Internet Protocol Security (IPsec) is a protocol suite for securing Internet Pro
 
 IPsec includes protocols for establishing mutual authentication between agents at the beginning of the session and cryptographic key negotiations during the session. The protocol can be used to protect data flows between a pair of hosts (host-to-host), between a pair of security gateways (network-to-network), or between a security gateway and a host (network-to-host).
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -25,8 +25,8 @@ Specifications
 |RFC4303 | IP Encapsulating Security Payload
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

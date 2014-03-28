@@ -10,8 +10,8 @@ The file is composed of a magic number and a series of TLV chunks.
 Each chunk contains a type, length, data, and a checksum at the end.
 
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Specifications
 |http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html | PNG (Portable Network Graphics) Specification, Version 1.2
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

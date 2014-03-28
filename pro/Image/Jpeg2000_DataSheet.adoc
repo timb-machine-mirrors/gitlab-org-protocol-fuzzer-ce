@@ -8,8 +8,8 @@ JPEG 2000 is an Image File Format developed as the next evolution of the JPEG st
 The format supports bother lossless and lossy compression, multiple resolution representations, and better compression and error resilience than the previous standard.
 The file is structured as recursive "boxes" containing metadata and pixel streaming.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -17,8 +17,8 @@ Specifications
 |ISO 15444 | JPEG 2000 image coding system
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

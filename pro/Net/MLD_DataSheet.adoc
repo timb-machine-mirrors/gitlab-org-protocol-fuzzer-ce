@@ -10,8 +10,8 @@ Multicast Listener Discovery Protocol (MLD) is used to declare and manage group 
 
 Commands include adding and removing IP's from a group and querying servers for current group membership. 
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -21,8 +21,8 @@ Specifications
 |RFC2710 | Multicast Listener Discovery (MLD) for IPv6
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

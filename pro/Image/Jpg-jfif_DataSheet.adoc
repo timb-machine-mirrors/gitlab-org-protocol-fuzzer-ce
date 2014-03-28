@@ -9,8 +9,8 @@ It is built to be an extensible format and supports a variety of compressions an
 Even though its structure is very similar to the EXIF standard, these two formats are incompatible.
 Many programs ignore these differences in requirements.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Specifications
 |http://www.w3.org/Graphics/JPEG/itu-t81.pdf | Information Technology - Digital Compression and Coding of Continuous-Tone Still Images - Requirements and Guidelines
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 
 [options="header"]

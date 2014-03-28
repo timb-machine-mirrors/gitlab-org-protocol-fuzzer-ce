@@ -9,8 +9,8 @@
 Internet Protocol version 6 (IPv6) is the the communications protocol that provides an identification and location system for computers on networks and routes traffic across the Internet. 
 IPv6 was developed to deal with the long-anticipated problem of IPv4 address exhaustion and eventually will replace IPv4.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -20,8 +20,8 @@ Specifications
 |RFC3775 | Mobility Support in IPv6
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

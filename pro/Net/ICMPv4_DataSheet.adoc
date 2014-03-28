@@ -8,8 +8,8 @@
 
 Internet Control Message Protocol version 4 (ICMPv4) is the implementation of a message relay protocol on top of IPv4. It provides error responses for the IPv4 protocol as well as simple data transmission. It is commonly used in the ping application for testing network response and connectivity.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -22,8 +22,8 @@ Specifications
 |RFC6633 | Deprecation of ICMP Source Quench Messages
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

@@ -7,8 +7,8 @@
 
 Use the Lightweight Directory Access Protocol (LDAP) application protocol to access and maintain distributed directory information services over an Internet Protocol (IP) network.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -16,8 +16,8 @@ Specifications
 |RFC4511 | Lightweight Directory Access Protocol (LDAP) :  The Protocol
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

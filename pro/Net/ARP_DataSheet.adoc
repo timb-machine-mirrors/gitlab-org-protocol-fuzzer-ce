@@ -8,8 +8,8 @@
 
 The Address Resolution Protocol translates between hardware and protocol addresses. In Ethernet and Wireless networks, it usually translates between IPv4 and MAC addresses.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -17,8 +17,8 @@ Specifications
 |RFC826 | An Ethernet Address Resolution ProtocolS	
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

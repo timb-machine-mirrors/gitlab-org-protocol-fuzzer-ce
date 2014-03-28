@@ -10,8 +10,8 @@ The User Datagram Protocol (UDP) is one of the core members of the Internet prot
 
 UDP uses a simple transmission model with a minimum of protocol mechanism. It has no handshaking dialogues, and thus exposes any underlying network protocol unreliability to the user's program. As this is normally IP over unreliable media, there is no guarantee of delivery, ordering, or duplicate protection.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Specifications
 |RFC768  | User Datagram Protocol
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

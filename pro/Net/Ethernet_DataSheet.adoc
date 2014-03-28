@@ -9,8 +9,8 @@
 An Ethernet Frame is a link layer data packet, as described in IEEE 802.3. It encapsulates all layers above it. 
 This is a simple protocol; this pit would not be used alone, but would likely be used to construct encapsulated protocol pits.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Specifications
 |802.1Q | VLAN Tagging
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

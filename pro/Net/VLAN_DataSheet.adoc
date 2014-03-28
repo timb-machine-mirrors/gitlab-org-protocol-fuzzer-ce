@@ -8,8 +8,8 @@
 
 In computer networking, a single layer-2 network may be partitioned to create multiple, mutually isolated, distinct broadcast domains, so that packets can only pass between them via one or more routers. Such a domain is referred to as a virtual local area network, virtual LAN or VLAN.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -18,8 +18,8 @@ Specifications
 |IEEE 802.1ad | Virtual Bridged Local Area Networks Amendment 4: Provider Bridges
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

@@ -11,8 +11,8 @@ The file format is closely tied to the DIB internal data structure in the Window
 
 
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -20,8 +20,8 @@ Specifications
 |http://msdn.microsoft.com/en-us/library/dd183386%28VS.85%29.aspx | Bitmap Header Types
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

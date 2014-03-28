@@ -6,8 +6,8 @@
 
 The ICO file format is an image file format for computer icons in Microsoft Windows. ICO files contain one or more small images at multiple sizes and color depths, such that they may be scaled appropriately.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========

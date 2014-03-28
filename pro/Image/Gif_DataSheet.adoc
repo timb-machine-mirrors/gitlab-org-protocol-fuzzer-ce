@@ -9,8 +9,8 @@ The format uses LZW lossless encryption for packing and can support animated ima
 It is comprised a short header and collection of recursive, null-terminated blocks.
 Blocks can contain information such as graphic settings, color tables, comments, and pixel data.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -19,8 +19,8 @@ Specifications
 |http://www.w3.org/Graphics/GIF/spec-gif89a.txt | Graphics Interchange Format Version 89a
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

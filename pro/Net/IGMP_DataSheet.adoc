@@ -11,8 +11,8 @@ Internet Group Management Protocol (IGMP) is used to declare and manage group me
 Multicast IP Addresses allow machines to subscribe to IP address groups. This way, packets addressed to a group IP Address are distributed among all members. IGMP is protocol over IPv4 that allows machines to manage their group subscriptions.
 
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -23,8 +23,8 @@ Specifications
 |RFC1112| Host Extensions for IP Multicasting
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

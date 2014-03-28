@@ -11,8 +11,8 @@ It is formally described in IEEE 802.1AB as _Station and Media Access Control Co
 It replaces proprietary protocols such as EDP, CDP, LLTD, and SONMP.
 
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -20,8 +20,8 @@ Specifications
 |IEEE 802.1AB | Station and Media Access Control Connectivity Discovery
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

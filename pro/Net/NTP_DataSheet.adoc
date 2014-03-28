@@ -8,8 +8,8 @@
 
 Network Time Protocol (NTP) is a networking protocol for clock synchronization between computer systems over packet-switched, variable-latency data networks.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -17,8 +17,8 @@ Specifications
 |RFC5905 | Network Time Protocol Version 4: Protocol and Algorithms Specification
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========

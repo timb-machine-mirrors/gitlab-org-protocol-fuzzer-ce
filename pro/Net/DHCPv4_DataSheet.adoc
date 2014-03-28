@@ -13,8 +13,8 @@ Requesting IP addresses with DHCP reduces the changes of address collisions and 
 Requests are broadcasted over the layer-2 network to an entire network space and relayed on until received by a DHCP Server.
 The server responds back with an available IP address and a handshake is completed between the two systems.
 
-Specifications
---------------
+=== Specifications
+
 
 [options="header"]
 |========
@@ -25,8 +25,8 @@ Specifications
 |RFC3396 | Encoding Long Options in the Dynamic Host Configuration Protocol (DHCPv4)
 |========
 
-Use Cases
----------
+=== Use Cases
+
 
 [options="header"]
 |========
