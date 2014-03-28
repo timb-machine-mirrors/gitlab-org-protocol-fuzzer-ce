@@ -499,7 +499,6 @@ def all_pit_argument_info():
 
 if __name__ == "__main__":
 	temp_dirs = []
-	failures = [] # [(pit, os, testname, error_output)]
 	running_jobs = [] # [<admin responses>]
 
 	clear_peachfarm_errors()
@@ -546,7 +545,6 @@ if __name__ == "__main__":
 	print '\nPassing Tests: ',     ' '.join(j.pit_name for j in running_jobs if not j.has_error)
 	print '\nPit Names: ', pit_names
 
-	if failures != []:
-		print '\n\nFailing Tests: ', '  '.join(failures), '\n\n'
-		sys.exit(len(failures))
+	problem_tests = [j.pit_name for j in FarmJob.all_jobs if j.has_error or not j.has_started_succesfully]
+	sys.exit(len(problem_tests))
 
