@@ -1,6 +1,6 @@
 <<<
 [[Transformers_JsEncodeTransformer]]
-=== JsEncode
+== JsEncode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,11 +19,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-==== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 _JsEncode_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].
 All characters will be encoded.

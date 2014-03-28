@@ -98,7 +98,7 @@ Output
 A
 ----
 
-NOTE: The hex values must be EVEN numbered! For example this is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
+*NOTE:* The hex values must be EVEN numbered! For example this is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
 ==========================
 
 .literal

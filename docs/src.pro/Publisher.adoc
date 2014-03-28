@@ -55,7 +55,8 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_FilePerIteration[FilePerIteration]
  * xref:Publishers_Http[Http]
  * xref:Publishers_I2C[I2C] 
- * xref:Publishers_Null[Null]
+// MIKE: Do not include the null publisher in documentation.
+// * xref:Publishers_Null[Null]
  * xref:Publishers_RawEther[RawEther]
  * xref:Publishers_RawIPv4[RawIPv4]
  * xref:Publishers_RawIPv6[RawIPv6]

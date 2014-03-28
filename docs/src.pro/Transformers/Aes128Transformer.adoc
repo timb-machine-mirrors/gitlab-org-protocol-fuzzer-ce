@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Aes128Transformer]]
-=== Aes128
+== Aes128
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -18,12 +18,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-
-==== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
 _Aes128_ will transform the parent xref:DataModel[DataModel] by encrypting the data using AES (Rijndael) with the provided Key and Initialization Vector. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 
@@ -115,6 +111,7 @@ This example uses Aes128 on an inline value, writes the transformed value to a f
 ----
 
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 

@@ -8,7 +8,7 @@
 
 The Block element is a child element of xref:DataModel[DataModel] or Block. Blocks are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. Blocks and DataModels are very similar, the only difference is their location. DataModels are a top level element, blocks are a child of xref:DataModel[DataModel]. Both Block and xref:DataModel[DataModel] elements can be used as the template for other Blocks or xref:DataModel[DataModels].
 
-== Syntax
+=== Syntax
 
 [source,xml]
 ----
@@ -35,7 +35,7 @@ xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur.
 xref:occurs[occurs]:: The actual number of times this block occurs.
 xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to false.
 
-=== Child-Elements
+=== Child Elements
 
 xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
 xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.

@@ -98,7 +98,7 @@ xref:minOccurs[minOccurs]:: The minimum number of times this block must occur, d
 xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur, defaults to 1.
 xref:occurs[occurs]:: Actual number of occurrences, defaults to 1.
 
-=== Child-Elements
+=== Child Elements
 
 xref:Analyzers[Analyzer]:: Attach an analyzer to this element
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.

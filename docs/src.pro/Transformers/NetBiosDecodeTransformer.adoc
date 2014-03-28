@@ -1,6 +1,6 @@
 <<<
 [[Transformers_NetBiosDecodeTransformer]]
-=== NetBiosDecode
+== NetBiosDecode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,11 +19,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-==== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 _NetBiosDecode_ will decode NetBios encoded strings.
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
@@ -36,7 +33,7 @@ There are no required parameters.
 
 _Optional:_
 
- * pad -- Boolean whether NetBios name should be padded/trimmed to 32 bytes.
+pad:: Boolean whether NetBios name should be padded/trimmed to 32 bytes.
 
 ==== Attributes
 

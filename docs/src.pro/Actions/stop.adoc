@@ -66,7 +66,7 @@ xref:Action_when[when]:: Only perform action if the expression provided evaluate
 xref:Action_onStart[onStart]:: Expression to run on start of an action.
 xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
 
-=== Child-Elements
+=== Child Elements
 
 No child elements are supported by this element.
 

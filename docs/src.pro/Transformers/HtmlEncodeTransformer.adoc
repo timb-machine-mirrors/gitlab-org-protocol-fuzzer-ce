@@ -1,6 +1,6 @@
 <<<
 [[Transformers_HtmlEncodeTransformer]]
-=== HtmlEncode
+== HtmlEncode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -24,11 +24,8 @@
 // msdn says < & " is encoded
 // < & ' " is actually encoded
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-==== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 _HtmlEncode_ will produce an HTML/XML encoded string of the provided value in the parent xref:DataModel[DataModel].
 Only the characters < & ' and " will be encoded.

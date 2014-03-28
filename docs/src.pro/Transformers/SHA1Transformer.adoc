@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Sha1Transformer]]
-=== Sha1
+== Sha1
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,7 +19,8 @@
 // expanded description
 // added full example
 
-==== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
 _Sha1_ will produce a SHA1 hash of the value in the parent xref:DataModel[DataModel].
 This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.

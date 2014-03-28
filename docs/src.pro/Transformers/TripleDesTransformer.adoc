@@ -1,8 +1,8 @@
 <<<
 [[Transformers_TripleDesTransformer]]
-=== TripleDesTransformer
+== TripleDes
 
-// Reviewed:
+	// Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
 // Verify parameters expand parameter description
@@ -19,7 +19,8 @@
 // expanded description
 // added full example
 
-==== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
 The _TripleDesTransformer_ will produce the bytes from a Triple DES encryption of the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bi-directionally encrypt data as well as decrypt data.

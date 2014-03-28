@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Base64DecodeTransformer]]
-=== Base64Decode
+== Base64Decode
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -19,11 +19,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-==== Transformer type: Encoder/Decoder
+[horizontal]
+Type:: Encoder/Decoder
 
 _Base64Decode_ will Base64 decode the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
@@ -112,8 +109,8 @@ This example uses  Base64Encode on an inline value, writes the transformed value
 </Peach>
 ----
 
-
 Output from this example.
+
 ----
 > peach -1 --debug example.xml
 

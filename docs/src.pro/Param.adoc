@@ -33,22 +33,27 @@ Params are common for various xref:AgentsMonitors[Monitors], xref:Publisher[Publ
 
 _Attributes:_
 
- * xref:name[name] -- Name of parameter [required]
- * xref:value[value]:: Default value.
- * xref:valueType[valueType]:: Format of value attribute.
+_Required:_
 
-_Valid Child-Elements:_
+xref:name[name]:: Name of parameter
+xref:value[value]:: Default value.
+
+_Optional:_
+
+xref:valueType[valueType]:: Format of value attribute.
+
+=== Child Elements
 
 This element has no valid child elements.
 
-=== Param in Call
+=== Call Action _Param_
 
 Param is also used as an argument to the xref:Action_call[call] Action.
 Call actions can have an array of parameters defined by param used in different ways by the Publisher
 In this usage of Param the element is solely a container for a DataModel and Data.
 The Data described in the Param will be fuzzed by Peach.
 
-=== Syntax
+==== Syntax
 
 [source,xml]
 ----
@@ -62,11 +67,17 @@ The Data described in the Param will be fuzzed by Peach.
 </Action>
 ----
 
-_Attributes:_
+==== Attributes
 
- * xref:name[name] -- Name of parameter [optional]
+_Required:_
 
-_Valid Child-Elements:_
+xref:name[name]:: Name of parameter
+
+_Optiona:_
+
+There are no optional attributes for this element.
+
+==== Child Elements
 
 xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
 xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing

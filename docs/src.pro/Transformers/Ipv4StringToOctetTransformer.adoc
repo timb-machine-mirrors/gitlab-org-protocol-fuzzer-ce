@@ -1,6 +1,6 @@
 <<<
 [[Transformers_Ipv4StringToOctetTransformer]]
-=== Ipv4StringToOctet
+== Ipv4StringToOctet
 
 // 02/19/2014: Seth & Adam: Outlined
 //  TODO:
@@ -17,9 +17,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
+[horizontal]
+Type:: Encoder/Decoder
 
 ==== Transformer type: Encoder/Decoder
 

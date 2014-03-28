@@ -92,7 +92,7 @@ xref:occurs[occurs]::
 	The actual number of times this number occurs.
 	Defaults to 1.
 
-=== Child-Elements
+=== Child Elements
 
 xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
@@ -261,7 +261,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 <1> The 16 bit little endian value 5
 
-NOTE: Numbers use the `size` attribute which is, by default, the size in
+*NOTE:* Numbers use the `size` attribute which is, by default, the size in
 *bytes*. `Number` elements do not accept `length` attribute used by other elements.
 ==========================
 

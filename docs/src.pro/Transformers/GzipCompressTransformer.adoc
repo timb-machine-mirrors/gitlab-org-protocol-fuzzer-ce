@@ -1,5 +1,5 @@
 [[Transformers_GzipCompressTransformer]]
-=== GzipCompress
+== GzipCompress
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
@@ -18,11 +18,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name
-
-==== Transformer type: Compress
+[horizontal]
+Type:: Compress
 
 _GzipCompress_ performs a Gzip compression on the value in the parent xref:DataModel[DataModel].
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.

@@ -19,11 +19,8 @@
 // expanded description
 // added full example
 
-// Updated:
-// - 03/26/2014 Lynn
-//Corrected the transformer name 
-
-==== Transformer type: Cryptography
+[horizontal]
+Type:: Cryptography
 
 _CvsScramble_ performs a pserver password scramble on the given value. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 

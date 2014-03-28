@@ -30,7 +30,7 @@ See also xref:Analyzers_Xml[XML] analyzer and xref:XmlElement[XmlElement] elemen
 
 _Required:_
 
-attributeName:: Name of XML element [required]
+attributeName:: Name of XML element
 
 _Optional:_
 
