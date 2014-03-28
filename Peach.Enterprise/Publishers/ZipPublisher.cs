@@ -95,7 +95,7 @@ namespace Peach.Enterprise.Publishers
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Zip publisher could not get stream name.", ex);
+				throw new SoftException("Zip publisher could not get stream name.", ex);
 			}
 
 			try
