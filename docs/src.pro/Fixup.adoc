@@ -10,7 +10,6 @@ It is possible that after Peach has fuzzed a file, some non-data elements may ha
  
 IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 
-HashFixup is the base class used by the other hashing fixups.
 
 .Default Fixups
 [options="header",halign="center"] 
@@ -38,3 +37,5 @@ HashFixup is the base class used by the other hashing fixups.
 |xref:Fixups_TCPChecksumFixup[TCP Checksum] |Y|||
 |xref:Fixups_UDPChecksumFixup[UDP Checksum]|Y|||
 |=======================================================
+
+HashFixup is the base class used by the other hashing fixups.
