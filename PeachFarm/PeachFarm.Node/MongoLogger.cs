@@ -7,8 +7,8 @@ using PeachFarm.Common.Messages;
 
 namespace PeachFarm.Loggers
 {
-	[Peach.Core.Logger("PeachFarm", true)]
-	[Peach.Core.Logger("logger.PeachFarm")]
+//	[Peach.Core.Logger("PeachFarm", true)]
+//	[Peach.Core.Logger("logger.PeachFarm")]
 	[Peach.Core.Parameter("MongoDbConnectionString", typeof(string), "Connection string to Mongo database")]
 	[Peach.Core.Parameter("JobID", typeof(string), "")]
 	[Peach.Core.Parameter("NodeName", typeof(string), "")]
