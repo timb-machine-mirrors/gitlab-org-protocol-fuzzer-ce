@@ -1,11 +1,13 @@
 [[constraint]]
 == Constraint Attribute ==
 
-The constraint attribute specifies a scripting expression that helps Peach identify if the data element has been properly consumed for incoming data. The constraint expression must evaluate to true or false. True indicates that the incoming data was properly parsed into the data element. False indicates that an error has occurred. The constraint attribute does not affect how the value is mutated.
+The constraint attribute specifies a scripting expression that helps Peach identify if the data element has been properly consumed for incoming data. The constraint expression evaluates to true (the incoming data was properly parsed into the data element) or false (an error has occurred). 
+
+The constraint attribute does not affect how the value is mutated.
 
 NOTE: Constraints are only executed when parsing data into a data element.
 
-TIP: Constraints are typicaly slower than using xref:Choice[Choice] or the _token_ attribute
+TIP: Constraints are typically slower than using xref:Choice[Choice] or the _token_ attribute
 
 The following special variables are available to the expression:
 
