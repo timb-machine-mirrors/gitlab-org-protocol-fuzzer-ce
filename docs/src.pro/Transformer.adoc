@@ -10,7 +10,7 @@ Transformers are different than Fixups:
  * Transformers only operate on the parent element 
  * Fixups reference another element's data.
 
-==== Example
+=== Example
 
 [source,xml]
 ----
