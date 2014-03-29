@@ -1,7 +1,9 @@
 [[Iteration_fuzzing]]
 == Fuzzing Iteration
 
-Fuzzing iterations are the most common iteration type. The majority of iterations are usually fuzzing iterations. A fuzzing iteration will mutate the models to produce a fuzz test case that is sent to the target. During a fuzzing iteration it is expected that the target will behave in unexpected ways. As such it is expected that we might get errors from our I/O interface such as time outs, short writes or read. Additionally it is likely that we will not beable to fully execute our state models, or correctly crack the returned data. Because all of these error conditions are so likely to occur, and do not indicate an issue has occured, they are largely ignored. An expected error seen during a fuzzing iteration will at most cause Peach to skip to the next iteration.
+Fuzzing iterations are the most common iteration type. The majority of iterations are usually fuzzing iterations.
+
+ A fuzzing iteration will mutate the models to produce a fuzz test case that is sent to the target. During a fuzzing iteration it is expected that the target will behave in unexpected ways. As such it is expected that we might get errors from our I/O interface such as time outs, short writes or read. Additionally it is likely that we will not beable to fully execute our state models, or correctly crack the returned data. Because all of these error conditions are so likely to occur, and do not indicate an issue has occured, they are largely ignored. An expected error seen during a fuzzing iteration will at most cause Peach to skip to the next iteration.
 
 For targets that are long running, such as network services, it is recommended that xref:Iteration_control[control iterations] be configured to validate the target is still capable of correct operation.
 
