@@ -4,7 +4,7 @@
 // Reviewed:
 //  - 03/3/2014: Lynn: Added fixups and information about HashFixup
 
-// - -3/27/2014 Turned fixup links into a table
+// - -3/27/2014 Turned fixup links into a table and updated file names
 
 It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to “fix up” certain header and checksum fields that may have been fuzzed.  
  
@@ -26,7 +26,7 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|Y|||
 |xref:Fixups_LRCFixup[Lrc]|Y|||
 |xref:Fixups_MD5Fixup[Md5] ||Y||
-|xref:Fixups_Script[Script]|||Y|
+|xref:Fixups_ScriptFixup[Script]|||Y|
 |xref:Fixups_SequenceIncrementFixup[Sequence Increment]||||Y
 |xref:Fixups_SequenceRandomFixup[Sequence Random]||||Y
 |xref:Fixups_SHA1Fixup[Sha]||Y||

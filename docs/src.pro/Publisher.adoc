@@ -24,6 +24,9 @@
 // * Remote publishers
 // * List all action types we utilize
 
+// Updated:
+// 03/31/2014 Lynn: Renamed publisher xref files
+
 Publishers are the I/O interfaces used by Peach to send and receive data.
 Publishers support both stream and call based operations.
 
@@ -59,13 +62,12 @@ More information on creating a customer publisher can be found in the xref:Exten
 // * xref:Publishers_Null[Null]
  * xref:Publishers_RawEther[RawEther]
  * xref:Publishers_RawIPv4[RawIPv4]
- * xref:Publishers_RawIPv6[RawIPv6]
  * xref:Publishers_RawV4[RawV4]
  * xref:Publishers_Remote[Remote]
  * xref:Publishers_SerialPort[SerialPort] 
- * xref:Publishers_SslClient[SslClient] 
+ * xref:Publishers_Ssl[SslClient] 
  * xref:Publishers_SslListener[SslListener] 
- * xref:Publishers_TcpClient[TcpClient]
+ * xref:Publishers_Tcp[TcpClient]
  * xref:Publishers_TcpListener[TcpListener]
  * xref:Publishers_Udp[Udp]
  * xref:Publishers_WebService[WebService]
