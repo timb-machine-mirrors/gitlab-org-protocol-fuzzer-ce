@@ -229,8 +229,24 @@ For the Offset relations, expressionGet and expressionSet use the two variables,
 
 Expression gets and sets should be each other's mathematical inverse. The Get input and Set output should be the same. 
 
-expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
-expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
+In this example we will provide two python expressions that allow us to modify the offset when it is set or get. 
+
+[source,xml]
+----
+<DataModel name="TheDataModel">
+	<Number name="num" size="32">
+		<Relation type="offset" of="Offset0" expressionGet="offset / 2" expressionSet="offset * 2"/>
+	</Number>
+
+	<Blob/>
+
+	<String name="Target" value="CRAZY STRING!" />
+</DataModel>
+----
+
+expressionGet:: This value is used internally and will determine the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
+
+expressionSet:: Sets the value that will be produced.  In the preceeding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
 
 *Offset Relation with Placement*
 
