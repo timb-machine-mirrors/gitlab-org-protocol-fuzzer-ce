@@ -7,6 +7,7 @@ using Peach.Core.Dom;
 using NLog;
 using Ionic.Zip;
 using Peach.Core.IO;
+using System.Threading;
 
 namespace Peach.Enterprise.Publishers
 {
@@ -19,6 +20,8 @@ namespace Peach.Enterprise.Publishers
 
 		public string FileName { get; set; }
 
+		private static int maxOpenAttempts = 10;
+
 		private Stream fileStream;
 		private ZipFile zipFile;
 
@@ -29,19 +32,56 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnOpen()
 		{
-			fileStream = File.Open(FileName, FileMode.Create);
-			zipFile = new ZipFile();
+			int i = 0;
+
+			while (true)
+			{
+				try
+				{
+					fileStream = File.Open(FileName, FileMode.Create);
+					zipFile = new ZipFile();
+					return;
+				}
+				catch (Exception ex)
+				{
+					if (++i < maxOpenAttempts)
+					{
+						Thread.Sleep(200);
+					}
+					else
+					{
+						Logger.Error("Could not open file '{0}' after {1} attempts.  {2}", FileName, maxOpenAttempts, ex.Message);
+						throw new SoftException(ex);
+					}
+				}
+			}
 		}
 
 		protected override void OnClose()
 		{
-			zipFile.Save(fileStream);
+			try
+			{
+				if (zipFile != null)
+					zipFile.Save(fileStream);
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException("Zip publisher could not save file.", ex);
+			}
+			finally
+			{
+				if (zipFile != null)
+				{
+					zipFile.Dispose();
+					zipFile = null;
+				}
 
-			zipFile.Dispose();
-			zipFile = null;
-
-			fileStream.Dispose();
-			fileStream = null;
+				if (fileStream != null)
+				{
+					fileStream.Dispose();
+					fileStream = null;
+				}
+			}
 		}
 
 		public override void output(DataModel dataModel)
