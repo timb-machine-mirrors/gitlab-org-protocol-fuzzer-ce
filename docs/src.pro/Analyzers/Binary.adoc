@@ -97,7 +97,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Output in Peach Validator 
 
 .{nbsp}
-image::../src.pro/images/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
 
@@ -191,7 +191,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Output in Peach Validator 
 
 .{nbsp}
-image::../src.pro/images/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
 
@@ -263,6 +263,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Output in Peach Validator 
 
 .{nbsp}
-image::../src.pro/images/BinaryAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/BinaryAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
