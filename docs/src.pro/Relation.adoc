@@ -62,7 +62,8 @@ In this example we will provide two python expressions that allow us to modify t
 ----
 
 expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
-expressionSet:: Produces a value for the publisher.  In the following example +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
+
+expressionSet:: Produces a value for the publisher.  In the prior example, +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
 
 
 
@@ -110,7 +111,8 @@ In this example we will provide two python expressions that allow us to modify t
 ----
 
 expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
-expressionSet:: Sets the value that will be produced.  In the following example +count+ will be determined based on how many xref:String[String] elements are read in.
+
+expressionSet:: Sets the value that will be produced.  In the prior example, +count+ will be determined based on how many xref:String[String] elements are read in.
 
 
 
@@ -129,7 +131,7 @@ Offset relations allow modeling formats that require changing the offset and als
 
 If there are no Relative attributes, Offset is measured from the beginning of the data model. If there is a Relative attribute, Offset is measured from the specified element. 
 
-Here we have a series elements which are ASCII representations of numeric values of the offset sizes to various string elements below.
+Here we have a series of elements which are ASCII representations of numeric values of the offset sizes to various string elements below.
 
 [source,xml]
 ----
@@ -185,7 +187,7 @@ A relative offset is from the data element the relation is attached to.
 
 If there is data that represents the distance (in bytes) to somewhere in target element, use the relative offset when you model your data. Peach will automatically calculate the location so you know exact where it is. 
 
-In this example, when determining the offset of _StringData_ Peach will add/subtract the position of _OffsetToString_ to it's value as needed to determine the correct offset.
+In this example, when determining the offset of _StringData_, Peach will add/subtract the position of _OffsetToString_ to its value as needed to determine the correct offset.
 
 [source,xml]
 ----
@@ -246,13 +248,13 @@ In this example we will provide two python expressions that allow us to modify t
 
 expressionGet:: This value is used internally and will determine the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
 
-expressionSet:: Sets the value that will be produced.  In the preceeding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
+expressionSet:: Sets the value that will be produced.  In the preceding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
 
 *Offset Relation with Placement*
 
-In this model we will use a typical patter in which an array of offsets gives us the location of another element. We will use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
+In this model we will use a typical patter where an array of offsets gives us the location of another element. We will use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
 
-*NOTE:* Placement only works when parsing data into a DataModel.  Read xref:Placement[Placement] for more information.
+*NOTE:* Placement only works when parsing data into a DataModel.  See xref:Placement[Placement] for more information.
 
 [source,xml]
 ----
