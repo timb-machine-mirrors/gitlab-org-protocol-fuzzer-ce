@@ -1,5 +1,5 @@
 <<<
-[[Transformers_SHA256Transformer]]
+[[Transformers_Sha256Transformer]]
 == Sha256
 
 // Reviewed:

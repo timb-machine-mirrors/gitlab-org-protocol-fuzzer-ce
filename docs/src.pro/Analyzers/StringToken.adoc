@@ -111,7 +111,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Output in Peach Validator 
 
 .{nbsp}
-image::../src.pro/images/StringTokenAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/StringTokenAnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
 
@@ -180,6 +180,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 Output in Peach Validator 
 
 .{nbsp}
-image::../src.pro/images/StringTokenAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/StringTokenAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================

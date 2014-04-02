@@ -1,5 +1,5 @@
 [[Agent]]
-=== Agents
+== Agents
 
 Agents are processes that host Monitors locally or remotely.  Monitors collect information and perform actions on behalf of the fuzzer.
 
