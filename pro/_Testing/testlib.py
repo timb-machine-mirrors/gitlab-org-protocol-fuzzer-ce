@@ -8,6 +8,8 @@ import time
 from copy import copy
 from types import MethodType
 from subprocess import Popen, PIPE
+if "win" in sys.platform.lower():
+    from win32com.shell import shell
 
 IS_INTERACTIVE = sys.stdout.isatty()
 
