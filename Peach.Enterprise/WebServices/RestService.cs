@@ -98,6 +98,7 @@ namespace Peach.Enterprise.WebServices
 		public string repoUrl { get; set; }
 		public uint seed { get; set; }
 		public uint iteration { get; set; }
+		public string jobUrl { get; set; }
 	}
 
 	public class RestService : Nancy.NancyModule
@@ -135,6 +136,7 @@ namespace Peach.Enterprise.WebServices
 				repoUrl = "",
 				seed = engine.context.config.randomSeed,
 				iteration = engine.context.test.strategy.Iteration,
+				jobUrl = Request.Url.Path + "/" + Guid.Empty.ToString(),
 			};
 
 			return JsonConvert.SerializeObject(obj);
