@@ -1,17 +1,20 @@
 [[State_onComplete]]
+
+// - 03/28/2014 Lynn: Miscellaneous edits
+
 == State onComplete Attribute
 
-The _onComplete_ attribute is a scripting statement that is evaluated after preforming the actions in a xref:State[State].
+The _onComplete_ attribute is a python scripting statement that is evaluated prior to preforming the actions in a xref:State[State] model. 
 This statement can be used to increment a counter or preform other functions defined in separate files included with the xref:Import[Import] element.
 
-See also the _xref:State_onStart[onStart]_ attribute.
+TIP:  _xref:State_onStart[onStart]_ is the sibling attribute.
+
 
 .Keeping State
 ****
-Peach provides a mechanism for the user to store state during for the lifetime of the current iteration, or the fuzzing session.
-This is accomplished using one of two state bags exposed through the RunContext instance.
-The state bags are defined as _Dictionary<string, object>_ in C#.
-A full example of using the iteration state bag is provided in the examples section.
+State bags are defined as _Dictionary<string, object>_ in C#. If you use one of two state bags exposed through the RunContext instance, you can store state during the lifetime of the current iteration or the fuzzing session.
+
+A full example of using the iteration state bag is provided in the below examples.
 
 _Using the Session State:_
 

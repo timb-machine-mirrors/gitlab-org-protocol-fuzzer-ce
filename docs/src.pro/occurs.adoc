@@ -15,7 +15,9 @@
 // * link to discussion of arrays in book
 // * 
 
-A combination of xref:minOccurs[minOccurs] and xref:maxOccurs[maxOccurs]. This attribute creates exactly that number of the data element it is specified for. Internally Peach will treat this element as an array.
+// - 03/28/2014 Lynn: Miscellaneous edits
+
+Occurs is a combination of xref:minOccurs[minOccurs] and xref:maxOccurs[maxOccurs]. The Occurs attribute value is the exact number of  element occurrences for the specified data element. Internally Peach will treat this element as an array.
 
 === Examples
 

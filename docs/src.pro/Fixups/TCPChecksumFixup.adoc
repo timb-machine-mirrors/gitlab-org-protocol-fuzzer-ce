@@ -1,6 +1,6 @@
 <<<
 [[Fixups_TCPChecksumFixup]]
-== TCPChecksumFixup
+== TCPChecksum
 
 // Reviewed:
 //  - 02/18/2014: Seth & Adam: Outlined
@@ -13,9 +13,12 @@
 // - 02/18/2014: Mick
 // Added full examples
 
+// Updated:
+// - 03/26/2014 Lynn
+//Corrected the fixup name 
 
-The _TCPChecksumFixup_ will produce an internet checksum as defined in RFC 1071.
-A discussion on how to apply TCPChecksumFixup can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
+The _TCPChecksum_ will produce an internet checksum as defined in RFC 1071.
+A discussion on how to apply TCPChecksum can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
 This checksum is primarily used when fuzzing the TCPv4 and TCPv6 Protocols.
 
 === Parent Elements
@@ -33,7 +36,7 @@ dst:: Destination IP Address. IP address of the remote machine
 
 .Basic Usage Example
 ====================
-This example shows the basic usage of TCPChecksumFixup.
+This example shows the basic usage of TCPChecksum.
 
 [source,xml]
 ----
@@ -51,7 +54,7 @@ This example shows the basic usage of TCPChecksumFixup.
 			<Number name="ControlBits" size="12" endian="big" />
 			<Number name="WindowSize" size="16" endian="big" valueType="hex" value="aaaa"/>
 			<Number name="CheckSum" size="16" endian="big">
-				<Fixup class="TCPChecksumFixup">
+				<Fixup class="TCPChecksum">
 					<Param name="ref" value="Packet" />
 					<Param name="src" value="127.0.0.1" />
 					<Param name="dst" value="127.0.0.1" />

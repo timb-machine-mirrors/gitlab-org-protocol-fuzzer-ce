@@ -100,18 +100,26 @@ Since Pits may contain multiple Publishers within a Test, many Actions have a pa
 
 === Attributes
 
-xref:name[name]:: Name of the action [optional]
-xref:Action_Types[type]:: Action type [required], see list of action types
+_Required:_
+
+xref:name[name]:: Name of the action
+xref:Action_Types[type]:: Action type, see list of action types
+
+_Required Based on Type:_
+
+xref:xpath[valueXpath]:: Path to the source element defined using XPath notation when type is +slurp+.
+xref:xpath[setXpath]:: Path to the destination element defined using XPath notation when type is +slurp+.
+xref:ref[ref]:: Reference of state to change to when type is +changeState+.
+property:: Name of property to get/set in the publisher when type is +setProperty+ or +getProperty+.
+
+_Optional:_
+
 publisher:: Name of the publisher that this action should be called on or Peach.Agent
 xref:Action_when[when]:: Only preform action if the expression provided evaluates to true
 xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
 xref:Action_onStart[onStart]:: Expression to run on start of an action
-xref:xpath[valueXpath]:: Path to the source element defined using XPath notation [type=slurp]
-xref:xpath[setXpath]:: Path to the destination element defined using XPath notation [type=slurp]
-xref:ref[ref]:: Reference of state to change to [type=changeState]
-property:: Name of property to get/set in the publisher [type=setProperty or type=getProperty]
 
-=== Child-Elements
+=== Child Elements
 
 xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
 xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing

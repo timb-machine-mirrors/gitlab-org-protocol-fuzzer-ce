@@ -82,7 +82,8 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-image::../src.pro/images/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
+.{nbsp}
+image::{images}/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
 
 ==========================
 
@@ -148,7 +149,8 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-image::../src.pro/images/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
+.{nbsp}
+image::{images}/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
 
 ==========================
 
@@ -269,6 +271,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-image::../src.pro/images/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
+.{nbsp}
+image::{images}/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
 
 ==========================

@@ -16,7 +16,6 @@
 // * State model reference
 // * Use of multiple tests in a pit file
 
-
 The Test element is used to configure a specific fuzzing test that combines a StateModel with a Publisher and other configuration options such as including/excluding elements from being mutated, Agents, and fuzzing strategies.
 
 Multiple Test elements are supported, simply provide the name of the test element to use
@@ -63,18 +62,27 @@ not provided on the command line.
 
 === Attributes
 
- * xref:name[name] -- Name of the test, use "Default" for default test [required]
+_Required:_
+
+xref:name[name]:: Name of the test, use "Default" for default test 
+
+_Optional:_
+
 waitTime:: Time to wait in between each test case (Defaults to zero (0))
 faultWaitTime:: Time to wait for a fault to occur before starting next iteration (Defaults to 0)
 controlIteration:: How often should we perform control iterations.  (Defaults to 0)
 
-=== Child-Elements
+=== Child Elements
 
- * xref:AgentsMonitors[Agent] (optional)
- * xref:StateModel[StateModel] (required)
- * xref:Publisher[Publisher] (required)
- * xref:Test_Include[Include] (optional)
- * xref:Test_Exclude[Exclude] (optional)
- * xref:MutationStrategies[Strategy] (optional)
- * xref:Logger[Logger] (optional, recommended)
+_Required:_
 
+ * xref:StateModel[StateModel]
+ * xref:Publisher[Publisher]
+
+_Optional:_
+
+ * xref:AgentsMonitors[Agent]
+ * xref:Test_Include[Include]
+ * xref:Test_Exclude[Exclude]
+ * xref:MutationStrategies[Strategy]
+ * xref:Logger[Logger]

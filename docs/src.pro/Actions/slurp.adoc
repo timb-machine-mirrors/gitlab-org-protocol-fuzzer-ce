@@ -59,7 +59,7 @@ The following links provide additional information regarding XPaths.
 
  * http://www.w3schools.com/xpath/[XPath Tutorial]
  * http://www.w3schools.com/xpath/xpath_syntax.asp[XPath Syntax]
- * http://www.w3.org/TR/xpath/.[XPath Specification]
+ * http://www.w3.org/TR/xpath/[XPath Specification]
 
 ****
 
@@ -105,7 +105,7 @@ xref:Action_when[when]:: Only perform action if the expression provided evaluate
 xref:Action_onStart[onStart]:: Expression to run on start of an action.
 xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
 
-=== Child-Elements
+=== Child Elements
 
 No child-elements are supported by this element.
 

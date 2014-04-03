@@ -1,8 +1,11 @@
 [[minOccurs]]
 
+// 03/28/2014 Lynn
+// Sentence edits.
+
 == Minimum Occurrence Attribute
 
-The occurrence attributes are used to define how often an element can occur.  The _minOccurs_ attribute specifies the minimum number of times an element can occur.  The occurrence attributes _minOccurs_ and xref:maxOccurs[maxOccurs] can be combined to provide the occurrence range of an element.  Occurrence attributes are used when cracking and producing_mutating data. Internally Peach will treat this element as an array.
+The occurrence attributes are used to define how often an element can occur.  The _minOccurs_ attribute specifies the minimum number of times an element can occur.  The occurrence attributes _minOccurs_ and xref:maxOccurs[maxOccurs] can be combined to provide the occurrence range of an element.  Occurrence attributes are used when cracking, producing, and mutating data. Peach will treat this element as an array.
 
 Related attributes: xref:maxOccurs[maxOccurs], xref:occurs[occurs].
 

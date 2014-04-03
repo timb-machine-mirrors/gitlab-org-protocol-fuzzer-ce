@@ -1,5 +1,4 @@
 [[Analyzers_StringToken]]
-
 == String Token Analyzer
 
 The String Token Analyzer will create a tokenized tree from a string based on special characters and punctuation used.  For example the string "?key=value&key2=value" would create a tree like the following:
@@ -111,7 +110,8 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-image::../src.pro/images/StringTokenAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+.{nbsp}
+image::{images}/StringTokenAnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
 
@@ -179,6 +179,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-image::../src.pro/images/StringTokenAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
+.{nbsp}
+image::{images}/StringTokenAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================

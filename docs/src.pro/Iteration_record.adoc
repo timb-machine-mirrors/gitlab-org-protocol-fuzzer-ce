@@ -1,10 +1,21 @@
 [[Iteration_record]]
+
+// 03/28/2014 - Lynn: Major edits
+
 == Record Iteration
 
-Record iterations occur when a new data set is loaded for use. As such it is always performed as the first iteration of the fuzzering session. During a record iteration, no mutations are made. The expectation is the state model should execute fully with no errors. During the execution of the state model the flow of states and actions are recorded. During a record iteration we will also identify the data models and data elements likely to be fuzzed during our fuzzing session and be capable on the next iteration of estimating the total iteration count required for a deterministic fuzzing run. If xref:Iteration_control[control iterations] have been configured, the control iterations will verify the fuzzer was able to execute the same set of actions to determine if the target is still operational.
+The record iteration is used to validate a Peach pit is operating correctly. During a record iteration, no mutations are made so we expect the state model will execute with no errors.
 
-When running Peach with a range of just one test, you will actually see two iterations performed. A record iteration along with a single fuzzing iteration.
+Every time Peach starts, it performs a record iteration to record and evaluate the information it receives for this fuzzing session. The following information is recorded for use during later iterations:
 
-The initial record iteration is often used to validate a Peach pit is operating correctly.
+* Applicable data models and data elements, to estimate the total iteration count required for xref:Iteration_fuzzing[fuzzing iterations]
+* Which mutators can act on which data elements  
+* Choices and arrays
+* Data flows, to compare with the xref:Iteration_control[control iterations]
+* States and actions flows
+
+If xref:Iteration_control[control iterations] have been configured, the control iterations will verify the fuzzer was able to execute the same set of actions as in the record iteration to determine if the target is still operational.
+
+When running Peach with one test, you will actually see two iterations performed--a record iteration along with a single fuzzing iteration.
 
 See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].

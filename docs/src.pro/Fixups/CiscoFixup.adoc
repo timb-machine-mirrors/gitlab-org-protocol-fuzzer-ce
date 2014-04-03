@@ -15,7 +15,7 @@
 // Added parent types
 // Added full example
 
-The _CiscoCdpChecksum_ is a Custom Peach algorithm to fix  Cisco's one-off error in their CRC implementation (known feature).
+_CiscoCdpChecksum_ is a Custom Peach algorithm to fix  Cisco's one-off error in their CRC implementation (known feature).
 It is defined in RFC1071.
 It can be found in the Open source CRCTool Library.
 This is used when fuzzing protocols that perform the Cisco implementation of CRC.

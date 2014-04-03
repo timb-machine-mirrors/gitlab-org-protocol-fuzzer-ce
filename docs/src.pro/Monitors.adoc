@@ -1,102 +1,95 @@
 [[Monitors]]
-== Monitors ==
+== Monitors
+
+//Updated:
+//  - 03/04/2014: Lynn: Added Monitor table.
+
+// - 03/27/2014 Monitor names in table now link to the monitor documentation
 
 xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
  
+.Monitors and Operating Systems 
+[options="header",halign="center"] 
 |==========================================================
-|Monitor|Enterprise|Linux|OSX|Windows
-|Android|X|||
-|Android Emulator|X|||
-|CanaKitRelay|X|||
-|CleanupFolder|X|||
-|CleanupRegistry||||X
-|CrashReporter|||X|
-|CrashWrangler|||X|
-|IpPower9258|X|||
-|LinuxCrash||X||
-|LinuxDebugger||X||
-|Memory|X|||
-|PageHeap||||X
-|PcapMonitor|X|||
-|PingMontor|X|||
-|PopupWatcher||||X
-|Process|X|||
-|ProcessKiller|X|||
-|RunCommand|X|||
-|SaveFile|X|||
-|Socket|X|||
-|SSH|X|||
-|SshDownloader|X|||
-|VmwareMonitor|X|||
-|WindowsDebugger||||X
-|WindowsService||||X
+|Monitor    |Enterprise|Linux|OSX|Windows
+|xref:Monitors_Android[Android Monitor]|X|||
+|xref:Monitors_AndroidEmulator[Android Emulator Monitor]|X|||
+|xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]|X|||
+|xref:Monitors_CleanupFolder[Cleanup Folder Monitor]|X|||
+|xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]||||X
+|xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]|||X|
+|xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]|||X|
+|xref:Monitors_IpPower9258[IpPower9258 Monitor]|X|||
+|xref:Monitors_LinuxCrash[Linux Crash Monitor]||X||
+|xref:Monitors_LinuxDebugger[Linux Debugger Monitor]||X||
+|xref:Monitors_MemoryMonitor[Memory Monitor]|X|||
+|xref:Monitors_PageHeap[Page Heap Monitor]||||X
+|xref:Monitors_Pcap[Pcap Network Monitor]|X|||
+|xref:Monitors_Ping[Ping Monitor]|X|||
+|xref:Monitors_PopupWatcher[Popup Watcher Monitor]||||X
+|xref:Monitors_Process[Process Launcher Monitor]|X|||
+|xref:Monitors_ProcessKiller[Process Killer Monitor]|X|||
+|xref:Monitors_RunCommand[Run Command Monitor]|X|||
+|xref:Monitors_SaveFile[Save File Monitor]|X|||
+|xref:Monitors_Socket[Socket Listener Monitor]|X|||
+|xref:Monitors_Ssh[SSH Monitor]|X|||
+|xref:Monitors_SshDownloader[SSH Downloader Monitor]|X|||
+|xref:Monitors_Vmware[Vmware Control Monitor]|X|||
+|xref:Monitors_WindowsDebugger[Windows Debugger Monitor]||||X
+|xref:Monitors_WindowsService[Windows Service Monitor]||||X
 |==========================================================
 
-=== Monitor Families ===
-
-==== Windows Monitors ====
-
-xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]
-xref:Monitors_PageHeap[Page Heap Monitor]
-xref:Monitors_PopupWatcher[Popup Watcher Monitor]
-xref:Monitors_WindowsDebugger[Windows Debugger Monitor]
-xref:Monitors_WindowsService[Windows Service Monitor]
-
-==== OS X Monitors ====
- 
-xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]
-xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]
-
-==== Linux Monitors ====
-
-xref:Monitors_LinuxCrash[Linux Crash Monitor]
-xref:Monitors_LinuxDebugger[Linux Debugger Monitor]
- 
-==== Cross Platform Monitors ====
-
-xref:Monitors_Android[Android Monitor]
-xref:Monitors_AndroidEmulator[Android Emulator Monitor]
-xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]
-xref:Monitors_CleanupFolder[Cleanup Folder Monitor]
-xref:Monitors_IpPower9258[IpPower9258 Monitor]
-xref:Monitors_MemoryMonitor[Memory Monitor]
-xref:Monitors_Pcap[Pcap Network Monitor]
-xref:Monitors_Ping[Ping Monitor]
-xref:Monitors_Process[Process Launcher Monitor]
-xref:Monitors_ProcessKiller[Process Killer Monitor]
-xref:Monitors_RunCommand[Run Command Monitor] 
-xref:Monitors_SaveFile[Save File Monitor]
-xref:Monitors_Socket[Socket Listener Monitor]
-xref:Monitors_Ssh[SSH Monitor]
-xref:Monitors_SshDownloader[SSH Downloader Monitor]
-xref:Monitors_Vmware[Vmware Control Monitor]
 
 :leveloffset: 2
 
-include::Monitors/Android.adoc[Android]
+include::Monitors/Android.adoc[]
+
 include::Monitors/AndroidEmulator.adoc[]
+
 include::Monitors/CanaKitRelay.adoc[]
+
 include::Monitors/CleanupFolder.adoc[]
+
 include::Monitors/CleanupRegistry.adoc[]
+
 include::Monitors/CrashReporter.adoc[]
+
 include::Monitors/CrashWrangler.adoc[]
+
 include::Monitors/IpPower9258.adoc[]
+
 include::Monitors/LinuxCrash.adoc[]
+
 include::Monitors/LinuxDebugger.adoc[]
+
 include::Monitors/MemoryMonitor.adoc[]
+
 include::Monitors/PageHeap.adoc[]
+
 include::Monitors/Pcap.adoc[]
+
 include::Monitors/Ping.adoc[]
+
 include::Monitors/PopupWatcher.adoc[]
+
 include::Monitors/Process.adoc[]
+
 include::Monitors/ProcessKiller.adoc[]
+
 include::Monitors/RunCommand.adoc[]
+
 include::Monitors/SaveFile.adoc[]
+
 include::Monitors/Socket.adoc[]
+
 include::Monitors/Ssh.adoc[]
+
 include::Monitors/SshDownloader.adoc[]
+
 include::Monitors/Vmware.adoc[]
+
 include::Monitors/WindowsDebugger.adoc[]
+
 include::Monitors/WindowsService.adoc[]
 
 :leveloffset: 0

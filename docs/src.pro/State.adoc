@@ -61,7 +61,7 @@ _Optional:_
 xref:State_onStart[onStart]:: Scripting statement run prior to any actions
 xref:State_onComplete[onComplete]:: Scripting statement run after explicit actions
 
-=== Child-Elements
+=== Child Elements
 
 xref:Action[Action]:: One ore more Actions are required.
 
