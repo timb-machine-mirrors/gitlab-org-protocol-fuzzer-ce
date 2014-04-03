@@ -27,6 +27,8 @@ namespace Peach.Enterprise.WebServices
 		{
 			Get["/jobs"] = _ => GetJobs();
 			Get["/jobs/{id}"] = _ => GetJob(_.id);
+			Get["/jobs/{id}/visualizer"] = _ => GetVisualizerData(_.id);
+			Get["/jobs/{id}/visualizer/view"] = _ => View["visualizer/index.html"];
 
 			Get["/peaches"] = _ => { return null; };
 
@@ -55,6 +57,34 @@ namespace Peach.Enterprise.WebServices
 			_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
 			_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
 			return new Job(_context);
+		}
+
+		object GetVisualizerData(string id)
+		{
+			_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
+			_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
+
+			foreach (var logger in _context.Engine.context.test.loggers)
+			{
+				var v = logger as Peach.Enterprise.Loggers.VisualizerLogger;
+				if (v != null)
+				{
+					var response = (Nancy.Response)v.json;
+
+					response.ContentType = "application/json";
+
+					return response;
+					/*
+					var Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length);
+					return new
+					{
+						ContentType = "application/json",
+						Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length)
+					};*/
+				}
+			}
+
+			return null;
 		}
 
 		object GetNodes()
@@ -115,7 +145,6 @@ namespace Peach.Enterprise.WebServices
 			}
 
 			return null;
-
 		}
 
 		public static void Initialize(Engine engine)

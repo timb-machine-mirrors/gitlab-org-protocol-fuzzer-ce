@@ -11,6 +11,7 @@ using Nancy.TinyIoc;
 using Nancy.Bootstrapper;
 using Nancy.Hosting.Self;
 using Nancy.Diagnostics;
+using Nancy.Conventions;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -73,6 +74,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			_host.Stop();
 		}
+
 	}
 
 	public class PeachBootstrapper : DefaultNancyBootstrapper
@@ -85,6 +87,14 @@ namespace Peach.Enterprise.WebServices
 			_engine = engine;
 			_service = new RestService();
 			RestService.Initialize(_engine);
+		}
+
+		protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
+		{
+			this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
+			{
+				return string.Concat("web/", viewName);
+			});
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
@@ -110,6 +120,20 @@ namespace Peach.Enterprise.WebServices
 
 			//container.Register<ISearchRepository, SearchRepository>();
 			//container.Register<IResponseFactory, ResponseFactory>();
+		}
+
+		/*
+		protected override void ConfigureConventions(NancyConventions nancyConventions)
+		{
+			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("web", @"web"));
+			base.ConfigureConventions(nancyConventions);
+		}*/
+
+		protected override void ConfigureConventions(NancyConventions nancyConventions)
+		{
+			//hacky only supports jobs/1/...
+			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1/visualizer", "/web/visualizer"));
+			base.ConfigureConventions(nancyConventions);
 		}
 	}
 
