@@ -94,9 +94,9 @@ namespace Peach.Enterprise.WebServices
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
 		{
-			base.ConfigureApplicationContainer(container);
-
 			container.Register<Peach.Core.Engine>(this.engine);
+			container.Register<Nancy.Serialization.JsonNet.JsonNetSerializer>();
+			container.Register<RestService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
