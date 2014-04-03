@@ -30,7 +30,7 @@ A PIT is NOT valid unless...
 Peach.exe -t pit_file.xml 
 ----
 
-If a stack trace prints, record the stack trace where improper error handling occurs.
+If a stack trace prints, record the stack trace where the improper error handling occurred.
 The pit doesn't run properly.
 During the testing and building phase run the first iteration only. 
 

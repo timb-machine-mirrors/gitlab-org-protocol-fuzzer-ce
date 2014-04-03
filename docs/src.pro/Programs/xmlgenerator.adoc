@@ -1,7 +1,11 @@
 [[Program_PeachXmlGenerator]]
 == Peach XML Generator
 
-The Peach XML Generator will generate sample files to use during fuzzing based on the DTD schema. This program only works with DTD schemas at this time. The produced files can then be used with Peach to fuzz a target.
+The Peach XML Generator will generate sample files to use during fuzzing based on the DTD schema. 
+
+TIP: This program only works with DTD schemas. 
+
+The produced files can then be used with Peach to fuzz a target.
 
 === Syntax
 

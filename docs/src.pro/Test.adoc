@@ -18,11 +18,9 @@
 
 The Test element is used to configure a specific fuzzing test that combines a StateModel with a Publisher and other configuration options such as including/excluding elements from being mutated, Agents, and fuzzing strategies.
 
-Multiple Test elements are supported, simply provide the name of the test element to use
-on the Peach command line.
+Multiple Test elements are supported: simply provide the name of the test element to use on the Peach command line.
 
-NOTE: When running Peach, the Test element named "Default" will be run if a test name is
-not provided on the command line.
+NOTE: When running Peach, the Test element named "Default" will be run if a test name is not provided on the command line.
 
 === Syntax
 
