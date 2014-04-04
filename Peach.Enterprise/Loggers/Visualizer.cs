@@ -57,7 +57,6 @@ namespace Peach.Enterprise.Loggers
 			//base.Action_Finished(action);
 
 			// TODO - Handle parameters
-			var name = action.dataModel.name;
 			foreach (var data in action.allData)
 			{
 				dataModelsFromActions.Add(new Tuple<string, DataModel>(data.dataModel.name, data.dataModel));
@@ -133,58 +132,18 @@ namespace Peach.Enterprise.Loggers
 			{
 				writer.WriteStartObject();
 
-				if (item is Peach.Core.Dom.Array)
+				var cont = item as DataElementContainer;
+				if (cont != null)
 				{
-					DataModelToJson(item.name, (DataElementContainer)item, writer);
+					DataModelToJson(item.name, cont, writer);
 				}
-
-				if (item is Peach.Core.Dom.Block)
-				{
-					DataModelToJson(item.name, (DataElementContainer)item, writer);
-				}
-
-				if (item is Peach.Core.Dom.Flag)
-				{
-					DataModelToJson(item.name, (DataElementContainer)item, writer);
-				}
-
-				if (item is Peach.Core.Dom.Choice)
-				{
-					DataModelToJson(item.name, (DataElementContainer)item, writer);
-				}
-
-				if (item is Peach.Core.Dom.String)
+				else
 				{
 					writer.WritePropertyName("name");
 					writer.WriteValue(item.name);
 					writer.WritePropertyName("type");
-					writer.WriteValue("String");
-
-				}
-
-				if (item is Number)
-				{
-					writer.WritePropertyName("name");
-					writer.WriteValue(item.name);
-					writer.WritePropertyName("type");
-					writer.WriteValue("Number");
-
-				}
-
-				if (item is Blob)
-				{
-					writer.WritePropertyName("name");
-					writer.WriteValue(item.name);
-					writer.WritePropertyName("type");
-					writer.WriteValue("Number");
-				}
-
-				if (item is XmlElement)
-				{
-					writer.WritePropertyName("name");
-					writer.WriteValue(item.name);
-					writer.WritePropertyName("type");
-					writer.WriteValue("XmlElement");
+					writer.WriteValue(item.elementType);
+					
 				}
 
 				writer.WriteEndObject();
