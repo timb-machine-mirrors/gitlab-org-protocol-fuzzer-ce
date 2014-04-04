@@ -2,7 +2,7 @@
 == Minset
 
 Peach Minset is used to locate the minimum set of sample data with the best code coverage metrics to use while fuzzing.
-This process can be distributed out across multiple machines to decrease the run time.
+This process can be distributed across multiple machines to decrease the run time.
 
 There are two steps to the process:
 

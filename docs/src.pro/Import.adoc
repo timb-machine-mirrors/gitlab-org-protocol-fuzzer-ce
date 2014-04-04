@@ -2,7 +2,7 @@
 [[Import]]
 == Import
 
-This element allows importing custom Python modules for use in Pit file. _Import_ works like the Python import keyword.
+The Import element allows you to import custom Python modules to use in your Pit file. _Import_ works like the Python import keyword.
 
 === Syntax
 
