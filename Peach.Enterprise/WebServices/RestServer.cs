@@ -22,6 +22,16 @@ namespace Peach.Enterprise.WebServices
 
 		public RestServer(Peach.Core.Engine engine)
 		{
+			// Lets store faults here.
+			// TODO: This needs to be moved someplace better later.
+			engine.context.stateStore["Peach.Faults"] = new List<Peach.Core.Fault>();
+			engine.context.stateStore["Peach.StartTime"] = DateTime.Now;
+			engine.context.stateStore["Peach.Rest.Faults"] = new List<Peach.Enterprise.WebServices.Fault>();
+
+			// Collect fault information
+			// TODO: This should happen someplace else I think :)
+			RestService.Initialize(engine);
+
 			host = new NancyHost(
 				new PeachBootstrapper(engine),
 				new HostConfiguration()
@@ -125,6 +135,11 @@ namespace Peach.Enterprise.WebServices
 		{
 			//hacky only supports jobs/1/...
 			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1/visualizer", "/web/visualizer"));
+			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1", "/web/visualizer"));
+
+			nancyConventions.StaticContentsConventions.Add(
+				StaticContentConventionBuilder.AddDirectory("/", @"web"));
+
 			base.ConfigureConventions(nancyConventions);
 		}
 	}

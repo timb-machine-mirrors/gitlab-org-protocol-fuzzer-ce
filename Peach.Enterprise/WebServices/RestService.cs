@@ -12,95 +12,6 @@ using Newtonsoft.Json;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class Job
-	{
-		//RestContext _context;
-		//uint _currentIteration = 0;
-
-		//public Job(RestContext context)
-		//{
-		//	_context = context;
-		//	_context.Engine.IterationStarting += engine_IterationStarting;
-		//}
-
-		//~Job()
-		//{
-		//	if (_context != null && _context.Engine != null)
-		//		_context.Engine.IterationStarting -= engine_IterationStarting;
-		//}
-
-		//void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
-		//{
-		//	_currentIteration = currentIteration;
-		//}
-
-		//public string jobUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/jobs/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string faultsUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/faults").ToString();
-		//	}
-		//}
-		//public string targetUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/target/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string targetConfigUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/target/" + Guid.Empty.ToString() + "/configs/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string nodesUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/nodes").ToString();
-		//	}
-		//}
-		//public string pitUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/pits/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string peachUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/peaches/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string reportUrl { get { return null; } }
-		//public string packageFileUrl { get { return null; } }
-
-		//public string name { get { return "Default Peach Job"; } }
-		//public string notes { get { return ""; } }
-		//public string user { get { return "peach"; } }
-		//public uint seed { get { return _context.Engine.context.config.randomSeed; } }
-		//public uint iterationCount { get { return _currentIteration; } }
-		//public DateTime startDate { get { return DateTime.Now; } }
-		//public DateTime stopData { get { return DateTime.Now; } }
-		//public string[] tags { get { return new string[0]; } }
-		//public Group[] groups { get { return new Group[0]; } }
-		public string repoUrl { get; set; }
-		public uint seed { get; set; }
-		public uint iteration { get; set; }
-		public string jobUrl { get; set; }
-	}
-
 	public class RestService : Nancy.NancyModule
 	{
 		Engine engine;
@@ -115,34 +26,21 @@ namespace Peach.Enterprise.WebServices
 			Get["/jobs/{id}/visualizer"] = _ => GetVisualizerData(_.id);
 			Get["/jobs/{id}/visualizer/view"] = _ => View["visualizer/index.html"];
 
-			//Get["/jobs/{id}"] = _ => GetJob(_.id);
+			Get["/jobs/{id}"] = _ => GetJob(_.id);
 
-			//Get["/peaches"] = _ => { return null; };
+			Get["/peaches"] = _ => { return null; };
 
-			//Get["/nodes"] = _ => GetNodes();
-			//Get["/nodes/{id}"] = _ => GetNode(_.id);
+			Get["/nodes"] = _ => GetNodes();
+			Get["/nodes/{id}"] = _ => GetNode(_.id);
 
-			//Get["/pits"] = _ => GetPits();
-			//Get["/pits/{id}"] = _ => GetPit(_.id);
+			Get["/pits"] = _ => GetPits();
+			Get["/pits/{id}"] = _ => GetPit(_.id);
 
-			//Get["/libraries"] = _ => GetLibraries();
-			//Get["/libraries/{id}"] = _ => GetLibrary(_.id);
+			Get["/libraries"] = _ => GetLibraries();
+			Get["/libraries/{id}"] = _ => GetLibrary(_.id);
 
-			//Get["/faults"] = _ => GetFaults();
-			//Get["/faults/{id}"] = _ => GetFault(_.id);
-		}
-
-		object GetJobs()
-		{
-			var obj = new Job()
-			{
-				repoUrl = "",
-				seed = engine.context.config.randomSeed,
-				iteration = engine.context.test.strategy.Iteration,
-				jobUrl = Request.Url.Path + "/" + Guid.Empty.ToString(),
-			};
-
-			return JsonConvert.SerializeObject(obj);
+			Get["/faults"] = _ => GetFaults();
+			Get["/faults/{id}"] = _ => GetFault(_.id);
 		}
 
 		object GetVisualizerData(string id)
@@ -163,448 +61,454 @@ namespace Peach.Enterprise.WebServices
 			return null;
 		}
 
-		//object GetJobs()
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Job[] { new Job(_context) }; 
-		//}
+		object GetJobs()
+		{
+			return new Job[] { new Job(new Uri(Request.Url), engine) };
+		}
 
-		//object GetJob(string id)
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Job(_context);
-		//}
+		object GetJob(string id)
+		{
+
+			
+			var job = new Job(new Uri(Request.Url), engine);
+
+			try
+			{
+				var a0 = job.name;
+				var a1 = job.startDate;
+				var a2 = job.stopDate;
+				var a3 = job.runtime;
+				var a4 = job.speed;
+				var a5 = job.totalFaults;
+
+				return job;
+			}
+			catch (Exception e)
+			{
+				return e;
+			}
+		}
 
 
-		//object GetNodes()
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Node[] { new Node(_context) };
-		//}
-		//object GetNode(string id)
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Node(_context);
-		//}
+		object GetNodes()
+		{
+			return new Node[] { new Node(new Uri(Request.Url), engine) };
+		}
+		object GetNode(string id)
+		{
+			return new Node(new Uri(Request.Url), engine);
+		}
 
-		//object GetPits()
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Pit[] { new Pit(_context) };
-		//}
-		//object GetPit(string id)
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Pit(_context);
-		//}
+		object GetPits()
+		{
+			return new Pit[] { new Pit(new Uri(Request.Url), engine) };
+		}
+		object GetPit(string id)
+		{
+			return new Pit(new Uri(Request.Url), engine);
+		}
 
-		//object GetLibraries()
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Library[] { new Library(_context) };
-		//}
-		//object GetLibrary(string id)
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return new Library(_context);
-		//}
+		object GetLibraries()
+		{
+			return new Library[] { new Library(new Uri(Request.Url), engine) };
+		}
+		object GetLibrary(string id)
+		{
+			return new Library(new Uri(Request.Url), engine);
+		}
 
-		//object GetFaults()
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	return _context.Faults.ToArray();
-		//}
-		//object GetFault(string sid)
-		//{
-		//	_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
-		//	_context.BaseUrl = new Uri(_context.BaseUrl.AbsoluteUri.Substring(0, _context.BaseUrl.AbsoluteUri.Length - _context.BaseUrl.AbsolutePath.Length));
-		//	Guid id = Guid.Parse(sid);
+		object GetFaults()
+		{
+			var faults = (List<Fault>)engine.context.stateStore["Peach.Rest.Faults"];
+			return faults.ToArray();
+		}
+		object GetFault(string sid)
+		{
+			Guid id = Guid.Parse(sid);
 
-		//	foreach (Fault fault in _context.Faults)
-		//	{
-		//		if (fault.id == id)
-		//			return fault;
-		//	}
+			foreach (Fault fault in (List<Fault>)engine.context.stateStore["Peach.Rest.Faults"])
+			{
+				if (fault.id == id)
+					return fault;
+			}
 
-		//	return null;
-		//}
+			return null;
+		}
 
-		//public static void Initialize(Engine engine)
-		//{
-		//	_context.Engine = engine;
-		//	engine.Fault += engine_Fault;
-		//	engine.ReproFault += engine_ReproFault;
-		//	engine.ReproFailed += engine_ReproFailed;
-		//}
+		public static void Initialize(Engine engine)
+		{
+			engine.Fault += engine_Fault;
+			engine.ReproFault += engine_ReproFault;
+			engine.ReproFailed += engine_ReproFailed;
+		}
 
-		//static void engine_ReproFailed(RunContext context, uint currentIteration)
-		//{
-		//	_context.Faults.Last().reproducable = false;
-		//}
+		static void engine_ReproFailed(RunContext context, uint currentIteration)
+		{
+			((List<Fault>)context.stateStore["Peach.Rest.Faults"]).Last().reproducable = false;
+		}
 
-		//static void engine_ReproFault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Core.Fault[] faultData)
-		//{
-		//	Fault current = null;
+		static void engine_ReproFault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Core.Fault[] faultData)
+		{
+			Fault current = null;
 
-		//	foreach (var fault in faultData)
-		//	{
-		//		if (fault.type == FaultType.Fault)
-		//		{
-		//			current = new Fault(_context, fault);
-		//			current.reproducable = false;
+			foreach (var fault in faultData)
+			{
+				if (fault.type == FaultType.Fault)
+				{
+					current = new Fault(context.engine, fault);
+					current.reproducable = false;
 
-		//			_context.Faults.Add(current);
+					((List<Fault>)context.stateStore["Peach.Rest.Faults"]).Add(current);
+					((List<Core.Fault>)context.stateStore["Peach.Faults"]).Add(fault);
 
-		//			break;
-		//		}
-		//	}
+					break;
+				}
+			}
 
-		//	List<Fault.File> files = new List<Fault.File>();
+			List<Fault.File> files = new List<Fault.File>();
 
-		//	foreach (var fault in faultData)
-		//	{
-		//		if (fault.type != FaultType.Fault)
-		//		{
-		//			var file = new Fault.File(_context);
-		//			file.name = System.IO.Path.Combine(fault.folderName, fault.monitorName);
-		//			files.Add(file);
-		//		}
-		//	}
+			foreach (var fault in faultData)
+			{
+				if (fault.type != FaultType.Fault)
+				{
+					var file = new Fault.File();
+					file.name = System.IO.Path.Combine(fault.folderName, fault.monitorName);
+					files.Add(file);
+				}
+			}
 
-		//	current.files = files.ToArray();
-		//}
+			//current.files = files.ToArray();
+		}
 
-		//static void engine_Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Core.Fault[] faultData)
-		//{
-		//	Fault current = null;
-		//	var last = _context.Faults.Last();
+		static void engine_Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Core.Fault[] faultData)
+		{
+			var faults = ((List<Fault>)context.stateStore["Peach.Rest.Faults"]);
+			var coreFaults = ((List<Core.Fault>)context.stateStore["Peach.Faults"]);
 
-		//	foreach (var fault in faultData)
-		//	{
-		//		if (fault.type == FaultType.Fault)
-		//		{
-		//			current = new Fault(_context, fault);
-		//			current.id = last.id;
-		//			current.reproducable = true;
+			Fault current = null;
+			var last = faults.Last();
 
-		//			_context.Faults[_context.Faults.IndexOf(last)] = current;
+			foreach (var fault in faultData)
+			{
+				if (fault.type == FaultType.Fault)
+				{
+					current = new Fault(context.engine, fault);
+					current.id = last.id;
+					current.reproducable = true;
 
-		//			break;
-		//		}
-		//	}
+					faults[faults.IndexOf(last)] = current;
+					coreFaults[coreFaults.IndexOf(coreFaults.Last())] = fault;
 
-		//	List<Fault.File> files = new List<Fault.File>();
+					break;
+				}
+			}
 
-		//	foreach (var fault in faultData)
-		//	{
-		//		if (fault.type != FaultType.Fault)
-		//		{
-		//			var file = new Fault.File(_context);
-		//			file.name = System.IO.Path.Combine(fault.folderName, fault.monitorName);
-		//			files.Add(file);
-		//		}
-		//	}
+			List<Fault.File> files = new List<Fault.File>();
 
-		//	current.files = files.ToArray();
-		//}
+			foreach (var fault in faultData)
+			{
+				if (fault.type != FaultType.Fault)
+				{
+					var file = new Fault.File();
+					file.name = System.IO.Path.Combine(fault.folderName, fault.monitorName);
+					files.Add(file);
+				}
+			}
+
+			//current.files = files.ToArray();
+		}
 	}
 
-	//public class Node
-	//{
-	//	RestContext _context;
+	public class Node
+	{
+		Uri _baseUrl;
+		Engine _engine;
 
-	//	public Node(RestContext context)
-	//	{
-	//		_context = context;
-	//		mac = "00:00:00:00:00:00";
-	//		ip = "127.0.0.1";
-	//		tags = new string[0];
-	//		status = "alive";
-	//		version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-	//		timestamp = DateTime.Now.ToShortTimeString();
-	//		job = new Job(context);
-	//	}
+		public Node(Uri url, Engine engine)
+		{
+			_baseUrl = url;
+			_engine = engine;
 
-	//	public string nodeUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(
-	//				_context.BaseUrl,
-	//				"/p/peaches/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string mac { get; set; }
-	//	public string ip { get; set; }
-	//	public string[] tags { get; set; }
-	//	public string status { get; set; }
-	//	public string version { get; set; }
-	//	public string timestamp { get; set; }
-	//	public Job job { get; set; }
-	//}
+			mac = "00:00:00:00:00:00";
+			ip = "127.0.0.1";
+			tags = new string[0];
+			status = "alive";
+			version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			timestamp = DateTime.Now.ToShortTimeString();
 
-	//public class Job
-	//{
-	//	RestContext _context;
-	//	uint _currentIteration = 0;
+			job = new Job(_baseUrl, _engine);
+		}
 
-	//	public Job(RestContext context)
-	//	{
-	//		_context = context;
-	//		_context.Engine.IterationStarting += engine_IterationStarting;
-	//	}
+		public string nodeUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/peaches/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string mac { get; set; }
+		public string ip { get; set; }
+		public string[] tags { get; set; }
+		public string status { get; set; }
+		public string version { get; set; }
+		public string timestamp { get; set; }
+		public Job job { get; set; }
+	}
 
-	//	~Job()
-	//	{
-	//		if(_context != null && _context.Engine != null)
-	//			_context.Engine.IterationStarting -= engine_IterationStarting;
-	//	}
+	public class Job
+	{
+		Uri _baseUrl;
+		Engine _engine;
 
-	//	void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
-	//	{
-	//		_currentIteration = currentIteration;
-	//	}
+		public Job(Uri baseUrl, Engine engine)
+		{
+			_engine = engine;
+			_baseUrl = baseUrl;
+		}
 
-	//	public string jobUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/jobs/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string faultsUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/faults").ToString();
-	//		}
-	//	}
-	//	public string targetUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/target/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string targetConfigUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/target/" + Guid.Empty.ToString() + "/configs/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string nodesUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/nodes").ToString();
-	//		}
-	//	}
-	//	public string pitUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/pits/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string peachUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/peaches/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string reportUrl { get { return null; } }
-	//	public string packageFileUrl { get { return null; } }
+		public string jobUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/jobs/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string faultsUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/faults").ToString();
+			}
+		}
+		public string targetUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/target/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string targetConfigUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/target/" + Guid.Empty.ToString() + "/configs/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string nodesUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/nodes").ToString();
+			}
+		}
+		public string pitUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/pits/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string peachUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/peaches/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string reportUrl { get { return null; } }
+		public string packageFileUrl { get { return null; } }
 
-	//	public string name { get { return "Default Peach Job"; } }
-	//	public string notes { get { return ""; } }
-	//	public string user { get { return "peach"; } }
-	//	public uint seed { get { return _context.Engine.context.config.randomSeed; } }
-	//	public uint iterationCount { get { return _currentIteration; } }
-	//	public DateTime startDate { get { return DateTime.Now; } }
-	//	public DateTime stopData { get { return DateTime.Now; } }
-	//	public string[] tags { get { return new string[0]; } }
-	//	public Group[] groups { get { return new Group[0]; } }
-	//}
+		public string name { get { return _engine.context.test.name; } }
+		public string notes { get { return ""; } }
+		public string user { get { return "peach"; } }
+		public uint seed { get { return _engine.context.config.randomSeed; } }
+		public uint iterationCount { get { return _engine.context.currentIteration; } }
+		public string startDate { get { return ((DateTime)_engine.context.stateStore["Peach.StartTime"]).ToShortDateString(); } }
+		public string stopDate { get { return ""; } }
+		public string runtime { get { return (DateTime.Now - ((DateTime)_engine.context.stateStore["Peach.StartTime"])).ToString(@"hh\:mm\:ss"); } }
+		public int speed { get { return (int)((iterationCount / (DateTime.Now - ((DateTime)_engine.context.stateStore["Peach.StartTime"])).TotalMinutes) * 60); } }
+		public string[] tags { get { return new string[0]; } }
+		public Group[] groups { get { return new Group[0]; } }
 
-	//public class Library
-	//{
-	//	RestContext _context;
+		public int totalFaults { get { return ((List<Fault>)_engine.context.stateStore["Peach.Rest.Faults"]).Count; } }
+	}
 
-	//	public Library(RestContext context)
-	//	{
-	//		_context = context;
-	//	}
+	public class Library
+	{
+		Uri _baseUrl;
+		Engine _engine;
 
-	//	public string libraryUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/libraries/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string name { get { return "Peach Library"; } }
-	//	public string description { get { return ""; } }
-	//	public bool locked { get { return true; } }
-	//	public Version[] versions { get; set; }
-	//	public Group[] groups { get; set; }
-	//	public string user { get { return "peach"; } }
-	//	public DateTime timestamp { get { return DateTime.Now; } }
+		public Library(Uri baseUrl, Engine engine)
+		{
+			_baseUrl = baseUrl;
+			_engine = engine;
+		}
 
-	//	public class Version
-	//	{
-	//		RestContext _context;
+		public string libraryUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/libraries/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string name { get { return "Peach Library"; } }
+		public string description { get { return ""; } }
+		public bool locked { get { return true; } }
+		public Version[] versions { get; set; }
+		public Group[] groups { get; set; }
+		public string user { get { return "peach"; } }
+		public DateTime timestamp { get { return DateTime.Now; } }
 
-	//		public Version(RestContext context)
-	//		{
-	//			_context = context;
-	//		}
+		public class Version
+		{
+			Uri _baseUrl;
+			Engine _engine;
 
-	//		public int version { get { return 1; } }
-	//		public bool locked { get { return true; } }
-	//		public Pit[] pits { get { return new Pit[] { new Pit(_context)}; } }
-	//		public string user { get { return "peach"; } }
-	//		public DateTime timestamp { get { return DateTime.Now; } }
-	//	}
-	//}
+			public Version(Uri baseUrl, Engine engine)
+			{
+				_baseUrl = baseUrl;
+				_engine = engine;
+			}
 
-	//public class Group
-	//{
-	//	public Group(RestContext context)
-	//	{
-	//	}
+			public int version { get { return 1; } }
+			public bool locked { get { return true; } }
+			public Pit[] pits { get { return new Pit[] { new Pit(_baseUrl, _engine) }; } }
+			public string user { get { return "peach"; } }
+			public DateTime timestamp { get { return DateTime.Now; } }
+		}
+	}
 
-	//	public string groupUrl { get; set; }
-	//	public string access { get { return "read"; } }
-	//}
+	public class Group
+	{
+		public Group(Uri baseUrl, Engine engine)
+		{
+		}
 
-	//public class Pit
-	//{
-	//	RestContext _context;
+		public string groupUrl { get; set; }
+		public string access { get { return "read"; } }
+	}
 
-	//	public Pit(RestContext context)
-	//	{
-	//		_context = context;
-	//	}
+	public class Pit
+	{
+		Uri _baseUrl;
+		Engine _engine;
 
-	//	public string pitUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/pits/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
+		public Pit(Uri baseUrl, Engine engine)
+		{
+			_baseUrl = baseUrl;
+			_engine = engine;
+		}
 
-	//	public string name { get { return _context.Engine.context.config.pitFile; } }
-	//	public string description { get { return ""; } }
-	//	public string[] tags { get { return new string[0]; } }
-	//}
+		public string pitUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/pits/" + Guid.Empty.ToString()).ToString();
+			}
+		}
 
-	//public class Fault
-	//{
-	//	RestContext _context;
-	//	Peach.Core.Fault _fault = null;
-	//	DateTime _timestamp;
-	//	public Guid id = Guid.NewGuid();
+		public string name { get { return _engine.context.config.pitFile; } }
+		public string description { get { return ""; } }
+		public string[] tags { get { return new string[0]; } }
+	}
 
-	//	public Fault(RestContext context, Peach.Core.Fault fault)
-	//	{
-	//		_context = context;
-	//		_fault = fault;
-	//		_timestamp = DateTime.Now;
+	public class Fault
+	{
+		Uri _baseUrl = null;
+		Engine _engine;
+		Peach.Core.Fault _fault = null;
+		DateTime _timestamp;
+		public Guid id = Guid.NewGuid();
 
-	//	}
+		public Fault(Engine engine, Peach.Core.Fault fault)
+		{
+			_engine = engine;
+			_baseUrl = new Uri("http://localhost:8888");
+			_fault = fault;
+			_timestamp = DateTime.Now;
+			//files = new File[] { };
+			reproducable = false;
+		}
 
-	//	public string faultUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl, "/p/faults/" + id.ToString()).ToString();
-	//		}
-	//	}
-	//	public string jobUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/jobs/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string targetUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/targets/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string pitUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/pits/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string nodeUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/nodes/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
-	//	public string peachUrl
-	//	{
-	//		get
-	//		{
-	//			return new Uri(_context.BaseUrl,"/p/peaches/" + Guid.Empty.ToString()).ToString();
-	//		}
-	//	}
+		public string faultUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/faults/" + id.ToString()).ToString();
+			}
+		}
+		public string jobUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/jobs/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string targetUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/targets/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string pitUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/pits/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string nodeUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/nodes/" + Guid.Empty.ToString()).ToString();
+			}
+		}
+		public string peachUrl
+		{
+			get
+			{
+				return new Uri(_baseUrl, "/p/peaches/" + Guid.Empty.ToString()).ToString();
+			}
+		}
 
-	//	public string title { get { return _fault.title; } }
-	//	public string description { get { return _fault.description; } }
-	//	public string source { get { return _fault.detectionSource; } }
-	//	public bool reproducable { get; set; }
-	//	public uint iteration { get { return _fault.iteration; } }
-	//	public uint seed { get { return _context.Engine.context.config.randomSeed; } }
-	//	public FaultType faultType { get { return _fault.type; } }
-	//	public string exploitability { get { return _fault.exploitability; } }
-	//	public string majorHash { get { return _fault.majorHash; } }
-	//	public string minorHash { get { return _fault.minorHash; } }
-	//	public string folderName { get { return _fault.folderName; } }
-	//	public string timestamp { get { return _timestamp.ToString(); } }
-	//	public File[] files { get; set; }
-	//	public string[][] mutations { get { return new string[0][]; } }
-	//	public string[] tags { get { return new string[0]; } }
+		public string title { get { return _fault.title; } }
+		public string description { get { return _fault.description; } }
+		public string source { get { return _fault.detectionSource; } }
+		public bool reproducable { get; set; }
+		public uint iteration { get { return _fault.iteration; } }
+		public uint seed { get { return _engine.context.config.randomSeed; } }
+		public string faultType { get { return _fault.type.ToString(); } }
+		public string exploitability { get { return _fault.exploitability; } }
+		public string majorHash { get { return _fault.majorHash; } }
+		public string minorHash { get { return _fault.minorHash; } }
+		public string folderName { get { return _fault.folderName; } }
+		public string timestamp { get { return _timestamp.ToString(); } }
+		//public File[] files { get; set; }
+		//public string[][] mutations { get { return new string[][] {}; } }
+		//public string[] tags { get { return new string[] {}; } }
 
-	//	public class File
-	//	{
-	//		RestContext _context;
-	//		Guid id = Guid.NewGuid();
+		public class File
+		{
+			Uri _baseUrl = null;
+			Guid id = Guid.NewGuid();
 
-	//		public File(RestContext context)
-	//		{
-	//			_context = context;
-	//		}
+			public File()
+			{
+			}
 
-	//		public string fileUrl
-	//		{
-	//			get
-	//			{
-	//				return new Uri(_context.BaseUrl, "/p/files/" + id.ToString()).ToString();
-	//			}
-	//		}
+			public string fileUrl
+			{
+				get
+				{
+					return new Uri(_baseUrl, "/p/files/" + id.ToString()).ToString();
+				}
+			}
 
-	//		public string name { get; set; }
-	//	}
-	//}
+			public string name { get; set; }
+		}
+	}
 }
 
 // end
