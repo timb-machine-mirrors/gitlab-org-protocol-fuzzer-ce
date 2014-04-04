@@ -1,6 +1,6 @@
 [[Program_PeachFuzzBang]]
 === Peach Fuzz Bang
 
-Peach Fuzz Bang is a graphical program for performing file fuzzing. By default it will perform dumb fuzzing, but can be configured with a data model, enabling smart fuzzing to be performed. When launched, default values are provided for Windows, Linux, or OS X.
+Peach Fuzz Bang is a graphical program for performing file fuzzing. By default it will perform dumb fuzzing, but can be configured with a data model, enabling you to perform smart fuzzing. When launched, default values are provided for Windows, Linux, or OS X.
 
 // TODO - Expand documentation.

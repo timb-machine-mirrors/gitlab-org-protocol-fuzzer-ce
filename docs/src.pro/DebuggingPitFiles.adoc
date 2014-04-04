@@ -16,9 +16,9 @@ A PIT is NOT valid unless...
  * The first iteration is successful against the target
  * The target is isolated from other input. 
  * You can demonstrate the target has parsed your data by checking if:
- ** GUI opening the image data
+ ** GUI opens the image data
  ** Network service logs your data 
- ** Correct response packet from the target for the packet you sent
+ ** You get the correct response packet from the target for the packet you sent
  ** The status lights blink appropriately
  * Logging is enabled
  * Monitoring is enabled
@@ -30,7 +30,7 @@ A PIT is NOT valid unless...
 Peach.exe -t pit_file.xml 
 ----
 
-If a stack trace prints, record the stack trace where improper error handling is happening.
+If a stack trace prints, record the stack trace where the improper error handling occurred.
 The pit doesn't run properly.
 During the testing and building phase run the first iteration only. 
 
