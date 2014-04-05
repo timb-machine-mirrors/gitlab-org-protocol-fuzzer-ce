@@ -24,7 +24,6 @@ namespace Peach.Enterprise.WebServices
 			Get["/jobs"] = _ => GetJobs();
 
 			Get["/jobs/{id}/visualizer"] = _ => GetVisualizerData(_.id);
-			Get["/jobs/{id}/visualizer/view"] = _ => View["visualizer/index.html"];
 
 			Get["/jobs/{id}"] = _ => GetJob(_.id);
 
@@ -41,6 +40,12 @@ namespace Peach.Enterprise.WebServices
 
 			Get["/faults"] = _ => GetFaults();
 			Get["/faults/{id}"] = _ => GetFault(_.id);
+			Get["/faults/risk"] = _ => GetFaultsRisk();
+		}
+
+		object GetFaultsRisk()
+		{
+			return null;
 		}
 
 		object GetVisualizerData(string id)
