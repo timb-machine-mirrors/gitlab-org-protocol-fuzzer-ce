@@ -2,15 +2,14 @@
 == Minset
 
 Peach Minset is used to locate the minimum set of sample data with the best code coverage metrics to use while fuzzing.
-This process can be distributed out across multiple machines to decrease the run time.
+This process can be distributed across multiple machines to decrease the run time.
 
 There are two steps to the process:
 
 . Collect traces       [long process]
 . Compute minimum set  [short process]
 
-The first step, collecting traces, can be distributed and the results
-collected for analysis by step #2.
+The first step can be distributed and the results collected for analysis by the second step.
 
 === Collect Traces
 
@@ -29,7 +28,7 @@ command.exe args %s:: Executable and arguments. +%s+ is replaced with the path a
 
 === Compute Minimum Set
 
-Analyzes all .trace files to determin the minimum set of samples to use during fuzzing. This process cannot be parallelized.
+Analyzes all .trace files to determine the minimum set of samples to use during fuzzing. This process cannot be parallelized.
 
 ==== Syntax
 
