@@ -4,6 +4,8 @@
 
 The _Defaults_ element is used to change data element attribute defaults. 
 
+// TODO List all the attributes we can change
+
 === Syntax
 
 [source,xml]

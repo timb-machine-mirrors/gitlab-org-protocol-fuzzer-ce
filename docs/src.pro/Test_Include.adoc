@@ -2,9 +2,13 @@
 [[Test_Include]]
 == Include
 
-// TODO - Merge with Test/Include
+// TODO - Merge with Test/Exclude
 	
-Includes all or a specific data element for fuzzing. The combination of this element and also the xref:Test_Exclude[Exclude] element allows for including or excluding various data elements from being mutated. By default all data elements are mutated.
+The Include and xref:Test_Exclude[Exclude] elements allows for excluding or including various data elements from mutation. 
+	
+By default, Peach fuzzes all data elements.  If you use the xref:Test_Exclude[Exclude] element to prevents Peach from fuzzing all or specific data elements, use Include to ensure that certain elements are fuzzed. 
+
+XPath is used to identify the included elements. 
 
 .XPath Further Reading
 ****
