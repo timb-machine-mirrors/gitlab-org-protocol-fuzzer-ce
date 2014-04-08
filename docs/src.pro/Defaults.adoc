@@ -2,7 +2,7 @@
 [[Defaults]]
 == Defaults
 
-The _Defaults_ element is used to change defaults for data element attributes. 
+The _Defaults_ element is used to change data element attribute defaults. 
 
 === Syntax
 

@@ -2,9 +2,9 @@
 [[Include]]
 == Include
 
-The Include element allows for including other pit files into namespaces for 
-use in the current Pit file.  When referencing included Pit files prefix element 
-names with the namespace and a colon (:) _foo:datamodel_.
+The Include element allows you to include other Pit files in namespaces so they can be used by the current Pit file.  
+
+When referencing included Pit files, prefix element names with the namespace and a colon (:) _foo:datamodel_.
 
 === Syntax
 
