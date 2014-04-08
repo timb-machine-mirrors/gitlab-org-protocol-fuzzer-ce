@@ -16,6 +16,8 @@ namespace Peach.Enterprise.Analyzers
 	[Serializable]
 	public class ZipAnalyzer : Analyzer
 	{
+		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
 		protected Dictionary<string, string> mappings = new Dictionary<string, string>();
 
 		static ZipAnalyzer()
@@ -86,6 +88,8 @@ namespace Peach.Enterprise.Analyzers
 						string entryName = entry.FileName;
 						var entryData = new BitStream();
 
+						logger.Debug("Attempting to parse: {0}", entryName);
+
 						using (var rdr = entry.OpenReader())
 						{
 							rdr.CopyTo(entryData);
@@ -106,6 +110,8 @@ namespace Peach.Enterprise.Analyzers
 						stream["Content"] = content;
 
 						block.Add(stream);
+
+						logger.Debug("Successfully parsed: {0}", entryName);
 					}
 				}
 
@@ -131,6 +137,8 @@ namespace Peach.Enterprise.Analyzers
 					var other = dom.getRef<DataModel>(item.Value, d => d.dataModels);
 					if (other == null)
 						throw new PeachException("Error, Could not resolve ref'd data model.");
+
+					logger.Debug("Resolved entry '{0}' to data model '{1}'.", fileName, other.name);
 
 					return (DataElementContainer)other.Clone("Content");
 
