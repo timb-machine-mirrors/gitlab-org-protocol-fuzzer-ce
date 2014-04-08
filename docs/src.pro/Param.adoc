@@ -11,6 +11,8 @@
 //  * Different thigns using param
 //  * valueType
 
+// Reviewed:
+// 04/07/2015 editing and cleanup
 
 Param provides a key-value pair to the parent element, typically used for configuration settings.
 
@@ -49,11 +51,9 @@ This element has no valid child elements.
 
 === _Param_ and the Call Action 
 
-Param is also used as an argument to the xref:Action_call[call] Action.
+Param  can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters defined by param used in different ways by the Publisher.
 
-Call actions can have an array of parameters defined by param used in different ways by the Publisher
-In this usage of Param the element is solely a container for a DataModel and Data.
-The Data described in the Param will be fuzzed by Peach.
+In this example, the element is solely a container for a DataModel and Data. The Data described in Param will be fuzzed by Peach.
 
 ==== Syntax
 
