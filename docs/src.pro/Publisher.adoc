@@ -72,6 +72,7 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_Udp[Udp]
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
+ * xref:Publishers_Zip[Zip]
  
 // TODO
 
