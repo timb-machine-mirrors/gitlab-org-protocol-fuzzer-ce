@@ -18,15 +18,21 @@
 // * Complicated state model with early exit will cause nothing to get fuzzed (maybe in booky part)
 // * Mutators get random numbers from strategies
 
+
 Peach has pluggable mutation strategies to deal with two common situations: 
 
 * Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element will get fuzzed with each test case, this may not be the best solution for larger, complex systems which can produce millions of test case variations.  
 
 * Peach needs a mechanism to allow you to easily change how fuzzing is performed. This helps you determine the best fuzzing methods and strategies for your situation.
 
-By implementing a single class, a user can fully control how Peach fuzzes a target including state transitions.
+If you implement a single single C# class, you can fully control how Peach fuzzes a target (including state transitions) because:
 
-Peach supplies three mutation strategies:
+* The C# class has full control over data mutations and state transition mutations.
+* Data mutations are changing the value of a data element
+* State mutations are if the pit says we should transition to state named "RxPacket1" but the mutation strategy can change this so peach transitions to the state named "TxPacket4" instead.
+
+
+Peach supplies three user-extensible mutation strategies:
 
 * Random (default)
 * Sequential
