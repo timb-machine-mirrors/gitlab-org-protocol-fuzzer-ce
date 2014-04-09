@@ -6,7 +6,7 @@
 
 == Data
 
-At the start of Pit processing, all data sets are either empty or have their values defined in the data model (by the _value_ attributes). Peach uses the Data element to override a _value_ attribute or to assign a value in order to create and load the data into a DataModel.
+At the start of Pit processing, all data sets are either empty or have their values defined in the data model (by the _value_ attributes). Peach uses the Data element to override a _value_ attribute or to assign a value to create and load the data into a DataModel.
 
 To match the data into the correct elements, Peach will use the cracking subsystem. This will fail if the data does not fit. 
 
@@ -18,12 +18,11 @@ There are currently three ways to load data:
 * via a python expression
 * by setting values field by field
 
-The Data element is a valid top level element (child of <Peach>) when defining sets of data to be referenced later on.  It is also valid as a child of xref:Action[Action] and xref:Param[Param] when used to both define data or reference an existing top level definition.
-
-
-If multiple Data files xml blocks are specified, the attribute _switchCount_ with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next data file.
+The Data element is a valid top level element (child of <Peach>) when defining data sets that will be referenced during later processing.  It is also valid as a child of xref:Action[Action] and xref:Param[Param] when used to both define data or reference an existing top level definition.
 
 === Data and _switchCount_
+
+If you specify multiple XML blocks in a data file, use the _switchCount_ attribute with the xref:MutationStrategies[random strategy] to specify the number of iterations performed before switching to the next data file.
 
 If there are multiple data elements, after _switchCount_ number of fuzzing iterations, Peach will switch which data element it will use to populate the fuzzing file. 
 

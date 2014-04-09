@@ -2,6 +2,7 @@
 == Zip Analyzer
 
 The Zip Analyzer will consume zip compressed data and convert it into a sequence of xref:Stream[Stream] elements.
+
 This analyzer can be attached to a blob.
 
 === Syntax

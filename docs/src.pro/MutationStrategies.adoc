@@ -29,7 +29,7 @@ If you implement a single single C# class, you can fully control how Peach fuzze
 
 * The C# class has full control over data mutations and state transition mutations.
 * Data mutations are changing the value of a data element
-* State mutations are if the pit says we should transition to state named "RxPacket1" but the mutation strategy can change this so peach transitions to the state named "TxPacket4" instead.
+* You can easily change the state. If the pit says to transition to state named "RxPacket1," the mutation strategy can change the state so Peach transitions to the state named "TxPacket4" instead.
 
 
 Peach supplies three user-extensible mutation strategies:
@@ -42,7 +42,11 @@ Peach supplies three user-extensible mutation strategies:
 
 Random is the default fuzzing strategy.  
 
-This strategy will select up to _MaxFieldsToMutate_ elements to mutate at a time.  For each selected element one of it's corresponding mutators is selected at random. Peach derives the randomness of these selections from randomly generated seed number. An identical test run can be repeated by passing the same *seed* value as a Peach command line option with the _--seed_ command line option.  This is useful for replaying fuzzing iterations to reproduce a previous Fault.
+This strategy will select up to _MaxFieldsToMutate_ elements to mutate at a time.  For each selected element, one of it's corresponding mutators is selected at random. 
+
+NOTE: Peach derives the randomness of these selections from a randomly generated seed number. 
+
+An identical test run can be repeated by passing the same *seed* value with the Peach _--seed_ command line option.  This is useful for replaying fuzzing iterations to reproduce a previous Fault.
 
 This strategy is most useful for larger data models or for use after performing a sequential fuzzing run.
 

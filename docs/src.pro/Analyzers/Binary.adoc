@@ -4,7 +4,7 @@
 
 The Binary analyzer is applied to Blob data elements.  It is an easy way to improve fuzzing of unknown binary data.
 
-The analyzer will look for known types inside of the Blob value, such as strings, and crack the Blob into a DataModel. If a string type is found Peach will run the StringToken analyzer on each string. 
+The analyzer will look for known types inside of the Blob value (such as strings) and crack the Blob into a DataModel. If a string type is, found Peach will run the StringToken analyzer on each string. 
 
 IMPORTANT: The Binary analyzer can only be used on Blob data types. 
 
