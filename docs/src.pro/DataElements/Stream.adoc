@@ -88,12 +88,12 @@ is analogous to:
 The stream name, attribute and children all support fuzzing.
 Additionally, relations and fixups can reference children of different streams.
 The Stream element is intended for use by publishers that are stream aware.
-For example, the [[Publishers_Zip]] takes creates a zip file entry for each corresponding stream element.
-If the publisher is not stream aware, the stream element is treated exactly like a [[DataElements_Block]].
+For example, the xref:Publishers_Zip[Zip] publisher takes creates a zip file entry for each corresponding stream element.
+If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
 
 === Examples
 
-.Stream with [[Publishers_Zip]]
+.Stream with xref:Publishers_Zip[Zip] publisher
 ==========================
 This definition will produce a zip file containing a single entry 'file1.txt' containing the string 'Hello World'.
 
@@ -157,7 +157,7 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 ----
 ==========================
 
-.Stream with [[Publishers_ConsoleHex]]
+.Stream with xreg:Publishers_ConsoleHex[ConsoleHex] publisher
 ==========================
 Streams are treated like blocks when used with publishers that are not stream aware.
 
