@@ -21,7 +21,7 @@ There are currently three ways to load data:
 The Data element is a valid top level element (child of <Peach>) when defining sets of data to be referenced later on.  It is also valid as a child of xref:Action[Action] and xref:Param[Param] when used to both define data or reference an existing top level definition.
 
 
-If multiple Data files xml blocks are specified, the attribute _switchCount_ with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next.
+If multiple Data files xml blocks are specified, the attribute _switchCount_ with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next data file.
 
 === Data and _switchCount_
 

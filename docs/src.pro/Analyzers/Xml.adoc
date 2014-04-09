@@ -1,7 +1,11 @@
 [[Analyzers_Xml]]
 == Xml Analyzer
 
-The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. This analyzer can be attached to a string. For inline values Xml special characters must be encoded. (< = &lt;, > = &gt;, " = &quot;, & = &amp;)
+The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. 
+
+This analyzer can be attached to a string. 
+
+TIP: XML special characters (< = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values . 
 
 === Syntax
 
@@ -23,7 +27,7 @@ There are no required attributes.
 
 .Simple Hello World Example
 ==========================
-This example uses the Xml analyzer on an inline value.  
+This example uses the XML analyzer on an inline value.  
 
 [source,xml]
 ----
