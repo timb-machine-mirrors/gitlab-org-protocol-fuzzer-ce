@@ -2,10 +2,11 @@
 [[Stream]]
 == Stream
 
-The Stream element is a child element of xref:DataModel[DataModel] or Block.
-Streams are used to group one or more data elements such as xref:Number[Number]
-or xref:String[String] together into a logical structure.
+Streams are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure.
+
 Streams also include two additional pieces of metadata, a stream name and stream attribute.
+
+The Stream element is a child element of xref:DataModel[DataModel] or Block.
 
 === Syntax
 
@@ -60,7 +61,7 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 === Background
 
-The Stream element is very similiar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
+The Stream element is similar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
 Conceptually, the following Stream example:
 
 [source,xml]
