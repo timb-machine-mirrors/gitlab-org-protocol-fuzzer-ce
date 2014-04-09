@@ -6,7 +6,7 @@
 //  * Adds a module path for python
 //  * Examples (better than we currently have :))
 
-The _PythonPath_ element is a top level element that adds a path to the paths searched by Python for modules. Its primary use is when extending Peach and including the location of custom code.
+The _PythonPath_ top level element adds a path to the Python module search path list. It extends Peach and includes custom code locations.
 
 === Syntax
 

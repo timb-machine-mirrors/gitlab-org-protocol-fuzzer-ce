@@ -1,17 +1,33 @@
 <<<
 [[Data]]
+
+// Update - 04/04/2014
+//  Lynn: Major edits
+
 == Data
 
-Data elements are used to create and load default sets of data into DataModels.
-This data overwrites the default data in the _value_ attributes of the data elements.
-To match the data into the correct elements, Peach will "crack" the data and fail if the data does not fit.
-This is done the same way data is cracked from an xref:Action_input[input] Action.
+At the start of Pit processing, all data sets are either empty or have their values defined in the data model (by the _value_ attributes). Peach uses the Data element to override a _value_ attribute or to assign a value in order to create and load the data into a DataModel.
 
-There are currently three ways to load data, first is from a file, the second is via a python expression, and the third is by setting values field by field.
+To match the data into the correct elements, Peach will use the cracking subsystem. This will fail if the data does not fit. 
+
+Data is cracked in a DataModel the same way that we crack an xref:Action_input[input] Action in a StateMode. 
+
+There are currently three ways to load data: 
+
+* a file
+* via a python expression
+* by setting values field by field
 
 The Data element is a valid top level element (child of <Peach>) when defining sets of data to be referenced later on.  It is also valid as a child of xref:Action[Action] and xref:Param[Param] when used to both define data or reference an existing top level definition.
 
-If multiple Data files xml blocks are specified, the attribute _switchCount_ with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next.
+
+If multiple Data files xml blocks are specified, the attribute _switchCount_ with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next data file.
+
+=== Data and _switchCount_
+
+If there are multiple data elements, after _switchCount_ number of fuzzing iterations, Peach will switch which data element it will use to populate the fuzzing file. 
+
+The following example illustrates this. There are two data elements. Peach will fuzz with the first data element until it does this _switchCount_ number of times and then will switch to the second element and fuzz with that element.
 
 [source,xml]
 ----

@@ -38,7 +38,7 @@ peach -t peach_xml_file
 
 .Running a Pit
 ======================
-This example shows how to run a fuzzing definition. The following command line will launch Peach and fuzz using +pit.xml+, and if it exists, +pit.xml.config+ as the configuration file.
+This example shows how to run a fuzzing definition. The following command line will launch Peach and fuzz using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file.
 
 ----
 > peach pit.xml
@@ -47,7 +47,9 @@ This example shows how to run a fuzzing definition. The following command line w
 
 .Single Iteration with Debug Output
 ======================
-When testing the definition, running a single non-mutating iteration with debug output can be very useful. The following command line will launch Peach and fuzz using +pit.xml+, and if it exists, +pit.xml.config+ as the configuration file. The command line will combine the +-1+ and +--debug+ arguments to run a single iteration with debugging information included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
+When testing a definition, we recommend running a single non-mutating iteration with debug output. 
+
+The following command line will launch Peach and fuzz using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. The command line will combine the +-1+ and +--debug+ arguments to run a single iteration; the debugging information  will be included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
 
 ----
 > peach -1 --debug samples\DebuggerWindows.xml
@@ -117,7 +119,7 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 
 .Replay Existing Test Sequence
 ======================
-Once a faulting condition has been found it is common to want to reproduce the exact test, or sequence of tests to reproduce the issue. Peach can reproduce exact test sequences when the following is known:
+Once you find a faulting condition, you may want to replicate the exact test (or sequence of tests) to recreate the issue. Peach can reproduce exact test sequences given the following information:
 
 . Exact version of Peach. This is found in the log file +status.txt+.
 . Seed number used. This is also found in the log file +status.txt+.
@@ -139,13 +141,15 @@ Pit File: samples\DebuggerWindows.xml
 <1> Version of Peach used. Must match when reproducing.
 <2> Seed used. Must match when reproducing.
 
-The first command line we can use will skip directly to a specific iteration and start fuzzing. This is useful if you want to run a series of iterations starting from a certain point. Notice that our +--seed+ argument matches the value from our +status.txt+ file.
+We can use the first command line to skip directly to a specific iteration and start fuzzing. This will let you run a series of iterations starting from a certain point. 
+
+TIP: The +--seed+ argument matches the value from the +status.txt+ file.
 
 ----
 > peach --seed 51816 --skipto 37566
 ----
 
-The second command line we can use will perform a range of iterations (1 or more). This is useful if only the exact iteration is wanted, or a short range of iterations.
+We can use the second command line to perform either a specific iteration or a small number of iterations.
 
 ----
 > peach --seed 51816 --range 37566,37566
@@ -154,7 +158,9 @@ The second command line we can use will perform a range of iterations (1 or more
 
 .Starting a Peach Agent Process
 ======================
-Agents are considered long running processes that are utilized by the core Peach engine during a fuzzing session. The following will start a Peach agent using the _tcp_ channel protocol.
+Agents are long running processes used by the Peach engine core during a fuzzing session. 
+
+The following will start a Peach agent using the _tcp_ channel protocol:
 
 ----
 > peach -a tcp
@@ -168,7 +174,7 @@ Agents are considered long running processes that are utilized by the core Peach
 
 .Regenerating the Peach Schema File
 ======================
-The Peach schema file, _peach.xsd_, provides intellisense in editors that support it such as Visual Studio and oxYgen XML Editor. When adding extensions to Peach, an new schema file can be generated that includes these extensions.
+The Peach schema file, _peach.xsd_, provides intellisense in supported editors (like Visual Studio and oxYgen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
 
 ----
 > peach --makexsd

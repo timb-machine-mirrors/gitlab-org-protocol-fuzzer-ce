@@ -4,7 +4,9 @@
 
 // TODO - Merge with Test/Exclude
 
-Excludes all or specific data elements from being fuzzed. The combination of this element and also the xref:Test_Include[Include] element allows for including or excluding various data elements from being mutated. By default all data elements are mutated.
+By default, Peach fuzzes all data elements.  Exclude prevents Peach from fuzzing all or specific data elements. XPath is used to identify the excluded elements. 
+
+The Exclude and xref:Test_Include[Include] elements allows for excluding or including various data elements from mutation. 
 
 NOTE: Even though a data element is excluded it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element will not have any specific mutations performed directly to it.
 

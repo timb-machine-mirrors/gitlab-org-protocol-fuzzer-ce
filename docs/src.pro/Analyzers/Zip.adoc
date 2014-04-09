@@ -1,0 +1,211 @@
+[[Analyzers_Zip]]
+== Zip Analyzer
+
+The Zip Analyzer will consume zip compressed data and convert it into a sequence of xref:Stream[Stream] elements.
+This analyzer can be attached to a blob.
+
+=== Syntax
+
+[source,xml]
+----
+<Blob>
+	<Analyzer class="Zip" />
+</Blob>
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+There are no optional attributes.
+
+=== Parameters
+
+Map:: List of stream name to data model mappings
+
+
+==== Examples
+
+.Extension Mapping Example
+==========================
+This produces a zip file then re-opens it running the file through the analyzer.  
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+	<DataModel name="OutputModel">
+		<Stream streamName="file1.bin">
+			<String value="This is file one"/>
+		</Stream>
+		<Stream streamName="dir/file2.txt">
+			<String value="&lt;file&gt;file two&lt;/file&gt;"/>
+		</Stream>
+		<Stream streamName="dir/file3.xml">
+			<String value="&lt;file&gt;file three&lt;/file&gt;"/>
+		</Stream>
+	</DataModel>
+
+	<DataModel name="StringModel">
+		<String name="stringValue"/>
+	</DataModel>
+
+	<DataModel name="XmlModel">
+		<String name="stringValue">
+			<Analyzer class="Xml"/>
+		</String>
+	</DataModel>
+
+	<DataModel name="InputModel">
+		<Blob name="value">
+			<Analyzer class="Zip">
+				<Param name="Map" value="/\.txt$/StringModel/,/\.xml$/XmlModel/"/>
+			</Analyzer>
+		</Blob>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<Action type="output" publisher="OutputPub">
+				<DataModel ref="OutputModel"/>
+			</Action>
+
+			<Action type="close" publisher="OutputPub"/>
+
+			<Action type="input" publisher="InputPub">
+				<DataModel ref="InputModel"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+
+		<Publisher class="Zip" name="OutputPub">
+			<Param name="FileName" value="fuzzed.zip" />
+		</Publisher>
+
+		<Publisher class="File" name="InputPub">
+			<Param name="FileName" value="fuzzed.zip" />
+			<Param name="Overwrite" value="false" />
+			<Param name="Append" value="false" />
+		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/> 
+		</Logger>
+	</Test>
+</Peach>
+----
+
+Output from this example.
+----
+>peach -1 --debug example.xml 
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 22910.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Enterprise.Publishers.ZipPublisher start()
+Peach.Enterprise.Publishers.ZipPublisher open()
+Peach.Enterprise.Publishers.ZipPublisher Added 3 entries to zip file.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Enterprise.Publishers.ZipPublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'InputModel' Bytes: 0/588, Bits: 0/4704
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: DataModel 'InputModel'
+Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.value' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'InputModel' Size: <null>, Bytes: 0/588, Bits: 0/4704
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker Blob 'InputModel.value' Bytes: 0/588, Bits: 0/4704
+Peach.Core.Cracker.DataCracker getSize: -----> Blob 'InputModel.value'
+Peach.Core.Cracker.DataCracker scan: Blob 'InputModel.value' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: Blob 'InputModel.value'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 4704
+Peach.Core.Cracker.DataCracker Crack: Blob 'InputModel.value' Size: 4704, Bytes: 0/588, Bits: 0/4704
+Peach.Core.Dom.DataElement Blob 'InputModel.value' value is: 50 4b 03 04 14 00 00 00 00 00 fa 86 87 44 47 8e a7 f7 10 00 00 00 10 00 00 00 09 00 24 00 66 69.. (Len: 588 bytes)
+Peach.Enterprise.Analyzers.ZipAnalyzer Attempting to parse: file1.bin
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker Block 'Content' Bytes: 0/16, Bits: 0/128
+Peach.Core.Cracker.DataCracker getSize: -----> Block 'Content'
+Peach.Core.Cracker.DataCracker scan: Block 'Content'
+Peach.Core.Cracker.DataCracker scan: Blob 'Content.Data' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: Block 'Content' Size: <null>, Bytes: 0/16, Bits: 0/128
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker Blob 'Content.Data' Bytes: 0/16, Bits: 0/128
+Peach.Core.Cracker.DataCracker getSize: -----> Blob 'Content.Data'
+Peach.Core.Cracker.DataCracker scan: Blob 'Content.Data' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: Blob 'Content.Data'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 128
+Peach.Core.Cracker.DataCracker Crack: Blob 'Content.Data' Size: 128, Bytes: 0/16, Bits: 0/128
+Peach.Core.Dom.DataElement Blob 'Content.Data' value is: 54 68 69 73 20 69 73 20 66 69 6c 65 20 6f 6e 65
+Peach.Enterprise.Analyzers.ZipAnalyzer Successfully parsed: file1.bin
+Peach.Enterprise.Analyzers.ZipAnalyzer Attempting to parse: dir/file2.txt
+Peach.Enterprise.Analyzers.ZipAnalyzer Resolved entry 'dir/file2.txt' to data model 'StringModel'.
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'Content' Bytes: 0/21, Bits: 0/168
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'Content'
+Peach.Core.Cracker.DataCracker scan: DataModel 'Content'
+Peach.Core.Cracker.DataCracker scan: String 'Content.stringValue' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'Content' Size: <null>, Bytes: 0/21, Bits: 0/168
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'Content.stringValue' Bytes: 0/21, Bits: 0/168
+Peach.Core.Cracker.DataCracker getSize: -----> String 'Content.stringValue'
+Peach.Core.Cracker.DataCracker scan: String 'Content.stringValue' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'Content.stringValue'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 168
+Peach.Core.Cracker.DataCracker Crack: String 'Content.stringValue' Size: 168, Bytes: 0/21, Bits: 0/168
+Peach.Core.Dom.DataElement String 'Content.stringValue' value is: <file>file two</file>
+Peach.Enterprise.Analyzers.ZipAnalyzer Successfully parsed: dir/file2.txt
+Peach.Enterprise.Analyzers.ZipAnalyzer Attempting to parse: dir/file3.xml
+Peach.Enterprise.Analyzers.ZipAnalyzer Resolved entry 'dir/file3.xml' to data model 'XmlModel'.
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'Content' Bytes: 0/23, Bits: 0/184
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'Content'
+Peach.Core.Cracker.DataCracker scan: DataModel 'Content'
+Peach.Core.Cracker.DataCracker scan: String 'Content.stringValue' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'Content' Size: <null>, Bytes: 0/23, Bits: 0/184
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker String 'Content.stringValue' Bytes: 0/23, Bits: 0/184
+Peach.Core.Cracker.DataCracker getSize: -----> String 'Content.stringValue'
+Peach.Core.Cracker.DataCracker scan: String 'Content.stringValue' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: String 'Content.stringValue'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 184
+Peach.Core.Cracker.DataCracker Crack: String 'Content.stringValue' Size: 184, Bytes: 0/23, Bits: 0/184
+Peach.Core.Dom.DataElement String 'Content.stringValue' value is: <file>file three</file>
+Peach.Enterprise.Analyzers.ZipAnalyzer Successfully parsed: dir/file3.xml
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Enterprise.Publishers.ZipPublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
+
+[*] Test 'Default' finished.
+----
+
+View of fuzzed.zip in Peach Validator 
+
+.{nbsp}
+image::{images}/ZipAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+
+==========================

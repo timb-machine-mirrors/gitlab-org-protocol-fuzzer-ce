@@ -9,7 +9,7 @@ using Peach.Core;
 
 namespace PeachFarm.Loggers
 {
-	[Peach.Core.Logger("MetricsRabbit", true)]
+//	[Peach.Core.Logger("MetricsRabbit", true)]
 	[Parameter("Path", typeof(string), "Log folder")]
 	[Peach.Core.Parameter("JobID", typeof(string), "JobID")]
 	[Peach.Core.Parameter("RabbitHost", typeof(string), "RabbitHost")]

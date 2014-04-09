@@ -295,6 +295,8 @@ namespace Peach.Enterprise.Runtime
 			Console.SetCursorPosition(4, 6);
 			DisplayStaticText("Status: ");
 			Console.Write(_status);
+			for (int i = _status.Length; i < Console.WindowWidth; i++)
+				Console.Write(' ');
 
 			// Display faults
 

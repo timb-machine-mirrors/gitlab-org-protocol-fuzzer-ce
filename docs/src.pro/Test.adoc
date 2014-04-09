@@ -16,13 +16,16 @@
 // * State model reference
 // * Use of multiple tests in a pit file
 
-The Test element is used to configure a specific fuzzing test that combines a StateModel with a Publisher and other configuration options such as including/excluding elements from being mutated, Agents, and fuzzing strategies.
+// Reviewed 04/07/2014: Lynn
+// Major edits 
 
-Multiple Test elements are supported, simply provide the name of the test element to use
-on the Peach command line.
+The Test element defines the tests that Peach will run during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
 
-NOTE: When running Peach, the Test element named "Default" will be run if a test name is
-not provided on the command line.
+Test configures a specific fuzzing occurrence that combines a StateModel with a Publisher and other configuration options (such as including/excluding elements from being mutated, Agents, and fuzzing strategies).
+
+One pit can contain multiple Test elements; simply provide the test element names on the Peach command line. 
+
+NOTE: When running Peach, the Test element named "Default" will be run if a test name is not provided on the command line.
 
 === Syntax
 

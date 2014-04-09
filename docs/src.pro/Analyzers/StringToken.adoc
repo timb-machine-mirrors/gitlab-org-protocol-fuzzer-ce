@@ -20,7 +20,7 @@ Root --+
 
 This allows Peach to perform mutations that can expose bugs in parsers. 
 
-Currently the String Token Analyzer only works at runtime when attached to a DataElement.
+IMPORTANT: The String Token Analyzer only works at runtime when attached to a DataElement.
 
 === Syntax
 

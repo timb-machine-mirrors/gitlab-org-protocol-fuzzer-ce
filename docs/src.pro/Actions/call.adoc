@@ -29,6 +29,9 @@
 // 03/04/2014: Lynn: 
 //  Edited and re-wrote content and corrected QuickTIme information
 
+// 04/07/2014: Lynn
+//  add information about Param and Call
+
 The _call_ action provide a method calling metaphor in Peach state models.
 Call actions support zero or multiple (user-defined and supplied) parameters along with capturing a resulting return value.    
  * If there are no parameters, the _call_ action just performs the call.
@@ -64,6 +67,10 @@ If a monitor supports interaction via the _call_ action it will be documented wi
 An instance of this usage is provided in the examples section.
 ****
 
+._Param_ and the _call_ action 
+
+ xref:Param[Param] can be used as a _call_ action argument. It is used for configuration settings and provides a key-value pair to the parent element.
+ 
 .Default Order of Actions
 ****
 The following is the default order in which Actions are performed when fuzzing:
