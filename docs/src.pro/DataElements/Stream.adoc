@@ -3,9 +3,13 @@
 == Stream
 
 The Stream element is a child element of xref:DataModel[DataModel] or Block.
-Streams are used to group one or more data elements such as xref:Number[Number]
-or xref:String[String] together into a logical structure.
+Streams are used to represent multiple streams of data in a single model.
+A single data model representing a zip file would use the Stream element to represent each file that makes up the zip file.
+Stream elements allow groupings one or more data elements such as xref:Number[Number]
+or xref:String[String] together into a logical structure to represent the content of the stream.
 Streams also include two additional pieces of metadata, a stream name and stream attribute.
+Publishers that are stream aware can use the metadata and content to combine all streams in a data model into a single file.
+The xref:Publishers_Zip[Zip] publisher looks for Stream elements and creates a zip archive of all the streams in a model.
 
 === Syntax
 
@@ -88,7 +92,6 @@ is analogous to:
 The stream name, attribute and children all support fuzzing.
 Additionally, relations and fixups can reference children of different streams.
 The Stream element is intended for use by publishers that are stream aware.
-For example, the xref:Publishers_Zip[Zip] publisher takes creates a zip file entry for each corresponding stream element.
 If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
 
 === Examples
