@@ -14,7 +14,7 @@
 // Reviewed:
 // 04/07/2015 editing and cleanup
 
-Param provides a key-value pair to the parent element, typically used for configuration settings.
+Param provides a key-value parameter pair to the parent element It is used for configuration settings.
 
 Params are common child-element for various xref:AgentsMonitors[Monitors], xref:Publisher[Publishers], and xref:Fixup[Fixups].
 
@@ -51,7 +51,7 @@ This element has no valid child elements.
 
 === _Param_ and the Call Action 
 
-Param  can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters defined by param used in different ways by the Publisher.
+Param  can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters (defined by param) used in different ways by the Publisher.
 
 In this example, the element is solely a container for a DataModel and Data. The Data described in Param will be fuzzed by Peach.
 

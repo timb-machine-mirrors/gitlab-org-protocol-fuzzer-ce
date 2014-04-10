@@ -6,6 +6,10 @@
 //  - 03/06/2014: Lynn
 //   Added and edited child elements
 
+// Reviewed: 
+// 04/09/2014: Lynn
+// Added String as a Child element
+
 The Block element is a child element of xref:DataModel[DataModel] or Block. Blocks are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. Blocks and DataModels are very similar, the only difference is their location. DataModels are a top level element, blocks are a child of xref:DataModel[DataModel]. Both Block and xref:DataModel[DataModel] elements can be used as the template for other Blocks or xref:DataModel[DataModels].
 
 === Syntax
@@ -47,6 +51,7 @@ xref:Hint[Hint]:: Provide information to mutators.
 xref:Number[Number]:: Defines a binary number of arbitrary bit size.
 xref:Padding[Padding]:: Pad out variably sized blocks or data models.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Stream[Stream]::  Group one or more data elements together into a logical structure.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
 
