@@ -183,7 +183,7 @@ Here we have a series of elements which are ASCII representations of numeric val
 
 *Relative Offset*
 
-A relative offset is from the data element the relation is attached to.  
+A relative offset is the offset from the data element the relation is attached to.  
 
 If there is data that represents the distance (in bytes) to somewhere in target element, use the relative offset when you model your data. Peach will automatically calculate the location so you know exact where it is. 
 

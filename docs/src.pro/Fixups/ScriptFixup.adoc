@@ -16,9 +16,14 @@
 // Added description
 
 
-The _Script_ is a proxy that allow you to write fixups in a scripting language like python or ruby.
-The class parameter is required for python fixups. It has two arguments--self (a python construct inherent in the language) and element (the data element being "fixed up").
-The class parameter's returned argument must match the DataElement type of the Fixup's parent.
+_Script_ is a proxy that allow you to write fixups in a scripting language like Python or Ruby.
+
+The class parameter is required for python fixups. It has two arguments:
+  
+self:: a python construct inherent in the language 
+element:: the data element being "fixed up"
+
+The class parameter's returned argument must match the Fixup parent's DataElement type.
 
 === Parent Elements
 

@@ -17,9 +17,10 @@
 // - 03/26/2014 Lynn
 //Corrected the fixup name 
 
-The _TCPChecksum_ will produce an internet checksum as defined in RFC 1071.
+The _TCPChecksum_ will produce an internet checksum as defined in RFC 1071. This checksum is primarily used when fuzzing the TCPv4 and TCPv6 Protocols.
+
 A discussion on how to apply TCPChecksum can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
-This checksum is primarily used when fuzzing the TCPv4 and TCPv6 Protocols.
+
 
 === Parent Elements
 
