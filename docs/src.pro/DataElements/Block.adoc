@@ -10,7 +10,13 @@
 // 04/09/2014: Lynn
 // Added String as a Child element
 
-The Block element is a child element of xref:DataModel[DataModel] or Block. Blocks are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. Blocks and DataModels are very similar, the only difference is their location. DataModels are a top level element, blocks are a child of xref:DataModel[DataModel]. Both Block and xref:DataModel[DataModel] elements can be used as the template for other Blocks or xref:DataModel[DataModels].
+Blocks are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. 
+
+Blocks and xref:DataModel[DataModels] are very similar; both can be used as the template for other Blocks or xref:DataModel[DataModels]. Their only difference is their location. 
+
+* DataModels are a top level element 
+* Blocks are a child of xref:DataModel[DataModel] 
+
 
 === Syntax
 

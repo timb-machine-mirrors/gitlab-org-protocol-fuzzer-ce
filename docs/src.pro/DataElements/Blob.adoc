@@ -6,9 +6,9 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes).
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). Blobs are always sized in bytes, never bits.
 
-A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Blobs are always sized in bytes, never bits. By default Blobs will be dumb fuzzed (see list of mutators below), as the internal data is unknown.
+A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Because their internal data format is unknown, Blobs will be dumb fuzzed (see list of applicable mutators below).
 
 Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
 
@@ -36,7 +36,7 @@ xref:occurs[occurs]::
 	Actual occurrences of element. Defaults to 1.
 
 	- Used to define arrays with a static size.
-	- Adding this attribute, even with a value of 1 will
+	- Adding this attribute, even with a value of 1, will
 	convert it to an array.
 
 
@@ -45,13 +45,13 @@ xref:minOccurs[minOccurs]::
 
 	- Used to define arrays with a variable size. Arrays defined by min/maxOccurs will generally have a relation
 	defined.
-	- Adding this attribute, even with a value of 1 will convert it to an array.
+	- Adding this attribute, even with a value of 1, will convert an element to an array.
 
 xref:maxOccurs[maxOccurs]::
 	The maximum number of times this blob can occur. Defaults to 1.
 
 	- Used to define arrays with a static size.
-	- Adding this attribute, even with a value of 1 will convert it to an array.
+	- Adding this attribute, even with a value of 1, will convert it to an array.
 
 xref:constraint[constraint]::
 	A constraint in the form of an expression.  Used during data cracking.
@@ -85,12 +85,12 @@ xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]::
 
 xref:Mutators_SizedDataNumericalEdgeCasesMutator[SizedDataNumericalEdgeCasesMutator]::
 	Change the length of the size of a data	element to a range around numerical edge cases
-	+
+	
 	This mutator is only applied when element is part of a size relationship.
 
 xref:Mutators_SizedDataVarianceMutator[SizedDataVarianceMutator]::
 	Change the length of the size of a data element that contains a size relation to a range around numerical edge cases and changes the data element that the relation points to size to match that value.
-	+
+	
 	This mutator is only applied when element is part of a size relationship.
 
 [[Blob_Examples]]

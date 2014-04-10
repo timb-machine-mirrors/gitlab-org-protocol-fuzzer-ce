@@ -6,7 +6,7 @@
 
 == DataModel
 
-The DataModel element is a child of the Peach root element.  A DataModel defines the structure of a data block by specifying additional child elements such as xref:Number[Number], xref:Blob[Blob], or xref:String[String].
+The DataModel element is a child of the Peach root element.  DataModels defines the structure of data blocks by specifying additional child elements such as xref:Number[Number], xref:Blob[Blob], or xref:String[String].
 
 === Syntax
 
