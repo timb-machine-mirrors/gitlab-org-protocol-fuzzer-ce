@@ -160,7 +160,7 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 ----
 ==========================
 
-.Stream with xreg:Publishers_ConsoleHex[ConsoleHex] publisher
+.Stream with xref:Publishers_ConsoleHex[ConsoleHex] publisher
 ==========================
 Streams are treated like blocks when used with publishers that are not stream aware.
 
@@ -232,7 +232,7 @@ Produce a zip file containing multiple files.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-  <DataModel name="StreamExample3_Output">
+  <DataModel name="StreamExample3">
     <Stream streamName="file1.txt">
       <String value="Root file one"/>
     </Stream>
@@ -244,20 +244,10 @@ Produce a zip file containing multiple files.
     </Stream>
   </DataModel>
 
-  <DataModel name="StreamExample3_Input">
-   <Blob name="Value"/>
-  </DataModel>
-
   <StateModel name="TheState" initialState="initial">
     <State name="initial">
-      <Action type="output" publisher="ZipPub">
-        <DataModel ref="StreamExample3_Output" />
-      </Action>
-
-      <Action type="close" publisher="ZipPub"/>
-
-      <Action type="input" publisher="FilePub">
-        <DataModel ref="StreamExample3_Input" />
+      <Action type="output">
+        <DataModel ref="StreamExample3" />
       </Action>
     </State>
   </StateModel>
@@ -265,14 +255,8 @@ Produce a zip file containing multiple files.
   <Test name="Default">
     <StateModel ref="TheState"/>
 
-    <Publisher class="Zip" name="ZipPub">
+    <Publisher class="Zip">
       <Param name="FileName" value="fuzzed.zip" />
-    </Publisher>
-
-    <Publisher class="File" name="FilePub">
-      <Param name="FileName" value="fuzzed.zip" />
-      <Param name="Overwrite" value="false" />
-      <Param name="Append" value="false" />
     </Publisher>
 
     <Logger class="File">
@@ -299,34 +283,25 @@ Peach.Core.Dom.Action ActionType.Output
 Peach.Enterprise.Publishers.ZipPublisher start()
 Peach.Enterprise.Publishers.ZipPublisher open()
 Peach.Enterprise.Publishers.ZipPublisher Added 3 entries to zip file.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Close
 Peach.Enterprise.Publishers.ZipPublisher close()
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Input
-Peach.Core.Publishers.FilePublisher start()
-Peach.Core.Publishers.FilePublisher open()
-Peach.Core.Publishers.FilePublisher input()
-Peach.Core.Cracker.DataCracker ------------------------------------
-Peach.Core.Cracker.DataCracker DataModel 'StreamExample3_Input' Bytes: 0/599, Bits: 0/4792
-Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'StreamExample3_Input'
-Peach.Core.Cracker.DataCracker scan: DataModel 'StreamExample3_Input'
-Peach.Core.Cracker.DataCracker scan: Blob 'StreamExample3_Input.Value' -> Offset: 0, Unsized element
-Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
-Peach.Core.Cracker.DataCracker Crack: DataModel 'StreamExample3_Input' Size: <null>, Bytes: 0/599, Bits: 0/4792
-Peach.Core.Cracker.DataCracker ------------------------------------
-Peach.Core.Cracker.DataCracker Blob 'StreamExample3_Input.Value' Bytes: 0/599, Bits: 0/4792
-Peach.Core.Cracker.DataCracker getSize: -----> Blob 'StreamExample3_Input.Value'
-Peach.Core.Cracker.DataCracker scan: Blob 'StreamExample3_Input.Value' -> Offset: 0, Unsized element
-Peach.Core.Cracker.DataCracker lookahead: Blob 'StreamExample3_Input.Value'
-Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 4792
-Peach.Core.Cracker.DataCracker Crack: Blob 'StreamExample3_Input.Value' Size: 4792, Bytes: 0/599, Bits: 0/4792
-Peach.Core.Dom.DataElement Blob 'StreamExample3_Input.Value' value is: 50 4b 03 04 14 00 00 00 08 00 eb 73 87 44 b5 95 4a 81 0f 00 00 00 0d 00 00 00 09 00 24 00 66 69.. (Len: 599 bytes)
-Peach.Core.Publishers.FilePublisher close()
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Enterprise.Publishers.ZipPublisher stop()
-Peach.Core.Publishers.FilePublisher stop()
 
 [*] Test 'Default' finished.
 ----
+
+Contents of produced +fuzzed.zip+
+
+----
+> unzip -l fuzzed.zip
+Archive:  fuzzed.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       13  04-09-2014 18:14   file1.txt
+       24  04-09-2014 18:14   dir/file1.txt
+       24  04-09-2014 18:14   dir/file2.txt
+---------                     -------
+       61                     3 files
+----
+
 ==========================

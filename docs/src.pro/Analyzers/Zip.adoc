@@ -9,7 +9,7 @@ The content of stream element corresponds to the content of the file in the zip 
 
 The Zip Analyzer allows the content of each file in the zip archive to be mapped to a xref:DataModel[DataModel].
 This allows Peach to further decompose the contents of a file in a zip archive instead of just treating the contents as a xref:Blob[Blob].
-The mapping is controlled by the 'Map' parameter to the analyzer.
+The mapping is controlled by the +Map+ parameter to the analyzer.
 
 This analyzer can be attached to a blob.
 
@@ -34,7 +34,12 @@ There are no optional attributes.
 
 === Parameters
 
-Map:: Controls the stream name to data model mappings.  This parameter is a comma separated list of mappings.  Each mapping is a tuple containing a regular expression match and a DataModel name.  The tuple is delineated with a forward slash character, similar to the substitution regular expression pattern.  When the regular expression matches the file name in the zip archive the corresponding DataModel will be used for the file contents.  For example, to use the data model 'TextModel' for all files ending in '.txt' the parameter's value will be '/.txt$/TextModel/'.
+Map:: Controls the stream name to data model mappings.
+This parameter is a comma separated list of mappings.
+Each mapping is a tuple containing a regular expression match and a DataModel name.
+The tuple is delineated with a forward slash character, similar to the substitution regular expression pattern.
+When the regular expression matches the file name in the zip archive the corresponding DataModel will be used for the file contents.
+For example, to use the data model +TextModel+ for all files ending in +.txt+ the parameter's value will be +/.txt$/TextModel/+.
 
 
 ==== Examples
