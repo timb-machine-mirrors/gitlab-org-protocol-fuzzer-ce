@@ -24,7 +24,7 @@ Type:: Cryptography
 
 _Sha256_ will produce a SHA256 hash of the value in the parent xref:DataModel[DataModel].
 
-This xref:Transformer[Transformer] can only be applied to outgoing data as it is a fundamental principle of hashes that the operation be one-way.
+This xref:Transformer[Transformer] can only be applied to outgoing data because hashes are one-way operations.
 
 === Parameters
 
