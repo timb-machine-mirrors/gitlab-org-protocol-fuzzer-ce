@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _HexTransformer_ takes the provided value and produces an ASCII string of hex characters that represent the data.
+
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to string.
 
 === Parameters

@@ -23,19 +23,21 @@
 
 // 03/04/2014: Mike: Ready for tech review
 
-In Peach there are two models that create a fuzzer, the xref:DataModel[DataModel] and the StateModel.
-The StateModel recreates the basic state machine logic needed to test a protocol.
-The StateModel defines how to send and receive data to the fuzzing target.
+Two Peach models can create a fuzzer, the xref:DataModel[DataModel] and the StateModel.
+
+The StateModel consists of at least one xref:State[State] element. StateModels define how to send data to and receive data from the fuzzing target as well as creating the basic state machine logic needed to test a protocol.
+
+NOTE: Only one StateModel can be used for a given Test.
 
 StateModels can range from very simple to extremely complex.
 When starting out, keep the StateModels simple and expand as needed.
+
+Multiple xref:State[State] elements are required for non-deterministic interactions (such as a target sending an unpredictable command and expecting a certain response from the fuzzer), 
+In these situations, couple the xref:Action_changeState[changeState] action with a xref:Action_when[when] attribute to change to the correct state depending on the state and data of Peach.
+
 StateModels can contain various States to model full interactions with a target.
 Many interactions will be deterministic in their IO and will not need multiple States.
 Actions inside a State will occur sequentially top to bottom and that is often enough control.
-
-Only one StateModel can be used for a given Test.
-If the interaction is non-deterministic (such as a target sending an unpredictable command and expecting a certain response from the fuzzer), more states must be used.
-In these situations the xref:Action_changeState[changeState] action can be coupled with a xref:Action_when[when] attribute to change to the correct state depending on the state and data of Peach.
 
 Recursion into States is allowed in Peach.
 When a state is re-entered all data previously set through cracking input or slurping is reset to its default values.
@@ -63,7 +65,7 @@ xref:State[State]:: One or more State elements are required.
 
 .File Fuzzing
 ==========================
-When file fuzzing Peach writes data to a file, then calls the target process to open said file.
+When file fuzzing, Peach writes data to a file, then calls the target process to open the file.
 Peach can uses a single state and three actions for a simple file fuzzer.
 
 [source,xml]
@@ -283,7 +285,7 @@ The following StateModel utilizes multiple states to interact with the fuzzing t
 
 .Loop Using Iteration State Bag
 ==========================
-This example will use the iteration state bag to simulate a for loop.
+This example will use the iteration state bag to simulate a "do while" or "do until" loop.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>
