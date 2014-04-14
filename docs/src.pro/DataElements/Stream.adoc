@@ -2,14 +2,11 @@
 [[Stream]]
 == Stream
 
-The Stream element is a child element of xref:DataModel[DataModel] or Block.
-Streams are used to represent multiple streams of data in a single model.
-A single data model representing a zip file would use the Stream element to represent each file that makes up the zip file.
-Stream elements allow groupings one or more data elements such as xref:Number[Number]
-or xref:String[String] together into a logical structure to represent the content of the stream.
+Streams are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure.
+
 Streams also include two additional pieces of metadata, a stream name and stream attribute.
-Publishers that are stream aware can use the metadata and content to combine all streams in a data model into a single file.
-The xref:Publishers_Zip[Zip] publisher looks for Stream elements and creates a zip archive of all the streams in a model.
+
+The Stream element is a child element of xref:DataModel[DataModel] or Block.
 
 === Syntax
 
@@ -64,7 +61,7 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 === Background
 
-The Stream element is very similiar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
+The Stream element is similar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
 Conceptually, the following Stream example:
 
 [source,xml]
@@ -92,6 +89,7 @@ is analogous to:
 The stream name, attribute and children all support fuzzing.
 Additionally, relations and fixups can reference children of different streams.
 The Stream element is intended for use by publishers that are stream aware.
+For example, the xref:Publishers_Zip[Zip] publisher takes creates a zip file entry for each corresponding stream element.
 If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
 
 === Examples
@@ -160,7 +158,7 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 ----
 ==========================
 
-.Stream with xref:Publishers_ConsoleHex[ConsoleHex] publisher
+.Stream with xreg:Publishers_ConsoleHex[ConsoleHex] publisher
 ==========================
 Streams are treated like blocks when used with publishers that are not stream aware.
 
@@ -232,7 +230,7 @@ Produce a zip file containing multiple files.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-  <DataModel name="StreamExample3">
+  <DataModel name="StreamExample3_Output">
     <Stream streamName="file1.txt">
       <String value="Root file one"/>
     </Stream>
@@ -244,10 +242,20 @@ Produce a zip file containing multiple files.
     </Stream>
   </DataModel>
 
+  <DataModel name="StreamExample3_Input">
+   <Blob name="Value"/>
+  </DataModel>
+
   <StateModel name="TheState" initialState="initial">
     <State name="initial">
-      <Action type="output">
-        <DataModel ref="StreamExample3" />
+      <Action type="output" publisher="ZipPub">
+        <DataModel ref="StreamExample3_Output" />
+      </Action>
+
+      <Action type="close" publisher="ZipPub"/>
+
+      <Action type="input" publisher="FilePub">
+        <DataModel ref="StreamExample3_Input" />
       </Action>
     </State>
   </StateModel>
@@ -255,8 +263,14 @@ Produce a zip file containing multiple files.
   <Test name="Default">
     <StateModel ref="TheState"/>
 
-    <Publisher class="Zip">
+    <Publisher class="Zip" name="ZipPub">
       <Param name="FileName" value="fuzzed.zip" />
+    </Publisher>
+
+    <Publisher class="File" name="FilePub">
+      <Param name="FileName" value="fuzzed.zip" />
+      <Param name="Overwrite" value="false" />
+      <Param name="Append" value="false" />
     </Publisher>
 
     <Logger class="File">
@@ -283,25 +297,34 @@ Peach.Core.Dom.Action ActionType.Output
 Peach.Enterprise.Publishers.ZipPublisher start()
 Peach.Enterprise.Publishers.ZipPublisher open()
 Peach.Enterprise.Publishers.ZipPublisher Added 3 entries to zip file.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
 Peach.Enterprise.Publishers.ZipPublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Input
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher input()
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker DataModel 'StreamExample3_Input' Bytes: 0/599, Bits: 0/4792
+Peach.Core.Cracker.DataCracker getSize: -----> DataModel 'StreamExample3_Input'
+Peach.Core.Cracker.DataCracker scan: DataModel 'StreamExample3_Input'
+Peach.Core.Cracker.DataCracker scan: Blob 'StreamExample3_Input.Value' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
+Peach.Core.Cracker.DataCracker Crack: DataModel 'StreamExample3_Input' Size: <null>, Bytes: 0/599, Bits: 0/4792
+Peach.Core.Cracker.DataCracker ------------------------------------
+Peach.Core.Cracker.DataCracker Blob 'StreamExample3_Input.Value' Bytes: 0/599, Bits: 0/4792
+Peach.Core.Cracker.DataCracker getSize: -----> Blob 'StreamExample3_Input.Value'
+Peach.Core.Cracker.DataCracker scan: Blob 'StreamExample3_Input.Value' -> Offset: 0, Unsized element
+Peach.Core.Cracker.DataCracker lookahead: Blob 'StreamExample3_Input.Value'
+Peach.Core.Cracker.DataCracker getSize: <----- Last Unsized: 4792
+Peach.Core.Cracker.DataCracker Crack: Blob 'StreamExample3_Input.Value' Size: 4792, Bytes: 0/599, Bits: 0/4792
+Peach.Core.Dom.DataElement Blob 'StreamExample3_Input.Value' value is: 50 4b 03 04 14 00 00 00 08 00 eb 73 87 44 b5 95 4a 81 0f 00 00 00 0d 00 00 00 09 00 24 00 66 69.. (Len: 599 bytes)
+Peach.Core.Publishers.FilePublisher close()
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Enterprise.Publishers.ZipPublisher stop()
+Peach.Core.Publishers.FilePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-
-Contents of produced +fuzzed.zip+
-
-----
-> unzip -l fuzzed.zip
-Archive:  fuzzed.zip
-  Length      Date    Time    Name
----------  ---------- -----   ----
-       13  04-09-2014 18:14   file1.txt
-       24  04-09-2014 18:14   dir/file1.txt
-       24  04-09-2014 18:14   dir/file2.txt
----------                     -------
-       61                     3 files
-----
-
 ==========================

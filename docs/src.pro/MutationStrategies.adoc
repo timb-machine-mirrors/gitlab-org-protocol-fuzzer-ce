@@ -25,7 +25,7 @@ Peach has pluggable mutation strategies to deal with two common situations:
 
 * Peach needs a mechanism to allow you to easily change how fuzzing is performed. This helps you determine the best fuzzing methods and strategies for your situation.
 
-If you implement a single single C# class, you can fully control how Peach fuzzes a target (including state transitions) because:
+If you implement a single C# class, you can fully control how Peach fuzzes a target (including state transitions) because:
 
 * The C# class has full control over data mutations and state transition mutations.
 * Data mutations are changing the value of a data element
@@ -96,4 +96,4 @@ TIP: The seed for this strategy is not configurable and is always 31337.
 
 === RandomDeterministic
 
-This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and if run to completion will run every iteration that is generation with the Sequential strategy.  Similarly to the Random strategy the seed value can be used to repeat a previous test run with identical fuzzing.
+This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and, if run to completion, will run every iteration that is generation with the Sequential strategy.  Similarly to the Random strategy the seed value can be used to repeat a previous test run with identical fuzzing.

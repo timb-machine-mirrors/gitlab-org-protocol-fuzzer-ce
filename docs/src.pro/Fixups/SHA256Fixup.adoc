@@ -14,9 +14,9 @@
 // Added full examples
 
 
-Performs a SHA-256 hash of _ref_ element's value and places it in the parent element.
+Performs a SHA-256 hash of _ref_ element's value and places it in the parent element. This is used when fuzzing protocols that hash data with SHA-256.
+
 The SHA256 algorithm is defined in US Federal Information Processing Standard (FIPS) PUB 180-4 and is implemented in .Net Framework Implementation - System.Security.Cryptography.
-This is used when fuzzing protocols that hash data with SHA-256.
 
 === Parent Elements
 

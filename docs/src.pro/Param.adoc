@@ -14,7 +14,7 @@
 // Reviewed:
 // 04/07/2015 editing and cleanup
 
-Param provides a key-value parameter pair to the parent element It is used for configuration settings.
+Param provides a key-value parameter pair to the parent element. It is used for configuration settings.
 
 Params are common child-element for various xref:AgentsMonitors[Monitors], xref:Publisher[Publishers], and xref:Fixup[Fixups].
 

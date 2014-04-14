@@ -29,6 +29,7 @@ Type:: Encoder/Decoder
 
 _HtmlEncode_ will produce an HTML/XML encoded string of the provided value in the parent xref:DataModel[DataModel].
 Only the characters < & ' and " will be encoded.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
