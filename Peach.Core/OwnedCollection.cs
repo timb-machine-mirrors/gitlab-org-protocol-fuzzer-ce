@@ -15,15 +15,32 @@ namespace Peach.Core
 		T parent { get; set; }
 	}
 
+	/// <summary>
+	/// Collection that contains both named and owned objects.
+	/// Automatically synchronizes the parent property of all items
+	/// to be the owner on insertion and null on removal.
+	/// </summary>
+	/// <typeparam name="TOwner">Thet type of the owner.</typeparam>
+	/// <typeparam name="TObject">The type of the objects to collect.</typeparam>
+	[Serializable]
 	public class OwnedCollection<TOwner, TObject> : NamedCollection<TObject> where TObject : INamed, IOwned<TOwner>
 	{
 		private TOwner owner;
 
+		/// <summary>
+		/// Constructs a new OwnedCollection
+		/// </summary>
+		/// <param name="owner">The value to set to the parent property of inserted items.</param>
 		public OwnedCollection(TOwner owner)
 		{
 			this.owner = owner;
 		}
 
+		/// <summary>
+		/// Constructs a new OwnedCollection.
+		/// </summary>
+		/// <param name="owner">The value to set to the parent property of inserted items.</param>
+		/// <param name="baseName">Specifies the base name to use when generating unique names.</param>
 		public OwnedCollection(TOwner owner, string baseName)
 			: base(baseName)
 		{
