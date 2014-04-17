@@ -1,0 +1,42 @@
+
+:Doctitle: DHCPv4 Peach Pit Data Sheet
+:Description: Dynamic Host Configuration Protocol version 4 (DHCPv4)
+
+ * Peach Pit: DHCPv4
+ * Direction: Client
+ * Supported Platforms: Windows, Linux, OS X
+
+Dynamic Host Configuration Protocol Version 4 (DHCPv4) is the network configuration protocol over IPv4.
+
+DHCP provides a way for devices on a network to request an available IP address from a central server.
+Requesting IP addresses with DHCP reduces the changes of address collisions and allows hosts to become addressable without needing the network configuration's previous details.
+Requests are broadcasted over the layer-2 network to an entire network space and relayed on until received by a DHCP Server.
+The server responds back with an available IP address and a handshake is completed between the two systems.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC1531 | Dynamic Host Configuration Protocol
+|RFC1541 | Dynamic Host Configuration Protocol
+|RFC2131 | Dynamic Host Configuration Protocol
+|RFC3396 | Encoding Long Options in the Dynamic Host Configuration Protocol (DHCPv4)
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|DHCP Message | RFC2131 (Section 2)
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|DHCPREQUEST | RFC2131 (Section 4.3.2)
+|DHCPACK | RFC2131 (Section 4.4)
+|========

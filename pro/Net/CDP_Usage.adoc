@@ -1,0 +1,67 @@
+include::CDP_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+This pit broadcasts CDP packets; no extra applications are required.
+
+==== Required Pit Configuration Changes
+SourceIPv4:: IPv4 address of the interface on the local machine.
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface (used for monitoring).
+Hostname:: Hostname of the switch.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 -debug CDP.xml
+----
+==== Full test run
+----
+peach CDP.xml
+----
+
+=== Examples
+
+.Sample CDP Configuration File
+==========================
+Example configuration to broadcast CDP packets.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="SourceMAC" value="5254005335d3"/>
+    <Define key="TargetMAC" value="ffffffffffff"/>
+    <Define key="Hostname" value="foobar"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="logs/cdp/"/>
+    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
+  </OSX>
+
+  <Windows platform="windows">
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+  </Windows>
+</PitDefines>
+----
+==========================

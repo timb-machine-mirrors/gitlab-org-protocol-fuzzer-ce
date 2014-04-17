@@ -1,0 +1,145 @@
+include::Ldap_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A configured LDAP server with an account that is defined in the configuration file is required.
+On linux OpenLDAP can be used.
+
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine
+SourceIPv4:: IP address of the interface on the local machine
+TargetPort:: LDAP port number of the target host machine
+Interface:: Name of local interface (used for monitoring)
+Username:: Username used to login to the Ldap service
+Password:: Password for the user logging into the Ldap service
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing
+LoggerPath:: Path to folder where logs will be stored
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+#Ldap Search Test
+peach -1 --debug LDAP.xml
+
+#Ldap Server Side Test
+peach -1 --debug LDAP.xml Server
+
+#Ldap Add Test
+peach -1 --debug LDAP.xml Add
+
+#Ldap Comopre Test
+peach -1 --debug LDAP.xml Compare
+
+#Ldap Delete Test
+peach -1 --debug LDAP.xml Delete
+
+#Ldap ExtendOp Test
+peach -1 --debug LDAP.xml ExtendOp
+----
+==== Full test run
+----
+#Ldap Search Test
+peach LDAP.xml
+
+#Ldap Server Side Test
+peach LDAP.xml Server
+
+#Ldap Add Test
+peach LDAP.xml Add
+
+#Ldap Comopre Test
+peach LDAP.xml Compare
+
+#Ldap Delete Test
+peach LDAP.xml Delete
+
+#Ldap ExtendOp Test
+peach LDAP.xml ExtendOp
+----
+
+=== Examples
+
+.Sample LDAP Configuration File
+==========================
+Example configuration using OpenLdap on linux.
+
+First we must install OpenLDAP, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for OpenLDAP.
+
+----
+#Install OpenLdap server
+sudo apt-get install slapd ldap-utils migrationtools
+
+#Configure slapd
+dpkg-reconfigure slapd
+
+  *Omit OpenLDAP server configuration? No
+  *DNS domain name: peach.local
+  *Name of your organization: Peach 3.0
+  *Admin Password: password
+  *Confirm Password: password
+  *Database backend to use: BDB
+  *Do you want your database to be removed when slapd is purged? No
+  *Move old database? Yes
+  *Allow LDAPv2 Protocol? No
+
+#Edit migration tools common and edit the following parameters
+pico /etc/migrate_comon.ph
+  $DEFAULT_MAIL_DOMAIN = "peach.local";
+  $DEFAULT_BASE = "dc=peach.local";
+#Press ctrl+x to save
+
+#Create a group and people ldif file
+pico ~/grouppeople.ldif
+  dn: ou=People,dc=peach,dc=local
+  ou: People
+  objectclass: organizationalUnit
+#Press ctrl+x to save
+
+#Use migration tools to export users on your system to ldif files
+/usr/share/migrationtools/migrate_group.pl /etc/group ~/group.ldif
+/usr/share/migrationtools/migrate_passwd.pl /etc/passwd ~/password.ldif
+
+#Add the the created files to Ldap, the admin password is required after each of the following commands
+cd ~
+ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f grouppeople.ldif
+ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f group.ldif
+ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f password.ldif
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="LoggerPath"  value="./logs/ldap"/>
+    <Define key="Strategy"  value="Random"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="TargetPort" value="389"/>
+    <Define key="Password" value="password"/>
+    <Define key="UserName" value="cn=admin,dc=example,dc=com"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+  </Windows>
+</PitDefines>
+----
+==========================

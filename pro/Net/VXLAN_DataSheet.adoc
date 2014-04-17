@@ -1,0 +1,29 @@
+
+:Doctitle: VXLAN Peach Pit Data Sheet
+:Description: Virtual Extensible Local Area Network (VXLAN)
+
+ * Peach Pit: VXLAN
+ * Direction: Client
+ * Supported Platforms: Linux
+
+VXLAN (Virtual eXtensible Local Area Network) runs over the existing networking infrastructure and provides a means to "stretch" a Layer 2 network.
+
+VXLAN is a Layer 2 overlay scheme over a Layer 3 network. Each overlay is termed a VXLAN segment. Only VMs within the same VXLAN segment can communicate with each other. Each VXLAN segment is scoped through a 24 bit segment ID [the VXLAN Network Identifier (VNI)]. This allows up to 16M VXLAN segments to coexist within the same administrative domain.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|http://tools.ietf.org/id/draft-mahalingam-dutt-dcops-vxlan-06.txt |  VXLAN: A Framework for Overlaying Virtualized Layer 2 Networks over Layer 3 Networks
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|VXLAN Frame | http://tools.ietf.org/id/draft-mahalingam-dutt-dcops-vxlan-06.txt
+|========

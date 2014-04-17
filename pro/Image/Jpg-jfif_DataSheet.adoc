@@ -1,0 +1,36 @@
+:Doctitle: JPG-JFIF Peach Pit Data Sheet
+:Description: JPG-JFIF Image Format
+
+ * Peach Pit: JPG-JFIF
+ * Supported Platorms: Windows, Linux, OS X
+
+JPEG File Interchange Format (JFIF) is an image format built on a TLV segment structure.
+It is built to be an extensible format and supports a variety of compressions and encodings.
+Even though its structure is very similar to the EXIF standard, these two formats are incompatible.
+Many programs ignore these differences in requirements.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|http://www.w3.org/Graphics/JPEG/jfif3.pdf | JPEG File Interchange Format
+|http://www.w3.org/Graphics/JPEG/itu-t81.pdf | Information Technology - Digital Compression and Coding of Continuous-Tone Still Images - Requirements and Guidelines
+|========
+
+=== Use Cases
+
+
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Quantization | Digital Compression (B.2.4.1)
+|Huffman | Digital Compression (B.2.4.2)
+|Arithmetic Conditioning | Digital Compression (B.2.4.3)
+|Restart Interval | Digital Compression (B.2.4.4)
+|Comment | Digital Compression (B.2.4.5)
+|Application Data | Digital Compression (B.2.4.6)
+|========
+

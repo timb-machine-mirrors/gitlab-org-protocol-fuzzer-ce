@@ -1,0 +1,56 @@
+
+:Doctitle: ICMPv4 Peach Pit Data Sheet
+:Description: Internet Control Message Protocol version 4 (ICMPv4)
+
+ * Peach Pit: ICMPv4
+ * Direction: Client
+ * Supported Platforms: Windows, Linux, OS X
+
+Internet Control Message Protocol version 4 (ICMPv4) is the implementation of a message relay protocol on top of IPv4. It provides error responses for the IPv4 protocol as well as simple data transmission. It is commonly used in the ping application for testing network response and connectivity.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC792 | Internet Control Message Protocol
+|RFC1071 | Computing the Internet Checksum
+|RFC1122 | Requirements for Internet Hosts -- Communication Layers
+|RFC1256 | ICMP Router Discovery Messages
+|RFC6918 | Formally Deprecating Some ICMPv4 Message Types
+|RFC6633 | Deprecation of ICMP Source Quench Messages
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|8) Echo | RFC792
+|0) Echo Reply | RFC792
+|3) Destination Unreachable | RFC792
+|4) Source Quench | RFC792
+|5) Redirect | RFC792
+|11) Time Exceeded | RFC792
+|12) Parameter Problem | RFC792
+|13) Timestamp | RFC792
+|14) Timestamp Reply Problem | RFC792
+|15) Information Request | RFC792
+|16) Information Reply | RFC792
+|9) Router Advertisement | RFC1256 (Section 3)
+|10) Router Solicitation | RFC1256 (Section 3)
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Internet Checksum | RFC1071
+|========
+
+[options="header"]
+|========
+|Supported Payloads | Specification
+|IPv4 in Error Responses | RFC1122
+|========

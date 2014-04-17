@@ -1,0 +1,44 @@
+:Doctitle: IPsec Peach Pit Data Sheet
+:Description: Internet Protocol Security
+
+ * Peach Pit: IPsec
+ * Direction: Client
+ * Supported Platforms: Windows, Linux
+
+Internet Protocol Security (IPsec) is a protocol suite for securing Internet Protocol (IP) communications by authenticating and encrypting each IP packet of a communication session.
+
+IPsec includes protocols for establishing mutual authentication between agents at the beginning of the session and cryptographic key negotiations during the session. The protocol can be used to protect data flows between a pair of hosts (host-to-host), between a pair of security gateways (network-to-network), or between a security gateway and a host (network-to-host).
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC2403 | The Use of HMAC-MD5-96 within ESP and AH
+|RFC2404 | The Use of HMAC-SHA-1-96 within ESP and AH
+|RFC2405 | The ESP DES-CBC Cipher Algorithm With Explicit IV
+|RFC2410 | The NULL Encryption Algorithm and Its Use With IPsec
+|RFC2451 | The ESP CBC-Mode Cipher Algorithms
+|RFC2857 | The Use of HMAC-RIPEMD-160-96 within ESP and AH
+|RFC4302 | IP Authentication Header
+|RFC4303 | IP Encapsulating Security Payload
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|Encapsulating Security Payload Packet Format | RFC4303 2
+|Authentication Header (AH) | RFC4302
+|Transport Mode Processing | RFC4303 3.1.1
+|Tunnel Mode Processing | RFC4303 3.1.2
+|Separate Confidentiality and Integrity Algorithms | RFC4303 3.4.4.1
+|ICV HMAC-MD5-96 | RFC2403
+|ICV HMAC-SHA-1-96 | RFC2404
+|ICV HMAC-RIPEMD-160-96 | RFC2857
+|3DES-CBC Cipher Encryption | RFC2405, RFC2451
+|Null Encryption | RFC2410
+|========

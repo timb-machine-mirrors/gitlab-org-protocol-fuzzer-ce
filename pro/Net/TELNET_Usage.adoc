@@ -1,0 +1,102 @@
+include::TELNET_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A Telnet server is required to test the client side of the Telnet pit.
+On Linux, telnetd can be downloaded using apt-get.
+
+
+
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+SourcePort:: Telnet port number of the local machine.
+TargetPort:: Telnet port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+Username:: User name of the remote Telnet account.
+Password:: Password for the associated Telnet user account.
+Program:: The client program to test when fuzzing as the server.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+#Test client
+peach -1 --debug TELNET.xml
+
+#Test server
+peach -1 --debug TELNET.xml Server
+----
+==== Full test run
+----
+#Test client
+peach TELNET.xml
+
+#Test server
+peach TELNET.xml Server
+----
+
+=== Examples
+
+.Sample Telnet Configuration File
+==========================
+Example configuration using telnetd on linux.
+
+First we must install telnet and telnetd, for this example we assume you are running on ubuntu or debian. For other platforms follow the platform specific installation instructions for telnet and telnetd.
+
+----
+#Install telnet and telnet server on Linux
+sudo apt-get install telnet
+sudo apt-get install telnetd
+
+#Download Putty for Telnet windows. Putty can be downloaded using the link below
+http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetPort" value="23"/>
+    <Define key="SourcePort" value="31337"/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="./logs/telnet/"/>
+    <Define key="Strategy" value="Sequential"/>
+    <Define key="Username" value="username"/>
+    <Define key="Password" value="password"/>
+    <Define key="Path" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="Program" value="telnet"/>
+    <Define key="Agent" value="Linux"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+    <Define key="Program" value="telnet"/>
+    <Define key="Agent" value="OSX"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="Program" value="putty.exe"/>
+    <Define key="Agent" value="Windows"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+  </Windows>
+</PitDefines>
+----
+==========================
