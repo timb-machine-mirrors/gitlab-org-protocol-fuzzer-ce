@@ -56,6 +56,7 @@ namespace Peach.Core.Dom
 	[Parameter("relativeTo", typeof(string), "Element to compute value relative to", "")]
 	public class OffsetRelation : Relation
 	{
+		[Serializable]
 		private class RelativeBinding : Binding
 		{
 			OffsetRelation rel;

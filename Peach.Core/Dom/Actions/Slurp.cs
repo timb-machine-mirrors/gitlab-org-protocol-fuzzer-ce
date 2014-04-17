@@ -8,6 +8,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Slurp")]
+	[Serializable]
 	public class Slurp : Action
 	{
 		/// <summary>

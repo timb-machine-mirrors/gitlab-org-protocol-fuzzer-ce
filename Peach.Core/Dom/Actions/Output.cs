@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Output")]
+	[Serializable]
 	public class Output : Action
 	{
 		public ActionData data { get; set; }

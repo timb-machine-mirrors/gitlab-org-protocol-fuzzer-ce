@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Input")]
+	[Serializable]
 	public class Input : Action
 	{
 		public ActionData data { get; set; }

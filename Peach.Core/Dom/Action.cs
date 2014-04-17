@@ -55,6 +55,7 @@ namespace Peach.Core.Dom
 	/// <summary>
 	/// Performs an Action such as sending output, calling a method, etc.
 	/// </summary>
+	[Serializable]
 	public abstract class Action : INamed
 	{
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
