@@ -330,8 +330,10 @@ namespace Peach.Enterprise.WebServices
 		public uint iterationCount { get { return _engine.context.currentIteration; } }
 		public string startDate { get { return ((DateTime)_engine.context.stateStore["Peach.StartTime"]).ToShortDateString(); } }
 		public string stopDate { get { return ""; } }
+
 		public string runtime { get { return (DateTime.Now - ((DateTime)_engine.context.stateStore["Peach.StartTime"])).ToString(@"hh\:mm\:ss"); } }
 		public int speed { get { return (int)((iterationCount / (DateTime.Now - ((DateTime)_engine.context.stateStore["Peach.StartTime"])).TotalMinutes) * 60); } }
+		
 		public string[] tags { get { return new string[0]; } }
 		public Group[] groups { get { return new Group[0]; } }
 
