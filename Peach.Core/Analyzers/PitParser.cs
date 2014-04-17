@@ -609,21 +609,6 @@ namespace Peach.Core.Analyzers
 			return null;
 		}
 
-
-
-		/// <summary>
-		/// Find a referenced Dom element by name, taking into account namespace prefixes.
-		/// </summary>
-		/// <typeparam name="T">Type of Dom element.</typeparam>
-		/// <param name="dom">Dom to search in</param>
-		/// <param name="refName">Name of reference</param>
-		/// <param name="predicate">Selector predicate that returns the element collection</param>
-		/// <returns></returns>
-		protected T getRef<T>(Dom.Dom dom, string refName, Func<Dom.Dom, ITryGetValue<string, T>> predicate)
-		{
-			return dom.getRef<T>(refName, predicate);
-		}
-
 		#endregion
 
 		/// <summary>
@@ -1607,7 +1592,7 @@ namespace Peach.Core.Analyzers
 			{
 				string refName = node.getAttrString("ref");
 
-				var other = getRef<DataSet>(_dom, refName, a => a.datas);
+				var other = _dom.getRef<DataSet>(refName, a => a.datas);
 				if (other == null)
 					throw new PeachException("Error, could not resolve Data element ref attribute value '" + refName + "'.");
 
@@ -1811,7 +1796,7 @@ namespace Peach.Core.Analyzers
 				{
 					string refName = child.getAttrString("ref");
 
-					var agent = getRef<Dom.Agent>(parent, refName, a => a.agents);
+					var agent = parent.getRef<Dom.Agent>(refName, a => a.agents);
 					if (agent == null)
 						throw new PeachException("Error, Test::" + test.name + " Agent name in ref attribute not found.");
 
@@ -1841,7 +1826,7 @@ namespace Peach.Core.Analyzers
 				{
 					string strRef = child.getAttrString("ref");
 
-					test.stateModel = getRef<Dom.StateModel>(parent, strRef, a => a.stateModels);
+					test.stateModel = parent.getRef<Dom.StateModel>(strRef, a => a.stateModels);
 					if (test.stateModel == null)
 						throw new PeachException("Error, could not locate StateModel named '" +
 							strRef + "' for Test '" + test.name + "'.");
