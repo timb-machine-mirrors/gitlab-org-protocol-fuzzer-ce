@@ -247,6 +247,10 @@ namespace Peach.Core
 			 * return clone;
 			 */
 
+			// Only operate on classes that are explicitly marked as Serializable
+			if (!type.GetAttributes<SerializableAttribute>(null).Any())
+				throw new NotSupportedException("Can not clone '{0}', it is not marked as serializable.".Fmt(type.FullName));
+
 			// Get functions decorated with callback attributes
 			var onCloning = GetMethodsWithAttribute(typeof(OnCloningAttribute), type);
 			var onCloned = GetMethodsWithAttribute(typeof(OnClonedAttribute), type);
