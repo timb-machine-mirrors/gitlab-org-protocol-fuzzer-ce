@@ -2,7 +2,9 @@
 
 == ASN.1 Analyzer
 
-Converts Abstract Syntax Notation One (ASN.1) into a full DataModel. The analyzer can convert from BER, CER, and DER type ASN.1 encodings. This analyzer can only be used on Blob types.  
+Converts Abstract Syntax Notation One (ASN.1) into a full DataModel. This analyzer can convert from BER, CER, and DER type ASN.1 encodings. 
+
+IMPORTANT: The ASN.1 analyzer can only be used on Blob data types.  
 
 === Syntax
 

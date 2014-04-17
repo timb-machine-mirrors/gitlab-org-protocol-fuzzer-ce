@@ -1,5 +1,5 @@
 [[MutationStrategies]]
-== Mutation Strategies
+== Pluggable Mutation Strategies
 
 // Reviewed:
 //  - 01/30/2014: Seth & Mike: Outlined
@@ -18,17 +18,40 @@
 // * Complicated state model with early exit will cause nothing to get fuzzed (maybe in booky part)
 // * Mutators get random numbers from strategies
 
-Traditionally Peach has fuzzed DataModels in a top-down sequential method.  While this guarantees that every data element will get fuzzed with every test case, this is not optimal for larger complex systems which can produce millions of test case variations.  Additionally, it is recognized that a mechanism was needed to allow for easily changing how fuzzing is performed to allow for easier research into the best methods and strategies.
 
-Out of this was born pluggable mutation strategies.  By implementing a single class a user can fully control how Peach fuzzes a target including state transitions.
+Peach has pluggable mutation strategies to deal with two common situations: 
 
-Peach comes with three strategies by default.
+* Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element will get fuzzed with each test case, this may not be the best solution for larger, complex systems which can produce millions of test case variations.  
 
-=== Random (Default)
+* Peach needs a mechanism to allow you to easily change how fuzzing is performed. This helps you determine the best fuzzing methods and strategies for your situation.
 
-The random strategy will run forever.  This strategy will select up to _MaxFieldsToMutate_ elements to mutate at a time.  For each selected element one of it's corresponding mutators is selected at random. Peach derives the randomness of these selections from randomly generated seed number. An identical test run can be repeated by passing the same *seed* value as a Peach command line option with the _--seed_ command line option.  This is useful for replaying fuzzing iterations to reproduce a previous Fault.
+If you implement a single single C# class, you can fully control how Peach fuzzes a target (including state transitions) because:
+
+* The C# class has full control over data mutations and state transition mutations.
+* Data mutations are changing the value of a data element
+* You can easily change the state. If the pit says to transition to state named "RxPacket1," the mutation strategy can change the state so Peach transitions to the state named "TxPacket4" instead.
+
+
+Peach supplies three user-extensible mutation strategies:
+
+* Random (default)
+* Sequential
+* RandomDeterministic
+
+=== Random 
+
+Random is the default fuzzing strategy.  
+
+This strategy will select up to _MaxFieldsToMutate_ elements to mutate at a time.  For each selected element, one of it's corresponding mutators is selected at random. 
+
+NOTE: Peach derives the randomness of these selections from a randomly generated seed number. 
+
+An identical test run can be repeated by passing the same *seed* value with the Peach _--seed_ command line option.  This is useful for replaying fuzzing iterations to reproduce a previous Fault.
 
 This strategy is most useful for larger data models or for use after performing a sequential fuzzing run.
+
+IMPORTANT: The random strategy can have an infinite number of fuzzing iterations; it can run forever. 
+
 
 ==== Parameters
 
@@ -55,7 +78,11 @@ SwitchCount:: Number of iterations to perform before switching xref:Data[Data] s
 
 === Sequential
 
-Peach will fuzz each element in the DataModel in order one at a time. Peach will start from the top of the DataModel and apply all valid mutation to each data element until all possible mutations have been exhausted.  There is a finite number of fuzzing iterations with this strategy.  The seed for this strategy is not configurable and is always 31337.
+If you select the sequential strategy, Peach will fuzz each element in the DataModel in order, one at a time. Peach will start from the top of the DataModel and apply all valid mutation to each data element until all possible mutations have been exhausted.  
+
+The sequential strategy has a finite number of fuzzing iterations.  
+
+TIP: The seed for this strategy is not configurable and is always 31337.
 
 ==== Examples
 

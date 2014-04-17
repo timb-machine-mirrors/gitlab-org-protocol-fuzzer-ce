@@ -1,5 +1,9 @@
 <<<
 [[DataModel]]
+
+// Reviewed: 04/09/2014: Lynn
+// Added String as a Child element
+
 == DataModel
 
 The DataModel element is a child of the Peach root element.  A DataModel defines the structure of a data block by specifying additional child elements such as xref:Number[Number], xref:Blob[Blob], or xref:String[String].
@@ -35,6 +39,7 @@ xref:Hint[Hint]:: Provide information to mutators.
 xref:Number[Number]:: Defines a binary number of arbitrary bit size.
 xref:Padding[Padding]:: Pad out variably sized blocks or data models.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Stream[Stream]::  Group one or more data elements together into a logical structure.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
 

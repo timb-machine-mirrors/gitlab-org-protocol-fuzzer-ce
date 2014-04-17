@@ -55,7 +55,7 @@ namespace Peach.Enterprise.WebServices
 				var v = logger as Peach.Enterprise.Loggers.VisualizerLogger;
 				if (v != null)
 				{
-					var response = (Nancy.Response)v.json;
+					var response = (Nancy.Response)v.getJson();
 
 					response.ContentType = "application/json";
 

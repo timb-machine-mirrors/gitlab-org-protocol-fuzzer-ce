@@ -14,19 +14,23 @@ using Peach.Core.IO;
 
 using Newtonsoft.Json;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace Peach.Enterprise.Loggers
 {
 	[Logger("Visualizer", true)]
 	public class VisualizerLogger :Peach.Core.Logger
 	{
-
-		public string json;
-
+		object mutext = new object();
+		string json;
 		public static string startUpPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "PeachView" + Path.DirectorySeparatorChar;
-		private string _elementName = "";
-		private string _mutatorName = "";
-		private uint _totalIterations = 0;
+
+		uint currentIteration = 0;
+		uint totalIterations = 0;
+
+		List<ActionData> recentData = new List<ActionData>();
+		List<Tuple<string, string>> fuzzedElements = new List<Tuple<string, string>>();
+		List<ActionData> dataModelsFromActions = new List<ActionData>();
 
 		public VisualizerLogger(Dictionary<string, Variant> args)
 		{
@@ -34,42 +38,73 @@ namespace Peach.Enterprise.Loggers
 
 		protected override void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
 		{
-			_elementName = element.fullName;
-			_mutatorName = mutator.name;
+			lock (mutext)
+			{
+				fuzzedElements.Add(new Tuple<string, string>(element.fullName, mutator.name));
+			}
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			if (totalIterations != null)
-				_totalIterations = (uint)totalIterations;
+			lock (mutext)
+			{
+				if (totalIterations != null)
+					this.totalIterations = (uint)totalIterations;
 
-			// Remove any data models from last iteration
-			dataModelsFromActions.Clear();
+				// Remove any data models from last iteration
+				dataModelsFromActions.Clear();
+				fuzzedElements.Clear();
+			}
 		}
 
 		/// <summary>
 		/// Collection of data models from Action_Finished event.
 		/// </summary>
-		List<Tuple<string, DataModel>> dataModelsFromActions = new List<Tuple<string, DataModel>>();
-
 		protected override void Action_Finished(Peach.Core.Dom.Action action)
 		{
-			//base.Action_Finished(action);
-
 			// TODO - Handle parameters
-			foreach (var data in action.allData)
+			lock (mutext)
 			{
-				dataModelsFromActions.Add(new Tuple<string, DataModel>(data.dataModel.name, data.dataModel));
+				dataModelsFromActions.AddRange(action.allData);
 			}
 		}
 
 		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
 		{
+			lock (mutext)
+			{
+				recentData = dataModelsFromActions;
+				dataModelsFromActions = new List<ActionData>();
+				json = null;
+
+				this.currentIteration = currentIteration;
+			}
+		}
+
+		public string getJson()
+		{
+			lock (mutext)
+			{
+				if (json == null)
+					json = getJsonData();
+				return json;
+			}
+		}
+
+		static string Base64Encode(BitwiseStream bs)
+		{
+			bs.Seek(0, SeekOrigin.Begin);
+			var writer = new MemoryStream();
+			var cs = new CryptoStream(writer, new ToBase64Transform(), CryptoStreamMode.Write);
+			bs.CopyTo(cs);
+			cs.FlushFinalBlock();
+			return System.Text.Encoding.ASCII.GetString(writer.ToArray());
+		}
+
+		public string getJsonData()
+		{
 			try
 			{
-				if (context.controlIteration || context.controlRecordingIteration)
-					return;
-
 				StringBuilder stringBuilder = new StringBuilder();
 				StringWriter stringWriter = new StringWriter(stringBuilder);
 
@@ -80,18 +115,24 @@ namespace Peach.Enterprise.Loggers
 					jsonWriter.WritePropertyName("IterationNumber");
 					jsonWriter.WriteValue(Convert.ToString(currentIteration));
 					jsonWriter.WritePropertyName("TotalIteration");
-					jsonWriter.WriteValue(Convert.ToString(_totalIterations));
-					jsonWriter.WritePropertyName("ElementName");
-					jsonWriter.WriteValue(_elementName);
-					jsonWriter.WritePropertyName("MutatorName");
-					jsonWriter.WriteValue(_mutatorName);
+					jsonWriter.WriteValue(Convert.ToString(totalIterations));
 					jsonWriter.WriteEndObject();
 
+					//Adding all mutated elements to json string
+					jsonWriter.WriteStartObject();
+					jsonWriter.WritePropertyName("MutatedElements");
+					jsonWriter.WriteStartArray();
+					foreach (var item in fuzzedElements)
+					{
+						jsonWriter.WriteValue(item.Item1);
+					}
+					jsonWriter.WriteEndArray();
+					jsonWriter.WriteEndObject();
+					
 					jsonWriter.WriteStartObject();
 					jsonWriter.WritePropertyName("DataModels");
 					jsonWriter.WriteStartArray();
-
-					foreach (var item in dataModelsFromActions)
+					foreach (var item in recentData)
 					{
 						// StateModel.dataActions is now the serialized data model
 						// in order to properly keep the data around when actions
@@ -104,8 +145,20 @@ namespace Peach.Enterprise.Loggers
 						// EDDINGTON
 						// Easy fix was to store datamodels during Action_Finished.
 
+						//Add fuzzed data
 						jsonWriter.WriteStartObject();
-						DataModelToJson(item.Item1, item.Item2, jsonWriter);
+						jsonWriter.WritePropertyName("FuzzedDataModel");
+						jsonWriter.WriteValue(Base64Encode(item.dataModel.Value));
+						jsonWriter.WriteEndObject();
+
+						//Add original data
+						jsonWriter.WriteStartObject();
+						jsonWriter.WritePropertyName("OriginalDataModel");
+						jsonWriter.WriteValue(Base64Encode(item.originalDataModel.Value));
+						jsonWriter.WriteEndObject();
+						
+						jsonWriter.WriteStartObject();
+						DataModelToJson(item.dataModel.name, item.dataModel, jsonWriter);
 						jsonWriter.WriteEndObject();
 					}
 
@@ -114,11 +167,11 @@ namespace Peach.Enterprise.Loggers
 					jsonWriter.WriteEndArray();
 				}
 
-				json = stringBuilder.ToString();
+				return stringBuilder.ToString();
 			}
 			catch (Exception e)
 			{
-				throw new PeachException("Failure writing Peach JSON Model for Visualizer", e);
+				throw new PeachException("Failure writing Peach JSON Model for Visualizer: {0}".Fmt(e.Message), e);
 			}
 		}
 

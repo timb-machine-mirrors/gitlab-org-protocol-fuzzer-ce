@@ -1,0 +1,307 @@
+<<<
+[[Stream]]
+== Stream
+
+The Stream element is a child element of xref:DataModel[DataModel] or Block.
+Streams are used to represent multiple streams of data in a single model.
+A single data model representing a zip file would use the Stream element to represent each file that makes up the zip file.
+Stream elements allow groupings one or more data elements such as xref:Number[Number]
+or xref:String[String] together into a logical structure to represent the content of the stream.
+Streams also include two additional pieces of metadata, a stream name and stream attribute.
+Publishers that are stream aware can use the metadata and content to combine all streams in a data model into a single file.
+The xref:Publishers_Zip[Zip] publisher looks for Stream elements and creates a zip archive of all the streams in a model.
+
+=== Syntax
+
+[source,xml]
+----
+<Stream streamName="TheStream">
+  <String value="Hello world!" />
+</Block>
+----
+
+=== Attributes
+
+_Required:_
+
+streamName:: Name of the underlying stream
+
+_Optional:_
+
+xref:name[name]:: Name of the stream element.
+xref:ref[ref]:: Reference to a [DataModel_Stream]] to use as a template.
+xref:length[length]:: Data element length.
+xref:lengthType[lengthType]:: The unit measure of length attribute. Default is bytes.
+xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
+xref:minOccurs[minOccurs]:: The minimum number of times this block must occur.
+xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur.
+xref:occurs[occurs]:: The actual number of times this block occurs.
+xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to false.
+streamAttribute:: Integer representing any underlyng attributes of stream, defaults to 0.
+
+=== Child Elements
+
+xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
+xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Block[Block]:: Group one or more data elements together into a logical structure.
+xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
+xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Flags[Flags]:: Defines a set of bit sized flags.
+xref:Hint[Hint]:: Provide information to mutators.
+xref:Number[Number]:: Defines a binary number of arbitrary bit size.
+xref:Padding[Padding]:: Pad out variably sized blocks or data models.
+xref:Placement[Placement]:: Relocate an element after it has been cracked.
+xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
+
+=== Mutators
+
+The following mutators will operate on this element type:
+
+xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
+xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
+xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighboring each other
+
+=== Background
+
+The Stream element is very similiar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
+Conceptually, the following Stream example:
+
+[source,xml]
+----
+<Stream name="TheStream" streamName="file1.txt" streamAttribute="100">
+  <String value="Hello World"/>
+  <Transformer class="Base64Encode"/>
+</Stream>
+----
+
+is analogous to:
+
+[source,xml]
+----
+<Block name="TheStream">
+  <String name="Name" value="file1.txt"/>
+  <Number name="Attribute" size="32" signed="false" value="100"/>
+  <Block name="Content">
+    <String value="Hello World"/>
+    <Transformer class="Base64Encode"/>
+  </Block>
+</Block>
+----
+
+The stream name, attribute and children all support fuzzing.
+Additionally, relations and fixups can reference children of different streams.
+The Stream element is intended for use by publishers that are stream aware.
+If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
+
+=== Examples
+
+.Stream with xref:Publishers_Zip[Zip] publisher
+==========================
+This definition will produce a zip file containing a single entry 'file1.txt' containing the string 'Hello World'.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="StreamExample1">
+    <Stream streamName="file1.txt">
+      <String value="Hello World"/>
+    </Stream>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="StreamExample1" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="Zip">
+      <Param name="FileName" value="fuzzed.zip" />
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 59388.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Enterprise.Publishers.ZipPublisher start()
+Peach.Enterprise.Publishers.ZipPublisher open()
+Peach.Enterprise.Publishers.ZipPublisher Added 1 entries to zip file.
+Peach.Enterprise.Publishers.ZipPublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Enterprise.Publishers.ZipPublisher stop()
+
+[*] Test 'Default' finished.
+
+----
+==========================
+
+.Stream with xref:Publishers_ConsoleHex[ConsoleHex] publisher
+==========================
+Streams are treated like blocks when used with publishers that are not stream aware.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="StreamExample2">
+    <Stream streamName="file1.txt">
+      <String value="Hello World"/>
+    </Stream>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output" publisher="ConsolePub">
+        <DataModel ref="StreamExample2" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="ConsoleHex" name="ConsolePub"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 30169.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(11 bytes)
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64                  Hello World
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================
+
+.Multiple streams
+==========================
+Produce a zip file containing multiple files.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
+
+  <DataModel name="StreamExample3">
+    <Stream streamName="file1.txt">
+      <String value="Root file one"/>
+    </Stream>
+    <Stream streamName="dir/file1.txt">
+      <String value="File one in subdirectory"/>
+    </Stream>
+    <Stream streamName="dir/file2.txt">
+      <String value="File two in subdirectory"/>
+    </Stream>
+  </DataModel>
+
+  <StateModel name="TheState" initialState="initial">
+    <State name="initial">
+      <Action type="output">
+        <DataModel ref="StreamExample3" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="TheState"/>
+
+    <Publisher class="Zip">
+      <Param name="FileName" value="fuzzed.zip" />
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 58326.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Enterprise.Publishers.ZipPublisher start()
+Peach.Enterprise.Publishers.ZipPublisher open()
+Peach.Enterprise.Publishers.ZipPublisher Added 3 entries to zip file.
+Peach.Enterprise.Publishers.ZipPublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Enterprise.Publishers.ZipPublisher stop()
+
+[*] Test 'Default' finished.
+----
+
+Contents of produced +fuzzed.zip+
+
+----
+> unzip -l fuzzed.zip
+Archive:  fuzzed.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       13  04-09-2014 18:14   file1.txt
+       24  04-09-2014 18:14   dir/file1.txt
+       24  04-09-2014 18:14   dir/file2.txt
+---------                     -------
+       61                     3 files
+----
+
+==========================
