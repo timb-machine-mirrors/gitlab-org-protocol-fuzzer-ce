@@ -22,11 +22,12 @@
 // 03/05/2014: Lynn: 
 //  Edited text
 
-The _accept_ Action will block execution until an incoming connection is available, made, and accepted, or a time out is reached.
-This action is most common in situations where a target application initiates communication and Peach is playing the roll of a server. 
-Not all xref:Publisher[Publishers] support this action type. One that does support the _accept_ action is the xref:Publishers_TcpListener[TcpListener] Publisher.
-Peach is single-threaded so it is unable to execute any scripts or other tasks while waiting for a connection from the target.
-Some Publishers use an AcceptTimeout parameter for setting a duration of time to wait for a connection.
+The _accept_ Action will block execution until an incoming connection is available, made, and accepted, or a time out is reached. This action is most common in situations where a target application initiates the communication and Peach acts as a server. 
+
+Not all xref:Publisher[Publishers] support the _accept_ action type; One that does is the xref:Publishers_TcpListener[TcpListener] Publisher.
+
+Peach is single-threaded so it can't execute any other tasks (including scripts) while waiting for a target connection.
+Some Publishers use an _AcceptTimeout_ parameter to set a time duration to wait for a connection.
 
 .Accept Timeout
 ****

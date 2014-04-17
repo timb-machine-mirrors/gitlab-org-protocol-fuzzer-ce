@@ -27,11 +27,14 @@
 // 03/05/2014: Lynn: 
 //  Edited text 
 
-The _open_ action will cause the associated publisher to open it's resource.
+The _open_ (or _connect_) action will cause the associated publisher to open its resource.
+
 * For the xref:Publishers_File[File publisher], this will open the file handle.
 * For the xref:Publishers_Tcp[TCP publisher] it will initiate the network connection.
-Open is an implicit action that will occur by default at the start of each iteration. The only time the _open_ action needs to be explicitly called is when he default behaviour needs to be changed (for example, when listening for an initial incoming UDP packet).
-Unlike the accept action used with TCP, UDP does not block while accepting incoming packets.
+
+Open is an implicit action that occurs by default at the start of each iteration. 
+
+The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet) because unlike the xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets.
 
 NOTE: _connect_ is a pseudonym for _open_. They can be used interchangeably.
 
