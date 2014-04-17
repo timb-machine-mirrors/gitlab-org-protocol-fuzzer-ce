@@ -36,63 +36,56 @@ using System.Xml;
 
 namespace Peach.Core.Dom
 {
-	[Serializable]
 	public class Dom : INamed
 	{
-		public string fileName = "";
-		public string version = "";
-		public string author = "";
-		public string description = "";
+		/// <summary>
+		/// The namespace of this Dom.
+		/// </summary>
+		public string name { get; set; }
 
-		public RunContext context = null;
-		public OrderedDictionary<string, Dom> ns = new OrderedDictionary<string, Dom>();
-		public OrderedDictionary<string, DataModel> dataModels = new OrderedDictionary<string, DataModel>();
-		public OrderedDictionary<string, StateModel> stateModels = new OrderedDictionary<string, StateModel>();
-		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
-		public OrderedDictionary<string, Test> tests = new OrderedDictionary<string, Test>();
-		public NamedCollection<DataSet> datas = new NamedCollection<DataSet>();
+		public string fileName { get; set; }
+		public string version { get; set; }
+		public string author { get; set; }
+		public string description { get; set; }
+
+		public RunContext context { get; set; }
+
+		public OwnedCollection<Dom, DataModel> dataModels { get; private set; }
+		public OwnedCollection<Dom, StateModel> stateModels { get; private set; }
+		public OwnedCollection<Dom, Test> tests { get; private set; }
+		public NamedCollection<Dom> ns { get; private set; }
+		public NamedCollection<Agent> agents { get; private set; }
+		public NamedCollection<DataSet> datas { get; private set; }
 
 		public Dom()
 		{
 			name = "";
+			fileName = "";
+			version = "";
+			author = "";
+			description = "";
 
-			dataModels.AddEvent += new AddEventHandler<string, DataModel>(dataModels_AddEvent);
-			stateModels.AddEvent += new AddEventHandler<string, StateModel>(stateModels_AddEvent);
-			tests.AddEvent += new AddEventHandler<string, Test>(tests_AddEvent);
+			dataModels = new OwnedCollection<Dom, DataModel>(this);
+			stateModels = new OwnedCollection<Dom, StateModel>(this);
+			tests = new OwnedCollection<Dom, Test>(this);
+			ns = new NamedCollection<Dom>();
+			agents = new NamedCollection<Agent>();
+			datas = new NamedCollection<DataSet>();
 		}
-
-		#region OrderedDictionary AddEvent Handlers
-
-		void tests_AddEvent(OrderedDictionary<string, Test> sender, string key, Test value)
-		{
-			value.parent = this;
-		}
-
-		void stateModels_AddEvent(OrderedDictionary<string, StateModel> sender, string key, StateModel value)
-		{
-			value.parent = this;
-		}
-
-		void dataModels_AddEvent(OrderedDictionary<string, DataModel> sender, string key, DataModel value)
-		{
-			value.dom = this;
-		}
-
-		#endregion
 
 		/// <summary>
 		/// Execute all analyzers on all data models in DOM.
 		/// </summary>
 		public void evaulateDataModelAnalyzers()
 		{
-			foreach (DataModel model in dataModels.Values)
+			foreach (var model in dataModels)
 				model.evaulateAnalyzers();
 
-			foreach (Test test in tests.Values)
+			foreach (var test in tests)
 			{
-				foreach (State state in test.stateModel.states)
+				foreach (var state in test.stateModel.states)
 				{
-					foreach (Action action in state.actions)
+					foreach (var action in state.actions)
 					{
 						foreach (var data in action.allData)
 						{
@@ -132,16 +125,6 @@ namespace Peach.Core.Dom
 				return value;
 			return default(T);
 		}
-
-
-		#region INamed Members
-
-		public virtual string name
-		{
-			get; set;
-		}
-
-		#endregion
 	}
 }
 

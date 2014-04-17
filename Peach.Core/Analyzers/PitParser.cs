@@ -379,7 +379,7 @@ namespace Peach.Core.Analyzers
 						var newParser = new PitParser();
 						Dom.Dom newDom = newParser.asParser(args, fileName);
 						newDom.name = ns;
-						dom.ns[ns] = newDom;
+						dom.ns.Add(newDom);
 						break;
 
 					case "Require":
@@ -453,7 +453,7 @@ namespace Peach.Core.Analyzers
 				{
 					try
 					{
-						dom.dataModels.Add(dm.name, dm);
+						dom.dataModels.Add(dm);
 					}
 					catch (ArgumentException)
 					{
@@ -495,7 +495,7 @@ namespace Peach.Core.Analyzers
 
 					try
 					{
-						dom.stateModels.Add(sm.name, sm);
+						dom.stateModels.Add(sm);
 					}
 					catch (ArgumentException)
 					{
@@ -528,7 +528,7 @@ namespace Peach.Core.Analyzers
 
 					try
 					{
-						dom.tests.Add(test.name, test);
+						dom.tests.Add(test);
 					}
 					catch (ArgumentException)
 					{
@@ -593,13 +593,13 @@ namespace Peach.Core.Analyzers
 					return elem;
 			}
 
-			foreach (DataModel model in dom.dataModels.Values)
+			foreach (DataModel model in dom.dataModels)
 			{
 				if (model.name == name)
 					return model;
 			}
 
-			foreach (DataModel model in dom.dataModels.Values)
+			foreach (DataModel model in dom.dataModels)
 			{
 				DataElement elem = model.find(name);
 				if (elem != null)

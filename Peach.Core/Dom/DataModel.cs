@@ -51,7 +51,7 @@ namespace Peach.Core.Dom
 	[Parameter("name", typeof(string), "Model name", "")]
 	[Parameter("ref", typeof(string), "Model to reference", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
-	public class DataModel : Block
+	public class DataModel : Block, IOwned<Dom>, IOwned<Action>
 	{
 		/// <summary>
 		/// Dom parent of data model if any
@@ -125,6 +125,10 @@ namespace Peach.Core.Dom
 
 			return dataModel;
 		}
+
+		Dom IOwned<Dom>.parent { get { return dom; } set { dom = value; } }
+
+		Action IOwned<Action>.parent { get { return action; } set { action = value; } }
 	}
 }
 

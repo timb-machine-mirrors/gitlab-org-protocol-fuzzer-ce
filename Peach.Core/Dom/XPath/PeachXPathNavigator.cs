@@ -370,7 +370,7 @@ namespace Peach.Core.Dom.XPath
 			else if (currentNode is Test)
 			{
 				var dom = parent as Dom;
-				int index = dom.tests.IndexOfKey(((INamed)currentNode).name);
+				int index = dom.tests.IndexOf((Test)currentNode);
 				if (dom.tests.Count <= (index + 1))
 					return false;
 

@@ -168,7 +168,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[Serializable]
 	[DebuggerDisplay("{debugName}")]
-	public abstract class DataElement : INamed
+	public abstract class DataElement : INamed, IOwned<DataElementContainer>
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
