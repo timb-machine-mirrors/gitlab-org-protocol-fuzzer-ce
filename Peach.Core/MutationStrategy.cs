@@ -47,12 +47,6 @@ namespace Peach.Core
 	[Serializable]
 	public abstract class MutationStrategy
 	{
-		public delegate void DataMutationEventHandler(ActionData actionData, DataElement element, Mutator mutator);
-		public delegate void StateMutationEventHandler(State state, Mutator mutator);
-
-		public static event DataMutationEventHandler DataMutating;
-		public static event StateMutationEventHandler StateMutating;
-
 		protected RunContext _context;
 		protected Engine _engine;
 		protected Random _random;
@@ -122,18 +116,6 @@ namespace Peach.Core
 		protected void SeedRandom()
 		{
 			_random = new Random(Seed + Iteration);
-		}
-
-		protected void OnDataMutating(ActionData actionData, DataElement element, Mutator mutator)
-		{
-			if (DataMutating != null)
-				DataMutating(actionData, element, mutator);
-		}
-
-		protected void OnStateMutating(State state, Mutator mutator)
-		{
-			if (StateMutating != null)
-				StateMutating(state, mutator);
 		}
 
 		/// <summary>

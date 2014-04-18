@@ -48,7 +48,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify first two values, last two values, and count (= 202)
@@ -103,7 +103,7 @@ namespace Peach.Core.Test.Mutators
 
 			var config = new RunConfiguration();
 
-			var e = new Engine(null);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.Greater(dataModels.Count, 201);

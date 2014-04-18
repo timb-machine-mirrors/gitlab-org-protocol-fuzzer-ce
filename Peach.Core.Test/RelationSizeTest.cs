@@ -239,7 +239,7 @@ namespace Peach.Core.Test
 			config.rangeStart = 0;
 			config.rangeStop = 9;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(10, dataModels.Count);
@@ -305,7 +305,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, dataModels.Count);
@@ -354,7 +354,7 @@ namespace Peach.Core.Test
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(4, actions.Count);
@@ -705,7 +705,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -752,7 +752,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, dataModels.Count);

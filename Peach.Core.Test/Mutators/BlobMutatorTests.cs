@@ -77,7 +77,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -108,7 +108,7 @@ namespace Peach.Core.Test.Mutators
 			config.rangeStop = iterations;
 			config.randomSeed = 12345;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values

@@ -53,7 +53,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -118,7 +118,7 @@ namespace Peach.Core.Test.MutationStrategies
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -320,7 +320,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			return dom.tests[0].strategy.Count;
@@ -374,7 +374,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2380, dataModels.Count);
@@ -437,7 +437,7 @@ namespace Peach.Core.Test.MutationStrategies
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
 			RunConfiguration config = new RunConfiguration();
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 			
 			// 4 DM for control

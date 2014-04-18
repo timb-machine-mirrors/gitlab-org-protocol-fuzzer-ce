@@ -48,7 +48,7 @@ namespace Peach.Core.Test.Transformers.Type
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -92,7 +92,7 @@ namespace Peach.Core.Test.Transformers.Type
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -142,7 +142,7 @@ namespace Peach.Core.Test.Transformers.Type
 			config.rangeStart = 1;
 			config.rangeStop = 1;
 			
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 			string val1 = "Peach";
 			Assert.AreEqual(val1, (string)mutations[0]);

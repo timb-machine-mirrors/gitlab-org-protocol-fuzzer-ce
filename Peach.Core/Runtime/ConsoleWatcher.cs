@@ -182,7 +182,7 @@ namespace Peach.Core.Runtime
 			Console.WriteLine("Test '" + context.test.name + "' starting with random seed " + context.config.randomSeed + ".");
 		}
 
-		protected override void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
 			WriteInfoMark();
 			Console.WriteLine("Fuzzing: {0}", element.fullName);
@@ -190,7 +190,7 @@ namespace Peach.Core.Runtime
 			Console.WriteLine("Mutator: {0}", mutator.name);
 		}
 
-		protected override void MutationStrategy_StateMutating(State state, Mutator mutator)
+		protected override void StateMutating(RunContext context, State state, Mutator mutator)
 		{
 			WriteInfoMark();
 			Console.WriteLine("Fuzzing State: {0}", state.name);

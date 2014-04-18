@@ -387,7 +387,7 @@ namespace Peach.Core.MutationStrategies
 				if (elem != null && elem.MutatedValue == null)
 				{
 					Mutator mutator = Random.Choice(item.Mutators);
-					OnDataMutating(data, elem, mutator);
+					Context.OnDataMutating(data, elem, mutator);
 					logger.Debug("Action_Starting: Fuzzing: " + item.ElementName);
 					logger.Debug("Action_Starting: Mutator: " + mutator.name);
 					mutator.randomMutation(elem);
@@ -428,7 +428,7 @@ namespace Peach.Core.MutationStrategies
 					continue;
 
 				Mutator mutator = Random.Choice(item.Mutators);
-				OnStateMutating(state, mutator);
+				Context.OnStateMutating(state, mutator);
 
 				logger.Debug("MutateChangingState: Fuzzing state change: " + state.name);
 				logger.Debug("MutateChangingState: Mutator: " + mutator.name);

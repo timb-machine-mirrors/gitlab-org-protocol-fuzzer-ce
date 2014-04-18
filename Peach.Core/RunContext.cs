@@ -60,6 +60,34 @@ namespace Peach.Core
                 CollectFaults(this);
         }
 
+		#region Data Mutation Events
+
+		public delegate void DataMutationEventHandler(RunContext context, ActionData actionData, DataElement element, Mutator mutator);
+
+		public event DataMutationEventHandler DataMutating;
+
+		public void OnDataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		{
+			if (DataMutating != null)
+				DataMutating(this, actionData, element, mutator);
+		}
+
+		#endregion
+
+		#region State Mutation Events
+
+		public delegate void StateMutationEventHandler(RunContext context, State state, Mutator mutator);
+
+		public event StateMutationEventHandler StateMutating;
+
+		public void OnStateMutating(State state, Mutator mutator)
+		{
+			if (StateMutating != null)
+				StateMutating(this, state, mutator);
+		}
+
+		#endregion
+
 		#endregion
 
 		/// <summary>

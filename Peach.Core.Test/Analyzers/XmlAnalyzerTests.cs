@@ -282,7 +282,7 @@ namespace Peach.Core.Test.Analyzers
 			uint count = 0;
 
 			var config = new RunConfiguration();
-			var e = new Engine(null);
+			var e = new Engine(this);
 			e.IterationStarting += (ctx, curr, total) => ++count;
 			e.startFuzzing(dom, config);
 
@@ -344,7 +344,7 @@ namespace Peach.Core.Test.Analyzers
 			uint count = 0;
 
 			var config = new RunConfiguration();
-			var e = new Engine(null);
+			var e = new Engine(this);
 			e.IterationStarting += (ctx, curr, total) => ++count;
 			e.startFuzzing(dom, config);
 

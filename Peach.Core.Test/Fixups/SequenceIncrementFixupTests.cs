@@ -47,7 +47,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -99,7 +99,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -193,7 +193,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(8, this.actions.Count);
@@ -286,7 +286,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, this.actions.Count);
@@ -359,7 +359,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, this.actions.Count);
@@ -409,7 +409,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			try
 			{
@@ -457,7 +457,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			try
 			{
@@ -508,7 +508,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, this.actions.Count);
@@ -569,7 +569,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 3) * 3, this.dataModels.Count);
@@ -633,7 +633,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 3) * 3, this.dataModels.Count);
@@ -706,7 +706,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 3) * 3, this.dataModels.Count);
@@ -780,7 +780,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, this.dataModels.Count);
@@ -839,7 +839,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 1;
 			config.rangeStop = 20;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(21 * 3, this.dataModels.Count);
@@ -897,7 +897,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 1;
 			config.rangeStop = 20;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(21 * 3, this.dataModels.Count);
@@ -968,7 +968,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 1;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.IterationStarting += IterationStarting;
 			e.startFuzzing(dom, config);
 
@@ -1036,7 +1036,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 1;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.IterationStarting += IterationStarting;
 			e.startFuzzing(dom, config);
 
@@ -1105,7 +1105,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(33, this.dataModels.Count);
@@ -1136,7 +1136,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 3;
 			config.rangeStop = 12;
 
-			e = new Engine(null);
+			e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(33, this.dataModels.Count);
@@ -1199,7 +1199,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// Ensure we don't crash if the element was removed

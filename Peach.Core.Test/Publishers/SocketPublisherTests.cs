@@ -319,7 +319,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, actions.Count);
@@ -355,7 +355,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(3, actions.Count);
@@ -405,7 +405,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(3, actions.Count);
@@ -442,7 +442,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, actions.Count);
@@ -472,7 +472,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			Assert.Throws<PeachException>(delegate() { e.startFuzzing(dom, config); });
 		}
 
@@ -498,7 +498,7 @@ namespace Peach.Core.Test.Publishers
 			config.rangeStart = 0;
 			config.rangeStop = 1;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(4, dataModels.Count);
@@ -525,7 +525,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(2, actions.Count);
@@ -556,7 +556,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(2, actions.Count);
@@ -582,7 +582,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -656,7 +656,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, actions.Count);
@@ -674,7 +674,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -720,7 +720,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, this.actions.Count);
@@ -767,7 +767,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			try
 			{
@@ -842,7 +842,7 @@ namespace Peach.Core.Test.Publishers
 				config.rangeStart = 1;
 				config.rangeStop = 200;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 				e.IterationFinished += new Engine.IterationFinishedEventHandler(e_IterationFinished);
 				e.startFuzzing(dom, config);
 
@@ -952,7 +952,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, actions.Count);

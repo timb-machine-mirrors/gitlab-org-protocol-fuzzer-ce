@@ -272,7 +272,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -320,7 +320,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -365,7 +365,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
@@ -429,7 +429,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
@@ -505,7 +505,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 
 				e.startFuzzing(dom, config);
 
@@ -554,7 +554,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 
 				e.startFuzzing(dom, config);
 

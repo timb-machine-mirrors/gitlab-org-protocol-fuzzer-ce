@@ -52,7 +52,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -134,7 +134,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             DataElementContainer blk = null;
@@ -232,7 +232,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, strategies.Count);
@@ -274,7 +274,7 @@ namespace Peach.Core.Test.Mutators
 
 			var config = new RunConfiguration();
 
-			var e = new Engine(null);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// 2 Data models, 1 control and 1 with Hello & World swapped

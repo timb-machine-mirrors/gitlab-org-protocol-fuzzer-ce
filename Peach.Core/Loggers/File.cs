@@ -356,7 +356,7 @@ namespace Peach.Core.Loggers
 			}
 		}
 
-		protected override void MutationStrategy_DataMutating(ActionData data, DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, ActionData data, DataElement element, Mutator mutator)
 		{
 			var rec = states.Last().actions.Last();
 

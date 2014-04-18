@@ -255,7 +255,7 @@ namespace Peach.Core.MutationStrategies
 			var key = "Run_{0}.{1}".Fmt(state.runCount, state.name);
 			if (key == _enumerator.Current.Item1)
 			{
-				OnStateMutating(state, _enumerator.Current.Item2);
+				Context.OnStateMutating(state, _enumerator.Current.Item2);
 				logger.Debug("MutateChangingState: Fuzzing state change: " + state.name);
 				logger.Debug("MutateChangingState: Mutator: " + _enumerator.Current.Item2.name);
 				return _enumerator.Current.Item2.changeState(state);
@@ -276,7 +276,7 @@ namespace Peach.Core.MutationStrategies
 			if (dataElement != null)
 			{
 				var mutator = _enumerator.Current.Item2;
-				OnDataMutating(data, dataElement, mutator);
+				Context.OnDataMutating(data, dataElement, mutator);
 				logger.Debug("ApplyMutation: Fuzzing: " + fullName);
 				logger.Debug("ApplyMutation: Mutator: " + mutator.name);
 				mutator.sequentialMutation(dataElement);
