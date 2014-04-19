@@ -25,12 +25,12 @@ Action elements are child elements of xref:State[State]. Actions are used to sen
 Action elements perform various operations in the xref:StateModel[StateModel].
 
 * Actions can send output, receive input, open a connection, and much more. Two examples are the open action initializing a listener and the close action freeing up resources.
-* Actions can also control the Peach environment by changing to another state in the xref:StateModel[StateModel], moving data between DataModels, and calling custom methods defined by Agents.
+* Actions can also control the Peach environment by changing to another state in the xref:StateModel[StateModel], moving data between xref:DataModel[DataModels], and calling custom methods defined by xref:Agent[Agents].
 
 Many Actions are called by Peach implicitly (without explicitly declaring it within a State). Two examples are:
 
-* The start action that performs every iteration automatically  
-* The open action called before any outputs or inputs
+* The xref:Action_Start[_start_] action that performs every iteration automatically  
+* The  xref:Action_Open[_open_] action called before any outputs or inputs
 
 
 === Syntax

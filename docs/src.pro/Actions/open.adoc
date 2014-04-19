@@ -34,7 +34,7 @@ The _open_ (or _connect_) action will cause the associated publisher to open its
 
 Open is an implicit action that occurs by default at the start of each iteration. 
 
-The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet) because unlike the xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets.
+The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet because unlike the xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets).
 
 NOTE: _connect_ is a pseudonym for _open_. They can be used interchangeably.
 

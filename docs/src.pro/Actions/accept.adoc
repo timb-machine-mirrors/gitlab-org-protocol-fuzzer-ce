@@ -39,13 +39,13 @@ xref:Iteration_record[record iteration]::
   In both cases fuzzing cannot continue causing Peach to stop.
   
 xref:Iteration_control[control iteration]::
-  Peach will trigger a fault. Note that control iterations must be enabled for this state to be reached.
-  On control iterations it is assumed that any error is the result of the target entering an unwanted state.
-  Such transitions are considered faults and logged as such.
+  Peach will trigger a fault. Control iterations must be enabled for this state to be reached.
+  During control iterations, Peach assumes that any error results from the target entering an unwanted state.
+  Such transitions are considered faults and logged as faults.
   
 xref:Iteration_fuzzing[fuzzing iteration]::
   Peach will continue to next iteration.
-  During normal fuzzing iterations it is assumed we will cause odd behaviour from the target which should be ignored unless they occur on a control iteration (an iteration with out any mutations occurring).
+  During normal fuzzing iterations, Peach ignores odd behavior from the target unless it occurs on a control iteration (an iteration with out any mutations occurring).
 ****
 
 .Default Order of Actions
