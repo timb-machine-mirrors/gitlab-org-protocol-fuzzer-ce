@@ -43,9 +43,6 @@ using System.ComponentModel;
 
 namespace Peach.Core.Dom
 {
-	public delegate void StateModelStartingEventHandler(StateModel model);
-	public delegate void StateModelFinishedEventHandler(StateModel model);
-
 	/// <summary>
 	/// Defines a state machine to use during a fuzzing test.  State machines in Peach are intended to be
 	/// fairly simple and allow for only the basic modeling typically required for fuzzing state aware protocols or 
@@ -114,28 +111,6 @@ namespace Peach.Core.Dom
 		public State initialState { get; set; }
 
 		/// <summary>
-		/// StateModel is starting to execute.
-		/// </summary>
-		public static event StateModelStartingEventHandler Starting;
-
-		/// <summary>
-		/// StateModel has finished executing.
-		/// </summary>
-		public static event StateModelFinishedEventHandler Finished;
-
-		protected virtual void OnStarting()
-		{
-			if (Starting != null)
-				Starting(this);
-		}
-
-		protected virtual void OnFinished()
-		{
-			if (Finished != null)
-				Finished(this);
-		}
-
-		/// <summary>
 		/// Saves the data produced/consumed by an action for future logging.
 		/// </summary>
 		/// <param name="name"></param>
@@ -175,7 +150,7 @@ namespace Peach.Core.Dom
 
 				State currentState = initialState;
 
-				OnStarting();
+				context.OnStateModelStarting(this);
 
 				while (true)
 				{
@@ -193,8 +168,8 @@ namespace Peach.Core.Dom
 						else
 							logger.Debug("Run(): Changing state mutated.  Switching to \"" + newState.name + 
 								"\" instead of \""+ase.changeToState+"\".");
-						
-						currentState.OnChanging(newState);
+
+						context.OnStateChanging(currentState, newState);
 						currentState = newState;
 					}
 				}
@@ -208,7 +183,7 @@ namespace Peach.Core.Dom
 				foreach (Publisher publisher in context.test.publishers.Values)
 					publisher.close();
 
-				OnFinished();
+				context.OnStateModelFinished(this);
 			}
 		}
 	}

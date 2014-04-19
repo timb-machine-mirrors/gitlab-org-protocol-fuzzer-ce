@@ -63,21 +63,6 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// State is starting to execute.
-		/// </summary>
-		public static event StateStartingEventHandler Starting;
-
-		/// <summary>
-		/// State has finished executing.
-		/// </summary>
-		public static event StateFinishedEventHandler Finished;
-
-		/// <summary>
-		/// Changing to another state.
-		/// </summary>
-		public static event StateChangingStateEventHandler ChangingState;
-
-		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
 		[XmlElement("Godel")]
@@ -141,24 +126,6 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public uint runCount { get; private set; }
 
-		protected virtual void OnStarting()
-		{
-			if (Starting != null)
-				Starting(this);
-		}
-
-		protected virtual void OnFinished()
-		{
-			if (Finished != null)
-				Finished(this);
-		}
-
-		public virtual void OnChanging(State toState)
-		{
-			if (ChangingState != null)
-				ChangingState(this, toState);
-		}
-
 		protected virtual void RunScript(string expr)
 		{
 			if (!string.IsNullOrEmpty(expr))
@@ -194,7 +161,7 @@ namespace Peach.Core.Dom
 				if (++runCount > 1)
 					UpdateToOriginalDataModel(runCount);
 
-				OnStarting();
+				context.OnStateStarting(this);
 
 				RunScript(onStart);
 
@@ -218,7 +185,7 @@ namespace Peach.Core.Dom
 				finished = true;
 
 				RunScript(onComplete);
-				OnFinished();
+				context.OnStateFinished(this);
 			}
 		}
 

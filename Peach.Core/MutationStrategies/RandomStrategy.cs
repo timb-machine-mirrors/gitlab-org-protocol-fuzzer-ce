@@ -138,8 +138,8 @@ namespace Peach.Core.MutationStrategies
 		{
 			base.Initialize(context, engine);
 
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.State.Starting += new StateStartingEventHandler(State_Starting);
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
 			engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
 			_mutators = new List<Type>();
 			_mutators.AddRange(EnumerateValidMutators());
@@ -166,8 +166,8 @@ namespace Peach.Core.MutationStrategies
 		{
 			base.Finalize(context, engine);
 
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.State.Starting -= State_Starting;
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
 			engine.IterationStarting -= engine_IterationStarting;
 		}
 
@@ -232,7 +232,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		void Action_Starting(Core.Dom.Action action)
+		void ActionStarting(RunContext context, Dom.Action action)
 		{
 			// Is this a supported action?
 			if (!action.outputData.Any())
@@ -250,7 +250,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		void State_Starting(State state)
+		void StateStarting(RunContext context, State state)
 		{
 			if (!_context.controlIteration || !_context.controlRecordingIteration)
 				return;

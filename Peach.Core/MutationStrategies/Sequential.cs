@@ -68,8 +68,8 @@ namespace Peach.Core.MutationStrategies
 			// Force seed to always be the same
 			context.config.randomSeed = 31337;
 
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.State.Starting += new StateStartingEventHandler(State_Starting);
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
 			context.engine.IterationFinished += new Engine.IterationFinishedEventHandler(engine_IterationFinished);
 			context.engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
 			_mutators = new List<Type>();
@@ -97,8 +97,8 @@ namespace Peach.Core.MutationStrategies
 		{
 			base.Finalize(context, engine);
 
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.State.Starting -= State_Starting;
+			context.ActionStarting -= ActionStarting;
+			context.StateStarting -= StateStarting;
 			context.engine.IterationStarting -= engine_IterationStarting;
 			context.engine.IterationFinished -= engine_IterationFinished;
 		}
@@ -176,7 +176,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void Action_Starting(Core.Dom.Action action)
+		private void ActionStarting(RunContext context, Dom.Action action)
 		{
 			// Is this a supported action?
 			if (!action.outputData.Any())
@@ -189,7 +189,7 @@ namespace Peach.Core.MutationStrategies
 				RecordDataModel(action);
 		}
 
-		void State_Starting(State state)
+		void StateStarting(RunContext context, State state)
 		{
 			if (_context.controlIteration && _context.controlRecordingIteration)
 			{

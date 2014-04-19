@@ -60,7 +60,7 @@ namespace Peach.Core
                 CollectFaults(this);
         }
 
-		#region Data Mutation Events
+		#region Mutation Events
 
 		public delegate void DataMutationEventHandler(RunContext context, ActionData actionData, DataElement element, Mutator mutator);
 
@@ -72,10 +72,6 @@ namespace Peach.Core
 				DataMutating(this, actionData, element, mutator);
 		}
 
-		#endregion
-
-		#region State Mutation Events
-
 		public delegate void StateMutationEventHandler(RunContext context, State state, Mutator mutator);
 
 		public event StateMutationEventHandler StateMutating;
@@ -84,6 +80,84 @@ namespace Peach.Core
 		{
 			if (StateMutating != null)
 				StateMutating(this, state, mutator);
+		}
+
+		#endregion
+
+		#region State Model Events
+
+		public delegate void StateModelEventHandler(RunContext context, StateModel stateModel);
+
+		public event StateModelEventHandler StateModelStarting;
+
+		public void OnStateModelStarting(StateModel stateModel)
+		{
+			if (StateModelStarting != null)
+				StateModelStarting(this, stateModel);
+		}
+
+		public event StateModelEventHandler StateModelFinished;
+
+		public void OnStateModelFinished(StateModel stateModel)
+		{
+			if (StateModelFinished != null)
+				StateModelFinished(this, stateModel);
+		}
+
+		#endregion
+
+		#region State Events
+
+		public delegate void StateStartingEventHandler(RunContext context, State state);
+
+		public event StateStartingEventHandler StateStarting;
+
+		public void OnStateStarting(State state)
+		{
+			if (StateStarting != null)
+				StateStarting(this, state);
+		}
+
+		public delegate void StateFinishedEventHandler(RunContext context, State state);
+
+		public event StateFinishedEventHandler StateFinished;
+
+		public void OnStateFinished(State state)
+		{
+			if (StateFinished != null)
+				StateFinished(this, state);
+		}
+
+		public delegate void StateChangingEventHandler(RunContext context, State oldState, State newState);
+
+		public event StateChangingEventHandler StateChanging;
+
+		public void OnStateChanging(State oldState, State newState)
+		{
+			if (StateChanging != null)
+				StateChanging(this, oldState, newState);
+		}
+
+		#endregion
+
+		#region Action Events
+
+		public delegate void ActionEventHandler(RunContext context, Dom.Action Action);
+
+		public event ActionEventHandler ActionStarting;
+
+		public void OnActionStarting(Dom.Action action)
+		{
+			if (ActionStarting != null)
+				ActionStarting(this, action);
+		}
+
+		public event ActionEventHandler ActionFinished;
+
+		public void OnActionFinished(Dom.Action action)
+		{
+			if (ActionFinished != null)
+				ActionFinished(this, action);
 		}
 
 		#endregion

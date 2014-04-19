@@ -44,6 +44,14 @@ namespace Peach.Core.Fixups
 		public SequenceRandomFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
+		}
+
+		protected override Variant fixupImpl()
+		{
+			throw new NotImplementedException();
+		}
+
+#if DISABLED
 			Core.Dom.StateModel.Starting += new StateModelStartingEventHandler(StateModel_Starting);
 		}
 
@@ -145,6 +153,7 @@ namespace Peach.Core.Fixups
 
 			return GetRandom(parent, dm.action, false);
 		}
+#endif
 	}
 }
 

@@ -62,26 +62,26 @@ namespace Peach.Core
 
 			context.DataMutating += DataMutating;
 			context.StateMutating += StateMutating;
-			StateModel.Starting += new StateModelStartingEventHandler(StateModel_Starting);
-			StateModel.Finished += new StateModelFinishedEventHandler(StateModel_Finished);
-			State.Starting += new StateStartingEventHandler(State_Starting);
-			State.Finished += new StateFinishedEventHandler(State_Finished);
-			State.ChangingState += new StateChangingStateEventHandler(State_ChangingState);
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.Action.Finished += new ActionFinishedEventHandler(Action_Finished);
+			context.StateModelStarting += StateModelStarting;
+			context.StateModelFinished += StateModelFinished;
+			context.StateStarting += StateStarting;
+			context.StateFinished += StateFinished;
+			context.StateChanging += StateChanging;
+			context.ActionStarting += ActionStarting;
+			context.ActionFinished += ActionFinished;
 		}
 
 		public void Finalize(Engine engine, RunContext context)
 		{
 			context.DataMutating -= DataMutating;
 			context.StateMutating -= StateMutating;
-			StateModel.Starting -= StateModel_Starting;
-			StateModel.Finished -= StateModel_Finished;
-			State.Starting -= State_Starting;
-			State.Finished -= State_Finished;
-			State.ChangingState -= State_ChangingState;
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.Action.Finished -= Action_Finished;
+			context.StateModelStarting -= StateModelStarting;
+			context.StateModelFinished -= StateModelFinished;
+			context.StateStarting -= StateStarting;
+			context.StateFinished -= StateFinished;
+			context.StateChanging -= StateChanging;
+			context.ActionStarting -= ActionStarting;
+			context.ActionFinished -= ActionFinished;
 		}
 
 		protected virtual void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
@@ -92,39 +92,39 @@ namespace Peach.Core
 		{
 		}
 
+		protected virtual void ActionFinished(RunContext context, Dom.Action action)
+		{
+		}
+
+		protected virtual void ActionStarting(RunContext context, Dom.Action action)
+		{
+		}
+
+		protected virtual void StateChanging(RunContext context, State oldState, State newState)
+		{
+		}
+
+		protected virtual void StateFinished(RunContext context, State state)
+		{
+		}
+
+		protected virtual void StateStarting(RunContext context, State state)
+		{
+		}
+
+		protected virtual void StateModelFinished(RunContext context, StateModel model)
+		{
+		}
+
+		protected virtual void StateModelStarting(RunContext context, StateModel model)
+		{
+		}
+
 		protected virtual void Engine_HaveCount(RunContext context, uint totalIterations)
 		{
 		}
 
 		protected virtual void Engine_HaveParallel(RunContext context, uint startIteration, uint stopIteration)
-		{
-		}
-
-		protected virtual void Action_Finished(Core.Dom.Action action)
-		{
-		}
-
-		protected virtual void Action_Starting(Core.Dom.Action action)
-		{
-		}
-
-		protected virtual void State_ChangingState(State state, State toState)
-		{
-		}
-
-		protected virtual void State_Finished(State state)
-		{
-		}
-
-		protected virtual void State_Starting(State state)
-		{
-		}
-
-		protected virtual void StateModel_Finished(StateModel model)
-		{
-		}
-
-		protected virtual void StateModel_Starting(StateModel model)
 		{
 		}
 

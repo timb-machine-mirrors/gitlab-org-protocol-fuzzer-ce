@@ -1509,7 +1509,7 @@ namespace Peach.Core.Analyzers
 				if (data.dataModel != null)
 				{
 					data.dataModel.dom = null;
-					data.dataModel.action = data.action;
+					data.dataModel.actionData = data;
 				}
 
 				if (child.Name == "Data")

@@ -287,8 +287,8 @@ namespace Peach.Core.Dom.XPath
 				{
 					if (obj.dom != null)
 						parent = obj.dom;
-					else if (obj.action != null)
-						parent = obj.action;
+					else if (obj.actionData != null)
+						parent = obj.actionData.action;
 				}
 
 				if(parent == null)
@@ -432,8 +432,8 @@ namespace Peach.Core.Dom.XPath
 			{
 				if (obj.dom != null)
 					currentNode = obj.dom;
-				else if (obj.action != null)
-					currentNode = obj.action;
+				else if (obj.actionData != null)
+					currentNode = obj.actionData.action;
 				else
 					throw new Exception("Error, data model with no dom/action parent!");
 			}

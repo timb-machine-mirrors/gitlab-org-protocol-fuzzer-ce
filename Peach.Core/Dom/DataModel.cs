@@ -51,7 +51,7 @@ namespace Peach.Core.Dom
 	[Parameter("name", typeof(string), "Model name", "")]
 	[Parameter("ref", typeof(string), "Model to reference", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
-	public class DataModel : Block, IOwned<Dom>, IOwned<Action>
+	public class DataModel : Block, IOwned<Dom>, IOwned<ActionData>
 	{
 		/// <summary>
 		/// Dom parent of data model if any
@@ -79,7 +79,7 @@ namespace Peach.Core.Dom
 		/// This variable is one of those parent holders.
 		/// </remarks>
 		[NonSerialized]
-		public Action action = null;
+		public ActionData actionData = null;
 
 		public DataModel()
 		{
@@ -89,6 +89,27 @@ namespace Peach.Core.Dom
 			: base(name)
 		{
 		}
+
+		#region Action Run Event
+
+		public delegate void ActionRunEventHandler(RunContext context);
+
+		[NonSerialized]
+		private ActionRunEventHandler actionRun;
+
+		public event ActionRunEventHandler ActionRun
+		{
+			add { actionRun += value; }
+			remove { actionRun -= value; }
+		}
+
+		public void OnActionRun(RunContext context)
+		{
+			if (actionRun != null)
+				actionRun(context);
+		}
+
+		#endregion
 
 		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
@@ -128,7 +149,7 @@ namespace Peach.Core.Dom
 
 		Dom IOwned<Dom>.parent { get { return dom; } set { dom = value; } }
 
-		Action IOwned<Action>.parent { get { return action; } set { action = value; } }
+		ActionData IOwned<ActionData>.parent { get { return actionData; } set { actionData = value; } }
 	}
 }
 

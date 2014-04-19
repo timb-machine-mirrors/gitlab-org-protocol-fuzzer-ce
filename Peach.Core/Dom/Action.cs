@@ -191,28 +191,6 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Action is starting to execute
-		/// </summary>
-		public static event ActionStartingEventHandler Starting;
-
-		/// <summary>
-		/// Action has finished executing
-		/// </summary>
-		public static event ActionFinishedEventHandler Finished;
-
-		protected virtual void OnStarting()
-		{
-			if (Starting != null)
-				Starting(this);
-		}
-
-		protected virtual void OnFinished()
-		{
-			if (Finished != null)
-				Finished(this);
-		}
-
 		protected virtual void RunScript(string expr)
 		{
 			if (!string.IsNullOrEmpty(expr))
@@ -343,11 +321,15 @@ namespace Peach.Core.Dom
 				finished = false;
 				error = false;
 
-				OnStarting();
+				context.OnActionStarting(this);
 
 				logger.Debug("ActionType.{0}", GetType().Name.ToString());
 
 				RunScript(onStart);
+
+				// Notify the data model the action is about to run
+				foreach (var item in allData)
+					item.dataModel.OnActionRun(context);
 
 				// Save output data
 				foreach (var item in outputData)
@@ -371,7 +353,7 @@ namespace Peach.Core.Dom
 			finally
 			{
 				finished = true;
-				OnFinished();
+				context.OnActionFinished(this);
 			}
 		}
 	}

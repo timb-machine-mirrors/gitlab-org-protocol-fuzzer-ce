@@ -111,7 +111,7 @@ namespace Peach.Core.Dom
 		public void UpdateToOriginalDataModel()
 		{
 			System.Diagnostics.Debug.Assert(dataModel != null);
-			dataModel.action = null;
+			dataModel.actionData = null;
 
 			// If is the first time through we need to cache a clean data model
 			if (originalDataModel == null)
@@ -140,7 +140,7 @@ namespace Peach.Core.Dom
 				dataModel = originalDataModel.Clone() as DataModel;
 			}
 
-			dataModel.action = action;
+			dataModel.actionData = this;
 		}
 
 		/// <summary>
@@ -154,7 +154,7 @@ namespace Peach.Core.Dom
 
 			// Work in a clean copy of the original
 			var copy = sourceDataModel.Clone() as DataModel;
-			copy.action = action;
+			copy.actionData = this;
 			option.Apply(copy);
 
 			// Evaulate the full dataModel prior to saving as the original
@@ -194,7 +194,7 @@ namespace Peach.Core.Dom
 			cracker.CrackData(copy, bs);
 
 			dataModel = copy;
-			dataModel.action = action;
+			dataModel.actionData = this;
 		}
 
 		/// <summary>

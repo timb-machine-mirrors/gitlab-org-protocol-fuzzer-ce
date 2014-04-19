@@ -55,6 +55,11 @@ namespace Peach.Core.Fixups
 			ParameterParser.Parse(this, args);
 		}
 
+		protected override Variant fixupImpl()
+		{
+			throw new NotImplementedException();
+		}
+#if DISABLED
 		void StateModel_Finished(StateModel model)
 		{
 			Core.Dom.Action.Starting -= Action_Starting;
@@ -132,6 +137,7 @@ namespace Peach.Core.Fixups
 			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
 			Core.Dom.StateModel.Finished += new StateModelFinishedEventHandler(StateModel_Finished);
 		}
+#endif
 	}
 }
 

@@ -405,6 +405,10 @@ namespace Peach.Core.Test.Fixups
 				Assert.AreEqual("SequenceRandomFixup has non numeric parent 'DM.blob'.", ex.Message);
 			}
 		}
+
+		// Test array
+
+		// Test action param
     }
 }
 

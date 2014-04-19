@@ -307,7 +307,7 @@ namespace Peach.Core.Loggers
 			}
 		}
 
-		protected override void State_Starting(Core.Dom.State state)
+		protected override void StateStarting(RunContext context, State state)
 		{
 			states.Add(
 				new Fault.State()
@@ -317,7 +317,7 @@ namespace Peach.Core.Loggers
 				});
 		}
 
-		protected override void Action_Starting(Core.Dom.Action action)
+		protected override void ActionStarting(RunContext context, Dom.Action action)
 		{
 			var rec = new Fault.Action()
 			{
@@ -343,7 +343,7 @@ namespace Peach.Core.Loggers
 			states.Last().actions.Add(rec);
 		}
 
-		protected override void Action_Finished(Dom.Action action)
+		protected override void ActionFinished(RunContext context, Dom.Action action)
 		{
 			var rec = states.Last().actions.Last();
 			if (rec.models == null)

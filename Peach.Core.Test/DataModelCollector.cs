@@ -44,7 +44,7 @@ namespace Peach.Core.Test
 			iterStrategies = new List<string>();
 		}
 
-		protected override void Action_Finished(Dom.Action action)
+		protected override void ActionFinished(RunContext context, Dom.Action action)
 		{
 			if (!action.allData.Any())
 				return;
