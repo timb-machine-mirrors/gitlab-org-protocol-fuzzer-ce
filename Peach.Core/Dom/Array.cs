@@ -96,6 +96,17 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		protected override IEnumerable<DataElement> Children()
+		{
+			if (Count > 0)
+				return this;
+
+			if (origionalElement != null)
+				return new DataElement[1] { origionalElement };
+
+			return new DataElement[0];
+		}
+
 		public override void RemoveAt(int index)
 		{
 			base.RemoveAt(index);

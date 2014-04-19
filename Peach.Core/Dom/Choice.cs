@@ -142,14 +142,6 @@ namespace Peach.Core.Dom
 			return choice;
 		}
 
-		public override void ClearBindings(bool remove)
-		{
-			base.ClearBindings(remove);
-
-			foreach (var item in choiceElements)
-				item.Value.ClearBindings(remove);
-		}
-
 		public override void RemoveAt(int index)
 		{
 			base.RemoveAt(index);
@@ -221,6 +213,12 @@ namespace Peach.Core.Dom
 					}
 				}
 			}
+		}
+
+		protected override IEnumerable<DataElement> Children()
+		{
+			// Return choices
+			return choiceElements.Values;
 		}
 
 		protected override Variant GenerateInternalValue()

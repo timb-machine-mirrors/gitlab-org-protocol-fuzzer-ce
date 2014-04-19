@@ -253,6 +253,52 @@ namespace Peach.Core.Dom
 
 		#endregion
 
+		#region Walking Functions
+
+		public IEnumerable<DataElement> PreOrderTraverse()
+		{
+			var toVisit = new List<DataElement>();
+			toVisit.Add(null);
+
+			var elem = this;
+
+			while (elem != null)
+			{
+				yield return elem;
+
+				int index = toVisit.Count;
+				foreach (var item in elem.Children())
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		public IEnumerable<DataElement> BreadthFirstTraverse()
+		{
+			var toVisit = new Queue<DataElement>();
+			toVisit.Enqueue(this);
+
+			while (toVisit.Count > 0)
+			{
+				var elem = toVisit.Dequeue();
+
+				foreach (var item in elem.Children())
+					toVisit.Enqueue(item);
+
+				yield return elem;
+			}
+		}
+
+		protected virtual IEnumerable<DataElement> Children()
+		{
+			return new DataElement[0];
+		}
+
+		#endregion
+
 		private string _name;
 
 		public string name
@@ -847,8 +893,7 @@ namespace Peach.Core.Dom
 						// element in the heirarchy has a _recustionDepth > 1
 						// Otherwise, we are invalid if the _recursionDepth > 0
 
-						string relName = null;
-						if (isChildOf(elem, out relName))
+						if (isChildOf(elem))
 						{
 							var parent = this;
 
@@ -1335,31 +1380,6 @@ namespace Peach.Core.Dom
 
 		/// <summary>
 		/// Determines whether or not a DataElement is a child of this DataElement.
-		/// Computes the relative name from 'this' to 'dataElement'.  If 'dataElement'
-		/// is not a child of 'this', the absolute path of 'dataElement' is computed.
-		/// </summary>
-		/// <param name="dataElement">The DataElement to test for a child relationship.</param>
-		/// <param name="relName">String to receive the realitive name of 'dataElement'.</param>
-		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
-		public bool isChildOf(DataElement dataElement, out string relName)
-		{
-			relName = name;
-
-			DataElement obj = _parent;
-			while (obj != null)
-			{
-				if (obj == dataElement)
-					return true;
-
-				relName = obj.name + "." + relName;
-				obj = obj.parent;
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Determines whether or not a DataElement is a child of this DataElement.
 		/// </summary>
 		/// <param name="dataElement">The DataElement to test for a child relationship.</param>
 		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
@@ -1385,9 +1405,7 @@ namespace Peach.Core.Dom
 			oldElem.parent = null;
 			this.parent = null;
 
-			UpdateBindings(oldElem, oldElem);
-
-			foreach (var elem in oldElem.EnumerateAllElements())
+			foreach (var elem in oldElem.PreOrderTraverse())
 				UpdateBindings(oldElem, elem);
 
 			oldElem.parent = oldParent;
@@ -1427,85 +1445,42 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public virtual void ClearBindings(bool remove)
-		{
-			foreach (var item in this.relations.ToArray())
-			{
-				if (remove)
-					item.From.relations.Remove(item);
-
-				item.Clear();
-			}
-		}
-
 		private DataElement MoveTo(DataElementContainer newParent, int index)
 		{
-			DataElementContainer oldParent = this.parent;
-
-			if (oldParent == newParent)
-			{
-				int oldIdx = oldParent.IndexOf(this);
-				oldParent.RemoveAt(oldIdx);
-				if (oldIdx < index)
-					--index;
-				newParent.Insert(index, this);
-				return this;
-			}
-
-			string newName = this.name;
-			for (int i = 0; newParent.ContainsKey(newName); i++)
-				newName = this.name + "_" + i;
-
 			DataElement newElem;
 
-			if (newName == this.name)
+			var oldIndex = parent.IndexOf(this);
+
+			if (parent == newParent)
 			{
-				newElem = this;
+				newElem = Clone();
+
+				if (oldIndex < index)
+					index--;
 			}
 			else
 			{
-				newElem = this.Clone(newName);
-
-				// We are "moving" the element, but doing so by cloning
-				// into a new element.  The clone will duplicate relations
-				// that reach outside of the element tree, so we need to
-				// clean up all old relations that were inside
-				// the old element tree.
-
-				ClearBindings(true);
+				var newName = newParent.UniqueName(name);
+				newElem = Clone(newName);
 			}
 
-			// Save off relations
-			var relations = newElem.relations.Of<Binding>().ToArray();
-
-			oldParent.RemoveAt(oldParent.IndexOf(this));
+			parent.RemoveAt(oldIndex);
 			newParent.Insert(index, newElem);
-
-			// When an element is moved, the name can change.
-			// Additionally, the resolution algorithm might not
-			// be able to locate the proper element, so set
-			// the 'OfName' to the full name of the new element.
-
-			foreach (var rel in relations)
-			{
-				rel.OfName = newElem.fullName;
-				rel.Resolve();
-			}
 
 			return newElem;
 		}
 
 		public DataElement MoveBefore(DataElement target)
 		{
-			DataElementContainer parent = target.parent;
-			int offset = parent.IndexOf(target);
+			var parent = target.parent;
+			var offset = parent.IndexOf(target);
 			return MoveTo(parent, offset);
 		}
 
 		public DataElement MoveAfter(DataElement target)
 		{
-			DataElementContainer parent = target.parent;
-			int offset = parent.IndexOf(target) + 1;
+			var parent = target.parent;
+			var offset = parent.IndexOf(target) + 1;
 			return MoveTo(parent, offset);
 		}
 

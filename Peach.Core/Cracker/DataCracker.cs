@@ -389,14 +389,11 @@ namespace Peach.Core.Cracker
 			var fixups = new List<Tuple<Fixup, string, string>>();
 			DataElementContainer oldParent = element.parent;
 
-			// Ensure relations are resolved
-			foreach (var relation in element.relations)
-			{
-				if (relation.Of != element && relation.From != element)
-					throw new CrackingFailure("Error, unable to resolve Relations of/from to match current element.", element, data);
-			}
+			// Locate relevant fixups that reference this element about to me moved
+			// or any element that is a child of the element that is going to be moved
+			// Store off fixup,ref,Full.Path.To.Element.We.Are.Placing
+			// So we can update it to New.Path.To.Placed.Element
 
-			// Locate relevant fixups
 			DataElementContainer root = element.getRoot() as DataElementContainer;
 			foreach (DataElement child in root.EnumerateAllElements())
 			{
@@ -423,7 +420,6 @@ namespace Peach.Core.Cracker
 					fixup.Item1.updateRef(fixup.Item2, fixup.Item3);
 			}
 
-
 			string debugName = element.debugName;
 			DataElement newElem = null;
 
@@ -440,7 +436,7 @@ namespace Peach.Core.Cracker
 				DataElement before = element.find(element.placement.before);
 				if (before == null)
 					throw new CrackingFailure("Error, unable to resolve Placement on element '" + element.fullName +
-						"' with 'after' == '" + element.placement.after + "'.", element, data);
+						"' with 'before' == '" + element.placement.after + "'.", element, data);
 				newElem = element.MoveBefore(before);
 			}
 

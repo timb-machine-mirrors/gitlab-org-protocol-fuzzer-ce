@@ -245,6 +245,11 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		protected override IEnumerable<DataElement> Children()
+		{
+			return this;
+		}
+
 		/// <summary>
 		/// Check if we are a parent of an element.  This is
 		/// true even if we are not the direct parent, but several
@@ -355,14 +360,6 @@ namespace Peach.Core.Dom
 			this[newElem.name] = newElem;
 		}
 
-		public override void ClearBindings(bool remove)
-		{
-			base.ClearBindings(remove);
-
-			foreach (var item in this)
-				item.ClearBindings(remove);
-		}
-
 		public void SwapElements(int first, int second)
 		{
 			if (first >= _childrenList.Count || second >= _childrenList.Count)
@@ -425,7 +422,14 @@ namespace Peach.Core.Dom
 			System.Diagnostics.Debug.Assert(removed);
 
 			// Clear any bindings this element has to other elements
-			item.ClearBindings(false);
+			foreach (var elem in item.PreOrderTraverse())
+			{
+				foreach (var rel in elem.relations.ToArray())
+				{
+					rel.From.relations.Remove(rel);
+					rel.Clear();
+				}
+			}
 
 			Invalidate();
 		}
