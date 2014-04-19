@@ -25,29 +25,29 @@
 
 Two Peach models can create a fuzzer, the xref:DataModel[DataModel] and the _StateModel_.
 
-The _StateModel_ consists of at least one xref:State[State] element. StateModel define how to send data to and receive data from the fuzzing target as well as creating the basic state machine logic needed to test a protocol.
+The _StateModel_ consists of at least one xref:State[State] element. _StateModel_ defines how to send data to and receive data from the fuzzing target as well as creating the basic state machine logic needed to test a protocol.
 
 NOTE: Only one _StateModel_ can be used for a given Test.
 
-StateModel can range from very simple to extremely complex.
-When starting out, keep the StateModels simple and expand as needed.
+_StateModel_ can range from very simple to extremely complex.
+When starting out, keep the _StateModel_ simple and expand as needed.
 
-Multiple xref:State[State] elements are required for non-deterministic interactions (such as a target sending an unpredictable command and expecting a certain response from the fuzzer), 
-In these situations, couple the xref:Action_changeState[changeState] action with a xref:Action_when[when] attribute to change to the correct state depending on the state and data of Peach.
+Multiple xref:State[State] elements are required for non-deterministic interactions (such as a target sending an unpredictable command and expecting a certain response from the fuzzer). 
+In these situations, couple the xref:Action_changeState[changeState] action with a xref:Action_when[when] attribute to change to the correct state depending on Peach's state and data.
 
-StateModels can contain various States to model full interactions with a target.
+_StateModel_ can contain various States to model full interactions with a target.
 Many interactions will have deterministic I/O and will not need multiple States.
-Since actions inside a State occur sequentially, top to bottom, that is usually enough control.
+Since actions inside a xref:State[State] occur sequentially, top to bottom, that is usually enough control.
 
 Recursion into States is allowed in Peach.
 When a state is re-entered, all data previously set through cracking input or slurping is reset to its default values.
 
 IMPORTANT: Peach is not responsible for guaranteeing an exit condition in recursive state changes; if you need such an exit condition, you will need to create it.
 
-Each Action supports various parameters that will execute scripts in certain times (such as once an Action has completed or before it starts).
+Each xref:Action[Action] supports various parameters that will execute scripts in certain times (such as once an xref:Action[Action] has completed or before it starts).
 This can be used by complicated StateModels that need counters or other advanced operations.  
 
-Advanced StateModel can use the Peach Statebag dictionaries from within these scripts to store data. The Statebag dictionaries are accessible via class RunContext.
+Advanced StateModels can use the Peach Statebag dictionaries from within these scripts to store data. The Statebag dictionaries are accessible via class RunContext.
 
 _StateModel_ variables can persist throughout a single iteration with _iterationStateStore_ (or the entire fuzzing session with _stateStore_) and can be referred to through the scripting environment. 
 

@@ -32,7 +32,7 @@ The _close_ Action will cause the associated publisher to close its resource.
 
 Close is an implicit action that occurs by default at the end of each iteration. 
 
-The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed (for example, during file fuzzing when the data will be written using an xref:Action_output[_output_] Action and closed using a _close_ Action; and the target application launched using a xref:Action_call[_call_] Action)). 
+The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed (for example, during file fuzzing when the data will be written using an xref:Action_output[_output_] Action and closed using a _close_ Action; and the target application launched using a xref:Action_call[_call_] Action). 
 
 .Default Order of Actions
 ****
