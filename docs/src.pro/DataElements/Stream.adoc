@@ -2,17 +2,19 @@
 [[Stream]]
 == Stream
 
-Stream elements are used to represent multiple blocks of files that contain other files (like zip files) in a single model. Stream elements are similar to xref:Block[Block] elements except they contain file names and file attributes. 
+Stream elements are used to represent multiple blocks of files that contain other files (like zip files) in a single model. 
+
+Stream elements are similar to xref:Block[Block] elements except they contain file names and file attributes. 
 
 Stream is a child element of either xref:DataModel[DataModel] or xref:Block[Block].
 
-IMPORTANT: xref:Publishers_Zip[Zip] publisher is the only publisher aware of Stream elements. All other publisher will treat Stream elements as if they were Block elements.
+IMPORTANT: Zip is the only publisher aware of Stream elements.
 
 A single data model representing a zip file would use the Stream element to represent each file that makes up the zip file.
 
 Stream elements allow groupings one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure to represent the content of the stream.
 
-Streams also include two additional pieces of metadata, a stream name and stream attribute. Stream aware publishers can use the metadata and content to combine all streams in a data model into a single file. 
+Streams include two additional pieces of metadata, a stream name and stream attribute. Stream aware publishers can use the metadata and content to combine all streams in a data model into a single file. 
 
 The xref:Publishers_Zip[Zip] publisher looks for Stream elements and creates a zip archive of all the streams in a model.
 
@@ -69,7 +71,7 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 === Background
 
-The Stream element is very similar to the [[DataModel_Block]] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
+The Stream element is very similar to the xref:Block[Block] element except the Stream element includes two pieces of additional data: the stream name and stream attributes.
 
 Conceptually, the following Stream example:
 
@@ -99,7 +101,7 @@ The stream name, attribute and children all support fuzzing.
 
 Additionally, relations and fixups can reference children of different streams.
 
-The Stream element is intended for use by publishers that are stream aware. If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
+The Stream element is intended for use by publishers that are stream aware ( like xref:Publishers_Zip[Zip]). If the publisher is not stream aware, the stream element is treated exactly like a xref:Block[Block].
 
 === Examples
 
