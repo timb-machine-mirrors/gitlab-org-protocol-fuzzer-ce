@@ -48,6 +48,8 @@ using System.Xml.Serialization;
 
 namespace Peach.Core.Dom
 {
+	#region Enumerations
+
 	/// <summary>
 	/// Length types
 	/// </summary>
@@ -119,8 +121,6 @@ namespace Peach.Core.Dom
 		Network,
 	}
 
-	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
-
 	/// <summary>
 	/// Mutated value override's fixupImpl
 	///
@@ -162,6 +162,10 @@ namespace Peach.Core.Dom
 		/// </summary>
 		Default = Fixup,
 	}
+
+	#endregion
+
+	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
 
 	/// <summary>
 	/// Base class for all data elements.
@@ -296,6 +300,72 @@ namespace Peach.Core.Dom
 		{
 			return new DataElement[0];
 		}
+
+		#region Find Element By Name
+
+		public DataElement Find(string name)
+		{
+			var parts = name.Split(new[] { '.' });
+
+			foreach (var item in Walk())
+			{
+				int index = 0;
+
+				if (item.name != parts[index++])
+					continue;
+
+				var candidate = item;
+
+				do
+				{
+					if (index == parts.Length)
+						return candidate;
+
+					candidate = candidate.GetChild(parts[index++]);
+					if (candidate == null)
+						break;
+				}
+				while (true);
+			}
+
+			return null;
+		}
+
+		public IEnumerable<DataElement> Walk()
+		{
+			// Preform pre-order traversal starting with ourselves
+			foreach (var item in PreOrderTraverse())
+				yield return item;
+
+			// Walk up the dom, performing pre-order traversal of each of
+			// our parents but skip children that have already been traversed.
+			var skip = this;
+			var next = parent;
+
+			while (next != null)
+			{
+				yield return next;
+
+				foreach (var child in next.Children())
+				{
+					if (child != skip)
+					{
+						foreach (var item in child.PreOrderTraverse())
+							yield return item;
+					}
+				}
+
+				skip = next;
+				next = next.parent;
+			}
+		}
+
+		protected virtual DataElement GetChild(string name)
+		{
+			return null;
+		}
+
+		#endregion
 
 		#endregion
 
@@ -1025,12 +1095,11 @@ namespace Peach.Core.Dom
 
 		public DataElement CommonParent(DataElement elem)
 		{
-			List<DataElement> parents = new List<DataElement>();
-			DataElementContainer parent = null;
+			var parents = new List<DataElement>();
 
 			parents.Add(this);
 
-			parent = this.parent;
+			var parent = this.parent;
 			while (parent != null)
 			{
 				parents.Add(parent);
@@ -1385,7 +1454,7 @@ namespace Peach.Core.Dom
 		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
 		public bool isChildOf(DataElement dataElement)
 		{
-			DataElement obj = _parent;
+			var obj = _parent;
 			while (obj != null)
 			{
 				if (obj == dataElement)
