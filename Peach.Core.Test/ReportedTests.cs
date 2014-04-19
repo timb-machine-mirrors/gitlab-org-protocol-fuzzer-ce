@@ -412,5 +412,77 @@ namespace Peach.Core.Test
 		}
 
 		uint engineCount = 0;
+
+		[Test, Ignore]
+		public void PlacementWithOffset()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='entry_model'>
+		<Number size='8' name='blob_offset'>
+			<Relation type='offset' of='blob' />
+		</Number>
+		<Number name='blob_size' size='8'>
+			<Relation type='size' of='blob' />
+		</Number>
+
+		<Block name='blob'>
+			<Placement before='end_entries' />
+			<Blob name='blobdata' />
+		</Block>
+	</DataModel>
+
+	<DataModel name='DataEntry'>
+		<Block name='dataEntry_header'>
+			<Number size='8' name='data_size'>
+				<Relation type='size' of='dataentry_data' />
+			</Number>
+			<Number size='8' name='data_offset'>
+				<Relation type='offset' of='dataentry_data' />
+			</Number>
+		</Block>
+		<Block name='Holder'>
+			<Placement before='EndPlaceBlock'/>
+			<Block name='dataentry_data'>
+				<Number name='entry_count' size='8'>
+					<Relation type='count' of='entriesf' />
+				</Number>
+				<Number name='entry_offset' size='8'>
+					<Relation type='offset' of='entriesf' />
+				</Number>
+			</Block>
+			<Block name='entriesf' minOccurs='0' ref='entry_model' />
+		</Block>
+
+
+		<Block name='end_entries' />
+	</DataModel>
+
+	<DataModel name='EntryList'>
+		<Blob name='ELToken' valueType='string' value='EL' token='true' />
+		<Number size='8' name='entry_count'>
+			<Relation type='count' of='Entries' />
+		</Number>
+		
+		<Choice name='Entries' minOccurs='0'>
+			<Block name='ADataEntry' ref='DataEntry' />
+		</Choice>
+
+		<Block name='EndPlaceBlock'/>
+		
+		<Blob name='ENDToken' valueType='string' value='ND' token='true' />
+	</DataModel>
+</Peach>";
+
+			var bytes = HexString.Parse("45 4c 01 03 09 41 41 41 41 01 0e 00 00 00 10 42 41 41 4e 44").Value;
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[2], new BitStream(bytes));
+
+
+		}
 	}
 }
