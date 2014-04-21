@@ -36,3 +36,7 @@ output/
 .mr.developer.cfg
 .project
 .pydevproject
+
+pro/logs
+pro/fuzzed.*
+
