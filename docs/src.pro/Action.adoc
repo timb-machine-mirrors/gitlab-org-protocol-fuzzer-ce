@@ -20,16 +20,18 @@
 // described scripting and showed an example of multiple publishers
 // fixed children and attributes
 
-Action elements perform various operations in the StateModel.
-Actions are primarily a way of sending commands to the xref:Publisher[Publisher].
-Actions can send output, receive input, open a connection, and much more.
-Actions can also control the Peach environment.
-Examples include changing to another state in the StateModel, moving data between DataModels, and calling custom methods defined by Agents.
-Actions are child elements of xref:State[State].
+Action elements are child elements of xref:State[State]. Actions are used to send commands to the xref:Publisher[Publisher].
 
-Many Actions are called by Peach implicitly (without explicitly declaring it within a State).
-An example of which is the start action that is performed every iteration automatically or the open action which is called before any outputs or inputs.
-For the case of open or close explicitly declaring the actions may be useful in freeing up resources or initializing a listener.
+Action elements perform various operations in the xref:StateModel[StateModel].
+
+* Actions can send output, receive input, open a connection, and much more. Two examples are the open action initializing a listener and the close action freeing up resources.
+* Actions can also control the Peach environment by changing to another state in the xref:StateModel[StateModel], moving data between xref:DataModel[DataModels], and calling custom methods defined by xref:Agent[Agents].
+
+Many Actions are called by Peach implicitly (without explicitly declaring it within a State). Two examples are:
+
+* The xref:Action_Start[_start_] action that performs every iteration automatically  
+* The  xref:Action_Open[_open_] action called before any outputs or inputs
+
 
 === Syntax
 
@@ -49,10 +51,9 @@ For the case of open or close explicitly declaring the actions may be useful in 
 </StateModel>
 ----
 
-Each Action supports various parameters that will execute scripts in certain times such as once an Action has completed or before it starts.
-This is useful for complicated StateModels that need the assistance of counters or other advanced operations.  
+Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed) .
 
-Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to explicitly declare what Publisher the command is referring to.
+Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to explicitly declare which Publisher the command refers to.
 
 [source,xml]
 ----

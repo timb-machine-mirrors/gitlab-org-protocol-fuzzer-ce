@@ -21,7 +21,9 @@
 [horizontal]
 Type:: Compress
 
-_GzipDecompress_ performs a gzip decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
+_GzipDecompress_ performs a gzip decompression on the value in the parent xref:DataModel[DataModel]. 
+
+The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters
 

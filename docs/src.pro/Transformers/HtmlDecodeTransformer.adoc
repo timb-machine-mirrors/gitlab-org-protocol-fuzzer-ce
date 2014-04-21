@@ -28,7 +28,8 @@
 Type:: Encoder/Decoder
 
 _HtmlDecode_ will decode any HTML/XML encoded characters in the string in the parent xref:DataModel[DataModel].
-Only the characters < & ' and " will be encoded on.
+Only the characters < & ' and " will be decoded.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

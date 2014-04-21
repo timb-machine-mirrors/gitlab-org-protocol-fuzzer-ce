@@ -352,7 +352,9 @@ namespace PeachFarm.Admin
 		{
 			if (e.Result.Success)
 			{
-				System.Console.WriteLine("Stop Peach Success\n");
+				System.Console.WriteLine("Stop Peach message successfully sent to Nodes.\n");
+				System.Console.WriteLine("For long running iterations it may take a long time for each Node to finish its current iteration and stop fuzzing.");
+				System.Console.WriteLine("You can monitor Node status with \"pf_admin.exe -nodes\" or with the Peach Farm Monitor web app.");
 			}
 			else
 			{

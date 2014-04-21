@@ -12,7 +12,7 @@ XPath is used to identify the included elements.
 
 .XPath Further Reading
 ****
-The following links provide additional information regarding XPaths.
+The following links provide additional information regarding XPath.
 
  * http://www.w3schools.com/xpath/[XPath Tutorial]
  * http://www.w3schools.com/xpath/xpath_syntax.asp[XPath Syntax]

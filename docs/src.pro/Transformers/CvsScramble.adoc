@@ -22,7 +22,9 @@
 [horizontal]
 Type:: Cryptography
 
-_CvsScramble_ performs a pserver password scramble on the given value. The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
+_CvsScramble_ performs a pserver password scramble on the given value. 
+
+The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 
 === Parameters
 

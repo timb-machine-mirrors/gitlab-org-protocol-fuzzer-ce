@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _UrlEncode_ will produce a URL encoded string of the provided value in the parent xref:DataModel[DataModel].
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
