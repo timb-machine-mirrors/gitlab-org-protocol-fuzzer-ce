@@ -5,6 +5,7 @@ include::VLAN_DataSheet.adoc[]
 ==== Target Configuration
 A VLAN interface or VLAN enabled switch is required.
 A VLAN interface can be added on Linux using vconfig.
+
 In order to run all tests both a UDP and TCP listener are required. The networking tool socat can be used as the listener.
 
 ==== Required Pit Configuration Changes
@@ -44,7 +45,7 @@ peach VLAN.xml
 ==========================
 Example configuration to send vlan packets
 
-First we must install vlan and configure vlan. Once that is done socat needs to be set up in different terminals to listen for incoming packets. For this example we assume you are running linux. For other platforms follow the platform specific installation instructions for vlan and socat.
+First we must install vlan and configure vlan. Once that is done socat needs to be set up in different terminals to listen for incoming packets. For this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for vlan and socat.
 
 ----
 sudo apt-get install vlan

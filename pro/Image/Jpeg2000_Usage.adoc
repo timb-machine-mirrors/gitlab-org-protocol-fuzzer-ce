@@ -4,8 +4,8 @@ include::Jpeg2000_DataSheet.adoc[]
 
 ==== Target Configuration
 Any number of image viewing programs (like GIMP 2.8 on Linux and Windows) may be targeted with the JPEG2000 file format.
-In the JPEG2000.xml.config pit file, you can set the target program that you are fuzzing, such as GIMP 2.8.
-If available, you can set different target programs for different operating systems.
+
+In the JPEG2000.xml.config pit file, you can set the target program that you are fuzzing, such as GIMP 2.8. If available, you can set different target programs for different operating systems.
 
 ==== Required Pit Configuration Changes
 Seed:: Name of a valid JPEG2000 file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together with an asterisk wildcard.
@@ -36,9 +36,9 @@ peach JPEG2000.xml
 
 .Sample JPEG2000 Configuration File
 ==========================
-Example configuration using feh on linux. The configuration file also contains settings for gimp on Windows and preview on OSX:
+Example configuration using feh on Linux. The configuration file also contains settings for gimp on Windows and preview on OSX:
 
-First we must install feh, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for feh.
+First we must install feh; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for feh.
 
 ----
 #Installing feh on linux

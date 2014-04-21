@@ -36,7 +36,7 @@ peach avi_divx.xml
 ==========================
 Example configuration using VLC player.
 
-First we must install VLC player, for this example we assume you are running on ubuntu or debian. For other platforms follow instructions per VLC http://www.videolan.org/vlc/index.html[website]:
+First we must install VLC player, for this example we assume you are running on Ubuntu or Debian. For other platforms follow instructions on the VLC http://www.videolan.org/vlc/index.html[website]:
 
 ----
 sudo apt-get install vlc

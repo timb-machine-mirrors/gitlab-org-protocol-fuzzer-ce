@@ -4,6 +4,7 @@ include::TCPv6_DataSheet.adoc[]
 
 ==== Target Configuration
 An application must be listening on the TCP port defined in the configuration file. The network tool socat can be used as the listener.
+
 Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
 
 ==== Required Pit Configuration Changes
@@ -38,9 +39,9 @@ peach TCPv6.xml
 
 .Sample TCPv6 Configuration File
 ==========================
-Example configuration using socat on linux.
+Example configuration using socat on Linux.
 
-First we must configure the firewall then install and run socat, for this example we assume you are running linux. For other platforms follow the platform specific installation instructions for socat and firewall configuration.
+First we must configure the firewall then install and run socat, for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat and firewall configuration.
 
 [source,bash]
 ----

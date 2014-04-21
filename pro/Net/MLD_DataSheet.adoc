@@ -6,7 +6,9 @@
  * Direction: Client
  * Supported Platforms: Windows, Linux, OS X
 
-Multicast Listener Discovery Protocol (MLD) is used to declare and manage group membership for multicast addresses in IPv6. The protocol is contained within IPv6 and its structure is similar to ICMPv6. It contains similar functionality to the Internet Group Management Protocol for IPv4. 
+Multicast Listener Discovery Protocol (MLD) is used to declare and manage group membership for multicast addresses in IPv6. 
+
+The protocol is contained within IPv6 and its structure is similar to ICMPv6. It contains similar functionality to the Internet Group Management Protocol for IPv4. 
 
 Commands include adding and removing IP's from a group and querying servers for current group membership. 
 

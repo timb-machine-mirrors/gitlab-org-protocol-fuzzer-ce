@@ -4,18 +4,19 @@ include::Png_DataSheet.adoc[]
 
 ==== Target Configuration
 Any number of image viewing programs may be targeted with the PNG file format. Example targets for fuzzing PNG are "feh" on Linux and "mspaint.exe" on Windows.
+
 In the Png.xml.config pit file, you can set the target program that you are fuzzing, such as feh or mspaint.exe. Normally you would set different target programs for different operating systems.
 
 ==== Required Pit Configuration Changes
-Seed:: Name of a valid PNG file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together wtih an asterisk wildcard.
-Target:: The program that will open the fuzzed Png files.
+Seed:: Name of a valid PNG file located in the Samples directory. An empty string indicates use all files in the directory.  Multiple files can be globbed together with an asterisk wildcard.
+Target:: The program that will open the fuzzed PNG files.
 
 ==== Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Directory path to folder where logs will be stored.
 Agent:: The agent that will be ran to open the target program. This is generally OS dependent.
 Path:: Path to the relative base directory where all pits are located.
-SamplePath:: Path to the directory in which the Png sample files are stored.  Relative to Path.
+SamplePath:: Path to the directory in which the PNG sample files are stored.  Relative to Path.
 
 ==== Configure Additional Monitors
 Add monitors to agent as needed
@@ -35,9 +36,9 @@ peach Png.xml
 
 .Sample Png Configuration File
 ==========================
-Example configuration using feh on linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
+Example configuration using feh on Linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
 
-First we must install feh, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for feh.
+First we must install feh, for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for feh.
 
 ----
 #Installing feh on linux

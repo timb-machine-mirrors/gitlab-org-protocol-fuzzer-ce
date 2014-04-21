@@ -4,6 +4,7 @@ include::Ico_DataSheet.adoc[]
 
 ==== Target Configuration
 Any number of image viewing programs may be targeted with the Ico file format. Example targets for fuzzing Ico are "feh" on Linux and "mspaint.exe" on Windows.
+
 In the Ico.xml.config pit file, you can set the target program that you are fuzzing, such as feh or mspaint.exe. Normally you would set different target programs for different operating systems.
 
 ==== Required Pit Configuration Changes
@@ -15,7 +16,7 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Directory path to folder where logs will be stored.
 Agent:: The agent that will be ran to open the target program. This is generally OS dependent.
 Path:: Path to the relative base directory where all pits are located.
-SamplePath:: Path to the directory in which the Ico sample files are stored.  Relative to Path.
+SamplePath:: Path to the directory in which the ICO sample files are stored.  Relative to Path.
 
 ==== Configure Additional Monitors
 Add monitors to agent as needed
@@ -33,11 +34,11 @@ peach Ico.xml
 
 === Examples
 
-.Sample Ico Configuration File
+.Sample ICO Configuration File
 ==========================
 Example configuration using feh on linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
 
-First we must install feh, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for feh.
+First we must install feh, for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for feh.
 
 ----
 #Installing feh on linux

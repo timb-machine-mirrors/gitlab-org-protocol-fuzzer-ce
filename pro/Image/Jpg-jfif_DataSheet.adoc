@@ -6,6 +6,7 @@
 
 JPEG File Interchange Format (JFIF) is an image format built on a TLV segment structure.
 It is built to be an extensible format and supports a variety of compressions and encodings.
+
 Even though its structure is very similar to the EXIF standard, these two formats are incompatible.
 Many programs ignore these differences in requirements.
 

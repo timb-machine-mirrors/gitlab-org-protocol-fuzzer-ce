@@ -6,7 +6,8 @@
  * Direction: Broadcast
  * Supported Platforms: Linux
 
-An Ethernet Frame is a link layer data packet, as described in IEEE 802.3. It encapsulates all layers above it. 
+An Ethernet Frame is a link layer data packet as described in IEEE 802.3. It encapsulates all the layers above it. 
+
 This is a simple protocol; this pit would not be used alone, but would likely be used to construct encapsulated protocol pits.
 
 === Specifications

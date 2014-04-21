@@ -4,15 +4,15 @@ include::Ldap_DataSheet.adoc[]
 
 ==== Target Configuration
 A configured LDAP server with an account that is defined in the configuration file is required.
-On linux OpenLDAP can be used.
+On Linux OpenLDAP can be used.
 
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine
 SourceIPv4:: IP address of the interface on the local machine
 TargetPort:: LDAP port number of the target host machine
 Interface:: Name of local interface (used for monitoring)
-Username:: Username used to login to the Ldap service
-Password:: Password for the user logging into the Ldap service
+Username:: Username used to login to the LDAP service
+Password:: Password for the user logging into the LDAP service
 
 ==== Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing
@@ -71,7 +71,7 @@ peach LDAP.xml ExtendOp
 ==========================
 Example configuration using OpenLdap on linux.
 
-First we must install OpenLDAP, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for OpenLDAP.
+First we must install OpenLDAP; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for OpenLDAP.
 
 ----
 #Install OpenLdap server

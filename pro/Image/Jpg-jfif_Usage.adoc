@@ -35,12 +35,12 @@ peach jpg-jfif.xml
 
 .Sample JPG-JFIF Configuration File
 ==========================
-Example configuration using feh on linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
+Example configuration using feh on Linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
 
-First we must install feh, for this example we assume you are running on ubuntu or debian. For other platforms follow the  platform specific installation instructions for feh.
+First we must install feh, for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for feh.
 
 ----
-#Installing feh on linux
+#Installing feh on Linux
 sudo apt-get install feh
 ----
 

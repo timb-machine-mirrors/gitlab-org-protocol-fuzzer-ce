@@ -6,6 +6,7 @@
 
 The Portable Network Graphics (PNG) file format was defined to be a non-patented lossless image compression format for images in network communications.
 It supports RGB palettes, grayscale, and non-palette-bases RGB[A] images.
+
 The file is composed of a magic number and a series of TLV chunks.
 Each chunk contains a type, length, data, and a checksum at the end.
 

@@ -4,7 +4,7 @@
  * Peach Pit: BMP
  * Supported Platforms: Windows, Linux, OS X
 
-Bitmap is a Microsoft defined file format containing raster graphic images. 
+Bitmap (BMP) is a Microsoft defined file format containing raster graphic images. 
 Bitmap files contain fixed sized headers and a variable length pixel array.
 
 The BMP header varies by a the version number; each subsequent version appends fields to end of the previous version. For example:  
