@@ -52,6 +52,7 @@ namespace Peach.Core.Dom
 	{
 		protected List<DataElement> _childrenList = new List<DataElement>();
 		protected Dictionary<string, DataElement> _childrenDict = new Dictionary<string, DataElement>();
+
 		[Serializable]
 		class ElementCollection : OwnedCollection<DataElementContainer, DataElement>
 		{
@@ -216,20 +217,6 @@ namespace Peach.Core.Dom
 
 				return true;
 			}
-		}
-
-		/// <summary>
-		/// Recursively execute analyzers
-		/// </summary>
-		public override void evaulateAnalyzers()
-		{
-			foreach (DataElement child in this._childrenList.ToArray())
-				child.evaulateAnalyzers();
-
-			if (analyzer == null)
-				return;
-
-			analyzer.asDataElement(this, null);
 		}
 
 		/// <summary>

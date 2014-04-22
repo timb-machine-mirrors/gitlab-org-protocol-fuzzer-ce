@@ -637,12 +637,11 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Recursively execute analyzers
 		/// </summary>
-		public virtual void evaulateAnalyzers()
+		public void evaulateAnalyzers()
 		{
-			if (analyzer == null)
-				return;
-
-			analyzer.asDataElement(this, null);
+			foreach (var item in PreOrderTraverse())
+				if (item.analyzer != null)
+					item.analyzer.asDataElement(item, null);
 		}
 
 		public Dictionary<string, Hint> Hints
