@@ -25,7 +25,7 @@ namespace Peach.Core
 	[Serializable]
 	public class OwnedCollection<TOwner, TObject> : NamedCollection<TObject> where TObject : INamed, IOwned<TOwner>
 	{
-		private TOwner owner;
+		protected TOwner owner { get; private set; }
 
 		/// <summary>
 		/// Constructs a new OwnedCollection
