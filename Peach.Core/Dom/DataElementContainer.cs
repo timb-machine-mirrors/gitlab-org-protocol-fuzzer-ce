@@ -119,14 +119,6 @@ namespace Peach.Core.Dom
 				data.SeekBits(startPosition + size.Value, System.IO.SeekOrigin.Begin);
 		}
 
-		public override bool isLeafNode
-		{
-			get
-			{
-				return _childrenList.Count == 0;
-			}
-		}
-
 		public DataElement QuickNameMatch(string[] names)
 		{
 			if (names.Length == 0)
@@ -162,7 +154,7 @@ namespace Peach.Core.Dom
 		{
 			string ret = name;
 
-			for (int i = 1; ContainsKey(ret); ++i)
+			for (int i = 1; _childrenDict.ContainsKey(ret); ++i)
 			{
 				ret = string.Format("{0}_{1}", name, i);
 			}
@@ -220,16 +212,6 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// Does container contain child element with name key?
-		/// </summary>
-		/// <param name="key">Name of child element to check</param>
-		/// <returns>Returns true if child exits</returns>
-		public bool ContainsKey(string key)
-		{
-			return _childrenDict.ContainsKey(key);
-		}
-
-		/// <summary>
 		/// Enumerate all child elements recursevely.
 		/// </summary>
 		/// <remarks>
@@ -258,25 +240,6 @@ namespace Peach.Core.Dom
 		protected override IEnumerable<DataElement> Children()
 		{
 			return this;
-		}
-
-		/// <summary>
-		/// Check if we are a parent of an element.  This is
-		/// true even if we are not the direct parent, but several
-		/// layers up.
-		/// </summary>
-		/// <param name="element">Element to check</param>
-		/// <returns>Returns true if we are a parent of element.</returns>
-		public bool isParentOf(DataElement element)
-		{
-			while (element.parent != null && element.parent is DataElement)
-			{
-				element = element.parent;
-				if (element == this)
-					return true;
-			}
-
-			return false;
 		}
 
 		/// <summary>
@@ -310,7 +273,7 @@ namespace Peach.Core.Dom
 			sb.Append("\n");
 		}
 
-		public DataElement this[int index]
+		public virtual DataElement this[int index]
 		{
 			get { return _childrenList[index]; }
 			set
@@ -341,7 +304,18 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public DataElement this[string key]
+		/// <summary>
+		/// Does container contain child element with name key?
+		/// </summary>
+		/// <param name="key">Name of child element to check</param>
+		/// <param name="value">Gets the element named 'key'.</param>
+		/// <returns>Returns true if child exits</returns>
+		public virtual bool TryGetValue(string key, out DataElement value)
+		{
+			return _childrenDict.TryGetValue(key, out value);
+		}
+
+		public virtual DataElement this[string key]
 		{
 			get { return _childrenDict[key]; }
 			set

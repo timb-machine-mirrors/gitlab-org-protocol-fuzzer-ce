@@ -224,8 +224,6 @@ namespace Peach.Core.Dom
 			else
 				clone = clone.Clone(clone.name + "_" + index);
 
-			System.Diagnostics.Debug.Assert(!ContainsKey(clone.name));
-
 			return clone;
 		}
 

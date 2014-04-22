@@ -752,16 +752,6 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// Is this a leaf of the DataModel tree?
-		/// 
-		/// True if DataElement has no children.
-		/// </summary>
-		public virtual bool isLeafNode
-		{
-			get { return true; }
-		}
-
-		/// <summary>
 		/// Does element have a length?  This is
 		/// separate from Relations.
 		/// </summary>
@@ -1498,13 +1488,28 @@ namespace Peach.Core.Dom
 		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
 		public bool isChildOf(DataElement dataElement)
 		{
-			var obj = _parent;
-			while (obj != null)
+			for (var obj = parent; obj != null; obj = obj.parent)
 			{
 				if (obj == dataElement)
 					return true;
+			}
 
-				obj = obj.parent;
+			return false;
+		}
+
+		/// <summary>
+		/// Check if we are a parent of an element.  This is
+		/// true even if we are not the direct parent, but several
+		/// layers up.
+		/// </summary>
+		/// <param name="element">Element to check</param>
+		/// <returns>Returns true if we are a parent of element.</returns>
+		public bool isParentOf(DataElement element)
+		{
+			for (var obj = element.parent; obj != null; obj = obj.parent)
+			{
+				if (obj == this)
+					return true;
 			}
 
 			return false;

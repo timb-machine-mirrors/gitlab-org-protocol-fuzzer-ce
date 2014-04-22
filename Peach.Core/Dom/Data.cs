@@ -159,10 +159,10 @@ namespace Peach.Core.Dom
 					name = m.Groups[1].Value;
 					int index = int.Parse(m.Groups[2].Value);
 
-					if (!container.ContainsKey(name))
+					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					var array = container[name] as Array;
+					var array = elem as Array;
 					if (array == null)
 						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
 
@@ -211,10 +211,9 @@ namespace Peach.Core.Dom
 				}
 				else
 				{
-					if (!container.ContainsKey(name))
+					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					elem = container[name];
 					container = elem as DataElementContainer;
 				}
 			}
