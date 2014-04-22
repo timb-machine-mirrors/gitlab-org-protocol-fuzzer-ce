@@ -331,6 +331,54 @@ namespace Peach.Core.Dom
 			return null;
 		}
 
+		public IEnumerable<DataElement> EnumerateAll()
+		{
+			var toVisit = new List<IEnumerable<DataElement>>();
+			toVisit.Add(Children());
+
+			while (toVisit.Count > 0)
+			{
+				var index = 0;
+				var elems = toVisit[0];
+				toVisit.RemoveAt(0);
+
+				foreach (var item in elems)
+				{
+					toVisit.Insert(index++, item.Children());
+					yield return item;
+				}
+			}
+		}
+
+		public IEnumerable<DataElement> EnumerateUpTree()
+		{
+			// Traverse, will not return ourselves
+			foreach (var item in EnumerateAll())
+				yield return item;
+
+			var skip = this;
+			var next = parent;
+
+			while (next != null)
+			{
+				// Return parent's children first
+				foreach (var child in next.Children())
+					yield return child;
+
+				foreach (var child in next.Children().Where(x => x != skip))
+				{
+					// Traverse on children we have not already traversed
+					foreach (var item in child.EnumerateAll())
+						yield return item;
+				}
+
+				skip = next;
+				next = next.parent;
+			}
+
+			yield return skip;
+		}
+
 		public IEnumerable<DataElement> Walk()
 		{
 			// Preform pre-order traversal starting with ourselves
@@ -346,13 +394,10 @@ namespace Peach.Core.Dom
 			{
 				yield return next;
 
-				foreach (var child in next.Children())
+				foreach (var child in next.Children().Where(x => x != skip))
 				{
-					if (child != skip)
-					{
-						foreach (var item in child.PreOrderTraverse())
-							yield return item;
-					}
+					foreach (var item in child.PreOrderTraverse())
+						yield return item;
 				}
 
 				skip = next;
@@ -1333,7 +1378,7 @@ namespace Peach.Core.Dom
 			{
 				if (!knownParents.Contains(item))
 				{
-					foreach (DataElement e in item.EnumerateAllElements())
+					foreach (DataElement e in item.EnumerateAllElements(knownParents))
 						yield return e;
 
 					knownParents.Add(item);

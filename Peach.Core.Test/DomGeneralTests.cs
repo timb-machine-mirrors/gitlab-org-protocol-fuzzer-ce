@@ -6,6 +6,8 @@ using NUnit.Framework;
 using Peach.Core.IO;
 using Peach.Core.Dom;
 using NLog;
+using System.IO;
+using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test
 {
@@ -281,6 +283,82 @@ namespace Peach.Core.Test
 			Assert.AreEqual(m, items[0]);
 			Assert.AreEqual(c, items[1]);
 			Assert.AreEqual(e, items[2]);
+		}
+
+		[Test]
+		public void TestEnumeration()
+		{
+			/*
+			        F
+			       / \
+			      /   \
+			     /     \
+			    B       G
+			   / \     / \
+			  A   D   K   I
+			 /   / \     / \
+			L   C   E   H   J
+			*/
+
+			string xml = @"
+<Peach>
+	<DataModel name='F'>
+		<Block name='B'>
+			<Block name='A'>
+				<Blob name='L'/>
+			</Block>
+			<Block name='D'>
+				<Blob name='C'/>
+				<Blob name='E'/>
+			</Block>
+		</Block>
+		<Block name='G'>
+			<Blob name='K'/>
+			<Block name='I'>
+				<Blob name='H'/>
+				<Blob name='J'/>
+			</Block>
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = dom.dataModels[0].find("E");
+			Assert.NotNull(e);
+
+			var d = dom.dataModels[0].find("D");
+			Assert.NotNull(d);
+
+			var iter1 = e.EnumerateElementsUpTree().Select(a => a.name).ToList();
+			var iter2 = e.EnumerateUpTree().Select(a => a.name).ToList();
+
+			var eEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
+			Assert.AreEqual(eEnum, string.Join(",", iter1));
+			Assert.AreEqual(eEnum, string.Join(",", iter2));
+
+			var iter3 = d.EnumerateElementsUpTree().Select(a => a.name).ToList();
+			var iter4 = d.EnumerateUpTree().Select(a => a.name).ToList();
+
+			var dEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
+			Assert.AreEqual(dEnum, string.Join(",", iter3));
+			Assert.AreEqual(dEnum, string.Join(",", iter4));
+
+			var iter5 = dom.dataModels[0].EnumerateAllElements().Select(a => a.name).ToList();
+			var iter6 = dom.dataModels[0].EnumerateAll().Select(a => a.name).ToList();
+
+			var rootAll = "B,G,A,D,L,C,E,K,I,H,J";
+			Assert.AreEqual(rootAll, string.Join(",", iter5));
+			Assert.AreEqual(rootAll, string.Join(",", iter6));
+
+			var iter7 = dom.dataModels[0].EnumerateElementsUpTree().Select(a => a.name).ToList();
+			var iter8 = dom.dataModels[0].EnumerateUpTree().Select(a => a.name).ToList();
+
+			var rootEnum = "B,G,A,D,L,C,E,K,I,H,J,F";
+			Assert.AreEqual(rootEnum, string.Join(",", iter7));
+			Assert.AreEqual(rootEnum, string.Join(",", iter8));
 		}
 	}
 }
