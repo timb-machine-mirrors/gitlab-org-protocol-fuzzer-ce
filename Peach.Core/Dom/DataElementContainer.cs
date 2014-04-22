@@ -52,6 +52,29 @@ namespace Peach.Core.Dom
 	{
 		protected List<DataElement> _childrenList = new List<DataElement>();
 		protected Dictionary<string, DataElement> _childrenDict = new Dictionary<string, DataElement>();
+		[Serializable]
+		class ElementCollection : OwnedCollection<DataElementContainer, DataElement>
+		{
+			public ElementCollection(DataElementContainer owner)
+				: base(owner)
+			{
+			}
+
+			protected override void InsertItem(int index, DataElement item)
+			{
+				base.InsertItem(index, item);
+			}
+
+			protected override void SetItem(int index, DataElement item)
+			{
+				base.SetItem(index, item);
+			}
+
+			protected override void RemoveItem(int index)
+			{
+				base.RemoveItem(index);
+			}
+		}
 
 		public DataElementContainer()
 		{
