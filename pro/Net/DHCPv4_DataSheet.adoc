@@ -10,6 +10,7 @@ Dynamic Host Configuration Protocol Version 4 (DHCPv4) is the network configurat
 
 DHCP provides a way for devices on a network to request an available IP address from a central server.
 Requesting IP addresses with DHCP reduces the changes of address collisions and allows hosts to become addressable without needing the network configuration's previous details.
+
 Requests are broadcasted over the layer-2 network to an entire network space and relayed on until received by a DHCP Server.
 The server responds back with an available IP address and a handshake is completed between the two systems.
 
