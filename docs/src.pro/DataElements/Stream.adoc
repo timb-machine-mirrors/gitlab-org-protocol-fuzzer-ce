@@ -2,7 +2,7 @@
 [[Stream]]
 == Stream
 
-Streams are logical blocks of data that contain other data blocks (like zip files and audio/video [A/V] multimedia files). Stream element are used to represent streams in a single model. 
+Streams are logical blocks of data that contain other data blocks (like zip and audio/video [A/V] multimedia files). Stream element are used to represent streams in a single model. 
 
 Stream elements are similar to xref:Block[Block] elements except they contain stream names and stream attributes. 
 
