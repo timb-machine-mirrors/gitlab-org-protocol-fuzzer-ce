@@ -40,7 +40,7 @@ peach Bmp.xml
 
 .Sample Bmp Configuration File
 ==========================
-This example configuration uses feh on linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
+This example configuration uses feh on Linux. The configuration file also contains settings for mspaint on Windows and preview on OSX:
 
 First, install feh; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for feh.
 
