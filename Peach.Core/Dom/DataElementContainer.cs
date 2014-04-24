@@ -48,34 +48,34 @@ namespace Peach.Core.Dom
 	/// data elements.  Such as Block, Choice, or Flags.
 	/// </summary>
 	[Serializable]
-	public abstract class DataElementContainer : DataElement, IEnumerable<DataElement>, IList<DataElement>
+	public abstract class DataElementContainer : DataElement, IList<DataElement>
 	{
 		protected List<DataElement> _childrenList = new List<DataElement>();
 		protected Dictionary<string, DataElement> _childrenDict = new Dictionary<string, DataElement>();
 
-		[Serializable]
-		class ElementCollection : OwnedCollection<DataElementContainer, DataElement>
-		{
-			public ElementCollection(DataElementContainer owner)
-				: base(owner)
-			{
-			}
+		//[Serializable]
+		//class ElementCollection : OwnedCollection<DataElementContainer, DataElement>
+		//{
+		//	public ElementCollection(DataElementContainer owner)
+		//		: base(owner)
+		//	{
+		//	}
 
-			protected override void InsertItem(int index, DataElement item)
-			{
-				base.InsertItem(index, item);
-			}
+		//	protected override void InsertItem(int index, DataElement item)
+		//	{
+		//		base.InsertItem(index, item);
+		//	}
 
-			protected override void SetItem(int index, DataElement item)
-			{
-				base.SetItem(index, item);
-			}
+		//	protected override void SetItem(int index, DataElement item)
+		//	{
+		//		base.SetItem(index, item);
+		//	}
 
-			protected override void RemoveItem(int index)
-			{
-				base.RemoveItem(index);
-			}
-		}
+		//	protected override void RemoveItem(int index)
+		//	{
+		//		base.RemoveItem(index);
+		//	}
+		//}
 
 		public DataElementContainer()
 		{
@@ -84,6 +84,53 @@ namespace Peach.Core.Dom
 		public DataElementContainer(string name)
 			: base(name)
 		{
+		}
+
+		/// <summary>
+		/// Called before the item is going to be added
+		/// </summary>
+		/// <param name="item"></param>
+		protected virtual void OnInsertItem(DataElement item)
+		{
+
+			item.parent = this;
+
+			Invalidate();
+		}
+
+		/// <summary>
+		/// Called after the item has been removed
+		/// </summary>
+		/// <param name="item"></param>
+		protected virtual void OnRemoveItem(DataElement item)
+		{
+			// Clear any bindings this element has to other elements
+			foreach (var elem in item.PreOrderTraverse())
+			{
+				foreach (var rel in elem.relations.ToArray())
+				{
+					rel.From.relations.Remove(rel);
+					rel.Clear();
+				}
+			}
+
+			Invalidate();
+		}
+
+		/// <summary>
+		/// Called before oldItem is going to be replaced with newItem
+		/// </summary>
+		/// <param name="oldItem"></param>
+		/// <param name="newItem"></param>
+		protected virtual void OnSetItem(DataElement oldItem, DataElement newItem)
+		{
+			oldItem.parent = null;
+
+			newItem.UpdateBindings(oldItem);
+
+			newItem.parent = this;
+
+			Invalidate();
 		}
 
 		public override void Crack(DataCracker context, BitStream data, long? size)
@@ -273,37 +320,6 @@ namespace Peach.Core.Dom
 			sb.Append("\n");
 		}
 
-		public virtual DataElement this[int index]
-		{
-			get { return _childrenList[index]; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException("value");
-
-				if (index == _childrenList.Count)
-				{
-					Insert(index, value);
-					return;
-				}
-
-				var oldElem = _childrenList[index];
-				oldElem.parent = null;
-
-				_childrenDict.Remove(oldElem.name);
-				_childrenList.RemoveAt(index);
-
-				_childrenDict.Add(value.name, value);
-				_childrenList.Insert(index, value);
-
-				value.UpdateBindings(oldElem);
-
-				value.parent = this;
-
-				Invalidate();
-			}
-		}
-
 		/// <summary>
 		/// Does container contain child element with name key?
 		/// </summary>
@@ -313,6 +329,29 @@ namespace Peach.Core.Dom
 		public virtual bool TryGetValue(string key, out DataElement value)
 		{
 			return _childrenDict.TryGetValue(key, out value);
+		}
+
+		public virtual DataElement this[int index]
+		{
+			get { return _childrenList[index]; }
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException("value");
+
+				if (index >= _childrenList.Count)
+					throw new ArgumentOutOfRangeException("index");
+
+				var oldElem = _childrenList[index];
+
+				_childrenDict.Remove(oldElem.name);
+				_childrenList.RemoveAt(index);
+
+				_childrenDict.Add(value.name, value);
+				_childrenList.Insert(index, value);
+
+				OnSetItem(oldElem, value);
+			}
 		}
 
 		public virtual DataElement this[string key]
@@ -370,7 +409,7 @@ namespace Peach.Core.Dom
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return _childrenList.GetEnumerator();
+			return GetEnumerator();
 		}
 
 		#endregion
@@ -388,9 +427,7 @@ namespace Peach.Core.Dom
 			_childrenDict.Add(item.name, item);
 			_childrenList.Insert(index, item);
 
-			item.parent = this;
-
-			Invalidate();
+			OnInsertItem(item);
 		}
 
 		public virtual void RemoveAt(int index)
@@ -405,17 +442,7 @@ namespace Peach.Core.Dom
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
 
-			// Clear any bindings this element has to other elements
-			foreach (var elem in item.PreOrderTraverse())
-			{
-				foreach (var rel in elem.relations.ToArray())
-				{
-					rel.From.relations.Remove(rel);
-					rel.Clear();
-				}
-			}
-
-			Invalidate();
+			OnRemoveItem(item);
 		}
 
 		#endregion
@@ -428,16 +455,16 @@ namespace Peach.Core.Dom
 			_childrenDict.Add(item.name, item);
 			_childrenList.Add(item);
 
-			item.parent = this;
-
-			Invalidate();
+			OnInsertItem(item);
 		}
 
 		public void Clear()
 		{
+//			while (_childrenList.Count > 0)
+//				RemoveAt(0);
+
 			_childrenList.Clear();
 			_childrenDict.Clear();
-
 			Invalidate();
 		}
 
