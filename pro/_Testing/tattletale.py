@@ -71,19 +71,20 @@ def get_prev_run_num(pit_os):
     # if the formatting here changes, there be trouble (work to do b/c teh bugz)
     import re
     reg = re.compile('#\d+')
-    g = requests.get('http://10.0.1.76:8011/builders/%s_pits' % pit_os)
+    g = requests.get('http://10.0.1.76:8012/builders/%s_pits' % pit_os)
     recent_runs = sorted(map(lambda x: int(x.strip('#')), reg.findall(g.content)))
     previous_run = recent_runs.pop() # last item
     _PREV_RUN_NUMS[pit_os] = previous_run
     return previous_run
 
 def get_link_to_test_run(pit_os, run_num):
+    link_url_fmt = 'http://buildbot:8012/builders/%s_pits/builds/%s/steps/run%%20pits/logs/stdio'
     if pit_os == 'all':
-        link  = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('win', _PREV_RUN_NUMS['win'])
-        link += "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('lin', _PREV_RUN_NUMS['lin'])
-        link += "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio\n" % ('osx', _PREV_RUN_NUMS['osx'])
+        link  = link_url_fmt % ('win', _PREV_RUN_NUMS['win']) + '\n'
+        link += link_url_fmt % ('lin', _PREV_RUN_NUMS['lin']) + '\n'
+        link += link_url_fmt % ('osx', _PREV_RUN_NUMS['osx']) + '\n'
     else:
-        link = "http://buildbot:8011/builders/%s_pits/builds/%s/steps/run/logs/stdio" % (pit_os, run_num)
+        link  = link_url_fmt % (pit_os, run_num)
     return link
 
 def get_problem_tests(pit_os, run_num):
