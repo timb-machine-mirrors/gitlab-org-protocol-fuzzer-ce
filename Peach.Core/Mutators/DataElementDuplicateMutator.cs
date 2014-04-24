@@ -106,7 +106,7 @@ namespace Peach.Core.Mutators
 			for (int i = 0; i < newCount; ++i)
 			{
 				// Make sure we pick a unique name
-				string newName = obj.parent.UniqueName(obj.name);
+				string newName = "{0}_{1}".Fmt(obj.name, i);
 
 				DataElement newElem = Activator.CreateInstance(obj.GetType(), new object[] { newName }) as DataElement;
 				newElem.MutatedValue = mutatedValue;
