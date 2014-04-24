@@ -4,7 +4,8 @@ include::Ldap_DataSheet.adoc[]
 
 ==== Target Configuration
 A configured LDAP server with an account that is defined in the configuration file is required.
-On Linux OpenLDAP can be used.
+
+OpenLDAP can be used on Linux.
 
 ==== Required Pit Configuration Changes
 TargetIPv4:: IP address of the target host machine
@@ -69,7 +70,7 @@ peach LDAP.xml ExtendOp
 
 .Sample LDAP Configuration File
 ==========================
-Example configuration using OpenLdap on linux.
+Example configuration using OpenLdap on Linux.
 
 First we must install OpenLDAP; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for OpenLDAP.
 

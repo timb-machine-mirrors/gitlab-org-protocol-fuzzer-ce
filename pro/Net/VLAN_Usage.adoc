@@ -45,7 +45,9 @@ peach VLAN.xml
 ==========================
 Example configuration to send vlan packets
 
-First we must install vlan and configure vlan. Once that is done socat needs to be set up in different terminals to listen for incoming packets. For this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for vlan and socat.
+In order to replicate this example, first install vlan and configure vlan. Then, set up socat in different terminals to listen for incoming packets. 
+
+For this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for vlan and socat.
 
 ----
 sudo apt-get install vlan

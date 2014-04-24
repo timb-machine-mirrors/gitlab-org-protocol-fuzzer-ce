@@ -4,6 +4,7 @@ include::TCPv4_DataSheet.adoc[]
 
 ==== Target Configuration
 A TCP listener listening on the TCPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
+
 To use this pit, disable outgoing RST packets; Peach manages TCP states outside of the kernel context.
 
 ==== Required Pit Configuration Changes

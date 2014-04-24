@@ -4,6 +4,7 @@ include::Jpg-jfif_DataSheet.adoc[]
 
 ==== Target Configuration
 Any number of image viewing programs may be targeted with the JPG-JFIF file format. Example targets for fuzzing JPG-JFIF are "feh" on Linux and "mspaint.exe" on Windows.
+
 In the jpg-jfif.xml.config pit file, you can set the target program that you are fuzzing, such as feh or mspaint.exe. Normally you would set different target programs for different operating systems.
 
 ==== Required Pit Configuration Changes
