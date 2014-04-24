@@ -365,12 +365,9 @@ namespace Peach.Core.Dom
 				foreach (var child in next.Children())
 					yield return child;
 
-				foreach (var child in next.Children().Where(x => x != skip))
-				{
-					// Traverse on children we have not already traversed
-					foreach (var item in child.EnumerateAll())
-						yield return item;
-				}
+				// Traverse on children we have not already traversed
+				foreach (var child in next.Children().Where(x => x != skip).SelectMany(x => x.EnumerateAll()))
+					yield return child;
 
 				skip = next;
 				next = next.parent;
