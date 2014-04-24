@@ -998,16 +998,12 @@ namespace Peach.Core.Analyzers
 					((System.Xml.XmlElement)child).SetAttribute("name", elem.name);
 
 					var array = Dom.Array.PitParser(this, child, element) as Dom.Array;
-					array.origionalElement = elem;
 
-					if (array.occurs > 0)
-						array.Add(elem);
-					else
-						elem.parent = array;
+					// Set the original element
+					array.OriginalElement = elem;
 
-					// Expand all occurances
-					for (int i = 1; i < array.occurs; ++i)
-						array.Add(elem.Clone(elem.name + "_" + i));
+					// Expand the array to the correct size
+					array.ExpandTo(array.occurs);
 
 					// Copy over hints, some may be for array
 					foreach (var key in elem.Hints.Keys)

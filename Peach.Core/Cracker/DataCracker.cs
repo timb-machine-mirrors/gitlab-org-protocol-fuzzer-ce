@@ -711,7 +711,7 @@ namespace Peach.Core.Cracker
 
 			int tokenCount = tokens.Count;
 			long arrayPos = 0;
-			var ret = scan(array.origionalElement, ref arrayPos, tokens, null, until);
+			var ret = scan(array.OriginalElement, ref arrayPos, tokens, null, until);
 
 			for (int i = tokenCount; i < tokens.Count; ++i)
 			{

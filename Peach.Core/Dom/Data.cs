@@ -180,21 +180,9 @@ namespace Peach.Core.Dom
 					if (array.maxOccurs != -1 && index > array.maxOccurs)
 						throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
 
-					if (!array.hasExpanded && array.origionalElement == null)
-					{
-						array.origionalElement = array[0];
-						array.RemoveAt(0);
-					}
+					// Add elements up to our index
+					array.ExpandTo(index + 1);
 
-					// Add elements upto our index
-					for (int x = array.Count; x <= index; x++)
-					{
-						string itemName = array.origionalElement.name + "_" + x;
-						var item = array.origionalElement.Clone(itemName);
-						array.Add(item);
-					}
-
-					array.hasExpanded = true;
 					elem = array[index];
 					container = elem as DataElementContainer;
 				}

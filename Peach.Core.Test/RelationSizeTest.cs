@@ -866,8 +866,8 @@ namespace Peach.Core.Test
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 
-			array.Add(array.origionalElement.Clone("one"));
-			array.Add(array.origionalElement.Clone("two"));
+			array.Add(array.OriginalElement.Clone("one"));
+			array.Add(array.OriginalElement.Clone("two"));
 
 			var c1 = array[0] as Choice;
 			c1.SelectedElement = c1.choiceElements[0];

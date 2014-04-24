@@ -63,8 +63,7 @@ namespace Peach.Core.Test
 			Assert.AreEqual(1, (int)num.InternalValue);
 
 			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
-			array.origionalElement = array[0];
-			array.hasExpanded = true;
+			array.OriginalElement = array[0];
 
 			array.Add(new Dom.String("Child2") { DefaultValue = new Variant("2") });
 			array.Add(new Dom.String("Child3") { DefaultValue = new Variant("3") });
@@ -91,8 +90,7 @@ namespace Peach.Core.Test
 			Number num = dom.dataModels[0][0] as Number;
 
 			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
-			array.origionalElement = array[0];
-			array.hasExpanded = true;
+			array.OriginalElement = array[0];
 
 			array.Add(new Dom.String("Child2") { DefaultValue = new Variant("2") });
 			array.Add(new Dom.String("Child3") { DefaultValue = new Variant("3") });

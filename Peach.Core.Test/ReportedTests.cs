@@ -287,7 +287,7 @@ namespace Peach.Core.Test
 			string xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
-		<String name='str' value='Hello'/>
+		<String name='str' value='A'/>
 		<Block name='blk' minOccurs='1'>
 			<String name='val'/>
 		</Block>
@@ -312,7 +312,7 @@ namespace Peach.Core.Test
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Dom.Array array = dom.tests[0].stateModel.states["State1"].actions[0].dataModel[1] as Dom.Array;
-			array.ExpandTo(50);
+			array.CountOverride = 50;
 
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
 			var iter = navi.Select("//str");
@@ -343,22 +343,16 @@ namespace Peach.Core.Test
 			}
 			while (iter.MoveNext());
 
-			// When Array.ExpandTo() is used, it duplicates the element and adds that
-			// same element over and over, so there are really only 2 unique elements in the array...
-			Assert.AreEqual(2, count);
-			Assert.AreEqual(50, array.Count);
+			// When Array.CountOverride is used, it duplicates the last element
+			// over and over, so there are really only 1 elements in the array...
+			Assert.AreEqual(1, count);
+			Assert.AreEqual(1, array.Count);
+			Assert.AreEqual(50, array.CountOverride);
 
-			int hash = 0;
-			for (int i = 0; i < array.Count; ++i)
-			{
-				if (i <= 1)
-					hash = array[i].GetHashCode();
+			var val = array.InternalValue.BitsToString();
+			var exp = new string('A', 50);
 
-				Assert.AreEqual(hash, array[i].GetHashCode());
-				var b = array[i] as Block;
-				Assert.NotNull(b);
-				Assert.AreEqual("Hello", (string)b[0].DefaultValue);
-			}
+			Assert.AreEqual(exp, val);
 		}
 
 		[Test]
