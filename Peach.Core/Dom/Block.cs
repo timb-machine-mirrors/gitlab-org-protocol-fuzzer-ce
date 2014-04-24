@@ -112,58 +112,18 @@ namespace Peach.Core.Dom
 			return block;
 		}
 
-		protected override Variant GenerateInternalValue()
+		protected override Variant GenerateDefaultValue()
 		{
-			Variant value;
+			var stream = new BitStreamList() { Name = fullName };
 
-			// 1. Default value
-
-			if (_mutatedValue == null)
+			foreach (var child in this)
 			{
-				var stream = new BitStreamList() { Name = fullName };
-				foreach (var child in this)
-				{
-					var val = child.Value;
-					val.Name = child.fullName;
-					stream.Add(val);
-				}
-
-				value = new Variant(stream);
-			}
-			else
-			{
-				value = MutatedValue;
+				var val = child.Value;
+				val.Name = child.fullName;
+				stream.Add(val);
 			}
 
-			// 2. Relations
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
-				return MutatedValue;
-			}
-
-			foreach (var r in relations.From<Relation>())
-			{
-				// CalculateFromValue can return null sometimes
-				// when mutations mess up the relation.
-				// In that case use the exsiting value for this element.
-
-				var relationValue = r.CalculateFromValue();
-				if (relationValue != null)
-					value = relationValue;
-			}
-
-			// 3. Fixup
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
-				return MutatedValue;
-			}
-
-			if (_fixup != null)
-				value = _fixup.fixup(this);
-
-			return value;
+			return new Variant(stream);
 		}
 	}
 }

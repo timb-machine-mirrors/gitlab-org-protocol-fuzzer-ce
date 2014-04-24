@@ -221,50 +221,12 @@ namespace Peach.Core.Dom
 			return choiceElements.Values;
 		}
 
-		protected override Variant GenerateInternalValue()
+		protected override Variant GenerateDefaultValue()
 		{
-			Variant value;
-
-			// 1. Default value
-
-			if (_selectedElement == null)
+			if (SelectedElement == null)
 				SelectDefault();
 
-			if (_mutatedValue == null)
-				value = new Variant(SelectedElement.Value);
-
-			else
-				value = MutatedValue;
-
-			// 2. Relations
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
-				return MutatedValue;
-			}
-
-			foreach (var r in relations.From<Relation>())
-			{
-				// CalculateFromValue can return null sometimes
-				// when mutations mess up the relation.
-				// In that case use the exsiting value for this element.
-
-				var relationValue = r.CalculateFromValue();
-				if (relationValue != null)
-					value = relationValue;
-			}
-
-			// 3. Fixup
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
-				return MutatedValue;
-			}
-
-			if (_fixup != null)
-				value = _fixup.fixup(this);
-
-			return value;
+			return new Variant(SelectedElement.Value);
 		}
 	}
 }

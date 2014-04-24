@@ -1034,31 +1034,30 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
+		protected virtual Variant GenerateDefaultValue()
+		{
+			return DefaultValue;
+		}
+
 		/// <summary>
 		/// Generate the internal value of this data element
 		/// </summary>
 		/// <returns>Internal value in .NET form</returns>
 		protected virtual Variant GenerateInternalValue()
 		{
-			Variant value;
-
 			// 1. Default value
 
-			value = DefaultValue;
+			var value = MutatedValue != null ? MutatedValue : GenerateDefaultValue();
 
 			// 2. Check for type transformations
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.TypeTransform))
-			{
 				return MutatedValue;
-			}
 
 			// 3. Relations
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
 				return MutatedValue;
-			}
 
 			foreach (var r in relations.From<Relation>())
 			{
@@ -1074,9 +1073,7 @@ namespace Peach.Core.Dom
 			// 4. Fixup
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
 				return MutatedValue;
-			}
 
 			if (_fixup != null)
 				value = _fixup.fixup(this);
