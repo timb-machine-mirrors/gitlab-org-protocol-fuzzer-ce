@@ -34,6 +34,14 @@ using System.Security.Cryptography;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Linq;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Crypto.Encodings;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Tls;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Math;
 
 namespace Peach.Core.Transformers.Crypto
 {
@@ -55,50 +63,30 @@ namespace Peach.Core.Transformers.Crypto
 			ParameterParser.Parse(this, args);
 		}
 
-		private static byte[] StringToByteArray(string hex)
-		{
-			return Enumerable.Range(0, hex.Length)
-							 .Where(x => x % 2 == 0)
-							 .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-							 .ToArray();
-		}
-
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
 			var key = PublicKey.Value;
 			byte[] Exponent = { 1, 0, 1 };
-			var rsa = new RSACryptoServiceProvider(2048);
-			RSAParameters RSAKeyInfo = new RSAParameters();
+			var premaster = new byte[data.Length];
+			data.Read(premaster, 0, premaster.Length);
 
-			//Set RSAKeyInfo to the public key values. 
-			RSAKeyInfo.Modulus = key;
-			RSAKeyInfo.Exponent = Exponent;
-			rsa.ImportParameters(RSAKeyInfo);
-			
-			var newdata = new byte[data.Length];
-			data.Read(newdata, 0, newdata.Length);
-			return new BitStream(rsa.Encrypt(newdata, false));
+			var modulus = new BigInteger(key);
+			var exponent = new BigInteger(Exponent);
+
+			RsaKeyParameters rsaServerPublicKey = new RsaKeyParameters(false, modulus, exponent);
+
+			var random = new SecureRandom();
+			Pkcs1Encoding encoding = new Pkcs1Encoding(new RsaBlindedEngine());
+			encoding.Init(true, new ParametersWithRandom(rsaServerPublicKey, random));
+
+			byte[] keData = encoding.ProcessBlock(premaster, 0, premaster.Length);
+
+			return new BitStream(keData);
 		}
 
 		protected override BitStream internalDecode(BitStream data)
 		{
-			var key = PrivateKey.Value;
-			var newdata = new byte[data.Length];
-			var rsa = new RSACryptoServiceProvider(2048);
-			rsa.ImportCspBlob(key);
-			
-			return new BitStream(rsa.Encrypt(newdata, true));
+			throw new NotImplementedException();
 		}
-
-		//private void ComputeMasterSecret()
-		//{
-		//    byte[] label = Utils.BitConverter.StringToByteArray(Utils.BitConverter.ConvertStringToHex("master secret", Encoding.ASCII));
-
-		//    byte[] seed = new byte[client_random.Length + server_random.Length];
-		//    Buffer.BlockCopy(client_random, 0, seed, 0, client_random.Length);
-		//    Buffer.BlockCopy(server_random, 0, seed, client_random.Length, server_random.Length);
-
-		//    master_secret = PRF(pre_master_secret, label, seed, 48);
-		//}
 	}
 }
