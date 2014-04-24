@@ -1124,6 +1124,8 @@ namespace Peach.Core.Dom
 				if (_transformer != null)
 					value = _transformer.encode(value);
 
+			value.Name = fullName;
+
 			return value;
 		}
 
