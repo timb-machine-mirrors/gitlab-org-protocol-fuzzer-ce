@@ -17,12 +17,9 @@
 //  talked about intial state and changin states
 //  added example
 
-State encapsulates a logical unit of work for Peach to perform in a larger state model.
-Some state models will only require one state while others will require many states to model complex protocols.
+State elements reside in xref:StateModel[StateModels]. Each state element contains a logical Peach work unit.
 
-States are comprised of actions.
-Each action can perform tasks related to how the individual state is encapsulating logic.
-Actions are performed sequentially from top to bottom.
+Each xref:StateModel[StateModel] must contain at least one state element. If you wish to model complex protocols or systems, you will need multiple state elements within your xref:StateModel[StateModel].
 
 === Syntax
 
@@ -43,12 +40,16 @@ Actions are performed sequentially from top to bottom.
 </StateModel>
 ----
 
-In more complex systems there will be multiple states within a StateModel.
-The first state is selected via the intitalState attribute in the StateModel declaration.
-States are not like Actions in that they will not be performed from top down.
-The first state is selected from the initialState attribute of the StateModel and a new State can be transitioned into with a changeState action.
-This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
-In situations where the same order of actions will occur every time it is recommended to keep all actions in one state.
+State elements contain one or more action elements. Each action element can perform tasks related to how the individual state element consolidates logic.
+
+Actions are performed sequentially from top to bottom.
+
+Multiple state elements may not be performed in the order in which they appear in the xref:StateModel[StateModel]. This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
+
+* The 'intitalState' attribute in the xref:StateModel[StateModel] declaration determines which is the first state element to be executed. 
+* Peach transitions into a new State after a 'changeState' action.
+
+If the same action elements execute in the order occurs every time, we recommend keeping all the actions in one state element.
 
 === Attributes
 

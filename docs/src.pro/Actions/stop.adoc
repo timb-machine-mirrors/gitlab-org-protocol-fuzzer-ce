@@ -20,21 +20,22 @@
 // 03/05/2014: Lynn: 
 //  Edited definition text 
 
-The stop action causes a xref:Publisher[Publisher] to perform any final clean that would otherwise occur at the end of a fuzzing session.
-This is one of the implicit actions that will be called by Peach and does not need to be included in the xref:StateModel unless there is a change in the default behavior.
+The stop action causes a xref:Publisher[Publisher] to perform the final clean that would usually occur at the end of a fuzzing session. 
 
-By default, xref:Action_start[_start_] will occur once at the start of the fuzzing session, and _stop_ will occur once at the end of the fuzzing session.
-Including the _start_ or _stop_ action in the StateModel will cause them to run on every iteration instead of once per session. This should be avoided unless this is specifically required.
+Including the xref:Action_start[_start_] or _stop_ action in the StateModel will cause them to run on every iteration instead of once per session. This should be avoided unless specifically required.
 
-Not all xref:Publisher[Publishers] make use of start/stop.
+xref:Action_start[_start_] normally occurs once at the start of the fuzzing session, and _stop_ normally occur once at the end of the fuzzing session. Since _stop_ is one of the implicit Peach actions, it does not need to be included in the xref:StateModel[StateModel] unless there is a change in the default behavior.
+
+
+Not all xref:Publisher[Publishers] make use of start and stop.
 
 .Default Order of Actions
 ****
-The following is the default order in which Actions are performed when fuzzing:
+The following is the default Actions order when fuzzing:
 
 . start - Implicit, once per session
 . open - Implicit, once per iteration
-. Explicit actions (such as accept, input, and output)
+. Explicit actions (such as accept, input and output)
 . close - Implicit, once per iteration
 . stop - Implicit, once per session
 ****
@@ -72,11 +73,11 @@ No child elements are supported by this element.
 
 === Examples
 
-.Default behaviour
+.Default behavior
 ==========================
-Example Pit showing normal default behaviour.
-Notice that we do not need to include the _stop_ or _start_ actions.
-The output is shown after.
+Example Pit shows normal (default) behavior.
+We do not need to include the _stop_ or _start_ actions.
+The output is shown after the example.
 
 [source,xml]
 ----

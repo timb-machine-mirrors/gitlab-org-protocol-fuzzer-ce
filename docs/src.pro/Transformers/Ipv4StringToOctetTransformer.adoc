@@ -24,6 +24,7 @@ Type:: Encoder/Decoder
 
 _Ipv4StringToOctet_ will produce the bytes from the string representation of an Internet Protocol version 4 address.
 An example would be transforming the string 127.0.0.1 to 0x7F000001.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

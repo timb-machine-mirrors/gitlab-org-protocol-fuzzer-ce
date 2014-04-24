@@ -24,6 +24,7 @@ Type:: Encoder/Decoder
 
 _Ipv6StringToOctet_ will produce the octet bytes from the string representation of an Internet Protocol version 6 address.
 An example would be transforming the string ::1 to 0x00000000000000000000000000000001.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

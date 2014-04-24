@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _SidStringToBytes_ will produce the byte representation from a security identifier string.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

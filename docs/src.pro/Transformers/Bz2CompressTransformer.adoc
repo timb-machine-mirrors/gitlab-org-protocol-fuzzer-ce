@@ -23,6 +23,7 @@
 Type:: Compress
 
 _Bz2Compress_ performs a bzip2 compression on the value in the parent xref:DataModel[DataModel].
+
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters

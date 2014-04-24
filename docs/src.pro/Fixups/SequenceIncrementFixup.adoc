@@ -24,8 +24,9 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-The _SequenceIncrement_ will increment each iteration starting at 1.
+_SequenceIncrement_ will increment each iteration starting at 1.
 This is useful when a field must be a unique or sequential value every iteration.
+
 This checksum can be used when fuzzing protocols that contain a incrementing sequence numbers.
 The Fixup will produce numbers valid for the DataElement it modifies and is constrained to their size.
 

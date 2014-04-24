@@ -25,14 +25,14 @@
 // 03/04/2014: Lynn: 
 //  Edited text 
 
-The _close_ Action will cause the Publisher to close it's resource.
-For the xref:Publishers_File[File Publisher], this will close the file handle.
-For the xref:Publishers_Tcp[TCP Publisher] it will close the network connection.
-Because the _close_ Action will occur by default at the end of each iteration, the only time the _close_ Action needs to be explicitly called is when the default behaviour needs to be changed.
-A common example of explicitly calling the _close_ Action is during file fuzzing. During file fuzzing the data:
-will be written using an xref:Action_output[_output_] Action 
-then closed using a _close_ Action 
-and finally the target application launched using a xref:Action_call[_call_] Action
+The _close_ Action will cause the associated publisher to close its resource.
+
+* For the xref:Publishers_File[File Publisher], this will close the file handle.
+* For the xref:Publishers_Tcp[TCP Publisher] it will close the network connection.
+
+Close is an implicit action that occurs by default at the end of each iteration. 
+
+The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed (for example, during file fuzzing when the data will be written using an xref:Action_output[_output_] Action and closed using a _close_ Action; and the target application launched using a xref:Action_call[_call_] Action). 
 
 .Default Order of Actions
 ****
@@ -86,7 +86,7 @@ No child elements are supported by this element.
 
 .Implicit Use of _close_ Action
 ==========================
-This is an example of the default implicit behaviour of _close_.
+This is an example of the default implicit behavior of _close_.
 
 [source,xml]
 ----
@@ -154,7 +154,7 @@ Peach.Core.Publishers.FilePublisher stop()
 
 .Explicit Use of _close_ Action
 ==========================
-This is an example of needed to call _close_ in a different order than default.
+This is an example of needed to call _close_ in a different order than the default order.
 When file fuzzing, the file data is written using an _xref:Action_output[output]_, then the file is closed using a _close_ action.
 And finally the target is launched using a _xref:Action_call[call]_ action with the special Publisher name of _Peach.Agent_.
 

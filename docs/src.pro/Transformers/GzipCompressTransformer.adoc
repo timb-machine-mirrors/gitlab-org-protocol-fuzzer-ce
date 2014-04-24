@@ -22,6 +22,7 @@
 Type:: Compress
 
 _GzipCompress_ performs a Gzip compression on the value in the parent xref:DataModel[DataModel].
+
 The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters

@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _Base64Encode_ will Base64 encode the value in the parent xref:DataModel[DataModel].
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

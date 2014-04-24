@@ -17,7 +17,8 @@
 
 The _SequenceRandom_ will produce a random integer each iteration.
 This is useful when a field must be a unique value every iteration.
-This checksum can be used when fuzzing protocols that contain a nonce or psuedo-random sequence number.
+
+This checksum can be used when fuzzing protocols that contain a nonce or pseudo-random sequence number.
 The RNG uses the same seed as Peach so values produced are reproducible by setting the seed via command line.
 
 NOTE: SequenceRandom does not protect against duplicate values occurring.
