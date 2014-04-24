@@ -46,6 +46,10 @@ namespace Peach.Core
 
 		private Dictionary<string, string> refs = new Dictionary<string,string>();
 
+		public virtual void Run(RunContext ctx)
+		{
+		}
+
 		/// <summary>
 		/// Returns mapping of ref key to ref value, eg: ("ref1", "DataModel.Emenent_0")
 		/// </summary>

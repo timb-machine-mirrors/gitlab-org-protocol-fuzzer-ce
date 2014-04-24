@@ -321,15 +321,15 @@ namespace Peach.Core.Dom
 				finished = false;
 				error = false;
 
+				// Notify the data model the action is about to run
+				foreach (var item in outputData)
+					item.dataModel.Run(context);
+
 				context.OnActionStarting(this);
 
 				logger.Debug("ActionType.{0}", GetType().Name.ToString());
 
 				RunScript(onStart);
-
-				// Notify the data model the action is about to run
-				foreach (var item in allData)
-					item.dataModel.OnActionRun(context);
 
 				// Save output data
 				foreach (var item in outputData)

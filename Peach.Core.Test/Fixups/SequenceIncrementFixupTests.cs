@@ -205,13 +205,13 @@ namespace Peach.Core.Test.Fixups
 			Assert.AreEqual(1, (int)this.actions[0].dataModel[0].InternalValue);
 
 			Assert.AreEqual(12, (int)this.actions[1].dataModel[0].DefaultValue);
-			Assert.AreEqual(1, (int)this.actions[1].dataModel[0].InternalValue);
+			Assert.AreEqual(12, (int)this.actions[1].dataModel[0].InternalValue);
 
 			Assert.AreEqual(0, (int)this.actions[2].dataModel[0].DefaultValue);
 			Assert.AreEqual(2, (int)this.actions[2].dataModel[0].InternalValue);
 
 			Assert.AreEqual(13, (int)this.actions[3].dataModel[0].DefaultValue);
-			Assert.AreEqual(2, (int)this.actions[3].dataModel[0].InternalValue);
+			Assert.AreEqual(13, (int)this.actions[3].dataModel[0].InternalValue);
 
 			Assert.AreEqual(0, (int)this.actions[4].dataModel[0].DefaultValue);
 			Assert.AreEqual(3, (int)this.actions[4].dataModel[0].InternalValue);
@@ -295,7 +295,7 @@ namespace Peach.Core.Test.Fixups
 			Assert.AreEqual(0, (int)dom.dataModels[0][0].InternalValue);
 
 			Assert.AreEqual(12, (int)this.actions[0].dataModel[0].DefaultValue);
-			Assert.AreEqual(0, (int)this.actions[0].dataModel[0].InternalValue);
+			Assert.AreEqual(12, (int)this.actions[0].dataModel[0].InternalValue);
 
 			Assert.AreEqual(12, (int)this.actions[1].dataModel[0].DefaultValue);
 			Assert.AreEqual(1, (int)this.actions[1].dataModel[0].InternalValue);
