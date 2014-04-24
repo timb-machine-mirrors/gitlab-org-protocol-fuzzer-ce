@@ -89,16 +89,5 @@ namespace Peach.Core.Transformers.Crypto
 			
 			return new BitStream(rsa.Encrypt(newdata, true));
 		}
-
-		//private void ComputeMasterSecret()
-		//{
-		//    byte[] label = Utils.BitConverter.StringToByteArray(Utils.BitConverter.ConvertStringToHex("master secret", Encoding.ASCII));
-
-		//    byte[] seed = new byte[client_random.Length + server_random.Length];
-		//    Buffer.BlockCopy(client_random, 0, seed, 0, client_random.Length);
-		//    Buffer.BlockCopy(server_random, 0, seed, client_random.Length, server_random.Length);
-
-		//    master_secret = PRF(pre_master_secret, label, seed, 48);
-		//}
 	}
 }
