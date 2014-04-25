@@ -5,6 +5,7 @@ include::IPSECv6_DataSheet.adoc[]
 ==== Target Configuration
 An IPsec target configured for manual keying using the keys defined in the configuration file is required.
 IP-tools on Linux can be used.
+
 Both a UDP and an TCP listener are required to run all the tests. The networking tool socat can be used as a listener.
 
 ==== Required Pit Configuration Changes

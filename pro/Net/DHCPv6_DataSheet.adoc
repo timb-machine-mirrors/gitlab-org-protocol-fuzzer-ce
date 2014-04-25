@@ -11,7 +11,7 @@ Dynamic Host Configuration Protocol Version 6 (DHCPv6) is a variation of the DHC
 * Like DHCPv4, DHCPv6 allocates addresses from a central server and requests are broadcast across the link layer.
 * Unlike IPv4, hosts on an IPv6 network can automatically assign address without DHCP or a central server with stateless address auto-configuration.
 
-Hosts may still use DHCPv6 even if they are not requesting an address to configure other network parameters, such as DNS settings.
+Hosts may still use DHCPv6 even if they are not requesting an address to configure other network parameters (like DNS settings).
 
 === Specifications
 
