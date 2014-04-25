@@ -6,9 +6,12 @@
  * Direction: Client
  * Supported Platforms: Windows, Linux, OS X
 
-The User Datagram Protocol (UDP) is one of the core members of the Internet protocol suite, which allows computer applications to send messages, in this case referred to as datagrams, to other hosts on an Internet Protocol (IP) network without prior communications to set up special transmission channels or data paths.
+The User Datagram Protocol (UDP) is one of the core members of the Internet protocol suite, which allows computer applications to send messages (which may be referred to as datagrams) to other hosts on an Internet Protocol (IP) network without prior communications in order to set up special transmission channels or data paths.
 
-UDP uses a simple transmission model with a minimum of protocol mechanism. It has no handshaking dialogues, and thus exposes any underlying network protocol unreliability to the user's program. As this is normally IP over unreliable media, there is no guarantee of delivery, ordering, or duplicate protection.
+UDP uses a simple transmission model with a minimum of protocol mechanism. UDP is a protocol over IP; it does not add any complexity to verify that its messages got to where they were supposed to go. 
+
+UDP has no handshaking dialogs; the user's program is exposed to any underlying network protocol unreliability. This means that there is no guarantee of delivery, ordering, or duplicate protection.
+
 
 === Specifications
 

@@ -62,7 +62,7 @@ peach ftp.xml ServerPassive
 ==========================
 Example configuration targeting the ftpd server on Linux.
 
-First we must install ftpd, for this example we assume  you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for ftpd._
+First we must install ftpd; for this example we assume  you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for ftpd._
 
 ----
 sudo apt-get install ftpd

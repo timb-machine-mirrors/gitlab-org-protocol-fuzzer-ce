@@ -37,7 +37,7 @@ peach UDPv6.xml
 ==========================
 Example configuration using socat on Linux.
 
-First we must install socat and configure socat to listen for packets, for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
+First we must install socat and configure socat to listen for packets; for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
 
 ----
 sudo apt-get install socat

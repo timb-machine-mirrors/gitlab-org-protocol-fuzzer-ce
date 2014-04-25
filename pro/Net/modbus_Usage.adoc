@@ -41,7 +41,7 @@ peach modbus.xml
 ==========================
 Example configuration using socat on Linux.
 
-First we must install and run socat, for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
+First we must install and run socat; for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
 
 ----
 sudo apt-get install socat

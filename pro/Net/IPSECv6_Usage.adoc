@@ -58,7 +58,7 @@ peach IPSECv6.xml AH
 ==========================
 Example configuration using ipsec-tools on Linux.
 
-First we must install ipsec-tools, for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for ipsec-tools.
+First we must install ipsec-tools; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the  platform specific installation instructions for ipsec-tools.
 
 ----
 #This will enable to the target machine to both send and receive IPsec traffic from the specified IP addresses

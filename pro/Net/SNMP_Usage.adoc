@@ -48,7 +48,7 @@ peach -1 --debug SNMP.xml Server
 ==========================
 Example configuration using snmpd on Linux.
 
-First we must install snmpd, for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for snmpd.
+First we must install snmpd; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for snmpd.
 
 ----
 #Install SNMP daemon
