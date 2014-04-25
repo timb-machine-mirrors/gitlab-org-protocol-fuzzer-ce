@@ -32,6 +32,7 @@ xref:Action_setProperty[_setProperty_] is the other (output) half of the propert
 _getProperty_ actions are considered input actions and take a single xref:DataModel[DataModel] as a child-element to receive the data.
 
 The _getProperty_ action is useful when fuzzing targets that use this type of metaphor to interact with (like Microsoft COM/DCOM).
+
 In addition to targets that use the property metaphor, some Publishers (like UDP Publisher) support using properties to get or set values. An instance of this (using netcat as the client connecting to Peach) is in the examples section.
 
 NOTE: Properties exposed by publishers are documented with the publisher itself.

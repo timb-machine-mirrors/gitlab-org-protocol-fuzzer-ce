@@ -38,18 +38,20 @@
 //  Rewrote definition text
 
 Slurp is used to move data between two DataModels.
-The input element is defined by valueXpath. The data model and the element in valueXpath were previously referenced by a prior input action.
-The output element is defined by setXpath.  The data model and the element in setXpath will be referenced by a future action. 
 
-XML Path (XPath) language is used by valueXpath and setXpath to specify the data that are going to be moved. XPath is used to target a specific element for the setXpath and valueXpath parameters. This allows for a variety of ways to access elements in the DOM.
+* The input element is defined by xref:xpath[valueXpath. The data model and the element in valueXpath were previously referenced by a prior input action.
+* The output element is defined by xref:xpath[setXpath.  The data model and the element in setXpath will be referenced by a future action. 
+
+XML Path (XPath) language is used by valueXpath and setXpath to specify the data that are going to be moved. XPath is used to target a specific element for the setXpath and valueXpath parameters. This allows for a variety of ways to access elements in the Document Object Model (DOM).
 
 A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to be sent back to the server (see the Challenge Response example below). Slurp will copy the data from one (valueXpath) action, input from the server, to the other (setXpath) action, output to the server.
 
-The Slurp action is limited to copying values only between two non-container elements (a container element is one which can contain other elements such as a Choice, Block, or DataModel). Attempting to Slurp a container element will cause a Peach error.
+The Slurp action is limited to copying values only between two non-container elements (a container element is one which can contain other elements such as xref:DataElements_Choice[Choice], xref:DataElement_Block[Block], or xref:DataElement_DataModel[DataModel]). Attempting to Slurp a container element will cause a Peach error.
 Other potential Slurp errors:
- * the setXpath parameter does not return any elements (has no content or non-existent path)
- * the valueXpath parameter does not return a single element (Only one element allowed--none doesn't work; neither does more than one. If you want to move more than one set of data, issue multiple slurp commands)
- * the valueXpath and setXpath parameters return the same element
+
+* the setXpath parameter does not return any elements (has no content or non-existent path)
+* the valueXpath parameter does not return a single element (Only one element allowed--none doesn't work; neither does more than one. If you want to move more than one set of data, issue multiple slurp commands)
+* the valueXpath and setXpath parameters return the same element
 
 Assigning a unique name to elements will make targeting those elements with the setXpath and valueXpath parameters much easier as XPath wild cards can be used. Using XPath wild cards with unique element names allows an element to be targeted with just its name instead of using the full path to the element. See the below examples for slurp actions with and without unique element names.
 
