@@ -18,7 +18,8 @@
 
 The _changeState_ Action will change to a different state within your xref:StateModel[StateModel]. 
 This is typically used in conjunction with the xref:Action_when[when] attribute to switch states based on received data.
-This is useful for network protocols that select response data based on an input code.
+
+_changeState_ is useful for network protocols that select response data based on an input code.
 States will go through multiple actions sequentially so it may not be necessary to changeState if the path of events are predefined.
 
 === Syntax
