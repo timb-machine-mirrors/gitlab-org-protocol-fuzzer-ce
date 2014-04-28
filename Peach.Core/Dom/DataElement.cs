@@ -252,7 +252,20 @@ namespace Peach.Core.Dom
 		/// <returns>Returns a copy of the DataElement.</returns>
 		public virtual DataElement Clone(string name)
 		{
-			return ObjectCopier.Clone(this, new CloneContext(this, name));
+			var ret = ObjectCopier.Clone(this, new CloneContext(this, name));
+
+			if (this.name != name)
+			{
+				if (ret.parent == null)
+					ret.fullName = ret.name;
+				else
+					ret.fullName = ret.parent.fullName + "." + ret.name;
+
+				foreach (var item in ret.PreOrderTraverse().Skip(1))
+					item.fullName = item.parent.fullName + "." + item.name;
+			}
+
+			return ret;
 		}
 
 		#endregion
@@ -436,14 +449,15 @@ namespace Peach.Core.Dom
 		protected Transformer _transformer = null;
 		protected Placement _placement = null;
 
-		protected DataElementContainer _parent;
-
 		private uint _recursionDepth = 0;
 		private uint _intRecursionDepth = 0;
 		private bool _readValueCache = true;
 		private bool _writeValueCache = true;
 		private Variant _internalValue;
 		private BitwiseStream _value;
+
+		private DataElementContainer _parent;
+		private string _fullName;
 
 		private bool _invalidated = false;
 
@@ -527,8 +541,8 @@ namespace Peach.Core.Dom
 				_value = null;
 
 				// Bubble this up the chain
-				if (_parent != null)
-					_parent.Invalidate();
+				if (parent != null)
+					parent.Invalidate();
 
 				if (_invalidatedEvent != null)
 					_invalidatedEvent(this, e);
@@ -554,11 +568,10 @@ namespace Peach.Core.Dom
 		}
 
 		protected static uint _uniqueName = 0;
+
 		public DataElement()
+			: this("DataElement_" + (_uniqueName++).ToString())
 		{
-			_relations = new RelationContainer(this);
-			_name = "DataElement_" + _uniqueName;
-			_uniqueName++;
 		}
 
 		public DataElement(string name)
@@ -566,8 +579,12 @@ namespace Peach.Core.Dom
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
+			elementType = GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
+
 			_relations = new RelationContainer(this);
 			_name = name;
+			fullName = name;
+			root = this;
 		}
 
 		public static T Generate<T>(XmlNode node) where T : DataElement, new()
@@ -595,18 +612,14 @@ namespace Peach.Core.Dom
 
 		public string elementType
 		{
-			get
-			{
-				return GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
-			}
+			get;
+			private set;
 		}
 
 		public string debugName
 		{
-			get
-			{
-				return "{0} '{1}'".Fmt(elementType, fullName);
-			}
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -615,20 +628,21 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public string fullName
 		{
-			// TODO: Cache fullName if possible
-
 			get
 			{
-				string fullname = name;
-				DataElement obj = _parent;
-				while (obj != null)
-				{
-					fullname = obj.name + "." + fullname;
-					obj = obj.parent;
-				}
-
-				return fullname;
+				return _fullName;
 			}
+			private set
+			{
+				_fullName = value;
+				debugName = "{0} '{1}'".Fmt(elementType, value);
+			}
+		}
+
+		public DataElement root
+		{
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -691,18 +705,33 @@ namespace Peach.Core.Dom
 			}
 			set
 			{
+				if (value == parent)
+					return;
+
 				_parent = value;
+
+				if (parent == null)
+				{
+					root = this;
+					fullName = name;
+				}
+				else
+				{
+					root = parent.root;
+					fullName = parent.fullName + "." + name;
+				}
+
+				foreach (var item in PreOrderTraverse().Skip(1))
+				{
+					item.root = root;
+					item.fullName = item.parent.fullName + "." + item.name;
+				}
 			}
 		}
 
 		public DataElement getRoot()
 		{
-			DataElement obj = this;
-
-			while (obj != null && obj._parent != null)
-				obj = obj.parent;
-
-			return obj;
+			return root;
 		}
 
 		/// <summary>
@@ -711,14 +740,14 @@ namespace Peach.Core.Dom
 		/// <returns>Returns sibling or null.</returns>
 		public DataElement nextSibling()
 		{
-			if (_parent == null)
+			if (parent == null)
 				return null;
 
-			int nextIndex = _parent.IndexOf(this) + 1;
-			if (nextIndex >= _parent.Count)
+			int nextIndex = parent.IndexOf(this) + 1;
+			if (nextIndex >= parent.Count)
 				return null;
 
-			return _parent[nextIndex];
+			return parent[nextIndex];
 		}
 
 		/// <summary>
@@ -727,14 +756,14 @@ namespace Peach.Core.Dom
 		/// <returns>Returns sibling or null.</returns>
 		public DataElement previousSibling()
 		{
-			if (_parent == null)
+			if (parent == null)
 				return null;
 
-			int priorIndex = _parent.IndexOf(this) - 1;
+			int priorIndex = parent.IndexOf(this) - 1;
 			if (priorIndex < 0)
 				return null;
 
-			return _parent[priorIndex];
+			return parent[priorIndex];
 		}
 
 		/// <summary>
@@ -980,13 +1009,11 @@ namespace Peach.Core.Dom
 				if (_fixup != null)
 				{
 					// The root can't have a fixup!
-					System.Diagnostics.Debug.Assert(_parent != null);
+					System.Diagnostics.Debug.Assert(parent != null);
 
 
 					//// We can only have a valid fixup value when the parent
 					//// has not recursed onto itself
-					//if (_parent._recursionDepth > 1)
-					//    return false;
 
 					foreach (var elem in _fixup.dependents)
 					{
@@ -996,16 +1023,16 @@ namespace Peach.Core.Dom
 
 						if (isChildOf(elem))
 						{
-							var parent = this;
+							var p = this;
 
 							do
 							{
-								parent = parent.parent;
+								p = p.parent;
 
-								if (parent._recursionDepth > 1)
+								if (p._recursionDepth > 1)
 									return false;
 							}
-							while (parent != elem);
+							while (p != elem);
 						}
 						else if (elem._recursionDepth > 0)
 						{

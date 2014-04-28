@@ -144,7 +144,13 @@ namespace Peach.Core.Dom
 
 		public override void RemoveAt(int index)
 		{
-			base.RemoveAt(index);
+			// Choices only have a single child, the chosen element
+			if (index != 0 || Count != 1)
+				throw new ArgumentOutOfRangeException("index");
+
+			// Call clear so that we don't reset the parent
+			// of our chosen element
+			Clear();
 
 			if (this.Count == 0)
 				parent.Remove(this);

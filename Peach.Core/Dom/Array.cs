@@ -147,6 +147,9 @@ namespace Peach.Core.Dom
 		{
 			base.OnRemoveItem(item);
 
+			if (item == originalElement)
+				originalElement = null;
+
 			if (this.Count == 0 && OriginalElement == null)
 				parent.Remove(this);
 		}

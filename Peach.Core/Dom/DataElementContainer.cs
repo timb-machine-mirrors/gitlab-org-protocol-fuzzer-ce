@@ -437,10 +437,11 @@ namespace Peach.Core.Dom
 
 			System.Diagnostics.Debug.Assert(item.parent == this);
 
-			item.parent = null;
 			bool removed = _childrenDict.Remove(item.name);
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
+
+			item.parent = null;
 
 			OnRemoveItem(item);
 		}
