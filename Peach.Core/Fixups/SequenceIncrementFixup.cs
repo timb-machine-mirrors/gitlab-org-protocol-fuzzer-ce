@@ -44,10 +44,8 @@ namespace Peach.Core.Fixups
 	[Parameter("Offset", typeof(uint?), "Sets the per-iteration initial value to Offset * (Iteration - 1)", "")]
 	[Parameter("Once", typeof(bool), "Only increment once per iteration", "false")]
 	[Serializable]
-	public class SequenceIncrementFixup : Fixup
+	public class SequenceIncrementFixup : VolatileFixup
 	{
-		Variant defaultValue;
-
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }
 
@@ -57,19 +55,7 @@ namespace Peach.Core.Fixups
 			ParameterParser.Parse(this, args);
 		}
 
-		protected override Variant fixupImpl()
-		{
-			return defaultValue ?? parent.DefaultValue;
-		}
-
-		public override void Run(RunContext ctx)
-		{
-			defaultValue = Update(ctx);
-
-			parent.Invalidate();
-		}
-
-		Variant Update(RunContext ctx)
+		protected override Variant OnActionRun(RunContext ctx)
 		{
 			if (!(parent is Dom.Number) && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");

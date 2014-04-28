@@ -90,13 +90,21 @@ namespace Peach.Core.Dom
 		{
 		}
 
+		public delegate void ActionRunEventHandler(RunContext ctx);
+
+		[NonSerialized]
+		private ActionRunEventHandler actionRunEvent;
+
+		public event ActionRunEventHandler ActionRun
+		{
+			add { actionRunEvent += value; }
+			remove { actionRunEvent -= value; }
+		}
+
 		public void Run(RunContext context)
 		{
-			foreach (var item in PreOrderTraverse())
-			{
-				if (item.fixup != null)
-					item.fixup.Run(context);
-			}
+			if (actionRunEvent != null)
+				actionRunEvent(context);
 		}
 
 		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)

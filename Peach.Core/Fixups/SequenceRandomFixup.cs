@@ -39,32 +39,18 @@ namespace Peach.Core.Fixups
 	[Fixup("SequenceRandomFixup")]
 	[Fixup("sequence.SequenceRandomFixup")]
 	[Serializable]
-	public class SequenceRandomFixup : Fixup
+	public class SequenceRandomFixup : VolatileFixup
 	{
-		Variant defaultValue;
-
 		public SequenceRandomFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 		}
 
-		protected override Variant fixupImpl()
+		protected override Variant OnActionRun(RunContext ctx)
 		{
-			return defaultValue ?? parent.DefaultValue;
-		}
-
-		public override void Run(RunContext ctx)
-		{
-			defaultValue = GetRandom(parent, ctx);
-
-			parent.Invalidate();
-		}
-
-		Variant GetRandom(DataElement elem, RunContext ctx)
-		{
-			Dom.Number num = elem as Dom.Number;
-			if (num == null && !(elem is Dom.String && elem.Hints.ContainsKey("NumericalString")))
-				throw new PeachException("SequenceRandomFixup has non numeric parent '" + elem.fullName + "'.");
+			Dom.Number num = parent as Dom.Number;
+			if (num == null && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
+				throw new PeachException("SequenceRandomFixup has non numeric parent '" + parent.fullName + "'.");
 
 			Random rng;
 
