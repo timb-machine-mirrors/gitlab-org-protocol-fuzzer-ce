@@ -7,142 +7,42 @@ using System.Reflection;
 
 using Peach.Core;
 using NLog;
-using Nancy.Serialization.JsonNet;
-using Newtonsoft.Json;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class Job
+	public class RestContext
 	{
-		//RestContext _context;
-		//uint _currentIteration = 0;
-
-		//public Job(RestContext context)
-		//{
-		//	_context = context;
-		//	_context.Engine.IterationStarting += engine_IterationStarting;
-		//}
-
-		//~Job()
-		//{
-		//	if (_context != null && _context.Engine != null)
-		//		_context.Engine.IterationStarting -= engine_IterationStarting;
-		//}
-
-		//void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
-		//{
-		//	_currentIteration = currentIteration;
-		//}
-
-		//public string jobUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/jobs/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string faultsUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/faults").ToString();
-		//	}
-		//}
-		//public string targetUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/target/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string targetConfigUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/target/" + Guid.Empty.ToString() + "/configs/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string nodesUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/nodes").ToString();
-		//	}
-		//}
-		//public string pitUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/pits/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string peachUrl
-		//{
-		//	get
-		//	{
-		//		return new Uri(_context.BaseUrl, "/p/peaches/" + Guid.Empty.ToString()).ToString();
-		//	}
-		//}
-		//public string reportUrl { get { return null; } }
-		//public string packageFileUrl { get { return null; } }
-
-		//public string name { get { return "Default Peach Job"; } }
-		//public string notes { get { return ""; } }
-		//public string user { get { return "peach"; } }
-		//public uint seed { get { return _context.Engine.context.config.randomSeed; } }
-		//public uint iterationCount { get { return _currentIteration; } }
-		//public DateTime startDate { get { return DateTime.Now; } }
-		//public DateTime stopData { get { return DateTime.Now; } }
-		//public string[] tags { get { return new string[0]; } }
-		//public Group[] groups { get { return new Group[0]; } }
-		public string repoUrl { get; set; }
-		public uint seed { get; set; }
-		public uint iteration { get; set; }
-		public string jobUrl { get; set; }
+		public Engine Engine = null;
+		public List<Fault> Faults = new List<Fault>();
+		public Uri BaseUrl = new Uri("http://unknown");
 	}
 
 	public class RestService : Nancy.NancyModule
 	{
-		Engine engine;
+//		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static RestContext _context = new RestContext();
 
-		public RestService(Engine engine)
+		public RestService()
 			: base("/p")
 		{
-			this.engine = engine;
-
 			Get["/jobs"] = _ => GetJobs();
+			Get["/jobs/{id}"] = _ => GetJob(_.id);
 
-			//Get["/jobs/{id}"] = _ => GetJob(_.id);
+			Get["/peaches"] = _ => { return null; };
 
-			//Get["/peaches"] = _ => { return null; };
+			Get["/nodes"] = _ => GetNodes();
+			Get["/nodes/{id}"] = _ => GetNode(_.id);
 
-			//Get["/nodes"] = _ => GetNodes();
-			//Get["/nodes/{id}"] = _ => GetNode(_.id);
+			Get["/pits"] = _ => GetPits();
+			Get["/pits/{id}"] = _ => GetPit(_.id);
 
-			//Get["/pits"] = _ => GetPits();
-			//Get["/pits/{id}"] = _ => GetPit(_.id);
+			Get["/libraries"] = _ => GetLibraries();
+			Get["/libraries/{id}"] = _ => GetLibrary(_.id);
 
-			//Get["/libraries"] = _ => GetLibraries();
-			//Get["/libraries/{id}"] = _ => GetLibrary(_.id);
-
-			//Get["/faults"] = _ => GetFaults();
-			//Get["/faults/{id}"] = _ => GetFault(_.id);
+			Get["/faults"] = _ => GetFaults();
+			Get["/faults/{id}"] = _ => GetFault(_.id);
 		}
 
-		object GetJobs()
-		{
-			var obj = new Job()
-			{
-				repoUrl = "",
-				seed = engine.context.config.randomSeed,
-				iteration = engine.context.test.strategy.Iteration,
-				jobUrl = Request.Url.Path + "/" + Guid.Empty.ToString(),
-			};
-
-			return JsonConvert.SerializeObject(obj);
-		}
-
-#if DISABLED
 		object GetJobs()
 		{
 			_context.BaseUrl = new Uri(this.Context.Request.Url.ToString());
@@ -296,10 +196,8 @@ namespace Peach.Enterprise.WebServices
 
 			current.files = files.ToArray();
 		}
-#endif
 	}
 
-#if DISABLED
 	public class Node
 	{
 		RestContext _context;
@@ -587,7 +485,6 @@ namespace Peach.Enterprise.WebServices
 			public string name { get; set; }
 		}
 	}
-#endif
 }
 
 // end

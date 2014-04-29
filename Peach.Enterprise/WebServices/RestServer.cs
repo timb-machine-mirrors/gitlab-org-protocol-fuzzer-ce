@@ -16,22 +16,15 @@ namespace Peach.Enterprise.WebServices
 {
 	public class RestServer
 	{
-		NancyHost host = null;
-		int port = 8888;
+		NancyHost _host = null;
+		public int port = 8888;
+		Peach.Core.Engine _engine { get; set; }
 
 		public RestServer(Peach.Core.Engine engine)
 		{
-			host = new NancyHost(
-				new PeachBootstrapper(engine),
-				new HostConfiguration()
-				{
-					UrlReservations = new UrlReservations()
-					{
-						CreateAutomatically = true,
-					},
-				},
-				new Uri("http://localhost:" + port.ToString())
-			);
+			_engine = engine;
+			port = findNextAvailablePort(8888);
+			_host = new NancyHost(new PeachBootstrapper(engine), new Uri("http://localhost:" + port));
 		}
 
 		public static int findNextAvailablePort(int port)
@@ -67,41 +60,57 @@ namespace Peach.Enterprise.WebServices
 
 		~RestServer()
 		{
-			if(host != null)
-				host.Stop();
+			if(_host != null)
+				_host.Stop();
 		}
 
 		public void Start()
 		{
-			host.Start();
+			_host.Start();
 		}
 
 		public void Stop()
 		{
-			host.Stop();
+			_host.Stop();
 		}
 	}
 
 	public class PeachBootstrapper : DefaultNancyBootstrapper
 	{
-		Peach.Core.Engine engine = null;
+		Peach.Core.Engine _engine = null;
+		RestService _service { get; set; }
 
-		public PeachBootstrapper(Peach.Core.Engine engine)
-			: base()
+		public PeachBootstrapper(Peach.Core.Engine engine) : base()
 		{
-			this.engine = engine;
+			_engine = engine;
+			_service = new RestService();
+			RestService.Initialize(_engine);
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
 		{
-			container.Register<Peach.Core.Engine>(this.engine);
-			container.Register<Nancy.Serialization.JsonNet.JsonNetSerializer>();
+			container.Register(typeof(Nancy.Serialization.JsonNet.JsonNetSerializer));
 			container.Register<RestService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
 		{
-			base.ConfigureRequestContainer(container, context);
+			//container.Register<RestService>(_service);
+
+			//// Get our session manager - this will "bubble up" to the parent container
+			//// and get our application scope singleton
+			//var session = container.Resolve<IRavenSessionManager>().GetSession();
+
+			//// We can put this in context.items and it will be disposed when the request ends
+			//// assuming it implements IDisposable.
+			//context.Items["RavenSession"] = session;
+
+			//// Just guessing what this type is called
+			//container.Register<IRavenSession>(session);
+
+			//container.Register<ISearchRepository, SearchRepository>();
+			//container.Register<IResponseFactory, ResponseFactory>();
 		}
 	}
+
 }
