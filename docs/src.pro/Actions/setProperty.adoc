@@ -24,7 +24,9 @@
 //  Edited text and corrected Apple QuickTime information
 
 The _setProperty_ Action allows Peach to modify parameters of a Publisher while fuzzing. These parameters are fuzzed as well in the same way an output action would be.
+
 Properties are used by Publishers like COM where a COM attribute is set and mutated by Peach (see example below).
+
 Another reason to set a property would be fuzzing the MTU attribute of the RawEther Publisher.
 This action is not supported by all Publishers.
 
