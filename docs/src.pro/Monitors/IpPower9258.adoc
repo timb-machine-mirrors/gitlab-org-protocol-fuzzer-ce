@@ -2,7 +2,9 @@
 [[Monitors_IpPower9258]]
 == IpPower9258 Monitor
 
-The _IpPower9258_ monitor controls a networked power switch.  This allows devices to be powered on/off during fuzzing. Currently only switching one port is supported per monitor instance. To control multiple ports use multiple instances of this monitor. The model is "IP Power 9258" and available for purchase on eBay and Amazon.
+The _IpPower9258_ monitor controls a networked power switch.  This allows devices to be powered on/off during fuzzing. 
+
+Currently only switching one port is supported per monitor instance. To control multiple ports use multiple instances of this monitor. The model is "IP Power 9258" and available for purchase on eBay and Amazon.
 
 === Parameters
 
