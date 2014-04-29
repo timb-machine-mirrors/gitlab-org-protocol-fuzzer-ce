@@ -16,8 +16,8 @@ namespace Peach.Core.Fixups
 		DataModel dataModel;
 		Variant defaultValue;
 
-		public VolatileFixup(DataElement parent, Dictionary<string, Variant> args)
-			: base(parent, args)
+		public VolatileFixup(DataElement parent, Dictionary<string, Variant> args, params string[] refs)
+			: base(parent, args, refs)
 		{
 		}
 
