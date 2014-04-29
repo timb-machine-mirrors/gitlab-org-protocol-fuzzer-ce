@@ -106,29 +106,6 @@ namespace Peach.Core.Dom
 		{
 		}
 
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			if (Count == 0)
-			{
-				// Mutation might have erased all of our children
-				if (OriginalElement == null)
-					yield break;
-
-				// First our origionalElement
-				yield return OriginalElement;
-
-				// Next our origionalElement element's children
-				foreach (var item in OriginalElement.EnumerateAllElements(knownParents))
-					yield return item;
-			}
-			else
-			{
-				// Default to our base to enumerate array elements
-				foreach (var item in base.EnumerateAllElements(knownParents))
-					yield return item;
-			}
-		}
-
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them

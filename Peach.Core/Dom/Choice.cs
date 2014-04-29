@@ -149,7 +149,10 @@ namespace Peach.Core.Dom
 				throw new ArgumentOutOfRangeException("index");
 
 			// Call clear so that we don't reset the parent
-			// of our chosen element
+			// of our chosen element.
+			// Also reset our selected element so GetChildren()
+			// will return our choices.
+			_selectedElement = null;
 			Clear();
 
 			if (this.Count == 0)
@@ -188,43 +191,23 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			// First our children
-			foreach (DataElement child in this)
-				yield return child;
-
-			// Next our children's children
-			foreach (DataElement child in this)
-			{
-				if (!knownParents.Contains(child))
-				{
-					foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-						yield return subChild;
-				}
-			}
-
-			if (_selectedElement == null)
-			{
-				foreach (DataElement child in choiceElements.Values)
-					yield return child;
-
-				// Next our children's children
-				foreach (DataElement child in choiceElements.Values)
-				{
-					if (!knownParents.Contains(child))
-					{
-						foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-							yield return subChild;
-					}
-				}
-			}
-		}
-
 		protected override IEnumerable<DataElement> Children()
 		{
-			// Return choices
-			return choiceElements.Values;
+			// Return choices if we haven't chosen yet
+			if (_selectedElement != null)
+				return base.Children();
+			else
+				return choiceElements.Values;
+		}
+
+		protected override DataElement GetChild(string name)
+		{
+			DataElement ret;
+			if (_selectedElement == null)
+				choiceElements.TryGetValue(name, out ret);
+			else
+				TryGetValue(name, out ret);
+			return ret;
 		}
 
 		protected override Variant GenerateDefaultValue()

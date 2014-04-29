@@ -272,6 +272,10 @@ namespace Peach.Core.Dom
 
 		#region Walking Functions
 
+		/// <summary>
+		/// Performs pre-order traversal starting with this node.
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<DataElement> PreOrderTraverse()
 		{
 			var toVisit = new List<DataElement>();
@@ -293,6 +297,10 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		/// <summary>
+		/// Performs breadth-first traversal starting with this node.
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<DataElement> BreadthFirstTraverse()
 		{
 			var toVisit = new Queue<DataElement>();
@@ -309,39 +317,37 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		protected virtual IEnumerable<DataElement> Children()
+		/// <summary>
+		/// Walk the DOM by performing pre-order traversal starting
+		/// at this node.  Then perform pre-order traversal of our
+		/// parent ignoring the branch containing ourselves. Keep
+		/// iterating up the tree until we reach the root.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DataElement> Walk()
 		{
-			return new DataElement[0];
-		}
+			// Preform pre-order traversal starting with ourselves
+			foreach (var item in PreOrderTraverse())
+				yield return item;
 
-		#region Find Element By Name
+			// Walk up the dom, performing pre-order traversal of each of
+			// our parents but skip children that have already been traversed.
+			var skip = this;
+			var next = parent;
 
-		public DataElement Find(string name)
-		{
-			var parts = name.Split(new[] { '.' });
-
-			foreach (var item in Walk())
+			while (next != null)
 			{
-				int index = 0;
+				yield return next;
 
-				if (item.name != parts[index++])
-					continue;
-
-				var candidate = item;
-
-				do
+				foreach (var child in next.Children().Where(x => x != skip))
 				{
-					if (index == parts.Length)
-						return candidate;
-
-					candidate = candidate.GetChild(parts[index++]);
-					if (candidate == null)
-						break;
+					foreach (var item in child.PreOrderTraverse())
+						yield return item;
 				}
-				while (true);
-			}
 
-			return null;
+				skip = next;
+				next = next.parent;
+			}
 		}
 
 		public IEnumerable<DataElement> EnumerateAll()
@@ -389,38 +395,132 @@ namespace Peach.Core.Dom
 			yield return skip;
 		}
 
-		public IEnumerable<DataElement> Walk()
+		protected virtual IEnumerable<DataElement> Children()
 		{
-			// Preform pre-order traversal starting with ourselves
-			foreach (var item in PreOrderTraverse())
-				yield return item;
+			return new DataElement[0];
+		}
 
-			// Walk up the dom, performing pre-order traversal of each of
-			// our parents but skip children that have already been traversed.
-			var skip = this;
-			var next = parent;
+		#region Find Element By Name
 
-			while (next != null)
+		/// <summary>
+		/// Find data element with specific name.
+		/// </summary>
+		/// <remarks>
+		/// We will search starting at our level in the tree, then moving
+		/// to children from our level, then walk up node by node to the
+		/// root of the tree.
+		/// </remarks>
+		/// <param name="name">Name to search for</param>
+		/// <returns>Returns found data element or null.</returns>
+		public DataElement find(string name)
+		{
+			// TODO: Investigate to see if pre-order is any better
+			// return FindByWalk(name);
+			return FindByEnumerateUpTree(name);
+		}
+
+		private DataElement FindByWalk(string name)
+		{
+			var parts = name.Split(new[] { '.' });
+
+			foreach (var item in Walk())
 			{
-				yield return next;
+				int index = 0;
 
-				foreach (var child in next.Children().Where(x => x != skip))
+				if (item.name != parts[index++])
+					continue;
+
+				var candidate = item;
+
+				do
 				{
-					foreach (var item in child.PreOrderTraverse())
-						yield return item;
-				}
+					if (index == parts.Length)
+						return candidate;
 
-				skip = next;
-				next = next.parent;
+					candidate = candidate.GetChild(parts[index++]);
+					if (candidate == null)
+						break;
+				}
+				while (true);
 			}
+
+			return null;
+		}
+
+		private DataElement FindByEnumerateUpTree(string name)
+		{
+			var parts = name.Split(new[] { '.' });
+
+			// EnumerateUpTree doesn't check this first, so do that
+			if (parts.Length == 1 && parts[0] == this.name)
+				return this;
+
+			foreach (var item in EnumerateUpTree())
+			{
+				int index = 0;
+
+				if (item.name != parts[index++])
+					continue;
+
+				var candidate = item;
+
+				do
+				{
+					if (index == parts.Length)
+						return candidate;
+
+					candidate = candidate.GetChild(parts[index++]);
+					if (candidate == null)
+						break;
+				}
+				while (true);
+			}
+
+			return null;
 		}
 
 		protected virtual DataElement GetChild(string name)
 		{
 			return null;
 		}
-
+	
 		#endregion
+
+		/// <summary>
+		/// Enumerate all items in tree starting with our current position
+		/// then moving up towards the root.
+		/// </summary>
+		/// <remarks>
+		/// This method uses yields to allow for efficient use even if the
+		/// quired node is found quickely.
+		/// 
+		/// The method in which we return elements should match a human
+		/// search pattern of a tree.  We start with our current position and
+		/// return all children then start walking up the tree towards the root.
+		/// At each parent node we return all children (excluding already returned
+		/// nodes).
+		/// 
+		/// This method is ideal for locating objects in the tree in a way indented
+		/// a human user.
+		/// </remarks>
+		/// <returns></returns>
+		public IEnumerable<DataElement> EnumerateElementsUpTree()
+		{
+			return EnumerateUpTree();
+		}
+
+		/// <summary>
+		/// Enumerate all child elements recursevely.
+		/// </summary>
+		/// <remarks>
+		/// This method will return this objects direct children
+		/// and finally recursevely return children's children.
+		/// </remarks>
+		/// <returns></returns>
+		public IEnumerable<DataElement> EnumerateAllElements()
+		{
+			return EnumerateAll();
+		}
 
 		#endregion
 
@@ -1150,285 +1250,6 @@ namespace Peach.Core.Dom
 			return value;
 		}
 
-		public DataElement CommonParent(DataElement elem)
-		{
-			var parents = new List<DataElement>();
-
-			parents.Add(this);
-
-			var parent = this.parent;
-			while (parent != null)
-			{
-				parents.Add(parent);
-				parent = parent.parent;
-			}
-
-			if (parents.Contains(elem))
-				return elem;
-
-			parent = elem.parent;
-			while (parent != null)
-			{
-				if (parents.Contains(parent))
-					return parent;
-
-				parent = parent.parent;
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		/// Enumerates all DataElements starting from 'start.'
-		/// 
-		/// This method will first return children, then siblings, then children
-		/// of siblings as it walks up the parent chain.  It will not return
-		/// any duplicate elements.
-		/// 
-		/// Note: This is not the fastest way to enumerate all elements in the
-		/// tree, it's specifically intended for findings Elements in a search
-		/// pattern that matches a persons assumptions about name resolution.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <returns>All DataElements in model.</returns>
-		public static IEnumerable EnumerateAllElementsFromHere(DataElement start)
-		{
-			foreach(DataElement elem in EnumerateAllElementsFromHere(start, new List<DataElement>()))
-				yield return elem;
-		}
-
-		/// <summary>
-		/// Enumerates all DataElements starting from 'start.'
-		/// 
-		/// This method will first return children, then siblings, then children
-		/// of siblings as it walks up the parent chain.  It will not return
-		/// any duplicate elements.
-		/// 
-		/// Note: This is not the fastest way to enumerate all elements in the
-		/// tree, it's specifically intended for findings Elements in a search
-		/// pattern that matches a persons assumptions about name resolution.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <param name="cache">Cache of DataElements already returned</param>
-		/// <returns>All DataElements in model.</returns>
-		public static IEnumerable EnumerateAllElementsFromHere(DataElement start, 
-			List<DataElement> cache)
-		{
-			// Add ourselvs to the cache is not already done
-			if (!cache.Contains(start))
-				cache.Add(start);
-
-			// 1. Enumerate all siblings
-
-			if (start.parent != null)
-			{
-				foreach (DataElement elem in start.parent)
-					if (!cache.Contains(elem))
-						yield return elem;
-			}
-
-			// 2. Children
-
-			foreach (DataElement elem in EnumerateChildrenElements(start, cache))
-				yield return elem;
-
-			// 3. Children of siblings
-
-			if (start.parent != null)
-			{
-				foreach (DataElement elem in start.parent)
-				{
-					if (!cache.Contains(elem))
-					{
-						cache.Add(elem);
-						foreach(DataElement ret in EnumerateChildrenElements(elem, cache))
-							yield return ret;
-					}
-				}
-			}
-
-			// 4. Parent, walk up tree
-
-			if (start.parent != null)
-				foreach (DataElement elem in EnumerateAllElementsFromHere(start.parent))
-					yield return elem;
-		}
-
-		/// <summary>
-		/// Enumerates all children starting from, but not including
-		/// 'start.'  Will also enumerate the children of children until
-		/// leaf nodes are hit.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <param name="cache">Cache of already seen elements</param>
-		/// <returns>Returns DataElement children of start.</returns>
-		protected static IEnumerable EnumerateChildrenElements(DataElement start, List<DataElement> cache)
-		{
-			if (!(start is DataElementContainer))
-				yield break;
-
-			foreach (DataElement elem in start as DataElementContainer)
-				if (!cache.Contains(elem))
-					yield return elem;
-
-			foreach (DataElement elem in start as DataElementContainer)
-			{
-				if (!cache.Contains(elem))
-				{
-					cache.Add(elem);
-					foreach (DataElement ret in EnumerateAllElementsFromHere(elem, cache))
-						yield return ret;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Find data element with specific name.
-		/// </summary>
-		/// <remarks>
-		/// We will search starting at our level in the tree, then moving
-		/// to children from our level, then walk up node by node to the
-		/// root of the tree.
-		/// </remarks>
-		/// <param name="name">Name to search for</param>
-		/// <returns>Returns found data element or null.</returns>
-		public DataElement find(string name)
-		{
-			string [] names = name.Split(new char[] {'.'});
-
-			if (names.Length == 1)
-			{
-				// Make sure it's not us :)
-				if (this.name == names[0])
-					return this;
-
-				// Check our children
-				foreach (DataElement elem in EnumerateElementsUpTree())
-				{
-					if(elem.name == names[0])
-						return elem;
-				}
-
-				// Can't locate!
-				return null;
-			}
-
-			foreach (DataElement elem in EnumerateElementsUpTree())
-			{
-				if (elem.fullName == name)
-					return elem;
-
-				if (!(elem is DataElementContainer))
-					continue;
-
-				DataElement ret = ((DataElementContainer)elem).QuickNameMatch(names);
-				if (ret != null)
-					return ret;
-			}
-
-			DataElement root = getRoot();
-			if (root == this)
-				return null;
-
-			return root.find(name);
-		}
-
-		/// <summary>
-		/// Enumerate all items in tree starting with our current position
-		/// then moving up towards the root.
-		/// </summary>
-		/// <remarks>
-		/// This method uses yields to allow for efficient use even if the
-		/// quired node is found quickely.
-		/// 
-		/// The method in which we return elements should match a human
-		/// search pattern of a tree.  We start with our current position and
-		/// return all children then start walking up the tree towards the root.
-		/// At each parent node we return all children (excluding already returned
-		/// nodes).
-		/// 
-		/// This method is ideal for locating objects in the tree in a way indented
-		/// a human user.
-		/// </remarks>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateElementsUpTree()
-		{
-			foreach (DataElement e in EnumerateElementsUpTree(new List<DataElement>()))
-				yield return e;
-		}
-
-		/// <summary>
-		/// Enumerate all items in tree starting with our current position
-		/// then moving up towards the root.
-		/// </summary>
-		/// <remarks>
-		/// This method uses yields to allow for efficient use even if the
-		/// quired node is found quickely.
-		/// 
-		/// The method in which we return elements should match a human
-		/// search pattern of a tree.  We start with our current position and
-		/// return all children then start walking up the tree towards the root.
-		/// At each parent node we return all children (excluding already returned
-		/// nodes).
-		/// 
-		/// This method is ideal for locating objects in the tree in a way indented
-		/// a human user.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to stop duplicates</param>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateElementsUpTree(List<DataElement> knownParents)
-		{
-			List<DataElement> toRoot = new List<DataElement>();
-			DataElement cur = this;
-			while (cur != null)
-			{
-				toRoot.Add(cur);
-				cur = cur.parent;
-			}
-
-			foreach (DataElement item in toRoot)
-			{
-				if (!knownParents.Contains(item))
-				{
-					foreach (DataElement e in item.EnumerateAllElements(knownParents))
-						yield return e;
-
-					knownParents.Add(item);
-				}
-			}
-
-			// Root will not be returned otherwise
-			yield return getRoot();
-		}
-
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateAllElements()
-		{
-			foreach (DataElement e in EnumerateAllElements(new List<DataElement>()))
-				yield return e;
-		}
-
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to skip</param>
-		/// <returns></returns>
-		public virtual IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			yield break;
-		}
-
 		/// <summary>
 		/// Fixup for this data element.  Can be null.
 		/// </summary>
@@ -1504,6 +1325,8 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
+		#region Parent/Child Helpers
+
 		/// <summary>
 		/// Determines whether or not a DataElement is a child of this DataElement.
 		/// </summary>
@@ -1537,6 +1360,42 @@ namespace Peach.Core.Dom
 
 			return false;
 		}
+
+		/// <summary>
+		/// Finds the common parent between this elemet
+		/// and the target element.
+		/// </summary>
+		/// <param name="elem">Element to check</param>
+		/// <returns>The common parent or null of none exists.</returns>
+		public DataElement CommonParent(DataElement elem)
+		{
+			var parents = new List<DataElement>();
+
+			parents.Add(this);
+
+			var parent = this.parent;
+			while (parent != null)
+			{
+				parents.Add(parent);
+				parent = parent.parent;
+			}
+
+			if (parents.Contains(elem))
+				return elem;
+
+			parent = elem.parent;
+			while (parent != null)
+			{
+				if (parents.Contains(parent))
+					return parent;
+
+				parent = parent.parent;
+			}
+
+			return null;
+		}
+
+		#endregion
 
 		public void UpdateBindings(DataElement oldElem)
 		{

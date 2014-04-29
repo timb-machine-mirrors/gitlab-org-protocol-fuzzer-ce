@@ -53,30 +53,6 @@ namespace Peach.Core.Dom
 		protected List<DataElement> _childrenList = new List<DataElement>();
 		protected Dictionary<string, DataElement> _childrenDict = new Dictionary<string, DataElement>();
 
-		//[Serializable]
-		//class ElementCollection : OwnedCollection<DataElementContainer, DataElement>
-		//{
-		//	public ElementCollection(DataElementContainer owner)
-		//		: base(owner)
-		//	{
-		//	}
-
-		//	protected override void InsertItem(int index, DataElement item)
-		//	{
-		//		base.InsertItem(index, item);
-		//	}
-
-		//	protected override void SetItem(int index, DataElement item)
-		//	{
-		//		base.SetItem(index, item);
-		//	}
-
-		//	protected override void RemoveItem(int index)
-		//	{
-		//		base.RemoveItem(index);
-		//	}
-		//}
-
 		public DataElementContainer()
 		{
 		}
@@ -92,7 +68,6 @@ namespace Peach.Core.Dom
 		/// <param name="item"></param>
 		protected virtual void OnInsertItem(DataElement item)
 		{
-
 			item.parent = this;
 
 			Invalidate();
@@ -104,6 +79,8 @@ namespace Peach.Core.Dom
 		/// <param name="item"></param>
 		protected virtual void OnRemoveItem(DataElement item)
 		{
+			item.parent = null;
+
 			// Clear any bindings this element has to other elements
 			foreach (var elem in item.PreOrderTraverse())
 			{
@@ -164,37 +141,6 @@ namespace Peach.Core.Dom
 
 			if (size.HasValue && sizedData == data)
 				data.SeekBits(startPosition + size.Value, System.IO.SeekOrigin.Begin);
-		}
-
-		public DataElement QuickNameMatch(string[] names)
-		{
-			if (names.Length == 0)
-				throw new ArgumentException("Array must contain at least one entry.", "names");
-
-			if (this.name != names[0])
-				return null;
-
-			DataElement ret = this;
-			for (int cnt = 1; cnt < names.Length; cnt++)
-			{
-				var cont = ret as DataElementContainer;
-				if (cont == null)
-					return null;
-
-				var choice = cont as Choice;
-				if (choice != null && choice.SelectedElement == null)
-				{
-					if (!choice.choiceElements.TryGetValue(names[cnt], out ret))
-						return null;
-				}
-				else
-				{
-					if (!cont._childrenDict.TryGetValue(names[cnt], out ret))
-						return null;
-				}
-			}
-
-			return ret;
 		}
 
 		public string UniqueName(string name)
@@ -258,35 +204,16 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to skip</param>
-		/// <returns></returns>
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			// First our children
-			foreach (DataElement child in this)
-				yield return child;
-
-			// Next our children's children
-			foreach (DataElement child in this)
-			{
-				if (!knownParents.Contains(child))
-				{
-					foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-						yield return subChild;
-				}
-			}
-		}
-
 		protected override IEnumerable<DataElement> Children()
 		{
 			return this;
+		}
+
+		protected override DataElement GetChild(string name)
+		{
+			DataElement ret;
+			TryGetValue(name, out ret);
+			return ret;
 		}
 
 		/// <summary>
@@ -441,8 +368,6 @@ namespace Peach.Core.Dom
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
 
-			item.parent = null;
-
 			OnRemoveItem(item);
 		}
 
@@ -461,11 +386,9 @@ namespace Peach.Core.Dom
 
 		public void Clear()
 		{
-//			while (_childrenList.Count > 0)
-//				RemoveAt(0);
-
 			_childrenList.Clear();
 			_childrenDict.Clear();
+
 			Invalidate();
 		}
 
