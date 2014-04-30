@@ -29,8 +29,6 @@ Runs the BadBehaviorActivity, sending random taps to generate different types of
 
 To run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge) platform-tools directory and point the EmulatorPath to the adb tools directory.
 
-The Avd parameter must be the name of a valid AVD ((Android Virtual Device)). To create a new AVD open the 'android.bat' file lcoated in the tools directory of the adb sdk. From the GUI that opens up click on 'Tools' in the menu bar then 'Manage AVDS...'. From the window that opens up click 'New...' and create a new AVD.
-
 The Avd parameter must also be the name of a valid AVD (Android Virtual Device). To create a new AVD:
 
 . Open the 'android.bat' file located in the adb SDK tools directory. 

@@ -2,15 +2,19 @@
 [[Monitors_IpPower9258]]
 == IpPower9258 Monitor
 
-The _IpPower9258_ monitor controls a networked power switch.  This allows devices to be powered on/off during fuzzing. 
+The _IpPower9258_ monitor controls a IP Power 9258 Network Power Controller (or Switch). This allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing. 
 
-Currently only switching one port is supported per monitor instance. To control multiple ports use multiple instances of this monitor. The model is "IP Power 9258" and available for purchase on eBay and Amazon.
+NOTE: IP Power 9258 is the only networked power switch that Peach supports. If you wish to fuzz another networked power controller or switch, you will need to write your own monitor.
+
+Each _IpPower9258_ monitor switches an individual port. To control multiple ports, use multiple _IpPower9258_ monitors. 
+
+You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers (or switches) from a variety on online retailers. 
 
 === Parameters
 
 _Required:_
 
-Host:: Host or IP address (can include http interface port e.g. :8080)
+Host:: Host or IP address (can include HTTP interface port e.g. :8080)
 User:: Username
 Password:: Password
 Port:: Port to reset (1..4)
