@@ -49,6 +49,7 @@ namespace Peach.Core.Dom
 	/// change to another State.  Such changes can occur dynamically based on content received or sent
 	/// by attaching python expressions to actions via the onStart/onComplete/when attributes.
 	/// </summary>
+	[Serializable]
 	public class State : INamed
 	{
 		[NonSerialized]

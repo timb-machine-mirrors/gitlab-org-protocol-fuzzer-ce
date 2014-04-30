@@ -49,6 +49,7 @@ namespace Peach.Core.Dom
 	/// call sequences.  State machines are made up of one or more States which are in them selves make up of
 	/// one or more Action.  As Actions are executed the data can be moved between them as needed.
 	/// </summary>
+	[Serializable]
 	public class StateModel : INamed, IOwned<Dom>
 	{
 		[NonSerialized]
