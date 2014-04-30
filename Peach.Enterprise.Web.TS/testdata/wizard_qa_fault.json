@@ -6,6 +6,7 @@
 	"qa": [
 		{
 			"id": 0,
+			"type": "intro",
 			"qref":"static/fault-intro.html",
 			"next":1
 		},
@@ -130,8 +131,8 @@
 			"type":"choice",
 			"key":"WinDbgIgnoreFirstChanceGuardPage", 
 			"choice":[
-				{ "value":true,"a":"Yes, ignore them.", "key": 5000 },
-				{ "value":false,"a":"No, do not ignore them.", "key": 5000 }
+				{ "value":true,"a":"Yes, ignore them.", "next": 5000 },
+				{ "value":false,"a":"No, do not ignore them.", "next": 5000 }
 			]
 		},
 		{
