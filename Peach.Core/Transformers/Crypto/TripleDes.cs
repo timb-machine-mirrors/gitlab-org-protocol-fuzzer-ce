@@ -17,8 +17,8 @@ namespace Peach.Core.Transformers.Crypto
     [Serializable]
     public class TripleDes : SymmetricAlgorithmTransformer
     {
-        public TripleDes(Dictionary<string, Variant> args)
-            : base(args)
+        public TripleDes(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
         }
 

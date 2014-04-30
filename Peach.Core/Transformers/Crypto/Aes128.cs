@@ -17,8 +17,8 @@ namespace Peach.Core.Transformers.Crypto
     [Serializable]
     public class Aes128 : SymmetricAlgorithmTransformer
     {
-        public Aes128(Dictionary<string, Variant> args)
-            : base(args)
+        public Aes128(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
         }
 

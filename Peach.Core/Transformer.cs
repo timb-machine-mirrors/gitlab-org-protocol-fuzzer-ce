@@ -40,12 +40,15 @@ namespace Peach.Core
 	/// Transformers perform static transforms of data.
 	/// </summary>
 	[Serializable]
-	public abstract class Transformer
+	public abstract class Transformer : IOwned<DataElement>
 	{
+		public DataElement parent { get; set; }
+
 		public Transformer anotherTransformer;
 
-		public Transformer(Dictionary<string, Variant> args)
+		public Transformer(DataElement parent, Dictionary<string, Variant> args)
 		{
+			this.parent = parent;
 		}
 
 		/// <summary>

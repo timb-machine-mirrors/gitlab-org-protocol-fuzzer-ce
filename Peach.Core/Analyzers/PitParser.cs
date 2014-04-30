@@ -898,7 +898,7 @@ namespace Peach.Core.Analyzers
 			if (element.transformer != null)
 				throw new PeachException("Error, multiple transformers are defined on element '" + element.name + "'.");
 
-			element.transformer = handlePlugin<Transformer, TransformerAttribute>(node, element, false);
+			element.transformer = handlePlugin<Transformer, TransformerAttribute>(node, element, true);
 
 			handleNestedTransformer(node, element, element.transformer);
 		}
@@ -912,7 +912,7 @@ namespace Peach.Core.Analyzers
 					if (transformer.anotherTransformer != null)
 						throw new PeachException("Error, multiple nested transformers are defined on element '" + element.name + "'.");
 
-					transformer.anotherTransformer = handlePlugin<Transformer, TransformerAttribute>(child, element, false);
+					transformer.anotherTransformer = handlePlugin<Transformer, TransformerAttribute>(child, element, true);
 
 					handleNestedTransformer(child, element, transformer.anotherTransformer);
 				}

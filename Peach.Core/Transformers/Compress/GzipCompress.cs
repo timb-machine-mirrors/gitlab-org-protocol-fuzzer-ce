@@ -45,8 +45,8 @@ namespace Peach.Core.Transformers.Compress
 	[Serializable]
 	public class GzipCompress : Transformer
 	{
-		public GzipCompress(Dictionary<string, Variant> args)
-			: base(args)
+		public GzipCompress(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

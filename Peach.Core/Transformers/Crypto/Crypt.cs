@@ -42,8 +42,8 @@ namespace Peach.Core.Transformers.Crypto
 	[Serializable]
 	public class Crypt : Transformer
 	{
-		public Crypt(Dictionary<string, Variant> args)
-			: base(args)
+		public Crypt(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

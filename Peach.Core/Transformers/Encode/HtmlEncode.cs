@@ -45,8 +45,8 @@ namespace Peach.Core.Transformers.Encode
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected NLog.Logger Logger { get { return logger; } }
 
-		public HtmlEncode(Dictionary<string, Variant> args)
-			: base(args)
+		public HtmlEncode(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
         {
         }
 

@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Crypto
 	[Serializable]
 	public class Sha256 : Transformer
 	{
-		public Sha256(Dictionary<string, Variant> args)
-			: base(args)
+		public Sha256(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

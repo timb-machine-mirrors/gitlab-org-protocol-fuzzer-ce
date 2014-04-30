@@ -42,8 +42,8 @@ namespace Peach.Core.Transformers.Crypto
 	[Serializable]
 	public class ApacheMd5Crypt : Transformer
 	{
-		public ApacheMd5Crypt(Dictionary<string, Variant> args)
-			: base(args)
+		public ApacheMd5Crypt(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Crypto
 	[Serializable]
 	public class Hmac : Transformer
 	{
-		public Hmac(Dictionary<string, Variant> args)
-			: base(args)
+		public Hmac(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

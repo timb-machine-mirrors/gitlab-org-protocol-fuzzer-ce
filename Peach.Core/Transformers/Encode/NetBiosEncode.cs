@@ -43,7 +43,8 @@ namespace Peach.Core.Transformers.Encode
     {
         Dictionary<string, Variant> m_args;
 
-        public NetBiosEncode(Dictionary<string, Variant> args) : base(args)
+        public NetBiosEncode(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
             m_args = args;
         }
