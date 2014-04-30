@@ -57,8 +57,8 @@ namespace Peach.Core.Transformers.Crypto
 		public HexString PrivateKey { get; set; }
 		public bool UseStateBag { get; set; }
 
-		public Rsa(Dictionary<string, Variant> args)
-			: base(args)
+		public Rsa(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
 		}

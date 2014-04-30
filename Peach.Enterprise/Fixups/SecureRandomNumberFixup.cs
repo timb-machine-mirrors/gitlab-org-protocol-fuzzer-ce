@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using Peach.Core.Dom;
+using Peach.Core.Fixups;
 using Peach.Core.IO;
 using Peach.Core;
 
@@ -41,31 +42,11 @@ namespace Peach.Enterprise.Fixups
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Parameter("Length", typeof(int), "Length in bytes to return")]
 	[Serializable]
-	public class SecureRandomNumberFixup : Fixup
+	public class SecureRandomNumberFixup : VolatileFixup
 	{
 		static void Parse(string str, out DataElement val)
 		{
 			val = null;
-		}
-
-		void StateModel_Finished(StateModel model)
-		{
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.StateModel.Finished -= StateModel_Finished;
-		}
-
-		void Action_Starting(Peach.Core.Dom.Action action)
-		{
-			var root = parent.getRoot() as DataModel;
-
-			foreach (var item in action.outputData)
-			{
-				if (item.dataModel == root)
-				{
-					parent.Invalidate();
-					Update();
-				}
-			}
 		}
 
 		public int Length { get; set; }
@@ -80,37 +61,17 @@ namespace Peach.Enterprise.Fixups
 				throw new PeachException("The length must be greater than 0.");
 		}
 
-		protected Variant Update()
+		protected override Variant OnActionRun(RunContext ctx)
 		{
 			if (elements["ref"].hasLength && Length > elements["ref"].length)
 				throw new PeachException("Length is greater than 'ref' elements size.");
 
-			var bs = new BitStream();
-			var random = new byte[Length];
-			RandomNumberGenerator rng = new RNGCryptoServiceProvider();
+			var buf = new byte[Length];
+			var rng = new RNGCryptoServiceProvider();
 
-			rng.GetBytes(random);
+			rng.GetBytes(buf);
 			
-			bs.Write(random, 0, Length);
-
-			return new Variant(bs);
-		}
-
-		protected override Variant fixupImpl()
-		{
-			DataModel dm = parent.getRoot() as DataModel;
-
-			if (dm == null || dm.action == null)
-				return parent.DefaultValue;
-
-			return Update();
-		}
-
-		[OnCloned]
-		private void OnCloned(SecureRandomNumberFixup original, object context)
-		{
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.StateModel.Finished += new StateModelFinishedEventHandler(StateModel_Finished);
+			return new Variant(new BitStream(buf));
 		}
 	}
 }

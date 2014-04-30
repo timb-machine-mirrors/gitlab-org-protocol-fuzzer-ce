@@ -473,7 +473,7 @@ namespace PeachFarm.Node
 				return;
 			}
 
-			foreach (var test in dom.tests.Values)
+			foreach (var test in dom.tests)
 			{
 				test.loggers = loggers;
 			}
