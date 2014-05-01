@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 using Peach.Core;
 using Peach.Core.Dom;
@@ -40,6 +41,7 @@ using NLog;
 using SharpPcap;
 using SharpPcap.AirPcap;
 using PacketDotNet;
+
 
 namespace Peach.Enterprise.Publishers
 {
@@ -60,6 +62,8 @@ namespace Peach.Enterprise.Publishers
 		protected bool PrependRadioHeader { get; set; }
 
 		protected ICaptureDevice airPcap;
+
+		protected MemoryStream _recvBuffer = null;
 		
 
 		public AirPcapPublisher(Dictionary<string, Variant> args)
@@ -77,12 +81,16 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnStart()
 		{
+			_recvBuffer = new MemoryStream();
+
 			airPcap.Open(CaptureMode);
 		}
 
 		protected override void OnStop()
 		{
 			airPcap.Close();
+
+			_recvBuffer.Close();
 		}
 
 		protected override void OnOpen()
@@ -119,6 +127,9 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnOutput(BitwiseStream data)
 		{
+			if (Logger.IsDebugEnabled)
+				Logger.Debug("\n\n" + Utilities.HexDump(data));
+
 			try
 			{
 				var packet = new byte[data.Length];
@@ -154,8 +165,45 @@ namespace Peach.Enterprise.Publishers
 		{
 			Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
 
-			Console.WriteLine(BitConverter.ToString(e.Packet.Data));
+			_recvBuffer.SetLength(0);
+			_recvBuffer.Write(packet.Bytes, 0, packet.Bytes.Length);
+			_recvBuffer.Seek(0, SeekOrigin.Begin);
 		}
+
+		#region Read Stream
+
+		public override bool CanRead
+		{
+			get { return _recvBuffer.CanRead; }
+		}
+
+		public override bool CanSeek
+		{
+			get { return _recvBuffer.CanSeek; }
+		}
+
+		public override long Length
+		{
+			get { return _recvBuffer.Length; }
+		}
+
+		public override long Position
+		{
+			get { return _recvBuffer.Position; }
+			set { _recvBuffer.Position = value; }
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			return _recvBuffer.Seek(offset, origin);
+		}
+
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			return _recvBuffer.Read(buffer, offset, count);
+		}
+
+		#endregion
 
 	}
 }
