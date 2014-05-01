@@ -15,6 +15,7 @@ namespace Peach.Core.Fixups
 	{
 		DataModel dataModel;
 		Variant defaultValue;
+		Exception lastError;
 
 		public VolatileFixup(DataElement parent, Dictionary<string, Variant> args, params string[] refs)
 			: base(parent, args, refs)
@@ -23,6 +24,9 @@ namespace Peach.Core.Fixups
 
 		protected override Variant fixupImpl()
 		{
+			if (lastError != null)
+				throw new SoftException(lastError);
+
 			if (dataModel == null)
 			{
 				dataModel = parent.getRoot() as DataModel;
@@ -43,7 +47,16 @@ namespace Peach.Core.Fixups
 
 		void OnActionRunEvent(RunContext ctx)
 		{
-			defaultValue = OnActionRun(ctx);
+			lastError = null;
+
+			try
+			{
+				defaultValue = OnActionRun(ctx);
+			}
+			catch (Exception ex)
+			{
+				lastError = ex;
+			}
 
 			parent.Invalidate();
 		}
