@@ -218,3 +218,7 @@
 /// <reference path="../js/models.peach.js" />
 /// <reference path="../js/models.wizard.js" />
 /// <reference path="../js/controllers.wizard.js" />
+/// <reference path="../visualizer/d3.min.js" />
+/// <reference path="../visualizer/d3.v3.min.js" />
+/// <reference path="../visualizer/driver.js" />
+/// <reference path="jquery.xhashchange.min.js" />

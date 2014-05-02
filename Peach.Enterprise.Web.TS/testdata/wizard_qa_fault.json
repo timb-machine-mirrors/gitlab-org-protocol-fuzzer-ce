@@ -131,8 +131,8 @@
 			"type":"choice",
 			"key":"WinDbgIgnoreFirstChanceGuardPage", 
 			"choice":[
-				{ "value":true,"a":"Yes, ignore them.", "next": 5000 },
-				{ "value":false,"a":"No, do not ignore them.", "next": 5000 }
+				{ "value":true,"a":"Yes, ignore them." },
+				{ "value":false,"a":"No, do not ignore them." }
 			]
 		},
 		{
@@ -183,8 +183,7 @@
 			"id":3104,
 			"q":"What is the full path to the GDB executable? If left blank Peach will search the path for GDB.",
 			"type":"string",
-			"key":"LinuxDebugGdbPath",
-			"next": 5000
+			"key":"LinuxDebugGdbPath"
 		},
 		{
 			"id":4100,
@@ -209,8 +208,7 @@
 			"key":"PingRetryCount",
 			"type":"range",
 			"rangeMin":1,
-			"rangeMax":999999,
-			"next": 5000
+			"rangeMax":999999
 		},
 		{
 			"id":4200,
@@ -243,14 +241,9 @@
 			"type":"choice",
 			"key":"ProcessFaultOnEarlyExit", 
 			"choice":[
-				{ "value":true,"a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing.", "next": 5000 },
-				{ "value":false,"a":"No, it's okay if my process/service exits early. This is common for file fuzzing.", "next": 5000 }
+				{ "value":true,"a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing." },
+				{ "value":false,"a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
 			]
-		},
-		{
-			"id": 5000,
-			"type": "done",
-			"qref":"static/fault-done.html"
 		}
 	]
 }
