@@ -182,16 +182,10 @@
           <Param name="ref" value="Header"/>
         </Fixup>
       </Number>
-      <Block name="SrcBlock" length="4"> <!--Used for cracking-->
-        <String name="SrcIP" value="##SourceIPv4##" mutable="false">
-          <Transformer class="Ipv4StringToOctet" />
-        </String>
-      </Block>
-      <Block name="DstBlock" length="4"> <!--Used for cracking-->
-        <String name="DestIP" value="##TargetIPv4##" mutable="false"> <!--These fields must be nonmutable on windows-->
-          <Transformer class="Ipv4StringToOctet" />
-        </String>
-      </Block>
+      <!--These fields must be nonmutable on windows-->
+      <Blob name="SrcIP" valueType="ipv4" length="4" value="##SourceIPv4##" mutable="false"/>
+      <!--These fields must be nonmutable on windows-->
+      <Blob name="DestIP" valueType="ipv4" length="4" value="##TargetIPv4##" mutable="false"/>
       <Block name="Options" >
         <Block name="Option" ref="IPv4Options" minOccurs="0" />
         <Padding alignment="32" />

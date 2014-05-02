@@ -43,11 +43,7 @@
 				<Number name="AddressValueLength" size="8">
 					<Relation type="size" of="AddressTlvValue"/>
 				</Number>
-				<Block name="AddressTlvValueBlock" length="4">
-					<String name="AddressTlvValue" value="##SourceIPv4##">
-						<Transformer class="Ipv4StringToOctet"/>
-					</String>
-				</Block>
+				<Blob name="AddressTlvValue" valueType="ipv4" length="4" value="##SourceIPv4##"/>
 			</Block>
 		</Block>
 

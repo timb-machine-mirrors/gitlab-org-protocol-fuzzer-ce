@@ -23,8 +23,6 @@
 
 	<DataModel name="InIPv4Packet" ref="IPv4:Packet">
 		<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06"/>
-		<Blob name="Header.SrcBlock.SrcIP" length="4"/>
-		<Blob name="Header.DstBlock.DestIP" length="4"/>
 		<Block name="Payload" ref="Packet"/>
 	</DataModel>
 </Peach>
