@@ -47,7 +47,7 @@ Example configuration to broadcast arp packets.
     <Define key="TargetMAC"   value="ffffffffffff"/>
     <Define key="TargetIPv4"  value="127.0.0.2"/>
     <Define key="LoggerPath"  value="logs/arp/"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

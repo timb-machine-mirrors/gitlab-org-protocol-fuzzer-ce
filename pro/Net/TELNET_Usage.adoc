@@ -71,7 +71,7 @@ http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
     <Define key="SourcePort" value="31337"/>
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="./logs/telnet/"/>
-    <Define key="Strategy" value="Sequential"/>
+    <Define key="Strategy" value="Random"/>
     <Define key="Username" value="username"/>
     <Define key="Password" value="password"/>
     <Define key="PitLibraryPath" value="."/>

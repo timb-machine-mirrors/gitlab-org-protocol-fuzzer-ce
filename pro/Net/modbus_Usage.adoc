@@ -68,7 +68,7 @@ socat tcp-l:502,fork exec:'/bin/cat'
     <!-- General Configurations -->
     <Define key="Timeout" value="5000"/>
     <Define key="LoggerPath" value="logs/modbus/"/>
-    <Define key="Strategy" value="Sequential"/>
+    <Define key="Strategy" value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 </PitDefines>

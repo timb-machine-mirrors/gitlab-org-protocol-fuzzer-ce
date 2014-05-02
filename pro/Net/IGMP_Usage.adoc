@@ -52,7 +52,7 @@ Core Networking - Internet Group Management Protocol (IGMP-In)
     <Define key="TargetIPv4" value="224.0.0.22"/>
     <Define key="LoggerPath" value="logs/IGMP/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

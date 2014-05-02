@@ -46,7 +46,7 @@ Example configuration for sending LLDP packets.
     <Define key="TargetMAC" value="ffffffffffff"/>
     <Define key="Hostname" value="foobar"/>
     <Define key="LoggerPath"  value="logs/lldp/"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

@@ -55,7 +55,7 @@ socat STDIO udp6-listen:12345
     <Define key="SourceIPv6" value="::1"/>
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

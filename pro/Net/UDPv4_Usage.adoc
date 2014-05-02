@@ -55,7 +55,7 @@ socat STDIO udp4-listen:12345
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

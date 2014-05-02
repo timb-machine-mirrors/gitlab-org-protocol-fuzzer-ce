@@ -43,7 +43,7 @@ Example configuration for sending raw ethernet packets.
 <PitDefines>
   <All>
     <Define key="LoggerPath"  value="./logs/ethernet/"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="TargetMAC" value="0000000000"/>
     <Define key="SourceMAC" value="0000000000"/>
     <Define key="PitLibraryPath" value="."/>

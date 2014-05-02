@@ -53,7 +53,7 @@ File and Printer Sharing (Echo Request - ICMPv4-In)
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/ICMP/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="Strategy"  value="Sequential"/>
+    <Define key="Strategy"  value="Random"/>
     <Define key="PitLibraryPath" value="."/>
   </All>
 

@@ -47,7 +47,7 @@ Example configuration for sending LACP packets.
     <Define key="LoggerPath"    value="./logs/lacp/"/>
     <Define key="ActorPort"     value="0012"/>
     <Define key="PartnerPort"   value="0000"/>
-    <Define key="Strategy"      value="Sequential"/>
+    <Define key="Strategy"      value="Random"/>
     <Define key="PitLibraryPath"          value="."/>
   </All>
 
