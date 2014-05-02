@@ -81,7 +81,7 @@
           <Number size="16" value="0x0044"/>
           <Number size="16" value="0xc00e"/>
           <Number size="16" value="0xc004"/>-->
-          <Number size="16" value="0x002f"/>
+          <Number size="16" value="0x002f"/> <!-- rsa aes128 sha-->
           <!--<Number size="16" value="0x0096"/>
           <Number size="16" value="0x0041"/>
           <Number size="16" value="0xc011"/>
@@ -208,14 +208,14 @@
           <Relation type="size" of="CertificateBlock"/>
         </Number>
         <Block name="CertificateBlock">
-			<!--Number name="CertificateLength" size="24">
-			  <Relation type="size" of="Certificate"/>
-			</Number-->
-			<Block name="Certificate">
-			  <Blob>
-			   <Analyzer class="Asn1"/>
-			  </Blob>
-			</Block>
+    			<Number name="CertificateLength" size="24">
+    			  <Relation type="size" of="Certificate"/>
+    			</Number>
+    			<Block name="Certificate">
+    			  <Blob>
+    			   <Analyzer class="Asn1"/>
+    			  </Blob>
+    			</Block>
         </Block>
       </Block>
     </Block>
@@ -298,14 +298,14 @@
       <Choice>
         <Block name="SizedPayload">
           <Number name="PayloadLength" size="16">
-             <Relation type="size" of="Payload"/>
+             <Relation type="size" of="Value"/>
           </Number>
-          <Blob name="Payload"/>
+          <Blob name="Value"/>
           <Blob name="Padding" minOccurs="0"/>
         </Block>
         <Block name="UnsizedPayload">
           <Number name="PayloadLength" size="16"/>
-          <Blob name="Payload"/>
+          <Blob name="Value"/>
         </Block>
       </Choice>
       <Transformer class="Tls">
@@ -338,9 +338,9 @@
       <Blob name="VerifyData">
        <Fixup class="Tls"/>
       </Blob>
-	  <Transformer class="Tls">
-	    <Param name="ContentType" value="22"/>
-	  </Transformer>
+  	  <Transformer class="Tls">
+  	    <Param name="ContentType" value="22"/>
+  	  </Transformer>
     </Block>
   </DataModel>
 
@@ -368,7 +368,7 @@
                 </Fixup>
               </Blob>
               <Transformer class="Rsa">
-                <Param name="PublicKey" value="00AED0C3966B30C6C3A0322D3ABBAA24428CFE355AC3EB38E5723E3E74DB51E58E20671183CF919F7CB1778620BB6FAF48DF26551E979DFDAF5C4A2C143B8DECA29C7CDCC7690356374E134E7A7D1C25995F8285D0003C7B9A7DF424FD6A462E9CFAD07AAF6DF4D08081ED49BF521412B7411F0860AC87BB9F1D187D09274793751D6C23DA2972F56499E487316B6B2F85D03D0E6CE61DBC1320D5EFD27A9A3F3B487B5FC2BAC6014A597D9F76899340934AE737D4C0CC4B4F1EF8FF55D6BE5901E9D8738BED3786B0AACD722D55E820464A7AF8E8C55038DB0A66E215291705697DE48016806AC7EE419B5C3B08E1CA5CC01B9D648C04BE9FBB6F968CA40F22C1"/>
+                <Param name="PublicKey" value="##PublicKey##"/>
               </Transformer>
             </Block>
           </Block>
@@ -379,23 +379,23 @@
 
   <StateModel name="TheStateModel" initialState="Initial">
     <State name="Initial" onStart="context.iterationStateStore['HandshakeMessage'] = []">
-      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['ClientRandom'] = (self.dataModel.find('Random').InternalValue)">
+      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['ClientRandom'] = (self.dataModel.find('Random'))">
         <DataModel ref="ClientHello"/>
       </Action>
 
-      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['ServerRandom'] = (self.dataModel.find('Random').InternalValue)">
+      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['ServerRandom'] = (self.dataModel.find('Random'))">
         <DataModel ref="ServerHello"/>
       </Action>
 
-      <Action type="input" name='incert' onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['Certificate'] = (self.dataModel.find('Certificate').InternalValue);">
+      <Action type="input" name='incert' onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload'))">
         <DataModel ref="HandShakeCertificate"/>
       </Action>
 
-      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue)">
+      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload'))">
         <DataModel ref="ServerHelloDone"/>
       </Action>
 
-      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['PreMasterSecret'] = (self.dataModel.find('PreMasterSecretBlock').InternalValue)">
+      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['PreMasterSecret'] = (self.dataModel.find('PreMasterSecretBlock'))">
         <DataModel ref="ClientKeyExchange"/>
       </Action>
 
@@ -419,69 +419,41 @@
         <DataModel ref="EncrypedHandshake"/>
       </Action>
 
-       <Action type="output">
+       <Action name="HeartBeatRequest" type="output">
         <DataModel ref="HeartBeatRequest"/>
       </Action>
 
-      <Action type="input">
+      <Action name="HeartBeatResponse" type="input">
         <DataModel ref="Beat"/>
         <!-- RFC6520: Heartbeat response size must never be larger than 16384 -->
-       <Godel post='self.dataModel.find("HeartBeat") is None or int(self.dataModel.find("PayloadLength").InternalValue) &lt;= int(16384)'/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <StateModel name="PreSsl" initialState="Initial">
-    <State name="Initial" onStart="context.iterationStateStore['HandshakeMessage'] = []">
-      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['ClientRandom'] = (self.dataModel.find('Random').InternalValue)">
-        <DataModel ref="ClientHello"/>
-      </Action>
-
-      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['ServerRandom'] = (self.dataModel.find('Random').InternalValue)">
-        <DataModel ref="ServerHello"/>
-      </Action>
-
-      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue); context.iterationStateStore['Certificate'] = (self.dataModel.find('Certificate').InternalValue);">
-        <DataModel ref="HandShakeCertificate"/>
-      </Action>
-
-      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload').InternalValue)">
-        <DataModel ref="ServerHelloDone"/>
-      </Action>
-
-      <Action type="output">
-        <DataModel ref="HeartBeatRequest"/>
-      </Action>
-
-      <Action type="input">
-        <DataModel ref="Beat"/>
-        <!-- RFC6520: Heartbeat response size must never be larger than 16384 -->
-        <Godel post='self.dataModel.find("HeartBeat") is None or int(self.dataModel.find("PayloadLength").InternalValue) &lt;= int(16384)'/>
+       <!--<Godel post='self.dataModel.find("HeartBeat") is None or int(self.dataModel.find("PayloadLength").InternalValue) &lt;= int(16384)'/>-->
+       <Godel post='self.dataModel.find("HeartBeat") is None or (self.dataModel.find("Value").InternalValue) == (self.parent.actions["HeartBeatRequest"].dataModel.find("Value").InternalValue)'/>
       </Action>
     </State>
   </StateModel>
 
   <Agent name="Local">
     <!--Monitor class="Pcap">
-      <Param name="Device" value="VMware Network Adapter VMnet8"/>
-      <Param name="Filter" value="port 443"/>
+      <Param name="Device" value="##Interface##"/>
+      <Param name="Filter" value="port ##TargetPort##"/>
     </Monitor-->
   </Agent>
 
-<!-- seed=14718 range=2071,2071-->
   <Test name="Default">
     <Agent ref="Local"/>
 
     <StateModel ref="TheStateModel"/>
 
     <Publisher class="Tcp">
-      <Param name="Host" value="10.0.1.52"/>
-      <Param name="Port" value="443"/>
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
       <Param name="Timeout" value="5000"/>
     </Publisher>
 
+    <Strategy class="##Strategy##"/>
+
     <Logger class="File">
-      <Param name="Path" value="godel_logs"/>
+      <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
 </Peach>
