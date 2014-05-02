@@ -50,7 +50,7 @@ sudo apt-get install feh
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value="jpg-jfif_sample_01.jpg"/>
+    <Define key="Seed" value="*.jpg"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="LoggerPath"  value="./logs/jpg-jfif/"/>
     <Define key="SamplePath" value="./_Common/Samples/Image"/>

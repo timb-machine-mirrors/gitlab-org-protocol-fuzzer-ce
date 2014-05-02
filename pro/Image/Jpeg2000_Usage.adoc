@@ -50,7 +50,7 @@ sudo apt-get install feh
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value="jpeg2000_sample_01.jp2"/>
+    <Define key="Seed" value="*.jp2"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="LoggerPath"  value="./logs/JPEG2000/"/>
     <Define key="SamplePath" value="./_Common/Samples/Image" />

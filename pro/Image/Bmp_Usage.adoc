@@ -54,7 +54,7 @@ sudo apt-get install feh
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value="bmp_sample_01.bmp"/>
+    <Define key="Seed" value="*.bmp"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="LoggerPath"  value="./logs/bmp/"/>
     <Define key="SamplePath" value="./_Common/Samples/Image"/>

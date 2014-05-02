@@ -47,7 +47,7 @@ sudo apt-get install vlc
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value=""/>
+    <Define key="Seed" value="avi_divx_sample*.avi"/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="LoggerPath"  value="./logs/avi_divx/"/>
     <Define key="PitLibraryPath" value="."/>
