@@ -43,19 +43,22 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Math;
 
+using NLog;
+
 namespace Peach.Core.Transformers.Crypto
 {
 	[Description("Rsa Transformer")]
 	[Transformer("Rsa", true)]
 	[Parameter("PublicKey", typeof(HexString), "Public key used to encrypt", "")]
-	[Parameter("PrivateKey", typeof(HexString), "Private key used to decrypt", "")]
-	[Parameter("UseStateBag", typeof(bool), "Use state bag to get public key", "false")]
+	[Parameter("PublicExponent", typeof(HexString), "PublicKeyExponent", "010001")]
 	[Serializable]
 	public class Rsa : Transformer
 	{
+		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		protected NLog.Logger Logger { get { return logger; } }
+
 		public HexString PublicKey { get; set; }
-		public HexString PrivateKey { get; set; }
-		public bool UseStateBag { get; set; }
+		public HexString PublicExponent { get; set; }
 
 		public Rsa(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
@@ -65,23 +68,25 @@ namespace Peach.Core.Transformers.Crypto
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
-			var key = PublicKey.Value;
-			byte[] Exponent = { 1, 0, 1 };
-			var premaster = new byte[data.Length];
-			data.Read(premaster, 0, premaster.Length);
+			var modulus = new BigInteger(PublicKey.Value);
+			var exponent = new BigInteger(PublicExponent.Value);
 
-			var modulus = new BigInteger(key);
-			var exponent = new BigInteger(Exponent);
-
-			RsaKeyParameters rsaServerPublicKey = new RsaKeyParameters(false, modulus, exponent);
+			var rsaServerPublicKey = new RsaKeyParameters(false, modulus, exponent);
 
 			var random = new SecureRandom();
-			Pkcs1Encoding encoding = new Pkcs1Encoding(new RsaBlindedEngine());
+			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
 			encoding.Init(true, new ParametersWithRandom(rsaServerPublicKey, random));
 
-			byte[] keData = encoding.ProcessBlock(premaster, 0, premaster.Length);
+			if (data.Length > encoding.GetInputBlockSize())
+			{
+				logger.Debug("Data length greater than block size, returning unencrypted data");
+				return data;
+			}
 
-			return new BitStream(keData);
+			var clear = new BitReader(data).ReadBytes((int)data.Length);
+			var encrypted = encoding.ProcessBlock(clear, 0, clear.Length);
+
+			return new BitStream(encrypted);
 		}
 
 		protected override BitStream internalDecode(BitStream data)
