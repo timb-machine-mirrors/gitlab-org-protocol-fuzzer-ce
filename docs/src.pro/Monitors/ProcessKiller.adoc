@@ -85,6 +85,6 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example whenever the process notepad.exe is running it will be killed.
+In this example, whenever the process notepad.exe is running it will be killed.
 
 ========================

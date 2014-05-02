@@ -2,22 +2,24 @@
 [[Monitors_Ssh]]
 == Ssh Monitor
 
-The _Ssh_ monitor connects to a remote host over SSH. The monitor supports password, keyboard, and private key authentication methods. The monitor runs a given command on the remote system. A regular expression can be applied to the result of the command to determine if a Fault has occurred.
+The _Ssh_ monitor connects to a remote host over SSH (Secure Shell).
 
-The Monitor holds a persistent connection open to the system over the course of the fuzzing run.
+_Ssh_ runs a given command on the remote system. To determine if a Fault has occurred, apply a regular expression to the result.  
+
+_Ssh_ holds a persistent connection open to the system over the course of the fuzzing run and supports password, keyboard, and private key authentication methods. 
 
 === Parameters
 
 _Required:_
 
-Host:: Host to ssh too
+Host:: Host to SSH too
 Username:: Username for ssh
 Command:: Command to check for fault
 
 _Optional:_
 
-Password:: Password for ssh account, defaults to "".
-KeyPath:: Path to ssh key, defaults to "".
+Password:: Password for SSH account, defaults to "".
+KeyPath:: Path to SSH key, defaults to "".
 CheckValue:: Regex to match command response, defaults to "".
 FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
 
@@ -25,7 +27,7 @@ FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
 
 .Checking for core dump files
 ==========
-For this example we ssh into the target machine at the end of each iteration to check if any core files exist and fault if one does exist.
+For this example we SSH into the target machine at the end of each iteration to check if any core files exist and fault if one does exist.
 
 In order to run this example a valid Host, Username, and Password need to be specified.
 
@@ -99,6 +101,6 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-To see that Peach is actually checking for the file on the remote machine create a file named target.testing.core in /var/cores. When Peach logs in and finds the file a fault will occur.
+To verify that Peach is checking for a file on the remote machine, create a file named target.testing.core in /var/cores. When Peach logs in and finds that file, a fault occurs.
 
 ==========
