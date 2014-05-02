@@ -107,10 +107,8 @@
 					<Relation type="size" of="Data"/>
 				</Number>
 				<Block name="Data">
-					<Blob name="Ipv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce">
-					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="##TargetIPv6Lease##"> -->
-						<!-- <Transformer class="Ipv6StringToOctet"/> -->
-					</Blob>
+					<Blob name="Ipv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce"/>
+					<!-- <Blob name="Ipv6Address" length="16" valueType="ipv6" value="##TargetIPv6Lease##"/> -->
 					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
 					<Number name="PreferredLifetime" size="32" value="2000"/>
 					<Number name="ValidLifetime" size="32" value="3000"/>

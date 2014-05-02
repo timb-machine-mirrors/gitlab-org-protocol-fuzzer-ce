@@ -25,16 +25,8 @@
 		<Number name="PayloadLength" size="16" endian="big" valueType="hex" value="ffff"/>
 		<Number name="NextHeader" size="8" endian="big" value="59"/>
 		<Number name="HopLimit" size="8" endian="big" valueType="hex" value="40"/>
-		<Block name="SrcBlock" length="16">
-			<Blob name="SrcIP" value="##SourceIPv6##">
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-		</Block>
-		<Block name="DstBlock" length="16">
-			<Blob name="DestIP" value="##TargetIPv6##">
-				<Transformer class="Ipv6StringToOctet"/>
-			</Blob>
-		</Block>
+		<Blob name="SrcIP" length="16" valueType="ipv6" value="##SourceIPv6##"/>
+		<Blob name="DestIP" length="16" valueType="ipv6" value="##TargetIPv6##"/>
 		<Block name="IPv6Payload"/>
 	</DataModel>
 	
