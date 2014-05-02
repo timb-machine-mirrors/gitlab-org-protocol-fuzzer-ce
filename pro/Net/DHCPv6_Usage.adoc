@@ -69,7 +69,7 @@ Core Networking - Dynamic Host Configuration Protocol for IPv6(DHCPV6-In)
     <Define key="Strategy"  value="Sequential"/>
     <Define key="Interface"  value="::1"/> <!-- This needs to be "::1" to bind to all interfaces. This is because ipv6 multicast oddness. -->
     <Define key="RemoteAgentIP"  value="127.0.0.1"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

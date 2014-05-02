@@ -65,7 +65,7 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
     <Define key="LoggerPath" value="logs/ICMPv6/"/>
     <Define key="SourceIPv6" value="::1"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

@@ -53,7 +53,7 @@ Core Networking - Internet Group Management Protocol (IGMP-In)
     <Define key="LoggerPath" value="logs/IGMP/"/>
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

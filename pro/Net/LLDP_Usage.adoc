@@ -47,7 +47,7 @@ Example configuration for sending LLDP packets.
     <Define key="Hostname" value="foobar"/>
     <Define key="LoggerPath"  value="logs/lldp/"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

@@ -120,7 +120,7 @@ sudo socat STDIO tcp-listen:12345
     <Define key="HashAlg" value="HMACSHA1"/>
     <Define key="AuthKey" value="4141414141414141414141414141414141414141"/>
     <Define key="SPI" value="201"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
   </All>

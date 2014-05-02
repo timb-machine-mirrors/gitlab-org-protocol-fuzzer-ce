@@ -4,10 +4,10 @@
 			 author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT StateModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
 
-	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
-	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
-	<Include ns="UDPv6" src="file:##Path##/_Common/Models/Net/UDPv6_Data.xml"/>
-	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
+	<Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_Data.xml"/>
+	<Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
+	<Include ns="UDPv6" src="file:##PitLibraryPath##/_Common/Models/Net/UDPv6_Data.xml"/>
+	<Include ns="ICMP" src="file:##PitLibraryPath##/_Common/Models/Net/ICMPv6_Data.xml"/>
 
 	<!--START HERE-->
 

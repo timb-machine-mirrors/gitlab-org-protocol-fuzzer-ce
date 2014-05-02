@@ -8,8 +8,8 @@
 	<!-- Implementation notes: Supports the minimum necessary for server side of 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
 
-	<Include ns="DHCP" src="file:##Path##/_Common/Models/Net/DHCPv6_Data.xml"/>
-	<PythonPath path="##Path##/_Common/Models/Net/"/>
+	<Include ns="DHCP" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_Data.xml"/>
+	<PythonPath path="##PitLibraryPath##/_Common/Models/Net/"/>
 	<Import import="DHCPv6"/>
 
 

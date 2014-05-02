@@ -53,7 +53,7 @@ socat STDIO udp4-listen:123
     <Define key="TargetIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="./logs/ntp/"/>
     <Define key="Strategy" value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 </PitDefines>
 ----

@@ -46,7 +46,7 @@ Example configuration for sending raw ethernet packets.
     <Define key="Strategy"  value="Sequential"/>
     <Define key="TargetMAC" value="0000000000"/>
     <Define key="SourceMAC" value="0000000000"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
     <!-- this is for testing with ARP -->
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <!-- this is for testing with ARP -->

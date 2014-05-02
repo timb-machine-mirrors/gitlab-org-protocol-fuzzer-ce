@@ -74,7 +74,7 @@ http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
     <Define key="Strategy" value="Sequential"/>
     <Define key="Username" value="username"/>
     <Define key="Password" value="password"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

@@ -6,15 +6,15 @@
 
 	<!-- http://tools.ietf.org/html/draft-mahalingam-dutt-dcops-vxlan-04 -->
 
-	<Include ns="ICMP" src="file:##Path##/_Common/Models/Net/ICMPv6_Data.xml"/>
-	<Include ns="Ethernet" src="file:##Path##/_Common/Models/Net/Ethernet_Data.xml"/>
-	<Include ns="VLAN" src="file:##Path##/_Common/Models/Net/VLAN_Data.xml"/>
+	<Include ns="ICMP" src="file:##PitLibraryPath##/_Common/Models/Net/ICMPv6_Data.xml"/>
+	<Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
+	<Include ns="VLAN" src="file:##PitLibraryPath##/_Common/Models/Net/VLAN_Data.xml"/>
 	
-	<Include ns="IPv4" src="file:##Path##/_Common/Models/Net/IPv4_Data.xml"/>
-	<Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_Data.xml"/>
+	<Include ns="IPv4" src="file:##PitLibraryPath##/_Common/Models/Net/IPv4_Data.xml"/>
+	<Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_Data.xml"/>
 	
-	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCP_Data.xml"/>
-	<Include ns="UDPv4" src="file:##Path##/_Common/Models/Net/UDPv4_Data.xml"/>
+	<Include ns="TCP" src="file:##PitLibraryPath##/_Common/Models/Net/TCP_Data.xml"/>
+	<Include ns="UDPv4" src="file:##PitLibraryPath##/_Common/Models/Net/UDPv4_Data.xml"/>
 
 
   <DataModel name="VXLANHeader">

@@ -56,7 +56,7 @@ Core Networking - Multicast Listener Report v2 (ICMPv6-In)
     <Define key="LoggerPath" value="logs/MLD/"/>
     <Define key="SourceIPv6" value="::1"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

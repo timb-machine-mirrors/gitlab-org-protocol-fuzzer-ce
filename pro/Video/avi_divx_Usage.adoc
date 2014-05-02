@@ -50,8 +50,8 @@ sudo apt-get install vlc
     <Define key="Seed" value=""/>
     <Define key="Strategy"  value="Sequential"/>
     <Define key="LoggerPath"  value="./logs/avi_divx/"/>
-    <Define key="Path" value="."/>
-    <Define key="SamplePath" value="/_Common/Samples/Video/"/>
+    <Define key="PitLibraryPath" value="."/>
+    <Define key="SamplePath" value="./_Common/Samples/Video"/>
   </All>
 
   <Linux platform="linux">

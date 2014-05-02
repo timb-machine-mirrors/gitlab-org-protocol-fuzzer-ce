@@ -63,7 +63,7 @@ Example configuration for sending vxlan packets.
     <Define key="TargetIPv6" value="::1"/>
     <Define key="SourceIPv6" value="::1"/>
     <Define key="Tag" value="1"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
     <Define key="SourcePort" value="12345"/>
     <Define key="TargetPort" value="12345"/>
   </All>

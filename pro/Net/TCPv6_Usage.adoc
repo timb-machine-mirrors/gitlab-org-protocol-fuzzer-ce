@@ -69,7 +69,7 @@ socat tcp6-l:4321,fork,reuseaddr STDIO
     <Define key="TargetPort" value="4321"/>
     <Define key="SourcePort" value="5280"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
     <Define key="TargetIPBytes" value="C0A89280"/>
     <Define key="SourceIPBytes" value="C0A89201"/>
   </All>

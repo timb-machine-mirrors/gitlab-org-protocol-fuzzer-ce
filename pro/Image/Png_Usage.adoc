@@ -54,8 +54,8 @@ sudo apt-get install feh
     <Define key="Seed" value="png_sample_*.PNG"/>
     <Define key="Strategy"  value="Random"/>
     <Define key="LoggerPath"  value="./logs/png/"/>
-    <Define key="SamplePath" value="_Common/Samples/Image"/>
-    <Define key="Path" value="."/>
+    <Define key="SamplePath" value="./_Common/Samples/Image"/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">

@@ -79,7 +79,7 @@ sudo apt-get install ftpd
     <Define key="Strategy"  value="Sequential"/>
     <Define key="FtpUser" value="username"/>
     <Define key="FtpPass" value="password"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
     <Define key="DataPort" value="31337"/>
   </All>
 

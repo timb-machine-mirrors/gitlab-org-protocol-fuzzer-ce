@@ -69,7 +69,7 @@ socat tcp-l:502,fork exec:'/bin/cat'
     <Define key="Timeout" value="5000"/>
     <Define key="LoggerPath" value="logs/modbus/"/>
     <Define key="Strategy" value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 </PitDefines>
 ----

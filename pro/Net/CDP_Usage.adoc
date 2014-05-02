@@ -48,7 +48,7 @@ Example configuration to broadcast CDP packets.
     <Define key="SourceIPv4" value="127.0.0.1"/>
     <Define key="LoggerPath" value="logs/cdp/"/>
     <Define key="Strategy"  value="Sequential"/>
-    <Define key="Path" value="."/>
+    <Define key="PitLibraryPath" value="."/>
   </All>
 
   <Linux platform="linux">
