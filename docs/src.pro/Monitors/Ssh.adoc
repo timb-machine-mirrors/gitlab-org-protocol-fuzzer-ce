@@ -29,7 +29,7 @@ FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
 ==========
 For this example we SSH into the target machine at the end of each iteration to check if any core files exist and fault if one does exist.
 
-In order to run this example a valid Host, Username, and Password need to be specified.
+To run this example, specify a valid Host, Username, and Password.
 
 [source,xml]
 ----

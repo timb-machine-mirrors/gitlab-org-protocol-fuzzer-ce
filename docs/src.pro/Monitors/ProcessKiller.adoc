@@ -18,7 +18,7 @@ There are no optional parameters for this monitor.
 
 .Terminate two processes
 ========================
-Before running this example open notepad.exe.
+Before running this example, open notepad.exe.
 
 [source,xml]
 ----

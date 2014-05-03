@@ -8,8 +8,8 @@ The _Process_ monitor controls a process during a fuzzing run. It has a number o
  * Logs a fault if a process exits early
  * Restarts a process on every iteration
  * Terminates a process if the CPU usage is low
- * Interacts with StateModel to allow waiting for process exit
- * Interacts with StateModel to allow for delayed starting of a process
+ * Interacts with xref:StateModel[StateModel] to allow waiting for process exit
+ * Interacts with xref:StateModel[StateModel] to allow for delayed starting of a process
 
 === Parameters
 
@@ -23,7 +23,7 @@ Arguments:: Command line arguments
 RestartOnEachTest:: Restart process on each iteration, defaults to false.
 FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
 NoCpuKill:: Disable process killing when CPU usage nears zero, defaults to false.
-StartOnCall:: Start process on a call action from the StateModel (this value and the method value must match)
+StartOnCall:: Start process on a call action from the xref:StateModel[StateModel] (this value and the method value must match)
 WaitForExitOnCall:: Wait for process to exit on state model call (this value and the method value must match)
 WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite.
 

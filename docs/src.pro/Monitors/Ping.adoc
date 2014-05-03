@@ -4,7 +4,7 @@
 
 The _Ping_ monitor can verify whether a device is or is not functioning. 
 
- _Ping_ will continue to monitor until either a _Timeout_ occurs or it receives a host response. 
+_Ping_ will continue to monitor until either a _Timeout_ occurs or it receives a host response. 
 
 _Ping_ can validate that a target is still up or waiting to restart. This is useful when fuzzing embedded devices that do not have easily discernible crashes.
 

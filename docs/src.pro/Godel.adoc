@@ -41,7 +41,7 @@ post:: Scripting expression that evaluates to true or false. Default is null.
 
 === Scripting Expressions
 
-When evaluating the 'inv' and 'pre' scripting expressions two variables are provided: self and context:
+When evaluating the 'inv' and 'pre' scripting expressions two variables are provided: 'self' and 'context':
 
 * 'self' is a reference to the parent element.  
 +

@@ -7,8 +7,9 @@
 // added example
 // verified params and actions
 
-The _I2C_ Publisher enables writing and reading bytes directly to an I2C bus.
-The Publisher is designed to interface with the Total Phase Aardvark I2C USB adapter.
+Use the _I2C_ Publisher to read and write bytes directly to and from an I2C bus.
+
+_I2C_ is designed to interface with the Total Phase Aardvark I2C/SPI (USB) Host Adapter. 
 
 === Syntax
 

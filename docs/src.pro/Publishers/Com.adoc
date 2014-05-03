@@ -18,9 +18,14 @@
 // TODO - Debugger example
 
 The _Com_ Publisher allows calling methods and properties on COM objects. Properties and Methods correlate directly to those in the corresponding COM definition. 
-The setProperty and getProperty Actions can only accept Strings or Numbers as binary arrays are incompatible with COM Properties.
 
-NOTE: This Publisher only runs on Windows. To use this Publisher, Peach.Core.ComContainer.exe must be running in a separate command prompt while the Peach is running. This side process will host the COM object. A debugger monitor can be configured to launch and monitor this process if wanted. See xref:Monitors_WindowsDebugger monitor for more information about configuring a debugger monitor.
+The xref:Action_setProperty[setProperty] and xref:Action_getProperty[getProperty] Actions can only accept Strings or Numbers because binary arrays are incompatible with COM Properties.
+
+NOTE: _Com_ Publisher only runs on Windows. 
+
+To use _Com_, Peach.Core.ComContainer.exe must be running in a separate command prompt (so it can host the COM object) while the Peach is running. 
+
+You can configure a debugger monitor to launch and monitor this process. See xref:Monitors_WindowsDebugger monitor for more information about configuring a debugger monitor.
 
 === Syntax
 

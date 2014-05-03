@@ -4,7 +4,7 @@
 
 The _Vmware_ monitor can control a VMware virtual machine.  
 
- _Vmware_ can start a virtual machine and (optional) reset to a snapshot on every iteration.  When a fault occurs, _Vmware_ will reset to the specified snapshot (if any exists).
+_Vmware_ can start a virtual machine and (optional) reset to a snapshot on every iteration.  When a fault occurs, _Vmware_ will reset to the specified snapshot (if any exists).
 
 TIP: When using with vSphere/ESXi, prefix the image name with the storage location in brackets.  Example: "[ha-datacenter/datastore1] guest/guest.vmx"
 
