@@ -55,7 +55,6 @@ namespace Peach.Enterprise.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-
 		protected int DeviceNumber { get; set; }
 		protected DeviceMode CaptureMode { get; set; }
 		protected int Timeout { get; set; }
@@ -65,7 +64,6 @@ namespace Peach.Enterprise.Publishers
 
 		protected MemoryStream _recvBuffer = null;
 		
-
 		public AirPcapPublisher(Dictionary<string, Variant> args)
             : base(args)
         {
@@ -83,7 +81,7 @@ namespace Peach.Enterprise.Publishers
 		{
 			_recvBuffer = new MemoryStream();
 
-			airPcap.Open(CaptureMode);
+			airPcap.Open(CaptureMode, 1);
 		}
 
 		protected override void OnStop()
@@ -103,26 +101,6 @@ namespace Peach.Enterprise.Publishers
 		{
 			airPcap.StopCapture();
 			airPcap.OnPacketArrival -= airPcap_OnPacketArrival;
-		}
-
-		protected override void OnAccept()
-		{
-			throw new PeachException("Error, action 'accept' not supported by publisher");
-		}
-
-		protected override Variant OnCall(string method, List<ActionParameter> args)
-		{
-			throw new PeachException("Error, action 'call' not supported by publisher");
-		}
-
-		protected override void OnSetProperty(string property, Variant value)
-		{
-			throw new PeachException("Error, action 'setProperty' not supported by publisher");
-		}
-
-		protected override Variant OnGetProperty(string property)
-		{
-			throw new PeachException("Error, action 'getProperty' not supported by publisher");
 		}
 
 		protected override void OnOutput(BitwiseStream data)
@@ -148,20 +126,7 @@ namespace Peach.Enterprise.Publishers
 			}
 		}
 
-
-		protected override void OnInput()
-		{
-			throw new PeachException("Error, action 'input' not supported by publisher");
-		}
-
-		protected byte[] PrependRadiotapHeader(byte[] packet)
-		{
-			var ret = new byte[20 + packet.Length];
-
-			return ret;
-		}
-
-		protected virtual void airPcap_OnPacketArrival(object sender, SharpPcap.CaptureEventArgs e)
+        protected virtual void airPcap_OnPacketArrival(object sender, SharpPcap.CaptureEventArgs e)
 		{
 			Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
 

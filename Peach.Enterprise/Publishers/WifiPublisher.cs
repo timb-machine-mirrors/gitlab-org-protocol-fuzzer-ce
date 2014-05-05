@@ -50,10 +50,11 @@ namespace Peach.Enterprise.Publishers
 	[Parameter("DeviceNumber", typeof(int), "The AirPcap device to use.", "0")]
 	[Parameter("CaptureMode", typeof(DeviceMode), "Capture mode to use (Promisucous, Normal)", "Promiscuous")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
+    [Parameter("ApAuthTimeout", typeof(int), "How many milliseconds to wait for the AP auth state to complete (default 60000)", "60000")]
 	[Parameter("PrependRadioHeader", typeof(bool), "Prepend Radiotap Header to outgoing data (default true)", "true")]
 	[Parameter("SecurityMode", typeof(SecurityModes), "802.11 security mode to use", "None")]
-	[Parameter("TargetMac", typeof(HexString), "MAC address of the target", "000000000000")]
-	[Parameter("SourceMac", typeof(HexString), "MAC address of the lost machine", "000000000000")]
+	[Parameter("TargetMac", typeof(HexString), "MAC address of the target")]
+	[Parameter("SourceMac", typeof(HexString), "MAC address of the host machine")]
 	public class WifiPublisher : AirPcapPublisher
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -63,9 +64,8 @@ namespace Peach.Enterprise.Publishers
 		protected SecurityModes SecurityMode { get; set; }
 		protected HexString TargetMac { get; set; }
 		protected HexString SourceMac { get; set; }
-
-		AutoResetEvent readyEvt;
-		
+        protected int ApAuthTimeout { get; set; }
+	
 		byte[] beacon = null;
 		byte[] auth;
 		byte[] action;
@@ -91,40 +91,85 @@ namespace Peach.Enterprise.Publishers
 		static byte[] target;
 		static byte[] source;
 
+        bool respondedToProbe;
+        bool respondedToAuth;
+        bool respondedToAssociationRequest;
+
 		object mutex = new object();
+
 		Thread beaconThread = null;
 
-		public WifiPublisher(Dictionary<string, Variant> args) 
+        #region Helper Methods
+
+        string FormatAsMac(byte[] mac)
+        {
+            var str = new StringBuilder();
+
+            foreach (var b in mac)
+            {
+                str.Append(string.Format("{0}:", b.ToString("x2")));
+            }
+            str.Remove(str.Length - 1, 1);
+
+            return str.ToString();
+        }
+
+        bool AreEqual(byte[] buf1, int buf1Offset, int buf1Length, byte[] buf2)
+        {
+            if (buf1 == null || buf2 == null)
+                return false;
+
+            if (buf1Length != buf2.Length)
+                return false;
+
+            for (int i = 0; i < buf1Length; i++)
+            {
+                if (buf1[buf1Offset + i] != buf2[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        byte[] DataModelToBuf(DataModel dm)
+        {
+            var bs = dm.Value;
+
+            var buf = new BitReader(bs).ReadBytes((int)bs.Length);
+
+            return buf;
+        }
+
+        #endregion
+
+        public WifiPublisher(Dictionary<string, Variant> args) 
 			: base(args)
 		{
 			ParameterParser.Parse(this, args);
+
 			target = TargetMac.Value;
 			source = SourceMac.Value;
 		}
 
 		protected override void OnOpen()
 		{
-			airPcap.OnPacketArrival += new SharpPcap.PacketArrivalEventHandler(airPcap_OnPacketArrival);
-			airPcap.StartCapture();
 		}
 
 		protected override void OnClose()
 		{
-			try
-			{
-				airPcap.StopCapture();
-				airPcap.OnPacketArrival -= airPcap_OnPacketArrival;
-			}
-			catch (SharpPcap.PcapException)
-			{
-			}
 		}
 
-		protected override void OnStart()
+       	protected override void OnStart()
 		{
 			base.OnStart();
 
-			readyEvt = new AutoResetEvent(false);
+            airPcap.Filter = string.Format("wlan src {0} and (wlan dst {1} or wlan dst ff:ff:ff:ff:ff:ff)",
+                FormatAsMac(target), FormatAsMac(source));
+
+
+            respondedToAuth = false;
+            respondedToProbe = false;
+            respondedToAssociationRequest = false;
 
 			beaconThread = new Thread(BeaconThread);
 			beaconThread.Start();
@@ -134,291 +179,46 @@ namespace Peach.Enterprise.Publishers
 		{
 			base.OnStop();
 
-			if (readyEvt != null)
-			{
-				readyEvt.Dispose();
-				readyEvt = null;
-			}
-
 			beaconThread.Join();
 			beaconThread = null;
 		}
 
 		protected override void OnInput()
 		{
-			//Blocking Packet
-			//while (!getPacket())
-			//{
-			//	continue;
-			//}
-			readyEvt.WaitOne(Timeout);
-		}
+            var timeout = Timeout;
+            var sw = new Stopwatch();
+            sw.Restart();
 
-		void SendPacket(byte[] buf)
-		{
-			readyEvt.Set();
+            RawCapture packet = null;
+            while (timeout > 0)
+            {
+                packet = airPcap.GetNextPacket();
 
-		//	lock (mutex)
-			{
-				if (buf != null)
-					OnOutput(new BitStream(buf));
-			}
-		}
+                if (packet != null)
+                {
+                    break;
+                }
 
-		bool AreEqual(byte[] buf1, int buf1Offset, int buf1Length, byte[] buf2)
-		{
-			if (buf1 == null || buf2 == null)
-				return false;
+                timeout -= (int)sw.ElapsedMilliseconds;
+            }
 
-			if (buf1Length != buf2.Length)
-				return false;
+            sw.Stop();
 
-			for (int i = 0; i < buf1Length; i++)
-			{
-				if (buf1[buf1Offset + i] != buf2[i])
-					return false;
-			}
+            if (timeout < 0)
+                throw new SoftException("Didn't recieve a packet before the timeout expired.");
 
-			return true;
-		}
-
-		bool responsedtoProbe = false;
-		protected override void airPcap_OnPacketArrival(object sender, SharpPcap.CaptureEventArgs e)
-		{
-			long elapsed_time = 0;
-			Stopwatch stopwatch = new Stopwatch();
-			stopwatch.Start();
-
-			var off = BitConverter.ToInt16(e.Packet.Data, 2);
-			//Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
-
-			//var off = packet.Header.Length;
-
-			if (e.Packet.Data.Length < (off + 16))
-				return;
-
-			var type = (e.Packet.Data[off] & 0x0F) >> 2;
-			var subtype = e.Packet.Data[off] >> 4;
-
-			if (!AreEqual(e.Packet.Data, off + 10, 6, target))
-				return;
-
-			if (!AreEqual(e.Packet.Data, off + 16, 6, source) && !AreEqual(e.Packet.Data, off + 16, 6, broadcast))
-				return;
-
-
-			if (type == 0)
-			{
-				switch(subtype)
-				{
-					case 0:
-						SendPacket(acknowledgement);
-						SendPacket(associationResponse);
-						SendPacket(action);
-						//If Auth?
-						//KeyMessageState
-						//lock (mutex)
-						//{
-						// AuthState=True
-						// message = 1
-						//}
-						//SendPacket(keymessage1);
-						break;
-					case 2:
-						SendPacket(reassociationResponse);
-						break;
-					case 4:
-						if (!responsedtoProbe)
-						{
-							SendPacket(probeResponse);
-							responsedtoProbe = true;
-						}
-						break;
-					case 11:
-						SendPacket(acknowledgement);
-						SendPacket(auth);
-						break;
-					case 13:
-						SendPacket(acknowledgement);
-						break;
-					default:
-						break;
-				}
-			}
-			else if (type == 1)
-			{
-				switch(subtype)
-				{
-					case 10:
-						SendPacket(acknowledgement);
-						break;
-					case 11:
-						SendPacket(clearToSend);
-						break;
-					default:
-						break;
-				}
-			}
-			else if (type == 2)
-			{
-				SendPacket(acknowledgement);
-			}
-
-			stopwatch.Stop();
-			elapsed_time = stopwatch.ElapsedMilliseconds;
-			Console.WriteLine("===================== {0}", elapsed_time);
-			//_recvBuffer.SetLength(0);
-			//_recvBuffer.Write(packet.Bytes, 0, packet.Bytes.Length);
-			//_recvBuffer.Seek(0, SeekOrigin.Begin);
-		}
-
-		
-		protected bool getPacket()
-		{
-			long elapsed_time = 0;
-			Stopwatch stopwatch = new Stopwatch();
-			stopwatch.Start();
-			var x = airPcap.GetNextPacket();
-			
-			
-			
-			var off = BitConverter.ToInt16(x.Data, 2);
-
-			if (x.Data.Length < (off + 16))
-				return false;
-
-			var type = (x.Data[off] & 0x0F) >> 2;
-			var subtype = x.Data[off] >> 4;
-
-			if (!AreEqual(x.Data, off + 10, 6, target))
-				return false;
-
-			if (!AreEqual(x.Data, off + 16, 6, source) && !AreEqual(x.Data, off + 16, 6, broadcast))
-				return false;
-
-			
-
-			if (type == 0)
-			{
-				switch (subtype)
-				{
-					case 0:
-						SendPacket(acknowledgement);
-						SendPacket(associationResponse);
-						SendPacket(action);
-						//If Auth?
-						//KeyMessageState
-						//lock (mutex)
-						//{
-						// AuthState=True
-						// message = 1
-						//}
-						//SendPacket(keymessage1);
-						break;
-					case 2:
-						SendPacket(reassociationResponse);
-						break;
-					case 4:
-						if (!responsedtoProbe)
-						{
-							SendPacket(probeResponse);
-							responsedtoProbe = true;
-						}
-						break;
-					case 11:
-						SendPacket(acknowledgement);
-						SendPacket(auth);
-						break;
-					case 13:
-						SendPacket(acknowledgement);
-						break;
-					default:
-						break;
-				}
-			}
-			else if (type == 1)
-			{
-				switch (subtype)
-				{
-					case 10:
-						SendPacket(acknowledgement);
-						break;
-					case 11:
-						SendPacket(clearToSend);
-						break;
-					default:
-						break;
-				}
-			}
-			else if (type == 2)
-			{
-				SendPacket(acknowledgement);
-			}
-
-			//_recvBuffer.SetLength(0);
-			//_recvBuffer.Write(packet.Bytes, 0, packet.Bytes.Length);
-			//_recvBuffer.Seek(0, SeekOrigin.Begin);
-
-			stopwatch.Stop();
-			elapsed_time = stopwatch.ElapsedMilliseconds;
-			Console.WriteLine("===================== {0}", elapsed_time);
-
-			return true;
-		}
-
-		void BeaconThread()
-		{
-			while (true)
-			{
-				try
-				{
-				//	lock (mutex)
-					{
-						if (beacon != null)
-						{
-							airPcap.SendPacket(beacon);
-							Thread.Sleep(125);
-						}
-					}
-				}
-				catch (SharpPcap.PcapException)
-				{
-				}
-
-				//Needs to be a better way to do this.
-				
-			}
-		}
-
-		long GetSequenceOffset(DataModel dm)
-		{
-			long off = 0;
-
-			foreach (var d in dm)
-			{
-				if (d.name == "FragmentSequenceNumber")
-					break;
-
-				off += d.Value.Length;
-			}
-
-			return off;
-		}
-
-		byte[] DataModelToBuf(DataModel dm)
-		{
-			var bs = dm.Value;
-
-			var buf = new BitReader(bs).ReadBytes((int)bs.Length);
-
-			return buf;
+            _recvBuffer.SetLength(0);
+            _recvBuffer.Write(packet.Data, 0, packet.Data.Length);
+            _recvBuffer.Seek(0, SeekOrigin.Begin);
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			try
 			{
-				var buf = DataModelToBuf(args[0].dataModel);
+				byte[] buf = null;
+                if (args.Count > 0)
+                 buf = DataModelToBuf(args[0].dataModel);
 
 				if (method.Equals("Beacon"))
 				{
@@ -560,6 +360,10 @@ namespace Peach.Enterprise.Publishers
 						reassociationResponse = buf;
 					}
 				}
+                else if (method.Equals("StartApAuth"))
+                {
+                    StartAuthState();
+                }
 			}
 			catch (Exception ex)
 			{
@@ -568,6 +372,145 @@ namespace Peach.Enterprise.Publishers
 			}
 
 			return null;
-		}	
+		}
+
+        void SendPacket(byte[] buf)
+        {
+
+            if (buf != null)
+                OnOutput(new BitStream(buf));
+        }
+
+        //Make this a call; Switch to regular input output. -- dhcp arp
+        //Recive packet thread that acks on input and buffers data until input is called
+        void StartAuthState()
+        {
+            var timeout = ApAuthTimeout;
+            var sw = new Stopwatch();
+            sw.Restart();
+
+            while (timeout > 0)
+            {
+                var packet = airPcap.GetNextPacket();
+
+                if (packet == null)
+                {
+                    timeout -= (int)sw.ElapsedMilliseconds;
+                    continue;
+                }
+
+                var off = BitConverter.ToInt16(packet.Data, 2);
+
+                var type = (packet.Data[off] & 0x0F) >> 2;
+                var subtype = packet.Data[off] >> 4;
+
+                if (type == 0)
+                {
+                    switch (subtype)
+                    {
+                        case 0:
+
+                            if (!respondedToAssociationRequest)
+                            {
+                                SendPacket(acknowledgement);
+                                SendPacket(associationResponse);
+                                respondedToAssociationRequest = true;
+                            }
+                            //If Auth?
+                            //KeyMessageState
+                            //lock (mutex)
+                            //{
+                            // AuthState=True
+                            // message = 1
+                            //}
+                            //SendPacket(keymessage1);
+                            if (SecurityMode == SecurityModes.None)
+                                return;
+
+                            break;
+                        case 2:
+                            SendPacket(reassociationResponse);
+                            break;
+                        case 4:
+                            if (!respondedToProbe)
+                            {
+                                SendPacket(probeResponse);
+                                respondedToProbe = true;
+                            }
+                            break;
+                        case 11:
+                            if (!respondedToAuth)
+                            {
+                                SendPacket(acknowledgement);
+                                SendPacket(auth);
+                                respondedToAuth = true;
+                            }
+                            break;
+                        case 13:
+                            SendPacket(acknowledgement);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (type == 1)
+                {
+                    switch (subtype)
+                    {
+                        case 10:
+                            SendPacket(acknowledgement);
+                            break;
+                        case 11:
+                            SendPacket(clearToSend);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (type == 2)
+                {
+                    switch (subtype)
+                    {
+                        case 4:
+                            SendPacket(acknowledgement);
+                            break;
+                        default:
+                            SendPacket(acknowledgement);
+                            break;
+                    }
+                }
+
+                timeout -= (int)sw.ElapsedMilliseconds;
+                //_recvBuffer.SetLength(0);
+               // _recvBuffer.Write(packet.Data, 0, packet.Data.Length);
+                //_recvBuffer.Seek(0, SeekOrigin.Begin);
+            }
+
+            sw.Stop();
+
+            if (timeout < 0)
+                throw new SoftException("Unable to complete 802.11 association.");
+        }
+
+        void BeaconThread()
+        {
+            while (true)
+            {
+                try
+                {
+                    //	lock (mutex)
+                    {
+                        if (beacon != null)
+                        {
+                            airPcap.SendPacket(beacon);
+                            Thread.Sleep(125);
+                        }
+                    }
+                }
+                catch (SharpPcap.PcapException)
+                {
+                }
+            }
+        }
 	}
 }
