@@ -230,7 +230,7 @@ efcd d2                                ".Replace("\r\n", "")).Value;
 			var cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], input);
 
-			int cnt = dom.dataModels[0].Walk().Count();
+			int cnt = dom.dataModels[0].EnumerateAllElements().Count() + 1;
 			Assert.AreEqual(640, cnt);
 
 			var iv = dom.dataModels[0][1].InternalValue;
