@@ -5,7 +5,15 @@
 
 The _CrashReporter_ monitor will collect information from crashes detected by OS X System Crash Reporter.
 
-TIP: Make sure to disable the crash report dialog window. The following command can be used: +defaults write com.apple.CrashReporter DialogType none+. To reverse this change use: +defaults write com.apple.CrashReporter DialogType crashreport+.
+IMPORTANT: Make sure to disable the Apple crash report dialog window before fuzzing. 
+
+To disable the Apple crash report dialog window, use the following command: 
+
++defaults write com.apple.CrashReporter DialogType none+. 
+
+When you are done fuzzing, enable the Apple crash report dialog window with the following command: 
+
++defaults write com.apple.CrashReporter DialogType crashreport+.
 
 === Parameters
 

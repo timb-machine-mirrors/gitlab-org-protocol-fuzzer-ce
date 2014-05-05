@@ -2,7 +2,9 @@
 [[Monitors_Ping]]
 == Ping Monitor
 
-The _Ping_ monitor will block until the _Timeout_ occurs. This monitor is useful for validating a target is still up or waiting for a target to restart.
+The _Ping_ monitor will block until the _Timeout_ occurs. 
+
+This monitor can validate that a target is still up or waiting to restart.
 
 === Parameters
 
