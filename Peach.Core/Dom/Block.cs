@@ -79,10 +79,11 @@ namespace Peach.Core.Dom
 
 			if (node.hasAttr("ref"))
 			{
-				string name = node.getAttr("name", null);
-				string refName = node.getAttrString("ref");
+				var name = node.getAttr("name", null);
+				var refName = node.getAttrString("ref");
+				var dom = ((DataModel)parent.root).dom;
+				var refObj = dom.getRef(refName, parent);
 
-				DataElement refObj = context.getReference(refName, parent);
 				if (refObj == null)
 					throw new PeachException("Error, Block {0}could not resolve ref '{1}'. XML:\n{2}".Fmt(
 						name == null ? "" : "'" + name + "' ", refName, node.OuterXml));

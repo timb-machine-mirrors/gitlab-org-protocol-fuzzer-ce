@@ -60,7 +60,6 @@ namespace Peach.Core.Analyzers
 
 		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
 
-		Dom.Dom _dom = null;
 		bool isScriptingLanguageSet = false;
 
 		/// <summary>
@@ -198,7 +197,7 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		protected virtual Dom.Dom getNewDom()
+		protected virtual Dom.Dom CreateDom()
 		{
 			return new Dom.Dom();
 		}
@@ -216,20 +215,20 @@ namespace Peach.Core.Analyzers
 			XmlDocument xmldoc = new XmlDocument();
 			xmldoc.LoadXml(xml);
 
-			_dom = getNewDom();
+			var dom = CreateDom();
 
 			foreach (XmlNode child in xmldoc.ChildNodes)
 			{
 				if (child.Name == "Peach")
 				{
-					handlePeach(_dom, child, args);
+					handlePeach(dom, child, args);
 					break;
 				}
 			}
 
-			_dom.evaulateDataModelAnalyzers();
+			dom.evaulateDataModelAnalyzers();
 
-			return _dom;
+			return dom;
 		}
 
 		private static string readWithDefines(Dictionary<string, object> args, Stream data)
@@ -398,8 +397,7 @@ namespace Peach.Core.Analyzers
 							fileName = newFileName;
 						}
 
-						var newParser = new PitParser();
-						Dom.Dom newDom = newParser.asParser(args, fileName);
+						var newDom = asParser(args, fileName);
 						newDom.name = ns;
 						dom.ns.Add(newDom);
 						break;
@@ -469,7 +467,7 @@ namespace Peach.Core.Analyzers
 
 			foreach (XmlNode child in node)
 			{
-				var dm = handleDataModel(child, null);
+				var dm = handleDataModel(child, dom, null);
 
 				if (dm != null)
 				{
@@ -497,7 +495,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Data")
 				{
-					var data = handleData(child, dom.datas.UniqueName());
+					var data = handleData(child, dom, dom.datas.UniqueName());
 
 					try
 					{
@@ -561,60 +559,6 @@ namespace Peach.Core.Analyzers
 					}
 				}
 			}
-		}
-
-		#endregion
-
-		#region Reference Resolution
-
-		/// <summary>
-		/// Resolve a 'ref' attribute.  Will throw a PeachException if
-		/// namespace is given, but not found.
-		/// </summary>
-		/// <param name="name">Ref name to resolve.</param>
-		/// <param name="container">Container to start searching from.</param>
-		/// <returns>DataElement for ref or null if not found.</returns>
-		public DataElement getReference(string name, DataElementContainer container)
-		{
-			return getReference(_dom, name, container);
-		}
-
-		static DataElement getReference(Dom.Dom dom, string name, DataElementContainer container)
-		{
-			if (name.IndexOf(':') > -1)
-			{
-				string ns = name.Substring(0, name.IndexOf(':'));
-
-				Dom.Dom other;
-				if (!dom.ns.TryGetValue(ns, out other))
-					throw new PeachException("Unable to locate namespace '" + ns + "' in ref '" + name + "'.");
-
-				name = name.Substring(name.IndexOf(':') + 1);
-
-				return getReference(other, name, container);
-			}
-
-			if (container != null)
-			{
-				DataElement elem = container.find(name);
-				if (elem != null)
-					return elem;
-			}
-
-			foreach (DataModel model in dom.dataModels)
-			{
-				if (model.name == name)
-					return model;
-			}
-
-			foreach (DataModel model in dom.dataModels)
-			{
-				DataElement elem = model.find(name);
-				if (elem != null)
-					return elem;
-			}
-
-			return null;
 		}
 
 		#endregion
@@ -1059,7 +1003,7 @@ namespace Peach.Core.Analyzers
 					localScope["self"] = element;
 					localScope["node"] = node;
 					localScope["Parser"] = this;
-					localScope["Context"] = this._dom.context;
+					localScope["Context"] = ((DataModel)element.root).dom;
 
 					var obj = Scripting.EvalExpression(value, localScope);
 
@@ -1074,15 +1018,15 @@ namespace Peach.Core.Analyzers
 					break;
 				case "ipv4":
 					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-						throw new PeachException("Error, the value of " + elem.debugName + " is not a valid IPv4 address.");
+						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv4 address.");
 
-					elem.DefaultValue = new Variant(asIp.GetAddressBytes());
+					element.DefaultValue = new Variant(asIp.GetAddressBytes());
 					break;
 				case "ipv6":
 					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
-						throw new PeachException("Error, the value of " + elem.debugName + " is not a valid IPv6 address.");
+						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv6 address.");
 
-					elem.DefaultValue = new Variant(asIp.GetAddressBytes());
+					element.DefaultValue = new Variant(asIp.GetAddressBytes());
 					break;
 
 				default:
@@ -1094,7 +1038,7 @@ namespace Peach.Core.Analyzers
 
 		#region DataModel
 
-		protected DataModel handleDataModel(XmlNode node, DataModel old)
+		protected DataModel handleDataModel(XmlNode node, Dom.Dom dom, DataModel old)
 		{
 			Type type;
 			if (!dataModelPitParsable.TryGetValue(node.Name, out type))
@@ -1108,15 +1052,11 @@ namespace Peach.Core.Analyzers
 			if (pitParsableMethod == null)
 				throw new PeachException("Error, type with PitParsableAttribute is missing static PitParser(...) method: " + type.FullName);
 
-			PitParserDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserDelegate), pitParsableMethod) as PitParserDelegate;
+			PitParserTopLevelDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserTopLevelDelegate), pitParsableMethod) as PitParserTopLevelDelegate;
 
-			var elem = delegateAction(this, node, null);
-			if (elem == null)
-				throw new PeachException("Error, type failed to parse provided XML: " + type.FullName);
-
-			var dataModel = elem as DataModel;
+			var dataModel = delegateAction(this, node, dom);
 			if (dataModel == null)
-				throw new PeachException("Error, type failed to return top level element: " + type.FullName);
+				throw new PeachException("Error, type failed to parse provided XML: " + type.FullName);
 
 			return dataModel;
 		}
@@ -1466,9 +1406,11 @@ namespace Peach.Core.Analyzers
 
 		protected virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
 		{
+			var dom = data.action.parent.parent.parent;
+
 			foreach (XmlNode child in node.ChildNodes)
 			{
-				data.dataModel = handleDataModel(child, data.dataModel);
+				data.dataModel = handleDataModel(child, dom, data.dataModel);
 
 				if (data.dataModel != null)
 				{
@@ -1485,7 +1427,7 @@ namespace Peach.Core.Analyzers
 							data.action.parent.name,
 							data.action.name));
 
-					var item = handleData(child, data.dataSets.UniqueName());
+					var item = handleData(child, dom, data.dataSets.UniqueName());
 
 					try
 					{
@@ -1551,7 +1493,7 @@ namespace Peach.Core.Analyzers
 
 		#region Data
 
-		protected virtual DataSet handleData(XmlNode node, string uniqueName)
+		protected virtual DataSet handleData(XmlNode node, Dom.Dom dom, string uniqueName)
 		{
 			DataSet dataSet = null;
 
@@ -1559,7 +1501,7 @@ namespace Peach.Core.Analyzers
 			{
 				string refName = node.getAttrString("ref");
 
-				var other = _dom.getRef<DataSet>(refName, a => a.datas);
+				var other = dom.getRef<DataSet>(refName, a => a.datas);
 				if (other == null)
 					throw new PeachException("Error, could not resolve Data element ref attribute value '" + refName + "'.");
 

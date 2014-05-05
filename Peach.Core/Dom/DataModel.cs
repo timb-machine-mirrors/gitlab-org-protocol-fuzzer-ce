@@ -107,7 +107,7 @@ namespace Peach.Core.Dom
 				actionRunEvent(context);
 		}
 
-		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public static DataModel PitParser(PitParser context, XmlNode node, Dom dom)
 		{
 			string name = node.getAttr("name", null);
 			string refName = node.getAttr("ref", null);
@@ -116,7 +116,7 @@ namespace Peach.Core.Dom
 
 			if (refName != null)
 			{
-				var refObj = context.getReference(refName, parent) as DataModel;
+				var refObj = dom.getRef<DataModel>(refName, a => a.dataModels);
 				if (refObj == null)
 					throw new PeachException("Error, DataModel {0}could not resolve ref '{1}'. XML:\n{2}".Fmt(
 						name == null ? "" : "'" + name + "' ", refName, node.OuterXml));
@@ -135,6 +135,8 @@ namespace Peach.Core.Dom
 
 				dataModel = new DataModel(name);
 			}
+
+			dataModel.dom = dom;
 
 			context.handleCommonDataElementAttributes(node, dataModel);
 			context.handleCommonDataElementChildren(node, dataModel);
