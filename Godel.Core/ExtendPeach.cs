@@ -26,22 +26,12 @@ namespace Godel.Core
 			Context.engine.TestStarting += engine_TestStarting;
 			Context.engine.TestFinished += engine_TestFinished;
 
-			Peach.Core.Dom.StateModel.Starting += StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished += StateModel_Finished;
-			Peach.Core.Dom.State.Starting += State_Starting;
-			Peach.Core.Dom.State.Finished += State_Finished;
-			Peach.Core.Dom.Action.Starting += Action_Starting;
-			Peach.Core.Dom.Action.Finished += Action_Finished;
-		}
-
-		void CleanupEvents()
-		{
-			Peach.Core.Dom.StateModel.Starting -= StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished -= StateModel_Finished;
-			Peach.Core.Dom.State.Starting -= State_Starting;
-			Peach.Core.Dom.State.Finished -= State_Finished;
-			Peach.Core.Dom.Action.Starting -= Action_Starting;
-			Peach.Core.Dom.Action.Finished -= Action_Finished;
+			Context.StateModelStarting += StateModel_Starting;
+			Context.StateModelFinished += StateModel_Finished;
+			Context.StateStarting += State_Starting;
+			Context.StateFinished += State_Finished;
+			Context.ActionStarting += Action_Starting;
+			Context.ActionFinished += Action_Finished;
 		}
 
 		GodelContext GetExpr(params string[] names)
@@ -105,18 +95,11 @@ namespace Godel.Core
 			OriginalStateModel = null;
 			Expressions = null;
 			Engine = null;
-
-			// Leave the events subscribed until we get a state model start with the wrong context
-			//CleanupEvents();
 		}
 
-		void StateModel_Starting(Peach.Core.Dom.StateModel model)
+		void StateModel_Starting(RunContext context, Peach.Core.Dom.StateModel model)
 		{
-			if (model.parent.context != Context)
-			{
-				CleanupEvents();
-				return;
-			}
+			System.Diagnostics.Debug.Assert(model.parent.context == Context);
 
 			if (Expressions == null)
 				return;
@@ -140,21 +123,21 @@ namespace Godel.Core
 				expr.Pre(model);
 		}
 
-		void StateModel_Finished(Peach.Core.Dom.StateModel model)
+		void StateModel_Finished(RunContext context, Peach.Core.Dom.StateModel model)
 		{
 			var expr = GetExpr(model.name);
 			if (expr != null)
 				expr.Post(model, OriginalStateModel);
 		}
 
-		void State_Starting(Peach.Core.Dom.State state)
+		void State_Starting(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
 				expr.Pre(state);
 		}
 
-		void State_Finished(Peach.Core.Dom.State state)
+		void State_Finished(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
@@ -164,14 +147,14 @@ namespace Godel.Core
 			}
 		}
 
-		void Action_Starting(Peach.Core.Dom.Action action)
+		void Action_Starting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)
 				expr.Pre(action);
 		}
 
-		void Action_Finished(Peach.Core.Dom.Action action)
+		void Action_Finished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)

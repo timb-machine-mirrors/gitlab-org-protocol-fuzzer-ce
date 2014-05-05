@@ -123,10 +123,11 @@ namespace Peach.Enterprise.Dom
 
 		protected override Variant GenerateInternalValue()
 		{
-			if (!this.ContainsKey("Content"))
+			DataElement elem;
+			if (!TryGetValue("Content", out elem))
 				return new Variant(new BitStream());
 
-			return this["Content"].InternalValue;
+			return elem.InternalValue;
 		}
 
 		public override void Crack(DataCracker context, BitStream data, long? size)

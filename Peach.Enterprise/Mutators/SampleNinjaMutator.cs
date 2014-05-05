@@ -183,7 +183,7 @@ select count('x')
 		private static string GetPitFile(DataElement elem)
 		{
 			var root = elem.getRoot() as DataModel;
-			var dom = root.action.parent.parent.parent as Peach.Core.Dom.Dom;
+			var dom = root.actionData.action.parent.parent.parent;
 			return dom.context.config.pitFile;
 		}
 	}

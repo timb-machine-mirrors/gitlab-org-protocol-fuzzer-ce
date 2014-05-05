@@ -59,7 +59,7 @@ xref:length[length]:: Length in characters of the string
 xref:lengthType[lengthType]:: Units of the length attribute (defaults to bytes)
 
 type::
-	Character encoding type, defaults to _ascii_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32.
+	Character encoding type, defaults to _ascii_. Valid options are: ASCII, utf7, utf8, utf16, utf16be, utf32.
 	+
 	When strings are outputted they are first encoded. The default encoding is 7-bit ASCII, also known as latin-1. Most common Unicode encodings are supported.
 
