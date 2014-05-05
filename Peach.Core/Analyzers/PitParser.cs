@@ -41,6 +41,7 @@ using NLog;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Globalization;
+using System.Net;
 
 namespace Peach.Core.Analyzers
 {
@@ -1022,6 +1023,7 @@ namespace Peach.Core.Analyzers
 			value = reEscapeSlash.Replace(value, new MatchEvaluator(ReplaceSlash));
 
 			string valueType = null;
+			IPAddress asIp = null;
 
 			if (node.hasAttr("valueType"))
 				valueType = node.getAttrString("valueType");
@@ -1070,6 +1072,19 @@ namespace Peach.Core.Analyzers
 					// No action requried, default behaviour
 					element.DefaultValue = new Variant(value);
 					break;
+				case "ipv4":
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+						throw new PeachException("Error, the value of " + elem.debugName + " is not a valid IPv4 address.");
+
+					elem.DefaultValue = new Variant(asIp.GetAddressBytes());
+					break;
+				case "ipv6":
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+						throw new PeachException("Error, the value of " + elem.debugName + " is not a valid IPv6 address.");
+
+					elem.DefaultValue = new Variant(asIp.GetAddressBytes());
+					break;
+
 				default:
 					throw new PeachException("Error, invalid value for 'valueType' attribute: " + valueType);
 			}
