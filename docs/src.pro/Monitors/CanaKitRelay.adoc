@@ -2,7 +2,9 @@
 [[Monitors_CanaKitRelay]]
 == CanaKitRelay Monitor
 
-The _CanaKitRelay_ monitor controls a set of relays capable of turning on/off AC and DC lines.  This is useful for toggling power states or resetting a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay.
+The _CanaKitRelay_ monitor controls a set of relays capable of turning AC and DC lines on and off.  
+
+_CanaKitRelay_ can be used to toggle power states or reset a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay.
 
 http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay Controller]
 
