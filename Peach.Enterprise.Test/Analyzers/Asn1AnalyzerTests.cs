@@ -65,7 +65,7 @@ namespace Peach.Enterprise.Test.Analyzers
 			CrackData(new MemoryStream(TestCert));
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void Fuzz()
 		{
 			var tmp = Path.GetTempFileName();
@@ -124,10 +124,7 @@ namespace Peach.Enterprise.Test.Analyzers
 			var final = dom.dataModels[0].Value.ToArray();
 			var expected = data.ToArray();
 
-			File.WriteAllBytes("C:\\Work\\badasn1.bin", final);
-
 			Assert.AreEqual(expected, final);
-
 		}
 
 		byte[] TestCert = Peach.Core.HexString.Parse(@"
