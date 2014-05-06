@@ -5,7 +5,7 @@
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
   <!-- Requires Linux Peach 3.0 and RawEther publisher -->
 
-  <Include ns="LACP" src="file:##Path##/_Common/Models/Net/LACP_State.xml"/>
+  <Include ns="LACP" src="file:##PitLibraryPath##/_Common/Models/Net/LACP_State.xml"/>
 
   <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
     <Monitor class="Process">

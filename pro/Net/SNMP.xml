@@ -8,7 +8,7 @@
       Simple Network Management Protocol v2c
   -->
 
-	<Include ns="SNMP" src="file:##Path##/_Common/Models/Net/SNMP_State.xml"/>
+	<Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
 
   <Agent name="Agent">
   </Agent>

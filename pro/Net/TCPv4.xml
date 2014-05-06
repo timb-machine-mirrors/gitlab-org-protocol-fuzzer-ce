@@ -9,7 +9,7 @@
 
 	<!--  iptables -A OUTPUT -p tcp -m tcp \-\-tcp-flags RST RST -j DROP -->
 
-	<Include ns="TCP" src="file:##Path##/_Common/Models/Net/TCPv4_State.xml"/>
+	<Include ns="TCP" src="file:##PitLibraryPath##/_Common/Models/Net/TCPv4_State.xml"/>
 
 	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">

@@ -5,7 +5,7 @@
 <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
 <!-- Requires Peach for Raw publishing -->
 
-  <Include ns="IPv6" src="file:##Path##/_Common/Models/Net/IPv6_State.xml"/>
+  <Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_State.xml"/>
 
   <Agent name="LocalAgent">
     <Monitor class="Pcap">

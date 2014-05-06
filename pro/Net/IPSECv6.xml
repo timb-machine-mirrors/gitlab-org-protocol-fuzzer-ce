@@ -4,7 +4,7 @@
        author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
 	
-	<Include ns="IPSECv6" src="file:##Path##/_Common/Models/Net/IPSECv6_State.xml"/>
+	<Include ns="IPSECv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPSECv6_State.xml"/>
 	
   <Agent name="LocalAgent">
     <Monitor class="Pcap">

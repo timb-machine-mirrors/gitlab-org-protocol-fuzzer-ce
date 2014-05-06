@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        version="1.0" author="Deja vu Security" description="PNG Graphics File Pit">
 
-  <Include ns="PNG" src="file:##Path##/_Common/Models/Image/PNG_State.xml"/>
+  <Include ns="PNG" src="file:##PitLibraryPath##/_Common/Models/Image/PNG_State.xml"/>
 
   <Agent name="LinuxAgent">
     <Monitor class="LinuxCrashMonitor"/>

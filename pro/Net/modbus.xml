@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
 	author="Deja Vu Security, LLC" description="Modbus PIT" version="0.0.1">
 
-	<Include ns="Modbus" src="file:##Path##/_Common/Models/Net/modbus_State.xml"/>
+	<Include ns="Modbus" src="file:##PitLibraryPath##/_Common/Models/Net/modbus_State.xml"/>
 
 	<Test name="Default">
 		<StateModel ref="Modbus:OverTcp"/>
