@@ -24,7 +24,7 @@
 			"id":2,
 			"q": "What is the hostname or IP address of the remote machine that will perform detection?",
 			"type": "string",
-			"key": "HostName",
+			"key": "AgentUrl",
 			"next": 3
 		},
 		{
@@ -55,8 +55,8 @@
 			"q": "How would you like to detect a faulting condition in your target?",
 			"type": "choice",
 			"choice":[
-				{ "value": 0, "a":"Detect a process or service has misbehaved. Misbehaving includes: early exit, crashes, and interesting exceptions.", "next":1100 },
-				{ "value": 1, "a":"Detect availability of remote device.", "next":4100 }
+				{ "a":"Detect a process or service has misbehaved. Misbehaving includes: early exit, crashes, and interesting exceptions.", "next":1100 },
+				{ "a":"Detect availability of remote device.", "next":4100 }
 			]
 		},
 		{
@@ -64,15 +64,16 @@
 			"q":"What type of process or service do you want to perform fault detection on?",
 			"type":"choice",
 			"choice":[
-				{ "value": 0, "a":"User process started by command line.", "next":1110 },
-				{ "value": 1, "a":"Windows service process.", "next":1120},
-				{ "value": 2, "a":"Currently running process. Note: This should only be selected if the process cannot be started via the command line. Once the process crashes, fuzzing will be halted.", "next":1130 }
+				{ "a":"User process started by command line.", "next":1110 },
+				{ "a":"Windows service process.", "next":1120},
+				{ "a":"Currently running process. Note: This should only be selected if the process cannot be started via the command line. Once the process crashes, fuzzing will be halted.", "next":1130 }
 			]
 		},
 		{
 			"id":1110,
 			"q":"What is executable to run? This should include the full path. Peach includes macro defines for Peach working directory as well as the current working directory.",
 			"type":"string",
+			"required": false,
 			"key":"WinDbgExecutable",
 			"next":1111
 		},
@@ -80,6 +81,7 @@
 			"id":1111,
 			"q":"What are the arguments to the program? Macro defines are available, see expandable listing below.",
 			"type":"string",
+			"required": false,
 			"key":"WinDbgArguments",
 			"next":1140
 		},
@@ -155,6 +157,7 @@
 			"id":3101,
 			"q":"What are the arguments to the program? Macro defines are available, see expandable listing below.",
 			"type":"string",
+			"required": false,
 			"key":"LinuxDebugerArguments",
 			"next":3102
 		},
@@ -221,6 +224,7 @@
 			"id":4201,
 			"q":"What are the arguments to the program? Macro defines are available, see expandable listing below.",
 			"type":"string",
+			"required": false,
 			"key":"ProcessArguments",
 			"next":4202
 		},
@@ -245,5 +249,75 @@
 				{ "value":false,"a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
 			]
 		}
+	],
+	"monitors": [
+		{
+			"monitorClass": "Agent",
+			"path": [0],
+			"map": [
+				{"key":"AgentUrl", "param":"location", "optional":true }
+			]
+		},
+		{
+			"monitorClass":"PageHeap",
+			"path": [1110],
+			"map": [
+				{ "key":"WinDbgExecutable", "param":"Executable", "optional":false },
+				{ "key":"WinDbgPath", "param":"WinDbgPath", "optional":true  }
+			]
+		},
+		{
+			"monitorClass":"WindowsDebugger",
+			"path": [1100],
+			"map": [
+				{ "key":"WinDbgExecutable",	"param":"Executable",					"optional":true },
+				{ "key":"WinDbgArguments", "param":"Arguments",					"optional":true },
+				{ "key":"WinDbgProcessName", "param":"ProcessName",					"optional":true  },
+				{ "key":"WinDbgService", "param":"Service",						"optional":true },
+				{ "key":"WinDbgPath", "param":"WinDbgPath",					"optional":true },
+				{ "key":"WinDbgStartOnCall", "param":"StartOnCall",					"optional":true },
+				{ "key":"WinDbgFaultOnEarlyExit", "param":"FaultOnEarlyExit",				"optional":true },
+				{ "key":"WinDbgRestartOnEachTest", "param":"RestartOnEachTest",			"optional":true },
+				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage",	"optional":true }
+			]
+		},
+		{
+			"monitorClass":"Ping",
+			"path": [4100,4101,4102],
+			"map": [
+				{ "key":"PingHost","param":"Host",				"optional":false },
+				{ "key":"PingFaultOnSuccess","param":"FaultOnSuccess",	"optional":true },
+				{ "key":"PingRetryCount","param":"RetryCount",		"optional":true }
+			]
+		},
+		{
+			"monitorClass":"LinuxDebugger",
+			"path": [3104],
+			"map": [
+				{ "key":"Executable","param":"Executable",		"optional":false },
+				{ "key":"Arguments","param":"Arguments",		"optional":true },
+				{ "key":"LinuxDebugGdbPath","param":"GdbPath",		"optional":true },
+				{ "key":"RestartOnEachTest","param":"RestartOnEachTest",		"optional":true },
+				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit",		"optional":true },
+				{ "key":"StartOnCall","param":"StartOnCall",		"optional":true }
+			]
+		},
+		{
+			"monitorClass":"CrashReporter",
+			"path": [2000],
+			"map": []
+		},
+		{
+			"monitorClass":"Process",
+			"path": [4200],
+			"map": [
+				{ "key":"ProcessExecutable","param":"Executable",		"optional":false },
+				{ "key":"ProcessArguments","param":"Arguments",		"optional":true },
+				{ "key":"ProcessRestartOnEachTest","param":"RestartOnEachTest",		"optional":true },
+				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit",		"optional":true },
+				{ "key":"ProcessStartOnCall",	"param":"StartOnCall",		"optional":true }
+			]
+		}
 	]
+
 }
