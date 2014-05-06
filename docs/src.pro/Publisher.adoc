@@ -43,7 +43,7 @@ When fuzzing network protocols, publishers typically uses the protocol that enco
 
 ==== Custom Publishers
 
-Peach supports the creation of custom Publishers. We recommend that you review some of the existing Publishers' code before you create your own so you can understand how to implement a Publishers.
+Peach supports the creation of custom Publishers. We recommend that you review some of the existing Publishers' code before you create your own so you can understand how to implement a Publisher.
 
 More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
 

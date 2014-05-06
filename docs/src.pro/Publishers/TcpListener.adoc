@@ -9,6 +9,11 @@
 
 The _TcpListener_ publisher is able to listen for incoming connections on a TCP port.
 
+Since it is easy to confuse _Tcp_ Client and _TcpListener_, here's the difference:
+
+* The _Tcp_ Client Publisher connects out(ward)
+* The _TcpListener_ Publisher listens to (inward) connections
+
 === Syntax
 
 [source,xml]

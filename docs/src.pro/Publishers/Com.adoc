@@ -25,7 +25,7 @@ NOTE: _Com_ Publisher only runs on Windows.
 
 To use _Com_, Peach.Core.ComContainer.exe must be running in a separate command prompt (so it can host the COM object) while the Peach is running. 
 
-You can configure a debugger monitor to launch and monitor this process. See xref:Monitors_WindowsDebugger monitor for more information about configuring a debugger monitor.
+You can configure a debugger monitor to launch and monitor this process. See the xref:Monitors_WindowsDebugger[WindowsDebugger] monitor for more information about configuring a debugger monitor.
 
 === Syntax
 
