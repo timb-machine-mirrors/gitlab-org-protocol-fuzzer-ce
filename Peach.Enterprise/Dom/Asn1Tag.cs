@@ -77,11 +77,9 @@ namespace Peach.Enterprise.Dom
 			{
 				ret.WriteBits(0x1f, 5);
 
-				int n = 0;
-				while ((value >> (n * 7)) > 0)
-				{
-					n++;
-				}
+				int n = 1;
+				for (ulong tmp = value; tmp > 0x7f; tmp >>= 7)
+					++n;
 
 				while (n-- > 0)
 				{
