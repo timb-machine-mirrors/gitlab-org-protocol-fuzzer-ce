@@ -700,27 +700,32 @@ namespace Peach.Core.Dom
 			root = this;
 		}
 
-		public static T Generate<T>(XmlNode node) where T : DataElement, new()
+		public static T Generate<T>(XmlNode node, DataElementContainer parent) where T : DataElement, new()
 		{
+			T ret;
+
 			string name = null;
 			if (node.hasAttr("name"))
 				name = node.getAttrString("name");
 
 			if (string.IsNullOrEmpty(name))
 			{
-				return new T();
+				ret = new T();
 			}
 			else
 			{
 				try
 				{
-					return (T)Activator.CreateInstance(typeof(T), name);
+					ret = (T)Activator.CreateInstance(typeof(T), name);
 				}
 				catch (TargetInvocationException ex)
 				{
 					throw ex.InnerException;
 				}
 			}
+
+			ret.parent = parent;
+			return ret;
 		}
 
 		public string elementType
@@ -772,6 +777,14 @@ namespace Peach.Core.Dom
 		{
 			get { return hints; }
 			set { hints = value; }
+		}
+
+		public object EvalExpression(string code, Dictionary<string, object> localScope)
+		{
+			var dm = (DataModel)root;
+			var dom = dm.dom ?? dm.actionData.action.parent.parent.parent;
+
+			return dom.Python.Eval(code, localScope);
 		}
 
 		/// <summary>

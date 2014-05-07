@@ -76,7 +76,7 @@ namespace Peach.Core.Dom
 					state["value"] = count;
 					state["self"] = From;
 
-					object value = Scripting.EvalExpression(_expressionGet, state);
+					object value = From.EvalExpression(_expressionGet, state);
 					count = Convert.ToInt64(value);
 				}
 
@@ -123,7 +123,7 @@ namespace Peach.Core.Dom
 					state["value"] = count;
 					state["self"] = From;
 
-					object value = Scripting.EvalExpression(_expressionSet, state);
+					object value = From.EvalExpression(_expressionSet, state);
 					count = Convert.ToInt32(value);
 				}
 
@@ -146,7 +146,7 @@ namespace Peach.Core.Dom
 				state["value"] = count;
 				state["self"] = From;
 
-				object newValue = Scripting.EvalExpression(_expressionSet, state);
+				object newValue = From.EvalExpression(_expressionSet, state);
 				count = Convert.ToInt32(newValue);
 			}
 

@@ -95,7 +95,7 @@ namespace Peach.Core.Dom
 			if (node.Name == "Flags")
 				return null;
 
-			var flag = DataElement.Generate<Flag>(node);
+			var flag = DataElement.Generate<Flag>(node, parent);
 
 			int position = node.getAttrInt("position");
 			int size = node.getAttrInt("size");

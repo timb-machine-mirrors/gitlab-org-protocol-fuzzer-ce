@@ -102,7 +102,7 @@ namespace Peach.Core.Dom
 			}
 			else
 			{
-				block = DataElement.Generate<Block>(node);
+				block = DataElement.Generate<Block>(node, parent);
 				block.parent = parent;
 			}
 

@@ -60,8 +60,6 @@ namespace Peach.Core.Analyzers
 
 		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
 
-		bool isScriptingLanguageSet = false;
-
 		/// <summary>
 		/// Contains default attributes for DataElements
 		/// </summary>
@@ -400,61 +398,78 @@ namespace Peach.Core.Analyzers
 						var newDom = asParser(args, fileName);
 						newDom.name = ns;
 						dom.ns.Add(newDom);
+
+						foreach (var item in newDom.Python.Paths)
+							dom.Python.AddSearchPath(item);
+
+						foreach (var item in newDom.Python.Modules)
+							dom.Python.ImportModule(item);
+
+						foreach (var item in newDom.Ruby.Paths)
+							dom.Ruby.AddSearchPath(item);
+
+						foreach (var item in newDom.Ruby.Modules)
+							dom.Ruby.ImportModule(item);
+
 						break;
 
 					case "Require":
-						Scripting.Imports.Add(child.getAttrString("require"));
+						dom.Ruby.ImportModule(child.getAttrString("require"));
+						//Scripting.Imports.Add(child.getAttrString("require"));
 						break;
 
 					case "Import":
-						if (child.hasAttr("from"))
-							throw new PeachException("Error, This version of Peach does not support the 'from' attribute for 'Import' elements.");
+						dom.Python.ImportModule(child.getAttrString("import"));
+						//if (child.hasAttr("from"))
+						//	throw new PeachException("Error, This version of Peach does not support the 'from' attribute for 'Import' elements.");
 
-						Scripting.Imports.Add(child.getAttrString("import"));
+						//Scripting.Imports.Add(child.getAttrString("import"));
 						break;
 
 					case "PythonPath":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						Scripting.Paths.Add(child.getAttrString("path"));
-						isScriptingLanguageSet = true;
+						dom.Python.AddSearchPath(child.getAttrString("path"));
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
+						//Scripting.Paths.Add(child.getAttrString("path"));
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "RubyPath":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						Scripting.Paths.Add(child.getAttrString("require"));
-						isScriptingLanguageSet = true;
+						dom.Ruby.AddSearchPath(child.getAttrString("require"));
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
+						//Scripting.Paths.Add(child.getAttrString("require"));
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Python":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						isScriptingLanguageSet = true;
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
+						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Ruby":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						isScriptingLanguageSet = true;
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
+						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Defaults":
@@ -1005,7 +1020,7 @@ namespace Peach.Core.Analyzers
 					localScope["Parser"] = this;
 					localScope["Context"] = ((DataModel)element.root).dom;
 
-					var obj = Scripting.EvalExpression(value, localScope);
+					var obj = element.EvalExpression(value, localScope);
 
 					if (obj == null)
 						throw new PeachException("Error, the value of " + element.debugName + " is not a valid eval statement.");

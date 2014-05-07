@@ -105,22 +105,15 @@ namespace Peach.Core.Test.CrackingTests
 				"	</DataModel>" +
 				"</Peach>";
 
-			try
-			{
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-				var data = Bits.Fmt("{0}", "Hello");
+			var data = Bits.Fmt("{0}", "Hello");
 
-				DataCracker cracker = new DataCracker();
-				cracker.CrackData(dom.dataModels[0], data);
+			DataCracker cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[0], data);
 
-				Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
-			}
-			finally
-			{
-				Scripting.Imports.Clear();
-			}
+			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 		}
 
 		[Test]

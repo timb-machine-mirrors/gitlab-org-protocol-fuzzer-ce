@@ -38,7 +38,7 @@ namespace Peach.Core.Fixups
 				Dictionary<string, object> state = new Dictionary<string, object>();
 				state["fixupSelf"] = this;
 
-				_pythonFixup = Scripting.EvalExpression(
+				_pythonFixup = parent.EvalExpression(
 					string.Format("{0}(fixupSelf)",
 					(string)args["class"]),
 					state);
@@ -63,7 +63,7 @@ namespace Peach.Core.Fixups
 				Dictionary<string, object> state = new Dictionary<string, object>();
 				state["fixupSelf"] = this;
 
-				_pythonFixup = Scripting.EvalExpression(
+				_pythonFixup = parent.EvalExpression(
 					string.Format("{0}(fixupSelf)",
 					(string)args["class"]),
 					state);

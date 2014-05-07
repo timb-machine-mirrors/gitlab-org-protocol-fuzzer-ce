@@ -57,6 +57,9 @@ namespace Peach.Core.Dom
 		public NamedCollection<Agent> agents { get; private set; }
 		public NamedCollection<DataSet> datas { get; private set; }
 
+		public Scripting Python { get; private set; }
+		public Scripting Ruby { get; private set; }
+
 		public Dom()
 		{
 			name = "";
@@ -71,6 +74,9 @@ namespace Peach.Core.Dom
 			ns = new NamedCollection<Dom>();
 			agents = new NamedCollection<Agent>();
 			datas = new NamedCollection<DataSet>();
+
+			Python = new PythonScripting();
+			Ruby = new RubyScripting();
 		}
 
 		/// <summary>
@@ -152,7 +158,7 @@ namespace Peach.Core.Dom
 
 				name = name.Substring(name.IndexOf(':') + 1);
 
-				return getReference(other, name, container);
+				return getRef(other, name, container);
 			}
 
 			if (container != null)

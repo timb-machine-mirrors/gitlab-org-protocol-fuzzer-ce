@@ -108,7 +108,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "Flags")
 				return null;
 
-			var flags = DataElement.Generate<Flags>(node);
+			var flags = DataElement.Generate<Flags>(node, parent);
 
 			string strSize = null;
 			if (node.hasAttr("size"))
