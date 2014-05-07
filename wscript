@@ -10,8 +10,12 @@ inst = 'output'
 appname = 'EPeach'
 maxdepth = 2
 branch = 1
+
 # Path to peach community
 peach = 'Peach'
+
+# Ignore peach commuinity Peach.exe
+ignore = [ 'Peach/Peach' ]
 
 def add_tools(tools):
 	for i in ['win', 'linux', 'osx']:
@@ -34,12 +38,4 @@ def configure(ctx):
 	wscript.configure(ctx)
 
 def build(ctx):
-	subdirs = getattr(ctx, 'subdirs', None)
-
-	if subdirs:
-		try:
-			subdirs.remove(os.path.join('Peach', 'Peach'))
-		except ValueError:
-			pass
-
 	wscript.build(ctx)
