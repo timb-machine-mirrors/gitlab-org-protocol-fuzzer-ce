@@ -7,7 +7,7 @@
 		{
 			"id": 0,
 			"type": "intro",
-			"qref":"static/fault-intro.html",
+			"qref":"partials/fault-intro.html",
 			"next":1
 		},
 		{

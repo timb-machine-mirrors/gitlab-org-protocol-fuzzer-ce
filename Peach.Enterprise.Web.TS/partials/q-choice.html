@@ -1,0 +1,20 @@
+﻿<div>
+	<label class="control-label bolder blue">{{vm.currentQuestion.q}}</label>
+	<div class="control-group">
+		<div ng-repeat="choice in vm.currentQuestion.choice" class="radio">
+			<input type="radio" name="dummy" ng-model="vm.currentQuestion.value" ng-value="choice.value || choice.next" />
+			<span>{{choice.a}}</span>
+		</div>
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev" ng-click="vm.back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+			Next
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+
+</div>

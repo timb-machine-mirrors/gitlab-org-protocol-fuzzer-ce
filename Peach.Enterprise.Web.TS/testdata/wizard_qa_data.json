@@ -8,7 +8,7 @@
 		{
 			"id": 0,
 			"type": "intro",
-			"qref":"static/data-intro.html",
+			"qref":"partials/data-intro.html",
 			"next":1
 		},
 		{

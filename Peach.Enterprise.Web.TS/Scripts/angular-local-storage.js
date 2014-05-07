@@ -3,7 +3,7 @@
 'use strict';
 var angularLocalStorage = angular.module('LocalStorageModule', []); //.service("localStorageService", function() {
 
-angularLocalStorage.provider('localStorage', function() {
+angularLocalStorage.provider('localStorageService', function() {
   
   // You should set a prefix to avoid overwriting any local storage variables from the rest of your app
   // e.g. localStorageServiceProvider.setPrefix('youAppName');
