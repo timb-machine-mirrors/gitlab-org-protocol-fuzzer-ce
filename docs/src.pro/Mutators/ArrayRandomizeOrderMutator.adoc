@@ -2,7 +2,9 @@
 [[Mutators_ArrayRandomizeOrderMutator]]
 == ArrayRandomizeOrderMutator
 
-This mutator will randomize the order of an array. The default number of permutations that it produces is 50.
+This mutator will randomize the order of an array. 
+
+The default number of permutations produced is 50.
 
 === Supported Elements
 

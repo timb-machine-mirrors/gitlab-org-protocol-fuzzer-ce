@@ -10,9 +10,9 @@
 // - 02/18/2014: Jordyn
 // Added full example
 
-The _Remote_ publisher runs another publisher from a Peach remote xref:Agent[Agent] process. 
+_Remote_ publisher runs another publisher from a Peach remote xref:Agent[Agent] process. 
 
-_Remote_ resides on a separate (virtual or actual) machine from the remote xref:Agent[Agent]. The remote xref:Agent[Agent] must have started before _Remote_ is initiated. Peach will connect to the agent and provide the information required to start a remote publisher.
+_Remote_ resides on a separate (virtual or actual) machine from the remote xref:Agent[Agent]. The remote xref:Agent[Agent] must have started before _Remote_ is initiated. Peach will connect to the agent and provide the information required to start the remote publisher.
 
 === Syntax
 

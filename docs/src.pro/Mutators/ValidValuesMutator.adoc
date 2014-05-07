@@ -2,7 +2,9 @@
 [[Mutators_ValidValuesMutator]]
 == ValidValuesMutator
 
-This mutator will allow users to specify additional data for each data element through a hint. Each of these values must be separated with a semicolon.
+This mutator will allow users to specify additional data for each data element through a hint. 
+
+Each of these values must be in a value list in the hint, separated with a semicolon.
 
 === Supported Elements
 

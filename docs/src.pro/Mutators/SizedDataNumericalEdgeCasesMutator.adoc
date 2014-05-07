@@ -2,7 +2,11 @@
 [[Mutators_SizedDataNumericalEdgeCasesMutator]]
 == SizedDataNumericalEdgeCasesMutator
 
-This mutator will change the length of the size of a data element to a range around numerical edge cases. By default, this range is N - 50 to N + 50 around each edge case. Even though the size of the data element will be manipulated, the size indicator in the relation will stay the same. This means the actual size of the data and the size reported by the relation will not be equal.
+This mutator will change the length of the size of a data element to a range around numerical edge cases. 
+
+The default range is N - 50 to N + 50 around each edge case. 
+
+Even though Peach manipulates the size of the data element, the size indicator in the relation will stay the same. This means the actual size of the data and the size reported by the relation will not be equal.
 
 === Supported Elements
 
