@@ -140,6 +140,15 @@ namespace Peach.Core
 
 		#region Exec & Eval
 
+		public ScriptScope CreateScope()
+		{
+			var scope = engine.CreateScope();
+
+			Apply(scope, modules);
+
+			return scope;
+		}
+
 		public void Exec(string code, Dictionary<string, object> localScope)
 		{
 			var scope = CreateScope(localScope);
@@ -207,9 +216,8 @@ namespace Peach.Core
 
 		private ScriptScope CreateScope(Dictionary<string, object> localScope)
 		{
-			var scope = engine.CreateScope();
+			var scope = CreateScope();
 
-			Apply(scope, modules);
 			Apply(scope, localScope);
 
 			return scope;
