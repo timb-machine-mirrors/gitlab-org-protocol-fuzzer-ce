@@ -218,7 +218,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "String")
 				return null;
 
-			var str = DataElement.Generate<String>(node);
+			var str = DataElement.Generate<String>(node, parent);
 
 			if (node.hasAttr("nullTerminated"))
 				str.nullTerminated = node.getAttrBool("nullTerminated");

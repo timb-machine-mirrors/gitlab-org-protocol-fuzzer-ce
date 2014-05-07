@@ -131,7 +131,7 @@ namespace Peach.Core.Dom
 		{
 			if (!string.IsNullOrEmpty(expr))
 			{
-				Scripting.Exec(expr, scope);
+				parent.parent.Python.Exec(expr, scope);
 			}
 		}
 

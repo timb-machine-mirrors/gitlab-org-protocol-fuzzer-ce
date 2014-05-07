@@ -529,7 +529,7 @@ namespace Peach.Core.Cracker
 				logger.Debug("Constraint, value=[" + (string)iv + "].");
 			}
 
-			object oReturn = Scripting.EvalExpression(element.constraint, scope);
+			object oReturn = element.EvalExpression(element.constraint, scope);
 
 			if (!((bool)oReturn))
 				throw new CrackingFailure("Constraint failed.", element, data);

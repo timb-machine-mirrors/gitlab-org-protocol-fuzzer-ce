@@ -81,7 +81,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "Blob")
 				return null;
 
-			var blob = DataElement.Generate<Blob>(node);
+			var blob = DataElement.Generate<Blob>(node, parent);
 
 			context.handleCommonDataElementAttributes(node, blob);
 			context.handleCommonDataElementChildren(node, blob);

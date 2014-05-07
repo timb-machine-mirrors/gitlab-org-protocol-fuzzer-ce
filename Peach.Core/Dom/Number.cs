@@ -93,7 +93,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "Number")
 				return null;
 
-			var num = DataElement.Generate<Number>(node);
+			var num = DataElement.Generate<Number>(node, parent);
 
 			if (node.hasAttr("signed"))
 				num.Signed = node.getAttrBool("signed");

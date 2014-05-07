@@ -199,8 +199,6 @@ namespace Peach.Core
 		[NonSerialized]
 		public AgentManager agentManager = null;
 
-		public bool needDataModel = true;
-
 		/// <summary>
 		/// An object store that will last entire run.  For use
 		/// by Peach code to store some state.

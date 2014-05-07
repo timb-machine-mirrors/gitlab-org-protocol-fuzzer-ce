@@ -61,7 +61,7 @@ namespace Peach.Core.Fixups
 			state["data"] = from.Value;
 			try
 			{
-				object value = Scripting.EvalExpression(expression, state);
+				object value = parent.EvalExpression(expression, state);
 
 				if (value is string)
 				{

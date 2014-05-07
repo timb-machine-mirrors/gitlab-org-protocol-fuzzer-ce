@@ -195,7 +195,7 @@ namespace Peach.Core.Dom
 		{
 			if (!string.IsNullOrEmpty(expr))
 			{
-				Scripting.Exec(expr, scope);
+				parent.parent.parent.Python.Exec(expr, scope);
 			}
 		}
 
@@ -274,7 +274,7 @@ namespace Peach.Core.Dom
 
 			if (when != null)
 			{
-				object value = Scripting.EvalExpression(when, scope);
+				object value = parent.parent.parent.Python.Eval(when, scope);
 				if (!(value is bool))
 				{
 					logger.Debug("Run: action '{0}' when return is not boolean, returned: {1}", name, value);

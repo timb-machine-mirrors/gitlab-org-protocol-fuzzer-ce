@@ -57,6 +57,9 @@ namespace Peach.Core.Dom
 		public NamedCollection<Agent> agents { get; private set; }
 		public NamedCollection<DataSet> datas { get; private set; }
 
+		public Scripting Python { get; private set; }
+		public Scripting Ruby { get; private set; }
+
 		public Dom()
 		{
 			name = "";
@@ -71,6 +74,9 @@ namespace Peach.Core.Dom
 			ns = new NamedCollection<Dom>();
 			agents = new NamedCollection<Agent>();
 			datas = new NamedCollection<DataSet>();
+
+			Python = new PythonScripting();
+			Ruby = new RubyScripting();
 		}
 
 		/// <summary>
@@ -95,6 +101,8 @@ namespace Peach.Core.Dom
 				}
 			}
 		}
+
+		#region Reference Resolution
 
 		/// <summary>
 		/// Find a referenced Dom element by name, taking into account namespace prefixes.
@@ -125,6 +133,58 @@ namespace Peach.Core.Dom
 				return value;
 			return default(T);
 		}
+
+		/// <summary>
+		/// Resolve a 'ref' attribute.  Will throw a PeachException if
+		/// namespace is given, but not found.
+		/// </summary>
+		/// <param name="name">Ref name to resolve.</param>
+		/// <param name="element">Container to start searching from.</param>
+		/// <returns>DataElement for ref or null if not found.</returns>
+		public DataElement getRef(string name, DataElementContainer element)
+		{
+			return getRef(this, name, element);
+		}
+
+		static DataElement getRef(Dom dom, string name, DataElementContainer container)
+		{
+			if (name.IndexOf(':') > -1)
+			{
+				string ns = name.Substring(0, name.IndexOf(':'));
+
+				Dom other;
+				if (!dom.ns.TryGetValue(ns, out other))
+					throw new PeachException("Unable to locate namespace '" + ns + "' in ref '" + name + "'.");
+
+				name = name.Substring(name.IndexOf(':') + 1);
+
+				return getRef(other, name, container);
+			}
+
+			if (container != null)
+			{
+				DataElement elem = container.find(name);
+				if (elem != null)
+					return elem;
+			}
+
+			foreach (DataModel model in dom.dataModels)
+			{
+				if (model.name == name)
+					return model;
+			}
+
+			foreach (DataModel model in dom.dataModels)
+			{
+				DataElement elem = model.find(name);
+				if (elem != null)
+					return elem;
+			}
+
+			return null;
+		}
+
+		#endregion
 	}
 }
 
