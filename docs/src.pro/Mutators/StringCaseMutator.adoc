@@ -2,17 +2,17 @@
 [[Mutators_StringCaseMutator]]
 == StringCaseMutator
 
-This mutator will change the case of a string three ways: 
+This mutator will randomly change the string case one of three ways: 
 
-. First it lower-cases each character
-. Then it upper-cases each character
-. Then it randomly decides to upper-case or lower-case each character
+* It lower-cases each character
+* It upper-cases each character
+* It randomly decides to upper-case or lower-case each character
 
-For example, "Hello, World!" would be mutated in these ways:
+For example, "Hello, World!" could be mutated in one of these ways:
 
- * LowerCase -- "hello, world!"
- * UpperCase -- "HELLO, WORLD!"
- * RandomCase -- "heLLo, WOrLd!" (or any random combination of lower/upper)
+* LowerCase -- "hello, world!"
+* UpperCase -- "HELLO, WORLD!"
+* RandomCase -- "heLLo, WOrLd!" (or any random combination of lower/upper)
 
 === Supported Elements
 
