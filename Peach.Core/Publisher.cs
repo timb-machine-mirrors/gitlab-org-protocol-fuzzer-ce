@@ -60,11 +60,11 @@ namespace Peach.Core
 
 		[NonSerialized]
 		private Test _test;
+
 		private bool _hasStarted;
 		private bool _isOpen;
 		private uint _iteration;
 		private bool _isControlIteration;
-		private string _result;
 
 		#endregion
 
@@ -102,8 +102,7 @@ namespace Peach.Core
 		/// </summary>
 		public virtual string Result
 		{
-			get { return _result; }
-			set { _result = value; }
+			get { return null; }
 		}
 
 		#endregion

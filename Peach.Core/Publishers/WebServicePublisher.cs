@@ -38,9 +38,13 @@ namespace Peach.Core.Publishers
 		public string Wsdl { get; set; }
 		public int Timeout { get; set; }
 		public int Throttle { get; set; }
-        public string StatusCode = HttpStatusCode.OK.ToString();
+		public string StatusCode = HttpStatusCode.OK.ToString();
 		public bool ErrorOnStatusCode { get; set; }
-		public override string Result { get { return StatusCode;} set { StatusCode = value; } }
+
+		public override string Result
+		{
+			get { return StatusCode; }
+		}
 
 		protected MemoryStream _buffer = new MemoryStream();
 		protected int _pos = 0;
