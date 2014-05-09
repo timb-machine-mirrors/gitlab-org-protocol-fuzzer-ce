@@ -29,6 +29,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Peach.Core.Dom;
 
@@ -41,59 +42,74 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class Monitor
 	{
-		IAgent _agent;
-
 		public Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
-			_agent = agent;
+			Agent = agent;
 			Name = name;
+			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
 		}
 
-		public string Name { get; set; }
+		/// <summary>
+		/// The agent that is running this monitor.
+		/// </summary>
+		public IAgent Agent { get; private set; }
 
-		protected IAgent Agent { get { return _agent; } }
+		/// <summary>
+		/// The name of this monitor.
+		/// </summary>
+		public string Name { get; private set; }
 
-        public abstract void StopMonitor();
+		/// <summary>
+		/// The class of this monitor.
+		/// </summary>
+		public string Class { get; private set; }
 
-        /// <summary>
-        /// Starting a fuzzing session.  A session includes a number of test iterations.
-        /// </summary>
-        public abstract void SessionStarting();
-        /// <summary>
-        /// Finished a fuzzing session.
-        /// </summary>
-        public abstract void SessionFinished();
+		/// <summary>
+		/// Stop the monitor instance.
+		/// </summary>
+		public abstract void StopMonitor();
 
-        /// <summary>
-        /// Starting a new iteration
-        /// </summary>
-        /// <param name="iterationCount">Iteration count</param>
-        /// <param name="isReproduction">Are we re-running an iteration</param>
-        public abstract void IterationStarting(uint iterationCount, bool isReproduction);
-        /// <summary>
-        /// Iteration has completed.
-        /// </summary>
-        /// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-        public abstract bool IterationFinished();
+		/// <summary>
+		/// Starting a fuzzing session.  A session includes a number of test iterations.
+		/// </summary>
+		public abstract void SessionStarting();
+
+		/// <summary>
+		/// Finished a fuzzing session.
+		/// </summary>
+		public abstract void SessionFinished();
+
+		/// <summary>
+		/// Starting a new iteration
+		/// </summary>
+		/// <param name="iterationCount">Iteration count</param>
+		/// <param name="isReproduction">Are we re-running an iteration</param>
+		public abstract void IterationStarting(uint iterationCount, bool isReproduction);
+
+		/// <summary>
+		/// Iteration has completed.
+		/// </summary>
+		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
+		public abstract bool IterationFinished();
 
 
-        /// <summary>
-        /// Was a fault detected during current iteration?
-        /// </summary>
-        /// <returns>True if a fault was detected, else false.</returns>
-        public abstract bool DetectedFault();
+		/// <summary>
+		/// Was a fault detected during current iteration?
+		/// </summary>
+		/// <returns>True if a fault was detected, else false.</returns>
+		public abstract bool DetectedFault();
 
-        /// <summary>
-        /// Return a Fault instance
-        /// </summary>
-        /// <returns></returns>
-        public abstract Fault GetMonitorData();
+		/// <summary>
+		/// Return a Fault instance
+		/// </summary>
+		/// <returns></returns>
+		public abstract Fault GetMonitorData();
 
-        /// <summary>
-        /// Can the fuzzing session continue, or must we stop?
-        /// </summary>
-        /// <returns>True if session must stop, else false.</returns>
-        public abstract bool MustStop();
+		/// <summary>
+		/// Can the fuzzing session continue, or must we stop?
+		/// </summary>
+		/// <returns>True if session must stop, else false.</returns>
+		public abstract bool MustStop();
 
 		/// <summary>
 		/// Send a message to the monitor and possibly get data back.
