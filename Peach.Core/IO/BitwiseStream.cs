@@ -76,6 +76,33 @@ namespace Peach.Core.IO
 		#region Helpers
 
 		/// <summary>
+		/// Ensures that the data stream length is in full bytes
+		/// by returning a new stream padded with up to 7 bits of '0'
+		/// </summary>
+		/// <returns>Stream of bits padded to a byte boundary</returns>
+		public BitwiseStream PadBits()
+		{
+			var data = this;
+			var lengthBits = LengthBits;
+
+			var extra = 8 - (int)(lengthBits % 8);
+			if (extra != 8)
+			{
+				var lst = new BitStreamList();
+				lst.Add(data);
+
+				var pad = new BitStream();
+				pad.WriteBits(0, extra);
+				lst.Add(pad);
+				lengthBits += extra;
+
+				data = lst;
+			}
+
+			return data;
+		}
+
+		/// <summary>
 		/// Reports the position of the first occurrence of the specified BitStream in this
 		/// instance. The search starts at a specified BitStream position.
 		/// </summary>
