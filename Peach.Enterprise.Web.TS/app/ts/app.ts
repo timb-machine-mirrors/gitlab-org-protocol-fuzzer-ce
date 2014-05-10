@@ -7,31 +7,33 @@
 	//var HEX_REGEXP = /^([A-Fa-f0-9]{2}){8,9}$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 
+	//	"dashServices",
+	//	"dashControllers",
+
 	var dashApp = angular.module("dashApp", [
-		"dashServices",
-		"dashControllers",
+		"ngResource",
 		"emguo.poller",
 		"ngGrid",
 		"n3-charts.linechart",
 		"ngRoute",
-		"LocalStorageModule"
+		"LocalStorageModule",
 	])
-		.service("peach", function ($resource) { return new PeachRestService($resource); })
+		.service("peachService", ["$resource", ($resource) => new PeachService($resource)])
 		.config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
 			//$locationProvider.html5Mode(true);
 
 			$routeProvider
 				.when("/", {
 					templateUrl: "/partials/dash.html",
-					controller: "DashAppCtrl"
+					controller: DashController
 				})
 				.when("/metrics", {
 					templateUrl: "/partials/metrics.html",
-					controller: "MetricsAppCtrl"
+					controller: MetricsController
 				})
 				.when("/faults", {
 					templateUrl: "/partials/faults.html",
-					controller: "FaultsAppCtrl"
+					controller: FaultsController
 				})
 				.when("/configurator/intro", {
 					templateUrl: "/partials/configurator-intro.html"
@@ -87,4 +89,7 @@
 				}
 			};
 		});
+
+	//var dashServices = angular.module('dashServices', ['ngResource']);
+	//dashServices.service("peachService", PeachRestService);
 } 
