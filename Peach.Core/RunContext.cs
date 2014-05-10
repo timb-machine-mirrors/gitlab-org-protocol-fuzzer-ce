@@ -46,19 +46,23 @@ namespace Peach.Core
 	{
 		#region Events
 
-        public delegate void CollectFaultsHandler(RunContext context);
+		#region Fault Collection
 
-        /// <summary>
-        /// This event is triggered after an interation has occured to allow
-        /// collection of faults into RunContext.faults collection.
-        /// </summary>
-        public event CollectFaultsHandler CollectFaults;
+		public delegate void CollectFaultsHandler(RunContext context);
 
-        public void OnCollectFaults()
-        {
-            if (CollectFaults != null)
-                CollectFaults(this);
-        }
+		/// <summary>
+		/// This event is triggered after an interation has occured to allow
+		/// collection of faults into RunContext.faults collection.
+		/// </summary>
+		public event CollectFaultsHandler CollectFaults;
+
+		public void OnCollectFaults()
+		{
+			if (CollectFaults != null)
+				CollectFaults(this);
+		}
+
+		#endregion
 
 		#region Mutation Events
 
@@ -162,6 +166,119 @@ namespace Peach.Core
 
 		#endregion
 
+		#region Agent Events
+
+		public delegate void AgentEventHandler(RunContext context, AgentClient agent);
+		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string name, Variant data);
+		public delegate void CreatePublisherEventHandler(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args);
+		public delegate void StartMonitorEventHandler(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
+
+		public event AgentEventHandler AgentConnect;
+
+		public void OnAgentConnect(AgentClient agent)
+		{
+			if (AgentConnect != null)
+				AgentConnect(this, agent);
+		}
+
+		public event AgentEventHandler AgentDisconnect;
+
+		public void OnAgentDisconnect(AgentClient agent)
+		{
+			if (AgentDisconnect != null)
+				AgentDisconnect(this, agent);
+		}
+
+		public event CreatePublisherEventHandler CreatePublisher;
+
+		public void OnCreatePublisher(AgentClient agent, string cls, Dictionary<string, Variant> args)
+		{
+			if (CreatePublisher != null)
+				CreatePublisher(this, agent, cls, args);
+		}
+
+		public event StartMonitorEventHandler StartMonitor;
+
+		public void OnStartMonitor(AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		{
+			if (StartMonitor != null)
+				StartMonitor(this, agent, name, cls, args);
+		}
+
+		public event AgentEventHandler StopAllMonitors;
+
+		public void OnStopAllMonitors(AgentClient agent)
+		{
+			if (StopAllMonitors != null)
+				StopAllMonitors(this, agent);
+		}
+
+		public event AgentEventHandler SessionStarting;
+
+		public void OnSessionStarting(AgentClient agent)
+		{
+			if (SessionStarting != null)
+				SessionStarting(this, agent);
+		}
+
+		public event AgentEventHandler SessionFinished;
+
+		public void OnSessionFinished(AgentClient agent)
+		{
+			if (SessionFinished != null)
+				SessionFinished(this, agent);
+		}
+
+		public event AgentEventHandler IterationStarting;
+
+		public void OnIterationStarting(AgentClient agent)
+		{
+			if (IterationStarting != null)
+				IterationStarting(this, agent);
+		}
+
+		public event AgentEventHandler IterationFinished;
+
+		public void OnIterationFinished(AgentClient agent)
+		{
+			if (IterationFinished != null)
+				IterationFinished(this, agent);
+		}
+
+		public event AgentEventHandler DetectedFault;
+
+		public void OnDetectedFault(AgentClient agent)
+		{
+			if (DetectedFault != null)
+				DetectedFault(this, agent);
+		}
+
+		public event AgentEventHandler GetMonitorData;
+
+		public void OnGetMonitorData(AgentClient agent)
+		{
+			if (GetMonitorData != null)
+				GetMonitorData(this, agent);
+		}
+
+		public event AgentEventHandler MustStop;
+
+		public void OnMustStop(AgentClient agent)
+		{
+			if (MustStop != null)
+				MustStop(this, agent);
+		}
+
+		public event MessageEventHandler Message;
+
+		public void OnMessage(AgentClient agent, string name, Variant data)
+		{
+			if (Message != null)
+				Message(this, agent, name, data);
+		}
+
+		#endregion
+
 		#endregion
 
 		/// <summary>
@@ -212,6 +329,9 @@ namespace Peach.Core
 		[NonSerialized]
 		public Dictionary<string, object> iterationStateStore = new Dictionary<string, object>();
 
+		/// <summary>
+		/// The current iteration of fuzzing.
+		/// </summary>
 		public uint currentIteration = 0;
 
 		#region Control Iterations
@@ -364,8 +484,6 @@ namespace Peach.Core
 
 		#endregion
 	}
-
-
 }
 
 // end

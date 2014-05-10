@@ -44,7 +44,7 @@ namespace Peach.Core.Test.Publishers
 		string raw_eth = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
-		<String value=""Hello!Hello!001122334455""/>
+		<Blob value=""Hello!Hello!001122334455""/>
 	</DataModel>
 
 	<StateModel name=""TheStateModel"" initialState=""InitialState"">

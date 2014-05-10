@@ -34,6 +34,7 @@ using System.Text;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -41,362 +42,774 @@ using NLog;
 using Peach.Core.Agent;
 using System.Net.Sockets;
 using Peach.Core.IO;
+using System.IO;
+using System.Runtime.Remoting.Activation;
 
 namespace Peach.Core.Agent.Channels
 {
+	#region TCP Agent Client
+
 	[Agent("tcp", true)]
 	public class AgentClientTcpRemoting : AgentClient
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		#region Publisher Proxy
 
-		int _remotingWaitTime = 1000 * 60 * 1;
-		TcpClientChannel _channel = null;
-		AgentServiceTcpRemote proxy = null;
-		string _url = null;
-
-		/// <summary>
-		/// This is set to true when fault data is collected
-		/// indicating a fualt has occured.  When a fault occures
-		/// the agent might get restarted or a virtual machine
-		/// reset to a snapshot.
-		/// </summary>
-		bool _restartAgent = false;
-
-		/// <summary>
-		/// Contains information about all created monitors.
-		/// </summary>
-		/// <remarks>
-		/// When restarting the agent connect we will need to recreate monitors.
-		/// 
-		/// The tuple contains:
-		/// 
-		///   * name
-		///   * cls
-		///   * args
-		/// 
-		/// </remarks>
-		List<Tuple<string, string, List<KeyValuePair<string, Variant>>>> _monitors = new List<Tuple<string, string, List<KeyValuePair<string, Variant>>>>();
-
-		public AgentClientTcpRemoting(string name, string uri, string password)
+		class PublisherProxy : IPublisher
 		{
-			this.name = name;
+			#region Serialization Helpers
+
+			private static byte[] ToBytes<T>(T t) where T: class
+			{
+				if (t == null)
+					return null;
+
+				var ms = new MemoryStream();
+				var fmt = new BinaryFormatter();
+				fmt.Serialize(ms, t);
+				return ms.ToArray();
+			}
+
+			private static T FromBytes<T>(byte[] bytes) where T: class
+			{
+				if (bytes == null)
+					return null;
+
+				var ms = new MemoryStream(bytes);
+				var fmt = new BinaryFormatter();
+				var obj = fmt.Deserialize(ms);
+				return (T)obj;
+			}
+
+			#endregion
+
+			#region Run Action On Proxy
+
+			private static void Exec(string what, System.Action action)
+			{
+				Exception remotingException = null;
+
+				var th = new Thread(delegate()
+				{
+					try
+					{
+						action();
+					}
+					catch (RemotingException ex)
+					{
+						logger.Trace("Ignoring remoting exception during {0}", what);
+						logger.Trace("\n{0}", ex);
+					}
+					catch (PeachException ex)
+					{
+						remotingException = new PeachException(ex.Message, ex);
+					}
+					catch (SoftException ex)
+					{
+						remotingException = new SoftException(ex.Message, ex);
+					}
+					catch (Exception ex)
+					{
+						remotingException = new AgentException(ex.Message, ex);
+					}
+				});
+
+				th.Start();
+
+				if (!th.Join(remotingWaitTime))
+				{
+					th.Abort();
+					th.Join();
+
+					logger.Trace("Ignoring remoting timeout during {0}", what);
+				}
+
+				if (remotingException != null)
+					throw remotingException;
+			}
+
+			private static T Exec<T>(string what, System.Func<T> action)
+			{
+				T t = default(T);
+
+				Exec(what, () => { t = action(); });
+
+				return t;
+			}
+
+			#endregion
+
+			#region Private Members
+
+			uint iteration;
+			bool isControlIteration;
+			PublisherTcpRemote remotePub;
+			MemoryStream stream;
+
+			#endregion
+
+			#region Public Members
+
+			public string cls { get; private set; }
+
+			public List<KeyValuePair<string, Variant>> args { get; private set; }
+
+			public PublisherTcpRemote proxy
+			{
+				get
+				{
+					return remotePub;
+				}
+				set
+				{
+					if (remotePub != null)
+					{
+						// Proxy changed due to reconnect.
+						// Don't have to Exec() this in a worker thread
+						// since its called from a worker thread inside
+						// of AgentClientTcpRemoting
+						value.Iteration = iteration;
+						value.IsControlIteration = isControlIteration;
+						value.Start();
+					}
+
+					remotePub = value;
+
+					// Reset the stream since we have a new remote publisher
+					stream.Seek(0, SeekOrigin.Begin);
+					stream.SetLength(0);
+				}
+			}
+
+			#endregion
+
+			#region Constructor
+
+			public PublisherProxy(string cls, Dictionary<string, Variant> args)
+			{
+				this.cls = cls;
+				this.args = args.ToList();
+				this.stream = new MemoryStream();
+			}
+
+			#endregion
+
+			#region IPublisher
+
+			public uint Iteration
+			{
+				set
+				{
+					iteration = value;
+					Exec("Iteration set", () => { proxy.Iteration = value; });
+				}
+			}
+
+			public bool IsControlIteration
+			{
+				set
+				{
+					isControlIteration = value;
+					Exec("IsControlIteration set", () => { proxy.IsControlIteration = value; });
+				}
+			}
+
+			public string Result
+			{
+				get
+				{
+					return Exec<string>("Result get", () => { return proxy.Result; });
+				}
+			}
+
+			public Stream Stream
+			{
+				get { return stream; }
+			}
+
+			public void Start()
+			{
+				Exec("Start", () => { proxy.Start(); });
+			}
+
+			public void Stop()
+			{
+				Exec("Stop", () => { proxy.Stop(); });
+			}
+
+			public void Open()
+			{
+				Exec("Open", () => { proxy.Open(); });
+			}
+
+			public void Close()
+			{
+				Exec("Close", () => { proxy.Close(); });
+			}
+
+			public void Accept()
+			{
+				Exec("Accept", () => { proxy.Accept(); });
+			}
+
+			public Variant Call(string method, List<ActionParameter> args)
+			{
+				throw new NotSupportedException();
+			}
+
+			public void SetProperty(string property, Variant value)
+			{
+				var bytes = ToBytes(value);
+
+				Exec("SetProperty", () => { proxy.SetProperty(property, bytes); });
+			}
+
+			public Variant GetProperty(string property)
+			{
+				var bytes = Exec<byte[]>("GetProperty", () => { return proxy.GetProperty(property); });
+
+				return FromBytes<Variant>(bytes);
+			}
+
+			public void Output(DataModel dataModel)
+			{
+				Exec("BeginOutput", () => { proxy.BeginOutput(); });
+
+				var data = dataModel.Value.PadBits();
+
+				var total = data.Length;
+				var len = Math.Min(total - data.Position, 1024 * 1024);
+
+				while (len > 0)
+				{
+					var buf = new byte[len];
+					data.Read(buf, 0, buf.Length);
+
+					Exec("Output", () => { proxy.Output(buf); });
+
+					len = Math.Min(total - data.Position, 1024 * 1024);
+				}
+
+				Exec("EndOutput", () => { proxy.EndOutput(); });
+			}
+
+			public void Input()
+			{
+				var reset = Exec<bool>("Input", () => { return proxy.Input(); });
+
+				if (reset)
+				{
+					stream.Seek(0, SeekOrigin.Begin);
+					stream.SetLength(0);
+				}
+
+				ReadAllBytes();
+			}
+
+			public void WantBytes(long count)
+			{
+				Exec("WantBytes", () => { proxy.WantBytes(count); });
+
+				ReadAllBytes();
+			}
+
+			#endregion
+
+			#region Read Input Bytes
+
+			private void ReadAllBytes()
+			{
+				var pos = stream.Position;
+				var buf = ReadBytes();
+
+				while (buf.Length > 0)
+				{
+					stream.Write(buf, 0, buf.Length);
+					buf = ReadBytes();
+				}
+
+				stream.Seek(pos, SeekOrigin.Begin);
+			}
+
+			private byte[] ReadBytes()
+			{
+				return Exec<byte[]>("ReadBytes", () => { return proxy.ReadBytes(); });
+			}
+
+			#endregion
 		}
 
-		/// <summary>
-		/// Perform our remoting call with a forced timeout.
-		/// </summary>
-		/// <param name="method"></param>
-		protected void PerformRemoting(ThreadStart method)
+		#endregion
+
+		#region Private Members
+
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
+		protected override NLog.Logger Logger { get { return logger; } }
+
+		class MonitorInfo
+		{
+			public string Name { get; set; }
+			public string Class { get; set; }
+			public List<KeyValuePair<string, Variant>> Args { get; set; }
+		}
+
+		List<MonitorInfo> monitors = new List<MonitorInfo>();
+		List<PublisherProxy> publishers = new List<PublisherProxy>();
+
+		static int remotingWaitTime = 1000 * 60 * 1;
+
+		TcpClientChannel channel;
+		AgentTcpRemote proxy;
+		string serviceUrl;
+
+		#endregion
+
+		#region Constructor
+
+		public AgentClientTcpRemoting(string name, string url, string password)
+			: base(name, url, password)
+		{
+			serviceUrl = new Uri(new Uri(url), "/PeachAgent").ToString();
+		}
+
+		#endregion
+
+		#region Run Action Proxy
+
+		private static void Exec(System.Action action)
 		{
 			Exception remotingException = null;
 
-			var thread = new System.Threading.Thread(delegate()
+			var th = new Thread(delegate()
 			{
 				try
 				{
-					method();
+					action();
+				}
+				catch (PeachException ex)
+				{
+					remotingException = new PeachException(ex.Message, ex);
+				}
+				catch (SoftException ex)
+				{
+					remotingException = new SoftException(ex.Message, ex);
+				}
+				catch (RemotingException ex)
+				{
+					remotingException = new RemotingException(ex.Message, ex);
 				}
 				catch (Exception ex)
 				{
-					remotingException = ex;
+					remotingException = new AgentException(ex.Message, ex);
 				}
 			});
 
-			thread.Start();
-			if (thread.Join(_remotingWaitTime))
+			th.Start();
+
+			if (!th.Join(remotingWaitTime))
 			{
-				if (remotingException != null)
-				{
-					if (remotingException is PeachException)
-						throw new PeachException(remotingException.Message, remotingException);
-
-					if (remotingException is SoftException)
-						throw new SoftException(remotingException.Message, remotingException);
-
-					if (remotingException is RemotingException)
-						throw new RemotingException(remotingException.Message, remotingException);
-
-					throw new AgentException(remotingException.Message, remotingException);
-				}
+				th.Abort();
+				th.Join();
+				remotingException = new RemotingException("Remoting call timed out.");
 			}
-			else
-			{
-				throw new RemotingException("Remoting call timed out.");
-			}
+
+			if (remotingException != null)
+				throw remotingException;
 		}
 
-		public override bool SupportedProtocol(string protocol)
+		private static T Exec<T>(System.Func<T> action)
 		{
-			logger.Trace("SupportedProtocol");
-			OnSupportedProtocolEvent(protocol);
+			T t = default(T);
 
-			protocol = protocol.ToLower();
-			if (protocol == "tcp")
-				return true;
+			Exec(() => { t = action(); });
 
-			return false;
+			return t;
 		}
 
-		protected void CreateProxy()
-		{
-			RemoveProxy();
+		#endregion
 
-			IDictionary props = new Hashtable() as IDictionary;
+		#region Remote Channel Control
+
+		private void CreateProxy()
+		{
+			// Perform client activation
+			//object[] attr = { new UrlAttribute(serviceUrl) };
+			//proxy = (AgentTcpRemote)Activator.CreateInstance(typeof(AgentTcpRemote), null, attr);
+
+			// Perform server activation
+			var server = (AgentServiceTcpRemote)Activator.GetObject(typeof(AgentServiceTcpRemote), serviceUrl);
+
+			if (server == null)
+				throw new PeachException("Error, unable to create proxy for remote agent '" + serviceUrl + "'.");
+
+			// Activate the proxy on the client side
+			Exec(() => { proxy = server.GetProxy(); });
+		}
+
+		private void RemoveProxy()
+		{
+			proxy = null;
+		}
+
+		private void CreateChannel()
+		{
+			var props = (IDictionary)new Hashtable();
 			props["port"] = 0;
-			props["timeout"] = (uint)1000*60*1; // wait one minute max
-			props["connectionTimeout"] = (uint)1000*60*1; // wait one minute max
+			props["timeout"] = (uint)remotingWaitTime;
+			props["connectionTimeout"] = (uint)remotingWaitTime;
 
 #if !MONO
 			if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)
 				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
 #endif
 
-			BinaryClientFormatterSinkProvider clientProvider = new BinaryClientFormatterSinkProvider();
+			var clientProvider = new BinaryClientFormatterSinkProvider();
+			channel = new TcpClientChannel(props, clientProvider);
 
-			_channel = new TcpClientChannel(props, clientProvider);
-			ChannelServices.RegisterChannel(_channel, false); // Disable security for speed
-
-			proxy = (AgentServiceTcpRemote)Activator.GetObject(typeof(AgentServiceTcpRemote), _url);
-			if (proxy == null)
-				throw new PeachException("Error, unable to create proxy for remote agent '" + _url + "'.");
-		}
-
-		protected void RemoveProxy()
-		{
-			proxy = null;
-
-			if (_channel != null)
+			try
 			{
-				ChannelServices.UnregisterChannel(_channel);
-				_channel = null;
+				ChannelServices.RegisterChannel(channel, false); // Disable security for speed
+			}
+			catch
+			{
+				channel = null;
+				throw;
 			}
 		}
 
-		public override void AgentConnect(string name, string url, string password)
+		private void RemoveChannel()
 		{
-			logger.Trace("AgentConnect");
-			OnAgentConnectEvent(name, url, password);
+			if (channel != null)
+			{
+				try
+				{
+					ChannelServices.UnregisterChannel(channel);
+				}
+				finally
+				{
+					channel = null;
+				}
+			}
+		}
 
-			if (proxy != null)
-				AgentDisconnect();
-
-			if (url.EndsWith("/"))
-				url += "PeachAgent";
-			else
-				url += "/PeachAgent";
-
-			_url = url;
+		private void ReconnectProxy(uint iterationCount, bool isReproduction)
+		{
+			logger.Debug("ReconnectProxy: Attempting to reconnect");
 
 			CreateProxy();
 
-			try
+			Exec(() =>
 			{
-				proxy.AgentConnect(null);
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Error, unable to connect to remote agent '" + _url + "'.  " + ex.Message, ex);
-			}
+				proxy.AgentConnect();
+
+				foreach (var item in monitors)
+					proxy.StartMonitor(item.Name, item.Class, item.Args);
+
+				proxy.SessionStarting();
+				proxy.IterationStarting(iterationCount, isReproduction);
+
+				// ReconnectProxy is only called via IterationStart()
+				// IterationStart is called on the agents before the current
+				// Iteration/IsControlIteration is set on the publishers
+				// Therefore we just need to recreate the publisher proxy
+				foreach (var item in publishers)
+					item.proxy = proxy.CreatePublisher(item.cls, item.args);
+			});
 		}
 
-		public override void AgentDisconnect()
+		#endregion
+
+		#region AgentClient Overrides
+
+		protected override void OnAgentConnect()
 		{
-			logger.Trace("AgentDisconnect");
-			OnAgentDisconnectEvent();
-
-			PerformRemoting(delegate() { proxy.AgentDisconnect(); });
-			RemoveProxy();
-		}
-
-		/// <summary>
-		/// This method is used to recreate monitors when we restart an agent connection.
-		/// </summary>
-		protected void RecreateMonitors()
-		{
-			foreach (var moninfo in _monitors)
-			{
-				PerformRemoting(delegate() { proxy.StartMonitor(moninfo.Item1, moninfo.Item2, moninfo.Item3); });
-			}
-		}
-
-		public override Publisher CreatePublisher(string cls, Dictionary<string, Variant> args)
-		{
-			logger.Trace("CreatePublisher: {0}", cls);
-
-			OnCreatePublisherEvent(cls, args);
-
-			Publisher ret = null;
-
-			// Remote 'args' as a List to support mono/microsoft interoperability
-			PerformRemoting(delegate() { ret = proxy.CreatePublisher(cls, args.ToList()); });
-
-			return ret;
-		}
-
-		public override BitwiseStream CreateBitwiseStream()
-		{
-			logger.Trace("CreateBitwiseStream");
-
-			OnCreateBitwiseStreamEvent();
-
-			BitwiseStream ret = null;
-			PerformRemoting(delegate() { ret = proxy.CreateBitwiseStream(); });
-
-			return ret;
-		}
-
-		public override void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
-		{
-			logger.Trace("StartMonitor: {0}, {1}", name, cls);
-
-			// Remote 'args' as a List to support mono/microsoft interoperability
-			var asList = args.ToList();
-			_monitors.Add(new Tuple<string, string, List<KeyValuePair<string, Variant>>>(name, cls, asList));
-
-			OnStartMonitorEvent(name, cls, args);
-			PerformRemoting(delegate() { proxy.StartMonitor(name, cls, asList); });
-		}
-
-		public override void StopMonitor(string name)
-		{
-			logger.Trace("AgentConnect: {0}", name);
-			OnStopMonitorEvent(name);
-			PerformRemoting(delegate() { proxy.StopMonitor(name); });
-		}
-
-		public override void StopAllMonitors()
-		{
-			logger.Trace("StopAllMonitors");
-			OnStopAllMonitorsEvent();
-			PerformRemoting(delegate() { proxy.StopAllMonitors(); });
-		}
-
-		public override void SessionStarting()
-		{
-			logger.Trace("SessionStarting");
-			OnSessionStartingEvent();
-			PerformRemoting(delegate() { proxy.SessionStarting(); });
-		}
-
-		public override void SessionFinished()
-		{
-			logger.Trace("SessionFinished");
-			OnSessionFinishedEvent();
-			PerformRemoting(delegate() { proxy.SessionFinished(); });
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-			logger.Trace("IterationStarting: {0}, {1}", iterationCount, isReproduction);
-
-			OnIterationStartingEvent(iterationCount, isReproduction);
-
-			if (_restartAgent)
-				_restartAgent = false;
+			System.Diagnostics.Debug.Assert(channel == null);
 
 			try
 			{
-				bool connected = false;
-				PerformRemoting(delegate() { connected = proxy.Connected; });
-				if (connected)
+				CreateChannel();
+				CreateProxy();
+
+				try
 				{
-					PerformRemoting(delegate() { proxy.IterationStarting(iterationCount, isReproduction); });
-					return;
+					Exec(() => { proxy.AgentConnect(); });
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Error, unable to connect to remote agent '{0}'. {1}".Fmt(serviceUrl, ex.Message), ex);
 				}
 			}
-			catch (SocketException)
+			catch
 			{
-				logger.Debug("IterationStarting: Socket error, recreating proxy");
+				// If this throws, OnAgentDisconnect will not be called
+				// so cleanup the proxt and channel
 
-				proxy = (AgentServiceTcpRemote)Activator.GetObject(typeof(AgentServiceTcpRemote), _url);
-				if (proxy == null)
-					throw new PeachException("Error, unable to create proxy for remote agent '" + _url + "'.");
+				RemoveProxy();
+				RemoveChannel();
+
+				throw;
 			}
-
-			proxy.AgentConnect(null);
-			RecreateMonitors();
-			proxy.SessionStarting();
-			proxy.IterationStarting(iterationCount, isReproduction);
 		}
 
-		public override bool IterationFinished()
+		protected override void OnAgentDisconnect()
 		{
-			logger.Trace("IterationFinished");
-			OnIterationFinishedEvent();
-			bool ret = false;
-			PerformRemoting(delegate() { ret = proxy.IterationFinished(); });
-			return ret;
+			try
+			{
+				Exec(() => { proxy.AgentDisconnect(); });
+			}
+			finally
+			{
+				RemoveProxy();
+				RemoveChannel();
+			}
 		}
 
-		public override bool DetectedFault()
+		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
 		{
-			logger.Trace("DetectedFault");
-			OnDetectedFaultEvent();
-			
-			bool ret = false;
-			PerformRemoting(delegate() { ret = proxy.DetectedFault(); });
-			return ret;
+			var pub = new PublisherProxy(cls, args);
+
+			publishers.Add(pub);
+
+			Exec(() => { pub.proxy = proxy.CreatePublisher(pub.cls, pub.args); });
+
+			return pub;
 		}
 
-		public override Fault[] GetMonitorData()
+		protected override void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args)
 		{
-			logger.Trace("GetMonitorData");
+			// Remote 'args' as a List to support mono/microsoft interoperability
+			var asList = args.ToList();
 
-			// On next iteration starting we will reconnect
-			// to our remote agent.
-			_restartAgent = true;
+			// Keep track of monitor info so we can recreate them if the proxy disappears
+			monitors.Add(new MonitorInfo() { Name = name, Class = cls, Args = asList });
 
-			OnGetMonitorDataEvent();
-
-			Fault[] ret = null;
-			PerformRemoting(delegate() { ret = proxy.GetMonitorData(); });
-			return ret;
+			Exec(() => { proxy.StartMonitor(name, cls, asList); });
 		}
 
-		public override bool MustStop()
+		protected override void OnStopAllMonitors()
 		{
-			logger.Trace("MustStop");
-			OnMustStopEvent();
-
-			bool ret = false;
-			PerformRemoting(delegate() { ret = proxy.MustStop(); });
-			return ret;
+			Exec(() => { proxy.StopAllMonitors(); });
 		}
 
-		public override Variant Message(string name, Variant data)
+		protected override void OnSessionStarting()
 		{
-			logger.Trace("Message: {0}", name);
-			OnMessageEvent(name, data);
-			
-			Variant ret = null;
-			PerformRemoting(delegate() { ret = proxy.Message(name, data); });
-			return ret;
+			Exec(() => { proxy.SessionStarting(); });
 		}
 
+		protected override void OnSessionFinished()
+		{
+			Exec(() => { proxy.SessionFinished(); });
+		}
+
+		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
+		{
+			try
+			{
+				Exec(() => { proxy.IterationStarting(iterationCount, isReproduction); });
+			}
+			catch (RemotingException ex)
+			{
+				logger.Debug("IterationStarting: {0}", ex.Message);
+
+				ReconnectProxy(iterationCount, isReproduction);
+			}
+			catch (SocketException ex)
+			{
+				logger.Debug("IterationStarting: {0}", ex.Message);
+
+				ReconnectProxy(iterationCount, isReproduction);
+			}
+		}
+
+		protected override bool OnIterationFinished()
+		{
+			return Exec<bool>(() => { return proxy.IterationFinished(); });
+		}
+
+		protected override bool OnDetectedFault()
+		{
+			return Exec<bool>(() => { return proxy.DetectedFault(); });
+		}
+
+		protected override Fault[] OnGetMonitorData()
+		{
+			return Exec<Fault[]>(() => { return proxy.GetMonitorData(); });
+		}
+
+		protected override bool OnMustStop()
+		{
+			return Exec<bool>(() => { return proxy.MustStop(); });
+		}
+
+		protected override Variant OnMessage(string name, Variant data)
+		{
+			return Exec<Variant>(() => { return proxy.Message(name, data); });
+		}
+
+		#endregion
 	}
 
-	/// <summary>
-	/// Implement agent service running over XML-RPC.
-	/// </summary>
-	public class AgentServiceTcpRemote : MarshalByRefObject, IAgent
+	#endregion
+
+	#region Remoting Objects
+
+	#region Publisher Remoting Object
+
+	internal class PublisherTcpRemote  : MarshalByRefObject
 	{
-		public Agent agent = null;
+		#region Serialization Helpers
+
+		private static byte[] ToBytes<T>(T t) where T : class
+		{
+			if (t == null)
+				return null;
+
+			var ms = new MemoryStream();
+			var fmt = new BinaryFormatter();
+			fmt.Serialize(ms, t);
+			return ms.ToArray();
+		}
+
+		private static T FromBytes<T>(byte[] bytes) where T : class
+		{
+			if (bytes == null)
+				return null;
+
+			var ms = new MemoryStream(bytes);
+			var fmt = new BinaryFormatter();
+			var obj = fmt.Deserialize(ms);
+			return (T)obj;
+		}
+
+		#endregion
+
+		BitStreamList data;
+		Publisher pub;
+
+		public PublisherTcpRemote(Publisher pub)
+		{
+			this.pub = pub;
+		}
+
+		public uint Iteration
+		{
+			set { pub.Iteration = value; }
+		}
+
+		public bool IsControlIteration
+		{
+			set { pub.IsControlIteration = value; }
+		}
+
+		public string Result
+		{
+			get { return pub.Result; }
+		}
+
+		public void Start()
+		{
+			pub.start();
+		}
+
+		public void Stop()
+		{
+			pub.stop();
+		}
+
+		public void Open()
+		{
+			pub.open();
+		}
+
+		public void Close()
+		{
+			pub.close();
+		}
+
+		public void Accept()
+		{
+			pub.accept();
+		}
+
+		public bool Input()
+		{
+			pub.input();
+
+			return pub.Position == 0;
+		}
+
+		public byte[] ReadBytes()
+		{
+			var len = Math.Min(pub.Length - pub.Position, 1024 * 1024);
+			var buf = new byte[len];
+
+			pub.Read(buf, 0, buf.Length);
+
+			return buf;
+		}
+
+		public void WantBytes(long count)
+		{
+			pub.WantBytes(count);
+		}
+
+		public void BeginOutput()
+		{
+			data = new BitStreamList();
+		}
+
+		public void Output(byte[] buf)
+		{
+			data.Add(new BitStream(buf));
+		}
+
+		public void EndOutput()
+		{
+			pub.output(data);
+
+			data.Dispose();
+			data = null;
+		}
+
+		public void SetProperty(string property, byte[] bytes)
+		{
+			var value = FromBytes<Variant>(bytes);
+			pub.setProperty(property, value);
+		}
+
+		public byte[] GetProperty(string property)
+		{
+			var value = pub.getProperty(property);
+			return ToBytes(value);
+		}
+	}
+
+	#endregion
+
+	#region Agent Remoting Object
+
+	/// <summary>
+	/// Implement agent service running over .NET TCP remoting
+	/// </summary>
+	internal class AgentTcpRemote : MarshalByRefObject, IAgent
+	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public AgentServiceTcpRemote()
+		Agent agent = new Agent();
+
+		public AgentTcpRemote()
 		{
-			agent = new Agent("AgentServiceTcpRemote");
 		}
 
-		public bool Connected
+		public PublisherTcpRemote CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
-			get; private set;
+			logger.Trace("CreatePublisher: {0}", cls);
+			return new PublisherTcpRemote(agent.CreatePublisher(cls, args));
 		}
 
-		public void AgentConnect(string password)
+		public void AgentConnect()
 		{
 			logger.Trace("AgentConnect");
-			Connected = true;
 			agent.AgentConnect();
 		}
 
@@ -406,28 +819,10 @@ namespace Peach.Core.Agent.Channels
 			agent.AgentDisconnect();
 		}
 
-		public Publisher CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
-		{
-			logger.Trace("CreatePublisher: {0}", cls);
-			return agent.CreatePublisher(cls, args);
-		}
-
-		public BitwiseStream CreateBitwiseStream()
-		{
-			logger.Trace("CreateBitwiseStream");
-			return new BitStream();
-		}
-
 		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
-			logger.Trace("StartMonitor: {0}, {1}", name, cls);
+			logger.Trace("StartMonitor: {0} {1}", name, cls);
 			agent.StartMonitor(name, cls, args);
-		}
-
-		public void StopMonitor(string name)
-		{
-			logger.Trace("AgentConnect: {0}", name);
-			agent.StopMonitor(name);
 		}
 
 		public void StopAllMonitors()
@@ -450,7 +845,7 @@ namespace Peach.Core.Agent.Channels
 
 		public void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			logger.Trace("IterationStarting: {0}, {1}", iterationCount, isReproduction);
+			logger.Trace("IterationStarting: {0} {1}", iterationCount, isReproduction);
 			agent.IterationStarting(iterationCount, isReproduction);
 		}
 
@@ -491,6 +886,24 @@ namespace Peach.Core.Agent.Channels
 		}
 	}
 
+	#endregion
+
+	#region Agent Remote Service
+
+	internal class AgentServiceTcpRemote : MarshalByRefObject
+	{
+		public AgentTcpRemote GetProxy()
+		{
+			return new AgentTcpRemote();
+		}
+	}
+
+	#endregion
+
+	#endregion
+
+	#region TCP Agent Server
+
 	[AgentServer("tcp")]
 	public class AgentServerTcpRemoting : IAgentServer
 	{
@@ -508,22 +921,30 @@ namespace Peach.Core.Agent.Channels
 			if (args.ContainsKey("port"))
 				port = int.Parse(args["port"]);
 
-			//select channel to communicate
-			IDictionary props = new Hashtable() as IDictionary;
+			// select channel to communicate
+			var props = (IDictionary)new Hashtable();
 			props["port"] = port;
 			props["name"] = string.Empty;
 			//props["exclusiveAddressUse"] = false;
-			//var chan = new TcpServerChannel(props, null);
-			BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
+
+			var serverProvider = new BinaryServerFormatterSinkProvider();
 			serverProvider.TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full;
-			TcpChannel chan = new TcpChannel(props, null, serverProvider);
+			var chan = new TcpChannel(props, null, serverProvider);
 
-			ChannelServices.RegisterChannel(chan, false);    //register channel
+			// register channel
+			ChannelServices.RegisterChannel(chan, false);
 
-			//register remote object
+			// register remote object
+			// mono doesn't work with client activation so
+			// use singleton activation with a function to
+			// provide the actual client instance
 			RemotingConfiguration.RegisterWellKnownServiceType(
 				typeof(AgentServiceTcpRemote),
 				"PeachAgent", WellKnownObjectMode.Singleton);
+
+			// register remote object for client activation
+			//RemotingConfiguration.ApplicationName = "PeachAgent";
+			//RemotingConfiguration.RegisterActivatedServiceType(typeof(AgentTcpRemote));
 
 			//inform console
 			Console.WriteLine(" -- Press ENTER to quit agent -- ");
@@ -532,6 +953,6 @@ namespace Peach.Core.Agent.Channels
 
 		#endregion
 	}
-}
 
-// end
+	#endregion
+}

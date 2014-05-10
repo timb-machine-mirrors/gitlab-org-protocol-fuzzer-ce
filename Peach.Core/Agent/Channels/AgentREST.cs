@@ -44,6 +44,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Agent.Channels
 {
+#if DISABLED
 	#region RestProxyPublisher
 
 	public class RestProxyPublisher : Publisher
@@ -733,5 +734,6 @@ namespace Peach.Core.Agent.Channels
 			}
 		}
 	}
+#endif
 }
 // end
