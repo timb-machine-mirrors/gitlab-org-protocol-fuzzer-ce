@@ -39,7 +39,7 @@
 					templateUrl: "/partials/configurator-intro.html"
 				})
 				.when("/configurator/:step", {
-					templateUrl: "partials/wizard.html",
+					templateUrl: "/partials/wizard.html",
 					controller: WizardController
 				})
 				.when("/configurator/test", {
