@@ -379,7 +379,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		{
 		}
 
-		protected override void State_Starting(Core.Dom.State state)
+		protected override void StateStarting(RunContext context, Core.Dom.State state)
 		{
 			sample.State = state.name;
 
@@ -389,12 +389,12 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				OnStateSample(sample.State);
 		}
 
-		protected override void Action_Starting(Core.Dom.Action action)
+		protected override void ActionStarting(RunContext context, Core.Dom.Action action)
 		{
 			sample.Action = action.name;
 		}
 
-		protected override void MutationStrategy_DataMutating(Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
 		{
 			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
 			sample.Parameter = actionData.name ?? "";

@@ -2,7 +2,9 @@
 [[Mutators_FiniteRandomNumbersMutator]]
 == FiniteRandomNumbersMutator
 
-This mutator produces "random" numbers using a static seed so it will always produce the same random numbers.  By default 5,000 numbers are produced for each Number element that is found.  Each Number element is targeted in sequence.
+This mutator produces "random" numbers using a static seed so it will always produce the same random numbers.  
+
+By default 5,000 numbers are produced for each Number element that is found.  Each Number element is targeted in sequence.
 
 === Supported Elements
 

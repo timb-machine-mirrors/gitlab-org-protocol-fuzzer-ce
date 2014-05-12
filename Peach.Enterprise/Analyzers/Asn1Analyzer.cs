@@ -60,6 +60,10 @@ namespace Peach.Enterprise.Analyzers
 			// Decode ASN.1
 			Decode(block, data, positions, 0);
 
+			// Male sure we consumed all the input data
+			if (data.PositionBits != data.LengthBits)
+				throw new SoftException("Error, Asn1 analyzer only consumed {0} of {1} total bytes.".Fmt(data.Position, data.Length));
+
 			// Replace blob with block
 			blob.parent[blob.name] = block;
 
@@ -488,14 +492,22 @@ namespace Peach.Enterprise.Analyzers
 
 			try
 			{
+				System.Diagnostics.Debug.Assert(stream.PositionBits == 0);
+
 				var blk = new Block("Value");
 				Decode(blk, stream, positions, offset);
-				return blk;
+
+				if (stream.PositionBits == stream.LengthBits)
+					return blk;
+
+				stream.Seek(0, SeekOrigin.Begin);
 			}
 			catch (IOException)
 			{
-				return new Blob("Value") { DefaultValue = new Variant(stream) };
+				// Any IOException just yields a normal blob
 			}
+
+			return new Blob("Value") { DefaultValue = new Variant(stream) };
 		}
 
 		static BitStream ReadData(BitwiseStream stream, long length)

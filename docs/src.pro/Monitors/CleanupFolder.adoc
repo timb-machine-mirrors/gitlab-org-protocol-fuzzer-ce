@@ -2,7 +2,9 @@
 [[Monitors_CleanupFolder]]
 == CleanupFolder Monitor
 
-The _CleanupFolder_ monitor will remove the contents created by a target during runtime. The assets are removed prior to every iteration. When beginning a fuzzing run Peach will create a list of contents in the directory and remove any new files created. This is useful for cleaning up after target execution and not filling up hard drives with temporary, recovery, or scratch files.
+The _CleanupFolder_ monitor will remove the contents created by a target during runtime. The assets are removed prior to every iteration.
+
+When beginning a fuzzing run, Peach will create a list of contents in the directory and remove any new files created.  _CleanupFolder_ will clean up after target execution so your hard drives won't fill up with temporary, recovery, or scratch files.
 
 === Parameters
 
@@ -18,7 +20,7 @@ No optional parameters are supported by this monitor.
 
 .Remove contents of a folder
 ==============================
-This example should be ran from the folder defined in the CleanupFolder monitors folder parameter. During each iteration a file called fuzzed.txt will be created by the File publisher and deleted at the end of the iteration by the CleanupFolder monitor.
+Run this example from the folder defined in the CleanupFolder monitors folder parameter. During each iteration a file called fuzzed.txt will be created by the File publisher and deleted by the CleanupFolder monitor at the end of the iteration.
 
 [source,xml]
 ----

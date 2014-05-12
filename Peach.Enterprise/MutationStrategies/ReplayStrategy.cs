@@ -61,9 +61,9 @@ namespace Peach.Enterprise.MutationStrategies
 		{
 			base.Initialize(context, engine);
 
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.State.Starting += new StateStartingEventHandler(State_Starting);
-			engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
+			engine.IterationStarting += engine_IterationStarting;
 		}
 
 		void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -82,8 +82,8 @@ namespace Peach.Enterprise.MutationStrategies
 		{
 			base.Finalize(context, engine);
 
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.State.Starting -= State_Starting;
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
 			engine.IterationStarting -= engine_IterationStarting;
 		}
 
@@ -141,7 +141,7 @@ namespace Peach.Enterprise.MutationStrategies
 			}
 		}
 
-		void Action_Starting(Core.Dom.Action action)
+		void ActionStarting(RunContext ctx, Core.Dom.Action action)
 		{
 			// Is this a supported action?
 			if (!(action.outputData.Any()))
@@ -153,7 +153,7 @@ namespace Peach.Enterprise.MutationStrategies
 				SyncDataSet(action);
 		}
 
-		void State_Starting(State state)
+		void StateStarting(RunContext ctx, State state)
 		{
 		}
 

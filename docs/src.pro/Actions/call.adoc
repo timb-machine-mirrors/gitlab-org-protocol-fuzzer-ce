@@ -33,7 +33,9 @@
 //  add information about Param and Call
 
 The _call_ action provide a method calling metaphor in Peach state models.
-Call actions support zero or multiple (user-defined and supplied) parameters along with capturing a resulting return value.    
+
+Call actions support zero or multiple (user-defined and supplied) parameters along with capturing a resulting return value.  
+  
  * If there are no parameters, the _call_ action just performs the call.
  * If there are user-supplied parameters, the the  _call_ action may use them as part of the fuzzing data. 
 
@@ -45,8 +47,9 @@ Examples of interactions that use a method-call metaphor include Microsoft COM/D
 ****
 
 When using a _call_ action, any data sent via parameters is considered output and is fuzzed accordingly.
+
 As with the xref:Action_output[_output_] action, a single data model can be provided for each parameter along with zero or more xref:Data[Data] sets.
-If the resulting return value is captured it is considered input and will be cracked into the provided DataModel.
+If the resulting return value is captured, it is considered input and will be cracked into the provided DataModel.
 
 // 02/27/2014: Mike -- I don't think we do this currently. Only get/setProperty. Need to verify.
 //
@@ -144,9 +147,8 @@ xref:Result[Result]::
 
 .Call action using Com Publisher
 ================================
-In this example the name of the video file will be fuzzed, not the video file itself.
+In this example (which requires a QuickTime movie), the name of the video file will be fuzzed, not the video file itself.
 
-A QuickTime movie is also required.
 
 . Start QuickTime
 . Verify QuickTime move with the file name "video.mov" exists in current folder
@@ -206,7 +208,7 @@ A QuickTime movie is also required.
 
 .Interacting with Agents and Monitors
 ================================
-This is an example of controlling when the WindowsDebugger monitor will launch a target executable under a debugger.
+This example controls when the WindowsDebugger monitor will launch a target executable under a debugger.
 This is a typical configuration for file fuzzing.
 
 Notice the use of the special _Peach.Agent_ publisher name.

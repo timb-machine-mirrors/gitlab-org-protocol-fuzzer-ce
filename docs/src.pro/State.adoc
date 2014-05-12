@@ -17,9 +17,9 @@
 //  talked about intial state and changin states
 //  added example
 
-States resides in StateModels. Each state contains a logical Peach work unit.
+State elements reside in xref:StateModel[StateModels]. Each state element contains a logical Peach work unit.
 
-Each StateModel must contain at least one state. If you wish to model complex protocols or systems, you will need multiple states within your StateModel.
+Each xref:StateModel[StateModel] must contain at least one state element. If you wish to model complex protocols or systems, you will need multiple state elements within your xref:StateModel[StateModel].
 
 === Syntax
 
@@ -40,16 +40,16 @@ Each StateModel must contain at least one state. If you wish to model complex pr
 </StateModel>
 ----
 
-States contain one or more actions. Each action can perform tasks related to how the individual state consolidates logic.
+State elements contain one or more action elements. Each action element can perform tasks related to how the individual state element consolidates logic.
 
 Actions are performed sequentially from top to bottom.
 
-Multiple states may not be performed in the order in which they appear in the StateModel. This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
+Multiple state elements may not be performed in the order in which they appear in the xref:StateModel[StateModel]. This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
 
-* The 'intitalState' attribute in the StateModel declaration determines which is the first state to be executed. 
+* The 'intitalState' attribute in the xref:StateModel[StateModel] declaration determines which is the first state element to be executed. 
 * Peach transitions into a new State after a 'changeState' action.
 
-If the same actions execute in the order occurs every time it is recommended to keep all actions in one state.
+If the same action elements execute in the order occurs every time, we recommend keeping all the actions in one state element.
 
 === Attributes
 

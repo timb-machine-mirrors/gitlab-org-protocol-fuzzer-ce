@@ -2,7 +2,7 @@
 [[Mutators_DataElementSwapNearNodesMutator]]
 == DataElementSwapNearNodesMutator
 
-This mutator will swap two nodes in the data model that are neighboring each other.
+This mutator will swap two nodes in the data model that are next to each other.
 
 === Supported Elements
 

@@ -2,9 +2,11 @@
 [[Mutators_UnicodeBomMutator]]
 == UnicodeBomMutator
 
-This mutator injects BOMs into the same list of useful fuzzing strings that xref:Mutators_StringMutator[StringMutator] generates. 
+Unicode BOMs (byte order markers) are non-displayed byte sequences. The Unicode encoder uses Unicode BOMs to determine the data's byte order (endianness). 
 
-Unicode BOMs are byte order markers. They are non-displayed byte sequences that indicate the byte order (endianness) of the data to the unicode encoder. Because these elements do not display, they are not added to the character length of unicode strings. A common security issue is to miscalculate buffer sizes with handling strings containing BOMs. This can lead to memory overruns.
+_UnicodeBomMutator_ injects BOMs into the same list of useful fuzzing strings that xref:Mutators_StringMutator[StringMutator] generates. 
+
+Because Unicode BOMs do not display, they are not added to the Unicode strings' character length. A common security issue is to miscalculate buffer sizes with handling strings containing BOMs. This can lead to memory overruns.
 
 === Supported Elements
 

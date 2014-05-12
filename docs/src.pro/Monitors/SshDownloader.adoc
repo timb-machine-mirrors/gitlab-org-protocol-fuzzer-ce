@@ -2,21 +2,23 @@
 [[Monitors_SshDownloader]]
 == SshDownloader Monitor
 
-The _SshDownloader_ monitor is able to download a file or folder from a remote host over SSH SFTP. The
-monitor supports password, keyboard, and private key authentication methods.  The monitor is also able
-to delete files it has downloaded.
+The _SshDownloader_ monitor can download a file or folder from a remote host over SSH SFTP ((Secure Shell File Transfer Protocol). 
+
+_SshDownloader_ supports password, keyboard, and private key authentication methods.
+
+_SshDownloader_ can delete files it has downloaded.
 
 === Parameters
 
 _Required:_
 
-Host:: Host to ssh too
-Username:: Username for ssh
+Host:: Host to SSH too
+Username:: Username for SSH
 
 _Optional:_
 
-Password:: Password for ssh account, defaults to "".
-KeyPath:: Path to ssh key, defaults to "".
+Password:: Password for SSH account, defaults to "".
+KeyPath:: Path to SSH key, defaults to "".
 File:: File to download, defaults to "".
 Folder:: Folder to download, defaults to "".
 Remove:: Remove the remote file after download, defaults to true.
@@ -25,7 +27,7 @@ Remove:: Remove the remote file after download, defaults to true.
 
 .Grab core file
 ============
-This example will ssh into the Host machine and check for core files. If any core files exist a fault will be thrown and all core filles will be downloaded and saved as part of the fault record.
+This example will SSH into the Host machine and check for core files. If any core files exist, a fault will be thrown and all core files will be downloaded and in the fault record.
 
 [source,xml]
 ----
@@ -111,6 +113,8 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-To see that Peach is actually checking for the file on the remote machine create a file named target.testing.core in /var/cores. When Peach logs in and finds the file a fault will occur and the file target.testing.core will be downloaded and added to the fault record.
+
+To verify that Peach is checking for a file on the remote machine, create a file named target.testing.core in /var/cores. When Peach logs in and finds that file, a fault occurs and the file target.testing.core downloads and is added to the fault record.
+
 
 ============

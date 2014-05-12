@@ -121,7 +121,7 @@ namespace Peach.Enterprise.Runtime
 		    httpListener.Close(); 
 		}
 
-        protected override void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
         {
             _elementName = element.name;
             _mutatorName = mutator.name; 
@@ -141,9 +141,9 @@ namespace Peach.Enterprise.Runtime
 		/// </summary>
 		List<Tuple<string, DataModel>> dataModelsFromActions = new List<Tuple<string, DataModel>>();
 
-		protected override void Action_Finished(Peach.Core.Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
-			base.Action_Finished(action);
+			base.ActionFinished(context, action);
 
 			// TODO - Handle parameters
 			dataModelsFromActions.Add(new Tuple<string,DataModel>(action.dataModel.name, action.dataModel));

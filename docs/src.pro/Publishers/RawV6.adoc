@@ -17,7 +17,11 @@
 // Added information about when receiving input
 // Added get/setProperty actions
 
-The _RawV6_ publisher allows sending raw IPv6 packets without IP header. When receiving input, the IPv6 header is included in the received data. The MTU size of the publisher can be fuzzed by using the publisher's _setProperty_ action.
+The _RawV6_ publisher sends raw IPv6 packets without the IP headers. 
+
+Input received from _RawV6_ includes the IPv6 header in the received data. 
+
+The _RawV6_ MTU size can be fuzzed by using the _setProperty_ action.
 
 NOTE: This publisher runs best on Linux and requires root privileges.
 

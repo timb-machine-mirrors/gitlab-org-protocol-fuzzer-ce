@@ -8,6 +8,7 @@ using NLog;
 
 namespace Godel.Core
 {
+#if DISABLED
 	public class ExtendAction
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -133,6 +134,7 @@ namespace Godel.Core
 			}
 		}
 	}
+#endif
 }
 
 // end

@@ -9,9 +9,8 @@ The _CleanupRegistry_ monitor will remove a registry key or a key's children.
 _Required:_
 
 Key::
-	Registry key to remove.
-	+
-	The following key prefixes are used:
+	Registry key to remove. +
+		The following key prefixes are used:
 	+
 	[horizontal]
 	HKCU\\;; Current user

@@ -86,11 +86,11 @@ run.
 
 		public void PrintAllDataModels(Dom dom, string prefix = "")
 		{
-			foreach (string model in dom.dataModels.Keys)
-				Console.WriteLine("\t" + prefix + model);
+			foreach (var model in dom.dataModels)
+				Console.WriteLine("\t" + prefix + model.name);
 
-			foreach (string key in dom.ns.Keys)
-				PrintAllDataModels(dom.ns[key], prefix + key + ":");
+			foreach (var ns in dom.ns)
+				PrintAllDataModels(ns, prefix + ns.name + ":");
 		}
 
 		public Program(string pitfile, string datamodel, string samplefolder)
