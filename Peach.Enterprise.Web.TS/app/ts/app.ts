@@ -1,4 +1,10 @@
-﻿module DashApp {
+﻿/// <reference path="controllers.wizard.ts" />
+/// <reference path="controllers.dash.ts" />
+/// <reference path="models.wizard.ts" />
+/// <reference path="controllers.pittest.ts" />
+/// <reference path="services.peach.ts" />
+
+module DashApp {
 	"use strict";
 
 	var INTEGER_REGEXP = /^\-?\d+$/;

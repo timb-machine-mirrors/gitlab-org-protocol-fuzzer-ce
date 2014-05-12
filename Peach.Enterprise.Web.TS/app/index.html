@@ -64,14 +64,14 @@
 
 	<script src="/Content/js/ace-extra.min.js"></script>
 </head>
-<body class="skin-1" ng-controller="DashApp.DashController">
+<body class="skin-1">
 
 	<div class="navbar navbar-default" id="navbar">
 		<script type="text/javascript">
 			try { ace.settings.check('navbar', 'fixed') } catch (e) { }
 		</script>
 
-		<div class="navbar-container" id="navbar-container">
+		<div class="navbar-container" id="navbar-container" ng-controller="DashApp.DashController">
 			<div class="navbar-header pull-left">
 				<small>
 					<img src="/Content/images/peachlogo.png" height="50" />
@@ -121,7 +121,7 @@
 							<span class="menu-text"> Visualizer </span>
 						</a>
 					</li>
-					<li ng-class="{active: location.path() == '/faults'}">
+					<li ng-class="{active: location.path() == '/faults'}" ng-controller="DashApp.DashController">
 						<a href="#/faults">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
