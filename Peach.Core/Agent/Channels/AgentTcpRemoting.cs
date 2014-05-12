@@ -298,6 +298,9 @@ namespace Peach.Core.Agent.Channels
 
 				if (reset)
 				{
+					// If remote reset the input position back to zero
+					// we need to do the same. This reset happens on
+					// datagram publishers like Udp and RawV4.
 					stream.Seek(0, SeekOrigin.Begin);
 					stream.SetLength(0);
 				}
