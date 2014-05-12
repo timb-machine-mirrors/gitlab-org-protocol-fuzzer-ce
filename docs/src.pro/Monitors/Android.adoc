@@ -11,7 +11,7 @@ Two expected use cases are:
 
 This monitor can target both emulated and physical notes. 
 
-The http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device are required.
+The _Android_ monitor requires http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device.
 
 === Parameters
 

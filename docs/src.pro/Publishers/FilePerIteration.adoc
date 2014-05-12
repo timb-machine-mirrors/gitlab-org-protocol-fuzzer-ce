@@ -11,8 +11,11 @@
 //  Added full example
 //  Added description of format string for filename and how it appends the number with examples
 
-The _FilePerIteration_ publisher will create an output file for every iteration the fuzzer performs.  This is useful when pre-generating fuzzing cases. 
-Peach will append the iteration number to the fuzzed files name when generating the fuzzed files.  For a file name format of "fuzzed_{0}.bin" the {0} will be replaced with the current iteration number which produces the following filenames: fuzzed_1.bin, fuzzed_2.bin, fuzzed_3.bin, fuzzed_4.bin, etc.
+The _FilePerIteration_ publisher creates an output file for each fuzzer iteration.  
+
+Use _FilePerIteration_ when pre-generating fuzzing cases. 
+
+When generating the fuzzed files, Peach will append the iteration number to the fuzzed files name.  For a file name format of "fuzzed_{0}.bin" the {0} will be replaced with the current iteration number which produces the following filenames: fuzzed_1.bin, fuzzed_2.bin, fuzzed_3.bin, fuzzed_4.bin, etc.
 
 === Syntax
 

@@ -2,7 +2,7 @@
 [[Monitors_Socket]]
 == Socket Monitor
 
-The _Socket_ monitor waits for an incoming TCP or UDP connection. If a connection is accepted a fault will be raised.
+The _Socket_ monitor waits for an incoming TCP or UDP connection. If a connection is accepted, _Socket_ raises a fault.
 
 === Parameters
 
@@ -89,7 +89,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-To simulator this monitor faulting, after starting peach run the following command:
+To simulator this monitor faulting after starting Peach, run the following command:
 
 ----
 nc -vv 127.0.0.1 53

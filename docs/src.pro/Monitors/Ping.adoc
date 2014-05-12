@@ -2,9 +2,14 @@
 [[Monitors_Ping]]
 == Ping Monitor
 
-The _Ping_ monitor will block until the _Timeout_ occurs. 
+The _Ping_ monitor can verify whether a device is or is not functioning. 
 
-This monitor can validate that a target is still up or waiting to restart.
+_Ping_ will continue to monitor until either a _Timeout_ occurs or it receives a host response. 
+
+_Ping_ can validate that a target is still up or waiting to restart. This is useful when fuzzing embedded devices that do not have easily discernible crashes.
+
+_Ping_ can also be used to verify that device which is normally not functioning has started to function. For example, if  you are fuzzing a device that turns other computers on if certain interesting conditions occur, you can use _Ping_ with FaultOnSuccess to determine whether the computers are off (uninteresting result) or on (interesting result). 
+
 
 === Parameters
 

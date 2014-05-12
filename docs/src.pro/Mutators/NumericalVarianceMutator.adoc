@@ -6,7 +6,9 @@ This mutator will produce values of default - N through default + N where N defa
 
 .Numerical Strings
 ****
-This mutator will work with xref:String[String] elements that contain a default value that is numerical. If a string element does not contain a numerical string, this mutator will not mutate it. However, the default fuzzing cases for strings do include interesting numbers.
+This mutator will work with xref:String[String] elements that contain a default value that is numerical. If a string element does not contain a numerical string, this mutator will not mutate it. 
+
+The default fuzzing cases for strings do include interesting numbers.
 ****
 
 === Supported Elements
