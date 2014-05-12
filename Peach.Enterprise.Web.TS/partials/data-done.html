@@ -1,0 +1,31 @@
+﻿<div id="templateRoot">
+	<div>
+		<h1>Review - Data Collection</h1>
+	</div>
+
+	<div class="gridStyle" ng-grid="vm.dataGridOptions"></div>
+	
+
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev" ng-click="vm.back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.addNewDataInfo()" ng-disabled="configuratorForm.$invalid">
+			<i class="icon-arrow-left"></i>
+			Add More Data Collection
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.submitDataInfo()" ng-disabled="configuratorForm.$invalid">
+			Continue to Automation
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+
+	<link rel="stylesheet" href="assets/css/ui.jqgrid.css" />
+
+	<script type="text/javascript">
+
+		var scope = angular.element($("#templateRoot")).scope();
+	</script>
+
+</div>

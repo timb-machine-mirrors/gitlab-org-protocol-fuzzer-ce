@@ -55,3 +55,8 @@ _Resharper*
 *.sln
 *.lastbuildstate
 .depproj/
+
+# Nodejs and angular stuff, mostly for testing
+# package, bower, and karma configs can pull it all down
+/Peach.Enterprise.Web.TS/bower_components
+/Peach.Enterprise.Web.TS/node_modules
