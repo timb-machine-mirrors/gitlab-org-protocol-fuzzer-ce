@@ -36,7 +36,7 @@ namespace Peach.Enterprise.Loggers
 		{
 		}
 
-		protected override void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
 			lock (mutext)
 			{
@@ -60,7 +60,7 @@ namespace Peach.Enterprise.Loggers
 		/// <summary>
 		/// Collection of data models from Action_Finished event.
 		/// </summary>
-		protected override void Action_Finished(Peach.Core.Dom.Action action)
+		protected override void ActionFinished(RunContext context, Core.Dom.Action action)
 		{
 			// TODO - Handle parameters
 			lock (mutext)
