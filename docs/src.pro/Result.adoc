@@ -18,7 +18,8 @@
 // * Calls can be sent to agents/monitors and return data.
 
 Result is a child of the xref:Action_call[call] Action.
-Methods run with a call Action may sometimes have useful data returned.
+
+Methods run with a call Action often have useful data returned.
 Result allows cracking this returned data into a DataModel.
 This data can then be slurped into other DataModels and reused for various purposes.
 
@@ -40,3 +41,5 @@ xref:name[name]:: Name of parameter [optional]
 _Valid Child Elements:_
 
 xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be cracked
+
+// TODO Needs more content (it's pretty sparse) including an example

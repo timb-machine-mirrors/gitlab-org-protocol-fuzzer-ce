@@ -2,7 +2,9 @@
 [[Mutators_XmlW3CMutator]]
 == XmlW3CMutator
 
-This mutator will perform the W3C parser test suite. It targets the XML parser. This mutator will only work on xref:String[String elements] with the _XMLhint_ hint.
+This mutator will perform the W3C parser test suite. It targets the XML parser. 
+
+This mutator will only work on xref:String[String elements] with the _XMLhint_ hint.
 
 === Supported Elements
 

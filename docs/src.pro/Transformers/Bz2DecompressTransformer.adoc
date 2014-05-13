@@ -22,7 +22,9 @@
 [horizontal]
 Type:: Compress
 
-_Bz2Decompress_ performs a bzip2 decompression on the value in the parent xref:DataModel[DataModel]. The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
+_Bz2Decompress_ performs a bzip2 decompression on the value in the parent xref:DataModel[DataModel]. 
+
+The xref:Transformer[Transformer] can bidirectionally compress data as well as decompress data.
 
 === Parameters
 

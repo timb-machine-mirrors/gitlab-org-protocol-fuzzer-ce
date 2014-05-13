@@ -9,7 +9,11 @@
 //  Added information about when receiving input
 //  Added get/setProperty actions
 
-The _RawIPv4_ publisher allows sending raw IPv4 packets with IP header. When receiving input the IPv4 header is included in the received data. The maximum and minimum MTU size of the publisher can be fuzzed by using the _setProperty_ action on the publisher.
+The _RawIPv4_ publisher sends raw IPv4 packets with IP headers. 
+
+Input received from _RawIPv4_ includes the IPv4 header. 
+
+The _RawIPv4_ maximum and minimum MTU size can be fuzzed by using the _setProperty_ action.
 
 NOTE: This publisher runs best on Linux and requires root privileges.
 
@@ -46,19 +50,15 @@ xref:Action_close[close]:: Close and clean up the socket.
 xref:Action_output[output]:: Data sent via output is written to the open socket.
 xref:Action_input[input]:: Data received via input is read from the open socket.
 xref:Action_getProperty[getProperty]::
-	Get a property value.
-	+
-	This publisher supports two properties:
-	+
+	Get a property value. +
+	This publisher supports two properties:	+
 	[horizontal]
 	MTU;; The current MTU value
 	LastRecvAddr;; The last receive address
 
 xref:Action_setProperty[setProperty]:: 
-	Set a property value. This can be used to fuzz properties exposed by the publisher.
-	+
-	This publisher supports one property:
-	+
+	Set a property value. This can be used to fuzz properties exposed by the publisher.	+
+	This publisher supports one property: +
 	[horizontal]
 	MTU;; Set the current MTU value. The value will be ignored if not with in set range.
 

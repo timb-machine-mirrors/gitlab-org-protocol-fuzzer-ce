@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _IntToHex_ takes a string representation of an integer and produces an ASCII string of hex characters that represent that integer.
+
 The xref:Transformer[Transformer] can bidirectionally transform this data from hex to integer.
 
 === Parameters

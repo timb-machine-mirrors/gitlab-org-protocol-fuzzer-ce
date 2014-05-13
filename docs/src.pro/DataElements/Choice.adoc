@@ -6,9 +6,9 @@
 //  - 03/06/2014: Lynn
 //   Added and edited child elements
 
-The Choice element is a child element of xref:DataModel[DataModel] or xref:Block[Block].  Choice elements are expected to have valid sub-elements; Peach will select a sub-element to fuzz.
-
 Choice elements act like a switch statement in programming languages.
+
+The Choice element is a child element of xref:DataModel[DataModel] or xref:Block[Block].  Choice elements are expected to have valid sub-elements; Peach will select a sub-element to fuzz.
 
 === Syntax
 
@@ -71,13 +71,13 @@ xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
 
 .Basic Example
 ==========================
-A basic Choice block. This choice example will crack or consume data of type 1,2,3. Much like a regular switch statement a decision needs to be made on a token.
+A basic Choice block. This choice example will crack or consume data of type 1, 2, and 3. Much like a regular switch statement a decision needs to be made on a token.
 
-If the first 8 bits are 1 then the remaining data is treated as a 32 bit number.
-If the first 8 bits are 2 then the remaining data is treated as a 255 bytes of binary data.
-If the first 8 bits are 3 then the remaining data is treated as a 8 byte string.
+If the first 8 bits are 1, the remaining data is treated as a 32 bit number.
+If the first 8 bits are 2, the remaining data is treated as a 255 bytes of binary data.
+If the first 8 bits are 3, the remaining data is treated as a 8 byte string.
 
-When fuzzing Peach will chose one of the three types and fuzz it's output as an 8bit number followed by the corresponding type. Peach will attempt to full all three types. Data sets can be used to specify which choice to make at different stages in the state model.
+When fuzzing, Peach will chose one of the three types and fuzz it's output as an 8 bit number followed by the corresponding type. Peach will attempt to full all three types. Data sets can be used to specify which choice to make at different stages in the state model.
 
 [source,xml]
 ----

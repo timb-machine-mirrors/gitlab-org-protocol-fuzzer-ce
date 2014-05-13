@@ -28,8 +28,11 @@
 
 The _getProperty_ action provides one half (the input half) of a properties metaphor in Peach state models.
 xref:Action_setProperty[_setProperty_] is the other (output) half of the properties metaphor.
+
 _getProperty_ actions are considered input actions and take a single xref:DataModel[DataModel] as a child-element to receive the data.
+
 The _getProperty_ action is useful when fuzzing targets that use this type of metaphor to interact with (like Microsoft COM/DCOM).
+
 In addition to targets that use the property metaphor, some Publishers (like UDP Publisher) support using properties to get or set values. An instance of this (using netcat as the client connecting to Peach) is in the examples section.
 
 NOTE: Properties exposed by publishers are documented with the publisher itself.
@@ -82,6 +85,7 @@ xref:DataModel[DataModel]:: Reference to a DataModel into which input data will 
 .Accessing a Property using Microsoft COM Publisher
 ==========================
 This is an example of interacting with the QuickTime COM object.
+
 _getProperty_ is used to retrieve the height of the player window.
 Since _getProperty_ is considered a data input, it is not fuzzed.
 To fuzz the height property, xref:Action_setProperty[_setProperty_] would be used.

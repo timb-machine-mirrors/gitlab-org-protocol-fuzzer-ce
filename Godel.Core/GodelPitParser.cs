@@ -67,7 +67,7 @@ namespace Godel.Core
 
 		public ExtendPeach ExtendPeach { get; set; }
 
-		protected override Peach.Core.Dom.Dom getNewDom()
+		protected override Peach.Core.Dom.Dom CreateDom()
 		{
 			return new Dom();
 		}

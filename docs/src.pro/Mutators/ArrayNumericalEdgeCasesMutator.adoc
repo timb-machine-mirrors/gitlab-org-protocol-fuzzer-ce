@@ -2,7 +2,9 @@
 [[Mutators_ArrayNumericalEdgeCasesMutator]]
 == ArrayNumericalEdgeCasesMutator
 
-This mutator changes the lengths of arrays to a variable range around numerical edge cases. By default, this range is from N - 50 to N + 50 around each edge case.
+This mutator changes the lengths of arrays to a variable range around numerical edge cases. 
+
+The default range is from N - 50 to N + 50 around each edge case.
 
 === Supported Elements
 

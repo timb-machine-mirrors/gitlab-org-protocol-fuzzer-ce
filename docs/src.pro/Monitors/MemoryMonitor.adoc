@@ -2,13 +2,13 @@
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
-The _Memory_ monitor checks the memory usage of a process and throws a fault if it has gone over the set limit.  This is useful for detecting non-crashing extraneous memory usage.
+The _Memory_ monitor checks the process memory usage and initiates a fault if it has gone over the set limit.  This can detect non-crashing extraneous memory usage.
 
 === Parameters
 
 _Required:_
 
-Must use one of _Pid_ or _ProcessName_ and also _MemoryLimit_.
+Must use _MemoryLimit_ and either _Pid_ or _ProcessName_.
 
 Pid:: Process ID to monitor
 ProcessName:: Name of process to monitor

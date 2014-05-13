@@ -8,8 +8,15 @@
 // added params and actions
 // added example
 
-The _Ssl_ Publisher enables a pit to communicate via an SSL over TCP socket.
-This is used to fuzz protocol built inside an SSL encrypted channel, such as HTTPS.
+The _SslListner_ Publisher enables a pit to accept SSL connections over a TCP socket.
+
+_SslListner_ is used to fuzz protocol built inside an SSL encrypted channel, such as HTTPS.
+
+Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
+
+* The _Ssl_ Publisher connects out(ward)
+* The _SslListner_ Publisher accepts (inward) connections
+
 The SslListener is similar to the TcpListener because both will accept connections over a TCP port and block until a connection has been established.
 
 === Syntax

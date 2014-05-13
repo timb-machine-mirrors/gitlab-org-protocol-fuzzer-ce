@@ -29,7 +29,7 @@ namespace Peach.Enterprise.Dom
 			// Signed is true since C# streams use long for sizes
 			lengthType = LengthType.Bits;
 			length = 64;
-			Signed = true;
+			Signed = false;
 			LittleEndian = false;
 		}
 
@@ -39,7 +39,7 @@ namespace Peach.Enterprise.Dom
 			// Signed is true since C# streams use long for sizes
 			lengthType = LengthType.Bits;
 			length = 64;
-			Signed = true;
+			Signed = false;
 			LittleEndian = false;
 		}
 
@@ -99,11 +99,10 @@ namespace Peach.Enterprise.Dom
 			}
 			else
 			{
+
 				int n = 0;
-				while ((value >> (n * 8)) > 0)
-				{
-					n++;
-				}
+				for (ulong tmp = value; tmp > 0; tmp >>= 8)
+					++n;
 
 				ret.WriteByte((byte)(0x80 | n));
 

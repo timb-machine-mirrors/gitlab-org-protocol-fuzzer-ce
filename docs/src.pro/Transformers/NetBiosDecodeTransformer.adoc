@@ -23,6 +23,7 @@
 Type:: Encoder/Decoder
 
 _NetBiosDecode_ will decode NetBios encoded strings.
+
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters

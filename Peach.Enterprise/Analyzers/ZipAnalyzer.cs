@@ -73,7 +73,7 @@ namespace Peach.Enterprise.Analyzers
 
 			var dom = model.dom;
 			if (dom == null)
-				dom = model.action.parent.parent.parent;
+				dom = model.actionData.action.parent.parent.parent;
 
 			data.Seek(0, SeekOrigin.Begin);
 

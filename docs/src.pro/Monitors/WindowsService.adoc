@@ -2,8 +2,9 @@
 [[Monitors_WindowsService]]
 == WindowsService Monitor (Windows)
 
-The _WindowsService_ monitor controls a windows service
-The code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors
+The _WindowsService_ monitor controls a windows service.
+
+The code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors.
 
 === Parameters
 

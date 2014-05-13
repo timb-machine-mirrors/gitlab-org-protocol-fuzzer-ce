@@ -32,8 +32,9 @@
 //  Edited text and created the stream/datagram table
 
 The _input_ Action is used to receive/read in data using a xref:Publisher[Publisher].
-The most common use for _input_ actions is to receive data that will be acted upon.
-// Once received and xref:Cracking[cracked] into a data model the data can be copied to
+
+The most common use for _input_ actions is to receive data that will be fuzzed.
+// Once received and xref:Cracking[cracked] into a data model, the data can be copied to
 Once received and cracked into a data model the data can be copied to
 xref:Action_output[_output_] actions, or referenced in conditional expressions such as with the
 xref:Action_when[_when_] attribute.

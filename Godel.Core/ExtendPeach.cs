@@ -16,7 +16,6 @@ namespace Godel.Core
 	{
 		private RunContext Context { get; set; }
 		private NamedCollection<GodelContext> Expressions { get; set; }
-		private ScriptEngine Engine { get; set; }
 		private StateModel OriginalStateModel { get; set; }
 
 		public ExtendPeach(RunContext context)
@@ -26,22 +25,12 @@ namespace Godel.Core
 			Context.engine.TestStarting += engine_TestStarting;
 			Context.engine.TestFinished += engine_TestFinished;
 
-			Peach.Core.Dom.StateModel.Starting += StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished += StateModel_Finished;
-			Peach.Core.Dom.State.Starting += State_Starting;
-			Peach.Core.Dom.State.Finished += State_Finished;
-			Peach.Core.Dom.Action.Starting += Action_Starting;
-			Peach.Core.Dom.Action.Finished += Action_Finished;
-		}
-
-		void CleanupEvents()
-		{
-			Peach.Core.Dom.StateModel.Starting -= StateModel_Starting;
-			Peach.Core.Dom.StateModel.Finished -= StateModel_Finished;
-			Peach.Core.Dom.State.Starting -= State_Starting;
-			Peach.Core.Dom.State.Finished -= State_Finished;
-			Peach.Core.Dom.Action.Starting -= Action_Starting;
-			Peach.Core.Dom.Action.Finished -= Action_Finished;
+			Context.StateModelStarting += StateModel_Starting;
+			Context.StateModelFinished += StateModel_Finished;
+			Context.StateStarting += State_Starting;
+			Context.StateFinished += State_Finished;
+			Context.ActionStarting += Action_Starting;
+			Context.ActionFinished += Action_Finished;
 		}
 
 		GodelContext GetExpr(params string[] names)
@@ -59,40 +48,15 @@ namespace Godel.Core
 			if (dom == null || dom.godel.Count == 0)
 				return;
 
-			// Create the engine
-			Engine = IronPython.Hosting.Python.CreateEngine();
+			// Create a script scope
+			var scope = context.dom.Python.CreateScope();
 
-			// Add any specified paths to our engine.
-			ICollection<string> enginePaths = Engine.GetSearchPaths();
-			foreach (string path in Peach.Core.Scripting.Paths)
-				enginePaths.Add(path);
-			foreach (string path in ClassLoader.SearchPaths)
-				enginePaths.Add(Path.Combine(path, "Lib"));
-			Engine.SetSearchPaths(enginePaths);
-
-			// Import any modules
-			var modules = new Dictionary<string, object>();
-			foreach (string import in Peach.Core.Scripting.Imports)
-				if (!modules.ContainsKey(import))
-					modules.Add(import, Engine.ImportModule(import));
-
-			// Create the global scope
-			var scope = Engine.CreateScope();
-
-			// Add the imports to the global scope
-			foreach (var kv in modules)
-				scope.SetVariable(kv.Key, kv.Value);
-
-
+			// Pre-compile all the expressions
 			foreach (var item in dom.godel)
-			{
-				// Pre-compile all the expressions
 				item.OnTestStarting(Context, scope);
-			}
 
 			Expressions = dom.godel;
 		}
-
 
 		void engine_TestFinished(RunContext context)
 		{
@@ -104,19 +68,11 @@ namespace Godel.Core
 
 			OriginalStateModel = null;
 			Expressions = null;
-			Engine = null;
-
-			// Leave the events subscribed until we get a state model start with the wrong context
-			//CleanupEvents();
 		}
 
-		void StateModel_Starting(Peach.Core.Dom.StateModel model)
+		void StateModel_Starting(RunContext context, Peach.Core.Dom.StateModel model)
 		{
-			if (model.parent.context != Context)
-			{
-				CleanupEvents();
-				return;
-			}
+			System.Diagnostics.Debug.Assert(model.parent.context == Context);
 
 			if (Expressions == null)
 				return;
@@ -124,37 +80,26 @@ namespace Godel.Core
 			// Keep a copy of the original for 'pre' variable in the post 
 			OriginalStateModel = ObjectCopier.Clone(model);
 
-			// StateModel.parent and State.parent are not copied, so fix them up
-			foreach (var state in OriginalStateModel.states)
-			{
-				state.parent = OriginalStateModel;
-
-				foreach (var action in state.actions)
-				{
-					action.parent = state;
-				}
-			}
-
 			var expr = GetExpr(model.name);
 			if (expr != null)
 				expr.Pre(model);
 		}
 
-		void StateModel_Finished(Peach.Core.Dom.StateModel model)
+		void StateModel_Finished(RunContext context, Peach.Core.Dom.StateModel model)
 		{
 			var expr = GetExpr(model.name);
 			if (expr != null)
 				expr.Post(model, OriginalStateModel);
 		}
 
-		void State_Starting(Peach.Core.Dom.State state)
+		void State_Starting(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
 				expr.Pre(state);
 		}
 
-		void State_Finished(Peach.Core.Dom.State state)
+		void State_Finished(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
@@ -164,14 +109,14 @@ namespace Godel.Core
 			}
 		}
 
-		void Action_Starting(Peach.Core.Dom.Action action)
+		void Action_Starting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)
 				expr.Pre(action);
 		}
 
-		void Action_Finished(Peach.Core.Dom.Action action)
+		void Action_Finished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)

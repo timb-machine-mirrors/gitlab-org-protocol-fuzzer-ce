@@ -10,7 +10,9 @@
 //           - Udp "connect" w/host and port
 //           - Multicast example
 
-The _WebService_ publisher is able to call SOAP and WCF based web services.  By default the publisher will attempt to locate a service definition, or one can be provided.
+The _WebService_ publisher is able to call SOAP and WCF based web services.  
+
+_WebService_ will attempt to locate a service definition, or you can provide one.
 
 === Syntax
 

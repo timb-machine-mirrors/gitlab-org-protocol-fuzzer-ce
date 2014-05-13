@@ -7,7 +7,13 @@
 // Params are good
 // give full pit to run for example
 
-The _Tcp_ publisher connects to a remote TCP service.
+The _Tcp_ Client publisher connects to a remote TCP service.
+
+Since it is easy to confuse _Tcp_ Client and _TcpListener_, here's the difference:
+
+* The _Tcp_ Client Publisher connects out(ward)
+* The _TcpListener_ Publisher listens to (inward) connections
+
 
 === Syntax
 

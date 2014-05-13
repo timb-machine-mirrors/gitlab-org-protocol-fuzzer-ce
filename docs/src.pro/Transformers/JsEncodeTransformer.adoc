@@ -23,7 +23,8 @@
 Type:: Encoder/Decoder
 
 _JsEncode_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].
-All characters will be encoded.
+All the characters will be encoded.
+
 This xref:Transformer[Transformer] will only encode the output and not decode any input.
 
 === Parameters
