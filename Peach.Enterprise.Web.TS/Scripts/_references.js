@@ -215,3 +215,4 @@
 /// <reference path="../app/js/models.peach.js" />
 /// <reference path="../app/js/models.wizard.js" />
 /// <reference path="../app/js/services.peach.js" />
+/// <reference path="../content/js/angular-tree-control.js" />
