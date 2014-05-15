@@ -44,16 +44,16 @@ module DashApp {
 				.when("/configurator/intro", {
 					templateUrl: "/partials/configurator-intro.html"
 				})
-				.when("/configurator/:step", {
-					templateUrl: "/partials/wizard.html",
-					controller: WizardController
-				})
 				.when("/configurator/test", {
 					templateUrl: "/partials/configurator-test.html",
 					controller: PitTestController
 				})
 				.when("/configurator/done", {
 					templateUrl: "/partials/configurator-done.html"
+				})
+				.when("/configurator/:step", {
+					templateUrl: "/partials/wizard.html",
+					controller: WizardController
 				})
 				.otherwise({
 					redirectTo: "/"
