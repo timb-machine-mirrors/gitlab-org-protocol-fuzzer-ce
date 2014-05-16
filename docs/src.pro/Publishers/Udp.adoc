@@ -11,7 +11,11 @@
 //           - Multicast example
 
 
-The _Udp_ publisher is able to send and receive UDP packets. The underlying stack will correctly pad out the UDP packet on ouput and strip the padding on input. As such there will be a slight difference between what is seen in a packet capture. Each output action will result in a single packet being sent. Each input action will receive a single packet.
+The _Udp_ publisher sends and receives UDP packets. 
+
+The underlying stack will correctly pad out the UDP packet on output and strip the UDP padding on input. Because of the padding and stripping,  there will be a slight difference between what is sent in a packet capture. This will have no effect on the actual data sent, just the packet length.
+
+Each _Udp_ output action will result in a single packet being sent. Each _Udp_ input action will receive a single packet.
 
 === Syntax
 

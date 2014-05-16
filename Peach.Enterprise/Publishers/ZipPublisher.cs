@@ -84,6 +84,12 @@ namespace Peach.Enterprise.Publishers
 			}
 		}
 
+		protected override void OnOutput(BitwiseStream data)
+		{
+			// This publisher only supports output of data models
+			throw new NotSupportedException();
+		}
+
 		public override void output(DataModel dataModel)
 		{
 			long cnt = 0;
@@ -140,7 +146,7 @@ namespace Peach.Enterprise.Publishers
 
 			try
 			{
-				entryData = PadBits(stream["Content"].Value);
+				entryData = stream["Content"].Value.PadBits();
 			}
 			catch (Exception ex)
 			{

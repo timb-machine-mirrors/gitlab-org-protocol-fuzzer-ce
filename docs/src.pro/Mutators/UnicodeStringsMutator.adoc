@@ -2,7 +2,7 @@
 [[Mutators_UnicodeStringsMutator]]
 == UnicodeStringsMutator
 
-This mutator will cycle through a generated list of unicode strings. The length of the strings used vary.
+This mutator will cycle through a generated list of Unicode strings. The length of the strings used vary.
 
 === Supported Elements
 

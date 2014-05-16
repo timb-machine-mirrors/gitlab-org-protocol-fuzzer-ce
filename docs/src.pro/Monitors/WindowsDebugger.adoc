@@ -3,7 +3,8 @@
 == WindowsDebugger Monitor (Windows)
 
 The _WindowsDebugger_ monitor controls a windows debugger instance. 
-Source code is located in peach\Peach.Core.Test.OS.Windows\Agent\Monitors
+
+The source code can be found in peach\Peach.Core.Test.OS.Windows\Agent\Monitors.
 
 *Main Usages*
 

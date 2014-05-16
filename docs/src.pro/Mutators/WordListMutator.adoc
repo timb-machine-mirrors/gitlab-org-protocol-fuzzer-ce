@@ -2,7 +2,9 @@
 [[Mutators_WordListMutator]]
 == WordListMutator
 
-This mutator will allow users to specify additional data for each data element through a hint. Each of these values must be separated by a newline in a file.
+This mutator will allow users to specify additional data for each data element through a hint. 
+
+The values must be in the file specified in the hint. Each value must be separated by a newline.
 
 === Supported Elements
 
@@ -18,7 +20,7 @@ WordList:: Define additional values. Must be a path to a newline separated word 
 
 .Simple word list example
 =========================
-In this example the words from _wordlist.txt_ will be used during mutations. During fuzzing our string element will be mutated to the value of Apple, Orange, Peach, Pear, Grapefruit and Grape. These changes will occur when Peach select both the string element and the WordListMutator mutator.
+In this example, the words from _wordlist.txt_ will be used during mutations. During fuzzing, our string element will be mutated to the value of Apple, Orange, Peach, Pear, Grapefruit and Grape. These changes will occur when Peach select both the string element and the WordListMutator mutator.
 
 _wordlist.txt_
 ----

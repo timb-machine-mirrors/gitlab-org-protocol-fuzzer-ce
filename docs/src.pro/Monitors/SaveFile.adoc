@@ -2,9 +2,11 @@
 [[Monitors_SaveFile]]
 == SaveFile Monitor
 
-//Example needs fleshed out more
+// TODO Example needs fleshed out more
 
-The _SaveFile_ monitor will save a specified file as part of the logged data when a fault occurs. This is useful for collecting application specific logs.
+The _SaveFile_ monitor will save a specified file as part of the logged data when a fault occurs. 
+
+_SaveFile_ can collect application specific logs.
 
 === Parameters
 

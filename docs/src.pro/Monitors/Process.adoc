@@ -2,14 +2,14 @@
 [[Monitors_Process]]
 == Process Monitor
 
-The _Process_ monitor controls a process during a fuzzing run.  It has a number of features:
+The _Process_ monitor controls a process during a fuzzing run. It has a number of features:
 
- * Restart a process when it dies
- * Log a fault if a process exits early
- * Restart a process on every iteration
- * Terminate a process is the CPU usage is low
- * Interact with StateModel to allow waiting for process exit
- * Interact with StateModel to allow for delayed starting of a process
+ * Restarts a process when it dies
+ * Logs a fault if a process exits early
+ * Restarts a process on every iteration
+ * Terminates a process if the CPU usage is low
+ * Interacts with xref:StateModel[StateModel] to allow waiting for process exit
+ * Interacts with xref:StateModel[StateModel] to allow for delayed starting of a process
 
 === Parameters
 
@@ -23,7 +23,7 @@ Arguments:: Command line arguments
 RestartOnEachTest:: Restart process on each iteration, defaults to false.
 FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
 NoCpuKill:: Disable process killing when CPU usage nears zero, defaults to false.
-StartOnCall:: Start process on a call action from the StateModel (this value and the method value must match)
+StartOnCall:: Start process on a call action from the xref:StateModel[StateModel] (this value and the method value must match)
 WaitForExitOnCall:: Wait for process to exit on state model call (this value and the method value must match)
 WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite.
 
@@ -107,7 +107,7 @@ Peach.Core.Agent.Monitors.Process _Stop(): Killing process
 [*] Test 'Default' finished.
 ----
 
-When running this example notepad will open at session starting and close at session finished.
+When running this example, notepad will open at session starting and close at session finished.
 
 =================
 
@@ -189,7 +189,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example notepad will repeatedly open and close.
+When running this example, notepad will repeatedly open and close.
 
 =================
 
@@ -262,7 +262,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example notepad will repeatedly open and close.
+When running this example, notepad will repeatedly open and close.
 
 =================
 
@@ -339,6 +339,8 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-Since notepad doesn't close automatically you must close notepad after each iteration. Using WaitForExitOnCall is useful when you want halt fuzzing fuzzing until the process closes.
+Since notepad doesn't close automatically, remember to close notepad after each iteration. 
+
+Use WaitForExitOnCall when you want to halt fuzzing until the process closes.
 
 =================

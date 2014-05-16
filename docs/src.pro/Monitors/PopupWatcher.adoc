@@ -2,7 +2,9 @@
 [[Monitors_PopupWatcher]]
 == PopupWatcher Monitor (Windows)
 
-The _PopupWatcher_ monitor is able to close windows based on title.
+The _PopupWatcher_ monitor is able to close windows based on title. 
+
+When _PopupWatcher_ encounters the pop-up window specified by WindowNames, it triggers a fault and closes the pop-up window.
 
 === Parameters
 

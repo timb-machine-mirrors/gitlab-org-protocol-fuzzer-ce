@@ -8,7 +8,9 @@
 // Added parameters
 // Added Description
 
-The _AndroidMonkey_ publisher is used to communicate with both Android emulators and physicals devices. This allows the fuzzing of text inputs, screen touches and key presses. Using additional Android monitors, specific Android applications can be targeted for fuzzing and monitoring.
+The _AndroidMonkey_ publisher is used to communicate with both Android emulators and physicals devices. 
+
+_AndroidMonkey_ allows you to fuzz text inputs, screen touches and key presses. By using additional Android monitors, you can target specific Android applications for fuzzing and monitoring.
 
 === Syntax
 
