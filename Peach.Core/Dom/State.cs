@@ -131,7 +131,7 @@ namespace Peach.Core.Dom
 		{
 			if (!string.IsNullOrEmpty(expr))
 			{
-				Scripting.Exec(expr, scope);
+				parent.parent.Python.Exec(expr, scope);
 			}
 		}
 
@@ -201,6 +201,13 @@ namespace Peach.Core.Dom
 
 			foreach (var action in actions)
 				action.UpdateToOriginalDataModel();
+		}
+
+		[OnCloned]
+		void OnCloned(State original, object context)
+		{
+			foreach (var item in actions)
+				item.parent = this;
 		}
 	}
 }

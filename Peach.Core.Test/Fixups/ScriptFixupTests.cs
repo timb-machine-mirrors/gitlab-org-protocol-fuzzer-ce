@@ -78,7 +78,6 @@ class FixupReturningString:
             finally
             {
                 File.Delete(tmpFile);
-                Scripting.Imports.Clear();
             }
         }
     }

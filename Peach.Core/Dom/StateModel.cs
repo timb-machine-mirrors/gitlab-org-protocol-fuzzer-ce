@@ -187,6 +187,13 @@ namespace Peach.Core.Dom
 				context.OnStateModelFinished(this);
 			}
 		}
+
+		[OnCloned]
+		void OnCloned(StateModel original, object context)
+		{
+			foreach (var item in states)
+				item.parent = this;
+		}
 	}
 }
 

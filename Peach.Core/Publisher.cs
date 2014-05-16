@@ -60,11 +60,11 @@ namespace Peach.Core
 
 		[NonSerialized]
 		private Test _test;
+
 		private bool _hasStarted;
 		private bool _isOpen;
 		private uint _iteration;
 		private bool _isControlIteration;
-		private string _result;
 
 		#endregion
 
@@ -102,8 +102,7 @@ namespace Peach.Core
 		/// </summary>
 		public virtual string Result
 		{
-			get { return _result; }
-			set { _result = value; }
+			get { return null; }
 		}
 
 		#endregion
@@ -324,7 +323,7 @@ namespace Peach.Core
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
 		{
-			data = PadBits(data);
+			data = data.PadBits();
 			Logger.Debug("output({0} bytes)", data.Length);
 			OnOutput(data);
 		}
@@ -354,33 +353,6 @@ namespace Peach.Core
 		public virtual void output(DataModel dataModel)
 		{
 			output(dataModel.Value);
-		}
-
-		/// <summary>
-		/// Ensures that the data stream length is in full bytes
-		/// by padding with up to 7 bits of '0'
-		/// </summary>
-		/// <param name="data">Stream of bits</param>
-		/// <returns>Stream of bits padded to a byte boundary</returns>
-		protected static BitwiseStream PadBits(BitwiseStream data)
-		{
-			long lengthBits = data.LengthBits;
-
-			int extra = 8 - (int)(lengthBits % 8);
-			if (extra != 8)
-			{
-				BitStreamList lst = new BitStreamList();
-				lst.Add(data);
-
-				BitStream pad = new BitStream();
-				pad.WriteBits(0, extra);
-				lst.Add(pad);
-				lengthBits += extra;
-
-				data = lst;
-			}
-
-			return data;
 		}
 
 		#endregion

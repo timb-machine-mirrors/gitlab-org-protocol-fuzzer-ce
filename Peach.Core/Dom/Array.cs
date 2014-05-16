@@ -226,7 +226,7 @@ namespace Peach.Core.Dom
 
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
-			var array = DataElement.Generate<Array>(node);
+			var array = DataElement.Generate<Array>(node, parent);
 
 			if (node.hasAttr("minOccurs"))
 			{

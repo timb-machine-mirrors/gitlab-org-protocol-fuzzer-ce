@@ -88,7 +88,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "Padding")
 				return null;
 
-			var padding = DataElement.Generate<Padding>(node);
+			var padding = DataElement.Generate<Padding>(node, parent);
 
 			if (node.hasAttr("alignment"))
 				padding.alignment = node.getAttrInt("alignment");

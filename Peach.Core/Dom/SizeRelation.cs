@@ -91,7 +91,7 @@ namespace Peach.Core.Dom
 					state["value"] = size;
 					state["self"] = From;
 
-					object value = Scripting.EvalExpression(_expressionGet, state);
+					object value = From.EvalExpression(_expressionGet, state);
 					size = Convert.ToInt64(value);
 				}
 
@@ -131,7 +131,7 @@ namespace Peach.Core.Dom
 						state["value"] = size / 8;
 						state["self"] = From;
 
-						object newValue = Scripting.EvalExpression(_expressionSet, state);
+						object newValue = From.EvalExpression(_expressionSet, state);
 						size = Convert.ToInt64(newValue) * 8;
 					}
 
@@ -146,7 +146,7 @@ namespace Peach.Core.Dom
 						state["value"] = size;
 						state["self"] = From;
 
-						object newValue = Scripting.EvalExpression(_expressionSet, state);
+						object newValue = From.EvalExpression(_expressionSet, state);
 						size = Convert.ToInt64(newValue);
 					}
 				}
@@ -170,7 +170,7 @@ namespace Peach.Core.Dom
 				state["value"] = size / 8;
 				state["self"] = From;
 
-				object newValue = Scripting.EvalExpression(_expressionSet, state);
+				object newValue = From.EvalExpression(_expressionSet, state);
 				size = Convert.ToInt32(newValue);
 			}
 

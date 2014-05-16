@@ -79,7 +79,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "XmlElement")
 				return null;
 
-			var xmlElement = DataElement.Generate<XmlElement>(node);
+			var xmlElement = DataElement.Generate<XmlElement>(node, parent);
 
 			xmlElement.elementName = node.getAttrString("elementName");
 

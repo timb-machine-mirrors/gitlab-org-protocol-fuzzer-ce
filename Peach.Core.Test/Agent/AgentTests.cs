@@ -14,6 +14,7 @@ using Peach.Core.Analyzers;
 using System.IO;
 using Peach.Core.Agent;
 using System.Text;
+using Peach.Core.IO;
 
 namespace Peach.Core.Test.Agent
 {
@@ -149,82 +150,14 @@ namespace Peach.Core.Test.Agent
 			}
 		}
 
-		ManualResetEvent startEvent;
-
 		public void StartAgent()
 		{
-			process = new System.Diagnostics.Process();
-
-			if (Platform.GetOS() == Platform.OS.Windows)
-			{
-				process.StartInfo.FileName = "Peach.exe";
-				process.StartInfo.Arguments = "-a tcp";
-			}
-			else
-			{
-				List<string> paths = new List<string>();
-				paths.Add(Environment.CurrentDirectory);
-				paths.AddRange(process.StartInfo.EnvironmentVariables["PATH"].Split(Path.PathSeparator));
-				string peach = "Peach.exe";
-				foreach (var dir in paths)
-				{
-					var candidate = Path.Combine(dir, peach);
-					if (File.Exists(candidate))
-					{
-						peach = candidate;
-						break;
-					}
-				}
-
-				process.StartInfo.FileName = "mono";
-				process.StartInfo.Arguments = "--debug {0} -a tcp".Fmt(peach);
-			}
-
-			process.StartInfo.RedirectStandardInput = true;
-			process.StartInfo.RedirectStandardOutput = true;
-			process.StartInfo.UseShellExecute = false;
-			process.OutputDataReceived += new System.Diagnostics.DataReceivedEventHandler(process_OutputDataReceived);
-
-			try
-			{
-				using (startEvent = new ManualResetEvent(false))
-				{
-					process.Start();
-					if (Platform.GetOS() == Platform.OS.Windows)
-						process.BeginOutputReadLine();
-
-					startEvent.WaitOne(5000);
-				}
-			}
-			catch
-			{
-				process = null;
-				throw;
-			}
-			finally
-			{
-				startEvent = null;
-			}
-		}
-
-		void process_OutputDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e)
-		{
-			if (e.Data == null)
-				return;
-
-			if (e.Data.Contains("Press ENTER to quit agent"))
-				startEvent.Set();
+			process = Helpers.StartAgent();
 		}
 
 		public void StopAgent()
 		{
-			if (!process.HasExited)
-			{
-				process.Kill();
-				process.WaitForExit();
-			}
-
-			process.Close();
+			Helpers.StopAgent(process);
 			process = null;
 		}
 
@@ -694,7 +627,7 @@ namespace Peach.Core.Test.Agent
 
 		[Publisher("TestRemoteFile", true, IsTest = true)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
-		public class TestRemoteFilePublisher : Publisher
+		public class TestRemoteFilePublisher : Peach.Core.Publishers.StreamPublisher
 		{
 			private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 			protected override NLog.Logger Logger { get { return logger; } }
@@ -704,6 +637,99 @@ namespace Peach.Core.Test.Agent
 			public TestRemoteFilePublisher(Dictionary<string, Variant> args)
 				: base(args)
 			{
+				stream = new MemoryStream();
+			}
+
+			void log(string msg, params object[] args)
+			{
+				using (var writer = new StreamWriter(FileName, true))
+				{
+					writer.WriteLine(msg, args);
+				}
+			}
+
+			protected override void OnStart()
+			{
+				log("OnStart");
+			}
+
+			protected override void OnStop()
+			{
+				log("OnStop");
+			}
+
+			protected override void OnOpen()
+			{
+				log("OnOpen");
+			}
+
+			protected override void OnClose()
+			{
+				log("OnClose");
+			}
+
+			protected override void OnAccept()
+			{
+				log("OnAccept");
+			}
+
+			protected override void OnInput()
+			{
+				log("OnInput");
+
+				// Write some bytes!
+				stream = new MemoryStream();
+				var data = Encoding.ASCII.GetBytes("Returning Data");
+				stream.Write(data, 0, data.Length);
+				stream.Seek(0, SeekOrigin.Begin);
+			}
+
+			public override void WantBytes(long count)
+			{
+				log("WantBytes {0}", count);
+			}
+
+			public override int Read(byte[] buffer, int offset, int count)
+			{
+				int ret = base.Read(buffer, offset, count);
+				log("Read, Want: {0}, Got: {1}", count - offset, ret);
+				return ret;
+			}
+
+			protected override void OnOutput(BitwiseStream data)
+			{
+				// Do a copy to ensure it is remoted properly
+				var strm = new BitStream();
+				data.CopyTo(strm);
+
+				log("OnOutput {0}/{1}", strm.Length, strm.LengthBits);
+			}
+
+			protected override Variant OnGetProperty(string property)
+			{
+				log("GetProperty: {0}", property);
+
+				switch (property)
+				{
+					case "int":
+						return new Variant((int)100);
+					case "string":
+						return new Variant("This is a string");
+					case "bytes":
+						return new Variant(new byte[] { 0xff, 0x00, 0xff });
+					case "bits":
+						var bs = new BitStream();
+						bs.Write(new byte[] { 0xfe, 0x00, 0xfe }, 0, 3);
+						bs.Seek(0, SeekOrigin.Begin);
+						return new Variant(bs);
+					default:
+						return new Variant();
+				}
+			}
+
+			protected override void OnSetProperty(string property, Variant value)
+			{
+				log("SetProperty {0} {1} {2}", property, value.GetVariantType(), value.ToString());
 			}
 
 			protected override Variant OnCall(string method, List<Dom.ActionParameter> args)
@@ -713,17 +739,17 @@ namespace Peach.Core.Test.Agent
 				for (int i = 0; i < args.Count; ++i)
 				{
 					sb.AppendFormat("Param{0}: {1}", i + 1, Encoding.ASCII.GetString(args[i].dataModel.Value.ToArray()));
-					sb.AppendLine();
+					if (i < (args.Count - 1))
+						sb.AppendLine();
 				}
 
-				File.WriteAllText(FileName, sb.ToString());
+				log(sb.ToString());
 
 				return new Variant(Bits.Fmt("{0:L8}{1}", 7, "Success"));
 			}
 		}
 
 		[Test]
-		[Ignore("See issue #496")]
 		public void TestRemotePublisher()
 		{
 			string tmp = Path.GetTempFileName();
@@ -751,7 +777,37 @@ namespace Peach.Core.Test.Agent
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
-			<Action type='call' method='foo'>
+			<Action type='output'>
+				<DataModel ref='Param2'/>
+			</Action>
+
+			<Action type='accept'/>
+
+			<Action name='input' type='input'>
+				<DataModel ref='Param2'/>
+			</Action>
+
+			<Action type='setProperty' property='int'>
+				<DataModel ref='Param1'/>
+			</Action>
+
+			<Action type='getProperty' property='int'>
+				<DataModel ref='Param1'/>
+			</Action>
+
+			<Action type='getProperty' property='string'>
+				<DataModel ref='Param2'/>
+			</Action>
+
+			<Action type='getProperty' property='bytes'>
+				<DataModel ref='Param2'/>
+			</Action>
+
+			<Action type='getProperty' property='bits'>
+				<DataModel ref='Param2'/>
+			</Action>
+
+			<!--Action name='call' type='call' method='foo'>
 				<Param>
 					<DataModel ref='Param1'/>
 				</Param>
@@ -764,7 +820,7 @@ namespace Peach.Core.Test.Agent
 				<Result>
 					<DataModel ref='Result'/>
 				</Result>
-			</Action>
+			</Action-->
 		</State>
 	</StateModel>
 
@@ -796,18 +852,37 @@ namespace Peach.Core.Test.Agent
 				e.startFuzzing(dom, config);
 
 				var contents = File.ReadAllLines(tmp);
-				Assert.AreEqual(3, contents.Length);
-				Assert.AreEqual("Param1: \x7c", contents[0]);
-				Assert.AreEqual("Param2: Hello", contents[1]);
-				Assert.AreEqual("Param3: World", contents[2]);
+				var expected = new string[] {
+					"OnStart",
+					"OnOpen",
+					"OnOutput 5/40",
+					"OnAccept",
+					"OnInput",
+					"Read, Want: 14, Got: 14",
+					"Read, Want: 0, Got: 0",
+					"SetProperty int BitStream 7c",
+					"GetProperty: int",
+					"GetProperty: string",
+					"GetProperty: bytes",
+					"GetProperty: bits",
+					"OnClose",
+					"OnStop",
+				};
 
-				var act = dom.tests[0].stateModel.states[0].actions[0] as Dom.Actions.Call;
-				Assert.NotNull(act);
-				Assert.NotNull(act.result);
-				Assert.NotNull(act.result.dataModel);
-				Assert.AreEqual(2, act.result.dataModel.Count);
-				Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
-				Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
+				Assert.AreEqual(expected, contents);
+
+				var st = dom.tests[0].stateModel.states[0];
+				//var act = st.actions["call"] as Dom.Actions.Call;
+				//Assert.NotNull(act);
+				//Assert.NotNull(act.result);
+				//Assert.NotNull(act.result.dataModel);
+				//Assert.AreEqual(2, act.result.dataModel.Count);
+				//Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
+				//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
+
+				var inp = st.actions["input"];
+				Assert.AreEqual("Returning Data", inp.dataModel.InternalValue.BitsToString());
+
 			}
 			finally
 			{

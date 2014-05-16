@@ -44,7 +44,7 @@ namespace Peach.Core.Test.Publishers
 		string raw_eth = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
-		<String value=""Hello!Hello!001122334455""/>
+		<Blob value=""Hello!Hello!001122334455""/>
 	</DataModel>
 
 	<StateModel name=""TheStateModel"" initialState=""InitialState"">
@@ -58,7 +58,7 @@ namespace Peach.Core.Test.Publishers
 		</State>
 	</StateModel>
 
-	<Agent name=""LocalAgent"" location=""tcp://10.0.1.45:9001"">
+	<Agent name=""LocalAgent"" location=""tcp://127.0.0.1:9001"">
 	</Agent>
 
 	<Test name=""Default"">
@@ -75,7 +75,7 @@ namespace Peach.Core.Test.Publishers
 		string udp = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
-		<String value=""Hello!Hello!001122334455""/>
+		<String value=""Hello!Hello!001122334455"" token=""true""/>
 	</DataModel>
 
 	<StateModel name=""TheStateModel"" initialState=""InitialState"">
@@ -89,7 +89,7 @@ namespace Peach.Core.Test.Publishers
 		</State>
 	</StateModel>
 
-	<Agent name=""LocalAgent"" location=""tcp://10.0.1.45:9001"">
+	<Agent name=""LocalAgent"" location=""tcp://127.0.0.1:9001"">
 	</Agent>
 
 	<Test name=""Default"">
@@ -99,8 +99,8 @@ namespace Peach.Core.Test.Publishers
 			<Param name=""Agent"" value=""LocalAgent""/>
 			<Param name=""Class"" value=""Udp""/>
 			<Param name=""Host"" value=""127.0.0.1""/>
-			<Param name=""SrcPort"" value=""12344""/>
-			<Param name=""Port"" value=""12345""/>
+			<Param name=""SrcPort"" value=""{0}""/>
+			<Param name=""Port"" value=""{0}""/>
 		</Publisher>
 	</Test>
 </Peach>";
@@ -138,26 +138,39 @@ namespace Peach.Core.Test.Publishers
 
 		public void RunRemote(string xml)
 		{
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var process = Helpers.StartAgent();
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			try
+			{
+				PitParser parser = new PitParser();
+				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
+				RunConfiguration config = new RunConfiguration();
+				config.singleIteration = true;
+
+				Engine e = new Engine(null);
+				e.startFuzzing(dom, config);
+			}
+			finally
+			{
+				Helpers.StopAgent(process);
+			}
 		}
 
-		[Test, Ignore]
+		[Test]
 		public void TestRaw()
 		{
+			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
+				Assert.Ignore("Only supported on Linux");
+
 			RunRemote(raw_eth);
 		}
 
-		[Test, Ignore]
+		[Test]
 		public void TestUdp()
 		{
-			RunRemote(udp);
+			var port = TestBase.MakePort(12000, 13000);
+			RunRemote(udp.Fmt(port));
 		}
 	}
 }

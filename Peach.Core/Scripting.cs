@@ -43,78 +43,115 @@ using Peach.Core.IO;
 
 namespace Peach.Core
 {
-	public enum ScriptingEngines
+	public class PythonScripting : Scripting
 	{
-		Python,
-		Ruby
+		protected override ScriptEngine GetEngine()
+		{
+			// Need to add python stdlib to search path
+			var engine = IronPython.Hosting.Python.CreateEngine();
+			var paths = engine.GetSearchPaths();
+
+			foreach (string path in ClassLoader.SearchPaths)
+				paths.Add(Path.Combine(path, "Lib"));
+
+			engine.SetSearchPaths(paths);
+
+			return engine;
+		}
+	}
+
+	public class RubyScripting : Scripting
+	{
+		protected override ScriptEngine GetEngine()
+		{
+			return IronRuby.Ruby.CreateEngine();
+		}
 	}
 
 	/// <summary>
 	/// Scripting class provides easy to use
 	/// methods for using Python/Ruby with Peach.
 	/// </summary>
-	public static class Scripting
+	public abstract class Scripting
 	{
-		static public ScriptingEngines DefaultScriptingEngine = ScriptingEngines.Python;
-		static public List<string> Imports = new List<string>();
-		static public List<string> Paths = new List<string>();
-		static public Dictionary<string, object> GlobalScope = new Dictionary<string, object>();
+		#region Private Members
 
-		private static class Engine
+		private Dictionary<string, object> modules;
+		private ScriptEngine engine;
+
+		#endregion
+
+		#region Constructor
+
+		public Scripting()
 		{
-			static public ScriptEngine Instance { get; private set; }
-			static public Dictionary<string, object> Modules { get; private set; }
+			modules = new Dictionary<string, object>();
+			engine = GetEngine();
+		}
 
-			static Engine()
+		#endregion
+
+		#region Abstract Fucntions
+
+		protected abstract ScriptEngine GetEngine();
+
+		#endregion
+
+		#region Module Imports
+
+		public void ImportModule(string module)
+		{
+			if (!modules.ContainsKey(module))
+				modules.Add(module, engine.ImportModule(module));
+		}
+
+		public IEnumerable<string> Modules
+		{
+			get
 			{
-				// Construct the correct engine type
-				if (DefaultScriptingEngine == ScriptingEngines.Python)
-					Instance = IronPython.Hosting.Python.CreateEngine();
-				else
-					Instance = IronRuby.Ruby.CreateEngine();
-
-				// Add any specified paths to our engine.
-				ICollection<string> enginePaths = Instance.GetSearchPaths();
-				foreach (string path in Paths)
-					enginePaths.Add(path);
-				foreach (string path in ClassLoader.SearchPaths)
-					enginePaths.Add(Path.Combine(path, "Lib"));
-				Instance.SetSearchPaths(enginePaths);
-
-				// Import any modules
-				Modules = new Dictionary<string, object>();
-				foreach (string import in Imports)
-					if (!Modules.ContainsKey(import))
-						Modules.Add(import, Instance.ImportModule(import));
+				return modules.Keys;
 			}
 		}
 
-		private static ScriptScope Prepare(Dictionary<string, object> localScope)
+		#endregion
+
+		#region Search Paths
+
+		public void AddSearchPath(string path)
 		{
-			var paths = Paths.Except(Engine.Instance.GetSearchPaths()).ToList();
-			if (paths.Count > 0)
+			var paths = engine.GetSearchPaths();
+
+			if (!paths.Contains(path))
 			{
-				var list = Engine.Instance.GetSearchPaths().ToList();
-				list.AddRange(paths);
-				Engine.Instance.SetSearchPaths(list);
+				paths.Add(path);
+				engine.SetSearchPaths(paths);
 			}
+		}
 
-			var missing = Imports.Except(Engine.Modules.Keys).ToList();
-			foreach (var import in missing)
-				Engine.Modules.Add(import, Engine.Instance.ImportModule(import));
+		public IEnumerable<string> Paths
+		{
+			get
+			{
+				return engine.GetSearchPaths();
+			}
+		}
 
-			var scope = Engine.Instance.CreateScope();
+		#endregion
 
-			scope.Apply(Engine.Modules);
-			scope.Apply(GlobalScope);
-			scope.Apply(localScope);
+		#region Exec & Eval
+
+		public ScriptScope CreateScope()
+		{
+			var scope = engine.CreateScope();
+
+			Apply(scope, modules);
 
 			return scope;
 		}
 
-		public static void Exec(string code, Dictionary<string, object> localScope)
+		public void Exec(string code, Dictionary<string, object> localScope)
 		{
-			var scope = Prepare(localScope);
+			var scope = CreateScope(localScope);
 
 			try
 			{
@@ -126,21 +163,18 @@ namespace Peach.Core
 			}
 			finally
 			{
-				// Clean up any internal state created by the scope
-				var names = scope.GetVariableNames().ToList();
-				foreach (var name in names)
-					scope.RemoveVariable(name);
+				CleanupScope(scope);
 			}
 		}
 
-		public static object EvalExpression(string code, Dictionary<string, object> localScope)
+		public object Eval(string code, Dictionary<string, object> localScope)
 		{
-			var scope = Prepare(localScope);
+			var scope = CreateScope(localScope);
 
 			try
 			{
-				ScriptSource source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
-				object obj = source.Execute(scope);
+				var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
+				var obj = source.Execute(scope);
 
 				if (obj != null && obj.GetType() == typeof(BigInteger))
 				{
@@ -168,17 +202,36 @@ namespace Peach.Core
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error executing expression ["+code+"]: " + ex.ToString(), ex);
+				throw new PeachException("Error executing expression [" + code + "]: " + ex.ToString(), ex);
 			}
 			finally
 			{
-				var names = scope.GetVariableNames().ToList();
-				foreach (var name in names)
-					scope.RemoveVariable(name);
+				CleanupScope(scope);
 			}
 		}
 
-		private static void Apply(this ScriptScope scope, Dictionary<string, object> vars)
+		#endregion
+
+		#region Private Helpers
+
+		private ScriptScope CreateScope(Dictionary<string, object> localScope)
+		{
+			var scope = CreateScope();
+
+			Apply(scope, localScope);
+
+			return scope;
+		}
+
+		private void CleanupScope(ScriptScope scope)
+		{
+			// Clean up any internal state created by the scope
+			var names = scope.GetVariableNames().ToList();
+			foreach (var name in names)
+				scope.RemoveVariable(name);
+		}
+
+		private static void Apply(ScriptScope scope, Dictionary<string, object> vars)
 		{
 			foreach (var item in vars)
 			{
@@ -207,5 +260,7 @@ namespace Peach.Core
 				scope.SetVariable(name, value);
 			}
 		}
+
+		#endregion
 	}
 }
