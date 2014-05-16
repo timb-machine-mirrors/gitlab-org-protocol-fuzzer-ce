@@ -16,6 +16,10 @@
   </Agent>
 
   <Agent name="WinAgent">
+    <Monitor class="PageHeap">
+      <Param name="Executable" value="vlc.exe"/>
+    </Monitor>
+
     <Monitor class="WindowsDebugger">
       <Param name="CommandLine" value="##Target## fuzzed.png"/>
       <Param name="StartOnCall" value="FuzzMe"/>

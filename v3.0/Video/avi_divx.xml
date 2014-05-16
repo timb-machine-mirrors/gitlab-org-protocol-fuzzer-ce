@@ -16,7 +16,7 @@
 			<Param name="CpuKill" value="true"/>
 		</Monitor>
 	</Agent>
-	
+
 	<Agent name="OSX">
 		<Monitor class="CrashWrangler">
 			<Param name="Command" value="##Target##"/>
@@ -24,24 +24,29 @@
 			<Param name="StartOnCall" value="LaunchMplayer"/>
 		</Monitor>
 	</Agent>
-	
+
 	<Agent name="Win">
+		<Monitor class="PageHeap">
+      <Param name="Executable" value="vlc.exe"/>
+    </Monitor>
+
+
 		<Monitor class="WindowsDebugger">
 			<Param name="CommandLine" value="##Target## fuzzed.avi"/>
 			<Param name="StartOnCall" value="LaunchMplayer"/>
 			<Param name="CpuKill" value="true"/>
 		</Monitor>
 	</Agent>
-	
+
 	<Test name="Default">
 		<StateModel ref="AviDivx:MplayerTest"/>
-		
+
 		<Agent ref="##Agent##"/>
 
 		<Publisher class="File">
 			<Param name="FileName" value="fuzzed.avi"/>
 		</Publisher>
-		
+
 		<Strategy class="##Strategy##"/>
 
 		<Logger class="File">
