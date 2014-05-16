@@ -40,6 +40,7 @@ using NLog;
 
 using SharpPcap;
 using SharpPcap.AirPcap;
+using SharpPcap.WinPcap;
 using PacketDotNet;
 
 
@@ -47,7 +48,7 @@ namespace Peach.Enterprise.Publishers
 {
 	[Publisher("AirPcap", true)]
 	[Parameter("DeviceNumber", typeof(int), "The AirPcap device to use.", "0")]
-	[Parameter("CaptureMode", typeof(DeviceMode), "Capture mode to use (Promisucous, Normal)", "Promiscuous")]
+    [Parameter("CaptureMode", typeof(OpenFlags), "Capture mode to use (Promisucous, Normal)", "MaxResponsiveness")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("PrependRadioHeader", typeof(bool), "Prepend Radiotap Header to outgoing data (default true)", "true")]
 	public class AirPcapPublisher : Peach.Core.Publisher
@@ -56,11 +57,11 @@ namespace Peach.Enterprise.Publishers
 		protected override NLog.Logger Logger { get { return logger; } }
 
 		protected int DeviceNumber { get; set; }
-		protected DeviceMode CaptureMode { get; set; }
+		protected OpenFlags CaptureMode { get; set; }
 		protected int Timeout { get; set; }
 		protected bool PrependRadioHeader { get; set; }
 
-		protected ICaptureDevice airPcap;
+		protected AirPcapDevice airPcap;
 
 		protected MemoryStream _recvBuffer = null;
 		
@@ -68,18 +69,18 @@ namespace Peach.Enterprise.Publishers
             : base(args)
         {
 			ParameterParser.Parse(this, args);
-
-			var devices = AirPcapDeviceList.Instance;
-
-			if (devices.Count < 1 || devices.Count < (DeviceNumber - 1))
-				throw new PeachException("The requested AirPcap device could not be found");
-
-			airPcap = devices[DeviceNumber];
 		}
 
 		protected override void OnStart()
 		{
 			_recvBuffer = new MemoryStream();
+
+            var devices = AirPcapDeviceList.Instance;
+
+            if (devices.Count < 1 || devices.Count < (DeviceNumber - 1))
+                throw new PeachException("The requested AirPcap device could not be found");
+
+            airPcap = (AirPcapDevice)devices[DeviceNumber];
 
 			airPcap.Open(CaptureMode, 1);
 		}
