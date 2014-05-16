@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <Defaults>
+    <Number endian="big"/>
+  </Defaults>
+
+  <DataModel name="TLV">
+    <Number name="Type" size="16"/>
+    <Number name="Length" size="16">
+      <Relation type="size" of="Value"/>
+    </Number>
+    <Blob name="Value"/>
+  </DataModel>
+
+  <DataModel name="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Number name="Version" size="16" value="0x0301"/>
+    <Number name="Length" size="16">
+      <Relation type="size" of="Payload"/>
+    </Number>
+    <Block name="Payload"/>
+  </DataModel>
+
+  <DataModel name="ClientHello" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="1"/>
+      <Number name="Length" size="24">
+        <Relation type="size" of="Handshake"/>
+      </Number>
+      <Block name="Handshake">
+        <Number name="Version" size="16" value="0x0301"/>
+        <Block name="Random">
+          <Number name="GmtUnixTime" size="32" value="0xdec4e0b8">
+              <!--<Fixup name=""/>-->
+          </Number>
+          <Blob name="RandomBytes" length="28" valueType="hex">
+            <Fixup class="SecureRandomNumber">
+              <Param name="ref" value="RandomBytes"/>
+              <Param name="Length" value="28"/>
+            </Fixup>
+          </Blob>
+        </Block>
+        <Number name="SessionIdLength" size="8" value="0"/>
+        <Number name="CipherSuitesLength" size="16">
+          <Relation type="size" of="CipherSuites"/>
+        </Number>
+        <Block name="CipherSuites">
+          <!--<Number size="16" value="0xc014"/>
+          <Number size="16" value="0xc00a"/>
+          <Number size="16" value="0xc022"/>
+          <Number size="16" value="0xc021"/>
+          <Number size="16" value="0x0039"/>
+          <Number size="16" value="0x0038"/>
+          <Number size="16" value="0x0088"/>
+          <Number size="16" value="0x0087"/>
+          <Number size="16" value="0xc00f"/>
+          <Number size="16" value="0xc005"/>
+          <Number size="16" value="0x0035"/>
+          <Number size="16" value="0x0084"/>
+          <Number size="16" value="0xc012"/>
+          <Number size="16" value="0xc008"/>
+          <Number size="16" value="0xc01c"/>
+          <Number size="16" value="0xc01b"/>
+          <Number size="16" value="0x0016"/>
+          <Number size="16" value="0x0013"/>
+          <Number size="16" value="0xc00d"/>
+          <Number size="16" value="0xc003"/>
+          <Number size="16" value="0x000a"/>
+          <Number size="16" value="0xc013"/>
+          <Number size="16" value="0xc009"/>
+          <Number size="16" value="0xc01f"/>
+          <Number size="16" value="0xc01e"/>-->
+         <!-- <Number size="16" value="0x0033"/>
+          <Number size="16" value="0x0032"/>
+          <Number size="16" value="0x009a"/>
+          <Number size="16" value="0x0099"/>
+          <Number size="16" value="0x0045"/>
+          <Number size="16" value="0x0044"/>
+          <Number size="16" value="0xc00e"/>
+          <Number size="16" value="0xc004"/>-->
+          <Number size="16" value="0x002f"/> <!-- rsa aes128 sha-->
+          <!--<Number size="16" value="0x0096"/>
+          <Number size="16" value="0x0041"/>
+          <Number size="16" value="0xc011"/>
+          <Number size="16" value="0xc007"/>
+          <Number size="16" value="0xc00c"/>
+          <Number size="16" value="0xc002"/>
+          <Number size="16" value="0x0005"/>
+          <Number size="16" value="0x0004"/>
+          <Number size="16" value="0x0015"/>
+          <Number size="16" value="0x0012"/>
+          <Number size="16" value="0x0009"/>
+          <Number size="16" value="0x0014"/>
+          <Number size="16" value="0x0011"/>
+          <Number size="16" value="0x0008"/>
+          <Number size="16" value="0x0006"/>
+          <Number size="16" value="0x0003"/>
+          <Number size="16" value="0x00ff"/>-->
+        </Block>
+        <Number name="CompressionMethodsLength" size="8">
+          <Relation type="size" of="CompressionMethods"/>
+        </Number>
+        <Block name="CompressionMethods">
+          <Number name="Null" size="8" value="0"/>
+        </Block>
+        <Number name="ExtensionsLength" size="16">
+          <Relation type="size" of="Extensions"/>
+        </Number>
+        <Block name="Extensions">
+          <Block name="EcPointFormats" ref="TLV">
+            <Number name="Type" size="16" value="11"/>
+            <Block name="Value">
+              <Number name="EcPointFormatLength" size="8">
+                <Relation type="size" of="EllipticCurvePointFormats"/>
+              </Number>
+              <Block name="EllipticCurvePointFormats">
+                <Number name="Uncompressed" size="8" value="0"/>
+                <Number name="Ansix962CompressedPrime" size="8" value="1"/>
+                <Number name="Ansix962CompressedChar2" size="8" value="2"/>
+              </Block>
+            </Block>
+          </Block>
+          <Block name="EllipticCurve" ref="TLV">
+            <Number name="Type" size="16" value="10"/>
+            <Block name="Value">
+              <Number name="EllipticCurvesLength" size="16">
+                <Relation type="size" of="EllipticCurves"/>
+              </Number>
+              <Block name="EllipticCurves">
+                <Number size="16" value="0x000e"/>
+                <Number size="16" value="0x000d"/>
+                <Number size="16" value="0x0019"/>
+                <Number size="16" value="0x000b"/>
+                <Number size="16" value="0x000c"/>
+                <Number size="16" value="0x0018"/>
+                <Number size="16" value="0x0009"/>
+                <Number size="16" value="0x000a"/>
+                <Number size="16" value="0x0016"/>
+                <Number size="16" value="0x0017"/>
+                <Number size="16" value="0x0008"/>
+                <Number size="16" value="0x0006"/>
+                <Number size="16" value="0x0007"/>
+                <Number size="16" value="0x0014"/>
+                <Number size="16" value="0x0015"/>
+                <Number size="16" value="0x0004"/>
+                <Number size="16" value="0x0005"/>
+                <Number size="16" value="0x0012"/>
+                <Number size="16" value="0x0013"/>
+                <Number size="16" value="0x0001"/>
+                <Number size="16" value="0x0002"/>
+                <Number size="16" value="0x0003"/>
+                <Number size="16" value="0x000f"/>
+                <Number size="16" value="0x0010"/>
+                <Number size="16" value="0x0011"/>
+              </Block>
+            </Block>
+          </Block>
+          <Block name="SessionTicketTls" ref="TLV">
+            <Number name="Type" size="16" value="0x0023"/>
+            <Blob name="Value" length="0"/>
+          </Block>
+          <Block name="NextProtocolNegotiation" ref="TLV">
+            <Number name="Type" size="16" value="0x3374"/>
+            <Blob name="Value" length="0"/>
+          </Block>
+          <Block name="StatusRequest" ref="TLV">
+            <Number name="Type" size="16" value="0x0005"/>
+            <Blob name="Value" valueType="hex" value="0100000000"/>
+          </Block>
+          <Block name="HeartBeat" ref="TLV">
+            <Number name="Type" size="16" value="15"/>
+            <Number name="Value" size="8" value="1"/>
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="NewSessionTicket" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="4"/>
+      <Number name="Length" size="24">
+        <Relation type="size" of="SessionTicket"/>
+      </Number>
+      <Block name="SessionTicket">
+        <Number name="LifetimeHint" size="32" value="300"/>
+        <Number name="Length" size="16">
+          <Relation type="size" of="Ticket"/>
+        </Number>
+        <Blob name="Ticket"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HandShakeCertificate" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="CertificateType" size="8" value="11"/>
+      <Number name="Length" size="24">
+          <Relation type="size" of="Handshake"/>
+      </Number>
+      <Block name="Handshake">
+        <Number name="CertificateBlockLength" size="24">
+          <Relation type="size" of="CertificateBlock"/>
+        </Number>
+        <Block name="CertificateBlock">
+    			<Number name="CertificateLength" size="24">
+    			  <Relation type="size" of="Certificate"/>
+    			</Number>
+    			<Block name="Certificate">
+    			  <Blob>
+    			   <Analyzer class="Asn1"/>
+    			  </Blob>
+    			</Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ServerHelloDone" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="12"/>
+      <Number name="Length" size="24"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ServerHello" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="2"/>
+      <Number name="Length" size="24">
+          <Relation type="size" of="Handshake"/>
+      </Number>
+      <Block name="Handshake">
+        <Number name="Version" size="16" value="0x0301"/>
+        <Block name="Random">
+          <Number name="GmtUnixTime" size="32">
+            <!--<Fixup name=""/>-->
+          </Number>
+          <Blob name="RandomBytes" length="28">
+             <!--<Fixup name=""/>-->
+          </Blob>
+        </Block>
+        <Number name="SessionIdLength" size="8"/>
+        <Number name="CipherSuite" size="16" value="0x0039"/>
+        <Number name="CompressionMethod" size="8" value="0"/>
+        <Number name="ExtensionsLength" size="16">
+          <Relation type="size" of="Extensions"/>
+        </Number>
+        <Block name="Extensions">
+          <Block ref="TLV" minOccurs="0" maxOccurs="-1"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="RecordLayerAlert" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="21" token="true"/>
+    <Block name="Payload">
+      <Choice>
+        <Block name="Plaintext">
+          <Number name="Level" size="8"/>
+          <Number name="Description" size="8"/>
+        </Block>
+        <Block name="Encrypted">
+          <Blob/>
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HeartBeatRequest" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="24"/>
+    <Block name="Payload" ref="TLV">
+      <Number name="Type" size="8" value="1"/>
+	  <!--Number name="Length" size="16" value="17000"/-->
+      <Blob name="Value" value="hellohowareyoudoingtodayletsseeifwecanhitanewblocksize"/>
+      <Blob name="Padding" length="16"/>
+      <Transformer class="Tls">
+	    <Param name="ContentType" value="24"/>
+	  </Transformer>
+    </Block>
+  </DataModel>
+
+  <DataModel name="Empty">
+      <Blob length="0"/>
+  </DataModel>
+
+  <DataModel name="HeartBeatResponse" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="24" token="true"/>
+    <Block name="Payload">
+      <Number name="Type" size="8" value="2" token="true"/>
+      <Choice>
+        <Block name="SizedPayload">
+          <Number name="PayloadLength" size="16">
+             <Relation type="size" of="Value"/>
+          </Number>
+          <Blob name="Value"/>
+          <Blob name="Padding" minOccurs="0"/>
+        </Block>
+        <Block name="UnsizedPayload">
+          <Number name="PayloadLength" size="16"/>
+          <Blob name="Value"/>
+        </Block>
+      </Choice>
+      <Transformer class="Tls">
+	    <Param name="ContentType" value="24"/>
+	  </Transformer>
+    </Block>
+
+    <Block name="Alert" ref="RecordLayerAlert" minOccurs="0"/>
+  </DataModel>
+
+  <DataModel name="Beat">
+    <Choice name="Choices">
+      <Block name="HeartBeat" ref="HeartBeatResponse"/>
+      <Block ref="Empty"/>
+    </Choice>
+  </DataModel>
+
+  <DataModel name="ChangeCiperSpec" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="20"/>
+    <Blob name="Payload" valueType="hex" value="01"/>
+  </DataModel>
+
+  <DataModel name="EncrypedHandshake" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="20"/>
+      <Number name="Length" size="24">
+          <Relation type="size" of="VerifyData"/>
+      </Number>
+      <Blob name="VerifyData">
+       <Fixup class="Tls"/>
+      </Blob>
+  	  <Transformer class="Tls">
+  	    <Param name="ContentType" value="22"/>
+  	  </Transformer>
+    </Block>
+  </DataModel>
+
+  <!-- RSA Key Exchange -->
+  <DataModel name="ClientKeyExchange" ref="TlsPacket">
+    <Number name="ContentType" size="8" value="22"/>
+    <Block name="Payload">
+      <Number name="HandshakeType" size="8" value="16"/>
+      <Choice name="KeyExchangeChoice">
+        <Block name="RSA">
+          <Number name="Length" size="24">
+            <Relation type="size" of="RSAEncryptedPreMasterSecret"/>
+          </Number>
+          <Block name="RSAEncryptedPreMasterSecret">
+            <Number name="PubKeyength" size="16">
+              <Relation type="size" of="PreMasterSecretBlock"/>
+            </Number>
+            <Block name="PreMasterSecretBlock">
+              <Number name="Version" size="16" value="0x0301"/>
+              <Blob name="PreMasterSecret" length="46" valueType="hex" ><!--value="7C A8 18 D3 65 93 6D 3D 97 55 57 7D 8A 0D 6F
+6D 1F E3 E4 78 6B 88 F2 5A B3 B6 85 8C 59 33 E7 8A ED DD 14 C5 7B BC A3 7D 4F 1E 9E FD BB 04"-->
+                <Fixup class="SecureRandomNumber">
+                  <Param name="ref" value="PreMasterSecret"/>
+                  <Param name="Length" value="46"/>
+                </Fixup>
+              </Blob>
+              <Transformer class="Rsa">
+                <Param name="PublicKey" value="##PublicKey##"/>
+              </Transformer>
+            </Block>
+          </Block>
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+
+  <StateModel name="TheStateModel" initialState="Initial">
+    <State name="Initial" onStart="context.iterationStateStore['HandshakeMessage'] = []">
+      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['ClientRandom'] = (self.dataModel.find('Random'))">
+        <DataModel ref="ClientHello"/>
+      </Action>
+
+      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['ServerRandom'] = (self.dataModel.find('Random'))">
+        <DataModel ref="ServerHello"/>
+      </Action>
+
+      <Action type="input" name='incert' onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload'))">
+        <DataModel ref="HandShakeCertificate"/>
+      </Action>
+
+      <Action type="input" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload'))">
+        <DataModel ref="ServerHelloDone"/>
+      </Action>
+
+      <Action type="output" onComplete="context.iterationStateStore['HandshakeMessage'].append(self.dataModel.find('Payload')); context.iterationStateStore['PreMasterSecret'] = (self.dataModel.find('PreMasterSecretBlock'))">
+        <DataModel ref="ClientKeyExchange"/>
+      </Action>
+
+      <Action type="output">
+        <DataModel ref="ChangeCiperSpec"/>
+      </Action>
+
+      <Action type="output" >
+        <DataModel ref="EncrypedHandshake"/>
+      </Action>
+
+      <Action type="input">
+        <DataModel ref="NewSessionTicket"/>
+      </Action>
+
+      <Action type="input">
+        <DataModel ref="ChangeCiperSpec"/>
+      </Action>
+
+      <Action type="input">
+        <DataModel ref="EncrypedHandshake"/>
+      </Action>
+
+       <Action name="HeartBeatRequest" type="output">
+        <DataModel ref="HeartBeatRequest"/>
+      </Action>
+
+      <Action name="HeartBeatResponse" type="input">
+        <DataModel ref="Beat"/>
+        <!-- RFC6520: Heartbeat response size must never be larger than 16384 -->
+       <!--<Godel post='self.dataModel.find("HeartBeat") is None or int(self.dataModel.find("PayloadLength").InternalValue) &lt;= int(16384)'/>-->
+       <Godel post='self.dataModel.find("HeartBeat") is None or (self.dataModel.find("Value").InternalValue) == (self.parent.actions["HeartBeatRequest"].dataModel.find("Value").InternalValue)'/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <!--Monitor class="Pcap">
+      <Param name="Device" value="##Interface##"/>
+      <Param name="Filter" value="port ##TargetPort##"/>
+    </Monitor-->
+  </Agent>
+
+  <Test name="Default">
+    <Agent ref="Local"/>
+
+    <StateModel ref="TheStateModel"/>
+
+    <Publisher class="Tcp">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="5000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>

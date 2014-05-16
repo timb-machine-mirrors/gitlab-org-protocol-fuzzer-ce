@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+        author="Deja Vu Security, LLC" description="Ethernet PIT States" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+  <Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
+  <Include ns="ARP" src="file:##PitLibraryPath##/_Common/Models/Net/ARP_Data.xml"/>
+
+  <DataModel name="EthernetFrame" ref="Ethernet:Frame">
+    <Blob name="TypeOrLen" token="true" valueType="hex" value="0806"/> 
+    <Block name="Payload" mutable="false" ref="ARP:Packet" />
+  </DataModel>
+
+  <StateModel name="Send" initialState="Initial">
+    <State name="Initial">
+      <Action type="output">
+        <DataModel ref="EthernetFrame"/>
+      </Action>
+    </State>
+  </StateModel>
+</Peach>
+<!--End-->

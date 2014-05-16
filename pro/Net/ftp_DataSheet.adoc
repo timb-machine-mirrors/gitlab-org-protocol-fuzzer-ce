@@ -1,0 +1,36 @@
+:Doctitle: FTP Peach Pit Data Sheet
+:Description: File Transfer Protocol (FTP)
+
+ * Peach Pit: FTP
+ * Direction: Client, Server
+ * Supported Platforms: Windows, Linux, OS X
+
+File Transfer Protocol (FTP) is a standard network protocol used to transfer files from one host to another
+host over a TCP-based network, such as the Internet.
+
+FTP is built on a client-server architecture and uses separate control and data connections between the client
+and the server. FTP users may authenticate themselves using a clear-text sign-in protocol, normally in the form
+of a username and password, but can connect anonymously if the server is configured to allow it.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC 959 - File Transfer Protocol (FTP).
+|RFC 697 - CWD Command of FTP
+|RFC 775 - Directory Oriented FTP Commands
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|FTP Protocol | RFC959
+|CWD Command | RFC 697
+|Directory Oriented Commands | RFC 775
+|========
+

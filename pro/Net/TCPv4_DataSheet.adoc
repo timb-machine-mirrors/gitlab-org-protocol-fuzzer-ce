@@ -1,0 +1,38 @@
+
+:Doctitle: TCPv4 Peach Pit Data Sheet
+:Description: Transmission Control Protocol Version 4 (TCPv4)
+
+ * Peach Pit: TCPv4
+ * Direction: Client
+ * Supported Platforms: Windows, Linux, OS X
+
+The Transmission Control Protocol (TCP) is one of the core protocols of the Internet protocol suite (IP), and is so common that the entire suite is often called TCP/IP. 
+
+TCP provides reliable, ordered, error-checked delivery of a stream of octets between programs running on computers connected to a local area network, Intranet or the public Internet.
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC793 | Transmission Control Protocol
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|MaximumSegmentSize | RFC793 Section 3.1 page 17
+|========
+
+[options="header"]
+|========
+|Supported Features | Specification
+|Establishing a connection (Async, Client) | RFC793 Section 3.4
+|Closing a Connection (Async) | RFC793 Section 3.5 Case 2
+|Data Communication |  RFC793 Section 3.7
+|========
+

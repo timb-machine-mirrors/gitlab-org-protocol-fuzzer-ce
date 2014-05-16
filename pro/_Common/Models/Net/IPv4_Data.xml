@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd" 
+       author="Deja Vu Security, LLC" description="Internet Protocol Version 4 PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC. 2013 -->
+
+  <!-- IPv4 Options -->
+  <DataModel name="OptionsBlock">
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />
+      <Flag name="OptionClass" position="1" size="2" />
+      <Flag name="OptionNumber" position="3" size="5" />
+    </Flags>
+  </DataModel>
+  
+  <DataModel name="ExtendedOptionsBlock">
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />
+      <Flag name="OptionClass" position="1" size="2" />
+      <Flag name="OptionNumber" position="3" size="5" />
+    </Flags>
+    <Number name="OptionLength" size="8" endian="big">
+      <Relation type="size" of="ExtendedOptionsBlock"/>
+    </Number>
+    <Blob name="OptionData" />
+  </DataModel>
+  
+  <DataModel name="SRROptionPayload">
+    <Blob name="Pointer" length="1" />
+    <Block name="RouteData" minOccurs="0">
+        <Blob name="Address" length="4" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="TimeStampOptionPayload" ref="ExtendedOptionsBlock"> <!--TODO Length should not include data?-->
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" />  
+      <Flag name="OptionClass" position="1" size="2" value="2" token="true" />
+      <Flag name="OptionNumber" position="3" size="5" value="4" token="true" />
+    </Flags>
+    <Block name="OptionData">
+      <Blob name="Pointer" length="1" />
+      <Number name="oflw" size="4" />
+      <Choice>
+        <Block>
+          <Number name="flags" size="4" value="0" token="true" />
+          <Block minOccurs="0" >
+            <Blob name="Time" length="4" />
+          </Block>  
+        </Block>
+        <Block>
+          <Number name="flags" size="4" />
+          <Block minOccurs="0" >
+            <Blob name="Address" length="4" />        
+            <Blob name="Time" length="4" />
+          </Block>  
+        </Block>
+      </Choice>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="SecurityOptionPayload" ref="ExtendedOptionsBlock">
+    <Flags size="8" name="OptionType" endian="big">
+      <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+      <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+      <Flag name="OptionNumber" position="3" size="5" value="2" token="true" />
+    </Flags>
+    <Block name="OptionData">
+      <Block name="SField" length="2">
+        <Choice>
+          <Blob name="Unclassified" valueType="hex" value="00 00" token="true" />
+          <Blob name="Confidential" valueType="hex" value="F1 35" token="true" />
+          <Blob name="EFTO" valueType="hex" value="78 9A" token="true" />
+          <Blob name="MMMM" valueType="hex" value="BC 4D" token="true" />
+          <Blob name="PROG" valueType="hex" value="5E 26" token="true" />
+          <Blob name="Restricted" valueType="hex" value="AF 13" token="true" />
+          <Blob name="Secret" valueType="hex" value="D7 88" token="true" />
+          <Blob name="TopSecret" valueType="hex" value="6B C5" token="true" />
+          <Blob name="Reserved1" valueType="hex" value="35 E3" token="true" />
+          <Blob name="Reserved2" valueType="hex" value="9A F1" token="true" />
+          <Blob name="Reserved3" valueType="hex" value="4D 7F" token="true" />
+          <Blob name="Reserved4" valueType="hex" value="24 BD" token="true" />
+          <Blob name="Reserved5" valueType="hex" value="13 5E" token="true" />
+          <Blob name="Reserved6" valueType="hex" value="89 AF" token="true" />
+          <Blob name="Reserved7" valueType="hex" value="C4 D6" token="true" />
+          <Blob name="Reserved8" valueType="hex" value="E2 6B" token="true" />
+        </Choice>
+      </Block>
+      <Blob name="CField" length="2" />
+      <Blob name="HField" length="2" />
+      <Blob name="TCCField" length="3" />
+    </Block>
+  </DataModel>
+  
+  <DataModel name="IPv4Options"> 
+    <Choice>
+    
+      <Block name="EndOfOptionList" ref="OptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="0" token="true" />
+        </Flags>
+      </Block>
+
+      <Block name="NoOp" ref="OptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="1" token="true" />
+        </Flags>
+      </Block>
+
+      <Block name="Security" ref="SecurityOptionPayload" />
+
+      <Block name="LooseSourceRouting" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="3" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="StrictSourceRouting" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="9" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="RecordRoute" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="7" token="true" />
+        </Flags>
+        <Block name="OptionData" ref="SRROptionPayload" />
+      </Block>
+
+      <Block name="StreamID" ref="ExtendedOptionsBlock">
+        <Flags size="8" name="OptionType" endian="big">
+          <Flag name="CopiedFlag" position="0" size="1" value="1" />  
+          <Flag name="OptionClass" position="1" size="2" value="0" token="true" />
+          <Flag name="OptionNumber" position="3" size="5" value="8" token="true" />
+        </Flags>
+        <Blob name="OptionData" length="2" />
+      </Block>
+      
+      <Block name="Timestamp" />
+      
+    </Choice>
+  </DataModel>
+        
+  <!-- IP Packet RFC791 --> 
+  <DataModel name="Packet">
+    <Block name="Header">
+      <Flags size="16" endian="big">
+        <Flag name="Version" position="0" size="4" valueType="hex" value="04" token="true"/>
+        <Flag name="HeaderLength" position="4" size="4" valueType="hex">
+          <Relation type="size" of="Header" expressionGet="size * 4" expressionSet="size / 4"/>
+        </Flag>
+        <Flag name="DSCP" position="8" size="6" valueType="hex" value="00"/>
+        <Flag name="ECN" position="14" size="2" valueType="hex" value="00"/>
+      </Flags>
+      <Number name="TotalLength" size="16" endian="big" valueType="hex">
+        <Relation type="size" of="Packet"/>
+      </Number>
+      <Number name="Identification" size="16" endian="big" value="0"/>
+      <Flags name="Flags" size="16" endian="big">
+        <Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
+        <Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
+        <Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
+        <Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
+      </Flags>
+      <Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
+      <Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
+      <Number name="Checksum" size="16" endian="big">
+        <Fixup class="checksums.IcmpChecksumFixup">
+          <Param name="ref" value="Header"/>
+        </Fixup>
+      </Number>
+      <!--These fields must be nonmutable on windows-->
+      <Blob name="SrcIP" valueType="ipv4" length="4" value="##SourceIPv4##" mutable="false"/>
+      <!--These fields must be nonmutable on windows-->
+      <Blob name="DestIP" valueType="ipv4" length="4" value="##TargetIPv4##" mutable="false"/>
+      <Block name="Options" >
+        <Block name="Option" ref="IPv4Options" minOccurs="0" />
+        <Padding alignment="32" />
+      </Block>
+    </Block>
+    <Block name="Payload" />
+  </DataModel>
+</Peach>
+<!--END-->

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       author="Deja Vu Security, LLC" description="JPEG2000 PIT" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	
+	<Include ns="States" src="file:##PitLibraryPath##/_Common/Models/Image/JPEG2000_State.xml"/>
+
+	<Agent name="LinuxAgent">
+		<Monitor class="LinuxCrashMonitor"/>
+		<Monitor class="Process">
+			<Param name="Executable" value="##Target##"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="Arguments" value="fuzzed.jp2"/>
+			<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+
+	<Agent name="OsxAgent">
+		<Monitor class="CrashWrangler">
+			<Param name="Command" value="##Target##"/>
+			<Param name="Arguments" value="fuzzed.jp2"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+	
+	<Agent name="WinAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="##Target## fuzzed.jp2"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="CpuKill" value="true"/>
+		</Monitor>
+	</Agent>
+
+
+  <!-- **************
+        TEST SECTION  
+       ************** -->
+  <Test name="Default">
+		<StateModel ref="States:StateModel"/>
+    
+		<Agent ref="##Agent##"/>
+
+    <Publisher name="writer" class="file.FileWriter">
+      <Param name="FileName" value="fuzzed.jp2" />
+    </Publisher>
+
+    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
+    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
+	
+		<!-- GUI Launcher: WINDOWS ONLY -->
+		<!--
+		 <Publisher name="launch" class="process.DebuggerLauncherGui"> 
+			<Param name="WindowName" value="GUI Window Name" /> 
+		 </Publisher> 
+		 -->
+    <Strategy class="##Strategy##"/>
+
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+  </Test>
+</Peach>
+<!--END-->

@@ -27,6 +27,8 @@ pip-log.txt
 .tox
 nosetests.xml
 
+output/
+
 # Translations
 *.mo
 
@@ -34,3 +36,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+pro/logs
+pro/fuzzed.*
+

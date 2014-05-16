@@ -1,0 +1,69 @@
+include::LACP_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+No extra applications are required for pit tests but we recommend a LACP enabled switch.
+
+==== Required Pit Configuration Changes
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface.
+ActorPort:: Port number of the local machine.
+PartnerPort:: Port number of the target host machine.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 -debug LACP.xml
+----
+==== Full test run
+----
+peach LACP.xml
+----
+
+=== Examples
+
+.Sample LACP Configuration File
+==========================
+Example configuration for sending LACP packets.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="SourceMAC"     value="000000000000"/>
+    <Define key="TargetMAC"     value="000000000000"/>
+    <Define key="LoggerPath"    value="./logs/lacp/"/>
+    <Define key="ActorPort"     value="0012"/>
+    <Define key="PartnerPort"   value="0000"/>
+    <Define key="Strategy"      value="Random"/>
+    <Define key="PitLibraryPath"          value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface"       value="eth0"/>
+    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="tsharkBin"       value="/usr/bin/tshark"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
+  </OSX>
+
+  <Windows platform="windows">
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+  </Windows>
+</PitDefines>
+----
+==========================

@@ -1,0 +1,68 @@
+include::LLDP_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+This pit broadcasts LLDP packets; no extra applications are required.
+
+==== Required Pit Configuration Changes
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface (used for monitoring).
+Hostname:: Host name of the switch.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug LLDP.xml
+----
+==== Full test run
+----
+peach LLDP.xml
+----
+
+=== Examples
+
+.Sample LLDP Configuration File
+==========================
+Example configuration for sending LLDP packets.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="RemoteAgentIP" value="10.0.1.40"/>
+    <Define key="SourceMAC" value="000000000000"/>
+    <Define key="TargetMAC" value="ffffffffffff"/>
+    <Define key="Hostname" value="foobar"/>
+    <Define key="LoggerPath"  value="logs/lldp/"/>
+    <Define key="Strategy"  value="Random"/>
+    <Define key="PitLibraryPath" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="tsharkInterface" value="eth0"/>
+    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <!-- This can't run on OS X because it uses the RawEther publisher. -->
+  </OSX>
+
+  <Windows platform="windows">
+    <!-- This can't run on windows because it uses the RawEther publisher. -->
+  </Windows>
+</PitDefines>
+----
+==========================

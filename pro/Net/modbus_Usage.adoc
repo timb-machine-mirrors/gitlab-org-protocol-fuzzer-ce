@@ -1,0 +1,76 @@
+include::modbus_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A Modbus server listening on the Modbus port defined in configuration file is required. The network tool socat can be used as the listener.
+
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+TargetPort:: Modbus port number of the target host machine.
+SerialPort:: The serial port of the local machine when using Modbus over serial.
+Baudrate:: The baud rate for the current serial port.
+Parity:: The parity bit value used for the current serial port.
+DataBits:: The number of data bits in each character for the current serial port.
+StopBits:: Number of bits sent at the end of every character for the current serial port.
+Handshake:: The current handshake protocol used by the current serial port.
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Timeout:: How long to wait for incoming data.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug modbus.xml
+----
+==== Full test run
+----
+peach modbus.xml
+----
+
+=== Examples
+
+.Sample Modbus Configuration File
+==========================
+Example configuration using socat on Linux.
+
+First we must install and run socat; for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
+
+----
+sudo apt-get install socat
+
+socat tcp-l:502,fork exec:'/bin/cat'
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetIPv4" value="192.168.1.1"/>
+    <Define key="TargetPort" value="502"/>
+
+    <!-- Modbus over Serial Defines -->
+    <Define key="SerialPort" value="COM1"/>
+    <Define key="Baudrate" value="57600"/>
+    <Define key="Parity" value="None"/>
+    <Define key="DataBits" value="8"/>
+    <Define key="StopBits" value="One"/>
+    <Define key="Handshake" value="XOnXOff"/>
+
+    <!-- General Configurations -->
+    <Define key="Timeout" value="5000"/>
+    <Define key="LoggerPath" value="logs/modbus/"/>
+    <Define key="Strategy" value="Random"/>
+    <Define key="PitLibraryPath" value="."/>
+  </All>
+</PitDefines>
+----
+==========================

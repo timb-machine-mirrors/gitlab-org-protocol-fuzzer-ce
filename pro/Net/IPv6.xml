@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+        author="Deja Vu Security, LLC" description="Internet Protocol Version 6 PIT" version="0.0.2">
+<!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+<!-- Requires Peach for Raw publishing -->
+
+  <Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_State.xml"/>
+
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##"/>
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="IPv6:Transmit"/>
+
+    <Agent ref="LocalAgent"/> 
+
+    <Publisher class="RawEther">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_IPV6"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+</Peach>
+<!-- end -->

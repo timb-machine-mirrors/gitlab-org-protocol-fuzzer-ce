@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="Internet Security Protocol v6 PIT" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+	
+	<Include ns="IPSECv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPSECv6_State.xml"/>
+	
+  <Agent name="LocalAgent">
+    <Monitor class="Pcap">
+      <Param name="Device" value="##Interface##"/>
+    </Monitor>
+  </Agent>
+  
+  <!-- ESP Header Test -->
+  <Test name="Default">
+    <StateModel ref="IPSECv6:ESP"/>
+		
+		<Agent ref="LocalAgent"/>
+		
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="50"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+		
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+  
+  <!-- Authentication Header Test -->
+  <Test name="AH">
+    <StateModel ref="IPSECv6:AH"/>
+
+    <Agent ref="LocalAgent"/>
+
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="51"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>
+<!-- end -->

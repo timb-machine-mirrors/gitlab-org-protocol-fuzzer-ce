@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       author="Deja Vu Security, LLC" description="Virtual Extensible LAN PIT StateModels" version="0.0.2">
+  <!-- Copyright (c) Deja Vu Security, LLC. 2012 - 2013 -->
+	
+	<Include ns="DataModels" src="file:##PitLibraryPath##/_Common/Models/Net/VXLAN_Data.xml"/>
+	
+  <StateModel name="TheState" initialState="Initial">
+    <State name="Initial">
+      <!-- <Action type="output"> -->
+      <!--   <DataModel ref="DataModels:##Test##"/> -->
+      <!-- </Action> -->
+			<Action type="output">
+				<DataModel ref="DataModels:VXLAN"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv4EmptyPacketInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6EmptyPacketInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6ICMPInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6HopByHopInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6Fragment1InVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6Fragment2InVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6Fragment3InVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6DestinationOptionsInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv4TCPInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6TCPInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv4UDPInVxlan"/>
+			</Action>
+			<Action type="output">
+				<DataModel ref="DataModels:IPv6UDPInVxlan"/>
+			</Action>
+    </State>
+  </StateModel>
+</Peach>
+<!--END-->

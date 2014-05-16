@@ -1,0 +1,88 @@
+include::TCPv4_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A TCP listener listening on the TCPv4 port defined in configuration file is required. The network tool socat can be used as the listener.
+
+To use this pit, disable outgoing RST packets; Peach manages TCP states outside of the kernel context.
+
+==== Required Pit Configuration Changes
+TargetIPv4:: IP address of the target host machine.
+SourceIPv4:: IP address of the interface on the local machine.
+TargetIPBytes:: IP address of the target host machine in hexadecimal.
+SourceIPBytes:: IP address of the interface on the local machine in hexadecimal.
+SourcePort:: TCPv4 port number of the local machine.
+TargetPort:: TCPv4 port number of the target host machine.
+Interface:: Name of local interface (used for monitoring).
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug TCPv4.xml
+----
+==== Full test run
+----
+peach TCPv4.xml
+----
+
+=== Examples
+
+.Sample TCPv4 Configuration File
+==========================
+Example configuration using socat on Linux.
+
+First we must configure the firewall then install and run socat; for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat and firewall configuration.
+
+[source,bash]
+----
+#Disable outgoing RST on the node running Peach
+sudo iptables -A OUTPUT -p tcp -m tcp --tcp-flags RST RST -j DROP
+
+#Install socat
+
+sudo apt-get install socat
+
+#Set up TCPv4 listener
+socat tcp4-l:12345,fork,reuseaddr STDIO
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="LoggerPath" value="logs/tcp/"/>
+    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Define key="Strategy"  value="Random"/>
+    <Define key="TargetPort" value="12345"/>
+    <Define key="SourcePort" value="52080"/>
+    <Define key="PitLibraryPath" value="."/>
+    <Define key="TargetIPBytes" value="C0A89280"/>
+    <Define key="SourceIPBytes" value="C0A89201"/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+  </Windows>
+</PitDefines>
+----
+==========================

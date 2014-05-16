@@ -1,0 +1,90 @@
+include::ICMPv6_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+A target machine with ICMPv6 enabled.  A firewall must not block ICMPv6 messages.
+
+==== Required Pit Configuration Changes
+TargetIPv6:: IP address of the target host machine.
+SourceIPv6:: IP address of the interface on the local machine.
+Interface:: Name of local interface (used for monitoring).
+
+==== Optional Pit Configuration Changes.
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Path:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+peach -1 --debug ICMPv6.xml
+----
+==== Full test run
+----
+peach ICMPv6.xml
+----
+
+=== Examples
+
+.Sample ICMPv6 Configuration File
+==========================
+Example configuration sending ICMPv6 packets.
+
+For this example we assume you are running on Windows. For other platforms use the preferred way to configure the firewall.
+
+Windows Firewall Inbound Rules to enable on Target:
+
+----
+Core Networking - Destination Unreachable (ICMPv6-In)
+Core Networking - Multicast Listener Done (ICMPv6-In)
+Core Networking - Multicast Listener Query (ICMPv6-In)
+Core Networking - Multicast Listener Report (ICMPv6-In)
+Core Networking - Multicast Listener Report v2 (ICMPv6-In)
+Core Networking - Neighbor Discovery Advertisement (ICMPv6-In)
+Core Networking - Neighbor Discovery Solicitation (ICMPv6-In)
+Core Networking - Packet Too Big (ICMPv6-In)
+Core Networking - Parameter Problem (ICMPv6-In)
+Core Networking - Router Advertisement (ICMPv6-In)
+Core Networking - Router Solicitation (ICMPv6-In)
+Core Networking - Time Exceeded (ICMPv6-In)
+File and Printer Sharing (Echo Request - ICMPv6-In)
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="RemoteAgentIP" value="10.0.1.40"/>
+    <Define key="TargetIPv6" value="::1"/>
+    <Define key="LoggerPath" value="logs/ICMPv6/"/>
+    <Define key="SourceIPv6" value="::1"/>
+    <Define key="Strategy"  value="Random"/>
+    <Define key="PitLibraryPath" value="."/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="lo"/>
+    <Define key="tsharkInterface" value="lo"/>
+    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  </Linux>
+
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+    <Define key="tsharkInterface" value="en0"/>
+    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="tsharkInterface" value="2"/>
+    <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+  </Windows>
+</PitDefines>
+----
+==========================
