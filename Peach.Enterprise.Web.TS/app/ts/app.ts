@@ -24,7 +24,7 @@ module DashApp {
 		"ngRoute",
 		"LocalStorageModule",
 	])
-		.service("peachService", ["$resource", ($resource) => new PeachService($resource)])
+		.service("peachService", ["$resource", "$http", ($resource, $http) => new PeachService($resource, $http)])
 		.config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
 			//$locationProvider.html5Mode(true);
 
