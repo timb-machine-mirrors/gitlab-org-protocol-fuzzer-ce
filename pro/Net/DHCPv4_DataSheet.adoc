@@ -4,7 +4,7 @@
 
  * Peach Pit: DHCPv4
  * Direction: Client
- * Supported Platforms: Windows, Linux, OS X
+ * Supported Platforms: Linux
 
 Dynamic Host Configuration Protocol Version 4 (DHCPv4) is the network configuration protocol over IPv4.
 

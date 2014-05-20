@@ -18,7 +18,7 @@
     </Monitor>
   </Agent>
 
-  <Test name="Default">
+  <Test name="Default" controlIteration="2">
 		<StateModel ref="DHCPv4:Client"/>
 
     <Exclude xpath="//Payload"/>

@@ -45,11 +45,13 @@
 		<Blob name="ServerName" length="64"/>
 		<Blob name="BootFileName" length="128"/>
 		<Blob name="MagicCookie" length="4" valueType="hex" value="63825363"/>
-		<Block name="Options"/>
+		<Block name="DOptions"/>
 	</DataModel>
 
 	<DataModel name="DhcpIPPacket" ref="Ethernet:Frame">
-		<Block name="Payload" mutable="false" ref="IPv4:Packet"/>
+		<Block name="Payload" mutable="false" ref="IPv4:Packet">
+			<Block name="Header.Options"/>
+		</Block>
 	</DataModel>
 
 	<DataModel name="UdpDhcp" ref="UDPv4:Packet"/>
@@ -64,7 +66,7 @@
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="RelayAgentIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
-			<Block name="Options">
+			<Block name="DOptions">
 				<Block name="DhcpMessageType" ref="TLV">
 					<Number name="Type" size="8" value="53"/>
 					<Number name="Length" size="8">
@@ -113,7 +115,7 @@
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="RelayAgentIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
-			<Block name="Options">
+			<Block name="DOptions">
 				<Block name="DhcpMessageType" ref="TLV">
 					<Number name="Type" size="8" value="53"/>
 					<Number name="Length" size="8">
@@ -169,7 +171,7 @@
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="RelayAgentIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
-			<Block name="Options">
+			<Block name="DOptions">
 				<Block name="DhcpMessageType" ref="TLV">
 					<Number name="Type" size="8" value="53"/>
 					<Number name="Length" size="8">
@@ -749,17 +751,17 @@
 				</Block>
 				<Padding alignment="128"/>
 			</Block>
-			<Block name="Options" ref="DhcpOptions"/>
+			<Block name="DOptions" ref="DhcpOptions"/>
 		</Block>
 	</DataModel>
 
 	<DataModel name="Offer" ref="Response">
-		<Block name="Payload.Payload.UdpPayload.Options" ref="DhcpOptions"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions" ref="DhcpOptions"/>
 	</DataModel>
 
 	<DataModel name="Ack" ref="Response">
 		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
-		<Block name="Payload.Payload.UdpPayload.Options" ref="DhcpOptions"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions" ref="DhcpOptions"/>
 	</DataModel>
 
 </Peach>

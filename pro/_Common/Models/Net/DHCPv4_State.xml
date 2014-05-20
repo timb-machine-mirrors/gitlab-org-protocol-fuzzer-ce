@@ -26,7 +26,7 @@
 				<DataModel ref="DHCPv4:Request"/>
 			</Action>
 
-			<Action type="input">
+			<Action name="Ack" type="input">
 				<DataModel ref="DHCPv4:Response"/>
 			</Action>
 
