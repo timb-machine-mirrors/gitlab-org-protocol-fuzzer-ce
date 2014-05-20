@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
         author="Deja Vu Security, LLC" description="802.3 Ethernet PIT with 802.1Q support DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
@@ -30,7 +30,7 @@
     <Blob name="Src" valueType="hex" mutable="false" length="6" value="##SourceMAC##"/>
     <!-- IEEE 802.3 Section 3.2.6 Length/Type field -->
     <!-- More information can also be found at https://en.wikipedia.org/wiki/EtherType -->
-    <Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
+    <Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false" value="0x0800">
       <!-- "a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/ -->
       <!-- Type field indicates the number of MAC client data octets contained in the subsequent MAC Client -->
       <!-- Data field of the basic frame (Length interpretation). -->
