@@ -163,6 +163,43 @@
 		</Block>
 	</DataModel>
 
+	<DataModel name="Release" ref="DhcpUDPPacket">
+		<Block name="Payload.Payload.UdpPayload" ref="DHCP">
+			<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+			<Blob name="NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+			<Blob name="RelayAgentIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+			<Block name="Options">
+				<Block name="DhcpMessageType" ref="TLV">
+					<Number name="Type" size="8" value="53"/>
+					<Number name="Length" size="8">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Number name="Value" size="8" value="7"/>
+				</Block>
+				<Block name="DhcpServerIdentifier" ref="TLV">
+					<Number name="Type" size="8" value="54"/>
+					<Number name="Length" size="8">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Blob name="Value" valueType="ipv4" length="4" value="0.0.0.0"/>
+				</Block>
+				<Block name="ClientIdentifier" ref="TLV">
+					<Number name="Type" size="8" value="61"/>
+					<Number name="Length" size="8">
+						<Relation type="size" of="Value"/>
+					</Number>
+					<Block name="Value">
+						<Number name="HardwareType" size="8" value="1"/>
+						<Blob name="ClientMacAddress" valueType="hex" value="##SourceMAC##"/>
+					</Block>
+				</Block>
+				<Number name="End" size="8" value="255"/>
+				<Padding alignment="128"/>
+			</Block>
+		</Block>
+	</DataModel>
+
 	<DataModel name="DhcpOptions">
 		<Choice minOccurs="1" maxOccurs="-1">
 			<Block name="DhcpMessageType" ref="TLV">
@@ -249,6 +286,449 @@
 					<Number name="DomainNameServer" size="8" value="6"/>
 					<Number name="NetworkTimeProtocol" size="8" value="42"/>
 				</Block>
+			</Block>
+
+			<!-- For Cracking -->
+			<Block name="Pad" ref="TLV">
+				<Number name="Type" size="8" token="true" value="0"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TimeServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="4"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NameServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="5"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="LogServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="7"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="CookieServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="8"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="LPRServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="9"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="ImpressServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="10"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="ResourceLocationServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="11"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="HostName" ref="TLV">
+				<Number name="Type" size="8" token="true" value="12"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="BootFileSize" ref="TLV">
+				<Number name="Type" size="8" token="true" value="13"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="MeritDumpFile" ref="TLV">
+				<Number name="Type" size="8" token="true" value="14"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="DomainName" ref="TLV">
+				<Number name="Type" size="8" token="true" value="15"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="SwapServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="16"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="RootPath" ref="TLV">
+				<Number name="Type" size="8" token="true" value="17"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="ExtensionsPath" ref="TLV">
+				<Number name="Type" size="8" token="true" value="18"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="IPForwarding" ref="TLV">
+				<Number name="Type" size="8" token="true" value="19"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NonLocalSourceRouting" ref="TLV">
+				<Number name="Type" size="8" token="true" value="20"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="PolicyFilter" ref="TLV">
+				<Number name="Type" size="8" token="true" value="21"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="MaximumDatagramReassemblySize" ref="TLV">
+				<Number name="Type" size="8" token="true" value="22"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="DefaultIPTimeToLive" ref="TLV">
+				<Number name="Type" size="8" token="true" value="23"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="PathMtuAginingTimeout" ref="TLV">
+				<Number name="Type" size="8" token="true" value="24"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="PathMtuPlateauTable" ref="TLV">
+				<Number name="Type" size="8" token="true" value="25"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="InterfaceMTU" ref="TLV">
+				<Number name="Type" size="8" token="true" value="26"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="AllSubnetsLocal" ref="TLV">
+				<Number name="Type" size="8" token="true" value="27"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="BroadcastAddress" ref="TLV">
+				<Number name="Type" size="8" token="true" value="28"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="PerformMaskDiscovery" ref="TLV">
+				<Number name="Type" size="8" token="true" value="29"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="MaskSupplier" ref="TLV">
+				<Number name="Type" size="8" token="true" value="30"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="PerformRouterDiscovery" ref="TLV">
+				<Number name="Type" size="8" token="true" value="31"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="RouterSolicitationAddress" ref="TLV">
+				<Number name="Type" size="8" token="true" value="32"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="StaticRoute" ref="TLV">
+				<Number name="Type" size="8" token="true" value="32"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TrailerEncapsulationOption" ref="TLV">
+				<Number name="Type" size="8" token="true" value="1"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="ArpCacheTimeout" ref="TLV">
+				<Number name="Type" size="8" token="true" value="35"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="EthernetEncapsulation" ref="TLV">
+				<Number name="Type" size="8" token="true" value="36"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TcpDefaultTTL" ref="TLV">
+				<Number name="Type" size="8" token="true" value="37"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TcpKeepAliveInterval" ref="TLV">
+				<Number name="Type" size="8" token="true" value="38"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TcpKeepaliveGarage" ref="TLV">
+				<Number name="Type" size="8" token="true" value="39"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetworkInformationServiceDomain" ref="TLV">
+				<Number name="Type" size="8" token="true" value="40"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetworkInformationServers" ref="TLV">
+				<Number name="Type" size="8" token="true" value="41"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetworkTimeProtocolServers" ref="TLV">
+				<Number name="Type" size="8" token="true" value="42"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="VendorSpecificInformation" ref="TLV">
+				<Number name="Type" size="8" token="true" value="43"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetBiosOverTcpNameServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="44"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetBiosOverTcpDatagramServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="45"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetbiosOverTcpNodeType" ref="TLV">
+				<Number name="Type" size="8" token="true" value="46"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetbiosOverTcpScope" ref="TLV">
+				<Number name="Type" size="8" token="true" value="47"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="XWindowServerFontServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="48"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="XWinodwSystemDisplayManager" ref="TLV">
+				<Number name="Type" size="8" token="true" value="49"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="OptionOverload" ref="TLV">
+				<Number name="Type" size="8" token="true" value="52"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="Message" ref="TLV">
+				<Number name="Type" size="8" token="true" value="56"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="MaximumDhcpMessageSize" ref="TLV">
+				<Number name="Type" size="8" token="true" value="57"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="VendorClassIdentifier" ref="TLV">
+				<Number name="Type" size="8" token="true" value="60"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetworkInformationService+Domain" ref="TLV">
+				<Number name="Type" size="8" token="true" value="64"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NetworkInformationService+Servers" ref="TLV">
+				<Number name="Type" size="8" token="true" value="65"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="TftpServerName" ref="TLV">
+				<Number name="Type" size="8" token="true" value="66"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="BootfileName" ref="TLV">
+				<Number name="Type" size="8" token="true" value="67"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="MobileIpHomeAgent" ref="TLV">
+				<Number name="Type" size="8" token="true" value="68"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="SmtpServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="69"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="Pop3Server" ref="TLV">
+				<Number name="Type" size="8" token="true" value="70"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="NNTPServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="71"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="WWWServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="72"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="DefaultFingerServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="73"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="DefaultIrcServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="74"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="StreetTalkServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="75"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
+			</Block>
+			<Block name="StdaServer" ref="TLV">
+				<Number name="Type" size="8" token="true" value="76"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value"/>
 			</Block>
 		</Choice>
 
