@@ -158,7 +158,9 @@ namespace Peach.Core.Dom
 
 				name = name.Substring(name.IndexOf(':') + 1);
 
-				return getRef(other, name, container);
+				// If we have to look in a different namespace, ignore any container
+				// that might have been passed to us
+				return getRef(other, name, null);
 			}
 
 			if (container != null)
