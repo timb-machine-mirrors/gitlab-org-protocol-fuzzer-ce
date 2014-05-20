@@ -481,7 +481,7 @@ namespace Peach.Enterprise.WebServices
 		}
 
 		public string title { get { return _fault.title; } }
-		public string description { get { return _fault.description; } }
+		//public string description { get { return _fault.description; } }
 		public string source { get { return _fault.detectionSource; } }
 		public bool reproducable { get; set; }
 		public uint iteration { get { return _fault.iteration; } }
