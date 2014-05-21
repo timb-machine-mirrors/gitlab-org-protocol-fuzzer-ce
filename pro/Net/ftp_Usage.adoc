@@ -30,30 +30,30 @@ Add monitors to agent as needed
 ==== Single test debug run
 ----
 #Test client in active mode
-peach -1 --debug ftp.xml
+peach -1 --debug FTP_Client.xml
 
 #Test client in passive mode
-peach -1 --debug ftp.xml Passive
+peach -1 --debug FTP_Client.xml Passive
 
 #Test server in active mode
-peach -1 --debug ftp.xml Server
+peach -1 --debug FTP_Server.xml
 
 #Test server in passive mode
-peach -1 --debug ftp.xml ServerPassive
+peach -1 --debug FTP_Server.xml Passive
 ----
 ==== Full test run
 ----
 #Test client in active mode
-peach ftp.xml
+peach FTP_Client.xml
 
 #Test client in passive mode
-peach ftp.xml Passive
+peach FTP_Client.xml Passive
 
 #Test server in active mode
-peach ftp.xml Server
+peach FTP_Server.xml
 
 #Test server in passive mode
-peach ftp.xml ServerPassive
+peach FTP_Server.xml Passive
 ----
 
 === Examples

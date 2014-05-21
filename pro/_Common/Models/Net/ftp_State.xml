@@ -7,7 +7,7 @@
   <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_Data.xml"/>
 
   <!-- FTP Passive Mode-->
-  <StateModel name="AgentToHostPassive" initialState="InputUserName">
+  <StateModel name="ClientPassive" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
@@ -109,7 +109,7 @@
   </StateModel>
 
   <!-- FTP Active Mode-->
-  <StateModel name="AgentToHost" initialState="InputUserName">
+  <StateModel name="ClientActive" initialState="InputUserName">
     <State name="InputUserName">
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
@@ -205,7 +205,7 @@
   </StateModel>
 
   <!-- ################### Begin Active Mode Server State Model ################### -->
-  <StateModel name="HostToAgent" initialState="StartServer">
+  <StateModel name="ServerActive" initialState="StartServer">
     <State name="StartServer">
       <Action type="open" publisher="CommandPublisher"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
@@ -610,7 +610,7 @@
   </StateModel>
 
   <!-- ################### Begin Passive Mode Server State Model ################### -->
-  <StateModel name="PassiveHostToAgent" initialState="StartServer">
+  <StateModel name="ServerPassive" initialState="StartServer">
     <State name="StartServer">
       <Action type="open" publisher="CommandPublisher"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
