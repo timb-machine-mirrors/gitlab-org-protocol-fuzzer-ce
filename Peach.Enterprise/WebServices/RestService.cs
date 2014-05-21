@@ -10,6 +10,7 @@ using NLog;
 using Nancy.Serialization.JsonNet;
 using Newtonsoft.Json;
 
+#if DISABLED
 namespace Peach.Enterprise.WebServices
 {
 	public class RestService : Nancy.NancyModule
@@ -517,5 +518,6 @@ namespace Peach.Enterprise.WebServices
 		}
 	}
 }
+#endif
 
 // end

@@ -13,6 +13,7 @@ using Nancy.Hosting.Self;
 using Nancy.Diagnostics;
 using Nancy.Conventions;
 
+#if DISABLED
 namespace Peach.Enterprise.WebServices
 {
 	public class RestServer
@@ -144,3 +145,4 @@ namespace Peach.Enterprise.WebServices
 		}
 	}
 }
+#endif
