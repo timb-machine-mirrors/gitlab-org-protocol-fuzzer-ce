@@ -28,18 +28,18 @@ Add monitors to agent as needed
 ==== Single test debug run
 ----
 #Run client test
-peach -1 --debug SNMP.xml
+peach -1 --debug SNMP_Client.xml
 
 #Run server test
-peach -1 --debug SNMP.xml Server
+peach -1 --debug SNMP_Server.xml
 ----
 ==== Full test run
 ----
 #Run client test
-peach SNMP.xml
+peach SNMP_Client.xml
 
 #Run server test
-peach -1 --debug SNMP.xml Server
+peach SNMP_Server.xml
 ----
 
 === Examples

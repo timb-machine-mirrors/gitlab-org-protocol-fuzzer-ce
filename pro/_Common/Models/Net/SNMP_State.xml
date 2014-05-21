@@ -9,7 +9,7 @@
 	<Import import="SNMP"/>
 
 	<!-- Client State Model -->
-  <StateModel name="ManagerToAgent" initialState="Initial">
+  <StateModel name="Client" initialState="Initial">
     <State name="Initial">
       <!-- generate snmp get request packet -->
       <Action name="SnmpGetRequest" type="output" publisher="UdpHandler">
@@ -41,7 +41,7 @@
   </StateModel>
 
 	<!-- Server State Model -->
-  <StateModel name="AgentToManager" initialState="LaunchClient">
+  <StateModel name="Server" initialState="LaunchClient">
     <State name="LaunchClient">
       <Action type="open" publisher="UdpHandler"/>
 

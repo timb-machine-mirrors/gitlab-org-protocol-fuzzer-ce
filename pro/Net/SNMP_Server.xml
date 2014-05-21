@@ -10,9 +10,6 @@
 
 	<Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
 
-  <Agent name="Agent">
-  </Agent>
-
 	<Agent name="Windows">
     <Monitor class="Process">
       <Param name="Executable" value="##Program##" />
@@ -45,27 +42,8 @@
     </Monitor>
   </Agent>
 
-  <!-- Default test case -->
-  <Test name="Default">
-    <StateModel ref="SNMP:ManagerToAgent"/>
-
-    <Agent ref="Agent"/>
-
-    <Publisher class="Udp" name="UdpHandler">
-      <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##TargetIPv4##"/>
-      <Param name="Port" value="##TargetPort##"/>
-    </Publisher>
-
-    <Strategy class="##Strategy##"/>
-
-    <Logger class="File">
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-  </Test>
-
-	<Test name="Server">
-    <StateModel ref="SNMP:AgentToManager"/>
+	<Test name="Default">
+    <StateModel ref="SNMP:Server"/>
 
    <Agent ref="##Agent##"/>
 
