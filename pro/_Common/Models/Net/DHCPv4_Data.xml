@@ -29,7 +29,7 @@
 		<Number name="Hops" size="8" value="0"/>
 		<Number name="TransactionId" size="32" value="0x01963ac8"/>
 		<Number name="SecondsElapsed" size="16"  value="0"/>
-		<Flags size="16">
+		<Flags name="BootpFlags" size="16">
 			<Flag name="Broadcast" size="1" position="0"/>
 		</Flags>
 		<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="##SourceIPv4##"/>
@@ -756,13 +756,124 @@
 	</DataModel>
 
 	<DataModel name="Offer" ref="Response">
-		<Block name="Payload.Payload.UdpPayload.DOptions" ref="DhcpOptions"/>
+		<Blob name="Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" length="4" value="##TargetIPv4##"/>
+		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="##SourceIPv4##"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions">
+			<Block name="DhcpMessageType" ref="TLV">
+				<Number name="Type" size="8" value="53"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="8" value="2"/>
+			</Block>
+			<Block name="SubnetMask" ref="TLV">
+				<Number name="Type" size="8" token="true" value="1"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value" valueType="ipv4" length="4" value="##SubnetMask##"/>
+			</Block>
+			<Block name="RenewalTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="58"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="1800"/>
+			</Block>
+			<Block name="RebindingTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="59"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="3150"/>
+			</Block>
+			<Block name="IpAddressLeaseTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="51"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="3600"/>
+			</Block>
+			<Block name="DhcpServerIdentifier" ref="TLV">
+				<Number name="Type" size="8" value="54"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
+			</Block>
+			<Number name="End" size="8" value="255"/>
+			<Padding alignment="128"/>
+		</Block>
 	</DataModel>
 
 	<DataModel name="Ack" ref="Response">
+		<Blob name="Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" length="4" value="##TargetIPv4##"/>
 		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
-		<Block name="Payload.Payload.UdpPayload.DOptions" ref="DhcpOptions"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions">
+			<Block name="DhcpMessageType" ref="TLV">
+				<Number name="Type" size="8" value="53"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="8" value="5"/>
+			</Block>
+			<Block name="RenewalTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="58"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="1800"/>
+			</Block>
+			<Block name="RebindingTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="59"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="3150"/>
+			</Block>
+			<Block name="IpAddressLeaseTime" ref="TLV">
+				<Number name="Type" size="8" token="true" value="51"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="32" value="3600"/>
+			</Block>
+			<Block name="DhcpServerIdentifier" ref="TLV">
+				<Number name="Type" size="8" value="54"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
+			</Block>
+			<Block name="SubnetMask" ref="TLV">
+				<Number name="Type" size="8" token="true" value="1"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Blob name="Value" valueType="ipv4" length="4" value="##SubnetMask##"/>
+			</Block>
+			<Number name="End" size="8" value="255"/>
+			<Padding alignment="128"/>
+		</Block>
 	</DataModel>
 
+	<DataModel name="Nak" ref="Response">
+		<Flags name="BootpFlags" size="16">
+			<Flag name="Broadcast" size="1" position="0" value="1"/>
+		</Flags>
+		<Blob name="Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions">
+			<Block name="DhcpMessageType" ref="TLV">
+				<Number name="Type" size="8" value="53"/>
+				<Number name="Length" size="8">
+					<Relation type="size" of="Value"/>
+				</Number>
+				<Number name="Value" size="8" value="6"/>
+			</Block>
+			<Number name="End" size="8" value="255"/>
+			<Padding alignment="128"/>
+		</Block>
+	</DataModel>
 </Peach>
 <!-- end -->
