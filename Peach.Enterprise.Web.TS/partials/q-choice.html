@@ -2,7 +2,8 @@
 	<label class="control-label bolder blue">{{vm.currentQuestion.q}}</label>
 	<div class="control-group">
 		<div ng-repeat="choice in vm.currentQuestion.choice" class="radio">
-			<input type="radio" name="dummy" ng-model="vm.currentQuestion.value" ng-value="choice.value || choice.next" />
+			<!--  -->
+			<input type="radio" name="dummy" ng-model="vm.currentQuestion.value" ng-value="choice.value" />
 			<span>{{choice.a}}</span>
 		</div>
 	</div>

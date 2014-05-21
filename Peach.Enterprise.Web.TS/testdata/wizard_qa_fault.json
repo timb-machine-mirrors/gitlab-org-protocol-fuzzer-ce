@@ -55,8 +55,8 @@
 			"q": "How would you like to detect a faulting condition in your target?",
 			"type": "choice",
 			"choice":[
-				{ "a":"Detect a process or service has misbehaved. Misbehaving includes: early exit, crashes, and interesting exceptions.", "next":1100 },
-				{ "a":"Detect availability of remote device.", "next":4100 }
+				{ "value": 0, "a":"Detect a process or service has misbehaved. Misbehaving includes: early exit, crashes, and interesting exceptions.", "next":1100 },
+				{ "value": 1, "a":"Detect availability of remote device.", "next":4100 }
 			]
 		},
 		{
@@ -64,9 +64,9 @@
 			"q":"What type of process or service do you want to perform fault detection on?",
 			"type":"choice",
 			"choice":[
-				{ "a":"User process started by command line.", "next":1110 },
-				{ "a":"Windows service process.", "next":1120},
-				{ "a":"Currently running process. Note: This should only be selected if the process cannot be started via the command line. Once the process crashes, fuzzing will be halted.", "next":1130 }
+				{ "value": 0, "a":"User process started by command line.", "next":1110 },
+				{ "value": 1, "a":"Windows service process.", "next":1120},
+				{ "value": 2, "a":"Currently running process. Note: This should only be selected if the process cannot be started via the command line. Once the process crashes, fuzzing will be halted.", "next":1130 }
 			]
 		},
 		{

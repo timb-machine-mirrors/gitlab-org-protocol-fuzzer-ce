@@ -59,3 +59,5 @@ _ReSharper.Peach.net/*
 !/3rdParty/*
 
 app/js/*
+app/ts/*.js
+app/ts/*.js.map

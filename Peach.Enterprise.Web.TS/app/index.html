@@ -3,8 +3,7 @@
 <head>
 	<meta http-equiv="cache-control" content="no-cache" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title></title>
+	<title></title>
 
 	<link href="/Content/css/bootstrap.min.css" rel="stylesheet" />
 	<link rel="stylesheet" href="/Content/css/font-awesome.min.css" />
@@ -17,11 +16,12 @@
 	<link rel="stylesheet" href="/Content/css/visualizer.css" />
 	<link rel="stylesheet" href="/Content/css/tree-control.css" />
 
-
 	<link rel="stylesheet" href="/Content/css/datepicker.css" />
 	<link rel="stylesheet" href="/Content/css/ui.jqgrid.css" />
 
-	<script type="text/javascript" src="/Scripts/jquery-2.1.0.min.js"></script>
+	<link rel="stylesheet" href="css/app.css" />
+
+	<script type="text/javascript" src="/Scripts/jquery-2.1.1.min.js"></script>
 
 	<script type="text/javascript" src="/Scripts/angular.js"></script>
 	<script type="text/javascript" src="/Scripts/angular-poller.min.js"></script>
@@ -45,12 +45,13 @@
 	<script src="/Content/js/flot/jquery.flot.resize.min.js"></script>
 	<script src="/Content/js/jquery.dataTables.min.js"></script>
 	<script src="/Content/js/jquery.dataTables.bootstrap.js"></script>
+	<script src="/Content/js/line-chart.min.js"></script>
 
 	<script src="/Content/js/date-time/bootstrap-datepicker.min.js"></script>
 	<script src="/Content/js/jqGrid/jquery.jqGrid.min.js"></script>
 	<script src="/Content/js/jqGrid/i18n/grid.locale-en.js"></script>
 
-	<script src="/Content/js/ng-grid-2.0.7.min.js"></script>
+	<script src="/Scripts/ng-grid.min.js"></script>
 	<script src="/Content/js/line-chart.min.js"></script>
 	<script type="text/javascript" src="/Content/js/d3.min.js" charset="utf-8"></script>
 
@@ -67,14 +68,14 @@
 
 	<script src="/Content/js/ace-extra.min.js"></script>
 </head>
-<body class="skin-1">
+<body class="skin-1" ng-controller="DashApp.DashController">
 
 	<div class="navbar navbar-default" id="navbar">
 		<script type="text/javascript">
 			try { ace.settings.check('navbar', 'fixed') } catch (e) { }
 		</script>
 
-		<div class="navbar-container" id="navbar-container" ng-controller="DashApp.DashController">
+		<div class="navbar-container" id="navbar-container">
 			<div class="navbar-header pull-left">
 				<small>
 					<img src="/Content/images/peachlogo.png" height="50" />
@@ -236,15 +237,14 @@
 
 			<div class="main-content" ng-view>
 
-			<div id="pitselect">
-				<treecontrol 
-					class="tree-classic ng-isolate-scope" 
-					ng-controller="DashApp.DashController" 
-					tree-model="pitLibrary" 
-					options="opt1" 
-					on-selection="showSelected(node)" 
-					selected-node="node1"></treecontrol>
-			</div>
+				<div id="pitselect">
+					<treecontrol class="tree-classic ng-isolate-scope"
+											 ng-controller="DashApp.DashController"
+											 tree-model="pitLibrary"
+											 options="opt1"
+											 on-selection="showSelected(node)"
+											 selected-node="node1"></treecontrol>
+				</div>
 
 			</div><!-- /.main-container-inner -->
 

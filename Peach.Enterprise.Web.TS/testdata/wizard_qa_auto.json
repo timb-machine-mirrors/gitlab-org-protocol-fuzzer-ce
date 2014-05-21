@@ -56,8 +56,8 @@
 			"q": "What type of automation task would you like to perform?",
 			"type": "choice",
 			"choice": [
-				{ "a": "Interface with a CanaKit Relay board connected to the machine performing automation tasks.", "next":4100 },
-				{ "a": "Control a process running locally on the machine performing automation tasks.","next":4200 }
+				{ "value":  0, "a": "Interface with a CanaKit Relay board connected to the machine performing automation tasks.", "next":4100 },
+				{ "value":  1, "a": "Control a process running locally on the machine performing automation tasks.","next":4200 }
 			]
 		},
 		{
@@ -80,31 +80,31 @@
 			"id":4102,
 			"q":"Should the relay be ON or OFF by default?",
 			"type":"choice",
+			"key":"CanaKitRelayReverseSwitch",
 			"choice":[
-				{ "q":"The relay should be ON by default."},
-				{"key":"CanaKitRelayReverseSwitch", "value":"true", "q":"The relay should be OFF by default."}
-			],
-			"next":4103
+				{ "value": false, "a":"The relay should be ON by default.","next":4103},
+				{ "value": true, "a":"The relay should be OFF by default.","next":4103}
+			]
 		},
 		{
 			"id":4103,
 			"q":"Should the relay be reset on the start of fuzzing?",
 			"type":"choice",
+			"key":"CanaKitRelayResetOnStart",
 			"choice":[
-				{"key":"CanaKitRelayResetOnStart", "value":"true", "a":"Yes, reset the relay at the start of fuzzing."},
-				{"a":"No, do not change the relay at the start of fuzzing."}
-				],
-			"next":4104
+				{ "value":true, "a":"Yes, reset the relay at the start of fuzzing.",			"next":4104},
+				{"value": false, "a":"No, do not change the relay at the start of fuzzing.",			"next":4104}
+				]
 		},
 		{
 			"id":4104,
 			"q":"Should the relay be reset on every iteration?",
 			"type":"choice",
+			"key":"CanaKitRelayResetEveryIteration",
 			"choice":[
-				{"key":"CanaKitRelayResetEveryIteration", "value":"true", "a":"Yes, reset the relay at the start of every iteration."},
-				{"a":"No, do not change the relay at the start of an iteration."}
-				],
-			"next":4105
+				{ "value":true, "a":"Yes, reset the relay at the start of every iteration.","next":4105},
+				{ "value": false, "a":"No, do not change the relay at the start of an iteration.","next":4105}
+				]
 		},
 		{
 			"id":4105,
@@ -131,20 +131,21 @@
 			"id":4202,
 			"q":"When do you want to start the process?",
 			"type":"choice",
+			"key":"ProcessStart",
 			"choice":[
-				{"a":"Once per fuzzing run, and after a fault is detected? For network fuzzing, this is the most likely selection."},
-				{"key":"ProcessRestartOnEachTest", "value":"true", "a":"At the start of every iteration?"},
-				{"key":"ProcessStartOnCall", "value":"", "a":"At the end of every iteration? For file fuzzing, this is the most likely selection."}
-				],
-			"next":4203
+				{ "value":"StartOnEachIteration", "a":"Once per fuzzing run, and after a fault is detected? For network fuzzing, this is the most likely selection.","next":4203},
+				{ "value":"RestartOnEachTest", "a":"At the start of every iteration?","next":4203},
+				{"value":"StartOnCall", "a":"At the end of every iteration? For file fuzzing, this is the most likely selection.","next":4203}
+				]
 		},
 		{
 			"id":4203,
 			"q":"If the process exists early, should that be considered a fault?",
 			"type":"choice",
+			"key":"ProcessFaultOnEarlyExit",
 			"choice":[
-				{ "key":"ProcessFaultOnEarlyExit", "value":"true","a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing." },
-				{ "a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
+				{ "value":true,"a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing." },
+				{ "value":false, "a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
 			]
 		}
 	],
