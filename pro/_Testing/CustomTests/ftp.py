@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-test(name="ftp",
+test(name="FTP_Client",
      test="Default")
 
-test(name="ftp",
+test(name="FTP_Client",
      test="Passive")
 
-test(name="ftp",
-     test="Server")
+test(name="FTP_Server",
+     test="Default")
+
+test(name="FTP_Server",
+     test="Passive")
 
 
