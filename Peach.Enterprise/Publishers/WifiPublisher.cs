@@ -126,6 +126,21 @@ namespace Peach.Enterprise.Publishers
 
 		Thread beaconThread = null;
 
+		void compile()
+		{
+			SendPacket(probeRequest);
+			SendPacket(associationRequest);
+			SendPacket(reassociationRequest);
+			SendPacket(atim);
+			SendPacket(powerSavePoll);
+			SendPacket(readyToSend);
+			SendPacket(cfEnd);
+			SendPacket(keymessage2);
+			SendPacket(keymessage4);
+			SendPacket(cfEndCfAck);
+		}
+
+
         #region Helper Methods
 
         string FormatAsMac(byte[] mac)
@@ -909,7 +924,7 @@ namespace Peach.Enterprise.Publishers
 
             public byte[] GeneratePmk(byte[] password, byte[] salt, int iterations)
             {
-                var ret = new MemoryStream();
+                //var ret = new MemoryStream();
 
                 Pkcs5S2ParametersGenerator gen = new Pkcs5S2ParametersGenerator();
 
