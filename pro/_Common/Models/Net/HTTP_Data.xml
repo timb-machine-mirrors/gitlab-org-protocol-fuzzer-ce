@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="http protocol pit datamodels" version="0.0.1">
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+
+  <DataModel name="CRLF">
+    <Blob valueType="hex" token="true" value="0d 0a"/>
+  </DataModel>
+
+  <DataModel name="Header">
+    <String name="field-name" value="User-Agent" constraint="not value.startswith(&quot;\x0d\x0a&quot;)" />
+    <Blob value=":" token="true" />
+    <String name="field-value" value=" burl" />
+  </DataModel>
+
+  <DataModel name="ContentLengthHeader" ref="Header">
+    <String name="field-name" value="Content-Length" token="true" />
+    <String name="field-value">
+      <Hint name="NumericalString" value="true"/>
+      <Relation type="size" of="static-body-blob" />
+    </String>
+  </DataModel>
+
+  <DataModel name="TransferEncodingHeader" ref="Header">
+    <String name="field-name" value="Transfer-Encoding" token="true" />
+    <!-- transfer encodings besides "chunked" are not supported -->
+    <String name="field-value" value=" chunked" token="true" />
+  </DataModel>
+
+  <DataModel name="Headers">
+    <Block name="header-array" minOccurs="0" maxOccurs="-1">
+      <Choice name="header-switch" >
+        <Block name="content-length" ref="ContentLengthHeader" />
+        <Block name="transfer-encoding" ref="TransferEncodingHeader" />
+        <Block name="misc-header" ref="Header" />
+      </Choice>
+      <Block ref="CRLF" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="ChunkExtension">
+    <String name="extension-name" />
+    <Block minOccurs="0" maxOccurs="1" >
+      <Blob value="=" token="true" />
+      <String name="extension-val" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="Chunk" >
+    <String name="chunk-size" constraint="int(value) > 0" >
+      <Transformer class="IntToHex" />
+      <Relation type="size" of="chunk-data" />
+    </String>
+    <Block name="extension-array" minOccurs="0" maxOccurs="-1" >
+      <Blob value=";" token="true" />
+      <Block name="extension" ref="ChunkExtension" />
+    </Block>
+    <Block ref="CRLF" />
+    <Blob name="chunk-data" />
+    <Block ref="CRLF" />
+  </DataModel>
+
+  <DataModel name="ChunkLast" >
+    <String value="0" token="true" />
+    <Block name="extension-array" minOccurs="0" maxOccurs="-1" >
+      <Blob value=";" token="true" />
+      <Block name="extension" ref="ChunkExtension" />
+    </Block>
+    <Block ref="CRLF" />
+  </DataModel>
+
+  <DataModel name="ChunkTrailer">
+    <Block minOccurs="0" maxOccurs="-1">
+      <Block name="header" ref="Header" />
+      <Block ref="CRLF" />
+    </Block>
+  </DataModel>
+
+  <DataModel name="ChunkedBody" >
+    <Block name="chunk" ref="Chunk" minOccurs="0" maxOccurs="-1" />
+    <Block name="last-chunk" ref="ChunkLast" />
+    <Block name="trailer" ref="ChunkTrailer" />
+    <Block ref="CRLF" />
+  </DataModel>
+
+  <DataModel name="StaticBody" >
+    <Blob name="static-body-blob" />
+  </DataModel>
+
+  <DataModel name="EmptyBody" >
+    <Blob value="" length="0" token="true" />
+  </DataModel>
+
+  <DataModel name="Body">
+    <Choice name="body-switch">
+      <Block name="static" ref="StaticBody" />
+      <Block name="chunked" ref="ChunkedBody" />
+      <Block name="empty" ref="EmptyBody" />
+    </Choice>
+  </DataModel>
+
+  <DataModel name="Method">
+    <String name="method" value="GET" />
+  </DataModel>
+
+  <DataModel name="URI">
+    <String name="uri" value="/" />
+  </DataModel>
+
+  <DataModel name="Version">
+    <Blob value="HTTP/" token="true"/>
+    <String name="major-version" value="1">
+      <Hint name="NumericalString" value="true" />
+    </String>
+    <Blob value="." token="true"/>
+    <String name="minor-version" value="1">
+      <Hint name="NumericalString" value="true" />
+    </String>
+  </DataModel>
+
+  <DataModel name="RequestLine">
+    <Block name="method" ref="Method"/>
+    <Blob value=" " token="true" />
+    <Block name="uri" ref="URI" />
+    <Blob value=" " token="true" />
+    <Block name="version" ref="Version" />
+  </DataModel>
+
+  <DataModel name="Reason" >
+    <String name="reason" value="OK" />
+  </DataModel>
+
+  <DataModel name="ResponseLine" >
+    <Block name="version" ref="Version" />
+    <Blob value=" " token="true" />
+    <String name="status-code" value="200">
+      <Hint name="NumericalString" value="true" />
+    </String>
+    <Blob value=" " token="true" />
+    <Block name="reason" ref="Reason" />
+  </DataModel>
+
+  <DataModel name="Request">
+    <Block name="request-line" ref="RequestLine" />
+    <Block ref="CRLF"/>
+    <Block name="headers" ref="Headers" />
+    <Block ref="CRLF"/>
+    <Block name="body" ref="Body"/>
+  </DataModel>
+
+  <DataModel name="Response">
+    <Block name="response-line" ref="ResponseLine" />
+    <Block ref="CRLF"/>
+    <Block name="headers" ref="Headers" />
+    <Block ref="CRLF"/>
+    <Block name="body" ref="Body"/>
+  </DataModel>
+
+</Peach>

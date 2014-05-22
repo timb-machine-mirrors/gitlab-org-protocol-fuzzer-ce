@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="test http pit" version="0.0.1">
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+
+  <Include ns="HTTP" src="file:##PitLibraryPath##/_Common/Models/Net/HTTP_State.xml"/>
+
+  <Agent name="ServerOnWindows">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="##ServerCmd##" />
+    </Monitor>
+  </Agent>
+
+  <Agent name="ClientOnWindows">
+    <Monitor class="WindowsDebugger">
+      <Param name="CommandLine" value="##ClientCmd##" />
+      <Param name="StartOnCall" value="launchProgram" />
+    </Monitor>
+  </Agent>
+
+  <Agent name="ServerOnLinux">
+    <Monitor class="LinuxDebugger">
+      <Param name="Executable" value="##ServerProgram##" />
+      <Param name="Arguments" value="##ServerProgramArgs##" />
+    </Monitor>
+  </Agent>
+
+  <Agent name="ClientOnLinux">
+    <Monitor class="LinuxDebugger">
+      <Param name="Executable" value="##ClientProgram##" />
+      <Param name="Arguments" value="##ClientProgramArgs##" />
+      <Param name="StartOnCall" value="launchProgram" />
+    </Monitor>
+  </Agent>
+
+  <Agent name="ServerOnOSX">
+    <Monitor class="Process">
+      <Param name="Executable" value="##ServerProgram##" />
+      <Param name="Arguments" value="##ServerProgramArgs##" /> 
+    </Monitor>
+  </Agent>
+
+  <Agent name="ClientOnOSX">
+    <Monitor class="Process">
+      <Param name="Executable" value="##ClientProgram##" />
+      <Param name="Arguments" value="##ClientProgramArgs##" /> 
+      <Param name="StartOnCall" value="launchProgram" />
+     </Monitor>
+  </Agent>
+
+  <!-- name="FuzzServer" -->
+  <Test name="Default" >
+    <Agent ref="ServerOnWindows" platform="windows" />
+    <Agent ref="ServerOnLinux" platform="linux" />
+    <Agent ref="ServerOnOSX" platform="osx" />
+
+    <StateModel ref="HTTP:RequestToServer"/>
+
+    <Publisher class="Tcp" >
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="1000"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="Filesystem">
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+
+  <Test name="FuzzClient" >
+    <Agent ref="ClientOnWindows" platform="windows" />
+    <Agent ref="ClientOnLinux" platform="linux" />
+    <Agent ref="ClientOnOSX" platform="osx" />
+
+
+    <StateModel ref="HTTP:RequestFromClient"/>
+
+    <Publisher class="TcpListener" >
+      <Param name="Interface" value="0.0.0.0"/>
+      <Param name="Port" value="##TargetPort##"/>
+    </Publisher>
+
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="Filesystem">
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+
+</Peach>

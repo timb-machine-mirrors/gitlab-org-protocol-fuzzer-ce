@@ -1,0 +1,84 @@
+include::HTTP_DataSheet.adoc[]
+
+=== Configuration
+
+==== Target Configuration
+There are two types of use for this pit: fuzzing a server and fuzzing a client. The default test
+fuzzes a server and the 'FuzzClient' test fuzzes a client. Note that this pit will fuzz the HTTP
+protocol itself and is not meant to fuzz web applications.
+
+==== Required Pit Configuration Changes To Fuzz a Server
+TargetIPv4:: IP address of the target host machine.
+TargetPort:: port number of the target HTTP server.
+ServerCmd:: The server program to test when running the default test.
+Interface:: Name of local interface (used for monitoring).
+
+==== Required Pit Configuration Changes To Fuzz a Server
+ClientCmd:: The client program to test when running the 'FuzzClient' test.
+Interface:: Name of local interface (used for monitoring).
+
+==== Optional Pit Configuration Changes
+Strategy:: Fuzzing strategy Peach will use for testing.
+LoggerPath:: Path to folder where logs will be stored.
+Agent:: Agent to run depending on the target OS. Do not change this value.
+PitLibraryPath:: Path to the relative base directory where all pits are located.
+
+==== Configure Additional Monitors
+Add monitors to agent as needed
+
+=== Running
+
+==== Single test debug run
+----
+#fuzz server
+peach -1 --debug HTTP.xml
+
+#fuzz client
+peach -1 --debug HTTP.xml FuzzClient
+----
+==== Full test run
+----
+#fuzz server
+peach HTTP.xml
+
+#fuzz client
+peach HTTP.xml FuzzClient
+----
+
+=== Examples
+
+.Sample HTTP Configuration File
+==========================
+Example configuration targeting the curl command on Linux, OSX and Windows.
+Make sure the curl command is installed on your target system.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+  <All>
+    <Define key="LoggerPath" value="./logs/http/"/>
+    <Define key="Strategy" value="Random"/>
+    <Define key="PitLibraryPath" value="."/>
+    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Define key="TargetPort" value="80"/>
+  </All>
+
+  <Linux platform="linux">
+    <Define key="Interface" value="eth0"/>
+    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  </Linux>
+  
+  <OSX platform="osx">
+    <Define key="Interface" value="en0"/>
+    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  </OSX>
+
+  <Windows platform="windows">
+    <Define key="Interface" value="Local Area Connection"/>
+    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  </Windows>
+
+</PitDefines>
+----
+==========================
