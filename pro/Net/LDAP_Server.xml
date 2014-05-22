@@ -2,13 +2,13 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="LDAPv3 Pit" version="0.0.2">
-	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+	<!-- Copyright (c) Deja Vu Security, LLC 2014 -->
 
 	<Include ns="LDAP" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_State.xml"/>
 
 	<Agent name="ServerAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="..\..\..\..\Downloads\LdapAdmin.exe ldap://##SourceIPv4##/"/>
+			<Param name="CommandLine" value="##Target## ##Arguments##"/>
 			<Param name="NoCpuKill" value="true"/>
 			<Param name="FaultOnEarlyExit" value="true"/>
 			<Param name="WaitForExitTimeout" value="500"/>
