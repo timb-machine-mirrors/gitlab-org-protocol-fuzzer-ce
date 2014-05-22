@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC" description="LDAPv3 Pit" version="0.0.2">
+	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+	<Include ns="LDAP" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_State.xml"/>
+
+	<Agent name="ServerAgent">
+		<Monitor class="WindowsDebugger">
+			<Param name="CommandLine" value="..\..\..\..\Downloads\LdapAdmin.exe ldap://##SourceIPv4##/"/>
+			<Param name="NoCpuKill" value="true"/>
+			<Param name="FaultOnEarlyExit" value="true"/>
+			<Param name="WaitForExitTimeout" value="500"/>
+			<Param name="StartOnCall" value="launchProgram"/>
+		</Monitor>
+	</Agent>
+
+	<Test name="Default">
+		<Agent ref="ServerAgent"/>
+
+		<StateModel ref="LDAP:Server"/>
+
+		<Strategy class="##Strategy##"/>
+
+		<Publisher name="TcpHandler" class="TcpListener">
+			<Param name="Interface" value="##SourceIPv4##" />
+			<Param name="Port" value="##TargetPort##"/>
+			<Param name="Timeout" value="##Timeout##"/>
+		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+</Peach>
+<!-- end -->
