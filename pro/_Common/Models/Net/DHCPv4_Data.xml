@@ -858,7 +858,7 @@
 	</DataModel>
 
 	<DataModel name="Nak" ref="Response">
-		<Flags name="BootpFlags" size="16">
+		<Flags name="Payload.Payload.UdpPayload.BootpFlags" size="16">
 			<Flag name="Broadcast" size="1" position="0" value="1"/>
 		</Flags>
 		<Blob name="Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
