@@ -17,6 +17,8 @@ module DashApp {
 		"n3-charts.linechart",
 		"ngRoute",
 		"LocalStorageModule",
+		"ui.bootstrap",
+		"kendo.directives"
 	])
 		.service("peachService", ["$resource", "$http", ($resource, $http) => new PeachService($resource, $http)])
         .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
