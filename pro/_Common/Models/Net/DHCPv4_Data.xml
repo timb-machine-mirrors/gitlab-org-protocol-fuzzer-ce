@@ -51,6 +51,7 @@
 	<DataModel name="DhcpIPPacket" ref="Ethernet:Frame">
 		<Block name="Payload" mutable="false" ref="IPv4:Packet">
 			<Block name="Header.Options"/>
+			<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
 		</Block>
 	</DataModel>
 
