@@ -8,14 +8,12 @@ namespace Peach.Enterprise.WebServices.Models
 	{
 		String,
 		Hex,
-		Int,
+		Range,
 		Ipv4,
 		Ipv6,
 		Hwaddr,
-		Interface,
-		Enum, // enumType
-		//Range (min,max)
-		//OnCall,
+		Iface,
+		Enum,
 	}
 
 	public class ConfigItem
@@ -27,5 +25,7 @@ namespace Peach.Enterprise.WebServices.Models
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public ConfigType Type { get; set; }
 		public List<string> Defaults { get; set; }
+		public long Min { get; set; }
+		public ulong Max { get; set; }
 	}
 }

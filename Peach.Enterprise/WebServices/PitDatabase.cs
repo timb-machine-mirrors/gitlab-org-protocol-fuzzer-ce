@@ -9,6 +9,10 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
+using Peach.Core;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+
 namespace Peach.Enterprise.WebServices
 {
 	[XmlRoot("Peach", Namespace = "http://peachfuzzer.com/2012/Peach")]
@@ -28,7 +32,7 @@ namespace Peach.Enterprise.WebServices
 		public string version { get; set; }
 	}
 
-	internal class PitDatabase
+	public class PitDatabase
 	{
 		private static PeachElement Parse(string fileName)
 		{
@@ -44,7 +48,7 @@ namespace Peach.Enterprise.WebServices
 
 		private static string MakeGuid(string value)
 		{
-			var bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
+			var bytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value));
 			var sb = new StringBuilder();
 			for (int i = 0; i < bytes.Length; ++i)
 				sb.Append(bytes[i].ToString("x2"));
@@ -125,6 +129,22 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
+		private IEnumerable<NetworkInterface> Interfaces
+		{
+			get
+			{
+				if (interfaces == null)
+					interfaces = NetworkInterface.GetAllNetworkInterfaces()
+						.Where(i => i.OperationalStatus == OperationalStatus.Up)
+						.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+							|| i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211
+							|| i.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+						.ToList();
+
+				return interfaces;
+			}
+		}
+
 		public Models.Pit GetPit(string guid)
 		{
 			Models.Pit pit;
@@ -137,6 +157,96 @@ namespace Peach.Enterprise.WebServices
 			Models.Library library;
 			libraries.TryGetValue(guid, out library);
 			return library;
+		}
+
+		public Models.PitConfig GetConfig(string guid)
+		{
+			var pit = GetPit(guid);
+			if (pit == null)
+				return null;
+
+			var fileName = pit.Versions[0].Files[0].Name + ".config";
+
+			var defines = PitDefines.Parse(fileName);
+
+			var ret = new Models.PitConfig()
+			{
+				PitUrl = pit.PitUrl,
+				Config = MakeConfig(defines),
+			};
+
+			return ret;
+		}
+
+		public List<Models.ConfigItem> MakeConfig(List<PitDefines.Define> defines)
+		{
+			var ret = new List<Models.ConfigItem>();
+
+			foreach (var d in defines)
+			{
+				var item = new Models.ConfigItem()
+				{
+					Key = d.Key,
+					Value = d.Value,
+					Name = d.Name,
+					Description = d.Description,
+					Defaults = new List<string>(),
+				};
+
+				switch (d.Type)
+				{
+					case PitDefines.Type.String:
+						item.Type = Models.ConfigType.String;
+						break;
+					case PitDefines.Type.Strategy:
+						item.Type = Models.ConfigType.Enum;
+						item.Defaults.AddRange(
+							ClassLoader.GetAllByAttribute<MutationStrategyAttribute>(null)
+								.Select(kv => kv.Key)
+								.Where(k => k.IsDefault)
+								.Select(k => k.Name));
+						break;
+					case PitDefines.Type.Port:
+						item.Type = Models.ConfigType.Range;
+						item.Min = ushort.MinValue;
+						item.Max = ushort.MaxValue;
+						break;
+					case PitDefines.Type.Hwaddr:
+						item.Type = Models.ConfigType.Hwaddr;
+						item.Defaults.AddRange(
+							Interfaces
+								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
+								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
+								.Where(s => !string.IsNullOrEmpty(s)));
+						break;
+					case PitDefines.Type.Iface:
+						item.Type = Models.ConfigType.Iface;
+						item.Defaults.AddRange(Interfaces.Select(i => i.Name));
+						break;
+					case PitDefines.Type.Ipv4:
+						item.Type = Models.ConfigType.Ipv4;
+						item.Defaults.AddRange(
+							Interfaces
+								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
+								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+								.Select(a => a.Address.ToString()));
+						break;
+					case PitDefines.Type.Ipv6:
+						item.Type = Models.ConfigType.Ipv6;
+						item.Defaults.AddRange(
+							Interfaces
+								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
+								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
+								.Select(a => a.Address.ToString()));
+						break;
+					default:
+						throw new NotSupportedException();
+				}
+
+				ret.Add(item);
+			}
+
+			return ret;
 		}
 
 		private void AddEntry(Models.LibraryVersion lib, string fileName)
@@ -198,5 +308,6 @@ namespace Peach.Enterprise.WebServices
 
 		private Dictionary<string, Models.Pit> entries = new Dictionary<string, Models.Pit>();
 		private Dictionary<string, Models.Library> libraries = new Dictionary<string, Models.Library>();
+		private List<NetworkInterface> interfaces = new List<NetworkInterface>();
 	}
 }
