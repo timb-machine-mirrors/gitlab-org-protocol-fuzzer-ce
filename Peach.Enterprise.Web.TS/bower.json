@@ -20,6 +20,8 @@
     "angular-touch":        "1.2.16",
     "angular-ui-router":    "0.2.10",
 
+    "ng-grid":              "2.0.1",
+
     "angular-ui-bootstrap": "0.10.0",
 
     "jQuery":               "2.1.0"

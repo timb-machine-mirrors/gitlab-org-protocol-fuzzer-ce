@@ -14,7 +14,10 @@
 	<link rel="stylesheet" href="/Content/css/ace-skins.min.css" />
 	<link rel="stylesheet" href="/Content/css/ng-grid.min.css" />
 	<link rel="stylesheet" href="/Content/css/visualizer.css" />
-	<link rel="stylesheet" href="/Content/css/tree-control.css" />
+	<!--
+	<link rel="stylesheet" href="/Content/css/tree-control-attribute.css" />
+	-->
+	<link href="/Content/css/kendo.common.min.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="/Content/css/datepicker.css" />
 	<link rel="stylesheet" href="/Content/css/ui.jqgrid.css" />
@@ -28,37 +31,24 @@
 	<script type="text/javascript" src="/Scripts/angular-resource.js"></script>
 	<script type="text/javascript" src="/Scripts/angular-route.js"></script>
 	<script type="text/javascript" src="/Scripts/angular-local-storage.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap.min.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
 	<script type="text/javascript" src="/Scripts/i18n/angular-locale_en-us.js"></script>
+
+	<script src="/Content/js/kendo.web.min.js"></script>
+	<script src="/Content/js/angular-kendo.min.js"></script>
+
 
 	<script src="/Content/js/bootstrap.min.js"></script>
 	<script src="/Content/js/typeahead-bs2.min.js"></script>
 	<script src="/Content/js/ace-elements.min.js"></script>
 	<script src="/Content/js/ace.min.js"></script>
-
-	<script src="/Content/js/jquery-ui-1.10.3.custom.min.js"></script>
-	<script src="/Content/js/jquery.ui.touch-punch.min.js"></script>
-	<script src="/Content/js/jquery.slimscroll.min.js"></script>
-	<script src="/Content/js/jquery.easy-pie-chart.min.js"></script>
-	<script src="/Content/js/jquery.sparkline.min.js"></script>
-	<script src="/Content/js/flot/jquery.flot.min.js"></script>
-	<script src="/Content/js/flot/jquery.flot.pie.min.js"></script>
-	<script src="/Content/js/flot/jquery.flot.resize.min.js"></script>
-	<script src="/Content/js/jquery.dataTables.min.js"></script>
-	<script src="/Content/js/jquery.dataTables.bootstrap.js"></script>
-	<script src="/Content/js/line-chart.min.js"></script>
-
-	<script src="/Content/js/date-time/bootstrap-datepicker.min.js"></script>
-	<script src="/Content/js/jqGrid/jquery.jqGrid.min.js"></script>
-	<script src="/Content/js/jqGrid/i18n/grid.locale-en.js"></script>
-
 	<script src="/Scripts/ng-grid.min.js"></script>
 	<script src="/Content/js/line-chart.min.js"></script>
-	<script type="text/javascript" src="/Content/js/d3.min.js" charset="utf-8"></script>
-
-	<script type="text/javascript" src="/Content/js/angular-tree-control.js"></script>
 
 
 	<script type="text/javascript" src="js/app.js"></script>
+	<script type="text/javascript" src="js/controllers.main.js"></script>
 	<script type="text/javascript" src="js/controllers.dash.js"></script>
 	<script type="text/javascript" src="js/controllers.wizard.js"></script>
 	<script type="text/javascript" src="js/controllers.pittest.js"></script>
@@ -68,7 +58,7 @@
 
 	<script src="/Content/js/ace-extra.min.js"></script>
 </head>
-<body class="skin-1" ng-controller="DashApp.DashController">
+<body class="skin-1" ng-controller="DashApp.MainController">
 
 	<div class="navbar navbar-default" id="navbar">
 		<script type="text/javascript">
@@ -125,7 +115,7 @@
 							<span class="menu-text"> Visualizer </span>
 						</a>
 					</li>
-					<li ng-class="{active: location.path() == '/faults'}" ng-controller="DashApp.DashController">
+					<li ng-class="{active: location.path() == '/faults'}">
 						<a href="#/faults">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
@@ -236,15 +226,6 @@
 			</div>
 
 			<div class="main-content" ng-view>
-
-				<div id="pitselect">
-					<treecontrol class="tree-classic ng-isolate-scope"
-											 ng-controller="DashApp.DashController"
-											 tree-model="pitLibrary"
-											 options="opt1"
-											 on-selection="showSelected(node)"
-											 selected-node="node1"></treecontrol>
-				</div>
 
 			</div><!-- /.main-container-inner -->
 
