@@ -30,11 +30,13 @@ Add monitors to agent as needed
 
 .Single test debug run
 ----
-peach -1 -debug DHCPv6.xml
+peach -1 -debug DHCPv6_Server.xml
+peach -1 -debug DHCPv6_Client.xml
 ----
 .Full test run
 ----
-peach DHCPv6.xml
+peach DHCPv6_Server.xml
+peach DHCPv6_Client.xml
 ----
 
 === Examples

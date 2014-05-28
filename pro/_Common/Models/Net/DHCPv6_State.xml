@@ -8,11 +8,9 @@
 	<!-- Implementation notes: Supports the minimum necessary for server side of 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
 
-	<Include ns="DHCP" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_Data.xml"/>
+	<Include ns="DHCPv6" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_Data.xml"/>
 	<PythonPath path="##PitLibraryPath##/_Common/Models/Net/"/>
 	<Import import="DHCPv6"/>
-
-
 
 	<StateModel name="Server" initialState="Listening">
 		<!-- Supports: -->
@@ -28,7 +26,7 @@
 		<State name="Listening">
 
 			<Action type="input" name="Listen" publisher="LisentenPublisher">
-				<DataModel name="DhcpRequest" ref="DHCP:Packet"/>
+				<DataModel name="DhcpRequest" ref="DHCPv6:Packet"/>
 			</Action>
 			<Action type="getProperty" property="LastRecvAddr" publisher="LisentenPublisher">
 				<DataModel name="LastSendIP"/> <!-- Needed for ip address storage -->
@@ -67,7 +65,7 @@
 				<!-- message containing configuration parameters for all of the -->
 				<!-- options identified in the Option Request option that the -->
 				<!-- server has been configured to return to the client. -->
-				<DataModel name="DhcpAdvertise" ref="DHCP:Packet"/>
+				<DataModel name="DhcpAdvertise" ref="DHCPv6:Packet"/>
 				<Data name="DataSet">
 					<Field name="MsgType" value="2"/>
 					<!-- The server ... copies the Client Identifier from the Solicit -->
@@ -93,7 +91,7 @@
 							setXpath="//Reply//ServerIdentifier//LinkLayerAddressPlusTime/Time"/>
 
 			<Action type="output" name="Reply" publisher="SendPublisher">
-				<DataModel ref="DHCP:Packet" name="DhcpReply"/>
+				<DataModel ref="DHCPv6:Packet" name="DhcpReply"/>
 				<Data name="DataSet">
 					<Field name="MsgType" value="7"/>
 					<Field name="Option[0].OptionChoice.ServerIdentifier.Duid.DuidChoice.LinkLayerAddressPlusTime" value=""/>
@@ -106,11 +104,28 @@
 		<State name="Quit">
 			<!-- This is a state that exists to exit after a given number of unmatched packets -->
 		</State>
-
-
 	</StateModel>
 
+	<StateModel name="Client" initialState="Initial">
+		<State name="Initial">
+			<Action name="Solicit" type="output">
+				<DataModel ref="DHCPv6:Solicit"/>
+			</Action>
 
+			<Action name="Advertise" type="input">
+				<DataModel ref="DHCPv6:Packet"/>
+			</Action>
 
+			<Action type="slurp" valueXpath="//Advertise//IPv6Address" setXpath="//Request//IPv6Address"/>
+			<Action type="slurp" valueXpath="//Advertise//T1" setXpath="//Request//T1"/>
+			<Action type="slurp" valueXpath="//Advertise//T2" setXpath="//Request//T2"/>
+			<Action type="slurp" valueXpath="//Advertise//PreferredLifetime" setXpath="//Request//PreferredLifetime"/>
+			<Action type="slurp" valueXpath="//Advertise//ValidLifetime" setXpath="//Request//ValidLifetime"/>
+
+			<Action name="Request" type="output">
+				<DataModel ref="DHCPv6:Request"/>
+			</Action>
+		</State>
+	</StateModel>
 </Peach>
 <!-- end -->
