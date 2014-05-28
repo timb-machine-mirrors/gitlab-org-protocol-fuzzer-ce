@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Dynamic Host Configuration Protocol v6 PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
-	
+
 	<!-- Implements: RFC3315 [Dynamic Host Configuration Protocol for IPv6 (DHCPv6)](http://tools.ietf.org/html/rfc3315) -->
 	<!-- Implementation notes: Only implements the minimum necessary to support section 1.3 "Client-server Exchanges Involving Four Messages" -->
 	<!-- Implementation notes: Ported from v2.3/ipv6/dhcpv6.xml -->
@@ -40,6 +40,14 @@
 		<Number endian="big"/>
 	</Defaults>
 
+	<DataModel name="TLV">
+		<Number name="Type" size="16"/>
+		<Number name="Length" size="16">
+			<Relation type="size" of="Value"/>
+		</Number>
+		<Blob name="Value"/>
+	</DataModel>
+
 	<DataModel name="DuidTypes">
 		<Choice name="DuidChoice">
 			<!--
@@ -54,7 +62,7 @@
 					<Fixup class="ExpressionFixup">
 						<Param name="ref" value="Time"/>
 						<!-- <Param name="expression" value="code.InteractiveConsole(locals=locals()).interact()"/> -->
-						<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0))) % (2**32))"/>
+						<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
 					</Fixup>
 				</Number>
 				<Blob name="Address" length="6" valueType="hex" value="##SourceMAC##"/>
@@ -99,7 +107,6 @@
 	-->
 
 	<DataModel name="IaOption">
-
 		<Choice name="IaOptionChoice">
 			<Block name="IaAddress">
 				<Number name="Option" size="16" value="5" token="true"/>
@@ -107,9 +114,9 @@
 					<Relation type="size" of="Data"/>
 				</Number>
 				<Block name="Data">
-					<Blob name="Ipv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce"/>
-					<!-- <Blob name="Ipv6Address" length="16" valueType="ipv6" value="##TargetIPv6Lease##"/> -->
-					<!-- <Blob name="Ipv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
+					<Blob name="IPv6Address" length="16" valueType="hex" value="fe8000000000000009087a386156acce"/>
+					<!-- <Blob name="IPv6Address" length="16" valueType="ipv6" value="##TargetIPv6Lease##"/> -->
+					<!-- <Blob name="IPv6Address" length="16" valueType="hex" value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01"/> -->
 					<Number name="PreferredLifetime" size="32" value="2000"/>
 					<Number name="ValidLifetime" size="32" value="3000"/>
 				</Block>
@@ -124,9 +131,9 @@
           <Number name="PreferredLifetime" size="32" value="100"/>
           <Number name="ValidLifetime" size="32" value="100"/>
           <Number name="PrefixLength" size="8">
-            <Relation type="size" of="Ipv6Address"/>
+            <Relation type="size" of="IPv6Address"/>
           </Number>
-          <Blob name="Ipv6Address" length="16" valueType="hex" value="fc000000000201000000000000000000"/>
+          <Blob name="IPv6Address" length="16" valueType="hex" value="fc000000000201000000000000000000"/>
         </Block>
       </Block>
 		</Choice>
@@ -177,7 +184,6 @@
 					<Number name="Code" size="16" value="0"/>
 					<String name="Msg" value="Peachy DHCP Message!" />
 				</Block>
-
 			</Block>
 
 			<Block name="IdentityAssociationForNonTemporary">
@@ -237,8 +243,115 @@
 	<DataModel name="Packet">
 		<Number name="MsgType" size="8"/>
 		<Number name="XID" size="24"/>
-		<Block name="Option" ref="DhcpOption" minOccurs="0" maxOccurs="100000"/>
+		<Block name="Option" ref="DhcpOption" minOccurs="0" maxOccurs="-1"/>
 	</DataModel>
 
+	<DataModel name="Solicit">
+		<Number name="MessageType" size="8" value="1"/>
+		<Number name="TransactionId" size="24" value="0xe7fb58"/>
+		<Block name="Options">
+			<Block name="ElapsedTime" ref="TLV">
+				<Number name="Type" size="16" value="8" token="true"/>
+				<Number name="Value" size="16" value="0"/>
+			</Block>
+			<Block name="ClientIdentifier" ref="TLV">
+				<Number name="Type" size="16" value="1" token="true"/>
+				<Block name="Value">
+					<Number name="DuidType" size="16" value="1"/>
+					<Number name="HardwareType" size="16" value="1"/>
+					<Number name="DuidTime" size="32" value="0">
+						<Fixup class="ExpressionFixup">
+							<Param name="ref" value="DuidTime"/>
+							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
+						</Fixup>
+					</Number>
+					<Blob name="LinkLayerAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+				</Block>
+			</Block>
+			<Block name="IdentityAssociationForNonTemporary" ref="TLV">
+				<Number name="Type" size="16" value="3" token="true"/>
+				<Block name="Value">
+					<Number name="IAID" size="32" value="0x0e000c29"/>
+					<Blob name="T1" length="4" valueType="hex" value="00000000"/>
+					<Blob name="T2" length="4" valueType="hex" value="00000000"/>
+				</Block>
+			</Block>
+			<Block name="FullyQualifiedDomainName" ref="TLV">
+				<Number name="Type" size="16" value="39" token="true"/>
+				<Block name="Value">
+					<Flags name="Flags" size="8">
+						<Flag name="Sbit" size="1" position="0" value="0"/>
+						<Flag name="Obit" size="1" position="1" value="0"/>
+						<Flag name="Nbit" size="1" position="2" value="0"/>
+						<Flag name="Reserved" size="5" position="3" value="0"/>
+					</Flags>
+					<Number name="Length" size="8">
+						<Relation type="size" of="Domain"/>
+					</Number>
+					<String name="Domain" value="PeachDomain"/>
+				</Block>
+			</Block>
+			<Block name="VendorClass" ref="TLV">
+				<Number name="Type" size="16" value="16"/>
+				<Block name="Value">
+					<Number name="EnterpriseId" size="32" value="311"/>
+					<Number name="Length" size="16">
+						<Relation type="size" of="VendorClassData"/>
+					</Number>
+					<Blob name="VendorClassData" value="MSFT 5.0"/>
+				</Block>
+			</Block>
+			<Block name="OptionRequest" ref="TLV">
+				<Number name="Type" size="16" value="6"/>
+				<Block name="Value">
+					<Number name="DomainSearchList" size="16" value="24"/>
+					<Number name="DnsRecursiveNameServer" size="16" value="23"/>
+					<Number name="VendorSpedificInformation" size="16" value="17"/>
+					<Number name="FUllyQualifiedDomainName" size="16" value="39"/>
+				</Block>
+			</Block>
+		</Block>
+	</DataModel>
+
+	<DataModel name="Request" ref="Solicit">
+		<Number name="MessageType" size="8" value="3"/>
+		<Block name="Options">
+			<Block name="ElapsedTime" ref="Solicit.Options.ElapsedTime"/>
+			<Block name="ClientIdentifier" ref="Solicit.Options.ClientIdentifier"/>
+			<Block name="ServerIdentifier" ref="TLV">
+				<Number name="Type" size="16" value="2"/>
+				<Block name="Value">
+					<Number name="DuidType" size="16" value="1"/>
+					<Number name="HardwareType" size="16" value="1"/>
+					<Number name="DuidTime" size="32" value="0">
+						<Fixup class="ExpressionFixup">
+							<Param name="ref" value="DuidTime"/>
+							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
+						</Fixup>
+					</Number>
+					<Blob name="LinkLayerAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+				</Block>
+			</Block>
+			<Block name="IdentityAssociationForNonTemporary" ref="TLV">
+				<Number name="Type" size="16" value="3" token="true"/>
+				<Block name="Value">
+					<Number name="IAID" size="32" value="0x0e000c29"/>
+					<Number name="T1" size="32" value="1800"/>
+					<Number name="T2" size="32" value="2880"/>
+					<Block name="IaAddress" ref="TLV">
+						<Number name="Type" size="16" value="5"/>
+						<Block name="Value">
+							<Blob name="IPv6Address" valueType="hex" value="20010470680307310001000000000001"/>
+							<Number name="PreferredLifetime" size="32" value="3600"/>
+							<Number name="ValidLifetime" size="32" value="3600"/>
+						</Block>
+					</Block>
+				</Block>
+			</Block>
+			<Block name="FullyQualifiedDomainName" ref="Solicit.Options.FullyQualifiedDomainName"/>
+			<Block name="VendorClass" ref="Solicit.Options.VendorClass"/>
+			<Block name="OptionRequest" ref="Solicit.Options.OptionRequest"/>
+		</Block>
+	</DataModel>
 </Peach>
 <!-- end -->

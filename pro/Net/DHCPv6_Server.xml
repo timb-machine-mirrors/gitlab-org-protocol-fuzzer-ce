@@ -14,7 +14,6 @@
     </Monitor>
 	</Agent>
 
-  <!-- Server Test  -->
   <Test name="Default">
 		<StateModel ref="States:Server"/>
 
@@ -25,7 +24,7 @@
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
       <Param name="Interface" value="##Interface##"/>
-			<Param name="Timeout" value="36000"/> <!-- 10 minutes -->
+      <Param name="Timeout" value="36000"/>
     </Publisher>
 
 		<Publisher class="Udp" name="SendPublisher">
@@ -33,7 +32,7 @@
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
-			<Param name="Timeout" value="36000"/> <!-- 10 minutes -->
+			<Param name="Timeout" value="36000"/>
     </Publisher>
 
 		<Publisher class="ConsoleHex" name="TestPublisher"/>

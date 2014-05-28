@@ -31,18 +31,18 @@ Add monitors to agent as needed
 ==== Single test debug run
 ----
 #Test client
-peach -1 --debug TELNET.xml
+peach -1 --debug TELNET_Client.xml
 
 #Test server
-peach -1 --debug TELNET.xml Server
+peach -1 --debug TELNET_Server.xml
 ----
 ==== Full test run
 ----
 #Test client
-peach TELNET.xml
+peach TELNET_Client.xml
 
 #Test server
-peach TELNET.xml Server
+peach TELNET_Server.xml
 ----
 
 === Examples
