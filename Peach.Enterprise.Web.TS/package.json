@@ -18,8 +18,12 @@
   "scripts": {
     "postinstall": "bower install",
 
-    "prestart": "npm install",
+    "prestart": "tsc @tsc-args.txt",
     "start": "http-server -p 8000 .",
+    // putting npm install _after_ the start is wonky, but we don't really
+    // rely on it much. it's mostly there as ultra backup for the time being.
+    // (npm install _was_ in the prestart location)
+    "poststart": "npm install",
 
     "pretest": "npm install",
     "test": "karma start test/karma.conf.js",
