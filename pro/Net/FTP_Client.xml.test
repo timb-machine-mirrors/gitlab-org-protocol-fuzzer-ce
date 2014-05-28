@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="SourceIPv4" value="10.0.1.92"/>
+	<Define key="TargetIPv4" value="10.0.1.23"/>
+	<Define key="TargetPort" value="21"/>
+	<Define key="Strategy"  value="Random"/>
+	<Define key="FtpUser" value="jordyn"/>
+	<Define key="FtpPass" value="passworda"/>
+	<Define key="DataPort" value="31337"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Passive">
+	</Test>
+
+	<Test name="Default">
+		<Open action="FTP:ClientActive.InputUserName.Action" publisher="CommandPublisher"/>
+		<Input action="FTP:ClientActive.InputUserName.Action" publisher="CommandPublisher">
+<![CDATA[
+0000   32 32 30 20 75 62 75 6e 74 75 20 46 54 50 20 73  220 ubuntu FTP s
+0010   65 72 76 65 72 20 28 56 65 72 73 69 6f 6e 20 36  erver (Version 6
+0020   2e 34 2f 4f 70 65 6e 42 53 44 2f 4c 69 6e 75 78  .4/OpenBSD/Linux
+0030   2d 66 74 70 64 2d 30 2e 31 37 29 20 72 65 61 64  -ftpd-0.17) read
+0040   79 2e 0d 0a                                      y...
+]]>
+		</Input>
+		<Output action="FTP:ClientActive.InputUserName.Action_1" publisher="CommandPublisher">
+<![CDATA[
+0000   55 53 45 52 20 6a 6f 72 64 79 6e 0d 0a           USER jordyn..
+]]>
+		</Output>
+		<Input action="FTP:ClientActive.InputPasswd.Action" publisher="CommandPublisher">
+<![CDATA[
+0000   33 33 31 20 50 61 73 73 77 6f 72 64 20 72 65 71  331 Password req
+0010   75 69 72 65 64 20 66 6f 72 20 6a 6f 72 64 79 6e  uired for jordyn
+0020   2e 0d 0a                                         ...
+]]>
+		</Input>
+		<Output action="FTP:ClientActive.InputPasswd.Action_1" publisher="CommandPublisher">
+<![CDATA[
+0000   50 41 53 53 20 70 61 73 73 77 6f 72 64 61 0d 0a  PASS passworda..
+]]>
+		</Output>
+		<Input action="FTP:ClientActive.TestConnection.Action" publisher="CommandPublisher">
+<![CDATA[
+0000   32 33 30 20 55 73 65 72 20 6a 6f 72 64 79 6e 20  230 User jordyn 
+0010   6c 6f 67 67 65 64 20 69 6e 2e 0d 0a              logged in...
+]]>
+		</Input>
+	</Test>
+
+</TestData>

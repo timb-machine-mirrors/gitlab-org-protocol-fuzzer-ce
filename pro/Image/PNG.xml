@@ -34,7 +34,9 @@
   <Test name="Default">
     <StateModel ref="PNG:FileWriteAndLaunch"/>
 
-    <Agent ref="##Agent##"/>
+    <Agent ref="LinuxAgent" platform="linux"/>
+    <Agent ref="WinAgent" platform="windows"/>
+    <Agent ref="OsxAgent" platform="osx"/>
 
     <Publisher name="writer" class="File">
       <Param name="FileName" value="fuzzed.png"/>

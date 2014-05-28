@@ -10,7 +10,7 @@ manifest = [
 	{
 		'root' : 'pro',
 		'incl' : '*',
-		'excl' : '_Testing/* */.gitignore *.TODO *.adoc' },
+		'excl' : '_Testing/* */.gitignore *.TODO *.adoc *.test' },
 ]
 
 '''
