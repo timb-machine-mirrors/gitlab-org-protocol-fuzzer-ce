@@ -237,12 +237,12 @@ namespace Peach.Core.Analyzers
 			object obj;
 			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
 			{
-				var definedValues = obj as Dictionary<string, string>;
+				var definedValues = (IEnumerable<KeyValuePair<string, string>>)obj;
 				var sb = new StringBuilder(xml);
 
-				foreach (string key in definedValues.Keys)
+				foreach (var kv in definedValues)
 				{
-					sb.Replace("##" + key + "##", definedValues[key]);
+					sb.Replace("##" + kv.Key + "##", kv.Value);
 				}
 
 				xml = sb.ToString();
