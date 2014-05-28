@@ -2,9 +2,9 @@
 
 == Length Type Attribute ==
 
-The _lengthType_ attribute defines the unit of length in use.
+The _lengthType_ attribute defines the _length_ attribute unit.
 
-A length must be defined to use this attribute. 
+NOTE: A _length_ attribute must be defined to use _lengthType_. 
 
 bits:: Length is specified in units of bits
 bytes:: Length is specified in unites of bytes (default)

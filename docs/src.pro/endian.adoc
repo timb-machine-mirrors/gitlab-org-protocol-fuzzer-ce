@@ -3,7 +3,7 @@
 
 Specify the byte order of a field.  
 
-For more information about endianness see http://en.wikipedia.org/wiki/Endian[this Wikipedia article].
+For more information about endianness see http://en.wikipedia.org/wiki/Endian[the Endian Wikipedia article].
 
 _Valid Values:_
 

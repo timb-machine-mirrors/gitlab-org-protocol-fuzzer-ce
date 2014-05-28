@@ -1,0 +1,34 @@
+﻿<div class="page-content">
+	<div class="page-header">
+	<!--
+		<h1>
+			Configurator
+		</h1>
+	-->
+	</div><!-- /.page-header -->
+
+	<div class="row">
+		<div class="col-xs-12">
+			<form name="configuratorForm">
+				<div class="row-fluid" id="fuelux-wizard" data-target="#step-container">
+					<ul class="wizard-steps">
+						<li ng-class="{active: vm.stepNum == 1, complete: vm.stepNum > 1}">
+							<span class="step">1</span>
+							<span class="title">Introduction</span>
+						</li>
+						<li ng-class="{active: vm.stepNum == 2, complete: vm.stepNum > 2}">
+							<span class="step">2</span>
+							<span class="title">Questions &amp; Answers</span>
+						</li>
+						<li ng-class="{active: vm.stepNum == 3}">
+							<span class="step">3</span>
+							<span class="title">Review</span>
+						</li>
+					</ul>
+				</div>
+				<hr />
+				<div ng-include="vm.getTemplateUrl()" />
+			</form>
+		</div>
+	</div>
+</div>

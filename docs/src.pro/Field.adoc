@@ -1,7 +1,7 @@
 [[Field]]
 == Field
 
-The Field element specifies data to replace the default value for an  data element in the DataModel.
+The Field element specifies the data that replaces the default value in a DataModel element.
 
 === Attributes
 

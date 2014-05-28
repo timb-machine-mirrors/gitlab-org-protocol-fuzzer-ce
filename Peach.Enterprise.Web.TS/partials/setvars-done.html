@@ -1,0 +1,17 @@
+﻿<div>
+	<div>
+		<h1>Review</h1>
+		<p>TODO: Don't display state, but rather something prettier.</p>
+		<p>{{vm.state}}</p>
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev" ng-click="vm.back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.submitSetVarsInfo()" ng-disabled="configuratorForm.$invalid">
+			Continue to Fault Detection
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+</div>

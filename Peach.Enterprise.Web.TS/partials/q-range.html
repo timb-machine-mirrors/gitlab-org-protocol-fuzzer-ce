@@ -1,0 +1,22 @@
+﻿<div>
+	<label class="control-label bolder blue">{{vm.currentQuestion.q}}</label>
+	<div>
+		<input ng-model="vm.currentQuestion.value"
+					 step="1" min="{{vm.currentQuestion.rangeMin}}"
+					 max="{{vm.currentQuestion.rangeMax}}"
+					 type="number"
+					 required
+					 integer />
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev" ng-click="vm.back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+			Next
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+</div>
+

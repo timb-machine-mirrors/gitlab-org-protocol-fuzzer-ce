@@ -5,7 +5,7 @@
 [[Hint]]
 == Hint
 
-Hints are extensions of xref:Mutators[Mutators] that can be attached to data elements to provide the peach engine more information about the data that is being parsed and how it should treat it. For example, when a xref:String[String] contains a number, only the numerical tests contained within the string mutator would execute. 
+Hints are a xref:Mutators[Mutator] extension; they can be attached to data elements to provide the Peach engine more information about  parsed data (including how to treat it). For example, when a xref:String[String] contains a number, only the numerical tests contained within the string mutator would execute. 
 
 [source,xml]
 ----
