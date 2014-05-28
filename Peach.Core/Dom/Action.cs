@@ -345,6 +345,11 @@ namespace Peach.Core.Dom
 
 				finished = true;
 			}
+			catch (ActionChangeStateException)
+			{
+				// this is not an error
+				throw;
+			}
 			catch
 			{
 				error = true;
