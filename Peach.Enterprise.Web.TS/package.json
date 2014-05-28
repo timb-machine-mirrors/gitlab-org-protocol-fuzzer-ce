@@ -18,6 +18,7 @@
   "scripts": {
     "postinstall": "bower install",
 
+    "build-ts": "tsc @tsc-args.txt",
     "prestart": "npm install",
     "start": "http-server -p 8000 .",
 
