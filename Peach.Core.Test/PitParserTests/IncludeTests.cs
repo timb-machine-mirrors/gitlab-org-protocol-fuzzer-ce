@@ -395,6 +395,7 @@ namespace Peach.Core.Test.PitParserTests
 		}
 
 		[Test]
+<<<<<<< HEAD
 		public void IncludeScripting()
 		{
 			string inc1 = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -497,7 +498,6 @@ namespace Peach.Core.Test.PitParserTests
 			var exp = "typesrcdstPacket Payload";
 			Assert.AreEqual(exp, val);
 		}
-
 	}
 }
 
