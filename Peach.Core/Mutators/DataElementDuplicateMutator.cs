@@ -103,10 +103,12 @@ namespace Peach.Core.Mutators
 			value.SeekBits(0, System.IO.SeekOrigin.Begin);
 			var mutatedValue = new Variant(value);
 
+			var baseName = obj.parent.UniqueName(obj.name);
+
 			for (int i = 0; i < newCount; ++i)
 			{
 				// Make sure we pick a unique name
-				string newName = "{0}_{1}".Fmt(obj.name, i);
+				string newName = "{0}_{1}".Fmt(baseName, i);
 
 				DataElement newElem = Activator.CreateInstance(obj.GetType(), new object[] { newName }) as DataElement;
 				newElem.MutatedValue = mutatedValue;
