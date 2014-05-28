@@ -18,9 +18,9 @@
   "scripts": {
     "postinstall": "bower install",
 
-    "prestart": "tsc @tsc-args.txt",
+    "build-ts": "tsc @tsc-args.txt",
+    "prestart": "npm install",
     "start": "http-server -p 8000 .",
-    "poststart": "npm install",
 
     "pretest": "npm install",
     "test": "karma start test/karma.conf.js",
