@@ -18,6 +18,7 @@
 	<link rel="stylesheet" href="/Content/css/tree-control-attribute.css" />
 	-->
 	<link href="/Content/css/kendo.common.min.css" rel="stylesheet" />
+	<link href="/Content/css/kendo.default.min.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="/Content/css/datepicker.css" />
 	<link rel="stylesheet" href="/Content/css/ui.jqgrid.css" />
@@ -73,7 +74,7 @@
 			</div><!-- /.navbar-header -->
 
 			<div class="navbar-header pull-right" id="breadcrumbs">
-				<h3 style="color: lightgrey">{{pit.name}}</h3>
+				<h3 style="color: lightgrey">Pit: {{vm.pit.name || '(none)'}}</h3>
 			</div>
 		</div><!-- /.container -->
 	</div>
@@ -95,32 +96,32 @@
 				</script>
 
 				<ul class="nav nav-list">
-					<li ng-class="{active: location.path() == '/'}">
+					<li ng-class="{active: vm.location.path() == '/'}">
 						<a href="#/">
 							<i class="icon-dashboard"></i>
 							<span class="menu-text"> Dashboard </span>
 						</a>
 					</li>
 
-					<li ng-class="{active: location.path() == '/metrics'}">
+					<li ng-class="{active: vm.location.path() == '/metrics'}">
 						<a href="#/metrics">
 							<i class="icon-signal"></i>
 							<span class="menu-text"> Metrics </span>
 						</a>
 					</li>
 
-					<li ng-class="{active: location.path() == '/visualizer'}">
+					<li ng-class="{active: vm.location.path() == '/visualizer'}">
 						<a href="#/visualizer">
 							<i class="icon-eye-open"></i>
 							<span class="menu-text"> Visualizer </span>
 						</a>
 					</li>
-					<li ng-class="{active: location.path() == '/faults'}">
+					<li ng-class="{active: vm.location.path() == '/faults'}">
 						<a href="#/faults">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary ">{{job.totalFaults}}</span>
+								<span class="badge badge-primary ">{{vm.job.totalFaults}}</span>
 							</span>
 						</a>
 					</li>
@@ -131,49 +132,49 @@
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;" ng-controller="DashApp.WizardController">
-							<li ng-class="{active: location.path() == '/configurator/intro'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/intro'}">
 								<a href="#/configurator/intro">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.introclass"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/setvars'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/setvars'}">
 								<a href="#/configurator/setvars">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.setvarsclass"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/fault'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/fault'}">
 								<a href="#/configurator/fault">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.faultclass"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/data'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/data'}">
 								<a href="#/configurator/data">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.dataclass"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/auto'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/auto'}">
 								<a href="#/configurator/auto">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.autoclass"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/test'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/test'}">
 								<a href="#/configurator/test">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.testclass"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/done'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/done'}">
 								<a href="#/configurator/done">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.doneclass"></i>
