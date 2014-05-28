@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="Seed" value="*.bmp"/>
+	<Define key="Strategy"  value="Random"/>
+	<Define key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Image"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open   action="BMP:TheStateModel.Initial.WriteFileFromSample" publisher="writer"/>
+		<Output action="BMP:TheStateModel.Initial.WriteFileFromSample" publisher="writer"/>
+		<Close  action="BMP:TheStateModel.Initial.CloseFile"           publisher="writer"/>
+	</Test>
+</TestData>

@@ -34,7 +34,6 @@
 	<!-- RELEASE (8) workflow -->
 
 	<Import import="time"/>
-	<Import import="code"/>
 
 	<Defaults>
 		<Number endian="big"/>
@@ -61,7 +60,6 @@
 				<Number name="Time" size="32" value="0">
 					<Fixup class="ExpressionFixup">
 						<Param name="ref" value="Time"/>
-						<!-- <Param name="expression" value="code.InteractiveConsole(locals=locals()).interact()"/> -->
 						<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
 					</Fixup>
 				</Number>
@@ -248,7 +246,7 @@
 
 	<DataModel name="Solicit">
 		<Number name="MessageType" size="8" value="1"/>
-		<Number name="TransactionId" size="24" value="0xe7fb58"/>
+		<Number name="TransactionId" size="24" valueType="hex" value="##TransactionId##"/>
 		<Block name="Options">
 			<Block name="ElapsedTime" ref="TLV">
 				<Number name="Type" size="16" value="8" token="true"/>
@@ -259,7 +257,7 @@
 				<Block name="Value">
 					<Number name="DuidType" size="16" value="1"/>
 					<Number name="HardwareType" size="16" value="1"/>
-					<Number name="DuidTime" size="32" value="0">
+					<Number name="DuidTime" size="32" value="##SolicitDuidTime##">
 						<Fixup class="ExpressionFixup">
 							<Param name="ref" value="DuidTime"/>
 							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
@@ -288,7 +286,7 @@
 					<Number name="Length" size="8">
 						<Relation type="size" of="Domain"/>
 					</Number>
-					<String name="Domain" value="PeachDomain"/>
+					<String name="Domain" value="##Domain##"/>
 				</Block>
 			</Block>
 			<Block name="VendorClass" ref="TLV">
@@ -317,18 +315,20 @@
 		<Number name="MessageType" size="8" value="3"/>
 		<Block name="Options">
 			<Block name="ElapsedTime" ref="Solicit.Options.ElapsedTime"/>
-			<Block name="ClientIdentifier" ref="Solicit.Options.ClientIdentifier"/>
-			<Block name="ServerIdentifier" ref="TLV">
-				<Number name="Type" size="16" value="2"/>
-				<Block name="Value">
-					<Number name="DuidType" size="16" value="1"/>
-					<Number name="HardwareType" size="16" value="1"/>
-					<Number name="DuidTime" size="32" value="0">
+			<Block name="ClientIdentifier" ref="Solicit.Options.ClientIdentifier">
+				<Number name="Value.DuidTime" size="32" value="##RequestDuidTime##">
 						<Fixup class="ExpressionFixup">
 							<Param name="ref" value="DuidTime"/>
 							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
 						</Fixup>
 					</Number>
+			</Block>
+			<Block name="ServerIdentifier" ref="TLV">
+				<Number name="Type" size="16" value="2"/>
+				<Block name="Value">
+					<Number name="DuidType" size="16" value="1"/>
+					<Number name="HardwareType" size="16" value="1"/>
+					<Number name="DuidTime" size="32" value="0"/>
 					<Blob name="LinkLayerAddress" length="6" valueType="hex" value="##TargetMAC##"/>
 				</Block>
 			</Block>

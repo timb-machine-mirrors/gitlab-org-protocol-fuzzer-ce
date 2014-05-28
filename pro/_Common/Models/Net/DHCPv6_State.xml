@@ -121,9 +121,14 @@
 			<Action type="slurp" valueXpath="//Advertise//T2" setXpath="//Request//T2"/>
 			<Action type="slurp" valueXpath="//Advertise//PreferredLifetime" setXpath="//Request//PreferredLifetime"/>
 			<Action type="slurp" valueXpath="//Advertise//ValidLifetime" setXpath="//Request//ValidLifetime"/>
+			<Action type="slurp" valueXpath="//Advertise//ServerIdentifier//Time" setXpath="//Request//ServerIdentifier//DuidTime"/>
 
 			<Action name="Request" type="output">
 				<DataModel ref="DHCPv6:Request"/>
+			</Action>
+
+			<Action name="Reply" type="input">
+				<DataModel ref="DHCPv6:Packet"/>
 			</Action>
 		</State>
 	</StateModel>
