@@ -1,5 +1,7 @@
 --target ES5
 --out .\app\js\all.js
+--module amd
+--removeComments
 app/ts/app.ts
 app/ts/controllers.main.ts
 app/ts/controllers.dash.ts
