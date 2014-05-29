@@ -44,16 +44,6 @@
 
     <Strategy class="##Strategy##"/>
 
-    <!-- Command Line Launcher: Win/Lin/OSX    With Debugger -->
-    <!--Publisher name="launch" class=""> </Publisher>-->
-
-    <!-- GUI Launcher: WINDOWS ONLY -->
-    <!--
-				<Publisher name="launch" class="process.DebuggerLauncherGui">
-				<Param name="WindowName" value="GUI Window Name" />
-				</Publisher>
-    -->
-
     <Logger class="File">
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>

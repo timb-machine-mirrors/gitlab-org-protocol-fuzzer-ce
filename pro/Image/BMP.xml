@@ -6,13 +6,13 @@
 
 	<Include ns="BMP" src="file:##PitLibraryPath##/_Common/Models/Image/BMP_State.xml"/>
 
-  <Agent name="LinuxAgent">
+	<Agent name="LinuxAgent">
 		<Monitor class="LinuxCrashMonitor"/>
 		<Monitor class="Process">
-				<Param name="Executable" value="##Target##"/>
-				<Param name="StartOnCall" value="FuzzMe"/>
-				<Param name="Arguments" value="fuzzed.bmp"/>
-		<Param name="CpuKill" value="true"/>
+			<Param name="Executable" value="##Target##"/>
+			<Param name="StartOnCall" value="FuzzMe"/>
+			<Param name="Arguments" value="fuzzed.bmp"/>
+			<Param name="CpuKill" value="true"/>
 		</Monitor>
 	</Agent>
 
@@ -32,30 +32,21 @@
 		</Monitor>
 	</Agent>
 
-  <Test name="Default">
-		<StateModel ref="BMP:TheStateModel" />
+	<Test name="Default">
+		<StateModel ref="BMP:FileWriteAndLaunch" />
 
 		<Agent ref="LinuxAgent" platform="linux"/>
-    <Agent ref="WinAgent" platform="windows"/>
-    <Agent ref="OsxAgent" platform="osx"/>
+		<Agent ref="WinAgent" platform="windows"/>
+		<Agent ref="OsxAgent" platform="osx"/>
 
-    <Publisher name="writer" class="file.FileWriter">
-      <Param name="FileName" value="fuzzed.bmp" />
-    </Publisher>
+		<Publisher name="writer" class="file.FileWriter">
+			<Param name="FileName" value="fuzzed.bmp" />
+		</Publisher>
 
-    <!-- Command Line Launcher: Win/Lin/OSX  With Debugger -->
-    <!--Publisher name="launch" class="process.DebuggerLauncher"/-->
-
-		<!-- GUI Launcher: WINDOWS ONLY -->
-    <!--
-     <Publisher name="launch" class="process.DebuggerLauncherGui">
-      <Param name="WindowName" value="GUI Window Name" />
-     </Publisher>
-     -->
-    <Strategy class="##Strategy##"/>
+		<Strategy class="##Strategy##"/>
 
 		<Logger class="File">
 			<Param name="Path" value="##LoggerPath##"/>
 		</Logger>
-  </Test>
+	</Test>
 </Peach>

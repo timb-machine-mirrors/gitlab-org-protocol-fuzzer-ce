@@ -7,8 +7,8 @@
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">
-		<Open   action="BMP:TheStateModel.Initial.WriteFileFromSample" publisher="writer"/>
-		<Output action="BMP:TheStateModel.Initial.WriteFileFromSample" publisher="writer"/>
-		<Close  action="BMP:TheStateModel.Initial.CloseFile"           publisher="writer"/>
+		<Open   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Output action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Close  action="BMP:FileWriteAndLaunch.Initial.CloseFile"           publisher="writer"/>
 	</Test>
 </TestData>

@@ -6,7 +6,7 @@
 
 	<Include ns="BMP" src="file:##PitLibraryPath##/_Common/Models/Image/BMP_Data.xml"/>
 
-  <StateModel name="TheStateModel" initialState="Initial">
+  <StateModel name="FileWriteAndLaunch" initialState="Initial">
     <State name="Initial">
 
       <Action name="WriteFileFromSample" type="output" publisher="writer">
