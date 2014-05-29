@@ -1,7 +1,3 @@
-//
-// Configure Pit, Automation subtask
-//
-
 {
 	"state": [
     {"name":"OS", "value":"win"},
