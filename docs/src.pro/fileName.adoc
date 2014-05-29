@@ -1,8 +1,8 @@
 [[fileName]]
 == fileName ==
 
-_fileName_ can specify a single file ("+sample.png+"), or multiple files by pointing to a folder ("+samples+") or providing a file glob ("+samples_*.jpg+") when used with the xref:Data[Data] element.
+When used with the xref:Data[Data] element, _fileName_ can specify a single file ("+sample.png+"), or multiple files by pointing to a folder ("+samples+") or providing a file glob ("+samples_*.jpg+").
 
-If a folder or file glob specifies multiple files, the _switchCount_  attribute with the xref:MutationStrategies[random strategy] can be used to specify the number of iterations performed before switching to the next file.
+If a folder or file glob specifies multiple files, use the _switchCount_  attribute with the xref:MutationStrategies[random strategy] to specify the number of iterations performed before switching to the next file.
 
 IMPORTANT: Multiple files are only supported by the random mutation strategy!
