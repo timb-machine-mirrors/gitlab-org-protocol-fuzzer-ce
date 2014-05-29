@@ -1,3 +1,7 @@
+//
+// Configure Pit, Fault Detection subtask
+//
+
 {
 	"state": [
     {"name":"OS", "value":"win"},
