@@ -5,7 +5,7 @@
 
 == Mutable Attribute ==
 
-Mutable is used to define if this element, block, or datatype should be fuzzed. The default value is true.
+Mutable is used to define if this element, block, or datatype should be fuzzed. The default value is true (fuzz the element/block/datatype).
 
 IMPORTANT: Even when an element is marked as non-mutable it will still be modified as the fuzzer fuzzes the other elements.  Marking an element as non-mutable will only disable the mutators that would have operated on that element.
 
