@@ -30,7 +30,6 @@
       <Blob name="THA" valueType="hex" length="6" value="##TargetMAC##"/>
       <Blob name="TPA" valueType="ipv4" length="4" value="##TargetIPv4##"/>
     </Block>
-    <Blob name="Trailer"/>
   </DataModel>
 
 </Peach>

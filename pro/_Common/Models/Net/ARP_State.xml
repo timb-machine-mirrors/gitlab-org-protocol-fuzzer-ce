@@ -14,9 +14,9 @@
 
   <StateModel name="Request" initialState="Initial">
     <State name="Initial">
-      <Action type="output">
+      <Action name="Request" type="output">
         <DataModel ref="ARPPacket"/>
-        <Data name="ARPRequest">
+        <Data>
           <!--Field name="Dest" valueType="hex" mutable="false" value="ffffffffffff"/--><!--Can't make field immutable-->
           <Field name="Payload.Data.OPER.Request" value=""/>
         </Data>
@@ -26,16 +26,16 @@
 
   <StateModel name="Reply" initialState="Initial">
     <State name="Initial">
-      <Action name="GetRequest" type="input">
+      <Action name="Request" type="input">
         <DataModel ref="ARPPacket"/>
       </Action>
-      <Action type="slurp" valueXpath="//GetRequest//ARPPacket/Payload/Data/TPABlock/TPA" setXpath="//DoReply//SPA"/>
-      <Action type="slurp" valueXpath="//GetRequest//SPA" setXpath="//DoReply//TPA"/>
-      <Action type="slurp" valueXpath="//GetRequest//ARPPacket/Src" setXpath="//DoReply//Dest"/>
-      <Action type="slurp" valueXpath="//GetRequest//ARPPacket/Src" setXpath="//DoReply//THA"/>
-      <Action name="DoReply" type="output">
+      <Action type="slurp" valueXpath="//Reply//Request//TPA" setXpath="//Reply//Reply//SPA"/>
+      <Action type="slurp" valueXpath="//Reply//Request//SPA" setXpath="//Reply//TPA"/>
+      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//Dest"/>
+      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//THA"/>
+      <Action name="Reply" type="output">
         <DataModel ref="ARPPacket"/>
-        <Data name="ARPReply">
+        <Data>
           <Field name="Payload.Data.OPER.Reply" value=""/>
         </Data>
       </Action>

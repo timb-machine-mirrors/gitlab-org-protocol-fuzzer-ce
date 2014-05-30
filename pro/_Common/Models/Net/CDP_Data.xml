@@ -4,88 +4,153 @@
 			 author="Deja Vu Security, LLC" description="Cisco Discovery Protocol PIT DataModels" version="0.0.2">
 	<!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
-	<!-- Cisco Discovery Protocol Main DataModel -->
+	<Defaults>
+		<Number endian="big"/>
+	</Defaults>
+
+	<DataModel name="TLV">
+		<Number name="Type" size="16"/>
+		<Number name="Length" size="16">
+			<Relation type="size" of="TLV"/>
+		</Number>
+		<Blob name="Value"/>
+	</DataModel>
+
 	<DataModel name="Packet">
 		<Number name="Version" size="8" value="2"/>
-		<Number name="Ttl" size="8" value="120"/>
-		<Number name="Checksum" size="16" endian="big" mutable="false" value="0x0000">
-			<!-- This checksum, according to Cisco documentation, is a
-					 standard IP checksum
-					 (http://www.faqs.org/rfcs/rfc1071.html). The
-					 documentation is incorrect. For odd bytes lengths
-					 padding is incorrect. -->
+		<Number name="Ttl" size="8" value="180"/>
+		<Number name="Checksum" size="16" mutable="false" value="0x0000">
 			<Fixup class="CiscoFixup">
 				<Param name="ref" value="Packet"/>
 			</Fixup>
 		</Number>
-		<Block name="DeviceIdTlv" >
-			<Number name="DeviceIdTlvType" size="16" endian="big" value="1"/>
-			<Number name="DeviceIdTlvLength" size="16" endian="big">
-				<Relation type="size" of="DeviceIdTlv"/>
-			</Number>
-			<Blob name="DeviceIdTlvValue" value="##Hostname##"/>
-		</Block>
-
-		<Block name="AddressTlv" >
-			<Number name="AddressTlvType" size="16" endian="big" value="2"/>
-			<Number name="AddressTlvLength" size="16" endian="big">
-				<Relation type="size" of="AddressTlv"/>
-			</Number>
-			<Number name="AddressCount" size="32" endian="big">
-				<Relation type="count" of="AddressTlvValueBlock"/>
-			</Number>
-			<Block name="AddressTlvValueBlock" minOccurs="1">
-				<Number name="AddressProtoType" value="1" size="8"/>
-				<Number name="AddressProtoLength" size="8">
-					<Relation type="size" of="AddressProto"/>
-				</Number>
-				<Number name="AddressProto" size="16"/>
-				<Number name="AddressValueLength" size="8">
-					<Relation type="size" of="AddressTlvValue"/>
-				</Number>
-				<Blob name="AddressTlvValue" valueType="ipv4" length="4" value="##SourceIPv4##"/>
+		<Choice name="OptionChoices" minOccurs="0" maxOccurs="-1">
+			<Block name="DeviceId" ref="TLV">
+				<Number name="Type" size="16" token="true" value="1"/>
+				<String name="Value" value="##Hostname##"/>
 			</Block>
-		</Block>
 
-		<Block name="PortTlv">
-			<Number name="PortTlvType" size="16" endian="big" value="3"/>
-			<Number name="PortTlvLength" size="16" endian="big">
-				<Relation type="size" of="PortTlv"/>
-			</Number>
-			<Blob name="PortTlvValue" value="##Interface##"/>
-		</Block>
+			<Block name="Addresses">
+				<Number name="Type" size="16" token="true" value="2"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="Addresses"/>
+				</Number>
+				<Number name="Count" size="32" >
+					<Relation type="count" of="Value"/>
+				</Number>
+				<Block name="Value" minOccurs="1">
+					<Number name="ProtocolType" size="8" value="1" />
+					<Number name="ProtocoLength" size="8">
+						<Relation type="size" of="Protocol"/>
+					</Number>
+					<Number name="Protocol" size="8" value="204"/>
+					<Number name="AddressLength" size="16">
+						<Relation type="size" of="Address"/>
+					</Number>
+					<Blob name="Address" valueType="ipv4" length="4" value="##SourceIPv4##"/>
+				</Block>
+			</Block>
 
-		<Block name="CapabilitesTlv">
-			<Number name="CapabilitesTlvType" size="16" endian="big" value="4"/>
-			<Number name="CapabilitesTlvLength" size="16" endian="big">
-				<Relation type="size" of="CapabilitesTlv"/>
-			</Number>
-			<Blob name="CapabilitesTlvValue" length="4" valueType="hex" value="00000018"/>
-		</Block>
+			<Block name="PortId" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="3"/>
+				<String name="Value" value="##Interface##"/>
+			</Block>
 
-		<Block name="SoftwareVersionTlv">
-			<Number name="SoftwareVersionTlvType" size="16" endian="big" value="5"/>
-			<Number name="SoftwareVersionTlvLength" size="16" endian="big">
-				<Relation type="size" of="SoftwareVersionTlv"/>
-			</Number>
-			<Blob name="SoftwareVersionTlvValue" value="test"/>
-		</Block>
+			<Block name="Capabilites" ref="TLV">
+				<Number name="Type" size="16" token="true" value="4"/>
+				<Flags name="Value" size="32">
+					<Flag name="Router" size="1" position="24" value="0"/>
+					<Flag name="TransparentBridge" size="1" position="25" value="0"/>
+					<Flag name="SourceRouteBridge" size="1" position="26" value="0"/>
+					<Flag name="Switch" position="27" size="1" value="1"/>
+					<Flag name="Host" position="28" size="1" value="0"/>
+					<Flag name="IGMPCapable" size="1" position="29" value="1"/>
+					<Flag name="Repeater" size="1" position="30" value="0"/>
+				</Flags>
+			</Block>
 
-		<Block name="PlatformTlv">
-			<Number name="PlatformTlvType" size="16" endian="big" value="6"/>
-			<Number name="PlatformTlvLength" size="16" endian="big">
-				<Relation type="size" of="PlatformTlv"/>
-			</Number>
-			<Blob name="PlatformTlvValue" value="linux"/>
-		</Block>
+			<Block name="SoftwareVersion" ref="TLV">
+				<Number name="Type" size="16" token="true" value="5"/>
+				<Blob name="Value" valueType="hex" value="436973636f20496e7465726e6574776f726b204f7065726174696e672053797374656d20536f667477617265200a494f532028746d2920433239353020536f667477617265202843323935302d49364b324c3251342d4d292c2056657273696f6e2031322e3128323229454131342c2052454c4541534520534f4654574152452028666331290a546563686e6963616c20537570706f72743a20687474703a2f2f7777772e636973636f2e636f6d2f74656368737570706f72740a436f707972696768742028632920313938362d3230313020627920636973636f2053797374656d732c20496e632e0a436f6d70696c6564205475652032362d4f63742d31302031303a3335206279206e6275727261"/>
+			</Block>
 
-		<Block name="ArbitraryTlv" minOccurs="0" maxOccurs="50">
-			<Number name="ArbitraryTlvType" size="16" endian="big"/>
-			<Number name="ArbitraryTlvLength" size="16" endian="big">
-				<Relation type="size" of="ArbitraryTlv"/>
-			</Number>
-			<Blob name="ArbitraryTlvValue"/>
-		</Block>
-</DataModel>
+			<Block name="Platform" ref="TLV">
+				<Number name="Type" size="16" token="true" value="6"/>
+				<String name="Value" value="cisco WS-C2950-12"/>
+			</Block>
+
+			<Block name="ProtocolHello" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="8"/>
+				<Block name="Value">
+					<Number name="OUI" size="24" value="12"/>
+					<Number name="ProtocolId" size="16" value="0x0112"/>
+					<Blob name="ClusterMasterIp" valueType="ipv4" length="4" value="0.0.0.0"/>
+					<Blob name="UnknownIp" valueType="ipv4" length="4" value="255.255.255.255"/>
+					<Number name="Version" size="8" value="1"/>
+					<Number name="Subversion" size="8" value="2"/>
+					<Number name="Status" size="8" value="0x20"/>
+					<Number name="Unknown" size="8" value="0xFF"/>
+					<Blob name="ClusterCommandMac" length="6" valueType="hex" value="000000000000"/>
+					<Blob name="SwitchMac" length="6" valueType="hex" value="##SwitchMAC##"/>
+					<Number name="Unknown2" size="8" value="0xFF"/>
+					<Number name="ManagementVlan" size="16" value="0"/>
+				</Block>
+			</Block>
+
+			<Block name="VtpMangageMentDomain" ref="TLV">
+				<Number name="Type" size="16" token="true" value="9"/>
+				<String name="Value" value="##Domain##"/>
+			</Block>
+
+			<Block name="NativeVlan" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="10"/>
+				<Number name="Value" size="16" value="1"/>
+			</Block>
+
+			<Block name="Duplex" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="11"/>
+				<Number name="Value" size="8" value="1"/>
+			</Block>
+
+			<Block name="TrustBitmap" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="18"/>
+				<Number name="Value" size="8" value="0"/>
+			</Block>
+
+			<Block name="UntrustedPortCos" ref="TLV">
+				<Number name="Type" size="16" token="true"  value="19"/>
+				<Number name="Value" size="8" value="0"/>
+			</Block>
+
+			<Block name="ManagementAddress">
+				<Number name="Type" size="16" token="true" value="22"/>
+				<Number name="Length" size="16">
+					<Relation type="size" of="ManagementAddress"/>
+				</Number>
+				<Number name="Count" size="32" >
+					<Relation type="count" of="Value"/>
+				</Number>
+				<Block name="Value" minOccurs="1">
+					<Number name="ProtocolType" size="8" value="1" />
+					<Number name="ProtocoLength" size="8">
+						<Relation type="size" of="Protocol"/>
+					</Number>
+					<Number name="Protocol" size="8" value="204"/>
+					<Number name="AddressLength" size="16">
+						<Relation type="size" of="Address"/>
+					</Number>
+					<Blob name="Address" valueType="ipv4" length="4" value="##SourceIPv4##"/>
+				</Block>
+			</Block>
+
+			<Block name="ArbitraryTlv">
+				<Number name="ArbitraryTlvType" size="16" />
+				<Number name="ArbitraryTlvLength" size="16" >
+					<Relation type="size" of="ArbitraryTlv"/>
+				</Number>
+				<Blob name="ArbitraryTlvValue"/>
+			</Block>
+		</Choice>
+	</DataModel>
 </Peach>
 <!--End-->

@@ -23,7 +23,21 @@
 		<State name="Initial">
 			<Action name="SendPacket" type="output" publisher="RawHandler">
 				<DataModel ref="CDPPacket"/>
-				<!-- <DataModel ref="CDP:Packet"/> -->
+				<Data>
+					<Field name="Payload.CDP.OptionChoices[0].DeviceId" value=""/>
+					<Field name="Payload.CDP.OptionChoices[1].Addresses" value=""/>
+					<Field name="Payload.CDP.OptionChoices[2].PortId" value=""/>
+					<Field name="Payload.CDP.OptionChoices[3].Capabilites" value=""/>
+					<Field name="Payload.CDP.OptionChoices[4].SoftwareVersion" value=""/>
+					<Field name="Payload.CDP.OptionChoices[5].Platform" value=""/>
+					<Field name="Payload.CDP.OptionChoices[6].ProtocolHello" value=""/>
+					<Field name="Payload.CDP.OptionChoices[7].VtpMangageMentDomain" value=""/>
+					<Field name="Payload.CDP.OptionChoices[8].NativeVlan" value=""/>
+					<Field name="Payload.CDP.OptionChoices[9].Duplex" value=""/>
+					<Field name="Payload.CDP.OptionChoices[10].TrustBitmap" value=""/>
+					<Field name="Payload.CDP.OptionChoices[11].UntrustedPortCos" value=""/>
+					<Field name="Payload.CDP.OptionChoices[12].ManagementAddress" value=""/>
+				</Data>
 			</Action>
 		</State>
 	</StateModel>
