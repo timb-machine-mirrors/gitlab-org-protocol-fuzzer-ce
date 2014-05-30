@@ -8,6 +8,8 @@
 	<Include ns="IPv4" src="file:##PitLibraryPath##/_Common/Models/Net/IPv4_Data.xml"/>
 	<Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
 
+	<Import import="math"/>
+
 	<Defaults>
 		<Number endian="big"/>
 	</Defaults>
@@ -27,7 +29,7 @@
 			<Relation type="size" of="ClientMacAndPadding.ClientBlock.ClientMacAddr1"/>
 		</Number>
 		<Number name="Hops" size="8" value="0"/>
-		<Number name="TransactionId" size="32" value="0x01963ac8"/>
+		<Number name="TransactionId" size="32" value="0x00003d1d"/>
 		<Number name="SecondsElapsed" size="16"  value="0"/>
 		<Flags name="BootpFlags" size="16">
 			<Flag name="Broadcast" size="1" position="0"/>
@@ -46,8 +48,10 @@
 		<Blob name="BootFileName" length="128"/>
 		<Blob name="MagicCookie" length="4" valueType="hex" value="63825363"/>
 		<Block name="DOptions"/>
+		<Padding name="Padding" minSize="2400"/>
 	</DataModel>
 
+<!--
 	<DataModel name="DhcpIPPacket" ref="Ethernet:Frame">
 		<Block name="Payload" mutable="false" ref="IPv4:Packet">
 			<Block name="Header.Options"/>
@@ -59,9 +63,17 @@
 
 	<DataModel name="DhcpUDPPacket" ref="DhcpIPPacket">
 		<Block name="Payload.Payload" ref="UdpDhcp"/>
+	</DataModel>-->
+
+	<DataModel name="Packet" ref="Ethernet:Frame">
+		<Block name="Payload" mutable="false" ref="IPv4:Packet">
+			<Block name="Header.Options"/>
+			<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="11"/>
+			<Block name="Payload" ref="UDPv4:Packet"/>
+		</Block>
 	</DataModel>
 
-	<DataModel name="Discover" ref="DhcpUDPPacket">
+	<DataModel name="Discover" ref="Packet">
 		<Block name="Payload.Payload.UdpPayload" ref="DHCP">
 			<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
@@ -105,12 +117,11 @@
 					</Block>
 				</Block>
 				<Number name="End" size="8" value="255"/>
-				<Padding alignment="128"/>
 			</Block>
 		</Block>
 	</DataModel>
 
-	<DataModel name="Request" ref="DhcpUDPPacket">
+	<DataModel name="Request" ref="Packet">
 		<Block name="Payload.Payload.UdpPayload" ref="DHCP">
 			<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
@@ -161,13 +172,13 @@
 					</Block>
 				</Block>
 				<Number name="End" size="8" value="255"/>
-				<Padding alignment="128"/>
 			</Block>
 		</Block>
 	</DataModel>
 
-	<DataModel name="Release" ref="DhcpUDPPacket">
+	<DataModel name="Release" ref="Packet">
 		<Block name="Payload.Payload.UdpPayload" ref="DHCP">
+			<Number name="TransactionId" size="32" value="0x00003d1f"/>
 			<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="YourIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
 			<Blob name="NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
@@ -198,7 +209,6 @@
 					</Block>
 				</Block>
 				<Number name="End" size="8" value="255"/>
-				<Padding alignment="128"/>
 			</Block>
 		</Block>
 	</DataModel>
@@ -736,10 +746,9 @@
 		</Choice>
 
 		<Number name="End" size="8" value="255"/>
-		<Padding alignment="128"/>
 	</DataModel>
 
-	<DataModel name="Response" ref="DhcpUDPPacket">
+	<DataModel name="Response" ref="Packet">
 		<Block name="Payload.Payload.UdpPayload" ref="DHCP">
 			<Number name="OpCode" size="8" token="true" value="2"/>
 			<Blob name="ClientIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
@@ -803,7 +812,6 @@
 				<Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
 			</Block>
 			<Number name="End" size="8" value="255"/>
-			<Padding alignment="128"/>
 		</Block>
 	</DataModel>
 
@@ -854,7 +862,6 @@
 				<Blob name="Value" valueType="ipv4" length="4" value="##SubnetMask##"/>
 			</Block>
 			<Number name="End" size="8" value="255"/>
-			<Padding alignment="128"/>
 		</Block>
 	</DataModel>
 
@@ -873,7 +880,6 @@
 				<Number name="Value" size="8" value="6"/>
 			</Block>
 			<Number name="End" size="8" value="255"/>
-			<Padding alignment="128"/>
 		</Block>
 	</DataModel>
 </Peach>

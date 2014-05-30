@@ -8,8 +8,11 @@
 
 	<StateModel name="Client" initialState="Initial">
 		<State name="Initial">
-			<Action type="output">
+			<Action name="Discover" type="output">
 				<DataModel ref="DHCPv4:Discover"/>
+				<Data>
+					<Field name="Payload.Header.Identification" value="0xa836"/>
+				</Data>
 			</Action>
 
 			<Action name="Offer" type="input">
@@ -24,6 +27,9 @@
 
 			<Action name="Request" type="output">
 				<DataModel ref="DHCPv4:Request"/>
+				<Data>
+					<Field name="Payload.Header.Identification" value="0xa837"/>
+				</Data>
 			</Action>
 
 			<Action name="Ack" type="input">
