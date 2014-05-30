@@ -171,12 +171,12 @@
       <Number name="Identification" size="16" endian="big" value="0"/>
       <Flags name="Flags" size="16" endian="big">
         <Flag name="Reserved" position="0" size="1" valueType="hex" value="00"/>
-        <Flag name="DF" position="1" size="1" valueType="hex" value="01"/>
+        <Flag name="DF" position="1" size="1" valueType="hex" value="00"/>
         <Flag name="MF" position="2" size="1" valueType="hex" value="00"/>
         <Flag name="FragmentOffset" position="3" size="13" valueType="hex" value="00 00"/>
       </Flags>
-      <Number name="TTL" size="8" endian="big" valueType="hex" value="40"/>
-      <Number name="Protocol" size="8" endian="big" valueType="hex" value="1"/>
+      <Number name="TTL" size="8" endian="big" value="250"/>
+      <Number name="Protocol" size="8" endian="big" valueType="hex" value="01"/>
       <Number name="Checksum" size="16" endian="big">
         <Fixup class="checksums.IcmpChecksumFixup">
           <Param name="ref" value="Header"/>
