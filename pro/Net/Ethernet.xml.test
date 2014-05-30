@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="SourceMAC" value="000c298023ed"/>
+	<Define key="TargetMAC" value="28d2446e984d"/>
+	<Define key="SourceIPv4"  value="10.0.1.6"/>
+	<Define key="TargetIPv4"  value="10.0.1.110"/>
+	<Define key="Interface" value="FastEthernet0/1"/>
+	<Define key="Strategy"  value="Random"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open action="Ethernet:Send.Initial.ArpRequest" publisher="Pub"/>
+		<Output action="Ethernet:Send.Initial.ArpRequest" publisher="Pub">
+<![CDATA[
+0000   28 d2 44 6e 98 4d 00 0c 29 80 23 ed 08 06 00 01  (.Dn.M..).#.....
+0010   08 00 06 04 00 01 00 0c 29 80 23 ed 0a 00 01 06  ........).#.....
+0020   28 d2 44 6e 98 4d 0a 00 01 6e                    (.Dn.M...n......
+]]>
+		</Output>
+	</Test>
+
+</TestData>
