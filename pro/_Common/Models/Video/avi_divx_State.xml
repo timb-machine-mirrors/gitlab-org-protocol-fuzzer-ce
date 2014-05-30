@@ -6,20 +6,20 @@
 
 	<Include ns="AviDivx" src="file:##PitLibraryPath##/_Common/Models/Video/avi_divx_Data.xml"/>
 
-	<StateModel name="MplayerTest" initialState="Initial">
+	<StateModel name="FileWriteAndLaunch" initialState="Initial">
 		<State name="Initial">
 
 			<!-- Write out our avi file -->
-			<Action type="output">
+			<Action name="WriteFileFromSample" type="output">
 				<DataModel ref="AviDivx:AVI"/>
 				<!-- This is our sample file to read in -->
 				<Data fileName="##SamplePath##/##Seed##"/>
 			</Action>
 
-			<Action type="close"/>
+			<Action name="CloseFile" type="close"/>
 
 			<!-- Launch the target process -->
-			<Action type="call" method="LaunchMplayer" publisher="Peach.Agent" />
+			<Action type="call" method="Launch" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 </Peach>
