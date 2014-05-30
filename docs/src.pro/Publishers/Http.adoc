@@ -12,9 +12,9 @@
 // 02/14/2014: Jordyn
 //   Added full examples for post,cookie and input
 
-The _Http_ publisher sends data over HTTP via a method of your choice.
+_Http_ publisher sends data over HTTP via a valid HTTP method type.
 
-This publisher supports the following features:
+_Http_ supports the following features:
 
  * Authentication via Basic, Digest, or Windows integrated
  * Definable method type

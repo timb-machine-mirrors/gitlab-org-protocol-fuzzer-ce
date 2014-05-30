@@ -2,7 +2,16 @@
 [[Monitors_Android]]
 == Android Monitor
 
-The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. Two expected use cases are maintaining state while fuzzing native code, or launching and monitor Android Java applications. This monitor can target both emulated and physical notes. The http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device are required.
+The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. 
+
+Two expected use cases are:
+
+* Maintaining state while fuzzing native code
+* Launching and monitor Android Java applications. 
+
+This monitor can target both emulated and physical notes. 
+
+The _Android_ monitor requires http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device.
 
 === Parameters
 
@@ -35,11 +44,15 @@ WaitForReadyOnCall:: Waits for the device to be ready when notified by the state
 
 .Basic Usage Example
 ======================
-Runs the BadBehaviorActivity, sending random taps
+This example runs the BadBehaviorActivity, sending random taps
 
-In order to run the android emulator you must set your AdbPath to the directory containing the adb platoform-tools directory. The EmulatorPath must also point to the adb tools directory.
+To run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge) platform-tools directory and point the EmulatorPath to the adb tools directory.
 
-The Avd parameter must also be the name of a valid AVD. To create a new AVD open the 'android.bat' file lcoated in the tools directory of the adb sdk. From the GUI that opens up click on 'Tools' in the menu bar then 'Manage AVDS...'. From the window that opens up click 'New...' and create a new AVD.
+The Avd parameter must also be the name of a valid AVD (Android Virtual Device). To create a new AVD:
+
+. Open the 'android.bat' file located in the adb SDK tools directory. 
+. From the GUI that opens up click on 'Tools' in the menu bar then 'Manage AVDS...'. 
+. From the window that opens up click 'New...' and create a new AVD.
 
 [source,xml]
 ----

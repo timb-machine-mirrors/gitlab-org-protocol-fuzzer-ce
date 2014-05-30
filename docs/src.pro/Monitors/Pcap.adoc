@@ -2,11 +2,15 @@
 [[Monitors_Pcap]]
 == Pcap Monitor
 
-The _Pcap_ monitor performs a network capture during the fuzzing iteration. The captured data is discarded and re-captured on each iteration. If a fault occurs the captured data is logged as a pcap file and returned with the fault data. The Pcap file is compatible with Wireshark and tcpdump.
+The _Pcap_ monitor performs a network capture during the fuzzing iteration. The captured data is discarded and re-captured on each iteration. If a fault occurs, the captured data is logged as a pcap file and returned with the fault data. 
+
+The captured data pcap file is compatible with Wireshark and tcpdump.
 
 .List Network Interfaces
 ****
-The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. On Windows platforms the device name and also the more descriptive names shown by +ipconfig+ can be used.
+The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. 
+
+On Windows platforms, you can use the device name and the more descriptive names shown by +ipconfig+.
 
 -----------------------------------------------------------------
 > peach --showdevices
@@ -60,7 +64,9 @@ Filter:: PCAP style filter string (optional)
 
 .Capture output to CrashableServer on port 4244
 ==================
-This example will run CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. This example needs to point to the location of CrashableServer which is normally located in the Peach directory.
+This example will run CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. 
+
+To run this example, point to the CrashableServer location (normally the Peach directory).
 
 [source,xml]
 ----
@@ -163,6 +169,6 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 [*] Test 'Default' finished.
 ----
 
-Running this example for a few iterations will produce a crash. When Peach is logging the fault a pcap file will be created inside of the fault record.
+Running this example for a few iterations will produce a crash. When Peach is logging the fault, a pcap file will be created inside of the fault record.
 
 ==================

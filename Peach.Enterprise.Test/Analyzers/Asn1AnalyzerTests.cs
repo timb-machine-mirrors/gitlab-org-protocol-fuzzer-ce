@@ -66,15 +66,56 @@ namespace Peach.Enterprise.Test.Analyzers
 		}
 
 		[Test]
+		public void TestAsn1Tag()
+		{
+			var blk = new Peach.Core.Dom.Block();
+			var pre = new Peach.Core.Dom.Number() { lengthType = Core.Dom.LengthType.Bits, length = 3 };
+			var tag = new Peach.Enterprise.Dom.Asn1Tag();
+			tag.ForceMultiByteIdentifier = true;
+			tag.DefaultValue = new Variant(ulong.MaxValue);
+
+			blk.Add(pre);
+			blk.Add(tag);
+
+			var final = blk.Value.ToArray();
+			var exp = new byte[] { 0x1f, 0x81, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f };
+			Assert.AreEqual(exp, final);
+
+			tag.DefaultValue = new Variant(0);
+			final = blk.Value.ToArray();
+			exp = new byte[] { 0x1f, 0x00 };
+			Assert.AreEqual(exp, final);
+		}
+
+		[Test]
+		public void TestAsn1Length()
+		{
+			var len = new Peach.Enterprise.Dom.Asn1Length();
+			len.LongLength = true;
+			len.DefaultValue = new Variant(ulong.MaxValue);
+
+			var final = len.Value.ToArray();
+			var exp = new byte[] { 0x88, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+			Assert.AreEqual(exp, final);
+
+			len.DefaultValue = new Variant(0);
+			final = len.Value.ToArray();
+			exp = new byte[] { 0x80 };
+			Assert.AreEqual(exp, final);
+
+			len.DefaultValue = new Variant(1);
+			final = len.Value.ToArray();
+			exp = new byte[] { 0x81, 0x01 };
+			Assert.AreEqual(exp, final);
+		}
+
+		[Test]
 		public void Fuzz()
 		{
-			var tmp = Path.GetTempFileName();
-			File.WriteAllBytes(tmp, TestCert);
-
 			string pit = @"
 <Peach>
 	<DataModel name='DM'>
-		<Blob>
+		<Blob valueType='hex' value='30 04 01 02 03 04'>
 			<Analyzer class='Asn1'/>
 		</Blob>
 	</DataModel>
@@ -83,7 +124,6 @@ namespace Peach.Enterprise.Test.Analyzers
 		<State name='Initial'>
 			<Action type='output'>
 				<DataModel ref='DM'/>
-				<Data fileName='{0}'/>
 			</Action>
 		</State>
 	</StateModel>
@@ -92,11 +132,8 @@ namespace Peach.Enterprise.Test.Analyzers
 		<StateModel ref='SM'/>
 		<Strategy class='Sequential'/>
 		<Publisher class='Null'/>
-		<Mutators mode='include'>
-			<Mutator class='NumericalEdgeCaseMutator'/>
-		</Mutators>
 	</Test>
-</Peach>".Fmt(tmp);
+</Peach>";
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(System.Text.Encoding.ASCII.GetBytes(pit)));
@@ -106,7 +143,7 @@ namespace Peach.Enterprise.Test.Analyzers
 
 			e.startFuzzing(dom, cfg);
 
-			Assert.AreEqual(20000, e.context.currentIteration);
+			Assert.Greater(e.context.currentIteration, 26000);
 		}
 
 		private static void CrackData(MemoryStream data)
@@ -124,10 +161,7 @@ namespace Peach.Enterprise.Test.Analyzers
 			var final = dom.dataModels[0].Value.ToArray();
 			var expected = data.ToArray();
 
-			File.WriteAllBytes("C:\\Work\\badasn1.bin", final);
-
 			Assert.AreEqual(expected, final);
-
 		}
 
 		byte[] TestCert = Peach.Core.HexString.Parse(@"

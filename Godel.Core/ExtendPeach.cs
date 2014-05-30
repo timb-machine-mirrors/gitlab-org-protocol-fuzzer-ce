@@ -16,7 +16,6 @@ namespace Godel.Core
 	{
 		private RunContext Context { get; set; }
 		private NamedCollection<GodelContext> Expressions { get; set; }
-		private ScriptEngine Engine { get; set; }
 		private StateModel OriginalStateModel { get; set; }
 
 		public ExtendPeach(RunContext context)
@@ -49,40 +48,15 @@ namespace Godel.Core
 			if (dom == null || dom.godel.Count == 0)
 				return;
 
-			// Create the engine
-			Engine = IronPython.Hosting.Python.CreateEngine();
+			// Create a script scope
+			var scope = context.dom.Python.CreateScope();
 
-			// Add any specified paths to our engine.
-			ICollection<string> enginePaths = Engine.GetSearchPaths();
-			foreach (string path in Peach.Core.Scripting.Paths)
-				enginePaths.Add(path);
-			foreach (string path in ClassLoader.SearchPaths)
-				enginePaths.Add(Path.Combine(path, "Lib"));
-			Engine.SetSearchPaths(enginePaths);
-
-			// Import any modules
-			var modules = new Dictionary<string, object>();
-			foreach (string import in Peach.Core.Scripting.Imports)
-				if (!modules.ContainsKey(import))
-					modules.Add(import, Engine.ImportModule(import));
-
-			// Create the global scope
-			var scope = Engine.CreateScope();
-
-			// Add the imports to the global scope
-			foreach (var kv in modules)
-				scope.SetVariable(kv.Key, kv.Value);
-
-
+			// Pre-compile all the expressions
 			foreach (var item in dom.godel)
-			{
-				// Pre-compile all the expressions
 				item.OnTestStarting(Context, scope);
-			}
 
 			Expressions = dom.godel;
 		}
-
 
 		void engine_TestFinished(RunContext context)
 		{
@@ -94,7 +68,6 @@ namespace Godel.Core
 
 			OriginalStateModel = null;
 			Expressions = null;
-			Engine = null;
 		}
 
 		void StateModel_Starting(RunContext context, Peach.Core.Dom.StateModel model)
@@ -106,17 +79,6 @@ namespace Godel.Core
 
 			// Keep a copy of the original for 'pre' variable in the post 
 			OriginalStateModel = ObjectCopier.Clone(model);
-
-			// StateModel.parent and State.parent are not copied, so fix them up
-			foreach (var state in OriginalStateModel.states)
-			{
-				state.parent = OriginalStateModel;
-
-				foreach (var action in state.actions)
-				{
-					action.parent = state;
-				}
-			}
 
 			var expr = GetExpr(model.name);
 			if (expr != null)

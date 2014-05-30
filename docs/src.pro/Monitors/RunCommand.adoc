@@ -2,7 +2,9 @@
 [[Monitors_RunCommand]]
 == Run Command
 
-This monitor will run a specified command to perform some utility function. When to run the command is configurable.
+The _RunCommand_ monitor will run a specified command to perform some utility function. 
+
+You can configure _RunCommand_ to tell it when to run.
 
 === Parameters
 
@@ -14,7 +16,7 @@ _Optional:_
 
 Arguments:: Optional command line arguments
 When::
-	Period When the command should be ran. Defaults to +OnCall+.
+	Period when the command should be run. Defaults to +OnCall+.
 	+
 	[horizontal]
 	OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
@@ -33,7 +35,7 @@ Timeout:: Fault if process takes more than Timeout seconds where -1 is infinite 
 
 .Triggering _RunCommand_ from State Model
 =========================================
-The default usage of _RunCommand_ monitor is to run the command when a message is sent form the state model using a _call_ action type.
+_RunCommand_ monitor is used to run a command when the _call_ action sends a message from the state model.
 
 [source,xml]
 ----
@@ -112,7 +114,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 .OnStart Example
 =========================================
-A an example showing when the command is run when using a _when_ value of +OnStart+.
+_RunCommand_ monitor is used to run a command using a _when_ value of +OnStart+.
 
 [source,xml]
 ----
@@ -196,7 +198,7 @@ lalalalala
 
 .OnEnd Example
 =========================================
-A an example showing when the command is run when using a _when_ value of +OnEnd+.
+_RunCommand_ monitor is used to run a command using a _when_ value of +OnEnd+.
 
 [source,xml]
 ----
@@ -278,7 +280,7 @@ Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with argu
 
 .OnIterationStart Example
 =========================================
-A an example showing when the command is run when using a _when_ value of +OnIterationStart+.
+_RunCommand_ monitor is used to run a command using a _when_ value of +OnIterationStart+.
 
 [source,xml]
 ----
@@ -363,7 +365,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 .OnIterationEnd Example
 =========================================
-A an example showing when the command is run when using a _when_ value of +OnIterationEnd+.
+_RunCommand_ monitor is used to run a command using a _when_ value of +OnIterationEnd+.
 
 [source,xml]
 ----

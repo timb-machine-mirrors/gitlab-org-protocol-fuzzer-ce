@@ -15,7 +15,7 @@
 // Added full enum list for Ethernet protocol
 // Added short description about fuzzing mtu
 
-The _RawEther_ publisher allows sending raw IPv6 packets with IP header.
+The _RawEther_ publisher allows sending raw IPv6 packets with IP headers.
 
 NOTE: This publisher only runs on Linux with root privileges
 

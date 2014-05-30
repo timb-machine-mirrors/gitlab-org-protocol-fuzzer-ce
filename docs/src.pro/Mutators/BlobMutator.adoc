@@ -2,7 +2,9 @@
 [[Mutators_BlobMutator]]
 == BlobMutator
 
-This mutator has the ability to manipulate the blob in many ways. It will grow, shrink, or change bytes in the blob. The mutator will randomly select between the following actions:
+This mutator can randomly manipulate a blob. For example, it can grow or shrink the blob. It can also change the blob's bytes. 
+
+The mutator will randomly select between the following actions:
 
  * ExpandBuffer -- Chooses one of four ways to insert bytes into the blob.
  * ReduceBuffer -- Removes a random number of bytes from the blob.
@@ -15,7 +17,7 @@ If the mutator is expanding the buffer, it will do so in one of the following wa
 
  * SingleRandom -- Expand the Blob with the same random number.
  * Incrementing -- Expand the Blob with bytes that increment from a random start.
- * Zero -- Expand the Blob with zeroes.
+ * Zero -- Expand the Blob with zeros.
  * AllRandom -- Expand the Blob with bytes that are all random numbers.
 
 === Supported Elements

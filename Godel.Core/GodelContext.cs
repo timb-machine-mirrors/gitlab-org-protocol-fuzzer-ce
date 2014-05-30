@@ -9,6 +9,7 @@ using NLog;
 
 namespace Godel.Core
 {
+	[Serializable]
 	public class GodelContext : INamed
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

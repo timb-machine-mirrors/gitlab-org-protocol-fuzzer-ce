@@ -2,7 +2,11 @@
 [[Publishers_WebSocket]]
 == WebSocket Publisher
 
-The _WebSocket_ publisher allows rapid delivery of fuzzing data to browsers using a web socket. The web socket publisher works through a simple JSON based protocol. In the browser a JavaScript handler is evoked to accept data from the fuzzer and display it. The iterations will wait for the data to be fully loaded prior to completing an iteration. A template is provided to the fuzzer with a placeholder for the encoded data to be dropped. The template is loaded into an iframe by the client code.
+The _WebSocket_ publisher allows rapid delivery of fuzzing data to browsers using a web socket. 
+
+The web socket publisher works through a simple JSON based protocol. The browser evokes a JavaScript handler to accept data from the fuzzer and display it. The iterations will wait for the data to be fully loaded prior to completing an iteration. 
+
+Peach provides a fuzzer template with a placeholder to drop the encoded data. The client code loads the template into an iframe.
 
 === Syntax
 
