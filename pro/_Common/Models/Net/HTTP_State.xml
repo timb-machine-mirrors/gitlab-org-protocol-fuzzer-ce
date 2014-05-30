@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
+       author="Deja Vu Security, LLC" description="http protocol pit state models" version="0.0.1">
+  <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+
+  <Include ns="HTTP" src="file:##PitLibraryPath##/_Common/Models/Net/HTTP_Data.xml"/>
+
+  <StateModel name="RequestForParser" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="output">
+        <DataModel ref="HTTP:Request" />
+        <Data fileName="##SampleDir##/requests" />
+      </Action>
+
+      <Action type="close" />
+
+      <Action type="call" method="startRequestParser" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+  <StateModel name="RequestToServer" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="output">
+        <DataModel ref="HTTP:Request" />
+        <Data fileName="##SampleDir##/requests" />
+      </Action>
+
+      <Action type="input">
+        <DataModel ref="HTTP:Response" />
+      </Action>
+    </State>
+  </StateModel>
+
+  <StateModel name="ResponseForParser" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="output">
+        <DataModel ref="HTTP:Response" />
+        <Data fileName="##SampleDir##/responses" />
+      </Action>
+
+      <Action type="close" />
+
+      <Action type="call" method="startResponseParser" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+  <StateModel name="RequestFromClient" initialState="InitialState">
+    <State name="InitialState">
+      <Action type="open" />
+
+      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+
+      <Action type="accept" />
+
+      <Action type="input">
+        <DataModel ref="HTTP:Request" />
+      </Action>
+
+      <Action type="output">
+        <DataModel ref="HTTP:Response" />
+        <Data fileName="##SampleDir##/responses" />
+      </Action>
+    </State>
+  </StateModel>
+
+</Peach>

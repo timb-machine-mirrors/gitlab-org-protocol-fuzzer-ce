@@ -1,0 +1,28 @@
+:Doctitle: HTTP Peach Pit Data Sheet
+:Description: Hypertext Transfer Protocol (HTTP)
+
+ * Peach Pit: HTTP
+ * Direction: Client, Server
+ * Supported Platforms: Windows, Linux, OS X
+
+Hypertext Transfer Protocol (HTTP) ...
+
+=== Specifications
+
+
+[options="header"]
+|========
+|Specification | Title
+|RFC 1945 | Hypertext Transfer Protocol -- HTTP/1.0
+|RFC 2616 | Hypertext Transfer Protocol -- HTTP/1.1 
+|========
+
+=== Use Cases
+
+
+[options="header"]
+|========
+|Messages | Specification
+|Content Length Encoding | RFC1945
+|Chunked Transfer Encoding | RFC 2616
+|========
