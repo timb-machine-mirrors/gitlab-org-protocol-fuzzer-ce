@@ -407,7 +407,7 @@
 			<String name="XRMD" value="XRMD" token="true"/>
 		</Choice>
 		<Block name="ReqArgBlock" ref="ArgBlock">
-			<String name="Argument" value="foobarbaz"/>
+			<String name="Argument" value="foo"/>
 		</Block>
 	</DataModel>
 
@@ -418,7 +418,7 @@
 			<String name="XMKD" value="XMKD" token="true"/>
 		</Choice>
 		<Block name="ReqArgBlock" ref="ArgBlock">
-			<String name="Argument" value="foobarbaz"/>
+			<String name="Argument" value="foo"/>
 		</Block>
 	</DataModel>
 
