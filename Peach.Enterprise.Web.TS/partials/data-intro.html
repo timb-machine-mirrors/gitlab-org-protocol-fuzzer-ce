@@ -1,30 +1,22 @@
 ﻿<!-- Configure Pit: Introduction for Data Collection -->
-<div class="page-content">
-	<div class="page-header">
-		<h3>
-			Data Collection
-		</h3>
-	</div>x
-	<div class="row">
-		<div class="col-xs-12">
-			<p>
-				Data Collection section of the Pit Configurator is a series of questions and answers
-				that helps the user choose the appropriate Peach Monitors for collecting resulting data from Peach.<br />
-				The user may go through this process multiple times to select multiple Data Collecting monitors.<br />
-				At the end of the Q-A the total list of Monitors chosen by the Pit Configurator will be displayed.<br />
-				The user will then have the option to:
-				<ul>
-					<li>Delete any of the resulting Monitors</li>
-					<li>Begin the Q-A process again to choose more Monitors</li>
-					<li>Move on to Automation</li>
-				</ul>
-			</p>
-		</div>
-	</div>
-	<div class="row-fluid wizard-actions">
-		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
-			Next
-			<i class="icon-arrow-right icon-on-right"></i>
-		</button>
-	</div>
+<div>
+	<!-- Text within this div -->
+	<p>
+		Data Collection section of the Pit Configurator is a series of questions and answers
+		that helps the user choose the appropriate Peach Monitors for collecting resulting data from Peach.<br />
+		The user may go through this process multiple times to select multiple Data Collecting monitors.<br />
+		At the end of the Q-A the total list of Monitors chosen by the Pit Configurator will be displayed.<br />
+		The user will then have the option to:
+		<ul>
+			<li>Delete any of the resulting Monitors</li>
+			<li>Begin the Q-A process again to choose more Monitors</li>
+			<li>Move on to Automation</li>
+		</ul>
+	</p>
+</div>
+<div class="row-fluid wizard-actions">
+	<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+		Next
+		<i class="icon-arrow-right icon-on-right"></i>
+	</button>
 </div>
