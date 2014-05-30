@@ -12,3 +12,28 @@ When the project is built, the TypeScript files are translated to JavaScript and
 
 Any web pages checked into this project should not refer to any CDN sources for JavaScript files, they should be included in the project using NuGet if possible.
 
+
+################################################################################
+# these are handy powershell bits for making sure everything is good to go
+# when running tests, or serving the application through node. drop these into
+# your $PROFILE. you will need to `Set-ExecutionPolicy RemoteSigned` or larger.
+function jsonlintDir($dir) {
+    Get-ChildItem -Recurse -include *.json $dir | %{ echo "$($_.FullName)`n" ; jsonlint -q $_.FullName } 
+}
+
+function RunEpeachWeb() {
+    echo "going to epeach web project"
+    cd $epeach_js
+
+    echo "Lint-ing JSON files"
+    jsonlintDir('app')
+    jsonlintDir('testdata')
+    jsonlint -q bower.json
+    jsonlint -q package.json
+
+    echo "Compiling typescript"
+    tsc "@tsc-args.txt"
+    echo "Starting nodejs server"
+    npm start
+}
+################################################################################
