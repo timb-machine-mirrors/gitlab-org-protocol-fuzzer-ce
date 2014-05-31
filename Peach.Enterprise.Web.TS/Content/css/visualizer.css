@@ -1,0 +1,142 @@
+.node circle
+{
+  fill: orange;
+  stroke: #111;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.node
+{
+  font: 12px sans-serif;
+}
+
+.nodeHighlight
+{
+  font-weight: bold;
+}
+
+.nodeHighlight circle
+{
+
+  stroke: #111;
+  fill: green;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.nodeFuzzed
+{
+  font-weight: bold;
+}
+
+.nodeFuzzed circle
+{
+
+  stroke: #111;
+  fill: blue;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.linkHighlight
+{
+  fill: none;
+  stroke: #red;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.link {
+  fill: none;
+  stroke: #222;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+#viszContainer {
+  width: 65%;
+  height: 650px;
+}
+
+
+.col-xs-13, .col-xs-14
+{
+  float:left;
+  min-height: 1px;
+  padding-left: 12px;
+  padding-right: 12px;
+  position: relative;
+}
+
+.col-xs-13 {
+  width: 65%;
+}
+
+.col-xs-14 {
+  width: 35%;
+}
+
+#view
+{
+  margin-top: 75px;
+}
+
+@media (max-width: 1201px) {
+  .col-xs-13, .col-xs-14
+  {
+    width: 100%;
+  }
+
+  #view
+  {
+    margin-top: 10px;
+  }
+
+  #viszContainer {
+    width: 100%;
+  }
+}
+
+@media (max-height: 800px) {
+  #viszContainer {
+    height: 550px;
+  }
+}
+
+@media (min-height: 801px) {
+  #viszContainer {
+    height: 650px;
+  }
+}
+
+@media (min-height: 1100px) {
+  #viszContainer {
+    height: 900px;
+  }
+}
+
+@media (min-width: 1202px) {
+  @media (min-height: 1200px) {
+    #viszContainer {
+      height: 1000px;
+    }
+  }
+
+  @media (min-height: 1300px) {
+    #viszContainer {
+     height: 1100px;
+    }
+  }
+}
+
+@media (min-height: 1500px) {
+    #viszContainer {
+     height: 1200px;
+    }
+  }
+
+.headerInfo {
+  float: right;
+  padding-left: 50px;
+}

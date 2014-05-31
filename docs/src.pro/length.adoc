@@ -2,7 +2,7 @@
 [[length]]
 == Length Attribute
 
-The _length_ attribute defines the size of a Blob or String in bytes. 
+The _length_ attribute defines the Blob or String size in bytes. 
 
 === Examples
 
