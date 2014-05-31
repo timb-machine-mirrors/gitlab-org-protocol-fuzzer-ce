@@ -1,12 +1,12 @@
-﻿/// <reference path="controllers.wizard.ts" />
-/// <reference path="controllers.dash.ts" />
-/// <reference path="models.wizard.ts" />
-/// <reference path="controllers.pittest.ts" />
-/// <reference path="services.peach.ts" />
+﻿/// <reference path="controllers/wizard.ts" />
+/// <reference path="controllers/dash.ts" />
+/// <reference path="models/wizard.ts" />
+/// <reference path="controllers/pittest.ts" />
+/// <reference path="services/peach.ts" />
 
 module DashApp {
 	"use strict";
-
+	
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 
@@ -16,12 +16,12 @@ module DashApp {
 		"ngGrid",
 		"n3-charts.linechart",
 		"ngRoute",
-		"LocalStorageModule",
 		"ui.bootstrap",
-		"kendo.directives"
+		"kendo.directives",
+		"LocalStorageModule",
 	])
-		.service("peachService", ["$resource", "$http", ($resource, $http) => new PeachService($resource, $http)])
-        .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
+		.service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
+      .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
 
 			$routeProvider
 				.when("/", {
