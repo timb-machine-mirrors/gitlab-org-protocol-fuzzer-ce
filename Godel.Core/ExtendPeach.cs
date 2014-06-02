@@ -44,18 +44,18 @@ namespace Godel.Core
 
 		void engine_TestStarting(RunContext context)
 		{
-			var dom = context.dom as Godel.Core.Dom;
-			if (dom == null || dom.godel.Count == 0)
+			var sm = context.test.stateModel as Godel.Core.StateModel;
+			if (sm == null || sm.godel.Count == 0)
 				return;
 
 			// Create a script scope
 			var scope = context.dom.Python.CreateScope();
 
 			// Pre-compile all the expressions
-			foreach (var item in dom.godel)
+			foreach (var item in sm.godel)
 				item.OnTestStarting(Context, scope);
 
-			Expressions = dom.godel;
+			Expressions = sm.godel;
 		}
 
 		void engine_TestFinished(RunContext context)
@@ -78,7 +78,7 @@ namespace Godel.Core
 				return;
 
 			// Keep a copy of the original for 'pre' variable in the post 
-			OriginalStateModel = ObjectCopier.Clone(model);
+			OriginalStateModel = ObjectCopier.Clone((StateModel)model);
 
 			var expr = GetExpr(model.name);
 			if (expr != null)
