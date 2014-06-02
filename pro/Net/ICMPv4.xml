@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd"
        author="Deja Vu Security, LLC" description="Internet Control Message Protocol Version 4 PIT" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
@@ -16,7 +16,7 @@
       <Param name="Device" value="##Interface##" />
     </Monitor>
   </Agent>
-  
+
   <Agent name="LocalAgent">
     <Monitor class="Pcap">
       <Param name="Device" value="##Interface##" />
@@ -33,7 +33,24 @@
       <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Protocol" value="1"/>
     </Publisher>
-    
+
+    <Strategy class="##Strategy##"/>
+    <Logger class="File" >
+      <Param name="Path" value="##LoggerPath##" />
+    </Logger>
+  </Test>
+
+  <Test name="Echo">
+    <StateModel ref="ICMPv4:Echo"/>
+
+    <Agent ref="LocalAgent"/>
+
+    <Publisher class="RawV4">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Protocol" value="1"/>
+    </Publisher>
+
     <Strategy class="##Strategy##"/>
     <Logger class="File" >
       <Param name="Path" value="##LoggerPath##" />
