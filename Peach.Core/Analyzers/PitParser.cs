@@ -200,6 +200,11 @@ namespace Peach.Core.Analyzers
 			return new Dom.Dom();
 		}
 
+		protected virtual Dom.StateModel CreateStateModel()
+		{
+			return new Dom.StateModel();
+		}
+
 		public virtual Dom.Dom asParser(Dictionary<string, object> args, Stream data, bool doValidatePit)
 		{
 			// Reset the data element auto-name suffix back to zero
@@ -1217,7 +1222,7 @@ namespace Peach.Core.Analyzers
 		{
 			string name = node.getAttrString("name");
 			string initialState = node.getAttrString("initialState");
-			StateModel stateModel = new StateModel();
+			StateModel stateModel = CreateStateModel();
 			stateModel.name = name;
 			stateModel.parent = parent;
 
