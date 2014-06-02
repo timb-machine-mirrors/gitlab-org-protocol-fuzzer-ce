@@ -25,7 +25,7 @@ namespace Peach.Enterprise.WebServices.Models
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public ConfigType Type { get; set; }
 		public List<string> Defaults { get; set; }
-		public long Min { get; set; }
-		public ulong Max { get; set; }
+		public long? Min { get; set; }
+		public ulong? Max { get; set; }
 	}
 }

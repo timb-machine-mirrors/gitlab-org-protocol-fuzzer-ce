@@ -32,6 +32,19 @@ namespace Peach.Enterprise.WebServices
 		public string version { get; set; }
 	}
 
+	public class ValidationEventArgs : EventArgs
+	{
+		public ValidationEventArgs(Exception exception, string fileName)
+		{
+			Exception = exception;
+			FileName = fileName;
+		}
+
+		public Exception Exception { get; private set; }
+
+		public string FileName { get; private set; }
+	}
+
 	public class PitDatabase
 	{
 		private static PeachElement Parse(string fileName)
@@ -73,6 +86,12 @@ namespace Peach.Enterprise.WebServices
 
 		public PitDatabase()
 		{
+		}
+
+		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
+
+		public void Load(string path)
+		{
 			var name = "Peach Pro Library 2014 Q2";
 			var guid = MakeGuid(name);
 
@@ -84,7 +103,7 @@ namespace Peach.Enterprise.WebServices
 				Versions = new List<Models.LibraryVersion>(),
 				Groups = new List<Models.Group>(),
 				User = Environment.UserName,
-				Timestamp = Directory.GetCreationTime("."),
+				Timestamp = Directory.GetCreationTime(path),
 			};
 
 			var ver = new Models.LibraryVersion()
@@ -104,11 +123,19 @@ namespace Peach.Enterprise.WebServices
 			lib.Groups.Add(group);
 			libraries.Add(guid, lib);
 
-			foreach (var dir in Directory.EnumerateDirectories("."))
+			foreach (var dir in Directory.EnumerateDirectories(path))
 			{
 				foreach (var file in Directory.EnumerateFiles(dir, "*.xml"))
 				{
-					AddEntry(ver, file);
+					try
+					{
+						AddEntry(ver, file);
+					}
+					catch (Exception ex)
+					{
+						if (ValidationEventHandler != null)
+							ValidationEventHandler(this, new ValidationEventArgs(ex, file));
+					}
 				}
 			}
 		}
@@ -186,61 +213,42 @@ namespace Peach.Enterprise.WebServices
 			{
 				var item = new Models.ConfigItem()
 				{
+					Type = d.ConfigType,
 					Key = d.Key,
 					Value = d.Value,
 					Name = d.Name,
 					Description = d.Description,
-					Defaults = new List<string>(),
+					Defaults = new List<string>(d.Defaults),
+					Min = d.Min,
+					Max = d.Max,
 				};
 
-				switch (d.Type)
+				switch (item.Type)
 				{
-					case PitDefines.Type.String:
-						item.Type = Models.ConfigType.String;
-						break;
-					case PitDefines.Type.Strategy:
-						item.Type = Models.ConfigType.Enum;
-						item.Defaults.AddRange(
-							ClassLoader.GetAllByAttribute<MutationStrategyAttribute>(null)
-								.Select(kv => kv.Key)
-								.Where(k => k.IsDefault)
-								.Select(k => k.Name));
-						break;
-					case PitDefines.Type.Port:
-						item.Type = Models.ConfigType.Range;
-						item.Min = ushort.MinValue;
-						item.Max = ushort.MaxValue;
-						break;
-					case PitDefines.Type.Hwaddr:
-						item.Type = Models.ConfigType.Hwaddr;
+					case Models.ConfigType.Hwaddr:
 						item.Defaults.AddRange(
 							Interfaces
 								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
 								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
 								.Where(s => !string.IsNullOrEmpty(s)));
 						break;
-					case PitDefines.Type.Iface:
-						item.Type = Models.ConfigType.Iface;
+					case Models.ConfigType.Iface:
 						item.Defaults.AddRange(Interfaces.Select(i => i.Name));
 						break;
-					case PitDefines.Type.Ipv4:
-						item.Type = Models.ConfigType.Ipv4;
+					case Models.ConfigType.Ipv4:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
 								.Select(a => a.Address.ToString()));
 						break;
-					case PitDefines.Type.Ipv6:
-						item.Type = Models.ConfigType.Ipv6;
+					case Models.ConfigType.Ipv6:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
 								.Select(a => a.Address.ToString()));
 						break;
-					default:
-						throw new NotSupportedException();
 				}
 
 				ret.Add(item);
@@ -308,6 +316,7 @@ namespace Peach.Enterprise.WebServices
 
 		private Dictionary<string, Models.Pit> entries = new Dictionary<string, Models.Pit>();
 		private Dictionary<string, Models.Library> libraries = new Dictionary<string, Models.Library>();
-		private List<NetworkInterface> interfaces = new List<NetworkInterface>();
+
+		private List<NetworkInterface> interfaces = null;
 	}
 }

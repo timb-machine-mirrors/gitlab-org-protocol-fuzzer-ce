@@ -15,6 +15,7 @@ namespace Peach.Enterprise.WebServices
 		public CustomJsonSerializer()
 		{
 			ContractResolver = new CamelCasePropertyNamesContractResolver();
+			NullValueHandling = NullValueHandling.Ignore;
 		}
 	}
 
