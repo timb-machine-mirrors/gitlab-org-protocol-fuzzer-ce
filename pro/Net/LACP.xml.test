@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="SourceMAC"     value="0004961f506a"/>
+	<Define key="TargetMAC"     value="0180c2000002"/>
+	<Define key="ActorMAC"      value="0004961f506a"/>
+	<Define key="PartnerMAC"    value="000000000000"/>
+	<Define key="ActorPort"     value="0012"/>
+	<Define key="PartnerPort"   value="0000"/>
+	<Define key="Strategy"  value="Random"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open action="LACP:Transmit.Initial.Broadcast" publisher="Pub"/>
+		<Output action="LACP:Transmit.Initial.Broadcast" publisher="Pub">
+<![CDATA[
+0000   01 80 c2 00 00 02 00 04 96 1f 50 6a 88 09 01 01  ..........Pj....
+0010   01 14 91 f4 00 04 96 1f 50 6a 80 00 00 00 00 12  ........Pj......
+0020   47 00 00 00 02 14 00 00 00 00 00 00 00 00 00 00  G...............
+0030   00 00 00 00 3b 00 00 00 03 10 00 02 00 00 00 00  ....;...........
+0040   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0050   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0060   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0070   00 00 00 00 00 00 00 00 00 00 00 00              ............
+]]>
+		</Output>
+	</Test>
+
+</TestData>

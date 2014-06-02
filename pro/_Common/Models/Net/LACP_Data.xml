@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
        author="Deja Vu Security, LLC" description="Link Aggregation Control Protocol PIT DataModels" version="0.0.2">
   <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
 
   <DataModel name="Packet">
     <Block name="EtherHeader">
-      <Blob name="Dest" valueType="hex" value="ffffffffffff"/>
+      <Blob name="Dest" valueType="hex" value="##TargetMAC##"/>
       <Blob name="Src" valueType="hex" value="##SourceMAC##"/>
       <Blob name="Type" valueType="hex" value="8809"/>
     </Block>
@@ -20,7 +20,7 @@
           <Relation type="size" of="Actor"/>
         </Number>
         <Blob name="SysPriority" valueType="hex" value="91f4"/>
-        <Blob name="Sys" valueType="hex" value="##SourceMAC##"/>
+        <Blob name="Sys" valueType="hex" value="##ActorMAC##"/>
         <Blob name="Key" valueType="hex" value="8000"/>
         <Blob name="PortPriority" valueType="hex" value="0000"/>
         <Blob name="Port" valueType="hex" value="##ActorPort##"/>
@@ -34,7 +34,7 @@
           <Relation type="size" of="Partner"/>
         </Number>
         <Blob name="SysPriority" valueType="hex" value="0000"/>
-        <Blob name="Sys" valueType="hex" value="##TargetMAC##"/>
+        <Blob name="Sys" valueType="hex" value="##PartnerMAC##"/>
         <Blob name="Key" valueType="hex" value="0000"/>
         <Blob name="PortPriority" valueType="hex" value="0000"/>
         <Blob name="Port" valueType="hex" value="##PartnerPort##"/>
