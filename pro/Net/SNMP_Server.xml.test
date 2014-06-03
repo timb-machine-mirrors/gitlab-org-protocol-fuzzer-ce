@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="SourcePort" value="161"/>
+	<Define key="TargetPort" value="161"/>
+	<Define key="TargetIPv4" value="192.168.222.149"/>
+	<Define key="CommString" value="public"/>
+	<Define key="LoggerPath" value="./logs/snmp/"/>
+	<Define key="Strategy"  value="Random"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open action="SNMP:Server.LaunchClient.Action" publisher="Pub"/>
+		<Input action="SNMP:Server.ServerStart.GetRequest" publisher="Pub">
+<![CDATA[
+0000   30 29 02 01 01 04 06 70 75 62 6c 69 63 a0 1c 02  0).....public...
+0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0e 30 0c 06  .r. .......0.0..
+0020   08 2b 06 01 02 01 01 04 00 05 00                 .+.........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.ServerStart.Response" publisher="Pub">
+<![CDATA[
+0000   30 3c 02 01 01 04 06 70 75 62 6c 69 63 a2 2f 02  0<.....public./.
+0010   04 72 a0 20 a6 02 01 00 02 01 00 30 21 30 1f 06  .r. .......0!0..
+0020   08 2b 06 01 02 01 01 04 00 04 13 4d 65 20 3c 6d  .+.........Me <m
+0030   65 40 65 78 61 6d 70 6c 65 2e 6f 72 67 3e        e@example.org>
+]]>
+		</Output>
+
+	</Test>
+</TestData>

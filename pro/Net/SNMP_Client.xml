@@ -18,7 +18,7 @@
 
     <Agent ref="Agent"/>
 
-    <Publisher class="Udp" name="UdpHandler">
+    <Publisher class="Udp">
       <Param name="SrcPort" value="##SourcePort##"/>
       <Param name="Host" value="##TargetIPv4##"/>
       <Param name="Port" value="##TargetPort##"/>

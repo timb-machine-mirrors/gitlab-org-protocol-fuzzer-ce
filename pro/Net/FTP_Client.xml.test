@@ -11,6 +11,7 @@
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Passive">
+		<Open action="FTP:ClientActive.InputUserName.Action" publisher="CommandPublisher"/>
 	</Test>
 
 	<Test name="Default">

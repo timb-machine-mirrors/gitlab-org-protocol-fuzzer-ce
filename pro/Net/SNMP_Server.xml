@@ -45,9 +45,11 @@
 	<Test name="Default">
     <StateModel ref="SNMP:Server"/>
 
-   <Agent ref="##Agent##"/>
+    <Agent ref="Windows" platform="linux"/>
+    <Agent ref="Linux" platform="windows"/>
+    <Agent ref="OSX" platform="osx"/>
 
-    <Publisher class="Udp" name="UdpHandler">
+    <Publisher class="Udp">
       <Param name="SrcPort" value="##SourcePort##"/>
       <Param name="Host" value="##SourceIPv4##"/>
 			<Param name="Timeout" value="5000"/>
