@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Define key="SourceMAC"     value="0004961f506a"/>
-	<Define key="TargetMAC"     value="0180c2000002"/>
-	<Define key="ActorMAC"      value="0004961f506a"/>
-	<Define key="PartnerMAC"    value="000000000000"/>
-	<Define key="ActorPort"     value="0012"/>
-	<Define key="PartnerPort"   value="0000"/>
-	<Define key="Strategy"  value="Random"/>
+	<Hwaddr key="SourceMAC" name="Source MAC Address" description=""     value="0004961f506a"/>
+	<Hwaddr key="TargetMAC" name="Target MAC Address" description=""     value="0180c2000002"/>
+	<String key="ActorMAC"      value="0004961f506a"/>
+	<String key="PartnerMAC"    value="000000000000"/>
+	<String key="ActorPort"     value="18"/>
+	<String key="PartnerPort"   value="0"/>
+	<Strategy key="Strategy" name="name" description=""  value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

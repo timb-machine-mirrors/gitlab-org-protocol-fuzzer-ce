@@ -42,26 +42,26 @@ Example configuration for sending raw ethernet packets.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="LoggerPath"  value="./logs/ethernet/"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="TargetMAC" value="0000000000"/>
-    <Define key="SourceMAC" value="0000000000"/>
-    <Define key="PitLibraryPath" value="."/>
+    <String key="LoggerPath" name="Logger Path" description=""  value="./logs/ethernet/"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="0000000000"/>
+    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="0000000000"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
     <!-- this is for testing with ARP -->
-    <Define key="SourceIPv4" value="127.0.0.1"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
     <!-- this is for testing with ARP -->
-    <Define key="TargetIPv4" value="127.0.0.1"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
+  <OSX>
     <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
-  <Windows platform="windows">
+  <Windows>
     <!-- This can't run on windows because it uses the RawEther publisher. -->
   </Windows>
 </PitDefines>

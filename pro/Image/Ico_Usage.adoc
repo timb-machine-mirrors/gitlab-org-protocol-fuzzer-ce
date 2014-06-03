@@ -50,26 +50,26 @@ sudo apt-get install feh
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value="*.ico"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="LoggerPath"  value="./logs/ico/"/>
-    <Define key="SamplePath" value="./_Common/Samples/Image"/>
-    <Define key="PitLibraryPath" value="."/>
+    <String key="Seed" name="name" description="" value="*.ico"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="LoggerPath" name="Logger Path" description=""  value="./logs/ico/"/>
+    <String key="SamplePath" value="./_Common/Samples/Image"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Agent" value="LinuxAgent"/>
-    <Define key="Target" value="feh" />
+  <Linux>
+    <String key="Agent" value="LinuxAgent"/>
+    <String key="Target" name="name" description="" value="feh" />
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Agent" value="OsxAgent"/>
-    <Define key="Target" value="/Applications/Preview.app/Contents/MacOS/Preview" />
+  <OSX>
+    <String key="Agent" value="OsxAgent"/>
+    <String key="Target" name="name" description="" value="/Applications/Preview.app/Contents/MacOS/Preview" />
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Agent" value="WinAgent"/>
-    <Define key="Target" value="C:\\windows\\system32\\mspaint.exe" />
+  <Windows>
+    <String key="Agent" value="WinAgent"/>
+    <String key="Target" name="name" description="" value="C:\\windows\\system32\\mspaint.exe" />
   </Windows>
 </PitDefines>
 ----

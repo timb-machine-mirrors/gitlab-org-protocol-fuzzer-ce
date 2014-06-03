@@ -42,24 +42,24 @@ Example configuration to broadcast CDP packets.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="SourceMAC" value="5254005335d3"/>
-    <Define key="TargetMAC" value="ffffffffffff"/>
-    <Define key="Hostname" value="foobar"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="logs/cdp/"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="PitLibraryPath" value="."/>
+    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="5254005335d3"/>
+    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="ffffffffffff"/>
+    <String key="Hostname" value="foobar"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/cdp/"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
+  <OSX>
     <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
-  <Windows platform="windows">
+  <Windows>
     <!-- This can't run on windows because it uses the RawEther publisher. -->
   </Windows>
 </PitDefines>

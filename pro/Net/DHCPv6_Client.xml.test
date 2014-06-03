@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Define key="SourcePort"  value="546"/>
-  <Define key="MulticastDHCP"  value="ff02::1:2"/>
-  <Define key="SourceMAC"  value="000c29e9b43b"/>
-  <Define key="TargetMAC"  value="000c29ffdda1"/>
-  <Define key="TargetPort"  value="547"/>
-  <Define key="Strategy"   value="Random"/>
-  <Define key="LoggerPath"  value="logs/dhcpV6/"/>
-  <Define key="DuidTime"  value="0"/>
-  <Define key="RequestDuidTime"  value="392166683"/>
-  <Define key="SolicitDuidTime"  value="392166683"/>
-  <Define key="Domain" value="TSE-MANAGEMENT"/>
-  <Define key="TransactionId"  value="e7fb58"/>
+	<Range key="SourcePort" name="name" description="" min="0" max="65535"  value="546"/>
+  <String key="MulticastDHCP"  value="ff02::1:2"/>
+  <Hwaddr key="SourceMAC" name="Source MAC Address" description=""  value="000c29e9b43b"/>
+  <Hwaddr key="TargetMAC" name="Target MAC Address" description=""  value="000c29ffdda1"/>
+  <Range key="TargetPort" name="name" description="" min="0" max="65535"  value="547"/>
+  <Strategy key="Strategy" name="name" description=""   value="Random"/>
+  <String key="LoggerPath" name="Logger Path" description=""  value="logs/dhcpV6/"/>
+  <String key="DuidTime"  value="0"/>
+  <String key="RequestDuidTime"  value="392166683"/>
+  <String key="SolicitDuidTime"  value="392166683"/>
+  <String key="Domain" value="TSE-MANAGEMENT"/>
+  <String key="TransactionId"  value="e7fb58"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

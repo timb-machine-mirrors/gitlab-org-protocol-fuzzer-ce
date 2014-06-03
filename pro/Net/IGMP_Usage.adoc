@@ -48,30 +48,30 @@ Core Networking - Internet Group Management Protocol (IGMP-In)
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="RemoteAgentIP" value="10.0.1.40"/>
-    <Define key="TargetIPv4" value="224.0.0.22"/>
-    <Define key="LoggerPath" value="logs/IGMP/"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="PitLibraryPath" value="."/>
+    <Ipv4 key="RemoteAgentIP" name="Remote Agent IP Address" description="" value="10.0.1.40"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="224.0.0.22"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/IGMP/"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
-    <Define key="tsharkInterface" value="eth0"/>
-    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
+    <Iface key="tsharkInterface" name="name" description="" value="eth0"/>
+    <String key="tsharkBin" name="name" description="" value="/usr/bin/tshark"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Interface" value="em0"/>
-    <Define key="tsharkInterface" value="em0"/>
-    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="em0"/>
+    <Iface key="tsharkInterface" name="name" description="" value="em0"/>
+    <String key="tsharkBin" name="name" description="" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
-    <Define key="tsharkInterface" value="2"/>
-    <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
+    <Iface key="tsharkInterface" name="name" description="" value="2"/>
+    <String key="tsharkBin" name="name" description="" value="C:\Program Files\Wireshark\tshark.exe"/>
   </Windows>
 </PitDefines>
 ----

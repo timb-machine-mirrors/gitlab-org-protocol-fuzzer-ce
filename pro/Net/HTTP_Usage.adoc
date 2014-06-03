@@ -57,26 +57,26 @@ Make sure the curl command is installed on your target system.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="LoggerPath" value="./logs/http/"/>
-    <Define key="Strategy" value="Random"/>
-    <Define key="PitLibraryPath" value="."/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="TargetPort" value="80"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="./logs/http/"/>
+    <Strategy key="Strategy" name="name" description="" value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="80"/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
-    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
+    <String key="ClientCmd" value="curl 'http://localhost/'"/>
   </Linux>
   
-  <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
-    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="en0"/>
+    <String key="ClientCmd" value="curl 'http://localhost/'"/>
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
-    <Define key="ClientCmd" value="curl 'http://localhost/'"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
+    <String key="ClientCmd" value="curl 'http://localhost/'"/>
   </Windows>
 
 </PitDefines>

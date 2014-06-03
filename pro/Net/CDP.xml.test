@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Define key="SourceMAC" value="000bbe189a41"/>
-  <Define key="TargetMAC" value="01000ccccccc"/>
-  <Define key="SwitchMAC" value="000bbe189a40"/>
-  <Define key="Hostname" value="myswitch"/>
-  <Define key="Domain" value="MYDOMAIN"/>
-  <Define key="Interface" value="FastEthernet0/1"/>
-  <Define key="SourceIPv4" value="192.168.0.253"/>
-  <Define key="Strategy"  value="Random"/>
+	<Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000bbe189a41"/>
+  <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="01000ccccccc"/>
+  <String key="SwitchMAC" value="000bbe189a40"/>
+  <String key="Hostname" value="myswitch"/>
+  <String key="Domain" value="MYDOMAIN"/>
+  <Iface key="Interface" name="name" description="" value="FastEthernet0/1"/>
+  <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="192.168.0.253"/>
+  <Strategy key="Strategy" name="name" description=""  value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

@@ -47,25 +47,25 @@ sudo apt-get install vlc
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="Seed" value="avi_divx_sample*.avi"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="LoggerPath"  value="./logs/avi_divx/"/>
-    <Define key="PitLibraryPath" value="."/>
-    <Define key="SamplePath" value="./_Common/Samples/Video"/>
+    <String key="Seed" name="name" description="" value="avi_divx_sample*.avi"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="LoggerPath" name="Logger Path" description=""  value="./logs/avi_divx/"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <String key="SamplePath" value="./_Common/Samples/Video"/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Agent" value="Linux"/>
-    <Define key="Target" value="vlc" />
+  <Linux>
+    <String key="Agent" value="Linux"/>
+    <String key="Target" name="name" description="" value="vlc" />
   </Linux>
-  <OSX platform="osx">
-    <Define key="Agent" value="OSX"/>
-    <Define key="Target" value="/Applications/VLC.app/Contents/MacOS/VLC" />
+  <OSX>
+    <String key="Agent" value="OSX"/>
+    <String key="Target" name="name" description="" value="/Applications/VLC.app/Contents/MacOS/VLC" />
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Agent" value="Win"/>
-    <Define key="Target" value="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe" />
+  <Windows>
+    <String key="Agent" value="Win"/>
+    <String key="Target" name="name" description="" value="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe" />
 </PitDefines>
 ----
 

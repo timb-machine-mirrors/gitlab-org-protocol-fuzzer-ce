@@ -50,25 +50,25 @@ socat STDIO udp4-listen:12345
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="logs/udpV4/"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="SourcePort" value="12345"/>
-    <Define key="TargetPort" value="12345"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="PitLibraryPath" value="."/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/udpV4/"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="12345"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="en0"/>
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
   </Windows>
 </PitDefines>
 ----

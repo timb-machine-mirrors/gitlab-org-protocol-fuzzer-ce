@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Define key="SourceIPv4" value="192.168.222.130"/>
-	<Define key="TargetIPv4" value="192.168.222.128"/>
-	<Define key="TargetPort" value="21"/>
-	<Define key="Strategy"  value="Random"/>
-	<Define key="FtpUser" value="jordyn"/>
-	<Define key="FtpPass" value="passworda"/>
-	<Define key="DataPort" value="54465"/>
+	<Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="192.168.222.130"/>
+	<Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="192.168.222.128"/>
+	<Range key="TargetPort" name="name" description="" min="0" max="65535" value="21"/>
+	<Strategy key="Strategy" name="name" description=""  value="Random"/>
+	<String key="FtpUser" value="jordyn"/>
+	<String key="FtpPass" value="passworda"/>
+	<String key="DataPort" value="54465"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Passive">

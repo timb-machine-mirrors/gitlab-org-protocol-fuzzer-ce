@@ -50,33 +50,33 @@ Example configuration for sending vxlan packets.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="OuterSourceMAC" value="000000000000"/>
-    <Define key="OuterSourceIPv4" value="10.6.66.51" />
-    <Define key="OuterTargetMAC"   value="000000000000"/>
-    <Define key="OuterTargetIPv4" value="10.6.66.52"/>
-    <Define key="LoggerPath"  value="logs/vxlan/"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="SourceMAC" value="000000000000" />
-    <Define key="TargetMAC" value="000000000000"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="TargetIPv6" value="::1"/>
-    <Define key="SourceIPv6" value="::1"/>
-    <Define key="Tag" value="1"/>
-    <Define key="PitLibraryPath" value="."/>
-    <Define key="SourcePort" value="12345"/>
-    <Define key="TargetPort" value="12345"/>
+    <String key="OuterSourceMAC" value="000000000000"/>
+    <String key="OuterSourceIPv4" value="10.6.66.51" />
+    <String key="OuterTargetMAC"   value="000000000000"/>
+    <String key="OuterTargetIPv4" value="10.6.66.52"/>
+    <String key="LoggerPath" name="Logger Path" description=""  value="logs/vxlan/"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000000000000" />
+    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="000000000000"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="::1"/>
+    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="::1"/>
+    <String key="Tag" value="1"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="12345"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
+  <OSX>
     <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
-  <Windows platform="windows">
+  <Windows>
     <!-- This can't run on windows because it uses the RawEther publisher. -->
   </Windows>
 </PitDefines>

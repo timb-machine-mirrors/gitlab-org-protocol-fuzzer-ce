@@ -61,27 +61,27 @@ socat tcp4-l:12345,fork,reuseaddr STDIO
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="logs/tcp/"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="TargetPort" value="12345"/>
-    <Define key="SourcePort" value="52080"/>
-    <Define key="PitLibraryPath" value="."/>
-    <Define key="TargetIPBytes" value="C0A89280"/>
-    <Define key="SourceIPBytes" value="C0A89201"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/tcp/"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
+    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="52080"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <String key="TargetIPBytes" value="C0A89280"/>
+    <String key="SourceIPBytes" value="C0A89201"/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="en0"/>
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
   </Windows>
 </PitDefines>
 ----

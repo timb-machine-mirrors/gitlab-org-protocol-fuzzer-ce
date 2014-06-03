@@ -42,26 +42,26 @@ Example configuration for sending LACP packets.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="SourceMAC"     value="000000000000"/>
-    <Define key="TargetMAC"     value="000000000000"/>
-    <Define key="LoggerPath"    value="./logs/lacp/"/>
-    <Define key="ActorPort"     value="0012"/>
-    <Define key="PartnerPort"   value="0000"/>
-    <Define key="Strategy"      value="Random"/>
-    <Define key="PitLibraryPath"          value="."/>
+    <Hwaddr key="SourceMAC" name="Source MAC Address" description=""     value="000000000000"/>
+    <Hwaddr key="TargetMAC" name="Target MAC Address" description=""     value="000000000000"/>
+    <String key="LoggerPath" name="Logger Path" description=""    value="./logs/lacp/"/>
+    <String key="ActorPort"     value="0012"/>
+    <String key="PartnerPort"   value="0000"/>
+    <Strategy key="Strategy" name="name" description=""      value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description=""          value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface"       value="eth0"/>
-    <Define key="tsharkInterface" value="eth0"/>
-    <Define key="tsharkBin"       value="/usr/bin/tshark"/>
+  <Linux>
+    <Iface key="Interface" name="name" description=""       value="eth0"/>
+    <Iface key="tsharkInterface" name="name" description="" value="eth0"/>
+    <String key="tsharkBin" name="name" description=""       value="/usr/bin/tshark"/>
   </Linux>
 
-  <OSX platform="osx">
+  <OSX>
     <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
-  <Windows platform="windows">
+  <Windows>
     <!-- This can't run on windows because it uses the RawEther publisher. -->
   </Windows>
 </PitDefines>

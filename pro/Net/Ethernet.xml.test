@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Define key="SourceMAC" value="000c298023ed"/>
-	<Define key="TargetMAC" value="28d2446e984d"/>
-	<Define key="SourceIPv4"  value="10.0.1.6"/>
-	<Define key="TargetIPv4"  value="10.0.1.110"/>
-	<Define key="Interface" value="FastEthernet0/1"/>
-	<Define key="Strategy"  value="Random"/>
+	<Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000c298023ed"/>
+	<Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="28d2446e984d"/>
+	<Ipv4 key="SourceIPv4" name="Source IP Address" description=""  value="10.0.1.6"/>
+	<Ipv4 key="TargetIPv4" name="Target IP Address" description=""  value="10.0.1.110"/>
+	<Iface key="Interface" name="name" description="" value="FastEthernet0/1"/>
+	<Strategy key="Strategy" name="name" description=""  value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

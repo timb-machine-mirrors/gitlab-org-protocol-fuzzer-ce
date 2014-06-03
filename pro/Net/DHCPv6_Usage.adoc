@@ -58,35 +58,35 @@ Core Networking - Dynamic Host Configuration Protocol for IPv6(DHCPV6-In)
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="LoggerPath" value="logs/dhcpV6/"/>
-    <Define key="SourcePort" value="547"/>
-    <Define key="MulticastDHCP" value="ff02::1:2"/>
-    <Define key="TargetIPv6" value="fe80::5054:ff:fe02:c880"/>
-    <Define key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
-    <Define key="SourceIPv6" value="fe80::3e97:eff:fe47:524a%4"/>
-    <Define key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iteration -->
-    <Define key="SourceMAC" value="000c291bf55d"/>
-    <Define key="TargetPort" value="546"/>
-    <Define key="TargetInterface" value="veth1"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="Interface"  value="::1"/> <!-- This needs to be "::1" to bind to all interfaces. This is because ipv6 multicast oddness. -->
-    <Define key="RemoteAgentIP"  value="127.0.0.1"/>
-    <Define key="PitLibraryPath" value="."/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/dhcpV6/"/>
+    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="547"/>
+    <String key="MulticastDHCP" value="ff02::1:2"/>
+    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="fe80::5054:ff:fe02:c880"/>
+    <String key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
+    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="fe80::3e97:eff:fe47:524a%4"/>
+    <String key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iteration -->
+    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000c291bf55d"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="546"/>
+    <String key="TargetInterface" value="veth1"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <Iface key="Interface" name="name" description=""  value="::1"/> <!-- This needs to be "::1" to bind to all interfaces. This is because ipv6 multicast oddness. -->
+    <Ipv4 key="RemoteAgentIP" name="Remote Agent IP Address" description=""  value="127.0.0.1"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="tsharkInterface" value="eth0"/>
-    <Define key="tsharkBin" value="/usr/bin/tshark"/>
+  <Linux>
+    <Iface key="tsharkInterface" name="name" description="" value="eth0"/>
+    <String key="tsharkBin" name="name" description="" value="/usr/bin/tshark"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="tsharkInterface" value="en0"/>
-    <Define key="tsharkBin" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
+  <OSX>
+    <Iface key="tsharkInterface" name="name" description="" value="en0"/>
+    <String key="tsharkBin" name="name" description="" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="tsharkInterface" value="2"/>
-    <Define key="tsharkBin" value="C:\Program Files\Wireshark\tshark.exe"/>
+  <Windows>
+    <Iface key="tsharkInterface" name="name" description="" value="2"/>
+    <String key="tsharkBin" name="name" description="" value="C:\Program Files\Wireshark\tshark.exe"/>
   </Windows>
 </PitDefines>
 ----

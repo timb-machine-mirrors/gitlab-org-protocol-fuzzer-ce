@@ -120,26 +120,26 @@ ldapadd -x -W -D "cn=admin,dc=peach,dc=local" -f password.ldif
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="LoggerPath"  value="./logs/ldap"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
-    <Define key="TargetPort" value="389"/>
-    <Define key="Password" value="password"/>
-    <Define key="UserName" value="cn=admin,dc=example,dc=com"/>
-    <Define key="PitLibraryPath" value="."/>
+    <String key="LoggerPath" name="Logger Path" description=""  value="./logs/ldap"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="389"/>
+    <String key="Password" value="password"/>
+    <String key="UserName" value="cn=admin,dc=example,dc=com"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="en0"/>
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
   </Windows>
 </PitDefines>
 ----

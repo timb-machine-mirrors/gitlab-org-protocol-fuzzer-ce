@@ -67,35 +67,35 @@ http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="TargetPort" value="23"/>
-    <Define key="SourcePort" value="31337"/>
-    <Define key="TargetIPv4" value="127.0.0.1"/>
-    <Define key="LoggerPath" value="./logs/telnet/"/>
-    <Define key="Strategy" value="Random"/>
-    <Define key="Username" value="username"/>
-    <Define key="Password" value="password"/>
-    <Define key="PitLibraryPath" value="."/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="23"/>
+    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="31337"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="./logs/telnet/"/>
+    <Strategy key="Strategy" name="name" description="" value="Random"/>
+    <String key="Username" value="username"/>
+    <String key="Password" value="password"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 
-  <Linux platform="linux">
-    <Define key="Interface" value="eth0"/>
-    <Define key="Program" value="telnet"/>
-    <Define key="Agent" value="Linux"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
+  <Linux>
+    <Iface key="Interface" name="name" description="" value="eth0"/>
+    <String key="Program" name="Program" description="" value="telnet"/>
+    <String key="Agent" value="Linux"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
   </Linux>
 
-  <OSX platform="osx">
-    <Define key="Interface" value="en0"/>
-    <Define key="Program" value="telnet"/>
-    <Define key="Agent" value="OSX"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
+  <OSX>
+    <Iface key="Interface" name="name" description="" value="en0"/>
+    <String key="Program" name="Program" description="" value="telnet"/>
+    <String key="Agent" value="OSX"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
   </OSX>
 
-  <Windows platform="windows">
-    <Define key="Interface" value="Local Area Connection"/>
-    <Define key="Program" value="putty.exe"/>
-    <Define key="Agent" value="Windows"/>
-    <Define key="SourceIPv4" value="127.0.0.1"/>
+  <Windows>
+    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
+    <String key="Program" name="Program" description="" value="putty.exe"/>
+    <String key="Agent" value="Windows"/>
+    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
   </Windows>
 </PitDefines>
 ----

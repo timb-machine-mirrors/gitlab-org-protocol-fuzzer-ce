@@ -73,32 +73,32 @@ sudo apt-get install ftpd
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="TargetIPv4" value="10.0.1.23"/>
-    <Define key="TargetPort" value="21"/>
-    <Define key="LoggerPath" value="logs/ftp/"/>
-    <Define key="Strategy"  value="Random"/>
-    <Define key="FtpUser" value="username"/>
-    <Define key="FtpPass" value="password"/>
-    <Define key="PitLibraryPath" value="."/>
-    <Define key="DataPort" value="31337"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="10.0.1.23"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="21"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/ftp/"/>
+    <Strategy key="Strategy" name="name" description=""  value="Random"/>
+    <String key="FtpUser" value="username"/>
+    <String key="FtpPass" value="password"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <String key="DataPort" value="31337"/>
   </All>
 
-   <Linux platform="linux">
-     <Define key="Interface" value="eth0"/>
-     <Define key="Program"  value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.92"/>
+   <Linux>
+     <Iface key="Interface" name="name" description="" value="eth0"/>
+     <String key="Program" name="Program" description=""  value="ftp"/>
+     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.92"/>
    </Linux>
 
-   <OSX platform="osx">
-     <Define key="Interface" value="en0"/>
-     <Define key="Program" value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.94"/>
+   <OSX>
+     <Iface key="Interface" name="name" description="" value="en0"/>
+     <String key="Program" name="Program" description="" value="ftp"/>
+     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.94"/>
    </OSX>
 
-   <Windows platform="windows">
-     <Define key="Interface" value="Local Area Connection"/>
-     <Define key="Program"  value="ftp"/>
-     <Define key="SourceIPv4" value="10.0.1.82"/>
+   <Windows>
+     <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
+     <String key="Program" name="Program" description=""  value="ftp"/>
+     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.82"/>
    </Windows>
 </PitDefines>
 ----

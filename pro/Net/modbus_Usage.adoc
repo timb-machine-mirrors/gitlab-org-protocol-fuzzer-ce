@@ -54,22 +54,22 @@ socat tcp-l:502,fork exec:'/bin/cat'
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Define key="TargetIPv4" value="192.168.1.1"/>
-    <Define key="TargetPort" value="502"/>
+    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="192.168.1.1"/>
+    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="502"/>
 
     <!-- Modbus over Serial Defines -->
-    <Define key="SerialPort" value="COM1"/>
-    <Define key="Baudrate" value="57600"/>
-    <Define key="Parity" value="None"/>
-    <Define key="DataBits" value="8"/>
-    <Define key="StopBits" value="One"/>
-    <Define key="Handshake" value="XOnXOff"/>
+    <String key="SerialPort" value="COM1"/>
+    <String key="Baudrate" value="57600"/>
+    <String key="Parity" value="None"/>
+    <String key="DataBits" value="8"/>
+    <String key="StopBits" value="One"/>
+    <String key="Handshake" value="XOnXOff"/>
 
     <!-- General Configurations -->
-    <Define key="Timeout" value="5000"/>
-    <Define key="LoggerPath" value="logs/modbus/"/>
-    <Define key="Strategy" value="Random"/>
-    <Define key="PitLibraryPath" value="."/>
+    <String key="Timeout" value="5000"/>
+    <String key="LoggerPath" name="Logger Path" description="" value="logs/modbus/"/>
+    <Strategy key="Strategy" name="name" description="" value="Random"/>
+    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 </PitDefines>
 ----
