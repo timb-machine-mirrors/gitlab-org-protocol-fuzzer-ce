@@ -18,13 +18,13 @@ namespace Peach.Enterprise.WebServices
 
 		Pit[] GetPits()
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			return db.Entries.ToArray();
 		}
 
 		Pit GetPit(string id)
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			var pit = db.GetPit(id);
 			if (pit == null)
 				Context.Response.StatusCode = HttpStatusCode.NotFound;
@@ -33,7 +33,7 @@ namespace Peach.Enterprise.WebServices
 
 		PitConfig GetPitConfig(string id)
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			var cfg = db.GetConfig(id);
 			if (cfg == null)
 				Context.Response.StatusCode = HttpStatusCode.NotFound;

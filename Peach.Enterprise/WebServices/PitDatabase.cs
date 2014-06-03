@@ -45,6 +45,19 @@ namespace Peach.Enterprise.WebServices
 		public string FileName { get; private set; }
 	}
 
+	public class LoadEventArgs : EventArgs
+	{
+		public LoadEventArgs(Models.Pit pit, string fileName)
+		{
+			Pit = pit;
+			FileName = fileName;
+		}
+
+		public Models.Pit Pit { get; private set; }
+
+		public string FileName { get; private set; }
+	}
+
 	public class PitDatabase
 	{
 		private static PeachElement Parse(string fileName)
@@ -86,12 +99,25 @@ namespace Peach.Enterprise.WebServices
 
 		public PitDatabase()
 		{
+			entries = new Dictionary<string, Models.Pit>();
+			libraries = new Dictionary<string, Models.Library>();
+			interfaces = null;
+		}
+
+		public PitDatabase(string libraryPath)
+		{
+			Load(libraryPath);
 		}
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
+		public event EventHandler<LoadEventArgs> LoadEventHandler;
 
 		public void Load(string path)
 		{
+			entries = new Dictionary<string, Models.Pit>();
+			libraries = new Dictionary<string, Models.Library>();
+			interfaces = null;
+
 			var name = "Peach Pro Library 2014 Q2";
 			var guid = MakeGuid(name);
 
@@ -129,7 +155,10 @@ namespace Peach.Enterprise.WebServices
 				{
 					try
 					{
-						AddEntry(ver, file);
+						var item = AddEntry(ver, file);
+
+						if (LoadEventHandler != null)
+							LoadEventHandler(this, new LoadEventArgs(item, file));
 					}
 					catch (Exception ex)
 					{
@@ -257,7 +286,7 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		private void AddEntry(Models.LibraryVersion lib, string fileName)
+		private Models.Pit AddEntry(Models.LibraryVersion lib, string fileName)
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
@@ -312,11 +341,12 @@ namespace Peach.Enterprise.WebServices
 				Description = value.Description,
 				Tags = value.Tags,
 			});
+
+			return value;
 		}
 
-		private Dictionary<string, Models.Pit> entries = new Dictionary<string, Models.Pit>();
-		private Dictionary<string, Models.Library> libraries = new Dictionary<string, Models.Library>();
-
+		private Dictionary<string, Models.Pit> entries;
+		private Dictionary<string, Models.Library> libraries;
 		private List<NetworkInterface> interfaces = null;
 	}
 }

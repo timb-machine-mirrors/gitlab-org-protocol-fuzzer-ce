@@ -7,61 +7,73 @@ using System.IO;
 
 using Peach.Enterprise;
 using Peach.Enterprise.WebServices;
+using System.Text;
 
 namespace PitTester
 {
 	public static class Program
 	{
+		static int LogLevel = 0;
+
 		static int Main(string[] args)
 		{
-			if (args.Length == 0)
+			var p = new OptionSet()
+			{
+					{ "h|?|help", v => Syntax() },
+					{ "debug", v => LogLevel = 1 },
+					{ "trace", v => LogLevel = 2 },
+			};
+
+			var extra = p.Parse(args);
+
+			if (extra.Count != 1)
 				Syntax();
 
-			//var p = new OptionSet()
-			//	{
-			//		{ "h|?|help", v => Syntax() },
-			//		{ "analyzer=", v => analyzer = v },
-			//		{ "debug", v => config.debug = 1 },
-			//		{ "trace", v => config.debug = 2 },
-			//		{ "1", v => config.singleIteration = true},
-			//		{ "range=", v => ParseRange(config, v)},
-			//		{ "t|test", v => test = true},
-			//		{ "c|count", v => config.countOnly = true},
-			//		{ "skipto=", v => config.skipToIteration = Convert.ToUInt32(v)},
-			//		{ "seed=", v => config.randomSeed = Convert.ToUInt32(v)},
-			//		{ "p|parallel=", v => ParseParallel(config, v)},
-			//		{ "a|agent=", v => agent = v},
-			//		{ "D|define=", v => AddNewDefine(v) },
-			//		{ "definedvalues=", v => definedValues.Add(v) },
-			//		{ "config=", v => defindeValues.Add(v) },
-			//		{ "parseonly", v => parseOnly = true },
-			//		{ "bob", var => bob() },
-			//		{ "charlie", var => Charlie() },
-			//		{ "showdevices", var => ShowDevices() },
-			//		{ "showenv", var => ShowEnvironment() },
-			//		{ "makexsd", var => MakeSchema() },
-			//	};
-
-			//List<string> extra = p.Parse(args);
-
-			//if (extra.Count == 0 && agent == null && analyzer == null)
-			//	Syntax();
-
+			Peach.Core.Runtime.Program.ConfigureLogging(LogLevel);
 
 			var lib = new PitDatabase();
+			var errors = new StringBuilder();
+			var total = 0;
+
+			lib.LoadEventHandler += delegate(object sender, LoadEventArgs e)
+			{
+				Console.Write(".");
+			};
 
 			lib.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
 			{
-				Console.WriteLine("Failed to load {0}\n{1}", e.FileName, e.Exception.Message);
+				Console.WriteLine("E");
+
+				errors.AppendLine(e.FileName);
+				errors.AppendLine(e.Exception.Message);
+
+				++total;
 			};
 
-			Console.WriteLine("Loading library");
+			Console.WriteLine("Loading pit library");
 
 			lib.Load(args[0]);
 
-			Console.WriteLine("Loaded {0} pits", lib.Entries.Count());
+			Console.WriteLine();
+			Console.WriteLine("Loaded {0}/{1} pit files", lib.Entries.Count(), lib.Entries.Count() + total);
 
-			int errors = 0;
+			if (errors.Length > 0)
+			{
+				Console.WriteLine();
+				Console.WriteLine("Errors:");
+				Console.WriteLine();
+				Console.WriteLine(errors);
+			}
+			else
+			{
+				Console.WriteLine();
+			}
+
+			errors.Clear(); ;
+			total = 0;
+
+			Console.WriteLine("Verifying pit config files");
+
 			foreach (var e in lib.Entries)
 			{
 				var fileName = e.Versions[0].Files[0].Name;
@@ -69,20 +81,38 @@ namespace PitTester
 				try
 				{
 					PitDefines.Parse(fileName + ".config");
+
 					Console.Write(".");
-					//Console.WriteLine("Valid config for {0}", e.Name);
+
+					++total;
 				}
-				catch (Exception )
+				catch (Exception ex)
 				{
 					Console.Write("E");
-					++errors;
-					//Console.WriteLine("Inalid config for {0}\n{1}", e.Name, ex.Message);
+
+					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
+					errors.AppendLine();
+					errors.AppendLine(ex.Message);
 				}
 			}
 
 			Console.WriteLine();
-			Console.WriteLine("Parsed {0}/{1} .config files without errors.", lib.Entries.Count() - errors, lib.Entries.Count());
+			Console.WriteLine("Parsed {0}/{1} .config files", total, lib.Entries.Count());
 
+			if (errors.Length > 0)
+			{
+				Console.WriteLine();
+				Console.WriteLine("Errors:");
+				Console.WriteLine();
+				Console.WriteLine(errors);
+			}
+			else
+			{
+				Console.WriteLine();
+			}
+
+			errors.Clear(); ;
+			total = 0;
 
 			return 0;
 		}
@@ -90,7 +120,7 @@ namespace PitTester
 		static void Syntax()
 		{
 			var self = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
-			var syntax = @"{0} pit_library_path";
+			var syntax = @"{0} [--debug --trace] pit_library_path";
 
 			Console.WriteLine(syntax, self);
 
