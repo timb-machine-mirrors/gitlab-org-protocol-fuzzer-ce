@@ -5,7 +5,7 @@
 == State onStart Attribute
 
 The _onStart_ attribute is a python scripting statement that is evaluated prior to preforming the actions in a xref:State[State] model.
-This statement can be used to increment a counter or preform other functions defined in separate files included with the xref:Import[Import] element.
+The scripting statement can be used to increment a counter or preform other functions defined in separate files included with the xref:Import[Import] element.
 
 TIP:  _xref:State_onComplete[onComplete]_ is the sibling attribute.
 

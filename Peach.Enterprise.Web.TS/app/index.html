@@ -18,45 +18,13 @@
 	<link rel="stylesheet" href="/Content/css/tree-control-attribute.css" />
 	-->
 	<link href="/Content/css/kendo.common.min.css" rel="stylesheet" />
+	<link href="/Content/css/kendo.default.min.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="/Content/css/datepicker.css" />
 	<link rel="stylesheet" href="/Content/css/ui.jqgrid.css" />
 
 	<link rel="stylesheet" href="css/app.css" />
 
-	<script type="text/javascript" src="/Scripts/jquery-2.1.1.min.js"></script>
-
-	<script type="text/javascript" src="/Scripts/angular.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-poller.min.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-resource.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-route.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-local-storage.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap.min.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
-	<script type="text/javascript" src="/Scripts/i18n/angular-locale_en-us.js"></script>
-
-	<script src="/Content/js/kendo.web.min.js"></script>
-	<script src="/Content/js/angular-kendo.min.js"></script>
-
-
-	<script src="/Content/js/bootstrap.min.js"></script>
-	<script src="/Content/js/typeahead-bs2.min.js"></script>
-	<script src="/Content/js/ace-elements.min.js"></script>
-	<script src="/Content/js/ace.min.js"></script>
-	<script src="/Scripts/ng-grid.min.js"></script>
-	<script src="/Content/js/line-chart.min.js"></script>
-
-
-	<script type="text/javascript" src="js/app.js"></script>
-	<script type="text/javascript" src="js/controllers.main.js"></script>
-	<script type="text/javascript" src="js/controllers.dash.js"></script>
-	<script type="text/javascript" src="js/controllers.wizard.js"></script>
-	<script type="text/javascript" src="js/controllers.pittest.js"></script>
-	<script type="text/javascript" src="js/models.wizard.js"></script>
-	<script type="text/javascript" src="js/services.peach.js"></script>
-
-
-	<script src="/Content/js/ace-extra.min.js"></script>
 </head>
 <body class="skin-1" ng-controller="DashApp.MainController">
 
@@ -73,7 +41,27 @@
 			</div><!-- /.navbar-header -->
 
 			<div class="navbar-header pull-right" id="breadcrumbs">
-				<h3 style="color: lightgrey">{{pit.name}}</h3>
+				<ul class="nav ace-nav" style="background: none">
+					<li>
+						<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color: transparent; font-size: 20px">
+							<span>
+								{{vm.pit.name || '(none)'}}
+							</span>
+
+							<i class="icon-caret-down"></i>
+						</a>
+
+						<ul class="user-menu pull-right dropdown-menu dropdown-light-blue dropdown-caret dropdown-close">
+							<li>
+								<a href="#" ng-click="vm.showPitSelector()">
+									<!-- <i class="icon-cog"></i> -->
+									Select another Pit
+								</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+
 			</div>
 		</div><!-- /.container -->
 	</div>
@@ -95,32 +83,32 @@
 				</script>
 
 				<ul class="nav nav-list">
-					<li ng-class="{active: location.path() == '/'}">
+					<li ng-class="{active: vm.location.path() == '/'}">
 						<a href="#/">
 							<i class="icon-dashboard"></i>
 							<span class="menu-text"> Dashboard </span>
 						</a>
 					</li>
 
-					<li ng-class="{active: location.path() == '/metrics'}">
+					<li ng-class="{active: vm.location.path() == '/metrics'}">
 						<a href="#/metrics">
 							<i class="icon-signal"></i>
 							<span class="menu-text"> Metrics </span>
 						</a>
 					</li>
 
-					<li ng-class="{active: location.path() == '/visualizer'}">
+					<li ng-class="{active: vm.location.path() == '/visualizer'}">
 						<a href="#/visualizer">
 							<i class="icon-eye-open"></i>
 							<span class="menu-text"> Visualizer </span>
 						</a>
 					</li>
-					<li ng-class="{active: location.path() == '/faults'}">
+					<li ng-class="{active: vm.location.path() == '/faults'}">
 						<a href="#/faults">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary ">{{job.totalFaults}}</span>
+								<span class="badge badge-primary ">{{vm.job.totalFaults}}</span>
 							</span>
 						</a>
 					</li>
@@ -131,49 +119,49 @@
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;" ng-controller="DashApp.WizardController">
-							<li ng-class="{active: location.path() == '/configurator/intro'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/intro'}">
 								<a href="#/configurator/intro">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.introclass"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/setvars'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/setvars'}">
 								<a href="#/configurator/setvars">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.setvarsclass"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/fault'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/fault'}">
 								<a href="#/configurator/fault">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.faultclass"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/data'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/data'}">
 								<a href="#/configurator/data">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.dataclass"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/auto'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/auto'}">
 								<a href="#/configurator/auto">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.autoclass"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/test'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/test'}">
 								<a href="#/configurator/test">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.testclass"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{active: location.path() == '/configurator/done'}">
+							<li ng-class="{active: vm.location.path() == '/configurator/done'}">
 								<a href="#/configurator/done">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="vm.doneclass"></i>
@@ -231,5 +219,31 @@
 
 		</div><!-- /.main-container -->
 	</div>
+
+	<script type="text/javascript" src="/Scripts/jquery-2.1.1.min.js"></script>
+
+	<script type="text/javascript" src="/Scripts/angular.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-poller.min.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-resource.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-route.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-local-storage.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap.min.js"></script>
+	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+	<script type="text/javascript" src="/Scripts/i18n/angular-locale_en-us.js"></script>
+
+	<script src="/Content/js/kendo.web.min.js"></script>
+	<script src="/Content/js/angular-kendo.min.js"></script>
+
+
+	<script src="/Content/js/bootstrap.min.js"></script>
+	<script src="/Content/js/typeahead-bs2.min.js"></script>
+	<script src="/Content/js/ace-elements.min.js"></script>
+	<script src="/Content/js/ace.min.js"></script>
+	<script src="/Scripts/ng-grid.min.js"></script>
+	<script src="/Content/js/line-chart.min.js"></script>
+
+	<script src="js/all.js"></script>
+
+	<script src="/Content/js/ace-extra.min.js"></script>
 </body>
 </html>

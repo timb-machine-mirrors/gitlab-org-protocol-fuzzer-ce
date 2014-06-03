@@ -1,18 +1,32 @@
-﻿<div>
-	<h3>Fault Detection</h3>
-	<div>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</div>
-	<div>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</div>
-	<div>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</div>
-	<div class="row-fluid wizard-actions">
-		<!--
-		<button class="btn btn-prev" ng-click="vm.back()">
-			<i class="icon-arrow-left"></i>
-			Back
-		</button>
-			-->
-		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
-			Next
-			<i class="icon-arrow-right icon-on-right"></i>
-		</button>
-	</div>
+﻿<!-- Configure Pit: Introduction for Fault detection -->
+<div>
+	<!-- Text within this div -->
+	<p>				
+				Peach monitors your files while they are fuzzed (checking for irregular behavior such as a program crashing or remote device availability) to detect faults and save relevant information in the logging files.
+				<br/>
+				This portion of the wizard will set up the Pit Fault Detection section. You'll only have to do this once for each Pit you create.
+				<br/>
+				You;ll need the following information to completer the Pit Fault Detection section: 
+				<br/>
+			<ul>
+					<li>
+					Whether you want to detect a fault on a local or remote machine
+					</li>
+					<li>
+					If the detection is done on a remote machine, the remote machine's hostname/IP name and OS 
+					</li>
+					<li>
+					System and file information about your fault detection machine
+					</li>
+					<li>
+					What you want Peach to do when it detect target fault conditions
+					</li>
+			</ul>
+	</p>
+</div>
+<div class="row-fluid wizard-actions">
+	<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+		Next
+		<i class="icon-arrow-right icon-on-right"></i>
+	</button>
 </div>

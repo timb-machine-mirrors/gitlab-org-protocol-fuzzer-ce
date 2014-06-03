@@ -16,9 +16,9 @@
 // * examples
 // * 
 
-Almost every element in a Peach Pit file supports the name attribute.  Names are used for readability and xref:ref[referencing] other elements in a Pit file.
+Virtually all the Peach Pit file elements support the _name_ attribute.  Names are used for readability and xref:ref[referencing] other elements in a Pit file.
 
-IMPORTANT: Names should not contain punctuation. Punctuation marks like period (.), slash (\\), and colon (:) have special meaning for xref:ref[references].
+IMPORTANT: Names should not contain punctuation. Punctuation marks like period (.), slash (\\), and colon (:) have special xref:ref[references] meanings.
 
 Names are case sensitive and must be unique at the current scope level.
 
@@ -38,7 +38,7 @@ The following example has unique names for each element.
 </Block>
 ----
 
-The following example does not provide names for all values which is also okay.
+The following example does not provide names for all values which is also okay (as long as you don't want to access a particular element).
 
 [source,xml]
 ----
