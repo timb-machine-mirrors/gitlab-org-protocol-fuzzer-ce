@@ -464,6 +464,7 @@ namespace Peach.Enterprise.Test
 				test.agents.Clear();
 
 				var data = testData.Tests.Where(t => t.Name == test.name).First();
+
 				var logger = new PitTesterLogger(data);
 
 				test.loggers.Clear();
@@ -552,25 +553,21 @@ namespace Peach.Enterprise.Test
 		 */
 
 		[Test]
-		public void TestArpDefault()
+		public void TestArp()
 		{
 			TestPit("../../../../pits/pro", "Net/ARP.xml", "Default");
-		}
-
-		[Test]
-		public void TestArpReply()
-		{
 			TestPit("../../../../pits/pro", "Net/ARP.xml", "Reply");
 		}
 
+
 		[Test]
-		public void TestCDP()
+		public void TestCdp()
 		{
 			TestPit("../../../../pits/pro", "Net/CDP.xml", "Default");
 		}
 
 		[Test]
-		public void TestDHCPv4Client()
+		public void TestDhcpv4()
 		{
 			TestPit("../../../../pits/pro", "Net/DHCPv4.xml", "Default");
 		}
@@ -579,6 +576,12 @@ namespace Peach.Enterprise.Test
 		public void TestDhcpv6Client()
 		{
 			TestPit("../../../../pits/pro", "Net/DHCPv6_Client.xml", "Default");
+		}
+
+		[Test]
+		public void TestDhcpv6Server()
+		{
+			TestPit("../../../../pits/pro", "Net/DHCPv6_Server.xml", "Default");
 		}
 
 		[Test]
@@ -591,6 +594,154 @@ namespace Peach.Enterprise.Test
 		public void TestFtpClient()
 		{
 			TestPit("../../../../pits/pro", "Net/FTP_Client.xml", "Default");
+			TestPit("../../../../pits/pro", "Net/FTP_Client.xml", "Passive");
+		}
+
+		[Test]
+		public void TestFtpServer()
+		{
+			TestPit("../../../../pits/pro", "Net/FTP_Server.xml", "Default");
+			TestPit("../../../../pits/pro", "Net/FTP_Server.xml", "Passive");
+		}
+
+		[Test]
+		public void TestHttp()
+		{
+			TestPit("../../../../pits/pro", "Net/HTTP.xml", "Default");
+		}
+
+		[Test]
+		public void TestIcmpv4()
+		{
+			TestPit("../../../../pits/pro", "Net/ICMPv4.xml", "Echo");
+			//Need Real data for other icmp messages
+		}
+
+		[Test]
+		public void TestIcmpv6()
+		{
+			TestPit("../../../../pits/pro", "Net/ICMPv6.xml", "Echo");
+			TestPit("../../../../pits/pro", "Net/ICMPv6.xml", "NeighborSolicitation");
+			//Need tests for the rest of the ICMPv6 types
+		}
+
+		[Test]
+		public void TestIgmp()
+		{
+			//We just blast packets. Need actual server/client states to test
+			TestPit("../../../../pits/pro", "Net/IGMP.xml", "Default");
+		}
+
+		[Test]
+		public void TestIPsec()
+		{
+			//We just blast packets. Need actual states to test
+			TestPit("../../../../pits/pro", "Net/IPSECv6.xml", "Default");
+		}
+
+		[Test]
+		public void TestIPv4()
+		{
+			TestPit("../../../../pits/pro", "Net/IPv4.xml", "Default");
+		}
+
+		[Test]
+		public void TestIPv6()
+		{
+			//We just blast packets. Need actual states to test
+			TestPit("../../../../pits/pro", "Net/IPv6.xml", "Default");
+		}
+
+		[Test]
+		public void TestLacp()
+		{
+			TestPit("../../../../pits/pro", "Net/LACP.xml", "Default");
+		}
+
+		[Test]
+		public void TestLldp()
+		{
+			//We just blast packets. Need actual server/client states to test
+			TestPit("../../../../pits/pro", "Net/LLDP.xml", "Default");
+		}
+
+		[Test]
+		public void TestMld()
+		{
+			//We just blast packets. Need actual server/client states to test
+			TestPit("../../../../pits/pro", "Net/MLD.xml", "Default");
+		}
+
+		[Test]
+		public void TestModbus()
+		{
+			TestPit("../../../../pits/pro", "Net/Modbus.xml", "Default");
+		}
+
+		[Test]
+		public void TestNtp()
+		{
+			TestPit("../../../../pits/pro", "Net/NTP.xml", "Default");
+		}
+
+		[Test]
+		public void TestSnmpClient()
+		{
+			TestPit("../../../../pits/pro", "Net/SNMP_Client.xml", "Default");
+		}
+
+		[Test]
+		public void TestSnmpServer()
+		{
+			TestPit("../../../../pits/pro", "Net/SNMP_Server.xml", "Default");
+		}
+
+		[Test]
+		public void TestTcpv4()
+		{
+			TestPit("../../../../pits/pro", "Net/TCPv4.xml", "Default");
+		}
+
+		[Test]
+		public void TestTcpv6()
+		{
+			TestPit("../../../../pits/pro", "Net/TCPv6.xml", "Default");
+		}
+
+		[Test]
+		public void TestTelnetClient()
+		{
+			TestPit("../../../../pits/pro", "Net/TELNET_Client.xml", "Default");
+		}
+
+		[Test]
+		public void TestTelnetServer()
+		{
+			TestPit("../../../../pits/pro", "Net/TELNET_Server.xml", "Default");
+		}
+
+		[Test]
+		public void TestUdpv4()
+		{
+			TestPit("../../../../pits/pro", "Net/UDPv4.xml", "Default");
+		}
+
+		[Test]
+		public void TestUdpv6()
+		{
+			TestPit("../../../../pits/pro", "Net/UDPv6.xml", "Default");
+		}
+
+		[Test]
+		public void TestVlan()
+		{
+			TestPit("../../../../pits/pro", "Net/VLAN.xml", "Default");
+		}
+
+		[Test]
+		public void TestVxlan()
+		{
+			TestPit("../../../../pits/pro", "Net/VXLAN.xml", "Default");
 		}
 	}
 }
