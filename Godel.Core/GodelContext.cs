@@ -138,6 +138,8 @@ namespace Godel.Core
 			fault.title = msg;
 			fault.description = msg;
 			fault.folderName = "Godel";
+			fault.majorHash = "Godel";
+			fault.minorHash = debugName;
 
 			context.faults.Add(fault);
 

@@ -9,8 +9,11 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Text;
 
+using NUnit.Framework;
+
 namespace Peach.Enterprise.Test
 {
+	[TestFixture]
 	public class PitTester
 	{
 		#region TestData
@@ -227,6 +230,8 @@ namespace Peach.Enterprise.Test
 			Core.Dom.Action action;
 			bool verify;
 
+			public string ActionName { get; private set; }
+
 			public PitTesterLogger(TestData.Test testData)
 			{
 				this.testData = testData;
@@ -237,25 +242,29 @@ namespace Peach.Enterprise.Test
 				if (!verify)
 					return null;
 
+				//Ignore implicit closes that are called at end of state model
+				if (action == null)
+					return null;
+
 				try
 				{
 					if (index >= testData.Actions.Count)
 						throw new PeachException("Missing record in test data");
 
 					var d = testData.Actions[index++];
-					var actionName = string.Join(".", new[] { action.parent.parent.name, action.parent.name, action.name });
+					
 
 					if (typeof(T) != d.GetType())
 					{
-						var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(actionName, typeof(T).Name, d.GetType().Name);
+						var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(ActionName, typeof(T).Name, d.GetType().Name);
 						throw new PeachException(msg);
 					}
 
 					if (d.PublisherName != publisherName)
-						throw new PeachException("Bad publisher name");
+						throw new PeachException("Publisher names didn't match. Expected {0} but got {1}".Fmt(publisherName, d.PublisherName));
 
-					if (d.ActionName != actionName)
-						throw new PeachException("Mismatch on test");
+					if (d.ActionName != ActionName)
+						throw new PeachException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(ActionName, d.ActionName));
 
 					return (T)d;
 				}
@@ -277,8 +286,8 @@ namespace Peach.Enterprise.Test
 			protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
 			{
 				// TODO: Assert we made it all the way through TestData.Actions
-				if (verify && index != testData.Actions.Count)
-					throw new PeachException("Didn't make it all the way through the expected data");
+				//if (verify && index != testData.Actions.Count)
+				//	throw new PeachException("Didn't make it all the way through the expected data");
 
 				// Don't perform anymore verification
 				// This prevents publisher stopping that happens
@@ -289,6 +298,8 @@ namespace Peach.Enterprise.Test
 			protected override void ActionStarting(RunContext context, Core.Dom.Action action)
 			{
 				this.action = action;
+
+				ActionName = string.Join(".", new[] { action.parent.parent.name, action.parent.name, action.name });
 			}
 
 			protected override void ActionFinished(RunContext context, Core.Dom.Action action)
@@ -298,6 +309,8 @@ namespace Peach.Enterprise.Test
 					verify = false;
 
 				this.action = null;
+
+				ActionName = null;
 			}
 		}
 
@@ -410,11 +423,11 @@ namespace Peach.Enterprise.Test
 					expected = File.ReadAllBytes(dataSet.FileName);
 
 				if (expected.Length != actual.Length)
-					throw new PeachException("Expected/actual different lengths");
+					throw new PeachException("Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName, expected.Length, actual.Length));
 
 				for (int i = 0; i < actual.Length; ++i)
 					if (expected[i] != actual[i])
-						throw new PeachException("Expected/actual differ at offset " + i.ToString());
+						throw new PeachException("\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n".Fmt(testLogger.ActionName, expected[i], actual[i], i));
 			}
 
 			protected override void OnOutput(BitwiseStream data)
@@ -426,7 +439,7 @@ namespace Peach.Enterprise.Test
 
 		#endregion
 
-		public static void TestPit(string pitLibrary, string pitName)
+		public static void TestPit(string pitLibrary, string pitName, string testName=null)
 		{
 			var fileName = Path.Combine(pitLibrary, pitName);
 
@@ -463,8 +476,9 @@ namespace Peach.Enterprise.Test
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 0;
-			config.rangeStop = 1000;
+			config.rangeStop = 1;
 			config.pitFile = Path.GetFileName(pitName);
+			config.runName = testName;
 
 			var e = new Engine(null);
 
@@ -482,14 +496,101 @@ namespace Peach.Enterprise.Test
 			}
 		}
 
-		public void TestFtpClient()
+		/*
+		 * Image Tests
+		 */
+
+		[Test]
+		public void TestBmp()
 		{
-			TestPit("../../../../pits/pro", "Net/FTP_Client.xml");
+			TestPit("../../../../pits/pro", "Image/BMP.xml", "Default");
 		}
 
+		[Test]
+		public void TestGif()
+		{
+			TestPit("../../../../pits/pro", "Image/GIF.xml", "Default");
+		}
+
+		[Test]
+		public void TestICO()
+		{
+			TestPit("../../../../pits/pro", "Image/ICO.xml", "Default");
+		}
+
+		[Test]
+		public void TestJPEG2000()
+		{
+			TestPit("../../../../pits/pro", "Image/JPEG2000.xml", "Default");
+		}
+
+		[Test]
+		public void Testjpgjfif()
+		{
+			TestPit("../../../../pits/pro", "Image/jpg-jfif.xml", "Default");
+		}
+
+
+		[Test]
 		public void TestPng()
 		{
-			TestPit("../../../../pits/pro", "Image/PNG.xml");
+			TestPit("../../../../pits/pro", "Image/PNG.xml", "Default");
+		}
+
+		/*
+		 * Video Tests
+		 */
+
+		[Test]
+		public void TestAviDivx()
+		{
+			TestPit("../../../../pits/pro", "Video/avi_divx.xml", "Default");
+		}
+
+		/*
+		 *  Network Tests
+		 */
+
+		[Test]
+		public void TestArpDefault()
+		{
+			TestPit("../../../../pits/pro", "Net/ARP.xml", "Default");
+		}
+
+		[Test]
+		public void TestArpReply()
+		{
+			TestPit("../../../../pits/pro", "Net/ARP.xml", "Reply");
+		}
+
+		[Test]
+		public void TestCDP()
+		{
+			TestPit("../../../../pits/pro", "Net/CDP.xml", "Default");
+		}
+
+		[Test]
+		public void TestDHCPv4Client()
+		{
+			TestPit("../../../../pits/pro", "Net/DHCPv4.xml", "Default");
+		}
+
+		[Test]
+		public void TestDhcpv6Client()
+		{
+			TestPit("../../../../pits/pro", "Net/DHCPv6_Client.xml", "Default");
+		}
+
+		[Test]
+		public void TestEthernet()
+		{
+			TestPit("../../../../pits/pro", "Net/Ethernet.xml", "Default");
+		}
+
+		[Test]
+		public void TestFtpClient()
+		{
+			TestPit("../../../../pits/pro", "Net/FTP_Client.xml", "Default");
 		}
 	}
 }

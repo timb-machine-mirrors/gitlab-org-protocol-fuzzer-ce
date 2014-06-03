@@ -48,7 +48,9 @@ namespace Peach.Enterprise.Fixups
 			if (obj == null)
 				return null;
 
-			var v = (Variant)obj;
+
+			var intern = (DataElement)obj;
+			var v = intern.InternalValue;
 			var bs = (BitwiseStream)v;
 			var pos = bs.PositionBits;
 			bs.Seek(0, System.IO.SeekOrigin.Begin);
@@ -155,15 +157,15 @@ namespace Peach.Enterprise.Fixups
 			if (msgs == null)
 				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
 
-			var pms = ToBytes(GetState<Variant>(ctx, "PreMasterSecret"));
+			var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
 			if (pms == null)
 				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
 
-			var clientRandom = ToBytes(GetState<Variant>(ctx, "ClientRandom"));
+			var clientRandom = ToBytes(GetState<DataElement>(ctx, "ClientRandom"));
 			if (clientRandom == null)
 				throw new SoftException("Error in Tls fixup, client random doesn't exist in the state store.");
 
-			var serverRandom = ToBytes(GetState<Variant>(ctx, "ServerRandom"));
+			var serverRandom = ToBytes(GetState<DataElement>(ctx, "ServerRandom"));
 			if (serverRandom == null)
 				throw new SoftException("Error in Tls fixup, server random doesn't exist in the state store.");
 
