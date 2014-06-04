@@ -19,16 +19,35 @@ module DashApp {
 		//#region private variables
 		private params: IWizardParams;
 		private questionPath:number[] = [0];
-		private qa: W.Question[];
-		private monitors: W.MonitorDefinition[];
+		
 		private location: ng.ILocationService;
 		private peach: Services.IPeachService;
-		private localStorage: ng.ILocalStorageService;
-		public state: W.StateBag;
-		private faultSummary: string;
+		private pitConfigSvc: Services.IPitConfiguratorService;
 		//#endregion
 
 		//#region Public Properties
+
+		public get qa(): W.Question[] {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.QA;
+			else
+				return undefined;
+		}
+
+		public get monitors(): W.MonitorDefinition[] {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.Monitors;
+			else
+				return undefined;
+		}
+
+		public get defines(): P.PitConfig {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.Defines;
+			else
+				return undefined;
+		}
+		
 		public currentQuestion: W.Question;
 		public stepNum: number;
 
@@ -67,45 +86,43 @@ module DashApp {
 			return WizardController._doneclass;
 		}
 
-		get dataMonitors(): W.MonitorDefinition[] {
-			this._storedMonitors = <W.MonitorDefinition[]>this.localStorage.get("dataMonitors");
-			if (this._storedMonitors == undefined)
-				this._storedMonitors = this.findMonitors();
+		public get dataGridOptions(): any {
+			return {
+				data: "vm.DataMonitors",
+				columnDefs: [
+					{ field: "monitorClass", displayName: "Monitor" }
+				]
+			};
+		}
+
+		public get autoGridOptions(): any {
+			return {
+				data: "vm.AutoMonitors",
+				columnDefs: [
+					{ field: "monitorClass", displayName: "Monitor" }
+				]
+			};
+		}
+
+		public get FaultMonitors(): W.MonitorDefinition[] {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.FaultMonitors;
 			else
-				this._storedMonitors = this._storedMonitors.concat(this.findMonitors());
-			return this._storedMonitors;
+				return undefined;
 		}
 
-		get dataGridOptions(): any {
-			return {
-				data: "vm.dataMonitors",
-				columnDefs: [
-					{ field: "monitorClass", displayName: "Monitor" }
-				]
-			};
+		public get DataMonitors(): W.MonitorDefinition[] {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.DataMonitors;
+			else
+				return undefined;
 		}
 
-
-		private _storedMonitors: W.MonitorDefinition[];
-
-		get autoMonitors(): W.MonitorDefinition[]{
-			if (this._storedMonitors == undefined) {
-				this._storedMonitors = <W.MonitorDefinition[]>this.localStorage.get("autoMonitors");
-				if (this._storedMonitors == undefined)
-					this._storedMonitors = this.findMonitors();
-				else
-					this._storedMonitors = this._storedMonitors.concat(this.findMonitors());
-			}
-			return this._storedMonitors;
-		}
-
-		get autoGridOptions(): any {
-			return {
-				data: "vm.autoMonitors",
-				columnDefs: [
-					{ field: "monitorClass", displayName: "Monitor" }
-				]
-			};
+		public get AutoMonitors(): W.MonitorDefinition[] {
+			if (this.pitConfigSvc != undefined)
+				return this.pitConfigSvc.AutoMonitors;
+			else
+				return undefined;
 		}
 
 		public get title(): string {
@@ -126,15 +143,15 @@ module DashApp {
 		//#endregion
 
 		//#region ctor
-		static $inject = ["$scope", "$routeParams", "$location", "peachService", "localStorageService"];
+		static $inject = ["$scope", "$routeParams", "$location", "peachService", "pitConfiguratorService"];
 
-		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, localStorageService: ng.ILocalStorageService) {
+		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
 			this.params = $routeParams;
 
 			$scope.vm = this;
 			this.location = $location;
 			this.peach = peachService;
-			this.localStorage = localStorageService;
+			this.pitConfigSvc = pitConfiguratorService;
 
 			if(this.params.step != undefined)
 				this.refreshData($scope);
@@ -168,7 +185,7 @@ module DashApp {
 
 				//store the value in the state bag
 				if (q.key != undefined) {
-					this.state.s(q.key, q.value);
+					this.pitConfigSvc.StateBag.s(q.key, q.value);
 				}
 
 				var nextid: number;
@@ -177,10 +194,12 @@ module DashApp {
 					// get next id from selected choice
 					var choice = $.grep(q.choice, function (e)
 					{
-						if (e.value == undefined)
+						if (e.value == undefined && e.next != undefined)
 							return e.next.toString() == q.value.toString();
-						else
+						else if (e.value != undefined)
 							return e.value.toString() == q.value.toString();
+						else
+							return false;
 					})[0];
 
 					if (choice == undefined)
@@ -198,9 +217,11 @@ module DashApp {
 					this.currentQuestion.type = W.QuestionTypes.Done;
 					switch (this.params.step) {
 						case "setvars":
+							this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
 							this.currentQuestion.qref = "/partials/setvars-done.html";
 							break;
 						case "fault":
+							this.pitConfigSvc.FaultMonitors = this.findMonitors();
 							this.currentQuestion.qref = "/partials/fault-done.html";
 							break;
 						case "data":
@@ -219,7 +240,8 @@ module DashApp {
 			
 			//get value from the state bag if necessary
 			if (this.currentQuestion.value == undefined) {
-				this.currentQuestion.value = this.state.g(this.currentQuestion.key);
+				//this.currentQuestion.value = this.state.g(this.currentQuestion.key);
+				this.currentQuestion.value = this.pitConfigSvc.StateBag.g(this.currentQuestion.key);
 			}
 
 			this.stepNum = 2;
@@ -258,7 +280,6 @@ module DashApp {
 			}
 
 			this.resetStepClass();
-			this.faultSummary = "";
 		}
 
 		public back()	{
@@ -277,49 +298,35 @@ module DashApp {
 				this.stepNum = 2;
 
 			this.resetStepClass();
-			this.faultSummary = "";
 		}
 
-		public getFaultSummary(): string{
-			if (this.faultSummary.length == 0) {
-				var foundMonitors = this.findMonitors();
-				this.faultSummary = JSON.stringify(foundMonitors);
-			}
-			return this.faultSummary;
-		}
 
 		public submitSetVarsInfo() {
-			//TODO
-			this.localStorage.set(StorageStrings.PitDefines, this.state);
+			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
 			WizardController._setvarsclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/fault");
 		}
 
 		public submitFaultInfo() {
-			var foundMonitors = this.findMonitors();
-			this.storeMonitors(StorageStrings.FaultMonitors, foundMonitors, false);
+			this.pitConfigSvc.FaultMonitors = this.findMonitors();
 			WizardController._faultclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/data");
 		}
 
 		public addNewDataInfo() {
-			//TODO
-			var foundMonitors = this.findMonitors();
-			this.storeMonitors(StorageStrings.DataMonitors, foundMonitors, true);
+			this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 			this.currentQuestion = undefined;
 			this.next();
 		}
 
 		public submitDataInfo() {
-			var foundMonitors = this.findMonitors();
-			this.storeMonitors(StorageStrings.DataMonitors, foundMonitors, true);
+			this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 			WizardController._dataclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/auto");
 		}
 
 		public submitAutoInfo() {
-			var foundMonitors = this.findMonitors();
-			this.localStorage.add(StorageStrings.AutoMonitors, foundMonitors);
+			this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 			WizardController._autoclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/test");
 		}
@@ -327,86 +334,36 @@ module DashApp {
 		//#endregion
 
 		//#region private functions
-		private getDefines(): W.StateBag {
-			return <W.StateBag>this.localStorage.get(StorageStrings.PitDefines);
-		}
-
-		private getDefineValue(key: string): any {
-			var defines = this.getDefines();
-			return defines.g(key);
-		}
-
-		//private getDefinesKeys(): string[] {
-		//	var defines = this.getDefines();
-		//	return $.grep<Models.StateItem(defines).
-		//}
 
 		private refreshData(scope: ViewModelScope) {
-			var that = this;
 			var res: ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
 			switch (this.params.step) {
 				case "setvars":
-					this.localStorage.remove(StorageStrings.PitDefines);
-					res = this.peach.GetDefines((<P.Pit>this.localStorage.get("pit")).pitUrl);
+					this.pitConfigSvc.Defines = undefined;
+					res = this.peach.GetDefines(this.pitConfigSvc.Pit.pitUrl);
 					break;
 				case "fault":
-					this.localStorage.remove(StorageStrings.FaultMonitors);
+					this.pitConfigSvc.FaultMonitors = [];
 					res = this.peach.GetFaultQA();
 					break;
 				case "data":
-					this.localStorage.remove(StorageStrings.DataMonitors);
+					this.pitConfigSvc.DataMonitors = [];
 					res = this.peach.GetDataQA();
 					break;
 				case "auto":
-					this.localStorage.remove(StorageStrings.AutoMonitors);
+					this.pitConfigSvc.AutoMonitors = [];
 					res = this.peach.GetAutoQA();
 					break;
 				default:
 					return;
 			}
 
-			res.get(function (data) {
-				if (data.config != undefined)
-					that.qa = that.convertConfig(<Bork[]>data.config);
-
-				if(data.qa != undefined)
-					that.qa = <W.Question[]>data.qa;
-
-				if (data.state != undefined)
-					that.state = new W.StateBag(<any[]>data.state);
-				else
-					that.state = new W.StateBag();
-
-				if(data.monitors != undefined)
-					that.monitors = <W.MonitorDefinition[]>data.monitors;
-
-				that.next();
+			var peachData;
+			res.get((data) => {
+				this.pitConfigSvc.LoadData(data);
+				this.next();
 			}, this.getDataError);
-		}
-
-
-		
-		private convertConfig(config: Bork[]): W.Question[] {
-			var output: W.Question[] = [];
-			for (var i = 0; i < config.length; i++) {
-				var question = new W.Question;
-				question.id = i;
-				if (config[i].description != undefined)
-					question.q = config[i].description;
-				else
-					question.q = config[i].key;
-
-				question.key = config[i].key;
-				question.type = config[i].type;
-				question.value = config[i].value;
-				question.defaults = config[i].defaults;
-				if ((i + 1) < config.length) {
-					question.next = i + 1;
-				}
-				output.push(question);
-			}
-			return output;
 		}
 
 		private getDataError(something) {
@@ -427,8 +384,8 @@ module DashApp {
 			if (foundMonitors.length > 0) {
 				for (var m = 0; m < foundMonitors.length; m++) {
 					for (var i = 0; i < foundMonitors[m].map.length; i++) {
-						if (this.state.containsKey(foundMonitors[m].map[i].key)) {
-							var stateval = this.state.g(foundMonitors[m].map[i].key);
+						if (this.pitConfigSvc.StateBag.containsKey(foundMonitors[m].map[i].key)) {
+							var stateval = this.pitConfigSvc.StateBag.g(foundMonitors[m].map[i].key);
 							foundMonitors[m].map[i].value = stateval;
 						}
 					}
@@ -436,22 +393,6 @@ module DashApp {
 			}
 
 			return foundMonitors;
-		}
-
-		private storeMonitors(key: string, monitors: W.MonitorDefinition[], concat: boolean) {
-			if (concat) {
-				var dataMonitors = <W.MonitorDefinition[]>this.localStorage.get(key);
-				if (dataMonitors == undefined)
-					dataMonitors = monitors;
-				else
-					dataMonitors = dataMonitors.concat(monitors);
-
-				this.localStorage.set(key, dataMonitors);
-			}
-			else {
-				this.localStorage.remove(key);
-				this.localStorage.add(key, monitors);
-			}
 		}
 
 		private resetStepClass() {
@@ -472,13 +413,5 @@ module DashApp {
 		}
 
 		//#endregion
-	}
-
-	interface Bork {
-		key: string;
-		value: any;
-		description: string;
-		type: string;
-		defaults: any[];
 	}
 }

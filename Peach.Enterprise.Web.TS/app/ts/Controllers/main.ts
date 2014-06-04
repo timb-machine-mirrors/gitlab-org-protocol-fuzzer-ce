@@ -8,41 +8,31 @@ module DashApp {
 	import P = Models.Peach;
 
 	export class MainController {
-		private storage: ng.ILocalStorageService;
 		private peachService: Services.IPeachService;
 		private modal: ng.ui.bootstrap.IModalService;
+		private pitConfigSvc: Services.IPitConfiguratorService;
 
 		//#region Public Properties
-		private _pit: P.Pit;
 		public get pit(): P.Pit {
-			if (this._pit != undefined)
-				return this._pit;
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined)
+				return this.pitConfigSvc.Pit;
 			else
-				return this.storage.get(StorageStrings.Pit);
+				return undefined;
 		}
-
-		public set pit(pit: P.Pit) {
-			if (this._pit != pit) {
-				this._pit = pit;
-				this.storage.set(StorageStrings.Pit, pit);
-			}
-		}
-
 		public location: ng.ILocationService;
 		public job: P.Job;
 		//#endregion
 
 
-		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "localStorageService"];
+		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService"];
 
-		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, localStorageService: ng.ILocalStorageService) {
+		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
 			$scope.vm = this;
 
 			this.modal = $modal;
 			this.peachService = peachService;
 			this.location = $location;
-			this.storage = localStorageService;
-			this.storage.remove("pit");
+			this.pitConfigSvc = pitConfiguratorService;
 
 			var jobResource = peachService.GetJob();
 
@@ -66,9 +56,13 @@ module DashApp {
 						return this.peachService;
 					}
 				}
-			}).result.then((pitUrl: string) => {
-				this.peachService.GetPit(pitUrl, (data: P.Pit) => { this.pit = data });
+			})
+			.result.then((pitUrl: string) => {
+				this.peachService.GetPit(pitUrl, (data: P.Pit) =>
+				{
+					this.pitConfigSvc.Pit = data;
 				});
+			});
 		}
 	}
 

@@ -13,12 +13,13 @@
 		},
 		{
 			"id": 1,
-			"q": "Do you want to perform data collection on your local machine or a remote machine?",
+			"q": "Do you want to perform automation on your local machine or a remote machine?",
 			"type": "choice",
 			"key":"IsLocal",
 			"choice": [
 				{ "value":true,	"a": "From local machine.",	"next":4 },
-				{ "value":false, "a": "From remote machine.","next":2 }
+				{ "value":false, "a": "From remote machine.","next":2 },
+				{ "a": "Do not perform automation." }
 			]
 		},
 		{
@@ -152,7 +153,7 @@
 	"monitors": [
 		{
 			"monitorClass": "Agent",
-			"path": [ 0 ],
+			"path": [ 1 ],
 			"map": [
 				{"key":"AgentUrl", "param":"location" }
 				]
