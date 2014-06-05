@@ -1,5 +1,5 @@
-﻿/// <reference path="..\..\..\Scripts\typings\angularjs\angular.d.ts" />
-/// <reference path="..\..\..\Scripts\typings\angularjs\angular-resource.d.ts" />
+﻿/// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
+/// <reference path="../../../Scripts/typings/angularjs/angular-resource.d.ts" />
 
 module DashApp.Services {
 	import P = DashApp.Models.Peach;
@@ -68,8 +68,7 @@ module DashApp.Services {
 				throw new Error("GetPit: Argument 0 is of an incompatible type.");
 			}
 		}
-
-
+		
 		public PostPitConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
 			return this.resource("/p/conf/wizard/config");
 		}
@@ -87,6 +86,11 @@ module DashApp.Services {
 				var libs: P.PitLibrary[] = <P.PitLibrary[]>data;
 				success(libs);
 			});
+		}
+
+		public OpenTestResults() {
+			
+			
 		}
 	}
 } 

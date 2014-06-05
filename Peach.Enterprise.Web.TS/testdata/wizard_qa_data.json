@@ -18,7 +18,8 @@
 			"key":"IsLocal",
 			"choice": [
 				{ "value":true,	"a": "From a local machine.",	"next":4 },
-				{ "value":false, "a": "From a remote machine.","next":2 }
+				{ "value":false, "a": "From remote machine.","next":2 },
+				{ "a": "Do not perform data collection." }
 			]
 		},
 		{
@@ -81,7 +82,7 @@
 			"type":"string",
 			"key":"SaveFileFilename"
 		},
-		{File na
+		{
 			"id":4300,
 			"q":" Enter the SSH remote host hostname or IP address.",
 			"type":"string",
@@ -159,7 +160,7 @@
 	"monitors": [
 		{
 			"monitorClass": "Agent",
-			"path": [ 0 ],
+			"path": [ 1 ],
 			"map": [
 				{"key":"AgentUrl", "param":"location" }
 				]
