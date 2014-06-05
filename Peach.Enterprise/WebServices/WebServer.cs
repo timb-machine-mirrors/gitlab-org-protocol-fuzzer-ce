@@ -43,6 +43,8 @@ namespace Peach.Enterprise.WebServices
 			container.Register<JsonNetSerializer>();
 			container.Register<PitService>();
 			container.Register<LibraryService>();
+			container.Register<NodeService>();
+			container.Register<JobService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
