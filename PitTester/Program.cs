@@ -84,6 +84,19 @@ namespace PitTester
 				try
 				{
 					var defs = PitDefines.Parse(fileName + ".config");
+					var old = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+
+					if (defs.Count != old.Count)
+						throw new ApplicationException(string.Format("PitParser didn't properly parse defines file.  Expected '{0}' defines, got '{1}' defines.", defs.Count, old.Count));
+
+					for (int i = 0; i < defs.Count; ++i)
+					{
+						if (defs[i].Key != old[i].Key)
+							throw new ApplicationException(string.Format("PitParser didn't properly parse defines file. Expected '{1}' defines, got '{2}' for key at index {0}.", i, defs[i].Key, old[i].Key));
+						if (defs[i].Value != old[i].Value)
+							throw new ApplicationException(string.Format("PitParser didn't properly parse defines file. Expected '{1}' defines, got '{2}' for value at index {0}.", i, defs[i].Value, old[i].Value));
+					}
+
 					var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 					var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
 
