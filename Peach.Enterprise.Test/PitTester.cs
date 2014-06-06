@@ -212,7 +212,15 @@ namespace Peach.Enterprise.Test
 				}
 			}
 
-			[XmlElement("Define")]
+			[XmlElement("String", Type = typeof(PitDefines.StringDefine))]
+			[XmlElement("Hex", Type = typeof(PitDefines.HexDefine))]
+			[XmlElement("Range", Type = typeof(PitDefines.RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(PitDefines.Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(PitDefines.Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(PitDefines.HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(PitDefines.IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(PitDefines.StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(PitDefines.EnumDefine))]
 			public List<PitDefines.Define> Defines { get; set; }
 
 			[XmlElement("Test")]
