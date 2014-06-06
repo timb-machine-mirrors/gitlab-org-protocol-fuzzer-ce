@@ -26,7 +26,7 @@
 			"id":2,
 			"q": "What is the hostname or IP address of the remote machine that will perform collection?",
 			"type": "string",
-			"key": "HostName",
+			"key": "AgentUrl",
 			"next": 3
 		},
 		{
