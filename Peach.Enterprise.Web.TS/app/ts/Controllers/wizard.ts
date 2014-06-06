@@ -90,7 +90,8 @@ module DashApp {
 			return {
 				data: "vm.DataMonitors",
 				columnDefs: [
-					{ field: "monitorClass", displayName: "Monitor" }
+					{ field: "description", displayName: "" },
+					{ cellTemplate: "../../partials/monitor-cell-template.html" }
 				]
 			};
 		}
@@ -99,7 +100,8 @@ module DashApp {
 			return {
 				data: "vm.AutoMonitors",
 				columnDefs: [
-					{ field: "monitorClass", displayName: "Monitor" }
+					{ field: "description", displayName: "" },
+					{ cellTemplate: "../../partials/monitor-cell-template.html" }
 				]
 			};
 		}
@@ -265,6 +267,7 @@ module DashApp {
 							this.currentQuestion.qref = "/partials/fault-done.html";
 							break;
 						case "data":
+							this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
 						case "auto":
@@ -371,6 +374,17 @@ module DashApp {
 			this.location.path("/configurator/test");
 		}
 
+		public removeMonitor(index: number) {
+			switch (this.params.step) {
+				case "data":
+					this.pitConfigSvc.DataMonitors.splice(index, 1);
+					break;
+				case "auto":
+					this.pitConfigSvc.AutoMonitors.splice(index, 1);
+					break;
+			}
+		}
+
 		//#endregion
 
 		//#region private functions
@@ -432,7 +446,7 @@ module DashApp {
 				}
 			}
 
-			var agent: W.Agent;
+			var agent: W.Agent = new W.Agent();
 			agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
 			if (agent.agentUrl == undefined)
 				agent.agentUrl = "local://";
@@ -441,7 +455,7 @@ module DashApp {
 
 			agent.monitors = foundMonitors;
 
-			var agents: W.Agent[];
+			var agents: W.Agent[] = [];
 			agents.push(agent);
 
 			return agents;
