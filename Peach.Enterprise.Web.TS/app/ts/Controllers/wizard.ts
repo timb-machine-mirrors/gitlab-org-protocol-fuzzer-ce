@@ -118,21 +118,34 @@ module DashApp {
 			};
 		}
 
-		public get FaultMonitors(): W.Monitor[] {
+		public get definesGridOptions1(): any {
+			return {
+				data: "vm.DefinesSimple",
+				columnDefs: [
+					{ field: "key", displayName: "Name" },
+					{ field: "value", displayName: "Value" }
+				],
+				enableCellSelection: false,
+				enableRowSelection: false,
+				multiSelect: false
+			};
+		}
+
+		public get FaultMonitors(): W.Agent[]{
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.FaultMonitors;
 			else
 				return undefined;
 		}
 
-		public get DataMonitors(): W.Monitor[] {
+		public get DataMonitors(): W.Agent[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.DataMonitors;
 			else
 				return undefined;
 		}
 
-		public get AutoMonitors(): W.Monitor[] {
+		public get AutoMonitors(): W.Agent[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.AutoMonitors;
 			else
@@ -421,6 +434,11 @@ module DashApp {
 
 			var agent: W.Agent;
 			agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
+			if (agent.agentUrl == undefined)
+				agent.agentUrl = "local://";
+			else
+				agent.agentUrl = "tcp://" + agent.agentUrl;
+
 			agent.monitors = foundMonitors;
 
 			var agents: W.Agent[];
