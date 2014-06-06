@@ -84,9 +84,9 @@ namespace Peach.Core.Analyzers
 
 		}
 
-		public static Dictionary<string, string> parseDefines(string definedValuesFile)
+		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
 		{
-			var ret = new Dictionary<string, string>();
+			var ret = new OrderedDictionary<string, string>();
 			var keys = new HashSet<string>();
 
 			string normalized = Path.GetFullPath(definedValuesFile);
@@ -179,7 +179,7 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			return ret;
+			return ret.ToList();
 		}
 
 		public override Dom.Dom asParser(Dictionary<string, object> args, Stream data)

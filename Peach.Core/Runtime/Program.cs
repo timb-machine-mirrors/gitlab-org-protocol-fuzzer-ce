@@ -102,7 +102,7 @@ namespace Peach.Core.Runtime
 			LogManager.Configuration = nconfig;
 		}
 
-		public Dictionary<string, string> DefinedValues = new Dictionary<string, string>();
+		public OrderedDictionary<string, string> DefinedValues = new OrderedDictionary<string, string>();
 		public Peach.Core.Dom.Dom dom;
 
 		public int exitCode = 1;
