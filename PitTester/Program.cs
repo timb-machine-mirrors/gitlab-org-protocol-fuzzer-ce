@@ -32,6 +32,7 @@ namespace PitTester
 
 			Peach.Core.Runtime.Program.ConfigureLogging(LogLevel);
 
+			var libraryPath = args[0];
 			var lib = new PitDatabase();
 			var errors = new StringBuilder();
 			var total = 0;
@@ -54,7 +55,7 @@ namespace PitTester
 
 			Console.WriteLine("Loading pit library");
 
-			lib.Load(args[0]);
+			lib.Load(libraryPath);
 
 			Console.WriteLine();
 			Console.WriteLine("Loaded {0}/{1} pit files", lib.Entries.Count(), lib.Entries.Count() + total);
@@ -94,7 +95,7 @@ namespace PitTester
 						sb.AppendLine();
 					if (noDesc.Length > 0)
 						sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
-					if (sb.Length > 0)
+					if (sb.Length < 0)
 						throw new ApplicationException(sb.ToString());
 
 
@@ -173,7 +174,62 @@ namespace PitTester
 			errors.Clear(); ;
 			total = 0;
 
+			Console.WriteLine("Testing pit files");
+
+			foreach (var e in lib.Entries)
+			{
+				var fileName = e.Versions[0].Files[0].Name;
+
+				try
+				{
+					TestPit(libraryPath, fileName, null);
+
+					Console.Write(".");
+
+					++total;
+				}
+				catch (FileNotFoundException)
+				{
+					Console.Write("I");
+				}
+				catch (Exception ex)
+				{
+					Console.Write("E");
+
+					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
+					errors.AppendLine();
+					errors.AppendLine(ex.Message);
+				}
+			}
+
+			Console.WriteLine();
+			Console.WriteLine("Passed {0}/{1} pit tests", total, lib.Entries.Count());
+
+			if (errors.Length > 0)
+			{
+				Console.WriteLine();
+				Console.WriteLine("Errors:");
+				Console.WriteLine();
+				Console.WriteLine(errors);
+			}
+			else
+			{
+				Console.WriteLine();
+			}
+
+			errors.Clear(); ;
+			total = 0;
+
 			return 0;
+		}
+
+		static void TestPit(string libraryPath, string pitFile, string testName)
+		{
+			var testFile = pitFile + ".test";
+			if (!File.Exists(testFile))
+				throw new FileNotFoundException();
+
+
 		}
 
 		static void VerifyPit(string fileName)
