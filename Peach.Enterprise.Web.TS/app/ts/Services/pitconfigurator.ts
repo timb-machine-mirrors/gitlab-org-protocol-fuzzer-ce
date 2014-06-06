@@ -11,10 +11,10 @@ module DashApp.Services {
 		QA: W.Question[];
 		StateBag: W.StateBag;
 		Defines: P.PitConfig;
-		Monitors: W.MonitorDefinition[];
-		FaultMonitors: W.MonitorDefinition[];
-		DataMonitors: W.MonitorDefinition[];
-		AutoMonitors: W.MonitorDefinition[];
+		Monitors: W.Monitor[];
+		FaultMonitors: W.Agent[];
+		DataMonitors: W.Agent[];
+		AutoMonitors: W.Agent[];
 
 		SetVarsComplete: boolean;
 		FaultMonitorsComplete: boolean;
@@ -29,7 +29,7 @@ module DashApp.Services {
 
 		public Pit: Models.Peach.Pit;
 		public QA: W.Question[] = [];
-		public Monitors: W.MonitorDefinition[] = [];
+		public Monitors: W.Monitor[] = [];
 
 		//#region StateBag
 		private _stateBag: W.StateBag = new W.StateBag();
@@ -59,13 +59,13 @@ module DashApp.Services {
 		//#endregion
 
 		//#region FaultMonitors
-		private _faultMonitors: W.MonitorDefinition[] = [];
+		private _faultMonitors: W.Agent[] = [];
 
-		public get FaultMonitors(): W.MonitorDefinition[] {
+		public get FaultMonitors(): W.Agent[] {
 			return this._faultMonitors;
 		}
 
-		public set FaultMonitors(monitors: W.MonitorDefinition[]) {
+		public set FaultMonitors(monitors: W.Agent[]) {
 			if (this._faultMonitors != monitors) {
 				this._faultMonitors = monitors;
 			}
@@ -73,24 +73,24 @@ module DashApp.Services {
 		//#endregion
 
 		//#region DataMonitors
-		private _dataMonitors: W.MonitorDefinition[] = [];
-		public get DataMonitors(): W.MonitorDefinition[] {
+		private _dataMonitors: W.Agent[] = [];
+		public get DataMonitors(): W.Agent[] {
 			return this._dataMonitors;
 		}
 
-		public set DataMonitors(monitors: W.MonitorDefinition[]) {
+		public set DataMonitors(monitors: W.Agent[]) {
 			if (this._dataMonitors != monitors)
 				this._dataMonitors = monitors;
 		}
 		//#endregion
 
 		//#region AutoMonitors
-		private _autoMonitors: W.MonitorDefinition[] = [];
-		public get AutoMonitors(): W.MonitorDefinition[] {
+		private _autoMonitors: W.Agent[] = [];
+		public get AutoMonitors(): W.Agent[] {
 			return this._autoMonitors;
 		}
 
-		public set AutoMonitors(monitors: W.MonitorDefinition[]) {
+		public set AutoMonitors(monitors: W.Agent[]) {
 			if (this._autoMonitors != monitors)
 				this._autoMonitors = monitors;
 		}
@@ -136,7 +136,7 @@ module DashApp.Services {
 				}
 
 				if (data.monitors != undefined)
-					this.Monitors = <W.MonitorDefinition[]>data.monitors;
+					this.Monitors = <W.Monitor[]>data.monitors;
 			}
 		}
 	}

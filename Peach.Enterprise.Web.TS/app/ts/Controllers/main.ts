@@ -47,7 +47,7 @@ module DashApp {
 
 		public showPitSelector() {
 			this.modal.open({
-				templateUrl: "/partials/pitlibrary.html",
+				templateUrl: "../partials/pitlibrary.html",
 				keyboard: false,
 				backdrop: 'static',
 				controller: PitLibraryController,

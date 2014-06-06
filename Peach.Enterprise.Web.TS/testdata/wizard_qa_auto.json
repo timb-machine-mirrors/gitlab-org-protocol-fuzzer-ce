@@ -152,13 +152,6 @@
 	],
 	"monitors": [
 		{
-			"monitorClass": "Agent",
-			"path": [ 1 ],
-			"map": [
-				{"key":"AgentUrl", "param":"location" }
-				]
-		},
-		{
 			"monitorClass":"CanaKit",
 			"path": [ 4100 ],
 			"map": [

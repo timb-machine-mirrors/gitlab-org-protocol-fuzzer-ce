@@ -1,4 +1,4 @@
-﻿<div>
+﻿<accordion>
 	<label class="control-label bolder blue">
 		{{vm.currentQuestion.q}}
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>
@@ -6,6 +6,14 @@
 	<div>
 		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" ng-required="vm.currentQuestion.required" />
 	</div>
+	<accordion ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
+		<accordion-group>
+			<accordion-heading>
+				Defines <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+			</accordion-heading>
+			<div class="gridStyle" ng-grid="vm.definesGridOptions"></div>
+		</accordion-group>
+	</accordion>
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-prev" ng-click="vm.back()">
 			<i class="icon-arrow-left"></i>
@@ -16,4 +24,4 @@
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>
 	</div>
-</div>
+	</div>
