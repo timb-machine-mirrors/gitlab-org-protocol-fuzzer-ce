@@ -252,54 +252,47 @@
 	],
 	"monitors": [
 		{
-			"monitorClass": "Agent",
-			"path": [0],
-			"map": [
-				{"key":"AgentUrl", "param":"location", "optional":true }
-			]
-		},
-		{
 			"monitorClass":"PageHeap",
 			"path": [1110],
 			"map": [
-				{ "key":"WinDbgExecutable", "param":"Executable", "optional":false },
-				{ "key":"WinDbgPath", "param":"WinDbgPath", "optional":true  }
+				{ "key":"WinDbgExecutable", "param":"Executable" },
+				{ "key":"WinDbgPath", "param":"WinDbgPath"  }
 			]
 		},
 		{
 			"monitorClass":"WindowsDebugger",
 			"path": [1100],
 			"map": [
-				{ "key":"WinDbgExecutable",	"param":"Executable",					"optional":true },
-				{ "key":"WinDbgArguments", "param":"Arguments",					"optional":true },
-				{ "key":"WinDbgProcessName", "param":"ProcessName",					"optional":true  },
-				{ "key":"WinDbgService", "param":"Service",						"optional":true },
-				{ "key":"WinDbgPath", "param":"WinDbgPath",					"optional":true },
-				{ "key":"WinDbgStartOnCall", "param":"StartOnCall",					"optional":true },
-				{ "key":"WinDbgFaultOnEarlyExit", "param":"FaultOnEarlyExit",				"optional":true },
-				{ "key":"WinDbgRestartOnEachTest", "param":"RestartOnEachTest",			"optional":true },
-				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage",	"optional":true }
+				{ "key":"WinDbgExecutable",	"param":"Executable" },
+				{ "key":"WinDbgArguments", "param":"Arguments" },
+				{ "key":"WinDbgProcessName", "param":"ProcessName"  },
+				{ "key":"WinDbgService", "param":"Service" },
+				{ "key":"WinDbgPath", "param":"WinDbgPath" },
+				{ "key":"WinDbgStartOnCall", "param":"StartOnCall" },
+				{ "key":"WinDbgFaultOnEarlyExit", "param":"FaultOnEarlyExit" },
+				{ "key":"WinDbgRestartOnEachTest", "param":"RestartOnEachTest" },
+				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage" }
 			]
 		},
 		{
 			"monitorClass":"Ping",
 			"path": [4100,4101,4102],
 			"map": [
-				{ "key":"PingHost","param":"Host",				"optional":false },
-				{ "key":"PingFaultOnSuccess","param":"FaultOnSuccess",	"optional":true },
-				{ "key":"PingRetryCount","param":"RetryCount",		"optional":true }
+				{ "key":"PingHost","param":"Host" },
+				{ "key":"PingFaultOnSuccess","param":"FaultOnSuccess" },
+				{ "key":"PingRetryCount","param":"RetryCount" }
 			]
 		},
 		{
 			"monitorClass":"LinuxDebugger",
 			"path": [3104],
 			"map": [
-				{ "key":"Executable","param":"Executable",		"optional":false },
-				{ "key":"Arguments","param":"Arguments",		"optional":true },
-				{ "key":"LinuxDebugGdbPath","param":"GdbPath",		"optional":true },
-				{ "key":"RestartOnEachTest","param":"RestartOnEachTest",		"optional":true },
-				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit",		"optional":true },
-				{ "key":"StartOnCall","param":"StartOnCall",		"optional":true }
+				{ "key":"Executable","param":"Executable" },
+				{ "key":"Arguments","param":"Arguments" },
+				{ "key":"LinuxDebugGdbPath","param":"GdbPath" },
+				{ "key":"RestartOnEachTest","param":"RestartOnEachTest" },
+				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" },
+				{ "key":"StartOnCall","param":"StartOnCall" }
 			]
 		},
 		{
@@ -311,11 +304,11 @@
 			"monitorClass":"Process",
 			"path": [4200],
 			"map": [
-				{ "key":"ProcessExecutable","param":"Executable",		"optional":false },
-				{ "key":"ProcessArguments","param":"Arguments",		"optional":true },
-				{ "key":"ProcessRestartOnEachTest","param":"RestartOnEachTest",		"optional":true },
-				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit",		"optional":true },
-				{ "key":"ProcessStartOnCall",	"param":"StartOnCall",		"optional":true }
+				{ "key":"ProcessExecutable","param":"Executable" },
+				{ "key":"ProcessArguments","param":"Arguments" },
+				{ "key":"ProcessRestartOnEachTest","param":"RestartOnEachTest" },
+				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" },
+				{ "key":"ProcessStartOnCall",	"param":"StartOnCall" }
 			]
 		}
 	]

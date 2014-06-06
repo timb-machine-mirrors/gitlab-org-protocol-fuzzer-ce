@@ -26,7 +26,7 @@
 			"id":2,
 			"q": "What is the remote machine hostname or IP address?",
 			"type": "string",
-			"key": "HostName",
+			"key": "AgentUrl",
 			"next": 3
 		},
 		{
@@ -153,32 +153,27 @@
 			"key":"SshDownloaderRemove",
 			"choice":[
 				{"value":true, "a":"Yes, remove the file after downloading it." },
-				{"a":"No, do not remove the file.", "value": false}
+				{"value": false, "a":"No, do not remove the file."}
 				]
 		}
 	],
 	"monitors": [
-		{
-			"monitorClass": "Agent",
-			"path": [ 1 ],
-			"map": [
-				{"key":"AgentUrl", "param":"location" }
-				]
-		},
 		{
 			"monitorClass":"Pcap",
 			"path": [ 4100 ],
 			"map":[
 				{"key":"PcapDevice", "param":"Device"},
 				{"key":"PcapFilter", "param":"Filter"}
-				]
+				],
+			"description":"Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}."
 		},
 		{
 			"monitorClass":"SaveFile",
 			"path":[ 4200 ],
 			"map":[
 				{"key":"SaveFileFilename", "param":"Filename" }
-				]
+				],
+			"description":  "Save file at {SaveFilename}."
 		},
 		{
 			"monitorClass":"SshDownloader",
@@ -191,7 +186,8 @@
 				{"key":"SshDownloaderFile", "param":"File" },
 				{"key":"SshDownloaderFolder", "param":"Folder" },
 				{"key":"SshDownloaderRemove", "param":"Remove" }
-			]
+			],
+			"description": "Download file {SshDownloaderFile} in folder {SshDownloaderFolder} on host {SshDownloaderHost}"
 		}
 	]
 }

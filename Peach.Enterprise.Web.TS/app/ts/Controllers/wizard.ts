@@ -34,7 +34,7 @@ module DashApp {
 				return undefined;
 		}
 
-		public get monitors(): W.MonitorDefinition[] {
+		public get monitors(): W.Monitor[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.Monitors;
 			else
@@ -104,23 +104,44 @@ module DashApp {
 			};
 		}
 
-		public get FaultMonitors(): W.MonitorDefinition[] {
+		public get definesGridOptions(): any {
+			return {
+				data: "vm.DefinesSimple",
+				columnDefs: [
+					{ field: "key", displayName: "Name" },
+					{ field: "value", displayName: "Value" },
+					{ cellTemplate: "../../partials/defines-cell-template.html"}
+				],
+				enableCellSelection: false,
+				enableRowSelection: false,
+				multiSelect: false
+			};
+		}
+
+		public get FaultMonitors(): W.Monitor[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.FaultMonitors;
 			else
 				return undefined;
 		}
 
-		public get DataMonitors(): W.MonitorDefinition[] {
+		public get DataMonitors(): W.Monitor[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.DataMonitors;
 			else
 				return undefined;
 		}
 
-		public get AutoMonitors(): W.MonitorDefinition[] {
+		public get AutoMonitors(): W.Monitor[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.AutoMonitors;
+			else
+				return undefined;
+		}
+
+		public get DefinesSimple(): any[] {
+			if (this.pitConfigSvc != undefined) 
+				return this.pitConfigSvc.Defines.KeyValuePairs;
 			else
 				return undefined;
 		}
@@ -159,6 +180,12 @@ module DashApp {
 		//#endregion
 
 		//#region Public Methods
+		public insertDefine(row) {
+			if (this.currentQuestion.value == undefined) {
+				this.currentQuestion.value = "";
+			}
+			this.currentQuestion.value += "##" + row.getProperty("key") + "##";
+		}
 
 		public getTemplateUrl(): string {
 			if (this.currentQuestion != undefined) {
@@ -370,9 +397,9 @@ module DashApp {
 			console.log(something);
 		}
 
-		public findMonitors(): W.MonitorDefinition[] {
+		public findMonitors(): W.Agent[] {
 			var that = this;
-			var foundMonitors: W.MonitorDefinition[] = [];
+			var foundMonitors: W.Monitor[] = [];
 			foundMonitors = $.grep(this.monitors, function (m) {
 				var w = $.grep(m.path, function (p) {
 					return that.questionPath.indexOf(p) >= 0;
@@ -392,7 +419,14 @@ module DashApp {
 				}
 			}
 
-			return foundMonitors;
+			var agent: W.Agent;
+			agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
+			agent.monitors = foundMonitors;
+
+			var agents: W.Agent[];
+			agents.push(agent);
+
+			return agents;
 		}
 
 		private resetStepClass() {
