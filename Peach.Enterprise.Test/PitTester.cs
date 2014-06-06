@@ -10,6 +10,7 @@ using System.Xml;
 using System.Text;
 
 using NUnit.Framework;
+using System.ComponentModel;
 
 namespace Peach.Enterprise.Test
 {
@@ -18,7 +19,7 @@ namespace Peach.Enterprise.Test
 	{
 		#region TestData
 
-		[XmlRoot("TestData")]
+		[XmlRoot("TestData", IsNullable = false, Namespace = "http://peachfuzzer.com/2012/TestData")]
 		public class TestData
 		{
 			public TestData()
@@ -29,13 +30,7 @@ namespace Peach.Enterprise.Test
 
 			public static TestData Parse(string fileName)
 			{
-				using (var rdr = XmlReader.Create(fileName))
-				{
-					var s = new XmlSerializer(typeof(TestData));
-					var o = s.Deserialize(rdr);
-					var r = (TestData)o;
-					return r;
-				}
+				return XmlTools.Deserialize<TestData>(fileName);
 			}
 
 			public class Test
@@ -147,6 +142,7 @@ namespace Peach.Enterprise.Test
 				public override string ActionType { get { return "input"; } }
 
 				[XmlAttribute("datagram")]
+				[DefaultValue(false)]
 				public bool IsDatagram { get; set; }
 
 				[XmlIgnore]

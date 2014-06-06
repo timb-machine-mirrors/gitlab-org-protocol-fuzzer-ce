@@ -28,7 +28,7 @@ namespace Peach.Enterprise
 			var schema = new XmlSchemas();
 			var exporter = new XmlSchemaExporter(schema);
 
-			var xmlTypeMapping = importer.ImportTypeMapping(typeof(PitDefines));
+			var xmlTypeMapping = importer.ImportTypeMapping(type);
 			exporter.ExportTypeMapping(xmlTypeMapping);
 
 			foreach (XmlSchemaObject obj in schema[0].Items)
@@ -50,6 +50,11 @@ namespace Peach.Enterprise
 				{
 					var content = (XmlSchemaComplexContent)asType.ContentModel;
 					var ext = (XmlSchemaComplexContentExtension)content.Content;
+
+					// If xs:complexType isMixed='true' we need to set
+					// the xs:complexContent to have isMixed='true' also
+					if (content.IsMixed == false && asType.IsMixed == true)
+						content.IsMixed = true;
 
 					foreach (XmlSchemaAttribute attr in ext.Attributes)
 					{
@@ -118,7 +123,16 @@ namespace Peach.Enterprise
 					xmlReader.Close();
 			}
 
-			// "Error, Pit defines file '' failed to load.
+			private Exception MakeError(Exception inner, string msg, params object[] args)
+			{
+				var suffix = msg.Fmt(args);
+
+				if (string.IsNullOrEmpty(xmlReader.BaseURI))
+					return new PeachException("Error, {0} file {1}".Fmt(typeof(T).Name, suffix), inner);
+
+				return new PeachException("Error, {0} file '{1}' {2}".Fmt(typeof(T).Name, xmlReader.BaseURI, suffix), inner);
+			}
+
 			public T Deserialize()
 			{
 				try
@@ -128,30 +142,17 @@ namespace Peach.Enterprise
 					var r = (T)o;
 
 					if (errors.Length > 0)
-					{
-						throw new PeachException(errors.ToString());
-						//if (!string.IsNullOrEmpty(sourceName))
-						//	throw new PeachException("Error, Pit file \"{0}\" failed to validate: \r\n{1}".Fmt(sourceName, errors));
-						//else
-						//	throw new PeachException("Error, Pit file failed to validate: \r\n{0}".Fmt(errors));
-					}
+						throw MakeError(null, "failed to validate:\r\n{0}", errors);
 
 					return r;
 				}
 				catch (InvalidOperationException ex)
 				{
 					var inner = ex.InnerException as XmlException;
-					if (inner != null)
-					{
-						var msg = "Error loading PitDefines file '{0}'. {1}".Fmt(xmlReader.BaseURI, inner.Message);
-						throw new PeachException(msg);
-						//xmlReader.BaseURI
-					}
-			//		else
-			//		{
-			//		}
-					throw new PeachException("error", ex);
-					throw new PeachException("Error: XML Failed to load: " + ex.Message, ex);
+					if (inner != null && !string.IsNullOrEmpty(inner.Message))
+						throw MakeError(ex, "failed to load. {0}", inner.Message);
+					else
+						throw MakeError(ex, "failed to load. {0}", ex.Message);
 				}
 			}
 
@@ -179,7 +180,9 @@ namespace Peach.Enterprise
 
 				// Default the namespace to the namespace of the XmlRootAttribute
 				var nsMgr = new XmlNamespaceManager(settings.NameTable);
-				nsMgr.AddNamespace("", schema.TargetNamespace);
+
+				if (schema.TargetNamespace != null)
+					nsMgr.AddNamespace("", schema.TargetNamespace);
 
 				parserCtx = new XmlParserContext(settings.NameTable, nsMgr, null, XmlSpace.Default);
 			}
