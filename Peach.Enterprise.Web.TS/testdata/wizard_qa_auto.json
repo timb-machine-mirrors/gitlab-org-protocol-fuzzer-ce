@@ -24,14 +24,14 @@
 		},
 		{
 			"id":2,
-			"q": "What is the hostname or IP address of the remote machine that will perform collection?",
+			"q": "What is the automation remote machine's hostname or IP address?",
 			"type": "string",
 			"key": "AgentUrl",
 			"next": 3
 		},
 		{
 			"id":3,
-			"q":"What is the operating system of the remote machine that will perform collection?",
+			"q":"What is the automation remote machine's operating system?",
 			"type":"choice",
 			"key":"OS",
 			"choice":[
