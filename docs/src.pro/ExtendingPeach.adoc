@@ -4,7 +4,15 @@
 // TODO - Analyzer
 // TODO - Logger
 
-{product} was designed to be extended, allowing the end user increase the capabilities of Peach in new ways. The most common reasons for extending Peach include: custom validation algorithms such as checksums, custom publishers (I/O adapters), and monitoring. However, Peach also includes the ability to write custom agents, loggers, strategies, analyzers, and strategies. This section will cover the most common types of extensions to Peach.
+{product} was designed to be extended, allowing the you to increase the capabilities of Peach in new ways. The most common reasons for extending Peach include: 
+--
+* Custom validation algorithms (such as checksums) 
+* Custom publishers (I/O adapters), 
+* Monitoring
+--
+Peach allows you to write custom agents, loggers, strategies, analyzers, and strategies. 
+
+This section will cover the most common types of extensions to Peach.
 
 <<<
 [[Extend_Plugins]]

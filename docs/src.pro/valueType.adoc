@@ -15,23 +15,22 @@
 // * literal - IP address
 
 The _valueType_ attribute specifies what type of data is contained in the _value_ attribute.
-Valid values: +string+, +hex+, and +literal+.
+Valid values are +string+, +hex+, and +literal+.
 
 string::
-	String is the default _valueType_.
+	String is the default _valueType_. + 
 	The value provided is a string value.
 	String value will be converted into the appropriate data element type.
 	The _Number_ element expects numerical values while _String_ and _Blob_ will take any values.
 
 hex::
-  The value specified as a stream of hex bytes. +
+  The value specified as a stream of hex bytes. + 
   Peach is fairly good about figuring out different types of hex strings like "+0x00 0x00+" or "+\x00 \x00+" or "+00 00 00 00 00+".
 
 literal::
-	Specify a python or ruby statement that evaluates to the wanted value.
-	The evaluation occurs only once when the Pit is parsed into an internal dom tree.
-	Literal should *NOT* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup].
-	Literals are only to be used for quick one-time expressions.
+	Specify a python or ruby statement that evaluates to the wanted value. + 
+	The evaluation occurs only once when the Pit is parsed into an internal dom tree.+
+WARNING: Literal should *NOT* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup]. Literals are only to be used for quick one-time expressions.
 
 
 === Examples
@@ -97,7 +96,7 @@ Output
 A
 ----
 
-*NOTE:* The hex values must be EVEN numbered! For example this is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
+NOTE: The hex values must be EVEN numbered! For example this is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
 ==========================
 
 .literal
