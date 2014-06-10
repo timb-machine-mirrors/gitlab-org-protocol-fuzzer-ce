@@ -336,6 +336,9 @@ namespace Peach.Core
 				context.controlIteration = true;
 				context.controlRecordingIteration = true;
 
+				// Initialize the current iteration prior to the TestStarting event
+				context.currentIteration = iterationStart;
+
 				test.markMutableElements();
 
 				OnTestStarting(context);
