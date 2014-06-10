@@ -70,9 +70,7 @@ namespace Godel.Tests
 
 </Peach>
 ";
-			var e = new Engine(null);
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 
@@ -149,8 +147,7 @@ namespace Godel.Tests
 </Peach>
 ";
 			var e = new Engine(null);
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.singleIteration = true;
@@ -187,8 +184,7 @@ namespace Godel.Tests
 ";
 			var e = new Engine(null);
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -236,8 +232,7 @@ namespace Godel.Tests
 ";
 			var e = new Engine(null);
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -288,8 +283,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -334,8 +328,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -380,8 +373,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -428,8 +420,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -476,8 +467,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -524,8 +514,7 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var epeach = new Godel.Core.ExtendPeach(e.context);
-			var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -593,8 +582,7 @@ namespace Godel.Tests
 				var e = new Engine(null);
 				e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-				var epeach = new Godel.Core.ExtendPeach(e.context);
-				var parser = new Godel.Core.GodelPitParser() { ExtendPeach = epeach };
+				var parser = new Godel.Core.GodelPitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
 				var config = new RunConfiguration();
 				config.range = true;

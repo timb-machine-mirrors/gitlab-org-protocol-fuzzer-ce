@@ -32,8 +32,6 @@ namespace Godel.Core
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public ExtendPeach ExtendPeach { get; set; }
-
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
 			return new Dom();
@@ -134,6 +132,11 @@ namespace Godel.Core
 
 					newList.Add(item);
 				}
+
+				// If the test uses a state model that has godel nodes,
+				// add the godel logger to the test.
+				if (newList.Count > 0)
+					test.loggers.Insert(0, new GodelLogger());
 
 				sm.godel = newList;
 			}
