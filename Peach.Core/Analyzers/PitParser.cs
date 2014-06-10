@@ -75,13 +75,14 @@ namespace Peach.Core.Analyzers
 		static PitParser()
 		{
 			PitParser.supportParser = true;
-			Analyzer.defaultParser = new PitParser();
+
 			populatePitParsable();
+
+			Analyzer.defaultParser = new PitParser();
 		}
 
 		public PitParser()
 		{
-
 		}
 
 		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
