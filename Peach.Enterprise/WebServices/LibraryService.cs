@@ -17,13 +17,13 @@ namespace Peach.Enterprise.WebServices
 
 		Library[] GetLibraries()
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			return db.Libraries.ToArray();
 		}
 
 		Library GetLibrary(string id)
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			var lib = db.GetLibrary(id);
 			if (lib == null)
 				Context.Response.StatusCode = HttpStatusCode.NotFound;

@@ -394,7 +394,9 @@ namespace PeachFarm.Node
 			{
 				try
 				{
-					defines = Peach.Core.Analyzers.PitParser.parseDefines(nodeState.DefinesFilePath);
+					var defs = Peach.Core.Analyzers.PitParser.parseDefines(nodeState.DefinesFilePath);
+					foreach (var kv in defs)
+						defines[kv.Key] = kv.Value;
 				}
 				catch (Exception ex)
 				{

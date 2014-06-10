@@ -12,25 +12,13 @@ using System.IO;
 
 namespace Godel.Core
 {
-	public class ExtendPeach
+	public class GodelLogger : Logger
 	{
-		private RunContext Context { get; set; }
 		private NamedCollection<GodelContext> Expressions { get; set; }
 		private StateModel OriginalStateModel { get; set; }
 
-		public ExtendPeach(RunContext context)
+		public GodelLogger()
 		{
-			Context = context;
-
-			Context.engine.TestStarting += engine_TestStarting;
-			Context.engine.TestFinished += engine_TestFinished;
-
-			Context.StateModelStarting += StateModel_Starting;
-			Context.StateModelFinished += StateModel_Finished;
-			Context.StateStarting += State_Starting;
-			Context.StateFinished += State_Finished;
-			Context.ActionStarting += Action_Starting;
-			Context.ActionFinished += Action_Finished;
 		}
 
 		GodelContext GetExpr(params string[] names)
@@ -42,23 +30,23 @@ namespace Godel.Core
 			return null;
 		}
 
-		void engine_TestStarting(RunContext context)
+		protected override void Engine_TestStarting(RunContext context)
 		{
-			var dom = context.dom as Godel.Core.Dom;
-			if (dom == null || dom.godel.Count == 0)
+			var sm = context.test.stateModel as Godel.Core.StateModel;
+			if (sm == null || sm.godel.Count == 0)
 				return;
 
 			// Create a script scope
 			var scope = context.dom.Python.CreateScope();
 
 			// Pre-compile all the expressions
-			foreach (var item in dom.godel)
-				item.OnTestStarting(Context, scope);
+			foreach (var item in sm.godel)
+				item.OnTestStarting(context, scope);
 
-			Expressions = dom.godel;
+			Expressions = sm.godel;
 		}
 
-		void engine_TestFinished(RunContext context)
+		protected override void Engine_TestFinished(RunContext context)
 		{
 			if (Expressions != null)
 			{
@@ -70,36 +58,34 @@ namespace Godel.Core
 			Expressions = null;
 		}
 
-		void StateModel_Starting(RunContext context, Peach.Core.Dom.StateModel model)
+		protected override void StateModelStarting(RunContext context, Peach.Core.Dom.StateModel model)
 		{
-			System.Diagnostics.Debug.Assert(model.parent.context == Context);
-
 			if (Expressions == null)
 				return;
 
 			// Keep a copy of the original for 'pre' variable in the post 
-			OriginalStateModel = ObjectCopier.Clone(model);
+			OriginalStateModel = ObjectCopier.Clone((StateModel)model);
 
 			var expr = GetExpr(model.name);
 			if (expr != null)
 				expr.Pre(model);
 		}
 
-		void StateModel_Finished(RunContext context, Peach.Core.Dom.StateModel model)
+		protected override void StateModelFinished(RunContext context, Peach.Core.Dom.StateModel model)
 		{
 			var expr = GetExpr(model.name);
 			if (expr != null)
 				expr.Post(model, OriginalStateModel);
 		}
 
-		void State_Starting(RunContext context, Peach.Core.Dom.State state)
+		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
 				expr.Pre(state);
 		}
 
-		void State_Finished(RunContext context, Peach.Core.Dom.State state)
+		protected override void StateFinished(RunContext context, Peach.Core.Dom.State state)
 		{
 			var expr = GetExpr(state.parent.name, state.name);
 			if (expr != null)
@@ -109,14 +95,14 @@ namespace Godel.Core
 			}
 		}
 
-		void Action_Starting(RunContext context, Peach.Core.Dom.Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)
 				expr.Pre(action);
 		}
 
-		void Action_Finished(RunContext context, Peach.Core.Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
 			if (expr != null)

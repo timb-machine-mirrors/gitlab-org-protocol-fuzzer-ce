@@ -45,7 +45,9 @@ namespace Peach.Enterprise.Transformers.Crypto
 			var ctx = dataModel.actionData.action.parent.parent.parent.context;
 
 			// The Tls fixup needs to have run first or this transformer is useless
-			return (TlsBlockCipher)ctx.iterationStateStore["TlsBlockCipher"];
+			object obj;
+			ctx.iterationStateStore.TryGetValue("TlsBlockCipher", out obj);
+			return (TlsBlockCipher)obj;
 		}
 
 		// Called every time an output action occurs

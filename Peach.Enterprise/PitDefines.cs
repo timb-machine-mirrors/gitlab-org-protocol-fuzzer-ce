@@ -1,36 +1,21 @@
+using Peach.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Peach.Enterprise
 {
-	[XmlRoot("PitDefines")]
+	[XmlRoot("PitDefines", IsNullable = false, Namespace = "http://peachfuzzer.com/2012/PitDefines")]
 	public class PitDefines
 	{
-		public enum Type
-		{
-			[XmlEnum("string")]
-			String,
-			[XmlEnum("port")]
-			Port,
-			[XmlEnum("ipv4")]
-			Ipv4,
-			[XmlEnum("ipv6")]
-			Ipv6,
-			[XmlEnum("hwaddr")]
-			Hwaddr,
-			[XmlEnum("iface")]
-			Iface,
-			[XmlEnum("strategy")]
-			Strategy,
-			//[XmlEnum("enum")]
-			//Enum
-		}
+		#region Defines
 
-		public class Define
+		public abstract class Define
 		{
 			[XmlAttribute("key")]
 			public string Key { get; set; }
@@ -39,17 +24,177 @@ namespace Peach.Enterprise
 			public string Value { get; set; }
 
 			[XmlAttribute("name")]
-			[DefaultValue("")]
 			public string Name { get; set; }
 
 			[XmlAttribute("description")]
 			[DefaultValue("")]
 			public string Description { get; set; }
 
-			[XmlAttribute("type")]
-			[DefaultValue(Type.String)]
-			public Type Type { get; set; }
+			public abstract WebServices.Models.ConfigType ConfigType
+			{
+				get;
+			}
+
+			public virtual string[] Defaults
+			{
+				get { return new string[0]; }
+			}
+
+			public virtual long? Min
+			{
+				get { return null; }
+			}
+
+			public virtual ulong? Max
+			{
+				get { return null; }
+			}
 		}
+
+		/// <summary>
+		/// Free form string
+		/// </summary>
+		public class StringDefine : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.String; }
+			}
+		}
+
+		public class HexDefine : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Hex; }
+			}
+		}
+
+		public class RangeDefine : Define
+		{
+			[XmlAttribute("min")]
+			public long MinValue { get; set; }
+
+			[XmlAttribute("max")]
+			public ulong MaxValue { get; set; }
+
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Range; }
+			}
+
+			public override long? Min
+			{
+				get { return MinValue; }
+			}
+
+			public override ulong? Max
+			{
+				get { return MaxValue; }
+			}
+		}
+
+		public class Ipv4Define : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Ipv4; }
+			}
+		}
+
+		public class Ipv6Define : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Ipv6; }
+			}
+		}
+
+		public class HwaddrDefine : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Hwaddr; }
+			}
+		}
+
+		public class IfaceDefine : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Iface; }
+			}
+		}
+
+		public class StrategyDefine : Define
+		{
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Enum; }
+			}
+
+			public override string[] Defaults
+			{
+				get
+				{
+					return ClassLoader
+						.GetAllByAttribute<MutationStrategyAttribute>(null)
+						.Select(kv => kv.Key)
+						.Where(k => k.IsDefault)
+						.Select(k => k.Name)
+						.ToArray();
+				}
+			}
+		}
+
+		public class EnumDefine : Define
+		{
+			[XmlIgnore]
+			public Type EnumType { get; private set; }
+
+			[XmlAttribute("enumType")]
+			public string EnumTypeName
+			{
+				get
+				{
+					return EnumType != null ? EnumType.FullName : null;
+				}
+				set
+				{
+					if (value == null)
+					{
+						EnumType = null;
+						return;
+					}
+
+					foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+					{
+						EnumType = asm.GetType(value);
+						if (EnumType != null)
+							return;
+					}
+
+					throw new ArgumentException();
+				}
+			}
+
+			public override WebServices.Models.ConfigType ConfigType
+			{
+				get { return WebServices.Models.ConfigType.Enum; }
+			}
+
+			public override string[] Defaults
+			{
+				get
+				{
+					return Enum.GetNames(EnumType);
+				}
+			}
+		}
+
+		#endregion
+
+		#region Platforms
 
 		public abstract class Collection
 		{
@@ -60,7 +205,15 @@ namespace Peach.Enterprise
 
 			public abstract Peach.Core.Platform.OS Platform { get; }
 
-			[XmlElement("Define")]
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
 			public List<Define> Defines { get; set; }
 		}
 
@@ -112,6 +265,10 @@ namespace Peach.Enterprise
 			}
 		}
 
+		#endregion
+
+		#region Public Members
+
 		public PitDefines()
 		{
 			Platforms = new List<Collection>();
@@ -125,53 +282,35 @@ namespace Peach.Enterprise
 		[XmlElement("All", Type = typeof(All))]
 		public List<Collection> Platforms { get; set; }
 
-		public static PitDefines Deserialize(string inputUri)
-		{
-			return Deserialize(XmlReader.Create(inputUri));
-		}
+		#endregion
 
-		public static PitDefines Deserialize(System.IO.Stream stream)
-		{
-			return Deserialize(XmlReader.Create(stream));
-		}
-
-		public static PitDefines Deserialize(System.IO.TextReader textReader)
-		{
-			return Deserialize(XmlReader.Create(textReader));
-		}
-
-		public static PitDefines Deserialize(XmlReader xmlReader)
-		{
-			var s = new XmlSerializer(typeof(PitDefines));
-			var o = s.Deserialize(xmlReader);
-			var r = (PitDefines)o;
-
-			return r;
-		}
+		#region Parse
 
 		public static List<Define> Parse(string inputUri)
 		{
-			return Parse(XmlReader.Create(inputUri));
+			return Parse(XmlTools.Deserialize<PitDefines>(inputUri));
 		}
 
 		public static List<Define> Parse(System.IO.Stream stream)
 		{
-			return Parse(XmlReader.Create(stream));
+			return Parse(XmlTools.Deserialize<PitDefines>(stream));
 		}
 
 		public static List<Define> Parse(System.IO.TextReader textReader)
 		{
-			return Parse(XmlReader.Create(textReader));
+			return Parse(XmlTools.Deserialize<PitDefines>(textReader));
 		}
 
-		public static List<Define> Parse(XmlReader xmlReader)
+		private static List<Define> Parse(PitDefines defs)
 		{
-			var defs = Deserialize(xmlReader);
+			var os = Platform.GetOS();
 
 			return defs.Platforms
-				.Where(a => a.Platform.HasFlag(Peach.Core.Platform.GetOS()))
+				.Where(a => a.Platform.HasFlag(os))
 				.SelectMany(a => a.Defines)
 				.ToList();
 		}
+
+		#endregion
 	}
 }
