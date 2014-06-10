@@ -55,8 +55,6 @@ namespace Peach.Core.Runtime
 		// PUT THIS INTO YOUR PROGRAM
 		////public static int Run(string[] args)
 		////{
-		////    Peach.Core.AssertWriter.Register();
-
 		////    return new Program(args).exitCode;
 		////}
 
@@ -78,6 +76,7 @@ namespace Peach.Core.Runtime
 			{
 				// Need to reset configuration to null for NLog 2.0 on mono
 				// so we don't hang on exit.
+				LogManager.Flush();
 				LogManager.Configuration = null;
 				return;
 			}
@@ -102,12 +101,13 @@ namespace Peach.Core.Runtime
 			LogManager.Configuration = nconfig;
 		}
 
-		public OrderedDictionary<string, string> DefinedValues = new OrderedDictionary<string, string>();
-		public Peach.Core.Dom.Dom dom;
+		protected OrderedDictionary<string, string> DefinedValues = new OrderedDictionary<string, string>();
+
+		protected Dom.Dom dom;
+
+		protected RunConfiguration config = new RunConfiguration();
 
 		public int exitCode = 1;
-
-		protected RunConfiguration config = null;
 
 		/// <summary>
 		/// Copyright message
@@ -130,12 +130,15 @@ namespace Peach.Core.Runtime
 		/// </summary>
 		public virtual bool ErrorOnArchitecture { get { return true; } }
 
+		static Program()
+		{
+			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+			Peach.Core.AssertWriter.Register();
+		}
+
 		public Program(string[] args)
 		{
-			AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_DomainUnload);
-			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
-			config = new RunConfiguration();
-			config.debug = 0;
+			config.commandLine = args;
 
 			try
 			{
@@ -189,6 +192,12 @@ namespace Peach.Core.Runtime
 
 				if (extra.Count == 0 && agent == null && analyzer == null)
 					Syntax();
+
+				if (extra.Count > 0)
+					config.pitFile = extra[0];
+
+				if (extra.Count > 1)
+					config.runName = extra[1];
 
 				Platform.LoadAssembly();
 
@@ -272,30 +281,17 @@ namespace Peach.Core.Runtime
 					ConsoleWatcher.WriteInfoMark();
 					Console.Write("Validating file [" + extra[0] + "]... ");
 					Analyzer.defaultParser.asParserValidation(parserArgs, extra[0]);
-
-					if (Type.GetType("Mono.Runtime") != null)
-						Console.WriteLine("File parsed successfully, but XSD validation is not supported on the Mono runtime.");
-					else
-						Console.WriteLine("No Errors Found.");
-
+					Console.WriteLine("No Errors Found.");
 					return;
 				}
 
-				Engine e = new Engine(GetUIWatcher());
-				dom = GetParser(e).asParser(parserArgs, extra[0]);
-				config.pitFile = extra[0];
+				dom = GetParser().asParser(parserArgs, config.pitFile);
 
 				// Used for unittests
 				if (parseOnly)
 					return;
 
-				foreach (string arg in args)
-					config.commandLine += arg + " ";
-
-				if (extra.Count > 1)
-					config.runName = extra[1];
-
-				e.startFuzzing(dom, config);
+				RunEngine();
 
 				exitCode = 0;
 			}
@@ -324,9 +320,11 @@ namespace Peach.Core.Runtime
 			}
 		}
 
-		protected static void CurrentDomain_DomainUnload(object sender, EventArgs e)
+		protected virtual void RunEngine()
 		{
-			Console.ForegroundColor = DefaultForground;
+			var e = new Engine(GetUIWatcher());
+
+			e.startFuzzing(dom, config);
 		}
 
 		/// <summary>
@@ -633,7 +631,7 @@ Debug Peach XML File
 			return new ConsoleWatcher();
 		}
 
-		protected virtual Analyzer GetParser(Engine engine)
+		protected virtual Analyzer GetParser()
 		{
 			return Analyzer.defaultParser;
 		}
