@@ -29,6 +29,13 @@ namespace Peach.Enterprise.WebServices
 
 	internal class Bootstrapper : DefaultNancyBootstrapper
 	{
+		WebLogger logger;
+
+		public Bootstrapper(WebLogger logger)
+		{
+			this.logger = logger;
+		}
+
 		//protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
 		//{
 		//	this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
@@ -41,6 +48,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			container.Register<JsonSerializer, CustomJsonSerializer>();
 			container.Register<JsonNetSerializer>();
+			container.Register<WebLogger>(logger);
 			container.Register<PitService>();
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
@@ -79,11 +87,14 @@ namespace Peach.Enterprise.WebServices
 		NancyHost host;
 
 		public Uri Uri { get; private set; }
+		public WebLogger Logger { get; private set; }
 
 		public WebService()
 		{
 			Uri = new Uri("http://localhost:8888");
-			bootstrapper = new Bootstrapper();
+			Logger = new WebLogger();
+
+			bootstrapper = new Bootstrapper(Logger);
 			config = new HostConfiguration()
 			{
 				UrlReservations = new UrlReservations()
@@ -110,6 +121,7 @@ namespace Peach.Enterprise.WebServices
 			config = null;
 			bootstrapper = null;
 			Uri = null;
+			Logger = null;
 		}
 
 		public static int Run(string[] args)

@@ -178,7 +178,6 @@ namespace Peach.Enterprise.Test
 				Assert.NotNull(ex);
 			}
 		}
-
 	}
 
 

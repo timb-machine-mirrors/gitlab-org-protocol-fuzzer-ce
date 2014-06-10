@@ -36,6 +36,6 @@ namespace Peach.Enterprise.WebServices.Models
 
 		public DateTime Timestamp { get; set; }
 
-		public Job Job { get; set; }
+		public string JobUrl { get; set; }
 	}
 }
