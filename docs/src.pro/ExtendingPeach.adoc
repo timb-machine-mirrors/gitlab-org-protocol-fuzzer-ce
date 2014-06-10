@@ -19,6 +19,7 @@ This section will cover the most common types of extensions to Peach.
 === Peach Plugins
 
 When using Peach with custom/proprietary targets it often required to extend the functionality of peach with plugins.
+
 Peach is typically extended with custom implementations of Fixups, Transformers, Publishers and Monitors.
 All extensions follow the same paradigm.  First, create a C# class that derives from the appropriate peach base class.
 Second, decorate the class with the appropriate plugin attribute.
@@ -27,6 +28,10 @@ When Peach runs, it will automatically reflect all assemblies to get the list of
 
 To see a list of all detected plugins and their parameters, run 'peach --showenv'.
 
+=== Examples
+
+.Fixup
+==========================
 This example shows the class definition for a custom fixup called "MyFixup".
 
 [source,c#]
@@ -37,6 +42,8 @@ public class MyFixup : Peach.Core.Fixup
 }
 ----
 
+.Transformer
+==========================
 This example shows the class definition for a custom transformer called "MyTransformer".
 
 [source,c#]
@@ -47,6 +54,8 @@ public class MyTransformer : Peach.Core.Transformer
 }
 ----
 
+.Publisher
+==========================
 This example shows the class definition for a custom publisher called "MyPublisher".
 
 [source,c#]
@@ -57,6 +66,8 @@ public class MyPublisher : Peach.Core.Publisher
 }
 ----
 
+.Monitor
+==========================
 This example shows the class definition for a custom monitor called "MyMonitor".
 
 [source,c#]
@@ -67,9 +78,10 @@ public class MyMonitor : Peach.Core.Monitor
 }
 ----
 
-All plugins take a C# dictionary as a construction argument.
-This dictionary of arguments is populated with the names and values of the Param elements defined in the pit.
-This example shows the arguments in the constructor of the JsEncode transformer.
+Peach plugins take a C# dictionary as a construction argument.
+This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
+
+This example shows the arguments in the JsEncode transformer constructor.
 
 [source,c#]
 ----
@@ -83,12 +95,13 @@ public class JsEncode : Transformer
 }
 ----
 
-Peach plugins define all of their supported configuration arguments by decorating the plugin class with the ParameterAttribute.
-The ParameterAttribute defines the name, type, description and optional default value of each plugin parameter.
+Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
+
 The name and type specified in the ParameterAttribute must match a public property on the plugin class.
-If the name parameter happens to be a C# reserved keyword, the associated class property is prefixed with an underscore.
-If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
-Lastly, the default value is always provided as a string, regardless of the type of the parameter.
+
+If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
+
+The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
 
 This example shows the ParameterAttribute usage.
 
@@ -112,7 +125,8 @@ public class MyTransformer : Transformer
 }
 ----
 
-The ParameterParser.Parse() method is used to automatically populate all plugin properties from the dictionary of arguments.
+ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
+
 When populating the properties, type conversion is done to convert from the string specified in the pit to the concrete type defined in the plugin.
 When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
 
@@ -131,10 +145,10 @@ General Peach plugin best practices:
  * Avoid using large arrays of contiguous data
  * Validate parameter types in the plugin constructors
  * Provide useful error messages
- * Throw PeachException() when non-recoverable errors occur
+ * Throw PeachException() when non-recoverable errors occur such as:
  ** Parameter is out of range
  ** User lacks appropriate permissions
- * Throw SoftException when recoverable errors occur
+ * Throw SoftException when recoverable errors occur such as:
  ** File in use
  ** Error starting process
  ** Socket connection refused
