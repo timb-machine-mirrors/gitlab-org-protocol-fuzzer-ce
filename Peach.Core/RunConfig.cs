@@ -79,11 +79,6 @@ namespace Peach.Core
 		public int debug = 0;
 
 		/// <summary>
-		/// Fuzzing strategy to use
-		/// </summary>
-		public MutationStrategy strategy = null;
-
-		/// <summary>
 		/// Name of run to perform
 		/// </summary>
 		public string runName = "Default";
