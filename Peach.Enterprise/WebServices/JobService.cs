@@ -21,6 +21,7 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}"] = _ => GetJob(_.id);
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
+			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
 		}
 
 		Job[] GetJobs()
@@ -73,6 +74,20 @@ namespace Peach.Enterprise.WebServices
 				}
 
 				return new object[0];
+			}
+		}
+
+		Visualizer GetVisualizer(string id)
+		{
+			lock (logger)
+			{
+				if (logger.JobGuid != id)
+				{
+					Context.Response.StatusCode = HttpStatusCode.NotFound;
+					return null;
+				}
+
+				return logger.Visualizer;
 			}
 		}
 
