@@ -18,17 +18,21 @@ This section will cover the most common types of extensions to Peach.
 [[Extend_Plugins]]
 === Peach Plugins
 
-When using Peach with custom/proprietary targets it often required to extend the functionality of peach with plugins.
+If you have custom/proprietary targets, you may need to extend Peach's functionality by using plugins. 
 
-Peach is typically extended with custom implementations of Fixups, Transformers, Publishers and Monitors.
-All extensions follow the same paradigm.  First, create a C# class that derives from the appropriate peach base class.
-Second, decorate the class with the appropriate plugin attribute.
-Finally, compile the class into an assembly and place the assembly in the Peach directory.
-When Peach runs, it will automatically reflect all assemblies to get the list of Fixups, Transformers, Publishers and Monitors.
+Peach uses custom implementations of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers],and xref:Monitors[Monitors]Monitors to extend its functionality.
+
+All extensions follow the same paradigm:
+-- 
+. Create a C# class that derives from the appropriate Peach base class.
+. Decorate the class with the appropriate plugin attribute.
+. Compile the class into an assembly and place the assembly in the Peach directory.
+--
+When Peach runs, it will automatically reflect all assemblies to get the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers],and xref:Monitors[Monitors]Monitors.
 
 To see a list of all detected plugins and their parameters, run 'peach --showenv'.
 
-=== Examples
+==== Examples
 
 .Fixup
 ==========================
