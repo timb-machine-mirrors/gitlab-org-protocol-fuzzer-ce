@@ -189,7 +189,10 @@ class PeachTest:
 
     def clean_up(self):
         if "proc" in self.__dict__ and self.proc.poll():
-            self.proc.terminate()
+            try:
+                self.proc.terminate()
+            except OSError:
+                pass # if the pid disappears it can throw
         if "stderr" in self.__dict__:
             del(self.stderr)
         if "stdout" in self.__dict__:
