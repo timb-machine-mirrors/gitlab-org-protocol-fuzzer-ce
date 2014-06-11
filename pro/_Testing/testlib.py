@@ -156,8 +156,7 @@ class PeachTest:
                 self.status = "fail"
             else:
                 self.status = "pass"
-        if self.status == "fail":
-            self.log_output()
+        # if self.status == "fail": self.log_output()
         if self.teardown:
             self.teardown()
         sys.stdout.flush()
