@@ -17,20 +17,21 @@
 			"type": "choice",
 			"key":"IsLocal",
 			"choice": [
-				{ "value":true,	"a": "From local machine.",	"next":4 },
-				{ "value":false, "a": "From remote machine.","next":2 }
+				{ "value":true,	"a": "From a local machine.",	"next":4 },
+				{ "value":false, "a": "From remote machine.","next":2 },
+				{ "a": "Do not perform data collection." }
 			]
 		},
 		{
 			"id":2,
-			"q": "What is the hostname or IP address of the remote machine that will perform collection?",
+			"q": "What is the remote machine hostname or IP address?",
 			"type": "string",
-			"key": "HostName",
+			"key": "AgentUrl",
 			"next": 3
 		},
 		{
 			"id":3,
-			"q":"What is the operating system of the remote machine that will perform collection?",
+			"q":"What is the remote machine operating system?",
 			"type":"choice",
 			"key":"OS",
 			"choice":[
@@ -63,14 +64,14 @@
 		},
 		{
 			"id":4100,
-			"q": "What is the network device to perform the network capture on?",
+			"q": "Which network device will do the network capture?",
 			"type":"interface",
 			"key":"PcapDevice",
 			"next":4101
 		},
 		{
 			"id":4101,
-			"q":"Optionally, provide a PCAP filter rule to limit the network traffic collected. If no filter is provided, all traffic will be collected. A guide to writing PCAP filter rules is available at http://google.com/?q=pcap+filter.",
+			"q":"Provide a PCAP filter rule to limit the network traffic collected (optional). If no filter is provided, all traffic will be collected. A guide to writing PCAP filter rules is available at http://google.com/?q=pcap+filter.",
 			"type":"string",
 			"required": false,
 			"key":"PcapFilter"
@@ -83,14 +84,14 @@
 		},
 		{
 			"id":4300,
-			"q":"What is the remote host that will be connected to using SSH? Enter the hostname or IP address.",
+			"q":" Enter the SSH remote host hostname or IP address.",
 			"type":"string",
 			"key":"SshDownloaderHost",
 			"next":4301
 		},
 		{
 			"id":4301,
-			"q":"What username would you like to connect as? If this field is left blank, the current users username will be used.",
+			"q":"What username would you like to use? If this field is left blank, Peach will use the current users username.",
 			"type":"string",
 			"required":false,
 			"key":"SshDownloaderUsername",
@@ -98,7 +99,7 @@
 		},
 		{
 			"id":4302,
-			"q":"What type of authentication should be used?",
+			"q":"What is the authentication type?",
 			"type":"choice",
 			"choice":[
 				{"value": 0, "a":"Password authentication.", "next": 4310},
@@ -107,7 +108,7 @@
 		},
 		{
 			"id":4310,
-			"q":"Enter the password to use for authenticating to the remote host.",
+			"q":"Enter the remote host authentication password.",
 			"type":"string",
 			"required": false,
 			"key":"SshDownloaderPassword",
@@ -115,7 +116,7 @@
 		},
 		{
 			"id":4320,
-			"q":"Enter full path to private key file to use for authentication to the remote host.",
+			"q":"Enter the full private key file pathname that Peach will use to authenticate the remote host.",
 			"type":"string",
 			"required": false,
 			"key":"SshDownloaderKeyPath",
@@ -123,7 +124,7 @@
 		},
 		{
 			"id":4330,
-			"q":"Would you like to download a single file, or a folder of files?",
+			"q":"Would you like to download a single file or a folder of files?",
 			"type":"choice",
 			"choice":[
 				{"value": 0, "a":"Download a single file.", "next":4340},
@@ -132,7 +133,7 @@
 		},
 		{
 			"id":4340,
-			"q":"Enter the filename with full path to download.",
+			"q":"Enter the filename (full pathname) to download.",
 			"type":"string",
 			"required": false,
 			"key":"SshDownloaderFile",
@@ -140,44 +141,39 @@
 		},
 		{
 			"id":4350,
-			"q":"Enter the folder to download.",
+			"q":"Enter the download folder name.",
 			"type":"string",
 			"required": false,
 			"key":"SshDownloaderFolder"
 		},
 		{
 			"id":4360,
-			"q":"Should the file be removed after being downloaded?",
+			"q":"Should Peach remove the file after it's downloaded?",
 			"type":"choice",
 			"key":"SshDownloaderRemove",
 			"choice":[
 				{"value":true, "a":"Yes, remove the file after downloading it." },
-				{"a":"No, do not remove the file.", "value": false}
+				{"value": false, "a":"No, do not remove the file."}
 				]
 		}
 	],
 	"monitors": [
-		{
-			"monitorClass": "Agent",
-			"path": [ 0 ],
-			"map": [
-				{"key":"AgentUrl", "param":"location" }
-				]
-		},
 		{
 			"monitorClass":"Pcap",
 			"path": [ 4100 ],
 			"map":[
 				{"key":"PcapDevice", "param":"Device"},
 				{"key":"PcapFilter", "param":"Filter"}
-				]
+				],
+			"description":"Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}."
 		},
 		{
 			"monitorClass":"SaveFile",
 			"path":[ 4200 ],
 			"map":[
 				{"key":"SaveFileFilename", "param":"Filename" }
-				]
+				],
+			"description":  "Save file at {SaveFilename}."
 		},
 		{
 			"monitorClass":"SshDownloader",
@@ -190,7 +186,8 @@
 				{"key":"SshDownloaderFile", "param":"File" },
 				{"key":"SshDownloaderFolder", "param":"Folder" },
 				{"key":"SshDownloaderRemove", "param":"Remove" }
-			]
+			],
+			"description": "Download file {SshDownloaderFile} in folder {SshDownloaderFolder} on host {SshDownloaderHost}"
 		}
 	]
 }
