@@ -179,15 +179,6 @@ if __name__ == "__main__":
             elif test.status == "fail" or test.status == "except":
                 print "Ran: ", test.args
                 print "...and it " + test.color_text("red", "FAILED!")
-                had_pre_exe_err = not hasattr(test, 'output_dir')
-                if had_pre_exe_err:
-                    print 'Threw an exception before making output dir and' \
-                        + ' running Popen for this test'
-                else:
-                    with open(os.path.join(test.output_dir, 'sout')) as f:
-                        for line in f: print line
-                    with open(os.path.join(test.output_dir, 'serr')) as f:
-                        for line in f: print line
                 print ''
             elif test.status == "timeout":
                 print "...and it " + test.color_text("yellow", "TIMEDOUT!")

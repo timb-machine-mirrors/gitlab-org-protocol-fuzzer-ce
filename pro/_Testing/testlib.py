@@ -130,11 +130,7 @@ class PeachTest:
         self.cmd = self._show_cmd()
         print "===---===---=== running %s" % self.cmd
         sys.stdout.flush()
-        self.output_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
         timeout_counter = 0
-        if os.path.exists(self.output_dir):
-            shutil.rmtree(self.output_dir)
-        os.mkdir(self.output_dir)
         # execution should live inside of a 'with'
         self.proc = Popen(self.args, env=self.env)
         if self.timeout > 0:
