@@ -22,18 +22,15 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}"] = _ => GetNode(_.id);
 		}
 
-		Node[] GetNodes()
+		object GetNodes()
 		{
 			return new[] { MakeNode() };
 		}
 
-		Node GetNode(string id)
+		object GetNode(string id)
 		{
 			if (id != logger.NodeGuid)
-			{
-				Context.Response.StatusCode = HttpStatusCode.NotFound;
-				return null;
-			}
+				return HttpStatusCode.NotFound;
 
 			return MakeNode();
 		}

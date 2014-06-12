@@ -16,27 +16,29 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
 		}
 
-		Pit[] GetPits()
+		object GetPits()
 		{
 			var db = new PitDatabase(".");
 			return db.Entries.ToArray();
 		}
 
-		Pit GetPit(string id)
+		object GetPit(string id)
 		{
 			var db = new PitDatabase(".");
 			var pit = db.GetPit(id);
 			if (pit == null)
-				Context.Response.StatusCode = HttpStatusCode.NotFound;
+				return HttpStatusCode.NotFound;
+
 			return pit;
 		}
 
-		PitConfig GetPitConfig(string id)
+		object GetPitConfig(string id)
 		{
 			var db = new PitDatabase(".");
 			var cfg = db.GetConfig(id);
 			if (cfg == null)
-				Context.Response.StatusCode = HttpStatusCode.NotFound;
+				return HttpStatusCode.NotFound;
+
 			return cfg;
 		}
 	}

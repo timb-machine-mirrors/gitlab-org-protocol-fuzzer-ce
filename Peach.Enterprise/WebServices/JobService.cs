@@ -24,7 +24,7 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
 		}
 
-		Job[] GetJobs()
+		object GetJobs()
 		{
 			lock (logger)
 			{
@@ -35,57 +35,45 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		Job GetJob(string id)
+		object GetJob(string id)
 		{
 			lock (logger)
 			{
 				if (logger.JobGuid != id)
-				{
-					Context.Response.StatusCode = HttpStatusCode.NotFound;
-					return null;
-				}
+					return HttpStatusCode.NotFound;
 
 				return MakeJob();
 			}
 		}
 
-		string[] GetNodes(string id)
+		object GetNodes(string id)
 		{
 			lock (logger)
 			{
 				if (logger.JobGuid != id)
-				{
-					Context.Response.StatusCode = HttpStatusCode.NotFound;
-					return null;
-				}
+					return HttpStatusCode.NotFound;
 
 				return new[] { NodeService.Prefix + "/" + logger.NodeGuid };
 			}
 		}
 
-		object[] GetFaults(string id)
+		object GetFaults(string id)
 		{
 			lock (logger)
 			{
 				if (logger.JobGuid != id)
-				{
-					Context.Response.StatusCode = HttpStatusCode.NotFound;
-					return null;
-				}
+					return HttpStatusCode.NotFound;
 
 				return new object[0];
 			}
 		}
 
-		Visualizer GetVisualizer(string id)
+		object GetVisualizer(string id)
 		{
 			lock (logger)
 			{
 				if (logger.JobGuid != id)
-				{
-					Context.Response.StatusCode = HttpStatusCode.NotFound;
-					return null;
-				}
+					return HttpStatusCode.NotFound;
 
 				return logger.Visualizer;
 			}
