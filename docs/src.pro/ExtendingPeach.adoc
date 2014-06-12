@@ -4,13 +4,13 @@
 // TODO - Analyzer
 // TODO - Logger
 
-{product} was designed to be extended, allowing the you to increase the capabilities of Peach in new ways. The most common reasons for extending Peach include: 
+{product} was designed to be extended, allowing  you to increase Peach's capabilities. The most common reasons for extending Peach include: 
 --
 * Custom validation algorithms (such as checksums) 
 * Custom publishers (I/O adapters), 
 * Monitoring
 --
-Peach allows you to write custom agents, loggers, strategies, analyzers, and strategies. 
+Peach allows you to write custom agents, loggers, analyzers, and strategies. 
 
 This section will cover the most common types of extensions to Peach.
 
@@ -18,9 +18,26 @@ This section will cover the most common types of extensions to Peach.
 [[Extend_Plugins]]
 === Peach Plugins
 
-If you have custom/proprietary targets, you may need to extend Peach's functionality by using plugins. 
+If your target has something in its data model that Peach does not support (like a custom checksum algorithm or a custom data format), you may need to extend Peach's functionality by using Peach plugins. 
 
-Peach uses custom implementations of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers],and xref:Monitors[Monitors]Monitors to extend its functionality.
+Peach plugins take a C# dictionary as a construction argument.
+This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
+
+This example shows the arguments in the JsEncode transformer constructor.
+
+[source,c#]
+----
+[Transformer("JsEncode")]
+public class JsEncode : Transformer
+{
+	public JsEncode(Dictionary<string, Variant> args)
+		: base(args)
+	{
+	}
+}
+----
+
+Peach uses custom implementations of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors] to extend its functionality.
 
 All extensions follow the same paradigm:
 -- 
@@ -28,9 +45,67 @@ All extensions follow the same paradigm:
 . Decorate the class with the appropriate plugin attribute.
 . Compile the class into an assembly and place the assembly in the Peach directory.
 --
-When Peach runs, it will automatically reflect all assemblies to get the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers],and xref:Monitors[Monitors]Monitors.
+When Peach runs, it will automatically reflect all assemblies to get the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors].
 
 To see a list of all detected plugins and their parameters, run 'peach --showenv'.
+
+Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
+
+The name and type specified in the ParameterAttribute must match a public property on the plugin class.
+
+If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
+
+The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
+
+This example shows the ParameterAttribute usage.
+
+[source,c#]
+----
+[Transformer("MyTransformer")]
+[Parameter("level", typeof(int), "Specifies the level, default: 9", "9")]
+[Parameter("class", typeof(string), "Specifies the class, required!")]
+public class MyTransformer : Transformer
+{
+	// Type matches typeof(int) in ParameterAttribute
+	public int level { get; set; }
+
+	// Name is '_class' since 'class' is a C# keyword
+	public string _class { get; set; }
+
+	public MyTransformer(Dictionary<string, Variant> args)
+		: base(args)
+	{
+	}
+}
+----
+
+ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
+
+When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
+When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
+
+This method uses reflection to:
+
+ * Enforce missing required parameters
+ * Initialize optional parameters from default value
+ * Type conversion from string to concrete type
+ * Validation on all type conversion
+ ** -100 is valid int
+ ** -100 is not a valid byte
+
+General Peach plugin best practices:
+
+ * Use stream operations whenever possible
+ * Avoid using large arrays of contiguous data
+ * Validate parameter types in the plugin constructors
+ * Provide useful error messages
+ * Throw PeachException() when non-recoverable errors occur such as:
+ ** Parameter is out of range
+ ** User lacks appropriate permissions
+ * Throw SoftException when recoverable errors occur such as:
+ ** File in use
+ ** Error starting process
+ ** Socket connection refused
 
 ==== Examples
 
@@ -80,83 +155,8 @@ This example shows the class definition for a custom monitor called "MyMonitor".
 public class MyMonitor : Peach.Core.Monitor
 {
 }
-----
-
-Peach plugins take a C# dictionary as a construction argument.
-This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
-
-This example shows the arguments in the JsEncode transformer constructor.
-
-[source,c#]
-----
-[Transformer("JsEncode")]
-public class JsEncode : Transformer
-{
-	public JsEncode(Dictionary<string, Variant> args)
-		: base(args)
-	{
-	}
-}
-----
-
-Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
-
-The name and type specified in the ParameterAttribute must match a public property on the plugin class.
-
-If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
-
-The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
-
-This example shows the ParameterAttribute usage.
-
-[source,c#]
-----
-[Transformer("MyTransformer")]
-[Parameter("level", typeof(int), "Specifies the level, default: 9", "9")]
-[Parameter("class", typeof(string), "Specifies the class, required!")]
-public class MyTransformer : Transformer
-{
-	// Type matches typeof(int) in ParameterAttribute
-	public int level { get; set; }
-
-	// Name is '_class' since 'class' is a C# keyword
-	public string _class { get; set; }
-
-	public MyTransformer(Dictionary<string, Variant> args)
-		: base(args)
-	{
-	}
-}
-----
-
-ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
-
-When populating the properties, type conversion is done to convert from the string specified in the pit to the concrete type defined in the plugin.
-When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
-
-This method uses reflection to:
-
- * Enforce missing required parameters
- * Initialize optional parameters from default value
- * Type conversion from string to concrete type
- * Validation on all type conversion
- ** -100 is valid int
- ** -100 is not a valid byte
-
-General Peach plugin best practices:
-
- * Use stream operations whenever possible
- * Avoid using large arrays of contiguous data
- * Validate parameter types in the plugin constructors
- * Provide useful error messages
- * Throw PeachException() when non-recoverable errors occur such as:
- ** Parameter is out of range
- ** User lacks appropriate permissions
- * Throw SoftException when recoverable errors occur such as:
- ** File in use
- ** Error starting process
- ** Socket connection refused
-
+---- 
+ 
 <<<
 [[Extend_Fixup]]
 === Fixup
