@@ -242,7 +242,9 @@ namespace PitTester
 			if (!File.Exists(testFile))
 				throw new FileNotFoundException();
 
+			var pitName = pitFile.Substring(libraryPath.Length + 1);
 
+			Peach.Enterprise.Test.PitTester.TestPit(libraryPath, pitName, testName);
 		}
 
 		static void VerifyPit(string fileName)

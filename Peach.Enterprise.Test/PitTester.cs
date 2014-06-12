@@ -24,13 +24,22 @@ namespace Peach.Enterprise.Test
 		{
 			public TestData()
 			{
-				Defines = new List<PitDefines.Define>();
+				Defines = new List<Define>();
 				Tests = new List<Test>();
 			}
 
 			public static TestData Parse(string fileName)
 			{
 				return XmlTools.Deserialize<TestData>(fileName);
+			}
+
+			public class Define
+			{
+				[XmlAttribute("key")]
+				public string Key { get; set; }
+
+				[XmlAttribute("value")]
+				public string Value { get; set; }
 			}
 
 			public class Test
@@ -208,16 +217,8 @@ namespace Peach.Enterprise.Test
 				}
 			}
 
-			[XmlElement("String", Type = typeof(PitDefines.StringDefine))]
-			[XmlElement("Hex", Type = typeof(PitDefines.HexDefine))]
-			[XmlElement("Range", Type = typeof(PitDefines.RangeDefine))]
-			[XmlElement("Ipv4", Type = typeof(PitDefines.Ipv4Define))]
-			[XmlElement("Ipv6", Type = typeof(PitDefines.Ipv6Define))]
-			[XmlElement("Hwaddr", Type = typeof(PitDefines.HwaddrDefine))]
-			[XmlElement("Iface", Type = typeof(PitDefines.IfaceDefine))]
-			[XmlElement("Strategy", Type = typeof(PitDefines.StrategyDefine))]
-			[XmlElement("Enum", Type = typeof(PitDefines.EnumDefine))]
-			public List<PitDefines.Define> Defines { get; set; }
+			[XmlElement("Define")]
+			public List<Define> Defines { get; set; }
 
 			[XmlElement("Test")]
 			public List<Test> Tests { get; set; }
@@ -443,7 +444,7 @@ namespace Peach.Enterprise.Test
 
 		#endregion
 
-		public static void TestPit(string pitLibrary, string pitName, string testName=null)
+		public static void TestPit(string pitLibrary, string pitName, string testName = null)
 		{
 			var fileName = Path.Combine(pitLibrary, pitName);
 
@@ -483,7 +484,7 @@ namespace Peach.Enterprise.Test
 			config.rangeStart = 0;
 			config.rangeStop = 1;
 			config.pitFile = Path.GetFileName(pitName);
-			config.runName = testName;
+			config.runName = testName ?? "Default";
 
 			var e = new Engine(null);
 
@@ -495,7 +496,7 @@ namespace Peach.Enterprise.Test
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
 					e.context.currentIteration,
-					e.context.config.randomSeed,
+					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
 			}
