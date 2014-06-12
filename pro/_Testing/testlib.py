@@ -7,7 +7,7 @@ import time
 
 from copy import copy
 from types import MethodType
-from subprocess import Popen, PIPE
+from subprocess import Popen
 if "win" in sys.platform.lower() and "darwin" not in sys.platform.lower():
     from win32com.shell import shell
 
@@ -93,7 +93,6 @@ class PeachTest:
             self.defines[k] = v
 
     def render_defines(self):
-        asopts = []
         for k, v in self.defines.iteritems():
             yield '-D'
             yield '%s=%s' % (k, v)
@@ -129,19 +128,10 @@ class PeachTest:
             self.setup()
         self.build_cmd()
         self.cmd = self._show_cmd()
-        print "running %s" % self.cmd
-        if get_platform() == 'win':
-            output = sys.stdout
-        else:
-            output = PIPE
-        self.output_dir = os.path.join('.', '_tmp_' + str(os.getpid()))
+        print "===---===---=== running %s" % self.cmd
+        sys.stdout.flush()
         timeout_counter = 0
-        if os.path.exists(self.output_dir):
-            shutil.rmtree(self.output_dir)
-        os.mkdir(self.output_dir)
         # execution should live inside of a 'with'
-        sout = open(os.path.join(self.output_dir, 'sout'), 'w+')
-        serr = open(os.path.join(self.output_dir, 'serr'), 'w+')
         self.proc = Popen(self.args, env=self.env)
         if self.timeout > 0:
             while (self.proc.poll() == None) and\
@@ -162,16 +152,10 @@ class PeachTest:
                 self.status = "fail"
             else:
                 self.status = "pass"
-        sout.seek(0)
-        serr.seek(0)
-        self.stdout = sout.read()
-        self.stderr = serr.read()
-        sout.close()
-        serr.close()
-        if self.status == "fail":
-            self.log_output()
+        # if self.status == "fail": self.log_output()
         if self.teardown:
             self.teardown()
+        sys.stdout.flush()
         self.clean_up()
 
     def log_output(self):
@@ -201,7 +185,10 @@ class PeachTest:
 
     def clean_up(self):
         if "proc" in self.__dict__ and self.proc.poll():
-            self.proc.terminate()
+            try:
+                self.proc.terminate()
+            except OSError:
+                pass # if the pid disappears it can throw
         if "stderr" in self.__dict__:
             del(self.stderr)
         if "stdout" in self.__dict__:
