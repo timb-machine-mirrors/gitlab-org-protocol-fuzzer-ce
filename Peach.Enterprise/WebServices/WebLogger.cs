@@ -222,12 +222,12 @@ namespace Peach.Enterprise.WebServices
 			vizDataStart.DataMutating(actionData, element);
 		}
 
-		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Core.Fault[] faultData)
 		{
 			// Caught fault, trying to reproduce
 		}
 
-		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Core.Fault[] faultData)
 		{
 			// Reproducable
 			++FaultCount;
