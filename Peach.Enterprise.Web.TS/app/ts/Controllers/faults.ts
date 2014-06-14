@@ -10,10 +10,6 @@ module DashApp {
 
 		constructor($scope, poller, peachService: Services.IPeachService) {
 
-			//peachService.GetPit((data: Pit) => {
-			//	$scope.pit = data;
-			//});
-
 			$scope.faults = [];
 			$scope.gridFaults = {
 				showGroupPanel: true,
@@ -30,13 +26,6 @@ module DashApp {
 				]
 			}
 
-			var faultResource = peachService.GetJobFaults();
-
-			var faultPoller = poller.get(faultResource);
-
-			faultPoller.promise.then(null, null, function (data) {
-				$scope.faults = data;
-			});
 
 		}
 	}

@@ -11,6 +11,7 @@ module DashApp {
 		private peachService: Services.IPeachService;
 		private modal: ng.ui.bootstrap.IModalService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
+		private poller: any;
 
 		//#region Public Properties
 		public get pit(): P.Pit {
@@ -19,8 +20,23 @@ module DashApp {
 			else
 				return undefined;
 		}
+
+		public get job(): P.Job {
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined)
+				return this.pitConfigSvc.Job;
+			else
+				return undefined;
+		}
+
+		public get disabledTooltip(): string {
+			if (this.job == undefined)
+				return "";
+			else
+				return "Disabled while running a Job";
+		}
+
 		public location: ng.ILocationService;
-		public job: P.Job;
+		
 		//#endregion
 
 
@@ -33,16 +49,18 @@ module DashApp {
 			this.peachService = peachService;
 			this.location = $location;
 			this.pitConfigSvc = pitConfiguratorService;
+			this.poller = poller;
 
-			var jobResource = peachService.GetJob();
-
-			var jobPoller = poller.get(jobResource);
-
-			jobPoller.promise.then(null, null, function (data) {
-				this.job = data;
+			this.peachService.GetJobs((data: P.Job[]) => {
+				if (data.length > 0) {
+					this.pitConfigSvc.Job = new P.Job(data[0]);
+				}
+				else {
+					this.showPitSelector();
+				}
 			});
 
-			this.showPitSelector();
+
 		}
 
 		public showPitSelector() {

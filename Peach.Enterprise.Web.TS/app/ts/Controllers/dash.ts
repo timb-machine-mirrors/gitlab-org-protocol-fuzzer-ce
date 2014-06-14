@@ -10,26 +10,27 @@ module DashApp {
 	export class DashController {
 		"use strict";
 
+		private pitConfigSvc: Services.IPitConfiguratorService;
 
-		public pit: P.Pit;
-		public faults: P.Fault[];
+		public get pit(): P.Pit {
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined)
+				return this.pitConfigSvc.Pit;
+			else
+				return undefined;
+		}
+
+		public get job(): P.Job {
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined)
+				return this.pitConfigSvc.Job;
+			else
+				return undefined;
+		}
 		
-		static $inject = ["$scope", "poller", "peachService"];
+		static $inject = ["$scope", "pitConfiguratorService"];
 
-		constructor($scope, poller, peachService: Services.IPeachService) {
-			
-			peachService.GetPit(1, (data: P.Pit) => {
-				$scope.pit = data;
-			});
-
-
-			var jobResource = peachService.GetJob();
-
-			var jobPoller = poller.get(jobResource);
-
-			jobPoller.promise.then(null, null, function (data) {
-				$scope.job = data;
-			});
+		constructor($scope: ViewModelScope, pitConfiguratorService: Services.IPitConfiguratorService) {
+			this.pitConfigSvc = pitConfiguratorService;
+			$scope.vm = this;
 		}
 	}
 }

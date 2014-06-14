@@ -10,3 +10,22 @@
 .hidden {
 	display: none;
 }
+
+.panel-title a {
+	cursor: pointer;
+}
+/*
+.disabled {
+	pointer-events: none;
+	cursor: not-allowed;
+	
+}
+*/
+
+.skin-1 .nav-list > li.disabled > a > .menu-text,
+.skin-1 .nav-list > li.disabled > a > i,
+.skin-1 .nav-list > li.disabled > a > .arrow {
+	color: #595D60;
+	cursor: not-allowed;
+}
+

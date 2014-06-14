@@ -10,7 +10,9 @@ module DashApp.Services {
 		GetDataQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetAutoQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
-		GetJob(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+		GetJobs(success: (data: P.Job[]) => void): void;
+		GetJob(jobUrl: string);
+
 		GetJobFaults(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
@@ -48,9 +50,22 @@ module DashApp.Services {
 		public GetAutoQA(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
 			return this.resource("../testdata/wizard_qa_auto.json");
 		}
+		
+		public GetJobs(success: (data: P.Job[]) => void): void {
+			this.http.get("/p/jobs").success((data) => success(<P.Job[]>data));
+		}
 
-		public GetJob(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource('/p/jobs/1');
+		public GetJob(jobUrl: string) {
+			return this.resource(jobUrl, {}, {
+				poll: {
+					method: "GET",
+					isArray: false, 
+					headers: {
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					}
+				}
+			});
 		}
 
 		public GetJobFaults(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
