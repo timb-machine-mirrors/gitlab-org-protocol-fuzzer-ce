@@ -166,14 +166,28 @@ public class MyMonitor : Peach.Core.Monitor
 [[Extend_Fixup]]
 === Fixup
 
-Fixups compute a value based on other elements.  Because of this, fixups have to track
-whenever a referenced element changes and recompute their value.
-For example, the Crc32 fixup needs to know whenever the referenced element changes so that
-a new crc can be computed.
-To accomplish this, all fixup implementations must tell the base Fixup class what
-parameters are to be treated as references to other data elements.
-Fixup implementations accomplish this by passing the names of their data element reference parameters as arguments to the base class constructor.
+Fixups compute a value based on other elements.  
 
+Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their value 
+(for example, the Crc32 fixup needs to know whenever the referenced element changes so that a new crc can be computed). Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
+
+Each fixup implementation needs to implement a single function: fixupImpl().
+This function returns the result of the fixup computation.
+
+It is important to maintain the element type information when returning results from a fixup.
+Data element type returned by the fixup should match the data element type of the resulting field (the only exception is a string can be the resulting field when the fixup element inputs a number).
+
+If the fixup evaluates to an integer, an int type should be returned.  Similarly, if the fixup evaluates to a string, a string type should be returned. This allows Peach to perform proper byte encoding when creating the final value for a data element.
+
+Because the Crc fixup returns its value in an unsigned integer type, Peach will output the bytes in the endianness defined on the parent data element.
+
+Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
+The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
+
+==== Examples
+
+.Single data element
+==========================
 This is an example of a fixup with a single data element reference.
 
 [source,c#]
@@ -190,6 +204,8 @@ public class CustomFixupOne : Fixup
 }
 ----
 
+.Multi-data element
+==========================
 This is an example of a fixup with three data element references.
 
 [source,c#]
@@ -208,18 +224,8 @@ public class CustomFixupThree : Fixup
 }
 ----
 
-Each fixup implementation needs to implement a single function: fixupImpl().
-This function returns the result of the fixup computation.
-It is important to maintain proper typing information when returning results from a fixup.
-If the fixup evaluates to an integer, an int type should be returned.  Similarly,
-if the fixup evaluates to a string, a string type should be returned.
-This allows Peach to perform proper byte encoding when creating the final value for a data element.
-Because the Crc fixup returns its value in an unsigned integer type, Peach will output
-the bytes in the endianness defined on the parent data element.
-
-Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
-The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
-
+.fixupImpl function
+==========================
 This is an example of the fixupImpl function of a Crc fixup.
 
 [source,c#]
