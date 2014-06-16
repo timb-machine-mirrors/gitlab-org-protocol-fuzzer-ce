@@ -1,67 +1,81 @@
 [[Extending]]
 == Extending Peach
 
+Peach uses custom implementations of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors] to extend its functionality.
+
+All extensions follow the same paradigm:
+-- 
+. Create a C# class that derives from the appropriate Peach base class.
+. Decorate the class with the appropriate plugin attribute.
+. Compile the class into an assembly and place the assembly in the Peach directory.
+--
+When Peach runs, it will automatically reflect all assemblies to get the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors].
+
 // TODO - Analyzer
 // TODO - Logger
 
-{product} was designed to be extended, allowing the end user increase the capabilities of Peach in new ways. The most common reasons for extending Peach include: custom validation algorithms such as checksums, custom publishers (I/O adapters), and monitoring. However, Peach also includes the ability to write custom agents, loggers, strategies, analyzers, and strategies. This section will cover the most common types of extensions to Peach.
+{product} was designed to be extended, allowing  you to increase Peach's capabilities. The most common reasons for extending Peach include: 
+--
+* Custom validation algorithms (such as checksums) 
+* Custom publishers (I/O adapters), 
+* Monitoring
+--
+Peach allows you to write custom agents, loggers, analyzers, and strategies. 
+
+This section will cover the most common types of extensions to Peach.
 
 <<<
 [[Extend_Plugins]]
 === Peach Plugins
 
-When using Peach with custom/proprietary targets it often required to extend the functionality of peach with plugins.
-Peach is typically extended with custom implementations of Fixups, Transformers, Publishers and Monitors.
-All extensions follow the same paradigm.  First, create a C# class that derives from the appropriate peach base class.
-Second, decorate the class with the appropriate plugin attribute.
-Finally, compile the class into an assembly and place the assembly in the Peach directory.
-When Peach runs, it will automatically reflect all assemblies to get the list of Fixups, Transformers, Publishers and Monitors.
+If your target has something in its data model that Peach does not support (like a custom checksum algorithm or a custom data format), you may need to extend Peach's functionality by using Peach plugins. 
+
+Peach plugins take a C# dictionary as a construction argument.
+This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
 
 To see a list of all detected plugins and their parameters, run 'peach --showenv'.
 
-This example shows the class definition for a custom fixup called "MyFixup".
+Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
 
-[source,c#]
-----
-[Fixup("MyFixup", true)]
-public class MyFixup : Peach.Core.Fixup
-{
-}
-----
+The name and type specified in the ParameterAttribute must match a public property on the plugin class.
 
-This example shows the class definition for a custom transformer called "MyTransformer".
+If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
 
-[source,c#]
-----
-[Transformer("MyTransformer", true)]
-public class MyTransformer : Peach.Core.Transformer
-{
-}
-----
+The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
 
-This example shows the class definition for a custom publisher called "MyPublisher".
+ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
 
-[source,c#]
-----
-[Publisher("MyPublisher", true)]
-public class MyPublisher : Peach.Core.Publisher
-{
-}
-----
+When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
+When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
 
-This example shows the class definition for a custom monitor called "MyMonitor".
+This method uses reflection to:
 
-[source,c#]
-----
-[Monitor("MyMonitor", true)]
-public class MyMonitor : Peach.Core.Monitor
-{
-}
-----
+ * Enforce missing required parameters
+ * Initialize optional parameters from default value
+ * Type conversion from string to concrete type
+ * Validation on all type conversion
+ ** -100 is valid int
+ ** -100 is not a valid byte
 
-All plugins take a C# dictionary as a construction argument.
-This dictionary of arguments is populated with the names and values of the Param elements defined in the pit.
-This example shows the arguments in the constructor of the JsEncode transformer.
+General Peach plugin best practices:
+
+ * Use stream operations whenever possible
+ * Avoid using large arrays of contiguous data
+ * Validate parameter types in the plugin constructors
+ * Provide useful error messages
+ * Throw PeachException() when non-recoverable errors occur such as:
+ ** Parameter is out of range
+ ** User lacks appropriate permissions
+ * Throw SoftException when recoverable errors occur such as:
+ ** File in use
+ ** Error starting process
+ ** Socket connection refused
+
+==== Examples
+
+.Transformer
+==========================
+This example shows the arguments in the JsEncode transformer constructor.
 
 [source,c#]
 ----
@@ -75,13 +89,21 @@ public class JsEncode : Transformer
 }
 ----
 
-Peach plugins define all of their supported configuration arguments by decorating the plugin class with the ParameterAttribute.
-The ParameterAttribute defines the name, type, description and optional default value of each plugin parameter.
-The name and type specified in the ParameterAttribute must match a public property on the plugin class.
-If the name parameter happens to be a C# reserved keyword, the associated class property is prefixed with an underscore.
-If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
-Lastly, the default value is always provided as a string, regardless of the type of the parameter.
 
+.Fixup
+==========================
+This example shows the class definition for a custom fixup called "MyFixup".
+
+[source,c#]
+----
+[Fixup("MyFixup", true)]
+public class MyFixup : Peach.Core.Fixup
+{
+}
+----
+
+.ParameterAttribute
+==========================
 This example shows the ParameterAttribute usage.
 
 [source,c#]
@@ -104,45 +126,68 @@ public class MyTransformer : Transformer
 }
 ----
 
-The ParameterParser.Parse() method is used to automatically populate all plugin properties from the dictionary of arguments.
-When populating the properties, type conversion is done to convert from the string specified in the pit to the concrete type defined in the plugin.
-When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
+.Transformer
+==========================
+This example shows the class definition for a custom transformer called "MyTransformer".
 
-This method uses reflection to:
+[source,c#]
+----
+[Transformer("MyTransformer", true)]
+public class MyTransformer : Peach.Core.Transformer
+{
+}
+----
 
- * Enforce missing required parameters
- * Initialize optional parameters from default value
- * Type conversion from string to concrete type
- * Validation on all type conversion
- ** -100 is valid int
- ** -100 is not a valid byte
+.Publisher
+==========================
+This example shows the class definition for a custom publisher called "MyPublisher".
 
-General Peach plugin best practices:
+[source,c#]
+----
+[Publisher("MyPublisher", true)]
+public class MyPublisher : Peach.Core.Publisher
+{
+}
+----
 
- * Use stream operations whenever possible
- * Avoid using large arrays of contiguous data
- * Validate parameter types in the plugin constructors
- * Provide useful error messages
- * Throw PeachException() when non-recoverable errors occur
- ** Parameter is out of range
- ** User lacks appropriate permissions
- * Throw SoftException when recoverable errors occur
- ** File in use
- ** Error starting process
- ** Socket connection refused
+.Monitor
+==========================
+This example shows the class definition for a custom monitor called "MyMonitor".
 
+[source,c#]
+----
+[Monitor("MyMonitor", true)]
+public class MyMonitor : Peach.Core.Monitor
+{
+}
+---- 
+ 
 <<<
 [[Extend_Fixup]]
 === Fixup
 
-Fixups compute a value based on other elements.  Because of this, fixups have to track
-whenever a referenced element changes and recompute their value.
-For example, the Crc32 fixup needs to know whenever the referenced element changes so that
-a new crc can be computed.
-To accomplish this, all fixup implementations must tell the base Fixup class what
-parameters are to be treated as references to other data elements.
-Fixup implementations accomplish this by passing the names of their data element reference parameters as arguments to the base class constructor.
+Fixups compute a value based on other elements.  
 
+Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their value 
+(for example, the Crc32 fixup needs to know whenever the referenced element changes so that a new crc can be computed). Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
+
+Each fixup implementation needs to implement a single function: fixupImpl().
+This function returns the result of the fixup computation.
+
+It is important to maintain the element type information when returning results from a fixup.
+Data element type returned by the fixup should match the data element type of the resulting field (the only exception is a string can be the resulting field when the fixup element inputs a number).
+
+If the fixup evaluates to an integer, an int type should be returned.  Similarly, if the fixup evaluates to a string, a string type should be returned. This allows Peach to perform proper byte encoding when creating the final value for a data element.
+
+Because the Crc fixup returns its value in an unsigned integer type, Peach will output the bytes in the endianness defined on the parent data element.
+
+Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
+The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
+
+==== Examples
+
+.Single data element
+==========================
 This is an example of a fixup with a single data element reference.
 
 [source,c#]
@@ -159,6 +204,8 @@ public class CustomFixupOne : Fixup
 }
 ----
 
+.Multi-data element
+==========================
 This is an example of a fixup with three data element references.
 
 [source,c#]
@@ -177,18 +224,8 @@ public class CustomFixupThree : Fixup
 }
 ----
 
-Each fixup implementation needs to implement a single function: fixupImpl().
-This function returns the result of the fixup computation.
-It is important to maintain proper typing information when returning results from a fixup.
-If the fixup evaluates to an integer, an int type should be returned.  Similarly,
-if the fixup evaluates to a string, a string type should be returned.
-This allows Peach to perform proper byte encoding when creating the final value for a data element.
-Because the Crc fixup returns its value in an unsigned integer type, Peach will output
-the bytes in the endianness defined on the parent data element.
-
-Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
-The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
-
+.fixupImpl function
+==========================
 This is an example of the fixupImpl function of a Crc fixup.
 
 [source,c#]
@@ -210,7 +247,7 @@ protected override Variant fixupImpl()
 	// Return the crc of data as a uint
 	return new Variant((uint)crcTool.crctablefast(data));
 }
-----
+-----
 
 <<<
 [[Extend_Monitor]]

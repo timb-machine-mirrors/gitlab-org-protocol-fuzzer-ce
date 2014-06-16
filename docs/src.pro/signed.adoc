@@ -15,13 +15,15 @@
 //  * Number
 //  * Setting default
 
-Defines if the number contains a signed value or not. Useful when parsing length data. 
+Defines if the number contains a signed value or not.  The default value is true. 
+
+_signed_ is useful when parsing length data. 
 
 // TODO
 
 === Examples: ===
 
-To indicate this is an unsigned data element set the signed attribute equal to "false". The default is true. 
+To indicate this is an unsigned data element set the signed attribute equal to "false".
 
 [source,xml]
 ----

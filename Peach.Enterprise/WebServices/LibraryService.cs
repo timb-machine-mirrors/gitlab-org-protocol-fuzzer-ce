@@ -15,18 +15,19 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}"] = _ => GetLibrary(_.id);
 		}
 
-		Library[] GetLibraries()
+		object GetLibraries()
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			return db.Libraries.ToArray();
 		}
 
-		Library GetLibrary(string id)
+		object GetLibrary(string id)
 		{
-			var db = new PitDatabase();
+			var db = new PitDatabase(".");
 			var lib = db.GetLibrary(id);
 			if (lib == null)
-				Context.Response.StatusCode = HttpStatusCode.NotFound;
+				return HttpStatusCode.NotFound;
+
 			return lib;
 		}
 	}

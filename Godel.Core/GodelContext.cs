@@ -14,9 +14,11 @@ namespace Godel.Core
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public string debugName;
+		public string debugName { get; set; }
+		public string type { get; set; }
 		public string name { get; set; }
-		public bool controlOnly { get; set; }
+		public string refName { get; set; }
+		public bool? controlOnly { get; set; }
 		public string inv { get; set; }
 		public string pre { get; set; }
 		public string post { get; set; }
@@ -82,7 +84,7 @@ namespace Godel.Core
 			if (code == null)
 				return;
 
-			if (controlOnly && !context.controlIteration)
+			if (controlOnly.GetValueOrDefault() && !context.controlIteration)
 			{
 				logger.Debug("Godel {0}: Ignoring control only. ({1})", dir, debugName);
 				return;

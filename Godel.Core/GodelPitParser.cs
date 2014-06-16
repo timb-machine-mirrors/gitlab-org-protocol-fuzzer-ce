@@ -18,64 +18,33 @@ namespace Godel.Core
 		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
 	}
 
+	[Serializable]
+	public class StateModel : Peach.Core.Dom.StateModel
+	{
+		[NonSerialized]
+		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
+	}
+
 	/// <summary>
 	/// Extension of PitParser to add Ocl into the mix!
 	/// </summary>
 	public class GodelPitParser : PitParser
 	{
-		private class GodelNode : INamed
-		{
-			public GodelNode(Peach.Core.Dom.Action action, XmlNode node)
-				: this("Action", string.Join(".", action.parent.parent.name, action.parent.name, action.name), node)
-			{
-			}
-
-			public GodelNode(Peach.Core.Dom.State state, XmlNode node)
-				: this("State", string.Join(".", state.parent.name, state.name), node)
-			{
-			}
-
-			public GodelNode(Peach.Core.Dom.StateModel stateModel, XmlNode node)
-				: this("StateModel", stateModel.name, node)
-			{
-			}
-
-			public GodelNode(XmlNode node)
-			{
-				this.type = "top level";
-				this.name = null;
-				this.node = node;
-			}
-
-			private GodelNode(string type, string name, XmlNode node)
-			{
-				this.type = string.Format("{0} '{1}'", type, name);
-				this.name = name;
-				this.node = node;
-			}
-
-			public string type { get; private set; }
-			public string name { get; private set; }
-			public XmlNode node { get; private set; }
-
-		}
-
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		NamedCollection<GodelNode> godelNodes;
-		Dictionary<string, GodelContext> topLevel;
-
-		public ExtendPeach ExtendPeach { get; set; }
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
 			return new Dom();
 		}
 
+		protected override Peach.Core.Dom.StateModel CreateStateModel()
+		{
+			return new StateModel();
+		}
+
 		protected override void handlePeach(Peach.Core.Dom.Dom dom, XmlNode node, Dictionary<string, object> args)
 		{
-			godelNodes = new NamedCollection<GodelNode>();
-			topLevel = new Dictionary<string, GodelContext>();
+			var godelDom = (Dom)dom;
 
 			base.handlePeach(dom, node, args);
 
@@ -83,71 +52,119 @@ namespace Godel.Core
 			{
 				if (child.Name == "Godel")
 				{
-					var name = child.getAttrString("name");
-					var godel = handleGodelNode(new GodelNode(child));
+					GodelContext godel;
+
+					var refName = child.getAttr("ref", null);
+					if (refName != null)
+					{
+						var other = godelDom.getRef<GodelContext>(refName, d => ((Dom)d).godel);
+						if (other == null)
+							throw new PeachException("Error, could not resolve top level <Godel> element ref attribute value '" + refName + "'.");
+
+						godel = ObjectCopier.Clone(other);
+					}
+					else
+					{
+						godel = new GodelContext();
+					}
+
+					godel.name = child.getAttrString("name");
+					godel.refName = child.getAttr("ref", godel.refName);
+					godel.controlOnly = child.getAttr("controlOnly", godel.controlOnly.GetValueOrDefault());
+					godel.inv = child.getAttr("inv", godel.inv);
+					godel.pre = child.getAttr("pre", godel.pre);
+					godel.post = child.getAttr("post", godel.post);
 
 					try
 					{
-						topLevel.Add(name, godel);
+						godelDom.godel.Add(godel);
 					}
 					catch (ArgumentException ex)
 					{
-						throw new PeachException("Error, a top level <Godel> element named '{0}' already exists.".Fmt(name), ex);
+						throw new PeachException("Error, a top level <Godel> element named '{0}' already exists.".Fmt(godel.name), ex);
 					}
 				}
 			}
 
-			var godelDom = (Dom)dom;
-			foreach (var item in godelNodes)
+			foreach (StateModel sm in godelDom.stateModels)
 			{
-				var godel = handleGodelNode(item);
-				godelDom.godel.Add(godel);
+				foreach (var item in sm.godel)
+				{
+					if (!string.IsNullOrEmpty(item.refName))
+					{
+						var other = godelDom.getRef<GodelContext>(item.refName, d => ((Dom)d).godel);
+						if (other == null)
+							throw new PeachException("Error, could not resolve " + item.debugName + " <Godel> element ref attribute value '" + item.refName + "'.");
 
-				logger.Debug("Attached godel node to {0}.", item.type);
+						item.inv = item.inv ?? other.inv;
+						item.pre = item.pre ?? other.pre;
+						item.post = item.post ?? other.post;
+
+						if (!item.controlOnly.HasValue)
+							item.controlOnly = other.controlOnly;
+					}
+					else
+					{
+						if (!item.controlOnly.HasValue)
+							item.controlOnly = false;
+					}
+
+					logger.Debug("Attached godel node to {0}.", item.debugName);
+				}
 			}
 
-			godelNodes = null;
-			topLevel = null;
+			// The PitParser changes the state model name to include the namespace
+			// when parsing <Test> so we need to update the names of our godel nodes.
+			foreach (var test in godelDom.tests)
+			{
+				var newList = new NamedCollection<GodelContext>();
+				var sm = (StateModel)test.stateModel;
+
+				foreach (var item in sm.godel)
+				{
+					var idx = item.name.IndexOf('.');
+					if (idx < 0)
+						item.name = sm.name;
+					else
+						item.name = sm.name + item.name.Substring(item.name.IndexOf('.'));
+
+					item.debugName = "{0} '{1}'".Fmt(item.type, item.name);
+
+					newList.Add(item);
+				}
+
+				// If the test uses a state model that has godel nodes,
+				// add the godel logger to the test.
+				if (newList.Count > 0)
+					test.loggers.Insert(0, new GodelLogger());
+
+				sm.godel = newList;
+			}
 		}
 
-		private GodelContext handleGodelNode(GodelNode node)
+		private void deferParse(StateModel sm, string fullName, XmlNode node)
 		{
-			GodelContext godel;
-
-			if (node.node.hasAttr("ref"))
+			var godel = new GodelContext()
 			{
-				string refName = node.node.getAttrString("ref");
+				debugName = "{0} '{1}'".Fmt(node.ParentNode.Name, fullName),
+				type = node.ParentNode.Name,
+				name = fullName,
+				refName = node.getAttr("ref", null),
+				inv = node.getAttr("inv", null),
+				pre = node.getAttr("pre", null),
+				post = node.getAttr("post", null),
+			};
 
-				GodelContext other;
-				if (!topLevel.TryGetValue(refName, out other))
-					throw new PeachException("Error, could not resolve " + node.type + " <Godel> element ref attribute value '" + refName + "'.");
+			if (node.hasAttr("controlOnly"))
+				godel.controlOnly = node.getAttr("controlOnly", false);
 
-				godel = ObjectCopier.Clone(other);
-			}
-			else
-			{
-				godel = new GodelContext();
-			}
-
-			godel.debugName = node.type;
-			godel.name = node.name;
-			godel.controlOnly = node.node.getAttr("controlOnly", godel.controlOnly);
-			godel.inv = node.node.getAttr("inv", godel.inv);
-			godel.pre = node.node.getAttr("pre", godel.pre);
-			godel.post = node.node.getAttr("post", godel.post);
-
-			return godel;
-		}
-
-		private void deferParse(GodelNode node)
-		{
 			try
 			{
-				godelNodes.Add(node);
+				sm.godel.Add(godel);
 			}
 			catch (ArgumentException ex)
 			{
-				throw new PeachException("Error, more than one <Godel> element specified on {0}.".Fmt(node.type), ex);
+				throw new PeachException("Error, more than one <Godel> element specified on {0}.".Fmt(godel.debugName), ex);
 			}
 		}
 
@@ -158,7 +175,10 @@ namespace Godel.Core
 			foreach (XmlNode child in node)
 			{
 				if (child.Name == "Godel")
-					deferParse(new GodelNode(action, child));
+				{
+					var fullName = string.Join(".", action.parent.parent.name, action.parent.name, action.name);
+					deferParse((StateModel)parent.parent, fullName, child);
+				}
 			}
 
 			return action;
@@ -171,7 +191,10 @@ namespace Godel.Core
 			foreach (XmlNode child in node)
 			{
 				if (child.Name == "Godel")
-					deferParse(new GodelNode(state, child));
+				{
+					var fullName = string.Join(".", state.parent.name, state.name);
+					deferParse((StateModel)parent, fullName, child);
+				}
 			}
 
 			return state;
@@ -184,7 +207,7 @@ namespace Godel.Core
 			foreach (XmlNode child in node)
 			{
 				if (child.Name == "Godel")
-					deferParse(new GodelNode(stateModel, child));
+					deferParse((StateModel)stateModel, stateModel.name, child);
 			}
 
 			return stateModel;

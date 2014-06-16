@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+deps = [
+	'NLog.dll',
+	'SharpPcap.dll',
+	'Peach.Core.dll',
+	'System.dll',
+	'System.Core.dll',
+	'System.Xml.dll',
+	'Godel.Core.dll',
+	'Peach.Enterprise.dll',
+	'Peach.Enterprise.Test.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name = 'PitTester.exe',
+	ide_path = 'Peach Enterprise',
+)

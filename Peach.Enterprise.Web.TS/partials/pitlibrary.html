@@ -4,8 +4,9 @@
 	</div>
 	<div class="modal-body">
 		<div kendo-tree-view="tree"
-				 k-data-source="vm.libraries"></div>
-		<!-- k-on-change="selectedPit = dataItem.url" -->
+			k-on-change="vm.selectedPit = dataItem.pitUrl"
+			k-data-source="vm.libraries">
+		</div>
 	</div>
 
 	<div class="modal-footer">
