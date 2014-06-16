@@ -19,22 +19,23 @@ namespace Peach.Enterprise.WebServices
 			this.logger = logger;
 
 			Post["/config"] = _ => PostConfig();
+			Post["/monitors"] = _ => PostMonitors();
+
+			// /test/start?pitUrl=xxxx -> return /test/{id}
+			// /test/{id}
+			// /test/{id}/raw
 		}
 
 		object PostConfig()
 		{
-			lock (logger)
-			{
-				if (logger.JobGuid != null)
-					return HttpStatusCode.Conflict;
+			/*var cfg = */this.Bind<PitConfig>();
+			return HttpStatusCode.OK;
+		}
 
-				var agents = this.Bind<List<Models.Agent>>();
-
-				if (agents.Count == 0)
-					return HttpStatusCode.ImATeapot;
-
-				return HttpStatusCode.OK;
-			}
+		object PostMonitors()
+		{
+			/*var monitors = */this.Bind<PitMonitors>();
+			return HttpStatusCode.OK;
 		}
 	}
 }

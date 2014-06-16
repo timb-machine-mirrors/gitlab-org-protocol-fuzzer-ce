@@ -22,6 +22,40 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
 			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
+
+			Post[""] = _ => CreateJob();
+
+			Get["/{id}/start"] = _ => StartJob(_.id);
+			Get["/{id}/pause"] = _ => PauseJob(_.id);
+			Get["/{id}/stop"] = _ => StopJob(_.id);
+		}
+
+		object CreateJob()
+		{
+			lock (logger)
+			{
+				if (logger.JobGuid != null)
+					return HttpStatusCode.Forbidden;
+
+				// Parse pit, create thread, run engine
+			}
+
+			return HttpStatusCode.OK;
+		}
+
+		object PauseJob(string id)
+		{
+			return HttpStatusCode.NotImplemented;
+		}
+
+		object StartJob(string id)
+		{
+			return HttpStatusCode.NotImplemented;
+		}
+
+		object StopJob(string id)
+		{
+			return HttpStatusCode.NotImplemented;
 		}
 
 		object GetJobs()
