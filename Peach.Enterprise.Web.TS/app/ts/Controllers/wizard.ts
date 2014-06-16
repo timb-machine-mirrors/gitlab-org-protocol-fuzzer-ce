@@ -47,7 +47,7 @@ module DashApp {
 			else
 				return undefined;
 		}
-		
+
 		public currentQuestion: W.Question;
 		public stepNum: number;
 
@@ -133,9 +133,9 @@ module DashApp {
 			};
 		}
 
-		public get FaultMonitors(): W.Agent[]{
+		public get FaultMonitors(): W.Agent{
 			if (this.pitConfigSvc != undefined)
-				return this.pitConfigSvc.FaultMonitors;
+				return this.pitConfigSvc.FaultMonitors[0];
 			else
 				return undefined;
 		}
@@ -216,6 +216,7 @@ module DashApp {
 		public next() {
 			if (this.currentQuestion == undefined) {
 				//if we're not on a question, get the 0th
+				this.questionPath = [];
 				this.currentQuestion = <W.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
 			}
 			else {
@@ -271,6 +272,7 @@ module DashApp {
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
 						case "auto":
+							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/auto-done.html";
 							break;
 					}
@@ -343,6 +345,12 @@ module DashApp {
 			this.resetStepClass();
 		}
 
+		public restartFaultDetection() {
+			this.pitConfigSvc.FaultMonitors = [];
+			this.currentQuestion = undefined;
+			this.resetStepClass();
+			this.next();
+		}
 
 		public submitSetVarsInfo() {
 			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
@@ -351,25 +359,21 @@ module DashApp {
 		}
 
 		public submitFaultInfo() {
-			this.pitConfigSvc.FaultMonitors = this.findMonitors();
 			WizardController._faultclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/data");
 		}
 
 		public addNewDataInfo() {
-			this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 			this.currentQuestion = undefined;
 			this.next();
 		}
 
 		public submitDataInfo() {
-			this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 			WizardController._dataclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/auto");
 		}
 
 		public submitAutoInfo() {
-			this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 			WizardController._autoclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/test");
 		}
@@ -454,7 +458,18 @@ module DashApp {
 				agent.agentUrl = "tcp://" + agent.agentUrl;
 
 			agent.monitors = foundMonitors;
-
+			
+			for (var i = 0; i < agent.monitors.length; i++) {
+				if (agent.monitors[i].description != undefined) {
+					agent.description += agent.monitors[i].description.replace(/\{\{|\}\}|\{(\w+)\}/g, (a, b) => {
+						if (b == "AgentUrl")
+							return agent.agentUrl;
+						else
+							return this.pitConfigSvc.StateBag.g(b);
+					}) + "\n";
+				}
+			}
+			
 			var agents: W.Agent[] = [];
 			agents.push(agent);
 

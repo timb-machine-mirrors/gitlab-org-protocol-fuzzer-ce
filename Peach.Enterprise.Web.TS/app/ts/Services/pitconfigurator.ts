@@ -7,6 +7,7 @@ module DashApp.Services {
 	
 
 	export interface IPitConfiguratorService {
+		Job: Models.Peach.Job;
 		Pit: Models.Peach.Pit;
 		QA: W.Question[];
 		StateBag: W.StateBag;
@@ -20,16 +21,45 @@ module DashApp.Services {
 		FaultMonitorsComplete: boolean;
 		DataMonitorsComplete: boolean;
 		AutoMonitorsComplete: boolean;
-
+		
 		ResetAll();
 		LoadData(data);
 	}
 
 	export class PitConfiguratorService implements IPitConfiguratorService {
+		private jobPoller;
+		private faultsPoller;
+		private pollerSvc;
+		private peachSvc: Services.IPeachService;
+
+		private POLLER_TIME = 5000;
+
+		constructor(poller, peachService: Services.IPeachService) {
+			this.pollerSvc = poller;
+			this.peachSvc = peachService;
+		}
 
 		public Pit: Models.Peach.Pit;
 		public QA: W.Question[] = [];
 		public Monitors: W.Monitor[] = [];
+
+		//#region Job
+		private _job: Models.Peach.Job;
+
+		public get Job(): P.Job {
+			return this._job;
+		}
+
+		public set Job(job: P.Job) {
+			if (this._job != job) {
+				this._job = job;
+				this.startJobPoller();
+				//this.startFaultsPoller();
+				this.getPitInfo();
+			}
+		}
+		//#endregion
+
 
 		//#region StateBag
 		private _stateBag: W.StateBag = new W.StateBag();
@@ -40,7 +70,7 @@ module DashApp.Services {
 
 		public set StateBag(stateBag: W.StateBag) {
 			if (this._stateBag != stateBag)
-				this.StateBag = stateBag;
+				this._stateBag = stateBag;
 		}
 		//#endregion
 
@@ -79,8 +109,9 @@ module DashApp.Services {
 		}
 
 		public set DataMonitors(monitors: W.Agent[]) {
-			if (this._dataMonitors != monitors)
+			if (this._dataMonitors != monitors) {
 				this._dataMonitors = monitors;
+			}
 		}
 		//#endregion
 
@@ -91,8 +122,9 @@ module DashApp.Services {
 		}
 
 		public set AutoMonitors(monitors: W.Agent[]) {
-			if (this._autoMonitors != monitors)
+			if (this._autoMonitors != monitors) {
 				this._autoMonitors = monitors;
+			}
 		}
 		//#endregion
 
@@ -139,5 +171,66 @@ module DashApp.Services {
 					this.Monitors = <W.Monitor[]>data.monitors;
 			}
 		}
+
+		private startJobPoller() {
+			var jobResource = this.peachSvc.GetJob(this.Job.jobUrl);
+			this.jobPoller = this.pollerSvc.get(jobResource, {
+				action: "poll",
+				delay: this.POLLER_TIME,
+				method: "GET"
+			});
+
+			this.jobPoller.promise.then(null, (e) => {
+					console.error(e);
+				}, (data: P.Job) => {
+					this.updateJob(data);
+				});
+		}
+
+		private updateJob(job: P.Job) {
+			this.Job.iterationCount = job.iterationCount;
+			this.Job.speed = job.speed;
+			this.Job.faultCount = job.faultCount;
+			this.Job.runtime = job.runtime;
+		}
+
+		//private startFaultsPoller() {
+		//	var faultsResource = this.peachSvc.GetJobFaults();
+		//	this.faultsPoller = this.pollerSvc.get(faultsResource, {
+		//		action: "poll",
+		//		delay: this.POLLER_TIME,
+		//		method: "GET"
+		//	});
+
+		//	this.faultsPoller.promise.then(null, (e) => {
+		//		console.error(e);
+		//	}, (data: P.Fault[]) => {
+		//			this.updateFaults(data);
+		//		});
+		//}
+
+		//private updateFaults(faults: P.Fault[]) {
+
+		//}
+
+		private getPitInfo() {
+			if (this.Pit == undefined || (this.Pit.name != this._job.name)) {
+				if (this._job.pitUrl.length > 0)
+					this.peachSvc.GetPit(this._job.pitUrl, (data: P.Pit) => {
+						if (data != undefined)
+							this.Pit = data;
+					});
+				else {
+					this.Pit = new P.Pit();
+					this.Pit.pitUrl = "";
+					var lastSlash = this._job.name.lastIndexOf("\\");
+					var period = this._job.name.lastIndexOf(".");
+					this.Pit.name = this._job.name.substring(lastSlash + 1, period);
+					this.Pit.description = "";
+					this.Pit.tags = [];
+				}
+			}
+		}
+
 	}
 }

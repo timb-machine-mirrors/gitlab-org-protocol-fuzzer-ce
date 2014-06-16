@@ -15,9 +15,9 @@ module DashApp {
 		constructor($scope, poller, peachService: Services.IPeachService) {
 
 			//$scope.pit = peachService.GetPit().query();
-			peachService.GetPit(1, (data: P.Pit) => {
-				$scope.pit = data;
-			});
+			//peachService.GetPit(1, (data: P.Pit) => {
+			//	$scope.pit = data;
+			//});
 
 			$scope.metrics_faultsOverTime_data = [
 				{ x: new Date(2014, 4, 5, 1, 1, 0, 1), y: 1 },

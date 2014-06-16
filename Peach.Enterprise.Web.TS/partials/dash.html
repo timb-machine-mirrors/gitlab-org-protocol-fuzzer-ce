@@ -15,36 +15,36 @@
 				<div class="col-sm-7 infobox-container">
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.startDate}}</span>
+							<span class="infobox-data-number">{{vm.job.startDate | date:'M/d/yy h:mma'}}</span>
 							<div class="infobox-content">Started</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.runtime}}</span>
-							<div class="infobox-content">Running</div>
+							<span class="infobox-data-number">{{vm.job.runtime}}s</span>
+							<div class="infobox-content">Running Time</div>
 						</div>
 
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.speed}}/hr</span>
+							<span class="infobox-data-number">{{vm.job.speed}}/hr</span>
 							<div class="infobox-content">Speed</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.seed}}</span>
+							<span class="infobox-data-number">{{vm.job.seed}}</span>
 							<div class="infobox-content">Seed</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.iterationCount}}</span>
+							<span class="infobox-data-number">{{vm.job.iterationCount}}</span>
 							<div class="infobox-content">Iterations</div>
 						</div>
 					</div>
@@ -59,7 +59,7 @@
 
 					<div class="infobox infobox-red  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{job.totalFaults}}</span>
+							<span class="infobox-data-number">{{vm.job.faultCount}}</span>
 							<div class="infobox-content">Total Faults</div>
 						</div>
 					</div>
@@ -226,6 +226,8 @@
 <script src="/Content/js/date-time/bootstrap-datepicker.min.js"></script>
 <script src="/Content/js/jqGrid/jquery.jqGrid.min.js"></script>
 <script src="/Content/js/jqGrid/i18n/grid.locale-en.js"></script>
+
+
 
 <script type="text/javascript" src="/Content/js/d3.min.js" charset="utf-8"></script>
 

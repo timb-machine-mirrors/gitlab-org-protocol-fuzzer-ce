@@ -21,7 +21,7 @@ module DashApp {
 		"LocalStorageModule",
 	])
 		.service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
-		.service("pitConfiguratorService", () => new Services.PitConfiguratorService())
+		.service("pitConfiguratorService", ["poller","peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
     .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
 
 			$routeProvider

@@ -257,7 +257,8 @@
 			"map": [
 				{ "key":"WinDbgExecutable", "param":"Executable" },
 				{ "key":"WinDbgPath", "param":"WinDbgPath"  }
-			]
+			],
+			"description": "Page Heap: {WinDbgExecutable} {WinDbgPath}"
 		},
 		{
 			"monitorClass":"WindowsDebugger",
@@ -268,11 +269,10 @@
 				{ "key":"WinDbgProcessName", "param":"ProcessName"  },
 				{ "key":"WinDbgService", "param":"Service" },
 				{ "key":"WinDbgPath", "param":"WinDbgPath" },
-				{ "key":"WinDbgStartOnCall", "param":"StartOnCall" },
-				{ "key":"WinDbgFaultOnEarlyExit", "param":"FaultOnEarlyExit" },
-				{ "key":"WinDbgRestartOnEachTest", "param":"RestartOnEachTest" },
+				{ "key":"WinDbgStart", "param":"WinDbgStart" },
 				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage" }
-			]
+			],
+			"description": "Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}"
 		},
 		{
 			"monitorClass":"Ping",
@@ -281,7 +281,8 @@
 				{ "key":"PingHost","param":"Host" },
 				{ "key":"PingFaultOnSuccess","param":"FaultOnSuccess" },
 				{ "key":"PingRetryCount","param":"RetryCount" }
-			]
+			],
+			"description": "Ping: {PingHost} {PingFaultOnSuccess} {PingRetryCount}"
 		},
 		{
 			"monitorClass":"LinuxDebugger",
@@ -293,12 +294,14 @@
 				{ "key":"RestartOnEachTest","param":"RestartOnEachTest" },
 				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" },
 				{ "key":"StartOnCall","param":"StartOnCall" }
-			]
+			],
+			"description": "Linux Debugger: {Executable} {Arguments} {LinuxDebugGdbPath} {RestartOnEachTest} {FaultOnEarlyExit} {StartOnCall}"
 		},
 		{
 			"monitorClass":"CrashReporter",
 			"path": [2000],
-			"map": []
+			"map": [],
+			"description": "Crash Reporter"
 		},
 		{
 			"monitorClass":"Process",
@@ -309,7 +312,8 @@
 				{ "key":"ProcessRestartOnEachTest","param":"RestartOnEachTest" },
 				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" },
 				{ "key":"ProcessStartOnCall",	"param":"StartOnCall" }
-			]
+			],
+			"description": "Process: {ProcessExecutable} {ProcessArguments} {ProcessRestartOnEachTest} {ProcessFaultOnEarlyExit} {ProcessStartOnCall}"
 		}
 	]
 
