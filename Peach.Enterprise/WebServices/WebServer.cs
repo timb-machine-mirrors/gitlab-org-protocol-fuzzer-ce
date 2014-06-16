@@ -53,6 +53,7 @@ namespace Peach.Enterprise.WebServices
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
 			container.Register<JobService>();
+			container.Register<FaultService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)

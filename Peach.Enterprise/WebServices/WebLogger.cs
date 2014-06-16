@@ -9,6 +9,11 @@ namespace Peach.Enterprise.WebServices
 {
 	public class WebLogger : Logger
 	{
+		Core.Fault[] reproFault;
+
+		List<FaultSummary> faults = new List<FaultSummary>();
+		Dictionary<string, FaultDetail> faultDetails = new Dictionary<string, FaultDetail>();
+
 		Visualizer visualizer; // Cached JSON data
 		VizData vizDataStart;  // Partial data, collecting during current iteration
 		VizData vizDataFinal;  // Complete data, collected during last iteration
@@ -140,6 +145,9 @@ namespace Peach.Enterprise.WebServices
 		public uint FaultCount { get; private set; }
 		public System.DateTime StartDate { get; private set; }
 
+		/// <summary>
+		/// Get the most recent visualizer snapshot.
+		/// </summary>
 		public Visualizer Visualizer
 		{
 			get
@@ -152,6 +160,36 @@ namespace Peach.Enterprise.WebServices
 					// Return the cached visualizer view
 					return visualizer;
 				}
+			}
+		}
+
+		/// <summary>
+		/// Get a list of the summary of all detected faults.
+		/// </summary>
+		public List<FaultSummary> Faults
+		{
+			get
+			{
+				lock (this)
+				{
+					// Return a copy of our list
+					return faults.ToList();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Get the details of a specific fault id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public FaultDetail GetFault(string id)
+		{
+			lock (this)
+			{
+				FaultDetail ret;
+				faultDetails.TryGetValue(id, out ret);
+				return ret;
 			}
 		}
 
@@ -193,6 +231,9 @@ namespace Peach.Enterprise.WebServices
 				visualizer = null;
 				vizDataStart = null;
 				vizDataFinal = null;
+
+				faults.Clear();
+				faultDetails.Clear();
 			}
 		}
 
@@ -225,18 +266,79 @@ namespace Peach.Enterprise.WebServices
 		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Core.Fault[] faultData)
 		{
 			// Caught fault, trying to reproduce
+			reproFault = faultData;
 		}
 
 		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Core.Fault[] faultData)
 		{
-			// Reproducable
-			++FaultCount;
+			// Caught fault
+			OnFault(context, faultData, reproFault);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
-			// Non-reproducable
-			++FaultCount;
+			// Could not reproduce fault
+			OnFault(context, reproFault, null);
+		}
+
+		void OnFault(RunContext context, Core.Fault[] faultData, Core.Fault[] initialData)
+		{
+			// Reset any pending fault we are trying to reproduce
+			reproFault = null;
+
+			var coreFault = faultData.First(f => f.type == FaultType.Fault);
+
+			var id = System.Guid.NewGuid().ToString();
+			var bucket = string.Join("_", new[] { coreFault.majorHash, coreFault.minorHash, coreFault.exploitability }.Where(s => !string.IsNullOrEmpty(s)));
+
+			if (coreFault.folderName != null)
+				bucket = coreFault.folderName;
+			else if (string.IsNullOrEmpty(bucket))
+				bucket = "Unknown";
+
+			var faultSummary = new FaultSummary()
+			{
+				FaultUrl = FaultService.Prefix + "/" + id,
+				Reproducable = initialData != null,
+				Iteration = coreFault.iteration,
+				TimeStamp = System.DateTime.UtcNow,
+				BucketName = bucket,
+				Source = coreFault.detectionSource,
+				Exploitability = coreFault.exploitability ?? "",
+				MajorHash = coreFault.majorHash ?? "",
+				MinorHash = coreFault.minorHash ?? "",
+			};
+
+			var faultDetail = new FaultDetail()
+			{
+				FaultUrl = faultSummary.FaultUrl,
+				Reproducable = faultSummary.Reproducable,
+				Iteration = faultSummary.Iteration,
+				TimeStamp = faultSummary.TimeStamp,
+				BucketName = faultSummary.BucketName,
+				Source = faultSummary.Source,
+				Exploitability = faultSummary.Exploitability,
+				MajorHash = faultSummary.MajorHash,
+				MinorHash = faultSummary.MinorHash,
+
+				NodeUrl = NodeService.Prefix + "/" + NodeGuid,
+				TargetUrl = "",
+				TargetConfigUrl = "",
+				PitUrl = "",
+				PeachUrl = "",
+				Title = coreFault.title,
+				Description = coreFault.description,
+				Seed = context.config.randomSeed,
+				Files = new List<File>(),
+			};
+
+			lock (this)
+			{
+				faults.Add(faultSummary);
+				faultDetails.Add(id, faultDetail);
+
+				++FaultCount;
+			}
 		}
 	}
 }

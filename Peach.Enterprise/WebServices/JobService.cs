@@ -64,7 +64,7 @@ namespace Peach.Enterprise.WebServices
 				if (logger.JobGuid != id)
 					return HttpStatusCode.NotFound;
 
-				return new object[0];
+				return logger.Faults;
 			}
 		}
 
