@@ -247,7 +247,7 @@ protected override Variant fixupImpl()
 	// Return the crc of data as a uint
 	return new Variant((uint)crcTool.crctablefast(data));
 }
-----
+-----
 
 <<<
 [[Extend_Monitor]]
