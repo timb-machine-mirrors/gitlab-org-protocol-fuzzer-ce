@@ -8,8 +8,10 @@ namespace Peach.Enterprise.WebServices
 {
 	public class PitService : NancyModule
 	{
+		public static readonly string Prefix = "/p/pits";
+
 		public PitService()
-			: base("/p/pits")
+			: base(Prefix)
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
@@ -25,7 +27,7 @@ namespace Peach.Enterprise.WebServices
 		object GetPit(string id)
 		{
 			var db = new PitDatabase(".");
-			var pit = db.GetPit(id);
+			var pit = db.GetPitById(id);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
@@ -35,7 +37,7 @@ namespace Peach.Enterprise.WebServices
 		object GetPitConfig(string id)
 		{
 			var db = new PitDatabase(".");
-			var cfg = db.GetConfig(id);
+			var cfg = db.GetConfigById(id);
 			if (cfg == null)
 				return HttpStatusCode.NotFound;
 

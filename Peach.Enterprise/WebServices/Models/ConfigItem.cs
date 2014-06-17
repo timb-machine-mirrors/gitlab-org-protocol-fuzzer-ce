@@ -6,7 +6,6 @@ namespace Peach.Enterprise.WebServices.Models
 {
 	public enum ConfigType
 	{
-		Define,
 		String,
 		Hex,
 		Range,

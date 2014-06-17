@@ -123,7 +123,7 @@ namespace Peach.Enterprise.WebServices
 
 			var lib = new Models.Library()
 			{
-				LibraryUrl = "/p/libraries/" + guid,
+				LibraryUrl = LibraryService.Prefix + "/" + guid,
 				Name = name,
 				Description = name,
 				Versions = new List<Models.LibraryVersion>(),
@@ -147,7 +147,7 @@ namespace Peach.Enterprise.WebServices
 
 			lib.Versions.Add(ver);
 			lib.Groups.Add(group);
-			libraries.Add(guid, lib);
+			libraries.Add(lib.LibraryUrl, lib);
 
 			foreach (var dir in Directory.EnumerateDirectories(path))
 			{
@@ -201,23 +201,38 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public Models.Pit GetPit(string guid)
+		public Models.Pit GetPitById(string guid)
+		{
+			return GetPitByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public Models.Pit GetPitByUrl(string url)
 		{
 			Models.Pit pit;
-			entries.TryGetValue(guid, out pit);
+			entries.TryGetValue(url, out pit);
 			return pit;
 		}
 
-		public Models.Library GetLibrary(string guid)
+		public Models.Library GetLibraryById(string guid)
+		{
+			return GetLibraryByUrl(LibraryService.Prefix + "/" + guid);
+		}
+
+		public Models.Library GetLibraryByUrl(string url)
 		{
 			Models.Library library;
-			libraries.TryGetValue(guid, out library);
+			libraries.TryGetValue(url, out library);
 			return library;
 		}
 
-		public Models.PitConfig GetConfig(string guid)
+		public Models.PitConfig GetConfigById(string guid)
 		{
-			var pit = GetPit(guid);
+			return GetConfigByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public Models.PitConfig GetConfigByUrl(string url)
+		{
+			var pit = GetPitByUrl(url);
 			if (pit == null)
 				return null;
 
@@ -292,7 +307,7 @@ namespace Peach.Enterprise.WebServices
 			var guid = MakeGuid(fileName);
 			var value = new Models.Pit()
 			{
-				PitUrl = "/p/pits/" + guid,
+				PitUrl = PitService.Prefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.description,
 				Locked = lib.Locked,
@@ -332,7 +347,7 @@ namespace Peach.Enterprise.WebServices
 			value.Tags.Add(tag);
 			value.Peaches.Add(peachVer);
 
-			entries.Add(guid, value);
+			entries.Add(value.PitUrl, value);
 
 			lib.Pits.Add(new Models.LibraryPit()
 			{
