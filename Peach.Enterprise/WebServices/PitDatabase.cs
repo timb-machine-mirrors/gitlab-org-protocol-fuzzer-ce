@@ -15,10 +15,37 @@ using System.Net.Sockets;
 
 namespace Peach.Enterprise.WebServices
 {
-	[XmlRoot("Peach", Namespace = "http://peachfuzzer.com/2012/Peach")]
+	[XmlRoot("Peach", Namespace = Namespace)]
 	[Serializable]
 	public class PeachElement
 	{
+		public const string Namespace = "http://peachfuzzer.com/2012/Peach";
+		public const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
+
+		public PeachElement()
+		{
+			Children = new List<ChildElement>();
+		}
+
+		public abstract class ChildElement
+		{
+		}
+
+		public class TestElement : ChildElement
+		{
+			[XmlAttribute]
+			public string name { get; set; }
+		}
+
+		public class IncludeElement : ChildElement
+		{
+			[XmlAttribute]
+			public string ns { get; set; }
+
+			[XmlAttribute]
+			public string src { get; set; }
+		}
+
 		[XmlAttribute]
 		[DefaultValue("")]
 		public string author { get; set; }
@@ -30,6 +57,10 @@ namespace Peach.Enterprise.WebServices
 		[XmlAttribute]
 		[DefaultValue("")]
 		public string version { get; set; }
+
+		[XmlElement("Include", typeof(IncludeElement))]
+		[XmlElement("Test", typeof(TestElement))]
+		public List<ChildElement> Children { get; set; }
 	}
 
 	public class ValidationEventArgs : EventArgs
@@ -155,7 +186,7 @@ namespace Peach.Enterprise.WebServices
 				{
 					try
 					{
-						var item = AddEntry(ver, file);
+						var item = AddEntry(ver, path, file);
 
 						if (LoadEventHandler != null)
 							LoadEventHandler(this, new LoadEventArgs(item, file));
@@ -301,7 +332,7 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		private Models.Pit AddEntry(Models.LibraryVersion lib, string fileName)
+		private Models.Pit AddEntry(Models.LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
@@ -327,13 +358,7 @@ namespace Peach.Enterprise.WebServices
 				Timestamp = value.Timestamp
 			};
 
-			var file = new Models.PitFile()
-			{
-				Name = fileName,
-				FileUrl = "",
-			};
-
-			ver.Files.Add(file);
+			AddAllFiles(ver.Files, pitLibraryPath, fileName, contents);
 
 			value.Versions.Add(ver);
 
@@ -358,6 +383,34 @@ namespace Peach.Enterprise.WebServices
 			});
 
 			return value;
+		}
+
+		private void AddAllFiles(List<Models.PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
+		{
+			list.Add(new Models.PitFile()
+			{
+				Name = fileName,
+				FileUrl = "",
+			});
+
+			foreach (var child in contents.Children)
+			{
+				var inc = child as PeachElement.IncludeElement;
+				if (inc != null)
+				{
+					var otherName = inc.src;
+
+					otherName = otherName.Replace("file:", "");
+					otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
+
+					// Normalize the path
+					otherName = Path.Combine(Path.GetDirectoryName(otherName), Path.GetFileName(otherName));
+
+					var other = Parse(otherName);
+
+					AddAllFiles(list, pitLibraryPath, otherName, other);
+				}
+			}
 		}
 
 		private Dictionary<string, Models.Pit> entries;
