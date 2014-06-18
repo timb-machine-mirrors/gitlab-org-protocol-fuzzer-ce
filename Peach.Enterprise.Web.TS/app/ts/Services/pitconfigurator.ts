@@ -9,6 +9,9 @@ module DashApp.Services {
 	export interface IPitConfiguratorService {
 		Job: Models.Peach.Job;
 		Pit: Models.Peach.Pit;
+		Faults: Models.Peach.Fault[];
+
+		UserPitLibrary: string;
 		QA: W.Question[];
 		StateBag: W.StateBag;
 		Defines: P.PitConfig;
@@ -37,11 +40,19 @@ module DashApp.Services {
 		constructor(poller, peachService: Services.IPeachService) {
 			this.pollerSvc = poller;
 			this.peachSvc = peachService;
+
+			this.peachSvc.GetLibraries((data: P.PitLibrary[]) => {
+				this.UserPitLibrary = $.grep(data, (e) => {
+					return e.locked == false;
+				})[0].libraryUrl;
+			});
 		}
 
+		public Faults: Models.Peach.Fault[] = [];
 		public Pit: Models.Peach.Pit;
 		public QA: W.Question[] = [];
 		public Monitors: W.Monitor[] = [];
+		public UserPitLibrary: string;
 
 		//#region Job
 		private _job: Models.Peach.Job;
@@ -54,7 +65,7 @@ module DashApp.Services {
 			if (this._job != job) {
 				this._job = job;
 				this.startJobPoller();
-				//this.startFaultsPoller();
+				this.startFaultsPoller();
 				this.getPitInfo();
 			}
 		}
@@ -154,6 +165,16 @@ module DashApp.Services {
 			//this._stateBag = new W.StateBag;
 		}
 
+		public CopyPit(pit: P.Pit) {
+			var request: P.CopyPitRequest;
+			request.libraryUrl = this.UserPitLibrary;
+			request.pit = pit;
+
+			this.peachSvc.CopyPit(request, (data: P.Pit) => {
+				this.Pit = data;
+			});
+		}
+
 		public LoadData(data) {
 			if (data.config != undefined) {
 				this._defines = new P.PitConfig(<P.PitConfig>data);
@@ -173,9 +194,9 @@ module DashApp.Services {
 		}
 
 		private startJobPoller() {
-			var jobResource = this.peachSvc.GetJob(this.Job.jobUrl);
+			var jobResource = this.peachSvc.GetSingleThing(this.Job.jobUrl);
 			this.jobPoller = this.pollerSvc.get(jobResource, {
-				action: "poll",
+				action: "get",
 				delay: this.POLLER_TIME,
 				method: "GET"
 			});
@@ -194,24 +215,21 @@ module DashApp.Services {
 			this.Job.runtime = job.runtime;
 		}
 
-		//private startFaultsPoller() {
-		//	var faultsResource = this.peachSvc.GetJobFaults();
-		//	this.faultsPoller = this.pollerSvc.get(faultsResource, {
-		//		action: "poll",
-		//		delay: this.POLLER_TIME,
-		//		method: "GET"
-		//	});
+		private startFaultsPoller() {
+			var faultsResource = this.peachSvc.GetManyThings(this._job.faultsUrl);
+			this.faultsPoller = this.pollerSvc.get(faultsResource, {
+				action: "get",
+				delay: this.POLLER_TIME,
+				method: "GET"
+			});
 
-		//	this.faultsPoller.promise.then(null, (e) => {
-		//		console.error(e);
-		//	}, (data: P.Fault[]) => {
-		//			this.updateFaults(data);
-		//		});
-		//}
+			this.faultsPoller.promise.then(null, (e) => {
+				console.error(e);
+			}, (data: P.Fault[]) => {
+				this.Faults = data;
+				});
+		}
 
-		//private updateFaults(faults: P.Fault[]) {
-
-		//}
 
 		private getPitInfo() {
 			if (this.Pit == undefined || (this.Pit.name != this._job.name)) {
