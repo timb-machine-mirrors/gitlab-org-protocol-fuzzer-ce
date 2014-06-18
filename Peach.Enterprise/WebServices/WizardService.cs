@@ -18,12 +18,24 @@ namespace Peach.Enterprise.WebServices
 		{
 			this.logger = logger;
 
+			Get["/state"] = _ => GetState();
+
 			Post["/config"] = _ => PostConfig();
 			Post["/monitors"] = _ => PostMonitors();
 
 			// /test/start?pitUrl=xxxx -> return /test/{id}
 			// /test/{id}
 			// /test/{id}/raw
+		}
+
+		
+		object GetState()
+		{
+			var ret = new List<KeyValuePair<string, string>>();
+
+			ret.Add(new KeyValuePair<string, string>("OS", Peach.Core.Platform.GetOS().ToString()));
+
+			return ret;
 		}
 
 		object PostConfig()
@@ -37,7 +49,7 @@ namespace Peach.Enterprise.WebServices
 			// Don't allow changing configuration values
 			// of locked pits
 			if (pit.Locked)
-				return HttpStatusCode.Unauthorized;
+				return HttpStatusCode.Forbidden;
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 			var defines = PitDefines.Parse(fileName);
@@ -69,7 +81,7 @@ namespace Peach.Enterprise.WebServices
 		object PostMonitors()
 		{
 			/*var monitors = */this.Bind<PitMonitors>();
-			return HttpStatusCode.OK;
+			return HttpStatusCode.EnhanceYourCalm;
 		}
 	}
 }

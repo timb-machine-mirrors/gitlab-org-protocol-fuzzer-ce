@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using Peach.Core;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Xml.XPath;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -145,11 +146,140 @@ namespace Peach.Enterprise.WebServices
 
 		public void Load(string path)
 		{
+			roots = new Dictionary<string, LibraryRoot>();
 			entries = new Dictionary<string, Models.Pit>();
 			libraries = new Dictionary<string, Models.Library>();
 			interfaces = null;
 
-			var name = "Peach Pro Library 2014 Q2";
+			AddLibrary(path, "", "Peach Pro Library 2014 Q2", true);
+			AddLibrary(path, "User", "User Library", false);
+		}
+
+		/// <summary>
+		/// 
+		/// Throws:
+		///   UnauthorizedAccessException if the destination library is locked.
+		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
+		///   ArgumentException if a pit with the specified name already exists.
+		/// </summary>
+		/// <param name="libraryUrl">The destination library to save the pit in.</param>
+		/// <param name="pitUrl">The url of the source pit to copy.</param>
+		/// <param name="name">The name of the newly copied pit.</param>
+		/// <param name="description">The description of the newly copied pit.</param>
+		/// <returns>The url of the newly copied pit.</returns>
+		public string CopyPit(string libraryUrl, string pitUrl, string name, string description)
+		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A valid pit name is required.", "name");
+
+			var dstLib = GetLibraryByUrl(libraryUrl);
+			if (dstLib == null)
+				throw new KeyNotFoundException("The destination pit library could not be found.");
+			if (dstLib.Locked)
+				throw new UnauthorizedAccessException("The destination pit library is locked.");
+
+			// Only support a single user library for now
+			System.Diagnostics.Debug.Assert(dstLib.Name == "User Library");
+
+			var srcPit = GetPitByUrl(pitUrl);
+			if (srcPit == null)
+				throw new KeyNotFoundException("The source pit could not be found.");
+
+			var dstRoot = roots[dstLib.LibraryUrl];
+			var srcFile = srcPit.Versions[0].Files[0].Name;
+			var srcCat = srcPit.Tags[0].Values[1];
+
+			var dstDir = Path.Combine(dstRoot.PitLibraryPath, dstRoot.SubDir, srcCat);
+
+			if (!Directory.Exists(dstDir))
+				Directory.CreateDirectory(dstDir);
+
+			var dstFile = Path.Combine(dstDir, name + ".xml");
+
+			if (File.Exists(dstFile))
+				throw new ArgumentException("A pit already exists with the specified name.");
+
+			var doc = new XmlDocument();
+
+			using (var rdr = XmlReader.Create(srcFile))
+			{
+				doc.Load(rdr);
+			}
+
+			var nav = doc.CreateNavigator();
+
+			var nsMgr = new XmlNamespaceManager(nav.NameTable);
+			nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+			var it = nav.SelectSingleNode("/p:Peach", nsMgr);
+
+			SetPitAttr(it, "author", Environment.UserName);
+			SetPitAttr(it, "description", description);
+			SetPitAttr(it, "missing", description);
+
+			try
+			{
+				var settings = new XmlWriterSettings()
+				{
+					Indent = true,
+					Encoding = System.Text.Encoding.UTF8,
+					IndentChars = "  ",
+				};
+
+				using (var writer = XmlWriter.Create(dstFile, settings))
+				{
+					doc.WriteTo(writer);
+				}
+
+				// If there is a config file, copy it over
+				if (File.Exists(srcFile + ".config"))
+					File.Copy(srcFile + ".config", dstFile + ".config");
+			}
+			catch
+			{
+				try
+				{
+					if (File.Exists(srcFile))
+						File.Delete(dstFile);
+				}
+				catch
+				{
+				}
+
+				try
+				{
+					if (File.Exists(srcFile + ".config"))
+						File.Delete(dstFile + ".config");
+				}
+				catch
+				{
+				}
+
+				throw;
+			}
+
+			var item = AddEntry(dstLib.Versions[0], dstRoot.PitLibraryPath, dstFile);
+
+			return item.PitUrl;
+		}
+
+		private void SetPitAttr(XPathNavigator nav, string attribute, string value)
+		{
+			if (nav.MoveToAttribute(attribute, ""))
+			{
+				nav.SetValue(value);
+				nav.MoveToParent();
+			}
+			else
+			{
+				nav.CreateAttribute(null, attribute, null, value);
+			}
+		}
+
+		private void AddLibrary(string root, string subdir, string name, bool locked)
+		{
+			var path = Path.Combine(root, subdir);
+
 			var guid = MakeGuid(name);
 
 			var lib = new Models.Library()
@@ -157,6 +287,7 @@ namespace Peach.Enterprise.WebServices
 				LibraryUrl = LibraryService.Prefix + "/" + guid,
 				Name = name,
 				Description = name,
+				Locked = locked,
 				Versions = new List<Models.LibraryVersion>(),
 				Groups = new List<Models.Group>(),
 				User = Environment.UserName,
@@ -166,7 +297,7 @@ namespace Peach.Enterprise.WebServices
 			var ver = new Models.LibraryVersion()
 			{
 				Version = 1,
-				Locked = true,
+				Locked = lib.Locked,
 				Pits = new List<Models.LibraryPit>(),
 			};
 
@@ -176,12 +307,22 @@ namespace Peach.Enterprise.WebServices
 				Access = Models.GroupAccess.Read,
 			};
 
+			if (!ver.Locked)
+				group.Access |= Models.GroupAccess.Write;
+
 			lib.Versions.Add(ver);
 			lib.Groups.Add(group);
 			libraries.Add(lib.LibraryUrl, lib);
+			roots.Add(lib.LibraryUrl, new LibraryRoot() { PitLibraryPath = root, SubDir = subdir });
+
+			if (!Directory.Exists(path))
+				return;
 
 			foreach (var dir in Directory.EnumerateDirectories(path))
 			{
+				if (Path.GetDirectoryName(dir) == "User")
+					continue;
+
 				foreach (var file in Directory.EnumerateFiles(dir, "*.xml"))
 				{
 					try
@@ -269,13 +410,19 @@ namespace Peach.Enterprise.WebServices
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
-			var defines = PitDefines.Parse(fileName);
-
 			var ret = new Models.PitConfig()
 			{
 				PitUrl = pit.PitUrl,
-				Config = MakeConfig(defines),
 			};
+
+			if (!File.Exists(fileName))
+			{
+				ret.Config = new List<Models.ConfigItem>();
+			}
+			else
+			{
+				ret.Config = MakeConfig(PitDefines.Parse(fileName));
+			}
 
 			return ret;
 		}
@@ -413,6 +560,13 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
+		class LibraryRoot
+		{
+			public string PitLibraryPath { get; set; }
+			public string SubDir { get; set; }
+		}
+
+		private Dictionary<string, LibraryRoot> roots;
 		private Dictionary<string, Models.Pit> entries;
 		private Dictionary<string, Models.Library> libraries;
 		private List<NetworkInterface> interfaces = null;
