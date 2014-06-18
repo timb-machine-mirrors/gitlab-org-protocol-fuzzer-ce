@@ -9,6 +9,7 @@ using Peach.Enterprise;
 using Peach.Enterprise.WebServices;
 using System.Text;
 using System.Xml;
+using System.Xml.XPath;
 
 namespace PitTester
 {
@@ -149,24 +150,29 @@ namespace PitTester
 
 			foreach (var e in lib.Entries)
 			{
-				var fileName = e.Versions[0].Files[0].Name;
+				int success = 1;
 
-				try
+				for (int i = 0; i < e.Versions[0].Files.Count; ++i)
 				{
-					VerifyPit(fileName);
+					var fileName = e.Versions[0].Files[i].Name;
 
-					Console.Write(".");
+					try
+					{
+						VerifyPit(fileName, i == 0);
+					}
+					catch (Exception ex)
+					{
+						success = 0;
 
-					++total;
+						errors.AppendFormat("{0} -> {1}", e.Name, fileName);
+						errors.AppendLine();
+						errors.AppendLine(ex.Message);
+					}
 				}
-				catch (Exception ex)
-				{
-					Console.Write("E");
 
-					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
-					errors.AppendLine();
-					errors.AppendLine(ex.Message);
-				}
+				total += success;
+
+				Console.Write(success == 0 ? "E" : ".");
 			}
 
 			Console.WriteLine();
@@ -184,7 +190,10 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			if (args.Length > 0)
+				return 0;
+
+			errors.Clear();
 			total = 0;
 
 			Console.WriteLine("Testing pit files");
@@ -247,16 +256,16 @@ namespace PitTester
 			Peach.Enterprise.Test.PitTester.TestPit(libraryPath, pitName, testName);
 		}
 
-		static void VerifyPit(string fileName)
+		static void VerifyPit(string fileName, bool isTest)
 		{
+			var errors = new StringBuilder();
+
 			int idxDeclaration = 0;
 			int idxCopyright = 0;
 			int idx = 0;
 
 			using (var rdr = XmlReader.Create(fileName))
 			{
-				var errors = new StringBuilder();
-
 				while (++idx > 0)
 				{
 					do
@@ -298,14 +307,14 @@ namespace PitTester
 						else if (author != rdr.Value)
 							errors.AppendLine("Pit author is '" + rdr.Value + "' but should be '" + author + "'.");
 
-						var ns = "http://peachfuzzer.com/2012/Peach";
+						var ns = PeachElement.Namespace;
 
 						if (!rdr.MoveToAttribute("xmlns"))
 							errors.AppendLine("Pit is missing xmlns attribute.");
 						else if (ns != rdr.Value)
 							errors.AppendLine("Pit xmlns is '" + rdr.Value + "' but should be '" + ns + "'.");
 
-						var schema = "http://peachfuzzer.com/2012/Peach peach.xsd";
+						var schema = PeachElement.SchemaLocation;
 
 						if (!rdr.MoveToAttribute("schemaLocation", System.Xml.Schema.XmlSchema.InstanceNamespace))
 							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
@@ -322,9 +331,25 @@ namespace PitTester
 				if (idxCopyright == 0)
 					errors.AppendLine("Pit is missing top level copyright message.");
 
-				if (errors.Length > 0)
-					throw new ApplicationException(errors.ToString());
 			}
+
+			using (var rdr = XmlReader.Create(fileName))
+			{
+				var doc = new XPathDocument(rdr);
+				var nav = doc.CreateNavigator();
+				var nsMgr = new XmlNamespaceManager(nav.NameTable);
+				nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+				var it = nav.Select("/p:Peach/p:Test", nsMgr);
+
+				var expexted = isTest ? 1 : 0;
+
+				if (it.Count != expexted)
+					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
+			}
+
+			if (errors.Length > 0)
+				throw new ApplicationException(errors.ToString());
 		}
 
 		static void Syntax()

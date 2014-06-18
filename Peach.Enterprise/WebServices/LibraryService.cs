@@ -8,8 +8,10 @@ namespace Peach.Enterprise.WebServices
 {
 	public class LibraryService : NancyModule
 	{
+		public static readonly string Prefix = "/p/libraries";
+
 		public LibraryService()
-			: base("/p/libraries")
+			: base(Prefix)
 		{
 			Get[""] = _ => GetLibraries();
 			Get["/{id}"] = _ => GetLibrary(_.id);
@@ -24,7 +26,7 @@ namespace Peach.Enterprise.WebServices
 		object GetLibrary(string id)
 		{
 			var db = new PitDatabase(".");
-			var lib = db.GetLibrary(id);
+			var lib = db.GetLibraryById(id);
 			if (lib == null)
 				return HttpStatusCode.NotFound;
 
