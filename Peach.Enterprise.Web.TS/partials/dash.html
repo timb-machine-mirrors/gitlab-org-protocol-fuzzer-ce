@@ -22,7 +22,7 @@
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.job.runtime}}s</span>
+							<span class="infobox-data-number">{{vm.runtimeString}}</span>
 							<div class="infobox-content">Running Time</div>
 						</div>
 
@@ -134,15 +134,17 @@
 					<div class="widget-body">
 						<div class="widget-main padding-4">
 							<div class="tab-content padding-8 overflow-visible">
-								<div id="faults-tab" class="tab-pane active" ng-controller="DashApp.FaultsController">
+								<div id="faults-tab" class="tab-pane active">
 									<h4 class="smaller grey">
 										Recent Faults
 									</h4>
 
+									<div id="faults-table" class="table table-striped table-bordered table-hover"
+											 ng-grid="vm.gridRecentFaults" style="height: 350px" />
+									<!--
 									<div class="table-responsive">
-										<div id="faults-table" class="table table-striped table-bordered table-hover"
-												 ng-grid="gridFaults" style="height: 400px" />
 									</div>
+									-->
 								</div>
 							</div>
 

@@ -11,11 +11,15 @@ module DashApp.Services {
 		GetAutoQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
 		GetJobs(success: (data: P.Job[]) => void): void;
-		GetJob(jobUrl: string);
+		//GetJob(jobUrl: string);
 
-		GetJobFaults(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+		GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+		GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+
+		//GetJobFaults(jobUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
+		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void;
 
 		TestConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetLibraries(success: (data: P.PitLibrary[]) => void): void;
@@ -55,11 +59,11 @@ module DashApp.Services {
 			this.http.get("/p/jobs").success((data) => success(<P.Job[]>data));
 		}
 
-		public GetJob(jobUrl: string) {
-			return this.resource(jobUrl, {}, {
-				poll: {
+		public GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
+			return this.resource(url, {}, {
+				get: {
 					method: "GET",
-					isArray: false, 
+					isArray: false,
 					headers: {
 						"Accept": "application/json",
 						"Content-Type": "application/json"
@@ -68,8 +72,17 @@ module DashApp.Services {
 			});
 		}
 
-		public GetJobFaults(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource("/p/faults");
+		public GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
+			return this.resource(url, {}, {
+				get: {
+					method: "GET",
+					isArray: true,
+					headers: {
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					}
+				}
+			});
 		}
 		 
 		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
@@ -82,6 +95,10 @@ module DashApp.Services {
 			else {
 				throw new Error("GetPit: Argument 0 is of an incompatible type.");
 			}
+		}
+
+		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void {
+			this.http.post("/p/pits", request).success((data) => success(<P.Pit>data));
 		}
 		
 		public PostPitConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {

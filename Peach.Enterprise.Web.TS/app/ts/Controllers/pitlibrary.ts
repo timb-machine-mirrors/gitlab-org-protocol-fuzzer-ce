@@ -9,19 +9,19 @@ module DashApp {
 	import P = Models.Peach;
 
 	export class PitLibraryController {
-		_libraries: any;
+		private _libraries: any;
 
-		get libraries(): any {
+		public get libraries(): any {
 			return this._libraries;
 		}
 
-		selectedPit: string;
+		public selectedPit: P.Pit;
 
-		treeOptions = {
+		public treeOptions = {
 			nodeChildren: "children",
 			dirSelectable: true
 		}
-
+		
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
 		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, peachsvc: Services.IPeachService) {
@@ -60,6 +60,7 @@ module DashApp {
 
 		static CreateFromPitLibrary(pitLibrary: P.PitLibrary[]): TreeItem[] {
 			var output: TreeItem[] = [];
+			var categories: string[] = [];
 
 			for (var l = 0; l < pitLibrary.length; l++) {
 				var libitem: TreeItem = new TreeItem();
@@ -67,10 +68,26 @@ module DashApp {
 				libitem.items = [];
 				for (var v = 0; v < pitLibrary[l].versions.length; v++) {
 					for (var p = 0; p < pitLibrary[l].versions[v].pits.length; p++) {
+						var catitem: TreeItem;
+						var category = $.grep(pitLibrary[l].versions[v].pits[p].tags, (e) => {
+							return e.name.substr(0,8) == "Category";
+						})[0].values[1];
+
+						if (categories.indexOf(category) > 0) {
+							catitem = $.grep(libitem.items, (e) => { return e.text == category })[0];
+						}
+						else {
+							categories.push(category);
+							catitem = new TreeItem();
+							catitem.text = category;
+							catitem.items = [];
+							libitem.items.push(catitem);
+						}
+
 						var pititem: TreeItem = new TreeItem();
 						pititem.text = pitLibrary[l].versions[v].pits[p].name;
 						pititem.pitUrl = pitLibrary[l].versions[v].pits[p].pitUrl;
-						libitem.items.push(pititem);
+						catitem.items.push(pititem);
 					}
 				}
 				output.push(libitem);

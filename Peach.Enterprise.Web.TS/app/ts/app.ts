@@ -18,7 +18,6 @@ module DashApp {
 		"ngRoute",
 		"ui.bootstrap",
 		"kendo.directives",
-		"LocalStorageModule",
 	])
 		.service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
 		.service("pitConfiguratorService", ["poller","peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])

@@ -28,12 +28,20 @@ module DashApp {
 				return undefined;
 		}
 
-		public get disabledTooltip(): string {
+		public get jobRunningTooltip(): string {
 			if (this.job == undefined)
 				return "";
 			else
 				return "Disabled while running a Job";
 		}
+
+		public get jobNotRunningTooltip(): string {
+			if (this.job == undefined)
+				return "Disabled while not running a Job";
+			else
+				return "";
+		}
+
 
 		public location: ng.ILocationService;
 		
@@ -50,7 +58,7 @@ module DashApp {
 			this.location = $location;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.poller = poller;
-
+			
 			this.peachService.GetJobs((data: P.Job[]) => {
 				if (data.length > 0) {
 					this.pitConfigSvc.Job = new P.Job(data[0]);
@@ -78,6 +86,34 @@ module DashApp {
 			.result.then((pitUrl: string) => {
 				this.peachService.GetPit(pitUrl, (data: P.Pit) =>
 				{
+					if (data.locked) {
+						this.showPitCopier(data);
+					}
+					else {
+						this.pitConfigSvc.Pit = data;
+					}
+				});
+			});
+		}
+
+		public showPitCopier(pit: P.Pit) {
+			this.modal.open({
+				templateUrl: "../partials/copy-pit.html",
+				keyboard: false,
+				backdrop: 'static',
+				controller: CopyPitController,
+				resolve: {
+					pit: () => {
+						return pit;
+					}
+				}
+			}).result.then((pit: P.Pit) => {
+				var request: P.CopyPitRequest = {
+					libraryUrl: this.pitConfigSvc.UserPitLibrary,
+					pit: pit
+				};
+
+				this.peachService.CopyPit(request, (data: P.Pit) => {
 					this.pitConfigSvc.Pit = data;
 				});
 			});
