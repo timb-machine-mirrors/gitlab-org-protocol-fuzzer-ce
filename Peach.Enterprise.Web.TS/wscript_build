@@ -14,7 +14,7 @@ extras = []
 dirs = [ 'app', 'Content', 'partials', 'Scripts', 'testdata' ]
 
 for d in dirs:
-	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = 'all.js *.ts'))
+	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = ['app/js/*', '**/*.ts']))
 
 bld(
 	name='Peach.Enterprise.Web',
