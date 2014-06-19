@@ -61,7 +61,17 @@ namespace Peach.Enterprise.WebServices
 			base.ConfigureConventions(nancyConventions);
 
 			// Need to go before the default '/Content' handler in nancy
-			// nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
+			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
+		}
+
+		protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
+		{
+			base.ApplicationStartup(container, pipelines);
+
+			this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
+			{
+				return string.Concat("web/", viewName);
+			}); 
 		}
 	}
 

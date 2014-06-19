@@ -13,7 +13,7 @@ namespace Peach.Enterprise.WebServices
 			Get["/"] = _ => { return Response.AsRedirect("app/"); };
 
 			// Return index.html for /app/
-			Get["/app/"] = _ => View["index"];
+			Get["/app/"] = _ => View["app/index"];
 		}
 	}
 }
