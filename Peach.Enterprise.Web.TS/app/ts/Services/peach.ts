@@ -34,17 +34,36 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
+		private URL_PREFIX: string = "";
+
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
 			this.resource = $resource;
 			this.http = $http;
+
+			//this.TestConnection(null, () => {
+			//	this.URL_PREFIX = "http://localhost:8888";
+			//	this.RetestConnection();
+			//});
 		}
+
+		//private TestConnection(success: () => void, error: () => void) {
+		//	this.http.get(this.URL_PREFIX + "/p/jobs").then(success, error);
+		//} 
+
+		//private RetestConnection() {
+		//	this.http.get(this.URL_PREFIX + "/p/jobs").then((e) => {
+		//		//YAY
+		//	}, (e) => {
+		//		console.error("CANNOT FIND REST HOST");
+		//	});
+		//}
 
 		public GetFaultQA(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
 			return this.resource("../testdata/wizard_qa_fault.json");
 		}
 
 		public GetDefines(pitUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(pitUrl + "/config");
+			return this.resource(this.URL_PREFIX + pitUrl + "/config");
 		}
 
 		public GetDataQA(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
@@ -56,11 +75,14 @@ module DashApp.Services {
 		}
 		
 		public GetJobs(success: (data: P.Job[]) => void): void {
-			this.http.get("/p/jobs").success((data) => success(<P.Job[]>data));
+			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data), (e) => {
+				this.URL_PREFIX = "http://localhost:8888";
+				this.GetJobs(success);
+			});
 		}
 
 		public GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(url, {}, {
+			return this.resource(this.URL_PREFIX + url, {}, {
 				get: {
 					method: "GET",
 					isArray: false,
@@ -73,7 +95,7 @@ module DashApp.Services {
 		}
 
 		public GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(url, {}, {
+			return this.resource(this.URL_PREFIX + url, {}, {
 				get: {
 					method: "GET",
 					isArray: true,
@@ -87,10 +109,10 @@ module DashApp.Services {
 		 
 		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
 			if (typeof IdOrUrl == "number") {
-				this.http.get("/p/pits/" + parseInt(IdOrUrl)).success((data) => success(<P.Pit>data));
+				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl)).success((data) => success(<P.Pit>data));
 			}
 			else if (typeof IdOrUrl == "string") {
-				this.http.get(IdOrUrl).success((data) => success(<P.Pit>data));
+				this.http.get(this.URL_PREFIX + IdOrUrl).success((data) => success(<P.Pit>data));
 			}
 			else {
 				throw new Error("GetPit: Argument 0 is of an incompatible type.");
@@ -98,25 +120,27 @@ module DashApp.Services {
 		}
 
 		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void {
-			this.http.post("/p/pits", request).success((data) => success(<P.Pit>data));
+			this.http.post(this.URL_PREFIX + "/p/pits", request).success((data) => success(<P.Pit>data));
 		}
 		
 		public PostPitConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource("/p/conf/wizard/config");
+			return this.resource(this.URL_PREFIX + "/p/conf/wizard/config");
 		}
 
 		public PostMonitorConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource("/p/conf/wizard/monitors");
+			return this.resource(this.URL_PREFIX + "/p/conf/wizard/monitors");
 		}
 
 		public TestConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource("/testdata/test_results.json");
+			return this.resource(this.URL_PREFIX + "/testdata/test_results.json");
 		}
 
 		public GetLibraries(success: (data: P.PitLibrary[]) => void): void {
-			this.http.get("/p/libraries").success((data) => {
-				var libs: P.PitLibrary[] = <P.PitLibrary[]>data;
-				success(libs);
+			this.http.get(this.URL_PREFIX + "/p/libraries").then((e) => {
+				success(e.data);
+			}, (e) => {
+				this.URL_PREFIX = "http://localhost:8888";
+				this.GetLibraries(success);
 			});
 		}
 

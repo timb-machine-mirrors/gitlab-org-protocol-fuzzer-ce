@@ -31,7 +31,10 @@ module DashApp {
 		}
 
 		public get runtimeString(): string {
-			return moment(new Date(0, 0, 0, 0, 0, this.pitConfigSvc.Job.runtime)).format('H:mm:ss');
+			if (this.pitConfigSvc.Job == undefined)
+				return "";
+			else
+				return moment(new Date(0, 0, 0, 0, 0, this.pitConfigSvc.Job.runtime)).format('H:mm:ss');
 		}
 
 		//showGroupPanel: true,
