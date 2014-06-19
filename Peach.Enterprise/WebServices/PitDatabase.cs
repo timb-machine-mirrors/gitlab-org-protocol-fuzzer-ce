@@ -436,7 +436,7 @@ namespace Peach.Enterprise.WebServices
 				{
 					try
 					{
-						var item = AddEntry(ver, path, file);
+						var item = AddEntry(ver, root, file);
 
 						if (LoadEventHandler != null)
 							LoadEventHandler(this, new LoadEventArgs(item, file));
