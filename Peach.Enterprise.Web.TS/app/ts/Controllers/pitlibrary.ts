@@ -40,7 +40,9 @@ module DashApp {
 		}
 
 		changeSelection(pitUrl: string) {
-			this.notAPit = (pitUrl == undefined || pitUrl.length == 0);
+			this.notAPit = pitUrl == undefined;
+			if (pitUrl != undefined)
+				this.selectedPit = pitUrl;
 		}
 
 		selectPit() {
