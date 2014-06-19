@@ -1,4 +1,5 @@
 using Nancy;
+using Nancy.Conventions;
 using Nancy.Hosting.Self;
 using Nancy.Serialization.JsonNet;
 using Nancy.TinyIoc;
@@ -36,14 +37,6 @@ namespace Peach.Enterprise.WebServices
 			this.logger = logger;
 		}
 
-		//protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
-		//{
-		//	this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
-		//	{
-		//		return string.Concat("web/", viewName);
-		//	});
-		//}
-
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
 		{
 			container.Register<JsonSerializer, CustomJsonSerializer>();
@@ -55,6 +48,7 @@ namespace Peach.Enterprise.WebServices
 			container.Register<JobService>();
 			container.Register<FaultService>();
 			container.Register<WizardService>();
+			container.Register<IndexService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
@@ -62,24 +56,13 @@ namespace Peach.Enterprise.WebServices
 			base.ConfigureRequestContainer(container, context);
 		}
 
-		/*
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
 		{
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("web", @"web"));
 			base.ConfigureConventions(nancyConventions);
-		}*/
 
-		/*protected override void ConfigureConventions(NancyConventions nancyConventions)
-		{
-			//hacky only supports jobs/1/...
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1/visualizer", "/web/visualizer"));
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1", "/web/visualizer"));
-
-			nancyConventions.StaticContentsConventions.Add(
-				StaticContentConventionBuilder.AddDirectory("/", @"web"));
-
-			base.ConfigureConventions(nancyConventions);
-		}*/
+			// Need to go before the default '/Content' handler in nancy
+			// nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
+		}
 	}
 
 	public class WebService : IDisposable
