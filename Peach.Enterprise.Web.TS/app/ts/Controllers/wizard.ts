@@ -398,8 +398,9 @@ module DashApp {
 
 			switch (this.params.step) {
 				case "setvars":
-					this.pitConfigSvc.Defines = undefined;
-					res = this.peach.GetDefines(this.pitConfigSvc.Pit.pitUrl);
+					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions();
+					this.next();
+					return;
 					break;
 				case "fault":
 					this.pitConfigSvc.FaultMonitors = [];
@@ -417,7 +418,6 @@ module DashApp {
 					return;
 			}
 
-			var peachData;
 			res.get((data) => {
 				this.pitConfigSvc.LoadData(data);
 				this.next();

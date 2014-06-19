@@ -49,7 +49,6 @@ module DashApp.Services {
 		}
 
 		public Faults: Models.Peach.Fault[] = [];
-		public Pit: Models.Peach.Pit;
 		public QA: W.Question[] = [];
 		public Monitors: W.Monitor[] = [];
 		public UserPitLibrary: string;
@@ -70,6 +69,21 @@ module DashApp.Services {
 			}
 		}
 		//#endregion
+
+		private _pit: P.Pit;
+
+		public get Pit(): P.Pit {
+			return this._pit;
+		}
+
+		public set Pit(pit: P.Pit) { 
+			if (this._pit != pit) {
+				this._pit = pit;
+				this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
+					this._defines = new P.PitConfig(<P.PitConfig>data);
+				});
+			}
+		}
 
 
 		//#region StateBag
@@ -176,21 +190,16 @@ module DashApp.Services {
 		}
 
 		public LoadData(data) {
-			if (data.config != undefined) {
-				this._defines = new P.PitConfig(<P.PitConfig>data);
-				this.QA = this._defines.ToQuestions();
-			}
-			else {
 			if (data.qa != undefined)
 				this.QA = <W.Question[]>data.qa;
 
-				if (data.state != undefined) {
-					this._stateBag = new W.StateBag(<any[]>data.state);
-				}
-
-				if (data.monitors != undefined)
-					this.Monitors = <W.Monitor[]>data.monitors;
+			if (data.state != undefined) {
+				this._stateBag = new W.StateBag(<any[]>data.state);
 			}
+
+			if (data.monitors != undefined)
+				this.Monitors = <W.Monitor[]>data.monitors;
+
 		}
 
 		private startJobPoller() {
