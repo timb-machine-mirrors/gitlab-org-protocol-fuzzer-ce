@@ -75,8 +75,8 @@ module DashApp.Services {
 		}
 		
 		public GetJobs(success: (data: P.Job[]) => void): void {
-			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data), (e) => {
-				this.URL_PREFIX = "http://localhost:8888";
+			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data.data), (e) => {
+				this.URL_PREFIX = "http://localhost:8888"; 
 				this.GetJobs(success);
 			});
 		}
