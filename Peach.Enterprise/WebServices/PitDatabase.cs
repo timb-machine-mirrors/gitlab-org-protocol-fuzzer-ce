@@ -263,6 +263,115 @@ namespace Peach.Enterprise.WebServices
 			return item.PitUrl;
 		}
 
+		public static void SaveConfig(Models.Pit pit, List<Models.ConfigItem> config)
+		{
+			var fileName = pit.Versions[0].Files[0].Name + ".config";
+			var defines = PitDefines.Parse(fileName);
+
+			// For now, read in the current defines off disk and
+			// apply any applicable changes. We don't currently expect
+			// this api to add new defines or delete old defines.
+			foreach (var item in config)
+			{
+				foreach (var def in defines.Where(d => d.Key == item.Key))
+					def.Value = item.Value;
+			}
+
+			var final = new PitDefines()
+			{
+				Platforms = new List<PitDefines.Collection>(new[] {
+					new PitDefines.All()
+					{
+						Defines = defines,
+					}
+				}),
+			};
+
+			XmlTools.Serialize(fileName, final);
+		}
+
+		public static void SaveMonitors(Models.Pit pit, List<Models.Agent> monitors)
+		{
+			var fileName = pit.Versions[0].Files[0].Name;
+			var doc = new XmlDocument();
+
+			using (var rdr = XmlReader.Create(fileName))
+			{
+				doc.Load(rdr);
+			}
+
+			var nav = doc.CreateNavigator();
+
+			var nsMgr = new XmlNamespaceManager(nav.NameTable);
+			nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+			var oldAgents = nav.Select("//p:Agent", nsMgr).OfType<XPathNavigator>().ToList();
+
+			foreach (var a in oldAgents)
+				a.DeleteSelf();
+
+			var test = nav.SelectSingleNode("/p:Peach/p:Test", nsMgr);
+
+			var agents = new OrderedDictionary<string, XmlWriter>();
+
+			foreach (var item in monitors)
+			{
+				XmlWriter w;
+				if (!agents.TryGetValue(item.AgentUrl, out w))
+				{
+					var agentName = "Agent" + agents.Count.ToString();
+
+					w = test.InsertBefore();
+					w.WriteStartElement("Agent");
+					w.WriteAttributeString("name", agentName);
+					w.WriteAttributeString("location", item.AgentUrl);
+
+					// AppendChild so the agents stay in order
+					using (var testWriter = test.AppendChild())
+					{
+						testWriter.WriteStartElement("Agent");
+						testWriter.WriteAttributeString("ref", agentName);
+						testWriter.WriteEndElement();
+					}
+
+					agents.Add(item.AgentUrl, w);
+				}
+
+				foreach (var m in item.Monitors)
+				{
+					w.WriteStartElement("Monitor");
+					w.WriteAttributeString("class", m.MonitorClass);
+
+					foreach (var p in m.Map)
+					{
+						w.WriteStartElement("Param");
+						w.WriteAttributeString("name", p.Key);
+						w.WriteAttributeString("value", p.Value);
+						w.WriteEndElement();
+					}
+
+					w.WriteEndElement();
+				}
+			}
+
+			foreach (var a in agents)
+			{
+				a.Value.Close();
+			}
+
+			var settings = new XmlWriterSettings()
+			{
+				Indent = true,
+				Encoding = System.Text.Encoding.UTF8,
+				IndentChars = "  ",
+			};
+
+			using (var writer = XmlWriter.Create(fileName, settings))
+			{
+				doc.WriteTo(writer);
+			}
+		}
+
 		private void SetPitAttr(XPathNavigator nav, string attribute, string value)
 		{
 			if (nav.MoveToAttribute(attribute, ""))
@@ -327,7 +436,7 @@ namespace Peach.Enterprise.WebServices
 				{
 					try
 					{
-						var item = AddEntry(ver, path, file);
+						var item = AddEntry(ver, root, file);
 
 						if (LoadEventHandler != null)
 							LoadEventHandler(this, new LoadEventArgs(item, file));

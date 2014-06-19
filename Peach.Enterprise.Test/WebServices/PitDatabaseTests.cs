@@ -25,8 +25,21 @@ namespace Peach.Enterprise.Test.WebServices
        description='IMG PIT'
        version='0.0.1'>
 
+	<DataModel name='DM'>
+		<Blob/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
 	<Test name='Default'>
 		<StateModel ref='SM' />
+		<Publisher class='Null'/>
 	</Test>
 </Peach>
 ";
@@ -191,5 +204,137 @@ namespace Peach.Enterprise.Test.WebServices
 
 			Assert.AreEqual(srcCfg, newCfg);
 		}
+
+		[Test]
+		public void TestSaveMonitors()
+		{
+			var pit = db.Entries.First();
+
+			var json = @"
+[
+{
+	""agentUrl"":""local://"",
+	""monitors"": [
+		{
+			""monitorClass"":""PageHeap"",
+			""path"": [1110],
+			""map"": [
+				{ ""key"":""WinDbgExecutable"", ""param"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""key"":""WinDbgPath"", ""param"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
+			],
+			""description"": ""Page Heap: {WinDbgExecutable} {WinDbgPath}""
+		},
+		{
+			""monitorClass"":""WindowsDebugger"",
+			""path"": [1100],
+			""map"": [
+				{ ""key"":""WinDbgExecutable"",	""param"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""key"":""WinDbgArguments"", ""param"":""Arguments"", ""value"":""--arg"" },
+				{ ""key"":""WinDbgIgnoreFirstChanceGuardPage"",	""param"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
+			],
+			""description"": ""Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}""
+		},
+	],
+},
+{
+	""agentUrl"":""tcp://remotehostname"",
+	""monitors"": [
+		{
+			""monitorClass"":""Pcap"",
+			""path"": [ 4100 ],
+			""map"":[
+				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
+				],
+			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
+		},
+	],
+},
+{
+	""agentUrl"":""local://"",
+	""monitors"": [
+		{
+			""monitorClass"":""CanaKit"",
+			""path"": [ 4100 ],
+			""map"": [
+				{""key"":""CanaKitRelaySerialPort"",	""param"":""SerialPort"", ""value"":""COM1"" },
+				{""key"":""CanaKitRelayRelayNumber"",	""param"":""RelayNumber"", ""value"":""1"" },
+			]
+		},
+	],
+},
+{
+	""agentUrl"":""tcp://remotehostname2"",
+	""monitors"": [
+		{
+			""monitorClass"":""Pcap"",
+			""path"": [ 4100 ],
+			""map"":[
+				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
+				],
+			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
+		},
+	],
+},
+{
+	""agentUrl"":""tcp://remotehostname"",
+	""monitors"": [
+		{
+			""monitorClass"":""Pcap"",
+			""path"": [ 4100 ],
+			""map"":[
+				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 8080"" }
+				],
+			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
+		},
+	],
+},
+]";
+			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+
+			PitDatabase.SaveMonitors(pit, monitors);
+
+			var parser = new Peach.Core.Analyzers.PitParser();
+			var dom = parser.asParser(null, pit.Versions[0].Files[0].Name);
+
+			Assert.AreEqual(3, dom.tests[0].agents.Count);
+
+			Assert.AreEqual("Agent0", dom.tests[0].agents[0].name);
+			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
+			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
+
+			VerifyMonitor(monitors[0].Monitors[0], dom.tests[0].agents[0].monitors[0]);
+			VerifyMonitor(monitors[0].Monitors[1], dom.tests[0].agents[0].monitors[1]);
+			VerifyMonitor(monitors[2].Monitors[0], dom.tests[0].agents[0].monitors[2]);
+
+			Assert.AreEqual("Agent1", dom.tests[0].agents[1].name);
+			Assert.AreEqual("tcp://remotehostname", dom.tests[0].agents[1].location);
+			Assert.AreEqual(2, dom.tests[0].agents[1].monitors.Count);
+
+			VerifyMonitor(monitors[1].Monitors[0], dom.tests[0].agents[1].monitors[0]);
+			VerifyMonitor(monitors[4].Monitors[0], dom.tests[0].agents[1].monitors[1]);
+
+			Assert.AreEqual("Agent2", dom.tests[0].agents[2].name);
+			Assert.AreEqual("tcp://remotehostname2", dom.tests[0].agents[2].location);
+			Assert.AreEqual(1, dom.tests[0].agents[2].monitors.Count);
+
+			VerifyMonitor(monitors[3].Monitors[0], dom.tests[0].agents[2].monitors[0]);
+		}
+
+		private void VerifyMonitor(Enterprise.WebServices.Models.Monitor jsonMon, Core.Dom.Monitor domMon)
+		{
+			Assert.AreEqual(jsonMon.MonitorClass, domMon.cls);
+			Assert.AreEqual(jsonMon.Map.Count, domMon.parameters.Count);
+
+			foreach (var item in jsonMon.Map)
+			{
+				Assert.True(domMon.parameters.ContainsKey(item.Key));
+				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Key]);
+			}
+		}
+
+		void VerifyMonitor2() { }
 	}
 }
