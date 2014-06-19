@@ -60,37 +60,37 @@ module DashApp {
 
 		static CreateFromPitLibrary(pitLibrary: P.PitLibrary[]): TreeItem[] {
 			var output: TreeItem[] = [];
-			var categories: string[] = [];
+
+			var libitem: TreeItem;
+			var catitem: TreeItem;
+			var pititem: TreeItem;
+
 
 			for (var l = 0; l < pitLibrary.length; l++) {
-				var libitem: TreeItem = new TreeItem();
+				libitem = new TreeItem();
 				libitem.text = pitLibrary[l].name;
 				libitem.items = [];
 				for (var v = 0; v < pitLibrary[l].versions.length; v++) {
 					for (var p = 0; p < pitLibrary[l].versions[v].pits.length; p++) {
-						var catitem: TreeItem;
 						var category = $.grep(pitLibrary[l].versions[v].pits[p].tags, (e) => {
 							return e.name.substr(0,8) == "Category";
 						})[0].values[1];
 
-						if (categories.indexOf(category) > 0) {
-							catitem = $.grep(libitem.items, (e) => { return e.text == category })[0];
-						}
-						else {
-							categories.push(category);
+						catitem = $.grep(libitem.items, (e) => { return e.text == category })[0];
+						if(catitem == undefined) { 
 							catitem = new TreeItem();
 							catitem.text = category;
 							catitem.items = [];
 							libitem.items.push(catitem);
 						}
 
-						var pititem: TreeItem = new TreeItem();
+						pititem = new TreeItem();
 						pititem.text = pitLibrary[l].versions[v].pits[p].name;
 						pititem.pitUrl = pitLibrary[l].versions[v].pits[p].pitUrl;
 						catitem.items.push(pititem);
 					}
 				}
-				output.push(libitem);
+				output.push(libitem); 
 			}
 
 			return output;
