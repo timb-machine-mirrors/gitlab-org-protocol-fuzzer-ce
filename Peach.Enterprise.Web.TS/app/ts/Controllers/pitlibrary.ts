@@ -15,12 +15,14 @@ module DashApp {
 			return this._libraries;
 		}
 
-		public selectedPit: P.Pit;
+		public selectedPit: string;
 
 		public treeOptions = {
 			nodeChildren: "children",
 			dirSelectable: true
 		}
+
+		public notAPit:boolean = false;
 		
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
@@ -35,6 +37,10 @@ module DashApp {
 					});
 				}
 			});
+		}
+
+		changeSelection(pitUrl: string) {
+			this.notAPit = (pitUrl == undefined || pitUrl.length == 0);
 		}
 
 		selectPit() {

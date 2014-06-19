@@ -4,13 +4,25 @@
 	</div>
 	<div class="modal-body">
 		<div kendo-tree-view="tree"
-			k-on-change="vm.selectedPit = dataItem.pitUrl"
+			k-on-change="vm.changeSelection(dataItem.pitUrl)"
 			k-data-source="vm.libraries" style="max-height: 200px; height: 200px">
 		</div>
 	</div>
 
 	<div class="modal-footer">
-		<button class="btn btn-primary" ng-click="vm.selectPit()">Select</button>
+		<span class="alert alert-danger" ng-class="{hidden: vm.notAPit == false}" style="margin-right: 20px">
+			<!--
+			<button class="close" type="button" data-dismiss="alert">
+				<i class="icon-remove"></i>
+			</button>
+			<strong>
+				<i class="icon-remove"></i>
+				Oh snap!
+			</strong>
+			-->
+			Please select a Pit, not a Library or Category.
+		</span>
+		<button class="btn btn-primary" ng-click="vm.selectPit()" ng-class="{disabled: vm.notAPit == true}">Select</button>
 	</div>
 </div>
 
