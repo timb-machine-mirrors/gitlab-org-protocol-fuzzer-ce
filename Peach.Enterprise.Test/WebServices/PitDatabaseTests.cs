@@ -40,6 +40,9 @@ namespace Peach.Enterprise.Test.WebServices
        description='IMG PIT'
        version='0.0.1'>
 
+	<Agent name='TheAgent'>
+	</Agent>
+
 	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
 
 	<StateModel name='SM' initialState='Initial'>
@@ -51,6 +54,7 @@ namespace Peach.Enterprise.Test.WebServices
 	</StateModel>
 
 	<Test name='Default'>
+		<Agent ref='TheAgent'/>
 		<Strategy class='##Strategy##'/>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
@@ -221,6 +225,27 @@ namespace Peach.Enterprise.Test.WebServices
 			var newCfg = File.ReadAllText(expName + ".config");
 
 			Assert.AreEqual(srcCfg, newCfg);
+		}
+
+		[Test]
+		public void TestPitTester()
+		{
+			var pit = db.Entries.First();
+			var pitFile = pit.Versions[0].Files[0].Name;
+
+			var res = new Peach.Enterprise.WebServices.PitTester(root, pitFile);
+
+			Assert.NotNull(res);
+
+			while (res.Status == Enterprise.WebServices.Models.TestStatus.Active)
+				System.Threading.Thread.Sleep(1000);
+
+			Assert.AreEqual(Enterprise.WebServices.Models.TestStatus.Pass, res.Status);
+
+			foreach (var ev in res.Result.Events.ToList())
+			{
+				Assert.AreEqual(Enterprise.WebServices.Models.TestStatus.Pass, ev.Status);
+			}
 		}
 
 		[Test]
