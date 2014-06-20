@@ -190,9 +190,6 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			if (args.Length > 0)
-				return 0;
-
 			errors.Clear();
 			total = 0;
 
