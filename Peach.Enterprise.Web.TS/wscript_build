@@ -10,7 +10,7 @@ bld(
 	features = 'tsc',
 	name='Peach.Enterprise.Web',
 	source = bld.path.ant_glob('app/**/*.ts'),
-	js = 'app/js/app.js',
+	js = 'app/js/all.js',
 	install_path = '${BINDIR}/web',
 	install_644 = extras,
 )
