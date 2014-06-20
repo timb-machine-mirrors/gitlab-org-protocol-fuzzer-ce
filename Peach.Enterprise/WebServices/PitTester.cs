@@ -1,19 +1,250 @@
 using System;
+using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 using Peach.Enterprise.WebServices.Models;
+using System.Reflection;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Peach.Enterprise.WebServices
 {
 	public class PitTester
 	{
-		private PitTester()
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
+		private class EventCollector : Peach.Core.Watcher
 		{
-			Guid = System.Guid.NewGuid().ToString();
+			private PitTester tester;
+
+			public EventCollector(PitTester tester)
+			{
+				this.tester = tester;
+
+				Status = TestStatus.Active;
+				Events = new List<TestEvent>();
+			}
+
+			private void AddEvent(string name, string desc, TestStatus status = TestStatus.Active)
+			{
+				lock (tester.mutex)
+				{
+					Events.Add(new TestEvent()
+					{
+						Id = (uint)Events.Count,
+						Status = TestStatus.Active,
+						Short = name,
+						Description = desc,
+						Resolve = "",
+					});
+				}
+			}
+
+			protected override void Engine_TestStarting(Core.RunContext context)
+			{
+				AddEvent("Starting fuzzing engine", "Starting fuzzing engine");
+
+				// Before we get iteration start, we will get AgentConnect & SessionStart
+			}
+
+			protected override void Engine_TestFinished(Core.RunContext context)
+			{
+			}
+
+			protected override void Engine_IterationStarting(Core.RunContext context, uint currentIteration, uint? totalIterations)
+			{
+				lock (tester.mutex)
+				{
+					// Pass all events up to now
+					foreach (var e in Events)
+						e.Status = TestStatus.Pass;
+
+					// Add event for the iteration running
+					Events.Add(new TestEvent()
+					{
+						Id = (uint)Events.Count,
+						Status = TestStatus.Active,
+						Short = "Running iteration",
+						Description = "Running the initial control record iteration",
+						Resolve = "",
+					});
+				}
+			}
+
+			protected override void Engine_IterationFinished(Core.RunContext context, uint currentIteration)
+			{
+			}
+
+			protected override void StateModelStarting(Core.RunContext context, Core.Dom.StateModel model)
+			{
+			}
+
+			protected override void StateModelFinished(Core.RunContext context, Core.Dom.StateModel model)
+			{
+			}
+
+			private void EventSuccess()
+			{
+				lock (tester.mutex)
+				{
+					Events[Events.Count - 1].Status = TestStatus.Pass;
+				}
+			}
+
+			private void EventFail(string resolve)
+			{
+				lock (tester.mutex)
+				{
+					var last = Events[Events.Count - 1];
+
+					last.Status = TestStatus.Fail;
+					last.Resolve = resolve;
+				}
+			}
+
+			private Dictionary<string, object> ParseConfig()
+			{
+				var defs = new List<KeyValuePair<string, string>>();
+				var args = new Dictionary<string, object>();
+
+				args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+				defs.Add(new KeyValuePair<string, string>("Peach.Cwd", Environment.CurrentDirectory));
+				defs.Add(new KeyValuePair<string, string>("Peach.Pwd", Assembly.GetCallingAssembly().Location));
+				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", tester.pitLibraryPath));
+
+				var pitConfig = tester.pitFile + ".config";
+
+				// It is ok if a .config doesn't exist
+				if (System.IO.File.Exists(pitConfig))
+				{
+					try
+					{
+						AddEvent("Loading pit config", "Loading configuration file '" + pitConfig + "'");
+
+						var defines = PitDefines.Parse(pitConfig);
+
+						foreach (var d in defines)
+						{
+							defs.Add(new KeyValuePair<string, string>(d.Key, d.Value));
+						}
+
+						EventSuccess();
+					}
+					catch (Exception ex)
+					{
+						EventFail(ex.Message);
+
+						throw;
+					}
+				}
+
+				return args;
+			}
+
+			public Peach.Core.Dom.Dom ParsePit()
+			{
+				var args = ParseConfig();
+				var parser = new Godel.Core.GodelPitParser();
+
+				AddEvent("Loading pit file", "Loading pit file '" + tester.pitFile + "'");
+
+				try
+				{
+					var dom = parser.asParser(args, tester.pitFile);
+
+					EventSuccess();
+
+					return dom;
+				}
+				catch (Exception ex)
+				{
+					EventFail(ex.Message);
+
+					throw;
+				}
+			}
+
+			public TestStatus Status { get; set; }
+			public List<TestEvent> Events { get; set; }
 		}
 
-		public static PitTester Run(string pitLibraryPath, string pitFile)
+		private object mutex;
+		private EventCollector watcher;
+		private string pitLibraryPath;
+		private string pitFile;
+		private Thread thread;
+		private MemoryTarget target;
+
+		private void Run()
 		{
-			return new PitTester();
+			try
+			{
+				var nconfig = new LoggingConfiguration();
+				nconfig.AddTarget("target", target);
+
+				var rule = new LoggingRule("*", LogLevel.Debug, target);
+				nconfig.LoggingRules.Add(rule);
+
+				LogManager.Configuration = nconfig;
+
+				var dom = watcher.ParsePit();
+				var e = new Peach.Core.Engine(watcher);
+				var config = new Peach.Core.RunConfiguration()
+				{
+					// Run pit for a single iteration
+					singleIteration = true,
+					pitFile = pitFile,
+				};
+
+				e.startFuzzing(dom, config);
+
+				lock (mutex)
+				{
+					// Pass the last event
+					watcher.Events[watcher.Events.Count - 1].Status = TestStatus.Pass;
+					// Pass the whole test
+					watcher.Status = TestStatus.Pass;
+				}
+			}
+			catch (Exception ex)
+			{
+				lock (mutex)
+				{
+					foreach (var item in watcher.Events)
+					{
+						// Fail any active items
+						if (item.Status == TestStatus.Active)
+							item.Status = TestStatus.Fail;
+						//Fail the whole test
+						watcher.Status = TestStatus.Fail;
+					}
+				}
+
+				logger.Error(ex.Message);
+			}
+			finally
+			{
+				LogManager.Flush();
+				LogManager.Configuration = null;
+
+				thread = null;
+			}
+		}
+
+		public PitTester(string pitLibraryPath, string pitFile)
+		{
+			Guid = System.Guid.NewGuid().ToString();
+
+			this.mutex = new object();
+			this.watcher = new EventCollector(this);
+			this.pitLibraryPath = pitLibraryPath;
+			this.pitFile = pitFile;
+			this.target = new MemoryTarget() { Layout = "${logger} ${message}" };
+			this.thread = new Thread(Run);
+
+			thread.Start();
 		}
 
 		public string Guid
@@ -26,7 +257,10 @@ namespace Peach.Enterprise.WebServices
 		{
 			get
 			{
-				return TestStatus.Pass;
+				lock (mutex)
+				{
+					return watcher.Status;
+				}
 			}
 		}
 
@@ -34,37 +268,22 @@ namespace Peach.Enterprise.WebServices
 		{
 			get
 			{
-				return new TestResult()
+				lock (mutex)
 				{
-					Status = TestStatus.Pass,
-					Events = new List<TestEvent>(new[]
+					return new TestResult()
 					{
-						new TestEvent()
-						{
-							Id = 0,
-							Status = TestStatus.Pass,
-							Short = "Starting Engine",
-							Description = "The description of the engine starting",
-							Resolve = "Resolution instructions"
-						},
-						new TestEvent()
-						{
-							Id = 1,
-							Status = TestStatus.Pass,
-							Short = "Finished",
-							Description = "Finished description",
-							Resolve = "How to resolve"
-						},
-					})
-				};
+						Status = watcher.Status,
+						Events = watcher.Events.ToList(),
+					};
+				}
 			}
 		}
 
-		public string Log
+		public IList<string> Log
 		{
 			get
 			{
-				return "The log from the test goes here!";
+				return target.Logs;
 			}
 		}
 	}

@@ -19,11 +19,14 @@ namespace PitTester
 
 		static int Main(string[] args)
 		{
+			var notest = false;
+
 			var p = new OptionSet()
 			{
 					{ "h|?|help", v => Syntax() },
 					{ "debug", v => LogLevel = 1 },
 					{ "trace", v => LogLevel = 2 },
+					{ "notest", v => notest = true },
 			};
 
 			var extra = p.Parse(args);
@@ -109,7 +112,7 @@ namespace PitTester
 						sb.AppendLine();
 					if (noDesc.Length > 0)
 						sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
-					if (sb.Length < 0)
+					if (sb.Length > 0)
 						throw new ApplicationException(sb.ToString());
 
 
@@ -190,11 +193,11 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			if (args.Length > 0)
-				return 0;
-
 			errors.Clear();
 			total = 0;
+
+			if (notest)
+				return 0;
 
 			Console.WriteLine("Testing pit files");
 
@@ -355,7 +358,7 @@ namespace PitTester
 		static void Syntax()
 		{
 			var self = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
-			var syntax = @"{0} [--debug --trace] pit_library_path";
+			var syntax = @"{0} [--debug --trace --notest] pit_library_path";
 
 			Console.WriteLine(syntax, self);
 

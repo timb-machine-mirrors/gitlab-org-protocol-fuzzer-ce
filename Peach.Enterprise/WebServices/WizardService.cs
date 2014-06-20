@@ -4,6 +4,7 @@ using Nancy.Responses;
 using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Peach.Enterprise.WebServices
@@ -93,7 +94,7 @@ namespace Peach.Enterprise.WebServices
 					return HttpStatusCode.Forbidden;
 
 				
-				logger.Tester = PitTester.Run(".", pit.Versions[0].Files[0].Name);
+				logger.Tester = new PitTester(".", pit.Versions[0].Files[0].Name);
 
 				return Response.AsJson(new { TestUrl = Prefix + "/test/" + logger.Tester.Guid });
 			}
@@ -112,13 +113,26 @@ namespace Peach.Enterprise.WebServices
 
 		object GetTestRaw(string id)
 		{
+			IList<string> lines;
+
 			lock (logger)
 			{
 				if (logger.Tester == null || logger.Tester.Guid != id)
 					return HttpStatusCode.NotFound;
 
-				return logger.Tester.Log;
+				lines = logger.Tester.Log;
 			}
+
+			var writer = new StreamWriter(new MemoryStream());
+				
+			foreach (var line in logger.Tester.Log)
+				writer.WriteLine(line);
+
+			writer.Flush();
+
+			writer.BaseStream.Position = 0;
+
+			return Response.FromStream(writer.BaseStream, "text/plain");
 		}
 	}
 }
