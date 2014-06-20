@@ -1,5 +1,6 @@
 using Nancy;
 using Nancy.ModelBinding;
+using Nancy.Responses;
 using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,9 @@ namespace Peach.Enterprise.WebServices
 			Post["/config"] = _ => PostConfig();
 			Post["/monitors"] = _ => PostMonitors();
 
-			// /test/start?pitUrl=xxxx -> return /test/{id}
-			// /test/{id}
-			// /test/{id}/raw
+			Get["/test/start"] = _ => StartTest();
+			Get["/test/{id}"] = _ => GetTest(_.id);
+			Get["/test/{id}/raw"] = _ => GetTestRaw(_.id);
 		}
 
 		
@@ -72,6 +73,52 @@ namespace Peach.Enterprise.WebServices
 			PitDatabase.SaveMonitors(pit, monitors.Monitors);
 
 			return HttpStatusCode.OK;
+		}
+
+		object StartTest()
+		{
+			var pitUrl = Request.Query.pitUrl;
+
+			var db = new PitDatabase(".");
+			var pit = db.GetPitByUrl(pitUrl);
+			if (pit == null)
+				return HttpStatusCode.NotFound;
+
+			lock (logger)
+			{
+				if (logger.JobGuid != null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.Tester != null && logger.Tester.Status == TestStatus.Active)
+					return HttpStatusCode.Forbidden;
+
+				
+				logger.Tester = PitTester.Run(".", pit.Versions[0].Files[0].Name);
+
+				return Response.AsJson(new { TestUrl = Prefix + "/test/" + logger.Tester.Guid });
+			}
+		}
+
+		object GetTest(string id)
+		{
+			lock (logger)
+			{
+				if (logger.Tester == null || logger.Tester.Guid != id)
+					return HttpStatusCode.NotFound;
+
+				return logger.Tester.Result;
+			}
+		}
+
+		object GetTestRaw(string id)
+		{
+			lock (logger)
+			{
+				if (logger.Tester == null || logger.Tester.Guid != id)
+					return HttpStatusCode.NotFound;
+
+				return logger.Tester.Log;
+			}
 		}
 	}
 }
