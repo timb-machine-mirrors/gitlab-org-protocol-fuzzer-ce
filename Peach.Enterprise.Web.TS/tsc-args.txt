@@ -13,6 +13,5 @@ app/ts/controllers/pittest.ts
 app/ts/controllers/wizard.ts
 app/ts/models/peach.ts
 app/ts/models/wizard.ts
-app/ts/services/config.ts
 app/ts/services/peach.ts
 app/ts/services/pitConfigurator.ts
