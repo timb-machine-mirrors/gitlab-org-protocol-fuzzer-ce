@@ -48,9 +48,9 @@ module DashApp {
 		//#endregion
 
 
-		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService"];
+		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService","$http"];
 
-		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
+		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService, $http: ng.IHttpService) {
 			$scope.vm = this;
 
 			this.modal = $modal;
@@ -58,7 +58,17 @@ module DashApp {
 			this.location = $location;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.poller = poller;
+
+			$http.get("../testdata/test_config.json").then((response) => {
+				this.peachService.URL_PREFIX = response.data.URL_PREFIX;
+				this.getJobs();
+			}, (response) => {
+				this.getJobs();
+			});
 			
+		}
+
+		private getJobs() {
 			this.peachService.GetJobs((data: P.Job[]) => {
 				if (data.length > 0) {
 					this.pitConfigSvc.Job = new P.Job(data[0]);
@@ -67,7 +77,6 @@ module DashApp {
 					this.showPitSelector();
 				}
 			});
-
 
 		}
 

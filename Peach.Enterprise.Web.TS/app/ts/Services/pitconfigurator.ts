@@ -79,9 +79,11 @@ module DashApp.Services {
 		public set Pit(pit: P.Pit) { 
 			if (this._pit != pit) {
 				this._pit = pit;
-				this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
-					this._defines = new P.PitConfig(<P.PitConfig>data);
-				});
+				if (pit.pitUrl != undefined) {
+					this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
+						this._defines = new P.PitConfig(<P.PitConfig>data);
+					});
+				}
 			}
 		}
 
@@ -249,7 +251,6 @@ module DashApp.Services {
 					});
 				else {
 					this.Pit = new P.Pit();
-					this.Pit.pitUrl = "";
 					var lastSlash = this._job.name.lastIndexOf("\\");
 					var period = this._job.name.lastIndexOf(".");
 					this.Pit.name = this._job.name.substring(lastSlash + 1, period);

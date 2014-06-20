@@ -5,6 +5,9 @@ module DashApp.Services {
 	import P = DashApp.Models.Peach;
 
 	export interface IPeachService {
+
+		URL_PREFIX: string;
+		 
 		GetDefines(pitUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetFaultQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetDataQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
@@ -16,7 +19,8 @@ module DashApp.Services {
 		GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
-		//GetJobFaults(jobUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+		GetFault(faultUrl: string, success: (data: P.Fault) => void): void;
+
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
 		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void;
@@ -34,29 +38,12 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		private URL_PREFIX: string = "";
+		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
 			this.resource = $resource;
 			this.http = $http;
-
-			//this.TestConnection(null, () => {
-			//	this.URL_PREFIX = "http://localhost:8888";
-			//	this.RetestConnection();
-			//});
 		}
-
-		//private TestConnection(success: () => void, error: () => void) {
-		//	this.http.get(this.URL_PREFIX + "/p/jobs").then(success, error);
-		//} 
-
-		//private RetestConnection() {
-		//	this.http.get(this.URL_PREFIX + "/p/jobs").then((e) => {
-		//		//YAY
-		//	}, (e) => {
-		//		console.error("CANNOT FIND REST HOST");
-		//	});
-		//}
 
 		public GetFaultQA(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
 			return this.resource("../testdata/wizard_qa_fault.json");
@@ -75,10 +62,7 @@ module DashApp.Services {
 		}
 		
 		public GetJobs(success: (data: P.Job[]) => void): void {
-			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data), (e) => {
-				this.URL_PREFIX = "http://localhost:8888";
-				this.GetJobs(success);
-			});
+			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data.data));
 		}
 
 		public GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
@@ -106,7 +90,7 @@ module DashApp.Services {
 				}
 			});
 		}
-		 
+
 		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
 			if (typeof IdOrUrl == "number") {
 				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl)).success((data) => success(<P.Pit>data));
@@ -138,9 +122,6 @@ module DashApp.Services {
 		public GetLibraries(success: (data: P.PitLibrary[]) => void): void {
 			this.http.get(this.URL_PREFIX + "/p/libraries").then((e) => {
 				success(e.data);
-			}, (e) => {
-				this.URL_PREFIX = "http://localhost:8888";
-				this.GetLibraries(success);
 			});
 		}
 
