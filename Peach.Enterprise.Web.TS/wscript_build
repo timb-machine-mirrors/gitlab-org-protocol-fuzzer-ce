@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+'''
 tsc = bld(
 	rule = 'tsc --target ES5 --out ${TGT} --module amd --removeComments ${SRC}',
 	source = bld.path.ant_glob('app/**/*.ts'),
@@ -9,7 +9,7 @@ tsc = bld(
 alljs = tsc.to_nodes([tsc.target])
 
 bld.install_files('${BINDIR}/web/app/js', alljs)
-
+'''
 extras = []
 dirs = [ 'app', 'Content', 'partials', 'Scripts', 'testdata' ]
 

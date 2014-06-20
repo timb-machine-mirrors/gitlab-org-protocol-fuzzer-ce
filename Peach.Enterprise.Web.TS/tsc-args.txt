@@ -3,6 +3,7 @@
 --module amd
 --removeComments
 app/ts/app.ts
+app/ts/controllers/copypit.ts
 app/ts/controllers/dash.ts
 app/ts/controllers/faults.ts
 app/ts/controllers/main.ts
@@ -12,5 +13,6 @@ app/ts/controllers/pittest.ts
 app/ts/controllers/wizard.ts
 app/ts/models/peach.ts
 app/ts/models/wizard.ts
+app/ts/services/config.ts
 app/ts/services/peach.ts
 app/ts/services/pitConfigurator.ts
