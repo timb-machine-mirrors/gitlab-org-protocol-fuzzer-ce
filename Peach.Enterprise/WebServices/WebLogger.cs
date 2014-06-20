@@ -136,6 +136,8 @@ namespace Peach.Enterprise.WebServices
 
 		#endregion
 
+		public PitTester Tester { get; set; }
+
 		public string NodeGuid { get; private set; }
 		public string JobGuid { get; private set; }
 		public string Name { get; private set; }
