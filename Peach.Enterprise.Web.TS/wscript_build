@@ -1,17 +1,5 @@
 #!/usr/bin/env python
 
-'''
-tsc = bld(
-	rule = 'tsc --target ES5 --out ${TGT} --module amd --removeComments ${SRC}',
-	source = bld.path.ant_glob('app/**/*.ts'),
-	target = 'all.js',
-)
-
-alljs = tsc.to_nodes([tsc.target])
-
-bld.install_files('${BINDIR}/web/app/js', alljs)
-'''
-
 extras = []
 dirs = [ 'app', 'Content', 'partials', 'Scripts', 'testdata' ]
 
@@ -19,7 +7,10 @@ for d in dirs:
 	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = ['app/js/*', '**/*.ts']))
 
 bld(
+	features = 'tsc',
 	name='Peach.Enterprise.Web',
+	source = bld.path.ant_glob('app/**/*.ts'),
+	js = 'app/js/app.js',
 	install_path = '${BINDIR}/web',
 	install_644 = extras,
 )

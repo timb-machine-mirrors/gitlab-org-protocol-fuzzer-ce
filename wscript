@@ -33,7 +33,7 @@ def options(opt):
 	wscript.options(opt)
 
 def configure(ctx):
-	add_tools(['sign'])
+	add_tools(['sign', 'tsc'])
 
 	wscript.configure(ctx)
 
