@@ -11,7 +11,7 @@
 
 			<div class="row">
 				<div class="space-6"></div>
-				<div class="alert alert-warning" ng-class="hidden: vm.job != undefined">
+				<div class="alert alert-warning" ng-class="{hidden: vm.job != undefined}"> 
 					<strong>Warning!</strong>
 					Job not currently running, metrics unavailable.
 					<br>
@@ -95,7 +95,7 @@
 				<div class="vspace-sm"></div>
 
 				<div class="col-sm-5">
-					<div class="widget-box">
+					<div class="widget-box hidden">
 						<div class="widget-header widget-header-flat widget-header-small">
 							<h5>
 								<i class="icon-signal"></i>
@@ -115,109 +115,123 @@
 			<div class="hr hr32 hr-dotted"></div>
 
 			<div class="row">
-				<!-- <div class="col-lg-8"> -->
-				<div class="widget-box transparent" id="recent-box">
+				<div class="widget-box transparent">
 					<div class="widget-header">
-						<h4 class="lighter smaller">
-							<i class="icon-rss orange"></i>
-							RECENT
+						<h4 class="smaller grey">
+							Recent Faults
 						</h4>
+					</div>
+					<div class="widget-body">
+						<div id="faults-table" class="table table-striped table-bordered table-hover"
+								 ng-grid="vm.gridRecentFaults" style="height: 350px" />
+					</div>
+				</div>
 
-						<div class="widget-toolbar no-border">
-							<ul class="nav nav-tabs" id="recent-tab">
-								<li class="active">
-									<a data-toggle="tab" href="#faults-tab">Faults</a>
-								</li>
+	<!--
+					<div class="widget-box transparent" id="recent-box">
+						<div class="widget-header">
+							<h4 class="lighter smaller">
+								<i class="icon-rss orange"></i>
+								RECENT
+							</h4>
 
-								<li>
-									<a data-toggle="tab" href="#member-tab">Logs</a>
-								</li>
-							</ul>
+							<div class="widget-toolbar no-border">
+								<ul class="nav nav-tabs" id="recent-tab">
+									<li class="active">
+										<a data-toggle="tab" href="#faults-tab">Faults</a>
+									</li>
+
+									<li>
+										<a data-toggle="tab" href="#member-tab">Logs</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main padding-4">
+								<div class="tab-content padding-8 overflow-visible">
+									<div id="faults-tab" class="tab-pane active">
+										<h4 class="smaller grey">
+											Recent Faults
+										</h4>
+
+										<div id="faults-table" class="table table-striped table-bordered table-hover"
+												 ng-grid="vm.gridRecentFaults" style="height: 350px" />
+
+									</div>
+								</div>
+
+								<div id="member-tab" class="tab-pane">
+									<div class="table-responsive hidden">
+										<table id="logs-table" class="table table-striped table-bordered table-hover">
+											<thead>
+												<tr>
+													<th>Time</th>
+													<th>Log Entry</th>
+													<th>Class</th>
+												</tr>
+											</thead>
+
+											<tbody>
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>Performing iteration #62</td>
+													<td></td>
+												</tr>
+
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>Action_Starting: Fuzzing: TheDataModel.DataElement_0</td>
+													<td>Peach.Core.MutationStrategies.RandomStrategy</td>
+												</tr>
+
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>Action_Starting: Mutator: UnicodeUtf8ThreeCharMutator</td>
+													<td>Peach.Core.MutationStrategies.RandomStrategy</td>
+												</tr>
+
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>ActionType.Output</td>
+													<td>Peach.Core.Dom.Action</td>
+												</tr>
+
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>open()</td>
+													<td>Peach.Core.Publishers.ConsolePublisher</td>
+												</tr>
+
+												<tr>
+													<td>11/11/2014 11:11:11</td>
+													<td>output(876 bytes)</td>
+													<td>Peach.Core.Publishers.ConsolePublisher</td>
+												</tr>
+
+											</tbody>
+										</table>
+									</div>
+
+
+
+								</div>
+
+							</div>
 						</div>
 					</div>
+			
 
-					<div class="widget-body">
-						<div class="widget-main padding-4">
-							<div class="tab-content padding-8 overflow-visible">
-								<div id="faults-tab" class="tab-pane active">
-									<h4 class="smaller grey">
-										Recent Faults
-									</h4>
+				</div>
+			
+			-->
+			</div>
+		</div>
+	</div>
+</div>
 
-									<div id="faults-table" class="table table-striped table-bordered table-hover"
-											 ng-grid="vm.gridRecentFaults" style="height: 350px" />
-									<!--
-									<div class="table-responsive">
-									</div>
-									-->
-								</div>
-							</div>
-
-							<div id="member-tab" class="tab-pane">
-								<div class="table-responsive">
-									<table id="logs-table" class="table table-striped table-bordered table-hover">
-										<thead>
-											<tr>
-												<th>Time</th>
-												<th>Log Entry</th>
-												<th>Class</th>
-											</tr>
-										</thead>
-
-										<tbody>
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>Performing iteration #62</td>
-												<td></td>
-											</tr>
-
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>Action_Starting: Fuzzing: TheDataModel.DataElement_0</td>
-												<td>Peach.Core.MutationStrategies.RandomStrategy</td>
-											</tr>
-
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>Action_Starting: Mutator: UnicodeUtf8ThreeCharMutator</td>
-												<td>Peach.Core.MutationStrategies.RandomStrategy</td>
-											</tr>
-
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>ActionType.Output</td>
-												<td>Peach.Core.Dom.Action</td>
-											</tr>
-
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>open()</td>
-												<td>Peach.Core.Publishers.ConsolePublisher</td>
-											</tr>
-
-											<tr>
-												<td>11/11/2014 11:11:11</td>
-												<td>output(876 bytes)</td>
-												<td>Peach.Core.Publishers.ConsolePublisher</td>
-											</tr>
-
-										</tbody>
-									</table>
-								</div><!-- /.table-responsive -->
-
-
-
-							</div><!-- member-tab -->
-
-						</div>
-					</div><!-- /widget-main -->
-				</div><!-- /widget-body -->
-			</div><!-- /widget-box -->
-			<!-- </div>--><!-- /span -->
-
-		</div><!-- /.row -->
-	</div><!-- /.page-content -->
-</div><!-- /.main-content -->
+<!--
 
 <script src="/Content/js/jquery-ui-1.10.3.custom.min.js"></script>
 <script src="/Content/js/jquery.ui.touch-punch.min.js"></script>
@@ -237,7 +251,6 @@
 
 
 <script type="text/javascript" src="/Content/js/d3.min.js" charset="utf-8"></script>
-
 		<script type="text/javascript">
 			jQuery(function($) {
 				
@@ -381,5 +394,5 @@
 				
 			})
 		</script>
-
+-->
 
