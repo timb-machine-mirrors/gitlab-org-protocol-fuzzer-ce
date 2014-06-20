@@ -16,7 +16,7 @@ namespace Peach.Enterprise.Test.WebServices
 		string root;
 		PitDatabase db;
 
-		static string pitExample =
+		static string modelExample =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -26,18 +26,32 @@ namespace Peach.Enterprise.Test.WebServices
        version='0.0.1'>
 
 	<DataModel name='DM'>
-		<Blob/>
+		<String value='Hello World' />
 	</DataModel>
+</Peach>
+";
+
+		static string pitExample =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+       author='Deja Vu Security, LLC'
+       description='IMG PIT'
+       version='0.0.1'>
+
+	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
 
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
 			<Action type='output'>
-				<DataModel name='DM'/>
+				<DataModel name='DM:DM'/>
 			</Action>
 		</State>
 	</StateModel>
 
 	<Test name='Default'>
+		<Strategy class='##Strategy##'/>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
 	</Test>
@@ -67,6 +81,10 @@ namespace Peach.Enterprise.Test.WebServices
 			var cat = Path.Combine(tmp, "Image");
 			Directory.CreateDirectory(cat);
 
+			var mod = Path.Combine(tmp, "_Common", "Models", "Image");
+			Directory.CreateDirectory(mod);
+
+			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), modelExample);
 			File.WriteAllText(Path.Combine(cat, "IMG.xml"), pitExample);
 			File.WriteAllText(Path.Combine(cat, "IMG.xml.config"), configExample);
 
@@ -157,7 +175,7 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.AreEqual(Environment.UserName, newPit.User);
 
 			var expName = Path.Combine(root, "User", "Image", "IMG Copy.xml");
-			Assert.AreEqual(1, newPit.Versions[0].Files.Count);
+			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
 			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
 
 			Assert.True(File.Exists(expName));
@@ -193,7 +211,7 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.NotNull(newXml);
 
 			var expName = Path.Combine(root, "User", "Image", "IMG Copy 2.xml");
-			Assert.AreEqual(1, newPit.Versions[0].Files.Count);
+			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
 			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
 
 			Assert.True(File.Exists(expName));
@@ -297,7 +315,14 @@ namespace Peach.Enterprise.Test.WebServices
 			PitDatabase.SaveMonitors(pit, monitors);
 
 			var parser = new Peach.Core.Analyzers.PitParser();
-			var dom = parser.asParser(null, pit.Versions[0].Files[0].Name);
+
+			var opts = new Dictionary<string, object>();
+			var defs = new Dictionary<string, string>();
+			defs.Add("PitLibraryPath", root);
+			defs.Add("Strategy", "Random");
+			opts[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
 
 			Assert.AreEqual(3, dom.tests[0].agents.Count);
 
@@ -334,7 +359,5 @@ namespace Peach.Enterprise.Test.WebServices
 				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Key]);
 			}
 		}
-
-		void VerifyMonitor2() { }
 	}
 }
