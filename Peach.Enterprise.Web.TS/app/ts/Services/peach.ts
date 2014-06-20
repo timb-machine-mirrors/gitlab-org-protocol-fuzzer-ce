@@ -19,7 +19,7 @@ module DashApp.Services {
 		GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
-		GetFault(faultUrl: string, success: (data: P.Fault) => void): void;
+		//GetFault(faultUrl: string, success: (data: P.Fault) => void): void;
 
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
