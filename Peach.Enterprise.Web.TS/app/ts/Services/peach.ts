@@ -3,34 +3,31 @@
 
 module DashApp.Services {
 	import P = DashApp.Models.Peach;
+	import W = DashApp.Models.Wizard;
 
 	export interface IPeachService {
 
 		URL_PREFIX: string;
-		 
+
+		GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+		GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+
 		GetDefines(pitUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetFaultQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetDataQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetAutoQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
 		GetJobs(success: (data: P.Job[]) => void): void;
-		//GetJob(jobUrl: string);
 
-		GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
-		GetManyThings(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
-
-		GetFault(faultUrl: string, success: (data: P.Fault) => void): void;
+		GetLibraries(success: (data: P.PitLibrary[]) => void): void;
 
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
 		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void;
 
-		TestConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
-		GetLibraries(success: (data: P.PitLibrary[]) => void): void;
-
-		//PostPitConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
-		//PostMonitorConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
-
+		PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any>;
+		PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any>;
+		TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void);
 	}
 
 
@@ -62,7 +59,7 @@ module DashApp.Services {
 		}
 		
 		public GetJobs(success: (data: P.Job[]) => void): void {
-			this.http.get(this.URL_PREFIX + "/p/jobs").then((data) => success(<P.Job[]>data.data));
+			this.http.get(this.URL_PREFIX + "/p/jobs").then((response) => success(<P.Job[]>response.data));
 		}
 
 		public GetSingleThing(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>> {
@@ -93,10 +90,10 @@ module DashApp.Services {
 
 		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
 			if (typeof IdOrUrl == "number") {
-				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl)).success((data) => success(<P.Pit>data));
+				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl)).then((response) => success(<P.Pit>response.data));
 			}
 			else if (typeof IdOrUrl == "string") {
-				this.http.get(this.URL_PREFIX + IdOrUrl).success((data) => success(<P.Pit>data));
+				this.http.get(this.URL_PREFIX + IdOrUrl).then((response) => success(<P.Pit>response.data));
 			}
 			else {
 				throw new Error("GetPit: Argument 0 is of an incompatible type.");
@@ -104,25 +101,34 @@ module DashApp.Services {
 		}
 
 		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void {
-			this.http.post(this.URL_PREFIX + "/p/pits", request).success((data) => success(<P.Pit>data));
+			this.http.post(this.URL_PREFIX + "/p/pits", request).then((response) => success(<P.Pit>response.data));
 		}
 		
-		public PostPitConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(this.URL_PREFIX + "/p/conf/wizard/config");
+		public PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any> {
+			var request: P.PostConfigRequest = {
+				pitUrl: pitUrl,
+				config: config
+			};
+
+			return this.http.post(this.URL_PREFIX + "/p/conf/wizard/config", request);
 		}
 
-		public PostMonitorConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(this.URL_PREFIX + "/p/conf/wizard/monitors");
+		public PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any> {
+			var request: P.PostMonitorsRequest = {
+				pitUrl: pitUrl,
+				monitors: agents
+			};
+			return this.http.post(this.URL_PREFIX + "/p/conf/wizard/monitors", request);
 		}
 
-		public TestConfiguration(): ng.resource.IResourceClass<ng.resource.IResource<any>> {
-			return this.resource(this.URL_PREFIX + "/testdata/test_results.json");
+		public TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void) {
+			return this.http.get(this.URL_PREFIX + "/p/conf/wizard/test/start?pitUrl=" + pitUrl).then((response) => success(<P.StartTestResponse>response.data), (error) => {
+				console.error(error.data); 
+			});
 		}
 
 		public GetLibraries(success: (data: P.PitLibrary[]) => void): void {
-			this.http.get(this.URL_PREFIX + "/p/libraries").then((e) => {
-				success(e.data);
-			});
+			this.http.get(this.URL_PREFIX + "/p/libraries").then((response) => success(<P.PitLibrary[]>response.data));
 		}
 
 		public OpenTestResults() {
