@@ -45,30 +45,9 @@ SUCH DAMAGE.
 
   <Include ns="LLDP" src="file:##PitLibraryPath##/_Common/Models/Net/LLDP_State.xml"/>
 
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##"/>
-      <Param name="Arguments" value="-i ##tsharkInterface##"/>
-      <Param name="FaultOnEarlyExit" value="true"/>
-    </Monitor>
-
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
   <!-- Default test for LLDP -->
   <Test name="Default">
     <StateModel ref="LLDP:Announce"/>
-
-    <!--Agent ref="RemoteAgent"/-->
-    <!--Agent ref="LocalAgent"/-->
 
     <Publisher class="RawEther" name="RawHandler">
       <Param name="Interface" value="##Interface##"/>

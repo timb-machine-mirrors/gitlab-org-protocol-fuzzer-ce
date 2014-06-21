@@ -44,23 +44,8 @@ SUCH DAMAGE.
 
 	<Include ns="TCP" src="file:##PitLibraryPath##/_Common/Models/Net/TCPv6_State.xml"/>
 
-	<!--  ip6tables -A OUTPUT -p tcp -m tcp \-\-tcp-flags RST RST -j DROP -->
-
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-		<Monitor class="Process">
-			<Param name="Executable" value="##tsharkBin##" />
-			<Param name="Arguments" value="-i ##tsharkInterface##" />
-			<Param name="FaultOnEarlyExit" value="true" />
-		</Monitor>
-		<Monitor class="Pcap">
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
 		<StateModel ref="TCP:Listener"/>
-
-		<!-- <Agent ref="RemoteAgent"/> -->
 
 		<Publisher class="RawV6">
 			<Param name="Host" value="##TargetIPv6##"/>

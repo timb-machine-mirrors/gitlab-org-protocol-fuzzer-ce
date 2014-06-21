@@ -39,34 +39,28 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Virtual Extensible LAN PIT"
+       description="Modbus PIT"
        version="0.0.2">
-  <!-- Requires Linux Peach for the RawEther publisher -->
 
-  <Include ns="States" src="file:##PitLibraryPath##/_Common/Models/Net/VXLAN_State.xml"/>
+	<Include ns="Modbus" src="file:##PitLibraryPath##/_Common/Models/Net/modbus_State.xml"/>
 
-  <Agent name="Local">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
+	<Test name="Default">
+		<StateModel ref="Modbus:AsciiMode"/>
 
-  <!-- Default test for fuzzing VXLAN -->
-  <Test name="Default">
-    <StateModel ref="States:TheState"/>
+		<Publisher name="ModbusOverSerial" class="SerialPort">
+			<Param name="PortName" value="##SerialPort##"/>
+			<Param name="Baudrate" value="##Baudrate##"/>
+			<Param name="Parity" value="##Parity##"/>
+			<Param name="DataBits" value="##DataBits##"/>
+			<Param name="StopBits" value="##StopBits##"/>
+			<Param name="Handshake" value="##Handshake##"/>
+			<Param name="Timeout" value="##Timeout##"/>
+		</Publisher>
 
-    <Exclude />
-    <Include xpath="//VXHeader/*" />
+		<Strategy class="##Strategy##"/>
 
-    <Publisher class="RawEther">
-      <Param name="Interface" value="##Interface##"/>
-      <Param name="Protocol" value="ETH_P_8021Q"/>
-    </Publisher>
-
-    <Strategy class="##Strategy##"/>
-
-    <Logger class="File" >
-      <Param name="Path" value="##LoggerPath##" />
-    </Logger>
-  </Test>
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
 </Peach>
