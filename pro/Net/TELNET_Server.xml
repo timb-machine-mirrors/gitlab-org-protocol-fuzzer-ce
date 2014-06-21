@@ -44,43 +44,8 @@ SUCH DAMAGE.
 
 	<Include ns="TELNET" src="file:##PitLibraryPath##/_Common/Models/Net/TELNET_State.xml"/>
 
-	<Agent name="Windows">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="##Program## ##Arguments##" />
-			<Param name="NoCpuKill" value="true"/>
-			<Param name="FaultOnEarlyExit" value="false"/>
-			<Param name="WaitForExitTimeout" value="250"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-			<Param name="WaitForExitOnCall" value="exitProgram"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="Linux">
-		<Monitor class="LinuxCrashMonitor"/>
-
-		<Monitor class="Process">
-			<Param name="Executable" value="##Program##"/>
-			<Param name="Arguments" value="##Arguments##"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-			<Param name="WaitForExitOnCall" value="exitProgram"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="OSX">
-		<Monitor class="Process">
-			<Param name="Executable" value="##Program##"/>
-			<Param name="Arguments" value="##Arguments##"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-			<Param name="WaitForExitOnCall" value="exitProgram"/>
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
 		<StateModel ref="TELNET:Server"/>
-
-		<Agent ref="Windows" platform="windows"/>
-		<Agent ref="Linux" platform="osx"/>
-		<Agent ref="OSX" platform="linux"/>
 
 		<Publisher name="TcpHandler" class="TcpListener">
 			<Param name="Interface" value="##SourceIPv4##"/>

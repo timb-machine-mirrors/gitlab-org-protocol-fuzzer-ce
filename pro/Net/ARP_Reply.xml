@@ -39,44 +39,26 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
        author="Deja Vu Security, LLC"
- description="Cisco Discovery Protocol PIT StateModels" version="0.0.2">
+       description="Adress Resolution Protocol PIT"
+       version="0.0.2">
+  <!-- Requires Linux Peach for the RawEther publisher -->
 
-	<Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
-	<Include ns="CDP" src="file:##PitLibraryPath##/_Common/Models/Net/CDP_Data.xml"/>
-	<Include ns="LLC" src="file:##PitLibraryPath##/_Common/Models/Net/LLC_Data.xml"/>
+  <Include ns="ARP" src="file:##PitLibraryPath##/_Common/Models/Net/ARP_State.xml"/>
 
-	<DataModel name="CDPPacket" ref="Ethernet:Frame">
-		<Number name="TypeOrLen" size="16" token="true"  endian="big" mutable="false">
-			<Relation type="size" of="Payload"/>
-			<!-- !!FIXME!! Strip this relation out when relation implemented in parent ref -->
-		</Number>
-		<Block name="Payload" >
-			<Block name="LLC" ref="LLC:Header" />
-			<Block name="CDP" ref="CDP:Packet" />
-		</Block>
-	</DataModel>
+  <Test name="Default">
+    <Exclude xpath="//ARPPacket"/>
+    <Include xpath="//ARPPacket/Payload"/>
+    <StateModel ref="ARP:Reply"/>
 
-	<StateModel name="Multicast" initialState="Initial">
-		<State name="Initial">
-			<Action name="SendPacket" type="output" publisher="RawHandler">
-				<DataModel ref="CDPPacket"/>
-				<Data>
-					<Field name="Payload.CDP.OptionChoices[0].DeviceId" value=""/>
-					<Field name="Payload.CDP.OptionChoices[1].Addresses" value=""/>
-					<Field name="Payload.CDP.OptionChoices[2].PortId" value=""/>
-					<Field name="Payload.CDP.OptionChoices[3].Capabilites" value=""/>
-					<Field name="Payload.CDP.OptionChoices[4].SoftwareVersion" value=""/>
-					<Field name="Payload.CDP.OptionChoices[5].Platform" value=""/>
-					<Field name="Payload.CDP.OptionChoices[6].ProtocolHello" value=""/>
-					<Field name="Payload.CDP.OptionChoices[7].VtpMangageMentDomain" value=""/>
-					<Field name="Payload.CDP.OptionChoices[8].NativeVlan" value=""/>
-					<Field name="Payload.CDP.OptionChoices[9].Duplex" value=""/>
-					<Field name="Payload.CDP.OptionChoices[10].TrustBitmap" value=""/>
-					<Field name="Payload.CDP.OptionChoices[11].UntrustedPortCos" value=""/>
-					<Field name="Payload.CDP.OptionChoices[12].ManagementAddress" value=""/>
-				</Data>
-			</Action>
-		</State>
-	</StateModel>
+    <Publisher class="RawEther">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_ARP"/>
+    </Publisher>
+    
+    <Strategy class="##Strategy##"/>
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
 </Peach>
-<!--End-->

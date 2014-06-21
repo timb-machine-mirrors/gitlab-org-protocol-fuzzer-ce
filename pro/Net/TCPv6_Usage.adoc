@@ -8,10 +8,8 @@ An application must be listening on the TCP port defined in the configuration fi
 Disable outgoing RST packets when using this pit because Peach manages TCP state outside of the kernel context.
 
 ==== Required Pit Configuration Changes
-TargetIPv4:: IP address of the target host machine.
-SourceIPv4:: IP address of the interface on the local machine.
-TargetIPBytes:: IP address of the target host machine in hexadecimal.
-SourceIPBytes:: IP address of the interface on the local machine in hexadecimal.
+TargetIPv6:: IP address of the target host machine.
+SourceIPv6:: IP address of the interface on the local machine.
 SourcePort:: TCPv6 port number of the local machine.
 TargetPort:: TCPv6 port number of the target host machine.
 Interface:: Name of local interface (used for monitoring).
@@ -70,8 +68,6 @@ socat tcp6-l:4321,fork,reuseaddr STDIO
     <Range key="SourcePort" name="name" description="" min="0" max="65535" value="5280"/>
     <Strategy key="Strategy" name="name" description=""  value="Random"/>
     <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <String key="TargetIPBytes" value="C0A89280"/>
-    <String key="SourceIPBytes" value="C0A89201"/>
   </All>
 
   <Linux>
