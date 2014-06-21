@@ -53,7 +53,7 @@ SUCH DAMAGE.
 
 	<Test name="Default">
 		<Agent ref="LocalAgent" />
-		<StateModel ref="LDAP:Search"/>
+		<StateModel ref="LDAP:Client"/>
 
 		<Strategy class="##Strategy##"/>
 
@@ -65,74 +65,6 @@ SUCH DAMAGE.
 
 		<Logger class="File">
 		<Param name="Path" value="##LoggerPath##/Search" />
-		</Logger>
-	</Test>
-
-	<Test name="Add">
-		<Agent ref="LocalAgent" />
-		<StateModel ref="LDAP:Add"/>
-
-		<Strategy class="##Strategy##"/>
-
-		<Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
-			<Param name="Port" value="##TargetPort##" />
-			<Param name="Timeout" value="##Timeout##"/>
-		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##/Add" />
-		</Logger>
-	</Test>
-
-	<Test name="Compare">
-		<Agent ref="LocalAgent" />
-		<StateModel ref="LDAP:Compare"/>
-
-		<Strategy class="##Strategy##"/>
-
-		<Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
-			<Param name="Port" value="##TargetPort##" />
-			<Param name="Timeout" value="##Timeout##"/>
-		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##/Compare" />
-		</Logger>
-	</Test>
-
-	<Test name="Delete">
-		<Agent ref="LocalAgent" />
-		<StateModel ref="LDAP:Delete"/>
-
-		<Strategy class="##Strategy##"/>
-
-		<Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
-			<Param name="Port" value="##TargetPort##" />
-			<Param name="Timeout" value="##Timeout##"/>
-		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##/Delete" />
-		</Logger>
-	</Test>
-
-	<Test name="ExtendOp">
-		<Agent ref="LocalAgent" />
-		<StateModel ref="LDAP:ExtendOp"/>
-
-		<Strategy class="##Strategy##"/>
-
-		<Publisher class="Tcp" name="tcp">
-			<Param name="Host" value="##TargetIPv4##" />
-			<Param name="Port" value="##TargetPort##" />
-			<Param name="Timeout" value="##Timeout##"/>
-		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##/ExtendOp" />
 		</Logger>
 	</Test>
 </Peach>

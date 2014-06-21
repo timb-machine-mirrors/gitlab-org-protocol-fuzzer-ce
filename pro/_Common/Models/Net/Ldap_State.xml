@@ -43,103 +43,75 @@ SUCH DAMAGE.
 
 	<Include ns="DataModels" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_Data.xml"/>
 
-	<StateModel name="Search" initialState="Initial">
-		<State name="Initial">
+	<StateModel name="Client" initialState="Initial">
+		<State name="Search">
+      <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
        </Action>
-			<Action type="changeState" ref="ldap" />
-		</State>
-		<State name="ldap">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Search" />
 			</Action>
-			<Action type="changeState" ref="ubind" />
-		</State>
-		<State name="ubind">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
+      <Action type="close" publisher="tcp" />
 		</State>
-	</StateModel>
-
-	<StateModel name="Add" initialState="Initial">
-		<State name="Initial">
+    
+		<State name="Add">
+      <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
       </Action>
-			<Action type="changeState" ref="ldap" />
-		</State>
-		<State name="ldap">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Add" />
 			</Action>
-			<Action type="changeState" ref="ubind" />
-		</State>
-		<State name="ubind">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
+      <Action type="close" publisher="tcp" />
 		</State>
-	</StateModel>
-
-	<StateModel name="Compare" initialState="Initial">
-		<State name="Initial">
+    
+		<State name="Compare">
+      <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
       </Action>
-			<Action type="changeState" ref="ldap" />
-		</State>
-		<State name="ldap">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Compare" />
 			</Action>
-			<Action type="changeState" ref="ubind" />
-		</State>
-		<State name="ubind">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
+      <Action type="close" publisher="tcp" />
 		</State>
-	</StateModel>
-
-	<StateModel name="Delete" initialState="Initial">
-		<State name="Initial">
+    
+		<State name="Delete">
+      <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
-            </Action>
-			<Action type="changeState" ref="ldap" />
-		</State>
-		<State name="ldap">
+      </Action>
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Delete" />
 			</Action>
-			<Action type="changeState" ref="ubind" />
-		</State>
-		<State name="ubind">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
+      <Action type="close" publisher="tcp" />
 		</State>
-	</StateModel>
 
-	<StateModel name="ExtendOp" initialState="Initial">
-		<State name="Initial">
+		<State name="ExtendOp">
+      <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
-            </Action>
-			<Action type="changeState" ref="ldap" />
-		</State>
-		<State name="ldap">
+      </Action>
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:ExtendOp" />
 			</Action>
-			<Action type="changeState" ref="ubind" />
-		</State>
-		<State name="ubind">
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
+      <Action type="close" publisher="tcp" />
 		</State>
 	</StateModel>
 
