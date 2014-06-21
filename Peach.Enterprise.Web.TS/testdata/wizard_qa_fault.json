@@ -73,7 +73,7 @@
 			"id":1110,
 			"q":"Where is executable located (full path name)? Peach includes macro defines for Peach working directory as well as the current working directory.",
 			"type":"string",
-			"required": false,
+			"required": true,
 			"key":"WinDbgExecutable",
 			"next":1111
 		},
@@ -90,6 +90,7 @@
 			"q":"What is the name of the Windows Service? You can determine this name by XYZ.",
 			"type":"string",
 			"key":"WinDbgService",
+			"required": false,
 			"next":1140
 		},
 		{
@@ -97,7 +98,8 @@
 			"q":"What is the process name that you want to detect faults for? You can determine this by XYZ.",
 			"type":"string",
 			"key":"WinDbgProcessName",
-			"next":1141
+			"next":1141,
+			"required": false
 		},
 		{
 			"id":1140,
@@ -115,6 +117,7 @@
 			"q":"What is the Windows Debugging Tools path? If Windows Debugging Tools are not installed, please install now using the Windows SDK installer. If you leave this value blank, Peach will try to detect where the Windows Debugging Tools are installed to.",
 			"type":"string",
 			"key":"WinDbgPath",
+			"required": false,
 			"next":1142
 		},
 		{
@@ -151,6 +154,7 @@
 			"q":"What is executable to run? This should include the full path. Peach includes macro defines for Peach working directory as well as the current working directory.",
 			"type":"string",
 			"key":"LinuxDebugerExecutable",
+			"required":true,
 			"next":3101
 		},
 		{
@@ -186,13 +190,15 @@
 			"id":3104,
 			"q":"What is the full path to the GDB executable? If left blank Peach will search the path for GDB.",
 			"type":"string",
-			"key":"LinuxDebugGdbPath"
+			"key":"LinuxDebugGdbPath",
+			"required":false
 		},
 		{
 			"id":4100,
 			"q":"What is the hostname or IP address of the device to check for availability. This check will be performed using the ICMP PING packets. The device must be configured to respond to such packets. You can check this using the command line ping program.",
 			"type":"string",
 			"key":"PingHost",
+			"required": true,
 			"next":4101
 		},
 		{
@@ -211,14 +217,16 @@
 			"key":"PingRetryCount",
 			"type":"range",
 			"rangeMin":1,
-			"rangeMax":999999
+			"rangeMax":999999,
+			"required": false
 		},
 		{
 			"id":4200,
 			"q":"What is executable to run? This should include the full path. Peach includes macro defines for Peach working directory as well as the current working directory.",
 			"type":"string",
 			"key":"ProcessExecutable",
-			"next":4201
+			"next":4201,
+			"required": true
 		},
 		{
 			"id":4201,
