@@ -6,6 +6,7 @@
 /// <reference path="../../../scripts/typings/ng-grid/ng-grid.d.ts" />
 
 module DashApp {
+	"use strict";
 
 	import P = Models.Peach;
 
@@ -16,47 +17,50 @@ module DashApp {
 		private pitConfigSvc: Services.IPitConfiguratorService;
 
 		public get pit(): P.Pit {
-			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined)
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined) {
 				return this.pitConfigSvc.Pit;
-			else
+			}
+			else {
 				return undefined;
+			}
 		}
 
 		public get job(): P.Job {
-			
-			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined)
+
+			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined) {
 				return this.pitConfigSvc.Job;
-			else
+			}
+			else {
 				return undefined;
+			}
 		}
 
 		public get runtimeString(): string {
 			if (this.pitConfigSvc.Job == undefined)
 				return "";
 			else
-				return moment(new Date(0, 0, 0, 0, 0, this.pitConfigSvc.Job.runtime)).format('H:mm:ss');
+				return moment(new Date(0, 0, 0, 0, 0, this.pitConfigSvc.Job.runtime)).format("H:mm:ss");
 		}
 
 		//showGroupPanel: true,
 		//	jqueryUIDraggable: true,
 
 		public gridRecentFaults = {
-			data: 'vm.recentFaults',
-			sortInfo: { fields: ['iteration'], directions: ['desc'] },
+			data: "vm.recentFaults",
+			sortInfo: { fields: ["iteration"], directions: ["desc"] },
 			columnDefs: [
-				{ field: 'iteration', displayName: '#' },
-				{ field: 'timestamp', displayName: 'When' },
-				{ field: 'source', displayName: 'Monitor' },
-				{ field: 'exploitability', displayName: 'Risk' },
-				{ field: 'majorHash', displayName: 'Major Hash' },
-				{ field: 'minorHash', displayName: 'Minor Hash' }
+				{ field: "iteration", displayName: "#" },
+				{ field: "timestamp", displayName: "When" },
+				{ field: "source", displayName: "Monitor" },
+				{ field: "exploitability", displayName: "Risk" },
+				{ field: "majorHash", displayName: "Major Hash" },
+				{ field: "minorHash", displayName: "Minor Hash" }
 			],
 			enablePaging: true,
 			pagingOptions: { pageSize: 10, currentPage: 1, pageSizes: [10] },
-			totalServerItems: 'vm.job.faultCount',
+			totalServerItems: "vm.job.faultCount",
 			showFooter: false
-		}
-		//	showFooter: true
+		};
 		
 		public recentFaults: P.Fault[] = [];
 
@@ -66,14 +70,11 @@ module DashApp {
 			this.pitConfigSvc = pitConfiguratorService;
 			$scope.vm = this;
 
-			$scope.$watch('vm.job.faultCount', () => {
-				this.recentFaults = this.pitConfigSvc.Faults.sort((a, b) => {
-					if (a.iteration == b.iteration)
-						return 0;
-					if (a.iteration > b.iteration)
-						return -1;
-					else
-						return 1;
+			$scope.$watch("vm.job.faultCount", () => {
+				this.recentFaults = this.pitConfigSvc.Faults.sort((a: P.Fault, b: P.Fault) => {
+					if (a.iteration == b.iteration) { return 0; }
+					else if (a.iteration > b.iteration) { return -1; }
+					else { return 1;}
 				}).slice(0, 9);
 			});
 		}

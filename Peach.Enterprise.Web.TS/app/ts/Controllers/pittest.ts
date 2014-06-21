@@ -91,7 +91,7 @@ module DashApp {
 			this.q.all([monitorPromise, configPromise]).then((response) => {
 				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: P.StartTestResponse) => {
 					this.startTestPoller(data.testUrl);
-					//this.startLogPoller(data.testUrl);
+					this.startLogPoller(data.testUrl);
 				});
 			}, (response) => {
 				console.error(response);  

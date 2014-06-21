@@ -217,7 +217,7 @@ module DashApp {
 			if (this.currentQuestion == undefined) {
 				//if we're not on a question, get the 0th
 				this.questionPath = [];
-				this.currentQuestion = <W.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
+				this.currentQuestion = <W.Question>$.grep(this.qa, (e) => { return e.id == 0; })[0];
 			}
 			else {
 				var q = this.currentQuestion;
@@ -235,8 +235,7 @@ module DashApp {
 
 				if ([ W.QuestionTypes.Choice, W.QuestionTypes.Jump ].indexOf(q.type) >= 0) {
 					// get next id from selected choice
-					var choice = $.grep(q.choice, function (e)
-					{
+					var choice = $.grep(q.choice, (e) => {
 						if (e.value == undefined && e.next != undefined)
 							return e.next.toString() == q.value.toString();
 						else if (e.value != undefined)
@@ -246,7 +245,7 @@ module DashApp {
 					})[0];
 
 					if (choice == undefined)
-						nextid = q.choice[parseInt(q.value)].next;
+						nextid = q.choice[parseInt(q.value, 10)].next;
 					else
 						nextid = choice.next;
 				}
@@ -401,7 +400,6 @@ module DashApp {
 					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions();
 					this.next();
 					return;
-					break;
 				case "fault":
 					this.pitConfigSvc.FaultMonitors = [];
 					res = this.peach.GetFaultQA();
@@ -429,11 +427,10 @@ module DashApp {
 		}
 
 		public findMonitors(): W.Agent[] {
-			var that = this;
 			var foundMonitors: W.Monitor[] = [];
-			foundMonitors = $.grep(this.monitors, function (m) {
+			foundMonitors = $.grep(this.monitors, (m) => {
 				var w = $.grep(m.path, function (p) {
-					return that.questionPath.indexOf(p) >= 0;
+					return this.questionPath.indexOf(p) >= 0;
 				});
 
 				return (w.length == m.path.length);

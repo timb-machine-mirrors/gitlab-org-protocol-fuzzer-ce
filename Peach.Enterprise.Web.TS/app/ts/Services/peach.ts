@@ -2,6 +2,8 @@
 /// <reference path="../../../Scripts/typings/angularjs/angular-resource.d.ts" />
 
 module DashApp.Services {
+	"use strict";
+
 	import P = DashApp.Models.Peach;
 	import W = DashApp.Models.Wizard;
 
@@ -90,7 +92,7 @@ module DashApp.Services {
 
 		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
 			if (typeof IdOrUrl == "number") {
-				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl)).then((response) => success(<P.Pit>response.data));
+				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl, 10)).then((response) => success(<P.Pit>response.data));
 			}
 			else if (typeof IdOrUrl == "string") {
 				this.http.get(this.URL_PREFIX + IdOrUrl).then((response) => success(<P.Pit>response.data));
@@ -131,9 +133,5 @@ module DashApp.Services {
 			this.http.get(this.URL_PREFIX + "/p/libraries").then((response) => success(<P.PitLibrary[]>response.data));
 		}
 
-		public OpenTestResults() {
-			
-			
-		}
 	}
 } 
