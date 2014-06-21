@@ -87,13 +87,9 @@ namespace Peach.Enterprise.WebServices
 
 			lock (logger)
 			{
-				if (logger.JobGuid != null)
+				if (logger.Busy)
 					return HttpStatusCode.Forbidden;
 
-				if (logger.Tester != null && logger.Tester.Status == TestStatus.Active)
-					return HttpStatusCode.Forbidden;
-
-				
 				logger.Tester = new PitTester(".", pit.Versions[0].Files[0].Name);
 
 				return Response.AsJson(new { TestUrl = Prefix + "/test/" + logger.Tester.Guid });

@@ -4,6 +4,7 @@ using Peach.Core.IO;
 using Peach.Enterprise.WebServices.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -138,6 +139,7 @@ namespace Peach.Enterprise.WebServices
 
 		public PitTester Tester { get; set; }
 
+		public Thread Thread { get; private set; }
 		public string NodeGuid { get; private set; }
 		public string JobGuid { get; private set; }
 		public string Name { get; private set; }
@@ -146,6 +148,17 @@ namespace Peach.Enterprise.WebServices
 		public uint StartIteration { get; private set; }
 		public uint FaultCount { get; private set; }
 		public System.DateTime StartDate { get; private set; }
+
+		public bool Busy
+		{
+			get
+			{
+				if (JobGuid != null || Thread != null)
+					return true;
+
+				return Tester != null && Tester.Status == TestStatus.Active;
+			}
+		}
 
 		/// <summary>
 		/// Get the most recent visualizer snapshot.
@@ -193,6 +206,10 @@ namespace Peach.Enterprise.WebServices
 				faultDetails.TryGetValue(id, out ret);
 				return ret;
 			}
+		}
+
+		public void RunJob(string pitLibraryPath, string pitFile)
+		{
 		}
 
 		public WebLogger()
