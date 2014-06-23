@@ -120,8 +120,8 @@ namespace Peach.Enterprise.WebServices
 			}
 
 			var writer = new StreamWriter(new MemoryStream());
-				
-			foreach (var line in logger.Tester.Log)
+
+			foreach (var line in lines)
 				writer.WriteLine(line);
 
 			writer.Flush();
