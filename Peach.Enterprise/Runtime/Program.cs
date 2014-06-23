@@ -60,7 +60,7 @@ namespace Peach.Enterprise.Runtime
 
 		protected override void RunEngine()
 		{
-			using (var svc = new WebServices.WebService())
+			using (var svc = new WebServices.WebService(""))
 			{
 				svc.Start(new string[0]);
 

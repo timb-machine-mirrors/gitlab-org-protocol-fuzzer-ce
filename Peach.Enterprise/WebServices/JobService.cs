@@ -31,13 +31,21 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}/stop"] = _ => StopJob(_.id);
 		}
 
+		string PitLibraryPath
+		{
+			get
+			{
+				return (string)Context.Items["PitLibraryPath"];
+			}
+		}
+
 		object CreateJob()
 		{
 			var job = this.Bind<Models.Job>();
 			if (string.IsNullOrEmpty(job.PitUrl))
 				return HttpStatusCode.BadRequest;
 
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitByUrl(job.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
