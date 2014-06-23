@@ -1,4 +1,5 @@
 using Nancy;
+using Nancy.ModelBinding;
 using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
@@ -32,12 +33,21 @@ namespace Peach.Enterprise.WebServices
 
 		object CreateJob()
 		{
+			var job = this.Bind<Models.Job>();
+			if (string.IsNullOrEmpty(job.PitUrl))
+				return HttpStatusCode.BadRequest;
+
+			var db = new PitDatabase(".");
+			var pit = db.GetPitByUrl(job.PitUrl);
+			if (pit == null)
+				return HttpStatusCode.NotFound;
+
 			lock (logger)
 			{
-				if (logger.JobGuid != null)
+				if (logger.Busy)
 					return HttpStatusCode.Forbidden;
 
-				// Parse pit, create thread, run engine
+				logger.RunJob(".", pit.Versions[0].Files[0].Name);
 			}
 
 			return HttpStatusCode.OK;
@@ -55,7 +65,24 @@ namespace Peach.Enterprise.WebServices
 
 		object StopJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			System.Threading.Thread th = null;
+
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				th = logger.Thread;
+				th.Abort();
+			}
+
+			if (th != null)
+				th.Join();
+
+			return HttpStatusCode.OK;
 		}
 
 		object GetJobs()

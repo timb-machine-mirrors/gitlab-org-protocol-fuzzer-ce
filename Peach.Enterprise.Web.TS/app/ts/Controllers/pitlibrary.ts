@@ -2,9 +2,10 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/kendo/kendo.web.d.ts" />
+/// <reference path="../../../Scripts/typings/kendo/kendo.web.d.ts" />
 
 module DashApp {
+	"use strict";
 
 	import P = Models.Peach;
 
@@ -84,7 +85,7 @@ module DashApp {
 							return e.name.substr(0,8) == "Category";
 						})[0].values[1];
 
-						catitem = $.grep(libitem.items, (e) => { return e.text == category })[0];
+						catitem = $.grep(libitem.items, (e) => { return e.text == category; })[0];
 						if(catitem == undefined) { 
 							catitem = new TreeItem();
 							catitem.text = category;

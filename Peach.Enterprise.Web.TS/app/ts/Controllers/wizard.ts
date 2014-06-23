@@ -2,8 +2,8 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/angularjs/angular-local-storage.d.ts" />
-/// <reference path="../../../scripts/typings/angularjs/angular-route.d.ts" />
+/// <reference path="../../../Scripts/typings/angularjs/angular-local-storage.d.ts" />
+/// <reference path="../../../Scripts/typings/angularjs/angular-route.d.ts" />
 
 module DashApp {
 	"use strict";
@@ -429,11 +429,11 @@ module DashApp {
 		}
 
 		public findMonitors(): W.Agent[] {
-			var that = this;
+			//var that = this;
 			var foundMonitors: W.Monitor[] = [];
-			foundMonitors = $.grep(this.monitors, function (m) {
-				var w = $.grep(m.path, function (p) {
-					return that.questionPath.indexOf(p) >= 0;
+			foundMonitors = $.grep(this.monitors, (m) => {
+				var w = $.grep(m.path, (p) => {
+					return this.questionPath.indexOf(p) >= 0;
 				});
 
 				return (w.length == m.path.length);

@@ -70,24 +70,6 @@ module DashApp.Services {
 		}
 		//#endregion
 
-		private _pit: P.Pit;
-
-		public get Pit(): P.Pit {
-			return this._pit;
-		}
-
-		public set Pit(pit: P.Pit) { 
-			if (this._pit != pit) {
-				this._pit = pit;
-				if (pit.pitUrl != undefined) {
-					this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
-						this._defines = new P.PitConfig(<P.PitConfig>data);
-					});
-				}
-			}
-		}
-
-
 		//#region StateBag
 		private _stateBag: W.StateBag = new W.StateBag();
 
@@ -111,6 +93,26 @@ module DashApp.Services {
 		public set Defines(defines: P.PitConfig) {
 			if (this._defines != defines) {
 				this._defines = defines;
+			}
+		}
+		//#endregion
+
+
+		//#region Pit
+		private _pit: P.Pit;
+
+		public get Pit(): P.Pit {
+			return this._pit;
+		}
+
+		public set Pit(pit: P.Pit) {
+			if (this._pit != pit) {
+				this._pit = pit;
+				if (pit.pitUrl != undefined) {
+					this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
+						this._defines = new P.PitConfig(<P.PitConfig>data);
+					});
+				}
 			}
 		}
 		//#endregion

@@ -2,8 +2,11 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Enterprise.WebServices.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -66,7 +69,7 @@ namespace Peach.Enterprise.WebServices
 				MutatedElements.Add(actionData.outputName + "." + element.fullName);
 			}
 
-			public void ActionFinished(Action action)
+			public void ActionFinished(Peach.Core.Dom.Action action)
 			{
 				foreach (var item in action.outputData)
 				{
@@ -138,6 +141,7 @@ namespace Peach.Enterprise.WebServices
 
 		public PitTester Tester { get; set; }
 
+		public Thread Thread { get; private set; }
 		public string NodeGuid { get; private set; }
 		public string JobGuid { get; private set; }
 		public string Name { get; private set; }
@@ -146,6 +150,17 @@ namespace Peach.Enterprise.WebServices
 		public uint StartIteration { get; private set; }
 		public uint FaultCount { get; private set; }
 		public System.DateTime StartDate { get; private set; }
+
+		public bool Busy
+		{
+			get
+			{
+				if (JobGuid != null || Thread != null)
+					return true;
+
+				return Tester != null && Tester.Status == TestStatus.Active;
+			}
+		}
 
 		/// <summary>
 		/// Get the most recent visualizer snapshot.
@@ -193,6 +208,13 @@ namespace Peach.Enterprise.WebServices
 				faultDetails.TryGetValue(id, out ret);
 				return ret;
 			}
+		}
+
+		public void RunJob(string pitLibraryPath, string pitFile)
+		{
+			Thread = new Thread(delegate() { JobThread(pitLibraryPath, pitFile); });
+
+			Thread.Start();
 		}
 
 		public WebLogger()
@@ -251,11 +273,11 @@ namespace Peach.Enterprise.WebServices
 			vizDataFinal = vizDataStart;
 		}
 
-		protected override void ActionStarting(RunContext context, Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 		}
 
-		protected override void ActionFinished(RunContext context, Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			vizDataStart.ActionFinished(action);
 		}
@@ -340,6 +362,46 @@ namespace Peach.Enterprise.WebServices
 				faultDetails.Add(id, faultDetail);
 
 				++FaultCount;
+			}
+		}
+
+		void JobThread(string pitLibraryPath, string pitFile)
+		{
+			try
+			{
+				var defs = new List<KeyValuePair<string, string>>();
+				var args = new Dictionary<string, object>();
+
+				args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+				defs.Add(new KeyValuePair<string, string>("Peach.Cwd", Environment.CurrentDirectory));
+				defs.Add(new KeyValuePair<string, string>("Peach.Pwd", Assembly.GetCallingAssembly().Location));
+				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+
+				var pitConfig = pitFile + ".config";
+
+				// It is ok if a .config doesn't exist
+				if (System.IO.File.Exists(pitConfig))
+				{
+					foreach (var d in PitDefines.Parse(pitConfig))
+					{
+						defs.Add(new KeyValuePair<string, string>(d.Key, d.Value));
+					}
+				}
+
+				var parser = new Godel.Core.GodelPitParser();
+				var dom = parser.asParser(args, pitFile);
+				var config = new RunConfiguration() { pitFile = pitFile };
+				var engine = new Engine(this);
+
+				engine.startFuzzing(dom, config);
+			}
+			finally
+			{
+				lock (this)
+				{
+					Thread = null;
+				}
 			}
 		}
 	}

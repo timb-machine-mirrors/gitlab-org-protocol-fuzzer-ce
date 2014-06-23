@@ -1,4 +1,6 @@
 ﻿module DashApp {
+	"use strict";
+
 	import P = DashApp.Models.Peach;
 
 	export class CopyPitController {

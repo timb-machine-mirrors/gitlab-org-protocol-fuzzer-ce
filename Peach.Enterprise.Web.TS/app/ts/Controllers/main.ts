@@ -1,9 +1,10 @@
 ﻿/// <reference path="../Models/wizard.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
 
 module DashApp {
+	"use strict";
 
 	import P = Models.Peach;
 
@@ -84,7 +85,7 @@ module DashApp {
 			this.modal.open({
 				templateUrl: "../partials/pitlibrary.html",
 				keyboard: false,
-				backdrop: 'static',
+				backdrop: "static",
 				controller: PitLibraryController,
 				resolve: {
 					peachsvc: () => {
@@ -109,7 +110,7 @@ module DashApp {
 			this.modal.open({
 				templateUrl: "../partials/copy-pit.html",
 				keyboard: false,
-				backdrop: 'static',
+				backdrop: "static",
 				controller: CopyPitController,
 				resolve: {
 					pit: () => {

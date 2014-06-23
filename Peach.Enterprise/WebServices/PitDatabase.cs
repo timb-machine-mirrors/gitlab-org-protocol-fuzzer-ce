@@ -215,7 +215,6 @@ namespace Peach.Enterprise.WebServices
 
 			SetPitAttr(it, "author", Environment.UserName);
 			SetPitAttr(it, "description", description);
-			SetPitAttr(it, "missing", description);
 
 			try
 			{
