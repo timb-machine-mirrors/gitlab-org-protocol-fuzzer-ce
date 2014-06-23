@@ -41,11 +41,7 @@ module DashApp.Services {
 			this.pollerSvc = poller;
 			this.peachSvc = peachService;
 
-			this.peachSvc.GetLibraries((data: P.PitLibrary[]) => {
-				this.UserPitLibrary = $.grep(data, (e) => {
-					return e.locked == false;
-				})[0].libraryUrl;
-			});
+			this.initialize();
 		}
 
 		public Faults: Models.Peach.Fault[] = [];
@@ -262,5 +258,23 @@ module DashApp.Services {
 			}
 		}
 
+		private initialize() {
+			//this.peachSvc.GetLocalFile<any>("../testdata/test_config.json", (data) => {
+			//	this.peachSvc.URL_PREFIX = data.URL_PREFIX;
+			//	this.getUserLibrary();
+			//}, () => {
+			//	this.getUserLibrary();
+			//});
+
+			this.getUserLibrary();
+		}
+
+		private getUserLibrary() {
+			this.peachSvc.GetLibraries((data: P.PitLibrary[]) => {
+				this.UserPitLibrary = $.grep(data, (e) => {
+					return e.locked == false;
+				})[0].libraryUrl;
+			});
+		}
 	}
 }

@@ -30,6 +30,8 @@ module DashApp.Services {
 		PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any>;
 		PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any>;
 		TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void);
+
+		GetLocalFile<T>(url: string, success: (data: T) => void, error?: (response) => void): void;
 	}
 
 
@@ -37,7 +39,7 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		public URL_PREFIX: string = "";
+		public URL_PREFIX: string = "http://localhost:8888";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
 			this.resource = $resource;
@@ -130,7 +132,15 @@ module DashApp.Services {
 		}
 
 		public GetLibraries(success: (data: P.PitLibrary[]) => void): void {
-			this.http.get(this.URL_PREFIX + "/p/libraries").then((response) => success(<P.PitLibrary[]>response.data));
+			this.http.get(this.URL_PREFIX + "/p/libraries").then((response) => success(<P.PitLibrary[]>response.data), (error) => this.handleError(error));
+		}
+
+		public GetLocalFile<T>(url: string, success: (data: T) => void, error?: (response) => void): void {
+			this.http.get(url).then((response) => success(<T>response.data), (response) => error(response));
+		}
+
+		private handleError(error) {
+			console.error(error);
 		}
 
 	}
