@@ -73,6 +73,11 @@ def make_test(self):
 	if not test:
 		test = self.create_task('utest', inputs, outputs)
 
+	last_test = getattr(self.bld, 'last_utest_task', None)
+	if last_test:
+		test.set_run_after(last_test)
+	setattr(self.bld, 'last_utest_task', test)
+
 class utest(Task.Task):
 	vars = []
 
@@ -95,6 +100,10 @@ class utest(Task.Task):
 		self.ut_exec = getattr(self, 'ut_exec', [ self.inputs[0].abspath() ])
 		if getattr(self.generator, 'ut_fun', None):
 			self.generator.ut_fun(self)
+
+		args = Utils.to_list(getattr(self.generator, 'ut_args', ''))
+		if args:
+			self.ut_exec.extend(args)
 
 		Logs.debug('runner: %r' % self.ut_exec)
 		cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath()
