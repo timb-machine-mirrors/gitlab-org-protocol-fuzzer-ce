@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../scripts/typings/ng-grid/ng-grid.d.ts" />
+﻿/// <reference path="../../../Scripts/typings/ng-grid/ng-grid.d.ts" />
 
 module DashApp {
 	"use strict";

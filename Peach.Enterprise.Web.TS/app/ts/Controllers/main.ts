@@ -1,7 +1,7 @@
 ﻿/// <reference path="../Models/wizard.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
 
 module DashApp {
 	"use strict";
