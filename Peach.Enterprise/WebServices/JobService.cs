@@ -65,7 +65,24 @@ namespace Peach.Enterprise.WebServices
 
 		object StopJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			System.Threading.Thread th = null;
+
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				th = logger.Thread;
+				th.Abort();
+			}
+
+			if (th != null)
+				th.Join();
+
+			return HttpStatusCode.OK;
 		}
 
 		object GetJobs()
