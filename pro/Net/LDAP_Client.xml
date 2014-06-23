@@ -44,15 +44,7 @@ SUCH DAMAGE.
 
 	<Include ns="LDAP" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_State.xml"/>
 
-	<Agent name="LocalAgent">
-		<Monitor name="Network" class="Pcap">
-			<Param name="filter" value="tcp"/>
-			<Param name="Device" value="##Interface##" />
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
-		<Agent ref="LocalAgent" />
 		<StateModel ref="LDAP:Client"/>
 
 		<Strategy class="##Strategy##"/>

@@ -39,51 +39,31 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Internet Security Protocol version 6 PIT"
+       description="File Transfer Protocol server PIT"
        version="0.0.2">
 
-  <Include ns="IPSECv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPSECv6_State.xml"/>
+  <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>
 
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
-  <!-- ESP Header Test -->
   <Test name="Default">
-    <StateModel ref="IPSECv6:ESP"/>
+    <StateModel ref="FTP:ServerPassive"/>
 
-    <Agent ref="LocalAgent"/>
+    <Publisher name="CommandPublisher" class="TcpListener">
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="##CommandPort##"/>
+		<Param name="AcceptTimeout" value="##AcceptTimeout##"/>
+		<Param name="Timeout" value="##Timeout##"/>
+	</Publisher>
 
-    <Publisher class="RawV6">
-      <Param name="Host" value="##TargetIPv6##"/>
-      <Param name="Interface" value="##SourceIPv6##"/>
-      <Param name="Protocol" value="50"/>
-    </Publisher>
-    
-    <Strategy class="##Strategy##"/>
-
-    <Logger class="File">
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-  </Test>
-  
-  <!-- Authentication Header Test -->
-  <Test name="AH">
-    <StateModel ref="IPSECv6:AH"/>
-
-    <Agent ref="LocalAgent"/>
-
-    <Publisher class="RawV6">
-      <Param name="Host" value="##TargetIPv6##"/>
-      <Param name="Interface" value="##SourceIPv6##"/>
-      <Param name="Protocol" value="51"/>
+    <!-- Used by server state for data port in pasv mode -->
+    <Publisher name="DataPublisher" class="TcpListener">
+      <Param name="Interface" value="##SourceIPv4##"/>
+      <Param name="Port" value="##DataPort##"/>
+      <Param name="AcceptTimeout" value="##AcceptTimeout##"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
 
-    <Logger class="File">
+    <Logger class="File" >
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>

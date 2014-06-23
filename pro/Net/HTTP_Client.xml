@@ -39,25 +39,24 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Simple Network Management Protocol server PIT"
-       version="0.0.2">
+       description="Hyper Text Transfer Protocol PIT"
+       version="0.0.1">
 
-  <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
+  <Include ns="HTTP" src="file:##PitLibraryPath##/_Common/Models/Net/HTTP_State.xml"/>
 
-  <Test name="Default">
-    <StateModel ref="SNMP:Server"/>
+  <Test name="Default" >
+    <StateModel ref="HTTP:RequestFromClient"/>
 
-    <Publisher class="Udp">
-      <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##SourceIPv4##"/>
-      <Param name="Timeout" value="5000"/>
+    <Publisher class="TcpListener" >
+      <Param name="Interface" value="0.0.0.0"/>
+      <Param name="Port" value="##TargetPort##"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
 
-    <Logger class="File">
-      <Param name="Path" value="##LoggerPath##"/>
+    <Logger class="Filesystem">
+      <Param name="Path" value="##LoggerPath##" />
     </Logger>
   </Test>
-</Peach>
 
+</Peach>

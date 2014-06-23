@@ -48,7 +48,7 @@ SUCH DAMAGE.
     <StateModel ref="DHCPv6:Client"/>
 
     <Publisher class="Udp">
-      <Param name="Host" value="##MulticastDHCP##"/>
+      <Param name="Host" value="ff02::1:2"/>
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
       <Param name="Timeout" value="36000"/>

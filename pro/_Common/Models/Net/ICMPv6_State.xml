@@ -116,7 +116,14 @@ SUCH DAMAGE.
         <DataModel ref="IPv6inParameterProblem" />
       </Action>
 
-    </State>
+		<Action name="NeighborSolicitation" type="output">
+			<DataModel ref="ICMPv6:NeighborSolicitation"/>
+		</Action>
+
+		<Action name="NeighborAdvertisement" type="input">
+			<DataModel ref="ICMPv6:NeighborAdvertisement"/>
+		</Action>
+	</State>
   </StateModel>
 </Peach>
 <!--END-->

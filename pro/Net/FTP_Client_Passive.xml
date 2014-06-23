@@ -39,25 +39,30 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Simple Network Management Protocol server PIT"
+       description="File Transfer Protocol client PIT"
        version="0.0.2">
 
-  <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
+  <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>
 
   <Test name="Default">
-    <StateModel ref="SNMP:Server"/>
+    <StateModel ref="FTP:ClientPassive"/>
 
-    <Publisher class="Udp">
-      <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##SourceIPv4##"/>
-      <Param name="Timeout" value="5000"/>
+    <Publisher class="Tcp" name="CommandPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
+
+    <!-- Used by client state for data port in passive mode -->
+    <Publisher class="Tcp" name="DataPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
-
-    <Logger class="File">
+    <Logger class="File" >
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>
   </Test>
 </Peach>
-

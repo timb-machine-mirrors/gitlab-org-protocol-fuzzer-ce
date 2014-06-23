@@ -39,7 +39,7 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
        author="Deja Vu Security, LLC"
- description="http protocol pit state models" version="0.0.1">
+	   description="http protocol pit state models" version="0.0.1">
 
   <Include ns="HTTP" src="file:##PitLibraryPath##/_Common/Models/Net/HTTP_Data.xml"/>
 
@@ -47,7 +47,7 @@ SUCH DAMAGE.
     <State name="InitialState">
       <Action type="output">
         <DataModel ref="HTTP:Request" />
-        <Data fileName="##SampleDir##/requests" />
+        <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/requests" />
       </Action>
 
       <Action type="close" />
@@ -60,7 +60,7 @@ SUCH DAMAGE.
     <State name="InitialState">
       <Action type="output">
         <DataModel ref="HTTP:Request" />
-        <Data fileName="##SampleDir##/requests" />
+        <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/requests" />
       </Action>
 
       <Action type="input">
@@ -73,7 +73,7 @@ SUCH DAMAGE.
     <State name="InitialState">
       <Action type="output">
         <DataModel ref="HTTP:Response" />
-        <Data fileName="##SampleDir##/responses" />
+        <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/responses" />
       </Action>
 
       <Action type="close" />
@@ -96,7 +96,7 @@ SUCH DAMAGE.
 
       <Action type="output">
         <DataModel ref="HTTP:Response" />
-        <Data fileName="##SampleDir##/responses" />
+        <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/responses" />
       </Action>
     </State>
   </StateModel>

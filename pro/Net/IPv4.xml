@@ -44,27 +44,8 @@ SUCH DAMAGE.
 
   <Include ns="IPv4" src="file:##PitLibraryPath##/_Common/Models/Net/IPv4_State.xml"/>
 
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##"/>
-      <Param name="Arguments" value="-i ##tsharkInterface##"/>
-      <Param name="FaultOnEarlyExit" value="true"/>
-    </Monitor>
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-  
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
     <StateModel ref="IPv4:PingTest"/>
-
-    <Agent ref="LocalAgent"/>
 
     <Publisher class="RawIPv4">
       <Param name="Host" value="##TargetIPv4##"/>

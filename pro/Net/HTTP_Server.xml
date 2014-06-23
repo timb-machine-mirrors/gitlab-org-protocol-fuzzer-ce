@@ -44,55 +44,7 @@ SUCH DAMAGE.
 
   <Include ns="HTTP" src="file:##PitLibraryPath##/_Common/Models/Net/HTTP_State.xml"/>
 
-  <Agent name="ServerOnWindows">
-    <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="##ServerCmd##" />
-    </Monitor>
-  </Agent>
-
-  <Agent name="ClientOnWindows">
-    <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="##ClientCmd##" />
-      <Param name="StartOnCall" value="launchProgram" />
-    </Monitor>
-  </Agent>
-
-  <Agent name="ServerOnLinux">
-    <Monitor class="LinuxDebugger">
-      <Param name="Executable" value="##ServerProgram##" />
-      <Param name="Arguments" value="##ServerProgramArgs##" />
-    </Monitor>
-  </Agent>
-
-  <Agent name="ClientOnLinux">
-    <Monitor class="LinuxDebugger">
-      <Param name="Executable" value="##ClientProgram##" />
-      <Param name="Arguments" value="##ClientProgramArgs##" />
-      <Param name="StartOnCall" value="launchProgram" />
-    </Monitor>
-  </Agent>
-
-  <Agent name="ServerOnOSX">
-    <Monitor class="Process">
-      <Param name="Executable" value="##ServerProgram##" />
-      <Param name="Arguments" value="##ServerProgramArgs##" /> 
-    </Monitor>
-  </Agent>
-
-  <Agent name="ClientOnOSX">
-    <Monitor class="Process">
-      <Param name="Executable" value="##ClientProgram##" />
-      <Param name="Arguments" value="##ClientProgramArgs##" /> 
-      <Param name="StartOnCall" value="launchProgram" />
-     </Monitor>
-  </Agent>
-
-  <!-- name="FuzzServer" -->
   <Test name="Default" >
-    <Agent ref="ServerOnWindows" platform="windows" />
-    <Agent ref="ServerOnLinux" platform="linux" />
-    <Agent ref="ServerOnOSX" platform="osx" />
-
     <StateModel ref="HTTP:RequestToServer"/>
 
     <Publisher class="Tcp" >
@@ -107,25 +59,4 @@ SUCH DAMAGE.
       <Param name="Path" value="##LoggerPath##" />
     </Logger>
   </Test>
-
-  <Test name="FuzzClient" >
-    <Agent ref="ClientOnWindows" platform="windows" />
-    <Agent ref="ClientOnLinux" platform="linux" />
-    <Agent ref="ClientOnOSX" platform="osx" />
-
-
-    <StateModel ref="HTTP:RequestFromClient"/>
-
-    <Publisher class="TcpListener" >
-      <Param name="Interface" value="0.0.0.0"/>
-      <Param name="Port" value="##TargetPort##"/>
-    </Publisher>
-
-    <Strategy class="##Strategy##"/>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="##LoggerPath##" />
-    </Logger>
-  </Test>
-
 </Peach>

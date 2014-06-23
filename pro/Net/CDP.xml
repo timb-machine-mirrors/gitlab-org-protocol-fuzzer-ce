@@ -45,23 +45,6 @@ SUCH DAMAGE.
 
   <Include ns="CDP" src="file:##PitLibraryPath##/_Common/Models/Net/CDP_State.xml"/>
 
-  <Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
-    <Monitor class="Process">
-      <Param name="Executable" value="##tsharkBin##"/>
-      <Param name="Arguments" value="-i ##tsharkInterface##"/>
-      <Param name="FaultOnEarlyExit" value="true"/>
-    </Monitor>
-
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
 
   <!-- Default test case uses Raw Publisher define interface in defines file-->
   <Test name="Default">
@@ -69,9 +52,6 @@ SUCH DAMAGE.
     <Include xpath="//CDPPacket/Payload/CDP"/>
 
     <StateModel ref="CDP:Multicast"/>
-
-    <!--Agent ref="RemoteAgent"/-->
-    <!--Agent ref="LocalAgent"/-->
 
     <Publisher class="RawEther" name="RawHandler">
       <Param name="Interface" value="##Interface##"/>

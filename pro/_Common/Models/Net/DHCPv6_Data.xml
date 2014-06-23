@@ -283,7 +283,7 @@ SUCH DAMAGE.
 
 	<DataModel name="Solicit">
 		<Number name="MessageType" size="8" value="1"/>
-		<Number name="TransactionId" size="24" valueType="hex" value="##TransactionId##"/>
+		<Number name="TransactionId" size="24" valueType="hex" value="4c137f" />
 		<Block name="Options">
 			<Block name="ElapsedTime" ref="TLV">
 				<Number name="Type" size="16" value="8" token="true"/>
@@ -294,7 +294,7 @@ SUCH DAMAGE.
 				<Block name="Value">
 					<Number name="DuidType" size="16" value="1"/>
 					<Number name="HardwareType" size="16" value="1"/>
-					<Number name="DuidTime" size="32" value="##SolicitDuidTime##">
+					<Number name="DuidTime" size="32">
 						<Fixup class="ExpressionFixup">
 							<Param name="ref" value="DuidTime"/>
 							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>
@@ -323,7 +323,7 @@ SUCH DAMAGE.
 					<Number name="Length" size="8">
 						<Relation type="size" of="Domain"/>
 					</Number>
-					<String name="Domain" value="##Domain##"/>
+					<String name="Domain" value="peach.com"/>
 				</Block>
 			</Block>
 			<Block name="VendorClass" ref="TLV">
@@ -353,7 +353,7 @@ SUCH DAMAGE.
 		<Block name="Options">
 			<Block name="ElapsedTime" ref="Solicit.Options.ElapsedTime"/>
 			<Block name="ClientIdentifier" ref="Solicit.Options.ClientIdentifier">
-				<Number name="Value.DuidTime" size="32" value="##RequestDuidTime##">
+				<Number name="Value.DuidTime" size="32">
 						<Fixup class="ExpressionFixup">
 							<Param name="ref" value="DuidTime"/>
 							<Param name="expression" value="int(ref.DefaultValue) or int(int(time.time() - time.mktime((2000,1,1,0,0,0,0,0,0)) + time.timezone) % (2**32))"/>

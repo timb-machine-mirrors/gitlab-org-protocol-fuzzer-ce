@@ -39,18 +39,21 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Simple Network Management Protocol server PIT"
+       description="Internet Security Protocol version 6 PIT"
        version="0.0.2">
 
-  <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
+  <Include ns="IPSECv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPSECv6_State.xml"/>
 
+  <!-- Authentication Header Test -->
   <Test name="Default">
-    <StateModel ref="SNMP:Server"/>
+    <StateModel ref="IPSECv6:AH"/>
 
-    <Publisher class="Udp">
-      <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##SourceIPv4##"/>
-      <Param name="Timeout" value="5000"/>
+    <Agent ref="LocalAgent"/>
+
+    <Publisher class="RawV6">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Protocol" value="51"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
@@ -60,4 +63,3 @@ SUCH DAMAGE.
     </Logger>
   </Test>
 </Peach>
-
