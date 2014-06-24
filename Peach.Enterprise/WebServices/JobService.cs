@@ -63,12 +63,34 @@ namespace Peach.Enterprise.WebServices
 
 		object PauseJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				logger.PauseJob();
+
+				return HttpStatusCode.OK;
+			}
 		}
 
 		object StartJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				logger.ResumeJob();
+
+				return HttpStatusCode.OK;
+			}
 		}
 
 		object StopJob(string id)
