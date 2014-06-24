@@ -1,5 +1,5 @@
 ﻿<div>
-	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.key}}</div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>{{vm.currentQuestion.q}}</label>
 	<div class="dropdown" is-open="vm.isDefaultsOpen">
 		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" required class="dropdown-toggle" />

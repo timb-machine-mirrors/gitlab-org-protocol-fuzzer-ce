@@ -1,5 +1,5 @@
 ﻿<div>
-	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.key}}</div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>
 		{{vm.currentQuestion.q}}
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>

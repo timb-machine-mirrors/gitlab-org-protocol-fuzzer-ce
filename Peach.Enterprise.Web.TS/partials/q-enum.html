@@ -1,5 +1,5 @@
 ﻿<div>
-	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.key}}</div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>{{vm.currentQuestion.q}}</label>
 	<div>
 		<select class="form-control" ng-model="vm.currentQuestion.value" ng-options="default for default in vm.currentQuestion.defaults" style="width: 100px" />
