@@ -254,8 +254,6 @@ namespace PitTester
 					Console.Write(".");
 
 					++total;
-
-					break;
 				}
 				catch (FileNotFoundException)
 				{
