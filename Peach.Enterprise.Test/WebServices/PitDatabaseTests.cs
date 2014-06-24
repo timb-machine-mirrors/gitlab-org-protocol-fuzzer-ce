@@ -41,6 +41,10 @@ namespace Peach.Enterprise.Test.WebServices
        version='0.0.1'>
 
 	<Agent name='TheAgent'>
+		<Monitor class='RunCommand'>
+			<Param name='Command' value='Foo'/>
+			<Param name='StartOnCall' value='Foo'/>
+		</Monitor>
 	</Agent>
 
 	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />

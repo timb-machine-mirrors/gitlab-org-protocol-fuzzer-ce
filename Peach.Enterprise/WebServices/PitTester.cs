@@ -41,6 +41,67 @@ namespace Peach.Enterprise.WebServices
 				}
 			}
 
+			#region Agent Events
+
+			protected override void Agent_AgentConnect(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+				AddEvent("Connecting to agent", "Connecting to agent '" + agent.url + "'");
+			}
+
+			protected override void Agent_AgentDisconnect(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_CreatePublisher(Core.RunContext context, Core.Agent.AgentClient agent, string cls, Dictionary<string, Peach.Core.Variant> args)
+			{
+			}
+
+			protected override void Agent_StartMonitor(Core.RunContext context, Core.Agent.AgentClient agent, string name, string cls, Dictionary<string, Peach.Core.Variant> args)
+			{
+				EventSuccess();
+				AddEvent("Starting monitor", "Starting monitor '" + cls + "'");
+			}
+
+			protected override void Agent_StopAllMonitors(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_SessionStarting(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+				EventSuccess();
+			}
+
+			protected override void Agent_SessionFinished(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_IterationStarting(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_IterationFinished(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_DetectedFault(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_GetMonitorData(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_MustStop(Core.RunContext context, Core.Agent.AgentClient agent)
+			{
+			}
+
+			protected override void Agent_Message(Core.RunContext context, Core.Agent.AgentClient agent, string name, Peach.Core.Variant data)
+			{
+			}
+
+			#endregion
+
+
 			protected override void Engine_TestStarting(Core.RunContext context)
 			{
 				AddEvent("Starting fuzzing engine", "Starting fuzzing engine");
