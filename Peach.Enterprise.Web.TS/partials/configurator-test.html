@@ -1,8 +1,9 @@
 ﻿<div class="page-content">
 	<div class="page-header"></div>
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-xs-12"> 
 			<h3>Test Check List</h3>
+			<p>Once all of the configuration sections have been completed you can test your definition to verify it works correctly. This section will allow you to do just that, running a single iteration of the Pit, viewing the output of the test and the detailed log messages. If there is a problem with the configuration you can redo the configuration until it is correct.</p>
 			<table>
 				<tr>
 					<td>Set Variables</td>
@@ -19,7 +20,7 @@
 						<span class="label label-success arrowed" ng-class="{hidden: vm.FaultDetectionComplete == false}">Complete</span>
 						<span class="label label-danger arrowed" ng-class="{hidden: vm.FaultDetectionComplete == true}">
 							Fault Detection requires completion. <a href="#/configurator/fault">Go to Fault Detection</a>
-						</span>
+						</span> 
 					</td>
 				</tr>
 				<tr>
@@ -74,8 +75,8 @@
 
 
 	<div class="row-fluid wizard-actions">
-		<span ng-class="{hidden: 'fail'}[vm.testStatus]">Testing passed, press Continue to start a Job</span>
-		<span ng-class="{hidden: 'success'}">Testing failed, please correct the errors described above and return to this page to test again.</span>
+		<span ng-class="{hidden: 'fail'}[vm.testStatus]">Testing passed, press Continue</span>
+		<span ng-class="{hidden: 'success'}[vm.testStatus]">Testing failed, please correct the errors described above and return to this page to test again.</span>
 		<button class="btn btn-success btn-next" ng-click="vm.submitAllInfo()" ng-disabled="configuratorForm.$invalid" ng-class="{disabled: (vm.testStatus != 'pass')}">
 			Continue
 			<i class="icon-arrow-right icon-on-right"></i>

@@ -20,14 +20,14 @@
 				<div class="col-sm-7 infobox-container">
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{(vm.job.startDate | date:'M/d/yy h:mma') || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{(vm.job.startDate | date:'M/d/yy h:mma') || ' '}}</span>
 							<div class="infobox-content">Started</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.runtimeString || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{vm.runtimeString || ' '}}</span>
 							<div class="infobox-content">Running Time</div>
 						</div>
 
@@ -35,21 +35,21 @@
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.job.speed || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{vm.job.speed || ' '}}</span>
 							<div class="infobox-content">Iterations&#47;Hour</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.job.seed || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{vm.job.seed || ' '}}</span>
 							<div class="infobox-content">Seed</div>
 						</div>
 					</div>
 
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.job.iterationCount || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{vm.job.iterationCount || ' '}}</span>
 							<div class="infobox-content">Total Iterations</div>
 						</div>
 					</div>
@@ -64,7 +64,7 @@
 
 					<div class="infobox infobox-red  ">
 						<div class="infobox-data">
-							<span class="infobox-data-number">{{vm.job.faultCount || '(unavailable)'}}</span>
+							<span class="infobox-data-number">{{vm.job.faultCount || ' '}}</span>
 							<div class="infobox-content">Total Faults</div>
 						</div>
 					</div>
