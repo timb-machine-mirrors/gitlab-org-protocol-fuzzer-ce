@@ -1,10 +1,16 @@
 ﻿<div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.key}}</div>
 	<label>
 		{{vm.currentQuestion.q}}
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>
 	</label>
-	<div>
-		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" ng-required="vm.currentQuestion.required" style="width: 70%" />
+	<div class="dropdown" is-open="vm.isDefaultsOpen">
+		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" required class="dropdown-toggle" ng-required="vm.currentQuestion.required" style="width: 300px" />
+		<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
+			<li ng-repeat="default in vm.currentQuestion.defaults">
+				<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
+			</li>
+		</ul>
 	</div>
 	<accordion ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
 		<accordion-group>

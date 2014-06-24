@@ -161,7 +161,8 @@
 				{"key":"CanaKitRelayOnOffPause",	"param":"OnOffPause" },
 				{"key":"CanaKitRelayResetOnStart",	"param":"ResetOnStart" },
 				{"key":"CanaKitRelayReverseSwitch",	"param":"ReverseSwitch" }
-			]
+			],
+			"description": "Control a set of relays capable of turning on/off AC and DC lines. "
 		},
 		{
 			"monitorClass":"Process",
@@ -172,7 +173,8 @@
 				{ "key":"ProcessRestartOnEachTest",	"param":"RestartOnEachTest" },
 				{ "key":"ProcessFaultOnEarlyExit",	"param":"FaultOnEarlyExit" },
 				{ "key":"ProcessStartOnCall",		"param":"StartOnCall" }
-			]
+			],
+			"description": "Control a process. "
 		}
 	]
 

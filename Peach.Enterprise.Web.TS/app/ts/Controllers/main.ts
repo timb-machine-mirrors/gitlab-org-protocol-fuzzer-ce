@@ -9,7 +9,7 @@ module DashApp {
 	import P = Models.Peach;
 
 	export class MainController {
-		private peachService: Services.IPeachService;
+		private peachSvc: Services.IPeachService;
 		private modal: ng.ui.bootstrap.IModalService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		private poller: any;
@@ -55,22 +55,17 @@ module DashApp {
 			$scope.vm = this;
 
 			this.modal = $modal;
-			this.peachService = peachService;
+			this.peachSvc = peachService;
 			this.location = $location;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.poller = poller;
 
-			$http.get("../testdata/test_config.json").then((response) => {
-				this.peachService.URL_PREFIX = response.data.URL_PREFIX;
-				this.getJobs();
-			}, (response) => {
-				this.getJobs();
-			});
-			
+
+			this.initialize();
 		}
 
-		private getJobs() {
-			this.peachService.GetJobs((data: P.Job[]) => {
+		private initialize() {
+			this.peachSvc.GetJobs((data: P.Job[]) => {
 				if (data.length > 0) {
 					this.pitConfigSvc.Job = new P.Job(data[0]);
 				}
@@ -78,7 +73,6 @@ module DashApp {
 					this.showPitSelector();
 				}
 			});
-
 		}
 
 		public showPitSelector() {
@@ -89,12 +83,12 @@ module DashApp {
 				controller: PitLibraryController,
 				resolve: {
 					peachsvc: () => {
-						return this.peachService;
+						return this.peachSvc;
 					}
 				}
 			})
 			.result.then((pitUrl: string) => {
-				this.peachService.GetPit(pitUrl, (data: P.Pit) =>
+				this.peachSvc.GetPit(pitUrl, (data: P.Pit) =>
 				{
 					if (data.locked) {
 						this.showPitCopier(data);
@@ -123,7 +117,7 @@ module DashApp {
 					pit: pit
 				};
 
-				this.peachService.CopyPit(request, (data: P.Pit) => {
+				this.peachSvc.CopyPit(request, (data: P.Pit) => {
 					this.pitConfigSvc.Pit = data;
 				});
 			});
@@ -132,13 +126,5 @@ module DashApp {
 
 	export interface ViewModelScope extends ng.IScope {
 		vm: any;
-	}
-
-	export class StorageStrings {
-		static Pit = "pit";
-		static FaultMonitors = "faultMonitors";
-		static DataMonitors = "dataMonitors";
-		static AutoMonitors = "autoMonitors";
-		static PitDefines = "pitDefines";
 	}
 }

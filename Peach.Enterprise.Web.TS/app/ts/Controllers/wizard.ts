@@ -26,6 +26,17 @@ module DashApp {
 		//#endregion
 
 		//#region Public Properties
+		private _isDefaultsOpen: boolean = false;
+
+		public get isDefaultsOpen(): boolean {
+			return this._isDefaultsOpen;
+		}
+
+		public set isDefaultsOpen(value: boolean) {
+			if (value == false || this.currentQuestion.defaults.length > 0) {
+				this._isDefaultsOpen = value;
+			}
+		}
 
 		public get qa(): W.Question[] {
 			if (this.pitConfigSvc != undefined)
@@ -239,16 +250,20 @@ module DashApp {
 					{
 						if (e.value == undefined && e.next != undefined)
 							return e.next.toString() == q.value.toString();
-						else if (e.value != undefined)
+						else if (e.value != undefined && q.value != undefined)
 							return e.value.toString() == q.value.toString();
 						else
 							return false;
 					})[0];
 
-					if (choice == undefined)
-						nextid = q.choice[parseInt(q.value)].next;
-					else
+					if (choice == undefined) {
+						if (q.value != undefined) {
+							nextid = q.choice[parseInt(q.value)].next;
+						}
+					}
+					else {
 						nextid = choice.next;
+					}
 				}
 				else {
 					// get the next question
@@ -431,6 +446,8 @@ module DashApp {
 		public findMonitors(): W.Agent[] {
 			//var that = this;
 			var foundMonitors: W.Monitor[] = [];
+			var agents: W.Agent[] = [];
+
 			foundMonitors = $.grep(this.monitors, (m) => {
 				var w = $.grep(m.path, (p) => {
 					return this.questionPath.indexOf(p) >= 0;
@@ -448,30 +465,30 @@ module DashApp {
 						}
 					}
 				}
-			}
 
-			var agent: W.Agent = new W.Agent();
-			agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
-			if (agent.agentUrl == undefined)
-				agent.agentUrl = "local://";
-			else
-				agent.agentUrl = "tcp://" + agent.agentUrl;
+				var agent: W.Agent = new W.Agent();
+				agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
+				if (agent.agentUrl == undefined)
+					agent.agentUrl = "local://";
+				else
+					agent.agentUrl = "tcp://" + agent.agentUrl;
 
-			agent.monitors = foundMonitors;
-			
-			for (var i = 0; i < agent.monitors.length; i++) {
-				if (agent.monitors[i].description != undefined) {
-					agent.description += agent.monitors[i].description.replace(/\{\{|\}\}|\{(\w+)\}/g, (a, b) => {
-						if (b == "AgentUrl")
-							return agent.agentUrl;
-						else
-							return this.pitConfigSvc.StateBag.g(b);
-					}) + "\n";
+				agent.monitors = foundMonitors;
+
+				for (var i = 0; i < agent.monitors.length; i++) {
+					if (agent.monitors[i].description != undefined) {
+						agent.description += agent.monitors[i].description.replace(/\{\{|\}\}|\{(\w+)\}/g, (a, b) => {
+							if (b == "AgentUrl")
+								return agent.agentUrl;
+							else
+								return this.pitConfigSvc.StateBag.g(b);
+						}) + "\n";
+					}
 				}
+
+				agents.push(agent);
+
 			}
-			
-			var agents: W.Agent[] = [];
-			agents.push(agent);
 
 			return agents;
 		}

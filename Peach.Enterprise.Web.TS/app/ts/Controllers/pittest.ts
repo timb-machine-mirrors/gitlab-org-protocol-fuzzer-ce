@@ -134,11 +134,13 @@ module DashApp {
 				method: "GET"
 			});
 
-			this.logPoller.promise.then(null, (e) => {
-				console.error(e);
-			}, (data: string) => {
-				this.log = data;
-			});
+			this.logPoller.promise.then((data) => {
+				this.log = data; 
+			}, (data) => {
+					console.error("WTF");
+			}, (data) => {
+					console.error("WTF");
+				});
 		}
 	}
 }

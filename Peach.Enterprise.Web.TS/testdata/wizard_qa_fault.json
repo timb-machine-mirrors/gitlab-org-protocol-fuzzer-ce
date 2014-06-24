@@ -266,7 +266,7 @@
 				{ "key":"WinDbgExecutable", "param":"Executable" },
 				{ "key":"WinDbgPath", "param":"WinDbgPath"  }
 			],
-			"description": "Page Heap: {WinDbgExecutable} {WinDbgPath}"
+			"description": "Enable page heap debugging options for an executable. "
 		},
 		{
 			"monitorClass":"WindowsDebugger",
@@ -280,7 +280,7 @@
 				{ "key":"WinDbgStart", "param":"WinDbgStart" },
 				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage" }
 			],
-			"description": "Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}"
+			"description": "Enable Windows debugging. "
 		},
 		{
 			"monitorClass":"Ping",
@@ -290,7 +290,7 @@
 				{ "key":"PingFaultOnSuccess","param":"FaultOnSuccess" },
 				{ "key":"PingRetryCount","param":"RetryCount" }
 			],
-			"description": "Ping: {PingHost} {PingFaultOnSuccess} {PingRetryCount}"
+			"description": "Validate that the target is still up or waiting for the target to restart. "
 		},
 		{
 			"monitorClass":"LinuxDebugger",
@@ -303,13 +303,13 @@
 				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" },
 				{ "key":"StartOnCall","param":"StartOnCall" }
 			],
-			"description": "Linux Debugger: {Executable} {Arguments} {LinuxDebugGdbPath} {RestartOnEachTest} {FaultOnEarlyExit} {StartOnCall}"
+			"description": "Use GDB to launch an executable, monitoring it for exceptions. "
 		},
 		{
 			"monitorClass":"CrashReporter",
 			"path": [2000],
 			"map": [],
-			"description": "Crash Reporter"
+			"description": "Collect information from crashes detected by OS X System Crash Reporter. "
 		},
 		{
 			"monitorClass":"Process",
@@ -321,7 +321,7 @@
 				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" },
 				{ "key":"ProcessStartOnCall",	"param":"StartOnCall" }
 			],
-			"description": "Process: {ProcessExecutable} {ProcessArguments} {ProcessRestartOnEachTest} {ProcessFaultOnEarlyExit} {ProcessStartOnCall}"
+			"description": "Collect information about processes starting and stopping. "
 		}
 	]
 

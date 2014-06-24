@@ -37,16 +37,14 @@ To see a list of all detected plugins and their parameters, run 'peach --showenv
 
 Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
 
-The name and type specified in the ParameterAttribute must match a public property on the plugin class.
-
-If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
-
-The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
+ * The name and type specified in the ParameterAttribute must match a public property on the plugin class.
+ * If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
+ * The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
 
 ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
 
-When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
-When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
+ * When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
+ * When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
 
 This method uses reflection to:
 
