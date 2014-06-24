@@ -165,7 +165,7 @@
 				{"key":"PcapDevice", "param":"Device"},
 				{"key":"PcapFilter", "param":"Filter"}
 				],
-			"description":"Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}."
+			"description":"Perform a network capture during the fuzzing iteration. "
 		},
 		{
 			"monitorClass":"SaveFile",
@@ -187,7 +187,7 @@
 				{"key":"SshDownloaderFolder", "param":"Folder" },
 				{"key":"SshDownloaderRemove", "param":"Remove" }
 			],
-			"description": "Download file {SshDownloaderFile} in folder {SshDownloaderFolder} on host {SshDownloaderHost}"
+			"description": "Save a specified file as part of the logged data when a fault occurs. "
 		}
 	]
 }
