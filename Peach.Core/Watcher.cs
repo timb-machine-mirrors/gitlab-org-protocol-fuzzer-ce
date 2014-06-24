@@ -69,6 +69,20 @@ namespace Peach.Core
 			context.StateChanging += StateChanging;
 			context.ActionStarting += ActionStarting;
 			context.ActionFinished += ActionFinished;
+
+			context.AgentConnect += Agent_AgentConnect;
+			context.AgentDisconnect += Agent_AgentDisconnect;
+			context.CreatePublisher += Agent_CreatePublisher;
+			context.StartMonitor += Agent_StartMonitor;
+			context.StopAllMonitors += Agent_StopAllMonitors;
+			context.SessionStarting += Agent_SessionStarting;
+			context.SessionFinished += Agent_SessionFinished;
+			context.IterationStarting += Agent_IterationStarting;
+			context.IterationFinished += Agent_IterationFinished;
+			context.DetectedFault += Agent_DetectedFault;
+			context.GetMonitorData += Agent_GetMonitorData;
+			context.MustStop += Agent_MustStop;
+			context.Message += Agent_Message;
 		}
 
 		public void Finalize(Engine engine, RunContext context)
@@ -82,7 +96,77 @@ namespace Peach.Core
 			context.StateChanging -= StateChanging;
 			context.ActionStarting -= ActionStarting;
 			context.ActionFinished -= ActionFinished;
+
+			context.AgentConnect -= Agent_AgentConnect;
+			context.AgentDisconnect -= Agent_AgentDisconnect;
+			context.CreatePublisher -= Agent_CreatePublisher;
+			context.StartMonitor -= Agent_StartMonitor;
+			context.StopAllMonitors -= Agent_StopAllMonitors;
+			context.SessionStarting -= Agent_SessionStarting;
+			context.SessionFinished -= Agent_SessionFinished;
+			context.IterationStarting -= Agent_IterationStarting;
+			context.IterationFinished -= Agent_IterationFinished;
+			context.DetectedFault -= Agent_DetectedFault;
+			context.GetMonitorData -= Agent_GetMonitorData;
+			context.MustStop -= Agent_MustStop;
+			context.Message -= Agent_Message;
 		}
+
+		#region Agent Events
+
+		protected virtual void Agent_AgentConnect(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_AgentDisconnect(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args)
+		{
+		}
+
+		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		{
+		}
+
+		protected virtual void Agent_StopAllMonitors(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_SessionStarting(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_SessionFinished(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_IterationStarting(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_IterationFinished(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_DetectedFault(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_GetMonitorData(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_MustStop(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_Message(RunContext context, AgentClient agent, string name, Variant data)
+		{
+		}
+
+		#endregion
 
 		protected virtual void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
