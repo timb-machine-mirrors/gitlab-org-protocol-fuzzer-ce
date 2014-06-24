@@ -100,7 +100,7 @@ namespace PitTester
 					{
 						TestPit(libraryPath, fileName, null);
 
-						Console.Write("Successfully ran '{0}' test", test);
+						Console.WriteLine("Successfully ran '{0}' test", test);
 
 						return ret;
 					}
