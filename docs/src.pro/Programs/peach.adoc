@@ -1,7 +1,7 @@
 [[Program_Peach]]
-== Peach Command Line
+== The {peachcomd}
 
-Peach is normally run as a command line process with a console text based interface.
+Peach is normally run as a command line process with a console text based interface (the {peachcomd}).
 
 === Syntax
 
