@@ -1,4 +1,5 @@
 ﻿<div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.key}}</div>
 	<label>{{vm.currentQuestion.q}}</label>
 	<div>
 		<input ng-model="vm.currentQuestion.value"
