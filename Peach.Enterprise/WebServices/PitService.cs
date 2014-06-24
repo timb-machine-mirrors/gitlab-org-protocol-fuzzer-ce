@@ -21,15 +21,23 @@ namespace Peach.Enterprise.WebServices
 			Post[""] = _ => CopyPit();
 		}
 
+		string PitLibraryPath
+		{
+			get
+			{
+				return (string)Context.Items["PitLibraryPath"];
+			}
+		}
+
 		object GetPits()
 		{
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			return db.Entries.ToArray();
 		}
 
 		object GetPit(string id)
 		{
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitById(id);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
@@ -39,7 +47,7 @@ namespace Peach.Enterprise.WebServices
 
 		object GetPitConfig(string id)
 		{
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var cfg = db.GetConfigById(id);
 			if (cfg == null)
 				return HttpStatusCode.NotFound;
@@ -50,7 +58,7 @@ namespace Peach.Enterprise.WebServices
 		object CopyPit()
 		{
 			var data = this.Bind<PitCopy>();
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var newUrl = "";
 
 			try

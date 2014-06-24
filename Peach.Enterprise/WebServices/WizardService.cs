@@ -30,7 +30,14 @@ namespace Peach.Enterprise.WebServices
 			Get["/test/{id}/raw"] = _ => GetTestRaw(_.id);
 		}
 
-		
+		string PitLibraryPath
+		{
+			get
+			{
+				return (string)Context.Items["PitLibraryPath"];
+			}
+		}
+
 		object GetState()
 		{
 			var ret = new List<KeyValuePair<string, string>>();
@@ -43,7 +50,7 @@ namespace Peach.Enterprise.WebServices
 		object PostConfig()
 		{
 			var cfg = this.Bind<PitConfig>();
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitByUrl(cfg.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
@@ -61,7 +68,7 @@ namespace Peach.Enterprise.WebServices
 		object PostMonitors()
 		{
 			var monitors = this.Bind<PitMonitors>();
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitByUrl(monitors.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
@@ -80,7 +87,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			var pitUrl = Request.Query.pitUrl;
 
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitByUrl(pitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
@@ -120,8 +127,8 @@ namespace Peach.Enterprise.WebServices
 			}
 
 			var writer = new StreamWriter(new MemoryStream());
-				
-			foreach (var line in logger.Tester.Log)
+
+			foreach (var line in lines)
 				writer.WriteLine(line);
 
 			writer.Flush();

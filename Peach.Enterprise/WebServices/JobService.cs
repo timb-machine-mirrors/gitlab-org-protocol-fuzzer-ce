@@ -31,13 +31,21 @@ namespace Peach.Enterprise.WebServices
 			Get["/{id}/stop"] = _ => StopJob(_.id);
 		}
 
+		string PitLibraryPath
+		{
+			get
+			{
+				return (string)Context.Items["PitLibraryPath"];
+			}
+		}
+
 		object CreateJob()
 		{
 			var job = this.Bind<Models.Job>();
 			if (string.IsNullOrEmpty(job.PitUrl))
 				return HttpStatusCode.BadRequest;
 
-			var db = new PitDatabase(".");
+			var db = new PitDatabase(PitLibraryPath);
 			var pit = db.GetPitByUrl(job.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
@@ -55,12 +63,34 @@ namespace Peach.Enterprise.WebServices
 
 		object PauseJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				logger.PauseJob();
+
+				return HttpStatusCode.OK;
+			}
 		}
 
 		object StartJob(string id)
 		{
-			return HttpStatusCode.NotImplemented;
+			lock (logger)
+			{
+				if (logger.Thread == null)
+					return HttpStatusCode.Forbidden;
+
+				if (logger.JobGuid != id)
+					return HttpStatusCode.NotFound;
+
+				logger.ResumeJob();
+
+				return HttpStatusCode.OK;
+			}
 		}
 
 		object StopJob(string id)

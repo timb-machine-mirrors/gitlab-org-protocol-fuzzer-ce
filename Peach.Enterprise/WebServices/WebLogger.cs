@@ -17,6 +17,8 @@ namespace Peach.Enterprise.WebServices
 		List<FaultSummary> faults = new List<FaultSummary>();
 		Dictionary<string, FaultDetail> faultDetails = new Dictionary<string, FaultDetail>();
 
+		ManualResetEvent pauseEvent;
+
 		Visualizer visualizer; // Cached JSON data
 		VizData vizDataStart;  // Partial data, collecting during current iteration
 		VizData vizDataFinal;  // Complete data, collected during last iteration
@@ -212,9 +214,24 @@ namespace Peach.Enterprise.WebServices
 
 		public void RunJob(string pitLibraryPath, string pitFile)
 		{
+			if (Thread != null)
+				throw new InvalidOperationException("A job is already running.");
+
+			pauseEvent = new ManualResetEvent(true);
+
 			Thread = new Thread(delegate() { JobThread(pitLibraryPath, pitFile); });
 
 			Thread.Start();
+		}
+
+		public void PauseJob()
+		{
+			pauseEvent.Reset();
+		}
+
+		public void ResumeJob()
+		{
+			pauseEvent.Set();
 		}
 
 		public WebLogger()
@@ -365,6 +382,15 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
+		bool shouldStop()
+		{
+			// Called once per iteration.  Will block the engine
+			// until the event is set by ResumeJob()
+			pauseEvent.WaitOne();
+
+			return false;
+		}
+
 		void JobThread(string pitLibraryPath, string pitFile)
 		{
 			try
@@ -391,7 +417,7 @@ namespace Peach.Enterprise.WebServices
 
 				var parser = new Godel.Core.GodelPitParser();
 				var dom = parser.asParser(args, pitFile);
-				var config = new RunConfiguration() { pitFile = pitFile };
+				var config = new RunConfiguration() { pitFile = pitFile, shouldStop = shouldStop };
 				var engine = new Engine(this);
 
 				engine.startFuzzing(dom, config);
@@ -400,6 +426,9 @@ namespace Peach.Enterprise.WebServices
 			{
 				lock (this)
 				{
+					pauseEvent.Dispose();
+					pauseEvent = null;
+
 					Thread = null;
 				}
 			}

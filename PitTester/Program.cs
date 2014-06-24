@@ -19,7 +19,8 @@ namespace PitTester
 
 		static int Main(string[] args)
 		{
-			var notest = false;
+			bool notest = false;
+			string test = null;
 
 			var p = new OptionSet()
 			{
@@ -27,6 +28,7 @@ namespace PitTester
 					{ "debug", v => LogLevel = 1 },
 					{ "trace", v => LogLevel = 2 },
 					{ "notest", v => notest = true },
+					{ "test=", v => test = v },
 			};
 
 			var extra = p.Parse(args);
@@ -40,6 +42,7 @@ namespace PitTester
 			var lib = new PitDatabase();
 			var errors = new StringBuilder();
 			var total = 0;
+			var ret = 0;
 
 			lib.LoadEventHandler += delegate(object sender, LoadEventArgs e)
 			{
@@ -66,6 +69,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -76,8 +81,41 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
+
+			if (test != null)
+			{
+				var pit = lib.Entries.Where(e => e.Name == test).FirstOrDefault();
+				if (pit == null)
+				{
+					Console.WriteLine("Error, could not find a pit named '{0}'", test);
+					ret = -1;
+				}
+				else
+				{
+					var fileName = pit.Versions[0].Files[0].Name;
+
+					try
+					{
+						TestPit(libraryPath, fileName, null);
+
+						Console.WriteLine("Successfully ran '{0}' test", test);
+
+						return ret;
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Errors:");
+						Console.WriteLine("{0} -> {1}", pit.Name, fileName);
+						Console.WriteLine(ex.Message);
+
+						ret = -1;
+					}
+				}
+
+				return ret;
+			}
 
 			Console.WriteLine("Verifying pit config files");
 
@@ -136,6 +174,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -146,7 +186,7 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
 
 			Console.WriteLine("Verifying pit files");
@@ -183,6 +223,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -212,6 +254,8 @@ namespace PitTester
 					Console.Write(".");
 
 					++total;
+
+					break;
 				}
 				catch (FileNotFoundException)
 				{
@@ -232,6 +276,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -242,10 +288,10 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
 
-			return 0;
+			return ret;
 		}
 
 		static void TestPit(string libraryPath, string pitFile, string testName)
@@ -358,7 +404,7 @@ namespace PitTester
 		static void Syntax()
 		{
 			var self = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
-			var syntax = @"{0} [--debug --trace --notest] pit_library_path";
+			var syntax = @"{0} [--debug --trace --notest --test=Pit_Name] pit_library_path";
 
 			Console.WriteLine(syntax, self);
 

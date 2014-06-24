@@ -31,10 +31,12 @@ namespace Peach.Enterprise.WebServices
 	internal class Bootstrapper : DefaultNancyBootstrapper
 	{
 		WebLogger logger;
+		string pitLibraryPath;
 
-		public Bootstrapper(WebLogger logger)
+		public Bootstrapper(WebLogger logger, string pitLibraryPath)
 		{
 			this.logger = logger;
+			this.pitLibraryPath = pitLibraryPath;
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
@@ -54,6 +56,9 @@ namespace Peach.Enterprise.WebServices
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
 		{
 			base.ConfigureRequestContainer(container, context);
+
+			// Give all modules the pit library path
+			context.Items["PitLibraryPath"] = pitLibraryPath;
 		}
 
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
@@ -84,12 +89,12 @@ namespace Peach.Enterprise.WebServices
 		public Uri Uri { get; private set; }
 		public WebLogger Logger { get; private set; }
 
-		public WebService()
+		public WebService(string pitLibraryPath)
 		{
 			Uri = new Uri("http://localhost:8888");
 			Logger = new WebLogger();
 
-			bootstrapper = new Bootstrapper(Logger);
+			bootstrapper = new Bootstrapper(Logger, pitLibraryPath);
 			config = new HostConfiguration()
 			{
 				UrlReservations = new UrlReservations()
@@ -125,7 +130,7 @@ namespace Peach.Enterprise.WebServices
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
-				using (var svc = new WebService())
+				using (var svc = new WebService("."))
 				{
 					svc.Start(args);
 

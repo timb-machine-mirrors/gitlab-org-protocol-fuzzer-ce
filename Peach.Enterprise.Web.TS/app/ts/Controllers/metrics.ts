@@ -2,7 +2,7 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/moment/moment.d.ts" />
+/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
 
 module DashApp {
 	"use strict";
