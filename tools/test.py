@@ -38,6 +38,12 @@ def get_inst_node(self, dest, name):
 
 	return self.bld.srcnode.make_node([dest, name])
 
+def run_after_last_test(self, test):
+	last_test = getattr(self.bld, 'last_utest_task', None)
+	if last_test:
+		test.set_run_after(last_test)
+	setattr(self.bld, 'last_utest_task', test)
+
 @feature('test')
 @after_method('apply_link')
 def make_test(self):
@@ -62,6 +68,7 @@ def make_test(self):
 				outputs = [ xml, log ]
 				tg = self.bld(name = '')
 				test = tg.create_task('utest', inputs, outputs)
+				run_after_last_test(self, test)
 				setattr(self.bld, 'nunit_task', test)
 				tg.ut_fun = prepare_nunit_test
 			else:
@@ -72,11 +79,7 @@ def make_test(self):
 
 	if not test:
 		test = self.create_task('utest', inputs, outputs)
-
-	last_test = getattr(self.bld, 'last_utest_task', None)
-	if last_test:
-		test.set_run_after(last_test)
-	setattr(self.bld, 'last_utest_task', test)
+		run_after_last_test(self, test)
 
 class utest(Task.Task):
 	vars = []
