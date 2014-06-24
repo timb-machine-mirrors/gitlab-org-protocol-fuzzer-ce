@@ -502,6 +502,7 @@ namespace Peach.Enterprise.Test
 			}
 		}
 
+#if DISABLED
 		/*
 		 * Image Tests
 		 */
@@ -748,5 +749,6 @@ namespace Peach.Enterprise.Test
 		{
 			TestPit("../../../../pits/pro", "Net/VXLAN.xml", "Default");
 		}
+#endif
 	}
 }
