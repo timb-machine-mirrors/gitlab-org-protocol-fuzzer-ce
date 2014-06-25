@@ -52,8 +52,6 @@ namespace Peach.Enterprise.Publishers
 		protected string Password { get; set; }
 		protected string Ssid { get; set; }
 		
-		ConcurrentQueue<RawCapture> captureQueue = new ConcurrentQueue<RawCapture>();
-	
 		DataModel beacon = null;
 		DataModel auth = null;
 		DataModel actionBlockAckReq = null;
@@ -80,6 +78,7 @@ namespace Peach.Enterprise.Publishers
 		DataModel dhcpAck = null;
 		DataModel dhcpOffer = null;
 		DataModel arp = null;
+		DataModel arpResponse = null;
 
 		//WPA2 Data
 		Wpa wpa = null;
@@ -100,10 +99,7 @@ namespace Peach.Enterprise.Publishers
 		object mutex = new object();
 
 		Thread beaconThread = null;
-		Thread captureThread = null;
-		bool captureThreadStop = false;
 		bool beaconThreadStop = false;
-		//AutoResetEvent captureReceivedAck = new AutoResetEvent(false);	// Set when ack received
 		
 		void compile()
 		{
@@ -217,9 +213,6 @@ namespace Peach.Enterprise.Publishers
 
 			beaconThread = new Thread(BeaconThread);
 			beaconThread.Start();
-			
-			captureThread = new Thread(CaptureThread);
-			captureThread.Start();
 		}
 
 		protected override void OnStop()
@@ -229,13 +222,6 @@ namespace Peach.Enterprise.Publishers
 				beaconThreadStop = true;
 				beaconThread.Join(1000);
 				beaconThread = null;
-			}
-			
-			if(captureThread != null)
-			{
-				captureThreadStop = true;
-				captureThread.Join(1000);
-				captureThread = null;
 			}
 			
 			base.OnStop();
@@ -500,6 +486,17 @@ namespace Peach.Enterprise.Publishers
 						arp = buf;
 					}
 				}
+				else if(method.Equals("ArpResponse"))
+				{
+					lock (mutex)
+					{
+						arpResponse = buf;
+					}
+				}
+				else
+				{
+					logger.Error("Unknown call method: "+method);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -576,33 +573,21 @@ namespace Peach.Enterprise.Publishers
 			bs.Seek(pos, SeekOrigin.Begin);
 		}
 		
-		void CaptureThread()
-		{ 
-			int off;
-			RawCapture packet;
-
-			while(!captureThreadStop)
+		System.Diagnostics.Stopwatch receiveStopWatch = new System.Diagnostics.Stopwatch();
+		public void ReceivePacket(out RawCapture packet, out int off, out int type, out int subtype)
+		{
+			packet = null;
+			receiveStopWatch.Restart();
+			
+			while((int)receiveStopWatch.ElapsedMilliseconds < ApAuthTimeout)
 			{
-				lock(pcap)
-				{
-					packet = pcap.GetNextPacket();
-				}
+				packet = pcap.GetNextPacket();
 				
 				if (packet == null)
 					continue;
 				
 				// skip radiotap header
 				off = BitConverter.ToInt16(packet.Data, 2);
-				
-				//var type = (packet.Data[off] & 0x0F) >> 2;
-				//var subtype = packet.Data[off] >> 4;
-				
-				//if(type == 1 && subtype == 13 && AreEqual(packet.Data, off + 4, 6, source))
-				//{
-				//	logger.Debug("ACK");
-				//	captureReceivedAck.Set();
-				//	continue;
-				//}
 				
 				// Check to make sure it's from the correct target
 				if (!AreEqual(packet.Data, off + 10, 6, target))
@@ -611,28 +596,13 @@ namespace Peach.Enterprise.Publishers
 				if (!AreEqual(packet.Data, off + 4, 6, source) && !AreEqual(packet.Data, off + 4, 6, broadcast))
 					continue;
 				
-				//logger.Debug("T: " + type + " S: " + subtype);
+				type = (packet.Data[off] & 0x0F) >> 2;
+				subtype = packet.Data[off] >> 4;
 				
-				captureQueue.Enqueue(packet);
+				return;
 			}
-		}
-		
-		System.Diagnostics.Stopwatch receiveStopWatch = new System.Diagnostics.Stopwatch();
-		public void ReceivePacket(out RawCapture packet, out int off, out int type, out int subtype)
-		{
-			packet = null;
-			receiveStopWatch.Restart();
 			
-			while (!captureQueue.TryDequeue(out packet) && (int)receiveStopWatch.ElapsedMilliseconds < ApAuthTimeout);
-			
-			if(packet == null)
-				throw new SoftException("Unable to complete 802.11 association (timeout).");
-			
-			// skip radiotap header
-			off = BitConverter.ToInt16(packet.Data, 2);
-			
-			type = (packet.Data[off] & 0x0F) >> 2;
-			subtype = packet.Data[off] >> 4;
+			throw new SoftException("Unable to complete 802.11 association (timeout).");
 			
 			// Is this needed?
 			//_recvBuffer.SetLength(0);
@@ -666,6 +636,9 @@ namespace Peach.Enterprise.Publishers
 			var value = acknowledgement.Value;
 			value = auth.Value;
 			value = associationResponse.Value;
+			value = dhcpNak.Value;
+			value = dhcpAck.Value;
+			value = dhcpOffer.Value;
 			
 			while (true)
 			{
@@ -704,6 +677,12 @@ namespace Peach.Enterprise.Publishers
 						do
 						{
 							ReceivePacket(out packet, out off, out type, out subtype);
+							
+							//if(type == 0 && subtype == 11)
+							//{
+							//	SendPacket(acknowledgement, false, false);
+							//	SendPacket(auth, false, true);
+							//}
 						}
 						while(!(type == 0 && subtype == 0));
 						
@@ -821,18 +800,12 @@ namespace Peach.Enterprise.Publishers
 									
 									case 8:	// Actual data!!
 										
-										logger.Debug("Actual Data!!");
-										
 										SendPacket(acknowledgement, false, false);
 											
-										File.WriteAllBytes("data.bin", packet.Data);
-						
 										var rdr = new BitReader(new BitStream(packet.Data));
-										rdr.BaseStream.Position = off + 36;
+										rdr.BaseStream.Position = off + 32;
 										rdr.BigEndian();
 										var llc = rdr.ReadUInt16();
-										
-										logger.Debug("llc: "+ llc);
 										
 										if (packet.Data.Length > off + 34 && llc == 0x888e)
 										{
@@ -876,7 +849,15 @@ namespace Peach.Enterprise.Publishers
 						
 											break;
 										}
-						
+										
+										// Respond to ARP
+										if(llc == 0x0806 && DhcpState == DhcpStates.SentOffer)
+										{
+											SendPacket(arpResponse, true, true);
+											break;
+										}
+										
+										// Only respond to IPv4 packets
 										if (llc != 0x0800)
 											break;
 						
@@ -901,7 +882,8 @@ namespace Peach.Enterprise.Publishers
 						
 												DhcpState = DhcpStates.SentOffer;
 						
-												return;
+												break;
+											
 											case 3:
 												if (DhcpState == DhcpStates.None)
 												{
@@ -921,24 +903,24 @@ namespace Peach.Enterprise.Publishers
 													if (DhcpState == DhcpStates.SentOffer || DhcpState == DhcpStates.None)
 													{
 														SendPacket(dhcpAck, true, true);
-						
-														return;
+														
+														//return;
+														break;
 													}
 												}
-						
+												
 												break;
+											
 											default:
 												break;
 										}
-						
+										
 										break;
 									default:
 										break;
 								}
 							}
 						}
-						
-						//break;
 				}
 			}
 				
@@ -1236,20 +1218,29 @@ namespace Peach.Enterprise.Publishers
 			{
 				Type = -1;
 				if (len > Length)
+				{
+					logger.Warn("lan > Length #1");
 					return;
+				}
 
 				//radio header len
-				//len += BitConverter.ToInt16(packet, 2);
+				len += BitConverter.ToInt16(packet, 2);
 
 				//8 bytes for llc
 				len += 8;
 
 				if (len > Length)
+				{
+					logger.Warn("len > Length #2");
 					return;
+				}
 
 				//ipv4
 				if (packet[len] != 0x45)
+				{
+					logger.Warn("packet[len] != 0x45");
 					return;
+				}
     
 				len += (packet[len] >> 4) * 5;
 
@@ -1259,19 +1250,26 @@ namespace Peach.Enterprise.Publishers
 					port = System.Net.IPAddress.NetworkToHostOrder(port);
 
 				if (port != 0x0044 && port != 0x0043)
+				{
+					logger.Warn("port != 0x0044 && port != 0x0043");
 					return;
+				}
 
-				var dhcpPackLen = BitConverter.ToInt16(packet, len + 4);
+				var dhcpPackLen = BitConverter.ToInt16(packet, len+4);
 				if(BitConverter.IsLittleEndian)
 					dhcpPackLen = System.Net.IPAddress.NetworkToHostOrder(dhcpPackLen);
 				len += 8;
 
 				if (len + 242 > Length)
+				{
+					logger.Warn("len + 242 > Length");
 					return;
+				}
 
-				var tmp = new byte[dhcpPackLen - 4];
+				var tmp = new byte[dhcpPackLen-4];
 				Type = packet[len + 242];
-				System.Array.Copy(packet, len, tmp, 0, tmp.Length);
+				
+				System.Array.Copy(packet, len, tmp, 0, packet.Length - len);
 				packet = tmp;
 			}
 		}

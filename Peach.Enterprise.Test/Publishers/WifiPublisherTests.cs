@@ -102,7 +102,7 @@ namespace Peach.Enterprise.Test.Publishers
 
             public byte[] GeneratePmk(byte[] password, byte[] salt, int iterations)
             {
-                var ret = new MemoryStream();
+                //var ret = new MemoryStream();
 
                 Pkcs5S2ParametersGenerator gen = new Pkcs5S2ParametersGenerator();
 
