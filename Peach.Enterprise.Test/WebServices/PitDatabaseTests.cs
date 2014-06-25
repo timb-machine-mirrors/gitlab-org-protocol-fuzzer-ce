@@ -441,16 +441,17 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
 
 			var param1 = dom.tests[0].agents[0].monitors[0].parameters;
-			Assert.AreEqual(2, param1.Count);
+			Assert.AreEqual(1, param1.Count);
 			Assert.True(param1.ContainsKey("StartOnCall"));
-			Assert.AreEqual("launchProcess", (string)param1["StartOnCall"]);
-			Assert.True(param1.ContainsKey("WaitForExitOnCall"));
-			Assert.AreEqual("exitProcess", (string)param1["WaitForExitOnCall"]);
+			Assert.AreEqual("ExitIterationEvent", (string)param1["StartOnCall"]);
+
 
 			var param2 = dom.tests[0].agents[0].monitors[1].parameters;
-			Assert.AreEqual(1, param2.Count);
-			Assert.True(param2.ContainsKey("RestartOnEachTest"));
-			Assert.AreEqual("true", (string)param2["RestartOnEachTest"]);
+			Assert.AreEqual(2, param2.Count);
+			Assert.True(param2.ContainsKey("StartOnCall"));
+			Assert.AreEqual("StartIterationEvent", (string)param2["StartOnCall"]);
+			Assert.True(param2.ContainsKey("WaitForExitOnCall"));
+			Assert.AreEqual("ExitIterationEvent", (string)param2["WaitForExitOnCall"]);
 
 			var param3 = dom.tests[0].agents[0].monitors[2].parameters;
 			Assert.AreEqual(1, param3.Count);
