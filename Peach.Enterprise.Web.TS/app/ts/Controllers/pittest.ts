@@ -57,24 +57,24 @@ module DashApp {
 			this.testStatus = "notrunning";
 		}
 
+		//			rowHeight: 70,
 		public dataGridOptions: ngGrid.IGridOptions = {
-			data: "vm.testEvents",
+			data: "vm.testEvents", 
 			columnDefs: [
 				{
 					field: "status",
 					displayName: " ",
 					width: 25,
-					cellTemplate: "<div class=\"ngCellText\" ng-class=\"col.colIndex()\"><i ng-class=\"{'icon-ok green': row.getProperty(col.field) == 'pass', 'icon-warning-sign orange': row.getProperty(col.field) == 'warn', 'icon-remove red': row.getProperty(col.field) == 'fail'}\" /></div>"
+					cellTemplate: "../../partials/test-grid-status-template.html"
 				},
 				{
-					field: "short",
-					displayName: "Message"
+					displayName: "Message",
+					cellTemplate: "../../partials/test-grid-message-template.html"
 				}
 			]
 		};
 
 		public beginTest() {
-
 			var agents: W.Agent[] = [];
 			agents = agents.concat(this.pitConfigSvc.FaultMonitors);
 

@@ -45,8 +45,8 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		//public URL_PREFIX: string = "http://localhost:8888";
-		public URL_PREFIX: string = "";
+		public URL_PREFIX: string = "http://localhost:8888"; 
+		//public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
 			this.resource = $resource;
@@ -129,6 +129,13 @@ module DashApp.Services {
 				pitUrl: pitUrl,
 				monitors: agents
 			};
+
+			for (var a = 0; a < request.monitors.length; a++) {
+				for (var m = 0; m < request.monitors[a].monitors.length; m++) {
+					request.monitors[a].monitors[m].path = [];
+				}
+			}
+
 			return this.http.post(this.URL_PREFIX + "/p/conf/wizard/monitors", request);
 		}
 

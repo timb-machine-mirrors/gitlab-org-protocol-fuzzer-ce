@@ -2,7 +2,7 @@
 	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>{{vm.currentQuestion.q}}</label>
 	<div>
-		<input ng-model="vm.currentQuestion.value"
+		<input ng-model="vm.currentQuestion.value" ng-enter="vm.next()"
 					 step="1" min="{{vm.currentQuestion.rangeMin}}"
 					 max="{{vm.currentQuestion.rangeMax}}"
 					 type="number"
