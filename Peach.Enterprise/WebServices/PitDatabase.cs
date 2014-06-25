@@ -294,7 +294,17 @@ namespace Peach.Enterprise.WebServices
 			var fileName = pit.Versions[0].Files[0].Name;
 			var doc = new XmlDocument();
 
-			using (var rdr = XmlReader.Create(fileName))
+			var settingsRdr = new XmlReaderSettings();
+			settingsRdr.ValidationType = ValidationType.Schema;
+			settingsRdr.NameTable = new NameTable();
+
+			// Default the namespace to peach
+			var nsMgrRdr = new XmlNamespaceManager(settingsRdr.NameTable);
+			nsMgrRdr.AddNamespace("", PeachElement.Namespace);
+
+			var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
+
+			using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
 			{
 				doc.Load(rdr);
 			}
@@ -330,14 +340,14 @@ namespace Peach.Enterprise.WebServices
 					var agentName = "Agent" + agents.Count.ToString();
 
 					w = test.InsertBefore();
-					w.WriteStartElement("Agent");
+					w.WriteStartElement("Agent", PeachElement.Namespace);
 					w.WriteAttributeString("name", agentName);
 					w.WriteAttributeString("location", item.AgentUrl);
 
 					// AppendChild so the agents stay in order
 					using (var testWriter = test.AppendChild())
 					{
-						testWriter.WriteStartElement("Agent");
+						testWriter.WriteStartElement("Agent", PeachElement.Namespace);
 						testWriter.WriteAttributeString("ref", agentName);
 						testWriter.WriteEndElement();
 					}
@@ -347,12 +357,12 @@ namespace Peach.Enterprise.WebServices
 
 				foreach (var m in item.Monitors)
 				{
-					w.WriteStartElement("Monitor");
+					w.WriteStartElement("Monitor", PeachElement.Namespace);
 					w.WriteAttributeString("class", m.MonitorClass);
 
 					foreach (var p in m.Map)
 					{
-						w.WriteStartElement("Param");
+						w.WriteStartElement("Param", PeachElement.Namespace);
 
 						if (p.Param == "StartMode")
 						{
@@ -366,7 +376,7 @@ namespace Peach.Enterprise.WebServices
 								w.WriteAttributeString("name", "StartOnCall");
 								w.WriteAttributeString("value", "StartIterationEvent");
 								w.WriteEndElement();
-								w.WriteStartElement("Param");
+								w.WriteStartElement("Param", PeachElement.Namespace);
 								w.WriteAttributeString("name", "WaitForExitOnCall");
 								w.WriteAttributeString("value", "ExitIterationEvent");
 							}

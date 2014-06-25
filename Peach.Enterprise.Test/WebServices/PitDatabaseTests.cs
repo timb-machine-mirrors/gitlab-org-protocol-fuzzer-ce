@@ -256,6 +256,7 @@ namespace Peach.Enterprise.Test.WebServices
 		public void TestSaveMonitors()
 		{
 			var pit = db.Entries.First();
+			Assert.NotNull(pit);
 
 			var json = @"
 [
@@ -333,7 +334,9 @@ namespace Peach.Enterprise.Test.WebServices
 	],
 },
 ]";
+
 			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+			Assert.NotNull(monitors);
 
 			PitDatabase.SaveMonitors(pit, monitors);
 
