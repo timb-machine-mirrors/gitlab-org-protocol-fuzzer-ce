@@ -43,11 +43,7 @@ namespace Peach.Enterprise.WebServices
 				if (IsEngineRunning)
 					return HttpStatusCode.Forbidden;
 
-				System.Diagnostics.Debug.Assert(Runner == null);
-
 				StartJob(pit);
-
-				System.Diagnostics.Debug.Assert(Runner != null);
 
 				return Response.AsJson(new { JobUrl = Prefix + "/" + Runner.Guid });
 			}

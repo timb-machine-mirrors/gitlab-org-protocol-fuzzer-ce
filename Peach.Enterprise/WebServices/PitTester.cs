@@ -335,6 +335,7 @@ namespace Peach.Enterprise.WebServices
 					{
 						Status = watcher.Status,
 						Events = watcher.Events.ToList(),
+						Log = string.Join("\n", Log),
 					};
 				}
 			}

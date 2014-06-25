@@ -82,11 +82,7 @@ namespace Peach.Enterprise.WebServices
 				if (IsEngineRunning)
 					return HttpStatusCode.Forbidden;
 
-				System.Diagnostics.Debug.Assert(Tester == null);
-
 				StartTest(pit);
-
-				System.Diagnostics.Debug.Assert(Tester != null);
 
 				return Response.AsJson(new { TestUrl = Prefix + "/test/" + Tester.Guid });
 			}

@@ -16,5 +16,7 @@ namespace Peach.Enterprise.WebServices.Models
 		/// The events that mae up the test reslt
 		/// </summary>
 		public List<TestEvent> Events { get; set; }
+
+		public string Log { get; set; }
 	}
 }
