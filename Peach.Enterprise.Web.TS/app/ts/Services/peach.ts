@@ -45,8 +45,8 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		public URL_PREFIX: string = "http://localhost:8888"; 
-		//public URL_PREFIX: string = "";
+		//public URL_PREFIX: string = "http://localhost:8888"; 
+		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
 			this.resource = $resource;
