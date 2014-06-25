@@ -277,7 +277,7 @@
 				{ "key":"WinDbgProcessName", "param":"ProcessName"  },
 				{ "key":"WinDbgService", "param":"Service" },
 				{ "key":"WinDbgPath", "param":"WinDbgPath" },
-				{ "key":"WinDbgStart", "param":"WinDbgStart" },
+				{ "key":"WinDbgStart", "param":"StartMode" },
 				{ "key":"WinDbgIgnoreFirstChanceGuardPage",	"param":"IgnoreFirstChanceGuardPage" }
 			],
 			"description": "Enable Windows debugging. "
@@ -299,9 +299,8 @@
 				{ "key":"Executable","param":"Executable" },
 				{ "key":"Arguments","param":"Arguments" },
 				{ "key":"LinuxDebugGdbPath","param":"GdbPath" },
-				{ "key":"RestartOnEachTest","param":"RestartOnEachTest" },
-				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" },
-				{ "key":"StartOnCall","param":"StartOnCall" }
+				{ "key":"LinuxDebuggerStart","param":"StartMode" },
+				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" }
 			],
 			"description": "Use GDB to launch an executable, monitoring it for exceptions. "
 		},
@@ -317,9 +316,8 @@
 			"map": [
 				{ "key":"ProcessExecutable","param":"Executable" },
 				{ "key":"ProcessArguments","param":"Arguments" },
-				{ "key":"ProcessRestartOnEachTest","param":"RestartOnEachTest" },
-				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" },
-				{ "key":"ProcessStartOnCall",	"param":"StartOnCall" }
+				{ "key":"ProcessStart","param":"StartMode" },
+				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" }
 			],
 			"description": "Collect information about processes starting and stopping. "
 		}

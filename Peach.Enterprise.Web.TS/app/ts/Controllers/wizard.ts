@@ -171,7 +171,7 @@ module DashApp {
 			if (this.pitConfigSvc != undefined) 
 				return this.pitConfigSvc.Defines.config;
 			else
-				return undefined;
+				return [];
 		}
 
 		public get title(): string {

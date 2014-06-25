@@ -12,14 +12,26 @@
 			</li>
 		</ul>
 	</div>
-	<accordion ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
-		<accordion-group>
-			<accordion-heading ng-class="">
-				Defines <i class="pull-right icon-chevron-down" ng-class="{'icon-chevron-down': status.open, 'icon-chevron-right': !status.open}"></i>
-			</accordion-heading>
-			<div class="gridStyle" ng-grid="vm.definesGridOptions"></div>
-		</accordion-group>
-	</accordion>
+	<div class="space-6" />
+	<div id="accordion" class="accordion-style1 panel-group" ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<span class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" style="cursor: pointer">
+						<i class="icon-angle-down bigger-110" data-icon-hide="icon-angle-down" data-icon-show="icon-angle-right"></i>
+						&nbsp;Variables
+					</span>
+				</h4>
+			</div>
+
+			<div class="panel-collapse collapse" id="collapseOne">
+				<div class="panel-body">
+					<div class="gridStyle" ng-grid="vm.definesGridOptions"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="space-6" />
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-prev" ng-click="vm.back()">
 			<i class="icon-arrow-left"></i>
