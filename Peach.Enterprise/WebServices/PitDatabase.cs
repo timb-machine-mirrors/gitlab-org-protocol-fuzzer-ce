@@ -317,6 +317,8 @@ namespace Peach.Enterprise.WebServices
 			}
 
 			var test = nav.SelectSingleNode("/p:Peach/p:Test", nsMgr);
+			if (test == null)
+				throw new PeachException("Could not find a <Test> element in the pit '" + fileName + "'.");
 
 			var agents = new OrderedDictionary<string, XmlWriter>();
 
