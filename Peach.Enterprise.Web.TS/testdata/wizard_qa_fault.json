@@ -136,8 +136,8 @@
 			"type":"choice",
 			"key":"WinDbgIgnoreFirstChanceGuardPage", 
 			"choice":[
-				{ "value":true,"a":"Yes, ignore them." },
-				{ "value":false,"a":"No, do not ignore them." }
+				{ "value":false,"a":"No, do not ignore them." },
+				{ "value":true,"a":"Yes, ignore them." }
 			]
 		},
 		{
