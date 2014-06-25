@@ -203,6 +203,7 @@ namespace Peach.Enterprise
 				Defines = new List<Define>();
 			}
 
+			[XmlIgnore]
 			public abstract Peach.Core.Platform.OS Platform { get; }
 
 			[XmlElement("String", Type = typeof(StringDefine))]
@@ -219,6 +220,7 @@ namespace Peach.Enterprise
 
 		public class None : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.None; }
@@ -227,6 +229,7 @@ namespace Peach.Enterprise
 
 		public class Windows : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Windows; }
@@ -235,6 +238,7 @@ namespace Peach.Enterprise
 
 		public class OSX : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.OSX; }
@@ -243,6 +247,7 @@ namespace Peach.Enterprise
 
 		public class Linux : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Linux; }
@@ -251,6 +256,7 @@ namespace Peach.Enterprise
 
 		public class Unix : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Unix; }
@@ -259,6 +265,7 @@ namespace Peach.Enterprise
 
 		public class All : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.All; }
