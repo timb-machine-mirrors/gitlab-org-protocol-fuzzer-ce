@@ -64,10 +64,15 @@ namespace Peach.Enterprise.Test.WebServices
 
 			var nav = doc.CreateNavigator();
 
-			var nodes = nav.Select("//Agent").OfType<System.Xml.XPath.XPathNavigator>().ToList();
+			while (true)
+			{
+				var oldAgent = nav.SelectSingleNode("//Agent");
 
-			foreach (var n in nodes)
-				n.DeleteSelf();
+				if (oldAgent != null)
+					oldAgent.DeleteSelf();
+				else
+					break;
+			}
 
 			var sb = new StringBuilder();
 			using (var wtr = XmlWriter.Create(new StringWriter(sb), new XmlWriterSettings() { Indent = true, OmitXmlDeclaration = true}))

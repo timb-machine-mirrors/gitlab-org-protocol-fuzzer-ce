@@ -304,10 +304,17 @@ namespace Peach.Enterprise.WebServices
 			var nsMgr = new XmlNamespaceManager(nav.NameTable);
 			nsMgr.AddNamespace("p", PeachElement.Namespace);
 
-			var oldAgents = nav.Select("//p:Agent", nsMgr).OfType<XPathNavigator>().ToList();
+			while (true)
+			{
+				// Have to select one at a time and delete one at a time
+				// to work on mono and windows.
+				var oldAgent = nav.SelectSingleNode("//p:Agent", nsMgr);
 
-			foreach (var a in oldAgents)
-				a.DeleteSelf();
+				if (oldAgent != null)
+					oldAgent.DeleteSelf();
+				else
+					break;
+			}
 
 			var test = nav.SelectSingleNode("/p:Peach/p:Test", nsMgr);
 
