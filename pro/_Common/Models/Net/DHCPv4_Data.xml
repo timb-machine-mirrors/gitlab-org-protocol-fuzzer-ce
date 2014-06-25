@@ -817,7 +817,7 @@
 
 	<DataModel name="Ack" ref="Response">
 		<Blob name="Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" length="4" value="##TargetIPv4##"/>
-		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="0.0.0.0"/>
+		<Blob name="Payload.Payload.UdpPayload.NextServerIPAddress" valueType="ipv4" length="4" value="##SourceIPv4##"/>
 		<Block name="Payload.Payload.UdpPayload.DOptions">
 			<Block name="DhcpMessageType" ref="TLV">
 				<Number name="Type" size="8" value="53"/>
