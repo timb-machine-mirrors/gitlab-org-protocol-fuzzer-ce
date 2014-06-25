@@ -90,7 +90,7 @@
 			"q":"What is the name of the Windows Service? You can determine this name by XYZ.",
 			"type":"string",
 			"key":"WinDbgService",
-			"required": false,
+			"required": true,
 			"next":1140
 		},
 		{
@@ -99,7 +99,7 @@
 			"type":"string",
 			"key":"WinDbgProcessName",
 			"next":1141,
-			"required": false
+			"required": true
 		},
 		{
 			"id":1140,
