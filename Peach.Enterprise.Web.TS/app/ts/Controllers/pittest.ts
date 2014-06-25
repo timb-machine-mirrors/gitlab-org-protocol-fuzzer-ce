@@ -13,7 +13,7 @@ module DashApp {
 		private q: ng.IQService;
 		private pollerSvc;
 		private testPoller;
-		private logPoller;
+//		private logPoller;
 		private POLLER_TIME = 5000;
 
 		public isReadyToTest: boolean = false;
@@ -91,7 +91,7 @@ module DashApp {
 			this.q.all([monitorPromise, configPromise]).then((response) => {
 				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: P.StartTestResponse) => {
 					this.startTestPoller(data.testUrl);
-					this.startLogPoller(data.testUrl);
+					//this.startLogPoller(data.testUrl);
 				});
 			}, (response) => {
 				console.error(response);  
@@ -118,29 +118,30 @@ module DashApp {
 			}, (data: P.GetTestUpdateResponse) => {
 				this.testEvents = data.events;
 				this.testStatus = data.status;
+				this.log = data.log;
 				if (data.status != "active") {
 					this.testPoller.stop();
-					this.logPoller.stop();
+					//this.logPoller.stop();
 				}
 			});
 		}
 
-		private startLogPoller(testUrl: string) {
-			var url = testUrl + "/raw";
-			var logResource = this.peach.GetSingleThing(url);
-			this.logPoller = this.pollerSvc.get(logResource, {
-				action: "get",
-				delay: this.POLLER_TIME,
-				method: "GET"
-			});
+		//private startLogPoller(testUrl: string) {
+		//	var url = testUrl + "/raw";
+		//	var logResource = this.peach.GetSingleThing(url);
+		//	this.logPoller = this.pollerSvc.get(logResource, {
+		//		action: "get",
+		//		delay: this.POLLER_TIME,
+		//		method: "GET"
+		//	});
 
-			this.logPoller.promise.then((data) => {
-				this.log = data; 
-			}, (data) => {
-					console.error("WTF");
-			}, (data) => {
-					console.error("WTF");
-				});
-		}
+		//	this.logPoller.promise.then((data) => {
+		//		this.log = data; 
+		//	}, (data) => {
+		//			console.error("WTF");
+		//	}, (data) => {
+		//			console.error("WTF");
+		//		});
+		//}
 	}
 }

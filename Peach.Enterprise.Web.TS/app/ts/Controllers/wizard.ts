@@ -241,7 +241,11 @@ module DashApp {
 
 				//store the value in the state bag
 				if (q.key != undefined) {
-					this.pitConfigSvc.StateBag.s(q.key, q.value);
+					if (q.value == undefined && q.required == false) { 
+					}
+					else {
+						this.pitConfigSvc.StateBag.s(q.key, q.value);
+					}
 				}
 
 				var nextid: number;
@@ -446,7 +450,6 @@ module DashApp {
 		}
 
 		public findMonitors(): W.Agent[] {
-			//var that = this;
 			var foundMonitors: W.Monitor[] = [];
 			var agents: W.Agent[] = [];
 
@@ -460,10 +463,14 @@ module DashApp {
 
 			if (foundMonitors.length > 0) {
 				for (var m = 0; m < foundMonitors.length; m++) {
-					for (var i = 0; i < foundMonitors[m].map.length; i++) {
-						if (this.pitConfigSvc.StateBag.containsKey(foundMonitors[m].map[i].key)) {
-							var stateval = this.pitConfigSvc.StateBag.g(foundMonitors[m].map[i].key);
-							foundMonitors[m].map[i].value = stateval;
+					var map = foundMonitors[m].map;
+					foundMonitors[m].map = [];
+					for (var i = 0; i < map.length; i++) {
+
+						if (this.pitConfigSvc.StateBag.containsKey(map[i].key)) {
+							var stateval = this.pitConfigSvc.StateBag.g(map[i].key);
+							map[i].value = stateval;
+							foundMonitors[m].map.push(map[i]);
 						}
 					}
 				}
