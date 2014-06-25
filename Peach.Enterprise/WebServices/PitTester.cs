@@ -7,6 +7,7 @@ using System.Reflection;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using System.Collections.Concurrent;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -231,12 +232,41 @@ namespace Peach.Enterprise.WebServices
 			public List<TestEvent> Events { get; set; }
 		}
 
+		private class LoggingTarget : TargetWithLayout
+		{
+			private BlockingCollection<string> logs = new BlockingCollection<string>();
+
+			public IEnumerable<string> Logs
+			{
+				get
+				{
+					return logs;
+				}
+			}
+
+			protected override void Write(LogEventInfo logEvent)
+			{
+				var msg = this.Layout.Render(logEvent);
+
+				logs.Add(msg);
+			}
+		}
+
 		private object mutex;
 		private EventCollector watcher;
 		private string pitLibraryPath;
 		private string pitFile;
 		private Thread thread;
-		private MemoryTarget target;
+		private LoggingTarget target;
+
+		// Filter these loggers to the info level since they are spammy at debug
+		private static string[] FilteredLoggers =
+		{
+			"Peach.Core.Dom.Array",
+			"Peach.Core.Dom.Choice",
+			"Peach.Core.Dom.DataElement",
+			"Peach.Core.Cracker.DataCracker",
+		};
 
 		private void Run()
 		{
@@ -244,6 +274,13 @@ namespace Peach.Enterprise.WebServices
 			{
 				var nconfig = new LoggingConfiguration();
 				nconfig.AddTarget("target", target);
+
+				// Disable the data cracker logs to keep the size of the test log down
+				foreach (var item in FilteredLoggers)
+				{
+					var r = new LoggingRule(item, LogLevel.Info, target) { Final = true };
+					nconfig.LoggingRules.Add(r);
+				}
 
 				var rule = new LoggingRule("*", LogLevel.Debug, target);
 				nconfig.LoggingRules.Add(rule);
@@ -302,7 +339,7 @@ namespace Peach.Enterprise.WebServices
 			this.watcher = new EventCollector(this);
 			this.pitLibraryPath = pitLibraryPath;
 			this.pitFile = pitFile;
-			this.target = new MemoryTarget() { Layout = "${logger} ${message}" };
+			this.target = new LoggingTarget() { Layout = "${logger} ${message}" };
 			this.thread = new Thread(Run);
 
 			thread.Start();
@@ -341,7 +378,7 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public IList<string> Log
+		public IEnumerable<string> Log
 		{
 			get
 			{

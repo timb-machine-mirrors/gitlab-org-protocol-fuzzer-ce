@@ -101,7 +101,7 @@ namespace Peach.Enterprise.WebServices
 
 		object GetTestRaw(string id)
 		{
-			IList<string> lines;
+			IEnumerable<string> lines;
 
 			lock (Mutex)
 			{
