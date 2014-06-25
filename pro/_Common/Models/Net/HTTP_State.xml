@@ -45,6 +45,8 @@ SUCH DAMAGE.
 
   <StateModel name="RequestForParser" initialState="InitialState">
     <State name="InitialState">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output">
         <DataModel ref="HTTP:Request" />
         <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/requests" />
@@ -52,12 +54,14 @@ SUCH DAMAGE.
 
       <Action type="close" />
 
-      <Action type="call" method="startRequestParser" publisher="Peach.Agent" />
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="RequestToServer" initialState="InitialState">
     <State name="InitialState">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output">
         <DataModel ref="HTTP:Request" />
         <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/requests" />
@@ -66,11 +70,15 @@ SUCH DAMAGE.
       <Action type="input">
         <DataModel ref="HTTP:Response" />
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="ResponseForParser" initialState="InitialState">
     <State name="InitialState">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output">
         <DataModel ref="HTTP:Response" />
         <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/responses" />
@@ -78,7 +86,7 @@ SUCH DAMAGE.
 
       <Action type="close" />
 
-      <Action type="call" method="startResponseParser" publisher="Peach.Agent" />
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -86,7 +94,7 @@ SUCH DAMAGE.
     <State name="InitialState">
       <Action type="open" />
 
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
       <Action type="accept" />
 
@@ -98,6 +106,8 @@ SUCH DAMAGE.
         <DataModel ref="HTTP:Response" />
         <Data fileName="##PitLibraryPath##/_Common/Samples/Net/HTTP/responses" />
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 

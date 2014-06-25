@@ -45,6 +45,8 @@ SUCH DAMAGE.
 
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="GeneralQuery" type="output">
         <DataModel ref="MLD:Query"/>
       </Action>
@@ -66,6 +68,8 @@ SUCH DAMAGE.
       <Action type="output">
         <DataModel ref="MLD:Ver2Report"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

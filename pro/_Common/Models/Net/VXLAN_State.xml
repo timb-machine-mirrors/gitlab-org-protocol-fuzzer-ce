@@ -45,6 +45,8 @@ SUCH DAMAGE.
 	
   <StateModel name="TheState" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <!-- <Action type="output"> -->
       <!--   <DataModel ref="DataModels:##Test##"/> -->
       <!-- </Action> -->
@@ -87,6 +89,8 @@ SUCH DAMAGE.
 			<Action type="output">
 				<DataModel ref="DataModels:IPv6UDPInVxlan"/>
 			</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

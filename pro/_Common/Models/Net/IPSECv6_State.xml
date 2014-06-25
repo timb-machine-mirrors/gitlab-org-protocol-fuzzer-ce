@@ -45,6 +45,8 @@ SUCH DAMAGE.
 	
 	<StateModel name="ESP" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output">
 				<DataModel ref="DataModels:IPv6EmptyPacketIPSECv6##Mode##"/>
       </Action>
@@ -126,14 +128,20 @@ SUCH DAMAGE.
 			<Action type="output">
 				<DataModel ref="DataModels:IPv6UDPv6IPSECv6##Mode##"/>
       </Action>
-    </State>
+  
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+  </State>
   </StateModel>
 	
 	<StateModel name="AH" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action type="output">
 				<DataModel ref="DataModels:IPsecV6Ah##Mode##"/>
 			 </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 </Peach>

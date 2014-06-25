@@ -46,6 +46,8 @@ SUCH DAMAGE.
   <!-- FTP Passive Mode-->
   <StateModel name="ClientPassive" initialState="InputUserName">
     <State name="InputUserName">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
       </Action>
@@ -142,12 +144,16 @@ SUCH DAMAGE.
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ResponseTemplate" />
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <!-- FTP Active Mode-->
   <StateModel name="ClientActive" initialState="InputUserName">
     <State name="InputUserName">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ServerReadyForUser" />
       </Action>
@@ -254,6 +260,8 @@ SUCH DAMAGE.
       <Action name="Goodbye" type="input" publisher="CommandPublisher">
         <DataModel ref="FTP:ResponseTemplate" />
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -261,7 +269,8 @@ SUCH DAMAGE.
   <StateModel name="ServerActive" initialState="StartServer">
     <State name="StartServer">
       <Action type="open" publisher="CommandPublisher"/>
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="accept" publisher="CommandPublisher"/>
       <Action name="Next" type="changeState" ref="PreAuth"/>
     </State>
@@ -296,6 +305,8 @@ SUCH DAMAGE.
       <Action type="changeState" ref="PreAuth" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'SYST'"/>
 
       <Action type="changeState" ref="InputPasswd" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'USER'"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
 
     <State name="InputPasswd">
@@ -658,7 +669,8 @@ SUCH DAMAGE.
     </State>
 
     <State name="Done">
-      <Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -666,7 +678,8 @@ SUCH DAMAGE.
   <StateModel name="ServerPassive" initialState="StartServer">
     <State name="StartServer">
       <Action type="open" publisher="CommandPublisher"/>
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="accept" publisher="CommandPublisher"/>
       <Action name="Next" type="changeState" ref="PreAuth"/>
     </State>
@@ -701,6 +714,8 @@ SUCH DAMAGE.
       <Action type="changeState" ref="PreAuth" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'SYST'"/>
 
       <Action type="changeState" ref="InputPasswd" when="State.actions[1].dataModel.find('Command').SelectedElement.name == 'USER'"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
 
     <State name="InputPasswd">
@@ -1068,7 +1083,8 @@ SUCH DAMAGE.
     </State>
 
     <State name="Done">
-      <Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

@@ -51,6 +51,8 @@ SUCH DAMAGE.
 
   <StateModel name="Request" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Request" type="output">
         <DataModel ref="ARPPacket"/>
         <Data>
@@ -58,11 +60,15 @@ SUCH DAMAGE.
           <Field name="Payload.Data.OPER.Request" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="Reply" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Request" type="input">
         <DataModel ref="ARPPacket"/>
       </Action>
@@ -76,6 +82,8 @@ SUCH DAMAGE.
           <Field name="Payload.Data.OPER.Reply" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 

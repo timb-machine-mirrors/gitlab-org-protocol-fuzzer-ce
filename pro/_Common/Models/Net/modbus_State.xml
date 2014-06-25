@@ -45,6 +45,8 @@ SUCH DAMAGE.
 
   <StateModel name="RTUMode" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="input" publisher="ModbusOverSerial">
           <DataModel ref="Modbus:CatchInput" />
       </Action>
@@ -57,11 +59,15 @@ SUCH DAMAGE.
           <Field name="CrcBlock.FunctionChoices.Function.WriteSingleRegister" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="AsciiMode" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="input" publisher="ModbusOverSerial">
           <DataModel ref="Modbus:CatchInput" />
       </Action>
@@ -74,11 +80,15 @@ SUCH DAMAGE.
           <Field name="LrcBlock.Function" value="06"/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="OverTcp" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output" publisher="ModbusOverTcp">
         <DataModel ref="Modbus:TcpFrameFormat"/>
         <Data>
@@ -97,6 +107,8 @@ SUCH DAMAGE.
       <Action type="input" publisher="ModbusOverTcp">
           <DataModel ref="Modbus:CatchInput" />
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

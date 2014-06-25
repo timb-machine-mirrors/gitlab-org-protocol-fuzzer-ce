@@ -45,6 +45,7 @@ SUCH DAMAGE.
 
 	<StateModel name="FileWriteAndLaunch" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
       <Action name="WriteFileFromSample" type="output" publisher="writer">
         <DataModel name="Gif" ref="GIF:GIF"/>
@@ -52,7 +53,8 @@ SUCH DAMAGE.
       </Action>
 
       <Action name="CloseFile"  type="close" publisher="writer"/>
-      <Action name="Launch" type="call" method="FuzzMe" publisher="Peach.Agent"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

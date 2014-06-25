@@ -54,12 +54,16 @@ SUCH DAMAGE.
 
   <StateModel name="PingTest" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Request" type="output">
         <DataModel ref="ICMPInIPv4"/>
       </Action>
       <Action name="Reply" type="input">
         <DataModel ref="EchoReply"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

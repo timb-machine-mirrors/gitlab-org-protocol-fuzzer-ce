@@ -47,9 +47,13 @@ SUCH DAMAGE.
   <!-- StateModel for All LACP requests  -->
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Broadcast" type="output">
         <DataModel ref="LACP:Packet"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

@@ -44,7 +44,9 @@ SUCH DAMAGE.
 	<Include ns="DataModels" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_Data.xml"/>
 
 	<StateModel name="Client" initialState="Initial">
-		<State name="Search">
+		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
@@ -56,9 +58,7 @@ SUCH DAMAGE.
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
       <Action type="close" publisher="tcp" />
-		</State>
-    
-		<State name="Add">
+
       <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
@@ -70,9 +70,7 @@ SUCH DAMAGE.
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
       <Action type="close" publisher="tcp" />
-		</State>
-    
-		<State name="Compare">
+
       <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
@@ -84,9 +82,7 @@ SUCH DAMAGE.
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
       <Action type="close" publisher="tcp" />
-		</State>
-    
-		<State name="Delete">
+
       <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
@@ -98,9 +94,7 @@ SUCH DAMAGE.
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
       <Action type="close" publisher="tcp" />
-		</State>
 
-		<State name="ExtendOp">
       <Action type="open" publisher="tcp" />
 			<Action type="output" publisher="tcp">
 				<DataModel ref="DataModels:Bind" />
@@ -112,6 +106,8 @@ SUCH DAMAGE.
 				<DataModel ref="DataModels:Unbind" />
 			</Action>
       <Action type="close" publisher="tcp" />
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 
@@ -119,7 +115,8 @@ SUCH DAMAGE.
     <State name="ProcessRequest">
       <Action type="start" publisher="TcpHandler"/>
 
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 
       <Action type="accept" publisher="TcpHandler"/>
 
@@ -150,9 +147,14 @@ SUCH DAMAGE.
 
 			<!--TODO-->
 			<Action name="ExtendOp" type="changeState" ref="SearchResponse" when="int(StateModel.states['NextTransaction'].actions[0].dataModel.find('Code').InternalValue) == 0x80"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
-		<State name="Done"/>
+		<State name="Done">
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+    </State>
 
 		<State name="AddResponse">
 			<Action name="SendAddResponse" type="output" publisher="TcpHandler">
@@ -215,6 +217,8 @@ SUCH DAMAGE.
 
 			<!--TODO-->
 			<Action name="ExtendOp" type="changeState" ref="SearchResponse" when="int(StateModel.states['NextTransaction2'].actions[0].dataModel.find('Code').InternalValue) == 0x80"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="BindResponse">

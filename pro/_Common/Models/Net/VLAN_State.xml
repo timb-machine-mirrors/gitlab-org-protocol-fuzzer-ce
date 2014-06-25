@@ -47,6 +47,8 @@ SUCH DAMAGE.
 	<!-- StateModel for All VLAN requests  -->
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action type="output">
 				<DataModel ref="DataModels:IPv6EmptyPacketInVlan"/>
 			</Action>
@@ -128,6 +130,8 @@ SUCH DAMAGE.
 			<Action type="output">
 				<DataModel ref="DataModels:IPv6UDPv6InVlan"/>
 			</Action>			
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 </Peach>

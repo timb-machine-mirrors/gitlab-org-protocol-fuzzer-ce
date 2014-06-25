@@ -51,12 +51,16 @@ SUCH DAMAGE.
 
   <StateModel name="Send" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="ArpRequest" type="output">
         <DataModel ref="EthernetFrame"/>
         <Data>
           <Field name="Payload.Data.OPER.Request" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

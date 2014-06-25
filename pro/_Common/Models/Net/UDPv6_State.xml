@@ -46,9 +46,13 @@ SUCH DAMAGE.
 
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action type="output">
         <DataModel ref="UDPv6:Packet"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

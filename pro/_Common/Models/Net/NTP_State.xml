@@ -45,6 +45,8 @@ SUCH DAMAGE.
 
   <StateModel name="ClientToServer" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <!-- generate ntp lpeers request packet -->
       <Action name="NtpSendLpeersPacket" type="output" publisher="UdpHandler">
         <DataModel ref="NTP:NtpqLpeers"/>
@@ -59,6 +61,8 @@ SUCH DAMAGE.
       </Action>
       <!-- close udp socket -->
       <Action type="close" publisher="UdpHandler"/>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

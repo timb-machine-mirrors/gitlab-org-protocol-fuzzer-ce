@@ -50,10 +50,14 @@ SUCH DAMAGE.
 	<!-- Currenlty supports fuzzing a listener, not acting as a listener -->
 	
 	
-	<StateModel name="Listener" initialState="SendSyn">
+	<StateModel name="Listener" initialState="Initial">
+  
+    <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+			<Action type="changeState" ref="SendSyn" />
+    </State>
 
 		<State name="SendSyn" >
-
 			<!-- http://tools.ietf.org/html/rfc793#section-3.4 -->
 			<!-- Does not support sync connections or half-open recovery -->
 			<Action type="output"
@@ -198,6 +202,8 @@ SUCH DAMAGE.
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="Packet" ref="TCPv4:Packet"/>
 			</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="ImmediateClose">
@@ -238,6 +244,8 @@ SUCH DAMAGE.
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="FINACKPacket" ref="TCPv4:Packet"/>
 			</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="SendFinalAck">
@@ -246,6 +254,8 @@ SUCH DAMAGE.
 				<Data ref="TCP:ACK"/>
 				<DataModel name="ACKPacket" ref="TCPv4:Packet"/>
 			</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="Recovery">

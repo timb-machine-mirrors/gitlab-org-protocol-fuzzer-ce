@@ -84,6 +84,8 @@ SUCH DAMAGE.
 
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 
       <Action name="EchoRequest" type="output">
         <DataModel ref="ICMPv4:EchoRequest" />
@@ -137,6 +139,8 @@ SUCH DAMAGE.
         <DataModel ref="ICMPv4:RouterSolicitation" />
       </Action>
 
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>
