@@ -170,9 +170,8 @@
 			"map": [
 				{ "key":"ProcessExecutable",		"param":"Executable" },
 				{ "key":"ProcessArguments",			"param":"Arguments" },
-				{ "key":"ProcessRestartOnEachTest",	"param":"RestartOnEachTest" },
-				{ "key":"ProcessFaultOnEarlyExit",	"param":"FaultOnEarlyExit" },
-				{ "key":"ProcessStartOnCall",		"param":"StartOnCall" }
+				{ "key":"ProcessStart",	"param":"StartMode" },
+				{ "key":"ProcessFaultOnEarlyExit",	"param":"FaultOnEarlyExit" }
 			],
 			"description": "Control a process. "
 		}

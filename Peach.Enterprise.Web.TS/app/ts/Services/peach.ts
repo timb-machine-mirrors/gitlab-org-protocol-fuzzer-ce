@@ -25,7 +25,7 @@ module DashApp.Services {
 
 		GetPit(id: number, success: (data: P.Pit) => void): void;
 		GetPit(url: string, success: (data: P.Pit) => void): void;
-		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void;
+		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 
 		PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any>;
 		PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any>;
@@ -104,8 +104,8 @@ module DashApp.Services {
 			}
 		}
 
-		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void): void {
-			this.http.post(this.URL_PREFIX + "/p/pits", request).then((response) => success(<P.Pit>response.data));
+		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
+			this.http.post(this.URL_PREFIX + "/p/pits", request).then((response) => success(<P.Pit>response.data), (response) => error(<ng.IHttpPromiseCallbackArg<any>>response));
 		}
 		
 		public PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any> {

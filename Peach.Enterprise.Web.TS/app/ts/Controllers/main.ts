@@ -109,17 +109,16 @@ module DashApp {
 				resolve: {
 					pit: () => {
 						return pit;
+					},
+					libraryUrl: () => {
+						return this.pitConfigSvc.UserPitLibrary;
+					},
+					peachSvc: () => {
+						return this.peachSvc;
 					}
 				}
 			}).result.then((pit: P.Pit) => {
-				var request: P.CopyPitRequest = {
-					libraryUrl: this.pitConfigSvc.UserPitLibrary,
-					pit: pit
-				};
-
-				this.peachSvc.CopyPit(request, (data: P.Pit) => {
-					this.pitConfigSvc.Pit = data;
-				});
+				this.pitConfigSvc.Pit = pit;
 			});
 		}
 	}

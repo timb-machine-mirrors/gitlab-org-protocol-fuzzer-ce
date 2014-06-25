@@ -121,7 +121,8 @@ module DashApp {
 			return {
 				data: "vm.DefinesSimple",
 				columnDefs: [
-					{ field: "key", displayName: "Name" },
+					{ field: "name", displayName: "Name" },
+					{ field: "key", displayName: "Key" },
 					{ field: "value", displayName: "Value" },
 					{ cellTemplate: "../../partials/defines-cell-template.html"}
 				],
@@ -135,7 +136,8 @@ module DashApp {
 			return {
 				data: "vm.DefinesSimple",
 				columnDefs: [
-					{ field: "key", displayName: "Name" },
+					{ field: "name", displayName: "Name" },
+					{ field: "key", displayName: "Key" },
 					{ field: "value", displayName: "Value" }
 				],
 				enableCellSelection: false,
@@ -167,9 +169,9 @@ module DashApp {
 
 		public get DefinesSimple(): any[] {
 			if (this.pitConfigSvc != undefined) 
-				return this.pitConfigSvc.Defines.KeyValuePairs;
+				return this.pitConfigSvc.Defines.config;
 			else
-				return undefined;
+				return [];
 		}
 
 		public get title(): string {
