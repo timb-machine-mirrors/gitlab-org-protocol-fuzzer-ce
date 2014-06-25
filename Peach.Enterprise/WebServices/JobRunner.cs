@@ -17,6 +17,7 @@ namespace Peach.Enterprise.WebServices
 		{
 		}
 
+		public string PitUrl { get; private set; }
 		public string Guid { get; private set; }
 		public string Name { get; private set; }
 		public uint Seed { get; private set; }
@@ -87,7 +88,7 @@ namespace Peach.Enterprise.WebServices
 			return true;
 		}
 
-		public static JobRunner Run(WebLogger logger, string pitLibraryPath, string pitFile)
+		public static JobRunner Run(WebLogger logger, string pitLibraryPath, string pitFile, string pitUrl)
 		{
 			var config = new RunConfiguration() { pitFile = pitFile };
 
@@ -98,6 +99,7 @@ namespace Peach.Enterprise.WebServices
 				Seed = config.randomSeed,
 				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.StartPending,
+				PitUrl = pitUrl,
 			};
 
 			ret.pauseEvent = new ManualResetEvent(true);
@@ -117,6 +119,7 @@ namespace Peach.Enterprise.WebServices
 				Seed = config.randomSeed,
 				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.Running,
+				PitUrl = string.Empty,
 			};
 
 			return ret;

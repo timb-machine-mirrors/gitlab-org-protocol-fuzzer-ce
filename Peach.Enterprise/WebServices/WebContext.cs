@@ -39,9 +39,9 @@ namespace Peach.Enterprise.WebServices
 			Tester = new PitTester(PitLibraryPath, pitFile);
 		}
 
-		public void StartJob(string pitFile)
+		public void StartJob(string pitFile, string pitUrl)
 		{
-			Runner = JobRunner.Run(Logger, PitLibraryPath, pitFile);
+			Runner = JobRunner.Run(Logger, PitLibraryPath, pitFile, pitUrl);
 		}
 
 		public void AttachJob(RunConfiguration config)

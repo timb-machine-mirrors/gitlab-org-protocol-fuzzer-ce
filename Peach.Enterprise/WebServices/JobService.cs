@@ -135,7 +135,7 @@ namespace Peach.Enterprise.WebServices
 				TargetUrl = "",
 				TargetConfigUrl = "",
 				NodesUrl = Prefix + "/" + Runner.Guid + "/nodes",
-				PitUrl = "",
+				PitUrl = Runner.PitUrl,
 				PeachUrl = "",
 				ReportUrl = "",
 				PackageFileUrl = "",

@@ -81,7 +81,7 @@ namespace Peach.Enterprise.WebServices
 
 		protected void StartJob(Models.Pit pit)
 		{
-			context.StartJob(pit.Versions[0].Files[0].Name);
+			context.StartJob(pit.Versions[0].Files[0].Name, pit.PitUrl);
 		}
 	}
 }
