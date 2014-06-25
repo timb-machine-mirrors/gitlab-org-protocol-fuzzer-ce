@@ -44,42 +44,11 @@ SUCH DAMAGE.
 
 	<Include ns="JPEG2000" src="file:##PitLibraryPath##/_Common/Models/Image/JPEG2000_State.xml"/>
 
-	<Agent name="LinuxAgent">
-		<Monitor class="LinuxCrashMonitor"/>
-		<Monitor class="Process">
-			<Param name="Executable" value="##Target##"/>
-			<Param name="StartOnCall" value="FuzzMe"/>
-			<Param name="Arguments" value="fuzzed.jp2"/>
-			<Param name="CpuKill" value="true"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="OsxAgent">
-		<Monitor class="CrashWrangler">
-			<Param name="Command" value="##Target##"/>
-			<Param name="Arguments" value="fuzzed.jp2"/>
-			<Param name="StartOnCall" value="FuzzMe"/>
-			<Param name="CpuKill" value="true"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="WinAgent">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="##Target## fuzzed.jp2"/>
-			<Param name="StartOnCall" value="FuzzMe"/>
-			<Param name="CpuKill" value="true"/>
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
 		<StateModel ref="JPEG2000:FileWriteAndLaunch"/>
 
-		<Agent ref="LinuxAgent" platform="linux"/>
-		<Agent ref="WinAgent" platform="windows"/>
-		<Agent ref="OsxAgent" platform="osx"/>
-
 		<Publisher name="writer" class="file.FileWriter">
-			<Param name="FileName" value="fuzzed.jp2" />
+			<Param name="FileName" value="##FuzzedFile##" />
 		</Publisher>
 
 		<Strategy class="##Strategy##"/>
