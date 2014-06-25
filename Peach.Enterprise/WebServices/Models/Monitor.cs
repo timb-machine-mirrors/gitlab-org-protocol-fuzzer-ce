@@ -46,10 +46,17 @@ namespace Peach.Enterprise.WebServices.Models
 		/// </example>
 		public string MonitorClass { get; set; }
 
+#if DISABLED
+		The Path is disabled due to a bug deserializing integers in mono.
+		Newtonsoft.Json tries to use BigInteger.Parse which throws
+		a MissingMethodException on mono 2.10
+		http://json.codeplex.com/workitem/24176
+
 		/// <summary>
 		/// The wizard path that resulted in this monitor
 		/// </summary>
 		public List<uint> Path { get; set; }
+#endif
 
 		/// <summary>
 		/// The parameters to the monitor

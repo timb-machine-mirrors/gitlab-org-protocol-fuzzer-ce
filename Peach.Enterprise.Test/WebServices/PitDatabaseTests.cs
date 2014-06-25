@@ -264,7 +264,6 @@ namespace Peach.Enterprise.Test.WebServices
 	""monitors"": [
 		{
 			""monitorClass"":""PageHeap"",
-			""path"": [1110],
 			""map"": [
 				{ ""key"":""WinDbgExecutable"", ""param"":""Executable"", ""value"":""Foo.exe"" },
 				{ ""key"":""WinDbgPath"", ""param"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
@@ -273,7 +272,6 @@ namespace Peach.Enterprise.Test.WebServices
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
-			""path"": [1100],
 			""map"": [
 				{ ""key"":""WinDbgExecutable"",	""param"":""Executable"", ""value"":""Foo.exe"" },
 				{ ""key"":""WinDbgArguments"", ""param"":""Arguments"", ""value"":""--arg"" },
@@ -288,7 +286,6 @@ namespace Peach.Enterprise.Test.WebServices
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""path"": [ 4100 ],
 			""map"":[
 				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
 				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
@@ -302,7 +299,6 @@ namespace Peach.Enterprise.Test.WebServices
 	""monitors"": [
 		{
 			""monitorClass"":""CanaKit"",
-			""path"": [ 4100 ],
 			""map"": [
 				{""key"":""CanaKitRelaySerialPort"",	""param"":""SerialPort"", ""value"":""COM1"" },
 				{""key"":""CanaKitRelayRelayNumber"",	""param"":""RelayNumber"", ""value"":""1"" },
@@ -315,7 +311,6 @@ namespace Peach.Enterprise.Test.WebServices
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""path"": [ 4100 ],
 			""map"":[
 				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
 				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
@@ -329,7 +324,6 @@ namespace Peach.Enterprise.Test.WebServices
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""path"": [ 4100 ],
 			""map"":[
 				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
 				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 8080"" }

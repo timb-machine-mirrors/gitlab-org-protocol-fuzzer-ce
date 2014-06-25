@@ -24,7 +24,6 @@ namespace Peach.Enterprise.Test.WebServices
         ""monitors"": [
             {
                 ""monitorClass"":""Pcap"",
-                ""path"": [ 4100 ],
                 ""map"":[
                     {""key"":""PcapDevice"", ""param"":""Device"", value:""MyInterface""},
                     {""key"":""PcapFilter"", ""param"":""Filter"", value:""MyFilter""}
