@@ -344,8 +344,35 @@ namespace Peach.Enterprise.WebServices
 					foreach (var p in m.Map)
 					{
 						w.WriteStartElement("Param");
-						w.WriteAttributeString("name", p.Key);
-						w.WriteAttributeString("value", p.Value);
+
+						if (p.Param == "StartMode")
+						{
+							if (p.Value == "StartOnCall")
+							{
+								w.WriteAttributeString("name", "StartOnCall");
+								w.WriteAttributeString("value", "launchProcess");
+								w.WriteEndElement();
+								w.WriteStartElement("Param");
+								w.WriteAttributeString("name", "WaitForExitOnCall");
+								w.WriteAttributeString("value", "exitProcess");
+							}
+							else if (p.Value == "RestartOnEachTest")
+							{
+								w.WriteAttributeString("name", "RestartOnEachTest");
+								w.WriteAttributeString("value", "true");
+							}
+							else
+							{
+								w.WriteAttributeString("name", "RestartOnEachTest");
+								w.WriteAttributeString("value", "false");
+							}
+						}
+						else
+						{
+							w.WriteAttributeString("name", p.Param);
+							w.WriteAttributeString("value", p.Value);
+						}
+
 						w.WriteEndElement();
 					}
 

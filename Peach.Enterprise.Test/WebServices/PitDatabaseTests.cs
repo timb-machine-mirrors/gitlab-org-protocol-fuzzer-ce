@@ -384,9 +384,79 @@ namespace Peach.Enterprise.Test.WebServices
 
 			foreach (var item in jsonMon.Map)
 			{
-				Assert.True(domMon.parameters.ContainsKey(item.Key));
-				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Key]);
+				Assert.True(domMon.parameters.ContainsKey(item.Param));
+				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Param]);
 			}
 		}
+
+		[Test]
+		public void TestSaveProcessMonitors()
+		{
+			var pit = db.Entries.First();
+
+			var json = @"
+[
+{
+	""agentUrl"":""local://"",
+	""monitors"": [
+		{
+			""monitorClass"":""WindowsDebugger"",
+			""map"": [
+				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""StartOnCall"" },
+			],
+		},
+		{
+			""monitorClass"":""WindowsDebugger"",
+			""map"": [
+				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""RestartOnEachTest"" },
+			],
+		},
+		{
+			""monitorClass"":""WindowsDebugger"",
+			""map"": [
+				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""StartOnEachIteration"" },
+			],
+		},
+	],
+},
+]";
+			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+
+			PitDatabase.SaveMonitors(pit, monitors);
+
+			var parser = new Peach.Core.Analyzers.PitParser();
+
+			var opts = new Dictionary<string, object>();
+			var defs = new Dictionary<string, string>();
+			defs.Add("PitLibraryPath", root);
+			defs.Add("Strategy", "Random");
+			opts[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
+
+			Assert.AreEqual(1, dom.tests[0].agents.Count);
+
+			Assert.AreEqual("Agent0", dom.tests[0].agents[0].name);
+			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
+			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
+
+			var param1 = dom.tests[0].agents[0].monitors[0].parameters;
+			Assert.AreEqual(2, param1.Count);
+			Assert.True(param1.ContainsKey("StartOnCall"));
+			Assert.AreEqual("launchProcess", (string)param1["StartOnCall"]);
+			Assert.True(param1.ContainsKey("WaitForExitOnCall"));
+			Assert.AreEqual("exitProcess", (string)param1["WaitForExitOnCall"]);
+
+			var param2 = dom.tests[0].agents[0].monitors[1].parameters;
+			Assert.AreEqual(1, param2.Count);
+			Assert.True(param2.ContainsKey("RestartOnEachTest"));
+			Assert.AreEqual("true", (string)param2["RestartOnEachTest"]);
+
+			var param3 = dom.tests[0].agents[0].monitors[2].parameters;
+			Assert.AreEqual(1, param3.Count);
+			Assert.True(param3.ContainsKey("RestartOnEachTest"));
+			Assert.AreEqual("false", (string)param3["RestartOnEachTest"]);
+		}
+
 	}
 }
