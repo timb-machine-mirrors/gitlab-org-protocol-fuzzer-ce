@@ -393,6 +393,34 @@ namespace PitTester
 
 				if (it.Count != expexted)
 					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
+
+				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
+				while (sm.MoveNext())
+				{
+					var smName = sm.Current.GetAttribute("name", "") ?? "<unknown>";
+
+					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
+
+					bool gotStart = false;
+					bool gotEnd = false;
+
+					while (actions.MoveNext())
+					{
+						var meth = actions.Current.GetAttribute("method", "");
+						if (meth == "StartIterationEvent")
+							gotStart = true;
+						else if (meth == "ExitIterationEvent")
+							gotEnd = true;
+						else
+							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
+					}
+
+					if (!gotStart)
+						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'StartIterationEvent'.", smName));
+
+					if (!gotEnd)
+						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
+				}
 			}
 
 			if (errors.Length > 0)
