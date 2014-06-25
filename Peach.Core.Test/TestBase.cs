@@ -54,18 +54,25 @@ namespace Peach
 		{
 			System.Diagnostics.Debug.Listeners.Insert(0, new AssertTestFail());
 
-			ColoredConsoleTarget consoleTarget = new ColoredConsoleTarget();
+			var consoleTarget = new ConsoleTarget();
 			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
 
-			LoggingConfiguration config = new LoggingConfiguration();
+			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			LoggingRule rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+			var rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;
 
 			Peach.Core.Platform.LoadAssembly();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			LogManager.Flush();
+			LogManager.Configuration = null;
 		}
 	}
 
