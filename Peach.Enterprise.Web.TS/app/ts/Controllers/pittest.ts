@@ -57,9 +57,9 @@ module DashApp {
 			this.testStatus = "notrunning";
 		}
 
+		//			rowHeight: 70,
 		public dataGridOptions: ngGrid.IGridOptions = {
 			data: "vm.testEvents", 
-			rowHeight: 60,
 			columnDefs: [
 				{
 					field: "status",
