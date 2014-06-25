@@ -132,12 +132,13 @@ namespace Peach.Core.Runtime
 
 		static Program()
 		{
-			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
 			Peach.Core.AssertWriter.Register();
 		}
 
 		public Program(string[] args)
 		{
+			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+
 			config.commandLine = args;
 
 			try
