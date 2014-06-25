@@ -347,21 +347,21 @@ namespace Peach.Enterprise.WebServices
 
 						if (p.Param == "StartMode")
 						{
-							if (p.Value == "StartOnCall")
+							if (p.Value == "StartOnCall") // File fzzing
 							{
 								w.WriteAttributeString("name", "StartOnCall");
-								w.WriteAttributeString("value", "launchProcess");
+								w.WriteAttributeString("value", "ExitIterationEvent");
+							}
+							else if (p.Value == "RestartOnEachTest") // Network client
+							{
+								w.WriteAttributeString("name", "StartOnCall");
+								w.WriteAttributeString("value", "StartIterationEvent");
 								w.WriteEndElement();
 								w.WriteStartElement("Param");
 								w.WriteAttributeString("name", "WaitForExitOnCall");
-								w.WriteAttributeString("value", "exitProcess");
+								w.WriteAttributeString("value", "ExitIterationEvent");
 							}
-							else if (p.Value == "RestartOnEachTest")
-							{
-								w.WriteAttributeString("name", "RestartOnEachTest");
-								w.WriteAttributeString("value", "true");
-							}
-							else
+							else // Network server
 							{
 								w.WriteAttributeString("name", "RestartOnEachTest");
 								w.WriteAttributeString("value", "false");
