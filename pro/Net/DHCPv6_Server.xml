@@ -44,24 +44,14 @@ SUCH DAMAGE.
 
   <Include ns="States" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_State.xml"/>
 
-  <Agent name="DHCPTestClient">
-    <Monitor class="LinuxCrashMonitor"/>
-    <Monitor class="Process">
-      <Param name="Executable" value="dhclient" />
-      <Param name="Arguments" value="-lf /dev/null -6 -d ##TargetInterface##" />
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
     <StateModel ref="States:Server"/>
 
-    <Agent ref="DHCPTestClient"/>
-
     <Publisher class="Udp" name="LisentenPublisher">
-      <Param name="Host" value="##MulticastDHCP##"/>
+      <Param name="Host" value="ff02::1:2"/>
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Interface" value="##Interface##"/>
+      <Param name="Interface" value="::1"/>
       <Param name="Timeout" value="36000"/>
     </Publisher>
 

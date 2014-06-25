@@ -44,44 +44,8 @@ SUCH DAMAGE.
 
   <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
 
-  <Agent name="Windows">
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="-r:##SourceIPv4## -c: ##CommString## -v:2c ##SourceIPv4##"/>
-      <Param name="FaultOnEarlyExit" value="true"/>
-      <Param name="StartOnCall" value="launchProgram"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="Linux">
-     <Monitor class="LinuxCrashMonitor"/>
-
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="-c ##CommString## -v2c ##SourceIPv4##"/>
-      <Param name="StartOnCall" value="launchProgram" />
-      <Param name="FaultOnEarlyExit" value="true"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="OSX">
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="-c ##CommString## -v2c ##SourceIPv4##"/>
-      <Param name="StartOnCall" value="launchProgram" />
-      <Param name="FaultOnEarlyExit" value="true"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
     <StateModel ref="SNMP:Server"/>
-
-    <Agent ref="Windows" platform="linux"/>
-    <Agent ref="Linux" platform="windows"/>
-    <Agent ref="OSX" platform="osx"/>
 
     <Publisher class="Udp">
       <Param name="SrcPort" value="##SourcePort##"/>

@@ -39,4 +39,5 @@ output/
 
 pro/logs
 pro/fuzzed.*
+pro/User
 

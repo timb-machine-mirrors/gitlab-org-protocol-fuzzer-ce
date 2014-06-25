@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<String key="Seed" name="name" description="" value="avi_divx_sample*.avi"/>
-	<Strategy key="Strategy" name="name" description=""  value="Random"/>
-	<String key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Video"/>
+	<Define key="Seed"       value="avi_divx_sample*.avi"/>
+	<Define key="Strategy"   value="Random"/>
+	<Define key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Video"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

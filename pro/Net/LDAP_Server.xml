@@ -44,26 +44,14 @@ SUCH DAMAGE.
 
 	<Include ns="LDAP" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_State.xml"/>
 
-	<Agent name="ServerAgent">
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="##Target## ##Arguments##"/>
-			<Param name="NoCpuKill" value="true"/>
-			<Param name="FaultOnEarlyExit" value="true"/>
-			<Param name="WaitForExitTimeout" value="500"/>
-			<Param name="StartOnCall" value="launchProgram"/>
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
-		<Agent ref="ServerAgent"/>
-
 		<StateModel ref="LDAP:Server"/>
 
 		<Strategy class="##Strategy##"/>
 
 		<Publisher name="TcpHandler" class="TcpListener">
 			<Param name="Interface" value="##SourceIPv4##" />
-			<Param name="Port" value="##TargetPort##"/>
+			<Param name="Port" value="##SourcePort##"/>
 			<Param name="Timeout" value="##Timeout##"/>
 		</Publisher>
 

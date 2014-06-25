@@ -45,16 +45,8 @@ SUCH DAMAGE.
 
   <Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_State.xml"/>
 
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
-  <Test name="Default">
+    <Test name="Default">
     <StateModel ref="IPv6:Transmit"/>
-
-    <Agent ref="LocalAgent"/> 
 
     <Publisher class="RawEther">
       <Param name="Interface" value="##Interface##"/>

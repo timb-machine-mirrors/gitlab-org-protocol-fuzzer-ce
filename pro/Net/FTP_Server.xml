@@ -44,81 +44,20 @@ SUCH DAMAGE.
 
   <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>
 
-  <Agent name="LinServerAgent">
-    <Monitor class="LinuxCrashMonitor"/>
-
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="##SourceIPv4##" />
-      <Param name="StartOnCall" value="launchProgram"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="OsxServerAgent">
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="##SourceIPv4##" />
-      <Param name="StartOnCall" value="launchProgram"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
-  <Agent name="WinServerAgent">
-    <Monitor class="Process">
-      <Param name="Executable" value="##Program##" />
-      <Param name="Arguments" value="##Arguments##" />
-      <Param name="StartOnCall" value="launchProgram"/>
-      <Param name="WaitForExitOnCall" value="exitProgram"/>
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
-    <Agent ref="WinServerAgent" platform="windows"/>
-    <Agent ref="LinServerAgent" platform="linux"/>
-    <Agent ref="OsxServerAgent" platform="osx"/>
-
     <StateModel ref="FTP:ServerActive"/>
 
     <Publisher name="CommandPublisher" class="TcpListener">
       <Param name="Interface" value="##SourceIPv4##"/>
       <Param name="Port" value="##ComandPort##"/>
       <Param name="AcceptTimeout" value="##AcceptTimeout##"/>
-      <Param name="Timeout" value="5000"/>
+      <Param name="Timeout" value="##Timeout##"/>
     </Publisher>
 
     <!-- Used by server state for data port in active mode -->
     <Publisher name="DataPublisher" class="Tcp">
       <Param name="Host" value="##TargetIPv4##"/>
       <Param name="Port" value="##TargetPort##"/>
-    </Publisher>
-
-    <Strategy class="##Strategy##"/>
-
-    <Logger class="File" >
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-  </Test>
-
-  <Test name="Passive">
-    <Agent ref="WinServerAgent" platform="windows"/>
-    <Agent ref="LinServerAgent" platform="linux"/>
-    <Agent ref="OsxServerAgent" platform="osx"/>
-
-    <StateModel ref="FTP:ServerPassive"/>
-
-    <Publisher name="CommandPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="##CommandPort##"/>
-      <Param name="AcceptTimeout" value="10000"/>
-      <Param name="Timeout" value="5000"/>
-    </Publisher>
-
-    <!-- Used by server state for data port in pasv mode -->
-    <Publisher name="DataPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="##DataPort##"/>
-      <Param name="AcceptTimeout" value="##AcceptTimeout##"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>

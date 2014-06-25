@@ -44,16 +44,8 @@ SUCH DAMAGE.
 
   <Include ns="UDPv6" src="file:##PitLibraryPath##/_Common/Models/Net/UDPv6_State.xml"/>
 
-  <Agent name="LocalAgent">
-    <Monitor class="Pcap">
-      <Param name="Device" value="##Interface##"/>
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
     <StateModel ref="UDPv6:Transmit"/>
-
-    <Agent ref="LocalAgent"/>
 
     <Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>

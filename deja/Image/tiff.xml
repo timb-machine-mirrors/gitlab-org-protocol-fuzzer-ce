@@ -8,9 +8,9 @@
     <Number endian="little" signed="false" />
   </Defaults>
 
-  <!-- Base Entry Types -->
   <Import import="code" />
 
+  <!-- Basic Tiff block -->
   <DataModel name="DirectoryEntry">
     <Number name="Tag" size="16" signed="false" />
     <Number name="Type" size="16" />
@@ -25,6 +25,7 @@
     </Block>
   </DataModel>
 
+  <!-- Tiff block for when the value can not fit into the block -->
   <DataModel name="DirectoryEntryPointer" ref="DirectoryEntry">
     <Block name="Body">
       <Number name="Count" size="32" signed="false">
@@ -40,8 +41,12 @@
     </Block>  
   </DataModel>
 
+  <!--             -->
   <!-- Entry Types -->
+  <!--             -->
   
+  <!-- Type 1: each value is 1 byte -->
+
   <DataModel name="ByteEntry">
     <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
@@ -71,6 +76,7 @@
     </Choice>
   </DataModel>
 
+  <!-- Type 2: each value is 1 character -->
 
   <DataModel name="AsciiEntry">
     <Choice name="CountN">
@@ -104,6 +110,7 @@
     </Choice>
   </DataModel>
 
+  <!-- Type 3: each value is 1 short integer -->
 
   <DataModel name="ShortEntry">
     <Choice name="CountN">
@@ -124,6 +131,7 @@
     </Choice>
   </DataModel>
 
+  <!-- Type 4: each value is 1 long integer -->
 
   <DataModel name="LongEntry">
     <Choice name="CountN">
@@ -139,6 +147,7 @@
     </Choice>
   </DataModel>
 
+  <!-- Type 5: each value is a numerator and a denomitor -->
 
   <DataModel name="RationalEntry">
     <Block name="CX" ref="DirectoryEntryPointer">
@@ -153,6 +162,7 @@
 
   <!-- TIFF 6.0 Entry Types -->
   
+<!--  
   <DataModel name="SByteEntry">
     <Choice name="CountN">
       <Block name="C1" ref="DirectoryEntry">
@@ -281,11 +291,14 @@
     </Block>
   </DataModel>
 
+-->
+
   <!--      -->
   <!-- Tags -->
   <!--      -->
 
   <DataModel name="PhotometricInterpretation">
+    <!-- Can only be 1 short -->
     <Block name="TheShortEntry" ref="ShortEntry">
       <Number name="CountN.C1.Tag" size="16" value="262" token="true" signed="false"/>
       <Block name="CountN.C1.Body.ValueBlock.Value">
@@ -303,6 +316,7 @@
   </DataModel>
 
   <DataModel name="Compression">
+    <!-- Can only be 1 short -->
     <Block name="TheShortEntry" ref="ShortEntry">
       <Number name="CountN.C1.Tag" size="16" value="259" token="true" signed="false"/>
       <Block name="CountN.C1.Body.ValueBlock.Value">
@@ -319,26 +333,31 @@
 
 
   <!--
-    TODO More to add
+    TODO More to add more tags
 
+256: imagewidth Short or long - 1
+257: imagelength SHORT or long - 1
 
-imagewidth Short or long - 1
-imagelength SHORT or long - 1
-
-xres RATIONAL - 1 Not Req?
-yres RATIONAL - 1 not Req?
-resunit Short - 1 : 1/2/3 not Req?
+282: xres RATIONAL - 1 Not Required?
+283: yres RATIONAL - 1 not Required?
+296: resunit Short - 1 : 1/2/3 not Required?
 
 bitspersample SHORT - sample per pixle many??
 colormap SHORT - 3*(2^BitsPerSample)
 samplesperpixel SHORT - 1
 
-
-
   -->
 
 
+
+  <!--                                                  --->
+  <!-- RowsPerStrip, StripOffsets, and StripByteCounts
+  ---- determine the location of the data
+  --->
+  <!--                                                  --->
+
   <DataModel name="RowsPerStrip">
+    <!-- Can only be 1 short or 1 long-->
     <Choice>
       <Block name="TheShortEntry" ref="ShortEntry">
         <Number name="CountN.C1.Tag" size="16" value="278" token="true" signed="false"/>
@@ -356,16 +375,19 @@ samplesperpixel SHORT - 1
   <DataModel name="StripOffsets">
     <Choice name="ShortOrLong">
       <Block name="TheShortEntry" ref="ShortEntry">
-        <!-- TODO find a way to allow this option -->
+        <!-- TODO:
+          -- Currently can only support Tiffs with at least 3 strips
+          -- find a way to allow 1 or 2 as well
+        -->
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
         <!--Number name="CountN.C1.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="273" token="true" signed="false" />
         <Block name="CountN.C2.Body.ValueBlock.Value" /-->
-        <Block name="CountN.C1" constraint="True == False"/>
-        <Block name="CountN.C2" constraint="True == False"/>
-
         <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <!-- Count of the total number of strips in TIFF -->
           <Relation type="count" of="Strips"/>
         </Number>
         <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
@@ -379,8 +401,10 @@ samplesperpixel SHORT - 1
         <Block name="CountN.C1.Body.ValueBlock.Value">
           <Block name="StripOffsetLongPlaceholder" />
         </Block>
+
         <Number name="CountN.CX.Tag" size="16" value="273" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <!-- Count of the total number of strips in TIFF -->
           <Relation type="count" of="Strips"/>
         </Number>
         <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
@@ -394,16 +418,19 @@ samplesperpixel SHORT - 1
   <DataModel name="StripByteCounts">
     <Choice name="ShortOrLong">
       <Block name="TheShortEntry" ref="ShortEntry">
-        <!-- TODO -->
+        <!-- TODO:
+          -- Currently can only support Tiffs with at least 3 strips
+          -- find a way to allow 1 or 2 as well
+        -->
+        <Block name="CountN.C1" constraint="True == False"/>
+        <Block name="CountN.C2" constraint="True == False"/>
         <!--Number name="CountN.C1.Tag" size="16" value="279" token="true" signed="false" />
         <Block name="CountN.C1.Body.ValueBlock.Value" />
         <Number name="CountN.C2.Tag" size="16" value="279" token="true" signed="false" />
         <Block name="CountN.C2.Body.ValueBlock.Value" /-->
-        <Block name="CountN.C1" constraint="True == False"/>
-        <Block name="CountN.C2" constraint="True == False"/>
-
         <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <!-- Count of the total number of strips in TIFF -->
           <Relation type="count" of="Strips"/>
         </Number>
         <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
@@ -417,8 +444,10 @@ samplesperpixel SHORT - 1
         <Block name="CountN.C1.Body.ValueBlock.Value">
           <Block name="StripSizeLongPlaceholder" />
         </Block>
+
         <Number name="CountN.CX.Tag" size="16" value="279" token="true" signed="false" />
         <Number name="CountN.CX.Body.Count" size="32" signed="false">
+          <!-- Count of the total number of strips in TIFF -->
           <Relation type="count" of="Strips"/>
         </Number>
         <Number name="CountN.CX.Body.Pointer" size="32" signed="false">
@@ -449,6 +478,9 @@ samplesperpixel SHORT - 1
       <Block ref="ShortEntry" name="TheShortEntry" />
       <Block ref="LongEntry" name="TheLongEntry" />
       <Block ref="RationalEntry" name="TheRationalEntry" />
+
+      <!-- TIFF 6.0 only -->
+      
       <Block ref="SByteEntry" name="TheSByteEntry" />
       <Block ref="UndefinedEntry" name="TheUndefinedEntry" />
       <Block ref="SShortEntry" name="TheSShortEntry" />
@@ -456,6 +488,7 @@ samplesperpixel SHORT - 1
       <Block ref="SRationalEntry" name="TheSRationalEntry" />
       <Block ref="FloatEntry" name="TheFloatEntry" />
       <Block ref="DoubleEntry" name="TheDoubleEntry" />
+      
     </Choice>
   </DataModel>
 
@@ -465,6 +498,7 @@ samplesperpixel SHORT - 1
       <Relation type="count" of="IFDEntry"/>
     </Number>
     <Block name="IFDEntry" ref="DirectoryEntryOptions" minOccurs="1" />
+    <!-- For multiple IFDs -->
     <Choice name="ListChoice">
       <Number name="EndofList" value="0" size="32" signed="false" token="true"/>
       <Block name="NextItem">
@@ -486,26 +520,27 @@ samplesperpixel SHORT - 1
 
   <!-- MAIN TIFF DATA MODEL -->
   <DataModel name="TIFF">    
+    <!-- HEADER: currently only supports Little Endia files -->
     <Choice name="EndianessChoice">
       <Blob name="LittleEndian" length="2" value="II" token="true"/>
       <!--Blob name="BigEndian" length="2" value="MM" token="true"/-->
     </Choice>
-    
     <Number name="Magic" value="42" token="true" size="16"/>
-
     <Number name="IFDOffset" size="32" >
       <Relation type="offset" of="TheIFD" />
     </Number>
 
     <Block name="TheIFD" ref="ImageFileDirectory" />
-    
+
 
 
     <Block name="Strips" minOccurs="1">
+
       <!-- Image Data Strips-->
       <Blob name="ImageData">
         <Placement before="StripDataContainer.Holder" />
       </Blob>
+
       <!-- Strip Offsets -->
       <Choice name="StripOffsetChoice">
         <Block>
@@ -529,8 +564,8 @@ samplesperpixel SHORT - 1
             <Relation type="size" of="ImageData" />
           </Number>
         </Block>
-
       </Choice>
+
       <!-- Strip Lengths -->
       <Choice name="StripSizeChoice">
         <Block>

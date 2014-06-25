@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="0.0.0.0"/>
-	<Range key="SourcePort" name="name" description="" min="0" max="65535" value="68"/>
-	<Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="255.255.255.255"/>
-	<Range key="TargetPort" name="name" description="" min="0" max="65535" value="67"/>
-	<Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000b8201fc42"/>
-	<Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="ffffffffffff"/>
-	<String key="SubnetMask" value="255.255.255.0"/>
-	<String key="DHCPServerIP" value="192.168.0.1"/>
-	<Strategy key="Strategy" name="name" description=""  value="Random"/>
+	<Define key="SourceIPv4"   value="0.0.0.0"/>
+	<Define key="SourcePort"   value="68"/>
+	<Define key="TargetIPv4"   value="255.255.255.255"/>
+	<Define key="TargetPort"   value="67"/>
+	<Define key="SourceMAC"    value="000b8201fc42"/>
+	<Define key="TargetMAC"    value="ffffffffffff"/>
+	<Define key="SubnetMask"   value="255.255.255.0"/>
+	<Define key="DHCPServerIP" value="192.168.0.1"/>
+	<Define key="Strategy"     value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

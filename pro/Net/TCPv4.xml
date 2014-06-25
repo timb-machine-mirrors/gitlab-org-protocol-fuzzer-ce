@@ -50,7 +50,7 @@ SUCH DAMAGE.
 
 	<Include ns="TCP" src="file:##PitLibraryPath##/_Common/Models/Net/TCPv4_State.xml"/>
 
-	<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
+	<!--<Agent name="RemoteAgent" location="tcp://##RemoteAgentIP##:9001">
 		<Monitor class="Process">
 			<Param name="Executable" value="##tsharkBin##"/>
 			<Param name="Arguments" value="-i ##tsharkInterface##"/>
@@ -59,7 +59,7 @@ SUCH DAMAGE.
 		<Monitor class="Pcap">
 			<Param name="Device" value="##Interface##"/>
 		</Monitor>
-	</Agent>
+	</Agent>-->
 
 	<Test name="Default">
 		<StateModel ref="TCP:Listener"/>
