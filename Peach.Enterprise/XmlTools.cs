@@ -148,8 +148,14 @@ namespace Peach.Enterprise
 
 					return r;
 				}
+				catch (XmlException ex)
+				{
+					// mono throws XmlException
+					throw MakeError(ex, "failed to load. {0}", ex.Message);
+				}
 				catch (InvalidOperationException ex)
 				{
+					// microsoft throws InvalidOperationException with an inner XmlException
 					var inner = ex.InnerException as XmlException;
 					if (inner != null && !string.IsNullOrEmpty(inner.Message))
 						throw MakeError(ex, "failed to load. {0}", inner.Message);
