@@ -51,7 +51,7 @@ class FixupReturningString:
 
 	                            <Test name='Default'>
 		                            <StateModel ref='State'/>
-		                            <Publisher class='Console' />
+		                            <Publisher class='Null' />
 	                            </Test>
                             </Peach>".Fmt(tmpPath, tmpFile);
 
