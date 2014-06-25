@@ -40,12 +40,12 @@ namespace Peach.Enterprise
 				get { return new string[0]; }
 			}
 
-			public virtual long? Min
+			public virtual int? Min
 			{
 				get { return null; }
 			}
 
-			public virtual ulong? Max
+			public virtual uint? Max
 			{
 				get { return null; }
 			}
@@ -73,22 +73,22 @@ namespace Peach.Enterprise
 		public class RangeDefine : Define
 		{
 			[XmlAttribute("min")]
-			public long MinValue { get; set; }
+			public int MinValue { get; set; }
 
 			[XmlAttribute("max")]
-			public ulong MaxValue { get; set; }
+			public uint MaxValue { get; set; }
 
 			public override WebServices.Models.ConfigType ConfigType
 			{
 				get { return WebServices.Models.ConfigType.Range; }
 			}
 
-			public override long? Min
+			public override int? Min
 			{
 				get { return MinValue; }
 			}
 
-			public override ulong? Max
+			public override uint? Max
 			{
 				get { return MaxValue; }
 			}
