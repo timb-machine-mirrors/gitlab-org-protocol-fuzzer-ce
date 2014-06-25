@@ -170,7 +170,8 @@ namespace Peach.Core.Test.Agent
 			string agent = @"
 	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
 		<Monitor class='WindowsDebugger'>
-			<Param name='CommandLine' value='CrashableServer.exe 127.0.0.1 {0}'/>
+			<Param name='Executable' value='CrashableServer.exe'/>
+			<Param name='Arguments' value='127.0.0.1 {0}'/>
 			<Param name='RestartOnEachTest' value='true'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
 		</Monitor>
@@ -305,7 +306,8 @@ namespace Peach.Core.Test.Agent
 			string agent = @"
 	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
 		<Monitor class='WindowsDebugger'>
-			<Param name='CommandLine' value='CrashableServer.exe 127.0.0.1 {0}'/>
+			<Param name='Executable' value='CrashableServer.exe'/>
+			<Param name='Arguments' value='127.0.0.1 {0}'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
 		</Monitor>
 	</Agent>
@@ -397,7 +399,7 @@ namespace Peach.Core.Test.Agent
 			string agent = @"
 	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
 		<Monitor class='WindowsDebugger'>
-			<Param name='CommandLine' value='MissingProgram'/>
+			<Param name='Executable' value='MissingProgram'/>
 		</Monitor>
 	</Agent>
 ";
