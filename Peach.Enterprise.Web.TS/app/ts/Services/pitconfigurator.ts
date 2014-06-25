@@ -24,9 +24,21 @@ module DashApp.Services {
 		FaultMonitorsComplete: boolean;
 		DataMonitorsComplete: boolean;
 		AutoMonitorsComplete: boolean;
-		
+
+		CanStartJob: boolean;
+		CanPauseJob: boolean;
+		CanContinueJob: boolean;
+		CanStopJob: boolean;
+
+
+
 		ResetAll();
 		LoadData(data);
+
+		StartJob();
+		PauseJob();
+		StopJob();
+
 	}
 
 	export class PitConfiguratorService implements IPitConfiguratorService {
@@ -35,7 +47,7 @@ module DashApp.Services {
 		private pollerSvc;
 		private peachSvc: Services.IPeachService;
 
-		private POLLER_TIME = 5000;
+		private POLLER_TIME = 500;
 
 		constructor(poller, peachService: Services.IPeachService) {
 			this.pollerSvc = poller;
@@ -202,6 +214,50 @@ module DashApp.Services {
 
 		}
 
+		public get CanStartJob(): boolean {
+			var good: string[] = [P.JobStatuses.Stopped];
+			return (((this._job == undefined) && (this._pit != undefined)) || ((this._job != undefined) && (good.indexOf(this._job.status) >= 0)));
+		}
+
+		public get CanContinueJob(): boolean {
+			var good: string[] = [P.JobStatuses.Paused];
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+		}
+
+		public get CanPauseJob(): boolean {
+			var good: string[] = [P.JobStatuses.Running];
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+		}
+
+		public get CanStopJob(): boolean {
+			var good: string[] = [P.JobStatuses.Running, P.JobStatuses.Paused, P.JobStatuses.StartPending, P.JobStatuses.PausePending, P.JobStatuses.ContinuePending];
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+		}
+
+
+		public StartJob() {
+			if (this.CanStartJob) {
+				this.peachSvc.StartJob(this._pit.pitUrl, (job: P.Job) => {
+					this.Job = job;
+				});
+			}
+			else if (this.CanContinueJob) {
+				this.peachSvc.ContinueJob(this._job.jobUrl);
+			}
+		}
+
+		public PauseJob() {
+			if (this.CanPauseJob) {
+				this.peachSvc.PauseJob(this._job.jobUrl);
+			}
+		}
+
+		public StopJob() {
+			if (this.CanStopJob) {
+				this.peachSvc.StopJob(this._job.jobUrl);
+			}
+		}
+
 		private startJobPoller() {
 			var jobResource = this.peachSvc.GetSingleThing(this.Job.jobUrl);
 			this.jobPoller = this.pollerSvc.get(jobResource, {
@@ -220,8 +276,12 @@ module DashApp.Services {
 		private updateJob(job: P.Job) {
 			this.Job.iterationCount = job.iterationCount;
 			this.Job.speed = job.speed;
-			this.Job.faultCount = job.faultCount;
+			this.Job.faultCount = job.faultCount || 0;
 			this.Job.runtime = job.runtime;
+			this.Job.status = job.status;
+			this.Job.startDate = job.startDate;
+			this.Job.stopDate = job.stopDate;
+			this.Job.seed = job.seed;
 		}
 
 		private startFaultsPoller() {

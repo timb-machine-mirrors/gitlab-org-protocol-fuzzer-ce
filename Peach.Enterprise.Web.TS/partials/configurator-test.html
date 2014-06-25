@@ -1,61 +1,54 @@
 ﻿<div class="page-content">
 	<div class="page-header"></div>
-	<div class="row">
-		<div class="col-xs-12"> 
-			<h3>Test Check List</h3>
-			<p>Once all of the configuration sections have been completed you can test your definition to verify it works correctly. This section will allow you to do just that, running a single iteration of the Pit, viewing the output of the test and the detailed log messages. If there is a problem with the configuration you can redo the configuration until it is correct.</p>
-			<table>
-				<tr>
-					<td>Set Variables</td>
-					<td>
-						<span class="label label-success arrowed" ng-class="{hidden: vm.SetVarsComplete == false}">Complete</span>
-						<span class="label label-warning arrowed" ng-class="{hidden: vm.SetVarsComplete == true}">
-							Not completed, default values will be used
-						</span>
-					</td>
-				</tr>
-				<tr>
-					<td>Fault Detection</td>
-					<td>
-						<span class="label label-success arrowed" ng-class="{hidden: vm.FaultDetectionComplete == false}">Complete</span>
-						<span class="label label-danger arrowed" ng-class="{hidden: vm.FaultDetectionComplete == true}">
-							Fault Detection requires completion. <a href="#/configurator/fault">Go to Fault Detection</a>
-						</span> 
-					</td>
-				</tr>
-				<tr>
-					<td>Data Collection</td>
-					<td>
-						<span class="label label-success arrowed" ng-class="{hidden: vm.DataCollectionComplete == false}">Complete</span>
-						<span class="label label-warning arrowed" ng-class="{hidden: vm.DataCollectionComplete == true}">
-							No Data Collection will be performed
-						</span>
-					</td>
-				</tr>
-				<tr>
-					<td>Automation</td>
-					<td>
-						<span class="label label-success arrowed" ng-class="{hidden: vm.AutomationComplete == false}">Complete</span>
-						<span class="label label-warning arrowed" ng-class="{hidden: vm.AutomationComplete == true}">
-							No Automation will be performed
-						</span>
-					</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-
+	<h3>Test Check List</h3>
+	<p>Once all of the configuration sections have been completed you can test your definition to verify it works correctly. This section will allow you to do just that, running a single iteration of the Pit, viewing the output of the test and the detailed log messages. If there is a problem with the configuration you can redo the configuration until it is correct.</p>
+	<table>
+		<tr>
+			<td>Set Variables</td>
+			<td>
+				<span class="label label-success arrowed" ng-class="{hidden: vm.SetVarsComplete == false}">Complete</span>
+				<span class="label label-warning arrowed" ng-class="{hidden: vm.SetVarsComplete == true}">
+					Not completed, default values will be used
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>Fault Detection</td>
+			<td>
+				<span class="label label-success arrowed" ng-class="{hidden: vm.FaultDetectionComplete == false}">Complete</span>
+				<span class="label label-danger arrowed" ng-class="{hidden: vm.FaultDetectionComplete == true}">
+					Fault Detection requires completion. <a href="#/configurator/fault">Go to Fault Detection</a>
+				</span> 
+			</td>
+		</tr>
+		<tr>
+			<td>Data Collection</td>
+			<td>
+				<span class="label label-success arrowed" ng-class="{hidden: vm.DataCollectionComplete == false}">Complete</span>
+				<span class="label label-warning arrowed" ng-class="{hidden: vm.DataCollectionComplete == true}">
+					No Data Collection will be performed
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>Automation</td>
+			<td>
+				<span class="label label-success arrowed" ng-class="{hidden: vm.AutomationComplete == false}">Complete</span>
+				<span class="label label-warning arrowed" ng-class="{hidden: vm.AutomationComplete == true}">
+					No Automation will be performed
+				</span>
+			</td>
+		</tr>
+	</table>
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-warning btn-next" ng-click="vm.beginTest()" ng-disabled="configuratorForm.$invalid" ng-class="{disabled: vm.FaultDetectionComplete == false}">
 			Begin Test
-			<i class="icon-arrow-right icon-on-right"></i>
 		</button>
 	</div>
 
-	<hr />
-
 	<div class="row">
 		<div class="col-xs-12">
+			<hr />
 			<h3>Test Output</h3>
 			<tabset>
 				<tab ng-repeat="tab in vm.tabs" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">
@@ -65,18 +58,10 @@
 		</div>
 	</div>
 
-	<hr />
-
-	<div class="row">
-		<div class="col-xs-12">
-			<h3>Test Status: <span ng-class="{}">{{vm.testStatus}}</span></h3>
-		</div>
-	</div>
-
-
 	<div class="row-fluid wizard-actions">
-		<span ng-class="{hidden: 'fail'}[vm.testStatus]">Testing passed, press Continue</span>
-		<span ng-class="{hidden: 'success'}[vm.testStatus]">Testing failed, please correct the errors described above and return to this page to test again.</span>
+		<hr />
+		<span class="bigger-110" ng-class="{hidden: vm.testStatus != 'pass'}">Testing passed, press Continue</span>
+		<span ng-class="{hidden: vm.testStatus != 'fail'}">Testing failed, please correct the errors described above and return to this page to test again.</span>
 		<button class="btn btn-success btn-next" ng-click="vm.submitAllInfo()" ng-disabled="configuratorForm.$invalid" ng-class="{disabled: (vm.testStatus != 'pass')}">
 			Continue
 			<i class="icon-arrow-right icon-on-right"></i>

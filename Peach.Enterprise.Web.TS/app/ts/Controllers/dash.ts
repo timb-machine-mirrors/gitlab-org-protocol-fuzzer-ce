@@ -42,6 +42,30 @@ module DashApp {
 				return moment(new Date(0, 0, 0, 0, 0, this.pitConfigSvc.Job.runtime)).format("H:mm:ss");
 		}
 
+		public get CanStart() {
+			return (this.pitConfigSvc.CanStartJob || this.pitConfigSvc.CanContinueJob);
+		}
+
+		public get CanPause() {
+			return this.pitConfigSvc.CanPauseJob;
+		}
+
+		public get CanStop() {
+			return this.pitConfigSvc.CanStopJob;
+		}
+
+		public Start() {
+			this.pitConfigSvc.StartJob();
+		}
+
+		public Pause() {
+			this.pitConfigSvc.PauseJob();
+		}
+
+		public Stop() {
+			this.pitConfigSvc.StopJob();
+		}
+
 		//showGroupPanel: true,
 		//	jqueryUIDraggable: true,
 

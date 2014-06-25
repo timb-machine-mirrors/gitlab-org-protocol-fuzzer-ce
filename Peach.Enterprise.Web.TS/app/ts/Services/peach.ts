@@ -32,6 +32,12 @@ module DashApp.Services {
 		TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void);
 
 		GetLocalFile<T>(url: string, success: (data: T) => void, error?: (response) => void): void;
+
+		StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response) => void): void;
+		PauseJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		ContinueJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		StopJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		//KillJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 	}
 
 
@@ -139,6 +145,50 @@ module DashApp.Services {
 		public GetLocalFile<T>(url: string, success: (data: T) => void, error?: (response) => void): void {
 			this.http.get(url).then((response) => success(<T>response.data), (response) => error(response));
 		}
+
+		public StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response) => void) {
+			var job: P.Job = {
+				pitUrl: pitUrl
+			};
+
+			if (error === undefined) {
+				error = this.handleError;
+			}
+
+			this.http.post(this.URL_PREFIX + "/p/jobs", job).then((response) => {
+				job.jobUrl = (<P.Job>response.data).jobUrl;
+				success(job);
+			}, (response) => error(response));
+		}
+
+		public PauseJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+			if (error === undefined) {
+				error = this.handleError;
+			}
+
+			this.http.get(this.URL_PREFIX + jobUrl + "/pause").then(() => success, (response) => error(response));
+		}
+
+		public ContinueJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+			if (error === undefined) {
+				error = this.handleError;
+			}
+			this.http.get(this.URL_PREFIX + jobUrl + "/continue").then(() => success, (response) => error(response));
+		}
+
+		public StopJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+			if (error === undefined) {
+				error = this.handleError;
+			}
+			this.http.get(this.URL_PREFIX + jobUrl + "/stop").then(() => success, (response) => error(response));
+		}
+
+		//public KillJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+		//	if (error === undefined) {
+		//		error = this.handleError;
+		//	}
+		//	this.http.get(this.URL_PREFIX + jobUrl + "/kill").then(() => success, (response) => error(response));
+		//}
 
 		private handleError(error) {
 			console.error(error);

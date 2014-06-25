@@ -67,7 +67,7 @@ module DashApp {
 		private initialize() {
 			this.peachSvc.GetJobs((data: P.Job[]) => {
 				if (data.length > 0) {
-					this.pitConfigSvc.Job = new P.Job(data[0]);
+					this.pitConfigSvc.Job = data[0]; 
 				}
 				else {
 					this.showPitSelector();

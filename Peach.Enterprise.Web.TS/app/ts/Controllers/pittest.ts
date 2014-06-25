@@ -14,7 +14,7 @@ module DashApp {
 		private pollerSvc;
 		private testPoller;
 //		private logPoller;
-		private POLLER_TIME = 5000;
+		private POLLER_TIME = 500;
 
 		public isReadyToTest: boolean = false;
 

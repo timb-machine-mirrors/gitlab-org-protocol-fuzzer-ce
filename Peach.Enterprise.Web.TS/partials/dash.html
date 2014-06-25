@@ -11,12 +11,12 @@
 
 			<div class="row">
 				<div class="space-6"></div>
-				<div class="alert alert-warning" ng-class="{hidden: vm.job != undefined}"> 
+				<div class="alert alert-warning" ng-class="{hidden: vm.job != undefined}">
 					<strong>Warning!</strong>
 					Job not currently running, metrics unavailable.
 					<br>
 				</div>
-				
+
 				<div class="col-sm-7 infobox-container">
 					<div class="infobox infobox-blue  ">
 						<div class="infobox-data">
@@ -71,27 +71,9 @@
 
 					<div class="space-6"></div>
 
-					<div class="infobox infobox-blue infobox-small infobox-dark">
-
-						<div class="infobox-data">
-							<div class="infobox-content">START</div>
-						</div>
-					</div>
-
-					<div class="infobox infobox-red infobox-small infobox-dark">
-						<div class="infobox-data">
-							<div class="infobox-content">STOP</div>
-						</div>
-					</div>
-
-					<div class="infobox infobox-grey infobox-small infobox-dark">
-
-						<div class="infobox-data">
-							<div class="infobox-content">PAUSE</div>
-						</div>
-					</div>
 				</div>
 
+				
 				<div class="vspace-sm"></div>
 
 				<div class="col-sm-5">
@@ -112,6 +94,26 @@
 				</div><!-- /span -->
 			</div><!-- /row -->
 
+			<div class="row">
+				<div class="col-xs-2"></div>
+				<div class="col-xs-4">
+					<button class="btn btn-lg btn-primary" ng-click="vm.Start()"
+									ng-class="{disabled: vm.CanStart == false}">
+						START
+					</button>
+
+					<button class="btn btn-lg btn-danger" ng-click="vm.Stop()"
+									ng-class="{disabled: vm.CanStop == false}">
+						STOP
+					</button>
+
+					<button class="btn btn-lg btn-default" ng-click="vm.Pause()"
+									ng-class="{disabled: vm.CanPause == false}">
+						PAUSE
+					</button>
+				</div>
+			</div>
+
 			<div class="hr hr32 hr-dotted"></div>
 
 			<div class="row">
@@ -127,105 +129,105 @@
 					</div>
 				</div>
 
-	<!--
-					<div class="widget-box transparent" id="recent-box">
-						<div class="widget-header">
-							<h4 class="lighter smaller">
-								<i class="icon-rss orange"></i>
-								RECENT
-							</h4>
-
-							<div class="widget-toolbar no-border">
-								<ul class="nav nav-tabs" id="recent-tab">
-									<li class="active">
-										<a data-toggle="tab" href="#faults-tab">Faults</a>
-									</li>
-
-									<li>
-										<a data-toggle="tab" href="#member-tab">Logs</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="widget-body">
-							<div class="widget-main padding-4">
-								<div class="tab-content padding-8 overflow-visible">
-									<div id="faults-tab" class="tab-pane active">
-										<h4 class="smaller grey">
-											Recent Faults
+				<!--
+								<div class="widget-box transparent" id="recent-box">
+									<div class="widget-header">
+										<h4 class="lighter smaller">
+											<i class="icon-rss orange"></i>
+											RECENT
 										</h4>
 
-										<div id="faults-table" class="table table-striped table-bordered table-hover"
-												 ng-grid="vm.gridRecentFaults" style="height: 350px" />
+										<div class="widget-toolbar no-border">
+											<ul class="nav nav-tabs" id="recent-tab">
+												<li class="active">
+													<a data-toggle="tab" href="#faults-tab">Faults</a>
+												</li>
 
+												<li>
+													<a data-toggle="tab" href="#member-tab">Logs</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<div class="widget-body">
+										<div class="widget-main padding-4">
+											<div class="tab-content padding-8 overflow-visible">
+												<div id="faults-tab" class="tab-pane active">
+													<h4 class="smaller grey">
+														Recent Faults
+													</h4>
+
+													<div id="faults-table" class="table table-striped table-bordered table-hover"
+															 ng-grid="vm.gridRecentFaults" style="height: 350px" />
+
+												</div>
+											</div>
+
+											<div id="member-tab" class="tab-pane">
+												<div class="table-responsive hidden">
+													<table id="logs-table" class="table table-striped table-bordered table-hover">
+														<thead>
+															<tr>
+																<th>Time</th>
+																<th>Log Entry</th>
+																<th>Class</th>
+															</tr>
+														</thead>
+
+														<tbody>
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>Performing iteration #62</td>
+																<td></td>
+															</tr>
+
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>Action_Starting: Fuzzing: TheDataModel.DataElement_0</td>
+																<td>Peach.Core.MutationStrategies.RandomStrategy</td>
+															</tr>
+
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>Action_Starting: Mutator: UnicodeUtf8ThreeCharMutator</td>
+																<td>Peach.Core.MutationStrategies.RandomStrategy</td>
+															</tr>
+
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>ActionType.Output</td>
+																<td>Peach.Core.Dom.Action</td>
+															</tr>
+
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>open()</td>
+																<td>Peach.Core.Publishers.ConsolePublisher</td>
+															</tr>
+
+															<tr>
+																<td>11/11/2014 11:11:11</td>
+																<td>output(876 bytes)</td>
+																<td>Peach.Core.Publishers.ConsolePublisher</td>
+															</tr>
+
+														</tbody>
+													</table>
+												</div>
+
+
+
+											</div>
+
+										</div>
 									</div>
 								</div>
 
-								<div id="member-tab" class="tab-pane">
-									<div class="table-responsive hidden">
-										<table id="logs-table" class="table table-striped table-bordered table-hover">
-											<thead>
-												<tr>
-													<th>Time</th>
-													<th>Log Entry</th>
-													<th>Class</th>
-												</tr>
-											</thead>
-
-											<tbody>
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>Performing iteration #62</td>
-													<td></td>
-												</tr>
-
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>Action_Starting: Fuzzing: TheDataModel.DataElement_0</td>
-													<td>Peach.Core.MutationStrategies.RandomStrategy</td>
-												</tr>
-
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>Action_Starting: Mutator: UnicodeUtf8ThreeCharMutator</td>
-													<td>Peach.Core.MutationStrategies.RandomStrategy</td>
-												</tr>
-
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>ActionType.Output</td>
-													<td>Peach.Core.Dom.Action</td>
-												</tr>
-
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>open()</td>
-													<td>Peach.Core.Publishers.ConsolePublisher</td>
-												</tr>
-
-												<tr>
-													<td>11/11/2014 11:11:11</td>
-													<td>output(876 bytes)</td>
-													<td>Peach.Core.Publishers.ConsolePublisher</td>
-												</tr>
-
-											</tbody>
-										</table>
-									</div>
-
-
-
-								</div>
 
 							</div>
-						</div>
-					</div>
-			
 
-				</div>
-			
-			-->
+						-->
 			</div>
 		</div>
 	</div>
@@ -253,7 +255,7 @@
 <script type="text/javascript" src="/Content/js/d3.min.js" charset="utf-8"></script>
 		<script type="text/javascript">
 			jQuery(function($) {
-				
+
 				//$('#faults-table').dataTable();
 
 				$('.easy-pie-chart.percentage').each(function(){
@@ -271,24 +273,24 @@
 						size: size
 					});
 				})
-			
+
 				$('.sparkline').each(function(){
 					var $box = $(this).closest('.infobox');
 					var barColor = !$box.hasClass('infobox-dark') ? $box.css('color') : '#FFF';
 					$(this).sparkline('html', {tagValuesAttribute:'data-values', type: 'bar', barColor: barColor , chartRangeMin:$(this).data('min') || 0} );
 				});
-			
-			
-			  var placeholder = $('#piechart-placeholder').css({'width':'90%' , 'min-height':'150px'});
-			  var data = [
+
+
+				var placeholder = $('#piechart-placeholder').css({'width':'90%' , 'min-height':'150px'});
+				var data = [
 				{ label: "Numerical Edge",  data: 38.7, color: "#68BC31"},
 				{ label: "BOM",  data: 24.5, color: "#2091CF"},
 				{ label: "String",  data: 8.2, color: "#AF4E96"},
 				{ label: "DWORD Slide",  data: 18.6, color: "#DA5430"},
 				{ label: "other",  data: 10, color: "#FEE074"}
-			  ]
-			  function drawPieChart(placeholder, data, position) {
-			 	  $.plot(placeholder, data, {
+				]
+				function drawPieChart(placeholder, data, position) {
+					$.plot(placeholder, data, {
 					series: {
 						pie: {
 							show: true,
@@ -305,7 +307,7 @@
 					},
 					legend: {
 						show: true,
-						position: position || "ne", 
+						position: position || "ne",
 						labelBoxBorderColor: null,
 						margin:[-30,15]
 					}
@@ -317,17 +319,17 @@
 				 })
 			 }
 			 drawPieChart(placeholder, data);
-			
+
 			 // we saved the drawing function and the data to redraw with different position later when switching to RTL mode dynamically
 			 // so that's not needed actually.
 			 placeholder.data('chart', data);
 			 placeholder.data('draw', drawPieChart);
-			
-			
-			  var $tooltip = $("<div class='tooltip top in'><div class='tooltip-inner'></div></div>").hide().appendTo('body');
-			  var previousPoint = null;
-			
-			  placeholder.on('plothover', function (event, pos, item) {
+
+
+				var $tooltip = $("<div class='tooltip top in'><div class='tooltip-inner'></div></div>").hide().appendTo('body');
+				var previousPoint = null;
+
+				placeholder.on('plothover', function (event, pos, item) {
 				if(item) {
 					if (previousPoint != item.seriesIndex) {
 						previousPoint = item.seriesIndex;
@@ -339,50 +341,50 @@
 					$tooltip.hide();
 					previousPoint = null;
 				}
-				
+
 			 });
-			
-			
+
+
 				var d1 = [];
 				for (var i = 0; i < Math.PI * 2; i += 0.5) {
 					d1.push([i, Math.sin(i)]);
 				}
-			
+
 				var d2 = [];
 				for (var i = 0; i < Math.PI * 2; i += 0.5) {
 					d2.push([i, Math.cos(i)]);
 				}
-			
+
 				var d3 = [];
 				for (var i = 0; i < Math.PI * 2; i += 0.2) {
 					d3.push([i, Math.tan(i)]);
 				}
-				
+
 				$('#recent-box [data-rel="tooltip"]').tooltip({placement: tooltip_placement});
 				function tooltip_placement(context, source) {
 					var $source = $(source);
 					var $parent = $source.closest('.tab-content')
 					var off1 = $parent.offset();
 					var w1 = $parent.width();
-			
+
 					var off2 = $source.offset();
 					var w2 = $source.width();
-			
+
 					if( parseInt(off2.left) < parseInt(off1.left) + parseInt(w1 / 2) ) return 'right';
 					return 'left';
 				}
-			
-			
+
+
 				$('.dialogs,.comments').slimScroll({
 					height: '300px'
-			    });
-				
-				
+					});
+
+
 				//Android's default browser somehow is confused when tapping on label which will lead to dragging the task
 				//so disable dragging when clicking on label
 				var agent = navigator.userAgent.toLowerCase();
 				if("ontouchstart" in document && /applewebkit/.test(agent) && /android/.test(agent))
-				  $('#tasks').on('touchstart', function(e){
+					$('#tasks').on('touchstart', function(e){
 					var li = $(e.target).closest('#tasks li');
 					if(li.length == 0)return;
 					var label = li.find('label.inline').get(0);
@@ -390,9 +392,8 @@
 				});
 
 				/////////////////////////////////////////////////////////////////
-				
-				
+
+
 			})
 		</script>
 -->
-
