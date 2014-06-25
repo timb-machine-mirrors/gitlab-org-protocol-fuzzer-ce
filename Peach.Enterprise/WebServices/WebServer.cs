@@ -30,20 +30,18 @@ namespace Peach.Enterprise.WebServices
 
 	internal class Bootstrapper : DefaultNancyBootstrapper
 	{
-		WebLogger logger;
-		string pitLibraryPath;
+		WebContext context;
 
-		public Bootstrapper(WebLogger logger, string pitLibraryPath)
+		public Bootstrapper(WebContext context)
 		{
-			this.logger = logger;
-			this.pitLibraryPath = pitLibraryPath;
+			this.context = context;
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
 		{
 			container.Register<JsonSerializer, CustomJsonSerializer>();
 			container.Register<JsonNetSerializer>();
-			container.Register<WebLogger>(logger);
+			container.Register<WebContext>(context);
 			container.Register<PitService>();
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
@@ -56,9 +54,6 @@ namespace Peach.Enterprise.WebServices
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
 		{
 			base.ConfigureRequestContainer(container, context);
-
-			// Give all modules the pit library path
-			context.Items["PitLibraryPath"] = pitLibraryPath;
 		}
 
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
@@ -80,21 +75,21 @@ namespace Peach.Enterprise.WebServices
 		}
 	}
 
-	public class WebService : IDisposable
+	public class WebServer : IDisposable
 	{
 		Bootstrapper bootstrapper;
 		HostConfiguration config;
 		NancyHost host;
 
 		public Uri Uri { get; private set; }
-		public WebLogger Logger { get; private set; }
+		public WebContext Context { get; private set; }
 
-		public WebService(string pitLibraryPath)
+		public WebServer(string pitLibraryPath)
 		{
 			Uri = new Uri("http://localhost:8888");
-			Logger = new WebLogger();
+			Context = new WebContext(pitLibraryPath);
 
-			bootstrapper = new Bootstrapper(Logger, pitLibraryPath);
+			bootstrapper = new Bootstrapper(Context);
 			config = new HostConfiguration()
 			{
 				UrlReservations = new UrlReservations()
@@ -121,7 +116,7 @@ namespace Peach.Enterprise.WebServices
 			config = null;
 			bootstrapper = null;
 			Uri = null;
-			Logger = null;
+			Context = null;
 		}
 
 		public static int Run(string[] args)
@@ -130,7 +125,7 @@ namespace Peach.Enterprise.WebServices
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
-				using (var svc = new WebService("."))
+				using (var svc = new WebServer("."))
 				{
 					svc.Start(args);
 

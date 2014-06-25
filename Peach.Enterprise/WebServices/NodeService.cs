@@ -7,17 +7,13 @@ using System.Reflection;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class NodeService : NancyModule
+	public class NodeService : WebService
 	{
 		public static readonly string Prefix = "/p/nodes";
 
-		WebLogger logger;
-
-		public NodeService(WebLogger logger)
-			: base(Prefix)
+		public NodeService(WebContext context)
+			: base(context, Prefix)
 		{
-			this.logger = logger;
-
 			Get[""] = _ => GetNodes();
 			Get["/{id}"] = _ => GetNode(_.id);
 		}
@@ -29,7 +25,7 @@ namespace Peach.Enterprise.WebServices
 
 		object GetNode(string id)
 		{
-			if (id != logger.NodeGuid)
+			if (id != NodeGuid)
 				return HttpStatusCode.NotFound;
 
 			return MakeNode();
@@ -37,23 +33,23 @@ namespace Peach.Enterprise.WebServices
 
 		Node MakeNode()
 		{
-			// Make copy so we don't have to lock
-			var guid = logger.JobGuid;
-
-			var node = new Node()
+			lock (Mutex)
 			{
-				NodeUrl = Prefix + "/" + logger.NodeGuid,
-				Name = Environment.MachineName,
-				Mac = "00:00:00:00:00:00",
-				Ip = "0.0.0.0",
-				Tags = new List<Tag>(),
-				Status = NodeStatus.Alive,
-				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-				Timestamp = DateTime.UtcNow,
-				JobUrl = guid != null ? NodeService.Prefix + "/" + guid : null
-			};
+				var node = new Node()
+				{
+					NodeUrl = Prefix + "/" + NodeGuid,
+					Name = Environment.MachineName,
+					Mac = "00:00:00:00:00:00",
+					Ip = "0.0.0.0",
+					Tags = new List<Tag>(),
+					Status = NodeStatus.Alive,
+					Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+					Timestamp = DateTime.UtcNow,
+					JobUrl = Runner != null ? JobService.Prefix + "/" + Runner.Guid : null,
+				};
 
-			return node;
+				return node;
+			}
 		}
 	}
 }

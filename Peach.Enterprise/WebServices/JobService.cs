@@ -7,17 +7,13 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class JobService : NancyModule
+	public class JobService : WebService
 	{
 		public static readonly string Prefix = "/p/jobs";
 
-		WebLogger logger;
-
-		public JobService(WebLogger logger)
-			: base(Prefix)
+		public JobService(WebContext context)
+			: base(context, Prefix)
 		{
-			this.logger = logger;
-
 			Get[""] = _ => GetJobs();
 			Get["/{id}"] = _ => GetJob(_.id);
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
@@ -26,17 +22,10 @@ namespace Peach.Enterprise.WebServices
 
 			Post[""] = _ => CreateJob();
 
-			Get["/{id}/start"] = _ => StartJob(_.id);
+			Get["/{id}/continue"] = _ => ContinueJob(_.id);
 			Get["/{id}/pause"] = _ => PauseJob(_.id);
 			Get["/{id}/stop"] = _ => StopJob(_.id);
-		}
-
-		string PitLibraryPath
-		{
-			get
-			{
-				return (string)Context.Items["PitLibraryPath"];
-			}
+			Get["/{id}/kill"] = _ => KillJob(_.id);
 		}
 
 		object CreateJob()
@@ -45,81 +34,50 @@ namespace Peach.Enterprise.WebServices
 			if (string.IsNullOrEmpty(job.PitUrl))
 				return HttpStatusCode.BadRequest;
 
-			var db = new PitDatabase(PitLibraryPath);
-			var pit = db.GetPitByUrl(job.PitUrl);
+			var pit = PitDatabase.GetPitByUrl(job.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
-			lock (logger)
+			lock (Mutex)
 			{
-				if (logger.Busy)
+				if (IsEngineRunning)
 					return HttpStatusCode.Forbidden;
 
-				logger.RunJob(".", pit.Versions[0].Files[0].Name);
-			}
+				System.Diagnostics.Debug.Assert(Runner == null);
 
-			return HttpStatusCode.OK;
+				StartJob(pit);
+
+				System.Diagnostics.Debug.Assert(Runner != null);
+
+				return Response.AsJson(new { JobUrl = Prefix + "/" + Runner.Guid });
+			}
 		}
 
 		object PauseJob(string id)
 		{
-			lock (logger)
-			{
-				if (logger.Thread == null)
-					return HttpStatusCode.Forbidden;
-
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				logger.PauseJob();
-
-				return HttpStatusCode.OK;
-			}
+			return QueryJob(id, () => { return Runner.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
 		}
 
-		object StartJob(string id)
+		object ContinueJob(string id)
 		{
-			lock (logger)
-			{
-				if (logger.Thread == null)
-					return HttpStatusCode.Forbidden;
-
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				logger.ResumeJob();
-
-				return HttpStatusCode.OK;
-			}
+			return QueryJob(id, () => { return Runner.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
 		}
 
 		object StopJob(string id)
 		{
-			System.Threading.Thread th = null;
+			return QueryJob(id, () => { return Runner.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+		}
 
-			lock (logger)
-			{
-				if (logger.Thread == null)
-					return HttpStatusCode.Forbidden;
-
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				th = logger.Thread;
-				th.Abort();
-			}
-
-			if (th != null)
-				th.Join();
-
-			return HttpStatusCode.OK;
+		object KillJob(string id)
+		{
+			return QueryJob(id, () => { return Runner.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
 		}
 
 		object GetJobs()
 		{
-			lock (logger)
+			lock (Mutex)
 			{
-				if (logger.JobGuid == null)
+				if (Runner == null)
 					return new Job[0];
 
 				return new[] { MakeJob() };
@@ -128,45 +86,32 @@ namespace Peach.Enterprise.WebServices
 
 		object GetJob(string id)
 		{
-			lock (logger)
-			{
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				return MakeJob();
-			}
+			return QueryJob(id, () => { return MakeJob(); });
 		}
 
 		object GetNodes(string id)
 		{
-			lock (logger)
-			{
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				return new[] { NodeService.Prefix + "/" + logger.NodeGuid };
-			}
+			return QueryJob(id, () => { return new[] { NodeService.Prefix + "/" + NodeGuid }; });
 		}
 
 		object GetFaults(string id)
 		{
-			lock (logger)
-			{
-				if (logger.JobGuid != id)
-					return HttpStatusCode.NotFound;
-
-				return logger.Faults;
-			}
+			return QueryJob(id, () => { return Logger.Faults; });
 		}
 
 		object GetVisualizer(string id)
 		{
-			lock (logger)
+			return QueryJob(id, () => { return Logger.Visualizer; });
+		}
+
+		object QueryJob(string id, Func<object> query)
+		{
+			lock (Mutex)
 			{
-				if (logger.JobGuid != id)
+				if (Runner  == null || Runner.Guid != id)
 					return HttpStatusCode.NotFound;
 
-				return logger.Visualizer;
+				return query();
 			}
 		}
 
@@ -176,7 +121,10 @@ namespace Peach.Enterprise.WebServices
 		/// <returns>The resultant job record.</returns>
 		Job MakeJob()
 		{
-			var elapsed = DateTime.UtcNow - logger.StartDate;
+			System.Diagnostics.Debug.Assert(Runner != null);
+
+			var end = Runner.Status == JobStatus.Stopped ? Runner.StopDate : DateTime.UtcNow;
+			var elapsed = end - Runner.StartDate;
 
 			var group = new Group()
 			{
@@ -186,26 +134,27 @@ namespace Peach.Enterprise.WebServices
 
 			var job = new Job()
 			{
-				JobUrl = Prefix + "/" + logger.JobGuid,
-				FaultsUrl = Prefix + "/" + logger.JobGuid + "/faults",
+				JobUrl = Prefix + "/" + Runner.Guid,
+				FaultsUrl = Prefix + "/" + Runner.Guid + "/faults",
 				TargetUrl = "",
 				TargetConfigUrl = "",
-				NodesUrl = Prefix + "/" + logger.JobGuid + "/nodes",
+				NodesUrl = Prefix + "/" + Runner.Guid + "/nodes",
 				PitUrl = "",
 				PeachUrl = "",
 				ReportUrl = "",
 				PackageFileUrl = "",
 
-				Name = logger.Name,
+				Status = Runner.Status,
+				Name = Runner.Name,
 				Notes = "",
 				User = Environment.UserName,
-				Seed = logger.Seed,
-				IterationCount = logger.CurrentIteration,
-				StartDate = logger.StartDate,
-				StopDate = new DateTime(),
+				Seed = Runner.Seed,
+				IterationCount = Logger.CurrentIteration,
+				StartDate = Runner.StartDate,
+				StopDate = Runner.StopDate,
 				Runtime = (uint)elapsed.TotalSeconds,
-				Speed = (uint)((logger.CurrentIteration - logger.StartIteration) / elapsed.TotalHours),
-				FaultCount = logger.FaultCount,
+				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
+				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),
 				Groups = new List<Group>(new[] { group }),
 			};

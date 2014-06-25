@@ -12,12 +12,11 @@ namespace Peach.Enterprise.WebServices
 {
 	public class WebLogger : Logger
 	{
+		string nodeGuid;
 		Core.Fault[] reproFault;
 
 		List<FaultSummary> faults = new List<FaultSummary>();
 		Dictionary<string, FaultDetail> faultDetails = new Dictionary<string, FaultDetail>();
-
-		ManualResetEvent pauseEvent;
 
 		Visualizer visualizer; // Cached JSON data
 		VizData vizDataStart;  // Partial data, collecting during current iteration
@@ -141,28 +140,9 @@ namespace Peach.Enterprise.WebServices
 
 		#endregion
 
-		public PitTester Tester { get; set; }
-
-		public Thread Thread { get; private set; }
-		public string NodeGuid { get; private set; }
-		public string JobGuid { get; private set; }
-		public string Name { get; private set; }
-		public uint Seed { get; private set; }
 		public uint CurrentIteration { get; private set; }
 		public uint StartIteration { get; private set; }
 		public uint FaultCount { get; private set; }
-		public System.DateTime StartDate { get; private set; }
-
-		public bool Busy
-		{
-			get
-			{
-				if (JobGuid != null || Thread != null)
-					return true;
-
-				return Tester != null && Tester.Status == TestStatus.Active;
-			}
-		}
 
 		/// <summary>
 		/// Get the most recent visualizer snapshot.
@@ -212,44 +192,21 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public void RunJob(string pitLibraryPath, string pitFile)
+		public WebLogger(string nodeGuid)
 		{
-			if (Thread != null)
-				throw new InvalidOperationException("A job is already running.");
+			this.nodeGuid = nodeGuid;
 
-			pauseEvent = new ManualResetEvent(true);
-
-			Thread = new Thread(delegate() { JobThread(pitLibraryPath, pitFile); });
-
-			Thread.Start();
-		}
-
-		public void PauseJob()
-		{
-			pauseEvent.Reset();
-		}
-
-		public void ResumeJob()
-		{
-			pauseEvent.Set();
-		}
-
-		public WebLogger()
-		{
-			NodeGuid = System.Guid.NewGuid().ToString().ToLower();
+			// Ensure vizDataFinal is initialized
+			this.vizDataFinal = new VizData(0);
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
 			lock (this)
 			{
-				JobGuid = System.Guid.NewGuid().ToString().ToLower();
-				Name = context.config.pitFile;
-				Seed = context.config.randomSeed;
-				CurrentIteration = context.currentIteration;
+				StartIteration = context.currentIteration;
 				CurrentIteration = StartIteration;
 				FaultCount = 0;
-				StartDate = context.config.runDateTime.ToUniversalTime();
 
 				visualizer = null;
 				vizDataStart = null;
@@ -259,23 +216,7 @@ namespace Peach.Enterprise.WebServices
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			lock (this)
-			{
-				JobGuid = null;
-				Name = null;
-				Seed = 0;
-				CurrentIteration = 0;
-				StartIteration = 0;
-				FaultCount = 0;
-				StartDate = System.DateTime.MinValue;
-
-				visualizer = null;
-				vizDataStart = null;
-				vizDataFinal = null;
-
-				faults.Clear();
-				faultDetails.Clear();
-			}
+			// Leave everything as is so queries will still work
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -362,7 +303,7 @@ namespace Peach.Enterprise.WebServices
 				MajorHash = faultSummary.MajorHash,
 				MinorHash = faultSummary.MinorHash,
 
-				NodeUrl = NodeService.Prefix + "/" + NodeGuid,
+				NodeUrl = NodeService.Prefix + "/" + nodeGuid,
 				TargetUrl = "",
 				TargetConfigUrl = "",
 				PitUrl = "",
@@ -379,58 +320,6 @@ namespace Peach.Enterprise.WebServices
 				faultDetails.Add(id, faultDetail);
 
 				++FaultCount;
-			}
-		}
-
-		bool shouldStop()
-		{
-			// Called once per iteration.  Will block the engine
-			// until the event is set by ResumeJob()
-			pauseEvent.WaitOne();
-
-			return false;
-		}
-
-		void JobThread(string pitLibraryPath, string pitFile)
-		{
-			try
-			{
-				var defs = new List<KeyValuePair<string, string>>();
-				var args = new Dictionary<string, object>();
-
-				args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-
-				defs.Add(new KeyValuePair<string, string>("Peach.Cwd", Environment.CurrentDirectory));
-				defs.Add(new KeyValuePair<string, string>("Peach.Pwd", Assembly.GetCallingAssembly().Location));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-
-				var pitConfig = pitFile + ".config";
-
-				// It is ok if a .config doesn't exist
-				if (System.IO.File.Exists(pitConfig))
-				{
-					foreach (var d in PitDefines.Parse(pitConfig))
-					{
-						defs.Add(new KeyValuePair<string, string>(d.Key, d.Value));
-					}
-				}
-
-				var parser = new Godel.Core.GodelPitParser();
-				var dom = parser.asParser(args, pitFile);
-				var config = new RunConfiguration() { pitFile = pitFile, shouldStop = shouldStop };
-				var engine = new Engine(this);
-
-				engine.startFuzzing(dom, config);
-			}
-			finally
-			{
-				lock (this)
-				{
-					pauseEvent.Dispose();
-					pauseEvent = null;
-
-					Thread = null;
-				}
 			}
 		}
 	}

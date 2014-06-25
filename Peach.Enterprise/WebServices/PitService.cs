@@ -7,12 +7,12 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class PitService : NancyModule
+	public class PitService : WebService
 	{
 		public static readonly string Prefix = "/p/pits";
 
-		public PitService()
-			: base(Prefix)
+		public PitService(WebContext context)
+			: base(context, Prefix)
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
@@ -21,24 +21,14 @@ namespace Peach.Enterprise.WebServices
 			Post[""] = _ => CopyPit();
 		}
 
-		string PitLibraryPath
-		{
-			get
-			{
-				return (string)Context.Items["PitLibraryPath"];
-			}
-		}
-
 		object GetPits()
 		{
-			var db = new PitDatabase(PitLibraryPath);
-			return db.Entries.ToArray();
+			return PitDatabase.Entries.ToArray();
 		}
 
 		object GetPit(string id)
 		{
-			var db = new PitDatabase(PitLibraryPath);
-			var pit = db.GetPitById(id);
+			var pit = PitDatabase.GetPitById(id);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
@@ -47,8 +37,7 @@ namespace Peach.Enterprise.WebServices
 
 		object GetPitConfig(string id)
 		{
-			var db = new PitDatabase(PitLibraryPath);
-			var cfg = db.GetConfigById(id);
+			var cfg = PitDatabase.GetConfigById(id);
 			if (cfg == null)
 				return HttpStatusCode.NotFound;
 
@@ -58,7 +47,7 @@ namespace Peach.Enterprise.WebServices
 		object CopyPit()
 		{
 			var data = this.Bind<PitCopy>();
-			var db = new PitDatabase(PitLibraryPath);
+			var db = PitDatabase;
 			var newUrl = "";
 
 			try

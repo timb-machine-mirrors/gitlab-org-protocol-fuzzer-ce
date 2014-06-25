@@ -6,35 +6,25 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class LibraryService : NancyModule
+	public class LibraryService : WebService
 	{
 		public static readonly string Prefix = "/p/libraries";
 
-		public LibraryService()
-			: base(Prefix)
+		public LibraryService(WebContext context)
+			: base(context, Prefix)
 		{
 			Get[""] = _ => GetLibraries();
 			Get["/{id}"] = _ => GetLibrary(_.id);
 		}
 
-		string PitLibraryPath
-		{
-			get
-			{
-				return (string)Context.Items["PitLibraryPath"];
-			}
-		}
-
 		object GetLibraries()
 		{
-			var db = new PitDatabase(PitLibraryPath);
-			return db.Libraries.ToArray();
+			return PitDatabase.Libraries.ToArray();
 		}
 
 		object GetLibrary(string id)
 		{
-			var db = new PitDatabase(PitLibraryPath);
-			var lib = db.GetLibraryById(id);
+			var lib = PitDatabase.GetLibraryById(id);
 			if (lib == null)
 				return HttpStatusCode.NotFound;
 

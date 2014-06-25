@@ -1,8 +1,20 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
 namespace Peach.Enterprise.WebServices.Models
 {
+	public enum JobStatus
+	{
+		Stopped = 1,
+		StartPending = 2,
+		StopPending = 3,
+		Running = 4,
+		ContinuePending = 5,
+		PausePending = 6,
+		Paused = 7,
+	}
+
 	public class Job
 	{
 		/// <summary>
@@ -78,6 +90,12 @@ namespace Peach.Enterprise.WebServices.Models
 		/// "/p/files/{id}"
 		/// </example>
 		public string PackageFileUrl { get; set; }
+
+		/// <summary>
+		/// The status of this job record
+		/// </summary>
+		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
+		public JobStatus Status { get; set; }
 
 		/// <summary>
 		/// Display name for the job

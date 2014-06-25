@@ -9,17 +9,13 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class WizardService : NancyModule
+	public class WizardService : WebService
 	{
 		public static readonly string Prefix = "/p/conf/wizard";
 
-		WebLogger logger;
-
-		public WizardService(WebLogger logger)
-			: base(Prefix)
+		public WizardService(WebContext context)
+			: base(context, Prefix)
 		{
-			this.logger = logger;
-
 			Get["/state"] = _ => GetState();
 
 			Post["/config"] = _ => PostConfig();
@@ -28,14 +24,6 @@ namespace Peach.Enterprise.WebServices
 			Get["/test/start"] = _ => StartTest();
 			Get["/test/{id}"] = _ => GetTest(_.id);
 			Get["/test/{id}/raw"] = _ => GetTestRaw(_.id);
-		}
-
-		string PitLibraryPath
-		{
-			get
-			{
-				return (string)Context.Items["PitLibraryPath"];
-			}
 		}
 
 		object GetState()
@@ -50,8 +38,7 @@ namespace Peach.Enterprise.WebServices
 		object PostConfig()
 		{
 			var cfg = this.Bind<PitConfig>();
-			var db = new PitDatabase(PitLibraryPath);
-			var pit = db.GetPitByUrl(cfg.PitUrl);
+			var pit = PitDatabase.GetPitByUrl(cfg.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
@@ -68,8 +55,7 @@ namespace Peach.Enterprise.WebServices
 		object PostMonitors()
 		{
 			var monitors = this.Bind<PitMonitors>();
-			var db = new PitDatabase(PitLibraryPath);
-			var pit = db.GetPitByUrl(monitors.PitUrl);
+			var pit = PitDatabase.GetPitByUrl(monitors.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
@@ -87,30 +73,33 @@ namespace Peach.Enterprise.WebServices
 		{
 			var pitUrl = Request.Query.pitUrl;
 
-			var db = new PitDatabase(PitLibraryPath);
-			var pit = db.GetPitByUrl(pitUrl);
+			var pit = PitDatabase.GetPitByUrl(pitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
-			lock (logger)
+			lock (Mutex)
 			{
-				if (logger.Busy)
+				if (IsEngineRunning)
 					return HttpStatusCode.Forbidden;
 
-				logger.Tester = new PitTester(".", pit.Versions[0].Files[0].Name);
+				System.Diagnostics.Debug.Assert(Tester == null);
 
-				return Response.AsJson(new { TestUrl = Prefix + "/test/" + logger.Tester.Guid });
+				StartTest(pit);
+
+				System.Diagnostics.Debug.Assert(Tester != null);
+
+				return Response.AsJson(new { TestUrl = Prefix + "/test/" + Tester.Guid });
 			}
 		}
 
 		object GetTest(string id)
 		{
-			lock (logger)
+			lock (Mutex)
 			{
-				if (logger.Tester == null || logger.Tester.Guid != id)
+				if (Tester == null || Tester.Guid != id)
 					return HttpStatusCode.NotFound;
 
-				return logger.Tester.Result;
+				return Tester.Result;
 			}
 		}
 
@@ -118,12 +107,12 @@ namespace Peach.Enterprise.WebServices
 		{
 			IList<string> lines;
 
-			lock (logger)
+			lock (Mutex)
 			{
-				if (logger.Tester == null || logger.Tester.Guid != id)
+				if (Tester == null || Tester.Guid != id)
 					return HttpStatusCode.NotFound;
 
-				lines = logger.Tester.Log;
+				lines = Tester.Log;
 			}
 
 			var writer = new StreamWriter(new MemoryStream());

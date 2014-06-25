@@ -60,13 +60,16 @@ namespace Peach.Enterprise.Runtime
 
 		protected override void RunEngine()
 		{
-			using (var svc = new WebServices.WebService(""))
+			using (var svc = new WebServices.WebServer(""))
 			{
+				// Tell the web service the job is running off the command line
+				svc.Context.AttachJob(config);
+
 				svc.Start(new string[0]);
 
 				// Add the web logger as the 1st logger to each test
 				foreach (var test in dom.tests)
-					test.loggers.Insert(0, svc.Logger);
+					test.loggers.Insert(0, svc.Context.Logger);
 
 				base.RunEngine();
 			}
