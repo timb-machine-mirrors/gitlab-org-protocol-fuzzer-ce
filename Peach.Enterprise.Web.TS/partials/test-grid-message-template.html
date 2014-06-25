@@ -1,0 +1,5 @@
+﻿<div class="ngCellText" ng-class="col.colIndex()">
+	<div class="blue bolder">{{row.entity['short']}}</div>
+	<div>{{row.entity['description']}}</div>
+	<div class="red" ng-class="{hidden: row.entity['resolve'].length == 0}">{{row.entity['resolve']}}</div>
+</div>

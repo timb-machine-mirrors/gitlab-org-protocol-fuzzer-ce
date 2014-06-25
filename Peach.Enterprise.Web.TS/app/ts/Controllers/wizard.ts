@@ -26,17 +26,7 @@ module DashApp {
 		//#endregion
 
 		//#region Public Properties
-		private _isDefaultsOpen: boolean = false;
-
-		public get isDefaultsOpen(): boolean {
-			return this._isDefaultsOpen;
-		}
-
-		public set isDefaultsOpen(value: boolean) {
-			if (value == false || this.currentQuestion.defaults.length > 0) {
-				this._isDefaultsOpen = value;
-			}
-		}
+		public isDefaultsOpen: boolean = false;
 
 		public get qa(): W.Question[] {
 			if (this.pitConfigSvc != undefined)
