@@ -45,7 +45,52 @@ module DashApp {
 
 
 		public location: ng.ILocationService;
-		
+
+		public get IntroComplete() {
+			return this.pitConfigSvc.IntroComplete;
+		}
+
+		public get SetVarsComplete() {
+			return this.pitConfigSvc.SetVarsComplete;
+		}
+
+		public get FaultComplete() {
+			return this.pitConfigSvc.FaultMonitorsComplete;
+		}
+
+		public get AutoComplete() {
+			return this.pitConfigSvc.AutoMonitorsComplete;
+		}
+
+		public get DataComplete() {
+			return this.pitConfigSvc.DataMonitorsComplete;
+		}
+
+		public get TestComplete() {
+			return this.pitConfigSvc.TestComplete;
+		}
+
+		public get DoneComplete() {
+			return this.pitConfigSvc.DoneComplete;
+		}
+
+		public get CanSelectPit() {
+			if (this.job == undefined || this.job.status == P.JobStatuses.Stopped) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public get CanConfigurePit() {
+			if ((this.job == undefined || this.job.status == P.JobStatuses.Stopped) && (this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
+				return true;
+			}
+
+			return false;
+		}
+
+
 		//#endregion
 
 

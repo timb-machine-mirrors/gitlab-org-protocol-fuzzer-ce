@@ -52,41 +52,6 @@ module DashApp {
 		public currentQuestion: W.Question;
 		public stepNum: number;
 
-		private static _introclass: string = "";
-		get introclass(): string {
-			return WizardController._introclass;
-		}
-
-		private static _setvarsclass: string = "";
-		get setvarsclass(): string {
-			return WizardController._setvarsclass;
-		}
-
-		private static _faultclass: string = "";
-		get faultclass(): string {
-			return WizardController._faultclass;
-		}
-
-		private static _dataclass: string = "";
-		get dataclass(): string {
-			return WizardController._dataclass;
-		}
-
-		private static _autoclass: string = "";
-		get autoclass(): string {
-			return WizardController._autoclass;
-		}
-
-		private static _testclass: string = "";
-		get testclass(): string {
-			return WizardController._testclass;
-		}
-
-		private static _doneclass: string = "";
-		get doneclass(): string {
-			return WizardController._doneclass;
-		}
-
 		public get dataGridOptions(): any {
 			return {
 				data: "vm.DataMonitors",
@@ -179,6 +144,8 @@ module DashApp {
 			}
 		}
 
+		public IntroComplete: boolean = false;
+
 		//#endregion
 
 		//#region ctor
@@ -198,6 +165,25 @@ module DashApp {
 		//#endregion
 
 		//#region Public Methods
+
+		public get CanStart() {
+			return (this.pitConfigSvc.CanStartJob || this.pitConfigSvc.CanContinueJob);
+		}
+
+		public Start() {
+			this.pitConfigSvc.StartJob();
+		}
+
+		public completeIntro() {
+			this.pitConfigSvc.IntroComplete = true;
+			this.location.path("/configurator/fault");
+		}
+
+		public Done() {
+			this.pitConfigSvc.DoneComplete = true;
+			this.location.path("/");
+		}
+
 		public insertDefine(row) {
 			if (this.currentQuestion.value == undefined) {
 				this.currentQuestion.value = "";
@@ -283,7 +269,7 @@ module DashApp {
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
 						case "auto":
-							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
+							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/auto-done.html";
 							break;
 					}
@@ -335,7 +321,6 @@ module DashApp {
 					break;
 			}
 
-			this.resetStepClass();
 		}
 
 		public back()	{
@@ -353,24 +338,20 @@ module DashApp {
 			else
 				this.stepNum = 2;
 
-			this.resetStepClass();
 		}
 
 		public restartFaultDetection() {
 			this.pitConfigSvc.FaultMonitors = [];
 			this.currentQuestion = undefined;
-			this.resetStepClass();
 			this.next();
 		}
 
 		public submitSetVarsInfo() {
 			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
-			WizardController._setvarsclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/fault");
 		}
 
 		public submitFaultInfo() {
-			WizardController._faultclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/data");
 		}
 
@@ -380,12 +361,10 @@ module DashApp {
 		}
 
 		public submitDataInfo() {
-			WizardController._dataclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/auto");
 		}
 
 		public submitAutoInfo() {
-			WizardController._autoclass = W.ConfiguratorStepClasses.Complete;
 			this.location.path("/configurator/test");
 		}
 
@@ -491,24 +470,6 @@ module DashApp {
 
 			return agents;
 		}
-
-		private resetStepClass() {
-			switch (this.params.step) {
-				case "setvars":
-					WizardController._setvarsclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "fault":
-					WizardController._faultclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "data":
-					WizardController._dataclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "auto":
-					WizardController._autoclass = W.ConfiguratorStepClasses.None;
-					break;
-			}
-		}
-
 		//#endregion
 	}
 }

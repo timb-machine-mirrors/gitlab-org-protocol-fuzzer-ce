@@ -27,16 +27,13 @@ module DashApp {
 					templateUrl: "/partials/dash.html",
 					controller: DashController
 				})
-				.when("/metrics", {
-					templateUrl: "/partials/metrics.html",
-					controller: MetricsController
-				})
 				.when("/faults", {
 					templateUrl: "/partials/faults.html",
 					controller: FaultsController
 				})
 				.when("/configurator/intro", {
-					templateUrl: "/partials/configurator-intro.html"
+					templateUrl: "/partials/configurator-intro.html",
+					controller: WizardController
 				})
 				.when("/configurator/test", {
 					templateUrl: "/partials/configurator-test.html",
@@ -44,7 +41,7 @@ module DashApp {
 				})
 				.when("/configurator/done", {
 					templateUrl: "/partials/configurator-done.html",
-					controller: DashController 
+					controller: WizardController 
 				})
 				.when("/configurator/:step", {
 					templateUrl: "/partials/wizard.html",
