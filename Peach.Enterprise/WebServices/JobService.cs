@@ -148,7 +148,7 @@ namespace Peach.Enterprise.WebServices
 				IterationCount = Logger.CurrentIteration,
 				StartDate = Runner.StartDate,
 				StopDate = Runner.StopDate,
-				Runtime = (uint)elapsed.TotalSeconds,
+				Runtime = (uint)Runner.Runtime.TotalSeconds,
 				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),

@@ -2,6 +2,7 @@ using Peach.Core;
 using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -10,6 +11,7 @@ namespace Peach.Enterprise.WebServices
 {
 	public class JobRunner
 	{
+		Stopwatch stopwatch;
 		ManualResetEvent pauseEvent;
 		Thread thread;
 
@@ -24,6 +26,17 @@ namespace Peach.Enterprise.WebServices
 		public DateTime StartDate { get; private set; }
 		public DateTime StopDate { get; private set; }
 		public JobStatus Status { get; private set; }
+
+		public TimeSpan Runtime
+		{
+			get
+			{
+				if (stopwatch != null)
+					return stopwatch.Elapsed;
+
+				return DateTime.UtcNow - StartDate;
+			}
+		}
 
 		public bool Pause()
 		{
@@ -102,9 +115,11 @@ namespace Peach.Enterprise.WebServices
 				PitUrl = pitUrl,
 			};
 
+			ret.stopwatch = new Stopwatch();
 			ret.pauseEvent = new ManualResetEvent(true);
 			ret.thread = new Thread(delegate() { ret.ThreadProc(logger, pitLibraryPath, config); });
 
+			ret.stopwatch.Start();
 			ret.thread.Start();
 
 			return ret;
@@ -131,17 +146,26 @@ namespace Peach.Enterprise.WebServices
 			// until the event is set by ResumeJob()
 			if (!pauseEvent.WaitOne(0))
 			{
-				lock (this)
+				try
 				{
-					if (Status == JobStatus.StopPending)
-						return true;
+					stopwatch.Stop();
 
-					Status = JobStatus.Paused;
+					lock (this)
+					{
+						if (Status == JobStatus.StopPending)
+							return true;
+
+						Status = JobStatus.Paused;
+					}
+
+					pauseEvent.WaitOne();
+
+					Status = JobStatus.Running;
 				}
-
-				pauseEvent.WaitOne();
-
-				Status = JobStatus.Running;
+				finally
+				{
+					stopwatch.Start();
+				}
 			}
 
 
@@ -195,6 +219,8 @@ namespace Peach.Enterprise.WebServices
 			{
 				lock (this)
 				{
+					stopwatch.Stop();
+
 					pauseEvent.Dispose();
 					pauseEvent = null;
 					thread = null;
