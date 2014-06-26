@@ -160,7 +160,13 @@ namespace Peach.Enterprise.WebServices
 
 					pauseEvent.WaitOne();
 
-					Status = JobStatus.Running;
+					lock (this)
+					{
+						if (Status == JobStatus.StopPending)
+							return true;
+
+						Status = JobStatus.Running;
+					}
 				}
 				finally
 				{
