@@ -1,0 +1,102 @@
+<<<
+[[Monitors_Syslog]]
+== Syslog Monitor
+
+The syslog monitor will listen on a specified port for incoming syslog messages. This monitor is capable of performing data collection and fault detection. The default operation is data collection. Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex matches an incoming syslog message, a fault will be generated.
+
+=== Parameters
+
+_Required:_
+
+There are no required parameters for this monitor.
+
+_Optional:_
+
+Port:: Port number to listen on. Defaults to 514.
+Interface:: Interface to listen on. Defaults to 0.0.0.0 (all interfaces).
+FaultRegex:: Fault when regular expression matches.
+
+=== Examples
+
+.Collect Syslog Messages
+===============================
+
+This example shows the Syslog monitor listening on the default port for incoming messages. When a fault occurs all messages will get saved.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Syslog"/>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+.Fault on Syslog Message
+===============================
+
+This example shows the Syslog monitor listening on the default port for incoming messages. The FaultRegex is compared against each incoming message; when it matches a fault is generated and the syslog data is saved.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Syslog"/>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
