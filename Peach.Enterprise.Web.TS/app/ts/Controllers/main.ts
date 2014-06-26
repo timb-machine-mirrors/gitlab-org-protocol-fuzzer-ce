@@ -140,6 +140,9 @@ module DashApp {
 					}
 					else {
 						this.pitConfigSvc.Pit = data;
+						if (data.configured == false) {
+							this.location.path("#/configurator/intro");
+						}
 					}
 				});
 			});
@@ -164,6 +167,9 @@ module DashApp {
 				}
 			}).result.then((pit: P.Pit) => {
 				this.pitConfigSvc.Pit = pit;
+				if (pit.configured == undefined || pit.configured == false) {
+					this.location.path("/configurator/intro");
+				}
 			});
 		}
 	}

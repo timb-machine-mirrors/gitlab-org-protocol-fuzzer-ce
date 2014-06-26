@@ -14,7 +14,15 @@
 				<div class="alert alert-warning" ng-class="{hidden: vm.job != undefined}">
 					<strong>Warning!</strong>
 					Job not currently running, metrics unavailable.
-					<br>
+				</div>
+				<div class="alert alert-warning" ng-class="{hidden: vm.pit.configured == true}">
+					<strong>Warning!</strong>
+					Pit must be configured before starting a Job.
+					<a href="#/configurator/intro">Go to Pit Configuration now.</a>
+				</div>
+				<div class="alert alert-warning" ng-class="{hidden: vm.pit.pitUrl.length >= 0}">
+					<strong>Warning!</strong>
+					You are currently working with an unknown Pit. Job control will be unavailable.
 				</div>
 
 				<div class="col-sm-7 infobox-container">
@@ -73,7 +81,7 @@
 
 				</div>
 
-				
+
 				<div class="vspace-sm"></div>
 
 				<div class="col-sm-5">

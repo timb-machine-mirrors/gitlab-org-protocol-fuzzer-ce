@@ -34,8 +34,22 @@ namespace Peach.Enterprise.WebServices
 
 		public class TestElement : ChildElement
 		{
+			public class AgentElement
+			{
+				[XmlAttribute("ref")]
+				public string reference { get; set; }
+			}
+
+			public TestElement()
+			{
+				AgentRefs = new List<AgentElement>();
+			}
+
 			[XmlAttribute]
 			public string name { get; set; }
+
+			[XmlElement("Agent", typeof(AgentElement))]
+			public List<AgentElement> AgentRefs { get; set; }
 		}
 
 		public class IncludeElement : ChildElement
@@ -633,6 +647,19 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
+		private bool IsConfigured(PeachElement elem)
+		{
+			// Pit is 'configured' if there is a <Test> with an <Agent ref='xxx'/> child
+			foreach (var child in elem.Children)
+			{
+				var test = child as PeachElement.TestElement;
+				if (test != null && test.AgentRefs.Count > 0)
+					return true;
+			}
+
+			return false;
+		}
+
 		private Models.Pit AddEntry(Models.LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var contents = Parse(fileName);
@@ -653,6 +680,7 @@ namespace Peach.Enterprise.WebServices
 			var ver = new Models.PitVersion()
 			{
 				Version = 1,
+				Configured = IsConfigured(contents),
 				Locked = value.Locked,
 				Files = new List<Models.PitFile>(),
 				User = Environment.UserName,

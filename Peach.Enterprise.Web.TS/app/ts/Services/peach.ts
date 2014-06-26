@@ -23,8 +23,7 @@ module DashApp.Services {
 
 		GetLibraries(success: (data: P.PitLibrary[]) => void): void;
 
-		GetPit(id: number, success: (data: P.Pit) => void): void;
-		GetPit(url: string, success: (data: P.Pit) => void): void;
+		GetPit(pitUrl: string, success: (data: P.Pit) => void): void;
 		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 
 		PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any>;
@@ -33,7 +32,7 @@ module DashApp.Services {
 
 		GetLocalFile<T>(url: string, success: (data: T) => void, error?: (response) => void): void;
 
-		StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response) => void): void;
+		StartJob(job: P.Job, success: (data: P.Job) => void, error?: (response) => void): void;
 		PauseJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		ContinueJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		StopJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
@@ -45,7 +44,7 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		//public URL_PREFIX: string = "http://localhost:8888"; 
+		//public URL_PREFIX: string = "http://localhost:8888";
 		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
@@ -99,16 +98,11 @@ module DashApp.Services {
 			});
 		}
 
-		public GetPit(IdOrUrl: any, success: (data: P.Pit) => void): void { 
-			if (typeof IdOrUrl == "number") {
-				this.http.get(this.URL_PREFIX + "/p/pits/" + parseInt(IdOrUrl, 10)).then((response) => success(<P.Pit>response.data));
-			}
-			else if (typeof IdOrUrl == "string") {
-				this.http.get(this.URL_PREFIX + IdOrUrl).then((response) => success(<P.Pit>response.data));
-			}
-			else {
-				throw new Error("GetPit: Argument 0 is of an incompatible type.");
-			}
+		public GetPit(pitUrl: string, success: (data: P.Pit) => void): void { 
+			this.http.get(this.URL_PREFIX + pitUrl).then((response) => {
+				var pit = new P.Pit(<P.Pit>response.data);
+				success(pit);
+			});
 		}
 
 		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
@@ -153,11 +147,7 @@ module DashApp.Services {
 			this.http.get(url).then((response) => success(<T>response.data), (response) => error(response));
 		}
 
-		public StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response) => void) {
-			var job: P.Job = {
-				pitUrl: pitUrl
-			};
-
+		public StartJob(job: P.Job, success: (data: P.Job) => void, error?: (response) => void) {
 			if (error === undefined) {
 				error = this.handleError;
 			}

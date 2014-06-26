@@ -64,7 +64,7 @@
 		},
 		{
 			"id":4100,
-			"q": "Which network device will do the network capture?",
+			"q": "Which network device should be captured? For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'. Example interface names are 'Local Area Connection' and Ethernet on Windows, 'eth0' on Linux, and 'en0' on OS X.",
 			"type":"iface",
 			"key":"PcapDevice",
 			"next":4101

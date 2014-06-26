@@ -76,7 +76,7 @@ module DashApp.Services {
 				this._job = job;
 				this.startJobPoller();
 				this.startFaultsPoller();
-				this.getPitInfo();
+				this.getPit(job.pitUrl);
 			}
 		}
 		//#endregion
@@ -199,9 +199,10 @@ module DashApp.Services {
 		}
 
 		public CopyPit(pit: P.Pit) {
-			var request: P.CopyPitRequest;
-			request.libraryUrl = this.UserPitLibrary;
-			request.pit = pit;
+			var request: P.CopyPitRequest = {
+				libraryUrl: this.UserPitLibrary,
+				pit: pit
+			};
 
 			this.peachSvc.CopyPit(request, (data: P.Pit) => {
 				this.Pit = data;
@@ -242,14 +243,22 @@ module DashApp.Services {
 		}
 
 		private get isKnownPit() {
-			return (this._pit != undefined && this._pit.pitUrl != undefined && this._pit.pitUrl.length > 0);
+			return (this._pit != undefined && this._pit.pitUrl != undefined && this._pit.pitUrl.length > 0 && this._pit.configured);
 		}
 
 
 		public StartJob() {
 			if (this.CanStartJob) {
-				this.peachSvc.StartJob(this._pit.pitUrl, (job: P.Job) => {
-					this.Job = job;
+				var job: P.Job = {
+					pitUrl: this._pit.pitUrl,
+					status: P.JobStatuses.ActionPending
+				};
+				this._job = job;
+
+				this.peachSvc.StartJob(job, (job: P.Job) => {
+					this.updateJob(job);
+				}, (response) => {
+					this._autoMonitors
 				});
 			}
 			else if (this.CanContinueJob) {
@@ -288,6 +297,15 @@ module DashApp.Services {
 		}
 
 		private updateJob(job: P.Job) {
+			if (this.Job.jobUrl == undefined) {
+				this.Job.jobUrl = job.jobUrl;
+			}
+			else {
+				if (this.Job.jobUrl != job.jobUrl) {
+					console.error("tried to update job with a different joburl");
+					return;
+				}
+			}
 			this.Job.iterationCount = job.iterationCount;
 			this.Job.speed = job.speed;
 			this.Job.faultCount = job.faultCount || 0;
@@ -313,23 +331,40 @@ module DashApp.Services {
 				});
 		}
 
-
-		private getPitInfo() {
+		public getPit(pitUrl: string) {
 			if (this.Pit == undefined || (this.Pit.name != this._job.name)) {
 				if (this._job.pitUrl.length > 0)
 					this.peachSvc.GetPit(this._job.pitUrl, (data: P.Pit) => {
-						if (data != undefined)
-							this.Pit = data;
+						if (data != undefined) {
+							if ((this.Pit == undefined) || (this.Pit.pitUrl != data.pitUrl))
+								this.Pit = data;
+							else {
+								this.updatePit(data);
+							}
+						}
 					});
 				else {
 					this.Pit = new P.Pit();
-					var lastSlash = this._job.name.lastIndexOf("\\");
-					var period = this._job.name.lastIndexOf(".");
-					this.Pit.name = this._job.name.substring(lastSlash + 1, period);
+					this.Pit.name = this._job.name;
+					this.Pit.pitUrl = "";
 					this.Pit.description = "";
 					this.Pit.tags = [];
+					this.Pit.configured = true;
 				}
 			}
+		}
+
+		private updatePit(pit: P.Pit) {
+			if (this._pit.pitUrl != pit.pitUrl) {
+				console.error("trying to update a pit with the wrong pit url");
+				return;
+			}
+
+			this._pit.configured = pit.configured;
+			this._pit.description = pit.description;
+			this._pit.locked = pit.locked;
+			this._pit.name = pit.name;
+			this._pit.tags = pit.tags;
 		}
 
 		private initialize() {

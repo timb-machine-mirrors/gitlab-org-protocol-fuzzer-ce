@@ -253,6 +253,39 @@ namespace Peach.Enterprise.Test.WebServices
 		}
 
 		[Test]
+		public void HasAgents()
+		{
+			string noAgents =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+       author='Deja Vu Security, LLC'
+       description='File'
+       version='0.0.1'>
+
+	<Test name='Default'>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			File.WriteAllText(Path.Combine(root, "Image", "File.xml"), noAgents);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(2, db.Entries.Count());
+
+			var file = db.Entries.Where(e => e.Name == "File").FirstOrDefault();
+			Assert.NotNull(file);
+			Assert.False(file.Versions[0].Configured);
+
+			var img = db.Entries.Where(e => e.Name == "IMG").FirstOrDefault();
+			Assert.NotNull(img);
+			Assert.True(img.Versions[0].Configured);
+		}
+
+		[Test]
 		public void TestSaveMonitors()
 		{
 			var pit = db.Entries.First();
