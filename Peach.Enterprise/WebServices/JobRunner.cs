@@ -75,6 +75,7 @@ namespace Peach.Enterprise.WebServices
 				if (thread != null && Status != JobStatus.StopPending && Status != JobStatus.Stopped)
 				{
 					Status = JobStatus.StopPending;
+					pauseEvent.Set();
 					pauseEvent.Reset();
 					return true;
 				}
