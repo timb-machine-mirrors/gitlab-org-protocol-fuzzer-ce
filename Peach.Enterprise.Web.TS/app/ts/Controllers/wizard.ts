@@ -25,6 +25,22 @@ module DashApp {
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		//#endregion
 
+		//#region ctor
+		static $inject = ["$scope", "$routeParams", "$location", "peachService", "pitConfiguratorService"];
+
+		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
+			this.params = $routeParams;
+
+			$scope.vm = this;
+			this.location = $location;
+			this.peach = peachService;
+			this.pitConfigSvc = pitConfiguratorService;
+
+			if (this.params.step != undefined)
+				this.refreshData($scope);
+		}
+		//#endregion
+
 		//#region Public Properties
 		public isDefaultsOpen: boolean = false;
 
@@ -144,52 +160,14 @@ module DashApp {
 			}
 		}
 
-		public IntroComplete: boolean = false;
-
-		//#endregion
-
-		//#region ctor
-		static $inject = ["$scope", "$routeParams", "$location", "peachService", "pitConfiguratorService"];
-
-		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
-			this.params = $routeParams;
-
-			$scope.vm = this;
-			this.location = $location;
-			this.peach = peachService;
-			this.pitConfigSvc = pitConfiguratorService;
-
-			if(this.params.step != undefined)
-				this.refreshData($scope);
+		public get TestComplete(): boolean {
+			return this.pitConfigSvc.TestComplete;
 		}
+
 		//#endregion
+
 
 		//#region Public Methods
-
-		public get CanStart() {
-			return (this.pitConfigSvc.CanStartJob || this.pitConfigSvc.CanContinueJob);
-		}
-
-		public Start() {
-			this.pitConfigSvc.StartJob();
-		}
-
-		public completeIntro() {
-			this.pitConfigSvc.IntroComplete = true;
-			this.location.path("/configurator/fault");
-		}
-
-		public Done() {
-			this.pitConfigSvc.DoneComplete = true;
-			this.location.path("/");
-		}
-
-		public insertDefine(row) {
-			if (this.currentQuestion.value == undefined) {
-				this.currentQuestion.value = "";
-			}
-			this.currentQuestion.value += "##" + row.getProperty("key") + "##";
-		}
 
 		public getTemplateUrl(): string {
 			if (this.currentQuestion != undefined) {
@@ -209,6 +187,8 @@ module DashApp {
 				this.currentQuestion = <W.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
 			}
 			else {
+				this.setThisStepIncomplete();
+
 				var q = this.currentQuestion;
 				if (q.type != W.QuestionTypes.Jump) { 
 					// push this question id onto the path stack
@@ -256,19 +236,19 @@ module DashApp {
 					this.currentQuestion = new W.Question();
 					this.currentQuestion.type = W.QuestionTypes.Done;
 					switch (this.params.step) {
-						case "setvars":
+						case StepNames.SetVars:
 							this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
 							this.currentQuestion.qref = "/partials/setvars-done.html";
 							break;
-						case "fault":
+						case StepNames.Fault:
 							this.pitConfigSvc.FaultMonitors = this.findMonitors();
 							this.currentQuestion.qref = "/partials/fault-done.html";
 							break;
-						case "data":
+						case StepNames.Data:
 							this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
-						case "auto":
+						case StepNames.Auto:
 							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/auto-done.html";
 							break;
@@ -340,18 +320,26 @@ module DashApp {
 
 		}
 
+		//#region Step Functions
+		public completeIntro() {
+			this.pitConfigSvc.IntroComplete = true;
+			this.location.path("/configurator/setvars");
+		}
+
+		public submitSetVarsInfo() {
+			this.pitConfigSvc.SetVarsComplete = true;
+			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
+			this.location.path("/configurator/fault");
+		}
+
 		public restartFaultDetection() {
 			this.pitConfigSvc.FaultMonitors = [];
 			this.currentQuestion = undefined;
 			this.next();
 		}
 
-		public submitSetVarsInfo() {
-			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
-			this.location.path("/configurator/fault");
-		}
-
 		public submitFaultInfo() {
+			this.pitConfigSvc.FaultMonitorsComplete = true;
 			this.location.path("/configurator/data");
 		}
 
@@ -361,10 +349,17 @@ module DashApp {
 		}
 
 		public submitDataInfo() {
+			this.pitConfigSvc.DataMonitorsComplete = true;
 			this.location.path("/configurator/auto");
 		}
 
+		public addNewAutoInfo() {
+			this.currentQuestion = undefined;
+			this.next();
+		}
+
 		public submitAutoInfo() {
+			this.pitConfigSvc.AutoMonitorsComplete = true;
 			this.location.path("/configurator/test");
 		}
 
@@ -379,28 +374,70 @@ module DashApp {
 			}
 		}
 
+		public Done() {
+			this.pitConfigSvc.DoneComplete = true;
+			this.location.path("/");
+		}
+
 		//#endregion
 
+
+		public get CanStart() {
+			return (this.pitConfigSvc.CanStartJob);
+		}
+
+		public Start() {
+			this.pitConfigSvc.StartJob();
+		}
+
+		public insertDefine(row) {
+			if (this.currentQuestion.value == undefined) {
+				this.currentQuestion.value = "";
+			}
+			this.currentQuestion.value += "##" + row.getProperty("key") + "##";
+		}
+
+		//#endregion
+
+
 		//#region private functions
+		private setThisStepIncomplete() {
+			switch (this.params.step) {
+				case StepNames.SetVars:
+					this.pitConfigSvc.SetVarsComplete = false;
+					break;
+				case StepNames.Fault:
+					this.pitConfigSvc.FaultMonitorsComplete = false;
+					break;
+				case StepNames.Data:
+					this.pitConfigSvc.DataMonitorsComplete = false;
+					break;
+				case StepNames.Auto:
+					this.pitConfigSvc.AutoMonitorsComplete = false;
+					break;
+				default:
+					return;
+			}
+		}
 
 		private refreshData(scope: ViewModelScope) {
 			var res: ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
 			switch (this.params.step) {
-				case "setvars":
+				case StepNames.SetVars:
 					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions();
 					this.next();
 					return;
 					break;
-				case "fault":
+				case StepNames.Fault:
 					this.pitConfigSvc.FaultMonitors = [];
 					res = this.peach.GetFaultQA();
 					break;
-				case "data":
+				case StepNames.Data:
 					this.pitConfigSvc.DataMonitors = [];
 					res = this.peach.GetDataQA();
 					break;
-				case "auto":
+				case StepNames.Auto:
 					this.pitConfigSvc.AutoMonitors = [];
 					res = this.peach.GetAutoQA();
 					break;
@@ -471,5 +508,15 @@ module DashApp {
 			return agents;
 		}
 		//#endregion
+	}
+
+	export class StepNames {
+		static Intro: string = "intro";
+		static SetVars: string = "setvars";
+		static Fault: string = "fault";
+		static Data: string = "data";
+		static Auto: string = "auto";
+		static Test: string = "test";
+		static Done: string = "done";
 	}
 }

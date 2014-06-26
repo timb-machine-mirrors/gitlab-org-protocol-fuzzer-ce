@@ -118,13 +118,7 @@ module DashApp.Services {
 		public set Pit(pit: P.Pit) {
 			if (this._pit != pit) {
 				this._pit = pit;
-				this._autoMonitors = [];
-				this._dataMonitors = [];
-				this._defines = undefined;
-				this._faultMonitors = [];
-				this.IntroComplete = false;
-				this.TestComplete = false;
-				this.DoneComplete = false;
+				this.ResetAll();
 
 				if (pit.pitUrl != undefined) {
 					this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
@@ -175,23 +169,11 @@ module DashApp.Services {
 		}
 		//#endregion
 
-		public get SetVarsComplete(): boolean {
-			return (this._defines != undefined);
-		}
-
-		public get FaultMonitorsComplete(): boolean {
-			return (this._faultMonitors.length > 0);
-		}
-
-		public get DataMonitorsComplete(): boolean {
-			return (this._dataMonitors.length > 0);
-		}
-
-		public get AutoMonitorsComplete(): boolean {
-			return (this._autoMonitors.length > 0);
-		}
-
 		public IntroComplete: boolean = false;
+		public SetVarsComplete: boolean = false;
+		public FaultMonitorsComplete: boolean = false;
+		public DataMonitorsComplete: boolean = false;
+		public AutoMonitorsComplete: boolean = false;
 		public TestComplete: boolean = false;
 		public DoneComplete: boolean = false;
 
@@ -201,9 +183,19 @@ module DashApp.Services {
 			this._faultMonitors = [];
 			this._dataMonitors = [];
 			this._autoMonitors = [];
-
+			this.ResetConfiguratorSteps();
 			// Hmm, I dunno...
 			//this._stateBag = new W.StateBag;
+		}
+
+		public ResetConfiguratorSteps() {
+			this.IntroComplete = false;
+			this.SetVarsComplete = false;
+			this.FaultMonitorsComplete = false;
+			this.DataMonitorsComplete = false;
+			this.AutoMonitorsComplete = false;
+			this.TestComplete = false;
+			this.DoneComplete = false;
 		}
 
 		public CopyPit(pit: P.Pit) {
@@ -261,18 +253,21 @@ module DashApp.Services {
 				});
 			}
 			else if (this.CanContinueJob) {
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.ContinueJob(this._job.jobUrl);
 			}
 		}
 
 		public PauseJob() {
 			if (this.CanPauseJob) {
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.PauseJob(this._job.jobUrl);
 			}
 		}
 
 		public StopJob() {
 			if (this.CanStopJob) {
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.StopJob(this._job.jobUrl);
 			}
 		}
