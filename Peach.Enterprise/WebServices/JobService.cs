@@ -119,8 +119,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			System.Diagnostics.Debug.Assert(Runner != null);
 
-			var end = Runner.Status == JobStatus.Stopped ? Runner.StopDate : DateTime.UtcNow;
-			var elapsed = end - Runner.StartDate;
+			var elapsed = Runner.Runtime;
 
 			var group = new Group()
 			{
@@ -148,7 +147,7 @@ namespace Peach.Enterprise.WebServices
 				IterationCount = Logger.CurrentIteration,
 				StartDate = Runner.StartDate,
 				StopDate = Runner.StopDate,
-				Runtime = (uint)Runner.Runtime.TotalSeconds,
+				Runtime = (uint)elapsed.TotalSeconds,
 				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),
