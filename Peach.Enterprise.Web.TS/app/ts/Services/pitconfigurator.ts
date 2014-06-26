@@ -248,27 +248,26 @@ module DashApp.Services {
 
 		public StartJob() {
 			if (this.CanStartJob) {
-				this._job.status = P.JobStatuses.None;
 				this.peachSvc.StartJob(this._pit.pitUrl, (job: P.Job) => {
 					this.Job = job;
 				});
 			}
 			else if (this.CanContinueJob) {
-				this._job.status = P.JobStatuses.None;
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.ContinueJob(this._job.jobUrl);
 			}
 		}
 
 		public PauseJob() {
 			if (this.CanPauseJob) {
-				this._job.status = P.JobStatuses.None;
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.PauseJob(this._job.jobUrl);
 			}
 		}
 
 		public StopJob() {
 			if (this.CanStopJob) {
-				this._job.status = P.JobStatuses.None;
+				this._job.status = P.JobStatuses.ActionPending;
 				this.peachSvc.StopJob(this._job.jobUrl);
 			}
 		}

@@ -160,6 +160,10 @@ module DashApp {
 			}
 		}
 
+		public get TestComplete(): boolean {
+			return this.pitConfigSvc.TestComplete;
+		}
+
 		//#endregion
 
 
@@ -232,19 +236,19 @@ module DashApp {
 					this.currentQuestion = new W.Question();
 					this.currentQuestion.type = W.QuestionTypes.Done;
 					switch (this.params.step) {
-						case "setvars":
+						case StepNames.SetVars:
 							this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
 							this.currentQuestion.qref = "/partials/setvars-done.html";
 							break;
-						case "fault":
+						case StepNames.Fault:
 							this.pitConfigSvc.FaultMonitors = this.findMonitors();
 							this.currentQuestion.qref = "/partials/fault-done.html";
 							break;
-						case "data":
+						case StepNames.Data:
 							this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
-						case "auto":
+						case StepNames.Auto:
 							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/auto-done.html";
 							break;
@@ -379,7 +383,7 @@ module DashApp {
 
 
 		public get CanStart() {
-			return (this.pitConfigSvc.CanStartJob || this.pitConfigSvc.CanContinueJob);
+			return (this.pitConfigSvc.CanStartJob);
 		}
 
 		public Start() {
