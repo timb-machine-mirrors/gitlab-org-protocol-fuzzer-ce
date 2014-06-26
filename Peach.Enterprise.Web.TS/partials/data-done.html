@@ -3,7 +3,7 @@
 		<h4>Review</h4>
 	</div>
 
-	<div ng-switch="vm.AutoMonitors.length">
+	<div ng-switch="vm.DataMonitors.length">
 		<div ng-switch-when="0">You have elected to not perform Data Collection. Click Continue to move on to Automation.</div>
 		<div class="gridStyle" ng-grid="vm.dataGridOptions" ng-switch-default></div>
 	</div>
