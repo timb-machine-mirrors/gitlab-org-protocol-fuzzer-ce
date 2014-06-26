@@ -43,7 +43,8 @@ module DashApp {
 					controller: PitTestController
 				})
 				.when("/configurator/done", {
-					templateUrl: "/partials/configurator-done.html"
+					templateUrl: "/partials/configurator-done.html",
+					controller: DashController 
 				})
 				.when("/configurator/:step", {
 					templateUrl: "/partials/wizard.html",

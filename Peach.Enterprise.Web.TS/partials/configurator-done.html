@@ -1,12 +1,23 @@
-﻿<div>
-	<h1>Configurator - Review</h1>
-
-	<p>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
-
-	<p>Not sure what we're going to do here yet</p>
-
-	<button class="btn btn-success btn-next" ng-disabled="configuratorForm.$invalid">
-		SAVE WORK????
-		<i class="icon-arrow-right icon-on-right"></i>
-	</button>
+﻿<div class="page-content">
+	<div class="page-header">
+		<h3>
+			Pit Configurator - Done
+		</h3>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			Pit configuration is complete. Press the START button below to start a fuzzing job with your pit.
+			<div class="space-6"></div>
+			<div class="row-fluid wizard-actions">
+				<button class="btn btn-primary" ng-click="vm.Start()"
+								ng-class="{disabled: vm.CanStart == false}">
+					START
+				</button>
+				<a class="btn btn-success btn-next" href="#/">
+					Return To Dash
+					<i class="icon-arrow-right icon-on-right"></i>
+				</a>
+			</div>
+		</div>
+	</div>
 </div>

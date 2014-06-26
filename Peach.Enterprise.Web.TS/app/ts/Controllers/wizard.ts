@@ -224,7 +224,7 @@ module DashApp {
 			}
 			else {
 				var q = this.currentQuestion;
-				if (q.id != 0 && q.type != W.QuestionTypes.Jump) {
+				if (q.type != W.QuestionTypes.Jump) { 
 					// push this question id onto the path stack
 					this.questionPath.push(q.id);
 				}
@@ -342,7 +342,7 @@ module DashApp {
 			// pop the path and get the question
 
 			var previousid = 0;
-			if(this.questionPath.length > 1)
+			if(this.questionPath.length > 0)
 				previousid = this.questionPath.pop();
 
 			this.currentQuestion = $.grep(this.qa, function (e) { return e.id == previousid; })[0];

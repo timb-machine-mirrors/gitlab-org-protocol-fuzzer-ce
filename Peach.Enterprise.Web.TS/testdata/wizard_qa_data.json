@@ -65,7 +65,7 @@
 		{
 			"id":4100,
 			"q": "Which network device will do the network capture?",
-			"type":"interface",
+			"type":"iface",
 			"key":"PcapDevice",
 			"next":4101
 		},
