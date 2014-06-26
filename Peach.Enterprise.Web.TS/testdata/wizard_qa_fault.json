@@ -35,7 +35,7 @@
 			"choice":[
 				{ "value":"win", "a":"Windows", "next": 1000 },
 				{ "value":"osx", "a":"Apple OS X", "next": 2000 },
-				{ "value":"lin", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 3000 }
+				{ "value":"lin", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 3100 }
 			],
 			"next":4
 		},
@@ -47,7 +47,7 @@
 			"choice":[
 				{ "value":"win", "next":1000 },
 				{ "value":"osx", "next":2000 },
-				{ "value":"lin", "next":3000 }
+				{ "value":"lin", "next":3100 }
 				]
 		},
 		{
