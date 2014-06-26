@@ -388,6 +388,7 @@ module DashApp {
 
 		public Start() {
 			this.pitConfigSvc.StartJob();
+			this.Done();
 		}
 
 		public insertDefine(row) {
