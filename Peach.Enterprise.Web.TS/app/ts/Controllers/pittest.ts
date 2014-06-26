@@ -56,6 +56,8 @@ module DashApp {
 			this.peach = peachService;
 			this.q = $q;
 			this.testStatus = "notrunning";
+
+			var s: string;
 		}
 
 		//			rowHeight: 70,
