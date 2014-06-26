@@ -40,6 +40,7 @@ module DashApp {
 
 		public log: string = "";
 
+
 		public tabs: ITab[] = [
 			{ title: "Summary", content: "../partials/test-grid.html", active: true, disabled: false },
 			{ title: "Log", content: "../partials/test-raw.html", active: false, disabled: false }
@@ -100,8 +101,7 @@ module DashApp {
 		}
 
 		public submitAllInfo() {
-			//TODO
-			//this.peach.PostConfiguration();
+			this.pitConfigSvc.TestComplete = true;
 			this.location.path("/configurator/done");
 		}
 

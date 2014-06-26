@@ -11,9 +11,8 @@ module DashApp {
 	import P = Models.Peach;
 
 	export class DashController {
-		"use strict";
 
-
+		private location: ng.ILocationService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
 
 		public get pit(): P.Pit {
@@ -66,8 +65,6 @@ module DashApp {
 			this.pitConfigSvc.StopJob();
 		}
 
-		//showGroupPanel: true,
-		//	jqueryUIDraggable: true,
 
 		public gridRecentFaults = {
 			data: "vm.recentFaults",
@@ -88,10 +85,11 @@ module DashApp {
 		
 		public recentFaults: P.Fault[] = [];
 
-		static $inject = ["$scope", "pitConfiguratorService"];
+		static $inject = ["$scope", "pitConfiguratorService", "$location"];
 
-		constructor($scope: ViewModelScope, pitConfiguratorService: Services.IPitConfiguratorService) {
+		constructor($scope: ViewModelScope, pitConfiguratorService: Services.IPitConfiguratorService, $location: ng.ILocationService) {
 			this.pitConfigSvc = pitConfiguratorService;
+			this.location = $location;
 			$scope.vm = this;
 
 			$scope.$watch("vm.job.faultCount", () => {

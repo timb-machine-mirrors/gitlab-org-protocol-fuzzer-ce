@@ -24,6 +24,9 @@ module DashApp.Services {
 		FaultMonitorsComplete: boolean;
 		DataMonitorsComplete: boolean;
 		AutoMonitorsComplete: boolean;
+		IntroComplete: boolean;
+		TestComplete: boolean;
+		DoneComplete: boolean;
 
 		CanStartJob: boolean;
 		CanPauseJob: boolean;
@@ -105,7 +108,6 @@ module DashApp.Services {
 		}
 		//#endregion
 
-
 		//#region Pit
 		private _pit: P.Pit;
 
@@ -116,6 +118,14 @@ module DashApp.Services {
 		public set Pit(pit: P.Pit) {
 			if (this._pit != pit) {
 				this._pit = pit;
+				this._autoMonitors = [];
+				this._dataMonitors = [];
+				this._defines = undefined;
+				this._faultMonitors = [];
+				this.IntroComplete = false;
+				this.TestComplete = false;
+				this.DoneComplete = false;
+
 				if (pit.pitUrl != undefined) {
 					this.peachSvc.GetDefines(pit.pitUrl).get((data) => {
 						this._defines = new P.PitConfig(<P.PitConfig>data);
@@ -181,6 +191,11 @@ module DashApp.Services {
 			return (this._autoMonitors.length > 0);
 		}
 
+		public IntroComplete: boolean = false;
+		public TestComplete: boolean = false;
+		public DoneComplete: boolean = false;
+
+		
 		public ResetAll() {
 			this._defines = undefined;
 			this._faultMonitors = [];
@@ -216,22 +231,26 @@ module DashApp.Services {
 
 		public get CanStartJob(): boolean {
 			var good: string[] = [P.JobStatuses.Stopped];
-			return (((this._job == undefined) && (this._pit != undefined)) || ((this._job != undefined) && (good.indexOf(this._job.status) >= 0)));
+			return (((this._job == undefined) && (this.isKnownPit)) || ((this._job != undefined) && (good.indexOf(this._job.status) >= 0)));
 		}
 
 		public get CanContinueJob(): boolean {
 			var good: string[] = [P.JobStatuses.Paused];
-			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0) && this.isKnownPit);
 		}
 
 		public get CanPauseJob(): boolean {
 			var good: string[] = [P.JobStatuses.Running];
-			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0) && this.isKnownPit);
 		}
 
 		public get CanStopJob(): boolean {
 			var good: string[] = [P.JobStatuses.Running, P.JobStatuses.Paused, P.JobStatuses.StartPending, P.JobStatuses.PausePending, P.JobStatuses.ContinuePending];
-			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0));
+			return ((this._job != undefined) && (good.indexOf(this._job.status) >= 0) && this.isKnownPit);
+		}
+
+		private get isKnownPit() {
+			return (this._pit != undefined && this._pit.pitUrl != undefined && this._pit.pitUrl.length > 0);
 		}
 
 
