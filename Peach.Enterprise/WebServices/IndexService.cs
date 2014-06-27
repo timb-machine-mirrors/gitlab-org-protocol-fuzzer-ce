@@ -9,14 +9,10 @@ namespace Peach.Enterprise.WebServices
 		public IndexService()
 			: base("")
 		{
-			// Redirect / to /app/
-			Get["/"] = _ => { return Response.AsRedirect("app/"); };
-
-			// Return index.html for /app/
-			Get["/app/"] = _ => View["app/index"];
-
-			// Return index.html for /doc/
-			Get["/docs/"] = _ => View["docs/index"];
+			// Redirects
+			Get["/"] = _ => { return Response.AsRedirect("/app/index.html"); };
+			Get["/app"] = _ => { return Response.AsRedirect("/app/index.html"); };
+			Get["/docs"] = _ => { return Response.AsRedirect("/docs/index.html"); };
 		}
 	}
 }
