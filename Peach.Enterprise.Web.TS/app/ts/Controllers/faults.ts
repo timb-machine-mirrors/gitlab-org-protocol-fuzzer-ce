@@ -7,6 +7,7 @@ module DashApp {
 	"use strict";
 
 	import P = DashApp.Models.Peach;
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class FaultsController {
 		private pitConfigSvc: Services.IPitConfiguratorService;
@@ -23,15 +24,11 @@ module DashApp {
 		];
 
 		public gridFaults: ngGrid.IGridOptions = {
-			showGroupPanel: true,
-			jqueryUIDraggable: true,
 			data: "vm.faults",
 			sortInfo: { fields: ["iteration"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "iteration", displayName: "#" },
-				{
-					field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mma'"
-				},
+				{	field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mma'" },
 				{ field: "source", displayName: "Monitor" },
 				{ field: "exploitability", displayName: "Risk" },
 				{ field: "majorHash", displayName: "Major Hash" },
@@ -42,14 +39,22 @@ module DashApp {
 			showFooter: true,
 			multiSelect: false,
 			afterSelectionChange: (r, e) => {
-				this.peachSvc.GetSingleThing((<P.Fault>r.entity).faultUrl).get((data) => {
+				this.peachSvc.GetFault((<P.Fault>r.entity).faultUrl,(data: P.Fault) => {
 					this.currentFault = data;
 					this.tabs[1].active = true;
 				});
-			}
+			},
+			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 387 })]
 		};
+		//showGroupPanel: true,
+		//	jqueryUIDraggable: true,
+		//{ minHeight: 320 }
 
 		public currentFault: P.Fault;
+
+		public get isFaultSelected(): boolean {
+			return (this.currentFault != undefined);
+		}
 
 		public pagingOptions: ngGrid.IPagingOptions = {
 			pageSize: 10,

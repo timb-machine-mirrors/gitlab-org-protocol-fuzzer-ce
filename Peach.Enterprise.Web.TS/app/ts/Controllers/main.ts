@@ -83,7 +83,7 @@ module DashApp {
 		}
 
 		public get CanConfigurePit() {
-			if ((this.job == undefined || this.job.status == P.JobStatuses.Stopped) && (this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
+			if ((this.job == undefined || this.job.status == P.JobStatuses.Stopped) && (this.pit != undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
 				return true;
 			}
 
@@ -110,9 +110,9 @@ module DashApp {
 		}
 
 		private initialize() {
-			this.peachSvc.GetJobs((data: P.Job[]) => {
-				if (data.length > 0) {
-					this.pitConfigSvc.Job = data[0]; 
+			this.peachSvc.GetJob((job: P.Job) => {
+				if (job != undefined) {
+					this.pitConfigSvc.Job = job; 
 				}
 				else {
 					this.showPitSelector();

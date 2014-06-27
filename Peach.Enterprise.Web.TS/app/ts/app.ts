@@ -9,12 +9,12 @@ module DashApp {
 	
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
-
+		
+	//"n3-charts.linechart",
 	var dashApp = angular.module("dashApp", [
 		"ngResource",
 		"emguo.poller",
 		"ngGrid",
-		"n3-charts.linechart",
 		"ngRoute",
 		"ui.bootstrap",
 		"kendo.directives",
@@ -92,4 +92,6 @@ module DashApp {
 				}
 			} 
 		});
+
+
 } 
