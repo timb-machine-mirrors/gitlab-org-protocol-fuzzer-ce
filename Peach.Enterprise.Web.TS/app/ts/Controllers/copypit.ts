@@ -31,7 +31,6 @@
 			this.peachSvc.CopyPit(request, (data: P.Pit) => {
 				this.modalInstance.close(data);
 			}, (response: ng.IHttpPromiseCallbackArg<any>) => {
-				console.error(response);
 				switch (response.status) {
 					case 400:
 						this.error = this.pit.name + " already exists, please choose a new name.";

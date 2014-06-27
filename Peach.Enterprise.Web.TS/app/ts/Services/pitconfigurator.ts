@@ -76,6 +76,7 @@ module DashApp.Services {
 				this._job = job;
 				this.startJobPoller();
 				this.startFaultsPoller();
+
 				this.getPit(job.pitUrl);
 			}
 		}
@@ -249,16 +250,11 @@ module DashApp.Services {
 
 		public StartJob() {
 			if (this.CanStartJob) {
-				var job: P.Job = {
-					pitUrl: this._pit.pitUrl,
-					status: P.JobStatuses.ActionPending
-				};
-				this._job = job;
-
-				this.peachSvc.StartJob(job, (job: P.Job) => {
-					this.updateJob(job);
+				this.peachSvc.StartJob(this._pit.pitUrl, (job: P.Job) => {
+					this.Job = job;
 				}, (response) => {
-					this._autoMonitors
+					alert("Peach is busy with another task. Can't create Job.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
+					this._job = undefined;
 				});
 			}
 			else if (this.CanContinueJob) {
@@ -282,18 +278,23 @@ module DashApp.Services {
 		}
 
 		private startJobPoller() {
-			var jobResource = this.peachSvc.GetSingleThing(this.Job.jobUrl);
-			this.jobPoller = this.pollerSvc.get(jobResource, {
-				action: "get",
-				delay: this.POLLER_TIME,
-				method: "GET"
-			});
+			if (this.jobPoller == undefined) {
+				var jobResource = this.peachSvc.GetJobResource(this.Job.jobUrl);
+				this.jobPoller = this.pollerSvc.get(jobResource, {
+					action: "get",
+					delay: this.POLLER_TIME,
+					method: "GET"
+				});
 
-			this.jobPoller.promise.then(null, (e) => {
+				this.jobPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: P.Job) => {
-					this.updateJob(data);
-				});
+						this.updateJob(data);
+					});
+			}
+			else {
+				throw "jobPoller, wasn't what I was expecting";
+			}
 		}
 
 		private updateJob(job: P.Job) {
@@ -302,33 +303,48 @@ module DashApp.Services {
 			}
 			else {
 				if (this.Job.jobUrl != job.jobUrl) {
-					console.error("tried to update job with a different joburl");
-					return;
+					throw "tried to update job with a different joburl";
 				}
 			}
+
+			this.Job.faultsUrl = job.faultsUrl;
 			this.Job.iterationCount = job.iterationCount;
 			this.Job.speed = job.speed;
-			this.Job.faultCount = job.faultCount || 0;
 			this.Job.runtime = job.runtime;
 			this.Job.status = job.status;
 			this.Job.startDate = job.startDate;
 			this.Job.stopDate = job.stopDate;
 			this.Job.seed = job.seed;
+
+			this.Job.faultCount = job.faultCount;
+
+
+			if (job.status == P.JobStatuses.Stopped && this.jobPoller != undefined) {
+				this.jobPoller.stop();
+				this.jobPoller = undefined;
+				this.faultsPoller.stop();
+				this.faultsPoller = undefined; 
+			}
 		}
 
 		private startFaultsPoller() {
-			var faultsResource = this.peachSvc.GetManyThings(this._job.faultsUrl);
-			this.faultsPoller = this.pollerSvc.get(faultsResource, {
-				action: "get",
-				delay: this.POLLER_TIME,
-				method: "GET"
-			});
-
-			this.faultsPoller.promise.then(null, (e) => {
-				console.error(e);
-			}, (data: P.Fault[]) => {
-				this.Faults = data;
+			if (this.faultsPoller == undefined && this._job.faultsUrl != undefined) {
+				var faultsResource = this.peachSvc.GetManyResources(this._job.faultsUrl);
+				this.faultsPoller = this.pollerSvc.get(faultsResource, {
+					action: "get",
+					delay: this.POLLER_TIME,
+					method: "GET"
 				});
+
+				this.faultsPoller.promise.then(null, (e) => {
+					console.error(e);
+				}, (data: P.Fault[]) => {
+						this.Faults = data;
+					});
+			}
+			else {
+				console.error("uh...");
+			}
 		}
 
 		public getPit(pitUrl: string) {
@@ -349,14 +365,18 @@ module DashApp.Services {
 					this.Pit.pitUrl = "";
 					this.Pit.description = "";
 					this.Pit.tags = [];
-					this.Pit.configured = true;
+					this.Pit.versions = [{
+						version: 1,
+						configured: true,
+						locked: true
+					}];
 				}
 			}
 		}
 
 		private updatePit(pit: P.Pit) {
 			if (this._pit.pitUrl != pit.pitUrl) {
-				console.error("trying to update a pit with the wrong pit url");
+				throw "trying to update a pit with the wrong pit url";
 				return;
 			}
 

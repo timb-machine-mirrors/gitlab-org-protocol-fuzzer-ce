@@ -1,3 +1,4 @@
+/// <reference path="../app.ts" />
 /// <reference path="../Models/wizard.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
@@ -9,6 +10,7 @@ module DashApp {
 	"use strict";
 
 	import P = Models.Peach;
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class DashController {
 
@@ -80,8 +82,9 @@ module DashApp {
 			enablePaging: true,
 			pagingOptions: { pageSize: 10, currentPage: 1, pageSizes: [10] },
 			totalServerItems: "vm.job.faultCount",
-			showFooter: false
-		};
+			showFooter: false,
+			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 300 })]
+		}; 
 		
 		public recentFaults: P.Fault[] = [];
 
