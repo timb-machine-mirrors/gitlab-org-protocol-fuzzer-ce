@@ -16,7 +16,7 @@ namespace Peach.Enterprise.WebServices
 			Get["/app/"] = _ => View["app/index"];
 
 			// Return index.html for /doc/
-			Get["/doc/"] = _ => View["doc/index"];
+			Get["/docs/"] = _ => View["docs/index"];
 		}
 	}
 }
