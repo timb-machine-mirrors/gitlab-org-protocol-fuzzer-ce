@@ -10,6 +10,7 @@ using Peach.Enterprise.WebServices;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
+using System.Collections.Generic;
 
 namespace PitTester
 {
@@ -241,6 +242,9 @@ namespace PitTester
 			if (notest)
 				return 0;
 
+			var ignores = new List<string>();
+			var errorCount = 0;
+
 			Console.WriteLine("Testing pit files");
 
 			foreach (var e in lib.Entries)
@@ -258,10 +262,14 @@ namespace PitTester
 				catch (FileNotFoundException)
 				{
 					Console.Write("I");
+
+					ignores.Add(e.Name);
 				}
 				catch (Exception ex)
 				{
 					Console.Write("E");
+
+					++errorCount;
 
 					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
 					errors.AppendLine();
@@ -272,12 +280,20 @@ namespace PitTester
 			Console.WriteLine();
 			Console.WriteLine("Passed {0}/{1} pit tests", total, lib.Entries.Count());
 
+			if (ignores.Count > 0)
+			{
+				Console.WriteLine();
+				Console.WriteLine("Ignored {0}:");
+				Console.WriteLine();
+				Console.WriteLine(string.Join(", ", ignores));
+			}
+
 			if (errors.Length > 0)
 			{
 				ret = -1;
 
 				Console.WriteLine();
-				Console.WriteLine("Errors:");
+				Console.WriteLine("Errors: {0}", errorCount);
 				Console.WriteLine();
 				Console.WriteLine(errors);
 			}
