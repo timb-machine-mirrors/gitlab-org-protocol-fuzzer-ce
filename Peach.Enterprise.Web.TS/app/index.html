@@ -148,49 +148,49 @@
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{active: vm.location.path() == '/configurator/intro'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/intro'}">
 								<a href="#/configurator/intro">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IntroComplete}"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/setvars'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/setvars'}">
 								<a href="#/configurator/setvars">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.SetVarsComplete}"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/fault'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/fault'}">
 								<a href="#/configurator/fault">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.FaultComplete}"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/data'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/data'}">
 								<a href="#/configurator/data">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.DataComplete}"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/auto'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/auto'}">
 								<a href="#/configurator/auto">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.AutoComplete}"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/test'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/test'}">
 								<a href="#/configurator/test">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.TestComplete}"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/done'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/done'}">
 								<a href="#/configurator/done">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.DoneComplete}"></i>
@@ -199,15 +199,12 @@
 							</li>
 						</ul>
 					</li>
-					<!--
 					<li>
-						<a href="#" class="dropdown-toggle">
+						<a href="/docs" target="_blank">
 							<i class="icon-book"></i>
 							<span class="menu-text"> Documentation </span>
-
-							<b class="arrow icon-angle-down"></b>
 						</a>
-
+					<!--
 						<ul class="submenu">
 							<li>
 								<a href="#">
@@ -223,8 +220,8 @@
 								</a>
 							</li>
 						</ul>
-					</li>
 					-->
+					</li>
 					<li>
 						<a href="https://forums.peachfuzzer.com" target="_blank">
 							<i class="icon-bookmark"></i>
