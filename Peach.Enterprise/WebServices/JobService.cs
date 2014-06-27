@@ -45,7 +45,7 @@ namespace Peach.Enterprise.WebServices
 
 				StartJob(pit);
 
-				return Response.AsJson(new { JobUrl = Prefix + "/" + Runner.Guid });
+				return MakeJob();
 			}
 		}
 
