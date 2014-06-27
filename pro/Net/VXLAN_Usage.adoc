@@ -3,9 +3,13 @@ include::VXLAN_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
-Setting up VXLAN is a multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here]
+
+Setting up VXLAN is a multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here].
+
+The target must also have listeners configured for TCP and UDP reachable via IPv4 and IPv6.
 
 ==== Required Pit Configuration Changes
+
 TargetIPv6:: IPv6 address of the target host machine.
 SourceIPv6:: IPv6 address of the interface on the local machine.
 TargetIPv4:: IPv4 address of the target host machine.
