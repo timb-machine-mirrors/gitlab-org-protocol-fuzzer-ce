@@ -19,7 +19,7 @@ FaultRegex:: Fault when regular expression matches.
 === Examples
 
 .Collect Syslog Messages
-===============================
+========================
 
 This example shows the Syslog monitor listening on the default port for incoming messages. When a fault occurs all messages will get saved.
 
@@ -58,9 +58,11 @@ This example shows the Syslog monitor listening on the default port for incoming
   </Test>
 </Peach>
 ----
+========================
+
 
 .Fault on Syslog Message
-===============================
+========================
 
 This example shows the Syslog monitor listening on the default port for incoming messages. The FaultRegex is compared against each incoming message; when it matches a fault is generated and the syslog data is saved.
 
@@ -100,3 +102,4 @@ This example shows the Syslog monitor listening on the default port for incoming
 </Peach>
 ----
 
+========================

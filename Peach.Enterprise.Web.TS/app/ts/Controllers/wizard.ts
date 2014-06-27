@@ -10,6 +10,7 @@ module DashApp {
 
 	import W = DashApp.Models.Wizard;
 	import P = DashApp.Models.Peach;
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 	
 	export interface IWizardParams extends ng.route.IRouteParamsService {
 		step: string;
@@ -68,54 +69,50 @@ module DashApp {
 		public currentQuestion: W.Question;
 		public stepNum: number;
 
-		public get dataGridOptions(): any {
-			return {
-				data: "vm.DataMonitors",
-				columnDefs: [
-					{ field: "description", displayName: "" },
-					{ cellTemplate: "../../partials/monitor-cell-template.html" }
-				]
-			};
-		}
+		public dataGridOptions: ngGrid.IGridOptions = {
+			data: "vm.DataMonitors",
+			columnDefs: [
+				{ field: "description", displayName: "" },
+				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		public get autoGridOptions(): any {
-			return {
-				data: "vm.AutoMonitors",
-				columnDefs: [
-					{ field: "description", displayName: "" },
-					{ cellTemplate: "../../partials/monitor-cell-template.html" }
-				]
-			};
-		}
+		public autoGridOptions: ngGrid.IGridOptions = {
+			data: "vm.AutoMonitors",
+			columnDefs: [
+				{ field: "description", displayName: "" },
+				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		public get definesGridOptions(): any {
-			return {
-				data: "vm.DefinesSimple",
-				columnDefs: [
-					{ field: "name", displayName: "Name" },
-					{ field: "key", displayName: "Key" },
-					{ field: "value", displayName: "Value" },
-					{ cellTemplate: "../../partials/defines-cell-template.html"}
-				],
-				enableCellSelection: false,
-				enableRowSelection: false,
-				multiSelect: false
-			};
-		}
+		public definesGridOptions: ngGrid.IGridOptions = {
+			data: "vm.DefinesSimple",
+			columnDefs: [
+				{ field: "name", displayName: "Name" },
+				{ field: "key", displayName: "Key" },
+				{ field: "value", displayName: "Value" },
+				{ cellTemplate: "../../partials/defines-cell-template.html" }
+			],
+			enableCellSelection: false,
+			enableRowSelection: false,
+			multiSelect: false,
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		public get definesGridOptions1(): any {
-			return {
-				data: "vm.DefinesSimple",
-				columnDefs: [
-					{ field: "name", displayName: "Name" },
-					{ field: "key", displayName: "Key" },
-					{ field: "value", displayName: "Value" }
-				],
-				enableCellSelection: false,
-				enableRowSelection: false,
-				multiSelect: false
-			};
-		}
+		public definesGridOptions1: ngGrid.IGridOptions = {
+			data: "vm.DefinesSimple",
+			columnDefs: [
+				{ field: "name", displayName: "Name" },
+				{ field: "key", displayName: "Key" },
+				{ field: "value", displayName: "Value" }
+			],
+			enableCellSelection: false,
+			enableRowSelection: false,
+			multiSelect: false,
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
 		public get FaultMonitors(): W.Agent{
 			if (this.pitConfigSvc != undefined)
@@ -147,16 +144,16 @@ module DashApp {
 
 		public get title(): string {
 			switch (this.params.step) {
-				case "setvars":
+				case StepNames.SetVars:
 					return "Set Variables";
-				case "fault":
+				case StepNames.Fault:
 					return "Fault Detection";
-				case "data":
+				case StepNames.Data:
 					return "Data Collection";
-				case "auto":
+				case StepNames.Auto:
 					return "Automation";
 				default:
-					return "";
+					return this.params.step;
 			}
 		}
 

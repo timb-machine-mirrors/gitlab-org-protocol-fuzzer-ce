@@ -37,7 +37,7 @@ xref:Blob[Blob]
 xref:ref[ref]:: Reference to data element which the HMAC calculation will be performed on
 Key:: Key to use for HMAC
 HMAC:: Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES)
-xref:Length[Length]:: Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
+xref:length[Length]:: Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
 
 === Examples
 

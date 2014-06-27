@@ -27,7 +27,7 @@ WaitForWhen:: When to wait. One of: OnCall, OnStart, OnEnd, OnIterationStart, On
 === Examples
 
 .Collect Serial Data on Fault
-===============================
+=============================
 
 This example shows the Serial monitor configured to log the data received over COM1 in the event a fault is caused.
 
@@ -68,9 +68,11 @@ This example shows the Serial monitor configured to log the data received over C
   </Test>
 </Peach>
 ----
+=============================
+
 
 .Collect Serial Data on Fault
-===============================
+=============================
 
 This example shows the Serial monitor configured to both log the received data, and also generate a fault when the text "ERROR" is received.
 
@@ -112,9 +114,11 @@ This example shows the Serial monitor configured to both log the received data, 
   </Test>
 </Peach>
 ----
+=============================
+
 
 .Wait for Boot Message
-===============================
+======================
 
 This example might be used when fuzzing a network device such as a router. Peach is started once the router has booted and the Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault is found.
 
@@ -169,8 +173,10 @@ This example might be used when fuzzing a network device such as a router. Peach
 </Peach>
 ----
 
+======================
+
 .Multiple Serial Monitors with Same Port
-===============================
+========================================
 
 This example might be used when fuzzing a network device such as a router. Peach is started and waits for the device to boot using the first serial monitor. The second Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault is found.
 
@@ -231,9 +237,11 @@ This example might be used when fuzzing a network device such as a router. Peach
 </Peach>
 ----
 
+========================================
+
 
 .Multiple Serial Monitors
-===============================
+=========================
 
 This example hooks up to a console port and also a debug port on a device. The debug port is setup for data collection only, while the console port is setup for fault detection, data collection, and automation tasks.
 
@@ -293,3 +301,4 @@ This example hooks up to a console port and also a debug port on a device. The d
 </Peach>
 ----
 
+=========================

@@ -5,6 +5,7 @@ module DashApp {
 
 	import P = Models.Peach;
 	import W = Models.Wizard;
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class PitTestController {
 		private pitConfigSvc: Services.IPitConfiguratorService;
@@ -74,7 +75,8 @@ module DashApp {
 					displayName: "Message",
 					cellTemplate: "../../partials/test-grid-message-template.html"
 				}
-			]
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
 		public beginTest() {
@@ -95,6 +97,8 @@ module DashApp {
 				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: P.StartTestResponse) => {
 					this.startTestPoller(data.testUrl);
 					//this.startLogPoller(data.testUrl);
+				}, (response) => {
+					alert("Peach is busy with another task, can not test Pit.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
 				});
 			}, (response) => {
 				console.error(response);  
@@ -108,7 +112,7 @@ module DashApp {
 		}
 
 		private startTestPoller(testUrl: string) {
-			var testResource = this.peach.GetSingleThing(testUrl);
+			var testResource = this.peach.GetSingleResource(testUrl);
 			this.testPoller = this.pollerSvc.get(testResource, {
 				action: "get",
 				delay: this.POLLER_TIME,
