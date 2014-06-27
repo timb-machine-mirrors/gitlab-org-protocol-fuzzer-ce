@@ -13,7 +13,7 @@ doc = bld(
 nodes = bld.path.ant_glob('out.pro/webhelp/docs/**/*')
 for node in nodes:
     # difference between basedir and given dir
-    relfile = node.path_from(bld.path)
+    relfile = node.path_from(bld.path)[len('out.pro/webhelp/docs/'):]
     pos = relfile.rfind(os.sep)
     subpath = ''
     if pos > -1:
