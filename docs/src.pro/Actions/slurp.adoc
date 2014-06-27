@@ -46,7 +46,7 @@ XML Path (XPath) language is used by valueXpath and setXpath to specify the data
 
 A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to be sent back to the server (see the Challenge Response example below). Slurp will copy the data from one (valueXpath) action, input from the server, to the other (setXpath) action, output to the server.
 
-The Slurp action is limited to copying values only between two non-container elements (a container element is one which can contain other elements such as xref:DataElements_Choice[Choice], xref:DataElement_Block[Block], or xref:DataElement_DataModel[DataModel]). Attempting to Slurp a container element will cause a Peach error.
+The Slurp action is limited to copying values only between two non-container elements (a container element is one which can contain other elements such as xref:Choice[Choice], xref:Block[Block], or xref:DataModel[DataModel]). Attempting to Slurp a container element will cause a Peach error.
 Other potential Slurp errors:
 
 * the setXpath parameter does not return any elements (has no content or non-existent path)
