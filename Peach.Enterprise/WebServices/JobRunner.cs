@@ -76,7 +76,6 @@ namespace Peach.Enterprise.WebServices
 				{
 					Status = JobStatus.StopPending;
 					pauseEvent.Set();
-					pauseEvent.Reset();
 					return true;
 				}
 
@@ -143,9 +142,8 @@ namespace Peach.Enterprise.WebServices
 
 		bool shouldStop()
 		{
-			// Called once per iteration.  Will block the engine
-			// until the event is set by ResumeJob()
-			if (!pauseEvent.WaitOne(0))
+			// Called once per iteration.
+			if (Status != JobStatus.Running)
 			{
 				try
 				{
@@ -159,6 +157,7 @@ namespace Peach.Enterprise.WebServices
 						Status = JobStatus.Paused;
 					}
 
+					// Will block the engine until the event is set by ResumeJob()
 					pauseEvent.WaitOne();
 
 					lock (this)
@@ -174,7 +173,6 @@ namespace Peach.Enterprise.WebServices
 					stopwatch.Start();
 				}
 			}
-
 
 			return false;
 		}

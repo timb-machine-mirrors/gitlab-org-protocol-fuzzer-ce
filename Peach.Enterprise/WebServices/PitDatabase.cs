@@ -184,6 +184,9 @@ namespace Peach.Enterprise.WebServices
 		public string CopyPit(string libraryUrl, string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A non-empty pit name is required.", "name");
+
+			if (Path.GetFileName(name) != name)
 				throw new ArgumentException("A valid pit name is required.", "name");
 
 			var dstLib = GetLibraryByUrl(libraryUrl);
