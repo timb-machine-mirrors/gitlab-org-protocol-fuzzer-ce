@@ -196,6 +196,59 @@ namespace Peach.Enterprise.Test.WebServices
 		}
 
 		[Test]
+		public void TestCopyDotInName()
+		{
+			var pit = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+
+			var newName = "Foo.Mine";
+			var newDesc = "My copy of the img pit";
+
+			var newUrl = db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
+			var newPit = db.GetPitByUrl(newUrl);
+
+			Assert.AreEqual(newName, newPit.Name);
+		}
+
+		[Test]
+		public void TestCopyPathInFilename()
+		{
+			var pit = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+
+			var newName = "../../../Foo";
+			var newDesc = "My copy of the img pit";
+
+			try
+			{
+				db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
+				Assert.Fail("Should throw");
+			}
+			catch (ArgumentException)
+			{
+			}
+		}
+
+		[Test]
+		public void TestCopyBadFilename()
+		{
+			var pit = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+
+			var newName = "****";
+			var newDesc = "My copy of the img pit";
+
+			try
+			{
+				db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
+				Assert.Fail("Should throw");
+			}
+			catch (ArgumentException)
+			{
+			}
+		}
+
+		[Test]
 		public void TestCopyUser()
 		{
 			var pit = db.Entries.ElementAt(0);
