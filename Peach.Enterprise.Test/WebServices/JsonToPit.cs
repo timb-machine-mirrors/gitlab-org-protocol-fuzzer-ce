@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using NUnit.Framework;
-
 using Peach.Core;
 using System.Xml;
 
@@ -260,6 +259,20 @@ namespace Peach.Enterprise.Test.WebServices
 				File.Delete(src);
 				File.Delete(dst);
 			}
+		}
+
+		public class IntMember
+		{
+			public string Value { get; set; }
+		}
+
+		[Test]
+		public void JsonInt()
+		{
+			var json = " { \"Value\":500 }";
+			var obj = JsonConvert.DeserializeObject<IntMember>(json);
+			Assert.NotNull(obj);
+			Assert.AreEqual("500", obj.Value);
 		}
 	}
 }
