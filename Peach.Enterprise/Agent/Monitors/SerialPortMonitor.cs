@@ -81,8 +81,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		SerialPortMonitor _primary = null;
 		bool _lastWasFault = false;
 
-		AutoResetEvent _waitFor = new AutoResetEvent(false);
-
 		public SerialPortMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
