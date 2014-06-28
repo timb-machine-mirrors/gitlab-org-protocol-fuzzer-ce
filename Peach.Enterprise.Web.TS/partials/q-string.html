@@ -5,7 +5,7 @@
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>
 	</label>
 	<div class="dropdown" is-open="vm.isDefaultsOpen">
-		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" required class="dropdown-toggle" ng-required="vm.currentQuestion.required" style="width: 300px" ng-enter="vm.next()" />
+		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" class="dropdown-toggle" ng-required="vm.currentQuestion.required" style="width: 300px" ng-enter="vm.next()" />
 		<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
 			<li ng-repeat="default in vm.currentQuestion.defaults">
 				<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
