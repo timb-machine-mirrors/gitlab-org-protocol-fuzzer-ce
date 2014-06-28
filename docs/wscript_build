@@ -30,7 +30,7 @@ for node in nodes:
 
 doc.install_as(
   '${BINDIR}/Peach_Professional.pdf',
-  'out.pro/pdf/Peach_Professional.pdf',
+  'out.pro/pdf/peach_professional.pdf',
   chmod=Utils.O644,
   )
 
