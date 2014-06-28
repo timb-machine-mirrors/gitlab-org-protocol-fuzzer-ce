@@ -49,7 +49,7 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		//public URL_PREFIX: string = "http://localhost:8888"; 
+		//public URL_PREFIX: string = "http://localhost:8888";
 		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
@@ -138,10 +138,17 @@ module DashApp.Services {
 		
 		public PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any> {
 			if (this.isPitUrl(pitUrl)) {
+
 				var request: P.PostConfigRequest = {
 					pitUrl: pitUrl,
 					config: config
 				};
+
+				// remove me when linux can parse numbers
+				for (var i = 0; i < request.config.length; i++) {
+					request.config[i].max = undefined;
+					request.config[i].min = undefined;
+				}
 
 				return this.http.post(this.URL_PREFIX + "/p/conf/wizard/config", request);
 			}
@@ -157,6 +164,7 @@ module DashApp.Services {
 					monitors: agents
 				};
 
+				// remove me when linux can parse numbers
 				for (var a = 0; a < request.monitors.length; a++) {
 					for (var m = 0; m < request.monitors[a].monitors.length; m++) {
 						request.monitors[a].monitors[m].path = [];
