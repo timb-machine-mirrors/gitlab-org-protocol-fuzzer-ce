@@ -33,6 +33,8 @@ using System.Reflection;
 using System.IO;
 using System.Xml;
 
+using System.Linq;
+
 using Peach.Core.Dom;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -101,13 +103,32 @@ namespace Peach.Core.Runtime
 			LogManager.Configuration = nconfig;
 		}
 
-		protected OrderedDictionary<string, string> DefinedValues = new OrderedDictionary<string, string>();
+		/// <summary>
+		/// The list of .config files to be parsed for defines
+		/// </summary>
+		protected List<string> configFiles = new List<string>();
 
-		protected Dom.Dom dom;
+		/// <summary>
+		/// List of key,value pairs of extra defines to use
+		/// </summary>
+		protected List<KeyValuePair<string, string>> definedValues = new List<KeyValuePair<string, string>>();
 
+		/// <summary>
+		/// The result of parsing the pit file
+		/// </summary>
+		protected Dom.Dom dom = null;
+
+		/// <summary>
+		/// Configuration options for the engine
+		/// </summary>
 		protected RunConfiguration config = new RunConfiguration();
 
+		/// <summary>
+		/// The exit code of the process
+		/// </summary>
 		public int exitCode = 1;
+
+		#region Public Properties
 
 		/// <summary>
 		/// Copyright message
@@ -125,31 +146,20 @@ namespace Peach.Core.Runtime
 			get { return "Peach v" + Assembly.GetExecutingAssembly().GetName().Version; }
 		}
 
-		/// <summary>
-		/// Error on 64 vs 32bit missmatch? Override to change.
-		/// </summary>
-		public virtual bool ErrorOnArchitecture { get { return true; } }
-
-		static Program()
-		{
-			Peach.Core.AssertWriter.Register();
-		}
+		#endregion
 
 		public Program(string[] args)
 		{
-			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+			Peach.Core.AssertWriter.Register();
 
 			config.commandLine = args;
 
 			try
 			{
 				string analyzer = null;
-				bool test = false;
 				string agent = null;
-				var definedValues = new List<string>();
-				bool parseOnly = false;
+				bool test = false;
 
-				var color = Console.ForegroundColor;
 				Console.Write("\n");
 				Console.ForegroundColor = ConsoleColor.DarkRed;
 				Console.Write("[[ ");
@@ -159,140 +169,67 @@ namespace Peach.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
-				Console.ForegroundColor = color;
-
-				if (args.Length == 0)
-					Syntax();
+				Console.ForegroundColor = DefaultForground;
+				Console.WriteLine();
 
 				var p = new OptionSet()
 				{
+					// Gobal option
 					{ "h|?|help", v => Syntax() },
+
+					// Run analyzer and exit
 					{ "analyzer=", v => analyzer = v },
+
+					// Run agent and wait for ctrl-c
+					{ "a|agent=", v => agent = v},
+
 					{ "debug", v => config.debug = 1 },
 					{ "trace", v => config.debug = 2 },
 					{ "1", v => config.singleIteration = true},
-					{ "range=", v => ParseRange(config, v)},
-					{ "t|test", v => test = true},
+					{ "range=", v => ParseRange(v)},
 					{ "c|count", v => config.countOnly = true},
 					{ "skipto=", v => config.skipToIteration = Convert.ToUInt32(v)},
 					{ "seed=", v => config.randomSeed = Convert.ToUInt32(v)},
-					{ "p|parallel=", v => ParseParallel(config, v)},
-					{ "a|agent=", v => agent = v},
+					{ "p|parallel=", v => ParseParallel(v)},
+
+					// Defined values & .config files
 					{ "D|define=", v => AddNewDefine(v) },
-					{ "definedvalues=", v => definedValues.Add(v) },
-					{ "config=", v => definedValues.Add(v) },
-					{ "parseonly", v => parseOnly = true },
-					{ "bob", var => bob() },
+					{ "definedvalues=", v => configFiles.Add(v) },
+					{ "config=", v => configFiles.Add(v) },
+
+					{ "t|test", v => test = true},
+
+					// Global actions, get run and immediately exit
+					{ "bob", var => Bob() },
 					{ "charlie", var => Charlie() },
 					{ "showdevices", var => ShowDevices() },
 					{ "showenv", var => ShowEnvironment() },
 					{ "makexsd", var => MakeSchema() },
 				};
 
+				AddCustomOptions(p);
+
 				List<string> extra = p.Parse(args);
-
-				if (extra.Count == 0 && agent == null && analyzer == null)
-					Syntax();
-
-				if (extra.Count > 0)
-					config.pitFile = extra[0];
-
-				if (extra.Count > 1)
-					config.runName = extra[1];
-
-				Platform.LoadAssembly();
-
-				AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-				AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
-
-				// Do we have pit.xml.config file?
-				// If so load it as the first defines file.
-				if (extra.Count > 0 && File.Exists(extra[0]) &&
-					extra[0].ToLower().EndsWith(".xml") &&
-					File.Exists(extra[0] + ".config"))
-				{
-					definedValues.Insert(0, extra[0] + ".config");
-				}
-
-				foreach (var definedValuesFile in definedValues)
-				{
-					var defs = PitParser.parseDefines(definedValuesFile);
-
-					foreach (var kv in defs)
-					{
-						// Allow command line to override values in XML file.
-						if (!DefinedValues.ContainsKey(kv.Key))
-							DefinedValues.Add(kv.Key, kv.Value);
-					}
-				}
 
 				// Enable debugging if asked for
 				// If configuration was already done by a .config file, nothing will be changed
 				ConfigureLogging(config.debug);
 
+				// Load the platform assembly
+				Platform.LoadAssembly();
+
 				if (agent != null)
 				{
-					var agentType = ClassLoader.FindTypeByAttribute<AgentServerAttribute>((x, y) => y.name == agent);
-					if (agentType == null)
-					{
-						Console.WriteLine("Error, unable to locate agent server for protocol '" + agent + "'.\n");
-						return;
-					}
-
-					var agentServer = Activator.CreateInstance(agentType) as IAgentServer;
-
-					ConsoleWatcher.WriteInfoMark();
-					Console.WriteLine("Starting agent server");
-
-					agentServer.Run(new Dictionary<string, string>());
-					return;
+					OnRunAgent(agent);
 				}
-
-				if (analyzer != null)
+				else if (analyzer != null)
 				{
-					var analyzerType = ClassLoader.FindTypeByAttribute<AnalyzerAttribute>((x, y) => y.Name == analyzer);
-					if (analyzerType == null)
-					{
-						Console.WriteLine("Error, unable to locate analyzer called '" + analyzer + "'.\n");
-						return;
-					}
-
-					var field = analyzerType.GetField("supportCommandLine",
-						BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-					if ((bool)field.GetValue(null) == false)
-					{
-						Console.WriteLine("Error, analyzer not configured to run from command line.");
-						return;
-					}
-
-					var analyzerInstance = Activator.CreateInstance(analyzerType) as Analyzer;
-
-					ConsoleWatcher.WriteInfoMark();
-					Console.WriteLine("Starting Analyzer");
-
-					analyzerInstance.asCommandLine(new Dictionary<string, string>());
-					return;
+					OnRunAnalyzer(analyzer);
 				}
-
-				Dictionary<string, object> parserArgs = new Dictionary<string, object>();
-				parserArgs[PitParser.DEFINED_VALUES] = this.DefinedValues;
-
-				if (test)
+				else
 				{
-					ConsoleWatcher.WriteInfoMark();
-					Console.Write("Validating file [" + extra[0] + "]... ");
-					Analyzer.defaultParser.asParserValidation(parserArgs, extra[0]);
-					Console.WriteLine("No Errors Found.");
-					return;
+					OnRunJob(test, extra);
 				}
-
-				dom = GetParser().asParser(parserArgs, config.pitFile);
-
-				// Used for unittests
-				if (parseOnly)
-					return;
-
-				RunEngine();
 
 				exitCode = 0;
 			}
@@ -321,6 +258,20 @@ namespace Peach.Core.Runtime
 			}
 		}
 
+
+		protected virtual Watcher GetUIWatcher()
+		{
+			return new ConsoleWatcher();
+		}
+
+		protected virtual Analyzer GetParser()
+		{
+			return Analyzer.defaultParser;
+		}
+
+		/// <summary>
+		/// Create an engine and run the fuzzing job
+		/// </summary>
 		protected virtual void RunEngine()
 		{
 			var e = new Engine(GetUIWatcher());
@@ -334,6 +285,131 @@ namespace Peach.Core.Runtime
 		/// <param name="options"></param>
 		protected virtual void AddCustomOptions(OptionSet options)
 		{
+		}
+
+		/// <summary>
+		/// Run a command line analyzer of the specified name
+		/// </summary>
+		/// <param name="analyzer"></param>
+		protected virtual void OnRunAnalyzer(string analyzer)
+		{
+			var analyzerType = ClassLoader.FindTypeByAttribute<AnalyzerAttribute>((x, y) => y.Name == analyzer);
+			if (analyzerType == null)
+				throw new PeachException("Error, unable to locate analyzer called '" + analyzer + "'.\n");
+
+			var field = analyzerType.GetField("supportCommandLine", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+			if ((bool)field.GetValue(null) == false)
+				throw new PeachException("Error, analyzer not configured to run from command line.");
+
+			var analyzerInstance = Activator.CreateInstance(analyzerType) as Analyzer;
+
+			ConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Starting Analyzer");
+
+			analyzerInstance.asCommandLine(new Dictionary<string, string>());
+		}
+
+		/// <summary>
+		/// Run a peach agent of the specified protocol
+		/// </summary>
+		/// <param name="agent"></param>
+		protected virtual void OnRunAgent(string agent)
+		{
+			var agentType = ClassLoader.FindTypeByAttribute<AgentServerAttribute>((x, y) => y.name == agent);
+			if (agentType == null)
+				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
+
+			var agentServer = Activator.CreateInstance(agentType) as IAgentServer;
+
+			ConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Starting agent server");
+
+			agentServer.Run(new Dictionary<string, string>());
+		}
+
+		/// <summary>
+		/// Run a fuzzing job
+		/// </summary>
+		/// <param name="test">Test only. Parses the pit and exits.</param>
+		/// <param name="extra">Extra command line options</param>
+		protected virtual void OnRunJob(bool test, List<string> extra)
+		{
+			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+
+			if (extra.Count == 0)
+				Syntax();
+
+			if (extra.Count > 0)
+				config.pitFile = extra[0];
+
+			if (extra.Count > 1)
+				config.runName = extra[1];
+
+			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+
+			// Do we have pit.xml.config file?
+			// If so load it as the first defines file.
+			if (extra.Count > 0 && File.Exists(extra[0]) &&
+				extra[0].ToLower().EndsWith(".xml") &&
+				File.Exists(extra[0] + ".config"))
+			{
+				configFiles.Insert(0, extra[0] + ".config");
+			}
+
+			var defs = ParseDefines();
+
+			var parserArgs = new Dictionary<string, object>();
+			parserArgs[PitParser.DEFINED_VALUES] = defs;
+
+			var parser = GetParser();
+
+			if (test)
+			{
+				ConsoleWatcher.WriteInfoMark();
+				Console.Write("Validating file [" + config.pitFile + "]... ");
+				parser.asParserValidation(parserArgs, config.pitFile);
+				Console.WriteLine("No Errors Found.");
+			}
+			else
+			{
+				dom = parser.asParser(parserArgs, config.pitFile);
+
+				RunEngine();
+			}
+		}
+
+		/// <summary>
+		/// Combines define files and define arguments into a single list
+		/// Command line arguments override any .config file's defines
+		/// </summary>
+		/// <returns></returns>
+		protected virtual List<KeyValuePair<string, string>> ParseDefines()
+		{
+			var items = new List<List<KeyValuePair<string, string>>>();
+
+			// Add .config files in order
+			foreach (var file in configFiles)
+			{
+				items.Add(PitParser.parseDefines(file));
+			}
+
+			// Add -D command line options last
+			items.Add(definedValues);
+
+			var ret = new List<KeyValuePair<string, string>>();
+
+			// Foreach #define, save it, overwriting and previous value
+			foreach (var defs in items)
+			{
+				foreach (var kv in defs)
+				{
+					ret.RemoveAll(i => i.Key == kv.Key);
+					ret.Add(new KeyValuePair<string, string>(kv.Key, kv.Value));
+				}
+			}
+
+			return ret;
 		}
 
 		/// <summary>
@@ -435,60 +511,9 @@ Debug Peach XML File
 			throw new SyntaxException();
 		}
 
-		protected void bob()
-		{
-			string bob = @"
-@@@@@@@^^~~~~~~~~~~~~~~~~~~~~^@@@@@@@@@
-@@@@@@^     ~^  @  @@ @ @ @ I  ~^@@@@@@
-@@@@@            ~ ~~ ~I          @@@@@
-@@@@'                  '  _,w@<    @@@@
-@@@@     @@@@@@@@w___,w@@@@@@@@  @  @@@
-@@@@     @@@@@@@@@@@@@@@@@@@@@@  I  @@@
-@@@@     @@@@@@@@@@@@@@@@@@@@*@[ i  @@@
-@@@@     @@@@@@@@@@@@@@@@@@@@[][ | ]@@@
-@@@@     ~_,,_ ~@@@@@@@~ ____~ @    @@@
-@@@@    _~ ,  ,  `@@@~  _  _`@ ]L  J@@@
-@@@@  , @@w@ww+   @@@ww``,,@w@ ][  @@@@
-@@@@,  @@@@www@@@ @@@@@@@ww@@@@@[  @@@@
-@@@@@_|| @@@@@@P' @@P@@@@@@@@@@@[|c@@@@
-@@@@@@w| '@@P~  P]@@@-~, ~Y@@^'],@@@@@@
-@@@@@@@[   _        _J@@Tk     ]]@@@@@@
-@@@@@@@@,@ @@, c,,,,,,,y ,w@@[ ,@@@@@@@
-@@@@@@@@@ i @w   ====--_@@@@@  @@@@@@@@
-@@@@@@@@@@`,P~ _ ~^^^^Y@@@@@  @@@@@@@@@
-@@@@^^=^@@^   ^' ,ww,w@@@@@ _@@@@@@@@@@
-@@@_xJ~ ~   ,    @@@@@@@P~_@@@@@@@@@@@@
-@@   @,   ,@@@,_____   _,J@@@@@@@@@@@@@
-@@L  `' ,@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-";
-			Console.WriteLine(bob);
-			throw new SyntaxException();
-		}
+		#region Command line option parsing helpers
 
-
-		protected void Charlie()
-		{
-			Console.WriteLine(@"
-,-----.   
-\======'.                                                                 
- \  {}   '.                                                               
-  \   \/ V '.                                                             
-   \  || |   '._                                 _,cmmmnc,_               
-    \___68FS___\'-._=----+- _______________,.-=:3H)###C--  `c._           
-    :|=--------------`---" + "\"" + @"'`.   `  `.   `.   `,   `~\" + "\"\"" + @"===" + "\"" + @"~`    `'-.___   
-  ,dH] '       =(*)=         :       ---==;=--;  .   ;    +-- -_ .-`      
-  :HH]_:______________  ____,.........__     _____,.----=-" + "\"" + @"~ `            
-  ;:" + "\"" + @"+" + "\"" + @"\" + "\"" + @"+@" + "\"" + @"" + "\"" + @"+" + "\"" + @"\" + "\"" + @"" + "\"" + @"+@" + "\"" + @"'" + "\"" + @"+" + "\"" + @"\" + "\"" + @"+@" + "\"" + @"'----._.------\`  :          .   `.'`'" + "\"" + @"'" + "\"" + @"'" + "\"" + @"P
-  |:      .-'==-.__)___\. :        .   .'`___L~___(                       
-  |:  _.'`       '|   / \.:      .  .-`" + "\"" + @"" + "\"" + @"`                                
-  `'" + "\"" + @"'            `--'   \:    ._.-'                                      
-                         }_`============>-             
-");
-			throw new SyntaxException();
-		}
-
-		protected void ParseRange(RunConfiguration config, string v)
+		protected void ParseRange(string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -518,7 +543,7 @@ Debug Peach XML File
 			config.range = true;
 		}
 
-		protected void ParseParallel(RunConfiguration config, string v)
+		protected void ParseParallel(string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -553,32 +578,78 @@ Debug Peach XML File
 			config.parallel = true;
 		}
 
-		protected static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+		protected void AddNewDefine(string arg)
 		{
-			Console.WriteLine();
-			Console.WriteLine(" --- Ctrl+C Detected --- ");
-
-			e.Cancel = true;
-
-			// Need to call Environment.Exit from outside this event handler
-			// to ensure the finalizers get called...
-			// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
-			new Thread(delegate()
-			{
-				Environment.Exit(0);
-			}).Start();
-		}
-
-		public void AddNewDefine(string value)
-		{
-			if(value.IndexOf("=") < 0)
+			var idx = arg.IndexOf("=");
+			if (idx < 0)
 				throw new PeachException("Error, defined values supplied via -D/--define must have an equals sign providing a key-pair set.");
 
-			var kv = value.Split('=');
-			DefinedValues[kv[0]] = kv[1];
+			var key = arg.Substring(0, idx);
+			var value = arg.Substring(idx + 1);
+
+			// Allow command line options to override others
+			definedValues.RemoveAll(i => i.Key == key);
+			definedValues.Add(new KeyValuePair<string, string>(key, value));
 		}
 
-		public void ShowDevices()
+		#endregion
+
+		#region Global Actions
+
+		static void Bob()
+		{
+			string bob = @"
+@@@@@@@^^~~~~~~~~~~~~~~~~~~~~^@@@@@@@@@
+@@@@@@^     ~^  @  @@ @ @ @ I  ~^@@@@@@
+@@@@@            ~ ~~ ~I          @@@@@
+@@@@'                  '  _,w@<    @@@@
+@@@@     @@@@@@@@w___,w@@@@@@@@  @  @@@
+@@@@     @@@@@@@@@@@@@@@@@@@@@@  I  @@@
+@@@@     @@@@@@@@@@@@@@@@@@@@*@[ i  @@@
+@@@@     @@@@@@@@@@@@@@@@@@@@[][ | ]@@@
+@@@@     ~_,,_ ~@@@@@@@~ ____~ @    @@@
+@@@@    _~ ,  ,  `@@@~  _  _`@ ]L  J@@@
+@@@@  , @@w@ww+   @@@ww``,,@w@ ][  @@@@
+@@@@,  @@@@www@@@ @@@@@@@ww@@@@@[  @@@@
+@@@@@_|| @@@@@@P' @@P@@@@@@@@@@@[|c@@@@
+@@@@@@w| '@@P~  P]@@@-~, ~Y@@^'],@@@@@@
+@@@@@@@[   _        _J@@Tk     ]]@@@@@@
+@@@@@@@@,@ @@, c,,,,,,,y ,w@@[ ,@@@@@@@
+@@@@@@@@@ i @w   ====--_@@@@@  @@@@@@@@
+@@@@@@@@@@`,P~ _ ~^^^^Y@@@@@  @@@@@@@@@
+@@@@^^=^@@^   ^' ,ww,w@@@@@ _@@@@@@@@@@
+@@@_xJ~ ~   ,    @@@@@@@P~_@@@@@@@@@@@@
+@@   @,   ,@@@,_____   _,J@@@@@@@@@@@@@
+@@L  `' ,@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+";
+			Console.WriteLine(bob);
+			throw new SyntaxException();
+		}
+
+
+		static void Charlie()
+		{
+			Console.WriteLine(@"
+,-----.   
+\======'.                                                                 
+ \  {}   '.                                                               
+  \   \/ V '.                                                             
+   \  || |   '._                                 _,cmmmnc,_               
+    \___68FS___\'-._=----+- _______________,.-=:3H)###C--  `c._           
+    :|=--------------`---" + "\"" + @"'`.   `  `.   `.   `,   `~\" + "\"\"" + @"===" + "\"" + @"~`    `'-.___   
+  ,dH] '       =(*)=         :       ---==;=--;  .   ;    +-- -_ .-`      
+  :HH]_:______________  ____,.........__     _____,.----=-" + "\"" + @"~ `            
+  ;:" + "\"" + @"+" + "\"" + @"\" + "\"" + @"+@" + "\"" + @"" + "\"" + @"+" + "\"" + @"\" + "\"" + @"" + "\"" + @"+@" + "\"" + @"'" + "\"" + @"+" + "\"" + @"\" + "\"" + @"+@" + "\"" + @"'----._.------\`  :          .   `.'`'" + "\"" + @"'" + "\"" + @"'" + "\"" + @"P
+  |:      .-'==-.__)___\. :        .   .'`___L~___(                       
+  |:  _.'`       '|   / \.:      .  .-`" + "\"" + @"" + "\"" + @"`                                
+  `'" + "\"" + @"'            `--'   \:    ._.-'                                      
+                         }_`============>-             
+");
+			throw new SyntaxException();
+		}
+
+		static void ShowDevices()
 		{
 			Console.WriteLine();
 			Console.WriteLine("The following devices are available on this machine:");
@@ -599,13 +670,13 @@ Debug Peach XML File
 			throw new SyntaxException();
 		}
 
-		public void ShowEnvironment()
+		static void ShowEnvironment()
 		{
 			Peach.Core.Usage.Print();
 			throw new SyntaxException();
 		}
 
-		public void MakeSchema()
+		static void MakeSchema()
 		{
 			try
 			{
@@ -624,20 +695,26 @@ Debug Peach XML File
 			{
 				throw new PeachException("Error creating schema. {0}".Fmt(ex.Message), ex);
 			}
-
 		}
 
-		protected virtual Watcher GetUIWatcher()
-		{
-			return new ConsoleWatcher();
-		}
+		#endregion
 
-		protected virtual Analyzer GetParser()
+		protected static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
-			return Analyzer.defaultParser;
+			Console.WriteLine();
+			Console.WriteLine(" --- Ctrl+C Detected --- ");
+
+			e.Cancel = true;
+
+			// Need to call Environment.Exit from outside this event handler
+			// to ensure the finalizers get called...
+			// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
+			new Thread(delegate()
+			{
+				Environment.Exit(0);
+			}).Start();
 		}
 	}
-
 
 	public class SyntaxException : Exception
 	{
