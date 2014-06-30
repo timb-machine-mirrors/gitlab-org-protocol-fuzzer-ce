@@ -167,15 +167,7 @@ namespace Peach.Enterprise.WebServices
 
 			private Dictionary<string, object> ParseConfig()
 			{
-				var defs = new List<KeyValuePair<string, string>>();
 				var args = new Dictionary<string, object>();
-
-				args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-
-				defs.Add(new KeyValuePair<string, string>("Peach.Cwd", Environment.CurrentDirectory));
-				defs.Add(new KeyValuePair<string, string>("Peach.Pwd", Assembly.GetCallingAssembly().Location));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", tester.pitLibraryPath));
-
 				var pitConfig = tester.pitFile + ".config";
 
 				// It is ok if a .config doesn't exist
@@ -185,12 +177,8 @@ namespace Peach.Enterprise.WebServices
 					{
 						AddEvent("Loading pit config", "Loading configuration file '" + pitConfig + "'");
 
-						var defines = PitDefines.Parse(pitConfig);
-
-						foreach (var d in defines)
-						{
-							defs.Add(new KeyValuePair<string, string>(d.Key, d.Value));
-						}
+						var defs = PitDatabase.ParseConfig(tester.pitLibraryPath, pitConfig);
+						args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
 
 						EventSuccess();
 					}
@@ -200,6 +188,12 @@ namespace Peach.Enterprise.WebServices
 
 						throw;
 					}
+				}
+				else
+				{
+					// ParseConfig allows non-existant config files
+					var defs = PitDatabase.ParseConfig(tester.pitLibraryPath, pitConfig);
+					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
 				}
 
 				return args;

@@ -91,7 +91,7 @@ namespace Peach.Enterprise.WebServices
 			host = new NancyHost(bootstrapper, config, Uri);
 		}
 
-		public void Start(string[] args)
+		public void Start()
 		{
 			host.Start();
 		}
@@ -110,15 +110,15 @@ namespace Peach.Enterprise.WebServices
 			Context = null;
 		}
 
-		public static int Run(string[] args)
+		public static int Run(string pitLibraryPath)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
-				using (var svc = new WebServer("."))
+				using (var svc = new WebServer(pitLibraryPath))
 				{
-					svc.Start(args);
+					svc.Start();
 
 					try
 					{
@@ -128,6 +128,10 @@ namespace Peach.Enterprise.WebServices
 					{
 					}
 
+					Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					Console.WriteLine("Web site running at: {0}", svc.Uri);
+
+					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try

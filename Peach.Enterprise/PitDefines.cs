@@ -319,5 +319,14 @@ namespace Peach.Enterprise
 		}
 
 		#endregion
+
+		#region Evaluate
+
+		public static List<KeyValuePair<string, string>> Evaluate(List<KeyValuePair<string, string>> defs)
+		{
+			return defs;
+		}
+
+		#endregion
 	}
 }

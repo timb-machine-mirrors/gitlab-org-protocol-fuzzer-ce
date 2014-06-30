@@ -11,6 +11,8 @@ namespace Peach.Enterprise.WebServices
 {
 	public class JobRunner
 	{
+		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
 		Stopwatch stopwatch;
 		ManualResetEvent pauseEvent;
 		Thread thread;
@@ -101,7 +103,7 @@ namespace Peach.Enterprise.WebServices
 			return true;
 		}
 
-		public static JobRunner Run(WebLogger logger, string pitLibraryPath, string pitFile, string pitUrl)
+		public static JobRunner Run(WebLogger webLogger, string pitLibraryPath, string pitFile, string pitUrl)
 		{
 			var config = new RunConfiguration() { pitFile = pitFile };
 
@@ -117,7 +119,7 @@ namespace Peach.Enterprise.WebServices
 
 			ret.stopwatch = new Stopwatch();
 			ret.pauseEvent = new ManualResetEvent(true);
-			ret.thread = new Thread(delegate() { ret.ThreadProc(logger, pitLibraryPath, config); });
+			ret.thread = new Thread(delegate() { ret.ThreadProc(webLogger, pitLibraryPath, config); });
 
 			ret.stopwatch.Start();
 			ret.thread.Start();
@@ -177,33 +179,19 @@ namespace Peach.Enterprise.WebServices
 			return false;
 		}
 
-		void ThreadProc(WebLogger logger, string pitLibraryPath, RunConfiguration config)
+		void ThreadProc(WebLogger webLogger, string pitLibraryPath, RunConfiguration config)
 		{
 			try
 			{
-				var defs = new List<KeyValuePair<string, string>>();
+				var pitConfig = config.pitFile + ".config";
+				var defs = PitDatabase.ParseConfig(pitLibraryPath, pitConfig);
 				var args = new Dictionary<string, object>();
 
 				args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
 
-				defs.Add(new KeyValuePair<string, string>("Peach.Cwd", Environment.CurrentDirectory));
-				defs.Add(new KeyValuePair<string, string>("Peach.Pwd", Assembly.GetCallingAssembly().Location));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-
-				var pitConfig = config.pitFile + ".config";
-
-				// It is ok if a .config doesn't exist
-				if (System.IO.File.Exists(pitConfig))
-				{
-					foreach (var d in PitDefines.Parse(pitConfig))
-					{
-						defs.Add(new KeyValuePair<string, string>(d.Key, d.Value));
-					}
-				}
-
 				var parser = new Godel.Core.GodelPitParser();
 				var dom = parser.asParser(args, config.pitFile);
-				var engine = new Engine(logger);
+				var engine = new Engine(webLogger);
 
 				// hook up the stop event
 				config.shouldStop = shouldStop;
@@ -219,6 +207,10 @@ namespace Peach.Enterprise.WebServices
 				}
 
 				engine.startFuzzing(dom, config);
+			}
+			catch (Exception ex)
+			{
+				logger.Debug("Unhandled exception when running job:\n{0}", ex);
 			}
 			finally
 			{

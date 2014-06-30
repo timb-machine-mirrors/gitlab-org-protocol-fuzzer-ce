@@ -143,6 +143,43 @@ namespace Peach.Enterprise.WebServices
 			};
 		}
 
+		private static void AddDefine(List<KeyValuePair<string, string>> list, string key, string value)
+		{
+			for (int i = 0; i < list.Count; ++i)
+			{
+				if (list[i].Key == key)
+				{
+					list[i] = new KeyValuePair<string,string>(key, value);
+					return;
+				}
+			}
+
+			list.Add(new KeyValuePair<string,string>(key, value));
+		}
+
+		public static List<KeyValuePair<string, string>> ParseConfig(string pitLibraryPath, string pitConfig)
+		{
+			var defs = new List<KeyValuePair<string, string>>();
+
+			//// It is ok if a .config doesn't exist
+			if (System.IO.File.Exists(pitConfig))
+			{
+				foreach (var d in PitDefines.Parse(pitConfig))
+				{
+					AddDefine(defs, d.Key, d.Value);
+				}
+			}
+
+
+			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
+			AddDefine(defs, "Peach.Pwd", Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
+
+			var final = PitDefines.Evaluate(defs);
+
+			return final;
+		}
+
 		public PitDatabase()
 		{
 			entries = new Dictionary<string, Models.Pit>();
