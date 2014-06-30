@@ -255,7 +255,7 @@ module DashApp {
 					this.currentQuestion = <W.Question>$.grep(this.qa, function (e) { return e.id == nextid; })[0];
 				}
 
-			}
+			} 
 			
 			//get value from the state bag if necessary
 			if (this.currentQuestion.value == undefined) {
@@ -308,6 +308,7 @@ module DashApp {
 				previousid = this.questionPath.pop();
 
 			this.currentQuestion = $.grep(this.qa, function (e) { return e.id == previousid; })[0];
+
 			if (this.currentQuestion.type == W.QuestionTypes.Intro)
 				this.stepNum = 1;
 			else if (this.currentQuestion.type == W.QuestionTypes.Done)
@@ -423,7 +424,7 @@ module DashApp {
 
 			switch (this.params.step) {
 				case StepNames.SetVars:
-					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions();
+					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions(); 
 					this.next();
 					return;
 					break;
@@ -478,13 +479,12 @@ module DashApp {
 						}
 					}
 				}
-
+				var islocal: boolean = this.pitConfigSvc.StateBag.g("IsLocal");
 				var agent: W.Agent = new W.Agent();
-				agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
-				if (agent.agentUrl == undefined)
+				if (islocal)
 					agent.agentUrl = "local://";
 				else
-					agent.agentUrl = "tcp://" + agent.agentUrl;
+					agent.agentUrl = "tcp://" + this.pitConfigSvc.StateBag.g("AgentUrl");
 
 				agent.monitors = foundMonitors;
 
@@ -500,7 +500,6 @@ module DashApp {
 				}
 
 				agents.push(agent);
-
 			}
 
 			return agents;
