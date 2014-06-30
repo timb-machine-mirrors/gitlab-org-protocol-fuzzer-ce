@@ -3,8 +3,16 @@
 		<h4>Review</h4>
 	</div>
 	<div>
-		<pre>{{ vm.FaultMonitors.description }}</pre>
+		You have successfully completed the Fault Detection wizard!
+		You’re now ready to continue on to the Data Collection wizard,
+		or if you have made a mistake you can redo the Fault Detection wizard.
+		Based on your answers, Peach will do the following to detect faults:
 	</div>
+	<div class="space-6" />
+	<div>
+		<span class="alert-success bigger-120">{{ vm.FaultMonitors.description }}</span>
+	</div>
+	<div class="space-6" />
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-prev" ng-click="vm.restartFaultDetection()">
 			<i class="icon-arrow-left"></i>
