@@ -150,7 +150,7 @@ module DashApp {
 						this.showPitCopier(data);
 					}
 					else {
-						this.pitConfigSvc.Pit = data;
+						this.pitConfigSvc.Pit = new P.Pit(data);
 						if (data.configured == false) {
 							this.location.path("#/configurator/intro");
 						}
@@ -177,8 +177,8 @@ module DashApp {
 					}
 				}
 			}).result.then((pit: P.Pit) => {
-				this.pitConfigSvc.Pit = pit;
-				if (pit.configured == undefined || pit.configured == false) {
+				this.pitConfigSvc.Pit = new P.Pit(pit);
+				if (pit.configured == false) {
 					this.location.path("/configurator/intro");
 				}
 			});
