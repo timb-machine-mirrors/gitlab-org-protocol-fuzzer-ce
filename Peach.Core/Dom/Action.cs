@@ -55,6 +55,7 @@ namespace Peach.Core.Dom
 	/// <summary>
 	/// Performs an Action such as sending output, calling a method, etc.
 	/// </summary>
+	[Serializable]
 	public abstract class Action : INamed
 	{
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -190,33 +191,11 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Action is starting to execute
-		/// </summary>
-		public static event ActionStartingEventHandler Starting;
-
-		/// <summary>
-		/// Action has finished executing
-		/// </summary>
-		public static event ActionFinishedEventHandler Finished;
-
-		protected virtual void OnStarting()
-		{
-			if (Starting != null)
-				Starting(this);
-		}
-
-		protected virtual void OnFinished()
-		{
-			if (Finished != null)
-				Finished(this);
-		}
-
 		protected virtual void RunScript(string expr)
 		{
 			if (!string.IsNullOrEmpty(expr))
 			{
-				Scripting.Exec(expr, scope);
+				parent.parent.parent.Python.Exec(expr, scope);
 			}
 		}
 
@@ -295,7 +274,7 @@ namespace Peach.Core.Dom
 
 			if (when != null)
 			{
-				object value = Scripting.EvalExpression(when, scope);
+				object value = parent.parent.parent.Python.Eval(when, scope);
 				if (!(value is bool))
 				{
 					logger.Debug("Run: action '{0}' when return is not boolean, returned: {1}", name, value);
@@ -342,7 +321,11 @@ namespace Peach.Core.Dom
 				finished = false;
 				error = false;
 
-				OnStarting();
+				// Notify the data model the action is about to run
+				foreach (var item in outputData)
+					item.dataModel.Run(context);
+
+				context.OnActionStarting(this);
 
 				logger.Debug("ActionType.{0}", GetType().Name.ToString());
 
@@ -362,6 +345,11 @@ namespace Peach.Core.Dom
 
 				finished = true;
 			}
+			catch (ActionChangeStateException)
+			{
+				// this is not an error
+				throw;
+			}
 			catch
 			{
 				error = true;
@@ -370,7 +358,7 @@ namespace Peach.Core.Dom
 			finally
 			{
 				finished = true;
-				OnFinished();
+				context.OnActionFinished(this);
 			}
 		}
 	}

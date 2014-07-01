@@ -27,180 +27,31 @@
 // $Id$
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Reflection;
 
-using Peach.Core.Dom;
-
 using NLog;
-using Peach.Core.IO;
 
 namespace Peach.Core.Agent
 {
-
-	#region Event Delegates
-
-	public delegate void AgentConnectEventHandler(Agent agent);
-	public delegate void AgentDisconnectEventHandler(Agent agent);
-	public delegate void CreatePublisherEventHandler(Agent agent, string cls, Dictionary<string, Variant> args);
-	public delegate void StartMonitorEventHandler(Agent agent, string name, string cls, Dictionary<string, Variant> args);
-	public delegate void StopMonitorEventHandler(Agent agent, string name);
-	public delegate void StopAllMonitorsEventHandler(Agent agent);
-	public delegate void SessionStartingEventHandler(Agent agent);
-	public delegate void SessionFinishedEventHandler(Agent agent);
-	public delegate void IterationStartingEventHandler(Agent agent, uint iterationCount, bool isReproduction);
-	public delegate void IterationFinishedEventHandler(Agent agent);
-	public delegate void DetectedFaultEventHandler(Agent agent);
-	public delegate void GetMonitorDataEventHandler(Agent agent);
-	public delegate void MustStopEventHandler(Agent agent);
-	public delegate void MessageEventHandler(Agent agent, string name, Variant data);
-
-	#endregion
-
 	/// <summary>
 	/// Agent logic.  This class is typically
 	/// called from the server side of agent channels.
 	/// </summary>
-	public class Agent : IAgent, INamed
+	public class Agent : IAgent
 	{
-		public object parent;
-		OrderedDictionary<string, Monitor> monitors = new OrderedDictionary<string, Monitor>();
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		#region Events
+		List<Monitor> monitors = new List<Monitor>();
 
-		public event AgentConnectEventHandler AgentConnectEvent;
-		protected void OnAgentConnectEvent()
+		public string name { get; private set; }
+
+		public Agent()
 		{
-			if (AgentConnectEvent != null)
-				AgentConnectEvent(this);
 		}
 
-		public event AgentDisconnectEventHandler AgentDisconnectEvent;
-		protected void OnAgentDisconnectEvent()
-		{
-			if (AgentDisconnectEvent != null)
-				AgentDisconnectEvent(this);
-		}
-
-		public event CreatePublisherEventHandler CreatePublisherEvent;
-		protected void OnCreatePublisherEvent(string cls, Dictionary<string, Variant> args)
-		{
-			if (CreatePublisherEvent != null)
-				CreatePublisherEvent(this, cls, args);
-		}
-
-		public event StartMonitorEventHandler StartMonitorEvent;
-		protected void OnStartMonitorEvent(string name, string cls, Dictionary<string, Variant> args)
-		{
-			if (StartMonitorEvent != null)
-				StartMonitorEvent(this, name, cls, args);
-		}
-
-		public event StopMonitorEventHandler StopMonitorEvent;
-		protected void OnStopMonitorEvent(string name)
-		{
-			if (StopMonitorEvent != null)
-				StopMonitorEvent(this, name);
-		}
-
-		public event StopAllMonitorsEventHandler StopAllMonitorsEvent;
-		protected void OnStopAllMonitorsEvent()
-		{
-			if (StopAllMonitorsEvent != null)
-				StopAllMonitorsEvent(this);
-		}
-
-		public event SessionStartingEventHandler SessionStartingEvent;
-		protected void OnSessionStartingEvent()
-		{
-			if (SessionStartingEvent != null)
-				SessionStartingEvent(this);
-		}
-
-		public event SessionFinishedEventHandler SessionFinishedEvent;
-		protected void OnSessionFinishedEvent()
-		{
-			if (SessionFinishedEvent != null)
-				SessionFinishedEvent(this);
-		}
-
-		public event IterationStartingEventHandler IterationStartingEvent;
-		protected void OnIterationStartingEvent(uint iterationCount, bool isReproduction)
-		{
-			if (IterationStartingEvent != null)
-				IterationStartingEvent(this, iterationCount, isReproduction);
-		}
-
-		public event IterationFinishedEventHandler IterationFinishedEvent;
-		protected void OnIterationFinishedEvent()
-		{
-			if (IterationFinishedEvent != null)
-				IterationFinishedEvent(this);
-		}
-
-		public event DetectedFaultEventHandler DetectedFaultEvent;
-		protected void OnDetectedFaultEvent()
-		{
-			if (DetectedFaultEvent != null)
-				DetectedFaultEvent(this);
-		}
-
-		public event GetMonitorDataEventHandler GetMonitorDataEvent;
-		protected void OnGetMonitorDataEvent()
-		{
-			if (GetMonitorDataEvent != null)
-				GetMonitorDataEvent(this);
-		}
-
-		public event MustStopEventHandler MustStopEvent;
-		protected void OnMustStopEvent()
-		{
-			if (MustStopEvent != null)
-				MustStopEvent(this);
-		}
-
-		public event MessageEventHandler MessageEvent;
-		protected void OnMessageEvent(string name, Variant data)
-		{
-			if (MessageEvent != null)
-				MessageEvent(this, name, data);
-		}
-
-		#endregion
-
-		public Agent(string name)
-		{
-			this.name = name;
-		}
-
-		/// <summary>
-		/// Dictionary of currently loaded monitor instances.
-		/// </summary>
-		public OrderedDictionary<string, Monitor> Monitors
-		{
-			get { return monitors; }
-			protected set { monitors = value; }
-		}
-
-		#region IAgent Members
-
-		public void AgentConnect()
-		{
-			logger.Trace("AgentConnect");
-			OnAgentConnectEvent();
-		}
-
-		public void AgentDisconnect()
-		{
-			logger.Trace("AgentDisconnect");
-			OnAgentDisconnectEvent();
-			StopAllMonitors();
-			monitors.Clear();
-		}
+		#region Publisher Helpers
 
 		public Publisher CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
@@ -211,7 +62,6 @@ namespace Peach.Core.Agent
 		public Publisher CreatePublisher(string cls, Dictionary<string, Variant> args)
 		{
 			logger.Trace("CreatePublisher: {0}", cls);
-			OnCreatePublisherEvent(cls, args);
 
 			var type = ClassLoader.FindTypeByAttribute<PublisherAttribute>((x, y) => y.Name == cls);
 			if (type == null)
@@ -219,7 +69,7 @@ namespace Peach.Core.Agent
 
 			try
 			{
-				var pub = Activator.CreateInstance(type, args) as Publisher;
+				var pub = (Publisher)Activator.CreateInstance(type, args);
 				return pub;
 			}
 			catch (TargetInvocationException ex)
@@ -228,21 +78,31 @@ namespace Peach.Core.Agent
 			}
 		}
 
-		public BitwiseStream CreateBitwiseStream()
-		{
-			return new BitStream();
-		}
-
 		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
 			var newArgs = AsDict(args);
 			StartMonitor(name, cls, newArgs);
 		}
 
+		#endregion
+
+		#region IAgent Members
+
+		public void AgentConnect()
+		{
+			logger.Trace("AgentConnect");
+		}
+
+		public void AgentDisconnect()
+		{
+			logger.Trace("AgentDisconnect");
+
+			StopAllMonitors();
+		}
+
 		public void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
 		{
 			logger.Debug("StartMonitor: {0} {1}", name, cls);
-			OnStartMonitorEvent(name, cls, args);
 
 			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == cls);
 			if (type == null)
@@ -250,8 +110,8 @@ namespace Peach.Core.Agent
 
 			try
 			{
-				var monitor = Activator.CreateInstance(type, (IAgent)this, name, args) as Monitor;
-				this.monitors.Add(name, monitor);
+				var mon = (Monitor)Activator.CreateInstance(type, (IAgent)this, name, args);
+				monitors.Add(mon);
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -260,80 +120,63 @@ namespace Peach.Core.Agent
 
 		}
 
-		public void StopMonitor(string name)
-		{
-			logger.Debug("StopMonitor: {0}", name);
-			OnStopMonitorEvent(name);
-			monitors[name].StopMonitor();
-			monitors.Remove(name);
-		}
-
 		public void StopAllMonitors()
 		{
 			logger.Trace("StopAllMonitors");
-			OnStopAllMonitorsEvent();
 
-			foreach (Monitor monitor in monitors.Values.Reverse())
-				monitor.StopMonitor();
+			foreach (var mon in monitors.Reverse<Monitor>())
+			{
+				Guard(mon, "StopMonitor", () =>
+				{
+					mon.StopMonitor();
+				});
+			}
 
 			monitors.Clear();
 		}
 
 		public void SessionStarting()
 		{
-			OnSessionStartingEvent();
-
-			foreach (Monitor monitor in monitors.Values)
+			foreach (var mon in monitors)
 			{
-				logger.Debug("SessionStarting: " + monitor.Name);
-				monitor.SessionStarting();
+				logger.Debug("SessionStarting: {0}", mon.Name);
+				mon.SessionStarting();
 			}
 		}
 
 		public void SessionFinished()
 		{
-			OnSessionFinishedEvent();
-
-			foreach (Monitor monitor in monitors.Values.Reverse())
+			foreach (var mon in monitors.Reverse<Monitor>())
 			{
-				try
+				Guard(mon, "SessionFinished", () =>
 				{
-					logger.Debug("SessionFinished: " + monitor.Name);
-					monitor.SessionFinished();
-				}
-				catch (Exception ex)
-				{
-					logger.Warn("Ignoring monitor exception calling SessionFinished: " + ex.Message);
-				}
+					mon.SessionFinished();
+				});
 			}
 		}
 
 		public void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			logger.Trace("IterationStarting: {0} {1}", iterationCount, isReproduction);
-			OnIterationStartingEvent(iterationCount, isReproduction);
 
-			foreach (Monitor monitor in monitors.Values)
-				monitor.IterationStarting(iterationCount, isReproduction);
+			foreach (var mon in monitors)
+			{
+				mon.IterationStarting(iterationCount, isReproduction);
+			}
 		}
 
 		public bool IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-			OnIterationFinishedEvent();
 
-			bool replay = false;
-			foreach (Monitor monitor in monitors.Values.Reverse())
+			var replay = false;
+
+			foreach (var mon in monitors.Reverse<Monitor>())
 			{
-				try
+				Guard(mon, "IterationFinished", () =>
 				{
-					if (monitor.IterationFinished())
-						replay = true;
-				}
-				catch (Exception ex)
-				{
-					logger.Warn("Ignoring monitor exception calling IterationFinished: " + ex.Message);
-				}
+					replay |= mon.IterationFinished();
+				});
 			}
 
 			return replay;
@@ -342,20 +185,15 @@ namespace Peach.Core.Agent
 		public bool DetectedFault()
 		{
 			logger.Trace("DetectedFault");
-			OnDetectedFaultEvent();
 
-			bool detectedFault = false;
-			foreach (Monitor monitor in monitors.Values)
+			var detectedFault = false;
+
+			foreach (var mon in monitors)
 			{
-				try
+				Guard(mon, "DetectedFault", () =>
 				{
-					if (monitor.DetectedFault())
-						detectedFault = true;
-				}
-				catch (Exception ex)
-				{
-					logger.Warn("Ignoring monitor exception calling DetectedFault: " + ex.Message);
-				}
+					detectedFault |= mon.DetectedFault();
+				});
 			}
 
 			return detectedFault;
@@ -364,26 +202,25 @@ namespace Peach.Core.Agent
 		public Fault[] GetMonitorData()
 		{
 			logger.Trace("GetMonitorData");
-			OnGetMonitorDataEvent();
 
-			List<Fault> faults = new List<Fault>();
+			var faults = new List<Fault>();
 
-			foreach (Monitor monitor in monitors.Values)
+			foreach (var mon in monitors)
 			{
-				try
+				Guard(mon, "GetMonitorData", () =>
 				{
-					var fault = monitor.GetMonitorData();
+					var fault = mon.GetMonitorData();
 
 					if (fault != null)
 					{
-						fault.monitorName = monitor.Name;
+						fault.monitorName = mon.Name;
+
+						if (string.IsNullOrEmpty(fault.detectionSource))
+							fault.detectionSource = mon.Class;
+
 						faults.Add(fault);
 					}
-				}
-				catch (Exception ex)
-				{
-					logger.Warn("Ignoring monitor exception calling GetMonitorData: " + ex.Message);
-				}
+				});
 			}
 
 			return faults.ToArray();
@@ -392,35 +229,29 @@ namespace Peach.Core.Agent
 		public bool MustStop()
 		{
 			logger.Trace("MustStop");
-			OnMustStopEvent();
 
-			foreach (Monitor monitor in monitors.Values)
+			var mustStop = false;
+
+			foreach (var mon in monitors)
 			{
-				try
+				Guard(mon, "MustStop", () =>
 				{
-					if (monitor.MustStop())
-						return true;
-				}
-				catch (Exception ex)
-				{
-					logger.Warn("Ignoring monitor exception calling MustStop: " + ex.Message);
-				}
+					mustStop |= mon.MustStop();
+				});
 			}
 
-			return false;
+			return mustStop;
 		}
 
 		public Variant Message(string name, Variant data)
 		{
 			logger.Trace("Message: {0}", name);
-			OnMessageEvent(name, data);
 
 			Variant ret = null;
-			Variant tmp = null;
 
-			foreach (Monitor monitor in monitors.Values)
+			foreach (var monitor in monitors)
 			{
-				tmp = monitor.Message(name, data);
+				var tmp = monitor.Message(name, data);
 				if (tmp != null)
 					ret = tmp;
 			}
@@ -443,28 +274,16 @@ namespace Peach.Core.Agent
 		/// <returns>Query response or null</returns>
 		public object QueryMonitors(string query)
 		{
-			logger.Trace("Message: {0}", query);
-			object ret = null;
+			logger.Trace("QueryMonitors: {0}", query);
 
-			foreach (Monitor monitor in monitors.Values)
+			foreach (var mon in monitors)
 			{
-				ret = monitor.ProcessQueryMonitors(query);
+				var ret = mon.ProcessQueryMonitors(query);
 				if (ret != null)
 					return ret;
 			}
 
 			return null;
-		}
-
-		public void AgentConnect(string password)
-		{
-			throw new NotImplementedException();
-		}
-
-		public string name
-		{
-			get;
-			protected set;
 		}
 
 		private static Dictionary<string, Variant> AsDict(IEnumerable<KeyValuePair<string, Variant>> sequence)
@@ -476,29 +295,20 @@ namespace Peach.Core.Agent
 
 			return ret;
 		}
+
+		private static void Guard(Monitor mon, string what, System.Action action)
+		{
+			try
+			{
+				action();
+			}
+			catch (Exception ex)
+			{
+				logger.Warn("Ignoring {0} calling '{1}' on {2} monitor {3}: {4}",
+					ex.GetType().Name, what, mon.Class, mon.Name, ex.Message);
+
+				logger.Trace("\n{0}", ex);
+			}
+		}
 	}
-
-	public interface IAgent
-	{
-		// Note: We can't remote Dictionary<> objects properly between
-		// windows and linux using the BinaryFormatter.  For the IPC
-		// channel use a List<> instead.
-
-		void AgentConnect(string password);
-		void AgentDisconnect();
-		Publisher CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args);
-		void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args);
-		void StopMonitor(string name);
-		void StopAllMonitors();
-		void SessionStarting();
-		void SessionFinished();
-		void IterationStarting(uint iterationCount, bool isReproduction);
-		bool IterationFinished();
-		bool DetectedFault();
-		Fault[] GetMonitorData();
-		bool MustStop();
-		Variant Message(string name, Variant data);
-		object QueryMonitors(string query);
-	}
-
 }

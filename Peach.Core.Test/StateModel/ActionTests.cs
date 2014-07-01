@@ -94,8 +94,8 @@ namespace Peach.Core.Test.StateModel
 			started = false;
 			finished = false;
 
-			Dom.Action.Starting +=new ActionStartingEventHandler(Action_Starting);
-			Dom.Action.Finished += new ActionFinishedEventHandler(Action_Finished);
+			e.context.ActionStarting += ActionStarting;
+			e.context.ActionFinished += ActionFinished;
 
 			try
 			{
@@ -105,23 +105,18 @@ namespace Peach.Core.Test.StateModel
 			catch (PeachException)
 			{
 			}
-			finally
-			{
-				Dom.Action.Starting -= new ActionStartingEventHandler(Action_Starting);
-				Dom.Action.Finished -= new ActionFinishedEventHandler(Action_Finished);
-			}
 
 			Assert.AreEqual(true, started);
 			Assert.AreEqual(true, finished);
 		}
 
-		void Action_Finished(Dom.Action action)
+		void ActionFinished(RunContext context, Dom.Action action)
 		{
 			Assert.AreEqual(false, finished);
 			finished = true;
 		}
 
-		void Action_Starting(Dom.Action action)
+		void ActionStarting(RunContext context, Dom.Action action)
 		{
 			Assert.AreEqual(false, started);
 			started = true;

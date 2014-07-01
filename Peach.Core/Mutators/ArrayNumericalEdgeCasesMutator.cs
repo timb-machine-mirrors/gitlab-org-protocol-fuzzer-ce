@@ -144,28 +144,7 @@ namespace Peach.Core.Mutators
         public void performMutation(DataElement obj, int num)
         {
             logger.Debug("performMutation(num=" + num + ")");
-
-            Dom.Array objAsArray = (Dom.Array)obj;
-
-            //if (num == 0)
-            //  return;
-            if (num < objAsArray.Count)
-            {
-                // remove some items
-                for (int i = objAsArray.Count - 1; i >= num; --i)
-                {
-                    if (objAsArray[i] == null)
-                        break;
-
-                    objAsArray.RemoveAt(i);
-                }
-            }
-            else if (num > objAsArray.Count)
-            {
-                // add some items, but do it by replicating
-                // the last item over and over to save memory
-                objAsArray.ExpandTo(num);
-            }
+            ((Dom.Array)obj).CountOverride = num;
         }
     }
 }

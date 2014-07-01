@@ -54,7 +54,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values

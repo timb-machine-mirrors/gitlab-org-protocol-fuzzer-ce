@@ -56,6 +56,7 @@ namespace Peach.Core.Dom
 	[Parameter("relativeTo", typeof(string), "Element to compute value relative to", "")]
 	public class OffsetRelation : Relation
 	{
+		[Serializable]
 		private class RelativeBinding : Binding
 		{
 			OffsetRelation rel;
@@ -159,7 +160,7 @@ namespace Peach.Core.Dom
 					state["value"] = offset;
 					state["self"] = From;
 
-					object value = Scripting.EvalExpression(_expressionGet, state);
+					object value = From.EvalExpression(_expressionGet, state);
 					offset = Convert.ToInt64(value);
 				}
 
@@ -197,7 +198,7 @@ namespace Peach.Core.Dom
 					state["value"] = offset;
 					state["self"] = From;
 
-					object value = Scripting.EvalExpression(_expressionSet, state);
+					object value = From.EvalExpression(_expressionSet, state);
 					offset = Convert.ToInt32(value);
 				}
 
@@ -225,7 +226,7 @@ namespace Peach.Core.Dom
 				state["value"] = offset;
 				state["self"] = From;
 
-				object newValue = Scripting.EvalExpression(_expressionSet, state);
+				object newValue = From.EvalExpression(_expressionSet, state);
 				offset = Convert.ToInt32(newValue);
 			}
 

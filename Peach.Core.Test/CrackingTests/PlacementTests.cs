@@ -117,12 +117,43 @@ namespace Peach.Core.Test.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Data_0", dom.dataModels[0][1].name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][1].name);
 			Assert.AreEqual("Hello World", dom.dataModels[0][1].DefaultValue.BitsToString());
 		}
 
 		[Test]
-		public void RelationTest()
+		public void RelationSameParentTest()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<String name=\"TheString\" length=\"2\">" +
+				"			<Relation type=\"size\" of=\"Data\"/>" +
+				"		</String>" +
+				"		<Block name=\"Block1\">" +
+				"			<Blob name=\"Data\">" +
+				"				<Placement after=\"Block2\"/>" +
+				"			</Blob>" +
+				"			<Block name=\"Block2\"/>" +
+				"		</Block>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var data = Bits.Fmt("{0}", "11Hello World");
+
+			DataCracker cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(1, dom.dataModels[0][0].relations.Count);
+			Assert.AreEqual("Data", dom.dataModels[0][0].relations[0].OfName);
+			Assert.AreEqual("TheDataModel.Block1.Data", dom.dataModels[0][0].relations[0].Of.fullName);
+			Assert.AreEqual("Hello World", dom.dataModels[0][1].InternalValue.BitsToString());
+		}
+
+		[Test]
+		public void RelationNewParentTest()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
@@ -146,8 +177,46 @@ namespace Peach.Core.Test.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.AreEqual(1, dom.dataModels[0][0].relations.Count);
-			Assert.AreEqual("TheDataModel.Data", dom.dataModels[0][0].relations[0].OfName);
+			Assert.AreEqual("Data", dom.dataModels[0][0].relations[0].OfName);
+			Assert.AreEqual("TheDataModel.Data", dom.dataModels[0][0].relations[0].Of.fullName);
 			Assert.AreEqual("Hello World", dom.dataModels[0][2].DefaultValue.BitsToString());
+		}
+
+		[Test]
+		public void RelationRenameTest()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<Block name=\"Block1\">" +
+				"			<String name=\"TheString\" length=\"2\">" +
+				"				<Relation type=\"size\" of=\"Data\"/>" +
+				"			</String>" +
+				"			<Blob name=\"Data\">" +
+				"				<Placement after=\"Block1\"/>" +
+				"			</Blob>" +
+				"		</Block>" +
+				"		<Blob name='Data'/>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var blk = dom.dataModels[0][0] as Block;
+
+			Assert.AreEqual(1, blk[0].relations.Count);
+			Assert.AreEqual("Data", blk[0].relations[0].OfName);
+			Assert.AreEqual("TheDataModel.Block1.Data", blk[0].relations[0].Of.fullName);
+
+			var data = Bits.Fmt("{0}", "11Hello World");
+
+			DataCracker cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(1, blk[0].relations.Count);
+			Assert.AreEqual("Data_1", blk[0].relations[0].OfName);
+			Assert.AreEqual("TheDataModel.Data_1", blk[0].relations[0].Of.fullName);
+			Assert.AreEqual("Hello World", dom.dataModels[0][1].DefaultValue.BitsToString());
 		}
 
 		[Test]
@@ -247,7 +316,7 @@ namespace Peach.Core.Test.CrackingTests
 
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Block1", dom.dataModels[0][0].name);
-			Assert.AreEqual("Data_0", dom.dataModels[0][1].name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][1].name);
 			Assert.AreEqual("Data", dom.dataModels[0][2].name);
 
 
@@ -258,7 +327,8 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("TheString", Block1[0].name);
 
 			Assert.AreEqual(1, Block1[0].relations.Count);
-			Assert.AreEqual("TheDataModel.Data_0", Block1[0].relations[0].OfName);
+			Assert.AreEqual("Data_1", Block1[0].relations[0].OfName);
+			Assert.AreEqual("TheDataModel.Data_1", Block1[0].relations[0].Of.fullName);
 
 			var final = dom.dataModels[0].Value;
 
@@ -357,7 +427,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("Block0", dom.dataModels[0][0].name);
 			Assert.AreEqual("Block1", dom.dataModels[0][1].name);
 			Assert.AreEqual("Data", dom.dataModels[0][2].name);
-			Assert.AreEqual("Data_0", dom.dataModels[0][3].name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][3].name);
 			Assert.AreEqual("Placement", dom.dataModels[0][4].name);
 
 			var block0 = dom.dataModels[0][0] as DataElementContainer;
@@ -387,7 +457,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(1, fixup1.references.Count());
 			var fixup1_first = fixup1.references.First();
 			Assert.AreEqual("ref", fixup1_first.Item1);
-			Assert.AreEqual("TheDataModel.Data_0", fixup1_first.Item2);
+			Assert.AreEqual("TheDataModel.Data_1", fixup1_first.Item2);
 		}
 
 		[Test]
@@ -653,7 +723,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(new byte[] { 0x42 }, DataPlaced.DefaultValue.BitsToArray());
 		}
 
-		[Test, Ignore("Issue #480")]
+		[Test]
 		public void SizedPlaced()
 		{
 			// Ensure relations to elements inside a moved block are maintained when placement occurs

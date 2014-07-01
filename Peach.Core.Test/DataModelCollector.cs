@@ -8,7 +8,7 @@ using Peach.Core.Dom;
 
 namespace Peach.Core.Test
 {
-	public class DataModelCollector
+	public class DataModelCollector : Watcher
 	{
 		protected List<Variant> mutations = null;
 		protected List<BitwiseStream> values = null;
@@ -25,15 +25,11 @@ namespace Peach.Core.Test
 		{
 			cloneActions = false;
 			ResetContainers();
-			Dom.Action.Finished += new Dom.ActionFinishedEventHandler(Action_Finished);
-			Peach.Core.MutationStrategy.DataMutating += new MutationStrategy.DataMutationEventHandler(MutationStrategy_DataMutating);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			Dom.Action.Finished -= Action_Finished;
-			Peach.Core.MutationStrategy.DataMutating -= MutationStrategy_DataMutating;
 		}
 
 		protected void ResetContainers()
@@ -48,7 +44,7 @@ namespace Peach.Core.Test
 			iterStrategies = new List<string>();
 		}
 
-		protected void Action_Finished(Dom.Action action)
+		protected override void ActionFinished(RunContext context, Dom.Action action)
 		{
 			if (!action.allData.Any())
 				return;
@@ -80,7 +76,7 @@ namespace Peach.Core.Test
 			dataModels.Add(model);
 		}
 
-		void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
 			int len = strategies.Count;
 			string item = mutator.name + " | " + element.fullName;

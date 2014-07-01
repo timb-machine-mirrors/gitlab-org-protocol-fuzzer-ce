@@ -40,7 +40,8 @@ namespace Peach.Core.Transformers.Encode
     [Serializable]
     public class SidStringToBytes : Transformer
     {
-        public SidStringToBytes(Dictionary<string,Variant> args) : base(args)
+        public SidStringToBytes(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
         }
 

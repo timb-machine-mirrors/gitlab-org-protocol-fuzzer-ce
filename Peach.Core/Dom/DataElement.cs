@@ -48,6 +48,8 @@ using System.Xml.Serialization;
 
 namespace Peach.Core.Dom
 {
+	#region Enumerations
+
 	/// <summary>
 	/// Length types
 	/// </summary>
@@ -95,7 +97,20 @@ namespace Peach.Core.Dom
 		/// An example is "[1,2,3,4]" which would evaluate to a python list.
 		/// </summary>
 		[XmlEnum("literal")]
-		Literal
+		Literal,
+
+		/// <summary>
+		/// An IPv4 string address that is converted to an array of bytes.
+		/// An example is "127.0.0.1" which would evaluate to the bytes: 0x7f, 0x00, 0x00, 0x01.
+		/// </summary>
+		[XmlEnum("ipv4")]
+		IPv4,
+
+		/// <summary>
+		/// An IPv6 string address that is converted to an array of bytes.
+		/// </summary>
+		[XmlEnum("ipv6")]
+		IPv6,
 	}
 
 	public enum EndianType
@@ -118,8 +133,6 @@ namespace Peach.Core.Dom
 		[XmlEnum("network")]
 		Network,
 	}
-
-	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
 
 	/// <summary>
 	/// Mutated value override's fixupImpl
@@ -163,12 +176,16 @@ namespace Peach.Core.Dom
 		Default = Fixup,
 	}
 
+	#endregion
+
+	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
+
 	/// <summary>
 	/// Base class for all data elements.
 	/// </summary>
 	[Serializable]
 	[DebuggerDisplay("{debugName}")]
-	public abstract class DataElement : INamed
+	public abstract class DataElement : INamed, IOwned<DataElementContainer>
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -248,7 +265,274 @@ namespace Peach.Core.Dom
 		/// <returns>Returns a copy of the DataElement.</returns>
 		public virtual DataElement Clone(string name)
 		{
-			return ObjectCopier.Clone(this, new CloneContext(this, name));
+			var ret = ObjectCopier.Clone(this, new CloneContext(this, name));
+
+			if (this.name != name)
+			{
+				if (ret.parent == null)
+					ret.fullName = ret.name;
+				else
+					ret.fullName = ret.parent.fullName + "." + ret.name;
+
+				foreach (var item in ret.PreOrderTraverse().Skip(1))
+					item.fullName = item.parent.fullName + "." + item.name;
+			}
+
+			return ret;
+		}
+
+		#endregion
+
+		#region Walking Functions
+
+		/// <summary>
+		/// Performs pre-order traversal starting with this node.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DataElement> PreOrderTraverse()
+		{
+			var toVisit = new List<DataElement>();
+			toVisit.Add(null);
+
+			var elem = this;
+
+			while (elem != null)
+			{
+				yield return elem;
+
+				int index = toVisit.Count;
+				foreach (var item in elem.Children())
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		/// <summary>
+		/// Performs breadth-first traversal starting with this node.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DataElement> BreadthFirstTraverse()
+		{
+			var toVisit = new Queue<DataElement>();
+			toVisit.Enqueue(this);
+
+			while (toVisit.Count > 0)
+			{
+				var elem = toVisit.Dequeue();
+
+				foreach (var item in elem.Children())
+					toVisit.Enqueue(item);
+
+				yield return elem;
+			}
+		}
+
+		/// <summary>
+		/// Walk the DOM by performing pre-order traversal starting
+		/// at this node.  Then perform pre-order traversal of our
+		/// parent ignoring the branch containing ourselves. Keep
+		/// iterating up the tree until we reach the root.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DataElement> Walk()
+		{
+			// Preform pre-order traversal starting with ourselves
+			foreach (var item in PreOrderTraverse())
+				yield return item;
+
+			// Walk up the dom, performing pre-order traversal of each of
+			// our parents but skip children that have already been traversed.
+			var skip = this;
+			var next = parent;
+
+			while (next != null)
+			{
+				yield return next;
+
+				foreach (var child in next.Children().Where(x => x != skip))
+				{
+					foreach (var item in child.PreOrderTraverse())
+						yield return item;
+				}
+
+				skip = next;
+				next = next.parent;
+			}
+		}
+
+		public IEnumerable<DataElement> EnumerateAll()
+		{
+			var toVisit = new List<IEnumerable<DataElement>>();
+			toVisit.Add(Children());
+
+			while (toVisit.Count > 0)
+			{
+				var index = 0;
+				var elems = toVisit[0];
+				toVisit.RemoveAt(0);
+
+				foreach (var item in elems)
+				{
+					toVisit.Insert(index++, item.Children());
+					yield return item;
+				}
+			}
+		}
+
+		public IEnumerable<DataElement> EnumerateUpTree()
+		{
+			// Traverse, will not return ourselves
+			foreach (var item in EnumerateAll())
+				yield return item;
+
+			var skip = this;
+			var next = parent;
+
+			while (next != null)
+			{
+				// Return parent's children first
+				foreach (var child in next.Children())
+					yield return child;
+
+				// Traverse on children we have not already traversed
+				foreach (var child in next.Children().Where(x => x != skip).SelectMany(x => x.EnumerateAll()))
+					yield return child;
+
+				skip = next;
+				next = next.parent;
+			}
+
+			yield return skip;
+		}
+
+		protected virtual IEnumerable<DataElement> Children()
+		{
+			return new DataElement[0];
+		}
+
+		#region Find Element By Name
+
+		/// <summary>
+		/// Find data element with specific name.
+		/// </summary>
+		/// <remarks>
+		/// We will search starting at our level in the tree, then moving
+		/// to children from our level, then walk up node by node to the
+		/// root of the tree.
+		/// </remarks>
+		/// <param name="name">Name to search for</param>
+		/// <returns>Returns found data element or null.</returns>
+		public DataElement find(string name)
+		{
+			// TODO: Investigate to see if pre-order is any better
+			// return FindByWalk(name);
+			return FindByEnumerateUpTree(name);
+		}
+
+		private DataElement FindByWalk(string name)
+		{
+			var parts = name.Split(new[] { '.' });
+
+			foreach (var item in Walk())
+			{
+				int index = 0;
+
+				if (item.name != parts[index++])
+					continue;
+
+				var candidate = item;
+
+				do
+				{
+					if (index == parts.Length)
+						return candidate;
+
+					candidate = candidate.GetChild(parts[index++]);
+					if (candidate == null)
+						break;
+				}
+				while (true);
+			}
+
+			return null;
+		}
+
+		private DataElement FindByEnumerateUpTree(string name)
+		{
+			var parts = name.Split(new[] { '.' });
+
+			// EnumerateUpTree doesn't check this first, so do that
+			if (parts.Length == 1 && parts[0] == this.name)
+				return this;
+
+			foreach (var item in EnumerateUpTree())
+			{
+				int index = 0;
+
+				if (item.name != parts[index++])
+					continue;
+
+				var candidate = item;
+
+				do
+				{
+					if (index == parts.Length)
+						return candidate;
+
+					candidate = candidate.GetChild(parts[index++]);
+					if (candidate == null)
+						break;
+				}
+				while (true);
+			}
+
+			return null;
+		}
+
+		protected virtual DataElement GetChild(string name)
+		{
+			return null;
+		}
+	
+		#endregion
+
+		/// <summary>
+		/// Enumerate all items in tree starting with our current position
+		/// then moving up towards the root.
+		/// </summary>
+		/// <remarks>
+		/// This method uses yields to allow for efficient use even if the
+		/// quired node is found quickely.
+		/// 
+		/// The method in which we return elements should match a human
+		/// search pattern of a tree.  We start with our current position and
+		/// return all children then start walking up the tree towards the root.
+		/// At each parent node we return all children (excluding already returned
+		/// nodes).
+		/// 
+		/// This method is ideal for locating objects in the tree in a way indented
+		/// a human user.
+		/// </remarks>
+		/// <returns></returns>
+		public IEnumerable<DataElement> EnumerateElementsUpTree()
+		{
+			return EnumerateUpTree();
+		}
+
+		/// <summary>
+		/// Enumerate all child elements recursevely.
+		/// </summary>
+		/// <remarks>
+		/// This method will return this objects direct children
+		/// and finally recursevely return children's children.
+		/// </remarks>
+		/// <returns></returns>
+		public IEnumerable<DataElement> EnumerateAllElements()
+		{
+			return EnumerateAll();
 		}
 
 		#endregion
@@ -278,14 +562,15 @@ namespace Peach.Core.Dom
 		protected Transformer _transformer = null;
 		protected Placement _placement = null;
 
-		protected DataElementContainer _parent;
-
 		private uint _recursionDepth = 0;
 		private uint _intRecursionDepth = 0;
 		private bool _readValueCache = true;
 		private bool _writeValueCache = true;
 		private Variant _internalValue;
 		private BitwiseStream _value;
+
+		private DataElementContainer _parent;
+		private string _fullName;
 
 		private bool _invalidated = false;
 
@@ -369,8 +654,8 @@ namespace Peach.Core.Dom
 				_value = null;
 
 				// Bubble this up the chain
-				if (_parent != null)
-					_parent.Invalidate();
+				if (parent != null)
+					parent.Invalidate();
 
 				if (_invalidatedEvent != null)
 					_invalidatedEvent(this, e);
@@ -396,11 +681,10 @@ namespace Peach.Core.Dom
 		}
 
 		protected static uint _uniqueName = 0;
+
 		public DataElement()
+			: this("DataElement_" + (_uniqueName++).ToString())
 		{
-			_relations = new RelationContainer(this);
-			_name = "DataElement_" + _uniqueName;
-			_uniqueName++;
 		}
 
 		public DataElement(string name)
@@ -408,47 +692,52 @@ namespace Peach.Core.Dom
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
+			elementType = GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
+
 			_relations = new RelationContainer(this);
 			_name = name;
+			fullName = name;
+			root = this;
 		}
 
-		public static T Generate<T>(XmlNode node) where T : DataElement, new()
+		public static T Generate<T>(XmlNode node, DataElementContainer parent) where T : DataElement, new()
 		{
+			T ret;
+
 			string name = null;
 			if (node.hasAttr("name"))
 				name = node.getAttrString("name");
 
 			if (string.IsNullOrEmpty(name))
 			{
-				return new T();
+				ret = new T();
 			}
 			else
 			{
 				try
 				{
-					return (T)Activator.CreateInstance(typeof(T), name);
+					ret = (T)Activator.CreateInstance(typeof(T), name);
 				}
 				catch (TargetInvocationException ex)
 				{
 					throw ex.InnerException;
 				}
 			}
+
+			ret.parent = parent;
+			return ret;
 		}
 
 		public string elementType
 		{
-			get
-			{
-				return GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
-			}
+			get;
+			private set;
 		}
 
 		public string debugName
 		{
-			get
-			{
-				return "{0} '{1}'".Fmt(elementType, fullName);
-			}
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -457,37 +746,45 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public string fullName
 		{
-			// TODO: Cache fullName if possible
-
 			get
 			{
-				string fullname = name;
-				DataElement obj = _parent;
-				while (obj != null)
-				{
-					fullname = obj.name + "." + fullname;
-					obj = obj.parent;
-				}
-
-				return fullname;
+				return _fullName;
 			}
+			private set
+			{
+				_fullName = value;
+				debugName = "{0} '{1}'".Fmt(elementType, value);
+			}
+		}
+
+		public DataElement root
+		{
+			get;
+			private set;
 		}
 
 		/// <summary>
 		/// Recursively execute analyzers
 		/// </summary>
-		public virtual void evaulateAnalyzers()
+		public void evaulateAnalyzers()
 		{
-			if (analyzer == null)
-				return;
-
-			analyzer.asDataElement(this, null);
+			foreach (var item in PreOrderTraverse())
+				if (item.analyzer != null)
+					item.analyzer.asDataElement(item, null);
 		}
 
 		public Dictionary<string, Hint> Hints
 		{
 			get { return hints; }
 			set { hints = value; }
+		}
+
+		public object EvalExpression(string code, Dictionary<string, object> localScope)
+		{
+			var dm = (DataModel)root;
+			var dom = dm.dom ?? dm.actionData.action.parent.parent.parent;
+
+			return dom.Python.Eval(code, localScope);
 		}
 
 		/// <summary>
@@ -534,18 +831,33 @@ namespace Peach.Core.Dom
 			}
 			set
 			{
+				if (value == parent)
+					return;
+
 				_parent = value;
+
+				if (parent == null)
+				{
+					root = this;
+					fullName = name;
+				}
+				else
+				{
+					root = parent.root;
+					fullName = parent.fullName + "." + name;
+				}
+
+				foreach (var item in PreOrderTraverse().Skip(1))
+				{
+					item.root = root;
+					item.fullName = item.parent.fullName + "." + item.name;
+				}
 			}
 		}
 
 		public DataElement getRoot()
 		{
-			DataElement obj = this;
-
-			while (obj != null && obj._parent != null)
-				obj = obj.parent;
-
-			return obj;
+			return root;
 		}
 
 		/// <summary>
@@ -554,14 +866,14 @@ namespace Peach.Core.Dom
 		/// <returns>Returns sibling or null.</returns>
 		public DataElement nextSibling()
 		{
-			if (_parent == null)
+			if (parent == null)
 				return null;
 
-			int nextIndex = _parent.IndexOf(this) + 1;
-			if (nextIndex >= _parent.Count)
+			int nextIndex = parent.IndexOf(this) + 1;
+			if (nextIndex >= parent.Count)
 				return null;
 
-			return _parent[nextIndex];
+			return parent[nextIndex];
 		}
 
 		/// <summary>
@@ -570,14 +882,14 @@ namespace Peach.Core.Dom
 		/// <returns>Returns sibling or null.</returns>
 		public DataElement previousSibling()
 		{
-			if (_parent == null)
+			if (parent == null)
 				return null;
 
-			int priorIndex = _parent.IndexOf(this) - 1;
+			int priorIndex = parent.IndexOf(this) - 1;
 			if (priorIndex < 0)
 				return null;
 
-			return _parent[priorIndex];
+			return parent[priorIndex];
 		}
 
 		/// <summary>
@@ -589,16 +901,6 @@ namespace Peach.Core.Dom
 			//_invalidated = true;
 
 			OnInvalidated(null);
-		}
-
-		/// <summary>
-		/// Is this a leaf of the DataModel tree?
-		/// 
-		/// True if DataElement has no children.
-		/// </summary>
-		public virtual bool isLeafNode
-		{
-			get { return true; }
 		}
 
 		/// <summary>
@@ -833,13 +1135,11 @@ namespace Peach.Core.Dom
 				if (_fixup != null)
 				{
 					// The root can't have a fixup!
-					System.Diagnostics.Debug.Assert(_parent != null);
+					System.Diagnostics.Debug.Assert(parent != null);
 
 
 					//// We can only have a valid fixup value when the parent
 					//// has not recursed onto itself
-					//if (_parent._recursionDepth > 1)
-					//    return false;
 
 					foreach (var elem in _fixup.dependents)
 					{
@@ -847,19 +1147,18 @@ namespace Peach.Core.Dom
 						// element in the heirarchy has a _recustionDepth > 1
 						// Otherwise, we are invalid if the _recursionDepth > 0
 
-						string relName = null;
-						if (isChildOf(elem, out relName))
+						if (isChildOf(elem))
 						{
-							var parent = this;
+							var p = this;
 
 							do
 							{
-								parent = parent.parent;
+								p = p.parent;
 
-								if (parent._recursionDepth > 1)
+								if (p._recursionDepth > 1)
 									return false;
 							}
-							while (parent != elem);
+							while (p != elem);
 						}
 						else if (elem._recursionDepth > 0)
 						{
@@ -888,31 +1187,30 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
+		protected virtual Variant GenerateDefaultValue()
+		{
+			return DefaultValue;
+		}
+
 		/// <summary>
 		/// Generate the internal value of this data element
 		/// </summary>
 		/// <returns>Internal value in .NET form</returns>
 		protected virtual Variant GenerateInternalValue()
 		{
-			Variant value;
-
 			// 1. Default value
 
-			value = DefaultValue;
+			var value = MutatedValue != null ? MutatedValue : GenerateDefaultValue();
 
 			// 2. Check for type transformations
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.TypeTransform))
-			{
 				return MutatedValue;
-			}
 
 			// 3. Relations
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
 				return MutatedValue;
-			}
 
 			foreach (var r in relations.From<Relation>())
 			{
@@ -928,9 +1226,7 @@ namespace Peach.Core.Dom
 			// 4. Fixup
 
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
 				return MutatedValue;
-			}
 
 			if (_fixup != null)
 				value = _fixup.fixup(this);
@@ -975,287 +1271,9 @@ namespace Peach.Core.Dom
 				if (_transformer != null)
 					value = _transformer.encode(value);
 
+			value.Name = fullName;
+
 			return value;
-		}
-
-		public DataElement CommonParent(DataElement elem)
-		{
-			List<DataElement> parents = new List<DataElement>();
-			DataElementContainer parent = null;
-
-			parents.Add(this);
-
-			parent = this.parent;
-			while (parent != null)
-			{
-				parents.Add(parent);
-				parent = parent.parent;
-			}
-
-			if (parents.Contains(elem))
-				return elem;
-
-			parent = elem.parent;
-			while (parent != null)
-			{
-				if (parents.Contains(parent))
-					return parent;
-
-				parent = parent.parent;
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		/// Enumerates all DataElements starting from 'start.'
-		/// 
-		/// This method will first return children, then siblings, then children
-		/// of siblings as it walks up the parent chain.  It will not return
-		/// any duplicate elements.
-		/// 
-		/// Note: This is not the fastest way to enumerate all elements in the
-		/// tree, it's specifically intended for findings Elements in a search
-		/// pattern that matches a persons assumptions about name resolution.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <returns>All DataElements in model.</returns>
-		public static IEnumerable EnumerateAllElementsFromHere(DataElement start)
-		{
-			foreach(DataElement elem in EnumerateAllElementsFromHere(start, new List<DataElement>()))
-				yield return elem;
-		}
-
-		/// <summary>
-		/// Enumerates all DataElements starting from 'start.'
-		/// 
-		/// This method will first return children, then siblings, then children
-		/// of siblings as it walks up the parent chain.  It will not return
-		/// any duplicate elements.
-		/// 
-		/// Note: This is not the fastest way to enumerate all elements in the
-		/// tree, it's specifically intended for findings Elements in a search
-		/// pattern that matches a persons assumptions about name resolution.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <param name="cache">Cache of DataElements already returned</param>
-		/// <returns>All DataElements in model.</returns>
-		public static IEnumerable EnumerateAllElementsFromHere(DataElement start, 
-			List<DataElement> cache)
-		{
-			// Add ourselvs to the cache is not already done
-			if (!cache.Contains(start))
-				cache.Add(start);
-
-			// 1. Enumerate all siblings
-
-			if (start.parent != null)
-			{
-				foreach (DataElement elem in start.parent)
-					if (!cache.Contains(elem))
-						yield return elem;
-			}
-
-			// 2. Children
-
-			foreach (DataElement elem in EnumerateChildrenElements(start, cache))
-				yield return elem;
-
-			// 3. Children of siblings
-
-			if (start.parent != null)
-			{
-				foreach (DataElement elem in start.parent)
-				{
-					if (!cache.Contains(elem))
-					{
-						cache.Add(elem);
-						foreach(DataElement ret in EnumerateChildrenElements(elem, cache))
-							yield return ret;
-					}
-				}
-			}
-
-			// 4. Parent, walk up tree
-
-			if (start.parent != null)
-				foreach (DataElement elem in EnumerateAllElementsFromHere(start.parent))
-					yield return elem;
-		}
-
-		/// <summary>
-		/// Enumerates all children starting from, but not including
-		/// 'start.'  Will also enumerate the children of children until
-		/// leaf nodes are hit.
-		/// </summary>
-		/// <param name="start">Starting DataElement</param>
-		/// <param name="cache">Cache of already seen elements</param>
-		/// <returns>Returns DataElement children of start.</returns>
-		protected static IEnumerable EnumerateChildrenElements(DataElement start, List<DataElement> cache)
-		{
-			if (!(start is DataElementContainer))
-				yield break;
-
-			foreach (DataElement elem in start as DataElementContainer)
-				if (!cache.Contains(elem))
-					yield return elem;
-
-			foreach (DataElement elem in start as DataElementContainer)
-			{
-				if (!cache.Contains(elem))
-				{
-					cache.Add(elem);
-					foreach (DataElement ret in EnumerateAllElementsFromHere(elem, cache))
-						yield return ret;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Find data element with specific name.
-		/// </summary>
-		/// <remarks>
-		/// We will search starting at our level in the tree, then moving
-		/// to children from our level, then walk up node by node to the
-		/// root of the tree.
-		/// </remarks>
-		/// <param name="name">Name to search for</param>
-		/// <returns>Returns found data element or null.</returns>
-		public DataElement find(string name)
-		{
-			string [] names = name.Split(new char[] {'.'});
-
-			if (names.Length == 1)
-			{
-				// Make sure it's not us :)
-				if (this.name == names[0])
-					return this;
-
-				// Check our children
-				foreach (DataElement elem in EnumerateElementsUpTree())
-				{
-					if(elem.name == names[0])
-						return elem;
-				}
-
-				// Can't locate!
-				return null;
-			}
-
-			foreach (DataElement elem in EnumerateElementsUpTree())
-			{
-				if (elem.fullName == name)
-					return elem;
-
-				if (!(elem is DataElementContainer))
-					continue;
-
-				DataElement ret = ((DataElementContainer)elem).QuickNameMatch(names);
-				if (ret != null)
-					return ret;
-			}
-
-			DataElement root = getRoot();
-			if (root == this)
-				return null;
-
-			return root.find(name);
-		}
-
-		/// <summary>
-		/// Enumerate all items in tree starting with our current position
-		/// then moving up towards the root.
-		/// </summary>
-		/// <remarks>
-		/// This method uses yields to allow for efficient use even if the
-		/// quired node is found quickely.
-		/// 
-		/// The method in which we return elements should match a human
-		/// search pattern of a tree.  We start with our current position and
-		/// return all children then start walking up the tree towards the root.
-		/// At each parent node we return all children (excluding already returned
-		/// nodes).
-		/// 
-		/// This method is ideal for locating objects in the tree in a way indented
-		/// a human user.
-		/// </remarks>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateElementsUpTree()
-		{
-			foreach (DataElement e in EnumerateElementsUpTree(new List<DataElement>()))
-				yield return e;
-		}
-
-		/// <summary>
-		/// Enumerate all items in tree starting with our current position
-		/// then moving up towards the root.
-		/// </summary>
-		/// <remarks>
-		/// This method uses yields to allow for efficient use even if the
-		/// quired node is found quickely.
-		/// 
-		/// The method in which we return elements should match a human
-		/// search pattern of a tree.  We start with our current position and
-		/// return all children then start walking up the tree towards the root.
-		/// At each parent node we return all children (excluding already returned
-		/// nodes).
-		/// 
-		/// This method is ideal for locating objects in the tree in a way indented
-		/// a human user.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to stop duplicates</param>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateElementsUpTree(List<DataElement> knownParents)
-		{
-			List<DataElement> toRoot = new List<DataElement>();
-			DataElement cur = this;
-			while (cur != null)
-			{
-				toRoot.Add(cur);
-				cur = cur.parent;
-			}
-
-			foreach (DataElement item in toRoot)
-			{
-				if (!knownParents.Contains(item))
-				{
-					foreach (DataElement e in item.EnumerateAllElements())
-						yield return e;
-
-					knownParents.Add(item);
-				}
-			}
-
-			// Root will not be returned otherwise
-			yield return getRoot();
-		}
-
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <returns></returns>
-		public IEnumerable<DataElement> EnumerateAllElements()
-		{
-			foreach (DataElement e in EnumerateAllElements(new List<DataElement>()))
-				yield return e;
-		}
-
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to skip</param>
-		/// <returns></returns>
-		public virtual IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			yield break;
 		}
 
 		/// <summary>
@@ -1333,30 +1351,7 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
-		/// <summary>
-		/// Determines whether or not a DataElement is a child of this DataElement.
-		/// Computes the relative name from 'this' to 'dataElement'.  If 'dataElement'
-		/// is not a child of 'this', the absolute path of 'dataElement' is computed.
-		/// </summary>
-		/// <param name="dataElement">The DataElement to test for a child relationship.</param>
-		/// <param name="relName">String to receive the realitive name of 'dataElement'.</param>
-		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
-		public bool isChildOf(DataElement dataElement, out string relName)
-		{
-			relName = name;
-
-			DataElement obj = _parent;
-			while (obj != null)
-			{
-				if (obj == dataElement)
-					return true;
-
-				relName = obj.name + "." + relName;
-				obj = obj.parent;
-			}
-
-			return false;
-		}
+		#region Parent/Child Helpers
 
 		/// <summary>
 		/// Determines whether or not a DataElement is a child of this DataElement.
@@ -1365,17 +1360,68 @@ namespace Peach.Core.Dom
 		/// <returns>Returns true if 'dataElement' is a child, false otherwise.</returns>
 		public bool isChildOf(DataElement dataElement)
 		{
-			DataElement obj = _parent;
-			while (obj != null)
+			for (var obj = parent; obj != null; obj = obj.parent)
 			{
 				if (obj == dataElement)
 					return true;
-
-				obj = obj.parent;
 			}
 
 			return false;
 		}
+
+		/// <summary>
+		/// Check if we are a parent of an element.  This is
+		/// true even if we are not the direct parent, but several
+		/// layers up.
+		/// </summary>
+		/// <param name="element">Element to check</param>
+		/// <returns>Returns true if we are a parent of element.</returns>
+		public bool isParentOf(DataElement element)
+		{
+			for (var obj = element.parent; obj != null; obj = obj.parent)
+			{
+				if (obj == this)
+					return true;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Finds the common parent between this elemet
+		/// and the target element.
+		/// </summary>
+		/// <param name="elem">Element to check</param>
+		/// <returns>The common parent or null of none exists.</returns>
+		public DataElement CommonParent(DataElement elem)
+		{
+			var parents = new List<DataElement>();
+
+			parents.Add(this);
+
+			var parent = this.parent;
+			while (parent != null)
+			{
+				parents.Add(parent);
+				parent = parent.parent;
+			}
+
+			if (parents.Contains(elem))
+				return elem;
+
+			parent = elem.parent;
+			while (parent != null)
+			{
+				if (parents.Contains(parent))
+					return parent;
+
+				parent = parent.parent;
+			}
+
+			return null;
+		}
+
+		#endregion
 
 		public void UpdateBindings(DataElement oldElem)
 		{
@@ -1385,9 +1431,7 @@ namespace Peach.Core.Dom
 			oldElem.parent = null;
 			this.parent = null;
 
-			UpdateBindings(oldElem, oldElem);
-
-			foreach (var elem in oldElem.EnumerateAllElements())
+			foreach (var elem in oldElem.PreOrderTraverse())
 				UpdateBindings(oldElem, elem);
 
 			oldElem.parent = oldParent;
@@ -1427,85 +1471,42 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public virtual void ClearBindings(bool remove)
-		{
-			foreach (var item in this.relations.ToArray())
-			{
-				if (remove)
-					item.From.relations.Remove(item);
-
-				item.Clear();
-			}
-		}
-
 		private DataElement MoveTo(DataElementContainer newParent, int index)
 		{
-			DataElementContainer oldParent = this.parent;
-
-			if (oldParent == newParent)
-			{
-				int oldIdx = oldParent.IndexOf(this);
-				oldParent.RemoveAt(oldIdx);
-				if (oldIdx < index)
-					--index;
-				newParent.Insert(index, this);
-				return this;
-			}
-
-			string newName = this.name;
-			for (int i = 0; newParent.ContainsKey(newName); i++)
-				newName = this.name + "_" + i;
-
 			DataElement newElem;
 
-			if (newName == this.name)
+			var oldIndex = parent.IndexOf(this);
+
+			if (parent == newParent)
 			{
-				newElem = this;
+				newElem = Clone();
+
+				if (oldIndex < index)
+					index--;
 			}
 			else
 			{
-				newElem = this.Clone(newName);
-
-				// We are "moving" the element, but doing so by cloning
-				// into a new element.  The clone will duplicate relations
-				// that reach outside of the element tree, so we need to
-				// clean up all old relations that were inside
-				// the old element tree.
-
-				ClearBindings(true);
+				var newName = newParent.UniqueName(name);
+				newElem = Clone(newName);
 			}
 
-			// Save off relations
-			var relations = newElem.relations.Of<Binding>().ToArray();
-
-			oldParent.RemoveAt(oldParent.IndexOf(this));
+			parent.RemoveAt(oldIndex);
 			newParent.Insert(index, newElem);
-
-			// When an element is moved, the name can change.
-			// Additionally, the resolution algorithm might not
-			// be able to locate the proper element, so set
-			// the 'OfName' to the full name of the new element.
-
-			foreach (var rel in relations)
-			{
-				rel.OfName = newElem.fullName;
-				rel.Resolve();
-			}
 
 			return newElem;
 		}
 
 		public DataElement MoveBefore(DataElement target)
 		{
-			DataElementContainer parent = target.parent;
-			int offset = parent.IndexOf(target);
+			var parent = target.parent;
+			var offset = parent.IndexOf(target);
 			return MoveTo(parent, offset);
 		}
 
 		public DataElement MoveAfter(DataElement target)
 		{
-			DataElementContainer parent = target.parent;
-			int offset = parent.IndexOf(target) + 1;
+			var parent = target.parent;
+			var offset = parent.IndexOf(target) + 1;
 			return MoveTo(parent, offset);
 		}
 

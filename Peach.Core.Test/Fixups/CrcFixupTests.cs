@@ -50,7 +50,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -97,7 +97,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -145,7 +145,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -194,7 +194,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			byte[] precalcChecksum = new byte[] { 0x53, 0xF3 };
@@ -240,7 +240,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			byte[] precalcChecksum = new byte[] { 0xDA, 0xDA };

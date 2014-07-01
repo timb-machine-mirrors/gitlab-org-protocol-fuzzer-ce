@@ -40,7 +40,8 @@ namespace Peach.Core.Transformers.Encode
     [Serializable]
     public class JsEncode : Transformer
     {
-        public JsEncode(Dictionary<string, Variant> args) : base(args)
+        public JsEncode(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
         }
 

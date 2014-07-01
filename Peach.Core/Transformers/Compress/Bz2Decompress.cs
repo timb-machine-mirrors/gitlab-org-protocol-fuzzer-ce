@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Compress
 	[Serializable]
 	public class Bz2Decompress : Transformer
 	{
-		public Bz2Decompress(Dictionary<string, Variant> args)
-			: base(args)
+		public Bz2Decompress(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

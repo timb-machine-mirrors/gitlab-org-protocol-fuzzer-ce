@@ -9,6 +9,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Call")]
+	[Serializable]
 	public class Call : Action
 	{
 		public Call()

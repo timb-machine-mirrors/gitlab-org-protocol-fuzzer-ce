@@ -6,6 +6,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("SetProperty")]
+	[Serializable]
 	public class SetProperty : Action
 	{
 		/// <summary>

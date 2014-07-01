@@ -159,10 +159,10 @@ namespace Peach.Core.Dom
 					name = m.Groups[1].Value;
 					int index = int.Parse(m.Groups[2].Value);
 
-					if (!container.ContainsKey(name))
+					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					var array = container[name] as Array;
+					var array = elem as Array;
 					if (array == null)
 						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
 
@@ -180,21 +180,9 @@ namespace Peach.Core.Dom
 					if (array.maxOccurs != -1 && index > array.maxOccurs)
 						throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
 
-					if (!array.hasExpanded && array.origionalElement == null)
-					{
-						array.origionalElement = array[0];
-						array.RemoveAt(0);
-					}
+					// Add elements up to our index
+					array.ExpandTo(index + 1);
 
-					// Add elements upto our index
-					for (int x = array.Count; x <= index; x++)
-					{
-						string itemName = array.origionalElement.name + "_" + x;
-						var item = array.origionalElement.Clone(itemName);
-						array.Add(item);
-					}
-
-					array.hasExpanded = true;
 					elem = array[index];
 					container = elem as DataElementContainer;
 				}
@@ -211,10 +199,9 @@ namespace Peach.Core.Dom
 				}
 				else
 				{
-					if (!container.ContainsKey(name))
+					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					elem = container[name];
 					container = elem as DataElementContainer;
 				}
 			}

@@ -65,91 +65,96 @@ namespace Peach.Core.Analyzers
 
 		public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)
 		{
-			if (!(parent is Dom.String))
+			var strElement = parent as Dom.String;
+			if (strElement == null)
 				throw new PeachException("Error, XmlAnalyzer analyzer only operates on String elements!");
 
-			var strElement = parent as Dom.String;
-
-			if (string.IsNullOrEmpty((string)strElement.InternalValue))
+			var value = (string)strElement.InternalValue;
+			if (string.IsNullOrEmpty(value))
 				return;
 
 			var doc = new XmlDocument();
+
 			try
 			{
-				doc.LoadXml((string)strElement.InternalValue);
+				doc.LoadXml(value);
 			}
 			catch (Exception ex)
 			{
 				throw new PeachException("Error, XmlAnalyzer failed to analyze element '" + parent.name + "'.  " + ex.Message, ex);
 			}
 
-			Dom.XmlElement xmlElement = null;
+			var elem = new Dom.XmlElement(strElement.name);
 
-			foreach(XmlNode node in doc.ChildNodes)
+			foreach (XmlNode node in doc.ChildNodes)
 			{
-				if (node is XmlDeclaration || node is XmlComment)
-					continue;
-
-				if (node.Name.StartsWith("#"))
-					continue;
-
-				xmlElement = handleXmlNode(node, parent.name, strElement.stringType);
+				handleXmlNode(elem, node, strElement.stringType);
 			}
 
-			parent.parent[parent.name] = xmlElement;
+			var decl = doc.FirstChild as XmlDeclaration;
+			if (decl != null)
+			{
+				elem.version = decl.Version;
+				elem.encoding = decl.Encoding;
+				elem.standalone = decl.Standalone;
+			}
+
+			parent.parent[parent.name] = elem;
 		}
 
-		protected Dom.XmlElement handleXmlNode(XmlNode node, string name, StringType type)
+		protected void handleXmlNode(Dom.XmlElement elem, XmlNode node, StringType type)
 		{
-			Dom.XmlElement elem = null;
-
-			if (name != null)
-				elem = new Dom.XmlElement(name);
-			else
-				elem = new Dom.XmlElement();
+			if (node is XmlComment || node is XmlDeclaration)
+				return;
 
 			elem.elementName = node.Name;
 			elem.ns = node.NamespaceURI;
 
-			//Attributes are null when node is not of type XmlNodeType.Element
-			if (node.Attributes != null)
+			foreach (System.Xml.XmlAttribute attr in node.Attributes)
 			{
-				foreach (System.Xml.XmlAttribute attrib in node.Attributes)
+				var strElem = makeString("value", attr.Value, type);
+				var attrName = elem.UniqueName(attr.Name.Replace(':', '_'));
+				var attrElem = new Dom.XmlAttribute(attrName)
 				{
-					elem.Add(handleXmlAttribute(attrib, type));
-				}
+					attributeName = attr.Name,
+					ns = attr.NamespaceURI,
+				};
+
+				attrElem.Add(strElem);
+				elem.Add(attrElem);
 			}
-			foreach (XmlNode child in node.ChildNodes)
+
+			foreach (System.Xml.XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "#text")
 				{
-					var str = new Dom.String() { stringType = type };
-					str.DefaultValue = new Variant(child.Value);
+					var str = makeString(child.Name, child.Value, type);
 					elem.Add(str);
 				}
 				else if (!child.Name.StartsWith("#"))
 				{
-					elem.Add(handleXmlNode(child, null, type));
+					var childName = elem.UniqueName(child.Name.Replace(':', '_'));
+					var childElem = new Dom.XmlElement(childName);
+
+					elem.Add(childElem);
+
+					handleXmlNode(childElem, child, type);
 				}
 			}
-
-			return elem;
 		}
 
-		protected Dom.XmlAttribute handleXmlAttribute(System.Xml.XmlAttribute attrib, StringType type)
+		private static Dom.String makeString(string name, string value, StringType type)
 		{
-			var xmlAttrib = new Dom.XmlAttribute();
-			xmlAttrib.attributeName = attrib.Name;
-			xmlAttrib.ns = attrib.NamespaceURI;
+			var str = new Dom.String(name)
+			{
+				stringType = type,
+				DefaultValue = new Variant(value),
+			};
 
-			var strValue = new Dom.String() { stringType = type };
-			strValue.DefaultValue = new Variant(attrib.Value);
+			var hint = new Dom.Hint("Peach.TypeTransform", "false");
+			str.Hints.Add(hint.Name, hint);
 
-			xmlAttrib.Add(strValue);
-
-			return xmlAttrib;
+			return str;
 		}
 	}
 }
-
-// end

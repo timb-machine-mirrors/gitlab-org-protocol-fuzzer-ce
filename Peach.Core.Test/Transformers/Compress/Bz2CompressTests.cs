@@ -56,7 +56,7 @@ namespace Peach.Core.Test.Transformers.Compress
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             Assert.AreEqual(1, values.Count);
@@ -102,7 +102,7 @@ namespace Peach.Core.Test.Transformers.Compress
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			var blk = dataModels[0][0] as Dom.Block;

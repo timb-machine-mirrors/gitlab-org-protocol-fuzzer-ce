@@ -52,11 +52,11 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
-            Assert.AreEqual(6, dataModels.Count);
+            Assert.AreEqual(5, dataModels.Count);
 
             Assert.AreEqual(5, dataModels[0].Count);
             Assert.AreEqual("num0", dataModels[0][0].name);
@@ -92,13 +92,6 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num2", dataModels[4][2].name);
             Assert.AreEqual("num4", dataModels[4][3].name);
             Assert.AreEqual("num3", dataModels[4][4].name);
-
-            Assert.AreEqual(5, dataModels[5].Count);
-            Assert.AreEqual("num0", dataModels[5][0].name);
-            Assert.AreEqual("num1", dataModels[5][1].name);
-            Assert.AreEqual("num2", dataModels[5][2].name);
-            Assert.AreEqual("num3", dataModels[5][3].name);
-            Assert.AreEqual("num4", dataModels[5][4].name);
         }
 
         [Test]
@@ -141,12 +134,12 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             DataElementContainer blk = null;
 
-            Assert.AreEqual(7, dataModels.Count);
+            Assert.AreEqual(5, dataModels.Count);
 
             Assert.AreEqual(1, dataModels[0].Count);
             blk = dataModels[0][0] as DataElementContainer;
@@ -159,19 +152,8 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num3", blk[3].name);
             Assert.AreEqual("num4", blk[4].name);
 
-            Assert.AreEqual(1, dataModels[1].Count);
-            blk = dataModels[1][0] as DataElementContainer;
-            Assert.NotNull(blk);
-            Assert.AreEqual("blk", blk.name);
-            Assert.AreEqual(5, blk.Count);
-            Assert.AreEqual("num0", blk[0].name);
-            Assert.AreEqual("num1", blk[1].name);
-            Assert.AreEqual("num2", blk[2].name);
-            Assert.AreEqual("num3", blk[3].name);
-            Assert.AreEqual("num4", blk[4].name);
-
             Assert.AreEqual(1, dataModels[2].Count);
-            blk = dataModels[2][0] as DataElementContainer;
+            blk = dataModels[1][0] as DataElementContainer;
             Assert.NotNull(blk);
             Assert.AreEqual("blk", blk.name);
             Assert.AreEqual(5, blk.Count);
@@ -181,8 +163,8 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num3", blk[3].name);
             Assert.AreEqual("num4", blk[4].name);
 
-            Assert.AreEqual(1, dataModels[3].Count);
-            blk = dataModels[3][0] as DataElementContainer;
+            Assert.AreEqual(1, dataModels[2].Count);
+            blk = dataModels[2][0] as DataElementContainer;
             Assert.NotNull(blk);
             Assert.AreEqual("blk", blk.name);
             Assert.AreEqual(5, blk.Count);
@@ -192,8 +174,8 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num3", blk[3].name);
             Assert.AreEqual("num4", blk[4].name);
 
-            Assert.AreEqual(1, dataModels[4].Count);
-            blk = dataModels[4][0] as DataElementContainer;
+            Assert.AreEqual(1, dataModels[3].Count);
+            blk = dataModels[3][0] as DataElementContainer;
             Assert.NotNull(blk);
             Assert.AreEqual("blk", blk.name);
             Assert.AreEqual(5, blk.Count);
@@ -203,8 +185,8 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num2", blk[3].name);
             Assert.AreEqual("num4", blk[4].name);
 
-            Assert.AreEqual(1, dataModels[5].Count);
-            blk = dataModels[5][0] as DataElementContainer;
+            Assert.AreEqual(1, dataModels[4].Count);
+            blk = dataModels[4][0] as DataElementContainer;
             Assert.NotNull(blk);
             Assert.AreEqual("blk", blk.name);
             Assert.AreEqual(5, blk.Count);
@@ -213,18 +195,6 @@ namespace Peach.Core.Test.Mutators
             Assert.AreEqual("num2", blk[2].name);
             Assert.AreEqual("num4", blk[3].name);
             Assert.AreEqual("num3", blk[4].name);
-
-            Assert.AreEqual(1, dataModels[6].Count);
-            blk = dataModels[6][0] as DataElementContainer;
-            Assert.NotNull(blk);
-            Assert.AreEqual("blk", blk.name);
-            Assert.AreEqual(5, blk.Count);
-            Assert.AreEqual("num0", blk[0].name);
-            Assert.AreEqual("num1", blk[1].name);
-            Assert.AreEqual("num2", blk[2].name);
-            Assert.AreEqual("num3", blk[3].name);
-            Assert.AreEqual("num4", blk[4].name);
-
         }
 
 		[Test]
@@ -262,14 +232,56 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(2, strategies.Count);
+			Assert.AreEqual(1, strategies.Count);
 			Assert.AreEqual("DataElementSwapNearNodesMutator | TheModel.flags", strategies[0]);
-			Assert.AreEqual("DataElementSwapNearNodesMutator | TheModel.str", strategies[1]);
 		}
 
+		[Test]
+		public void NoSwapNoNextSibling()
+		{
+			// If an element has no next sibling, don't try and swap it
+			string xml = @"
+<Peach>
+	<DataModel name=""TheModel"">
+		<Block>
+			<String value=""Hello""/>
+			<String value=""World""/>
+		</Block>
+	</DataModel>
+
+	<StateModel name=""TheState"" initialState=""Initial"">
+		<State name=""Initial"">
+			<Action type=""output"">
+				<DataModel ref=""TheModel""/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name=""Default"">
+		<StateModel ref=""TheState""/>
+		<Publisher class=""Null""/>
+		<Strategy class=""Sequential""/>
+	</Test>
+</Peach>
+";
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string>();
+			dom.tests[0].includedMutators.Add("DataElementSwapNearNodesMutator");
+
+			var config = new RunConfiguration();
+
+			var e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			// 2 Data models, 1 control and 1 with Hello & World swapped
+			Assert.AreEqual(2, dataModels.Count);
+			Assert.AreEqual(Encoding.ASCII.GetBytes("HelloWorld"), dataModels[0].Value.ToArray());
+			Assert.AreEqual(Encoding.ASCII.GetBytes("WorldHello"), dataModels[1].Value.ToArray());
+		}
     }
 }
 

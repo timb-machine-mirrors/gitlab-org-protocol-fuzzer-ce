@@ -51,7 +51,7 @@ namespace Peach.Core.Dom
 	[Parameter("name", typeof(string), "Model name", "")]
 	[Parameter("ref", typeof(string), "Model to reference", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
-	public class DataModel : Block
+	public class DataModel : Block, IOwned<Dom>, IOwned<ActionData>
 	{
 		/// <summary>
 		/// Dom parent of data model if any
@@ -79,7 +79,7 @@ namespace Peach.Core.Dom
 		/// This variable is one of those parent holders.
 		/// </remarks>
 		[NonSerialized]
-		public Action action = null;
+		public ActionData actionData = null;
 
 		public DataModel()
 		{
@@ -90,7 +90,24 @@ namespace Peach.Core.Dom
 		{
 		}
 
-		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public delegate void ActionRunEventHandler(RunContext ctx);
+
+		[NonSerialized]
+		private ActionRunEventHandler actionRunEvent;
+
+		public event ActionRunEventHandler ActionRun
+		{
+			add { actionRunEvent += value; }
+			remove { actionRunEvent -= value; }
+		}
+
+		public void Run(RunContext context)
+		{
+			if (actionRunEvent != null)
+				actionRunEvent(context);
+		}
+
+		public static DataModel PitParser(PitParser context, XmlNode node, Dom dom)
 		{
 			string name = node.getAttr("name", null);
 			string refName = node.getAttr("ref", null);
@@ -99,7 +116,7 @@ namespace Peach.Core.Dom
 
 			if (refName != null)
 			{
-				var refObj = context.getReference(refName, parent) as DataModel;
+				var refObj = dom.getRef<DataModel>(refName, a => a.dataModels);
 				if (refObj == null)
 					throw new PeachException("Error, DataModel {0}could not resolve ref '{1}'. XML:\n{2}".Fmt(
 						name == null ? "" : "'" + name + "' ", refName, node.OuterXml));
@@ -119,12 +136,18 @@ namespace Peach.Core.Dom
 				dataModel = new DataModel(name);
 			}
 
+			dataModel.dom = dom;
+
 			context.handleCommonDataElementAttributes(node, dataModel);
 			context.handleCommonDataElementChildren(node, dataModel);
 			context.handleDataElementContainer(node, dataModel);
 
 			return dataModel;
 		}
+
+		Dom IOwned<Dom>.parent { get { return dom; } set { dom = value; } }
+
+		ActionData IOwned<ActionData>.parent { get { return actionData; } set { actionData = value; } }
 	}
 }
 

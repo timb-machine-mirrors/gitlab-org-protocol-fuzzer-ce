@@ -25,98 +25,12 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		private Publisher _publisher = null;
-		private BitwiseStream _stream = null;
-		int _remotingWaitTime = 1000 * 60 * 1;
+		private Peach.Core.Agent.IPublisher publisher;
 
 		public RemotePublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			this.Args = args;
-
-			stream = new MemoryStream();
-		}
-
-		/// <summary>
-		/// Perform our remoting call with a forced timeout.
-		/// </summary>
-		/// <param name="method"></param>
-		protected void PerformRemoting(ThreadStart method)
-		{
-			Exception remotingException = null;
-
-			var thread = new System.Threading.Thread(delegate()
-			{
-				try
-				{
-					method();
-				}
-				catch (Exception ex)
-				{
-					remotingException = ex;
-				}
-			});
-
-			thread.Start();
-			if (thread.Join(_remotingWaitTime))
-			{
-				if (remotingException != null)
-				{
-					if (remotingException is PeachException)
-						throw new PeachException(remotingException.Message, remotingException);
-
-					if (remotingException is SoftException)
-						throw new SoftException(remotingException.Message, remotingException);
-
-					if (remotingException is RemotingException)
-						throw new RemotingException(remotingException.Message, remotingException);
-
-					throw new AgentException(remotingException.Message, remotingException);
-				}
-			}
-			else
-			{
-				throw new RemotingException("Remoting call timed out.");
-			}
-		}
-
-		protected RunContext Context
-		{
-			get
-			{
-				Dom.Dom dom = this.Test.parent as Dom.Dom;
-				return dom.context;
-			}
-		}
-
-		public override Test Test
-		{
-			get { return base.Test; }
-			set { base.Test = value; }
-		}
-
-		protected void RestartRemotePublisher()
-		{
-			try
-			{
-				logger.Debug("Restarting remote publisher");
-
-				_stream = Context.agentManager.CreateBitwiseStream(Agent);
-				_publisher = Context.agentManager.CreatePublisher(Agent, Class, Args);
-				_publisher.Iteration = Iteration;
-				_publisher.IsControlIteration = IsControlIteration;
-				_publisher.start();
-			}
-			catch(Exception ex)
-			{
-				// Allow iteration to complete in case there is a latent
-				// fault we must catch, then exit.
-				//Context.agentManager.mustStopDueToError = true;
-
-				logger.Warn("Ignoring exception on remote publisher restart.  Will exit on MustStop. [" + ex.Message + "]");
-
-				throw new SoftException(ex.Message);
-			}
+			Args = args;
 		}
 
 		public override uint Iteration
@@ -129,20 +43,9 @@ namespace Peach.Core.Publishers
 			{
 				base.Iteration = value;
 
-				if (_publisher != null)
-				{
-					try
-					{
-						_publisher.Iteration = value;
-					}
-					catch (System.Runtime.Remoting.RemotingException re)
-					{
-						logger.Trace("Ignoring remoting exception on Iteration set");
-						logger.Trace(re);
-
-						RestartRemotePublisher();
-					}
-				}
+				// Can be null if called before start()
+				if (publisher != null)
+					publisher.Iteration = value;
 			}
 		}
 
@@ -156,20 +59,9 @@ namespace Peach.Core.Publishers
 			{
 				base.IsControlIteration = value;
 
-				if (_publisher != null)
-				{
-					try
-					{
-						_publisher.IsControlIteration = value;
-					}
-					catch (System.Runtime.Remoting.RemotingException re)
-					{
-						logger.Trace("Ignoring remoting exception on IsControlIteration set");
-						logger.Trace(re);
-
-						RestartRemotePublisher();
-					}
-				}
+				// Can be null if called before start()
+				if (publisher != null)
+					publisher.IsControlIteration = value;
 			}
 		}
 
@@ -177,279 +69,82 @@ namespace Peach.Core.Publishers
 		{
 			get
 			{
-				return _publisher.Result;
-			}
-			set
-			{
-				_publisher.Result = value;
+				return publisher.Result;
 			}
 		}
 
 		protected override void OnStart()
 		{
-			logger.Debug(">> OnStart");
-			_stream = Context.agentManager.CreateBitwiseStream(Agent);
-			_publisher = Context.agentManager.CreatePublisher(Agent, Class, Args);
-			_publisher.Iteration = Iteration;
-			_publisher.IsControlIteration = IsControlIteration;
-			_publisher.start();
+			publisher = Test.parent.context.agentManager.CreatePublisher(Agent, Class, Args);
+
+			publisher.Iteration = Iteration;
+			publisher.IsControlIteration = IsControlIteration;
+			publisher.Start();
+
+			stream = publisher.Stream;
 		}
 
 		protected override void OnStop()
 		{
-			try
-			{
-				PerformRemoting(delegate() { _publisher.stop(); });
-			}
-			catch (System.Runtime.Remoting.RemotingException re)
-			{
-				logger.Trace("Ignoring remoting exception on OnClose");
-				logger.Trace(re);
-			}
+			// Stream is managed by IPublisher
+			stream = null;
 
-			_publisher = null;
+			// Might be null if start() threw an exception
+			if (publisher != null)
+				publisher.Stop();
 		}
 
 		protected override void OnOpen()
 		{
-			try
-			{
-				PerformRemoting(delegate() { _publisher.open(); });
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnOpen");
-				logger.Trace(ex);
-
-				RestartRemotePublisher();
-
-				try
-				{
-					PerformRemoting(delegate() { _publisher.open(); });
-				}
-				catch(System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Trace("Ignoring remoting exception on OnOpen");
-					logger.Trace(re);
-				}
-			}
+			publisher.Open();
 		}
 
 		protected override void OnClose()
 		{
-			try
-			{
-				PerformRemoting(delegate() { _publisher.close(); });
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnClose");
-				logger.Trace(ex);
-
-				try
-				{
-					RestartRemotePublisher();
-					_publisher.close();
-				}
-				catch (System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Warn("Ignoring remoting exception on OnClose");
-					logger.Debug(re);
-				}
-			}
+			publisher.Close();
 		}
 
 		protected override void OnAccept()
 		{
-			try
-			{
-				PerformRemoting(delegate() { _publisher.accept(); });
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnAccept");
-				logger.Trace(ex);
-
-				RestartRemotePublisher();
-
-				try
-				{
-					PerformRemoting(delegate() { _publisher.accept(); });
-				}
-				catch (System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Trace("Ignoring remoting exception on OnAccept");
-					logger.Trace(re);
-				}
-				
-			}
+			publisher.Accept();
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
-			try
-			{
-				Variant ret = null;
-				PerformRemoting(delegate() { ret = _publisher.call(method, args); });
-				return ret;
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnCall");
-				logger.Trace(ex);
-
-				try
-				{
-					RestartRemotePublisher();
-					return _publisher.call(method, args);
-				}
-				catch (System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Warn("Ignoring remoting exception on OnCall");
-					logger.Debug(re);
-					return null;
-				}
-			}
+			return publisher.Call(method, args);
 		}
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
-			// The Engine always gives us a BitStream but we can't remote that
-			System.Diagnostics.Debug.Assert(value.GetVariantType() == Variant.VariantType.BitStream);
-			var buf = (byte[])value;
-			value = new Variant(buf);
-
-			try
-			{
-				PerformRemoting(delegate() { _publisher.setProperty(property, value); });
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnSetProperty");
-				logger.Trace(ex);
-
-				try
-				{
-					RestartRemotePublisher();
-					_publisher.setProperty(property, value);
-				}
-				catch (System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Warn("Ignoring remoting exception on OnSetProperty");
-					logger.Debug(re);
-				}
-			}
+			publisher.SetProperty(property, value);
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
-			try
-			{
-				Variant ret = null;
-				PerformRemoting(delegate() { ret = _publisher.getProperty(property); });
-				return ret;
-			}
-			catch (System.Runtime.Remoting.RemotingException ex)
-			{
-				logger.Trace("Ignoring initial remoting exception on OnGetProperty");
-				logger.Trace(ex);
-
-				try
-				{
-					RestartRemotePublisher();
-					return _publisher.getProperty(property);
-				}
-				catch (System.Runtime.Remoting.RemotingException re)
-				{
-					logger.Warn("Ignoring remoting exception on OnGetProperty");
-					logger.Debug(re);
-					return null;
-				}
-			}
+			return publisher.GetProperty(property);
 		}
 
 		protected override void OnOutput(BitwiseStream data)
 		{
-			try
-			{
-				PerformRemoting(delegate()
-				{
-					_stream.SetLength(0);
-					data.CopyTo(_stream);
-					_stream.Seek(0, SeekOrigin.Begin);
-					_publisher.output(_stream);
-				});
-			}
-			catch (System.Runtime.Remoting.RemotingException re)
-			{
-				logger.Warn("Ignoring remoting exception on OnOutput");
-				logger.Debug(re);
-			}
+			// Should never get called
+			throw new NotSupportedException();
+		}
+
+		public override void output(DataModel data)
+		{
+			publisher.Output(data);
 		}
 
 		protected override void OnInput()
 		{
-			try
-			{
-				PerformRemoting(delegate() { _publisher.input(); });
-
-				stream.Seek(0, SeekOrigin.Begin);
-				stream.SetLength(0);
-
-				ReadAllBytes();
-			}
-			catch (System.Runtime.Remoting.RemotingException re)
-			{
-				logger.Warn("Ignoring remoting exception on OnInput");
-				logger.Debug(re);
-			}
+			publisher.Input();
 		}
 
 		public override void WantBytes(long count)
 		{
-			try
-			{
-				long need = count - (stream.Length - stream.Position);
-				if (need > 0)
-				{
-					_publisher.WantBytes(need);
-					ReadAllBytes();
-				}
-			}
-			catch (System.Runtime.Remoting.RemotingException re)
-			{
-				logger.Warn("Ignoring remoting exception on WantBytes");
-				logger.Debug(re);
-			}
-		}
-
-		private void ReadAllBytes()
-		{
-			long pos = stream.Position;
-
-			try
-			{
-				for (;;)
-				{
-					int b = -1;
-
-					PerformRemoting(delegate() { b = _publisher.ReadByte(); });
-					
-					if (b == -1)
-					{
-						stream.Seek(pos, SeekOrigin.Begin);
-						return;
-					}
-
-					stream.WriteByte((byte)b);
-				}
-			}
-			catch (System.Runtime.Remoting.RemotingException re)
-			{
-				logger.Warn("Ignoring remoting exception on ReadAllBytes");
-				logger.Debug(re);
-				stream.Seek(pos, SeekOrigin.Begin);
-			}
+			count -= stream.Length - stream.Position;
+			if (count > 0)
+				publisher.WantBytes(count);
 		}
 	}
 }

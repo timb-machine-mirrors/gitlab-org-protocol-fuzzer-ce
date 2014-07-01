@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Crypto
 	[Serializable]
 	public class Md5 : Transformer
 	{
-		public Md5(Dictionary<string, Variant> args)
-			: base(args)
+		public Md5(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

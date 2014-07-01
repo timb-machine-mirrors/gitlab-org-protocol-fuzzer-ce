@@ -52,7 +52,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -132,7 +132,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values (4 models = 1 control + 3 elements to remove)
@@ -176,7 +176,7 @@ namespace Peach.Core.Test.Mutators
 			config.rangeStart = 0;
 			config.rangeStop = 29;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// Ensure we don't crash by trying to run the ArrayVarianceMutator after removing the str data element
@@ -219,7 +219,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, strategies.Count);

@@ -17,9 +17,10 @@ namespace Peach.Core.Fixups
 	/// argument.  A method "fixup" will be called, passing in the element and expecting
 	/// a byte[] array as output.
 	/// </remarks>
-	[Description("A Python or Ruby fixup.")]
-	[Fixup("ScriptFixup", true)]
-	[Parameter("class", typeof(string), "Reference to data element")]
+	[Description("Scripting fixup.")]
+	[Fixup("Script", true)]
+	[Fixup("ScriptFixup")]
+	[Parameter("class", typeof(string), "Scripting fixup class to instantiate")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Serializable]
 	public class ScriptFixup : Fixup
@@ -37,7 +38,7 @@ namespace Peach.Core.Fixups
 				Dictionary<string, object> state = new Dictionary<string, object>();
 				state["fixupSelf"] = this;
 
-				_pythonFixup = Scripting.EvalExpression(
+				_pythonFixup = parent.EvalExpression(
 					string.Format("{0}(fixupSelf)",
 					(string)args["class"]),
 					state);
@@ -62,7 +63,7 @@ namespace Peach.Core.Fixups
 				Dictionary<string, object> state = new Dictionary<string, object>();
 				state["fixupSelf"] = this;
 
-				_pythonFixup = Scripting.EvalExpression(
+				_pythonFixup = parent.EvalExpression(
 					string.Format("{0}(fixupSelf)",
 					(string)args["class"]),
 					state);

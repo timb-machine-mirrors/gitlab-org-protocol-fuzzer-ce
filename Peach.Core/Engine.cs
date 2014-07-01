@@ -336,6 +336,9 @@ namespace Peach.Core
 				context.controlIteration = true;
 				context.controlRecordingIteration = true;
 
+				// Initialize the current iteration prior to the TestStarting event
+				context.currentIteration = iterationStart;
+
 				test.markMutableElements();
 
 				OnTestStarting(context);
@@ -357,6 +360,8 @@ namespace Peach.Core
 
 				while ((firstRun || iterationCount <= iterationStop) && context.continueFuzzing)
 				{
+					context.currentIteration = iterationCount;
+
 					firstRun = false;
 
 					// Clear out or iteration based state store

@@ -34,8 +34,9 @@ using Peach.Core.Dom;
 
 namespace Peach.Core.Fixups
 {
-	[Description("XOR bytes of data.")]
-	[Fixup("ExpressionFixup", true)]
+	[Description("Provide scripting expression to perform fixup.")]
+	[Fixup("Expression", true)]
+	[Fixup("ExpressionFixup")]
 	[Fixup("checksums.ExpressionFixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Parameter("expression", typeof(string), "Expression returning string or int")]
@@ -60,7 +61,7 @@ namespace Peach.Core.Fixups
 			state["data"] = from.Value;
 			try
 			{
-				object value = Scripting.EvalExpression(expression, state);
+				object value = parent.EvalExpression(expression, state);
 
 				if (value is string)
 				{

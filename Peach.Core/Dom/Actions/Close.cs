@@ -3,6 +3,7 @@ using System;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Close")]
+	[Serializable]
 	public class Close : Action
 	{
 		protected override void OnRun(Publisher publisher, RunContext context)

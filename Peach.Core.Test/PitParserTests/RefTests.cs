@@ -253,7 +253,7 @@ namespace Peach.Core.Test.PitParserTests
 			Peach.Core.Dom.Array BlockArray = dom.dataModels[1][0] as Peach.Core.Dom.Array;
 			Assert.NotNull(BlockArray);
 
-			Block ReferencedBlock = ((Block)BlockArray.origionalElement);
+			Block ReferencedBlock = ((Block)BlockArray.OriginalElement);
 			Assert.AreEqual(3, ReferencedBlock.Count);
 			Assert.AreEqual("Str1", ReferencedBlock[0].name);
 			Assert.AreEqual("Str2", ReferencedBlock[1].name);

@@ -184,8 +184,8 @@ namespace Peach.Core.Transformers.Encode
 
 		#endregion
 
-		public Hex(Dictionary<string, Variant> args)
-			: base(args)
+		public Hex(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

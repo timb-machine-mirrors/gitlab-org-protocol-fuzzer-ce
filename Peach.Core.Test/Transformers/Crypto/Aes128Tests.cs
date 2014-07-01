@@ -108,7 +108,7 @@ namespace Peach.Core.Test.Transformers.Crypto
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values

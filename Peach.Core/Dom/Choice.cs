@@ -123,7 +123,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "Choice")
 				return null;
 
-			Choice choice = DataElement.Generate<Choice>(node);
+			Choice choice = DataElement.Generate<Choice>(node, parent);
 			choice.parent = parent;
 
 			context.handleCommonDataElementAttributes(node, choice);
@@ -142,17 +142,18 @@ namespace Peach.Core.Dom
 			return choice;
 		}
 
-		public override void ClearBindings(bool remove)
-		{
-			base.ClearBindings(remove);
-
-			foreach (var item in choiceElements)
-				item.Value.ClearBindings(remove);
-		}
-
 		public override void RemoveAt(int index)
 		{
-			base.RemoveAt(index);
+			// Choices only have a single child, the chosen element
+			if (index != 0 || Count != 1)
+				throw new ArgumentOutOfRangeException("index");
+
+			// Call clear so that we don't reset the parent
+			// of our chosen element.
+			// Also reset our selected element so GetChildren()
+			// will return our choices.
+			_selectedElement = null;
+			Clear();
 
 			if (this.Count == 0)
 				parent.Remove(this);
@@ -190,83 +191,31 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
+		protected override IEnumerable<DataElement> Children()
 		{
-			// First our children
-			foreach (DataElement child in this)
-				yield return child;
-
-			// Next our children's children
-			foreach (DataElement child in this)
-			{
-				if (!knownParents.Contains(child))
-				{
-					foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-						yield return subChild;
-				}
-			}
-
-			if (_selectedElement == null)
-			{
-				foreach (DataElement child in choiceElements.Values)
-					yield return child;
-
-				// Next our children's children
-				foreach (DataElement child in choiceElements.Values)
-				{
-					if (!knownParents.Contains(child))
-					{
-						foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-							yield return subChild;
-					}
-				}
-			}
+			// Return choices if we haven't chosen yet
+			if (_selectedElement != null)
+				return base.Children();
+			else
+				return choiceElements.Values;
 		}
 
-		protected override Variant GenerateInternalValue()
+		protected override DataElement GetChild(string name)
 		{
-			Variant value;
-
-			// 1. Default value
-
+			DataElement ret;
 			if (_selectedElement == null)
+				choiceElements.TryGetValue(name, out ret);
+			else
+				TryGetValue(name, out ret);
+			return ret;
+		}
+
+		protected override Variant GenerateDefaultValue()
+		{
+			if (SelectedElement == null)
 				SelectDefault();
 
-			if (_mutatedValue == null)
-				value = new Variant(SelectedElement.Value);
-
-			else
-				value = MutatedValue;
-
-			// 2. Relations
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
-				return MutatedValue;
-			}
-
-			foreach (var r in relations.From<Relation>())
-			{
-				// CalculateFromValue can return null sometimes
-				// when mutations mess up the relation.
-				// In that case use the exsiting value for this element.
-
-				var relationValue = r.CalculateFromValue();
-				if (relationValue != null)
-					value = relationValue;
-			}
-
-			// 3. Fixup
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
-				return MutatedValue;
-			}
-
-			if (_fixup != null)
-				value = _fixup.fixup(this);
-
-			return value;
+			return new Variant(SelectedElement.Value);
 		}
 	}
 }

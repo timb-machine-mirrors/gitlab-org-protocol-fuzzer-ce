@@ -64,8 +64,8 @@ namespace Peach.Core.Transformers.Crypto
 
 		byte marker = 0x41; // 'A'
 
-		public CvsScramble(Dictionary<string, Variant> args)
-			: base(args)
+		public CvsScramble(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

@@ -13,8 +13,8 @@ namespace Peach.Core.Transformers
 	[Serializable]
 	public class Null : Transformer
 	{
-		public Null(Dictionary<string, Variant> args)
-			: base(args)
+		public Null(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

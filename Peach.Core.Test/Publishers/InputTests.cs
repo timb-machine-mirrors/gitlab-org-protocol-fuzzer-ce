@@ -95,7 +95,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, this.actions.Count);

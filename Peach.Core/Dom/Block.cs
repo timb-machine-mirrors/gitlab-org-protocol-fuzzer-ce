@@ -79,10 +79,11 @@ namespace Peach.Core.Dom
 
 			if (node.hasAttr("ref"))
 			{
-				string name = node.getAttr("name", null);
-				string refName = node.getAttrString("ref");
+				var name = node.getAttr("name", null);
+				var refName = node.getAttrString("ref");
+				var dom = ((DataModel)parent.root).dom;
+				var refObj = dom.getRef(refName, parent);
 
-				DataElement refObj = context.getReference(refName, parent);
 				if (refObj == null)
 					throw new PeachException("Error, Block {0}could not resolve ref '{1}'. XML:\n{2}".Fmt(
 						name == null ? "" : "'" + name + "' ", refName, node.OuterXml));
@@ -101,7 +102,7 @@ namespace Peach.Core.Dom
 			}
 			else
 			{
-				block = DataElement.Generate<Block>(node);
+				block = DataElement.Generate<Block>(node, parent);
 				block.parent = parent;
 			}
 
@@ -112,58 +113,18 @@ namespace Peach.Core.Dom
 			return block;
 		}
 
-		protected override Variant GenerateInternalValue()
+		protected override Variant GenerateDefaultValue()
 		{
-			Variant value;
+			var stream = new BitStreamList() { Name = fullName };
 
-			// 1. Default value
-
-			if (_mutatedValue == null)
+			foreach (var child in this)
 			{
-				var stream = new BitStreamList() { Name = fullName };
-				foreach (var child in this)
-				{
-					var val = child.Value;
-					val.Name = child.fullName;
-					stream.Add(val);
-				}
-
-				value = new Variant(stream);
-			}
-			else
-			{
-				value = MutatedValue;
+				var val = child.Value;
+				val.Name = child.fullName;
+				stream.Add(val);
 			}
 
-			// 2. Relations
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
-			{
-				return MutatedValue;
-			}
-
-			foreach (var r in relations.From<Relation>())
-			{
-				// CalculateFromValue can return null sometimes
-				// when mutations mess up the relation.
-				// In that case use the exsiting value for this element.
-
-				var relationValue = r.CalculateFromValue();
-				if (relationValue != null)
-					value = relationValue;
-			}
-
-			// 3. Fixup
-
-			if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
-			{
-				return MutatedValue;
-			}
-
-			if (_fixup != null)
-				value = _fixup.fixup(this);
-
-			return value;
+			return new Variant(stream);
 		}
 	}
 }

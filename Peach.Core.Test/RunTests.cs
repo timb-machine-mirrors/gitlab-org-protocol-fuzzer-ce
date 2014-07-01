@@ -442,12 +442,12 @@ namespace Peach.Core.Test
 			var defs = PitParser.parseDefines(temp2);
 
 			Assert.AreEqual(3, defs.Count);
-			Assert.True(defs.ContainsKey("k1"));
-			Assert.True(defs.ContainsKey("k2"));
-			Assert.True(defs.ContainsKey("k2"));
-			Assert.AreEqual("override", defs["k1"]);
-			Assert.AreEqual("v2", defs["k2"]);
-			Assert.AreEqual("v3", defs["k3"]);
+			Assert.AreEqual("k1", defs[0].Key);
+			Assert.AreEqual("k2", defs[1].Key);
+			Assert.AreEqual("k3", defs[2].Key);
+			Assert.AreEqual("override", defs[0].Value);
+			Assert.AreEqual("v2", defs[1].Value);
+			Assert.AreEqual("v3", defs[2].Value);
 		}
 
 		[Test]

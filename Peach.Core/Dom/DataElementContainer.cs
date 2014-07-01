@@ -48,7 +48,7 @@ namespace Peach.Core.Dom
 	/// data elements.  Such as Block, Choice, or Flags.
 	/// </summary>
 	[Serializable]
-	public abstract class DataElementContainer : DataElement, IEnumerable<DataElement>, IList<DataElement>
+	public abstract class DataElementContainer : DataElement, IList<DataElement>
 	{
 		protected List<DataElement> _childrenList = new List<DataElement>();
 		protected Dictionary<string, DataElement> _childrenDict = new Dictionary<string, DataElement>();
@@ -60,6 +60,54 @@ namespace Peach.Core.Dom
 		public DataElementContainer(string name)
 			: base(name)
 		{
+		}
+
+		/// <summary>
+		/// Called before the item is going to be added
+		/// </summary>
+		/// <param name="item"></param>
+		protected virtual void OnInsertItem(DataElement item)
+		{
+			item.parent = this;
+
+			Invalidate();
+		}
+
+		/// <summary>
+		/// Called after the item has been removed
+		/// </summary>
+		/// <param name="item"></param>
+		protected virtual void OnRemoveItem(DataElement item)
+		{
+			item.parent = null;
+
+			// Clear any bindings this element has to other elements
+			foreach (var elem in item.PreOrderTraverse())
+			{
+				foreach (var rel in elem.relations.ToArray())
+				{
+					rel.From.relations.Remove(rel);
+					rel.Clear();
+				}
+			}
+
+			Invalidate();
+		}
+
+		/// <summary>
+		/// Called before oldItem is going to be replaced with newItem
+		/// </summary>
+		/// <param name="oldItem"></param>
+		/// <param name="newItem"></param>
+		protected virtual void OnSetItem(DataElement oldItem, DataElement newItem)
+		{
+			oldItem.parent = null;
+
+			newItem.UpdateBindings(oldItem);
+
+			newItem.parent = this;
+
+			Invalidate();
 		}
 
 		public override void Crack(DataCracker context, BitStream data, long? size)
@@ -95,50 +143,11 @@ namespace Peach.Core.Dom
 				data.SeekBits(startPosition + size.Value, System.IO.SeekOrigin.Begin);
 		}
 
-		public override bool isLeafNode
-		{
-			get
-			{
-				return _childrenList.Count == 0;
-			}
-		}
-
-		public DataElement QuickNameMatch(string[] names)
-		{
-			if (names.Length == 0)
-				throw new ArgumentException("Array must contain at least one entry.", "names");
-
-			if (this.name != names[0])
-				return null;
-
-			DataElement ret = this;
-			for (int cnt = 1; cnt < names.Length; cnt++)
-			{
-				var cont = ret as DataElementContainer;
-				if (cont == null)
-					return null;
-
-				var choice = cont as Choice;
-				if (choice != null && choice.SelectedElement == null)
-				{
-					if (!choice.choiceElements.TryGetValue(names[cnt], out ret))
-						return null;
-				}
-				else
-				{
-					if (!cont._childrenDict.TryGetValue(names[cnt], out ret))
-						return null;
-				}
-			}
-
-			return ret;
-		}
-
 		public string UniqueName(string name)
 		{
 			string ret = name;
 
-			for (int i = 1; ContainsKey(ret); ++i)
+			for (int i = 1; _childrenDict.ContainsKey(ret); ++i)
 			{
 				ret = string.Format("{0}_{1}", name, i);
 			}
@@ -195,73 +204,16 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Recursively execute analyzers
-		/// </summary>
-		public override void evaulateAnalyzers()
+		protected override IEnumerable<DataElement> Children()
 		{
-			foreach (DataElement child in this._childrenList.ToArray())
-				child.evaulateAnalyzers();
-
-			if (analyzer == null)
-				return;
-
-			analyzer.asDataElement(this, null);
+			return this;
 		}
 
-		/// <summary>
-		/// Does container contain child element with name key?
-		/// </summary>
-		/// <param name="key">Name of child element to check</param>
-		/// <returns>Returns true if child exits</returns>
-		public bool ContainsKey(string key)
+		protected override DataElement GetChild(string name)
 		{
-			return _childrenDict.ContainsKey(key);
-		}
-
-		/// <summary>
-		/// Enumerate all child elements recursevely.
-		/// </summary>
-		/// <remarks>
-		/// This method will return this objects direct children
-		/// and finally recursevely return children's children.
-		/// </remarks>
-		/// <param name="knownParents">List of known parents to skip</param>
-		/// <returns></returns>
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
-		{
-			// First our children
-			foreach (DataElement child in this)
-				yield return child;
-
-			// Next our children's children
-			foreach (DataElement child in this)
-			{
-				if (!knownParents.Contains(child))
-				{
-					foreach (DataElement subChild in child.EnumerateAllElements(knownParents))
-						yield return subChild;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Check if we are a parent of an element.  This is
-		/// true even if we are not the direct parent, but several
-		/// layers up.
-		/// </summary>
-		/// <param name="element">Element to check</param>
-		/// <returns>Returns true if we are a parent of element.</returns>
-		public bool isParentOf(DataElement element)
-		{
-			while (element.parent != null && element.parent is DataElement)
-			{
-				element = element.parent;
-				if (element == this)
-					return true;
-			}
-
-			return false;
+			DataElement ret;
+			TryGetValue(name, out ret);
+			return ret;
 		}
 
 		/// <summary>
@@ -295,7 +247,18 @@ namespace Peach.Core.Dom
 			sb.Append("\n");
 		}
 
-		public DataElement this[int index]
+		/// <summary>
+		/// Does container contain child element with name key?
+		/// </summary>
+		/// <param name="key">Name of child element to check</param>
+		/// <param name="value">Gets the element named 'key'.</param>
+		/// <returns>Returns true if child exits</returns>
+		public virtual bool TryGetValue(string key, out DataElement value)
+		{
+			return _childrenDict.TryGetValue(key, out value);
+		}
+
+		public virtual DataElement this[int index]
 		{
 			get { return _childrenList[index]; }
 			set
@@ -303,14 +266,10 @@ namespace Peach.Core.Dom
 				if (value == null)
 					throw new ArgumentNullException("value");
 
-				if (index == _childrenList.Count)
-				{
-					Insert(index, value);
-					return;
-				}
+				if (index >= _childrenList.Count)
+					throw new ArgumentOutOfRangeException("index");
 
 				var oldElem = _childrenList[index];
-				oldElem.parent = null;
 
 				_childrenDict.Remove(oldElem.name);
 				_childrenList.RemoveAt(index);
@@ -318,15 +277,11 @@ namespace Peach.Core.Dom
 				_childrenDict.Add(value.name, value);
 				_childrenList.Insert(index, value);
 
-				value.UpdateBindings(oldElem);
-
-				value.parent = this;
-
-				Invalidate();
+				OnSetItem(oldElem, value);
 			}
 		}
 
-		public DataElement this[string key]
+		public virtual DataElement this[string key]
 		{
 			get { return _childrenDict[key]; }
 			set
@@ -355,14 +310,6 @@ namespace Peach.Core.Dom
 			this[newElem.name] = newElem;
 		}
 
-		public override void ClearBindings(bool remove)
-		{
-			base.ClearBindings(remove);
-
-			foreach (var item in this)
-				item.ClearBindings(remove);
-		}
-
 		public void SwapElements(int first, int second)
 		{
 			if (first >= _childrenList.Count || second >= _childrenList.Count)
@@ -371,6 +318,8 @@ namespace Peach.Core.Dom
 			var tmp = _childrenList[first];
 			_childrenList[first] = _childrenList[second];
 			_childrenList[second] = tmp;
+
+			Invalidate();
 		}
 
 
@@ -387,7 +336,7 @@ namespace Peach.Core.Dom
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return _childrenList.GetEnumerator();
+			return GetEnumerator();
 		}
 
 		#endregion
@@ -405,9 +354,7 @@ namespace Peach.Core.Dom
 			_childrenDict.Add(item.name, item);
 			_childrenList.Insert(index, item);
 
-			item.parent = this;
-
-			Invalidate();
+			OnInsertItem(item);
 		}
 
 		public virtual void RemoveAt(int index)
@@ -417,15 +364,11 @@ namespace Peach.Core.Dom
 
 			System.Diagnostics.Debug.Assert(item.parent == this);
 
-			item.parent = null;
 			bool removed = _childrenDict.Remove(item.name);
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
 
-			// Clear any bindings this element has to other elements
-			item.ClearBindings(false);
-
-			Invalidate();
+			OnRemoveItem(item);
 		}
 
 		#endregion
@@ -438,9 +381,7 @@ namespace Peach.Core.Dom
 			_childrenDict.Add(item.name, item);
 			_childrenList.Add(item);
 
-			item.parent = this;
-
-			Invalidate();
+			OnInsertItem(item);
 		}
 
 		public void Clear()

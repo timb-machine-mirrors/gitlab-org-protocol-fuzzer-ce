@@ -48,7 +48,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -96,7 +96,7 @@ namespace Peach.Core.Test.Mutators
             config.rangeStop = 1000;
             config.randomSeed = 100;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -118,9 +118,8 @@ namespace Peach.Core.Test.Mutators
                     min = dataModels[i].Count;
             }
 
-            // Either duplicates or it doesn't.  This is what Peach 2.3 does, but is it right?
             Assert.AreEqual(1, min);
-            Assert.AreEqual(2, max);
+            Assert.AreEqual(51, max);
         }
 
 		[Test]
@@ -162,7 +161,7 @@ namespace Peach.Core.Test.Mutators
 			config.rangeStart = 0;
 			config.rangeStop = 2;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, iterStrategies.Count);
@@ -207,7 +206,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// 49 mutations of num and 49 mutations of str
@@ -249,13 +248,61 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, strategies.Count);
 			Assert.AreEqual("DataElementDuplicateMutator | TheModel.flags", strategies[0]);
 			Assert.AreEqual("DataElementDuplicateMutator | TheModel.str", strategies[1]);
 		}
+
+		[Test]
+		public void RandomStrategy()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name=""TheModel"">
+		<String value=""1""/>
+	</DataModel>
+
+	<StateModel name=""TheState"" initialState=""Initial"">
+		<State name=""Initial"">
+			<Action type=""output"">
+				<DataModel ref=""TheModel""/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name=""Default"">
+		<StateModel ref=""TheState""/>
+		<Publisher class=""Null""/>
+		<Strategy class=""Random""/>
+	</Test>
+</Peach>
+";
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string>();
+			dom.tests[0].includedMutators.Add("DataElementDuplicateMutator");
+
+			RunConfiguration config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 1;
+			config.rangeStop = 50;
+
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(51, dataModels.Count);
+
+			int len = 0;
+			foreach (var model in dataModels)
+			{
+				len = Math.Max(len, (int)model.Value.Length);
+			}
+			Assert.Greater(len, 25);
+		}
+
     }
 }
 

@@ -21,6 +21,7 @@ namespace Peach.Core
 	/// Provides finding a record by using T.name
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
+	[Serializable]
 	public class NamedCollection<T> : KeyedCollection<string, T>, ITryGetValue<string, T> where T : INamed
 	{
 		private string baseName;

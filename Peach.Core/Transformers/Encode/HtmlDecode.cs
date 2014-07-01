@@ -40,7 +40,8 @@ namespace Peach.Core.Transformers.Encode
     [Serializable]
     public class HtmlDecode : Transformer
     {
-        public HtmlDecode(Dictionary<string, Variant> args) : base(args)
+        public HtmlDecode(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
         }
 

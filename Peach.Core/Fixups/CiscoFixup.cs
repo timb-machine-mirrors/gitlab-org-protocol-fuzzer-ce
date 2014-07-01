@@ -24,7 +24,7 @@ namespace Peach.Core.Fixups.Libraries
 			if (i != count)
 			{
 				if ((buf[count - 1] & 0x80) != 0)
-					sum += (uint)((buf[count - 1] - 1) & 0xff00);
+					sum += (uint)((buf[count - 1] - 1) | 0xff00);
 				else
 					sum += (uint)(buf[count - 1]);
 			}
@@ -32,7 +32,8 @@ namespace Peach.Core.Fixups.Libraries
 	}
 
 
-	[Fixup("CiscoFixup", true)]
+	[Fixup("CiscoCdpChecksum", true)]
+	[Fixup("CiscoFixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Serializable]
 	public class CiscoFixup : Fixup

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("Output")]
+	[Serializable]
 	public class Output : Action
 	{
 		public ActionData data { get; set; }
@@ -29,8 +30,7 @@ namespace Peach.Core.Dom.Actions
 			publisher.start();
 			publisher.open();
 
-			var value = data.dataModel.Value;
-			publisher.output(value);
+			publisher.output(data.dataModel);
 		}
 	}
 }

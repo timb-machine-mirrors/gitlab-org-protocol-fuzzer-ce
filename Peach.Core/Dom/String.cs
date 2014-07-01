@@ -218,7 +218,7 @@ namespace Peach.Core.Dom
 			if (node.Name != "String")
 				return null;
 
-			var str = DataElement.Generate<String>(node);
+			var str = DataElement.Generate<String>(node, parent);
 
 			if (node.hasAttr("nullTerminated"))
 				str.nullTerminated = node.getAttrBool("nullTerminated");
@@ -236,7 +236,6 @@ namespace Peach.Core.Dom
 				throw new PeachException("Error, unknown String type '" + type + "' on element '" + str.name + "'.");
 
 			str.stringType = stringType;
-			str.encoding = Encoding.GetEncoding(stringType.ToString());
 
 			if (node.hasAttr("padCharacter"))
 				str.padCharacter = node.getAttrChar("padCharacter");

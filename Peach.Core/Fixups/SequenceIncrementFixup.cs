@@ -38,12 +38,13 @@ using Action = Peach.Core.Dom.Action;
 namespace Peach.Core.Fixups
 {
 	[Description("Standard sequential increment fixup.")]
-	[Fixup("SequenceIncrementFixup", true)]
+	[Fixup("SequenceIncrement", true)]
+	[Fixup("SequenceIncrementFixup")]
 	[Fixup("sequence.SequenceIncrementFixup")]
 	[Parameter("Offset", typeof(uint?), "Sets the per-iteration initial value to Offset * (Iteration - 1)", "")]
 	[Parameter("Once", typeof(bool), "Only increment once per iteration", "false")]
 	[Serializable]
-	public class SequenceIncrementFixup : Fixup
+	public class SequenceIncrementFixup : VolatileFixup
 	{
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }
@@ -54,45 +55,25 @@ namespace Peach.Core.Fixups
 			ParameterParser.Parse(this, args);
 		}
 
-		void StateModel_Finished(StateModel model)
+		protected override Variant OnActionRun(RunContext ctx)
 		{
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.StateModel.Finished -= StateModel_Finished;
-		}
+			if (!(parent is Dom.Number) && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
+				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
 
-		void Action_Starting(Action action)
-		{
-			var root = parent.getRoot() as DataModel;
-
-			foreach (var item in action.outputData)
-			{
-				if (item.dataModel == root)
-				{
-					parent.Invalidate();
-					Update(parent, action, Offset, Once, true);
-				}
-			}
-		}
-
-		static Variant Update(DataElement elem, Action action, uint? offset, bool once, bool increment)
-		{
-			if (!(elem is Dom.Number) && !(elem is Dom.String && elem.Hints.ContainsKey("NumericalString")))
-				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + elem.fullName + "'.");
-
-			ulong max = elem is Dom.Number ? ((Dom.Number)elem).MaxValue : ulong.MaxValue;
+			bool increment = true;
+			ulong max = parent is Dom.Number ? ((Dom.Number)parent).MaxValue : ulong.MaxValue;
 			ulong value = 0;
 			object obj = null;
 
-			string key = "SequenceIncrementFixup." + elem.fullName;
-			Dom.Dom dom = action.parent.parent.parent as Dom.Dom;
+			string key = "SequenceIncrementFixup." + parent.fullName;
 
-			if (dom.context.stateStore.TryGetValue(key, out obj))
+			if (ctx.stateStore.TryGetValue(key, out obj))
 				value = (ulong)obj;
 
-			if (dom.context.iterationStateStore.ContainsKey(key))
-				increment &= !once;
-			else if (offset.HasValue)
-				value = (ulong)offset.Value * (dom.context.test.strategy.Iteration - 1);
+			if (ctx.iterationStateStore.ContainsKey(key))
+				increment &= !Once;
+			else if (Offset.HasValue)
+				value = (ulong)Offset.Value * (ctx.currentIteration - 1);
 
 			// For 2 bit number, offset is 2, 2 actions per iter:
 			// Iter:  1a,1b,2a,2b,3a,3b,4a,4b,5a,5b,6a,6b
@@ -108,28 +89,11 @@ namespace Peach.Core.Fixups
 				if (++value > max)
 					value -= max;
 
-				dom.context.stateStore[key] = value;
-				dom.context.iterationStateStore[key] = value;
+				ctx.stateStore[key] = value;
+				ctx.iterationStateStore[key] = value;
 			}
 
 			return new Variant(value);
-		}
-
-		protected override Variant fixupImpl()
-		{
-			DataModel dm = parent.getRoot() as DataModel;
-
-			if (dm == null || dm.action == null)
-				return parent.DefaultValue;
-
-			return Update(parent, dm.action, Offset, Once, false);
-		}
-
-		[OnCloned]
-		private void OnCloned(SequenceIncrementFixup original, object context)
-		{
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.StateModel.Finished += new StateModelFinishedEventHandler(StateModel_Finished);
 		}
 	}
 }

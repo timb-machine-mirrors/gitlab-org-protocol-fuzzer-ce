@@ -56,13 +56,46 @@ namespace Peach.Core.Dom
 	public class Array : Block
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		public int minOccurs = 1;
 		public int maxOccurs = 1;
 		public int occurs = 1;
 
-		public bool hasExpanded = false;
+		private int? countOverride;
 
-		public DataElement origionalElement = null;
+		public int? CountOverride
+		{
+			get
+			{
+				return countOverride;
+			}
+			set
+			{
+				countOverride = value;
+				Invalidate();
+			}
+		}
+
+		private DataElement originalElement;
+
+		public DataElement OriginalElement
+		{
+			get
+			{
+				if (originalElement == null && Count > 0)
+					originalElement = this[0];
+
+				return originalElement;
+			}
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException("value");
+
+				originalElement = value;
+				originalElement.parent = this;
+			}
+		}
 
 		public Array()
 		{
@@ -73,34 +106,28 @@ namespace Peach.Core.Dom
 		{
 		}
 
-		public override IEnumerable<DataElement> EnumerateAllElements(List<DataElement> knownParents)
+		protected override IEnumerable<DataElement> Children()
 		{
-			if (Count == 0)
-			{
-				// Mutation might have erased all of our children
-				if (origionalElement == null)
-					yield break;
+			// If we have entries, just return them
+			if (Count > 0)
+				return this;
 
-				// First our origionalElement
-				yield return origionalElement;
+			// If we don't have entries, just return our original element
+			if (OriginalElement != null)
+				return new DataElement[1] { OriginalElement };
 
-				// Next our origionalElement element's children
-				foreach (var item in origionalElement.EnumerateAllElements(knownParents))
-					yield return item;
-			}
-			else
-			{
-				// Default to our base to enumerate array elements
-				foreach (var item in base.EnumerateAllElements(knownParents))
-					yield return item;
-			}
+			// Mutation might have removed our original element
+			return new DataElement[0];
 		}
 
-		public override void RemoveAt(int index)
+		protected override void OnRemoveItem(DataElement item)
 		{
-			base.RemoveAt(index);
+			base.OnRemoveItem(item);
 
-			if (this.Count == 0 && origionalElement == null)
+			if (item == originalElement)
+				originalElement = null;
+
+			if (this.Count == 0 && OriginalElement == null)
 				parent.Remove(this);
 		}
 
@@ -109,11 +136,10 @@ namespace Peach.Core.Dom
 			long startPos = data.PositionBits;
 			BitStream sizedData = ReadSizedData(data, size);
 
-			if (this.Count > 0)
-			{
-				origionalElement = this[0];
-				Clear();
-			}
+			if (OriginalElement == null)
+				throw new CrackingFailure("{0} has no original element.".Fmt(debugName), this, data);
+
+			Clear();
 
 			long min = minOccurs;
 			long max = maxOccurs;
@@ -134,7 +160,7 @@ namespace Peach.Core.Dom
 			for (int i = 0; max == -1 || i < max; ++i)
 			{
 				logger.Debug("Crack: ======================");
-				logger.Debug("Crack: {0} Trying #{1}", origionalElement.debugName, i+1);
+				logger.Debug("Crack: {0} Trying #{1}", OriginalElement.debugName, i + 1);
 
 				long pos = sizedData.PositionBits;
 				if (pos == sizedData.LengthBits)
@@ -143,7 +169,7 @@ namespace Peach.Core.Dom
 					break;
 				}
 
-				var clone = makeElement(i);
+				var clone = MakeElement(i);
 				Add(clone);
 
 				try
@@ -181,9 +207,26 @@ namespace Peach.Core.Dom
 				data.SeekBits(startPos + sizedData.PositionBits, System.IO.SeekOrigin.Begin);
 		}
 
+		protected override Variant GenerateDefaultValue()
+		{
+			int remain = CountOverride.GetValueOrDefault(Count);
+
+			var stream = new BitStreamList() { Name = fullName };
+
+			for (int i = 0; remain > 0 && i < Count; ++i, --remain)
+				stream.Add(this[i].Value);
+
+			var elem = Count == 0 ? OriginalElement : this[Count - 1];
+
+			while (remain-- > 0)
+				stream.Add(elem.Value);
+
+			return new Variant(stream);
+		}
+
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
-			var array = DataElement.Generate<Array>(node);
+			var array = DataElement.Generate<Array>(node, parent);
 
 			if (node.hasAttr("minOccurs"))
 			{
@@ -204,16 +247,14 @@ namespace Peach.Core.Dom
 			return array;
 		}
 
-		private DataElement makeElement(int index)
+		private DataElement MakeElement(int index)
 		{
-			var clone = origionalElement;
+			var clone = OriginalElement;
 
 			if (index == 0)
-				origionalElement = clone.Clone();
+				OriginalElement = clone.Clone();
 			else
-				clone = clone.Clone(clone.name + "_" + index);
-
-			System.Diagnostics.Debug.Assert(!ContainsKey(clone.name));
+				clone = clone.Clone("{0}_{1}".Fmt(clone.name, index));
 
 			return clone;
 		}
@@ -235,36 +276,22 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// Expands the size of the array to be 'num' long.
-		/// Does this by adding the same instance of the last
-		/// item in the array until the Count is num.
+		/// Expands the size of the array to be 'count' long.
+		/// Does this by adding the same instance of the first
+		/// item in the array until the Count is count.
 		/// </summary>
-		/// <param name="num">The total size the array should be.</param>
-		public void ExpandTo(int num)
+		/// <param name="count">The total size the array should be.</param>
+		public void ExpandTo(int count)
 		{
-			System.Diagnostics.Debug.Assert(Count > 0 || origionalElement != null);
+			System.Diagnostics.Debug.Assert(Count > 0 || OriginalElement != null);
 
-			DataElement item = null;
-			if (Count == 0)
-				item = origionalElement;
-			else
-				item = this[Count - 1];
+			// If we are empty, start by adding our OriginalElement
+			for (int i = Count; i < 1 && i < count; ++i)
+				Add(OriginalElement);
 
-
-			var bs = new BitStream();
-			item.Value.SeekBits(0, System.IO.SeekOrigin.Begin);
-			item.Value.CopyTo(bs);
-
-			var clone = item.Clone();
-			clone.MutatedValue = new Variant(bs);
-			clone.mutationFlags = MutateOverride.Default | MutateOverride.TypeTransform;
-
-			// Force the same element to be duplicated in the DataElementContainer
-			for (int i = Count; i < num; ++i)
-			{
-				_childrenList.Insert(i, clone);
-				_childrenDict[clone.name] = clone;
-			}
+			// Add clones of our original element for the remainder
+			for (int i = Count; i < count; ++i)
+				Add(MakeElement(i));
 
 			Invalidate();
 		}

@@ -68,8 +68,8 @@ namespace Peach.Core.MutationStrategies
 			// Force seed to always be the same
 			context.config.randomSeed = 31337;
 
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.State.Starting += new StateStartingEventHandler(State_Starting);
+			context.ActionStarting += ActionStarting;
+			context.StateStarting += StateStarting;
 			context.engine.IterationFinished += new Engine.IterationFinishedEventHandler(engine_IterationFinished);
 			context.engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
 			_mutators = new List<Type>();
@@ -97,8 +97,8 @@ namespace Peach.Core.MutationStrategies
 		{
 			base.Finalize(context, engine);
 
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.State.Starting -= State_Starting;
+			context.ActionStarting -= ActionStarting;
+			context.StateStarting -= StateStarting;
 			context.engine.IterationStarting -= engine_IterationStarting;
 			context.engine.IterationFinished -= engine_IterationFinished;
 		}
@@ -176,7 +176,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void Action_Starting(Core.Dom.Action action)
+		private void ActionStarting(RunContext context, Dom.Action action)
 		{
 			// Is this a supported action?
 			if (!action.outputData.Any())
@@ -189,7 +189,7 @@ namespace Peach.Core.MutationStrategies
 				RecordDataModel(action);
 		}
 
-		void State_Starting(State state)
+		void StateStarting(RunContext context, State state)
 		{
 			if (_context.controlIteration && _context.controlRecordingIteration)
 			{
@@ -255,7 +255,7 @@ namespace Peach.Core.MutationStrategies
 			var key = "Run_{0}.{1}".Fmt(state.runCount, state.name);
 			if (key == _enumerator.Current.Item1)
 			{
-				OnStateMutating(state, _enumerator.Current.Item2);
+				Context.OnStateMutating(state, _enumerator.Current.Item2);
 				logger.Debug("MutateChangingState: Fuzzing state change: " + state.name);
 				logger.Debug("MutateChangingState: Mutator: " + _enumerator.Current.Item2.name);
 				return _enumerator.Current.Item2.changeState(state);
@@ -276,7 +276,7 @@ namespace Peach.Core.MutationStrategies
 			if (dataElement != null)
 			{
 				var mutator = _enumerator.Current.Item2;
-				OnDataMutating(data, dataElement, mutator);
+				Context.OnDataMutating(data, dataElement, mutator);
 				logger.Debug("ApplyMutation: Fuzzing: " + fullName);
 				logger.Debug("ApplyMutation: Mutator: " + mutator.name);
 				mutator.sequentialMutation(dataElement);

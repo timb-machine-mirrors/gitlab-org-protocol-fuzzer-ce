@@ -239,7 +239,7 @@ namespace Peach.Core.Test
 			config.rangeStart = 0;
 			config.rangeStop = 9;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(10, dataModels.Count);
@@ -305,7 +305,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, dataModels.Count);
@@ -354,7 +354,7 @@ namespace Peach.Core.Test
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(4, actions.Count);
@@ -705,7 +705,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -752,7 +752,7 @@ namespace Peach.Core.Test
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, dataModels.Count);
@@ -866,8 +866,8 @@ namespace Peach.Core.Test
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 
-			array.Add(array.origionalElement.Clone("one"));
-			array.Add(array.origionalElement.Clone("two"));
+			array.Add(array.OriginalElement.Clone("one"));
+			array.Add(array.OriginalElement.Clone("two"));
 
 			var c1 = array[0] as Choice;
 			c1.SelectedElement = c1.choiceElements[0];

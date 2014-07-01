@@ -60,11 +60,11 @@ namespace Peach.Core
 
 		[NonSerialized]
 		private Test _test;
+
 		private bool _hasStarted;
 		private bool _isOpen;
 		private uint _iteration;
 		private bool _isControlIteration;
-		private string _result;
 
 		#endregion
 
@@ -102,8 +102,7 @@ namespace Peach.Core
 		/// </summary>
 		public virtual string Result
 		{
-			get { return _result; }
-			set { _result = value; }
+			get { return null; }
 		}
 
 		#endregion
@@ -324,23 +323,8 @@ namespace Peach.Core
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
 		{
-			long lengthBits = data.LengthBits;
-
-			int extra = 8 - (int)(lengthBits % 8);
-			if (extra != 8)
-			{
-				BitStreamList lst = new BitStreamList();
-				lst.Add(data);
-
-				BitStream pad = new BitStream();
-				pad.WriteBits(0, extra);
-				lst.Add(pad);
-				lengthBits += extra;
-
-				data = lst;
-			}
-
-			Logger.Debug("output({0} bytes)", lengthBits / 8);
+			data = data.PadBits();
+			Logger.Debug("output({0} bytes)", data.Length);
 			OnOutput(data);
 		}
 
@@ -360,6 +344,15 @@ namespace Peach.Core
 		/// <param name="count">The requested byte count</param>
 		public virtual void WantBytes(long count)
 		{
+		}
+
+		/// <summary>
+		/// Send data model
+		/// </summary>
+		/// <param name="dataModel">DataModel to send/write</param>
+		public virtual void output(DataModel dataModel)
+		{
+			output(dataModel.Value);
 		}
 
 		#endregion

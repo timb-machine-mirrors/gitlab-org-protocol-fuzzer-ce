@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Type
 	[Serializable]
 	public class IntToHex : Transformer
 	{
-		public IntToHex(Dictionary<string, Variant> args)
-			: base(args)
+		public IntToHex(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

@@ -51,7 +51,7 @@ class FixupReturningString:
 
 	                            <Test name='Default'>
 		                            <StateModel ref='State'/>
-		                            <Publisher class='Console' />
+		                            <Publisher class='Null' />
 	                            </Test>
                             </Peach>".Fmt(tmpPath, tmpFile);
 
@@ -67,7 +67,7 @@ class FixupReturningString:
                 RunConfiguration config = new RunConfiguration();
                 config.singleIteration = true;
 
-                Engine e = new Engine(null);
+                Engine e = new Engine(this);
                 e.startFuzzing(dom, config);
 
                 // verify values
@@ -78,7 +78,6 @@ class FixupReturningString:
             finally
             {
                 File.Delete(tmpFile);
-                Scripting.Imports.Clear();
             }
         }
     }

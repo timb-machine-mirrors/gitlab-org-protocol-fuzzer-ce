@@ -60,35 +60,147 @@ namespace Peach.Core
 			engine.HaveCount += new Engine.HaveCountEventHandler(Engine_HaveCount);
 			engine.HaveParallel += new Engine.HaveParallelEventHandler(Engine_HaveParallel);
 
-			MutationStrategy.DataMutating += new MutationStrategy.DataMutationEventHandler(MutationStrategy_DataMutating);
-			MutationStrategy.StateMutating += new MutationStrategy.StateMutationEventHandler(MutationStrategy_StateMutating);
-			StateModel.Starting += new StateModelStartingEventHandler(StateModel_Starting);
-			StateModel.Finished += new StateModelFinishedEventHandler(StateModel_Finished);
-			State.Starting += new StateStartingEventHandler(State_Starting);
-			State.Finished += new StateFinishedEventHandler(State_Finished);
-			State.ChangingState += new StateChangingStateEventHandler(State_ChangingState);
-			Core.Dom.Action.Starting += new ActionStartingEventHandler(Action_Starting);
-			Core.Dom.Action.Finished += new ActionFinishedEventHandler(Action_Finished);
+			context.DataMutating += DataMutating;
+			context.StateMutating += StateMutating;
+			context.StateModelStarting += StateModelStarting;
+			context.StateModelFinished += StateModelFinished;
+			context.StateStarting += StateStarting;
+			context.StateFinished += StateFinished;
+			context.StateChanging += StateChanging;
+			context.ActionStarting += ActionStarting;
+			context.ActionFinished += ActionFinished;
+
+			context.AgentConnect += Agent_AgentConnect;
+			context.AgentDisconnect += Agent_AgentDisconnect;
+			context.CreatePublisher += Agent_CreatePublisher;
+			context.StartMonitor += Agent_StartMonitor;
+			context.StopAllMonitors += Agent_StopAllMonitors;
+			context.SessionStarting += Agent_SessionStarting;
+			context.SessionFinished += Agent_SessionFinished;
+			context.IterationStarting += Agent_IterationStarting;
+			context.IterationFinished += Agent_IterationFinished;
+			context.DetectedFault += Agent_DetectedFault;
+			context.GetMonitorData += Agent_GetMonitorData;
+			context.MustStop += Agent_MustStop;
+			context.Message += Agent_Message;
 		}
 
 		public void Finalize(Engine engine, RunContext context)
 		{
-			MutationStrategy.DataMutating -= MutationStrategy_DataMutating;
-			MutationStrategy.StateMutating -= MutationStrategy_StateMutating;
-			StateModel.Starting -= StateModel_Starting;
-			StateModel.Finished -= StateModel_Finished;
-			State.Starting -= State_Starting;
-			State.Finished -= State_Finished;
-			State.ChangingState -= State_ChangingState;
-			Core.Dom.Action.Starting -= Action_Starting;
-			Core.Dom.Action.Finished -= Action_Finished;
+			context.DataMutating -= DataMutating;
+			context.StateMutating -= StateMutating;
+			context.StateModelStarting -= StateModelStarting;
+			context.StateModelFinished -= StateModelFinished;
+			context.StateStarting -= StateStarting;
+			context.StateFinished -= StateFinished;
+			context.StateChanging -= StateChanging;
+			context.ActionStarting -= ActionStarting;
+			context.ActionFinished -= ActionFinished;
+
+			context.AgentConnect -= Agent_AgentConnect;
+			context.AgentDisconnect -= Agent_AgentDisconnect;
+			context.CreatePublisher -= Agent_CreatePublisher;
+			context.StartMonitor -= Agent_StartMonitor;
+			context.StopAllMonitors -= Agent_StopAllMonitors;
+			context.SessionStarting -= Agent_SessionStarting;
+			context.SessionFinished -= Agent_SessionFinished;
+			context.IterationStarting -= Agent_IterationStarting;
+			context.IterationFinished -= Agent_IterationFinished;
+			context.DetectedFault -= Agent_DetectedFault;
+			context.GetMonitorData -= Agent_GetMonitorData;
+			context.MustStop -= Agent_MustStop;
+			context.Message -= Agent_Message;
 		}
 
-		protected virtual void MutationStrategy_DataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		#region Agent Events
+
+		protected virtual void Agent_AgentConnect(RunContext context, AgentClient agent)
 		{
 		}
 
-		protected virtual void MutationStrategy_StateMutating(State state, Mutator mutator)
+		protected virtual void Agent_AgentDisconnect(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args)
+		{
+		}
+
+		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		{
+		}
+
+		protected virtual void Agent_StopAllMonitors(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_SessionStarting(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_SessionFinished(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_IterationStarting(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_IterationFinished(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_DetectedFault(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_GetMonitorData(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_MustStop(RunContext context, AgentClient agent)
+		{
+		}
+
+		protected virtual void Agent_Message(RunContext context, AgentClient agent, string name, Variant data)
+		{
+		}
+
+		#endregion
+
+		protected virtual void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
+		{
+		}
+
+		protected virtual void StateMutating(RunContext context, State state, Mutator mutator)
+		{
+		}
+
+		protected virtual void ActionFinished(RunContext context, Dom.Action action)
+		{
+		}
+
+		protected virtual void ActionStarting(RunContext context, Dom.Action action)
+		{
+		}
+
+		protected virtual void StateChanging(RunContext context, State oldState, State newState)
+		{
+		}
+
+		protected virtual void StateFinished(RunContext context, State state)
+		{
+		}
+
+		protected virtual void StateStarting(RunContext context, State state)
+		{
+		}
+
+		protected virtual void StateModelFinished(RunContext context, StateModel model)
+		{
+		}
+
+		protected virtual void StateModelStarting(RunContext context, StateModel model)
 		{
 		}
 
@@ -97,34 +209,6 @@ namespace Peach.Core
 		}
 
 		protected virtual void Engine_HaveParallel(RunContext context, uint startIteration, uint stopIteration)
-		{
-		}
-
-		protected virtual void Action_Finished(Core.Dom.Action action)
-		{
-		}
-
-		protected virtual void Action_Starting(Core.Dom.Action action)
-		{
-		}
-
-		protected virtual void State_ChangingState(State state, State toState)
-		{
-		}
-
-		protected virtual void State_Finished(State state)
-		{
-		}
-
-		protected virtual void State_Starting(State state)
-		{
-		}
-
-		protected virtual void StateModel_Finished(StateModel model)
-		{
-		}
-
-		protected virtual void StateModel_Starting(StateModel model)
 		{
 		}
 

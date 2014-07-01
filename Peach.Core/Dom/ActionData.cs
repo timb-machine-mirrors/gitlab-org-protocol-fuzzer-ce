@@ -62,7 +62,7 @@ namespace Peach.Core.Dom
 		/// A cached copy of the clean data model.  Has fields/data applied
 		/// when applicable.
 		/// </summary>
-		private DataModel originalDataModel { get; set; }
+		public DataModel originalDataModel { get; private set; }
 
 		/// <summary>
 		/// The name of this record.
@@ -111,7 +111,6 @@ namespace Peach.Core.Dom
 		public void UpdateToOriginalDataModel()
 		{
 			System.Diagnostics.Debug.Assert(dataModel != null);
-			dataModel.action = null;
 
 			// If is the first time through we need to cache a clean data model
 			if (originalDataModel == null)
@@ -123,12 +122,14 @@ namespace Peach.Core.Dom
 					// Cache the model before any cracking has ever occured
 					// since we can't crack into an model that has previously
 					// been cracked (eg: Placement won't work).
+					dataModel.actionData = null;
 					sourceDataModel = dataModel;
 					Apply(option);
 				}
 				else
 				{
 					// Evaulate the full dataModel prior to saving as the original
+					dataModel.actionData = this;
 					var val = dataModel.Value;
 					System.Diagnostics.Debug.Assert(val != null);
 
@@ -138,9 +139,8 @@ namespace Peach.Core.Dom
 			else
 			{
 				dataModel = originalDataModel.Clone() as DataModel;
+				dataModel.actionData = this;
 			}
-
-			dataModel.action = action;
 		}
 
 		/// <summary>
@@ -154,6 +154,7 @@ namespace Peach.Core.Dom
 
 			// Work in a clean copy of the original
 			var copy = sourceDataModel.Clone() as DataModel;
+			copy.actionData = this;
 			option.Apply(copy);
 
 			// Evaulate the full dataModel prior to saving as the original
@@ -193,7 +194,7 @@ namespace Peach.Core.Dom
 			cracker.CrackData(copy, bs);
 
 			dataModel = copy;
-			dataModel.action = action;
+			dataModel.actionData = this;
 		}
 
 		/// <summary>

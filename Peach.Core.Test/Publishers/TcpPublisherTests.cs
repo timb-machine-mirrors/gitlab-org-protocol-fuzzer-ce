@@ -272,7 +272,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -320,7 +320,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -365,7 +365,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
@@ -429,7 +429,7 @@ namespace Peach.Core.Test.Publishers
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
@@ -505,7 +505,7 @@ namespace Peach.Core.Test.Publishers
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(null);
+				Engine e = new Engine(this);
 
 				e.startFuzzing(dom, config);
 
@@ -513,6 +513,60 @@ namespace Peach.Core.Test.Publishers
 				Assert.AreEqual("Hello", dom.tests[0].stateModel.states["InitialState"].actions[1].dataModel.InternalValue.BitsToString());
 				Assert.AreEqual("World", dom.tests[0].stateModel.states["InitialState"].actions[2].dataModel.InternalValue.BitsToString());
 				Assert.AreEqual("World", dom.tests[0].stateModel.states["InitialState"].actions[3].dataModel.InternalValue.BitsToString());
+			}
+		}
+
+		[Test]
+		public void TcpTimeout3()
+		{
+			var listener = new TcpListener(IPAddress.Loopback, 0);
+			listener.Start();
+
+			string xml = @"
+<Peach>
+	<DataModel name=""output"">
+		<String length=""1000000""/>
+	</DataModel>
+
+	<StateModel name=""SM"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action type=""output"">
+				<DataModel ref=""output""/>
+			</Action>
+		</State>
+	</StateModel>
+
+<Test name=""Default"">
+		<StateModel ref=""SM""/>
+		<Publisher class=""TcpClient"">
+			<Param name=""Host"" value=""127.0.0.1""/>
+			<Param name=""Port"" value=""{0}""/>
+			<Param name=""SendTimeout"" value=""1""/>
+		</Publisher>
+	</Test>
+</Peach>".Fmt(((IPEndPoint)listener.LocalEndpoint).Port);
+
+			try
+			{
+				PitParser parser = new PitParser();
+				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+				RunConfiguration config = new RunConfiguration();
+				config.singleIteration = true;
+
+				Engine e = new Engine(this);
+
+				e.startFuzzing(dom, config);
+
+				Assert.Fail("Should throw!");
+			}
+			catch (PeachException ex)
+			{
+				Assert.True(ex.Message.Contains("The operation has timed"));
+			}
+			finally
+			{
+				listener.Stop();
 			}
 		}
 	}

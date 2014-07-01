@@ -45,5 +45,9 @@ namespace Peach.Core
 		}
 	}
 
+	// Top level PitParser has Dom parent and returns a DataModel
+	public delegate DataModel PitParserTopLevelDelegate(PitParser context, XmlNode node, Dom.Dom parent);
+
+	// Child level PitParser has DataElementContainer parent and returns a DataElement
 	public delegate DataElement PitParserDelegate(PitParser context, XmlNode node, DataElementContainer parent);
 }

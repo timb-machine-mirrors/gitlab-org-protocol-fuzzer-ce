@@ -342,7 +342,7 @@ namespace Peach.Core.Test.MutationStrategies
 			config.range = true;
 			config.randomSeed = 12345;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(50, mutations.Count);
@@ -811,7 +811,7 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.Greater(choices[3], 0);
 		}
 
-		private static void RunSwitchTest(string xml, uint start, uint stop)
+		private void RunSwitchTest(string xml, uint start, uint stop)
 		{
 			PitParser parser = new PitParser();
 
@@ -825,7 +825,7 @@ namespace Peach.Core.Test.MutationStrategies
 			config.range = true;
 			config.randomSeed = 12345;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
@@ -873,7 +873,7 @@ namespace Peach.Core.Test.MutationStrategies
 			config.range = true;
 			config.randomSeed = 12345;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 

@@ -17,8 +17,8 @@ namespace Peach.Core.Transformers.Crypto
 
         protected abstract SymmetricAlgorithm GetEncryptionAlgorithm();
 
-        public SymmetricAlgorithmTransformer(Dictionary<string, Variant> args)
-            : base(args)
+        public SymmetricAlgorithmTransformer(DataElement parent, Dictionary<string, Variant> args)
+            : base(parent, args)
         {
             ParameterParser.Parse(this, args);
             GetEncryptionAlgorithm();           //Used for parameter validation

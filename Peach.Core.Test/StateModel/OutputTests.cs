@@ -68,7 +68,7 @@ namespace Peach.Core.Test.StateModel
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			byte [] buff = new byte[stream.Length];
@@ -141,7 +141,7 @@ namespace Peach.Core.Test.StateModel
 			config.rangeStart = 1;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 
@@ -235,7 +235,7 @@ namespace Peach.Core.Test.StateModel
 			config.rangeStart = 1;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 
@@ -303,7 +303,7 @@ namespace Peach.Core.Test.StateModel
 			config.rangeStart = 1;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			foreach (var item in allStrategies)

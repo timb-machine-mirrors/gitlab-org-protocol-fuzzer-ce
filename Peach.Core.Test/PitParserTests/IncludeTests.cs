@@ -393,6 +393,110 @@ namespace Peach.Core.Test.PitParserTests
 			var act = dom.tests[0].stateModel.states["Initial"].actions[2];
 			Assert.AreEqual("foo", (string)act.dataModel[0].DefaultValue);
 		}
+
+		[Test]
+		public void IncludeScripting()
+		{
+			string inc1 = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Peach>
+	<Import import=""re""/>
+
+	<DataModel name=""DM"">
+		<String name=""str1"" value=""foo"" constraint=""re.search('^Hello', value) != None""/>
+	</DataModel>
+
+</Peach>
+";
+
+			string template = @"
+<Peach>
+	<Include ns=""example"" src=""{0}"" />
+
+	<StateModel name=""State"" initialState=""Initial"">
+		<State name=""Initial"">
+			<Action type=""input"">
+				<DataModel ref=""example:DM"" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name=""Default"">
+		<StateModel ref=""State"" />
+		<Publisher class=""File"">
+			<Param name=""FileName"" value=""{1}""/>
+			<Param name=""Overwrite"" value=""false""/>
+		</Publisher>
+	</Test>
+</Peach>";
+
+			string tmp = Path.GetTempFileName();
+			File.WriteAllText(tmp, "Hello World");
+			string remote = Path.GetTempFileName();
+			string xml = string.Format(template, remote, tmp);
+			File.WriteAllText(remote, inc1);
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(null);
+			e.startFuzzing(dom, config);
+
+			var act = dom.tests[0].stateModel.states["Initial"].actions[0];
+			Assert.AreEqual("Hello World", (string)act.dataModel[0].DefaultValue);
+		}
+
+		[Test]
+		public void MultipleIncludes()
+		{
+			string inc1 = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='Frame'>
+		<Blob name='Type' value='type'/>
+		<Blob name='Payload' value='Frame Payload'/>
+	</DataModel>
+
+</Peach>
+";
+
+			string inc2 = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='Packet'>
+		<Blob name='Src' value='src'/>
+		<Blob name='Dst' value='dst'/>
+		<Blob name='Payload' value='Packet Payload'/>
+	</DataModel>
+
+</Peach>
+";
+
+			string tmp1 = Path.GetTempFileName();
+			string tmp2 = Path.GetTempFileName();
+			File.WriteAllText(tmp1, inc1);
+			File.WriteAllText(tmp2, inc2);
+
+			string xml = @"
+<Peach>
+	<Include ns='NS1' src='{0}' />
+	<Include ns='NS2' src='{1}' />
+
+	<DataModel name='Packet' ref='NS1:Frame'>
+		<Block name='Payload' ref='NS2:Packet'/>
+	</DataModel>
+</Peach>".Fmt(tmp1, tmp2);
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			Assert.AreEqual(1, dom.dataModels.Count);
+
+			var val = dom.dataModels[0].InternalValue.BitsToString();
+
+			var exp = "typesrcdstPacket Payload";
+			Assert.AreEqual(exp, val);
+		}
 	}
 }
 

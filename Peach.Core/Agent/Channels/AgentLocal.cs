@@ -35,6 +35,7 @@ using Peach.Core.Dom;
 using NLog;
 using Peach.Core.Agent;
 using Peach.Core.IO;
+using System.IO;
 
 namespace Peach.Core.Agent.Channels
 {
@@ -46,94 +47,170 @@ namespace Peach.Core.Agent.Channels
 	[Agent("local", true)]
 	public class AgentServerLocal : AgentClient
 	{
-		Agent agent = null;
+		#region Publisher Proxy
+
+		class PublisherProxy : IPublisher
+		{
+			Publisher publisher;
+
+			public PublisherProxy(Publisher publisher)
+			{
+				this.publisher = publisher;
+			}
+
+			#region IPublisher
+
+			public uint Iteration
+			{
+				set { publisher.Iteration = value; }
+			}
+
+			public bool IsControlIteration
+			{
+				set { publisher.IsControlIteration = value; }
+			}
+
+			public string Result
+			{
+				get { return publisher.Result; }
+			}
+
+			public Stream Stream
+			{
+				get { return publisher; }
+			}
+
+			public void Start()
+			{
+				publisher.start();
+			}
+
+			public void Stop()
+			{
+				publisher.stop();
+			}
+
+			public void Open()
+			{
+				publisher.open();
+			}
+
+			public void Close()
+			{
+				publisher.close();
+			}
+
+			public void Accept()
+			{
+				publisher.accept();
+			}
+
+			public Variant Call(string method, List<ActionParameter> args)
+			{
+				return publisher.call(method, args);
+			}
+
+			public void SetProperty(string property, Variant value)
+			{
+				publisher.setProperty(property, value);
+			}
+
+			public Variant GetProperty(string property)
+			{
+				return publisher.getProperty(property);
+			}
+
+			public void Output(DataModel data)
+			{
+				publisher.output(data);
+			}
+
+			public void Input()
+			{
+				publisher.input();
+			}
+
+			public void WantBytes(long count)
+			{
+				publisher.WantBytes(count);
+			}
+
+			#endregion
+		}
+
+		#endregion
+
+		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		protected override NLog.Logger Logger { get { return logger; } }
+
+		Agent agent = new Agent();
 
 		public AgentServerLocal(string name, string uri, string password)
+			: base(name, uri, password)
 		{
-			this.name = name;
-
-			agent = new Agent(name);
 		}
 
-		public override bool SupportedProtocol(string protocol)
-		{
-			if (protocol == "local")
-				return true;
-
-			return false;
-		}
-
-		public override void AgentConnect(string name, string url, string password)
+		protected override void OnAgentConnect()
 		{
 			agent.AgentConnect();
 		}
 
-		public override void AgentDisconnect()
+		protected override void OnAgentDisconnect()
 		{
 			agent.AgentDisconnect();
 		}
 
-		public override Publisher CreatePublisher(string cls, Dictionary<string, Variant> args)
+		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
 		{
-			return agent.CreatePublisher(cls, args);
+			return new PublisherProxy(agent.CreatePublisher(cls, args));
 		}
 
-		public override BitwiseStream CreateBitwiseStream()
-		{
-			return agent.CreateBitwiseStream();
-		}
-
-		public override void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		protected override void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args)
 		{
 			agent.StartMonitor(name, cls, args);
 		}
 
-		public override void StopMonitor(string name)
-		{
-			agent.StopMonitor(name);
-		}
-
-		public override void StopAllMonitors()
+		protected override void OnStopAllMonitors()
 		{
 			agent.StopAllMonitors();
 		}
 
-		public override void SessionStarting()
+		protected override void OnSessionStarting()
 		{
 			agent.SessionStarting();
 		}
 
-		public override void SessionFinished()
+		protected override void OnSessionFinished()
 		{
 			agent.SessionFinished();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
 		{
 			agent.IterationStarting(iterationCount, isReproduction);
 		}
 
-		public override bool IterationFinished()
+		protected override bool OnIterationFinished()
 		{
 			return agent.IterationFinished();
 		}
 
-		public override bool DetectedFault()
+		protected override bool OnDetectedFault()
 		{
 			return agent.DetectedFault();
 		}
 
-		public override Fault[] GetMonitorData()
+		protected override Fault[] OnGetMonitorData()
 		{
 			return agent.GetMonitorData();
 		}
 
-		public override bool MustStop()
+		protected override bool OnMustStop()
 		{
 			return agent.MustStop();
 		}
 
-		public override Variant Message(string name, Variant data)
+		protected override Variant OnMessage(string name, Variant data)
 		{
 			return agent.Message(name, data);
 		}

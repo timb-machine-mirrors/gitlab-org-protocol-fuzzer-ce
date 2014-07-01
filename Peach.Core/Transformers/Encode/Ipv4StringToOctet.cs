@@ -43,8 +43,8 @@ namespace Peach.Core.Transformers.Encode
 	[Serializable]
 	public class Ipv4StringToOctet : Transformer
 	{
-		public Ipv4StringToOctet(Dictionary<string, Variant> args)
-			: base(args)
+		public Ipv4StringToOctet(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

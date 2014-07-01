@@ -42,8 +42,8 @@ namespace Peach.Core.Transformers.Encode
 	[Serializable]
 	public class Base64Decode : Transformer
 	{
-		public Base64Decode(Dictionary<string, Variant> args)
-			: base(args)
+		public Base64Decode(DataElement parent, Dictionary<string, Variant> args)
+			: base(parent, args)
 		{
 		}
 

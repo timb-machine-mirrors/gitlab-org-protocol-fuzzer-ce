@@ -50,8 +50,7 @@ namespace Peach.Core.Test.Mutators
             dom.tests[0].includedMutators.Add("ArrayNumericalEdgeCasesMutator");
 
             var myArray = (Dom.Array)dom.tests[0].stateModel.initialState.actions[0].dataModel[0];
-            myArray.origionalElement = myArray[0];
-            myArray.hasExpanded = true;
+            myArray.OriginalElement = myArray[0];
             myArray.Add(new Dom.String("a1") { DefaultValue = new Variant("1") });
             myArray.Add(new Dom.String("a2") { DefaultValue = new Variant("2") });
             myArray.Add(new Dom.String("a3") { DefaultValue = new Variant("3") });
@@ -59,7 +58,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -112,8 +111,7 @@ namespace Peach.Core.Test.Mutators
             dom.tests[0].includedMutators.Add("ArrayNumericalEdgeCasesMutator");
 
             var myArray = (Dom.Array)dom.tests[0].stateModel.initialState.actions[0].dataModel[0];
-            myArray.origionalElement = myArray[0];
-            myArray.hasExpanded = true;
+            myArray.OriginalElement = myArray[0];
             myArray.Add(new Dom.String("a1") { DefaultValue = new Variant("1") });
             myArray.Add(new Dom.String("a2") { DefaultValue = new Variant("2") });
             myArray.Add(new Dom.String("a3") { DefaultValue = new Variant("3") });
@@ -121,7 +119,7 @@ namespace Peach.Core.Test.Mutators
 
             RunConfiguration config = new RunConfiguration();
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -193,7 +191,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 		}
@@ -235,7 +233,7 @@ namespace Peach.Core.Test.Mutators
 
 			RunConfiguration config = new RunConfiguration();
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.NotNull(mutations);

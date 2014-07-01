@@ -42,7 +42,8 @@ namespace Peach.Core.Transformers.Encode
     [Serializable]
     public class UrlEncode : Transformer
     {
-        public UrlEncode(Dictionary<string,Variant>  args) : base(args)
+        public UrlEncode(DataElement parent, Dictionary<string,Variant>  args)
+            : base(parent, args)
         {
         }
 

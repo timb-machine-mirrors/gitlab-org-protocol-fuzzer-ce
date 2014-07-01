@@ -46,19 +46,238 @@ namespace Peach.Core
 	{
 		#region Events
 
-        public delegate void CollectFaultsHandler(RunContext context);
+		#region Fault Collection
 
-        /// <summary>
-        /// This event is triggered after an interation has occured to allow
-        /// collection of faults into RunContext.faults collection.
-        /// </summary>
-        public event CollectFaultsHandler CollectFaults;
+		public delegate void CollectFaultsHandler(RunContext context);
 
-        public void OnCollectFaults()
-        {
-            if (CollectFaults != null)
-                CollectFaults(this);
-        }
+		/// <summary>
+		/// This event is triggered after an interation has occured to allow
+		/// collection of faults into RunContext.faults collection.
+		/// </summary>
+		public event CollectFaultsHandler CollectFaults;
+
+		public void OnCollectFaults()
+		{
+			if (CollectFaults != null)
+				CollectFaults(this);
+		}
+
+		#endregion
+
+		#region Mutation Events
+
+		public delegate void DataMutationEventHandler(RunContext context, ActionData actionData, DataElement element, Mutator mutator);
+
+		public event DataMutationEventHandler DataMutating;
+
+		public void OnDataMutating(ActionData actionData, DataElement element, Mutator mutator)
+		{
+			if (DataMutating != null)
+				DataMutating(this, actionData, element, mutator);
+		}
+
+		public delegate void StateMutationEventHandler(RunContext context, State state, Mutator mutator);
+
+		public event StateMutationEventHandler StateMutating;
+
+		public void OnStateMutating(State state, Mutator mutator)
+		{
+			if (StateMutating != null)
+				StateMutating(this, state, mutator);
+		}
+
+		#endregion
+
+		#region State Model Events
+
+		public delegate void StateModelEventHandler(RunContext context, StateModel stateModel);
+
+		public event StateModelEventHandler StateModelStarting;
+
+		public void OnStateModelStarting(StateModel stateModel)
+		{
+			if (StateModelStarting != null)
+				StateModelStarting(this, stateModel);
+		}
+
+		public event StateModelEventHandler StateModelFinished;
+
+		public void OnStateModelFinished(StateModel stateModel)
+		{
+			if (StateModelFinished != null)
+				StateModelFinished(this, stateModel);
+		}
+
+		#endregion
+
+		#region State Events
+
+		public delegate void StateStartingEventHandler(RunContext context, State state);
+
+		public event StateStartingEventHandler StateStarting;
+
+		public void OnStateStarting(State state)
+		{
+			if (StateStarting != null)
+				StateStarting(this, state);
+		}
+
+		public delegate void StateFinishedEventHandler(RunContext context, State state);
+
+		public event StateFinishedEventHandler StateFinished;
+
+		public void OnStateFinished(State state)
+		{
+			if (StateFinished != null)
+				StateFinished(this, state);
+		}
+
+		public delegate void StateChangingEventHandler(RunContext context, State oldState, State newState);
+
+		public event StateChangingEventHandler StateChanging;
+
+		public void OnStateChanging(State oldState, State newState)
+		{
+			if (StateChanging != null)
+				StateChanging(this, oldState, newState);
+		}
+
+		#endregion
+
+		#region Action Events
+
+		public delegate void ActionEventHandler(RunContext context, Dom.Action Action);
+
+		public event ActionEventHandler ActionStarting;
+
+		public void OnActionStarting(Dom.Action action)
+		{
+			if (ActionStarting != null)
+				ActionStarting(this, action);
+		}
+
+		public event ActionEventHandler ActionFinished;
+
+		public void OnActionFinished(Dom.Action action)
+		{
+			if (ActionFinished != null)
+				ActionFinished(this, action);
+		}
+
+		#endregion
+
+		#region Agent Events
+
+		public delegate void AgentEventHandler(RunContext context, AgentClient agent);
+		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string name, Variant data);
+		public delegate void CreatePublisherEventHandler(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args);
+		public delegate void StartMonitorEventHandler(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
+
+		public event AgentEventHandler AgentConnect;
+
+		public void OnAgentConnect(AgentClient agent)
+		{
+			if (AgentConnect != null)
+				AgentConnect(this, agent);
+		}
+
+		public event AgentEventHandler AgentDisconnect;
+
+		public void OnAgentDisconnect(AgentClient agent)
+		{
+			if (AgentDisconnect != null)
+				AgentDisconnect(this, agent);
+		}
+
+		public event CreatePublisherEventHandler CreatePublisher;
+
+		public void OnCreatePublisher(AgentClient agent, string cls, Dictionary<string, Variant> args)
+		{
+			if (CreatePublisher != null)
+				CreatePublisher(this, agent, cls, args);
+		}
+
+		public event StartMonitorEventHandler StartMonitor;
+
+		public void OnStartMonitor(AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		{
+			if (StartMonitor != null)
+				StartMonitor(this, agent, name, cls, args);
+		}
+
+		public event AgentEventHandler StopAllMonitors;
+
+		public void OnStopAllMonitors(AgentClient agent)
+		{
+			if (StopAllMonitors != null)
+				StopAllMonitors(this, agent);
+		}
+
+		public event AgentEventHandler SessionStarting;
+
+		public void OnSessionStarting(AgentClient agent)
+		{
+			if (SessionStarting != null)
+				SessionStarting(this, agent);
+		}
+
+		public event AgentEventHandler SessionFinished;
+
+		public void OnSessionFinished(AgentClient agent)
+		{
+			if (SessionFinished != null)
+				SessionFinished(this, agent);
+		}
+
+		public event AgentEventHandler IterationStarting;
+
+		public void OnIterationStarting(AgentClient agent)
+		{
+			if (IterationStarting != null)
+				IterationStarting(this, agent);
+		}
+
+		public event AgentEventHandler IterationFinished;
+
+		public void OnIterationFinished(AgentClient agent)
+		{
+			if (IterationFinished != null)
+				IterationFinished(this, agent);
+		}
+
+		public event AgentEventHandler DetectedFault;
+
+		public void OnDetectedFault(AgentClient agent)
+		{
+			if (DetectedFault != null)
+				DetectedFault(this, agent);
+		}
+
+		public event AgentEventHandler GetMonitorData;
+
+		public void OnGetMonitorData(AgentClient agent)
+		{
+			if (GetMonitorData != null)
+				GetMonitorData(this, agent);
+		}
+
+		public event AgentEventHandler MustStop;
+
+		public void OnMustStop(AgentClient agent)
+		{
+			if (MustStop != null)
+				MustStop(this, agent);
+		}
+
+		public event MessageEventHandler Message;
+
+		public void OnMessage(AgentClient agent, string name, Variant data)
+		{
+			if (Message != null)
+				Message(this, agent, name, data);
+		}
+
+		#endregion
 
 		#endregion
 
@@ -97,8 +316,6 @@ namespace Peach.Core
 		[NonSerialized]
 		public AgentManager agentManager = null;
 
-		public bool needDataModel = true;
-
 		/// <summary>
 		/// An object store that will last entire run.  For use
 		/// by Peach code to store some state.
@@ -111,6 +328,11 @@ namespace Peach.Core
 		/// </summary>
 		[NonSerialized]
 		public Dictionary<string, object> iterationStateStore = new Dictionary<string, object>();
+
+		/// <summary>
+		/// The current iteration of fuzzing.
+		/// </summary>
+		public uint currentIteration = 0;
 
 		#region Control Iterations
 
@@ -262,167 +484,6 @@ namespace Peach.Core
 
 		#endregion
 	}
-
-    /// <summary>
-    /// Type of fault
-    /// </summary>
-    public enum FaultType
-    {
-        Unknown,
-        // Actual fault
-        Fault,
-        // Data collection
-        Data
-    }
-
-    /// <summary>
-    /// Fault detected during fuzzing run
-    /// </summary>
-    [Serializable]
-    public class Fault
-    {
-		/// <summary>
-		/// Data contained in fault.
-		/// </summary>
-		[Serializable]
-		public class Data
-		{
-			public Data()
-			{
-			}
-
-			public Data(string key, byte[] value)
-			{
-				Key = key;
-				Value = value;
-			}
-
-			public string Key { get; set; }
-			public byte[] Value { get; set; }
-		}
-
-		[Serializable]
-		public class Mutation
-		{
-			public string element { get; set; }
-			public string mutator { get; set; }
-		}
-
-		[Serializable]
-		public class Model
-		{
-			public string dataSet { get; set; }
-			public string parameter { get; set; }
-			public string name { get; set; }
-			public List<Mutation> mutations { get; set; }
-		}
-
-		[Serializable]
-		public class Action
-		{
-			public string name;
-			public string type;
-			public List<Model> models { get; set; }
-		}
-
-		[Serializable]
-		public class State
-		{
-			public string name { get; set; }
-			public List<Action> actions { get; set; }
-		}
-
-        public Fault()
-        {
-        }
-
-        /// <summary>
-        /// Iteration fault was detected on
-        /// </summary>
-        public uint iteration = 0;
-
-        /// <summary>
-        /// Is this a control iteration.
-        /// </summary>
-        public bool controlIteration = false;
-
-        /// <summary>
-        /// Is this control operation also a recording iteration?
-        /// </summary>
-        public bool controlRecordingIteration = false;
-
-        /// <summary>
-        /// Type of fault
-        /// </summary>
-        public FaultType type = FaultType.Unknown;
-
-        /// <summary>
-        /// Who detected this fault?
-        /// </summary>
-        /// <remarks>
-        /// Example: "PageHeap Monitor"
-        /// Example: "Name (PageHeap Monitor)"
-        /// </remarks>
-        public string detectionSource = null;
-
-        /// <summary>
-        /// Name of monitor instance that created this fault
-        /// </summary>
-        /// <remarks>
-        /// Set by the agent
-        /// </remarks>
-        public string monitorName = null;
-
-        /// <summary>
-        /// Agent this fault came from
-        /// </summary>
-        /// <remarks>
-        /// Set by the AgentManager
-        /// </remarks>
-        public string agentName = null;
-
-        /// <summary>
-        /// Title of finding
-        /// </summary>
-        public string title = null;
-
-        /// <summary>
-        /// Multiline description and collection of information.
-        /// </summary>
-        public string description = null;
-
-        /// <summary>
-        /// Major hash of fault used for bucketting.
-        /// </summary>
-        public string majorHash = null;
-
-        /// <summary>
-        /// Minor hash of fault used for bucketting.
-        /// </summary>
-        public string minorHash = null;
-
-        /// <summary>
-        /// Exploitability of fault, used for bucketting.
-        /// </summary>
-        public string exploitability = null;
-
-        /// <summary>
-        /// Folder for fault to be collected under.  Only used when
-        /// major/minor hashes and exploitability are not defined.
-        /// </summary>
-        public string folderName = null;
-
-        /// <summary>
-        /// Binary data collected about fault.  Key is filename, value is content.
-        /// </summary>
-        public List<Data> collectedData = new List<Data>();
-        // Note: We can't use a Dictionary<> since it won't remote between mono and .net correctly
-
-        /// <summary>
-        /// List of all states run when fault was detected.
-        /// </summary>
-        public List<State> states = new List<State>();
-    }
 }
 
 // end

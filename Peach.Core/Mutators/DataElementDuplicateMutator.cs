@@ -72,7 +72,7 @@ namespace Peach.Core.Mutators
         //
         public new static bool supportedDataElement(DataElement obj)
         {
-            if (obj.isMutable && obj.parent != null && !(obj is Flag))
+            if (obj.isMutable && obj.parent != null && !(obj is Flag) && !(obj is XmlAttribute))
                 return true;
 
             return false;
@@ -89,13 +89,7 @@ namespace Peach.Core.Mutators
         //
         public override void randomMutation(DataElement obj)
         {
-            // TODO: Since 'this.mutation = X' is only called by the
-            // sequential mutation strategy, the random strategy
-            // will wither duplicate the element once or not
-            // duplicate at all.  Is this right? Should this really be:
-            //int newCount = context.Random.Next(minCount, maxCount + 1);
-            uint newCount = context.Random.Next(currentCount + 1);
-
+            uint newCount = (uint)context.Random.Next(minCount, maxCount + 1);
             performMutation(obj, newCount);
         }
 
@@ -109,13 +103,12 @@ namespace Peach.Core.Mutators
 			value.SeekBits(0, System.IO.SeekOrigin.Begin);
 			var mutatedValue = new Variant(value);
 
+			var baseName = obj.parent.UniqueName(obj.name);
+
 			for (int i = 0; i < newCount; ++i)
 			{
-				string newName = obj.name + "_" + i;
-
 				// Make sure we pick a unique name
-				while (obj.parent.ContainsKey(newName))
-					newName += "_" + i;
+				string newName = "{0}_{1}".Fmt(baseName, i);
 
 				DataElement newElem = Activator.CreateInstance(obj.GetType(), new object[] { newName }) as DataElement;
 				newElem.MutatedValue = mutatedValue;

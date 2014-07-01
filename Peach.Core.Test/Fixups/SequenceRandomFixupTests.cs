@@ -47,7 +47,7 @@ namespace Peach.Core.Test.Fixups
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -101,7 +101,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStop = 3;
 			config.randomSeed = 1;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 3) * 3, this.dataModels.Count);
@@ -152,7 +152,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 10;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 10) * 3, this.dataModels.Count);
@@ -169,7 +169,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 10;
 
-			e = new Engine(null);
+			e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(origModels.Count, dataModels.Count);
@@ -195,7 +195,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 20;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 20) * 3, this.dataModels.Count);
@@ -212,7 +212,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 10;
 			config.rangeStop = 20;
 
-			e = new Engine(null);
+			e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 11) * 3, this.dataModels.Count);
@@ -270,7 +270,7 @@ namespace Peach.Core.Test.Fixups
 			config.rangeStart = 0;
 			config.rangeStop = 3;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual((1 + 3) * 3, this.dataModels.Count);
@@ -344,7 +344,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			try
 			{
@@ -393,7 +393,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 
 			try
 			{
@@ -405,6 +405,10 @@ namespace Peach.Core.Test.Fixups
 				Assert.AreEqual("SequenceRandomFixup has non numeric parent 'DM.blob'.", ex.Message);
 			}
 		}
+
+		// Test array
+
+		// Test action param
     }
 }
 

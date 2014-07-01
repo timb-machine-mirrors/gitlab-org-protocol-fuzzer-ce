@@ -114,7 +114,7 @@ namespace Peach.Core.Dom
 	/// Template and optionally a Data set. In the future this will expand to include a state model,
 	/// defaults for generation, etc.
 	/// </summary>
-	public class Test : INamed
+	public class Test : INamed, IOwned<Dom>
 	{
 		#region Attributes
 

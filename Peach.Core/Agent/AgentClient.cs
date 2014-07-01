@@ -36,172 +36,55 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Agent
 {
-
-	#region Event Delegates
-
-	public delegate void SupportedProtocolClientEventHandler(AgentClient agent, string protocol);
-	public delegate void AgentConnectClientEventHandler(AgentClient agent, string name, string url, string password);
-	public delegate void AgentDisconnectClientEventHandler(AgentClient agent);
-	public delegate void CreatePublisherClientEventHandler(AgentClient agent, string cls, Dictionary<string, Variant> args);
-	public delegate void CreateBitwiseStreamClientEventHandler(AgentClient agent);
-	public delegate void StartMonitorClientEventHandler(AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
-	public delegate void StopMonitorClientEventHandler(AgentClient agent, string name);
-	public delegate void StopAllMonitorsClientEventHandler(AgentClient agent);
-	public delegate void SessionStartingClientEventHandler(AgentClient agent);
-	public delegate void SessionFinishedClientEventHandler(AgentClient agent);
-	public delegate void IterationStartingClientEventHandler(AgentClient agent, uint iterationCount, bool isReproduction);
-	public delegate void IterationFinishedClientEventHandler(AgentClient agent);
-	public delegate void DetectedFaultClientEventHandler(AgentClient agent);
-	public delegate void GetMonitorDataClientEventHandler(AgentClient agent);
-	public delegate void MustStopClientEventHandler(AgentClient agent);
-	public delegate void MessageClientEventHandler(AgentClient agent, string name, Variant data);
-
-	#endregion
-
 	/// <summary>
 	/// Abstract base class for all Agent servers.
 	/// </summary>
-	public abstract class AgentClient : INamed
+	public abstract class AgentClient : INamed, IOwned<AgentManager>
 	{
-		public object parent;
-
-		#region Events
-
-		public event SupportedProtocolClientEventHandler SupportedProtocolEvent;
-		protected void OnSupportedProtocolEvent(string protocol)
-		{
-			if (SupportedProtocolEvent != null)
-				SupportedProtocolEvent(this, protocol);
-		}
-
-		public event AgentConnectClientEventHandler AgentConnectEvent;
-		protected void OnAgentConnectEvent(string name, string url, string password)
-		{
-			if (AgentConnectEvent != null)
-				AgentConnectEvent(this, name, url, password);
-		}
-
-		public event AgentDisconnectClientEventHandler AgentDisconnectEvent;
-		protected void OnAgentDisconnectEvent()
-		{
-			if (AgentDisconnectEvent != null)
-				AgentDisconnectEvent(this);
-		}
-
-		public event CreatePublisherClientEventHandler CreatePublisherEvent;
-		protected void OnCreatePublisherEvent(string cls, Dictionary<string, Variant> args)
-		{
-			if (CreatePublisherEvent != null)
-				CreatePublisherEvent(this, cls, args);
-		}
-
-		public event CreateBitwiseStreamClientEventHandler CreateBitwiseStreamEvent;
-		protected void OnCreateBitwiseStreamEvent()
-		{
-			if (CreateBitwiseStreamEvent != null)
-				CreateBitwiseStreamEvent(this);
-		}
-
-		public event StartMonitorClientEventHandler StartMonitorEvent;
-		protected void OnStartMonitorEvent(string name, string cls, Dictionary<string, Variant> args)
-		{
-			if (StartMonitorEvent != null)
-				StartMonitorEvent(this, name, cls, args);
-		}
-
-		public event StopMonitorClientEventHandler StopMonitorEvent;
-		protected void OnStopMonitorEvent(string name)
-		{
-			if (StopMonitorEvent != null)
-				StopMonitorEvent(this, name);
-		}
-
-		public event StopAllMonitorsClientEventHandler StopAllMonitorsEvent;
-		protected void OnStopAllMonitorsEvent()
-		{
-			if (StopAllMonitorsEvent != null)
-				StopAllMonitorsEvent(this);
-		}
-
-		public event SessionStartingClientEventHandler SessionStartingEvent;
-		protected void OnSessionStartingEvent()
-		{
-			if (SessionStartingEvent != null)
-				SessionStartingEvent(this);
-		}
-
-		public event SessionFinishedClientEventHandler SessionFinishedEvent;
-		protected void OnSessionFinishedEvent()
-		{
-			if (SessionFinishedEvent != null)
-				SessionFinishedEvent(this);
-		}
-
-		public event IterationStartingClientEventHandler IterationStartingEvent;
-		protected void OnIterationStartingEvent(uint iterationCount, bool isReproduction)
-		{
-			if (IterationStartingEvent != null)
-				IterationStartingEvent(this, iterationCount, isReproduction);
-		}
-
-		public event IterationFinishedClientEventHandler IterationFinishedEvent;
-		protected void OnIterationFinishedEvent()
-		{
-			if (IterationFinishedEvent != null)
-				IterationFinishedEvent(this);
-		}
-
-		public event DetectedFaultClientEventHandler DetectedFaultEvent;
-		protected void OnDetectedFaultEvent()
-		{
-			if (DetectedFaultEvent != null)
-				DetectedFaultEvent(this);
-		}
-
-		public event GetMonitorDataClientEventHandler GetMonitorDataEvent;
-		protected void OnGetMonitorDataEvent()
-		{
-			if (GetMonitorDataEvent != null)
-				GetMonitorDataEvent(this);
-		}
-
-		public event MustStopClientEventHandler MustStopEvent;
-		protected void OnMustStopEvent()
-		{
-			if (MustStopEvent != null)
-				MustStopEvent(this);
-		}
-
-		public event MessageClientEventHandler MessageEvent;
-		protected void OnMessageEvent(string name, Variant data)
-		{
-			if (MessageEvent != null)
-				MessageEvent(this, name, data);
-		}
-
-		#endregion
-
-		public string name { get; protected set; }
+		protected abstract NLog.Logger Logger { get; }
 
 		/// <summary>
-		/// Does AgentServer instance support specified protocol?  For example, if
-		/// the user supplies an agent URL of "http://....", than "http" is the protocol.
-		/// </summary>
-		/// <param name="protocol">Protocol to check</param>
-		/// <returns>True if protocol is supported, else false.</returns>
-		public abstract bool SupportedProtocol(string protocol);
-
-		/// <summary>
-		/// Connect to agent
+		/// Construct an agent client
 		/// </summary>
 		/// <param name="name">Name of agent</param>
 		/// <param name="url">Agent URL</param>
 		/// <param name="password">Agent Password</param>
-		public abstract void AgentConnect(string name, string url, string password);
+		public AgentClient(string name, string url, string password)
+		{
+			this.name = name;
+			this.url = url;
+			this.password = password;
+		}
+
+		#region Public Agent Functions
+
+		public string name { get; private set; }
+		public string url { get; private set; }
+		public string password { get; private set; }
+
+		public AgentManager parent { get; set; }
+
+		/// <summary>
+		/// Connect to agent
+		/// </summary>
+		public void AgentConnect()
+		{
+			Logger.Trace("AgentConnect: {0}", name);
+			parent.Context.OnAgentConnect(this);
+
+			OnAgentConnect();
+		}
+
 		/// <summary>
 		/// Disconnect from agent
 		/// </summary>
-		public abstract void AgentDisconnect();
+		public void AgentDisconnect()
+		{
+			Logger.Trace("AgentDisconnect: {0}", name);
+			parent.Context.OnAgentDisconnect(this);
+
+			OnAgentDisconnect();
+		}
 
 		/// <summary>
 		/// Creates a publisher on the remote agent
@@ -209,13 +92,13 @@ namespace Peach.Core.Agent
 		/// <param name="cls">Class of publisher to create</param>
 		/// <param name="args">Arguments for publisher</param>
 		/// <returns>Instance of remote publisher</returns>
-		public abstract Publisher CreatePublisher(string cls, Dictionary<string, Variant> args);
+		public IPublisher CreatePublisher(string cls, Dictionary<string, Variant> args)
+		{
+			Logger.Trace("CreatePublisher: {0} {1}", name, cls);
+			parent.Context.OnCreatePublisher(this, cls, args);
 
-		/// <summary>
-		/// Creates a BitwiseStream on the remote agent
-		/// </summary>
-		/// <returns>Instance of BitwiseStream</returns>
-		public abstract BitwiseStream CreateBitwiseStream();
+			return OnCreatePublisher(cls, args);
+		}
 
 		/// <summary>
 		/// Start a specific monitor
@@ -223,55 +106,112 @@ namespace Peach.Core.Agent
 		/// <param name="name">Name for monitor instance</param>
 		/// <param name="cls">Class of monitor to start</param>
 		/// <param name="args">Arguments</param>
-		public abstract void StartMonitor(string name, string cls, Dictionary<string, Variant> args);
-		/// <summary>
-		/// Stop a specific monitor by name
-		/// </summary>
-		/// <param name="name">Name of monitor instance</param>
-		public abstract void StopMonitor(string name);
+		public void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		{
+			Logger.Trace("StartMonitor: {0} {1} {2}", this.name, name, cls);
+			parent.Context.OnStartMonitor(this, name, cls, args);
+
+			OnStartMonitor(name, cls, args);
+		}
+
 		/// <summary>
 		/// Stop all monitors currently running
 		/// </summary>
-		public abstract void StopAllMonitors();
+		public void StopAllMonitors()
+		{
+			Logger.Trace("StopAllMonitors: {0}", name);
+			parent.Context.OnStopAllMonitors(this);
+
+			OnStopAllMonitors();
+		}
 
 		/// <summary>
 		/// Starting a fuzzing session.  A session includes a number of test iterations.
 		/// </summary>
-		public abstract void SessionStarting();
+		public void SessionStarting()
+		{
+			Logger.Trace("SessionStarting: {0}", name);
+			parent.Context.OnSessionStarting(this);
+
+			OnSessionStarting();
+		}
+
 		/// <summary>
 		/// Finished a fuzzing session.
 		/// </summary>
-		public abstract void SessionFinished();
+		public void SessionFinished()
+		{
+			Logger.Trace("SessionFinished: {0}", name);
+			parent.Context.OnSessionFinished(this);
+
+			OnSessionFinished();
+		}
 
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
 		/// <param name="iterationCount">Iteration count</param>
 		/// <param name="isReproduction">Are we re-running an iteration</param>
-		public abstract void IterationStarting(uint iterationCount, bool isReproduction);
+		public void IterationStarting(uint iterationCount, bool isReproduction)
+		{
+			Logger.Trace("IterationStarting: {0} {1} {2}", name, iterationCount, isReproduction);
+			parent.Context.OnIterationStarting(this);
+
+			OnIterationStarting(iterationCount, isReproduction);
+		}
+
 		/// <summary>
 		/// Iteration has completed.
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		public abstract bool IterationFinished();
+		public bool IterationFinished()
+		{
+			Logger.Trace("IterationFinished: {0}", name);
+			parent.Context.OnIterationFinished(this);
+
+			return OnIterationFinished();
+		}
 
 		/// <summary>
 		/// Was a fault detected during current iteration?
 		/// </summary>
 		/// <returns>True if a fault was detected, else false.</returns>
-		public abstract bool DetectedFault();
+		public bool DetectedFault()
+		{
+			Logger.Trace("DetectedFault: {0}", name);
+			parent.Context.OnDetectedFault(this);
 
-        /// <summary>
-        /// Get the fault information
-        /// </summary>
-        /// <returns>Returns array of Fault instances</returns>
-		public abstract Fault[] GetMonitorData();
+			return OnDetectedFault();
+		}
+
+		/// <summary>
+		/// Get the fault information
+		/// </summary>
+		/// <returns>Returns array of Fault instances</returns>
+		public Fault[] GetMonitorData()
+		{
+			Logger.Trace("GetMonitorData: {0}", name);
+			parent.Context.OnGetMonitorData(this);
+
+			var ret = OnGetMonitorData();
+
+			foreach (var item in ret)
+				item.agentName = name;
+
+			return ret;
+		}
 
 		/// <summary>
 		/// Can the fuzzing session continue, or must we stop?
 		/// </summary>
 		/// <returns>True if session must stop, else false.</returns>
-		public abstract bool MustStop();
+		public bool MustStop()
+		{
+			Logger.Trace("MustStop: {0}", name);
+			parent.Context.OnMustStop(this);
+
+			return OnMustStop();
+		}
 
 		/// <summary>
 		/// Send a message to all monitors.
@@ -279,22 +219,123 @@ namespace Peach.Core.Agent
 		/// <param name="name">Message Name</param>
 		/// <param name="data">Message data</param>
 		/// <returns>Returns data as Variant or null.</returns>
-		public abstract Variant Message(string name, Variant data);
+		public Variant Message(string name, Variant data)
+		{
+			Logger.Trace("Message: {0} {1}", this.name, name);
+			parent.Context.OnMessage(this, name, data);
+
+			return OnMessage(name, data);
+		}
+
+		#endregion
+
+		#region Abstract Interface
+
+		#region Agent Control
+
+		/// <summary>
+		/// Connect to agent
+		/// </summary>
+		protected abstract void OnAgentConnect();
+
+		/// <summary>
+		/// Disconnect from agent
+		/// </summary>
+		protected abstract void OnAgentDisconnect();
+
+		#endregion
+
+		#region Publisher Functions
+
+		/// <summary>
+		/// Creates a publisher on the remote agent
+		/// </summary>
+		/// <param name="cls">Class of publisher to create</param>
+		/// <param name="args">Arguments for publisher</param>
+		/// <returns>Instance of remote publisher</returns>
+		protected abstract IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args);
+
+		#endregion
+
+		#region Monitor Functions
+
+		/// <summary>
+		/// Start a specific monitor
+		/// </summary>
+		/// <param name="name">Name for monitor instance</param>
+		/// <param name="cls">Class of monitor to start</param>
+		/// <param name="args">Arguments</param>
+		protected abstract void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args);
+
+		/// <summary>
+		/// Stop all monitors currently running
+		/// </summary>
+		protected abstract void OnStopAllMonitors();
+
+		/// <summary>
+		/// Starting a fuzzing session.  A session includes a number of test iterations.
+		/// </summary>
+		protected abstract void OnSessionStarting();
+
+		/// <summary>
+		/// Finished a fuzzing session.
+		/// </summary>
+		protected abstract void OnSessionFinished();
+
+		/// <summary>
+		/// Starting a new iteration
+		/// </summary>
+		/// <param name="iterationCount">Iteration count</param>
+		/// <param name="isReproduction">Are we re-running an iteration</param>
+		protected abstract void OnIterationStarting(uint iterationCount, bool isReproduction);
+		/// <summary>
+		/// Iteration has completed.
+		/// </summary>
+		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
+		protected abstract bool OnIterationFinished();
+
+		/// <summary>
+		/// Was a fault detected during current iteration?
+		/// </summary>
+		/// <returns>True if a fault was detected, else false.</returns>
+		protected abstract bool OnDetectedFault();
+
+		/// <summary>
+		/// Get the fault information
+		/// </summary>
+		/// <returns>Returns array of Fault instances</returns>
+		protected abstract Fault[] OnGetMonitorData();
+
+		/// <summary>
+		/// Can the fuzzing session continue, or must we stop?
+		/// </summary>
+		/// <returns>True if session must stop, else false.</returns>
+		protected abstract bool OnMustStop();
+
+		/// <summary>
+		/// Send a message to all monitors.
+		/// </summary>
+		/// <param name="name">Message Name</param>
+		/// <param name="data">Message data</param>
+		/// <returns>Returns data as Variant or null.</returns>
+		protected abstract Variant OnMessage(string name, Variant data);
+
+		#endregion
+
+		#endregion
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	public class AgentAttribute : Attribute
 	{
 		public string protocol;
-    public bool isDefault;
-    
-    public AgentAttribute(string protocol, bool isDefault = false)
+		public bool isDefault;
+
+		public AgentAttribute(string protocol, bool isDefault = false)
 		{
 			this.protocol = protocol;
-      this.isDefault = isDefault;
+			this.isDefault = isDefault;
 		}
-
-
 	}
 
 

@@ -5,6 +5,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom.Actions
 {
 	[Action("ChangeState")]
+	[Serializable]
 	public class ChangeState : Action
 	{
 		/// <summary>

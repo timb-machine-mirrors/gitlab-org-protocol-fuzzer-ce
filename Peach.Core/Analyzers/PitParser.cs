@@ -41,6 +41,7 @@ using NLog;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Globalization;
+using System.Net;
 
 namespace Peach.Core.Analyzers
 {
@@ -59,9 +60,6 @@ namespace Peach.Core.Analyzers
 
 		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
 
-		Dom.Dom _dom = null;
-		bool isScriptingLanguageSet = false;
-
 		/// <summary>
 		/// Contains default attributes for DataElements
 		/// </summary>
@@ -77,18 +75,19 @@ namespace Peach.Core.Analyzers
 		static PitParser()
 		{
 			PitParser.supportParser = true;
-			Analyzer.defaultParser = new PitParser();
+
 			populatePitParsable();
+
+			Analyzer.defaultParser = new PitParser();
 		}
 
 		public PitParser()
 		{
-
 		}
 
-		public static Dictionary<string, string> parseDefines(string definedValuesFile)
+		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
 		{
-			var ret = new Dictionary<string, string>();
+			var ret = new OrderedDictionary<string, string>();
 			var keys = new HashSet<string>();
 
 			string normalized = Path.GetFullPath(definedValuesFile);
@@ -181,7 +180,7 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			return ret;
+			return ret.ToList();
 		}
 
 		public override Dom.Dom asParser(Dictionary<string, object> args, Stream data)
@@ -197,9 +196,14 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		protected virtual Dom.Dom getNewDom()
+		protected virtual Dom.Dom CreateDom()
 		{
 			return new Dom.Dom();
+		}
+
+		protected virtual Dom.StateModel CreateStateModel()
+		{
+			return new Dom.StateModel();
 		}
 
 		public virtual Dom.Dom asParser(Dictionary<string, object> args, Stream data, bool doValidatePit)
@@ -215,20 +219,20 @@ namespace Peach.Core.Analyzers
 			XmlDocument xmldoc = new XmlDocument();
 			xmldoc.LoadXml(xml);
 
-			_dom = getNewDom();
+			var dom = CreateDom();
 
 			foreach (XmlNode child in xmldoc.ChildNodes)
 			{
 				if (child.Name == "Peach")
 				{
-					handlePeach(_dom, child, args);
+					handlePeach(dom, child, args);
 					break;
 				}
 			}
 
-			_dom.evaulateDataModelAnalyzers();
+			dom.evaulateDataModelAnalyzers();
 
-			return _dom;
+			return dom;
 		}
 
 		private static string readWithDefines(Dictionary<string, object> args, Stream data)
@@ -239,12 +243,12 @@ namespace Peach.Core.Analyzers
 			object obj;
 			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
 			{
-				var definedValues = obj as Dictionary<string, string>;
+				var definedValues = (IEnumerable<KeyValuePair<string, string>>)obj;
 				var sb = new StringBuilder(xml);
 
-				foreach (string key in definedValues.Keys)
+				foreach (var kv in definedValues)
 				{
-					sb.Replace("##" + key + "##", definedValues[key]);
+					sb.Replace("##" + kv.Key + "##", kv.Value);
 				}
 
 				xml = sb.ToString();
@@ -288,7 +292,7 @@ namespace Peach.Core.Analyzers
 
 			// Load the schema
 			var set = new XmlSchemaSet();
-			var xsd = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Core.peach.xsd");
+			var xsd = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "peach.xsd");
 			using (var tr = XmlReader.Create(xsd))
 			{
 				set.Add(PEACH_NAMESPACE_URI, tr);
@@ -334,6 +338,27 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
+		public static void displayDataModel(DataElement elem, int indent = 0)
+		{
+			string sIndent = "";
+			for (int i = 0; i < indent; i++)
+				sIndent += "  ";
+
+			Console.WriteLine(sIndent + string.Format("{0}: {1}", elem.GetHashCode(), elem.name));
+
+			var cont = elem as DataElementContainer;
+
+			if (cont == null)
+				return;
+
+			foreach (var child in cont)
+			{
+				displayDataModel(child, indent + 1);
+			}
+		}
+
+		#region Peach
+
 		/// <summary>
 		/// Handle parsing the top level Peach node.
 		/// </summary>
@@ -376,65 +401,81 @@ namespace Peach.Core.Analyzers
 							fileName = newFileName;
 						}
 
-						var newParser = new PitParser();
-						Dom.Dom newDom = newParser.asParser(args, fileName);
+						var newDom = asParser(args, fileName);
 						newDom.name = ns;
-						dom.ns[ns] = newDom;
+						dom.ns.Add(newDom);
+
+						foreach (var item in newDom.Python.Paths)
+							dom.Python.AddSearchPath(item);
+
+						foreach (var item in newDom.Python.Modules)
+							dom.Python.ImportModule(item);
+
+						foreach (var item in newDom.Ruby.Paths)
+							dom.Ruby.AddSearchPath(item);
+
+						foreach (var item in newDom.Ruby.Modules)
+							dom.Ruby.ImportModule(item);
+
 						break;
 
 					case "Require":
-						Scripting.Imports.Add(child.getAttrString("require"));
+						dom.Ruby.ImportModule(child.getAttrString("require"));
+						//Scripting.Imports.Add(child.getAttrString("require"));
 						break;
 
 					case "Import":
-						if (child.hasAttr("from"))
-							throw new PeachException("Error, This version of Peach does not support the 'from' attribute for 'Import' elements.");
+						dom.Python.ImportModule(child.getAttrString("import"));
+						//if (child.hasAttr("from"))
+						//	throw new PeachException("Error, This version of Peach does not support the 'from' attribute for 'Import' elements.");
 
-						Scripting.Imports.Add(child.getAttrString("import"));
+						//Scripting.Imports.Add(child.getAttrString("import"));
 						break;
 
 					case "PythonPath":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						Scripting.Paths.Add(child.getAttrString("path"));
-						isScriptingLanguageSet = true;
+						dom.Python.AddSearchPath(child.getAttrString("path"));
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
+						//Scripting.Paths.Add(child.getAttrString("path"));
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "RubyPath":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						Scripting.Paths.Add(child.getAttrString("require"));
-						isScriptingLanguageSet = true;
+						dom.Ruby.AddSearchPath(child.getAttrString("require"));
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
+						//Scripting.Paths.Add(child.getAttrString("require"));
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Python":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						isScriptingLanguageSet = true;
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
+						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Ruby":
-						if (isScriptingLanguageSet &&
-							Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						{
-							throw new PeachException("Error, cannot mix Python and Ruby!");
-						}
-						Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						isScriptingLanguageSet = true;
+						//if (isScriptingLanguageSet &&
+						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
+						//{
+						//	throw new PeachException("Error, cannot mix Python and Ruby!");
+						//}
+						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
+						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
+						//isScriptingLanguageSet = true;
 						break;
 
 					case "Defaults":
@@ -447,13 +488,13 @@ namespace Peach.Core.Analyzers
 
 			foreach (XmlNode child in node)
 			{
-				var dm = handleDataModel(child, null);
+				var dm = handleDataModel(child, dom, null);
 
 				if (dm != null)
 				{
 					try
 					{
-						dom.dataModels.Add(dm.name, dm);
+						dom.dataModels.Add(dm);
 					}
 					catch (ArgumentException)
 					{
@@ -462,7 +503,10 @@ namespace Peach.Core.Analyzers
 						throw new PeachException("Error, a " + name + " element named '" + dm.name + "' already exists.");
 					}
 
-					finalUpdateRelations(new DataModel[] {dm});
+					// Resolve relations in the data model
+					foreach (var item in dm.EnumerateAllElements())
+						foreach (var rel in item.relations.From<Binding>())
+							rel.Resolve();
 				}
 			}
 
@@ -472,7 +516,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Data")
 				{
-					var data = handleData(child, dom.datas.UniqueName());
+					var data = handleData(child, dom, dom.datas.UniqueName());
 
 					try
 					{
@@ -495,7 +539,7 @@ namespace Peach.Core.Analyzers
 
 					try
 					{
-						dom.stateModels.Add(sm.name, sm);
+						dom.stateModels.Add(sm);
 					}
 					catch (ArgumentException)
 					{
@@ -528,7 +572,7 @@ namespace Peach.Core.Analyzers
 
 					try
 					{
-						dom.tests.Add(test.name, test);
+						dom.tests.Add(test);
 					}
 					catch (ArgumentException)
 					{
@@ -538,126 +582,9 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		public static void displayDataModel(DataElement elem, int indent = 0)
-		{
-			string sIndent = "";
-			for (int i = 0; i < indent; i++)
-				sIndent += "  ";
-
-			Console.WriteLine(sIndent + string.Format("{0}: {1}", elem.GetHashCode(), elem.name));
-
-			var cont = elem as DataElementContainer;
-
-			if (cont == null)
-				return;
-
-			foreach (var child in cont)
-			{
-				displayDataModel(child, indent+1);
-			}
-		}
-
-		#region Utility Methods
-
-		/// <summary>
-		/// Resolve a 'ref' attribute.  Will throw a PeachException if
-		/// namespace is given, but not found.
-		/// </summary>
-		/// <param name="name">Ref name to resolve.</param>
-		/// <param name="container">Container to start searching from.</param>
-		/// <returns>DataElement for ref or null if not found.</returns>
-		public DataElement getReference(string name, DataElementContainer container)
-		{
-			return getReference(_dom, name, container);
-		}
-
-		protected DataElement getReference(Dom.Dom dom, string name, DataElementContainer container)
-		{
-			if (name.IndexOf(':') > -1)
-			{
-				string ns = name.Substring(0, name.IndexOf(':'));
-
-				Dom.Dom other;
-				if (!dom.ns.TryGetValue(ns, out other))
-					throw new PeachException("Unable to locate namespace '" + ns + "' in ref '" + name + "'.");
-
-				name = name.Substring(name.IndexOf(':') + 1);
-
-				return getReference(other, name, container);
-			}
-
-			if (container != null)
-			{
-				DataElement elem = container.find(name);
-				if (elem != null)
-					return elem;
-			}
-
-			foreach (DataModel model in dom.dataModels.Values)
-			{
-				if (model.name == name)
-					return model;
-			}
-
-			foreach (DataModel model in dom.dataModels.Values)
-			{
-				DataElement elem = model.find(name);
-				if (elem != null)
-					return elem;
-			}
-
-			return null;
-		}
-
-
-
-		/// <summary>
-		/// Find a referenced Dom element by name, taking into account namespace prefixes.
-		/// </summary>
-		/// <typeparam name="T">Type of Dom element.</typeparam>
-		/// <param name="dom">Dom to search in</param>
-		/// <param name="refName">Name of reference</param>
-		/// <param name="predicate">Selector predicate that returns the element collection</param>
-		/// <returns></returns>
-		protected T getRef<T>(Dom.Dom dom, string refName, Func<Dom.Dom, ITryGetValue<string, T>> predicate)
-		{
-			return dom.getRef<T>(refName, predicate);
-		}
-
 		#endregion
 
-		/// <summary>
-		/// Locate all relations and pair from/of.
-		/// </summary>
-		/// <remarks>
-		/// After we have completed creating our base dom tree we will perform
-		/// a second pass on all data models to locate every relation and resolve
-		/// both from/of and verify both sides are connected correctly.
-		/// 
-		/// After this, all relations will be bound to both from and of elements.
-		/// </remarks>
-		/// <param name="models"></param>
-		protected void finalUpdateRelations(ICollection<DataModel> models)
-		{
-			logger.Trace("finalUpdateRelations");
-
-			foreach (DataModel model in models)
-			{
-				//logger.Debug("finalUpdateRelations: DataModel: " + model.name);
-
-				foreach (DataElement elem in model.EnumerateAllElements())
-				{
-					//logger.Debug("finalUpdateRelations: " + elem.fullName);
-
-					foreach (var rel in elem.relations.From<Binding>())
-					{
-						//logger.Debug("finalUpdateRelations: Relation " + rel.GetType().Name);
-
-						rel.Resolve();
-					}
-				}
-			}
-		}
+		#region Defaults
 
 		protected virtual void handleDefaults(XmlNode node)
 		{
@@ -713,6 +640,10 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
+		#endregion
+
+		#region Agent
+
 		protected virtual Dom.Agent handleAgent(XmlNode node)
 		{
 			Dom.Agent agent = new Dom.Agent();
@@ -748,42 +679,97 @@ namespace Peach.Core.Analyzers
 			return agent;
 		}
 
-		#region Data Model
+		#endregion
 
-		protected DataModel handleDataModel(XmlNode node, DataModel old)
+		#region DataElement Default Attributes
+
+		static string getDefaultError(Type type, string key)
 		{
-			Type type;
-			if (!dataModelPitParsable.TryGetValue(node.Name, out type))
-				return old;
-
-			if (old != null)
-				throw new PeachException("Error, more than one {0} not allowed. XML:\n{1}".Fmt(
-					string.Join(",", dataModelPitParsable.Keys), node.OuterXml));
-
-			MethodInfo pitParsableMethod = type.GetMethod("PitParser");
-			if (pitParsableMethod == null)
-				throw new PeachException("Error, type with PitParsableAttribute is missing static PitParser(...) method: " + type.FullName);
-
-			PitParserDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserDelegate), pitParsableMethod) as PitParserDelegate;
-
-			var elem = delegateAction(this, node, null);
-			if (elem == null)
-				throw new PeachException("Error, type failed to parse provided XML: " + type.FullName);
-
-			var dataModel = elem as DataModel;
-			if (dataModel == null)
-				throw new PeachException("Error, type failed to return top level element: " + type.FullName);
-
-			return dataModel;
+			return string.Format("Error, element '{0}' has an invalid default value for attribute '{1}'.", type.Name, key);
 		}
 
-		protected bool IsArray(XmlNode node)
+		public string getDefaultAttr(Type type, string key, string defaultValue)
 		{
-			if (node.hasAttr("minOccurs") || node.hasAttr("maxOccurs") || node.hasAttr("occurs"))
-				return true;
+			Dictionary<string, string> defaults = null;
+			if (!dataElementDefaults.TryGetValue(type, out defaults))
+				return defaultValue;
 
-			return false;
+			string value = null;
+			if (!defaults.TryGetValue(key, out value))
+				return defaultValue;
+
+			return value;
 		}
+
+		public bool getDefaultAttr(Type type, string key, bool defaultValue)
+		{
+			string value = getDefaultAttr(type, key, null);
+
+			switch (value)
+			{
+				case null:
+					return defaultValue;
+				case "1":
+				case "true":
+					return true;
+				case "0":
+				case "false":
+					return false;
+				default:
+					throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to a boolean.");
+			}
+		}
+
+		public int getDefaultAttr(Type type, string key, int defaultValue)
+		{
+			string value = getDefaultAttr(type, key, null);
+			if (value == null)
+				return defaultValue;
+
+			int ret;
+			if (!int.TryParse(value, out ret))
+				throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to an integer.");
+
+			return ret;
+		}
+
+		public char getDefaultAttr(Type type, string key, char defaultValue)
+		{
+			string value = getDefaultAttr(type, key, null);
+			if (value == null)
+				return defaultValue;
+
+			if (value.Length != 1)
+				throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to a character.");
+
+			return value[0];
+		}
+
+		#endregion
+
+		#region Common DataElement Attributes & Children
+
+		#region Value Attribute Escaping
+
+		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n]+", RegexOptions.Singleline);
+		static Regex reEscapeSlash = new Regex(@"\\\\|\\n|\\r|\\t");
+
+		static string ReplaceSlash(Match m)
+		{
+			string s = m.ToString();
+
+			switch (s)
+			{
+				case "\\\\": return "\\";
+				case "\\n": return "\n";
+				case "\\r": return "\r";
+				case "\\t": return "\t";
+			}
+
+			throw new ArgumentOutOfRangeException("m");
+		}
+
+		#endregion
 
 		/// <summary>
 		/// Handle common attributes such as the following:
@@ -892,74 +878,6 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		protected void handleFixup(XmlNode node, DataElement element)
-		{
-			if (element.fixup != null)
-				throw new PeachException("Error, multiple fixups defined on element '" + element.name + "'.");
-
-			element.fixup = handlePlugin<Fixup, FixupAttribute>(node, element, true);
-		}
-
-		protected void handleAnalyzer(XmlNode node, DataElement element)
-		{
-			if (element.analyzer != null)
-				throw new PeachException("Error, multiple analyzers are defined on element '" + element.name + "'.");
-
-			element.analyzer = handlePlugin<Analyzer, AnalyzerAttribute>(node, element, false);
-		}
-
-		protected void handleTransformer(XmlNode node, DataElement element)
-		{
-			if (element.transformer != null)
-				throw new PeachException("Error, multiple transformers are defined on element '" + element.name + "'.");
-
-			element.transformer = handlePlugin<Transformer, TransformerAttribute>(node, element, false);
-
-			handleNestedTransformer(node, element, element.transformer);
-		}
-
-		protected void handleNestedTransformer(XmlNode node, DataElement element, Transformer transformer)
-		{
-			foreach (XmlNode child in node.ChildNodes)
-			{
-				if (child.Name == "Transformer")
-				{
-					if (transformer.anotherTransformer != null)
-						throw new PeachException("Error, multiple nested transformers are defined on element '" + element.name + "'.");
-
-					transformer.anotherTransformer = handlePlugin<Transformer, TransformerAttribute>(child, element, false);
-
-					handleNestedTransformer(child, element, transformer.anotherTransformer);
-				}
-			}
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <param name="node">XmlNode tor read children elements from</param>
-		/// <param name="element">Element to add items to</param>
-		protected void handleHint(XmlNode node, DataElement element)
-		{
-			var hint = new Hint(node.getAttrString("name"), node.getAttrString("value"));
-			element.Hints.Add(hint.Name, hint);
-			logger.Debug("handleHint: " + hint.Name + ": " + hint.Value);
-		}
-
-		protected void handlePlacement(XmlNode node, DataElement element)
-		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-
-			if (node.hasAttr("after"))
-				args["after"] = new Variant(node.getAttrString("after"));
-			else if (node.hasAttr("before"))
-				args["before"] = new Variant(node.getAttrString("before"));
-			else
-				throw new PeachException("Error, Placement on element \"" + element.name + "\" is missing 'after' or 'before' attribute.");
-
-			Placement placement = new Placement(args);
-			element.placement = placement;
-		}
-
 		/// <summary>
 		/// Handle parsing child data types into containers.
 		/// </summary>
@@ -975,7 +893,7 @@ namespace Peach.Core.Analyzers
 					continue;
 
 				Type dataElementType;
-				
+
 				if (!dataElementPitParsable.TryGetValue(child.Name, out dataElementType))
 				{
 					if (((IList<string>)dataElementCommon).Contains(child.Name))
@@ -1007,22 +925,18 @@ namespace Peach.Core.Analyzers
 					throw new PeachException("Error, type failed to parse provided XML: " + dataElementType.FullName);
 
 				// Wrap elements that are arrays with an Array object
-				if (IsArray(child))
+				if (child.hasAttr("minOccurs") || child.hasAttr("maxOccurs") || child.hasAttr("occurs"))
 				{
 					// Ensure the array has the same name as the 1st element
 					((System.Xml.XmlElement)child).SetAttribute("name", elem.name);
 
 					var array = Dom.Array.PitParser(this, child, element) as Dom.Array;
-					array.origionalElement = elem;
 
-					if (array.occurs > 0)
-						array.Add(elem);
-					else
-						elem.parent = array;
+					// Set the original element
+					array.OriginalElement = elem;
 
-					// Expand all occurances
-					for (int i = 1; i < array.occurs; ++i)
-						array.Add(elem.Clone(elem.name + "_" + i));
+					// Expand the array to the correct size
+					array.ExpandTo(array.occurs);
 
 					// Copy over hints, some may be for array
 					foreach (var key in elem.Hints.Keys)
@@ -1058,39 +972,28 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		Regex _hexWhiteSpace = new Regex(@"[h{},\s\r\n]+", RegexOptions.Singleline);
-		Regex _escapeSlash = new Regex(@"\\\\|\\n|\\r|\\t");
-
-		private static string replaceSlash(Match m)
-		{
-			string s = m.ToString();
-
-			switch (s)
-			{
-				case "\\\\": return "\\";
-				case "\\n": return "\n";
-				case "\\r": return "\r";
-				case "\\t": return "\t";
-			}
-			
-			throw new ArgumentOutOfRangeException("m");
-		}
-
-		public void handleCommonDataElementValue(XmlNode node, DataElement elem)
+		/// <summary>
+		/// Handle parsing value/valueType attributes on elements
+		/// transformer.
+		/// </summary>
+		/// <param name="node">Node to read values from</param>
+		/// <param name="element">Element to set values on</param>
+		public void handleCommonDataElementValue(XmlNode node, DataElement element)
 		{
 			if (!node.hasAttr("value"))
 				return;
 
 			string value = node.getAttrString("value");
 
-			value = _escapeSlash.Replace(value, new MatchEvaluator(replaceSlash));
+			value = reEscapeSlash.Replace(value, new MatchEvaluator(ReplaceSlash));
 
 			string valueType = null;
+			IPAddress asIp = null;
 
 			if (node.hasAttr("valueType"))
 				valueType = node.getAttrString("valueType");
 			else
-				valueType = getDefaultAttr(elem.GetType(), "valueType", "string");
+				valueType = getDefaultAttr(element.GetType(), "valueType", "string");
 
 			switch (valueType.ToLower())
 			{
@@ -1098,7 +1001,7 @@ namespace Peach.Core.Analyzers
 					// Handle hex data.
 
 					// 1. Remove white space
-					value = _hexWhiteSpace.Replace(value, "");
+					value = reHexWhiteSpace.Replace(value, "");
 
 					// 3. Remove 0x
 					value = value.Replace("0x", "");
@@ -1107,98 +1010,140 @@ namespace Peach.Core.Analyzers
 					value = value.Replace("\\x", "");
 
 					if (value.Length % 2 != 0)
-						throw new PeachException("Error, the hex value of " + elem.debugName + " must contain an even number of characters.");
+						throw new PeachException("Error, the hex value of " + element.debugName + " must contain an even number of characters.");
 
 					var array = HexString.ToArray(value);
 					if (array == null)
-						throw new PeachException("Error, the value of " + elem.debugName + " contains invalid hex characters.");
+						throw new PeachException("Error, the value of " + element.debugName + " contains invalid hex characters.");
 
-					elem.DefaultValue = new Variant(new BitStream(array));
+					element.DefaultValue = new Variant(new BitStream(array));
 					break;
 				case "literal":
 
 					var localScope = new Dictionary<string, object>();
-					localScope["self"] = elem;
+					localScope["self"] = element;
 					localScope["node"] = node;
 					localScope["Parser"] = this;
-					localScope["Context"] = this._dom.context;
-					
-					var obj = Scripting.EvalExpression(value, localScope);
+					localScope["Context"] = ((DataModel)element.root).dom;
+
+					var obj = element.EvalExpression(value, localScope);
 
 					if (obj == null)
-						throw new PeachException("Error, the value of " + elem.debugName + " is not a valid eval statement.");
+						throw new PeachException("Error, the value of " + element.debugName + " is not a valid eval statement.");
 
-					elem.DefaultValue = new Variant(obj.ToString());
+					element.DefaultValue = new Variant(obj.ToString());
 					break;
 				case "string":
 					// No action requried, default behaviour
-					elem.DefaultValue = new Variant(value);
+					element.DefaultValue = new Variant(value);
 					break;
+				case "ipv4":
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv4 address.");
+
+					element.DefaultValue = new Variant(asIp.GetAddressBytes());
+					break;
+				case "ipv6":
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv6 address.");
+
+					element.DefaultValue = new Variant(asIp.GetAddressBytes());
+					break;
+
 				default:
 					throw new PeachException("Error, invalid value for 'valueType' attribute: " + valueType);
 			}
 		}
 
-		private static string getDefaultError(Type type, string key)
+		#endregion
+
+		#region DataModel
+
+		protected DataModel handleDataModel(XmlNode node, Dom.Dom dom, DataModel old)
 		{
-			return string.Format("Error, element '{0}' has an invalid default value for attribute '{1}'.", type.Name, key);
+			Type type;
+			if (!dataModelPitParsable.TryGetValue(node.Name, out type))
+				return old;
+
+			if (old != null)
+				throw new PeachException("Error, more than one {0} not allowed. XML:\n{1}".Fmt(
+					string.Join(",", dataModelPitParsable.Keys), node.OuterXml));
+
+			MethodInfo pitParsableMethod = type.GetMethod("PitParser");
+			if (pitParsableMethod == null)
+				throw new PeachException("Error, type with PitParsableAttribute is missing static PitParser(...) method: " + type.FullName);
+
+			PitParserTopLevelDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserTopLevelDelegate), pitParsableMethod) as PitParserTopLevelDelegate;
+
+			var dataModel = delegateAction(this, node, dom);
+			if (dataModel == null)
+				throw new PeachException("Error, type failed to parse provided XML: " + type.FullName);
+
+			return dataModel;
 		}
 
-		public string getDefaultAttr(Type type, string key, string defaultValue)
+		protected void handleFixup(XmlNode node, DataElement element)
 		{
-			Dictionary<string, string> defaults = null;
-			if (!dataElementDefaults.TryGetValue(type, out defaults))
-				return defaultValue;
+			if (element.fixup != null)
+				throw new PeachException("Error, multiple fixups defined on element '" + element.name + "'.");
 
-			string value = null;
-			if (!defaults.TryGetValue(key, out value))
-				return defaultValue;
-
-			return value;
+			element.fixup = handlePlugin<Fixup, FixupAttribute>(node, element, true);
 		}
 
-		public bool getDefaultAttr(Type type, string key, bool defaultValue)
+		protected void handleAnalyzer(XmlNode node, DataElement element)
 		{
-			string value = getDefaultAttr(type, key, null);
+			if (element.analyzer != null)
+				throw new PeachException("Error, multiple analyzers are defined on element '" + element.name + "'.");
 
-			switch (value)
+			element.analyzer = handlePlugin<Analyzer, AnalyzerAttribute>(node, element, false);
+		}
+
+		protected void handleTransformer(XmlNode node, DataElement element)
+		{
+			if (element.transformer != null)
+				throw new PeachException("Error, multiple transformers are defined on element '" + element.name + "'.");
+
+			element.transformer = handlePlugin<Transformer, TransformerAttribute>(node, element, true);
+
+			handleNestedTransformer(node, element, element.transformer);
+		}
+
+		protected void handleNestedTransformer(XmlNode node, DataElement element, Transformer transformer)
+		{
+			foreach (XmlNode child in node.ChildNodes)
 			{
-				case null:
-					return defaultValue;
-				case "1":
-				case "true":
-					return true;
-				case "0":
-				case "false":
-					return false;
-				default:
-					throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to a boolean.");
+				if (child.Name == "Transformer")
+				{
+					if (transformer.anotherTransformer != null)
+						throw new PeachException("Error, multiple nested transformers are defined on element '" + element.name + "'.");
+
+					transformer.anotherTransformer = handlePlugin<Transformer, TransformerAttribute>(child, element, true);
+
+					handleNestedTransformer(child, element, transformer.anotherTransformer);
+				}
 			}
 		}
 
-		public int getDefaultAttr(Type type, string key, int defaultValue)
+		protected void handleHint(XmlNode node, DataElement element)
 		{
-			string value = getDefaultAttr(type, key, null);
-			if (value == null)
-				return defaultValue;
-
-			int ret;
-			if (!int.TryParse(value, out ret))
-				throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to an integer.");
-
-			return ret;
+			var hint = new Hint(node.getAttrString("name"), node.getAttrString("value"));
+			element.Hints.Add(hint.Name, hint);
+			logger.Debug("handleHint: " + hint.Name + ": " + hint.Value);
 		}
 
-		public char getDefaultAttr(Type type, string key, char defaultValue)
+		protected void handlePlacement(XmlNode node, DataElement element)
 		{
-			string value = getDefaultAttr(type, key, null);
-			if (value == null)
-				return defaultValue;
+			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
 
-			if (value.Length != 1)
-				throw new PeachException(getDefaultError(type, key) + "  Could not convert value '" + value + "' to a character.");
+			if (node.hasAttr("after"))
+				args["after"] = new Variant(node.getAttrString("after"));
+			else if (node.hasAttr("before"))
+				args["before"] = new Variant(node.getAttrString("before"));
+			else
+				throw new PeachException("Error, Placement on element \"" + element.name + "\" is missing 'after' or 'before' attribute.");
 
-			return value[0];
+			Placement placement = new Placement(args);
+			element.placement = placement;
 		}
 
 		protected void handleRelation(XmlNode node, DataElement parent)
@@ -1270,58 +1215,15 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		protected T handlePlugin<T, A>(XmlNode node, DataElement parent, bool useParent)
-			where T : class
-			where A : PluginAttribute
-		{
-			var pluginType = typeof(T).Name;
-
-			var cls = node.getAttrString("class");
-			var arg = handleParams(node);
-
-			var type = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == cls);
-			if (type == null)
-				throw new PeachException(string.Format("Error, unable to locate {0} named '{1}', FindTypeByAttribute returned null.", pluginType, cls));
-
-			validateParameterAttributes<A>(type, pluginType, cls, arg);
-
-			try
-			{
-				if (useParent)
-				{
-					return Activator.CreateInstance(type, parent, arg) as T;
-				}
-				else
-				{
-					return Activator.CreateInstance(type, arg) as T;
-				}
-			}
-			catch (Exception e)
-			{
-				if (e.InnerException != null)
-				{
-					throw new PeachException(string.Format(
-						"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
-						pluginType, cls, e.InnerException.Message
-					));
-				}
-
-				throw new PeachException(string.Format(
-					"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
-					pluginType, cls, e.InnerException.Message
-				), e);
-			}
-		}
-
 		#endregion
 
-		#region State Model
+		#region StateModel
 
 		protected virtual StateModel handleStateModel(XmlNode node, Dom.Dom parent)
 		{
 			string name = node.getAttrString("name");
 			string initialState = node.getAttrString("initialState");
-			StateModel stateModel = new StateModel();
+			StateModel stateModel = CreateStateModel();
 			stateModel.name = name;
 			stateModel.parent = parent;
 
@@ -1351,6 +1253,10 @@ namespace Peach.Core.Analyzers
 			return stateModel;
 		}
 
+		#endregion
+
+		#region State
+
 		protected virtual State handleState(XmlNode node, StateModel parent)
 		{
 			State state = new State();
@@ -1378,6 +1284,10 @@ namespace Peach.Core.Analyzers
 
 			return state;
 		}
+
+		#endregion
+
+		#region Action
 
 		protected virtual void handleActionAttr(XmlNode node, Dom.Action action, params string[] badAttrs)
 		{
@@ -1517,14 +1427,16 @@ namespace Peach.Core.Analyzers
 
 		protected virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
 		{
+			var dom = data.action.parent.parent.parent;
+
 			foreach (XmlNode child in node.ChildNodes)
 			{
-				data.dataModel = handleDataModel(child, data.dataModel);
+				data.dataModel = handleDataModel(child, dom, data.dataModel);
 
 				if (data.dataModel != null)
 				{
 					data.dataModel.dom = null;
-					data.dataModel.action = data.action;
+					data.dataModel.actionData = data;
 				}
 
 				if (child.Name == "Data")
@@ -1536,7 +1448,7 @@ namespace Peach.Core.Analyzers
 							data.action.parent.name,
 							data.action.name));
 
-					var item = handleData(child, data.dataSets.UniqueName());
+					var item = handleData(child, dom, data.dataSets.UniqueName());
 
 					try
 					{
@@ -1562,7 +1474,7 @@ namespace Peach.Core.Analyzers
 					data.action.name));
 		}
 
-		protected virtual Core.Dom.Action handleAction(XmlNode node, State parent)
+		protected virtual Dom.Action handleAction(XmlNode node, State parent)
 		{
 			var strType = node.getAttrString("type");
 			var type = ClassLoader.FindTypeByAttribute<ActionAttribute>((t, a) => 0 == string.Compare(a.Name, strType, true));
@@ -1598,8 +1510,11 @@ namespace Peach.Core.Analyzers
 			return action;
 		}
 
+		#endregion
 
-		protected virtual DataSet handleData(XmlNode node, string uniqueName)
+		#region Data
+
+		protected virtual DataSet handleData(XmlNode node, Dom.Dom dom, string uniqueName)
 		{
 			DataSet dataSet = null;
 
@@ -1607,7 +1522,7 @@ namespace Peach.Core.Analyzers
 			{
 				string refName = node.getAttrString("ref");
 
-				var other = getRef<DataSet>(_dom, refName, a => a.datas);
+				var other = dom.getRef<DataSet>(refName, a => a.datas);
 				if (other == null)
 					throw new PeachException("Error, could not resolve Data element ref attribute value '" + refName + "'.");
 
@@ -1725,6 +1640,10 @@ namespace Peach.Core.Analyzers
 			return dataSet;
 		}
 
+		#endregion
+
+		#region Test
+
 		protected virtual List<string> handleMutators(XmlNode node)
 		{
 			var ret = new List<string>();
@@ -1811,7 +1730,7 @@ namespace Peach.Core.Analyzers
 				{
 					string refName = child.getAttrString("ref");
 
-					var agent = getRef<Dom.Agent>(parent, refName, a => a.agents);
+					var agent = parent.getRef<Dom.Agent>(refName, a => a.agents);
 					if (agent == null)
 						throw new PeachException("Error, Test::" + test.name + " Agent name in ref attribute not found.");
 
@@ -1841,7 +1760,7 @@ namespace Peach.Core.Analyzers
 				{
 					string strRef = child.getAttrString("ref");
 
-					test.stateModel = getRef<Dom.StateModel>(parent, strRef, a => a.stateModels);
+					test.stateModel = parent.getRef<Dom.StateModel>(strRef, a => a.stateModels);
 					if (test.stateModel == null)
 						throw new PeachException("Error, could not locate StateModel named '" +
 							strRef + "' for Test '" + test.name + "'.");
@@ -1910,7 +1829,52 @@ namespace Peach.Core.Analyzers
 			return test;
 		}
 
-		public static uint _uniquePublisherName = 0;
+		#endregion
+
+		#region Plugin Helpers
+
+		protected T handlePlugin<T, A>(XmlNode node, DataElement parent, bool useParent)
+			where T : class
+			where A : PluginAttribute
+		{
+			var pluginType = typeof(T).Name;
+
+			var cls = node.getAttrString("class");
+			var arg = handleParams(node);
+
+			var type = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == cls);
+			if (type == null)
+				throw new PeachException(string.Format("Error, unable to locate {0} named '{1}', FindTypeByAttribute returned null.", pluginType, cls));
+
+			validateParameterAttributes<A>(type, pluginType, cls, arg);
+
+			try
+			{
+				if (useParent)
+				{
+					return Activator.CreateInstance(type, parent, arg) as T;
+				}
+				else
+				{
+					return Activator.CreateInstance(type, arg) as T;
+				}
+			}
+			catch (Exception e)
+			{
+				if (e.InnerException != null)
+				{
+					throw new PeachException(string.Format(
+						"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
+						pluginType, cls, e.InnerException.Message
+					));
+				}
+
+				throw new PeachException(string.Format(
+					"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
+					pluginType, cls, e.InnerException.Message
+				), e);
+			}
+		}
 
 		protected void validateParameterAttributes<A>(Type type, string pluginType, string name, IDictionary<string, Variant> xmlParameters) where A : PluginAttribute
 		{
@@ -1988,6 +1952,7 @@ namespace Peach.Core.Analyzers
 
 			return ret;
 		}
+
 		#endregion
 	}
 }

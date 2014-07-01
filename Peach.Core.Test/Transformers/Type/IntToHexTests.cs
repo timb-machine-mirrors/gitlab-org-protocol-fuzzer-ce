@@ -7,6 +7,7 @@ using NUnit.Framework.Constraints;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Transformers.Type
 {
@@ -48,7 +49,7 @@ namespace Peach.Core.Test.Transformers.Type
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
 
-            Engine e = new Engine(null);
+            Engine e = new Engine(this);
             e.startFuzzing(dom, config);
 
             // verify values
@@ -92,7 +93,7 @@ namespace Peach.Core.Test.Transformers.Type
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			// verify values
@@ -142,11 +143,36 @@ namespace Peach.Core.Test.Transformers.Type
 			config.rangeStart = 1;
 			config.rangeStop = 1;
 			
-			Engine e = new Engine(null);
+			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 			string val1 = "Peach";
 			Assert.AreEqual(val1, (string)mutations[0]);
 		}
+
+        [Test]
+        public void CrackTest()
+        {
+            string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String/>
+		<Transformer class='IntToHex'/>
+	</DataModel>
+</Peach>
+";
+
+            PitParser parser = new PitParser();
+            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+            var data = Bits.Fmt("{0}", new byte[] {0x31, 0x30 });
+
+            DataCracker cracker = new DataCracker();
+            cracker.CrackData(dom.dataModels[0], data);
+
+            var val = (string)dom.dataModels[0][0].DefaultValue;
+
+            Assert.AreEqual("16", val);
+        }
     }
 }
 
