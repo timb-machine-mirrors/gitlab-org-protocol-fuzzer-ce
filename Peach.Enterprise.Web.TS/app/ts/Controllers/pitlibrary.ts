@@ -19,8 +19,8 @@ module DashApp {
 		public selectedPit: string;
 
 		public treeOptions = {
-			nodeChildren: "children",
-			dirSelectable: true
+			nodeChildren: "items",
+			dirSelectable: false
 		}
 
 		public notAPit:boolean = false;
@@ -33,9 +33,10 @@ module DashApp {
 
 			peachsvc.GetLibraries((data: P.PitLibrary[]) => {
 				if (data != undefined && data.length > 0) {
-					this._libraries = new kendo.data.HierarchicalDataSource({
-						data: TreeItem.CreateFromPitLibrary(data)
-					});
+					//this._libraries = new kendo.data.HierarchicalDataSource({
+					//	data: TreeItem.CreateFromPitLibrary(data)
+					//});
+					this._libraries = TreeItem.CreateFromPitLibrary(data);
 				}
 			});
 		}
@@ -52,6 +53,7 @@ module DashApp {
 	}
 
 	export class TreeItem {
+		id: number;
 		text: string;
 		pitUrl: string;
 		items: TreeItem[];
@@ -73,10 +75,11 @@ module DashApp {
 			var libitem: TreeItem;
 			var catitem: TreeItem;
 			var pititem: TreeItem;
-
+			var id = 0;
 
 			for (var l = 0; l < pitLibrary.length; l++) {
 				libitem = new TreeItem();
+				libitem.id = id++;
 				libitem.text = pitLibrary[l].name;
 				libitem.items = [];
 				for (var v = 0; v < pitLibrary[l].versions.length; v++) {
@@ -88,12 +91,14 @@ module DashApp {
 						catitem = $.grep(libitem.items, (e) => { return e.text == category; })[0];
 						if(catitem == undefined) { 
 							catitem = new TreeItem();
+							catitem.id = id++;
 							catitem.text = category;
 							catitem.items = [];
 							libitem.items.push(catitem);
 						}
 
 						pititem = new TreeItem();
+						pititem.id = id++;
 						pititem.text = pitLibrary[l].versions[v].pits[p].name;
 						pititem.pitUrl = pitLibrary[l].versions[v].pits[p].pitUrl;
 						catitem.items.push(pititem);

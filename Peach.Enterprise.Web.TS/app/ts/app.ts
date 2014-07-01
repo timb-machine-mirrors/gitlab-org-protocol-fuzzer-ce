@@ -10,14 +10,15 @@ module DashApp {
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 		
-	//"n3-charts.linechart",
+	// "n3-charts.linechart",
+	//	"kendo.directives",
 	var dashApp = angular.module("dashApp", [
 		"ngResource",
-		"emguo.poller",
+		"emguo.poller", 
 		"ngGrid",
 		"ngRoute",
 		"ui.bootstrap",
-		"kendo.directives",
+		"treeControl"
 	]).service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
 		.service("pitConfiguratorService", ["poller","peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
     .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
