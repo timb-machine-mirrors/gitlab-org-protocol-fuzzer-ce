@@ -22,5 +22,3 @@ bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
 bld.read_all_csshlibs('Telerik ASP.NET AJAX/Bin40')
 bld.read_all_csshlibs('RadControls for WPF Q3 2012/Binaries/WPF40')
 bld.read_all_csshlibs('Actipro-WPF-Controls-12.2.0570/Assemblies')
-
-bld.read_csshlib('System.Numerics.dll', paths=[ bld.path ])
