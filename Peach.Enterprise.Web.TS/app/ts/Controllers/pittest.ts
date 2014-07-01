@@ -112,6 +112,7 @@ module DashApp {
 		}
 
 		private startTestPoller(testUrl: string) {
+			this.pitConfigSvc.Pit.configured = false;
 			var testResource = this.peach.GetSingleResource(testUrl);
 			this.testPoller = this.pollerSvc.get(testResource, {
 				action: "get",
