@@ -24,6 +24,12 @@ for node in nodes:
     # and the zip that depends on 'peach-doc' will include them
     doc.install_files(install_dir, node)
 
+doc.install_files(
+  '${BINDIR}/sdk/apidocs',
+  bld.path.ant_glob('out.pro/apidocs/**'),
+  chmod=Utils.O644,
+  )
+
 #doc.install_files(
 #  '${BINDIR}/docs',
 #  bld.path.ant_glob('out.pro/webhelp/docs/**'),
