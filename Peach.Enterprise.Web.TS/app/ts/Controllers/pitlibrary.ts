@@ -2,7 +2,6 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../Scripts/typings/kendo/kendo.web.d.ts" />
 
 module DashApp {
 	"use strict";

@@ -30,19 +30,18 @@ module DashApp {
 		}
 
 		public get jobRunningTooltip(): string {
-			if (this.job == undefined)
-				return "";
-			else
+			if (this.IsJobRunning)
 				return "Disabled while running a Job";
+			else
+				return "";
 		}
 
 		public get jobNotRunningTooltip(): string {
-			if (this.job == undefined)
+			if (this.IsJobRunning)
 				return "Disabled while not running a Job";
 			else
 				return "";
 		}
-
 
 		public location: ng.ILocationService;
 
@@ -88,6 +87,18 @@ module DashApp {
 			}
 
 			return false;
+		}
+
+		public get IsJobRunning() {
+			if (this.job != undefined && this.job.status != P.JobStatuses.Stopped) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public get CanViewFaults() {
+			return (this.job != undefined);
 		}
 
 

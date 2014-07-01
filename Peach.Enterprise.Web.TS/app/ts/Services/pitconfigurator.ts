@@ -332,15 +332,22 @@ module DashApp.Services {
 				var faultsResource = this.peachSvc.GetManyResources(this._job.faultsUrl);
 				this.faultsPoller = this.pollerSvc.get(faultsResource, {
 					action: "get",
-					delay: this.POLLER_TIME,
+					delay: 1000,
 					method: "GET"
 				});
 
 				this.faultsPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: P.Fault[]) => {
-						this.Faults = data;
-					});
+					//var start: number = 0;
+					//if (this.Faults.length > 1) {
+					//	start = this.Faults.length - 1;
+					//}
+					//for (var f = start; f < data.length; f++) {
+					//	this.Faults.push(data[f]);
+					//}
+					this.Faults = data;
+				});
 			}
 			else {
 				console.error("uh...");
