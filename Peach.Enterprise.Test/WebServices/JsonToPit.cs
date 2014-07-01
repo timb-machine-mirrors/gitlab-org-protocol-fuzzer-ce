@@ -266,7 +266,7 @@ namespace Peach.Enterprise.Test.WebServices
 			public string Value { get; set; }
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void JsonInt()
 		{
 			var json = " { \"Value\":500 }";
