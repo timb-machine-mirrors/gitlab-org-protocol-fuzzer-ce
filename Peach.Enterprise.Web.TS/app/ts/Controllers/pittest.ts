@@ -61,7 +61,6 @@ module DashApp {
 			var s: string;
 		}
 
-		//			rowHeight: 70,
 		public dataGridOptions: ngGrid.IGridOptions = {
 			data: "vm.testEvents", 
 			columnDefs: [
@@ -76,6 +75,7 @@ module DashApp {
 					cellTemplate: "../../partials/test-grid-message-template.html"
 				}
 			],
+			rowHeight: 45,
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
@@ -128,6 +128,9 @@ module DashApp {
 				if (data.status != "active") {
 					this.testPoller.stop();
 					//this.logPoller.stop();
+					if (data.status == "pass") {
+						this.pitConfigSvc.Pit.configured = true;
+					}
 				}
 			});
 		}
