@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
 using System.Xml;
+using System.Net.Sockets;
+using System.Net;
+using Peach.Enterprise.WebServices;
 
 namespace Peach.Enterprise.Test.WebServices
 {
@@ -274,5 +277,33 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.NotNull(obj);
 			Assert.AreEqual("500", obj.Value);
 		}
+
+		[Test]
+		public void MultipleServers()
+		{
+			var listener = new TcpListener(IPAddress.Any, 0);
+
+			try
+			{
+				listener.Start();
+
+				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+				Assert.AreNotEqual(0, port);
+
+				using (var web = new WebServer(""))
+				{
+					web.Start("localhost", port);
+
+					var actualPort = web.Uri.Port;
+					Assert.Greater(actualPort, port);
+				}
+			}
+			finally
+			{
+				listener.Stop();
+			}
+		}
+
 	}
 }

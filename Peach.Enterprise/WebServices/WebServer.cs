@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace Peach.Enterprise.WebServices
@@ -68,6 +70,9 @@ namespace Peach.Enterprise.WebServices
 
 	public class WebServer : IDisposable
 	{
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
+		const int ERROR_SHARING_VIOLATION = 32;
+
 		Bootstrapper bootstrapper;
 		HostConfiguration config;
 		NancyHost host;
@@ -77,7 +82,6 @@ namespace Peach.Enterprise.WebServices
 
 		public WebServer(string pitLibraryPath)
 		{
-			Uri = new Uri("http://localhost:8888");
 			Context = new WebContext(pitLibraryPath);
 
 			bootstrapper = new Bootstrapper(Context);
@@ -88,22 +92,55 @@ namespace Peach.Enterprise.WebServices
 					CreateAutomatically = true,
 				},
 			};
-			host = new NancyHost(bootstrapper, config, Uri);
 		}
 
 		public void Start()
 		{
-			host.Start();
+			Start("localhost", 8888);
+		}
+
+		public void Start(string hostname, int port)
+		{
+			while (host == null)
+			{
+				try
+				{
+					var tmpUri = new Uri(string.Format("http://{0}:{1}", hostname, port++));
+					var tmpHost = new NancyHost(bootstrapper, config, tmpUri);
+
+					tmpHost.Start();
+
+					Uri = tmpUri;
+					host = tmpHost;
+				}
+				catch (HttpListenerException ex)
+				{
+					// Windows gives ERROR_SHARING_VIOLATION when port in use
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION)
+						throw;
+				}
+				catch (SocketException ex)
+				{
+					// Mono gives AddressAlreadyInUse
+					if (ex.SocketErrorCode != SocketError.AddressAlreadyInUse)
+						throw;
+				}
+			}
 		}
 
 		public void Stop()
 		{
-			host.Stop();
+			if (host != null)
+			{
+				host.Stop();
+				host = null;
+			}
 		}
 
 		public void Dispose()
 		{
-			host = null;
+			Stop();
+
 			config = null;
 			bootstrapper = null;
 			Uri = null;
