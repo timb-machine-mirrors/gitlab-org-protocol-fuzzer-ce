@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -324,7 +325,30 @@ namespace Peach.Enterprise
 
 		public static List<KeyValuePair<string, string>> Evaluate(List<KeyValuePair<string, string>> defs)
 		{
-			return defs;
+			var ret = new List<KeyValuePair<string, string>>(defs);
+
+			var re = new Regex("##(\\w+?)##");
+
+			var evaluator = new MatchEvaluator(delegate(Match m)
+			{
+				var key = m.Groups[1].Value;
+				var val = ret.Where(_ => _.Key == key).Select(_ => _.Value).FirstOrDefault();
+
+				return val ?? m.Groups[0].Value;
+			});
+
+			for (var i = 0; i < ret.Count;)
+			{
+				var oldVal = ret[i].Value;
+				var newVal = re.Replace(oldVal, evaluator);
+
+				if (oldVal != newVal)
+					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
+				else
+					++i;
+			}
+
+			return ret;
 		}
 
 		#endregion
