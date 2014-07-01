@@ -11,7 +11,7 @@
 
 	<Test name="Default">
 		<Open action="SNMP:Server.LaunchClient.Action" publisher="Pub"/>
-		<Input action="SNMP:Server.ServerStart.GetRequest" publisher="Pub">
+		<Input action="SNMP:Server.LaunchClient.GetRequest" publisher="Pub">
 <![CDATA[
 0000   30 29 02 01 01 04 06 70 75 62 6c 69 63 a0 1c 02  0).....public...
 0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0e 30 0c 06  .r. .......0.0..
@@ -19,7 +19,7 @@
 ]]>
 		</Input>
 
-		<Output action="SNMP:Server.ServerStart.Response" publisher="Pub">
+		<Output action="SNMP:Server.LaunchClient.Response" publisher="Pub">
 <![CDATA[
 0000   30 3c 02 01 01 04 06 70 75 62 6c 69 63 a2 2f 02  0<.....public./.
 0010   04 72 a0 20 a6 02 01 00 02 01 00 30 21 30 1f 06  .r. .......0!0..
