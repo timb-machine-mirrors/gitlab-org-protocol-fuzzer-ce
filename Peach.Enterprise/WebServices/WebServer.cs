@@ -72,6 +72,7 @@ namespace Peach.Enterprise.WebServices
 	{
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
 		const int ERROR_SHARING_VIOLATION = 32;
+		const int ERROR_ALREADY_EXISTS = 183;
 
 		Bootstrapper bootstrapper;
 		HostConfiguration config;
@@ -116,7 +117,9 @@ namespace Peach.Enterprise.WebServices
 				catch (HttpListenerException ex)
 				{
 					// Windows gives ERROR_SHARING_VIOLATION when port in use
-					if (ex.ErrorCode != ERROR_SHARING_VIOLATION)
+					// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
+					// Mono raises "Prefix already in use" message
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION && ex.ErrorCode != ERROR_ALREADY_EXISTS && ex.Message != "Prefix already in use.")
 						throw;
 				}
 				catch (SocketException ex)

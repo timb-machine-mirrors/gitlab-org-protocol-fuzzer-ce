@@ -297,6 +297,14 @@ namespace Peach.Enterprise.Test.WebServices
 
 					var actualPort = web.Uri.Port;
 					Assert.Greater(actualPort, port);
+
+					using (var web2 = new WebServer(""))
+					{
+						web2.Start("localhost", actualPort);
+
+						var actualPort2 = web2.Uri.Port;
+						Assert.Greater(actualPort2, actualPort);
+					}
 				}
 			}
 			finally
