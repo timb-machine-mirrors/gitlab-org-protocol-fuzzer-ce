@@ -13,7 +13,7 @@ using NLog;
 namespace Peach.Enterprise.Transformers.Crypto
 {
 	[Description("Tls Transformer")]
-	[Transformer("Tls", true)]
+	[Transformer("Tls", true, IsTest = true)]
 	[Parameter("ContentType", typeof(byte), "Type of message to encrypt/decrypt")]
 	[Serializable]
 	public class Tls : Transformer

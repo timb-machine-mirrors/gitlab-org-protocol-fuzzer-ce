@@ -10,7 +10,7 @@ using Peach.Core;
 namespace Peach.Enterprise.Fixups
 {
 	[Description("Secure Random Number Fixup.")]
-	[Fixup("SecureRandomNumber", true)]
+	[Fixup("SecureRandomNumber", true, IsTest = true)]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Parameter("Length", typeof(int), "Length in bytes to return")]
 	[Serializable]
