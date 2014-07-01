@@ -72,10 +72,10 @@ SUCH DAMAGE.
       <Action name="Request" type="input">
         <DataModel ref="ARPPacket"/>
       </Action>
-      <Action type="slurp" valueXpath="//Reply//Request//TPA" setXpath="//Reply//Reply//SPA"/>
-      <Action type="slurp" valueXpath="//Reply//Request//SPA" setXpath="//Reply//TPA"/>
-      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//Dest"/>
-      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//THA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/TPA" setXpath="//Reply/ARPPacket/Payload/Data/SPA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/SPA" setXpath="//Reply/ARPPacket/Payload/Data/TPA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/THA" setXpath="//Reply/ARPPacket/Payload/Data/SHA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/SHA" setXpath="//Reply/ARPPacket/Payload/Data/THA"/>
       <Action name="Reply" type="output">
         <DataModel ref="ARPPacket"/>
         <Data>
