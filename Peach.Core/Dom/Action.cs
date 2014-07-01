@@ -53,7 +53,7 @@ namespace Peach.Core.Dom
 	public delegate void ActionFinishedEventHandler(Action action);
 
 	/// <summary>
-	/// Performs an Action such as sending output, calling a method, etc.
+	/// Base class for state model actions such as sending output, calling a method, etc.
 	/// </summary>
 	[Serializable]
 	public abstract class Action : INamed

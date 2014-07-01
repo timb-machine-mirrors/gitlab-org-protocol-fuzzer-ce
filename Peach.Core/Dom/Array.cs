@@ -47,9 +47,15 @@ namespace Peach.Core.Dom
 {
 
 	/// <summary>
-	/// Array of data elements.  Can be
-	/// zero or more elements.
+	/// Array of zero or more DataElements. When a user marks an element with the attributes of
+	/// occurs, minOcccurs, or maxOccurs, this element is used.
 	/// </summary>
+	/// <remarks>
+	/// Array elements can be in one of two states, pre and post expansion. Initially an Array
+	/// will have a single element called the OrigionalElement. This is the pre-expansion state. Once
+	/// data is loaded into the Array, the array will have zero or more copies of OrigionalElement, each
+	/// with different data. This is the post-expansion state.
+	/// </remarks>
 	[Serializable]
 	[DataElement("Array")]
 	[DataElementParentSupported(null)]
@@ -57,8 +63,17 @@ namespace Peach.Core.Dom
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
+		/// <summary>
+		/// Minimum number of elements this Array can contain
+		/// </summary>
 		public int minOccurs = 1;
+		/// <summary>
+		/// Maximum number of elements this Array can contain
+		/// </summary>
 		public int maxOccurs = 1;
+		/// <summary>
+		/// Number of occurrence this array should have
+		/// </summary>
 		public int occurs = 1;
 
 		private int? countOverride;
@@ -78,6 +93,10 @@ namespace Peach.Core.Dom
 
 		private DataElement originalElement;
 
+		/// <summary>
+		/// The original elements that was marked with the occurs, minOccurs, or maxOccurs
+		/// attributes.
+		/// </summary>
 		public DataElement OriginalElement
 		{
 			get
