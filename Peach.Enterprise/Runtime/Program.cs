@@ -114,7 +114,7 @@ namespace Peach.Enterprise.Runtime
 			}
 		}
 
-		protected virtual void Syntax()
+		protected override void Syntax()
 		{
 			string syntax = @"This is the Peach Runtime.  The Peach Runtime is one of the many ways
 to use Peach XML files.  Currently this runtime is still in development
