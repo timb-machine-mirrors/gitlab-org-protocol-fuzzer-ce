@@ -16,7 +16,10 @@ module DashApp {
 		public get job(): P.Job {
 			return this.pitConfigSvc.Job;
 		}
-		public faults: P.Fault[] = [];
+		//public faults: P.Fault[] = [];
+		public get faults(): P.Fault[] {
+			return this.pitConfigSvc.Faults;
+		}
 		
 		public tabs: ITab[] = [
 			{ title: "Summary", content: "../partials/fault-summary.html", active: true, disabled: false },
@@ -34,9 +37,7 @@ module DashApp {
 				{ field: "majorHash", displayName: "Major Hash" },
 				{ field: "minorHash", displayName: "Minor Hash" }
 			],
-			enablePaging: true,
 			totalServerItems: "vm.job.faultCount",
-			showFooter: true,
 			multiSelect: false,
 			afterSelectionChange: (r, e) => {
 				this.peachSvc.GetFault((<P.Fault>r.entity).faultUrl,(data: P.Fault) => {
@@ -44,11 +45,16 @@ module DashApp {
 					this.tabs[1].active = true;
 				});
 			},
-			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 387 })]
+			keepLastSelected: true
 		};
-		//showGroupPanel: true,
-		//	jqueryUIDraggable: true,
-		//{ minHeight: 320 }
+		
+		/*
+			showGroupPanel: true,
+			jqueryUIDraggable: true,
+			showFooter: false,
+			enablePaging: false,
+			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 200 })]
+		//*/		
 
 		public currentFault: P.Fault;
 
@@ -75,21 +81,25 @@ module DashApp {
 			this.pitConfigSvc = pitConfiguratorService;
 			this.peachSvc = peachService;
 
-			this.gridFaults.pagingOptions = this.pagingOptions;
-		
-			this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
+			this.initializeGrid($scope);
+		}
 
-			$scope.$watch("vm.pagingOptions", (newVal:ngGrid.IPagingOptions, oldVal:ngGrid.IPagingOptions) => {
-				if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
-					this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
-				}					
-			});
+		private initializeGrid(scope: ViewModelScope) {
+			//this.gridFaults.pagingOptions = this.pagingOptions;
 
-			$scope.$watch("vm.job.faultCount", (newVal: number, oldVal: number) => {
-				if (newVal !== oldVal) {
-					this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
-				}
-			});
+			//this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
+
+			//scope.$watch("vm.pagingOptions", (newVal: ngGrid.IPagingOptions, oldVal: ngGrid.IPagingOptions) => {
+			//	if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+			//		this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
+			//	}
+			//});
+
+			//scope.$watch("vm.job.faultCount", (newVal: number, oldVal: number) => {
+			//	if (newVal !== oldVal) {
+			//		this.setPagingData(this.pagingOptions.currentPage, this.pagingOptions.pageSize);
+			//	}
+			//});
 		}
 	}
 

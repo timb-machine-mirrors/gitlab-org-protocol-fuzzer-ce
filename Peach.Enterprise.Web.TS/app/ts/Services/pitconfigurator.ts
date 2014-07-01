@@ -118,7 +118,11 @@ module DashApp.Services {
 
 		public set Pit(pit: P.Pit) {
 			if (this._pit != pit) {
-				this._pit = pit;
+				if (pit.hasVersion == undefined) {
+					this._pit = new P.Pit(pit);
+				} else {
+					this._pit = pit;
+				}
 				this.ResetAll();
 
 				if (pit.pitUrl != undefined) {
@@ -198,18 +202,6 @@ module DashApp.Services {
 			this.TestComplete = false;
 			this.DoneComplete = false;
 		}
-
-		public CopyPit(pit: P.Pit) {
-			var request: P.CopyPitRequest = {
-				libraryUrl: this.UserPitLibrary,
-				pit: pit
-			};
-
-			this.peachSvc.CopyPit(request, (data: P.Pit) => {
-				this.Pit = data;
-			});
-		}
-
 		public LoadData(data) {
 			if (data.qa != undefined)
 				this.QA = <W.Question[]>data.qa;
@@ -244,13 +236,13 @@ module DashApp.Services {
 		}
 
 		private get isKnownPit() {
-			return (this._pit != undefined && this._pit.pitUrl != undefined && this._pit.pitUrl.length > 0 && this._pit.configured);
+			return (this.Pit != undefined && this.Pit.pitUrl != undefined && this.Pit.pitUrl.length > 0 && this.Pit.configured);
 		}
 
 
 		public StartJob() {
 			if (this.CanStartJob) {
-				this.peachSvc.StartJob(this._pit.pitUrl, (job: P.Job) => {
+				this.peachSvc.StartJob(this.Pit.pitUrl, (job: P.Job) => {
 					this.Job = job;
 				}, (response) => {
 					alert("Peach is busy with another task. Can't create Job.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
@@ -332,15 +324,22 @@ module DashApp.Services {
 				var faultsResource = this.peachSvc.GetManyResources(this._job.faultsUrl);
 				this.faultsPoller = this.pollerSvc.get(faultsResource, {
 					action: "get",
-					delay: this.POLLER_TIME,
+					delay: 1000,
 					method: "GET"
 				});
 
 				this.faultsPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: P.Fault[]) => {
-						this.Faults = data;
-					});
+					//var start: number = 0;
+					//if (this.Faults.length > 1) {
+					//	start = this.Faults.length - 1;
+					//}
+					//for (var f = start; f < data.length; f++) {
+					//	this.Faults.push(data[f]);
+					//}
+					this.Faults = data;
+				});
 			}
 			else {
 				console.error("uh...");
@@ -353,7 +352,7 @@ module DashApp.Services {
 					this.peachSvc.GetPit(this._job.pitUrl, (data: P.Pit) => {
 						if (data != undefined) {
 							if ((this.Pit == undefined) || (this.Pit.pitUrl != data.pitUrl))
-								this.Pit = data;
+								this.Pit = new P.Pit(data);
 							else {
 								this.updatePit(data);
 							}
@@ -375,16 +374,16 @@ module DashApp.Services {
 		}
 
 		private updatePit(pit: P.Pit) {
-			if (this._pit.pitUrl != pit.pitUrl) {
+			if (this.Pit.pitUrl != pit.pitUrl) {
 				throw "trying to update a pit with the wrong pit url";
 				return;
 			}
 
-			this._pit.configured = pit.configured;
-			this._pit.description = pit.description;
-			this._pit.locked = pit.locked;
-			this._pit.name = pit.name;
-			this._pit.tags = pit.tags;
+			this.Pit.configured = pit.configured;
+			this.Pit.description = pit.description;
+			this.Pit.locked = pit.locked;
+			this.Pit.name = pit.name;
+			this.Pit.tags = pit.tags;
 		}
 
 		private initialize() {

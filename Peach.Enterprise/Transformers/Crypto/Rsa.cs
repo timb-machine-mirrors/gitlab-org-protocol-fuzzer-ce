@@ -21,10 +21,10 @@ using NLog;
 
 namespace Peach.Core.Transformers.Crypto
 {
-	[Description("Rsa Transformer")]
-	[Transformer("Rsa", true)]
-	[Parameter("PublicKey", typeof(HexString), "Public key used to encrypt", "")]
-	[Parameter("PublicExponent", typeof(HexString), "PublicKeyExponent", "010001")]
+	[Transformer("Rsa", true, IsTest = true)]
+	[Description("RSA encryption and decryption")]
+	[Parameter("PublicKey", typeof(HexString), "Public key modulus", "")]
+	[Parameter("PublicExponent", typeof(HexString), "Public key exponent", "010001")]
 	[Serializable]
 	public class Rsa : Transformer
 	{
@@ -53,7 +53,7 @@ namespace Peach.Core.Transformers.Crypto
 
 			if (data.Length > encoding.GetInputBlockSize())
 			{
-				logger.Debug("Data length greater than block size, returning unencrypted data");
+				logger.Error("Data length greater than block size, returning unencrypted data");
 				return data;
 			}
 
@@ -65,7 +65,25 @@ namespace Peach.Core.Transformers.Crypto
 
 		protected override BitStream internalDecode(BitStream data)
 		{
-			throw new NotImplementedException();
+			var modulus = new BigInteger(PublicKey.Value);
+			var exponent = new BigInteger(PublicExponent.Value);
+
+			var rsaServerPublicKey = new RsaKeyParameters(false, modulus, exponent);
+
+			var random = new SecureRandom();
+			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
+			encoding.Init(false, new ParametersWithRandom(rsaServerPublicKey, random));
+
+			if (data.Length > encoding.GetInputBlockSize())
+			{
+				logger.Error("Data length greater than block size, returning encrypted data");
+				return data;
+			}
+
+			var cipher = new BitReader(data).ReadBytes((int)data.Length);
+			var clear = encoding.ProcessBlock(cipher, 0, cipher.Length);
+
+			return new BitStream(clear);
 		}
 	}
 }
