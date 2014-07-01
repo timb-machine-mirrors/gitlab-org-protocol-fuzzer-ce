@@ -8,6 +8,7 @@ namespace Peach.Enterprise.Runtime
 {
 	public class Program : Peach.Core.Runtime.Program
 	{
+		Uri webUri;
 		string pitLibraryPath;
 
 		public Program(string[] args)
@@ -48,7 +49,7 @@ namespace Peach.Enterprise.Runtime
 				// Ensure console is interactive
 				Console.Clear();
 
-				return new Peach.Enterprise.Runtime.ConsoleWatcher();
+				return new Peach.Enterprise.Runtime.ConsoleWatcher(" ({0})".Fmt(webUri));
 
 			}
 			catch (IOException)
@@ -99,6 +100,8 @@ namespace Peach.Enterprise.Runtime
 				svc.Context.AttachJob(config);
 
 				svc.Start();
+
+				webUri = svc.Uri;
 
 				Core.Runtime.ConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
