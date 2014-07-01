@@ -641,6 +641,10 @@ namespace Peach.Enterprise.WebServices
 
 			foreach (var d in defines)
 			{
+				// Don't present this to the user
+				if (d.Key == "PitLibraryPath")
+					continue;
+
 				var item = new Models.ConfigItem()
 				{
 					Type = d.ConfigType,
