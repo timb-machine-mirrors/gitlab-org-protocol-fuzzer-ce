@@ -53,7 +53,7 @@ sudo apt-get install feh
     <String key="Seed" name="name" description="" value="*.jp2"/>
     <Strategy key="Strategy" name="name" description=""  value="Random"/>
     <String key="LoggerPath" name="Logger Path" description=""  value="./logs/JPEG2000/"/>
-    <String key="SamplePath" value="./_Common/Samples/Image" />
+    <String key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Image" />
     <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
   </All>
 

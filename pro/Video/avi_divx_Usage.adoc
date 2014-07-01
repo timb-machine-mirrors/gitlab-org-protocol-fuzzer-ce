@@ -51,7 +51,7 @@ sudo apt-get install vlc
     <Strategy key="Strategy" name="name" description=""  value="Random"/>
     <String key="LoggerPath" name="Logger Path" description=""  value="./logs/avi_divx/"/>
     <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <String key="SamplePath" value="./_Common/Samples/Video"/>
+    <String key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Video"/>
   </All>
 
   <Linux>
