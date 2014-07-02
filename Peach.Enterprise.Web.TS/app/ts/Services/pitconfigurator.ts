@@ -20,6 +20,12 @@ module DashApp.Services {
 		DataMonitors: W.Agent[];
 		AutoMonitors: W.Agent[];
 
+		TestEvents: P.TestEvent[];
+		TestStatus: string;
+		TestLog: string;
+		TestTime: string;
+
+
 		SetVarsComplete: boolean;
 		FaultMonitorsComplete: boolean;
 		DataMonitorsComplete: boolean;
@@ -34,8 +40,8 @@ module DashApp.Services {
 		CanStopJob: boolean;
 
 
-
 		ResetAll();
+		ResetTestData();
 		LoadData(data);
 
 		StartJob();
@@ -182,12 +188,19 @@ module DashApp.Services {
 		public TestComplete: boolean = false;
 		public DoneComplete: boolean = false;
 
+
+		public TestEvents: P.TestEvent[] = [];
+		public TestStatus: string = "notrunning";
+		public TestLog: string = "";
+		public TestTime: string = "";
+
 		
 		public ResetAll() {
 			this._defines = undefined;
 			this._faultMonitors = [];
 			this._dataMonitors = [];
 			this._autoMonitors = [];
+			this.ResetTestData();
 			this.ResetConfiguratorSteps();
 			// Hmm, I dunno...
 			//this._stateBag = new W.StateBag;
@@ -202,6 +215,14 @@ module DashApp.Services {
 			this.TestComplete = false;
 			this.DoneComplete = false;
 		}
+
+		public ResetTestData() {
+			this.TestEvents = [];
+			this.TestStatus = "notrunning";
+			this.TestLog = "";
+			this.TestTime = "";
+		}
+
 		public LoadData(data) {
 			if (data.qa != undefined)
 				this.QA = <W.Question[]>data.qa;
@@ -385,6 +406,8 @@ module DashApp.Services {
 			this.Pit.name = pit.name;
 			this.Pit.tags = pit.tags;
 		}
+
+
 
 		private initialize() {
 			//this.peachSvc.GetLocalFile<any>("../testdata/test_config.json", (data) => {

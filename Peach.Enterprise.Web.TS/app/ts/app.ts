@@ -142,5 +142,4 @@ module DashApp {
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
-} 
-
+}
