@@ -751,7 +751,7 @@ namespace Peach.Core.Analyzers
 
 		#region Value Attribute Escaping
 
-		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n]+", RegexOptions.Singleline);
+		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:]+", RegexOptions.Singleline);
 		static Regex reEscapeSlash = new Regex(@"\\\\|\\n|\\r|\\t");
 
 		static string ReplaceSlash(Match m)
@@ -1039,13 +1039,13 @@ namespace Peach.Core.Analyzers
 					break;
 				case "ipv4":
 					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv4 address.");
+						throw new PeachException("Error, the value '" + value + "' of " + element.debugName + " is not a valid IPv4 address.");
 
 					element.DefaultValue = new Variant(asIp.GetAddressBytes());
 					break;
 				case "ipv6":
 					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
-						throw new PeachException("Error, the value of " + element.debugName + " is not a valid IPv6 address.");
+						throw new PeachException("Error, the value '" + value + "' of " + element.debugName + " is not a valid IPv6 address.");
 
 					element.DefaultValue = new Variant(asIp.GetAddressBytes());
 					break;

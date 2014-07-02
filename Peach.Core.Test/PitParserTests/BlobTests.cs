@@ -146,6 +146,40 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.AreEqual(exp, val);
 		}
 
+		[Test]
+		public void BlobTest7()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<Blob value=\"0.0.0.0\" valueType=\"ipv4\"/>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var val = dom.dataModels[0].Value.ToArray();
+			var exp = IPAddress.Any.GetAddressBytes();
+			Assert.AreEqual(exp, val);
+		}
+
+		[Test]
+		public void BlobTest8()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<Blob value=\"00:11:22:33:44:55\" valueType=\"hex\"/>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var val = dom.dataModels[0].Value.ToArray();
+			var exp = new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+			Assert.AreEqual(exp, val);
+		}
+
 		private void DoHexPad(bool throws, int length, string value, bool token = false)
 		{
 			string attr = value == null ? "" : string.Format("value=\"{0}\"", value);
