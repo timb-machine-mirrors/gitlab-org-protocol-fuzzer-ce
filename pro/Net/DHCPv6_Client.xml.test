@@ -8,12 +8,12 @@
 	<Define key="TargetPort"       value="547"/>
 	<Define key="Strategy"         value="Random"/>
 	<Define key="LoggerPath"       value="logs/dhcpV6/"/>
-	<Define key="DuidTime"         value="0"/>
-	<Define key="RequestDuidTime"  value="392166683"/>
-	<Define key="SolicitDuidTime"  value="392166683"/>
-	<Define key="Domain"           value="TSE-MANAGEMENT"/>
-	<Define key="TransactionId"    value="e7fb58"/>
 	<!-- PitLibraryPath is set by the tester -->
+
+	<Slurp setXpath="//TransactionId" valueType="hex" value="e7fb58"/>
+	<Slurp setXpath="//Solicit/DHCPv6:Solicit/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
+	<Slurp setXpath="//Request/DHCPv6:Request/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
+	<Slurp setXpath="//Domain" value="TSE-MANAGEMENT"/>
 
 	<Test name="Default">
 		<Open action="DHCPv6:Client.Initial.Solicit" publisher="Pub"/>

@@ -11,9 +11,9 @@
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">
-		<Open action="FTP:ClientActive.InputUserName.Action" publisher="CommandPublisher"/>
+		<Open action="FTP:ClientActive.InputUserName.Action_1" publisher="CommandPublisher"/>
 
-		<Input action="FTP:ClientActive.InputUserName.Action" publisher="CommandPublisher">
+		<Input action="FTP:ClientActive.InputUserName.Action_1" publisher="CommandPublisher">
 <![CDATA[
 0000   32 32 30 20 75 62 75 6e 74 75 20 46 54 50 20 73  220 ubuntu FTP s
 0010   65 72 76 65 72 20 28 56 65 72 73 69 6f 6e 20 36  erver (Version 6
@@ -23,7 +23,7 @@
 ]]>
 		</Input>
 
-		<Output action="FTP:ClientActive.InputUserName.Action_1" publisher="CommandPublisher">
+		<Output action="FTP:ClientActive.InputUserName.Action_2" publisher="CommandPublisher">
 <![CDATA[
 0000   55 53 45 52 20 6a 6f 72 64 79 6e 0d 0a           USER jordyn..
 ]]>

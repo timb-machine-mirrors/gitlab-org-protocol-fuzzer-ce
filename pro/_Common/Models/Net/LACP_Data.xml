@@ -60,7 +60,7 @@ SUCH DAMAGE.
         <Blob name="Sys" valueType="hex" value="##ActorMAC##"/>
         <Blob name="Key" valueType="hex" value="8000"/>
         <Blob name="PortPriority" valueType="hex" value="0000"/>
-        <Blob name="Port" value="##ActorPort##"/>
+        <Number size="16" endian="big" name="Port" value="##ActorPort##"/>
         <Blob name="State" valueType="hex"  value="47"/>
         <Blob name="Reserved" valueType="hex" value="000000"/>
       </Block>
@@ -74,7 +74,7 @@ SUCH DAMAGE.
         <Blob name="Sys" valueType="hex" value="##PartnerMAC##"/>
         <Blob name="Key" valueType="hex" value="0000"/>
         <Blob name="PortPriority" valueType="hex" value="0000"/>
-        <Blob name="Port" value="##PartnerPort##"/>
+        <Number size="16" endian="big" name="Port" value="##PartnerPort##"/>
         <Blob name="State" valueType="hex"  value="3b"/>
         <Blob name="Reserved" valueType="hex" value="000000"/>
       </Block>
