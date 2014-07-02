@@ -10,6 +10,7 @@ namespace Peach.Enterprise.Runtime
 	{
 		Uri webUri;
 		string pitLibraryPath;
+		bool noweb;
 
 		public Program(string[] args)
 			: base(args)
@@ -19,6 +20,7 @@ namespace Peach.Enterprise.Runtime
 		protected override void AddCustomOptions(Core.Runtime.OptionSet options)
 		{
 			options.Add("pits=", v => pitLibraryPath = v);
+			options.Add("noweb", v => noweb = true);
 		}
 
 		/// <summary>
@@ -49,7 +51,9 @@ namespace Peach.Enterprise.Runtime
 				// Ensure console is interactive
 				Console.Clear();
 
-				return new Peach.Enterprise.Runtime.ConsoleWatcher(" ({0})".Fmt(webUri));
+				var title = webUri == null ? "" : " ({0})".Fmt(webUri);
+
+				return new Peach.Enterprise.Runtime.ConsoleWatcher(title);
 
 			}
 			catch (IOException)
@@ -80,7 +84,7 @@ namespace Peach.Enterprise.Runtime
 				// Pit was specified on the command line, do normal behavior
 				base.OnRunJob(test, extra);
 			}
-			else
+			else if (!noweb)
 			{
 				// Ensure pit library exists
 				var pits = FindPitLibrary();
@@ -91,6 +95,12 @@ namespace Peach.Enterprise.Runtime
 
 		protected override void RunEngine()
 		{
+			if (noweb)
+			{
+				base.RunEngine();
+				return;
+			}
+
 			// Pass an empty pit library path if we are running a job off of
 			// the command line.
 
@@ -156,6 +166,7 @@ Syntax:
                              ##KEY## and it will be replaced for VALUE.
   --config=FILENAME          XML file containing defined values
   --pits=PIT_LIBRARY_PATH    The path to the pit library.
+  --noweb                    Disable the Peach web interface.
 
 Peach Web Interface
 

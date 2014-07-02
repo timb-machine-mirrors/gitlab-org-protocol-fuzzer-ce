@@ -146,7 +146,9 @@ namespace Peach.Enterprise.Test.WebServices
 
 			var cfg1 = db.GetConfigByUrl(img.PitUrl);
 			Assert.NotNull(cfg1);
-			Assert.AreEqual(2, cfg1.Config.Count);
+
+			// Expect PitLibraryPath to be removed
+			Assert.AreEqual(1, cfg1.Config.Count);
 
 			var imgCopy = ent.Where(e => e.Name == "IMG Copy").First();
 
@@ -240,11 +242,20 @@ namespace Peach.Enterprise.Test.WebServices
 
 			try
 			{
+				// Linux lets everything but '/' be in a file name
 				db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
-				Assert.Fail("Should throw");
+
+				if (Platform.GetOS() == Platform.OS.Windows)
+					Assert.Fail("Should throw");
+				else
+					Assert.Pass();
 			}
 			catch (ArgumentException)
 			{
+				if (Platform.GetOS() == Platform.OS.Windows)
+					Assert.Pass();
+				else
+					Assert.Fail("Should not throw");
 			}
 		}
 

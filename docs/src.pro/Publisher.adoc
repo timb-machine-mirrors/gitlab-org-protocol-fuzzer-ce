@@ -41,11 +41,15 @@ All fuzzing definitions must use at least one Publisher and (optionally) can use
 
 When fuzzing network protocols, publishers typically uses the protocol that encompasses (operates one layer below) the target protocol. For example, when fuzzing the HTTP protocol, use the xref:Publishers_Tcp[TCP] publisher.  When fuzzing TCP, use either the xref:Publishers_RawV4[RawV4] or xref:Publishers_RawV6[RawV6] publisher. When fuzzing IPv4 and IPv6, use the xref:Publishers_RawEther[RawEther] publisher.
 
+//////////////////////////////////
+
 ==== Custom Publishers
 
 Peach supports the creation of custom Publishers. We recommend that you review some of the existing Publishers' code before you create your own so you can understand how to implement a Publisher.
 
 More information on creating a customer publisher can be found in the xref:ExtendingPeach_CustomPublisher[Create a Custom Publisher] chapter.
+
+//////////////////////////////////
 
 ==== Publishers
 
