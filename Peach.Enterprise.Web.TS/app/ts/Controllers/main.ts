@@ -178,7 +178,7 @@ module DashApp {
 				}
 			}).result.then((pit: P.Pit) => {
 				this.pitConfigSvc.Pit = new P.Pit(pit);
-				if (pit.configured == false) {
+				if (this.pitConfigSvc.Pit.configured == false) {
 					this.location.path("/configurator/intro");
 				}
 			});
