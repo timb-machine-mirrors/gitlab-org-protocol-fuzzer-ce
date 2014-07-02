@@ -173,7 +173,7 @@
 			"map":[
 				{"key":"SaveFileFilename", "param":"Filename" }
 				],
-			"description":  "Save file at {SaveFilename}."
+			"description":  "Save a file."
 		},
 		{
 			"monitorClass":"SshDownloader",
