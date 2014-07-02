@@ -429,15 +429,15 @@ module DashApp {
 					return;
 					break;
 				case StepNames.Fault:
-					this.pitConfigSvc.FaultMonitors = [];
+					//this.pitConfigSvc.FaultMonitors = [];
 					res = this.peach.GetFaultQA();
 					break;
 				case StepNames.Data:
-					this.pitConfigSvc.DataMonitors = [];
+					//this.pitConfigSvc.DataMonitors = [];
 					res = this.peach.GetDataQA();
 					break;
 				case StepNames.Auto:
-					this.pitConfigSvc.AutoMonitors = [];
+					//this.pitConfigSvc.AutoMonitors = []; 
 					res = this.peach.GetAutoQA();
 					break;
 				default:

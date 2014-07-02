@@ -22,8 +22,17 @@
 		<li>Serial port, and related relay information (CanaKit Relay)</li>
 		<li>Executable name and location, arguments and actions to take (process)</li>
 	</ul>
+
+	<div ng-switch="vm.AutoMonitors.length">
+		<div ng-switch-when="0"></div>
+		<div ng-switch-default>
+			<h4>Items Already Added</h4>
+			<div class="gridStyle" ng-grid="vm.autoGridOptions"></div>
+		</div>
+	</div>
 </div>
 <div class="row-fluid wizard-actions">
+	<div class="space-6"></div>
 	<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
 		Next
 		<i class="icon-arrow-right icon-on-right"></i>
