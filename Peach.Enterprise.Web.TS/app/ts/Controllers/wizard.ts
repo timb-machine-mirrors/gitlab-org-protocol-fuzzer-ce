@@ -166,16 +166,17 @@ module DashApp {
 
 		//#region Public Methods
 
-		public getTemplateUrl(): string {
-			if (this.currentQuestion != undefined) {
-				if (this.currentQuestion.qref != undefined)
-					return this.currentQuestion.qref;
-				else
-					return "/partials/q-" + this.currentQuestion.type + ".html";
-			}
-			else
-				return "";
-		}
+		//public get TemplateUrl(): string { 
+		//	if (this.currentQuestion != undefined) {
+		//		if (this.currentQuestion.qref != undefined)
+		//			return this.currentQuestion.qref; 
+		//		else {
+		//			return "/partials/q-" + this.currentQuestion.type + ".html";
+		//		}
+		//	}
+		//	else
+		//		return "";
+		//}
 
 		public next() {
 			if (this.currentQuestion == undefined) {
