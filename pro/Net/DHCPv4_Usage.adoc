@@ -63,9 +63,9 @@ Core Networking - Dynamic Host Configuration Protocol (DHCP-In)
 				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
 
 		<Ipv4 key="SourceIPv4"
-			  value="127.0.0.1"
+			  value="0.0.0.0"
 			  name="Source IPv4 Address"
-			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+			  description="This is an advanced option and should be left as default."/>
 
 		<Range key="SourcePort"
 			   value="1055"
@@ -79,9 +79,15 @@ Core Networking - Dynamic Host Configuration Protocol (DHCP-In)
 				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
 
 		<Ipv4 key="TargetIPv4"
-			  value="127.0.0.1"
+			  value="255.255.255.255"
 			  name="Target IPv4 Address"
-			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+			  description="This is an advanced option and should be left as default." />
+
+		<Range key="TargetPort"
+			   value="67"
+			   min="0" max="65535"
+			   name="Target Port"
+			   description="The destination port the network packet is sent to."/>
 
 		<String key="LoggerPath"
 				value="logs/dhcpv4/"
