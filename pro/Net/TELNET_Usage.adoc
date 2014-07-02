@@ -3,12 +3,12 @@ include::TELNET_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
+
 A Telnet server is required to test the client side of the Telnet pit.
 On Linux, telnetd can be downloaded using apt-get.
 
-
-
 ==== Required Pit Configuration Changes
+
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
 SourcePort:: Telnet port number of the local machine.
@@ -23,80 +23,138 @@ Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
-----
-#Test client
-peach -1 --debug TELNET_Client.xml
 
-#Test server
+.Fuzzing a telnet client
+----
+peach -1 --debug TELNET_Client.xml
+----
+
+.Fuzzing a telnet server
+----
 peach -1 --debug TELNET_Server.xml
 ----
-==== Full test run
-----
-#Test client
-peach TELNET_Client.xml
 
-#Test server
+==== Full test run
+
+.Fuzzing a telnet client
+----
+peach TELNET_Client.xml
+----
+
+.Fuzzing a telnet server
+----
 peach TELNET_Server.xml
 ----
 
 === Examples
 
-.Sample Telnet Configuration File
+.Sample Telnet Server Configuration File
 ==========================
 Example configuration using telnetd on Linux.
 
-First we must install telnet and telnetd; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for telnet and telnetd.
+First we must install the telnet server telnetd; for this example we assume you are running on Ubuntu or Debian. A test user account must also be created.
 
 ----
-#Install telnet and telnet server on Linux
-sudo apt-get install telnet
+# Install telnet server on Linux
 sudo apt-get install telnetd
 
-#Download Putty for Telnet windows. Putty can be downloaded using the link below
-http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+# Add a test user account with password telnetuserp455
+sudo adduser telnetuser
 ----
 
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="23"/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="31337"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="./logs/telnet/"/>
-    <Strategy key="Strategy" name="name" description="" value="Random"/>
-    <String key="Username" value="username"/>
-    <String key="Password" value="password"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-  </All>
+	<All>
+		<String key="Username"
+				value="telnetuser"
+				name="Username"
+				description="Username to use when logging into telnet server."/>
+		<String key="Password"
+				value="telnetuserp455"
+				name="Password"
+				description="Password to use when logging into telnet server."/>
+		
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-    <String key="Program" name="Program" description="" value="telnet"/>
-    <String key="Agent" value="Linux"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-  </Linux>
+		<Range key="TargetPort"
+			   value="23"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
 
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-    <String key="Program" name="Program" description="" value="telnet"/>
-    <String key="Agent" value="OSX"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-  </OSX>
+		<String key="LoggerPath"
+				value="logs/telnet_client/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
 
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-    <String key="Program" name="Program" description="" value="putty.exe"/>
-    <String key="Agent" value="Windows"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-  </Windows>
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+</PitDefines>
+----
+==========================
+
+.Sample Telnet Client Configuration File
+==========================
+
+The Telnet Client Pit file will simulate a telnet server to perform fuzzing of a telnet client application. This example configuration assumes the user is running on Ubuntu Server LTS.
+
+.Install telnet on Linux 
+----
+sudo apt-get install telnet
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<Ipv4 key="SourceIPv4"
+			  value="127.0.0.1"
+			  name="Source IPv4 Address"
+			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+
+		<Range key="SourcePort"
+			   value="23"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
+
+		<String key="LoggerPath"
+				value="logs/telnet_server/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================
