@@ -283,7 +283,7 @@ namespace PitTester
 			if (ignores.Count > 0)
 			{
 				Console.WriteLine();
-				Console.WriteLine("Ignored {0}:");
+				Console.WriteLine("Ignored {0}:", ignores.Count);
 				Console.WriteLine();
 				Console.WriteLine(string.Join(", ", ignores));
 			}
