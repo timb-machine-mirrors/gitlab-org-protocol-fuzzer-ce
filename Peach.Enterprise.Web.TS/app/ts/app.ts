@@ -10,8 +10,6 @@ module DashApp {
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 		
-	// "n3-charts.linechart",
-	//	"kendo.directives",
 	var dashApp = angular.module("dashApp", [
 		"ngResource",
 		"emguo.poller", 
