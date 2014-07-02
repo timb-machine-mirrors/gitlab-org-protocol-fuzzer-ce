@@ -44,38 +44,9 @@ SUCH DAMAGE.
 
 	<Include ns="States" src="file:##PitLibraryPath##/_Common/Models/Application/Office_State.xml"/>
 
-	<Agent name="WinAgent">
-		<Monitor class="ButtonClicker">
-			<Param name="WindowText" value="Do you want to start in safe mode?" />
-			<Param name="ButtonName" value="No" />
-		</Monitor>
-
-		<Monitor class="ButtonClicker">
-			<Param name="WindowText" value="PowerPoint can attempt to repair the presentation" />
-			<Param name="ButtonName" value="Repair" />
-		</Monitor>
-		
-		<Monitor class="ButtonClicker">
-			<Param name="WindowText" value="Do you still want to open it?" />
-			<Param name="ButtonName" value="Yes" />
-		</Monitor>
-
-		<Monitor class="PageHeap">
-			<Param name="Executable" value="powerpnt.exe"/>
-		</Monitor>
-
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="##Target## fuzzed.pptx" />
-			<Param name="CpuPollInterval" value="1000"/>
-			<Param name="StartOnCall" value="FuzzMe" />
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
 		<StateModel ref="States:TheStateModel" />
 		
-		<Agent ref="WinAgent" platform="windows" />
-
 		<Publisher name="writer" class="Zip">
 			<Param name="FileName" value="fuzzed.pptx" />
 		</Publisher>
