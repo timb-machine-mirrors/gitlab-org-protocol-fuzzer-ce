@@ -49,7 +49,7 @@ SUCH DAMAGE.
 
     <Publisher name="CommandPublisher" class="TcpListener">
       <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="##ComandPort##"/>
+      <Param name="Port" value="##CommandPort##"/>
       <Param name="AcceptTimeout" value="##AcceptTimeout##"/>
       <Param name="Timeout" value="##Timeout##"/>
     </Publisher>
@@ -57,7 +57,7 @@ SUCH DAMAGE.
     <!-- Used by server state for data port in active mode -->
     <Publisher name="DataPublisher" class="Tcp">
       <Param name="Host" value="##TargetIPv4##"/>
-      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Port" value="##DataPort##"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>

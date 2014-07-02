@@ -47,8 +47,6 @@ SUCH DAMAGE.
   <Test name="Default">
     <StateModel ref="ICMPv6:Transmit"/>
 
-    <Agent ref="LocalAgent"/>
-
     <Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
