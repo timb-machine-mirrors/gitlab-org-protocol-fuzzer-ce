@@ -846,7 +846,8 @@ SUCH DAMAGE.
 				<Number name="Length" size="8">
 					<Relation type="size" of="Value"/>
 				</Number>
-				<Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
+				<!-- Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/ -->
+				<Blob name="Value" valueType="ipv4" length="4" value="192.168.0.1"/>
 			</Block>
 			<Number name="End" size="8" value="255"/>
 		</Block>
