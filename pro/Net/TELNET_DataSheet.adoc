@@ -36,7 +36,6 @@ User data is interspersed in-band with Telnet control information in an 8-bit by
 
 === Use Cases
 
-
 [options="header"]
 |========
 |Messages | Specification

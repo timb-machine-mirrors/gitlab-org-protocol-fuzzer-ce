@@ -10,7 +10,6 @@ TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
 SourcePort:: SNMP port number of the local machine.
 TargetPort:: SNMP port number of the target host machine.
-Interface:: Name of local interface (used for monitoring).
 CommString:: Community string used for by the SNMP server.
 Program:: The client program to test when fuzzing as the server.
 
@@ -20,52 +19,45 @@ LoggerPath:: Path to folder where logs will be stored.
 Agent:: Agent to run depending on the target OS. Do not change this value.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
-----
-#Run client test
-peach -1 --debug SNMP_Client.xml
 
-#Run server test
+.Fuzzing SNMP Client
+----
+peach -1 --debug SNMP_Client.xml
+----
+
+.Fuzzing SNMP Server
+----
 peach -1 --debug SNMP_Server.xml
 ----
-==== Full test run
-----
-#Run client test
-peach SNMP_Client.xml
 
-#Run server test
+==== Full test run
+
+.Fuzzing SNMP Client
+----
+peach SNMP_Client.xml
+----
+
+.Fuzzing SNMP Server
+----
 peach SNMP_Server.xml
 ----
 
 === Examples
 
-.Sample SNMP Configuration File
+.Sample SNMP Client Configuration File
 ==========================
-Example configuration using snmpd on Linux.
 
-First we must install snmpd; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for snmpd.
+Example configuration using snmp on Linux.
 
+.Install SNMP client
 ----
-#Install SNMP daemon
-sudo apt-get install snmpd
-
-#Add the IP address you want snmpd to listen on into the configuration file
-sudo pico /etc/default/snmpd
-  #Add the IP address of the interface the service will be listening on to the end of this line
-  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid'
-  #IP address has been added to the end of the line
-  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid 192.168.222.130'
-  #Save and exit
-
-#Restart snmpd
-sudo /etc/init.d/snmpd restart
-
-#Install SNMP client
 sudo apt-get install snmp
 ----
 
@@ -73,34 +65,109 @@ sudo apt-get install snmp
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="161"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="161"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-    <String key="CommString" value="public"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="./logs/snmp/"/>
-    <Strategy key="Strategy" name="name" description=""   value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description=""       value="."/>
-  </All>
+	<All>
+		<String key="CommString" 
+				value="public" 
+				name="Community String" 
+				description="The SNMP community string to expect and respond to."/>
+		
+		<Ipv4 key="SourceIPv4"
+			  value="127.0.0.1"
+			  name="Source IPv4 Address"
+			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-    <String key="Program" name="Program" description="" value="snmpwalk"/>
-    <String key="Agent" value="Linux"/>
-  </Linux>
+		<Range key="SourcePort"
+			   value="162"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="Port number to listen for incoming packets on."/>
 
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-    <String key="Program" name="Program" description="" value="snmpwalk"/>
-    <String key="Agent" value="OSX"/>
-  </OSX>
+		<String key="LoggerPath"
+				value="logs/snmp_server/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
 
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-    <String key="Program" name="Program" description="" value="snmpwalk"/>
-    <String key="Agent" value="Windows"/>
-  </Windows>
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+</PitDefines>
+----
+
+==========================
+
+.Sample SNMP Server Configuration File
+==========================
+
+Example configuration using snmpd on Linux.
+
+First we must install snmpd; for this example we assume you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for snmpd.
+
+----
+# Install SNMP daemon
+sudo apt-get install snmpd
+
+# Add the IP address you want snmpd to listen on into the configuration file
+sudo pico /etc/default/snmpd
+  #Add the IP address of the interface the service will be listening on to the end of this line
+  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid'
+  #IP address has been added to the end of the line
+  SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid 192.168.222.130'
+  #Save and exit
+
+# Restart snmpd
+sudo /etc/init.d/snmpd restart
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<String key="CommString"
+				value="public"
+				name="SNMP Community String"
+				description="SNNP community string to use in requests. The target SNMP server must be configured to respond to this community string."/>
+		
+		<Range key="SourcePort"
+			   value="161"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
+
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+
+		<Range key="TargetPort"
+			   value="162"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+
+		<String key="LoggerPath"
+				value="logs/snmp_client/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================

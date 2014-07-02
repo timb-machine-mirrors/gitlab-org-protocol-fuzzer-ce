@@ -39,20 +39,31 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Dynamic Host Configuration Protocol version 6 client PIT"
+       description="Dynamic Host Configuration Protocol version 6 server PIT"
        version="0.0.2">
 
-  <Include ns="DHCPv6" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_State.xml"/>
+  <Include ns="States" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv6_State.xml"/>
 
   <Test name="Default">
-    <StateModel ref="DHCPv6:Client"/>
+    <StateModel ref="States:Server"/>
 
-    <Publisher class="Udp">
+    <Publisher class="Udp" name="LisentenPublisher">
       <Param name="Host" value="ff02::1:2"/>
       <Param name="Port" value="##TargetPort##"/>
       <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="::1"/>
       <Param name="Timeout" value="36000"/>
     </Publisher>
+
+    <Publisher class="Udp" name="SendPublisher">
+      <Param name="Host" value="##TargetIPv6##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="SrcPort" value="##SourcePort##"/>
+      <Param name="Interface" value="##SourceIPv6##"/>
+      <Param name="Timeout" value="36000"/>
+    </Publisher>
+
+    <Publisher class="ConsoleHex" name="TestPublisher"/>
 
     <Strategy class="##Strategy##"/>
 

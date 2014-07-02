@@ -21,23 +21,49 @@ LoggerPath:: Path to folder where logs will be stored.
 Timeout:: How long to wait for incoming data.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
+
+.Fuzzing modbus via TCP
 ----
-peach -1 --debug modbus.xml
+peach modbus_tcp.xml
 ----
+
+.Fuzzing modbus via ASCII Serial
+----
+peach modbus_ascii_serial.xml
+----
+
+.Fuzzing modbus via RTU Serial
+----
+peach modbus_rtu_serial.xml
+----
+
 ==== Full test run
+
+.Fuzzing modbus via TCP
 ----
-peach modbus.xml
+peach modbus_tcp.xml
+----
+
+.Fuzzing modbus via ASCII Serial
+----
+peach modbus_ascii_serial.xml
+----
+
+.Fuzzing modbus via RTU Serial
+----
+peach modbus_rtu_serial.xml
 ----
 
 === Examples
 
-.Sample Modbus Configuration File
+.Sample Modbus TCP Configuration File
 ==========================
 Example configuration using socat on Linux.
 
@@ -53,24 +79,42 @@ socat tcp-l:502,fork exec:'/bin/cat'
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="192.168.1.1"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="502"/>
+	<All>
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
 
-    <!-- Modbus over Serial Defines -->
-    <String key="SerialPort" value="COM1"/>
-    <String key="Baudrate" value="57600"/>
-    <String key="Parity" value="None"/>
-    <String key="DataBits" value="8"/>
-    <String key="StopBits" value="One"/>
-    <String key="Handshake" value="XOnXOff"/>
+		<Range key="TargetPort"
+			   value="502"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
 
-    <!-- General Configurations -->
-    <String key="Timeout" value="5000"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/modbus/"/>
-    <Strategy key="Strategy" name="name" description="" value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-  </All>
+		<Range  key="Timeout"
+				value="5000"
+				min="0" max="10000000"
+				name="Timeout"
+				description="Timeout in milliseconds to wait for data to be send or received. During fuzzing a timeout failure will cause the fuzzer to skip to the next iteration."/>
+
+
+		<String key="LoggerPath"
+				value="logs/modbus_tcp/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================
+

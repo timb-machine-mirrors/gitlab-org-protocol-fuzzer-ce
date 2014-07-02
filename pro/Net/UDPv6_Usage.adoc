@@ -3,22 +3,25 @@ include::UDPv6_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
+
 A UDP listener listening on the UDPv6 port defined in configuration file is required. The network tool socat can be used as the listener.
 
 ==== Required Pit Configuration Changes
+
 TargetIPv6:: IP address of the target host machine.
 SourceIPv6:: IP address of the interface on the local machine.
 SourcePort:: UDPv6 port number of the local machine.
 TargetPort:: UDPv6 port number of the target host machine.
-Interface:: Name of local interface (used for monitoring).
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
@@ -35,6 +38,7 @@ peach UDPv6.xml
 
 .Sample UDPv6 Configuration File
 ==========================
+
 Example configuration using socat on Linux.
 
 First we must install socat and configure socat to listen for packets; for this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for socat.
@@ -50,26 +54,48 @@ socat STDIO udp6-listen:12345
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="::1"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/udpV6/"/>
-    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="::1"/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="12345"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+	  <Ipv6 key="SourceIPv6"
+			value="::1"
+			name="Source IPv6 Address"
+			description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+	  <Range key="SourcePort"
+			 value="1234"
+			 min="0" max="65535"
+			 name="Source Port"
+			 description="The source port the network packet originates from."/>
+
+	  <Ipv6 key="TargetIPv6"
+			value="::1"
+			name="Target IPv6 Address"
+			description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+	  <Range key="TargetPort"
+			 value="12345"
+			 min="0"
+			 max="65535"
+			 name="Target Port"
+			 description="The target or destination port the network packet is sent to."/>
+
+
+	  <String
+		  key="LoggerPath"
+		  value="logs/udpv6/"
+		  name="Logger Path"
+		  description="The directory where Peach will save the log produced when fuzzing." />
+
+	  <Strategy
+		  key="Strategy"
+		  value="Random"
+		  name="Mutation Strategy"
+		  description="The mutation strategy to use when fuzzing." />
+
+	  <String
+		  key="PitLibraryPath"
+		  value="."
+		  name="Pit Library Path"
+		  description="The path to the root of the pit library."/>
   </All>
-
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-  </Linux>
-
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-  </OSX>
-
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-  </Windows>
 </PitDefines>
 ----
 ==========================

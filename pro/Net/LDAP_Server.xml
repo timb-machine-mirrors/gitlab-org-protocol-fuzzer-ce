@@ -39,24 +39,24 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="LDAPv3 server PIT"
+       description="LDAPv3 client PIT"
        version="0.0.2">
 
 	<Include ns="LDAP" src="file:##PitLibraryPath##/_Common/Models/Net/Ldap_State.xml"/>
 
 	<Test name="Default">
-		<StateModel ref="LDAP:Server"/>
+		<StateModel ref="LDAP:Client"/>
 
 		<Strategy class="##Strategy##"/>
 
-		<Publisher name="TcpHandler" class="TcpListener">
-			<Param name="Interface" value="##SourceIPv4##" />
-			<Param name="Port" value="##SourcePort##"/>
+		<Publisher class="Tcp" name="tcp">
+			<Param name="Host" value="##TargetIPv4##" />
+			<Param name="Port" value="##TargetPort##" />
 			<Param name="Timeout" value="##Timeout##"/>
 		</Publisher>
 
 		<Logger class="File">
-			<Param name="Path" value="##LoggerPath##"/>
+		<Param name="Path" value="##LoggerPath##/Search" />
 		</Logger>
 	</Test>
 </Peach>
