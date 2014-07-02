@@ -3,7 +3,7 @@
 :Description: Dynamic Host Configuration Protocol version 6 (DHCPv6)
 
  * Peach Pit: DHCPv6
- * Direction: Client
+ * Direction: Client, Server
  * Supported Platforms: Windows, Linux, OS X
 
 Dynamic Host Configuration Protocol Version 6 (DHCPv6) is a variation of the DHCPv4 protocol for the IPv6 address space.

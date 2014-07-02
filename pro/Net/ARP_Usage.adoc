@@ -23,17 +23,32 @@ Add monitors to agent as needed
 === Running
 
 ==== Single test debug run
+
+.Fuzzing ARP Request
 ----
 peach -1 --debug ARP.xml
 ----
+
+.Fuzzing ARP Reply
+----
+peach -1 --debug ARP_Reply.xml
+----
+
 ==== Full test run
+
+.Fuzzing ARP Request
 ----
 peach ARP.xml
 ----
 
+.Fuzzing ARP Reply
+----
+peach ARP_Reply.xml
+----
+
 === Examples
 
-.Sample ARP Configuration File
+.Sample ARP Request Configuration File
 ==========================
 Example configuration to broadcast arp packets.
 
@@ -42,17 +57,45 @@ Example configuration to broadcast arp packets.
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="5254005335d3"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description=""  value="127.0.0.1"/>
-    <Hwaddr key="TargetMAC" name="Target MAC Address" description=""   value="ffffffffffff"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description=""  value="127.0.0.2"/>
-    <String key="LoggerPath" name="Logger Path" description=""  value="logs/arp/"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+    <Hwaddr		key="SourceMAC"
+				value="5254005335d3"
+				name="Source MAC Address" 
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
+	  
+    <Ipv4		key="SourceIPv4"
+				value="127.0.0.1"
+				name="Source IP Address"
+				description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+    <Hwaddr		key="TargetMAC"
+				value="000000000000"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+	  
+    <Ipv4		key="TargetIPv4"
+				value="127.0.0.2"
+				name="Target IP Address"
+				description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+    
+	<String		key="LoggerPath"
+				value="logs/arp/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+    <Strategy	key="Strategy"
+				value="Random"
+				name="Mutation Strategy"
+				description="The mutation strategy to use when fuzzing." />
+	
+    <String		key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
   </All>
 
   <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
+    <Iface		key="Interface"
+				value="eth0"
+				name="Network Interface"
+				description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
   </Linux>
 
   <OSX>

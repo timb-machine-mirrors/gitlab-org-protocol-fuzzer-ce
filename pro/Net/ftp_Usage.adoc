@@ -6,6 +6,7 @@ include::ftp_DataSheet.adoc[]
 An FTP server is required to test the client side of the FTP pit. On Linux, ftpd can be downloaded using apt-get.
 
 ==== Required Pit Configuration Changes
+
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
 SourcePort:: ftp port number of the local machine.
@@ -17,48 +18,65 @@ DataPort:: The port used to listen for incoming data connections.
 Program:: The client program to test when fuzzing as the server.
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Agent:: Agent to run depending on the target OS. Do not change this value.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
+
+.Fuzzing an FTP client in active mode
 ----
-#Test client in active mode
 peach -1 --debug FTP_Client.xml
+----
 
-#Test client in passive mode
-peach -1 --debug FTP_Client.xml Passive
+.Fuzzing an FTP client in passive mode
+----
+peach -1 --debug FTP_Client_Passive.xml
+----
 
-#Test server in active mode
+.Fuzzing an FTP Server in active mode
+----
 peach -1 --debug FTP_Server.xml
+----
 
-#Test server in passive mode
+.Fuzzing an FTP Server in passive mode
+----
 peach -1 --debug FTP_Server.xml Passive
 ----
+
 ==== Full test run
+
+.Fuzzing an FTP client in active mode
 ----
-#Test client in active mode
 peach FTP_Client.xml
+----
 
-#Test client in passive mode
-peach FTP_Client.xml Passive
+.Fuzzing an FTP client in passive mode
+----
+peach FTP_Client_Passive.xml
+----
 
-#Test server in active mode
+.Fuzzing an FTP server in active mode
+----
 peach FTP_Server.xml
+----
 
-#Test server in passive mode
-peach FTP_Server.xml Passive
+.Fuzzing an FTP server in passive mode
+----
+peach FTP_Server_Passive.xml
 ----
 
 === Examples
 
-.Sample ftp Configuration File
+.Sample FTP Client Configuration File
 ==========================
 Example configuration targeting the ftpd server on Linux.
 
@@ -72,34 +90,129 @@ sudo apt-get install ftpd
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="10.0.1.23"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="21"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/ftp/"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="FtpUser" value="username"/>
-    <String key="FtpPass" value="password"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <String key="DataPort" value="31337"/>
-  </All>
+	<All>
+		<Ipv4 key="SourceIPv4"
+			  value="127.0.0.1"
+			  name="Source IPv4 Address"
+			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
 
-   <Linux>
-     <Iface key="Interface" name="name" description="" value="eth0"/>
-     <String key="Program" name="Program" description=""  value="ftp"/>
-     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.92"/>
-   </Linux>
+		<Range
+			key="CommandPort"
+			value="21"
+			min="0" max="65535"
+			name="FTP Command Port"
+			description="Port number for the main FTP communication. Typically this is port 21." />
 
-   <OSX>
-     <Iface key="Interface" name="name" description="" value="en0"/>
-     <String key="Program" name="Program" description="" value="ftp"/>
-     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.94"/>
-   </OSX>
+		<Range
+			key="DataPort"
+			value="31337"
+			min="0" max="65535"
+			name="FTP Data Port"
+			description="Port number to use for data channel. This is a secondary port used to transfer file data and should not be port 21." />
 
-   <Windows>
-     <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-     <String key="Program" name="Program" description=""  value="ftp"/>
-     <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="10.0.1.82"/>
-   </Windows>
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+
+		<Range  key="AcceptTimeout"
+				value="5000"
+				min="0" max="10000000"
+				name="Timeout"
+				description="Timeout in milliseconds to wait for client connection. During fuzzing a timeout failure will cause the fuzzer to skip to the next iteration."/>
+
+		<Range  key="Timeout"
+				value="5000"
+				min="0" max="10000000"
+				name="Timeout"
+				description="Timeout in milliseconds to wait for data to be send or received. During fuzzing a timeout failure will cause the fuzzer to skip to the next iteration."/>
+
+		<String key="LoggerPath"
+				value="logs/ftp_server_passive/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+</PitDefines>
+----
+==========================
+
+.Sample FTP Server Configuration File
+==========================
+Example configuration targeting the ftpd server on Linux.
+
+First we must install ftpd; for this example we assume  you are running on Ubuntu or Debian. For other platforms follow the platform specific installation instructions for ftpd._
+
+----
+sudo apt-get install ftpd
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<String key="FtpUser"
+				value="ftpuser"
+				name="FTP Username"
+				description="FTP username used with the FTP Password to authenticate to the FTP server being tested."/>
+		<String key="FtpPass"
+				value="ftpuser123"
+				name="FTP Password"
+				description="FTP password used with the FTP Username to authenticate to the FTP server being tested."/>
+
+		<Ipv4 key="SourceIPv4"
+			  value="127.0.0.1"
+			  name="Source IPv4 Address"
+			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+
+		<Range key="TargetPort"
+			   value="21"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+		
+		<Range key="DataPort"
+			   value="31337"
+			   min="0" max="65535"
+			   name="FTP Data Port"
+			   description="Port number to use for data channel. This is a secondary port used to transfer file data and should not be port 21." />
+
+		<Range  key="Timeout"
+				value="5000"
+				min="0" max="10000000"
+				name="Timeout"
+				description="Timeout in milliseconds to wait for data to be send or received. During fuzzing a timeout failure will cause the fuzzer to skip to the next iteration."/>
+
+		<String key="LoggerPath"
+				value="logs/ftp_client/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================

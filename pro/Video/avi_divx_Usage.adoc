@@ -16,8 +16,9 @@ LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 Agent:: Agent to run depending on the target OS. This value shouldn't be changed.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
@@ -46,26 +47,32 @@ sudo apt-get install vlc
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <String key="Seed" name="name" description="" value="avi_divx_sample*.avi"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="LoggerPath" name="Logger Path" description=""  value="./logs/avi_divx/"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <String key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Video"/>
-  </All>
-
-  <Linux>
-    <String key="Agent" value="Linux"/>
-    <String key="Target" name="name" description="" value="vlc" />
-  </Linux>
-  <OSX>
-    <String key="Agent" value="OSX"/>
-    <String key="Target" name="name" description="" value="/Applications/VLC.app/Contents/MacOS/VLC" />
-  </OSX>
-
-  <Windows>
-    <String key="Agent" value="Win"/>
-    <String key="Target" name="name" description="" value="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe" />
+	<All>
+		<String key="Seed"
+				value="avi_divx_sample*.avi"
+				name="Seed File"
+				description="The name of the sample file to use when fuzzing." />
+		
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+		
+		<String key="LoggerPath"
+				value="./logs/avi_divx/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+		
+		<String key="SamplePath"
+				value="./_Common/Samples/Video"
+				name="Sample Path"
+				description="The directory containing the samples to use when fuzzing." />
+		
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library." />
+	</All>
 </PitDefines>
 ----
 
