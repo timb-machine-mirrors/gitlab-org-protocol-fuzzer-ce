@@ -734,6 +734,48 @@ namespace Peach.Core.Test.CrackingTests
 			bar = dom.dataModels[0].find("DM.Choice.Bar");
 			Assert.NotNull(bar);
 		}
+
+		[Test]
+		public void ChoiceThrows()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name=""DM"">
+		<Choice name=""Choice"">
+			<Block>
+				<Number size=""16"" name=""Foo"">
+					<Relation type=""size"" of=""Value"" expressionGet=""a bad scripting expression""/>
+				</Number>
+				<String name=""Value""/>
+			</Block>
+			<String name=""Bar"" value=""Bar""/>
+		</Choice>
+	</DataModel>
+</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var data = Bits.Fmt("{0}", "Bar");
+
+			DataCracker cracker = new DataCracker();
+
+			try
+			{
+				cracker.CrackData(dom.dataModels[0], data);
+
+				Assert.Fail("should throw");
+			}
+			catch (CrackingFailure)
+			{
+				Assert.Fail("should not throw cracking failure");
+			}
+			catch (PeachException)
+			{
+				// The bad scripting expression should propigate all the way up
+				// and not result in us matching on choice 'Bar'
+			}
+		}
 	}
 }
 

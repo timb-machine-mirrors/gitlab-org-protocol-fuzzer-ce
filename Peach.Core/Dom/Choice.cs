@@ -105,6 +105,7 @@ namespace Peach.Core.Dom
 				catch (Exception ex)
 				{
 					logger.Debug("handleChoice: Child threw exception: " + child.debugName + ": " + ex.Message);
+					throw;
 				}
 			}
 
