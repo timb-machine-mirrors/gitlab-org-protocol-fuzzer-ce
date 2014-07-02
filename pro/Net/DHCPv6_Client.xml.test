@@ -11,9 +11,8 @@
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Slurp setXpath="//TransactionId" valueType="hex" value="e7fb58"/>
-	<!--Slurp setXpath="//Solicit//DuidTime" value="0"/-->
-	<!--Slurp setXpath="//RequestDuidTime"  value="0x392166683"/-->
-	<!--Slurp setXpath="//SolicitDuidTime"  value="0x392166683"/-->
+	<Slurp setXpath="//Solicit/DHCPv6:Solicit/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
+	<Slurp setXpath="//Request/DHCPv6:Request/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
 	<Slurp setXpath="//Domain" value="TSE-MANAGEMENT"/>
 
 	<Test name="Default">
