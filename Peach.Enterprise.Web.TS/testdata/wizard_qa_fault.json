@@ -207,8 +207,8 @@
 			"type":"choice",
 			"key":"PingFaultOnSuccess", 
 			"choice":[
-				{"value":true, "a":"Fault when the device is available.", "next": 4102 },
-				{"value":false, "a":"Fault when the device is not available.", "next": 4102 }
+				{"value":false, "a":"Fault when the device is not available.", "next": 4102 },
+				{"value":true, "a":"Fault when the device is available.", "next": 4102 }
 			]
 		},
 		{
