@@ -51,7 +51,7 @@ peach VLAN.xml
 
 In this example, a Linux machine is configured with vlan support.  We recommend using the current release of Ubuntu Server LTS. In order to replicate this example, first install the +vlan+ package and configure. Then, set up +socat+ in different terminals to listen for incoming packets. 
 
-NOTE: The TargetMAC configuration parameter must be correctly configured.
+ NOTE: The TargetMAC configuration parameter must be correctly configured.
 
 ----
 # Install vlan
