@@ -48,6 +48,8 @@ module DashApp.Services {
 		PauseJob();
 		StopJob();
 
+		InitializeSetVars();
+
 	}
 
 	export class PitConfiguratorService implements IPitConfiguratorService {
@@ -66,9 +68,14 @@ module DashApp.Services {
 		}
 
 		public Faults: Models.Peach.Fault[] = [];
-		public QA: W.Question[] = [];
 		public Monitors: W.Monitor[] = [];
 		public UserPitLibrary: string;
+
+
+		private _qa: W.Question[] = [];
+		public get QA() {
+			return this._qa;
+		}
 
 		//#region Job
 		private _job: Models.Peach.Job;
@@ -224,8 +231,9 @@ module DashApp.Services {
 		}
 
 		public LoadData(data) {
-			if (data.qa != undefined)
-				this.QA = <W.Question[]>data.qa;
+			if (data.qa != undefined) {
+				this._qa = W.Question.CreateQA(<W.Question[]>data.qa); 
+			}
 
 			if (data.state != undefined) {
 				this._stateBag = new W.StateBag(<any[]>data.state);
@@ -392,6 +400,10 @@ module DashApp.Services {
 					}];
 				}
 			}
+		}
+
+		public InitializeSetVars() {
+			this._qa = this.Defines.ToQuestions(); 
 		}
 
 		private updatePit(pit: P.Pit) {

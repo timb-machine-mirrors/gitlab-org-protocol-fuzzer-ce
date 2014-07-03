@@ -260,7 +260,6 @@ module DashApp {
 			
 			//get value from the state bag if necessary
 			if (this.currentQuestion.value == undefined) {
-				//this.currentQuestion.value = this.state.g(this.currentQuestion.key);
 				this.currentQuestion.value = this.pitConfigSvc.StateBag.g(this.currentQuestion.key);
 			}
 
@@ -425,7 +424,7 @@ module DashApp {
 
 			switch (this.params.step) {
 				case StepNames.SetVars:
-					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions(); 
+					this.pitConfigSvc.InitializeSetVars();
 					this.next();
 					return;
 					break;

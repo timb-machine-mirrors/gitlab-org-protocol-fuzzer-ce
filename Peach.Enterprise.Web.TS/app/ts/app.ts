@@ -2,7 +2,7 @@
 /// <reference path="Controllers/dash.ts" />
 /// <reference path="Models/wizard.ts" />
 /// <reference path="Controllers/pittest.ts" />
-/// <reference path="Services/peach.ts" />
+/// <reference path="Services/peach.ts" /> 
 
 module DashApp {
 	"use strict";
@@ -143,3 +143,4 @@ module DashApp {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
 }
+
