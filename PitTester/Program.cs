@@ -443,6 +443,24 @@ namespace PitTester
 				}
 			}
 
+			try
+			{
+				if (isTest)
+				{
+					var args = new Dictionary<string, object>();
+					var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+					defs = PitDefines.Evaluate(defs);
+					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+					new Godel.Core.GodelPitParser().asParser(args, fileName);
+				}
+			}
+			catch (Exception ex)
+			{
+				errors.AppendLine("PitParser exception: " + ex.Message);
+			}
+
 			if (errors.Length > 0)
 				throw new ApplicationException(errors.ToString());
 		}
