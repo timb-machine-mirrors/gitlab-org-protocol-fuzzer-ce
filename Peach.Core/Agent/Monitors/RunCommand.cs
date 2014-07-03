@@ -71,7 +71,7 @@ namespace Peach.Core.Agent.Monitors
 
 				if (p.Timeout)
 				{
-					_fault.description = "Process failed to exit in alotted time.";
+					_fault.description = "Process failed to exit in allotted time.";
 					_fault.type = FaultType.Fault;
 				}
 				else if (FaultOnNonZeroExit && p.ExitCode != 0)
