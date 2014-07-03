@@ -47,7 +47,8 @@ namespace PitTester
 
 			lib.LoadEventHandler += delegate(object sender, LoadEventArgs e)
 			{
-				Console.Write(".");
+				if (e.Pit.Locked)
+					Console.Write(".");
 			};
 
 			lib.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
@@ -65,8 +66,11 @@ namespace PitTester
 
 			lib.Load(libraryPath);
 
+			// Ignore user pits
+			var entries = lib.Entries.Where(e => e.Locked).ToList();
+
 			Console.WriteLine();
-			Console.WriteLine("Loaded {0}/{1} pit files", lib.Entries.Count(), lib.Entries.Count() + total);
+			Console.WriteLine("Loaded {0}/{1} pit files", entries.Count(), entries.Count() + total);
 
 			if (errors.Length > 0)
 			{
@@ -87,7 +91,7 @@ namespace PitTester
 
 			if (test != null)
 			{
-				var pit = lib.Entries.Where(e => e.Name == test).FirstOrDefault();
+				var pit = entries.Where(e => e.Name == test).FirstOrDefault();
 				if (pit == null)
 				{
 					Console.WriteLine("Error, could not find a pit named '{0}'", test);
@@ -120,7 +124,7 @@ namespace PitTester
 
 			Console.WriteLine("Verifying pit config files");
 
-			foreach (var e in lib.Entries)
+			foreach (var e in entries)
 			{
 				var fileName = e.Versions[0].Files[0].Name;
 
@@ -171,7 +175,7 @@ namespace PitTester
 			}
 
 			Console.WriteLine();
-			Console.WriteLine("Parsed {0}/{1} .config files", total, lib.Entries.Count());
+			Console.WriteLine("Parsed {0}/{1} .config files", total, entries.Count());
 
 			if (errors.Length > 0)
 			{
@@ -192,7 +196,7 @@ namespace PitTester
 
 			Console.WriteLine("Verifying pit files");
 
-			foreach (var e in lib.Entries)
+			foreach (var e in entries)
 			{
 				int success = 1;
 
@@ -202,7 +206,7 @@ namespace PitTester
 
 					try
 					{
-						VerifyPit(fileName, i == 0);
+						VerifyPit(libraryPath, fileName, i == 0);
 					}
 					catch (Exception ex)
 					{
@@ -220,7 +224,7 @@ namespace PitTester
 			}
 
 			Console.WriteLine();
-			Console.WriteLine("Parsed {0}/{1} pit files", total, lib.Entries.Count());
+			Console.WriteLine("Parsed {0}/{1} pit files", total, entries.Count());
 
 			if (errors.Length > 0)
 			{
@@ -247,7 +251,7 @@ namespace PitTester
 
 			Console.WriteLine("Testing pit files");
 
-			foreach (var e in lib.Entries)
+			foreach (var e in entries)
 			{
 				var fileName = e.Versions[0].Files[0].Name;
 
@@ -278,7 +282,7 @@ namespace PitTester
 			}
 
 			Console.WriteLine();
-			Console.WriteLine("Passed {0}/{1} pit tests", total, lib.Entries.Count());
+			Console.WriteLine("Passed {0}/{1} pit tests", total, entries.Count());
 
 			if (ignores.Count > 0)
 			{
@@ -319,7 +323,7 @@ namespace PitTester
 			Peach.Enterprise.Test.PitTester.TestPit(libraryPath, pitName, testName);
 		}
 
-		static void VerifyPit(string fileName, bool isTest)
+		static void VerifyPit(string pitLibraryPath, string fileName, bool isTest)
 		{
 			var errors = new StringBuilder();
 
@@ -437,6 +441,24 @@ namespace PitTester
 					if (!gotEnd)
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
 				}
+			}
+
+			try
+			{
+				if (isTest)
+				{
+					var args = new Dictionary<string, object>();
+					var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+					defs = PitDefines.Evaluate(defs);
+					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+					new Godel.Core.GodelPitParser().asParser(args, fileName);
+				}
+			}
+			catch (Exception ex)
+			{
+				errors.AppendLine("PitParser exception: " + ex.Message);
 			}
 
 			if (errors.Length > 0)
