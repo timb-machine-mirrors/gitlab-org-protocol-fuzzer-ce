@@ -49,7 +49,7 @@ module DashApp.Services {
 		StopJob();
 
 		InitializeSetVars();
-
+		InitializeStateBag();
 	}
 
 	export class PitConfiguratorService implements IPitConfiguratorService {
@@ -235,10 +235,6 @@ module DashApp.Services {
 				this._qa = W.Question.CreateQA(<W.Question[]>data.qa); 
 			}
 
-			if (data.state != undefined) {
-				this._stateBag = new W.StateBag(<any[]>data.state);
-			}
-
 			if (data.monitors != undefined)
 				this.Monitors = <W.Monitor[]>data.monitors;
 
@@ -360,13 +356,6 @@ module DashApp.Services {
 				this.faultsPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: P.Fault[]) => {
-					//var start: number = 0;
-					//if (this.Faults.length > 1) {
-					//	start = this.Faults.length - 1;
-					//}
-					//for (var f = start; f < data.length; f++) {
-					//	this.Faults.push(data[f]);
-					//}
 					this.Faults = data;
 				});
 			}
@@ -422,14 +411,8 @@ module DashApp.Services {
 
 
 		private initialize() {
-			//this.peachSvc.GetLocalFile<any>("../testdata/test_config.json", (data) => {
-			//	this.peachSvc.URL_PREFIX = data.URL_PREFIX;
-			//	this.getUserLibrary();
-			//}, () => {
-			//	this.getUserLibrary();
-			//});
-
 			this.getUserLibrary();
+			this.InitializeStateBag();
 		}
 
 		private getUserLibrary() {
@@ -438,6 +421,13 @@ module DashApp.Services {
 					return e.locked == false;
 				})[0].libraryUrl;
 			});
+		}
+
+		public InitializeStateBag() {
+			this.peachSvc.GetState((data: W.StateItem[]) => {
+				this.StateBag = new W.StateBag(data);
+			});
+
 		}
 	}
 }

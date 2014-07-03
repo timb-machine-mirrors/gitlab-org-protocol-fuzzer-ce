@@ -42,6 +42,8 @@ module DashApp.Services {
 
 		GetSingleResource(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetManyResources(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+
+		GetState(success: (data: W.StateItem[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 	}
 
 
@@ -49,7 +51,7 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		//public URL_PREFIX: string = "http://localhost:8888";
+		//public URL_PREFIX: string = "http://localhost:8888"; 
 		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
@@ -230,6 +232,11 @@ module DashApp.Services {
 			}
 		}
 
+		public GetState(success: (data: W.StateItem[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+			this.HttpGet<any>("/p/conf/wizard/state", success, error);
+		}
+
+
 		//public KillJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
 		//	if (error === undefined) {
 		//		error = this.handleError;
@@ -272,6 +279,7 @@ module DashApp.Services {
 				throw "Bad URL: " + url;
 			}
 		}
+
 
 		private HttpGet<T>(url: string, success: (data?: T) => void, error: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
 			if (url != undefined && url.indexOf("/p/") >= 0) {

@@ -32,9 +32,6 @@ module DashApp {
 
 			peachsvc.GetLibraries((data: P.PitLibrary[]) => {
 				if (data != undefined && data.length > 0) {
-					//this._libraries = new kendo.data.HierarchicalDataSource({
-					//	data: TreeItem.CreateFromPitLibrary(data)
-					//});
 					this._libraries = TreeItem.CreateFromPitLibrary(data);
 				}
 			});
@@ -47,7 +44,11 @@ module DashApp {
 		}
 
 		selectPit() {
-			this.modalInstance.close(this.selectedPit);
+			if (this.selectedPit == undefined) {
+				this.notAPit = true;
+			} else {
+				this.modalInstance.close(this.selectedPit);
+			}
 		}
 	}
 

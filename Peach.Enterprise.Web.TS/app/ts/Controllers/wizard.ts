@@ -166,18 +166,6 @@ module DashApp {
 
 		//#region Public Methods
 
-		//public get TemplateUrl(): string { 
-		//	if (this.currentQuestion != undefined) {
-		//		if (this.currentQuestion.qref != undefined)
-		//			return this.currentQuestion.qref; 
-		//		else {
-		//			return "/partials/q-" + this.currentQuestion.type + ".html";
-		//		}
-		//	}
-		//	else
-		//		return "";
-		//}
-
 		public next() {
 			if (this.currentQuestion == undefined) {
 				//if we're not on a question, get the 0th
@@ -333,6 +321,7 @@ module DashApp {
 		public restartFaultDetection() {
 			this.pitConfigSvc.FaultMonitors = [];
 			this.currentQuestion = undefined;
+			this.pitConfigSvc.InitializeStateBag();
 			this.next();
 		}
 
@@ -342,6 +331,7 @@ module DashApp {
 		}
 
 		public addNewDataInfo() {
+			this.pitConfigSvc.InitializeStateBag();
 			this.currentQuestion = undefined;
 			this.next();
 		}
@@ -352,6 +342,7 @@ module DashApp {
 		}
 
 		public addNewAutoInfo() {
+			this.pitConfigSvc.InitializeStateBag();
 			this.currentQuestion = undefined;
 			this.next();
 		}
@@ -421,7 +412,7 @@ module DashApp {
 
 		private refreshData(scope: ViewModelScope) {
 			var res: ng.resource.IResourceClass<ng.resource.IResource<any>>;
-
+			this.pitConfigSvc.InitializeStateBag();
 			switch (this.params.step) {
 				case StepNames.SetVars:
 					this.pitConfigSvc.InitializeSetVars();
