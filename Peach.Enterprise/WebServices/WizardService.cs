@@ -30,7 +30,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			var ret = new List<KeyValuePair<string, string>>();
 
-			ret.Add(new KeyValuePair<string, string>("OS", Peach.Core.Platform.GetOS().ToString()));
+			ret.Add(new KeyValuePair<string, string>("LocalOS", Peach.Core.Platform.GetOS().ToString().ToLower()));
 
 			return ret;
 		}
