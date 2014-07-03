@@ -269,11 +269,34 @@ namespace Peach.Enterprise.Test.WebServices
 			public string Value { get; set; }
 		}
 
-		[Test, Ignore]
+		class MyJsonReader : JsonTextReader
+		{
+			public MyJsonReader(TextReader rdr)
+				: base(rdr)
+			{
+			}
+
+			public override string ReadAsString()
+			{
+				return base.ReadAsString();
+			}
+
+			public override int? ReadAsInt32()
+			{
+				return base.ReadAsInt32();
+			}
+		}
+
+		[Test]
 		public void JsonInt()
 		{
 			var json = " { \"Value\":500 }";
-			var obj = JsonConvert.DeserializeObject<IntMember>(json);
+			//var obj = JsonConvert.DeserializeObject<IntMember>(json);
+
+			var s = new JsonSerializer();
+			var rdr = new MyJsonReader(new StringReader(json));
+			var obj = s.Deserialize(rdr, typeof(IntMember)) as IntMember;
+
 			Assert.NotNull(obj);
 			Assert.AreEqual("500", obj.Value);
 		}
