@@ -4,6 +4,7 @@ subdirs = [
 	'Portable.Licensing',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
+	'Nancy.Serialization.JsonNet-0.22.2',
 	'SyslogSharp-1.0.07',
 ]
 
