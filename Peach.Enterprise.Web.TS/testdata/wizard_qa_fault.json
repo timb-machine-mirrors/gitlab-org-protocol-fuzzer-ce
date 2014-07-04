@@ -292,11 +292,11 @@
 			"monitorClass":"LinuxDebugger",
 			"path": [3104],
 			"map": [
-				{ "key":"Executable","param":"Executable" },
-				{ "key":"Arguments","param":"Arguments" },
+				{ "key":"LinuxDebugerExecutable","param":"Executable" },
+				{ "key":"LinuxDebugerArguments","param":"Arguments" },
 				{ "key":"LinuxDebugGdbPath","param":"GdbPath" },
 				{ "key":"LinuxDebuggerStart","param":"StartMode" },
-				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" }
+				{ "key":"LinuxDebugerFaultOnEarlyExit","param":"FaultOnEarlyExit" }
 			],
 			"description": "Use GDB to launch an executable, monitoring it for exceptions. "
 		},
