@@ -63,8 +63,24 @@ namespace Peach.Core.Dom
 		{
 			try
 			{
-				DataCracker cracker = new DataCracker();
-				cracker.CrackData(model, new BitStream(File.OpenRead(FileName)));
+				using (var fs = File.OpenRead(FileName))
+				{
+					Stream strm = fs;
+
+					// If the sample file is < 16Mb, copy it to
+					// a MemoryStream to speedup seeking during
+					// cracking of lots of choices.
+					if (fs.Length < 1024 * 1024 * 16)
+					{
+						var ms = new MemoryStream();
+						fs.CopyTo(ms);
+						ms.Seek(0, SeekOrigin.Begin);
+						strm = ms;
+					}
+
+					DataCracker cracker = new DataCracker();
+					cracker.CrackData(model, new BitStream(strm));
+				}
 			}
 			catch (Cracker.CrackingFailure ex)
 			{
