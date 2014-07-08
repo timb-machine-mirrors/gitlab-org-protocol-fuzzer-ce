@@ -78,33 +78,35 @@ module DashApp {
 			var id = 0;
 
 			for (var l = 0; l < pitLibrary.length; l++) {
-				libitem = new TreeItem();
-				libitem.id = id++;
-				libitem.text = pitLibrary[l].name;
-				libitem.items = [];
-				for (var v = 0; v < pitLibrary[l].versions.length; v++) {
-					for (var p = 0; p < pitLibrary[l].versions[v].pits.length; p++) {
-						var category = $.grep(pitLibrary[l].versions[v].pits[p].tags, (e) => {
-							return e.name.substr(0,8) == "Category";
-						})[0].values[1];
+				if (pitLibrary[l].versions[0].pits.length > 0) {
+					libitem = new TreeItem();
+					libitem.id = id++;
+					libitem.text = pitLibrary[l].name;
+					libitem.items = [];
+					for (var v = 0; v < pitLibrary[l].versions.length; v++) {
+						for (var p = 0; p < pitLibrary[l].versions[v].pits.length; p++) {
+							var category = $.grep(pitLibrary[l].versions[v].pits[p].tags, (e) => {
+								return e.name.substr(0, 8) == "Category";
+							})[0].values[1];
 
-						catitem = $.grep(libitem.items, (e) => { return e.text == category; })[0];
-						if(catitem == undefined) { 
-							catitem = new TreeItem();
-							catitem.id = id++;
-							catitem.text = category;
-							catitem.items = [];
-							libitem.items.push(catitem);
+							catitem = $.grep(libitem.items, (e) => { return e.text == category; })[0];
+							if (catitem == undefined) {
+								catitem = new TreeItem();
+								catitem.id = id++;
+								catitem.text = category;
+								catitem.items = [];
+								libitem.items.push(catitem);
+							}
+
+							pititem = new TreeItem();
+							pititem.id = id++;
+							pititem.text = pitLibrary[l].versions[v].pits[p].name;
+							pititem.pitUrl = pitLibrary[l].versions[v].pits[p].pitUrl;
+							catitem.items.push(pititem);
 						}
-
-						pititem = new TreeItem();
-						pititem.id = id++;
-						pititem.text = pitLibrary[l].versions[v].pits[p].name;
-						pititem.pitUrl = pitLibrary[l].versions[v].pits[p].pitUrl;
-						catitem.items.push(pititem);
 					}
+					output.push(libitem);
 				}
-				output.push(libitem); 
 			}
 
 			return output;
