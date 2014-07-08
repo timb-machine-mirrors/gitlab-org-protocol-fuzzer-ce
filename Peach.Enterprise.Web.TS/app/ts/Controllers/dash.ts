@@ -73,7 +73,7 @@ module DashApp {
 			sortInfo: { fields: ["iteration"], directions: ["desc"] },
 			columnDefs: [
 				{ field: "iteration", displayName: "#" },
-				{ field: "timestamp", displayName: "When" },
+				{ field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mma'" },
 				{ field: "source", displayName: "Monitor" },
 				{ field: "exploitability", displayName: "Risk" },
 				{ field: "majorHash", displayName: "Major Hash" },
