@@ -147,7 +147,7 @@
 	],
 	"monitors": [
 		{
-			"monitorClass":"CanaKit",
+			"monitorClass":"CanaKitRelay",
 			"path": [ 4100 ],
 			"map": [
 				{"key":"CanaKitRelaySerialPort",	"param":"SerialPort" },
