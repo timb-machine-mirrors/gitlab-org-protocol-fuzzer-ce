@@ -72,8 +72,8 @@ module DashApp {
 		public dataGridOptions: ngGrid.IGridOptions = {
 			data: "vm.DataMonitors",
 			columnDefs: [
-				{ field: "description", displayName: "" },
-				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+				{ cellTemplate: "../../partials/monitor-cell-template.html", width: 40, maxWidth: 40 },
+				{ field: "description", displayName: "" }
 			],
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
@@ -81,8 +81,8 @@ module DashApp {
 		public autoGridOptions: ngGrid.IGridOptions = {
 			data: "vm.AutoMonitors",
 			columnDefs: [
-				{ field: "description", displayName: "" },
-				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+				{ cellTemplate: "../../partials/monitor-cell-template.html", width: 40, maxWidth: 40 },
+				{ field: "description", displayName: "" }
 			],
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
