@@ -48,7 +48,7 @@ SUCH DAMAGE.
 		<StateModel ref="AviDivx:FileWriteAndLaunch"/>
 
 		<Publisher class="File">
-			<Param name="FileName" value="fuzzed.avi"/>
+			<Param name="FileName" value="##FuzzedFile##"/>
 		</Publisher>
 
 		<Strategy class="##Strategy##"/>
