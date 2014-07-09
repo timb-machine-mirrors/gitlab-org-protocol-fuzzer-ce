@@ -1,8 +1,16 @@
-﻿/// <reference path="Controllers/wizard.ts" />
-/// <reference path="Controllers/dash.ts" />
-/// <reference path="Models/wizard.ts" />
-/// <reference path="Controllers/pittest.ts" />
-/// <reference path="Services/peach.ts" /> 
+﻿/// <reference path="models/peach.ts" />
+/// <reference path="models/wizard.ts" />
+/// <reference path="services/peach.ts" />
+/// <reference path="services/pitconfigurator.ts" />
+/// <reference path="controllers/copypit.ts" />
+/// <reference path="controllers/dash.ts" />
+/// <reference path="controllers/faults.ts" />
+/// <reference path="controllers/main.ts" />
+/// <reference path="controllers/metrics.ts" />
+/// <reference path="controllers/pitlibrary.ts" />
+/// <reference path="controllers/pittest.ts" />
+/// <reference path="controllers/wizard.ts" />
+
 
 module DashApp {
 	"use strict";
@@ -10,7 +18,7 @@ module DashApp {
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 		
-	var dashApp = angular.module("dashApp", [
+	var peachDash = angular.module("peachDash", [
 		"ngResource",
 		"emguo.poller", 
 		"ngGrid",
@@ -143,3 +151,4 @@ module DashApp {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
 }
+

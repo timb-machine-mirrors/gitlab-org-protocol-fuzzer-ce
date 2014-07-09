@@ -1,10 +1,4 @@
-﻿/// <reference path="../Models/wizard.ts" />
-/// <reference path="../Models/peach.ts" />
-/// <reference path="../Models/peach.ts" />
-/// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../Scripts/typings/angularjs/angular-local-storage.d.ts" />
-/// <reference path="../../../Scripts/typings/angularjs/angular-route.d.ts" />
-
+﻿
 module DashApp {
 	"use strict";
 
