@@ -1,4 +1,5 @@
-﻿
+﻿/// <reference path="../../../scripts/typings/angularjs/angular-route.d.ts" />
+
 module DashApp {
 	"use strict";
 

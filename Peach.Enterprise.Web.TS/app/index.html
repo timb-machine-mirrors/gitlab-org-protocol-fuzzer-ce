@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html ng-app="dashApp" data-framework="typescript">
+<html ng-app="peachDash" data-framework="typescript">
 <head>
 	<meta http-equiv="cache-control" content="no-cache" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -243,13 +243,50 @@
 	</div>
 
 	<script type="text/javascript">
-		jQuery(function ($) {
-			// shows tooltips
-			$('[data-rel=tooltip]').tooltip();
+		var version = getHtmlVer();
+		if (version < 5) {
+			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version");
+		}
+		else {
+			initialize();
+		}
 
-			// handles disabling of navbar items
-			$("ul.nav-list").on('click', 'li.disabled', false);
-		});
+		function initialize() {
+			jQuery(function ($) {
+				// shows tooltips
+				$('[data-rel=tooltip]').tooltip();
+
+				// handles disabling of navbar items
+				$("ul.nav-list").on('click', 'li.disabled', false);
+			});
+		}
+
+		function getHtmlVer() {
+			var CName = navigator.appCodeName;
+			var UAgent = navigator.userAgent;
+			var HtmlVer = 0.0;
+			// Remove start of string in UAgent upto CName or end of string if not found.
+			UAgent = UAgent.substring((UAgent + CName).toLowerCase().indexOf(CName.toLowerCase()));
+			// Remove CName from start of string. (Eg. '/5.0 (Windows; U...)
+			UAgent = UAgent.substring(CName.length);
+			// Remove any spaves or '/' from start of string.
+			while (UAgent.substring(0, 1) == " " || UAgent.substring(0, 1) == "/") {
+				UAgent = UAgent.substring(1);
+			}
+			// Remove the end of the string from first characrer that is not a number or point etc.
+			var pointer = 0;
+			while ("0123456789.+-".indexOf((UAgent + "?").substring(pointer, pointer + 1)) >= 0) {
+				pointer = pointer + 1;
+			}
+			UAgent = UAgent.substring(0, pointer);
+
+			if (!isNaN(UAgent)) {
+				if (UAgent > 0) {
+					HtmlVer = UAgent;
+				}
+			}
+			return parseFloat(HtmlVer);
+		}
 	</script>
 </body>
 </html>

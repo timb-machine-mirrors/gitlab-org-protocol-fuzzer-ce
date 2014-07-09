@@ -1,4 +1,7 @@
-﻿module DashApp {
+﻿/// <reference path="../../../scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+
+
+module DashApp {
 	"use strict";
 
 	import P = DashApp.Models.Peach;

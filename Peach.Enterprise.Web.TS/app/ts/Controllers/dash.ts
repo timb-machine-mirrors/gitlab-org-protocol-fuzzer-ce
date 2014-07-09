@@ -1,3 +1,4 @@
+/// <reference path="../../../scripts/typings/moment/moment.d.ts" />
 
 module DashApp {
 	"use strict";
