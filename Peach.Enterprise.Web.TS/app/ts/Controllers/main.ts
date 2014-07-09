@@ -1,6 +1,9 @@
-﻿/// <reference path="../models/models.ts" />
-/// <reference path="../services/peach.ts" />
-/// <reference path="../services/pitconfigurator.ts" />
+﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../Models/models.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="../Services/pitconfigurator.ts" />
+/// <reference path="../Controllers/pitlibrary.ts" />
+/// <reference path="../Controllers/copypit.ts" />
 
 module DashApp {
 	"use strict";

@@ -1,4 +1,4 @@
-﻿/// <reference path="../models/models.ts" />
+﻿/// <reference path="../Models/models.ts" />
 /// <reference path="peach.ts" />
 
 module DashApp.Services {

@@ -1,14 +1,14 @@
-﻿/// <reference path="models/models.ts" />
-/// <reference path="services/peach.ts" />
-/// <reference path="services/pitconfigurator.ts" />
-/// <reference path="controllers/copypit.ts" />
-/// <reference path="controllers/dash.ts" />
-/// <reference path="controllers/faults.ts" />
-/// <reference path="controllers/main.ts" />
-/// <reference path="controllers/metrics.ts" />
-/// <reference path="controllers/pitlibrary.ts" />
-/// <reference path="controllers/pittest.ts" />
-/// <reference path="controllers/wizard.ts" />
+﻿/// <reference path="Models/models.ts" />
+/// <reference path="Services/peach.ts" />
+/// <reference path="Services/pitconfigurator.ts" />
+/// <reference path="Controllers/copypit.ts" />
+/// <reference path="Controllers/dash.ts" />
+/// <reference path="Controllers/faults.ts" />
+/// <reference path="Controllers/main.ts" />
+/// <reference path="Controllers/metrics.ts" />
+/// <reference path="Controllers/pitlibrary.ts" />
+/// <reference path="Controllers/pittest.ts" />
+/// <reference path="Controllers/wizard.ts" />
 
 
 module DashApp {

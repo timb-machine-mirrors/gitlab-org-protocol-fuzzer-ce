@@ -1,4 +1,5 @@
-﻿/// <reference path="../services/peach.ts" />
+﻿/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
+/// <reference path="../Services/peach.ts" />
 
 module DashApp {
 	"use strict";

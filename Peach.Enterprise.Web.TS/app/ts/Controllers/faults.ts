@@ -1,7 +1,8 @@
-﻿/// <reference path="../../../scripts/typings/ng-grid/ng-grid.d.ts" />
-/// <reference path="../models/models.ts" />
-/// <reference path="../services/pitconfigurator.ts" />
-/// <reference path="../services/peach.ts" />
+﻿/// <reference path="../../../Scripts/typings/ng-grid/ng-grid.d.ts" />
+/// <reference path="../Models/models.ts" />
+/// <reference path="../Services/pitconfigurator.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="main.ts" />
 
 module DashApp {
 	"use strict";

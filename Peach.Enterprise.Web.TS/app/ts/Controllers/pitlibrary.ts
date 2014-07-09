@@ -1,4 +1,6 @@
-﻿/// <reference path="../services/peach.ts" />
+﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="main.ts" />
 
 module DashApp {
 	"use strict";

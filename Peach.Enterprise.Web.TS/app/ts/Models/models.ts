@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../scripts/typings/jquery/jquery.d.ts" />
+﻿/// <reference path="../../../Scripts/typings/jquery/jquery.d.ts" />
 
 module DashApp.Models {
 	"use strict";
