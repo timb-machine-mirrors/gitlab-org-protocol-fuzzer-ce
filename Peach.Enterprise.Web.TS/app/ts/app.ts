@@ -147,12 +147,11 @@ module DashApp {
 		})
 		.run(function ($rootScope, $templateCache) {
 			$rootScope.$on('$routeChangeStart', function (event, next, current) {
-				if (typeof (current) !== 'undefined') {
+				if (typeof(current) !== 'undefined') {
 					$templateCache.remove(current.templateUrl);
 				}
 			});
 		});
-	//*/
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
