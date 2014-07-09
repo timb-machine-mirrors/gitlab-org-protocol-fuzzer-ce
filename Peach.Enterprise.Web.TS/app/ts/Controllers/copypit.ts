@@ -4,7 +4,7 @@
 module DashApp {
 	"use strict";
 
-	import P = DashApp.Models.Peach;
+	import P = DashApp.Models;
 
 	export class CopyPitController {
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;

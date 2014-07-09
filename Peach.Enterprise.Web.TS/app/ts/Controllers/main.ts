@@ -2,7 +2,7 @@
 module DashApp {
 	"use strict";
 
-	import P = Models.Peach;
+	import P = Models;
 
 	export class MainController {
 		private peachSvc: Services.IPeachService;

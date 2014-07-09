@@ -3,7 +3,7 @@
 module DashApp {
 	"use strict";
 
-	import P = DashApp.Models.Peach;
+	import P = DashApp.Models;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class FaultsController {

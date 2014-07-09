@@ -2,8 +2,8 @@
 module DashApp {
 	"use strict";
 
-	import P = Models.Peach;
-	import W = Models.Wizard;
+	import P = Models;
+	import W = Models;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class PitTestController {

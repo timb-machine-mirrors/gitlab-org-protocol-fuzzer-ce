@@ -3,8 +3,8 @@
 module DashApp {
 	"use strict";
 
-	import W = DashApp.Models.Wizard;
-	import P = DashApp.Models.Peach;
+	import W = DashApp.Models;
+	import P = DashApp.Models;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 	
 	export interface IWizardParams extends ng.route.IRouteParamsService {

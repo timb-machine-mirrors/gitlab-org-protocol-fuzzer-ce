@@ -2,14 +2,14 @@
 module DashApp.Services {
 	"use strict";
 
-	import W = Models.Wizard;
-	import P = Models.Peach;
+	import W = Models;
+	import P = Models;
 	
 
 	export interface IPitConfiguratorService {
-		Job: Models.Peach.Job;
-		Pit: Models.Peach.Pit;
-		Faults: Models.Peach.Fault[];
+		Job: Models.Job;
+		Pit: Models.Pit;
+		Faults: Models.Fault[];
 
 		UserPitLibrary: string;
 		QA: W.Question[];
@@ -67,7 +67,7 @@ module DashApp.Services {
 			this.initialize();
 		}
 
-		public Faults: Models.Peach.Fault[] = [];
+		public Faults: Models.Fault[] = [];
 		public Monitors: W.Monitor[] = [];
 		public UserPitLibrary: string;
 
@@ -78,7 +78,7 @@ module DashApp.Services {
 		}
 
 		//#region Job
-		private _job: Models.Peach.Job;
+		private _job: Models.Job;
 
 		public get Job(): P.Job {
 			return this._job;
