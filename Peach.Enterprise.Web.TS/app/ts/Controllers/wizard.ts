@@ -1,10 +1,13 @@
 ﻿/// <reference path="../../../scripts/typings/angularjs/angular-route.d.ts" />
+/// <reference path="../models/models.ts" />
+/// <reference path="../services/peach.ts" />
+/// <reference path="../services/pitconfigurator.ts" />
 
 module DashApp {
 	"use strict";
 
-	import W = DashApp.Models;
-	import P = DashApp.Models;
+	
+	
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 	
 	export interface IWizardParams extends ng.route.IRouteParamsService {
@@ -40,28 +43,28 @@ module DashApp {
 		//#region Public Properties
 		public isDefaultsOpen: boolean = false;
 
-		public get qa(): W.Question[] {
+		public get qa(): Models.Question[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.QA;
 			else
 				return undefined;
 		}
 
-		public get monitors(): W.Monitor[] {
+		public get monitors(): Models.Monitor[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.Monitors;
 			else
 				return undefined;
 		}
 
-		public get defines(): P.PitConfig {
+		public get defines(): Models.PitConfig {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.Defines;
 			else
 				return undefined;
 		}
 
-		public currentQuestion: W.Question;
+		public currentQuestion: Models.Question;
 		public stepNum: number;
 
 		public dataGridOptions: ngGrid.IGridOptions = {
@@ -109,21 +112,21 @@ module DashApp {
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
-		public get FaultMonitors(): W.Agent{
+		public get FaultMonitors(): Models.Agent{
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.FaultMonitors[0];
 			else
 				return undefined;
 		}
 
-		public get DataMonitors(): W.Agent[] {
+		public get DataMonitors(): Models.Agent[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.DataMonitors;
 			else
 				return undefined;
 		}
 
-		public get AutoMonitors(): W.Agent[] {
+		public get AutoMonitors(): Models.Agent[] {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.AutoMonitors;
 			else
@@ -165,13 +168,13 @@ module DashApp {
 			if (this.currentQuestion == undefined) {
 				//if we're not on a question, get the 0th
 				this.questionPath = [];
-				this.currentQuestion = <W.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
+				this.currentQuestion = <Models.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
 			}
 			else {
 				this.setThisStepIncomplete();
 
 				var q = this.currentQuestion;
-				if (q.type != W.QuestionTypes.Jump) { 
+				if (q.type != Models.QuestionTypes.Jump) { 
 					// push this question id onto the path stack
 					this.questionPath.push(q.id);
 				}
@@ -187,7 +190,7 @@ module DashApp {
 
 				var nextid: number;
 
-				if ([ W.QuestionTypes.Choice, W.QuestionTypes.Jump ].indexOf(q.type) >= 0) {
+				if ([ Models.QuestionTypes.Choice, Models.QuestionTypes.Jump ].indexOf(q.type) >= 0) {
 					// get next id from selected choice
 					var choice = $.grep(q.choice, function (e)
 					{
@@ -214,8 +217,8 @@ module DashApp {
 				}
 
 				if (nextid == undefined) {
-					this.currentQuestion = new W.Question();
-					this.currentQuestion.type = W.QuestionTypes.Done;
+					this.currentQuestion = new Models.Question();
+					this.currentQuestion.type = Models.QuestionTypes.Done;
 					switch (this.params.step) {
 						case StepNames.SetVars:
 							this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
@@ -236,7 +239,7 @@ module DashApp {
 					}
 				}
 				else {
-					this.currentQuestion = <W.Question>$.grep(this.qa, function (e) { return e.id == nextid; })[0];
+					this.currentQuestion = <Models.Question>$.grep(this.qa, function (e) { return e.id == nextid; })[0];
 				}
 
 			} 
@@ -250,13 +253,13 @@ module DashApp {
 
 			// special stuff to do based on the next question
 			switch (this.currentQuestion.type) {
-				case W.QuestionTypes.Intro:
+				case Models.QuestionTypes.Intro:
 					this.stepNum = 1;
 					break;
-				case W.QuestionTypes.Jump:
+				case Models.QuestionTypes.Jump:
 					this.next();
 					break;
-				case W.QuestionTypes.Choice:
+				case Models.QuestionTypes.Choice:
 
 					// what to do when there's no value already set for a choice question
 					// if the first choice has a value, set default selection to first
@@ -269,11 +272,11 @@ module DashApp {
 							this.currentQuestion.value = this.currentQuestion.choice[0].value;
 					}
 					break;
-				case W.QuestionTypes.Range:
+				case Models.QuestionTypes.Range:
 					if (this.currentQuestion.value == undefined)
 						this.currentQuestion.value = this.currentQuestion.rangeMin;
 					break;
-				case W.QuestionTypes.Done:
+				case Models.QuestionTypes.Done:
 					this.stepNum = 3;
 					break;
 				default:
@@ -292,9 +295,9 @@ module DashApp {
 
 			this.currentQuestion = $.grep(this.qa, function (e) { return e.id == previousid; })[0];
 
-			if (this.currentQuestion.type == W.QuestionTypes.Intro)
+			if (this.currentQuestion.type == Models.QuestionTypes.Intro)
 				this.stepNum = 1;
-			else if (this.currentQuestion.type == W.QuestionTypes.Done)
+			else if (this.currentQuestion.type == Models.QuestionTypes.Done)
 				this.stepNum = 3;
 			else
 				this.stepNum = 2;
@@ -440,9 +443,9 @@ module DashApp {
 			console.log(something);
 		}
 
-		public findMonitors(): W.Agent[] {
-			var foundMonitors: W.Monitor[] = [];
-			var agents: W.Agent[] = [];
+		public findMonitors(): Models.Agent[] {
+			var foundMonitors: Models.Monitor[] = [];
+			var agents: Models.Agent[] = [];
 
 			foundMonitors = $.grep(this.monitors, (m) => {
 				var w = $.grep(m.path, (p) => {
@@ -466,7 +469,7 @@ module DashApp {
 					}
 				}
 				var islocal: boolean = this.pitConfigSvc.StateBag.g("IsLocal");
-				var agent: W.Agent = new W.Agent();
+				var agent: Models.Agent = new Models.Agent();
 				if (islocal)
 					agent.agentUrl = "local://";
 				else

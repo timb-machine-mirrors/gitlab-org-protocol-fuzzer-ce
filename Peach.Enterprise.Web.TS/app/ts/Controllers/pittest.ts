@@ -1,9 +1,10 @@
-﻿
+﻿/// <reference path="../models/models.ts" />
+/// <reference path="../services/peach.ts" />
+/// <reference path="../services/pitconfigurator.ts" />
+
 module DashApp {
 	"use strict";
 
-	import P = Models;
-	import W = Models;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class PitTestController {
@@ -33,7 +34,7 @@ module DashApp {
 			return this.pitConfigSvc.AutoMonitorsComplete;
 		}
 
-		public get testEvents(): P.TestEvent[] {
+		public get testEvents(): Models.TestEvent[] {
 			return this.pitConfigSvc.TestEvents;
 		}
 
@@ -87,7 +88,7 @@ module DashApp {
 			this.pitConfigSvc.ResetTestData();
 			this.pitConfigSvc.Pit.configured = false;
 			this.pitConfigSvc.TestTime = moment().format("h:mm a");
-			var agents: W.Agent[] = [];
+			var agents: Models.Agent[] = [];
 			agents = agents.concat(this.pitConfigSvc.FaultMonitors);
 
 			if (this.pitConfigSvc.DataMonitors !== undefined) {
@@ -101,7 +102,7 @@ module DashApp {
 			var configPromise = this.peach.PostConfig(this.pitConfigSvc.Pit.pitUrl, this.pitConfigSvc.Defines.config);
 
 			this.q.all([monitorPromise, configPromise]).then((response) => {
-				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: P.StartTestResponse) => {
+				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: Models.StartTestResponse) => {
 					this.startTestPoller(data.testUrl);
 					//this.startLogPoller(data.testUrl);
 				}, (response) => {
@@ -128,7 +129,7 @@ module DashApp {
 
 			this.testPoller.promise.then(null, (e) => {
 				console.error(e);
-			}, (data: P.GetTestUpdateResponse) => {
+			}, (data: Models.GetTestUpdateResponse) => {
 				this.pitConfigSvc.TestEvents = data.events;
 				this.pitConfigSvc.TestStatus = data.status;
 				this.pitConfigSvc.TestLog = data.log;

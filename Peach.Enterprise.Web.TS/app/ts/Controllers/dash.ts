@@ -1,9 +1,10 @@
 /// <reference path="../../../scripts/typings/moment/moment.d.ts" />
+/// <reference path="../services/pitconfigurator.ts" />
+
 
 module DashApp {
 	"use strict";
 
-	import P = Models;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class DashController {
@@ -11,7 +12,7 @@ module DashApp {
 		private location: ng.ILocationService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
 
-		public get pit(): P.Pit {
+		public get pit(): Models.Pit {
 			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined) {
 				return this.pitConfigSvc.Pit;
 			}
@@ -20,7 +21,7 @@ module DashApp {
 			}
 		}
 
-		public get job(): P.Job {
+		public get job(): Models.Job {
 
 			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined) {
 				return this.pitConfigSvc.Job;
@@ -80,7 +81,7 @@ module DashApp {
 			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 300 })]
 		}; 
 		
-		public recentFaults: P.Fault[] = [];
+		public recentFaults: Models.Fault[] = [];
 
 		static $inject = ["$scope", "pitConfiguratorService", "$location"];
 
@@ -90,7 +91,7 @@ module DashApp {
 			$scope.vm = this;
 
 			$scope.$watch("vm.job.faultCount", () => {
-				this.recentFaults = this.pitConfigSvc.Faults.sort((a: P.Fault, b: P.Fault) => {
+				this.recentFaults = this.pitConfigSvc.Faults.sort((a: Models.Fault, b: Models.Fault) => {
 					if (a.iteration == b.iteration) { return 0; }
 					else if (a.iteration > b.iteration) { return -1; }
 					else { return 1;}

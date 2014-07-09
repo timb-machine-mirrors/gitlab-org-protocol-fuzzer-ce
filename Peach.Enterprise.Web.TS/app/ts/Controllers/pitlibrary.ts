@@ -1,8 +1,7 @@
-﻿
+﻿/// <reference path="../services/peach.ts" />
+
 module DashApp {
 	"use strict";
-
-	import P = Models;
 
 	export class PitLibraryController {
 		private _libraries: any;
@@ -26,7 +25,7 @@ module DashApp {
 			$scope.vm = this;
 			this.modalInstance = $modalInstance;
 
-			peachsvc.GetLibraries((data: P.PitLibrary[]) => {
+			peachsvc.GetLibraries((data: Models.PitLibrary[]) => {
 				if (data != undefined && data.length > 0) {
 					this._libraries = TreeItem.CreateFromPitLibrary(data);
 				}
@@ -65,7 +64,7 @@ module DashApp {
 			return output;
 		}
 
-		static CreateFromPitLibrary(pitLibrary: P.PitLibrary[]): TreeItem[] {
+		static CreateFromPitLibrary(pitLibrary: Models.PitLibrary[]): TreeItem[] {
 			var output: TreeItem[] = [];
 
 			var libitem: TreeItem;

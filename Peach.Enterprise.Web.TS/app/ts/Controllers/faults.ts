@@ -1,20 +1,23 @@
 ﻿/// <reference path="../../../scripts/typings/ng-grid/ng-grid.d.ts" />
+/// <reference path="../models/models.ts" />
+/// <reference path="../services/pitconfigurator.ts" />
+/// <reference path="../services/peach.ts" />
 
 module DashApp {
 	"use strict";
 
-	import P = DashApp.Models;
+	
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class FaultsController {
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		private peachSvc: Services.IPeachService;
 
-		public get job(): P.Job {
+		public get job(): Models.Job {
 			return this.pitConfigSvc.Job;
 		}
-		//public faults: P.Fault[] = [];
-		public get faults(): P.Fault[] {
+		//public faults: Models.Fault[] = [];
+		public get faults(): Models.Fault[] {
 			return this.pitConfigSvc.Faults;
 		}
 		
@@ -37,7 +40,7 @@ module DashApp {
 			totalServerItems: "vm.job.faultCount",
 			multiSelect: false,
 			afterSelectionChange: (r, e) => {
-				this.peachSvc.GetFault((<P.Fault>r.entity).faultUrl,(data: P.Fault) => {
+				this.peachSvc.GetFault((<Models.Fault>r.entity).faultUrl,(data: Models.Fault) => {
 					this.currentFault = data;
 					this.tabs[1].active = true;
 				});
@@ -53,7 +56,7 @@ module DashApp {
 			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 200 })]
 		//*/		
 
-		public currentFault: P.Fault;
+		public currentFault: Models.Fault;
 
 		public get isFaultSelected(): boolean {
 			return (this.currentFault != undefined);
