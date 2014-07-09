@@ -144,8 +144,7 @@ module DashApp {
 					ctrl.$formatters.push(maxValidator);
 				}
 			};
-		});
-	/*
+		})
 		.run(function ($rootScope, $templateCache) {
 			$rootScope.$on('$routeChangeStart', function (event, next, current) {
 				if (typeof (current) !== 'undefined') {
@@ -153,7 +152,7 @@ module DashApp {
 				}
 			});
 		});
-	*/
+	//*/
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
