@@ -1,8 +1,10 @@
 --target ES5
---out .\app\js\all.js
+--outDir .\app\js\
 --module amd
 --removeComments
-app/ts/app.ts
+app/ts/models/models.ts
+app/ts/services/peach.ts
+app/ts/services/pitConfigurator.ts
 app/ts/controllers/copypit.ts
 app/ts/controllers/dash.ts
 app/ts/controllers/faults.ts
@@ -11,6 +13,4 @@ app/ts/controllers/metrics.ts
 app/ts/controllers/pitlibrary.ts
 app/ts/controllers/pittest.ts
 app/ts/controllers/wizard.ts
-app/ts/models/models.ts
-app/ts/services/peach.ts
-app/ts/services/pitConfigurator.ts
+app/ts/app.ts
