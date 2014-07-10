@@ -83,7 +83,7 @@
 		},
 		{
 			"id":1120,
-			"q":"What is the name of the Windows Service? You can determine this name by XYZ.",
+			"q":"What is the name of the Windows Service?",
 			"type":"string",
 			"key":"WinDbgService",
 			"required": true,
@@ -91,7 +91,7 @@
 		},
 		{
 			"id":1130,
-			"q":"What is the process name that you want to detect faults for? You can determine this by XYZ.",
+			"q":"What is the process name that you want to detect faults for?",
 			"type":"string",
 			"key":"WinDbgProcessName",
 			"next":1141,

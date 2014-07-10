@@ -58,7 +58,7 @@
 		},
 		{
 			"id":4100,
-			"q":"What is the serial port the CanaKit Relay board connected to? You can determine this by XYZ.",
+			"q":"What is the serial port the CanaKit Relay board connected to?",
 			"type":"string",
 			"key":"CanaKitRelaySerialPort",
 			"next":4101
