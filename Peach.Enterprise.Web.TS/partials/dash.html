@@ -14,17 +14,26 @@
 					<div class="space-6"></div>
 
 					<div class="alert alert-warning" ng-hide="true" ng-class="{'show': vm.pit.configured == false }">
+						<button type="button" class="close" data-dismiss="alert">
+							<i class="icon-remove"></i>
+						</button>
 						<strong>Warning!</strong>
 						Pit must be configured before starting a Job.
 						<a href="#/configurator/intro">Go to Pit Configuration now.</a>
 					</div>
 					<div class="alert alert-warning" ng-hide="true" ng-class="{'show': vm.pit.pitUrl.length == 0}">
+						<button type="button" class="close" data-dismiss="alert">
+							<i class="icon-remove"></i>
+						</button>
 						<strong>Note:</strong>
 						You are currently working with a Pit chosen from the command line.
 						You will be limited to viewing Faults only.
 						To stop the currently running job, switch to the terminal window and close it or stop the process.
 					</div>
 					<div class="alert alert-success" ng-hide="true" ng-class="{'show': vm.pit.configured == true && vm.pit.pitUrl.length > 0 }">
+						<button type="button" class="close" data-dismiss="alert">
+							<i class="icon-remove"></i>
+						</button>
 						Your Pit is configured. Press the START button below to start a fuzzing job.
 					</div>
 
