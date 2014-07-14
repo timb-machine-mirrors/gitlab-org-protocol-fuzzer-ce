@@ -703,6 +703,11 @@ to execute same as initial control.  State " + state.name + "was not performed."
 				// Ignore, signals end of fuzzing run
 				logger.Debug("runTest: MutatorCompleted exception, ending fuzzing");
 			}
+			catch (Exception e)
+			{
+				OnTestError(context, e);
+				throw;
+			}
 			finally
 			{
 				foreach (Publisher publisher in context.test.publishers.Values)
