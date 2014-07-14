@@ -4,15 +4,21 @@
 		{{vm.currentQuestion.q}}
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>
 	</label>
-	<div class="dropdown" is-open="vm.isDefaultsOpen">
-		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" class="dropdown-toggle" ng-required="vm.currentQuestion.required" style="width: 300px" ng-enter="vm.next()" />
-		<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
-			<li ng-repeat="default in vm.currentQuestion.defaults">
-				<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
-			</li>
-		</ul>
+	<div class="row">
+		<div class="col-xs-8">
+			<div class="dropdown" is-open="vm.isDefaultsOpen">
+				<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" class="dropdown-toggle" ng-required="vm.currentQuestion.required" ng-enter="vm.next()" style="width:100%" />
+				<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
+					<li ng-repeat="default in vm.currentQuestion.defaults">
+						<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-xs-4"></div>
 	</div>
 	<div class="row-fluid wizard-actions">
+		<div class="space-6"></div>
 		<button class="btn btn-prev" ng-click="vm.back()">
 			<i class="icon-arrow-left"></i>
 			Back
