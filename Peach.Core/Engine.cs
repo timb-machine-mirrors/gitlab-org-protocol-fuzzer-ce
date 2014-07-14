@@ -425,7 +425,7 @@ namespace Peach.Core
 							{
 								logger.Debug("runTest: SoftException on control recording iteration");
 								if (se.InnerException != null && string.IsNullOrEmpty(se.Message))
-										throw new PeachException(se.InnerException.Message, se);
+									throw new PeachException(se.InnerException.Message, se);
 								throw new PeachException(se.Message, se);
 							}
 
@@ -464,7 +464,7 @@ namespace Peach.Core
 
 							// If this was a control iteration, verify it againt our origional
 							// recording.
-							if (context.controlRecordingIteration == false && 
+							if (context.controlRecordingIteration == false &&
 								context.controlIteration &&
 								!test.nonDeterministicActions)
 							{
