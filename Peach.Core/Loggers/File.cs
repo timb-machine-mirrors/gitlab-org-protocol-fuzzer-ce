@@ -371,7 +371,8 @@ namespace Peach.Core.Loggers
 
 		protected override void Engine_TestError(RunContext context, Exception e)
 		{
-			log.WriteLine("! Test error: " + e.ToString());
+			log.WriteLine("! Test error:");
+			log.WriteLine(e);
 			log.Flush();
 		}
 
