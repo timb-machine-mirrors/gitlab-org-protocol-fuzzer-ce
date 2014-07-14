@@ -341,9 +341,7 @@ namespace Peach.Core.Dom
 				foreach (var item in inputData)
 					parent.parent.SaveData(item.inputName, item.dataModel.Value);
 
-				RunScript(onComplete);
-
-				finished = true;
+				// onComplete script run from finally.
 			}
 			catch (ActionChangeStateException)
 			{
@@ -358,7 +356,16 @@ namespace Peach.Core.Dom
 			finally
 			{
 				finished = true;
-				context.OnActionFinished(this);
+
+				try
+				{
+					RunScript(onComplete);
+				}
+				finally
+				{
+					// Ensure C# delegates get notified even if onComplete throws
+					context.OnActionFinished(this);
+				}
 			}
 		}
 	}

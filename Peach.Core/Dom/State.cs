@@ -185,8 +185,15 @@ namespace Peach.Core.Dom
 			{
 				finished = true;
 
-				RunScript(onComplete);
-				context.OnStateFinished(this);
+				try
+				{
+					RunScript(onComplete);
+				}
+				finally
+				{
+					// Ensure C# delegates get notified even if onComplete throws
+					context.OnStateFinished(this);
+				}
 			}
 		}
 

@@ -706,5 +706,51 @@ namespace Peach.Core.Test.StateModel
 			}
 		}
 
+		[Test]
+		public void TestChangeStateComplete()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='str1' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial' onComplete='context.stateStore[""stateComplete""] = ""yes""'>
+			<Action type='output' onComplete='context.stateStore[""initialComplete""] = ""yes""'>
+				<DataModel ref='DM1'/>
+			</Action>
+			<Action type='changeState' ref='Second' onComplete='context.stateStore[""changeComplete""] = ""yes""' />
+		</State>
+		<State name='Second'>
+			<Action type='output' onComplete='context.stateStore[""secondComplete""] = ""yes""'>
+				<DataModel ref='DM1'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration();
+			config.singleIteration = true;
+
+			var e = new Engine(null);
+			e.startFuzzing(dom, config);
+
+			Assert.NotNull(e.context);
+			Assert.NotNull(e.context.stateStore);
+			Assert.AreEqual(4, e.context.stateStore.Count);
+			Assert.True(e.context.stateStore.ContainsKey("stateComplete"));
+			Assert.True(e.context.stateStore.ContainsKey("initialComplete"));
+			Assert.True(e.context.stateStore.ContainsKey("changeComplete"));
+			Assert.True(e.context.stateStore.ContainsKey("secondComplete"));
+		}
 	}
 }
