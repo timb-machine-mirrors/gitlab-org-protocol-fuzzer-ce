@@ -308,7 +308,11 @@ namespace Peach.Enterprise.WebServices
 					{
 						// Fail any active items
 						if (item.Status == TestStatus.Active)
+						{
+							item.Resolve = ex.Message;
 							item.Status = TestStatus.Fail;
+						}
+
 						//Fail the whole test
 						watcher.Status = TestStatus.Fail;
 					}
