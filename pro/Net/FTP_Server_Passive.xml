@@ -39,7 +39,7 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="File Transfer Protocol client PIT"
+       description="Fuzz an FTP server in passive mode"
        version="0.0.2">
 
   <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>

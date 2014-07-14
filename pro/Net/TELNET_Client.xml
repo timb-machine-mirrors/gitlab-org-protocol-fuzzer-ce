@@ -39,7 +39,7 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Telnet Command Protocol server PIT"
+       description="Fuzz a Telnet client"
        version="0.0.2">
 
 	<Include ns="TELNET" src="file:##PitLibraryPath##/_Common/Models/Net/TELNET_State.xml"/>
