@@ -89,9 +89,6 @@ namespace Peach.Enterprise.Publishers
 		static byte[] target;
 		static byte[] source;
 
-		//bool respondedToProbe;
-		//bool respondedToAuth;
-		//bool respondedToAssociationRequest;
 		bool receiveData;
 
 		UInt16 sequenceNumber = 0;
@@ -100,6 +97,11 @@ namespace Peach.Enterprise.Publishers
 
 		Thread beaconThread = null;
 		bool beaconThreadStop = false;
+		
+		Thread associateThread = null;
+		bool associateThreadStop = false;
+		AutoResetEvent associateThreadReady = new AutoResetEvent(false);
+		SoftException associateException = null;
 		
 		void compile()
 		{
@@ -164,16 +166,16 @@ namespace Peach.Enterprise.Publishers
 
 		void ResetState()
 		{
+			associateException = null;
+			associateThreadStop = false;
+			beaconThreadStop = false;
+			
 			aNonce = null;
 			sNonce = null;
 
 			sequenceNumber = 0;
 
 			wpa = new Wpa();
-
-			//respondedToAuth = false;
-			//respondedToProbe = false;
-			//respondedToAssociationRequest = false;
 
 			DhcpState = DhcpStates.None;
 		}
@@ -201,14 +203,6 @@ namespace Peach.Enterprise.Publishers
 		{
 			base.OnStart();
 
-			//pcap.Channel = Channel;
-			//pcap.MacFlags = AirPcapMacFlags.MonitorModeOn;
-			//pcap.AirPcapLinkType = AirPcapLinkTypes._802_11;
-
-
-			// pcap.Filter = string.Format("wlan src {0} and (wlan dst {1} or wlan dst ff:ff:ff:ff:ff:ff) or wlan host {0}",
-				//  FormatAsMac(target), FormatAsMac(source));
-
 			ResetState();
 
 			beaconThread = new Thread(BeaconThread);
@@ -217,11 +211,30 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnStop()
 		{
-			if (beacon != null)
+			if (beaconThread != null)
 			{
 				beaconThreadStop = true;
-				beaconThread.Join(1000);
+				
+				if(!beaconThread.Join(1000))
+				{
+					beaconThread.Abort();
+					beaconThread.Join();
+				}
+				
 				beaconThread = null;
+			}
+			
+			if (associateThread != null)
+			{
+				associateThreadStop = true;
+				
+				if(!associateThread.Join(1000))
+				{
+					associateThread.Abort();
+					associateThread.Join();
+				}
+				
+				associateThread = null;
 			}
 			
 			base.OnStop();
@@ -445,7 +458,16 @@ namespace Peach.Enterprise.Publishers
 				}
 				else if (method.Equals("StartApAuth"))
 				{
-					StartAuthState();
+					associateThread = new Thread(StartAuthState);
+					associateThread.Start();
+					associateThreadReady.WaitOne();
+				}
+				else if (method.Equals("WaitForAssociation"))
+				{
+					associateThread.Join();
+					
+					if(associateException != null)
+						throw associateException;
 				}
 				else if(method.Equals("ReceiveData"))
 				{
@@ -493,10 +515,24 @@ namespace Peach.Enterprise.Publishers
 						arpResponse = buf;
 					}
 				}
+				else if(method.Equals("Cache"))
+				{
+					// Cache values
+					var value = acknowledgement.Value;
+					value = auth.Value;
+					value = associationResponse.Value;
+					value = dhcpNak.Value;
+					value = dhcpAck.Value;
+					value = dhcpOffer.Value;
+				}
 				else
 				{
 					logger.Error("Unknown call method: "+method);
 				}
+			}
+			catch (SoftException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -610,6 +646,15 @@ namespace Peach.Enterprise.Publishers
 			//_recvBuffer.Seek(0, SeekOrigin.Begin);
 		}
 		
+		void EmptyPacketQueue()
+		{
+			while(true)
+			{
+				if(pcap.GetNextPacket() == null)
+					return;
+			}
+		}
+		
 		enum WifiState
 		{
 			Beacon,
@@ -619,546 +664,324 @@ namespace Peach.Enterprise.Publishers
 			//ActionRequest,
 			Unknown
 		}
-		
-		WifiState wifiState = WifiState.ProbeResponse;
 
 		void StartAuthState()
 		{
 			int off;
 			int type;
 			int subtype;
+			bool associated = false;
+			WifiState wifiState = WifiState.ProbeResponse;
 			
 			RawCapture packet = null;
+			EmptyPacketQueue();
 			
-			SendPacket(beacon, true, false);
-			
-			// Cache values
-			var value = acknowledgement.Value;
-			value = auth.Value;
-			value = associationResponse.Value;
-			value = dhcpNak.Value;
-			value = dhcpAck.Value;
-			value = dhcpOffer.Value;
-			
-			while (true)
+			try
 			{
-				switch(wifiState)
+				while (!associateThreadStop)
 				{
-					case WifiState.ProbeResponse:
-						logger.Debug("WifiState.ProbeResponse");
+					switch(wifiState)
+					{
+						case WifiState.ProbeResponse:
+							logger.Debug("WifiState.ProbeResponse");
 							
-						while(true)
-						{
-							ReceivePacket(out packet, out off, out type, out subtype);
+							associateThreadReady.Set();
 							
-							if(type == 0 && subtype == 4 && !AreEqual(packet.Data, off + 4, 6, broadcast))
+							while(!associateThreadStop)
 							{
-								SendPacket(probeResponse, true, true);
-								break;
-							}
-							else if(type == 0 && subtype == 11)
-							{
-								// Stop beacon thread so we can manage the sequence number
-								beaconThreadStop = true;
+								ReceivePacket(out packet, out off, out type, out subtype);
 								
-								SendPacket(acknowledgement, false, false);
-								SendPacket(auth, false, true);
-								wifiState = WifiState.AssociateResponse;
-								
-								break;
-							}
-						}
-						
-						break;
-					
-					case WifiState.AssociateResponse:
-						logger.Debug("WifiState.AssociateResponse");
-						
-						do
-						{
-							ReceivePacket(out packet, out off, out type, out subtype);
-							
-							//if(type == 0 && subtype == 11)
-							//{
-							//	SendPacket(acknowledgement, false, false);
-							//	SendPacket(auth, false, true);
-							//}
-						}
-						while(!(type == 0 && subtype == 0));
-						
-						SendPacket(acknowledgement, false, false);
-						SendPacket(associationResponse, false, true);
-						
-						if (SecurityMode == SecurityModes.None)
-						{
-							SendPacket(actionBlockAckReq, false, true);
-						}
-						else if (SecurityMode == SecurityModes.WPA2Aes || SecurityMode == SecurityModes.WPA2Tkip)
-						{
-							pcap.Close();
-							pcap.Open(CaptureMode, 1);
-							
-							DataElement aNonce = keymessage1.find("WpaKeyNonce");
-							if (aNonce != null)
-							{
-								var bs = (BitStream)aNonce.DefaultValue;
-								this.aNonce = new BitReader(bs).ReadBytes((int)bs.Length);
-							}
-							
-							SendPacket(keymessage1, true, true);
-						}
-						
-						wifiState = WifiState.Unknown;
-						
-						break;
-					
-					case WifiState.Unknown:
-						logger.Debug("WifiState.Unknown");
-						
-						while(true)
-						{
-							ReceivePacket(out packet, out off, out type, out subtype);
-							
-							logger.Debug("T: "+ type+" S: "+subtype);
-							
-							if (type == 0)	// Mgmt Frame
-							{
-								switch (subtype)
+								if(type == 0 && subtype == 4 && !AreEqual(packet.Data, off + 4, 6, broadcast))
 								{
-									case 2:
-										SendPacket(reassociationResponse, true, true);
-										break;
+									SendPacket(probeResponse, true, true);
+								}
+								else if(type == 0 && subtype == 4)
+								{
+									SendPacket(probeResponse, true, false);
+								}
+								else if(type == 0 && subtype == 11)
+								{
+									SendPacket(acknowledgement, false, false);
 									
-									case 13:	// Action
-										SendPacket(acknowledgement, false, false);
-										
-										// Respond to requests
-										if (packet.Data[off + 25] == 0)
-										{
-											try
-											{
-												(((actionBlockAckRep["Body"] as DataElementContainer)
-													["FixedParameters"] as DataElementContainer)
-													["BlockAck"] as DataElementContainer)
-													["DialogToken"].DefaultValue = new Variant(packet.Data[off + 26]);
-												
-												(actionBlockAckRep["MacHeaderFrame"] as DataElementContainer)
-													["BlockAckStartingSequenceControl"].DefaultValue = new Variant(3);
-											}
-											catch
-											{}
-											
-											SendPacket(actionBlockAckRep, false, true);
-										}
-										
-										break;
-									default:
-										break;
+									EmptyPacketQueue();
+									
+									SendPacket(auth, false, true);
+									wifiState = WifiState.AssociateResponse;
+									
+									// Stop sending beacon until next iteration
+									beacon = null;
+									
+									break;
 								}
 							}
-							else if (type == 1)	// Control Frame
+							
+							break;
+						
+						case WifiState.AssociateResponse:
+							logger.Debug("WifiState.AssociateResponse");
+							
+							do
 							{
-								switch (subtype)
-								{
-									case 8:		// Block ACK Request
-										
-										if (packet.Data.Length >= off + 22)
-										{
-											try
-											{
-												var tmp = new byte[2];
-												System.Array.Copy(packet.Data, off + 20, tmp, 0, 2);
-												
-												(blockAck["MacHeaderFrame"] as DataElementContainer)
-													["BlockAckStartingSequenceControl"].DefaultValue = new Variant(tmp);
-											}
-											catch
-											{}
-										}
-										
-										SendPacket(blockAck, false, false);
-										break;
-									
-									case 11:	// Request-to-send
-										SendPacket(clearToSend, false, false);
-										SendPacket(blockAck, false, false);
-										
-										break;
-									default:
-										break;
-								}
+								ReceivePacket(out packet, out off, out type, out subtype);
 							}
-							else if (type == 2) // Data Frame
+							while(!(type == 0 && subtype == 0) && !associateThreadStop);
+							
+							SendPacket(acknowledgement, false, false);
+							EmptyPacketQueue();
+							SendPacket(associationResponse, false, true);
+							
+							if (SecurityMode == SecurityModes.None)
 							{
-								DataElement elm;
-								switch (subtype)
+								SendPacket(actionBlockAckReq, false, true);
+							}
+							else if (SecurityMode == SecurityModes.WPA2Aes || SecurityMode == SecurityModes.WPA2Tkip)
+							{
+								pcap.Close();
+								pcap.Open(CaptureMode, 1);
+								
+								DataElement aNonce = keymessage1.find("WpaKeyNonce");
+								if (aNonce != null)
 								{
-									case 4:	// Null function (No Data)
+									var bs = (BitStream)aNonce.DefaultValue;
+									this.aNonce = new BitReader(bs).ReadBytes((int)bs.Length);
+								}
+								
+								SendPacket(keymessage1, true, true);
+							}
+							
+							wifiState = WifiState.Unknown;
+							
+							break;
+						
+						case WifiState.Unknown:
+							logger.Debug("WifiState.Unknown");
+							
+							while(!associateThreadStop)
+							{
+								ReceivePacket(out packet, out off, out type, out subtype);
+								
+								logger.Debug("T: "+ type+" S: "+subtype);
+								
+								if (type == 0)	// Mgmt Frame
+								{
+									switch (subtype)
+									{
+										case 2:
+											SendPacket(reassociationResponse, true, true);
+											break;
 										
-										SendPacket(acknowledgement, false, false);
-										break;
-									
-									case 8:	// Actual data!!
-										
-										SendPacket(acknowledgement, false, false);
+										case 13:	// Action
+											SendPacket(acknowledgement, false, false);
 											
-										var rdr = new BitReader(new BitStream(packet.Data));
-										rdr.BaseStream.Position = off + 32;
-										rdr.BigEndian();
-										var llc = rdr.ReadUInt16();
-										
-										if (packet.Data.Length > off + 34 && llc == 0x888e)
-										{
-											if (sNonce == null)
+											// Respond to requests
+											if (packet.Data[off + 25] == 0)
 											{
-												if (packet.Data.Length >= off + 83)
+												try
 												{
-													sNonce = new byte[32];
-													System.Array.Copy(packet.Data, off + 51, sNonce, 0, 32);
-						
-													wpa.GeneratePtk(source, target, aNonce, sNonce);
+													(((actionBlockAckRep["Body"] as DataElementContainer)
+														["FixedParameters"] as DataElementContainer)
+														["BlockAck"] as DataElementContainer)
+														["DialogToken"].DefaultValue = new Variant(packet.Data[off + 26]);
+													
+													(actionBlockAckRep["MacHeaderFrame"] as DataElementContainer)
+														["BlockAckStartingSequenceControl"].DefaultValue = new Variant(3);
 												}
-						
-												elm = keymessage3.find("WpaKeyMic");
-												DataElement Authentication = keymessage3.find("Authentication");
-												if (elm != null && Authentication != null)
-												{
-													var mac = new HMac(new Sha1Digest());
-													var ret = new byte[mac.GetMacSize()];
-													var bs = Authentication.Value;
-													var pos = bs.Position;
-						
-													CalculateSequenceNumber(bs, off, (int)pos);
-															
-													var buf = new BitReader(bs).ReadBytes((int)bs.Length);
-													var key = new KeyParameter(wpa.Kck);
-						
-						
-													mac.Init(key);
-													mac.BlockUpdate(buf, 0, buf.Length);
-													mac.DoFinal(ret, 0);
-						
-						
-													var r = new byte[16];
-													System.Array.Copy(ret, 0, r, 0, 16);
-													elm.DefaultValue = new Variant(r);
-												}
-						
-												SendPacket(keymessage3, false, true);
+												catch
+												{}
+												
+												SendPacket(actionBlockAckRep, false, true);
 											}
-						
-											break;
-										}
-										
-										// Respond to ARP
-										if(llc == 0x0806 && DhcpState == DhcpStates.SentOffer)
-										{
-											SendPacket(arpResponse, true, true);
-											break;
-										}
-										
-										// Only respond to IPv4 packets
-										if (llc != 0x0800)
-											break;
-						
-										var dhcp = new Packet(packet.Data);
-										dhcp.ParseDhcp(26);
-						
-										var tmp = new byte[4];
-										if (dhcp.packet.Length > 8)
-										{
-											System.Array.Copy(dhcp.packet, 4, tmp, 0, 4);
-										}
-						
-										switch (dhcp.Type)
-										{
-											case 1:
-												elm = dhcpOffer.find("TransactionId");
-												if (elm != null)
-													elm.DefaultValue = new Variant(tmp);
-						
-												SendPacket(arp, true, true);
-												SendPacket(dhcpOffer, true, true);
-						
-												DhcpState = DhcpStates.SentOffer;
-						
-												break;
 											
-											case 3:
-												if (DhcpState == DhcpStates.None)
+											break;
+										default:
+											break;
+									}
+								}
+								else if (type == 1)	// Control Frame
+								{
+									switch (subtype)
+									{
+										case 8:		// Block ACK Request
+											
+											if (packet.Data.Length >= off + 22)
+											{
+												try
 												{
-													elm = dhcpNak.find("TransactionId");
-													if (elm != null)
-														elm.DefaultValue = new Variant(tmp);
-						
-													SendPacket(dhcpNak, true, true);
-													DhcpState = DhcpStates.FirstReply;
+													var tmp = new byte[2];
+													System.Array.Copy(packet.Data, off + 20, tmp, 0, 2);
+													
+													(blockAck["MacHeaderFrame"] as DataElementContainer)
+														["BlockAckStartingSequenceControl"].DefaultValue = new Variant(tmp);
 												}
-												else
+												catch
+												{}
+											}
+											
+											SendPacket(blockAck, false, false);
+											break;
+										
+										case 11:	// Request-to-send
+											SendPacket(clearToSend, false, false);
+											SendPacket(blockAck, false, false);
+											
+											break;
+										default:
+											break;
+									}
+								}
+								else if (type == 2) // Data Frame
+								{
+									// Once we are here, association passed
+									associated = true;
+									
+									DataElement elm;
+									switch (subtype)
+									{
+										case 4:	// Null function (No Data)
+											
+											SendPacket(acknowledgement, false, false);
+											break;
+										
+										case 8:	// Actual data!!
+											
+											SendPacket(acknowledgement, false, false);
+												
+											var rdr = new BitReader(new BitStream(packet.Data));
+											rdr.BaseStream.Position = off + 32;
+											rdr.BigEndian();
+											var llc = rdr.ReadUInt16();
+											
+											if (packet.Data.Length > off + 34 && llc == 0x888e)
+											{
+												if (sNonce == null)
 												{
-													elm = dhcpAck.find("TransactionId");
-													if (elm != null)
-														elm.DefaultValue = new Variant(tmp);
-						
-													if (DhcpState == DhcpStates.SentOffer || DhcpState == DhcpStates.None)
+													if (packet.Data.Length >= off + 83)
 													{
-														SendPacket(dhcpAck, true, true);
-														
-														//return;
-														break;
+														sNonce = new byte[32];
+														System.Array.Copy(packet.Data, off + 51, sNonce, 0, 32);
+							
+														wpa.GeneratePtk(source, target, aNonce, sNonce);
 													}
+							
+													elm = keymessage3.find("WpaKeyMic");
+													DataElement Authentication = keymessage3.find("Authentication");
+													if (elm != null && Authentication != null)
+													{
+														var mac = new HMac(new Sha1Digest());
+														var ret = new byte[mac.GetMacSize()];
+														var bs = Authentication.Value;
+														var pos = bs.Position;
+							
+														CalculateSequenceNumber(bs, off, (int)pos);
+																
+														var buf = new BitReader(bs).ReadBytes((int)bs.Length);
+														var key = new KeyParameter(wpa.Kck);
+							
+							
+														mac.Init(key);
+														mac.BlockUpdate(buf, 0, buf.Length);
+														mac.DoFinal(ret, 0);
+							
+							
+														var r = new byte[16];
+														System.Array.Copy(ret, 0, r, 0, 16);
+														elm.DefaultValue = new Variant(r);
+													}
+							
+													SendPacket(keymessage3, false, true);
 												}
+							
+												break;
+											}
+											
+											// Respond to ARP
+											if(llc == 0x0806 && DhcpState == DhcpStates.SentOffer)
+											{
+												SendPacket(arpResponse, true, true);
 												
+												// At this point we are done!
+												return;
+												//break;
+											}
+											
+											// Only respond to IPv4 packets
+											if (llc != 0x0800)
 												break;
 											
-											default:
-												break;
-										}
-										
-										break;
-									default:
-										break;
+											var dhcp = new Packet(packet.Data);
+											dhcp.ParseDhcp(26);
+							
+											var tmp = new byte[4];
+											if (dhcp.packet.Length > 8)
+											{
+												System.Array.Copy(dhcp.packet, 4, tmp, 0, 4);
+											}
+							
+											switch (dhcp.Type)
+											{
+												case 1:
+													elm = dhcpOffer.find("TransactionId");
+													if (elm != null)
+														elm.DefaultValue = new Variant(tmp);
+													
+													SendPacket(arp, true, true);
+													SendPacket(dhcpOffer, true, true);
+													
+													DhcpState = DhcpStates.SentOffer;
+													
+													break;
+												
+												case 3:
+													if (DhcpState == DhcpStates.None)
+													{
+														elm = dhcpNak.find("TransactionId");
+														if (elm != null)
+															elm.DefaultValue = new Variant(tmp);
+							
+														SendPacket(dhcpNak, true, true);
+														DhcpState = DhcpStates.FirstReply;
+													}
+													else
+													{
+														elm = dhcpAck.find("TransactionId");
+														if (elm != null)
+															elm.DefaultValue = new Variant(tmp);
+							
+														if (DhcpState == DhcpStates.SentOffer || DhcpState == DhcpStates.None)
+														{
+															SendPacket(dhcpAck, true, true);
+															
+															//return;
+															break;
+														}
+													}
+													
+													break;
+												
+												default:
+													break;
+											}
+											
+											break;
+										default:
+											break;
+									}
 								}
 							}
-						}
+							
+							break;
+					}
 				}
 			}
+			catch(SoftException se)
+			{
+				if(associated)
+					return;
 				
-			//	ReceivePacket(out packet, out off, out type, out subtype);
-			//	
-			//	if (type == 0)
-			//	{
-			//		switch (subtype)
-			//		{
-			//			case 0:
-			//				
-			//				if (wifiState == WifiState.AssociateResponse)
-			//				{
-			//					SendPacket(acknowledgement, false, false);
-			//					SendPacket(associationResponse, false, true);
-			//					
-			//					wifiState = WifiState.ActionRequest;
-			//				}
-			//				
-			//				break;
-			//			case 2:
-			//				SendPacket(reassociationResponse, true, true);
-			//				break;
-			//			case 4:
-			//				// Don't response to broadcast probe requests
-			//				if (wifiState == WifiState.ProbeResponse && !AreEqual(packet.Data, off + 4, 6, broadcast))
-			//				{
-			//					//logger.Debug("Sending probe response");
-			//					
-			//					SendPacket(probeResponse, true, true);
-			//				}
-			//				break;
-			//			case 11:
-			//				if (wifiState == WifiState.ProbeResponse)
-			//				{
-			//					// Stop beacon thread so we can manage the sequence number
-			//					beaconThreadStop = true;
-			//				
-			//					SendPacket(acknowledgement, false, false);
-			//					SendPacket(auth, false, true);
-			//					wifiState = WifiState.AssociateResponse;
-			//				}
-			//				break;
-			//			case 13:
-			//				SendPacket(acknowledgement, false, false);
-			//				
-			//				var t = -1;
-			//				
-			//				if (packet.Data.Length >= off + 25)
-			//					t = packet.Data[off + 25];
-			//				
-			//				// check if the action is a request
-			//				if (t == 0)
-			//				{
-			//					byte token  = 0x00;
-			//					if (packet.Data.Length >= off + 26)
-			//						token = packet.Data[off + 26];
-			//					
-			//					try
-			//					{
-			//						(((actionBlockAckRep["Body"] as DataElementContainer)
-			//							["FixedParameters"] as DataElementContainer)
-			//							["BlockAck"] as DataElementContainer)
-			//							["DialogToken"].DefaultValue = new Variant(token);
-			//					}
-			//					catch
-			//					{}
-			//				                         
-			//					SendPacket(actionBlockAckRep, false, false);
-			//					
-			//					break;
-			//				}
-			//				
-			//				break;
-			//			default:
-			//				break;
-			//		}
-			//	}
-			//	else if (type == 1)
-			//	{
-			//		switch (subtype)
-			//		{
-			//			case 8:
-			//				
-			//				if (packet.Data.Length >= off + 22)
-			//				{
-			//					try
-			//					{
-			//						var tmp = new byte[2];
-			//						System.Array.Copy(packet.Data, off + 20, tmp, 0, 2);
-			//						
-			//						(blockAck["MacHeaderFrame"] as DataElementContainer)
-			//							["BlockAckStartingSequenceControl"].DefaultValue = new Variant(tmp);
-			//					}
-			//					catch
-			//					{}
-			//				}
-			//
-			//				SendPacket(blockAck, false, false);
-			//				break;
-			//			
-			//			case 11:
-			//				SendPacket(clearToSend, false, false);
-			//				SendPacket(blockAck, false, false);
-			//				
-			//				break;
-			//			default:
-			//				break;
-			//		}
-			//	}
-			//	else if (type == 2)
-			//	{
-			//		DataElement elm;
-			//		switch (subtype)
-			//		{
-			//			case 4:
-			//				SendPacket(acknowledgement, false, false);
-			//				break;
-			//			
-			//			case 8:
-			//				SendPacket(acknowledgement, false, false);
-			//
-			//				var rdr = new BitReader(new BitStream(packet.Data));
-			//				rdr.BaseStream.Position = 32;
-			//				rdr.BigEndian();
-			//				var llc = rdr.ReadUInt16();
-			//
-			//				if (packet.Data.Length > off + 34 && llc == 0x888e)
-			//				{
-			//					if (sNonce == null)
-			//					{
-			//						if (packet.Data.Length >= off + 83)
-			//						{
-			//							sNonce = new byte[32];
-			//							System.Array.Copy(packet.Data, off + 51, sNonce, 0, 32);
-			//
-			//							wpa.GeneratePtk(source, target, aNonce, sNonce);
-			//						}
-			//
-			//						elm = keymessage3.find("WpaKeyMic");
-			//						DataElement Authentication = keymessage3.find("Authentication");
-			//						if (elm != null && Authentication != null)
-			//						{
-			//							var mac = new HMac(new Sha1Digest());
-			//							var ret = new byte[mac.GetMacSize()];
-			//							var bs = Authentication.Value;
-			//							var pos = bs.Position;
-			//
-			//							CalculateSequenceNumber(bs, off, (int)pos);
-			//                                    
-			//							var buf = new BitReader(bs).ReadBytes((int)bs.Length);
-			//							var key = new KeyParameter(wpa.Kck);
-			//
-			//
-			//							mac.Init(key);
-			//							mac.BlockUpdate(buf, 0, buf.Length);
-			//							mac.DoFinal(ret, 0);
-			//
-			//
-			//							var r = new byte[16];
-			//							System.Array.Copy(ret, 0, r, 0, 16);
-			//							elm.DefaultValue = new Variant(r);
-			//						}
-			//
-			//						SendPacket(keymessage3, false, true);
-			//					}
-			//
-			//					break;
-			//				}
-			//
-			//
-			//				if (llc != 0x0800)
-			//					break;
-			//
-			//				var dhcp = new Packet(packet.Data);
-			//				dhcp.ParseDhcp(26);
-			//
-			//				var tmp = new byte[4];
-			//				if (dhcp.packet.Length > 8)
-			//				{
-			//					System.Array.Copy(dhcp.packet, 4, tmp, 0, 4);
-			//				}
-			//
-			//				switch (dhcp.Type)
-			//				{
-			//					case 1:
-			//						elm = dhcpOffer.find("TransactionId");
-			//						if (elm != null)
-			//							elm.DefaultValue = new Variant(tmp);
-			//
-			//						SendPacket(arp, true, true);
-			//						SendPacket(dhcpOffer, true, true);
-			//
-			//						DhcpState = DhcpStates.SentOffer;
-			//
-			//						return;
-			//					case 3:
-			//						if (DhcpState == DhcpStates.None)
-			//						{
-			//							elm = dhcpNak.find("TransactionId");
-			//							if (elm != null)
-			//								elm.DefaultValue = new Variant(tmp);
-			//
-			//							SendPacket(dhcpNak, true, true);
-			//							DhcpState = DhcpStates.FirstReply;
-			//						}
-			//						else
-			//						{
-			//							elm = dhcpAck.find("TransactionId");
-			//							if (elm != null)
-			//								elm.DefaultValue = new Variant(tmp);
-			//
-			//							if (DhcpState == DhcpStates.SentOffer || DhcpState == DhcpStates.None)
-			//							{
-			//								SendPacket(dhcpAck, true, true);
-			//
-			//								return;
-			//							}
-			//						}
-			//
-			//						break;
-			//					default:
-			//						break;
-			//				}
-			//
-			//				break;
-			//			default:
-			//				break;
-			//		}
-			//	}
-			//
-			//	//timeout -= (int)sw.ElapsedMilliseconds;
-			//}
-
-			//sw.Stop();
-
-			//if (timeout < 0)
-			//	throw new SoftException("Unable to complete 802.11 association.");
+				associateException = se;
+				
+				// NOTE: This is a thread, don't exception!
+			}
 		}
 
 		void BeaconThread()
