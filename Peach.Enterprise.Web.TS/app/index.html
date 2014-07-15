@@ -5,25 +5,48 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title></title>
 
-	<link href="/Content/css/bootstrap.min.css" rel="stylesheet" />
-	<link rel="stylesheet" href="/Content/css/font-awesome.min.css" />
-	<link rel="stylesheet" href="/Content/css/jquery-ui-1.10.3.full.min.css" />
-	<link rel="stylesheet" href="/Content/css/ace-fonts.css" />
-	<link rel="stylesheet" href="/Content/css/ace.min.css" />
-	<link rel="stylesheet" href="/Content/css/ace-rtl.min.css" />
-	<link rel="stylesheet" href="/Content/css/ace-skins.min.css" />
-	<link rel="stylesheet" href="/Content/css/ng-grid.min.css" />
-	<link rel="stylesheet" href="/Content/css/visualizer.css" />
-	<!--
-	<link rel="stylesheet" href="/Content/css/tree-control-attribute.css" />
-	-->
-	<link href="/Content/css/kendo.common.min.css" rel="stylesheet" />
-	<link href="/Content/css/kendo.default.min.css" rel="stylesheet" />
+	<link rel="shortcut icon" href="../Content/images/favicon.ico">
 
-	<link rel="stylesheet" href="/Content/css/datepicker.css" />
-	<link rel="stylesheet" href="/Content/css/ui.jqgrid.css" />
+	<link href="../Content/css/bootstrap.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../Content/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="../Content/css/jquery-ui-1.10.3.full.min.css" />
+	<link href="../Content/css/tree-control.min.css" rel="stylesheet" />
+	<link href="../Content/css/tree-control-attribute.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../Content/css/ace-fonts.css" />
+	<link rel="stylesheet" href="../Content/css/ace.min.css" />
+	<link rel="stylesheet" href="../Content/css/ace-rtl.min.css" />
+	<link rel="stylesheet" href="../Content/css/ace-skins.min.css" />
+	<link rel="stylesheet" href="../Content/css/ng-grid.min.css" />
+	<link rel="stylesheet" href="../Content/css/visualizer.css" />
+
+
+	<link rel="stylesheet" href="../Content/css/datepicker.css" />
 
 	<link rel="stylesheet" href="css/app.css" />
+
+	<script type="text/javascript" src="../Scripts/jquery-2.1.1.min.js"></script>
+	<script src="../Content/js/bootstrap.min.js"></script>
+
+	<script type="text/javascript" src="../Scripts/angular.js"></script>
+	<script type="text/javascript" src="../Scripts/angular-poller.min.js"></script>
+	<script type="text/javascript" src="../Scripts/angular-resource.js"></script>
+	<script type="text/javascript" src="../Scripts/angular-route.js"></script>
+	<script type="text/javascript" src="../Scripts/angular-ui/ui-bootstrap.min.js"></script>
+	<script type="text/javascript" src="../Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+	<script src="../Content/js/angular-tree-control.min.js"></script>
+
+
+	<script src="../Scripts/ng-grid.min.js"></script>
+	<script src="../Scripts/ng-grid-flexible-height.js"></script>
+
+	<!-- <script src="../Content/js/line-chart.min.js"></script> -->
+	<script src="../Content/js/typeahead-bs2.min.js"></script>
+	<script src="../Content/js/ace-elements.min.js"></script>
+	<script src="../Content/js/ace.min.js"></script>
+	<script src="../Content/js/ace-extra.min.js"></script>
+	<script src="../Scripts/moment.min.js"></script>
+
+	<script src="js/all.js"></script>
 
 </head>
 <body class="skin-1" ng-controller="DashApp.MainController">
@@ -36,14 +59,14 @@
 		<div class="navbar-container" id="navbar-container">
 			<div class="navbar-header pull-left">
 				<small>
-					<img src="/Content/images/peachlogo.png" height="50" />
+					<img src="../Content/images/peachlogo.png" height="50" />
 				</small>
 			</div><!-- /.navbar-header -->
 
 			<div class="navbar-header pull-right" id="breadcrumbs">
 				<ul class="nav ace-nav" style="background: none">
-					<li data-original-title="{{vm.disabledTooltip}}" class="tooltip-warning" data-rel="tooltip" data-placement="left">
-						<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color: transparent; font-size: 20px" ng-class="{disabled: vm.job != undefined}">
+					<li data-original-title="{{vm.jobRunningTooltip}}" class="tooltip-warning" data-rel="tooltip" data-placement="left">
+						<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color: transparent; font-size: 20px" ng-class="{disabled: vm.CanSelectPit == false}">
 							<span>
 								{{vm.pit.name || '(none)'}}
 							</span>
@@ -89,7 +112,7 @@
 							<span class="menu-text"> Dashboard </span>
 						</a>
 					</li>
-
+					<!--
 					<li ng-class="{active: vm.location.path() == '/metrics'}">
 						<a href="#/metrics">
 							<i class="icon-signal"></i>
@@ -103,7 +126,8 @@
 							<span class="menu-text"> Visualizer </span>
 						</a>
 					</li>
-					<li ng-class="{active: vm.location.path() == '/faults'}">
+					-->
+					<li ng-class="{active: vm.location.path() == '/faults','disabled': vm.CanViewFaults == false}">
 						<a href="#/faults">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
@@ -112,89 +136,87 @@
 							</span>
 						</a>
 					</li>
-					<li class="tooltip-warning" data-original-title="{{vm.disabledTooltip}}" data-rel="tooltip" data-placement="right" ng-class="{'disabled': vm.job != undefined}">
-						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.job != undefined}">
+					<li class="tooltip-warning" data-original-title="{{vm.jobRunningTooltip}}" data-rel="tooltip" data-placement="right" ng-class="{'disabled': vm.CanConfigurePit == false}">
+						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.CanConfigurePit == false}">
 							<i class="icon-desktop"></i>
 							<span class="menu-text"> Configure Pit </span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
-						<ul class="submenu" style="display: none;" ng-controller="DashApp.WizardController">
-							<li ng-class="{active: vm.location.path() == '/configurator/intro'}">
+						<ul class="submenu" style="display: none;">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/intro'}">
 								<a href="#/configurator/intro">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.introclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IntroComplete}"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/setvars'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/setvars'}">
 								<a href="#/configurator/setvars">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.setvarsclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.SetVarsComplete}"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/fault'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/fault'}">
 								<a href="#/configurator/fault">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.faultclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.FaultComplete}"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/data'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/data'}">
 								<a href="#/configurator/data">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.dataclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.DataComplete}"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/auto'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/auto'}">
 								<a href="#/configurator/auto">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.autoclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.AutoComplete}"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/test'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/test'}">
 								<a href="#/configurator/test">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.testclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.TestComplete}"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/configurator/done'}">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/done'}">
 								<a href="#/configurator/done">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="vm.doneclass"></i>
+									<i ng-class="{'icon-ok-sign green': vm.DoneComplete}"></i>
 									Done
 								</a>
 							</li>
 						</ul>
 					</li>
 					<li>
-						<a href="#" class="dropdown-toggle">
+						<a href="/docs" target="_blank">
 							<i class="icon-book"></i>
 							<span class="menu-text"> Documentation </span>
-
-							<b class="arrow icon-angle-down"></b>
 						</a>
+						<!--
+							<ul class="submenu">
+								<li>
+									<a href="#">
+										<i class="icon-double-angle-right"></i>
+										Chapter 1
+									</a>
+								</li>
 
-						<ul class="submenu">
-							<li>
-								<a href="#">
-									<i class="icon-double-angle-right"></i>
-									Chapter 1
-								</a>
-							</li>
-
-							<li>
-								<a href="#">
-									<i class="icon-double-angle-right"></i>
-									Chapter 2
-								</a>
-							</li>
-						</ul>
+								<li>
+									<a href="#">
+										<i class="icon-double-angle-right"></i>
+										Chapter 2
+									</a>
+								</li>
+							</ul>
+						-->
 					</li>
-
 					<li>
 						<a href="https://forums.peachfuzzer.com" target="_blank">
 							<i class="icon-bookmark"></i>
@@ -219,35 +241,6 @@
 
 		</div><!-- /.main-container -->
 	</div>
-
-	<script type="text/javascript" src="/Scripts/jquery-2.1.1.min.js"></script>
-
-	<script type="text/javascript" src="/Scripts/angular.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-poller.min.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-resource.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-route.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-local-storage.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap.min.js"></script>
-	<script type="text/javascript" src="/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
-	<script type="text/javascript" src="/Scripts/i18n/angular-locale_en-us.js"></script>
-
-	<script src="/Content/js/kendo.web.min.js"></script>
-	<script src="/Content/js/angular-kendo.min.js"></script>
-
-
-	<script src="/Content/js/bootstrap.min.js"></script>
-	<!--
-	<script src="/Content/js/typeahead-bs2.min.js"></script>
-	<script src="/Content/js/ace-extra.min.js"></script>
-		-->
-	<script src="/Scripts/ng-grid.min.js"></script>
-	<script src="/Content/js/line-chart.min.js"></script>
-
-	<script src="/Content/js/ace-elements.min.js"></script>
-	<script src="/Content/js/ace.min.js"></script>
-
-
-	<script src="js/all.js"></script>
 
 	<script type="text/javascript">
 		jQuery(function ($) {

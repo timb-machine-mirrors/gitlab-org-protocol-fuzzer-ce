@@ -1,12 +1,18 @@
 ﻿<div>
-	<label>{{vm.currentQuestion.q}}</label>
-	<div>
-		<input ng-model="vm.currentQuestion.value"
-					 step="1" min="{{vm.currentQuestion.rangeMin}}"
-					 max="{{vm.currentQuestion.rangeMax}}"
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
+	<label>{{vm.currentQuestion.q}} (value must be a number between {{vm.currentQuestion.rangeMin}} and {{vm.currentQuestion.rangeMax}})</label>
+	<div class="dropdown" is-open="vm.isDefaultsOpen">
+		<input ng-model="vm.currentQuestion.value" ng-enter="vm.next()" class="dropdown-toggle" ng-enter="vm.next()"
+					 step="1" ng-min="vm.currentQuestion.rangeMin"
+					 ng-max="vm.currentQuestion.rangeMax"
 					 type="number"
-					 required
+					 ng-required="vm.currentQuestion.required"
 					 integer />
+		<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
+			<li ng-repeat="default in vm.currentQuestion.defaults">
+				<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
+			</li>
+		</ul>
 	</div>
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-prev" ng-click="vm.back()">
@@ -19,4 +25,3 @@
 		</button>
 	</div>
 </div>
-

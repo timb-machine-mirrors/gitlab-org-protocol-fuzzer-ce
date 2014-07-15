@@ -30,9 +30,10 @@ namespace Peach.Enterprise.Runtime
 		string _status = "";
 		string _eta = "";
 
-		public ConsoleWatcher() : base()
+		public ConsoleWatcher(string titleSuffix = "") : base()
 		{
 			_title += Assembly.GetExecutingAssembly().GetName().Version;
+			_title += titleSuffix;
 		}
 
 		protected override void Engine_ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault [] faultData)

@@ -482,7 +482,7 @@ namespace Peach.Enterprise.Test
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 0;
-			config.rangeStop = 1;
+			config.rangeStop = 500;
 			config.pitFile = Path.GetFileName(pitName);
 			config.runName = testName ?? "Default";
 
@@ -502,6 +502,7 @@ namespace Peach.Enterprise.Test
 			}
 		}
 
+#if DISABLED
 		/*
 		 * Image Tests
 		 */
@@ -748,5 +749,6 @@ namespace Peach.Enterprise.Test
 		{
 			TestPit("../../../../pits/pro", "Net/VXLAN.xml", "Default");
 		}
+#endif
 	}
 }

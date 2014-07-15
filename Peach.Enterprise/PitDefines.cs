@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -40,12 +41,12 @@ namespace Peach.Enterprise
 				get { return new string[0]; }
 			}
 
-			public virtual long? Min
+			public virtual int? Min
 			{
 				get { return null; }
 			}
 
-			public virtual ulong? Max
+			public virtual uint? Max
 			{
 				get { return null; }
 			}
@@ -73,22 +74,22 @@ namespace Peach.Enterprise
 		public class RangeDefine : Define
 		{
 			[XmlAttribute("min")]
-			public long MinValue { get; set; }
+			public int MinValue { get; set; }
 
 			[XmlAttribute("max")]
-			public ulong MaxValue { get; set; }
+			public uint MaxValue { get; set; }
 
 			public override WebServices.Models.ConfigType ConfigType
 			{
 				get { return WebServices.Models.ConfigType.Range; }
 			}
 
-			public override long? Min
+			public override int? Min
 			{
 				get { return MinValue; }
 			}
 
-			public override ulong? Max
+			public override uint? Max
 			{
 				get { return MaxValue; }
 			}
@@ -203,6 +204,7 @@ namespace Peach.Enterprise
 				Defines = new List<Define>();
 			}
 
+			[XmlIgnore]
 			public abstract Peach.Core.Platform.OS Platform { get; }
 
 			[XmlElement("String", Type = typeof(StringDefine))]
@@ -219,6 +221,7 @@ namespace Peach.Enterprise
 
 		public class None : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.None; }
@@ -227,6 +230,7 @@ namespace Peach.Enterprise
 
 		public class Windows : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Windows; }
@@ -235,6 +239,7 @@ namespace Peach.Enterprise
 
 		public class OSX : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.OSX; }
@@ -243,6 +248,7 @@ namespace Peach.Enterprise
 
 		public class Linux : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Linux; }
@@ -251,6 +257,7 @@ namespace Peach.Enterprise
 
 		public class Unix : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Unix; }
@@ -259,6 +266,7 @@ namespace Peach.Enterprise
 
 		public class All : Collection
 		{
+			[XmlIgnore]
 			public override Peach.Core.Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.All; }
@@ -309,6 +317,38 @@ namespace Peach.Enterprise
 				.Where(a => a.Platform.HasFlag(os))
 				.SelectMany(a => a.Defines)
 				.ToList();
+		}
+
+		#endregion
+
+		#region Evaluate
+
+		public static List<KeyValuePair<string, string>> Evaluate(List<KeyValuePair<string, string>> defs)
+		{
+			var ret = new List<KeyValuePair<string, string>>(defs);
+
+			var re = new Regex("##(\\w+?)##");
+
+			var evaluator = new MatchEvaluator(delegate(Match m)
+			{
+				var key = m.Groups[1].Value;
+				var val = ret.Where(_ => _.Key == key).Select(_ => _.Value).FirstOrDefault();
+
+				return val ?? m.Groups[0].Value;
+			});
+
+			for (var i = 0; i < ret.Count;)
+			{
+				var oldVal = ret[i].Value;
+				var newVal = re.Replace(oldVal, evaluator);
+
+				if (oldVal != newVal)
+					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
+				else
+					++i;
+			}
+
+			return ret;
 		}
 
 		#endregion

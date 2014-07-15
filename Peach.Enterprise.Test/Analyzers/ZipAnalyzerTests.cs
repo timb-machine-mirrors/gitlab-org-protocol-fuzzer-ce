@@ -19,8 +19,8 @@ namespace Peach.Enterprise.Test.Analyzers
 
 			using (var z = new ZipFile())
 			{
-				z.AddEntry("foo", "Hello");
-				z.AddEntry("bar", "World");
+				z.AddEntry("foo", new MemoryStream(Encoding.ASCII.GetBytes("Hello")));
+				z.AddEntry("bar", new MemoryStream(Encoding.ASCII.GetBytes("World")));
 
 				z.Save(bs);
 			}
@@ -56,8 +56,8 @@ namespace Peach.Enterprise.Test.Analyzers
 
 			using (var z = new ZipFile())
 			{
-				z.AddEntry("foo.xml", "<Elem>Hello</Elem>");
-				z.AddEntry("bar.bin", "World");
+				z.AddEntry("foo.xml", new MemoryStream(Encoding.ASCII.GetBytes("<Elem>Hello</Elem>")));
+				z.AddEntry("bar.bin", new MemoryStream(Encoding.ASCII.GetBytes("World")));
 
 				z.Save(bs);
 			}

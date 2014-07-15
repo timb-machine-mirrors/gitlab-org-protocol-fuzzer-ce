@@ -1,0 +1,45 @@
+﻿<div ng-switch="vm.isFaultSelected" style="min-height:387px">
+	<h3 ng-switch-when="false" style="text-align: center">No Fault selected. Return to the Summary tab.</h3>
+	<table ng-switch-when="true">
+		<tr>
+			<td>Iteration:</td>
+			<td>{{vm.currentFault.iteration}}</td>
+		</tr>
+		<tr>
+			<td>Title:</td>
+			<td>{{vm.currentFault.title}}</td>
+		</tr>
+		<tr>
+			<td>When:</td>
+			<td>{{vm.currentFault.timeStamp  | date:'M/d/yy h:mma'}}</td>
+		</tr>
+		<tr>
+			<td>Source:</td>
+			<td>{{vm.currentFault.source}}</td>
+		</tr>
+		<tr>
+			<td>Risk:</td>
+			<td>{{vm.currentFault.exploitability}}</td>
+		</tr>
+		<tr>
+			<td>Major Hash:</td>
+			<td>{{vm.currentFault.majorHash}}</td>
+		</tr>
+		<tr>
+			<td>Minor Hash:</td>
+			<td>{{vm.currentFault.minorHash}}</td>
+		</tr>
+		<tr>
+			<td colspan="2">Description:</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div style="min-height: 213px; overflow-y: auto">
+					<pre>
+					{{vm.currentFault.description}}
+				</pre>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>

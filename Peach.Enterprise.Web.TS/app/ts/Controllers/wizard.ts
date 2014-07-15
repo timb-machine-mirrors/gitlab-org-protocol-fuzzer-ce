@@ -2,14 +2,15 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/angularjs/angular-local-storage.d.ts" />
-/// <reference path="../../../scripts/typings/angularjs/angular-route.d.ts" />
+/// <reference path="../../../Scripts/typings/angularjs/angular-local-storage.d.ts" />
+/// <reference path="../../../Scripts/typings/angularjs/angular-route.d.ts" />
 
 module DashApp {
 	"use strict";
 
 	import W = DashApp.Models.Wizard;
 	import P = DashApp.Models.Peach;
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 	
 	export interface IWizardParams extends ng.route.IRouteParamsService {
 		step: string;
@@ -25,7 +26,24 @@ module DashApp {
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		//#endregion
 
+		//#region ctor
+		static $inject = ["$scope", "$routeParams", "$location", "peachService", "pitConfiguratorService"];
+
+		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
+			this.params = $routeParams;
+
+			$scope.vm = this;
+			this.location = $location;
+			this.peach = peachService;
+			this.pitConfigSvc = pitConfiguratorService;
+
+			if (this.params.step != undefined)
+				this.refreshData($scope);
+		}
+		//#endregion
+
 		//#region Public Properties
+		public isDefaultsOpen: boolean = false;
 
 		public get qa(): W.Question[] {
 			if (this.pitConfigSvc != undefined)
@@ -51,87 +69,50 @@ module DashApp {
 		public currentQuestion: W.Question;
 		public stepNum: number;
 
-		private static _introclass: string = "";
-		get introclass(): string {
-			return WizardController._introclass;
-		}
+		public dataGridOptions: ngGrid.IGridOptions = {
+			data: "vm.DataMonitors",
+			columnDefs: [
+				{ field: "description", displayName: "" },
+				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		private static _setvarsclass: string = "";
-		get setvarsclass(): string {
-			return WizardController._setvarsclass;
-		}
+		public autoGridOptions: ngGrid.IGridOptions = {
+			data: "vm.AutoMonitors",
+			columnDefs: [
+				{ field: "description", displayName: "" },
+				{ cellTemplate: "../../partials/monitor-cell-template.html" }
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		private static _faultclass: string = "";
-		get faultclass(): string {
-			return WizardController._faultclass;
-		}
+		public definesGridOptions: ngGrid.IGridOptions = {
+			data: "vm.DefinesSimple",
+			columnDefs: [
+				{ field: "name", displayName: "Name" },
+				{ field: "key", displayName: "Key" },
+				{ field: "value", displayName: "Value" },
+				{ cellTemplate: "../../partials/defines-cell-template.html" }
+			],
+			enableCellSelection: false,
+			enableRowSelection: false,
+			multiSelect: false,
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
-		private static _dataclass: string = "";
-		get dataclass(): string {
-			return WizardController._dataclass;
-		}
-
-		private static _autoclass: string = "";
-		get autoclass(): string {
-			return WizardController._autoclass;
-		}
-
-		private static _testclass: string = "";
-		get testclass(): string {
-			return WizardController._testclass;
-		}
-
-		private static _doneclass: string = "";
-		get doneclass(): string {
-			return WizardController._doneclass;
-		}
-
-		public get dataGridOptions(): any {
-			return {
-				data: "vm.DataMonitors",
-				columnDefs: [
-					{ field: "description", displayName: "" },
-					{ cellTemplate: "../../partials/monitor-cell-template.html" }
-				]
-			};
-		}
-
-		public get autoGridOptions(): any {
-			return {
-				data: "vm.AutoMonitors",
-				columnDefs: [
-					{ field: "description", displayName: "" },
-					{ cellTemplate: "../../partials/monitor-cell-template.html" }
-				]
-			};
-		}
-
-		public get definesGridOptions(): any {
-			return {
-				data: "vm.DefinesSimple",
-				columnDefs: [
-					{ field: "key", displayName: "Name" },
-					{ field: "value", displayName: "Value" },
-					{ cellTemplate: "../../partials/defines-cell-template.html"}
-				],
-				enableCellSelection: false,
-				enableRowSelection: false,
-				multiSelect: false
-			};
-		}
-
-		public get definesGridOptions1(): any {
-			return {
-				data: "vm.DefinesSimple",
-				columnDefs: [
-					{ field: "key", displayName: "Name" },
-					{ field: "value", displayName: "Value" }
-				],
-				enableCellSelection: false,
-				enableRowSelection: false,
-				multiSelect: false
-			};
-		}
+		public definesGridOptions1: ngGrid.IGridOptions = {
+			data: "vm.DefinesSimple",
+			columnDefs: [
+				{ field: "name", displayName: "Name" },
+				{ field: "key", displayName: "Key" },
+				{ field: "value", displayName: "Value" }
+			],
+			enableCellSelection: false,
+			enableRowSelection: false,
+			multiSelect: false,
+			plugins: [new ngGridFlexibleHeightPlugin()]
+		};
 
 		public get FaultMonitors(): W.Agent{
 			if (this.pitConfigSvc != undefined)
@@ -156,51 +137,34 @@ module DashApp {
 
 		public get DefinesSimple(): any[] {
 			if (this.pitConfigSvc != undefined) 
-				return this.pitConfigSvc.Defines.KeyValuePairs;
+				return this.pitConfigSvc.Defines.config;
 			else
-				return undefined;
+				return [];
 		}
 
 		public get title(): string {
 			switch (this.params.step) {
-				case "setvars":
+				case StepNames.SetVars:
 					return "Set Variables";
-				case "fault":
+				case StepNames.Fault:
 					return "Fault Detection";
-				case "data":
+				case StepNames.Data:
 					return "Data Collection";
-				case "auto":
+				case StepNames.Auto:
 					return "Automation";
 				default:
-					return "";
+					return this.params.step;
 			}
 		}
 
-		//#endregion
-
-		//#region ctor
-		static $inject = ["$scope", "$routeParams", "$location", "peachService", "pitConfiguratorService"];
-
-		constructor($scope: ViewModelScope, $routeParams: IWizardParams, $location: ng.ILocationService, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
-			this.params = $routeParams;
-
-			$scope.vm = this;
-			this.location = $location;
-			this.peach = peachService;
-			this.pitConfigSvc = pitConfiguratorService;
-
-			if(this.params.step != undefined)
-				this.refreshData($scope);
+		public get TestComplete(): boolean {
+			return this.pitConfigSvc.TestComplete;
 		}
+
 		//#endregion
+
 
 		//#region Public Methods
-		public insertDefine(row) {
-			if (this.currentQuestion.value == undefined) {
-				this.currentQuestion.value = "";
-			}
-			this.currentQuestion.value += "##" + row.getProperty("key") + "##";
-		}
 
 		public getTemplateUrl(): string {
 			if (this.currentQuestion != undefined) {
@@ -220,15 +184,21 @@ module DashApp {
 				this.currentQuestion = <W.Question>$.grep(this.qa, function (e) {return e.id == 0 })[0];
 			}
 			else {
+				this.setThisStepIncomplete();
+
 				var q = this.currentQuestion;
-				if (q.id != 0 && q.type != W.QuestionTypes.Jump) {
+				if (q.type != W.QuestionTypes.Jump) { 
 					// push this question id onto the path stack
 					this.questionPath.push(q.id);
 				}
 
 				//store the value in the state bag
 				if (q.key != undefined) {
-					this.pitConfigSvc.StateBag.s(q.key, q.value);
+					if (q.value == undefined && q.required == false) { 
+					}
+					else {
+						this.pitConfigSvc.StateBag.s(q.key, q.value);
+					}
 				}
 
 				var nextid: number;
@@ -239,16 +209,20 @@ module DashApp {
 					{
 						if (e.value == undefined && e.next != undefined)
 							return e.next.toString() == q.value.toString();
-						else if (e.value != undefined)
+						else if (e.value != undefined && q.value != undefined)
 							return e.value.toString() == q.value.toString();
 						else
 							return false;
 					})[0];
 
-					if (choice == undefined)
-						nextid = q.choice[parseInt(q.value)].next;
-					else
+					if (choice == undefined) {
+						if (q.value != undefined) {
+							nextid = q.choice[parseInt(q.value)].next;
+						}
+					}
+					else {
 						nextid = choice.next;
+					}
 				}
 				else {
 					// get the next question
@@ -259,20 +233,20 @@ module DashApp {
 					this.currentQuestion = new W.Question();
 					this.currentQuestion.type = W.QuestionTypes.Done;
 					switch (this.params.step) {
-						case "setvars":
+						case StepNames.SetVars:
 							this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
 							this.currentQuestion.qref = "/partials/setvars-done.html";
 							break;
-						case "fault":
+						case StepNames.Fault:
 							this.pitConfigSvc.FaultMonitors = this.findMonitors();
 							this.currentQuestion.qref = "/partials/fault-done.html";
 							break;
-						case "data":
+						case StepNames.Data:
 							this.pitConfigSvc.DataMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/data-done.html";
 							break;
-						case "auto":
-							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.DataMonitors.concat(this.findMonitors());
+						case StepNames.Auto:
+							this.pitConfigSvc.AutoMonitors = this.pitConfigSvc.AutoMonitors.concat(this.findMonitors());
 							this.currentQuestion.qref = "/partials/auto-done.html";
 							break;
 					}
@@ -281,7 +255,7 @@ module DashApp {
 					this.currentQuestion = <W.Question>$.grep(this.qa, function (e) { return e.id == nextid; })[0];
 				}
 
-			}
+			} 
 			
 			//get value from the state bag if necessary
 			if (this.currentQuestion.value == undefined) {
@@ -324,17 +298,17 @@ module DashApp {
 					break;
 			}
 
-			this.resetStepClass();
 		}
 
 		public back()	{
 			// pop the path and get the question
 
 			var previousid = 0;
-			if(this.questionPath.length > 1)
+			if(this.questionPath.length > 0)
 				previousid = this.questionPath.pop();
 
 			this.currentQuestion = $.grep(this.qa, function (e) { return e.id == previousid; })[0];
+
 			if (this.currentQuestion.type == W.QuestionTypes.Intro)
 				this.stepNum = 1;
 			else if (this.currentQuestion.type == W.QuestionTypes.Done)
@@ -342,24 +316,28 @@ module DashApp {
 			else
 				this.stepNum = 2;
 
-			this.resetStepClass();
+		}
+
+		//#region Step Functions
+		public completeIntro() {
+			this.pitConfigSvc.IntroComplete = true;
+			this.location.path("/configurator/setvars");
+		}
+
+		public submitSetVarsInfo() {
+			this.pitConfigSvc.SetVarsComplete = true;
+			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
+			this.location.path("/configurator/fault");
 		}
 
 		public restartFaultDetection() {
 			this.pitConfigSvc.FaultMonitors = [];
 			this.currentQuestion = undefined;
-			this.resetStepClass();
 			this.next();
 		}
 
-		public submitSetVarsInfo() {
-			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
-			WizardController._setvarsclass = W.ConfiguratorStepClasses.Complete;
-			this.location.path("/configurator/fault");
-		}
-
 		public submitFaultInfo() {
-			WizardController._faultclass = W.ConfiguratorStepClasses.Complete;
+			this.pitConfigSvc.FaultMonitorsComplete = true;
 			this.location.path("/configurator/data");
 		}
 
@@ -369,12 +347,17 @@ module DashApp {
 		}
 
 		public submitDataInfo() {
-			WizardController._dataclass = W.ConfiguratorStepClasses.Complete;
+			this.pitConfigSvc.DataMonitorsComplete = true;
 			this.location.path("/configurator/auto");
 		}
 
+		public addNewAutoInfo() {
+			this.currentQuestion = undefined;
+			this.next();
+		}
+
 		public submitAutoInfo() {
-			WizardController._autoclass = W.ConfiguratorStepClasses.Complete;
+			this.pitConfigSvc.AutoMonitorsComplete = true;
 			this.location.path("/configurator/test");
 		}
 
@@ -389,27 +372,71 @@ module DashApp {
 			}
 		}
 
+		public Done() {
+			this.pitConfigSvc.DoneComplete = true;
+			this.location.path("/");
+		}
+
 		//#endregion
 
+
+		public get CanStart() {
+			return (this.pitConfigSvc.CanStartJob);
+		}
+
+		public Start() {
+			this.pitConfigSvc.StartJob();
+			this.Done();
+		}
+
+		public insertDefine(row) {
+			if (this.currentQuestion.value == undefined) {
+				this.currentQuestion.value = "";
+			}
+			this.currentQuestion.value += "##" + row.getProperty("key") + "##";
+		}
+
+		//#endregion
+
+
 		//#region private functions
+		private setThisStepIncomplete() {
+			switch (this.params.step) {
+				case StepNames.SetVars:
+					this.pitConfigSvc.SetVarsComplete = false;
+					break;
+				case StepNames.Fault:
+					this.pitConfigSvc.FaultMonitorsComplete = false;
+					break;
+				case StepNames.Data:
+					this.pitConfigSvc.DataMonitorsComplete = false;
+					break;
+				case StepNames.Auto:
+					this.pitConfigSvc.AutoMonitorsComplete = false;
+					break;
+				default:
+					return;
+			}
+		}
 
 		private refreshData(scope: ViewModelScope) {
 			var res: ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
 			switch (this.params.step) {
-				case "setvars":
-					this.pitConfigSvc.Defines = undefined;
-					res = this.peach.GetDefines(this.pitConfigSvc.Pit.pitUrl);
+				case StepNames.SetVars:
+					this.pitConfigSvc.QA = this.pitConfigSvc.Defines.ToQuestions(); 
+					this.next();
+					return;
 					break;
-				case "fault":
+				case StepNames.Fault:
 					this.pitConfigSvc.FaultMonitors = [];
 					res = this.peach.GetFaultQA();
 					break;
-				case "data":
+				case StepNames.Data:
 					this.pitConfigSvc.DataMonitors = [];
 					res = this.peach.GetDataQA();
 					break;
-				case "auto":
+				case StepNames.Auto:
 					this.pitConfigSvc.AutoMonitors = [];
 					res = this.peach.GetAutoQA();
 					break;
@@ -417,7 +444,6 @@ module DashApp {
 					return;
 			}
 
-			var peachData;
 			res.get((data) => {
 				this.pitConfigSvc.LoadData(data);
 				this.next();
@@ -429,11 +455,12 @@ module DashApp {
 		}
 
 		public findMonitors(): W.Agent[] {
-			var that = this;
 			var foundMonitors: W.Monitor[] = [];
-			foundMonitors = $.grep(this.monitors, function (m) {
-				var w = $.grep(m.path, function (p) {
-					return that.questionPath.indexOf(p) >= 0;
+			var agents: W.Agent[] = [];
+
+			foundMonitors = $.grep(this.monitors, (m) => {
+				var w = $.grep(m.path, (p) => {
+					return this.questionPath.indexOf(p) >= 0;
 				});
 
 				return (w.length == m.path.length);
@@ -441,58 +468,52 @@ module DashApp {
 
 			if (foundMonitors.length > 0) {
 				for (var m = 0; m < foundMonitors.length; m++) {
-					for (var i = 0; i < foundMonitors[m].map.length; i++) {
-						if (this.pitConfigSvc.StateBag.containsKey(foundMonitors[m].map[i].key)) {
-							var stateval = this.pitConfigSvc.StateBag.g(foundMonitors[m].map[i].key);
-							foundMonitors[m].map[i].value = stateval;
+					var map = foundMonitors[m].map;
+					foundMonitors[m].map = [];
+					for (var i = 0; i < map.length; i++) {
+
+						if (this.pitConfigSvc.StateBag.containsKey(map[i].key)) {
+							var stateval = this.pitConfigSvc.StateBag.g(map[i].key);
+							map[i].value = stateval;
+							foundMonitors[m].map.push(map[i]);
 						}
 					}
 				}
-			}
+				var islocal: boolean = this.pitConfigSvc.StateBag.g("IsLocal");
+				var agent: W.Agent = new W.Agent();
+				if (islocal)
+					agent.agentUrl = "local://";
+				else
+					agent.agentUrl = "tcp://" + this.pitConfigSvc.StateBag.g("AgentUrl");
 
-			var agent: W.Agent = new W.Agent();
-			agent.agentUrl = this.pitConfigSvc.StateBag.g("AgentUrl");
-			if (agent.agentUrl == undefined)
-				agent.agentUrl = "local://";
-			else
-				agent.agentUrl = "tcp://" + agent.agentUrl;
+				agent.monitors = foundMonitors;
 
-			agent.monitors = foundMonitors;
-			
-			for (var i = 0; i < agent.monitors.length; i++) {
-				if (agent.monitors[i].description != undefined) {
-					agent.description += agent.monitors[i].description.replace(/\{\{|\}\}|\{(\w+)\}/g, (a, b) => {
-						if (b == "AgentUrl")
-							return agent.agentUrl;
-						else
-							return this.pitConfigSvc.StateBag.g(b);
-					}) + "\n";
+				for (var i = 0; i < agent.monitors.length; i++) {
+					if (agent.monitors[i].description != undefined) {
+						agent.description += agent.monitors[i].description.replace(/\{\{|\}\}|\{(\w+)\}/g, (a, b) => {
+							if (b == "AgentUrl")
+								return agent.agentUrl;
+							else
+								return this.pitConfigSvc.StateBag.g(b);
+						}) + "\n";
+					}
 				}
+
+				agents.push(agent);
 			}
-			
-			var agents: W.Agent[] = [];
-			agents.push(agent);
 
 			return agents;
 		}
-
-		private resetStepClass() {
-			switch (this.params.step) {
-				case "setvars":
-					WizardController._setvarsclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "fault":
-					WizardController._faultclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "data":
-					WizardController._dataclass = W.ConfiguratorStepClasses.None;
-					break;
-				case "auto":
-					WizardController._autoclass = W.ConfiguratorStepClasses.None;
-					break;
-			}
-		}
-
 		//#endregion
+	}
+
+	export class StepNames {
+		static Intro: string = "intro";
+		static SetVars: string = "setvars";
+		static Fault: string = "fault";
+		static Data: string = "data";
+		static Auto: string = "auto";
+		static Test: string = "test";
+		static Done: string = "done";
 	}
 }

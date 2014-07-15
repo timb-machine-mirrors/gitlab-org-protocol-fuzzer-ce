@@ -1,14 +1,15 @@
 ﻿/// <reference path="../Models/wizard.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
 
 module DashApp {
+	"use strict";
 
 	import P = Models.Peach;
 
 	export class MainController {
-		private peachService: Services.IPeachService;
+		private peachSvc: Services.IPeachService;
 		private modal: ng.ui.bootstrap.IModalService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		private poller: any;
@@ -28,71 +29,163 @@ module DashApp {
 				return undefined;
 		}
 
-		public get disabledTooltip(): string {
-			if (this.job == undefined)
-				return "";
-			else
+		public get jobRunningTooltip(): string {
+			if (this.IsJobRunning)
 				return "Disabled while running a Job";
+			else
+				return "";
+		}
+
+		public get jobNotRunningTooltip(): string {
+			if (this.IsJobRunning)
+				return "Disabled while not running a Job";
+			else
+				return "";
 		}
 
 		public location: ng.ILocationService;
-		
+
+		public get IntroComplete() {
+			return this.pitConfigSvc.IntroComplete;
+		}
+
+		public get SetVarsComplete() {
+			return this.pitConfigSvc.SetVarsComplete;
+		}
+
+		public get FaultComplete() {
+			return this.pitConfigSvc.FaultMonitorsComplete;
+		}
+
+		public get AutoComplete() {
+			return this.pitConfigSvc.AutoMonitorsComplete;
+		}
+
+		public get DataComplete() {
+			return this.pitConfigSvc.DataMonitorsComplete;
+		}
+
+		public get TestComplete() {
+			return this.pitConfigSvc.TestComplete;
+		}
+
+		public get DoneComplete() {
+			return this.pitConfigSvc.DoneComplete;
+		}
+
+		public get CanSelectPit() {
+			if (this.job == undefined || this.job.status == P.JobStatuses.Stopped) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public get CanConfigurePit() {
+			if ((this.job == undefined || this.job.status == P.JobStatuses.Stopped) && (this.pit != undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public get IsJobRunning() {
+			if (this.job != undefined && this.job.status != P.JobStatuses.Stopped) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public get CanViewFaults() {
+			return (this.job != undefined);
+		}
+
+
 		//#endregion
 
 
-		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService"];
+		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService","$http"];
 
-		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
+		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService, $http: ng.IHttpService) {
 			$scope.vm = this;
 
 			this.modal = $modal;
-			this.peachService = peachService;
+			this.peachSvc = peachService;
 			this.location = $location;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.poller = poller;
 
-			this.peachService.GetJobs((data: P.Job[]) => {
-				if (data.length > 0) {
-					this.pitConfigSvc.Job = new P.Job(data[0]);
+
+			this.initialize();
+		}
+
+		private initialize() {
+			this.peachSvc.GetJob((job: P.Job) => {
+				if (job != undefined) {
+					this.pitConfigSvc.Job = job; 
 				}
 				else {
 					this.showPitSelector();
 				}
 			});
-
-
 		}
 
 		public showPitSelector() {
 			this.modal.open({
 				templateUrl: "../partials/pitlibrary.html",
 				keyboard: false,
-				backdrop: 'static',
+				backdrop: "static",
 				controller: PitLibraryController,
 				resolve: {
 					peachsvc: () => {
-						return this.peachService;
+						return this.peachSvc;
 					}
 				}
 			})
 			.result.then((pitUrl: string) => {
-				this.peachService.GetPit(pitUrl, (data: P.Pit) =>
+				this.peachSvc.GetPit(pitUrl, (data: P.Pit) =>
 				{
-					this.pitConfigSvc.Pit = data;
+					if (data.locked) {
+						this.showPitCopier(data);
+					}
+					else {
+						this.pitConfigSvc.Pit = new P.Pit(data);
+						if (data.configured == false) {
+							this.location.path("#/configurator/intro");
+						}
+					}
 				});
+			});
+		}
+
+		public showPitCopier(pit: P.Pit) {
+			this.modal.open({
+				templateUrl: "../partials/copy-pit.html",
+				keyboard: false,
+				backdrop: "static",
+				controller: CopyPitController,
+				resolve: {
+					pit: () => {
+						return pit;
+					},
+					libraryUrl: () => {
+						return this.pitConfigSvc.UserPitLibrary;
+					},
+					peachSvc: () => {
+						return this.peachSvc;
+					}
+				}
+			}).result.then((pit: P.Pit) => {
+				this.pitConfigSvc.Pit = new P.Pit(pit);
+				if (pit.configured == false) {
+					this.location.path("/configurator/intro");
+				}
 			});
 		}
 	}
 
 	export interface ViewModelScope extends ng.IScope {
 		vm: any;
-	}
-
-	export class StorageStrings {
-		static Pit = "pit";
-		static FaultMonitors = "faultMonitors";
-		static DataMonitors = "dataMonitors";
-		static AutoMonitors = "autoMonitors";
-		static PitDefines = "pitDefines";
 	}
 }

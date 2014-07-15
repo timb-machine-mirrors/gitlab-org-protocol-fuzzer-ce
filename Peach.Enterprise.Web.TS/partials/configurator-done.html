@@ -1,12 +1,27 @@
-﻿<div>
-	<h1>Configurator - Review</h1>
+﻿<div class="page-content">
+	<div class="page-header">
+		<h3>
+			Pit Configurator - Done
+		</h3>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			<div ng-switch="vm.TestComplete">
+				<span ng-switch-when="true">Pit configuration is complete. Press the START button below to start a fuzzing job with your pit.</span>
+				<span ng-switch-when="false">Pit configuration is not complete. Please complete all other steps before returning to this screen.</span>
+			</div>
 
-	<p>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
-
-	<p>Not sure what we're going to do here yet</p>
-
-	<button class="btn btn-success btn-next" ng-disabled="configuratorForm.$invalid">
-		SAVE WORK????
-		<i class="icon-arrow-right icon-on-right"></i>
-	</button>
+			<div class="space-6"></div>
+			<div class="row-fluid wizard-actions">
+				<button class="btn btn-primary" ng-click="vm.Start()"
+								ng-class="{disabled: vm.CanStart == false || vm.TestComplete == false}">
+					START
+				</button>
+				<button class="btn btn-success btn-next" ng-click="vm.Done()" ng-class="{disabled: vm.TestComplete == false}">
+					Return To Dash
+					<i class="icon-arrow-right icon-on-right"></i>
+				</button>
+			</div>
+		</div>
+	</div>
 </div>

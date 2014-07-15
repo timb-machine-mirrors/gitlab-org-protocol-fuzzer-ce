@@ -64,8 +64,8 @@
 		},
 		{
 			"id":4100,
-			"q": "Which network device will do the network capture?",
-			"type":"interface",
+			"q": "Which network device should be captured? For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'. Example interface names are 'Local Area Connection' and Ethernet on Windows, 'eth0' on Linux, and 'en0' on OS X.",
+			"type":"iface",
 			"key":"PcapDevice",
 			"next":4101
 		},
@@ -165,7 +165,7 @@
 				{"key":"PcapDevice", "param":"Device"},
 				{"key":"PcapFilter", "param":"Filter"}
 				],
-			"description":"Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}."
+			"description":"Perform a network capture during the fuzzing iteration. "
 		},
 		{
 			"monitorClass":"SaveFile",
@@ -187,7 +187,7 @@
 				{"key":"SshDownloaderFolder", "param":"Folder" },
 				{"key":"SshDownloaderRemove", "param":"Remove" }
 			],
-			"description": "Download file {SshDownloaderFile} in folder {SshDownloaderFolder} on host {SshDownloaderHost}"
+			"description": "Save a specified file as part of the logged data when a fault occurs. "
 		}
 	]
 }

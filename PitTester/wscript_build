@@ -2,6 +2,7 @@
 
 deps = [
 	'NLog.dll',
+	'nunit.framework.dll',
 	'SharpPcap.dll',
 	'Peach.Core.dll',
 	'System.dll',
@@ -13,9 +14,11 @@ deps = [
 ]
 
 bld(
-	features = 'cs',
+	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PitTester.exe',
+	ut_cwd = bld.path.find_node('../pits/pro').abspath(),
+	ut_args = '.',
 	ide_path = 'Peach Enterprise',
 )

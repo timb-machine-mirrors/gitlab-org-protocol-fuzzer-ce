@@ -4,6 +4,7 @@ subdirs = [
 	'Portable.Licensing',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
+	'SyslogSharp-1.0.07',
 ]
 
 bld.recurse(subdirs)

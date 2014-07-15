@@ -2,11 +2,12 @@
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../Models/peach.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../scripts/typings/moment/moment.d.ts" />
+/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
 
 module DashApp {
+	"use strict";
 
-	import P = Models.Peach;
+	// import P = Models.Peach;
 
 	export class MetricsController {
 
@@ -30,173 +31,173 @@ module DashApp {
 			$scope.metrics_faultsOverTime_options = {
 				axes: {
 					x: {
-						type: 'date',
+						type: "date",
 						tooltipFormatter: function (d) { return moment(d).fromNow(); },
-						key: 'x'
+						key: "x"
 					},
-					y: { type: 'linear' },
+					y: { type: "linear" },
 				},
 				series: [
 					{
-						y: 'y',
-						label: 'faults over time',
-						color: 'steelblue',
-						thickness: '2px',
+						y: "y",
+						label: "faults over time",
+						color: "steelblue",
+						thickness: "2px",
 						type: "line"
 					}
 				],
-				lineMode: 'linear',
+				lineMode: "linear",
 				tension: 0.7,
-				tooltipMode: 'default'
+				tooltipMode: "default"
 			};
 
 			$scope.dataMetricsMutator = [
 				{
-					'mutator': 'StringMutator',
-					'elementCount': 10,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"mutator": "StringMutator",
+					"elementCount": 10,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'mutator': 'StringMutator',
-					'elementCount': 10,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"mutator": "StringMutator",
+					"elementCount": 10,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'mutator': 'StringMutator',
-					'elementCount': 10,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"mutator": "StringMutator",
+					"elementCount": 10,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'mutator': 'StringMutator',
-					'elementCount': 10,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"mutator": "StringMutator",
+					"elementCount": 10,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				}
 			];
 			$scope.gridMetricsMutator = {
-				data: 'dataMetricsMutator',
-				sortInfo: { fields: ['mutator'], directions: ['asec'] },
+				data: "dataMetricsMutator",
+				sortInfo: { fields: ["mutator"], directions: ["asc"] },
 				columnDefs: [
-					{ field: 'mutator', displayName: 'Mutator' },
-					{ field: 'elementCount', displayName: 'Element Count' },
-					{ field: 'iterationCount', displayName: 'Iteration Count' },
-					{ field: 'bucketCount', displayName: 'Bucket Count' },
-					{ field: 'faultCount', displayName: 'Fault Count' }
+					{ field: "mutator", displayName: "Mutator" },
+					{ field: "elementCount", displayName: "Element Count" },
+					{ field: "iterationCount", displayName: "Iteration Count" },
+					{ field: "bucketCount", displayName: "Bucket Count" },
+					{ field: "faultCount", displayName: "Fault Count" }
 				]
-			}
+			};
 
 		$scope.dataMetricsElement = [
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				},
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				}
 			];
 			$scope.gridMetricsElement = {
-				data: 'dataMetricsElement',
-				sortInfo: { fields: ['element'], directions: ['asec'] },
+				data: "dataMetricsElement",
+				sortInfo: { fields: ["element"], directions: ["asc"] },
 				columnDefs: [
-					{ field: 'element', displayName: 'Element' },
-					{ field: 'mutatorCount', displayName: 'Mutator Count' },
-					{ field: 'iterationCount', displayName: 'Iteration Count' },
-					{ field: 'bucketCount', displayName: 'Bucket Count' },
-					{ field: 'faultCount', displayName: 'Fault Count' }
+					{ field: "element", displayName: "Element" },
+					{ field: "mutatorCount", displayName: "Mutator Count" },
+					{ field: "iterationCount", displayName: "Iteration Count" },
+					{ field: "bucketCount", displayName: "Bucket Count" },
+					{ field: "faultCount", displayName: "Fault Count" }
 				]
-			}
+			};
 
 		$scope.dataMetricsState = [
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				}
 			];
 			$scope.gridMetricsState = {
-				data: 'dataMetricsState',
-				sortInfo: { fields: ['element'], directions: ['asec'] },
+				data: "dataMetricsState",
+				sortInfo: { fields: ["element"], directions: ["asc"] },
 				columnDefs: [
-					{ field: 'element', displayName: 'Element' },
-					{ field: 'mutatorCount', displayName: 'Mutator Count' },
-					{ field: 'iterationCount', displayName: 'Iteration Count' },
-					{ field: 'bucketCount', displayName: 'Bucket Count' },
-					{ field: 'faultCount', displayName: 'Fault Count' }
+					{ field: "element", displayName: "Element" },
+					{ field: "mutatorCount", displayName: "Mutator Count" },
+					{ field: "iterationCount", displayName: "Iteration Count" },
+					{ field: "bucketCount", displayName: "Bucket Count" },
+					{ field: "faultCount", displayName: "Fault Count" }
 				]
-			}
+			};
 
 		$scope.dataMetricsData = [
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				}
 			];
 			$scope.gridMetricsData = {
-				data: 'dataMetricsData',
-				sortInfo: { fields: ['element'], directions: ['asec'] },
+				data: "dataMetricsData",
+				sortInfo: { fields: ["element"], directions: ["asc"] },
 				columnDefs: [
-					{ field: 'element', displayName: 'Element' },
-					{ field: 'mutatorCount', displayName: 'Mutator Count' },
-					{ field: 'iterationCount', displayName: 'Iteration Count' },
-					{ field: 'bucketCount', displayName: 'Bucket Count' },
-					{ field: 'faultCount', displayName: 'Fault Count' }
+					{ field: "element", displayName: "Element" },
+					{ field: "mutatorCount", displayName: "Mutator Count" },
+					{ field: "iterationCount", displayName: "Iteration Count" },
+					{ field: "bucketCount", displayName: "Bucket Count" },
+					{ field: "faultCount", displayName: "Fault Count" }
 				]
-			}
+			};
 
 
 		$scope.dataMetricsBucket = [
 				{
-					'element': 'FooData',
-					'mutatorCount': 3,
-					'iterationCount': 5000,
-					'bucketCount': 3,
-					'faultCount': 200
+					"element": "FooData",
+					"mutatorCount": 3,
+					"iterationCount": 5000,
+					"bucketCount": 3,
+					"faultCount": 200
 				}
 			];
 			$scope.gridMetricsBucket = {
-				data: 'dataMetricsBucket',
-				sortInfo: { fields: ['element'], directions: ['asec'] },
+				data: "dataMetricsBucket",
+				sortInfo: { fields: ["element"], directions: ["asc"] },
 				columnDefs: [
-					{ field: 'element', displayName: 'Element' },
-					{ field: 'mutatorCount', displayName: 'Mutator Count' },
-					{ field: 'iterationCount', displayName: 'Iteration Count' },
-					{ field: 'bucketCount', displayName: 'Bucket Count' },
-					{ field: 'faultCount', displayName: 'Fault Count' }
+					{ field: "element", displayName: "Element" },
+					{ field: "mutatorCount", displayName: "Mutator Count" },
+					{ field: "iterationCount", displayName: "Iteration Count" },
+					{ field: "bucketCount", displayName: "Bucket Count" },
+					{ field: "faultCount", displayName: "Fault Count" }
 				]
-			}
+			};
 
 
 		}

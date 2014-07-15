@@ -6,10 +6,12 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class LibraryService : NancyModule
+	public class LibraryService : WebService
 	{
-		public LibraryService()
-			: base("/p/libraries")
+		public static readonly string Prefix = "/p/libraries";
+
+		public LibraryService(WebContext context)
+			: base(context, Prefix)
 		{
 			Get[""] = _ => GetLibraries();
 			Get["/{id}"] = _ => GetLibrary(_.id);
@@ -17,14 +19,12 @@ namespace Peach.Enterprise.WebServices
 
 		object GetLibraries()
 		{
-			var db = new PitDatabase(".");
-			return db.Libraries.ToArray();
+			return PitDatabase.Libraries.ToArray();
 		}
 
 		object GetLibrary(string id)
 		{
-			var db = new PitDatabase(".");
-			var lib = db.GetLibrary(id);
+			var lib = PitDatabase.GetLibraryById(id);
 			if (lib == null)
 				return HttpStatusCode.NotFound;
 

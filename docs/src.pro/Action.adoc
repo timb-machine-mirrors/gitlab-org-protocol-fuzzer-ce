@@ -29,8 +29,8 @@ Action elements perform various operations in the xref:StateModel[StateModel].
 
 Many Actions are called by Peach implicitly (without explicitly declaring it within a State). Two examples are:
 
-* The xref:Action_Start[_start_] action that performs every iteration automatically  
-* The  xref:Action_Open[_open_] action called before any outputs or inputs
+* The xref:Action_start[_start_] action that performs every iteration automatically  
+* The  xref:Action_open[_open_] action called before any outputs or inputs
 
 
 === Syntax

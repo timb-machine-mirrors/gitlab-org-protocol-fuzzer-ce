@@ -9,6 +9,8 @@ using Peach.Enterprise;
 using Peach.Enterprise.WebServices;
 using System.Text;
 using System.Xml;
+using System.Xml.XPath;
+using System.Collections.Generic;
 
 namespace PitTester
 {
@@ -18,11 +20,16 @@ namespace PitTester
 
 		static int Main(string[] args)
 		{
+			bool notest = false;
+			string test = null;
+
 			var p = new OptionSet()
 			{
 					{ "h|?|help", v => Syntax() },
 					{ "debug", v => LogLevel = 1 },
 					{ "trace", v => LogLevel = 2 },
+					{ "notest", v => notest = true },
+					{ "test=", v => test = v },
 			};
 
 			var extra = p.Parse(args);
@@ -36,6 +43,7 @@ namespace PitTester
 			var lib = new PitDatabase();
 			var errors = new StringBuilder();
 			var total = 0;
+			var ret = 0;
 
 			lib.LoadEventHandler += delegate(object sender, LoadEventArgs e)
 			{
@@ -62,6 +70,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -72,8 +82,41 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
+
+			if (test != null)
+			{
+				var pit = lib.Entries.Where(e => e.Name == test).FirstOrDefault();
+				if (pit == null)
+				{
+					Console.WriteLine("Error, could not find a pit named '{0}'", test);
+					ret = -1;
+				}
+				else
+				{
+					var fileName = pit.Versions[0].Files[0].Name;
+
+					try
+					{
+						TestPit(libraryPath, fileName, null);
+
+						Console.WriteLine("Successfully ran '{0}' test", test);
+
+						return ret;
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Errors:");
+						Console.WriteLine("{0} -> {1}", pit.Name, fileName);
+						Console.WriteLine(ex.Message);
+
+						ret = -1;
+					}
+				}
+
+				return ret;
+			}
 
 			Console.WriteLine("Verifying pit config files");
 
@@ -108,7 +151,7 @@ namespace PitTester
 						sb.AppendLine();
 					if (noDesc.Length > 0)
 						sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
-					if (sb.Length < 0)
+					if (sb.Length > 0)
 						throw new ApplicationException(sb.ToString());
 
 
@@ -132,6 +175,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -142,31 +187,36 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
 
 			Console.WriteLine("Verifying pit files");
 
 			foreach (var e in lib.Entries)
 			{
-				var fileName = e.Versions[0].Files[0].Name;
+				int success = 1;
 
-				try
+				for (int i = 0; i < e.Versions[0].Files.Count; ++i)
 				{
-					VerifyPit(fileName);
+					var fileName = e.Versions[0].Files[i].Name;
 
-					Console.Write(".");
+					try
+					{
+						VerifyPit(fileName, i == 0);
+					}
+					catch (Exception ex)
+					{
+						success = 0;
 
-					++total;
+						errors.AppendFormat("{0} -> {1}", e.Name, fileName);
+						errors.AppendLine();
+						errors.AppendLine(ex.Message);
+					}
 				}
-				catch (Exception ex)
-				{
-					Console.Write("E");
 
-					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
-					errors.AppendLine();
-					errors.AppendLine(ex.Message);
-				}
+				total += success;
+
+				Console.Write(success == 0 ? "E" : ".");
 			}
 
 			Console.WriteLine();
@@ -174,6 +224,8 @@ namespace PitTester
 
 			if (errors.Length > 0)
 			{
+				ret = -1;
+
 				Console.WriteLine();
 				Console.WriteLine("Errors:");
 				Console.WriteLine();
@@ -184,8 +236,14 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
+
+			if (notest)
+				return 0;
+
+			var ignores = new List<string>();
+			var errorCount = 0;
 
 			Console.WriteLine("Testing pit files");
 
@@ -204,10 +262,14 @@ namespace PitTester
 				catch (FileNotFoundException)
 				{
 					Console.Write("I");
+
+					ignores.Add(e.Name);
 				}
 				catch (Exception ex)
 				{
 					Console.Write("E");
+
+					++errorCount;
 
 					errors.AppendFormat("{0} -> {1}", e.Name, fileName);
 					errors.AppendLine();
@@ -218,10 +280,20 @@ namespace PitTester
 			Console.WriteLine();
 			Console.WriteLine("Passed {0}/{1} pit tests", total, lib.Entries.Count());
 
-			if (errors.Length > 0)
+			if (ignores.Count > 0)
 			{
 				Console.WriteLine();
-				Console.WriteLine("Errors:");
+				Console.WriteLine("Ignored {0}:");
+				Console.WriteLine();
+				Console.WriteLine(string.Join(", ", ignores));
+			}
+
+			if (errors.Length > 0)
+			{
+				ret = -1;
+
+				Console.WriteLine();
+				Console.WriteLine("Errors: {0}", errorCount);
 				Console.WriteLine();
 				Console.WriteLine(errors);
 			}
@@ -230,10 +302,10 @@ namespace PitTester
 				Console.WriteLine();
 			}
 
-			errors.Clear(); ;
+			errors.Clear();
 			total = 0;
 
-			return 0;
+			return ret;
 		}
 
 		static void TestPit(string libraryPath, string pitFile, string testName)
@@ -247,16 +319,16 @@ namespace PitTester
 			Peach.Enterprise.Test.PitTester.TestPit(libraryPath, pitName, testName);
 		}
 
-		static void VerifyPit(string fileName)
+		static void VerifyPit(string fileName, bool isTest)
 		{
+			var errors = new StringBuilder();
+
 			int idxDeclaration = 0;
 			int idxCopyright = 0;
 			int idx = 0;
 
 			using (var rdr = XmlReader.Create(fileName))
 			{
-				var errors = new StringBuilder();
-
 				while (++idx > 0)
 				{
 					do
@@ -298,14 +370,14 @@ namespace PitTester
 						else if (author != rdr.Value)
 							errors.AppendLine("Pit author is '" + rdr.Value + "' but should be '" + author + "'.");
 
-						var ns = "http://peachfuzzer.com/2012/Peach";
+						var ns = PeachElement.Namespace;
 
 						if (!rdr.MoveToAttribute("xmlns"))
 							errors.AppendLine("Pit is missing xmlns attribute.");
 						else if (ns != rdr.Value)
 							errors.AppendLine("Pit xmlns is '" + rdr.Value + "' but should be '" + ns + "'.");
 
-						var schema = "http://peachfuzzer.com/2012/Peach peach.xsd";
+						var schema = PeachElement.SchemaLocation;
 
 						if (!rdr.MoveToAttribute("schemaLocation", System.Xml.Schema.XmlSchema.InstanceNamespace))
 							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
@@ -322,15 +394,59 @@ namespace PitTester
 				if (idxCopyright == 0)
 					errors.AppendLine("Pit is missing top level copyright message.");
 
-				if (errors.Length > 0)
-					throw new ApplicationException(errors.ToString());
 			}
+
+			using (var rdr = XmlReader.Create(fileName))
+			{
+				var doc = new XPathDocument(rdr);
+				var nav = doc.CreateNavigator();
+				var nsMgr = new XmlNamespaceManager(nav.NameTable);
+				nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+				var it = nav.Select("/p:Peach/p:Test", nsMgr);
+
+				var expexted = isTest ? 1 : 0;
+
+				if (it.Count != expexted)
+					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
+
+				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
+				while (sm.MoveNext())
+				{
+					var smName = sm.Current.GetAttribute("name", "") ?? "<unknown>";
+
+					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
+
+					bool gotStart = false;
+					bool gotEnd = false;
+
+					while (actions.MoveNext())
+					{
+						var meth = actions.Current.GetAttribute("method", "");
+						if (meth == "StartIterationEvent")
+							gotStart = true;
+						else if (meth == "ExitIterationEvent")
+							gotEnd = true;
+						else
+							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
+					}
+
+					if (!gotStart)
+						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'StartIterationEvent'.", smName));
+
+					if (!gotEnd)
+						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
+				}
+			}
+
+			if (errors.Length > 0)
+				throw new ApplicationException(errors.ToString());
 		}
 
 		static void Syntax()
 		{
 			var self = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
-			var syntax = @"{0} [--debug --trace] pit_library_path";
+			var syntax = @"{0} [--debug --trace --notest --test=Pit_Name] pit_library_path";
 
 			Console.WriteLine(syntax, self);
 

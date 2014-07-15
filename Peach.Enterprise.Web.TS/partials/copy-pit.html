@@ -1,0 +1,33 @@
+﻿<div>
+	<div class="modal-header">
+		<h3 class="modal-title">Copy Pit</h3>
+	</div>
+	<div class="modal-body">
+		<div>
+			You've chosen a locked Pit. A working copy will be placed in the User Library.<br/>
+			Please fill in the following details to name and describe the copy.
+		</div>
+		<div>
+			<label>Name:</label>
+			<input id="name" ng-model="vm.pit.name" />
+		</div>
+		<div>
+			<label>Description:</label>
+			<input ng-model="vm.pit.description" />
+		</div>
+	</div>
+
+	<div class="modal-footer">
+		<span class="label label-danger" ng-class="{hidden: vm.error.length == 0}" style="margin-right: 20px">{{vm.error}}</span>
+		<button class="btn btn-primary" ng-click="vm.submit()">Submit</button>
+	</div>
+</div>
+<script src="../Scripts/jquery-2.1.1.js"></script>
+<script>
+	//var invalid = [32];
+	//$("#name").keypress(function (e) {
+	//	if (invalid.indexOf(e.which) >= 0) {
+	//		return false;
+	//	}
+	//});
+</script>

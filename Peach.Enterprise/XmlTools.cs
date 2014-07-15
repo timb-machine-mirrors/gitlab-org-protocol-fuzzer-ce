@@ -89,6 +89,8 @@ namespace Peach.Enterprise
 			return ret;
 		}
 
+		#region Reader
+
 		class Reader<T> : IDisposable
 		{
 			StringBuilder errors;
@@ -146,8 +148,14 @@ namespace Peach.Enterprise
 
 					return r;
 				}
+				catch (XmlException ex)
+				{
+					// mono throws XmlException
+					throw MakeError(ex, "failed to load. {0}", ex.Message);
+				}
 				catch (InvalidOperationException ex)
 				{
+					// microsoft throws InvalidOperationException with an inner XmlException
 					var inner = ex.InnerException as XmlException;
 					if (inner != null && !string.IsNullOrEmpty(inner.Message))
 						throw MakeError(ex, "failed to load. {0}", inner.Message);
@@ -188,6 +196,60 @@ namespace Peach.Enterprise
 			}
 		}
 
+		#endregion
+
+		#region Writer
+
+		class Writer<T> : IDisposable
+		{
+			XmlWriterSettings settings;
+			XmlWriter xmlWriter;
+
+			public Writer(string outputFileName)
+			{
+				Initialize();
+
+				xmlWriter = XmlWriter.Create(outputFileName, settings);
+			}
+
+			public Writer(Stream stream)
+			{
+				Initialize();
+
+				xmlWriter = XmlWriter.Create(stream, settings);
+			}
+
+			public Writer(TextWriter textWriter)
+			{
+				Initialize();
+
+				xmlWriter = XmlWriter.Create(textWriter, settings);
+			}
+
+			public void Dispose()
+			{
+				if (xmlWriter != null)
+					xmlWriter.Close();
+			}
+
+			public void Serialize(T obj)
+			{
+				var s = new XmlSerializer(typeof(T));
+				s.Serialize(xmlWriter, obj);
+			}
+
+			void Initialize()
+			{
+				settings = new XmlWriterSettings()
+				{
+					Encoding = System.Text.Encoding.UTF8,
+					Indent = true,
+				};
+			}
+		}
+
+		#endregion
+
 		public static T Deserialize<T>(string inputUri)
 		{
 			using (var rdr = new Reader<T>(inputUri))
@@ -209,6 +271,30 @@ namespace Peach.Enterprise
 			using (var rdr = new Reader<T>(textReader))
 			{
 				return rdr.Deserialize();
+			}
+		}
+
+		public static void Serialize<T>(string outputFileName, T obj)
+		{
+			using (var writer = new Writer<T>(outputFileName))
+			{
+				writer.Serialize(obj);
+			}
+		}
+
+		public static void Serialize<T>(Stream stream, T obj)
+		{
+			using (var writer = new Writer<T>(stream))
+			{
+				writer.Serialize(obj);
+			}
+		}
+
+		public static void Serialize<T>(TextWriter textWriter, T obj)
+		{
+			using (var writer = new Writer<T>(textWriter))
+			{
+				writer.Serialize(obj);
 			}
 		}
 	}

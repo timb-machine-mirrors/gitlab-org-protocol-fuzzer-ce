@@ -20,7 +20,7 @@ using Org.BouncyCastle.Crypto.Engines;
 namespace Peach.Enterprise.Fixups
 {
 	[Description("Tls")]
-	[Fixup("Tls", true)]
+	[Fixup("Tls", true, IsTest=true)]
 	[Serializable]
 	public class TlsFixup : VolatileFixup
 	{

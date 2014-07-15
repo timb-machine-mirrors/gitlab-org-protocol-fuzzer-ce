@@ -1,4 +1,5 @@
 using Nancy;
+using Nancy.Conventions;
 using Nancy.Hosting.Self;
 using Nancy.Serialization.JsonNet;
 using Nancy.TinyIoc;
@@ -6,6 +7,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace Peach.Enterprise.WebServices
@@ -29,31 +32,25 @@ namespace Peach.Enterprise.WebServices
 
 	internal class Bootstrapper : DefaultNancyBootstrapper
 	{
-		WebLogger logger;
+		WebContext context;
 
-		public Bootstrapper(WebLogger logger)
+		public Bootstrapper(WebContext context)
 		{
-			this.logger = logger;
+			this.context = context;
 		}
-
-		//protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
-		//{
-		//	this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
-		//	{
-		//		return string.Concat("web/", viewName);
-		//	});
-		//}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
 		{
 			container.Register<JsonSerializer, CustomJsonSerializer>();
 			container.Register<JsonNetSerializer>();
-			container.Register<WebLogger>(logger);
+			container.Register<WebContext>(context);
 			container.Register<PitService>();
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
 			container.Register<JobService>();
 			container.Register<FaultService>();
+			container.Register<WizardService>();
+			container.Register<IndexService>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
@@ -61,41 +58,33 @@ namespace Peach.Enterprise.WebServices
 			base.ConfigureRequestContainer(container, context);
 		}
 
-		/*
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
 		{
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("web", @"web"));
 			base.ConfigureConventions(nancyConventions);
-		}*/
 
-		/*protected override void ConfigureConventions(NancyConventions nancyConventions)
-		{
-			//hacky only supports jobs/1/...
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1/visualizer", "/web/visualizer"));
-			nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/p/jobs/1", "/web/visualizer"));
-
-			nancyConventions.StaticContentsConventions.Add(
-				StaticContentConventionBuilder.AddDirectory("/", @"web"));
-
-			base.ConfigureConventions(nancyConventions);
-		}*/
+			// Need to go before the default '/Content' handler in nancy
+			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
+			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/docs", @"docs"));
+		}
 	}
 
-	public class WebService : IDisposable
+	public class WebServer : IDisposable
 	{
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
+		const int ERROR_SHARING_VIOLATION = 32;
+
 		Bootstrapper bootstrapper;
 		HostConfiguration config;
 		NancyHost host;
 
 		public Uri Uri { get; private set; }
-		public WebLogger Logger { get; private set; }
+		public WebContext Context { get; private set; }
 
-		public WebService()
+		public WebServer(string pitLibraryPath)
 		{
-			Uri = new Uri("http://localhost:8888");
-			Logger = new WebLogger();
+			Context = new WebContext(pitLibraryPath);
 
-			bootstrapper = new Bootstrapper(Logger);
+			bootstrapper = new Bootstrapper(Context);
 			config = new HostConfiguration()
 			{
 				UrlReservations = new UrlReservations()
@@ -103,37 +92,70 @@ namespace Peach.Enterprise.WebServices
 					CreateAutomatically = true,
 				},
 			};
-			host = new NancyHost(bootstrapper, config, Uri);
 		}
 
-		public void Start(string[] args)
+		public void Start()
 		{
-			host.Start();
+			Start("localhost", 8888);
+		}
+
+		public void Start(string hostname, int port)
+		{
+			while (host == null)
+			{
+				try
+				{
+					var tmpUri = new Uri(string.Format("http://{0}:{1}", hostname, port++));
+					var tmpHost = new NancyHost(bootstrapper, config, tmpUri);
+
+					tmpHost.Start();
+
+					Uri = tmpUri;
+					host = tmpHost;
+				}
+				catch (HttpListenerException ex)
+				{
+					// Windows gives ERROR_SHARING_VIOLATION when port in use
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION)
+						throw;
+				}
+				catch (SocketException ex)
+				{
+					// Mono gives AddressAlreadyInUse
+					if (ex.SocketErrorCode != SocketError.AddressAlreadyInUse)
+						throw;
+				}
+			}
 		}
 
 		public void Stop()
 		{
-			host.Stop();
+			if (host != null)
+			{
+				host.Stop();
+				host = null;
+			}
 		}
 
 		public void Dispose()
 		{
-			host = null;
+			Stop();
+
 			config = null;
 			bootstrapper = null;
 			Uri = null;
-			Logger = null;
+			Context = null;
 		}
 
-		public static int Run(string[] args)
+		public static int Run(string pitLibraryPath)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
-				using (var svc = new WebService())
+				using (var svc = new WebServer(pitLibraryPath))
 				{
-					svc.Start(args);
+					svc.Start();
 
 					try
 					{
@@ -143,6 +165,10 @@ namespace Peach.Enterprise.WebServices
 					{
 					}
 
+					Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					Console.WriteLine("Web site running at: {0}", svc.Uri);
+
+					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try

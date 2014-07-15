@@ -1,0 +1,18 @@
+﻿<div ng-enter="vm.next()">
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
+	<label>{{vm.currentQuestion.q}}</label>
+	<div>
+		<select class="form-control" ng-model="vm.currentQuestion.value" ng-options="default for default in vm.currentQuestion.defaults" style="width: 100px" />
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev" ng-click="vm.back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+			Next
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+</div>
+

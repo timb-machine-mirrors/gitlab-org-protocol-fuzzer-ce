@@ -14,13 +14,6 @@
 .panel-title a {
 	cursor: pointer;
 }
-/*
-.disabled {
-	pointer-events: none;
-	cursor: not-allowed;
-	
-}
-*/
 
 .skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
@@ -29,3 +22,14 @@
 	cursor: not-allowed;
 }
 
+a.disabled {
+	cursor: not-allowed;
+}
+
+.absolute-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}

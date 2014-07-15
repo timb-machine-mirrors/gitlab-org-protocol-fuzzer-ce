@@ -156,6 +156,52 @@ namespace Peach.Enterprise.Test
 		}
 
 		[Test]
+		public void TestEvaluate()
+		{
+			var src = new List<KeyValuePair<string, string>>();
+			src.Add(new KeyValuePair<string, string>("SamplePath", "##PitLibraryPath##/Samples"));
+			src.Add(new KeyValuePair<string, string>("PitLibraryPath", "Peach/Pits"));
+
+			var dst = PitDefines.Evaluate(src);
+
+			Assert.AreEqual(2, dst.Count);
+			Assert.AreEqual("SamplePath", dst[0].Key);
+			Assert.AreEqual("Peach/Pits/Samples", dst[0].Value);
+			Assert.AreEqual("PitLibraryPath", dst[1].Key);
+			Assert.AreEqual("Peach/Pits", dst[1].Value);
+
+			src.Clear();
+			src.Add(new KeyValuePair<string, string>("k1", "##k2##"));
+			src.Add(new KeyValuePair<string, string>("k2", "##k3##-2"));
+			src.Add(new KeyValuePair<string, string>("k3", "##k4##-3"));
+			src.Add(new KeyValuePair<string, string>("k4", "##k5##/##k5##"));
+			src.Add(new KeyValuePair<string, string>("k5", "foo"));
+			src.Add(new KeyValuePair<string, string>("k6", "##k2##-##k3##"));
+
+			dst = PitDefines.Evaluate(src);
+
+			Assert.AreEqual(6, dst.Count);
+			Assert.AreEqual("k1", dst[0].Key);
+			Assert.AreEqual("foo/foo-3-2", dst[0].Value);
+			Assert.AreEqual("k2", dst[1].Key);
+			Assert.AreEqual("foo/foo-3-2", dst[1].Value);
+			Assert.AreEqual("k3", dst[2].Key);
+			Assert.AreEqual("foo/foo-3", dst[2].Value);
+			Assert.AreEqual("k4", dst[3].Key);
+			Assert.AreEqual("foo/foo", dst[3].Value);
+			Assert.AreEqual("k5", dst[4].Key);
+			Assert.AreEqual("foo", dst[4].Value);
+			Assert.AreEqual("k6", dst[5].Key);
+			Assert.AreEqual("foo/foo-3-2-foo/foo-3", dst[5].Value);
+
+			src.Clear();
+			src.Add(new KeyValuePair<string, string>("k1", "##missing##"));
+			dst = PitDefines.Evaluate(src);
+
+			Assert.AreEqual(src, dst);
+		}
+
+		[Test]
 		public void IncompleteXmlString()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>

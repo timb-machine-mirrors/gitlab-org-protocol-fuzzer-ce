@@ -6,17 +6,13 @@ using System.Linq;
 
 namespace Peach.Enterprise.WebServices
 {
-	public class FaultService : NancyModule
+	public class FaultService : WebService
 	{
 		public static readonly string Prefix = "/p/faults";
 
-		WebLogger logger;
-
-		public FaultService(WebLogger logger)
-			: base(Prefix)
+		public FaultService(WebContext context)
+			: base(context, Prefix)
 		{
-			this.logger = logger;
-
 			Get[""] = _ => GetFaults();
 			Get["/{id}"] = _ => GetFault(_.id);
 		}
@@ -28,7 +24,7 @@ namespace Peach.Enterprise.WebServices
 
 		object GetFault(string id)
 		{
-			var ret = logger.GetFault(id);
+			var ret = Logger.GetFault(id);
 			if (ret == null)
 				return HttpStatusCode.NotFound;
 

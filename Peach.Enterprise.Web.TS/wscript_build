@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+extras = []
+dirs = [ 'app', 'Content', 'partials', 'Scripts', 'testdata' ]
+
+for d in dirs:
+	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = ['app/js/*', '**/*.ts']))
+
+bld(
+	features = 'tsc',
+	name='Peach.Enterprise.Web',
+	source = bld.path.ant_glob('app/**/*.ts'),
+	js = 'app/js/all.js',
+	install_path = '${BINDIR}/web',
+	install_644 = extras,
+)

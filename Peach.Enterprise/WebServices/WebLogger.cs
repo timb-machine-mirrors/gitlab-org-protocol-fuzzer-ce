@@ -2,13 +2,17 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Enterprise.WebServices.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 
 namespace Peach.Enterprise.WebServices
 {
 	public class WebLogger : Logger
 	{
+		string nodeGuid;
 		Core.Fault[] reproFault;
 
 		List<FaultSummary> faults = new List<FaultSummary>();
@@ -66,7 +70,7 @@ namespace Peach.Enterprise.WebServices
 				MutatedElements.Add(actionData.outputName + "." + element.fullName);
 			}
 
-			public void ActionFinished(Action action)
+			public void ActionFinished(Peach.Core.Dom.Action action)
 			{
 				foreach (var item in action.outputData)
 				{
@@ -136,14 +140,9 @@ namespace Peach.Enterprise.WebServices
 
 		#endregion
 
-		public string NodeGuid { get; private set; }
-		public string JobGuid { get; private set; }
-		public string Name { get; private set; }
-		public uint Seed { get; private set; }
 		public uint CurrentIteration { get; private set; }
 		public uint StartIteration { get; private set; }
 		public uint FaultCount { get; private set; }
-		public System.DateTime StartDate { get; private set; }
 
 		/// <summary>
 		/// Get the most recent visualizer snapshot.
@@ -193,22 +192,21 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public WebLogger()
+		public WebLogger(string nodeGuid)
 		{
-			NodeGuid = System.Guid.NewGuid().ToString().ToLower();
+			this.nodeGuid = nodeGuid;
+
+			// Ensure vizDataFinal is initialized
+			this.vizDataFinal = new VizData(0);
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
 			lock (this)
 			{
-				JobGuid = System.Guid.NewGuid().ToString().ToLower();
-				Name = context.config.pitFile;
-				Seed = context.config.randomSeed;
-				CurrentIteration = context.currentIteration;
+				StartIteration = context.currentIteration;
 				CurrentIteration = StartIteration;
 				FaultCount = 0;
-				StartDate = context.config.runDateTime.ToUniversalTime();
 
 				visualizer = null;
 				vizDataStart = null;
@@ -218,23 +216,7 @@ namespace Peach.Enterprise.WebServices
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			lock (this)
-			{
-				JobGuid = null;
-				Name = null;
-				Seed = 0;
-				CurrentIteration = 0;
-				StartIteration = 0;
-				FaultCount = 0;
-				StartDate = System.DateTime.MinValue;
-
-				visualizer = null;
-				vizDataStart = null;
-				vizDataFinal = null;
-
-				faults.Clear();
-				faultDetails.Clear();
-			}
+			// Leave everything as is so queries will still work
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -249,11 +231,11 @@ namespace Peach.Enterprise.WebServices
 			vizDataFinal = vizDataStart;
 		}
 
-		protected override void ActionStarting(RunContext context, Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 		}
 
-		protected override void ActionFinished(RunContext context, Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			vizDataStart.ActionFinished(action);
 		}
@@ -321,7 +303,7 @@ namespace Peach.Enterprise.WebServices
 				MajorHash = faultSummary.MajorHash,
 				MinorHash = faultSummary.MinorHash,
 
-				NodeUrl = NodeService.Prefix + "/" + NodeGuid,
+				NodeUrl = NodeService.Prefix + "/" + nodeGuid,
 				TargetUrl = "",
 				TargetConfigUrl = "",
 				PitUrl = "",

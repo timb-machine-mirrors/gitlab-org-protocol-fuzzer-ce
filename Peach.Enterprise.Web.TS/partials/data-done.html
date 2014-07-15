@@ -1,23 +1,15 @@
-﻿<div id="templateRoot">
+﻿<div>
 	<div>
 		<h4>Review</h4>
 	</div>
 
-	<div>
-		{{vm.dataMonitors}}
+	<div ng-switch="vm.DataMonitors.length">
+		<div ng-switch-when="0">You have elected to not perform Data Collection. Click Continue to move on to Automation.</div>
+		<div class="gridStyle" ng-grid="vm.dataGridOptions" ng-switch-default></div>
 	</div>
-	
 
-	<div class="gridStyle" ng-grid="vm.dataGridOptions"></div>
-	
 
 	<div class="row-fluid wizard-actions">
-		<!--
-		<button class="btn btn-prev" ng-click="vm.back()">
-			<i class="icon-arrow-left"></i>
-			Back
-		</button>
-		-->
 		<button class="btn btn-success btn-next" ng-click="vm.addNewDataInfo()" ng-disabled="configuratorForm.$invalid">
 			<i class="icon-arrow-left"></i>
 			Add More Data Collection
@@ -27,7 +19,6 @@
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>
 	</div>
-
-
-
 </div>
+
+

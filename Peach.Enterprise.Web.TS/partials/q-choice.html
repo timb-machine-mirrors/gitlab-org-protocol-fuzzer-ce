@@ -1,8 +1,8 @@
-﻿<div>
+﻿<div ng-enter="vm.next()">
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>{{vm.currentQuestion.q}}</label>
 	<div class="control-group">
 		<div ng-repeat="choice in vm.currentQuestion.choice" class="radio">
-			<!--  -->
 			<input type="radio" name="dummy" ng-model="vm.currentQuestion.value" ng-value="choice.value" />
 			<span>{{choice.a}}</span>
 		</div>

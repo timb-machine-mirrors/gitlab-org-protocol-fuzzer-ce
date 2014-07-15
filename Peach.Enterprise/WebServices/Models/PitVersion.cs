@@ -7,6 +7,8 @@ namespace Peach.Enterprise.WebServices.Models
 	{
 		public uint Version { get; set; }
 
+		public bool Configured { get; set; }
+
 		public bool Locked { get; set; }
 
 		public List<PitFile> Files { get; set; }

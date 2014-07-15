@@ -12,13 +12,55 @@ using System.Xml.Serialization;
 using Peach.Core;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Xml.XPath;
 
 namespace Peach.Enterprise.WebServices
 {
-	[XmlRoot("Peach", Namespace = "http://peachfuzzer.com/2012/Peach")]
+	[XmlRoot("Peach", Namespace = Namespace)]
 	[Serializable]
 	public class PeachElement
 	{
+		public const string Namespace = "http://peachfuzzer.com/2012/Peach";
+		public const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
+
+		public PeachElement()
+		{
+			Children = new List<ChildElement>();
+		}
+
+		public abstract class ChildElement
+		{
+		}
+
+		public class TestElement : ChildElement
+		{
+			public class AgentElement
+			{
+				[XmlAttribute("ref")]
+				public string reference { get; set; }
+			}
+
+			public TestElement()
+			{
+				AgentRefs = new List<AgentElement>();
+			}
+
+			[XmlAttribute]
+			public string name { get; set; }
+
+			[XmlElement("Agent", typeof(AgentElement))]
+			public List<AgentElement> AgentRefs { get; set; }
+		}
+
+		public class IncludeElement : ChildElement
+		{
+			[XmlAttribute]
+			public string ns { get; set; }
+
+			[XmlAttribute]
+			public string src { get; set; }
+		}
+
 		[XmlAttribute]
 		[DefaultValue("")]
 		public string author { get; set; }
@@ -30,6 +72,10 @@ namespace Peach.Enterprise.WebServices
 		[XmlAttribute]
 		[DefaultValue("")]
 		public string version { get; set; }
+
+		[XmlElement("Include", typeof(IncludeElement))]
+		[XmlElement("Test", typeof(TestElement))]
+		public List<ChildElement> Children { get; set; }
 	}
 
 	public class ValidationEventArgs : EventArgs
@@ -97,6 +143,43 @@ namespace Peach.Enterprise.WebServices
 			};
 		}
 
+		private static void AddDefine(List<KeyValuePair<string, string>> list, string key, string value)
+		{
+			for (int i = 0; i < list.Count; ++i)
+			{
+				if (list[i].Key == key)
+				{
+					list[i] = new KeyValuePair<string,string>(key, value);
+					return;
+				}
+			}
+
+			list.Add(new KeyValuePair<string,string>(key, value));
+		}
+
+		public static List<KeyValuePair<string, string>> ParseConfig(string pitLibraryPath, string pitConfig)
+		{
+			var defs = new List<KeyValuePair<string, string>>();
+
+			//// It is ok if a .config doesn't exist
+			if (System.IO.File.Exists(pitConfig))
+			{
+				foreach (var d in PitDefines.Parse(pitConfig))
+				{
+					AddDefine(defs, d.Key, d.Value);
+				}
+			}
+
+
+			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
+			AddDefine(defs, "Peach.Pwd", Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
+
+			var final = PitDefines.Evaluate(defs);
+
+			return final;
+		}
+
 		public PitDatabase()
 		{
 			entries = new Dictionary<string, Models.Pit>();
@@ -114,18 +197,305 @@ namespace Peach.Enterprise.WebServices
 
 		public void Load(string path)
 		{
+			roots = new Dictionary<string, LibraryRoot>();
 			entries = new Dictionary<string, Models.Pit>();
 			libraries = new Dictionary<string, Models.Library>();
 			interfaces = null;
 
-			var name = "Peach Pro Library 2014 Q2";
+			AddLibrary(path, "", "Peach Pro Library 2014 Q2", true);
+			AddLibrary(path, "User", "User Library", false);
+		}
+
+		/// <summary>
+		/// 
+		/// Throws:
+		///   UnauthorizedAccessException if the destination library is locked.
+		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
+		///   ArgumentException if a pit with the specified name already exists.
+		/// </summary>
+		/// <param name="libraryUrl">The destination library to save the pit in.</param>
+		/// <param name="pitUrl">The url of the source pit to copy.</param>
+		/// <param name="name">The name of the newly copied pit.</param>
+		/// <param name="description">The description of the newly copied pit.</param>
+		/// <returns>The url of the newly copied pit.</returns>
+		public string CopyPit(string libraryUrl, string pitUrl, string name, string description)
+		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A non-empty pit name is required.", "name");
+
+			if (Path.GetFileName(name) != name)
+				throw new ArgumentException("A valid pit name is required.", "name");
+
+			var dstLib = GetLibraryByUrl(libraryUrl);
+			if (dstLib == null)
+				throw new KeyNotFoundException("The destination pit library could not be found.");
+			if (dstLib.Locked)
+				throw new UnauthorizedAccessException("The destination pit library is locked.");
+
+			// Only support a single user library for now
+			System.Diagnostics.Debug.Assert(dstLib.Name == "User Library");
+
+			var srcPit = GetPitByUrl(pitUrl);
+			if (srcPit == null)
+				throw new KeyNotFoundException("The source pit could not be found.");
+
+			var dstRoot = roots[dstLib.LibraryUrl];
+			var srcFile = srcPit.Versions[0].Files[0].Name;
+			var srcCat = srcPit.Tags[0].Values[1];
+
+			var dstDir = Path.Combine(dstRoot.PitLibraryPath, dstRoot.SubDir, srcCat);
+
+			if (!Directory.Exists(dstDir))
+				Directory.CreateDirectory(dstDir);
+
+			var dstFile = Path.Combine(dstDir, name + ".xml");
+
+			if (File.Exists(dstFile))
+				throw new ArgumentException("A pit already exists with the specified name.");
+
+			var doc = new XmlDocument();
+
+			using (var rdr = XmlReader.Create(srcFile))
+			{
+				doc.Load(rdr);
+			}
+
+			var nav = doc.CreateNavigator();
+
+			var nsMgr = new XmlNamespaceManager(nav.NameTable);
+			nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+			var it = nav.SelectSingleNode("/p:Peach", nsMgr);
+
+			SetPitAttr(it, "author", Environment.UserName);
+			SetPitAttr(it, "description", description);
+
+			try
+			{
+				var settings = new XmlWriterSettings()
+				{
+					Indent = true,
+					Encoding = System.Text.Encoding.UTF8,
+					IndentChars = "  ",
+				};
+
+				using (var writer = XmlWriter.Create(dstFile, settings))
+				{
+					doc.WriteTo(writer);
+				}
+
+				// If there is a config file, copy it over
+				if (File.Exists(srcFile + ".config"))
+					File.Copy(srcFile + ".config", dstFile + ".config");
+			}
+			catch
+			{
+				try
+				{
+					if (File.Exists(srcFile))
+						File.Delete(dstFile);
+				}
+				catch
+				{
+				}
+
+				try
+				{
+					if (File.Exists(srcFile + ".config"))
+						File.Delete(dstFile + ".config");
+				}
+				catch
+				{
+				}
+
+				throw;
+			}
+
+			var item = AddEntry(dstLib.Versions[0], dstRoot.PitLibraryPath, dstFile);
+
+			return item.PitUrl;
+		}
+
+		public static void SaveConfig(Models.Pit pit, List<Models.ConfigItem> config)
+		{
+			var fileName = pit.Versions[0].Files[0].Name + ".config";
+			var defines = PitDefines.Parse(fileName);
+
+			// For now, read in the current defines off disk and
+			// apply any applicable changes. We don't currently expect
+			// this api to add new defines or delete old defines.
+			foreach (var item in config)
+			{
+				foreach (var def in defines.Where(d => d.Key == item.Key))
+					def.Value = item.Value;
+			}
+
+			var final = new PitDefines()
+			{
+				Platforms = new List<PitDefines.Collection>(new[] {
+					new PitDefines.All()
+					{
+						Defines = defines,
+					}
+				}),
+			};
+
+			XmlTools.Serialize(fileName, final);
+		}
+
+		public static void SaveMonitors(Models.Pit pit, List<Models.Agent> monitors)
+		{
+			var fileName = pit.Versions[0].Files[0].Name;
+			var doc = new XmlDocument();
+
+			var settingsRdr = new XmlReaderSettings();
+			settingsRdr.ValidationType = ValidationType.Schema;
+			settingsRdr.NameTable = new NameTable();
+
+			// Default the namespace to peach
+			var nsMgrRdr = new XmlNamespaceManager(settingsRdr.NameTable);
+			nsMgrRdr.AddNamespace("", PeachElement.Namespace);
+
+			var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
+
+			using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+			{
+				doc.Load(rdr);
+			}
+
+			var nav = doc.CreateNavigator();
+
+			var nsMgr = new XmlNamespaceManager(nav.NameTable);
+			nsMgr.AddNamespace("p", PeachElement.Namespace);
+
+			while (true)
+			{
+				// Have to select one at a time and delete one at a time
+				// to work on mono and windows.
+				var oldAgent = nav.SelectSingleNode("//p:Agent", nsMgr);
+
+				if (oldAgent != null)
+					oldAgent.DeleteSelf();
+				else
+					break;
+			}
+
+			var test = nav.SelectSingleNode("/p:Peach/p:Test", nsMgr);
+			if (test == null)
+				throw new PeachException("Could not find a <Test> element in the pit '" + fileName + "'.");
+
+			var agents = new OrderedDictionary<string, XmlWriter>();
+
+			foreach (var item in monitors)
+			{
+				XmlWriter w;
+				if (!agents.TryGetValue(item.AgentUrl, out w))
+				{
+					var agentName = "Agent" + agents.Count.ToString();
+
+					w = test.InsertBefore();
+					w.WriteStartElement("Agent", PeachElement.Namespace);
+					w.WriteAttributeString("name", agentName);
+					w.WriteAttributeString("location", item.AgentUrl);
+
+					// AppendChild so the agents stay in order
+					using (var testWriter = test.AppendChild())
+					{
+						testWriter.WriteStartElement("Agent", PeachElement.Namespace);
+						testWriter.WriteAttributeString("ref", agentName);
+						testWriter.WriteEndElement();
+					}
+
+					agents.Add(item.AgentUrl, w);
+				}
+
+				foreach (var m in item.Monitors)
+				{
+					w.WriteStartElement("Monitor", PeachElement.Namespace);
+					w.WriteAttributeString("class", m.MonitorClass);
+
+					foreach (var p in m.Map)
+					{
+						w.WriteStartElement("Param", PeachElement.Namespace);
+
+						if (p.Param == "StartMode")
+						{
+							if (p.Value == "StartOnCall") // File fzzing
+							{
+								w.WriteAttributeString("name", "StartOnCall");
+								w.WriteAttributeString("value", "ExitIterationEvent");
+							}
+							else if (p.Value == "RestartOnEachTest") // Network client
+							{
+								w.WriteAttributeString("name", "StartOnCall");
+								w.WriteAttributeString("value", "StartIterationEvent");
+								w.WriteEndElement();
+								w.WriteStartElement("Param", PeachElement.Namespace);
+								w.WriteAttributeString("name", "WaitForExitOnCall");
+								w.WriteAttributeString("value", "ExitIterationEvent");
+							}
+							else // Network server
+							{
+								w.WriteAttributeString("name", "RestartOnEachTest");
+								w.WriteAttributeString("value", "false");
+							}
+						}
+						else
+						{
+							w.WriteAttributeString("name", p.Param);
+							w.WriteAttributeString("value", p.Value);
+						}
+
+						w.WriteEndElement();
+					}
+
+					w.WriteEndElement();
+				}
+			}
+
+			foreach (var a in agents)
+			{
+				a.Value.Close();
+			}
+
+			var settings = new XmlWriterSettings()
+			{
+				Indent = true,
+				Encoding = System.Text.Encoding.UTF8,
+				IndentChars = "  ",
+			};
+
+			using (var writer = XmlWriter.Create(fileName, settings))
+			{
+				doc.WriteTo(writer);
+			}
+		}
+
+		private void SetPitAttr(XPathNavigator nav, string attribute, string value)
+		{
+			if (nav.MoveToAttribute(attribute, ""))
+			{
+				nav.SetValue(value);
+				nav.MoveToParent();
+			}
+			else
+			{
+				nav.CreateAttribute(null, attribute, null, value);
+			}
+		}
+
+		private void AddLibrary(string root, string subdir, string name, bool locked)
+		{
+			var path = Path.Combine(root, subdir);
+
 			var guid = MakeGuid(name);
 
 			var lib = new Models.Library()
 			{
-				LibraryUrl = "/p/libraries/" + guid,
+				LibraryUrl = LibraryService.Prefix + "/" + guid,
 				Name = name,
 				Description = name,
+				Locked = locked,
 				Versions = new List<Models.LibraryVersion>(),
 				Groups = new List<Models.Group>(),
 				User = Environment.UserName,
@@ -135,7 +505,7 @@ namespace Peach.Enterprise.WebServices
 			var ver = new Models.LibraryVersion()
 			{
 				Version = 1,
-				Locked = true,
+				Locked = lib.Locked,
 				Pits = new List<Models.LibraryPit>(),
 			};
 
@@ -145,17 +515,27 @@ namespace Peach.Enterprise.WebServices
 				Access = Models.GroupAccess.Read,
 			};
 
+			if (!ver.Locked)
+				group.Access |= Models.GroupAccess.Write;
+
 			lib.Versions.Add(ver);
 			lib.Groups.Add(group);
-			libraries.Add(guid, lib);
+			libraries.Add(lib.LibraryUrl, lib);
+			roots.Add(lib.LibraryUrl, new LibraryRoot() { PitLibraryPath = root, SubDir = subdir });
+
+			if (!Directory.Exists(path))
+				return;
 
 			foreach (var dir in Directory.EnumerateDirectories(path))
 			{
+				if (Path.GetDirectoryName(dir) == "User")
+					continue;
+
 				foreach (var file in Directory.EnumerateFiles(dir, "*.xml"))
 				{
 					try
 					{
-						var item = AddEntry(ver, file);
+						var item = AddEntry(ver, root, file);
 
 						if (LoadEventHandler != null)
 							LoadEventHandler(this, new LoadEventArgs(item, file));
@@ -201,35 +581,56 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public Models.Pit GetPit(string guid)
+		public Models.Pit GetPitById(string guid)
+		{
+			return GetPitByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public Models.Pit GetPitByUrl(string url)
 		{
 			Models.Pit pit;
-			entries.TryGetValue(guid, out pit);
+			entries.TryGetValue(url, out pit);
 			return pit;
 		}
 
-		public Models.Library GetLibrary(string guid)
+		public Models.Library GetLibraryById(string guid)
+		{
+			return GetLibraryByUrl(LibraryService.Prefix + "/" + guid);
+		}
+
+		public Models.Library GetLibraryByUrl(string url)
 		{
 			Models.Library library;
-			libraries.TryGetValue(guid, out library);
+			libraries.TryGetValue(url, out library);
 			return library;
 		}
 
-		public Models.PitConfig GetConfig(string guid)
+		public Models.PitConfig GetConfigById(string guid)
 		{
-			var pit = GetPit(guid);
+			return GetConfigByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public Models.PitConfig GetConfigByUrl(string url)
+		{
+			var pit = GetPitByUrl(url);
 			if (pit == null)
 				return null;
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
-			var defines = PitDefines.Parse(fileName);
-
 			var ret = new Models.PitConfig()
 			{
 				PitUrl = pit.PitUrl,
-				Config = MakeConfig(defines),
 			};
+
+			if (!File.Exists(fileName))
+			{
+				ret.Config = new List<Models.ConfigItem>();
+			}
+			else
+			{
+				ret.Config = MakeConfig(PitDefines.Parse(fileName));
+			}
 
 			return ret;
 		}
@@ -240,6 +641,10 @@ namespace Peach.Enterprise.WebServices
 
 			foreach (var d in defines)
 			{
+				// Don't present this to the user
+				if (d.Key == "PitLibraryPath")
+					continue;
+
 				var item = new Models.ConfigItem()
 				{
 					Type = d.ConfigType,
@@ -286,13 +691,26 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		private Models.Pit AddEntry(Models.LibraryVersion lib, string fileName)
+		private bool IsConfigured(PeachElement elem)
+		{
+			// Pit is 'configured' if there is a <Test> with an <Agent ref='xxx'/> child
+			foreach (var child in elem.Children)
+			{
+				var test = child as PeachElement.TestElement;
+				if (test != null && test.AgentRefs.Count > 0)
+					return true;
+			}
+
+			return false;
+		}
+
+		private Models.Pit AddEntry(Models.LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
 			var value = new Models.Pit()
 			{
-				PitUrl = "/p/pits/" + guid,
+				PitUrl = PitService.Prefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.description,
 				Locked = lib.Locked,
@@ -306,19 +724,14 @@ namespace Peach.Enterprise.WebServices
 			var ver = new Models.PitVersion()
 			{
 				Version = 1,
+				Configured = IsConfigured(contents),
 				Locked = value.Locked,
 				Files = new List<Models.PitFile>(),
 				User = Environment.UserName,
 				Timestamp = value.Timestamp
 			};
 
-			var file = new Models.PitFile()
-			{
-				Name = fileName,
-				FileUrl = "",
-			};
-
-			ver.Files.Add(file);
+			AddAllFiles(ver.Files, pitLibraryPath, fileName, contents);
 
 			value.Versions.Add(ver);
 
@@ -332,7 +745,7 @@ namespace Peach.Enterprise.WebServices
 			value.Tags.Add(tag);
 			value.Peaches.Add(peachVer);
 
-			entries.Add(guid, value);
+			entries.Add(value.PitUrl, value);
 
 			lib.Pits.Add(new Models.LibraryPit()
 			{
@@ -345,6 +758,41 @@ namespace Peach.Enterprise.WebServices
 			return value;
 		}
 
+		private void AddAllFiles(List<Models.PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
+		{
+			list.Add(new Models.PitFile()
+			{
+				Name = fileName,
+				FileUrl = "",
+			});
+
+			foreach (var child in contents.Children)
+			{
+				var inc = child as PeachElement.IncludeElement;
+				if (inc != null)
+				{
+					var otherName = inc.src;
+
+					otherName = otherName.Replace("file:", "");
+					otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
+
+					// Normalize the path
+					otherName = Path.Combine(Path.GetDirectoryName(otherName), Path.GetFileName(otherName));
+
+					var other = Parse(otherName);
+
+					AddAllFiles(list, pitLibraryPath, otherName, other);
+				}
+			}
+		}
+
+		class LibraryRoot
+		{
+			public string PitLibraryPath { get; set; }
+			public string SubDir { get; set; }
+		}
+
+		private Dictionary<string, LibraryRoot> roots;
 		private Dictionary<string, Models.Pit> entries;
 		private Dictionary<string, Models.Library> libraries;
 		private List<NetworkInterface> interfaces = null;

@@ -1,19 +1,37 @@
 ﻿<div>
+	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
 	<label>
 		{{vm.currentQuestion.q}}
 		<span ng-switch="vm.currentQuestion.required"><span ng-switch-when="false">(Optional)</span></span>
 	</label>
-	<div>
-		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" ng-required="vm.currentQuestion.required" style="width: 70%" />
+	<div class="dropdown" is-open="vm.isDefaultsOpen">
+		<input name="{{vm.currentQuestion.key}}" ng-model="vm.currentQuestion.value" type="text" class="dropdown-toggle" ng-required="vm.currentQuestion.required" style="width: 300px" ng-enter="vm.next()" />
+		<ul class="dropdown-menu" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">
+			<li ng-repeat="default in vm.currentQuestion.defaults">
+				<div ng-click="vm.currentQuestion.value = default" style="width: 100%; cursor: pointer">{{default}}</div>
+			</li>
+		</ul>
 	</div>
-	<accordion ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
-		<accordion-group>
-			<accordion-heading ng-class="">
-				Defines <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-			</accordion-heading>
-			<div class="gridStyle" ng-grid="vm.definesGridOptions"></div>
-		</accordion-group>
-	</accordion>
+	<div class="space-6" />
+	<div id="accordion" class="accordion-style1 panel-group" ng-class="{hidden: vm.location.path() == '/configurator/setvars'}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<span class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" style="cursor: pointer">
+						<i class="icon-angle-down bigger-110" data-icon-hide="icon-angle-down" data-icon-show="icon-angle-right"></i>
+						&nbsp;Variables
+					</span>
+				</h4>
+			</div>
+
+			<div class="panel-collapse collapse" id="collapseOne">
+				<div class="panel-body">
+					<div class="gridStyle" ng-grid="vm.definesGridOptions"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="space-6" />
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-prev" ng-click="vm.back()">
 			<i class="icon-arrow-left"></i>

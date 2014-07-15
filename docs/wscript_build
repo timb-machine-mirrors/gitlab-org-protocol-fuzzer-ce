@@ -1,12 +1,51 @@
 #!/usr/bin/env python
 
-doc = bld(name='peach-userguide-pdf')
+import os
 
+doc = bld(
+  name='peach-doc', 
+#  rule='cmd.exe /c docs\\build.bat',
+#  source=bld.path.ant_glob('src.pro/**/*.adoc'),
+  )
+
+#doc.exec_command(cmd='build.bat')
+
+nodes = bld.path.ant_glob('out.pro/webhelp/docs/**/*')
+for node in nodes:
+    # difference between basedir and given dir
+    relfile = node.path_from(bld.path)[len('out.pro/webhelp/docs/'):]
+    pos = relfile.rfind(os.sep)
+    subpath = ''
+    if pos > -1:
+        subpath = relfile[:pos]
+    # add difference of path to install dir
+    install_dir = '${BINDIR}/docs/' + subpath
+    # Use 'doc.install_files' so they are tracked in the builder 'peach-doc'
+    # and the zip that depends on 'peach-doc' will include them
+    doc.install_files(install_dir, node)
+
+doc.install_files(
+  '${BINDIR}/sdk/apidocs',
+  bld.path.ant_glob('out.pro/apidocs/**'),
+  chmod=Utils.O644,
+  )
+
+#doc.install_files(
+#  '${BINDIR}/docs',
+#  bld.path.ant_glob('out.pro/webhelp/docs/**'),
+#  chmod=Utils.O644,
+#  )
+
+# For some reason, this needs to be a Node via find_resource
+# in order for the pkg phase of waf to work
+pdf = bld.path.find_resource('out.pro/pdf/peach_professional.pdf')
+
+# Install the pdf with the doc builder
 doc.install_as(
   '${BINDIR}/Peach_Professional.pdf',
-  doc.path.find_resource('pdf/Peach_Professional.pdf'),
+  pdf,
   chmod=Utils.O644,
-)
+  )
 
 """
 bld(
