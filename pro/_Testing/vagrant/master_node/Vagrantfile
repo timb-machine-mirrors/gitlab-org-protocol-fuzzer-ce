@@ -9,6 +9,8 @@ print access_creds[1]
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "aws_base"
+
   config.vm.provider :aws do |aws|
     access_creds = File.readlines('creds.txt', 'r')
     print access_creds[0]

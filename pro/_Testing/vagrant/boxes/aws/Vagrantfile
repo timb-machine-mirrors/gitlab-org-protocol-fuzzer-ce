@@ -1,0 +1,9 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provider :aws do |aws|
+    # ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20140607.1
+    aws.ami = "ami-b5a9d485"
+  end
+end
