@@ -1,32 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Range key="SourcePort" name="name" description="" min="0" max="65535" value="161"/>
-	<Range key="TargetPort" name="name" description="" min="0" max="65535" value="161"/>
-	<Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="192.168.222.149"/>
-	<String key="CommString" value="public"/>
-	<String key="LoggerPath" name="Logger Path" description="" value="./logs/snmp/"/>
-	<Strategy key="Strategy" name="name" description=""  value="Random"/>
+	<Define key="SourcePort" value="161"/>
+	<Define key="TargetPort" value="161"/>
+	<Define key="TargetIPv4" value="192.168.222.149"/>
+	<Define key="CommString" value="public"/>
+	<Define key="LoggerPath" value="./logs/snmp/"/>
+	<Define key="Strategy" value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">
-		<Open action="SNMP:Server.LaunchClient.Action" publisher="Pub"/>
-		<Input action="SNMP:Server.ServerStart.GetRequest" publisher="Pub">
+		<Open action="SNMP:Client.Initial.GetRequest" publisher="Pub"/>
+		<Output action="SNMP:Client.Initial.GetRequest" publisher="Pub">
 <![CDATA[
 0000   30 29 02 01 01 04 06 70 75 62 6c 69 63 a0 1c 02  0).....public...
 0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0e 30 0c 06  .r. .......0.0..
 0020   08 2b 06 01 02 01 01 04 00 05 00                 .+.........
 ]]>
-		</Input>
+		</Output>
 
-		<Output action="SNMP:Server.ServerStart.Response" publisher="Pub">
+		<Input action="SNMP:Client.Initial.GetResponse" datagram="true" publisher="Pub">
 <![CDATA[
 0000   30 3c 02 01 01 04 06 70 75 62 6c 69 63 a2 2f 02  0<.....public./.
 0010   04 72 a0 20 a6 02 01 00 02 01 00 30 21 30 1f 06  .r. .......0!0..
 0020   08 2b 06 01 02 01 01 04 00 04 13 4d 65 20 3c 6d  .+.........Me <m
 0030   65 40 65 78 61 6d 70 6c 65 2e 6f 72 67 3e        e@example.org>
 ]]>
+		</Input>
+
+		<Output action="SNMP:Client.Initial.GetNextRequest" publisher="Pub">
+<![CDATA[
+0000   30 2a 02 01 01 04 06 70 75 62 6c 69 63 a1 1d 02  0*.....public...
+0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0f 30 0d 06  .r. .......0.0..
+0020   09 2b 06 01 02 01 19 01 07 00 05 00              .+..........
+]]>
 		</Output>
 
+		<Input action="SNMP:Client.Initial.GetNextResponse" datagram="true" publisher="Pub">
+<![CDATA[
+0000   30 2a 02 01 01 04 06 70 75 62 6c 69 63 a2 1d 02  0*.....public...
+0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0f 30 0d 06  .r. .......0.0..
+0020   09 2b 06 01 02 01 19 01 07 00 82 00              .+..........
+]]>
+		</Input>
+
+		<Output action="SNMP:Client.Initial.GetBulkRequest" publisher="Pub">
+<![CDATA[
+0000   30 2a 02 01 01 04 06 70 75 62 6c 69 63 a5 1d 02  0*.....public...
+0010   04 72 a0 20 a6 02 01 00 02 01 0a 30 0f 30 0d 06  .r. .......0.0..
+0020   09 2b 06 01 02 01 19 01 07 00 05 00              .+..........
+]]>
+		</Output>
+
+		<Input action="SNMP:Client.Initial.GetBulkResponse" datagram="true" publisher="Pub">
+<![CDATA[
+0000   30 2a 02 01 01 04 06 70 75 62 6c 69 63 a2 1d 02  0*.....public...
+0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0f 30 0d 06  .r. .......0.0..
+0020   09 2b 06 01 02 01 19 01 07 00 82 00              .+..........
+]]>
+		</Input>
 	</Test>
+
 </TestData>

@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+access_creds = File.readlines('creds.txt', 'r')
+print access_creds[0]
+print access_creds[1]
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "aws_base"
+
+  config.vm.provider :aws do |aws|
+    access_creds = File.readlines('creds.txt', 'r')
+    print access_creds[0]
+    print access_creds[1]
+
+    access_creds = File.open('creds.txt', 'r').read
+
+    aws.access_key_id = access_creds[0]
+    aws.secret_access_key = access_creds[1]
+    aws.keypair_name = "pittesting"
+
+    aws.ami = "ami-b5a9d485" # Ubuntu 14.04
+    instance_type = "m1.small"
+
+    aws.tags = {
+      "Name" => "Pit-Testing Master Node",
+      "OS" => "Ubuntu 14.04"
+    }
+
+  end
+
+end

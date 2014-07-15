@@ -56,10 +56,14 @@ SUCH DAMAGE.
 	<!-- LLDP Simple State Model -->
   <StateModel name="Announce" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="LldpSendPacket" type="output">
         <!--Action name="ViewPacket" type="output" publisher="HexHandler"-->
 				<DataModel ref="LLDPPacket"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

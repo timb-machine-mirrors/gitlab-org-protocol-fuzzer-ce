@@ -39,30 +39,28 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="File Transfer Protocol server PIT"
+       description="Fuzz an FTP server in passive mode"
        version="0.0.2">
 
   <Include ns="FTP" src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>
 
   <Test name="Default">
-    <StateModel ref="FTP:ServerPassive"/>
+    <StateModel ref="FTP:ClientPassive"/>
 
-    <Publisher name="CommandPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="##CommandPort##"/>
-		<Param name="AcceptTimeout" value="##AcceptTimeout##"/>
-		<Param name="Timeout" value="##Timeout##"/>
-	</Publisher>
+    <Publisher class="Tcp" name="CommandPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
+    </Publisher>
 
-    <!-- Used by server state for data port in pasv mode -->
-    <Publisher name="DataPublisher" class="TcpListener">
-      <Param name="Interface" value="##SourceIPv4##"/>
-      <Param name="Port" value="##DataPort##"/>
-      <Param name="AcceptTimeout" value="##AcceptTimeout##"/>
+    <!-- Used by client state for data port in passive mode -->
+    <Publisher class="Tcp" name="DataPublisher">
+      <Param name="Host" value="##TargetIPv4##"/>
+      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Timeout" value="10000"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
-
     <Logger class="File" >
       <Param name="Path" value="##LoggerPath##"/>
     </Logger>

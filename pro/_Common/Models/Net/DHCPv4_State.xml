@@ -46,6 +46,8 @@ SUCH DAMAGE.
 
 	<StateModel name="Client" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action name="Discover" type="output">
 				<DataModel ref="DHCPv4:Discover"/>
 				<Data>
@@ -77,6 +79,9 @@ SUCH DAMAGE.
 			<Action name="Release" type="output">
 				<DataModel ref="DHCPv4:Release"/>
 			</Action>
+      
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+
 		</State>
 	</StateModel>
 </Peach>

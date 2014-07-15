@@ -63,6 +63,7 @@ SUCH DAMAGE.
 
   <StateModel name="Echo" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
       <Action name="EchoRequest" type="output">
         <DataModel ref="ICMPv6:EchoRequest"/>
@@ -72,11 +73,15 @@ SUCH DAMAGE.
         <DataModel ref="ICMPv6:EchoReply"/>
       </Action>
 
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="NeighborSolicitation" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 
       <Action name="NeighborSolicitation" type="output">
         <DataModel ref="ICMPv6:NeighborSolicitation"/>
@@ -86,11 +91,15 @@ SUCH DAMAGE.
         <DataModel ref="ICMPv6:NeighborAdvertisement"/>
       </Action>
 
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 
       <Action name="EchoRequest" type="output">
         <DataModel ref="ICMPv6:EchoRequest"/>
@@ -123,6 +132,8 @@ SUCH DAMAGE.
 		<Action name="NeighborAdvertisement" type="input">
 			<DataModel ref="ICMPv6:NeighborAdvertisement"/>
 		</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 	</State>
   </StateModel>
 </Peach>

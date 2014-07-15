@@ -3,9 +3,13 @@ include::VXLAN_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
-Setting up VXLAN is a multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here]
+
+Setting up VXLAN is a multi-step process. In order to simplify the setup, please refer to to VMware's official VLXAN deployment guide http://www.vmware.com/files/pdf/techpaper/VMware-VXLAN-Deployment-Guide.pdf[here].
+
+The target must also have listeners configured for TCP and UDP reachable via IPv4 and IPv6.
 
 ==== Required Pit Configuration Changes
+
 TargetIPv6:: IPv6 address of the target host machine.
 SourceIPv6:: IPv6 address of the interface on the local machine.
 TargetIPv4:: IPv4 address of the target host machine.
@@ -22,20 +26,25 @@ SourcePort:: UDPv4 and/or TCPv4 port number of the local machine.
 TargetPort:: UDPv4 and/or TCPv4 port number of the target host machine.
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
+
 ----
 peach -1 --debug VXLAN.xml
 ----
+
 ==== Full test run
+
 ----
 peach VXLAN.xml
 ----
@@ -44,36 +53,114 @@ peach VXLAN.xml
 
 .Sample VXLAN Configuration File
 ==========================
+
 Example configuration for sending vxlan packets.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <String key="OuterSourceMAC" value="000000000000"/>
-    <String key="OuterSourceIPv4" value="10.6.66.51" />
-    <String key="OuterTargetMAC"   value="000000000000"/>
-    <String key="OuterTargetIPv4" value="10.6.66.52"/>
-    <String key="LoggerPath" name="Logger Path" description=""  value="logs/vxlan/"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000000000000" />
-    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="000000000000"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="::1"/>
-    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="::1"/>
-    <String key="Tag" value="1"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="12345"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
+    <Hwaddr		key="OuterSourceMAC"	
+				value="5254005335d3" 
+				name="Source MAC Address" 
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
+	  
+    <Ipv4		key="OuterSourceIPv4"	
+				value="10.6.66.51" 
+				name="Source IP Address" 
+				description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+        
+    <Hwaddr		key="OuterTargetMAC"	
+				value="000000000000" 
+				name="Target MAC Address" 
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+    
+	  <Ipv4		key="OuterTargetIPv4"	
+				value="10.6.66.52" 
+				name="Target IP Address" 
+				description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+	  
+    <Hwaddr		key="SourceMAC"
+				value="6805ca0589fe"
+				name="Source MAC Address"
+				description="Hardware address of the network interface represented inside of the VXLAN encapsulation being sent from Peach Fuzzer. This address must not match OuterSourceMAC. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
+	
+	<Ipv4		key="SourceIPv4"
+				value="127.0.0.1"
+				name="Source IPv4 Address"
+				description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+	
+	<Ipv6		key="SourceIPv6"
+				value="::1"
+				name="Source IPv6 Address"
+				description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+	
+	<Range		key="SourcePort"
+				value="1234"
+				min="0" max="65535"
+				name="Source Port"
+				description="The source port the network packet originates from."/>
+
+	<Hwaddr		key="TargetMAC"
+				value="2233ca00ff0f"
+				name="Target MAC Address"
+				description="Hardware address of the network interface represented inside of the VXLAN encapsulation being sent to a target. This address must not match OuterTargetMAC. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  /> 
+	  
+    <Ipv4		key="TargetIPv4"
+				value="127.0.0.1"
+				name="Target IPv4 Address"
+				description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+	  
+	<Ipv6		key="TargetIPv6"
+				value="::1"
+				name="Target IPv6 Address"
+				description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+	  
+    <Range		key="TargetPort"
+				value="1234"
+				min="0" max="65535"
+				name="Target Port"
+				description="The target or destination port the network packet is sent to."/>
+	 
+	<Range		key="Vni"
+				value="42"
+				min="0" max="16777215"
+				name="VXLAN Network Identifier"
+				description="VXLAN Segment ID/VXLAN Network (VNI) - this is a 24 bit value used to designate the individual VXLAN overlay network on which the communicating VMs are situated.  VMs in different VXLAN overlay networks cannot communicate with each other."/>
+	  
+	<Range		key="Tag"
+				value="2"
+				min="0"
+				max="4095"
+				name="VLAN identifier"
+				description="A 12-bit field specifying the VLAN to which the frame belongs. The hexadecimal values of 0x000 and 0xFFF are reserved. All other values may be used as VLAN identifiers, allowing up to 4,094 VLANs. The reserved value 0x000 indicates that the frame does not belong to any VLAN; in this case, the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges, VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific." />
+	  
+	<String		key="LoggerPath"
+				value="logs/vxlan/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+	  
+	<Strategy	key="Strategy"
+				value="Random"
+				name="Mutation Strategy"
+				description="The mutation strategy to use when fuzzing." />
+	  
+	<String		key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
   </All>
 
   <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
+    <Iface		key="Interface"
+				value="eth0"
+				name="Network Interface"
+				description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
   </Linux>
 
   <OSX>
-    <!-- This can't run on OS X because it uses the RawEther publisher. -->
+     <!-- This can't run on OS X because it uses the RawEther publisher. -->
   </OSX>
 
   <Windows>
@@ -81,4 +168,5 @@ Example configuration for sending vxlan packets.
   </Windows>
 </PitDefines>
 ----
+
 ==========================

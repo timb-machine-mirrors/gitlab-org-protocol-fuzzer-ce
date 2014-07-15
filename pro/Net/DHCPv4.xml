@@ -39,7 +39,7 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Dynamic Host Configuration Protocol PIT"
+       description="Fuzz a DHCPv4 server"
        version="0.0.2">
 
   <Include ns="DHCPv4" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv4_State.xml"/>

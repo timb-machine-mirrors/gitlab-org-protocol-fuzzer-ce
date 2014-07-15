@@ -3,12 +3,13 @@ include::VLAN_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
-A VLAN interface or VLAN enabled switch is required.
-A VLAN interface can be added on Linux using vconfig.
 
-In order to run all tests both a UDP and TCP listener are required. The networking tool socat can be used as the listener.
+A VLAN interface or VLAN enabled switch or other device is required.
+
+In order to run all tests both a UDP and TCP listener are required. The networking tool +socat+ can be used as the listener.
 
 ==== Required Pit Configuration Changes
+
 TargetIPv6:: IPv6 address of the target host machine.
 SourceIPv6:: IPv6 address of the interface on the local machine.
 TargetIPv4:: IPv4 address of the target host machine.
@@ -16,25 +17,29 @@ SourceIPv4:: IPv4 address of the interface on the local machine.
 SourceMAC:: MAC address on local machine.
 TargetMAC:: MAC address of target machine.
 Tag:: VLAN identifier specifying the VLAN to which the frames belong.
-Interface:: Name of local interface (used for monitoring).
 SourcePort:: UDPv6 and/or TCPv6 port number of the local machine.
 TargetPort:: UDPv6 and/or TCPv6 port number of the target host machine.
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
+
 ----
 peach -1 --debug VLAN.xml
 ----
+
 ==== Full test run
+
 ----
 peach VLAN.xml
 ----
@@ -43,31 +48,28 @@ peach VLAN.xml
 
 .Sample VLAN Configuration File
 ==========================
-Example configuration to send vlan packets
 
-In order to replicate this example, first install vlan and configure vlan. Then, set up socat in different terminals to listen for incoming packets. 
+In this example, a Linux machine is configured with vlan support.  We recommend using the current release of Ubuntu Server LTS. In order to replicate this example, first install the +vlan+ package and configure. Then, set up +socat+ in different terminals to listen for incoming packets. 
 
-For this example we assume you are running Linux. For other platforms follow the platform specific installation instructions for vlan and socat.
+ NOTE: The TargetMAC configuration parameter must be correctly configured.
 
 ----
+# Install vlan
 sudo apt-get install vlan
 
-#Add a new vlan interface with the tag of 1
+# Add a new vlan interface with the tag of 1
 sudo vconfig add eth0 1
 
-#Config the vlan interface
+# Config the vlan interface
 sudo ifconfig eth0.1 192.168.1.1 netmask 255.255.255.0 broadcast 192.168.1.255 up
 
-#Install socat
-
+# Install socat
 sudo apt-get install socat
 
-#Setting up socat listener for UDP
-
+# Setting up socat listener for UDP
 sudo socat STDIO udp-listen:12345
 
-#Setting up socat listener for TCP
-
+# Setting up socat listener for TCP
 sudo socat STDIO tcp-listen:12345
 ----
 
@@ -75,31 +77,80 @@ sudo socat STDIO tcp-listen:12345
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000000000000" />
-    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="000000000000"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="::1"/>
-    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="::1"/>
-    <String key="Tag" value="1"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="12345"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="12345"/>
-  </All>
+	<!-- NOTE: This pit is only supported on Linux or OS X. -->
+	<All>
+		<Iface key="Interface"
+			   value="eth0"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+		
+		<Hwaddr key="SourceMAC"
+				value="000000000000"
+				name="Source MAC Address"
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
+		
+		<Ipv4 key="SourceIPv4"
+			  value="192.168.1.2"
+			  name="Source IPv4 Address"
+			  description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
+		<Ipv6 key="SourceIPv6"
+			  value="::1"
+			  name="Source IPv6 Address"
+			  description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+			  
+		<Range key="SourcePort" 
+			   value="1234"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
+		
+		<Hwaddr key="TargetMAC"
+				value="000000000000"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+		
+		<Ipv4 key="TargetIPv4"
+			  value="192.168.1.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+		
+		<Ipv6 key="TargetIPv6"
+			  value="::1"
+			  name="Target IPv6 Address"
+			  description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+		
+		<Range key="TargetPort"
+			   value="12345"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-  </Linux>
+		<Range key="Tag"
+			   value="1"
+			   min="0" max="4095"
+			   name="VLAN identifier"
+			   description="A 12-bit field specifying the VLAN to which the frame belongs. The hexadecimal values of 0x000 and 0xFFF are reserved. All other values may be used as VLAN identifiers, allowing up to 4,094 VLANs. The reserved value 0x000 indicates that the frame does not belong to any VLAN; in this case, the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges, VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific." />
 
-  <OSX>
-    <!-- This can't run on OS X because it uses the RawEther publisher. -->
-  </OSX>
-
-  <Windows>
-    <!-- This can't run on windows because it uses the RawEther publisher. -->
-  </Windows>
+		<String
+			key="LoggerPath"
+			value="logs/vlan/"
+			name="Logger Path"
+			description="The directory where Peach will save the log produced when fuzzing." />
+		
+		<Strategy
+			key="Strategy"
+			value="Random"
+			name="Mutation Strategy"
+			description="The mutation strategy to use when fuzzing." />
+		
+		<String
+			key="PitLibraryPath"
+			value="."
+			name="Pit Library Path"
+			description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
+
 ==========================

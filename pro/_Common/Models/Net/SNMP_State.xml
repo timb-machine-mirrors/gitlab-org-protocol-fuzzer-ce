@@ -48,6 +48,8 @@ SUCH DAMAGE.
 	<!-- Client State Model -->
   <StateModel name="Client" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <!-- generate snmp get request packet -->
       <Action name="GetRequest" type="output">
         <DataModel ref="SNMP:SnmpGet"/>
@@ -74,6 +76,8 @@ SUCH DAMAGE.
       <Action name="GetBulkResponse" type="input">
         <DataModel ref="SNMP:SnmpResponse"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -81,13 +85,9 @@ SUCH DAMAGE.
   <StateModel name="Server" initialState="LaunchClient">
     <State name="LaunchClient">
       <Action type="open"/>
+      
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
-
-      <Action type="changeState" ref="ServerStart"/>
-		</State>
-
-		<State name="ServerStart">
       <Action name="GetRequest" type="input">
         <DataModel ref="SNMP:SNMPHeaderV2_"/>
       </Action>
@@ -99,7 +99,7 @@ SUCH DAMAGE.
 				<DataModel ref="SNMP:SnmpResponse"/>
       </Action>
 
-       <Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

@@ -45,6 +45,8 @@ SUCH DAMAGE.
   
   <StateModel name="Transmit" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="GeneralQuery" type="output">
         <DataModel ref="IGMP:MembershipQuery"/>
       </Action>
@@ -65,6 +67,8 @@ SUCH DAMAGE.
       <Action type="output">
         <DataModel ref="IGMP:Ver3MembershipReport"/>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 </Peach>

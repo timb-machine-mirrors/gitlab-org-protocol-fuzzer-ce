@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TestData>
 
-	<Ipv4 key="RemoteAgentIP" name="Remote Agent IP Address" description="" value="10.0.1.40"/>
-  <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="192.168.222.134"/>
-  <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="192.168.222.1"/>
-	<Strategy key="Strategy" name="name" description=""  value="Random"/>
+	<Define key="TargetIPv4" value="192.168.222.134"/>
+	<Define key="SourceIPv4" value="192.168.222.1"/>
+	<Define key="Strategy" value="Random"/>
 	<!-- PitLibraryPath is set by the tester -->
 
 	<Test name="Default">

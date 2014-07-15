@@ -39,18 +39,18 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
-       description="Simple Network Management Protocol client PIT"
+       description="Fuzz an SNMP client"
        version="0.0.2">
 
   <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
 
   <Test name="Default">
-    <StateModel ref="SNMP:Client"/>
+    <StateModel ref="SNMP:Server"/>
 
     <Publisher class="Udp">
       <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##TargetIPv4##"/>
-      <Param name="Port" value="##TargetPort##"/>
+      <Param name="Host" value="##SourceIPv4##"/>
+      <Param name="Timeout" value="5000"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
@@ -60,3 +60,4 @@ SUCH DAMAGE.
     </Logger>
   </Test>
 </Peach>
+

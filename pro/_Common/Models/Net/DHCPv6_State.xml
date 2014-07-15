@@ -61,6 +61,8 @@ SUCH DAMAGE.
 
 		<!-- "The client sends a Solicit message to the All_DHCP_Relay_Agents_and_Servers address to find available DHCP servers." -->
 		<State name="Listening">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 
 			<Action type="input" name="Listen" publisher="LisentenPublisher">
 				<DataModel name="DhcpRequest" ref="DHCPv6:Packet"/>
@@ -136,15 +138,22 @@ SUCH DAMAGE.
 					<Field name="Option[2].OptionChoice.IdentityAssociationForNonTemporary.Data.IaOptions[0].IaOptionChoice.IaAddress" value="" />
 				</Data>
 			</Action>
+      
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+
 		</State>
 
 		<State name="Quit">
 			<!-- This is a state that exists to exit after a given number of unmatched packets -->
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+
 		</State>
 	</StateModel>
 
 	<StateModel name="Client" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action name="Solicit" type="output">
 				<DataModel ref="DHCPv6:Solicit"/>
 			</Action>
@@ -167,6 +176,8 @@ SUCH DAMAGE.
 			<Action name="Reply" type="input">
 				<DataModel ref="DHCPv6:Packet"/>
 			</Action>
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+
 		</State>
 	</StateModel>
 </Peach>

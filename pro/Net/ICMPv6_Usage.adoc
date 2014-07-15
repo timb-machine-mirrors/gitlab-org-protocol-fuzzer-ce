@@ -8,15 +8,15 @@ A target machine with ICMPv6 enabled.  A firewall must not block ICMPv6 messages
 ==== Required Pit Configuration Changes
 TargetIPv6:: IP address of the target host machine.
 SourceIPv6:: IP address of the interface on the local machine.
-Interface:: Name of local interface (used for monitoring).
 
 ==== Optional Pit Configuration Changes.
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
@@ -59,32 +59,37 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <Ipv4 key="RemoteAgentIP" name="Remote Agent IP Address" description="" value="10.0.1.40"/>
-    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="::1"/>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/ICMPv6/"/>
-    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="::1"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-  </All>
+	<All>
+		<Hwaddr key="SourceMAC"
+				value="000000000000"
+				name="Source MAC Address"
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="lo"/>
-    <Iface key="tsharkInterface" name="name" description="" value="lo"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/bin/tshark"/>
-  </Linux>
+		<Ipv6 key="SourceIPv6"
+			  value="::1"
+			  name="Source IPv6 Address"
+			  description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
 
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-    <Iface key="tsharkInterface" name="name" description="" value="en0"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
-  </OSX>
+		<Ipv6 key="TargetIPv6"
+			  value="::1"
+			  name="Target IPv6 Address"
+			  description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
 
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-    <Iface key="tsharkInterface" name="name" description="" value="2"/>
-    <String key="tsharkBin" name="name" description="" value="C:\Program Files\Wireshark\tshark.exe"/>
-  </Windows>
+		<String key="LoggerPath"
+				value="logs/icmpv6/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================

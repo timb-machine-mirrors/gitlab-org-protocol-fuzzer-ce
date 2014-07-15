@@ -23,29 +23,129 @@ Strategy:: Fuzzing strategy Peach will use for testing
 LoggerPath:: Path to folder where logs will be stored
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
-.Single test debug run
+==== Single test debug run
+
+.Fuzzing DHCPv6 Server
 ----
 peach -1 -debug DHCPv6_Server.xml
+----
+
+.Fuzzing DHCPv6 Client
+----
 peach -1 -debug DHCPv6_Client.xml
 ----
-.Full test run
+
+==== Single test debug run
+
+.Fuzzing DHCPv6 Server
 ----
 peach DHCPv6_Server.xml
+----
+
+.Fuzzing DHCPv6 Client
+----
 peach DHCPv6_Client.xml
 ----
 
 === Examples
 
-.Sample DHCPv6 Configuration File
+.Sample DHCPv6 Client Configuration File
+==========================
+
+Example configuration sending DHCPv6 packets.
+
+For this example we assume you are running on Ubuntu or Debian Linux.
+
+.Install DHCPv6 Client
+----
+sudo apt-get install wide-dhcpv6-client
+----
+
+.Running the client
+----
+dhcpv6c -f <interface>
+----
+
+ NOTE: The MAC addresses must be updated based on the environment.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<String key="TargetIPv6Lease"
+				value="fe80::908:7a38:6156:acce"
+				name="Target IPv6 Lease"
+				description="IPv6 address to assign."/>
+		
+		<String key="MaxTries"
+				value="20"
+				name="Max Tries"
+				description="Maximum number of tries to assign IP address per iteration."/>
+		
+		<Hwaddr key="SourceMAC"
+				value="000000000000"
+				name="Source MAC Address"
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
+
+		<Ipv6 key="SourceIPv6"
+			  value="::1"
+			  name="Source IPv6 Address"
+			  description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+		<Range key="SourcePort"
+			   value="547"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
+
+		<Hwaddr key="TargetMAC"
+				value="000000000000"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+		
+		<Ipv6 key="TargetIPv6"
+			  value="::1"
+			  name="Target IPv6 Address"
+			  description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+		<Range key="TargetPort"
+			   value="546"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+
+		<String key="LoggerPath"
+				value="logs/dhcpv6_server/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+</PitDefines>
+----
+==========================
+
+.Sample DHCPv6 Server Configuration File
 ==========================
 Example configuration sending DHCPv6 packets.
 
-For this example we assume you are running on Windows. For other platforms use the preferred way to configure the firewall.
+For this example we assume you are running on Windows.
 
 Windows Firewall Inbound Rules to enable on Target:
 
@@ -53,41 +153,71 @@ Windows Firewall Inbound Rules to enable on Target:
 Core Networking - Dynamic Host Configuration Protocol for IPv6(DHCPV6-In)
 ----
 
+ NOTE: The MAC addresses must be updated based on the environment.
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/dhcpV6/"/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="547"/>
-    <String key="MulticastDHCP" value="ff02::1:2"/>
-    <Ipv6 key="TargetIPv6" name="Target IP Address" description="" value="fe80::5054:ff:fe02:c880"/>
-    <String key="TargetIPv6Lease" value="fe80::908:7a38:6156:acce"/>
-    <Ipv6 key="SourceIPv6" name="Source IP Address" description="" value="fe80::3e97:eff:fe47:524a%4"/>
-    <String key="MaxTries" value="20"/> <!-- Maximum number of packets to listen for before going to next iteration -->
-    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="000c291bf55d"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="546"/>
-    <String key="TargetInterface" value="veth1"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <Iface key="Interface" name="name" description=""  value="::1"/> <!-- This needs to be "::1" to bind to all interfaces. This is because ipv6 multicast oddness. -->
-    <Ipv4 key="RemoteAgentIP" name="Remote Agent IP Address" description=""  value="127.0.0.1"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-  </All>
+	<All>
+		<String key="TargetIPv6Lease"
+				value="fe80::908:7a38:6156:acce"
+				name="Target IPv6 Lease"
+				description="IPv6 address to assign."/>
 
-  <Linux>
-    <Iface key="tsharkInterface" name="name" description="" value="eth0"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/bin/tshark"/>
-  </Linux>
+		<String key="MaxTries"
+				value="20"
+				name="Max Tries"
+				description="Maximum number of tries to assign IP address per iteration."/>
 
-  <OSX>
-    <Iface key="tsharkInterface" name="name" description="" value="en0"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
-  </OSX>
+		<Hwaddr key="SourceMAC"
+				value="000000000000"
+				name="Source MAC Address"
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
 
-  <Windows>
-    <Iface key="tsharkInterface" name="name" description="" value="2"/>
-    <String key="tsharkBin" name="name" description="" value="C:\Program Files\Wireshark\tshark.exe"/>
-  </Windows>
+		<Ipv6 key="SourceIPv6"
+			  value="::1"
+			  name="Source IPv6 Address"
+			  description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+		<Range key="SourcePort"
+			   value="547"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
+
+		<Hwaddr key="TargetMAC"
+				value="000000000000"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+		
+		<Ipv6 key="TargetIPv6"
+			  value="::1"
+			  name="Target IPv6 Address"
+			  description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
+
+		<Range key="TargetPort"
+			   value="546"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+
+		<String key="LoggerPath"
+				value="logs/dhcpv6_client/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================

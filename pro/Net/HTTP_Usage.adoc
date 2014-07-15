@@ -3,52 +3,65 @@ include::HTTP_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
+
 There are two types of use for this pit: fuzzing a server and fuzzing a client. The default test
 fuzzes a server and the 'FuzzClient' test fuzzes a client. Note that this pit will fuzz the HTTP
 protocol itself and is not meant to fuzz web applications.
 
 ==== Required Pit Configuration Changes To Fuzz a Server
+
 TargetIPv4:: IP address of the target host machine.
 TargetPort:: port number of the target HTTP server.
 ServerCmd:: The server program to test when running the default test.
 Interface:: Name of local interface (used for monitoring).
 
 ==== Required Pit Configuration Changes To Fuzz a Server
+
 ClientCmd:: The client program to test when running the 'FuzzClient' test.
 Interface:: Name of local interface (used for monitoring).
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Agent:: Agent to run depending on the target OS. Do not change this value.
 PitLibraryPath:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
-----
-#fuzz server
-peach -1 --debug HTTP.xml
 
-#fuzz client
-peach -1 --debug HTTP.xml FuzzClient
+.Fuzzing an HTTP Server
 ----
+peach -1 --debug HTTP_Server.xml
+----
+
+.Fuzzing an HTTP Client
+----
+peach -1 --debug HTTP_Client.xml
+----
+
 ==== Full test run
-----
-#fuzz server
-peach HTTP.xml
 
-#fuzz client
-peach HTTP.xml FuzzClient
+.Fuzzing an HTTP Server
+----
+peach HTTP_Server.xml
+----
+
+.Fuzzing an HTTP Client
+----
+peach HTTP_Client.xml
 ----
 
 === Examples
 
-.Sample HTTP Configuration File
+.Sample HTTP Client Configuration File
 ==========================
+
 Example configuration targeting the curl command on Linux, OSX and Windows.
 Make sure the curl command is installed on your target system.
 
@@ -56,29 +69,70 @@ Make sure the curl command is installed on your target system.
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <String key="LoggerPath" name="Logger Path" description="" value="./logs/http/"/>
-    <Strategy key="Strategy" name="name" description="" value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="80"/>
-  </All>
+	<All>
+		<Range key="TargetPort"
+			   value="80"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+		
+		<String key="LoggerPath"
+				value="logs/http_client/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-    <String key="ClientCmd" value="curl 'http://localhost/'"/>
-  </Linux>
-  
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-    <String key="ClientCmd" value="curl 'http://localhost/'"/>
-  </OSX>
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
 
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-    <String key="ClientCmd" value="curl 'http://localhost/'"/>
-  </Windows>
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+</PitDefines>
+----
+==========================
 
+.Sample HTTP Server Configuration File
+==========================
+
+An HTTP server must be configured on port 80.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<PitDefines>
+	<All>
+		<Ipv4 key="TargetIPv4"
+			  value="127.0.0.1"
+			  name="Target IPv4 Address"
+			  description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+
+		<Range key="TargetPort"
+			   value="80"
+			   min="0"
+			   max="65535"
+			   name="Target Port"
+			   description="The target or destination port the network packet is sent to."/>
+		
+		<String key="LoggerPath"
+				value="logs/http_server/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
 </PitDefines>
 ----
 ==========================

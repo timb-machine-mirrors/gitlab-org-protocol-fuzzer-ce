@@ -44,46 +44,11 @@ SUCH DAMAGE.
 
 	<Include ns="AviDivx" src="file:##PitLibraryPath##/_Common/Models/Video/avi_divx_State.xml"/>
 
-	<Agent name="Linux">
-		<Monitor class="LinuxCrashMonitor"/>
-
-		<Monitor class="Process">
-			<Param name="Executable" value="##Target##"/>
-			<Param name="StartOnCall" value="Launch"/>
-			<Param name="Arguments" value="fuzzed.avi"/>
-			<Param name="CpuKill" value="true"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="OSX">
-		<Monitor class="CrashWrangler">
-			<Param name="Command" value="##Target##"/>
-			<Param name="Arguments" value="fuzzed.avi"/>
-			<Param name="StartOnCall" value="Launch"/>
-		</Monitor>
-	</Agent>
-
-	<Agent name="Win">
-		<Monitor class="PageHeap">
-			<Param name="Executable" value="vlc.exe"/>
-		</Monitor>
-
-		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="##Target## fuzzed.avi"/>
-			<Param name="StartOnCall" value="Launch"/>
-			<Param name="CpuKill" value="true"/>
-		</Monitor>
-	</Agent>
-
 	<Test name="Default">
 		<StateModel ref="AviDivx:FileWriteAndLaunch"/>
 
-		<Agent ref="Linux" platform="linux"/>
-		<Agent ref="OSX" platform="osx"/>
-		<Agent ref="Win" platform="windows"/>
-
 		<Publisher class="File">
-			<Param name="FileName" value="fuzzed.avi"/>
+			<Param name="FileName" value="##FuzzedFile##"/>
 		</Publisher>
 
 		<Strategy class="##Strategy##"/>

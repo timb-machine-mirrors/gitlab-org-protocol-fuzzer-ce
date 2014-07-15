@@ -49,7 +49,7 @@ SUCH DAMAGE.
 		<State name="StartServer">
       <Action type="start" publisher="TcpHandler"/>
 
-      <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
       <Action type="accept" publisher="TcpHandler"/>
 
@@ -117,13 +117,15 @@ SUCH DAMAGE.
 
 		<State name="Done">
 			<Action type="close" publisher="TcpHandler"/>
-			<Action type="call" method="exitProgram" publisher="Peach.Agent"/>
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 
 	<!-- Telnet Client State Model -->
   <StateModel name="Client" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action name="TelnetSendConnect" type="output" publisher="TcpHandler" onStart="TELNET.process_client_output(self)">
         <DataModel ref="TELNET:TelnetConnect"/>
       </Action>
@@ -237,10 +239,14 @@ SUCH DAMAGE.
 			<Action name="TelnetSendPayload3" type="output" publisher="TcpHandler">
 				<DataModel ref="TELNET:TelnetSendPayload3"/>
 			</Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<!--Empty state that ends the iteration-->
-		<State name="Done"/>
+		<State name="Done">
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+    </State>
 	</StateModel>
 </Peach>
 <!--END-->

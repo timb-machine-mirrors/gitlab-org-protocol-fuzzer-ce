@@ -58,6 +58,8 @@ SUCH DAMAGE.
 
 	<StateModel name="Multicast" initialState="Initial">
 		<State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
 			<Action name="SendPacket" type="output" publisher="RawHandler">
 				<DataModel ref="CDPPacket"/>
 				<Data>
@@ -76,6 +78,8 @@ SUCH DAMAGE.
 					<Field name="Payload.CDP.OptionChoices[12].ManagementAddress" value=""/>
 				</Data>
 			</Action>
+      
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 	</StateModel>
 </Peach>

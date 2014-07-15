@@ -3,6 +3,7 @@ include::DHCPv4_DataSheet.adoc[]
 === Configuration
 
 ==== Target Configuration
+
 A target machine with DHCPv4 enabled.  The software tool bind can be targeted in a Linux environment.
 A firewall must not block the DHCPv4 messages.
 
@@ -10,33 +11,29 @@ A firewall must not block the DHCPv4 messages.
 TargetIPv4:: IP address of the target host machine.
 SourceIPv4:: IP address of the interface on the local machine.
 SourcePort:: UDPv4 port number of the local machine.
-TargetPort:: UDPv4 port number of the target host machine.
 SourceMAC:: MAC Address of the local machine.
 TargetMAC:: MAC Address of the target host machine.
-RouterIP:: Router IP Address (fuzzed in DataModel).
-BroadcastIP:: Broadcast IP Address (fuzzed in DataModel).
-DHCPServerIP:: DHCP Server IP Address (fuzzed in DataModel).
-SubnetMask:: Subnet Mask (fuzzed in DataModel).
-DomainName:: Domain Name (fuzzed in DataModel).
-DNS:: DNS Server IP Address (fuzzed in DataModel).
-NetBios:: NetBios Server IP Address (fuzzed in DataModel).
-Interface:: Name of local interface (used for monitoring).
+Interface:: Name of local interface.
 
 ==== Optional Pit Configuration Changes
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
-==== Configure Additional Monitors
-Add monitors to agent as needed
+==== Configure Monitoring
+
+Monitoring must be configured to provide fault detection, data collection, and automation as needed.
 
 === Running
 
 ==== Single test debug run
+
 ----
 peach -1 --debug DHCPv4.xml
 ----
+
 ==== Full test run
+
 ----
 peach DHCPv4.xml
 ----
@@ -59,43 +56,75 @@ Core Networking - Dynamic Host Configuration Protocol (DHCP-In)
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
-  <All>
-    <String key="LoggerPath" name="Logger Path" description="" value="logs/dhcp4/"/>
-    <Ipv4 key="SourceIPv4" name="Source IP Address" description="" value="127.0.0.1"/>
-    <Range key="SourcePort" name="name" description="" min="0" max="65535" value="68"/>
-    <Ipv4 key="TargetIPv4" name="Target IP Address" description="" value="127.0.0.1"/>
-    <Range key="TargetPort" name="name" description="" min="0" max="65535" value="67"/>
-    <Hwaddr key="SourceMAC" name="Source MAC Address" description="" value="0800c0565000"/>
-    <Hwaddr key="TargetMAC" name="Target MAC Address" description="" value="f8e71b290c00"/>
-    <Strategy key="Strategy" name="name" description=""  value="Random"/>
-    <String key="PitLibraryPath" name="Pit Library Path" description="" value="."/>
+	<All>
+		<Hwaddr key="SourceMAC"
+				value="000000000000"
+				name="Source MAC Address"
+				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
 
-    <String key="RouterIP" value="192.168.146.2"/>
-    <String key="BroadcastIP" value="192.168.146.255"/>
-    <String key="DHCPServerIP" value="192.168.146.254"/>
-    <String key="SubnetMask" value="255.255.255.0"/>
-    <String key="DomainName" value="localdomain"/>
-    <String key="DNS" value="192.168.146.2"/>
-    <String key="NetBios" value="192.168.146.2"/>
-  </All>
+		<Ipv4 key="SourceIPv4"
+			  value="0.0.0.0"
+			  name="Source IPv4 Address"
+			  description="This is an advanced option and should be left as default."/>
 
-  <Linux>
-    <Iface key="Interface" name="name" description="" value="eth0"/>
-    <Iface key="tsharkInterface" name="name" description="" value="eth0"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/bin/tshark"/>
-  </Linux>
+		<Range key="SourcePort"
+			   value="1055"
+			   min="0" max="65535"
+			   name="Source Port"
+			   description="The source port the network packet originates from."/>
 
-  <OSX>
-    <Iface key="Interface" name="name" description="" value="en0"/>
-    <Iface key="tsharkInterface" name="name" description="" value="en0"/>
-    <String key="tsharkBin" name="name" description="" value="/usr/local/bin/tshark"/> <!-- fix depending on actual install location -->
-  </OSX>
+		<Hwaddr key="TargetMAC"
+				value="000000000000"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
 
-  <Windows>
-    <Iface key="Interface" name="name" description="" value="Local Area Connection"/>
-    <Iface key="tsharkInterface" name="name" description="" value="2"/>
-    <String key="tsharkBin" name="name" description="" value="C:\Program Files\Wireshark\tshark.exe"/>
-  </Windows>
+		<Ipv4 key="TargetIPv4"
+			  value="255.255.255.255"
+			  name="Target IPv4 Address"
+			  description="This is an advanced option and should be left as default." />
+
+		<Range key="TargetPort"
+			   value="67"
+			   min="0" max="65535"
+			   name="Target Port"
+			   description="The destination port the network packet is sent to."/>
+
+		<String key="LoggerPath"
+				value="logs/dhcpv4/"
+				name="Logger Path"
+				description="The directory where Peach will save the log produced when fuzzing." />
+
+		<Strategy key="Strategy"
+				  value="Random"
+				  name="Mutation Strategy"
+				  description="The mutation strategy to use when fuzzing." />
+
+		<String key="PitLibraryPath"
+				value="."
+				name="Pit Library Path"
+				description="The path to the root of the pit library."/>
+	</All>
+
+	<Linux>
+		<Iface key="Interface"
+			   value="eth0"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+	</Linux>
+
+	<OSX>
+		<Iface key="Interface"
+			   value="en0"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+	</OSX>
+
+	<Windows>
+		<Iface key="Interface"
+			   value="Local Area Connection"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+	</Windows>
 </PitDefines>
 ----
 ==========================

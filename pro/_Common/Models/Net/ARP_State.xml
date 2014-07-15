@@ -51,6 +51,8 @@ SUCH DAMAGE.
 
   <StateModel name="Request" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Request" type="output">
         <DataModel ref="ARPPacket"/>
         <Data>
@@ -58,24 +60,30 @@ SUCH DAMAGE.
           <Field name="Payload.Data.OPER.Request" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
   <StateModel name="Reply" initialState="Initial">
     <State name="Initial">
+      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
       <Action name="Request" type="input">
         <DataModel ref="ARPPacket"/>
       </Action>
-      <Action type="slurp" valueXpath="//Reply//Request//TPA" setXpath="//Reply//Reply//SPA"/>
-      <Action type="slurp" valueXpath="//Reply//Request//SPA" setXpath="//Reply//TPA"/>
-      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//Dest"/>
-      <Action type="slurp" valueXpath="//Reply//Request//Src" setXpath="//Reply//THA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/TPA" setXpath="//Reply/ARPPacket/Payload/Data/SPA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/SPA" setXpath="//Reply/ARPPacket/Payload/Data/TPA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/THA" setXpath="//Reply/ARPPacket/Payload/Data/SHA"/>
+      <Action type="slurp" valueXpath="//Request/ARPPacket/Payload/Data/SHA" setXpath="//Reply/ARPPacket/Payload/Data/THA"/>
       <Action name="Reply" type="output">
         <DataModel ref="ARPPacket"/>
         <Data>
           <Field name="Payload.Data.OPER.Reply" value=""/>
         </Data>
       </Action>
+
+      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
