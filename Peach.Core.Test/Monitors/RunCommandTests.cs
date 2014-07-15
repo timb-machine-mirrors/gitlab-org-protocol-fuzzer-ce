@@ -91,10 +91,67 @@ namespace Peach.Core.Test.Monitors
 					f.WriteLine("#!/usr/bin/env sh");
 				}
 
-				f.WriteLine("echo {0}> {1}", testName, tempFile);
+				f.WriteLine("echo {0}>> {1}", testName, tempFile);
 			}
 
 			return fileName;
+		}
+
+		[Test]
+		public void MultipleOnCall()
+		{
+			string template = @"
+			<Peach>
+				<StateModel name='TheState' initialState='Initial'>
+					<State name='Initial'>
+						<Action type='call' method='RunMyScript' publisher='Peach.Agent'/>
+					</State>
+				</StateModel>
+
+				<Agent name='LocalAgent'>
+					<Monitor class='RunCommand'>
+						<Param name='Command' value='{0}'/>
+						<Param name='StartOnCall' value='RunMyScript'/>
+					</Monitor>
+					<Monitor class='RunCommand'>
+						<Param name='Command' value='{1}'/>
+						<Param name='StartOnCall' value='RunMyScript'/>
+					</Monitor>
+					<Monitor class='RunCommand'>
+						<Param name='Command' value='{2}'/>
+						<Param name='StartOnCall' value='RunMyScript'/>
+					</Monitor>
+				</Agent>
+
+				<Test name='Default'>
+					<Agent ref='LocalAgent'/>
+					<StateModel ref='TheState'/>
+					<Publisher class='Null'/>
+				</Test>
+			</Peach>";
+
+			var tmp = Path.GetTempFileName();
+			var script1 = createScript("Cmd1", tmp);
+			var script2 = createScript("Cmd2", tmp);
+			var script3 = createScript("Cmd3", tmp);
+
+			var xml = string.Format(template, script1, script2, script3);
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(null);
+			e.startFuzzing(dom, config);
+
+			string[] output = File.ReadAllLines(tmp);
+			Assert.AreEqual(3, output.Length);
+			Assert.AreEqual("Cmd1", output[0]);
+			Assert.AreEqual("Cmd2", output[1]);
+			Assert.AreEqual("Cmd3", output[2]);
+
 		}
 
 		[Test]
