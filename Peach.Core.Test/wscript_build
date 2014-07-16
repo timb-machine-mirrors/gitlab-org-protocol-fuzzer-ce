@@ -13,7 +13,7 @@ deps = [
 	'IronPython.dll',
 	'IronPython.Modules.dll',
 	'SharpPcap.dll',
-	'PacketDotNet.dll',	
+	'PacketDotNet.dll',
 ]
 
 bld(
