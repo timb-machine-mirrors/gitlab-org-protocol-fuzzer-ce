@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -1013,8 +1012,18 @@ namespace Peach.Enterprise.Publishers
 						Thread.Sleep(125);
 					}
 				}
-				catch (SharpPcap.DeviceNotReadyException)
+				catch (SharpPcap.DeviceNotReadyException de)
 				{
+					logger.Error(de.Message);
+					associateException = new SoftException(de.Message, de);
+					associateThreadStop = true;
+					return;
+				}
+				catch(SharpPcap.PcapException pe)
+				{
+					logger.Error(pe.Message);
+					associateException = new SoftException(pe.Message, pe);
+					associateThreadStop = true;
 					return;
 				}
 			}
