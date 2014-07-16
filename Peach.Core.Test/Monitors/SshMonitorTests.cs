@@ -146,6 +146,8 @@ namespace Peach.Core.Test.Monitors
 					}
 				}
 				var after = GetEventCount(client);
+
+				Assert.AreEqual(before, after);
 			}
 		}
 
