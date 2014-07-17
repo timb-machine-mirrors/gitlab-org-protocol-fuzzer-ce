@@ -441,7 +441,7 @@ namespace Peach.Core
 						byte b = bytes[j];
 						line[hexColumn] = HexChars[(b >> 4) & 0xF];
 						line[hexColumn + 1] = HexChars[b & 0xF];
-						line[charColumn] = (b < 32 ? '·' : (char)b);
+						line[charColumn] = ((b < 32 || b > 126) ? '.' : (char)b);
 					}
 					hexColumn += 3;
 					charColumn++;
