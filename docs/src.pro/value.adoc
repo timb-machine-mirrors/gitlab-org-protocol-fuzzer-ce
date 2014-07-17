@@ -14,7 +14,9 @@
 // * List supported elements (e.g. not supported by containers such as block, choice, xmlelement, xmlattribute, etc.)
 
 
-All of the data element types in peach support the value attribute.  Values are used to specify a default value for a field when peach is not mutating it's contents. 
+The _yalue_ attribute specifies a default value for a field when Peach is not mutating its contents. 
+
+All of the Peach data element types support  _value_.  
 
 // TODO
 

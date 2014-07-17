@@ -29,7 +29,8 @@ hex::
 
 literal::
 	Specify a python or ruby statement that evaluates to the wanted value. + 
-	The evaluation occurs only once when the Pit is parsed into an internal dom tree.+
+	The evaluation occurs only once when the Pit is parsed into an internal dom tree.
+	
 WARNING: Literal should *NOT* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup]. Literals are only to be used for quick one-time expressions.
 
 
@@ -96,7 +97,7 @@ Output
 A
 ----
 
-NOTE: The hex values must be EVEN numbered! For example this is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
+NOTE: The hex values must be EVEN numbered! This is WRONG: "+0x000+" and this is CORRECT: "+0x0000+"
 ==========================
 
 .literal

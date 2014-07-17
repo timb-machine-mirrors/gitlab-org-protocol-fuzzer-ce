@@ -32,7 +32,7 @@ A token is a data element that Peach will seek when parsing incoming data.  Toke
 // Comma separated list
 // HTTP
 
-To parse and fuzz the header "length" and the value "42". Into the a data model peach can understand that header and value are two different parts tokenized by a ":". 
+If you are trying to parse "length:42" and you want the header and value to be considered separate elements, label the colon delimiter ":" as a token.
 
 .Example Data to Crack
 ----
