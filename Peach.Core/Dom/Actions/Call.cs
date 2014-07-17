@@ -86,15 +86,16 @@ namespace Peach.Core.Dom.Actions
 
 		protected override void OnRun(Publisher publisher, RunContext context)
 		{
-			publisher.start();
-
 			Variant ret = null;
 
 			// Are we sending to Agents?
 			if (this.publisher == "Peach.Agent")
 				ret = context.agentManager.Message("Action.Call", new Variant(method));
 			else
+			{
+				publisher.start();
 				ret = publisher.call(method, parameters.ToList());
+			}
 
 			if (result != null && ret != null)
 			{
