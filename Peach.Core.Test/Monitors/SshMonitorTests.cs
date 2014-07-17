@@ -107,6 +107,50 @@ namespace Peach.Core.Test.Monitors
 			Assert.Null(faults);
 		}
 
+		void info_AuthenticationPrompt(object sender, Renci.SshNet.Common.AuthenticationPromptEventArgs e)
+		{
+			foreach (var prompt in e.Prompts)
+			{
+				prompt.Response = "test";
+			}
+		}
+
+		int GetEventCount(Renci.SshNet.SshClient client)
+		{
+			var session = client.GetType().GetProperty("Session", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(client, null) as Renci.SshNet.Session;
+			Assert.NotNull(session);
+
+			var evt = session.GetType().GetEvent("ErrorOccured");
+			var del = session.GetType().GetField(evt.Name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public).GetValue(session) as Delegate;
+
+			return del.GetInvocationList().Length;
+		}
+
+		[Test]
+		public void MultipleCommands()
+		{
+			//var ci = new Renci.SshNet.PasswordConnectionInfo("osxbuild-dev.local", "user", "password");
+			var ci = new Renci.SshNet.KeyboardInteractiveConnectionInfo(TestHost, "test");
+			ci.AuthenticationPrompt += new EventHandler<Renci.SshNet.Common.AuthenticationPromptEventArgs>(info_AuthenticationPrompt);
+
+			using (var client = new Renci.SshNet.SshClient(ci))
+			{
+				client.Connect();
+
+				var before = GetEventCount(client);
+				for (var i = 0; i < 100; ++i)
+				{
+					using (var cmd = client.CreateCommand("echo hi"))
+					{
+						cmd.Execute();
+					}
+				}
+				var after = GetEventCount(client);
+
+				Assert.AreEqual(before, after);
+			}
+		}
+
 		[Test]
 		public void TestFaults()
 		{
