@@ -48,8 +48,6 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnStart()
 		{
-			_recvBuffer = new MemoryStream();
-
 			var devices = LibPcapLiveDeviceList.Instance;
 
 			foreach (var device in devices)
@@ -59,18 +57,18 @@ namespace Peach.Enterprise.Publishers
 			if (pcap == null)
 				throw new PeachException("Radiotap Publisher was unable to find '" + Interface + "' interface.");
 
-			pcap.Open(CaptureMode, 1);
+			_recvBuffer = new MemoryStream();
 		}
 
 		protected override void OnStop()
 		{
-			pcap.Close();
-
 			_recvBuffer.Close();
+			_recvBuffer = null;
 		}
 
 		protected override void OnOpen()
 		{
+			pcap.Open(CaptureMode, 1);
 			pcap.OnPacketArrival += new SharpPcap.PacketArrivalEventHandler(pcap_OnPacketArrival);
 			pcap.StartCapture();
 		}
@@ -79,6 +77,7 @@ namespace Peach.Enterprise.Publishers
 		{
 			pcap.StopCapture();
 			pcap.OnPacketArrival -= pcap_OnPacketArrival;
+			pcap.Close();
 		}
 
 		protected override void OnOutput(BitwiseStream data)

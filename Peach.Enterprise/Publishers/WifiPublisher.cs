@@ -192,23 +192,13 @@ namespace Peach.Enterprise.Publishers
 
 		protected override void OnOpen()
 		{
-		}
-
-		protected override void OnClose()
-		{
-		}
-
-       	protected override void OnStart()
-		{
-			base.OnStart();
-
 			ResetState();
 
 			beaconThread = new Thread(BeaconThread);
 			beaconThread.Start();
 		}
 
-		protected override void OnStop()
+		protected override void OnClose()
 		{
 			if (beaconThread != null)
 			{
@@ -236,7 +226,6 @@ namespace Peach.Enterprise.Publishers
 				associateThread = null;
 			}
 			
-			base.OnStop();
 		}
 
 		protected override void OnInput()
