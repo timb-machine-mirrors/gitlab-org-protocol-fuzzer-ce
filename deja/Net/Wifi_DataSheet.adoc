@@ -1,36 +1,41 @@
 :Doctitle: Wifi (802.11) Pit Data Sheet
 :Description: Wifi (802.11)
 
- * Peach Pit: Wifi
- * Direction: Client
- * Supported Platforms: Linux (Ubuntu 14.04 LTS)
- * Supported Wireless Chipsets: RaLink Chipset
+* Peach Pit: Wifi
+* Direction: Client
+* Supported Platforms: Linux (Ubuntu Server 14.04 LTS)
+* Supported Wireless Chipsets: RaLink Chipset
 
-The Address Resolution Protocol translates between hardware and protocol addresses. In Ethernet and Wireless networks, it usually translates between IPv4 and MAC addresses.
+IEEE 802.11 is a set of media access control (MAC) and physical layer (PHY) specifications for implementing wireless local area network (WLAN) computer communication in the 2.4, 3.6, 5 and 60 GHz frequency bands.
 
 === Specifications
-
-TODO: THe following!
 
 [options="header"]
 |========
 |Specification | Title
-|RFC826 | An Ethernet Address Resolution ProtocolS	
+| IEEE 802.11-2012 | IEEE 802.11-2012 - Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
 |========
 
 === Use Cases
 
-
 [options="header"]
 |========
 |Messages | Specification
-|MSG 1 | RFC826
+| Probe Response | IEEE 802.11-2012
+| Authentication | IEEE 802.11-2012
+| Association Response | IEEE 802.11-2012
+| Reassociation Response | IEEE 802.11-2012
+| Deauthentication | IEEE 802.11-2012
+| Disassociation | IEEE 802.11-2012
+| Data Frame | IEEE 802.11-2012
+| Acknowledgement (ACK) | IEEE 802.11-2012
+| Ready-To-Send (RTS) | IEEE 802.11-2012
+| Clear-To-Send (CTS) | IEEE 802.11-2012
+| Action Frame | IEEE 802.11-2012
 |========
 
 [options="header"]
 |========
-|Supported Features | Specification
-|Arp Request Packet Generation for IPv4 over Ether | RFC826
-|Arp Reply Packet Generation in response to a request for IPv4 over Ether | RFC826
+|Supported Security Modes | Specification
+| Plain (No Security) | IEEE 802.11-2012
 |========
-

@@ -1,112 +1,393 @@
 include::Wifi_DataSheet.adoc[]
 
-TODO: All of the following.
+=== Supported Wireless Adapters
+
+The Wifi Pit supports USB Wireless devices based on the RaLink chipsets. At the time of writing the following devices are known to use the RaLink chipsets and work with the Wifi Pits:
+
+* Panda Wireless PAU03
+* Protronix 802.11N/G Wireless USB Adapter
+** Supports external antenna
+
+Both wireless adapters are available from Amazon and other retailers.
+
+*Chipsets Known Not to Work:*
+
+All other chipsets tested failed to work. This included Atheros and Realtek chipsets. The most common issues identified were related to wireless packet injection.
+
+=== Supported Operating Systems
+
+Deja vu Security recommends using Ubuntu Server 14.04 LTS on a physical machine, NOT a virtual machine, to perform Wifi fuzzing. During testing stability issues were identified when running with older Linux kernels or in a virtualized environment.
+
+=== Tested Wireless Stacks
+
+During testing of the Wifi Pit the following devices/stacks were tested for compatibility:
+
+* Windows 8.1
+* Linux (Ubuntu Server 14.04 LTS)
+* Android (Multiple versions)
+* iPhone 5S
+* iPhone 5
+
+It was found during testing that occasional timing issues would prevent association from working on the first try. This was most prevalent with Windows 8.1. In the case that the first iteration does not complete, re-running the test typically worked. If association is still failing after five attempts, contact Peach support for assistance.
 
 === Configuration
 
 ==== Target Configuration
-This pit sends ARP packets; no extra applications are required.
+
+A method for triggering the target to start the Wifi association is needed. The Wifi Pit must then be configured to 
+trigger the association.
 
 ==== Required Pit Configuration Changes
-TargetIPv4:: IPv4 address of the target host machine.
-SourceIPv4:: IPv4 address of the interface on the local machine.
-SourceMAC:: MAC address on local machine.
-TargetMAC:: MAC address of target machine.
-Interface:: Name of local interface (used for monitoring).
+
+Interface:: Name of local wireless interface
+TargetMAC:: MAC address of target machine
+SourceMAC:: MAC address on local machine
+
+Ssid:: SSID for Wireless network
+
+Channel:: Channel number between 1 and 14. ChannelFrequency must match the selected channel.
+ChannelFrequency::
++
+Channel frequency. Must match the Channel parameter using the following table.
++
+[options="header"]
+|====
+|Channel | Frequency
+| 1 | 2412
+| 2 | 2417
+| 3 | 2422
+| 4 | 2427
+| 5 | 2432
+| 6 | 2437
+| 7 | 2442
+| 8 | 2447
+| 9 | 2452
+| 10 | 2457
+| 11 | 2462
+| 12 | 2467
+| 13 | 2472
+| 14 | 2484
+|====
 
 ==== Optional Pit Configuration Changes
+
 Strategy:: Fuzzing strategy Peach will use for testing.
 LoggerPath:: Path to folder where logs will be stored.
 Path:: Path to the relative base directory where all pits are located.
 
 ==== Configure Additional Monitors
+
 Add monitors to agent as needed
 
 === Running
 
 ==== Single test debug run
 
-.Fuzzing ARP Request
+.Fuzzing Wifi Client Association
 ----
-peach -1 --debug ARP.xml
-----
-
-.Fuzzing ARP Reply
-----
-peach -1 --debug ARP_Reply.xml
+peach -1 --debug Wifi_Client.xml
 ----
 
 ==== Full test run
 
-.Fuzzing ARP Request
+.Fuzzing Wifi Client Association
 ----
-peach ARP.xml
-----
-
-.Fuzzing ARP Reply
-----
-peach ARP_Reply.xml
+peach Wifi_Client.xml
 ----
 
 === Examples
 
-.Sample ARP Request Configuration File
+.Wifi Client Association Fuzzing, Linux
 ==========================
-Example configuration to broadcast arp packets.
+
+This example will show a working configuration using two Ubuntu Server 14.04 LTS machines. One will host our fuzzer and will be referred to as the "fuzzer" or "fuzzing" machine. The second machine is the "target" machine.
+
+*Fuzzing Machine Configuration*
+
+The fuzzing machine is configured with the latest version of Peach Professional and a supported wireless device. It must also have IP connectivity to the target machine.
+
+_Install wireless-tools package:_
+
+----
+sudo apt-get install wireless-tools
+----
+
+*Target Machine Configuration*
+
+The target machine is configured with the latest version of Peach Professional, the wireless tools package, and a Linux supported wireless device.
+
+_Install wireless-tools package:_
+
+----
+sudo apt-get install wireless-tools
+----
+
+_Configure Wireless Interface:_
+
+A wireless network interface must be configured in +/etc/network/interfaces+. The following is an example configuration that assumes the wireless device is +wlan0+. This configuration should be appended to the +/etc/network/interfaces+ file.
+
+----
+iface wlan0 inet dhcp
+        wireless-essid PeachWifi
+----
+
+*Configure Wifi Pit*
+
+_Wifi_Client.xml_
+
+To configure the Wifi Pit we will need to add a remote agent that will trigger our Ubuntu Server target to start a Wifi association. This is done using the +ifup+ command. We will also need to stop the association at the end of the iteration. For Ubuntu Server 14.04 LTS this is done by killing the DHCP client process (dhclient) and then calling the +ifdown+ command.
+
+The interface name we will allow to be configurable by adding a _TargetInterface_ configuration value. An entry in the configuration file will be needed for it.
+
+----
+  <Agent name="TargetAgent" location="tcp://10.0.1.71:9001">
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/usr/bin/killall" />
+      <Param name="Arguments" value="dhclient" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifdown" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <!-- Connect -->
+    
+    <Monitor class="Process">
+      <Param name="Executable" value="/sbin/ifup" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Connect" />
+      <Param name="NoCpuKill" value="true" />
+      <Param name="WaitForExitTimeout" value="0" />
+    </Monitor>
+  </Agent>
+----
+
+The agent must be added to the _Test_ element using this line:
+
+----
+    <Agent ref="TargetAgent" />
+----
+
+Here is the completed _Wifi_Client.xml_ file:
+
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <Include ns="Wifi" src="file:../_Common/Models/Net/Wifi_State.xml"/>
+
+  <Agent name="Local">
+    
+    <!-- Startup -->
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## mode ad-hoc" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## up" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## mode monitor" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## up" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## chan ##Channel##" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    
+    <!-- Shutdown -->
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="When" value="OnEnd" />
+    </Monitor>
+  </Agent>
+  
+  <Agent name="TargetAgent" location="tcp://##TargetAgentIp##:9001">
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/usr/bin/killall" />
+      <Param name="Arguments" value="dhclient" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifdown" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <!-- Connect -->
+    
+    <Monitor class="Process">
+      <Param name="Executable" value="/sbin/ifup" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Connect" />
+      <Param name="NoCpuKill" value="true" />
+      <Param name="WaitForExitTimeout" value="0" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <Exclude xpath="//Radiotap"/>
+    <Exclude xpath="//ReceiverAddress"/>
+    
+    <StateModel ref="Wifi:AP"/>
+    
+    <Agent ref="Local" />
+    <Agent ref="TargetAgent" />
+	
+    <Publisher class="Wifi">
+    	<Param name="Interface" value="##Interface##" />
+      <Param name="TargetMac" value="##TargetMAC##"/>
+      <Param name="SourceMac" value="##SourceMAC##"/>
+      <Param name="Timeout" value="10000"/>
+      <Param name="ApAuthTimeout" value="10000" />
+    </Publisher>
+	
+	<Strategy class="##Strategy##" />
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+
+_Wifi_Client.xml.config_
+
+For the Wifi configuration file, the only parameters that must be updated are:
+
+TargetInterface:: The targets wireless interface name. This configuration value was added with our Agent configuration performed during this example. This configuration option does not ship with the Wifi pit.
+Interface:: Local wireless interface. This must be a supported wireless device.
+TargetMAC:: The hardware address of the targets wireless interface. Peach will only respond to this MAC address.
+SourceMAC:: The hardware address of the local wireless interface.
+
+Here is an example, completed configuration file:
 
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <PitDefines>
   <All>
-    <Hwaddr		key="SourceMAC"
-				value="5254005335d3"
-				name="Source MAC Address" 
-				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
-	  
-    <Ipv4		key="SourceIPv4"
-				value="127.0.0.1"
-				name="Source IP Address"
-				description="The IPv4 address of the machine running Peach Fuzzer. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field."/>
-    <Hwaddr		key="TargetMAC"
-				value="000000000000"
-				name="Target MAC Address"
-				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
-	  
-    <Ipv4		key="TargetIPv4"
-				value="127.0.0.2"
-				name="Target IP Address"
-				description="The IPv4 address of the target machine or device. The IPv4 address can be found on Windows by running 'ipconfig' and looking for the 'IPv4 Address' field. For Linux run 'ifconfig' and look for 'inet addr' field. For OS X run 'ifconfig' and look for the 'inet' field." />
+    <Ipv4 key="TargetAgentIp"
+          value="10.0.1.71" />
     
-	<String		key="LoggerPath"
-				value="logs/arp/"
-				name="Logger Path"
-				description="The directory where Peach will save the log produced when fuzzing." />
-    <Strategy	key="Strategy"
-				value="Random"
-				name="Mutation Strategy"
-				description="The mutation strategy to use when fuzzing." />
-	
-    <String		key="PitLibraryPath"
-				value="."
-				name="Pit Library Path"
-				description="The path to the root of the pit library."/>
+    <Iface key="TargetInterface" value="wlan0" />
+    
+    <Iface key="Interface"
+           value="wlan0"
+           name="Local Wireless Interface"
+           description="The local wireless interface name."/>
+    
+    <Hwaddr key="TargetMAC"
+            value="7cdd9047b053"
+            name="Target MAC Address"
+            description="MAC address of target wireless device."/>
+    
+    <Hwaddr key="SourceMAC"
+            value="7cdd906146f5"
+            name="Source MAC Address"
+            description="MAC address of local wireless device."/>
+    
+    <!--
+    
+    Channel Frequency Map
+    
+    C   Freq    NA  JP  World
+    1	2412	Yes	Yes	YesD
+    2	2417	Yes	Yes	YesD
+    3	2422	Yes	Yes	YesD
+    4	2427	Yes	Yes	YesD
+    5	2432	Yes	Yes	Yes
+    6	2437	Yes	Yes	Yes
+    7	2442	Yes	Yes	Yes
+    8	2447	Yes	Yes	Yes
+    9	2452	Yes	Yes	Yes
+    10	2457	Yes	Yes	Yes
+    11	2462	Yes	Yes	Yes
+    12	2467	No	Yes	Yes
+    13	2472	No 	Yes	Yes
+    14	2484    No  11b No
+    
+    -->
+    
+    <Range key="Channel"
+           value="2"
+           min="1" max="14"
+           name="Wireless Channel"
+           description="The wireless channel to broadcast on."/>
+    
+    <Range key="ChannelFrequency"
+          value="2417"
+           min="2412" max="2484"
+           name="Wireless Channel Frequency"
+           description="The wireless channel frequency to broadcast on. Must match channel number. Map: 1 - 2412; 2 - 2417; 3 - 2422; 4 - 2427; 5 - 2432; 6 - 2437; 7 - 2442; 8 - 2447; 9 - 2452; 10 - 2457; 11 - 2462; 12 - 2467; 13 - 2472; 14 - 2484." />
+    
+    <String key="Ssid"
+            value="PeachWifi"
+            name="Wireless SSID"
+            description="The wireless station identifier."/>
+    
+    <String key="LoggerPath"
+            value="logs/wifi_client/"
+            name="Logger Path"
+            description="The directory where Peach will save the log produced when fuzzing." />
+    
+    <Strategy key="Strategy"
+              value="Random"
+              name="Mutation Strategy"
+              description="The mutation strategy to use when fuzzing." />
+
+    <String key="PitLibraryPath"
+            value="."
+            name="Pit Library Path"
+            description="The path to the root of the pit library."/>
+    
+    <!-- Do not modify values below this line -->
+
+    <Ipv4 key="TargetIPv4" value="255.255.255.255" name="Target IP" description="Advanced option, do not modify."/>
+    <Range key="TargetPort" value="68" min="0" max="65535" name="Target Port" description="Advanced option, do not modify."/>
+    
+    <Ipv4 key="SourceIPv4" value="192.168.1.1" name="Source IP" description="Advanced option, do not modify."/>
+    <Range key="SourcePort" value="67" min="0" max="65535" name="Source Port" description="Advanced option, do not modify."/>
+
+    <Ipv4 key="AssignedIPv4" value="192.168.1.55" name="Assigned IP" description="Advanced option, do not modify."/>
+    <Ipv4 key="RouterIP" value="192.168.1.1" name="Router IP" description="Advanced option, do not modify."/>
+    <Ipv4 key="BroadcastIP" value="192.168.1.255" name="Broadcast IP" description="Advanced option, do not modify."/>
+    <Ipv4 key="DHCPServerIP" value="192.168.1.1" name="DHCP Server IP" description="Advanced option, do not modify."/>
+    <Ipv4 key="SubnetMask" value="255.255.255.0" name="Subnet Mask" description="Advanced option, do not modify."/>
+    <String key="DomainName" value="localdomain" name="Domain Name" description="Advanced option, do not modify."/>
+    <Ipv4 key="DNS" value="192.168.1.2" name="DNS" description="Advanced option, do not modify."/>
+    <Ipv4 key="NetBios" value="192.168.1.2" name="NetBios" description="Advanced option, do not modify."/>
+
   </All>
-
-  <Linux>
-    <Iface		key="Interface"
-				value="eth0"
-				name="Network Interface"
-				description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
-  </Linux>
-
-  <OSX>
-    <!-- This can't run on OS X because it uses the RawEther publisher. -->
-  </OSX>
-
-  <Windows>
-    <!-- This can't run on windows because it uses the RawEther publisher. -->
-  </Windows>
 </PitDefines>
 ----
 ==========================
