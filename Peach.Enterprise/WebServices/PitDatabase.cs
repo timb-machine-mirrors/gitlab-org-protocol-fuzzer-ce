@@ -202,7 +202,7 @@ namespace Peach.Enterprise.WebServices
 			libraries = new Dictionary<string, Models.Library>();
 			interfaces = null;
 
-			AddLibrary(path, "", "Peach Pro Library 2014 Q2", true);
+			AddLibrary(path, "", "Peach Pro Library 2014 Q1", true);
 			AddLibrary(path, "User", "User Library", false);
 		}
 

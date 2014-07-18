@@ -1,10 +1,14 @@
 ﻿/// <reference path="../../../Scripts/typings/ng-grid/ng-grid.d.ts" />
+/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
+/// <reference path="../Models/models.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="../Services/pitconfigurator.ts" />
+/// <reference path="main.ts" />
+/// <reference path="faults.ts" />
 
 module DashApp {
 	"use strict";
 
-	import P = Models.Peach;
-	import W = Models.Wizard;
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
 
 	export class PitTestController {
@@ -14,7 +18,6 @@ module DashApp {
 		private q: ng.IQService;
 		private pollerSvc;
 		private testPoller;
-//		private logPoller;
 		private POLLER_TIME = 500;
 
 		public isReadyToTest: boolean = false;
@@ -35,12 +38,21 @@ module DashApp {
 			return this.pitConfigSvc.AutoMonitorsComplete;
 		}
 
-		public testEvents: P.TestEvent[] = [];
+		public get testEvents(): Models.TestEvent[] {
+			return this.pitConfigSvc.TestEvents;
+		}
 
-		public testStatus: string = "notrunning";
+		public get testStatus(): string {
+			return this.pitConfigSvc.TestStatus;
+		}
 
-		public log: string = "";
+		public get log(): string {
+			return this.pitConfigSvc.TestLog;
+		}
 
+		public get testTime(): string {
+			return this.pitConfigSvc.TestTime;
+		}
 
 		public tabs: ITab[] = [
 			{ title: "Summary", content: "../partials/test-grid.html", active: true, disabled: false },
@@ -53,12 +65,9 @@ module DashApp {
 			$scope.vm = this;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.pollerSvc = poller;
-			this.location = $location;
+			this.location = $location; 
 			this.peach = peachService;
 			this.q = $q;
-			this.testStatus = "notrunning";
-
-			var s: string;
 		}
 
 		public dataGridOptions: ngGrid.IGridOptions = {
@@ -80,7 +89,10 @@ module DashApp {
 		};
 
 		public beginTest() {
-			var agents: W.Agent[] = [];
+			this.pitConfigSvc.ResetTestData();
+			this.pitConfigSvc.Pit.configured = false;
+			this.pitConfigSvc.TestTime = moment().format("h:mm a");
+			var agents: Models.Agent[] = [];
 			agents = agents.concat(this.pitConfigSvc.FaultMonitors);
 
 			if (this.pitConfigSvc.DataMonitors !== undefined) {
@@ -94,7 +106,7 @@ module DashApp {
 			var configPromise = this.peach.PostConfig(this.pitConfigSvc.Pit.pitUrl, this.pitConfigSvc.Defines.config);
 
 			this.q.all([monitorPromise, configPromise]).then((response) => {
-				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: P.StartTestResponse) => {
+				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: Models.StartTestResponse) => {
 					this.startTestPoller(data.testUrl);
 					//this.startLogPoller(data.testUrl);
 				}, (response) => {
@@ -112,7 +124,6 @@ module DashApp {
 		}
 
 		private startTestPoller(testUrl: string) {
-			this.pitConfigSvc.Pit.configured = false;
 			var testResource = this.peach.GetSingleResource(testUrl);
 			this.testPoller = this.pollerSvc.get(testResource, {
 				action: "get",
@@ -122,10 +133,10 @@ module DashApp {
 
 			this.testPoller.promise.then(null, (e) => {
 				console.error(e);
-			}, (data: P.GetTestUpdateResponse) => {
-				this.testEvents = data.events;
-				this.testStatus = data.status;
-				this.log = data.log;
+			}, (data: Models.GetTestUpdateResponse) => {
+				this.pitConfigSvc.TestEvents = data.events;
+				this.pitConfigSvc.TestStatus = data.status;
+				this.pitConfigSvc.TestLog = data.log;
 				if (data.status != "active") {
 					this.testPoller.stop();
 					//this.logPoller.stop();

@@ -23,8 +23,18 @@
 		<li>Output file name (locally generated file)</li>
 		<li>User name, authentication type and and required information, and files or folders to be downloaded (remote file)</li>
 	</ul>
+
+	<div ng-switch="vm.DataMonitors.length">
+		<div ng-switch-when="0"></div>
+		<div ng-switch-default>
+			<h4>Items Already Added</h4>
+			<div class="gridStyle" ng-grid="vm.dataGridOptions"></div>
+		</div>
+	</div>
+
 </div>
 <div class="row-fluid wizard-actions">
+	<div class="space-6"></div>
 	<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
 		Next
 		<i class="icon-arrow-right icon-on-right"></i>

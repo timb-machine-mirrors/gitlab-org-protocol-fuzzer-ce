@@ -1,11 +1,9 @@
 ﻿/// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
 /// <reference path="../../../Scripts/typings/angularjs/angular-resource.d.ts" />
+/// <reference path="../Models/models.ts" />
 
 module DashApp.Services {
 	"use strict";
-
-	import P = DashApp.Models.Peach;
-	import W = DashApp.Models.Wizard;
 
 	export interface IPeachService {
 
@@ -19,22 +17,22 @@ module DashApp.Services {
 		GetDataQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetAutoQA(): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
-		GetJob(success: (data: P.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		GetJob(success: (data: Models.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		GetJobResource(jobUrl: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 
-		GetJobFaults(jobUrl: string, success: (job: P.Fault[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
-		GetFault(faultUrl: string, success: (job: P.Fault) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		GetJobFaults(jobUrl: string, success: (job: Models.Fault[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		GetFault(faultUrl: string, success: (job: Models.Fault) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 
-		GetLibraries(success: (data: P.PitLibrary[]) => void): void;
+		GetLibraries(success: (data: Models.PitLibrary[]) => void): void;
 
-		GetPit(pitUrl: string, success: (data: P.Pit) => void): void;
-		CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		GetPit(pitUrl: string, success: (data: Models.Pit) => void): void;
+		CopyPit(request: Models.CopyPitRequest, success: (data: Models.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 
-		PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any>;
-		PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any>;
-		TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void);
+		PostConfig(pitUrl: string, config: Models.PitConfigItem[]): ng.IHttpPromise<any>;
+		PostMonitors(pitUrl: string, agents: Models.Agent[]): ng.IHttpPromise<any>;
+		TestConfiguration(pitUrl: string, success: (data: Models.StartTestResponse) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void);
 
-		StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
+		StartJob(pitUrl: string, success: (data: Models.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		PauseJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		ContinueJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 		StopJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
@@ -42,6 +40,8 @@ module DashApp.Services {
 
 		GetSingleResource(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
 		GetManyResources(url: string): ng.resource.IResourceClass<ng.resource.IResource<any>>;
+
+		GetState(success: (data: Models.StateItem[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void;
 	}
 
 
@@ -49,7 +49,7 @@ module DashApp.Services {
 		private resource: ng.resource.IResourceService;
 		private http: ng.IHttpService;
 
-		//public URL_PREFIX: string = "http://localhost:8888";
+		//public URL_PREFIX: string = "http://localhost:8888"; 
 		public URL_PREFIX: string = "";
 
 		constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService) {
@@ -73,8 +73,8 @@ module DashApp.Services {
 			return this.resource("../testdata/wizard_qa_auto.json");
 		}
 		
-		public GetJob(success: (data: P.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
-			this.HttpGet<P.Job[]>("/p/jobs",(jobs: P.Job[]) => {
+		public GetJob(success: (data: Models.Job) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
+			this.HttpGet<Models.Job[]>("/p/jobs",(jobs: Models.Job[]) => {
 				if (jobs.length >= 0) {
 					success(jobs[0]);
 				}
@@ -102,28 +102,28 @@ module DashApp.Services {
 			}
 		}
 
-		public GetJobFaults(jobUrl: string, success: (job: P.Fault[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
+		public GetJobFaults(jobUrl: string, success: (job: Models.Fault[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
 			if (this.isJobUrl(jobUrl)) {
-				this.HttpGet<P.Fault[]>(jobUrl + "/faults", success, error);
+				this.HttpGet<Models.Fault[]>(jobUrl + "/faults", success, error);
 			}
 			else {
 				throw "Not a Job URL: " + jobUrl;
 			}
 		}
 
-		public GetFault(faultUrl: string, success: (job: P.Fault) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
+		public GetFault(faultUrl: string, success: (job: Models.Fault) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
 			if (faultUrl != undefined && faultUrl.indexOf("/p/faults/") >= 0) {
-				this.HttpGet<P.Fault>(faultUrl, success, error);
+				this.HttpGet<Models.Fault>(faultUrl, success, error);
 			}
 			else {
 				throw "Not a Fault URL: " + faultUrl;
 			}
 		}
 
-		public GetPit(pitUrl: string, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {  
+		public GetPit(pitUrl: string, success: (data: Models.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {  
 			if(this.isPitUrl(pitUrl)) {
-				this.HttpGet(pitUrl, (pit: P.Pit) => {
-					var newpit: P.Pit = new P.Pit(pit);
+				this.HttpGet(pitUrl, (pit: Models.Pit) => {
+					var newpit: Models.Pit = new Models.Pit(pit);
 					success(newpit);
 				}, error);
 			}
@@ -132,14 +132,14 @@ module DashApp.Services {
 			}
 		}
 
-		public CopyPit(request: P.CopyPitRequest, success: (data: P.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
-			this.http.post(this.URL_PREFIX + "/p/pits", request).then((response) => success(<P.Pit>response.data), (response) => error(<ng.IHttpPromiseCallbackArg<any>>response));
+		public CopyPit(request: Models.CopyPitRequest, success: (data: Models.Pit) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
+			this.http.post(this.URL_PREFIX + "/p/pits", request).then((response) => success(<Models.Pit>response.data), (response) => error(<ng.IHttpPromiseCallbackArg<any>>response));
 		}
 		
-		public PostConfig(pitUrl: string, config: P.PitConfigItem[]): ng.IHttpPromise<any> {
+		public PostConfig(pitUrl: string, config: Models.PitConfigItem[]): ng.IHttpPromise<any> {
 			if (this.isPitUrl(pitUrl)) {
 
-				var request: P.PostConfigRequest = {
+				var request: Models.PostConfigRequest = {
 					pitUrl: pitUrl,
 					config: config
 				};
@@ -157,9 +157,9 @@ module DashApp.Services {
 			}
 		}
 
-		public PostMonitors(pitUrl: string, agents: W.Agent[]): ng.IHttpPromise<any> {
+		public PostMonitors(pitUrl: string, agents: Models.Agent[]): ng.IHttpPromise<any> {
 			if (this.isPitUrl(pitUrl)) {
-				var request: P.PostMonitorsRequest = {
+				var request: Models.PostMonitorsRequest = {
 					pitUrl: pitUrl,
 					monitors: agents
 				};
@@ -178,25 +178,25 @@ module DashApp.Services {
 			}
 		}
 
-		public TestConfiguration(pitUrl: string, success: (data: P.StartTestResponse) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+		public TestConfiguration(pitUrl: string, success: (data: Models.StartTestResponse) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
 			if (this.isPitUrl(pitUrl)) {
-				this.HttpGet<P.StartTestResponse>("/p/conf/wizard/test/start?pitUrl=" + pitUrl, success, error);
+				this.HttpGet<Models.StartTestResponse>("/p/conf/wizard/test/start?pitUrl=" + pitUrl, success, error);
 			}
 			else {
 				throw "Not a Pit URL: " + pitUrl;
 			}
 		}
 
-		public GetLibraries(success: (data: P.PitLibrary[]) => void): void {
-			this.HttpGet<P.PitLibrary[]>("/p/libraries", success, this.handleError);
+		public GetLibraries(success: (data: Models.PitLibrary[]) => void): void {
+			this.HttpGet<Models.PitLibrary[]>("/p/libraries", success, this.handleError);
 		}
 
-		public StartJob(pitUrl: string, success: (data: P.Job) => void, error?: (response) => void) {
+		public StartJob(pitUrl: string, success: (data: Models.Job) => void, error?: (response) => void) {
 			if (this.isPitUrl(pitUrl)) {
-				var job: P.Job = {
+				var job: Models.Job = {
 					pitUrl: pitUrl
 				}
-				this.HttpPost<P.Job>("/p/jobs", job, success, error);
+				this.HttpPost<Models.Job>("/p/jobs", job, success, error);
 			}
 			else {
 				throw "Not a Pit URL: " + pitUrl;
@@ -229,6 +229,11 @@ module DashApp.Services {
 				throw "Not a Job URL: " + jobUrl;
 			}
 		}
+
+		public GetState(success: (data: Models.StateItem[]) => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
+			this.HttpGet<any>("/p/conf/wizard/state", success, error);
+		}
+
 
 		//public KillJob(jobUrl: string, success?: () => void, error?: (response: ng.IHttpPromiseCallbackArg<any>) => void) {
 		//	if (error === undefined) {
@@ -272,6 +277,7 @@ module DashApp.Services {
 				throw "Bad URL: " + url;
 			}
 		}
+
 
 		private HttpGet<T>(url: string, success: (data?: T) => void, error: (response: ng.IHttpPromiseCallbackArg<any>) => void): void {
 			if (url != undefined && url.indexOf("/p/") >= 0) {

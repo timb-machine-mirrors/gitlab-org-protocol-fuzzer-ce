@@ -1,8 +1,4 @@
 {
-	"state": [
-    {"name":"OS", "value":"win"},
-    {"name":"HostName", "value":"127.0.0.1"}
-  ],
 	"qa": [
 		{
 			"id": 0,
@@ -33,9 +29,9 @@
 			"type":"choice",
 			"key":"OS",
 			"choice":[
-				{ "value":"win", "a":"Windows", "next": 1000 },
-				{ "value":"osx", "a":"Apple OS X", "next": 2000 },
-				{ "value":"lin", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 3100 }
+				{ "value":"windows", "a":"Windows", "next": 1000 },
+				{ "value":"osx", "a":"Apple OS X", "next": 4200 },
+				{ "value":"linux", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 3100 }
 			],
 			"next":4
 		},
@@ -43,11 +39,11 @@
 			"id":4,
 			"q":null,
 			"type":"jump",
-			"key":"OS",
+			"key":"LocalOS",
 			"choice":[
-				{ "value":"win", "next":1000 },
-				{ "value":"osx", "next":2000 },
-				{ "value":"lin", "next":3100 }
+				{ "value":"windows", "next":1000 },
+				{ "value":"osx", "next":4200 },
+				{ "value":"linux", "next":3100 }
 				]
 		},
 		{
@@ -87,7 +83,7 @@
 		},
 		{
 			"id":1120,
-			"q":"What is the name of the Windows Service? You can determine this name by XYZ.",
+			"q":"What is the name of the Windows Service?",
 			"type":"string",
 			"key":"WinDbgService",
 			"required": true,
@@ -95,7 +91,7 @@
 		},
 		{
 			"id":1130,
-			"q":"What is the process name that you want to detect faults for? You can determine this by XYZ.",
+			"q":"What is the process name that you want to detect faults for?",
 			"type":"string",
 			"key":"WinDbgProcessName",
 			"next":1141,
@@ -138,15 +134,6 @@
 			"choice":[
 				{ "value":false,"a":"No, do not ignore them." },
 				{ "value":true,"a":"Yes, ignore them." }
-			]
-		},
-		{
-			"id":2000,
-			"q":null,
-			"type":"jump",
-			"key":"OS",
-			"choice":[
-				{ "key":"OS", "value":"osx", "next":4200 }
 			]
 		},
 		{
@@ -207,8 +194,8 @@
 			"type":"choice",
 			"key":"PingFaultOnSuccess", 
 			"choice":[
-				{"value":true, "a":"Fault when the device is available.", "next": 4102 },
-				{"value":false, "a":"Fault when the device is not available.", "next": 4102 }
+				{"value":false, "a":"Fault when the device is not available.", "next": 4102 },
+				{"value":true, "a":"Fault when the device is available.", "next": 4102 }
 			]
 		},
 		{
@@ -296,17 +283,17 @@
 			"monitorClass":"LinuxDebugger",
 			"path": [3104],
 			"map": [
-				{ "key":"Executable","param":"Executable" },
-				{ "key":"Arguments","param":"Arguments" },
+				{ "key":"LinuxDebugerExecutable","param":"Executable" },
+				{ "key":"LinuxDebugerArguments","param":"Arguments" },
 				{ "key":"LinuxDebugGdbPath","param":"GdbPath" },
 				{ "key":"LinuxDebuggerStart","param":"StartMode" },
-				{ "key":"FaultOnEarlyExit","param":"FaultOnEarlyExit" }
+				{ "key":"LinuxDebugerFaultOnEarlyExit","param":"FaultOnEarlyExit" }
 			],
 			"description": "Use GDB to launch an executable, monitoring it for exceptions. "
 		},
 		{
 			"monitorClass":"CrashReporter",
-			"path": [2000],
+			"path": [4200],
 			"map": [],
 			"description": "Collect information from crashes detected by OS X System Crash Reporter. "
 		},

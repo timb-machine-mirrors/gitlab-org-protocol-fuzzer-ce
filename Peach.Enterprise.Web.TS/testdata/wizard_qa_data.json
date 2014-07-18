@@ -1,9 +1,4 @@
 {
-	"state": [
-		{"name":"OS", "value":"win"},
-		{"name":"IpAddress", "value":"127.0.0.1"},
-		{"name":"PingRetryCount", "value":"1"}
-	],
 	"qa": [
 		{
 			"id": 0,
@@ -35,9 +30,9 @@
 			"type":"choice",
 			"key":"OS",
 			"choice":[
-				{ "value":"win", "a":"Windows", "next": 4000 },
+				{ "value":"windows", "a":"Windows", "next": 4000 },
 				{ "value":"osx", "a":"Apple OS X", "next": 4000 },
-				{ "value":"lin", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 4000 }
+				{ "value":"linux", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 4000 }
 			],
 			"next":4
 		},
@@ -45,11 +40,11 @@
 			"id":4,
 			"q":null,
 			"type":"jump",
-			"key":"OS",
+			"key":"LocalOS",
 			"choice":[
-				{ "value":"win", "next":4000 },
+				{ "value":"windows", "next":4000 },
 				{ "value":"osx", "next":4000 },
-				{ "value":"lin", "next":4000 }
+				{ "value":"linux", "next":4000 }
 				]
 		},
 		{
@@ -173,7 +168,7 @@
 			"map":[
 				{"key":"SaveFileFilename", "param":"Filename" }
 				],
-			"description":  "Save file at {SaveFilename}."
+			"description":  "Save a file."
 		},
 		{
 			"monitorClass":"SshDownloader",

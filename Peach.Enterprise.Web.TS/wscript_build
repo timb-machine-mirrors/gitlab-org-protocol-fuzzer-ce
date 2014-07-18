@@ -9,8 +9,7 @@ for d in dirs:
 bld(
 	features = 'tsc',
 	name='Peach.Enterprise.Web',
-	source = bld.path.ant_glob('app/**/*.ts'),
-	js = 'app/js/all.js',
+	source = 'app/ts/app.ts',
 	install_path = '${BINDIR}/web',
 	install_644 = extras,
 )

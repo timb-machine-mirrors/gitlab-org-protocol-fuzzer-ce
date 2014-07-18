@@ -8,6 +8,7 @@ using Peach.Core.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Text;
+using Peach.Core.Dom.XPath;
 
 using NUnit.Framework;
 using System.ComponentModel;
@@ -25,6 +26,7 @@ namespace Peach.Enterprise.Test
 			public TestData()
 			{
 				Defines = new List<Define>();
+				Slurps = new List<Slurp>();
 				Tests = new List<Test>();
 			}
 
@@ -37,6 +39,19 @@ namespace Peach.Enterprise.Test
 			{
 				[XmlAttribute("key")]
 				public string Key { get; set; }
+
+				[XmlAttribute("value")]
+				public string Value { get; set; }
+			}
+
+			public class Slurp
+			{
+				[XmlAttribute("setXpath")]
+				public string SetXpath { get; set; }
+
+				[XmlAttribute("valueType")]
+				[DefaultValue("string")]
+				public string ValueType { get; set; }
 
 				[XmlAttribute("value")]
 				public string Value { get; set; }
@@ -219,6 +234,9 @@ namespace Peach.Enterprise.Test
 
 			[XmlElement("Define")]
 			public List<Define> Defines { get; set; }
+
+			[XmlElement("Slurp")]
+			public List<Slurp> Slurps { get; set; }
 
 			[XmlElement("Test")]
 			public List<Test> Tests { get; set; }
@@ -427,6 +445,9 @@ namespace Peach.Enterprise.Test
 				if (dataSet != null)
 					expected = File.ReadAllBytes(dataSet.FileName);
 
+				if (Logger.IsDebugEnabled)
+					Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
+
 				if (expected.Length != actual.Length)
 					throw new PeachException("Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName, expected.Length, actual.Length));
 
@@ -439,6 +460,28 @@ namespace Peach.Enterprise.Test
 			{
 				// Handled with the override for output()
 				throw new NotSupportedException();
+			}
+		}
+
+		#endregion
+
+		#region Namespace Resolver
+
+		class PeachXmlNamespaceResolver : IXmlNamespaceResolver
+		{
+			public IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)
+			{
+				return new Dictionary<string, string>();
+			}
+
+			public string LookupNamespace(string prefix)
+			{
+				return prefix;
+			}
+
+			public string LookupPrefix(string namespaceName)
+			{
+				return namespaceName;
 			}
 		}
 
@@ -477,6 +520,42 @@ namespace Peach.Enterprise.Test
 
 				foreach (var key in test.publishers.Keys)
 					test.publishers[key] = new PitTesterPublisher(key, logger);
+			}
+
+			if (testData.Slurps.Count > 0)
+			{
+				var doc = new XmlDocument();
+				var resolver = new PeachXmlNamespaceResolver();
+				var navi = new PeachXPathNavigator(dom);
+
+				foreach (var slurp in testData.Slurps)
+				{
+					var iter = navi.Select(slurp.SetXpath, resolver);
+					if (!iter.MoveNext())
+						throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
+
+					var n = doc.CreateElement("Foo");
+					n.SetAttribute("valueType", slurp.ValueType);
+					n.SetAttribute("value", slurp.Value);
+
+					var blob = new Blob();
+					new Peach.Core.Analyzers.PitParser().handleCommonDataElementValue(n, blob);
+
+					do
+					{
+						var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+						if (setElement == null)
+							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
+
+						setElement.DefaultValue = blob.DefaultValue;
+
+						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+							((BitwiseStream)blob.DefaultValue).Position = 0;
+					}
+					while (iter.MoveNext());
+
+					//ApplySlurp(dom, slurp);
+				}
 			}
 
 			var config = new RunConfiguration();

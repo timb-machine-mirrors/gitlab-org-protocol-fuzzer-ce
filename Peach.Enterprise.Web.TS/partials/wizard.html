@@ -23,8 +23,23 @@
 					</ul>
 				</div>
 				<hr />
-				<div ng-include="vm.getTemplateUrl()" />
+				<div ng-switch="vm.currentQuestion.type">
+					<div ng-switch-when="intro"><div ng-include="vm.currentQuestion.qref" /></div>
+					<div ng-switch-when="choice"><div ng-include="'../partials/q-choice.html'" /></div>
+					<div ng-switch-when="enum"><div ng-include="'../partials/q-enum.html'" /></div>
+					<div ng-switch-when="hex"><div ng-include="'../partials/q-hex.html'" /></div>
+					<div ng-switch-when="hwaddr"><div ng-include="'../partials/q-hwaddr.html'" /></div>
+					<div ng-switch-when="iface"><div ng-include="'../partials/q-iface.html'" /></div>
+					<div ng-switch-when="int"><div ng-include="'../partials/q-int.html'" /></div>
+					<div ng-switch-when="ipv4"><div ng-include="'../partials/q-ipv4.html'" /></div>
+					<div ng-switch-when="ipv6"><div ng-include="'../partials/q-ipv6.html'" /></div>
+					<div ng-switch-when="oncall"><div ng-include="'../partials/q-oncall.html'" /></div>
+					<div ng-switch-when="range"><div ng-include="'../partials/q-range.html'" /></div>
+					<div ng-switch-when="string"><div ng-include="'../partials/q-string.html'" /></div>
+					<div ng-switch-when="done"><div ng-include="vm.currentQuestion.qref" /></div>
+				</div>
 			</form>
 		</div>
 	</div>
 </div>
+

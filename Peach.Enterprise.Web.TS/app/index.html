@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html ng-app="dashApp" data-framework="typescript">
+<html ng-app="peachDash" data-framework="typescript">
 <head>
 	<meta http-equiv="cache-control" content="no-cache" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -46,7 +46,18 @@
 	<script src="../Content/js/ace-extra.min.js"></script>
 	<script src="../Scripts/moment.min.js"></script>
 
-	<script src="js/all.js"></script>
+
+	<script src="js/Models/models.js"></script>
+	<script src="js/Services/peach.js"></script>
+	<script src="js/Services/pitconfigurator.js"></script>
+	<script src="js/Controllers/copypit.js"></script>
+	<script src="js/Controllers/dash.js"></script>
+	<script src="js/Controllers/faults.js"></script>
+	<script src="js/Controllers/main.js"></script>
+	<script src="js/Controllers/pitlibrary.js"></script>
+	<script src="js/Controllers/pittest.js"></script>
+	<script src="js/Controllers/wizard.js"></script>
+	<script src="js/app.js"></script>
 
 </head>
 <body class="skin-1" ng-controller="DashApp.MainController">
@@ -66,7 +77,7 @@
 			<div class="navbar-header pull-right" id="breadcrumbs">
 				<ul class="nav ace-nav" style="background: none">
 					<li data-original-title="{{vm.jobRunningTooltip}}" class="tooltip-warning" data-rel="tooltip" data-placement="left">
-						<a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color: transparent; font-size: 20px" ng-class="{disabled: vm.CanSelectPit == false}">
+						<a data-toggle="dropdown" class="dropdown-toggle" style="background-color: transparent; font-size: 20px; cursor: pointer" ng-class="{disabled: vm.CanSelectPit == false}">
 							<span>
 								{{vm.pit.name || '(none)'}}
 							</span>
@@ -76,7 +87,7 @@
 
 						<ul class="user-menu pull-right dropdown-menu dropdown-light-blue dropdown-caret dropdown-close">
 							<li>
-								<a href="#" ng-click="vm.showPitSelector()">
+								<a ng-click="vm.showPitSelector()" style="cursor: pointer">
 									<!-- <i class="icon-cog"></i> -->
 									Select another Pit
 								</a>
@@ -243,13 +254,50 @@
 	</div>
 
 	<script type="text/javascript">
-		jQuery(function ($) {
-			// shows tooltips
-			$('[data-rel=tooltip]').tooltip();
+		var version = getHtmlVer();
+		if (version < 5) {
+			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version");
+		}
+		else {
+			initialize();
+		}
 
-			// handles disabling of navbar items
-			$("ul.nav-list").on('click', 'li.disabled', false);
-		});
+		function initialize() {
+			jQuery(function ($) {
+				// shows tooltips
+				$('[data-rel=tooltip]').tooltip();
+
+				// handles disabling of navbar items
+				$("ul.nav-list").on('click', 'li.disabled', false);
+			});
+		}
+
+		function getHtmlVer() {
+			var CName = navigator.appCodeName;
+			var UAgent = navigator.userAgent;
+			var HtmlVer = 0.0;
+			// Remove start of string in UAgent upto CName or end of string if not found.
+			UAgent = UAgent.substring((UAgent + CName).toLowerCase().indexOf(CName.toLowerCase()));
+			// Remove CName from start of string. (Eg. '/5.0 (Windows; U...)
+			UAgent = UAgent.substring(CName.length);
+			// Remove any spaves or '/' from start of string.
+			while (UAgent.substring(0, 1) == " " || UAgent.substring(0, 1) == "/") {
+				UAgent = UAgent.substring(1);
+			}
+			// Remove the end of the string from first characrer that is not a number or point etc.
+			var pointer = 0;
+			while ("0123456789.+-".indexOf((UAgent + "?").substring(pointer, pointer + 1)) >= 0) {
+				pointer = pointer + 1;
+			}
+			UAgent = UAgent.substring(0, pointer);
+
+			if (!isNaN(UAgent)) {
+				if (UAgent > 0) {
+					HtmlVer = UAgent;
+				}
+			}
+			return parseFloat(HtmlVer);
+		}
 	</script>
 </body>
 </html>

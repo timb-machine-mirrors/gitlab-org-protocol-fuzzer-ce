@@ -27,6 +27,8 @@ for node in nodes:
 doc.install_files(
   '${BINDIR}/sdk/apidocs',
   bld.path.ant_glob('out.pro/apidocs/**'),
+  relative_trick = True,
+  cwd = bld.path.find_dir('out.pro/apidocs'),
   chmod=Utils.O644,
   )
 

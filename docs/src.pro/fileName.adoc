@@ -5,4 +5,4 @@ When used with the xref:Data[Data] element, _fileName_ can specify a single file
 
 If a folder or file glob specifies multiple files, use the _switchCount_  attribute with the xref:MutationStrategies[random strategy] to specify the number of iterations performed before switching to the next file.
 
-IMPORTANT: Multiple files are only supported by the random mutation strategy!
+IMPORTANT: Multiple files are ONLY supported by the random mutation strategy

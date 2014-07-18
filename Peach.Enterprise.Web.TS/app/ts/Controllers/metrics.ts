@@ -1,13 +1,8 @@
-﻿/// <reference path="../Models/wizard.ts" />
-/// <reference path="../Models/peach.ts" />
-/// <reference path="../Models/peach.ts" />
-/// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
+﻿/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
+/// <reference path="../Services/peach.ts" />
 
 module DashApp {
 	"use strict";
-
-	// import P = Models.Peach;
 
 	export class MetricsController {
 
@@ -16,7 +11,7 @@ module DashApp {
 		constructor($scope, poller, peachService: Services.IPeachService) {
 
 			//$scope.pit = peachService.GetPit().query();
-			//peachService.GetPit(1, (data: P.Pit) => {
+			//peachService.GetPit(1, (data: Models.Pit) => {
 			//	$scope.pit = data;
 			//});
 

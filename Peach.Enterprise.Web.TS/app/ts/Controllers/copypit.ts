@@ -1,7 +1,12 @@
-﻿module DashApp {
+﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="main.ts" />
+
+
+module DashApp {
 	"use strict";
 
-	import P = DashApp.Models.Peach;
+	
 
 	export class CopyPitController {
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
@@ -9,10 +14,10 @@
 		private peachSvc: Services.IPeachService;
 
 
-		public pit: P.Pit;
+		public pit: Models.Pit;
 		public error: string = "";
 		
-		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, pit: P.Pit, libraryUrl: string, peachSvc: Services.IPeachService) {
+		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, pit: Models.Pit, libraryUrl: string, peachSvc: Services.IPeachService) {
 			$scope.vm = this;
 			this.modalInstance = $modalInstance;
 			this.pit = pit;
@@ -23,12 +28,12 @@
 		submit() {
 			this.error = "";
 
-			var request: P.CopyPitRequest = {
+			var request: Models.CopyPitRequest = {
 				libraryUrl: this.libraryUrl,
 				pit: this.pit
 			};
 
-			this.peachSvc.CopyPit(request, (data: P.Pit) => {
+			this.peachSvc.CopyPit(request, (data: Models.Pit) => {
 				this.modalInstance.close(data);
 			}, (response: ng.IHttpPromiseCallbackArg<any>) => {
 				switch (response.status) {

@@ -1,27 +1,32 @@
-﻿/// <reference path="Controllers/wizard.ts" />
-/// <reference path="Controllers/dash.ts" />
-/// <reference path="Models/wizard.ts" />
-/// <reference path="Controllers/pittest.ts" />
+﻿/// <reference path="Models/models.ts" />
 /// <reference path="Services/peach.ts" />
+/// <reference path="Services/pitconfigurator.ts" />
+/// <reference path="Controllers/copypit.ts" />
+/// <reference path="Controllers/dash.ts" />
+/// <reference path="Controllers/faults.ts" />
+/// <reference path="Controllers/main.ts" />
+/// <reference path="Controllers/metrics.ts" />
+/// <reference path="Controllers/pitlibrary.ts" />
+/// <reference path="Controllers/pittest.ts" />
+/// <reference path="Controllers/wizard.ts" />
+
 
 module DashApp {
 	"use strict";
 	
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
-		
-	// "n3-charts.linechart",
-	//	"kendo.directives",
-	var dashApp = angular.module("dashApp", [
+
+	var peachDash = angular.module("peachDash", [
 		"ngResource",
-		"emguo.poller", 
+		"emguo.poller",
 		"ngGrid",
 		"ngRoute",
 		"ui.bootstrap",
 		"treeControl"
 	]).service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
-		.service("pitConfiguratorService", ["poller","peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
-    .config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
+		.service("pitConfiguratorService", ["poller", "peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
+		.config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
 
 			$routeProvider
 				.when("/", {
@@ -42,7 +47,7 @@ module DashApp {
 				})
 				.when("/configurator/done", {
 					templateUrl: "/partials/configurator-done.html",
-					controller: WizardController 
+					controller: WizardController
 				})
 				.when("/configurator/:step", {
 					templateUrl: "/partials/wizard.html",
@@ -52,7 +57,7 @@ module DashApp {
 					redirectTo: "/"
 				});
 		}])
-	  .directive('integer', function () {
+		.directive('integer', function () {
 			return {
 				require: 'ngModel',
 				link: function (scope, elm, attrs, ctrl) {
@@ -60,7 +65,7 @@ module DashApp {
 						var isIntValue = INTEGER_REGEXP.test(viewValue);
 						ctrl.$setValidity('integer', isIntValue);
 						if (isIntValue) return viewValue;
-						else            return undefined;
+						else return undefined;
 					});
 				}
 			};
@@ -73,7 +78,7 @@ module DashApp {
 						var isHexValue = HEX_REGEXP.test(viewValue);
 						ctrl.$setValidity('hexstring', isHexValue);
 						if (isHexValue) return viewValue;
-						else            return undefined;
+						else return undefined;
 					});
 				}
 			};
@@ -91,7 +96,7 @@ module DashApp {
 						}
 					});
 				}
-			} 
+			}
 		})
 		.directive('ngMin', function () {
 			return {
@@ -139,10 +144,16 @@ module DashApp {
 					ctrl.$formatters.push(maxValidator);
 				}
 			};
+		})
+		.run(function ($rootScope, $templateCache) {
+			$rootScope.$on('$routeChangeStart', function (event, next, current) {
+				if (typeof(current) !== 'undefined') {
+					$templateCache.remove(current.templateUrl);
+				}
+			});
 		});
-
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}
-} 
+}
 

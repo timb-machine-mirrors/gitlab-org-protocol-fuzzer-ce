@@ -1,12 +1,13 @@
-﻿/// <reference path="../Models/wizard.ts" />
-/// <reference path="../Models/peach.ts" />
-/// <reference path="../../../Scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="../Models/models.ts" />
+/// <reference path="../Services/peach.ts" />
+/// <reference path="../Services/pitconfigurator.ts" />
+/// <reference path="../Controllers/pitlibrary.ts" />
+/// <reference path="../Controllers/copypit.ts" />
 
 module DashApp {
 	"use strict";
 
-	import P = Models.Peach;
 
 	export class MainController {
 		private peachSvc: Services.IPeachService;
@@ -15,14 +16,14 @@ module DashApp {
 		private poller: any;
 
 		//#region Public Properties
-		public get pit(): P.Pit {
+		public get pit(): Models.Pit {
 			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined)
 				return this.pitConfigSvc.Pit;
 			else
 				return undefined;
 		}
 
-		public get job(): P.Job {
+		public get job(): Models.Job {
 			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Job != undefined)
 				return this.pitConfigSvc.Job;
 			else
@@ -74,7 +75,7 @@ module DashApp {
 		}
 
 		public get CanSelectPit() {
-			if (this.job == undefined || this.job.status == P.JobStatuses.Stopped) {
+			if (this.job == undefined || this.job.status == Models.JobStatuses.Stopped) {
 				return true;
 			}
 
@@ -82,7 +83,7 @@ module DashApp {
 		}
 
 		public get CanConfigurePit() {
-			if ((this.job == undefined || this.job.status == P.JobStatuses.Stopped) && (this.pit != undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
+			if ((this.job == undefined || this.job.status == Models.JobStatuses.Stopped) && (this.pit != undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)) {
 				return true;
 			}
 
@@ -90,7 +91,7 @@ module DashApp {
 		}
 
 		public get IsJobRunning() {
-			if (this.job != undefined && this.job.status != P.JobStatuses.Stopped) {
+			if (this.job != undefined && this.job.status != Models.JobStatuses.Stopped) {
 				return true;
 			}
 
@@ -121,7 +122,7 @@ module DashApp {
 		}
 
 		private initialize() {
-			this.peachSvc.GetJob((job: P.Job) => {
+			this.peachSvc.GetJob((job: Models.Job) => {
 				if (job != undefined) {
 					this.pitConfigSvc.Job = job; 
 				}
@@ -144,13 +145,13 @@ module DashApp {
 				}
 			})
 			.result.then((pitUrl: string) => {
-				this.peachSvc.GetPit(pitUrl, (data: P.Pit) =>
+				this.peachSvc.GetPit(pitUrl, (data: Models.Pit) =>
 				{
 					if (data.locked) {
 						this.showPitCopier(data);
 					}
 					else {
-						this.pitConfigSvc.Pit = new P.Pit(data);
+						this.pitConfigSvc.Pit = new Models.Pit(data);
 						if (data.configured == false) {
 							this.location.path("#/configurator/intro");
 						}
@@ -159,7 +160,7 @@ module DashApp {
 			});
 		}
 
-		public showPitCopier(pit: P.Pit) {
+		public showPitCopier(pit: Models.Pit) {
 			this.modal.open({
 				templateUrl: "../partials/copy-pit.html",
 				keyboard: false,
@@ -176,9 +177,9 @@ module DashApp {
 						return this.peachSvc;
 					}
 				}
-			}).result.then((pit: P.Pit) => {
-				this.pitConfigSvc.Pit = new P.Pit(pit);
-				if (pit.configured == false) {
+			}).result.then((pit: Models.Pit) => {
+				this.pitConfigSvc.Pit = new Models.Pit(pit);
+				if (this.pitConfigSvc.Pit.configured == false) {
 					this.location.path("/configurator/intro");
 				}
 			});
