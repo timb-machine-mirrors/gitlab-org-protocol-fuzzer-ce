@@ -447,6 +447,7 @@ namespace Peach.Enterprise.Publishers
 						break;
 					
 					case "Cache":
+#pragma warning disable 219
 						// Cache values
 						var value = acknowledgement.Value;
 						value = auth.Value;
@@ -454,6 +455,7 @@ namespace Peach.Enterprise.Publishers
 						value = dhcpNak.Value;
 						value = dhcpAck.Value;
 						value = dhcpOffer.Value;
+#pragma warning enable 219
 						break;
 					
 					default:
