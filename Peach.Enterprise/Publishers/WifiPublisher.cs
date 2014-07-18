@@ -455,9 +455,9 @@ namespace Peach.Enterprise.Publishers
 						value = dhcpNak.Value;
 						value = dhcpAck.Value;
 						value = dhcpOffer.Value;
-#pragma warning enable 219
 						break;
-					
+#pragma warning restore 219
+
 					default:
 						logger.Error("Unknown call method: "+method);
 						break;
