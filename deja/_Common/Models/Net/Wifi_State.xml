@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <Include ns="Wifi" src="file:../_Common/Models/Net/Wifi_Data.xml"/>
+
+  <StateModel name="AP" initialState="Initial">
+    <State name="Initial">
+      
+      <Action type="call" method="Init" publisher="Peach.Agent" />
+      <Action type="open" />
+      
+      <Action type="call" method="Acknowledgement">
+        <Param>
+          <DataModel ref="Wifi:Acknowledgement"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="Beacon">
+        <Param>
+          <DataModel ref="Wifi:Beacon"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ProbeResponse">
+        <Param>
+          <DataModel ref="Wifi:ProbeResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ClearToSend">
+        <Param>
+          <DataModel ref="Wifi:ClearToSend"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="AssociationResponse">
+        <Param>
+          <DataModel ref="Wifi:AssociationResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="AuthenticationResponse">
+        <Param>
+          <DataModel ref="Wifi:AuthenticationResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ActionBlockAckRequest">
+        <Param>
+          <DataModel ref="Wifi:ActionBlockAckReq"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ActionBlockAckResponse">
+        <Param>
+          <DataModel ref="Wifi:ActionBlockAckRep"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="BlockAck">
+        <Param>
+          <DataModel ref="Wifi:BlockAck"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpNak">
+        <Param>
+          <DataModel ref="Wifi:DHCPNak"/>
+          <Data>
+            <Field name="Payload.IP.Payload.Header.DestIP" valueType="ipv4" value="255.255.255.255"/>
+            <Field name="Payload.IP.Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" value="##AssignedIPv4##"/>
+          </Data>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpAck">
+        <Param>
+          <DataModel ref="Wifi:DHCPAck"/>
+          <Data>
+            <Field name="Payload.IP.Payload.Header.DestIP" valueType="ipv4" value="255.255.255.255"/>
+            <Field name="Payload.IP.Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" value="##AssignedIPv4##"/>
+          </Data>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpOffer">
+        <Param>
+          <DataModel ref="Wifi:DHCPOffer"/>
+          <Data>
+            <Field name="Payload.IP.Payload.Header.DestIP" valueType="ipv4" value="255.255.255.255"/>
+            <Field name="Payload.IP.Payload.Payload.UdpPayload.YourIPAddress" valueType="ipv4" value="##AssignedIPv4##"/>
+          </Data>
+        </Param>
+      </Action>
+
+      <Action type="call" method="Arp">
+        <Param>
+          <DataModel ref="Wifi:ARP"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ArpResponse">
+        <Param>
+          <DataModel ref="Wifi:ARP"/>
+          <Data>
+            <Field name="Payload.ARP.OPcodeRequest" value="2" />
+            <Field name="Payload.ARP.SIAddr" valueType="hex" value="##TargetMAC##" />
+            <Field name="Payload.ARP.GIAddr" valueType="ipv4" value="0.0.0.0" />
+          </Data>
+        </Param>
+      </Action>
+      
+      <Action type="call" method="Cleanup" publisher="Peach.Agent" />
+      
+      <Action type="call" method="Cache"/>
+      <Action type="call" method="StartApAuth"/>
+      
+      <Action type="call" method="Connect" publisher="Peach.Agent"/>
+      
+      <Action type="call" method="WaitForAssociation"/>
+      
+      <Action type="close"/>
+      
+      <Action type="call" method="Cleanup" publisher="Peach.Agent" />
+
+    </State>
+  </StateModel>
+
+  <StateModel name="AP_WPA2" initialState="Initial">
+    <State name="Initial">
+      <Action type="call" method="Acknowledgement">
+        <Param>
+          <DataModel ref="Wifi:Acknowledgement"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="Beacon">
+        <Param>
+          <DataModel ref="Wifi:BeaconWpa2Aes"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ProbeResponse">
+        <Param>
+          <DataModel ref="Wifi:ProbeResponseWpa2Aes"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ClearToSend">
+        <Param>
+          <DataModel ref="Wifi:ClearToSend"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="AssociationResponse">
+        <Param>
+          <DataModel ref="Wifi:AssociationResponseWpa"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="AuthenticationResponse">
+        <Param>
+          <DataModel ref="Wifi:AuthenticationResponse"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ActionBlockAckRequest">
+        <Param>
+          <DataModel ref="Wifi:ActionBlockAckReq"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ActionBlockAckResponse">
+        <Param>
+          <DataModel ref="Wifi:ActionBlockAckRep"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="BlockAck">
+        <Param>
+          <DataModel ref="Wifi:BlockAck"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpNak">
+        <Param>
+          <DataModel ref="Wifi:DHCPNak"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpAck">
+        <Param>
+          <DataModel ref="Wifi:DHCPAck"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="KeyMessage1">
+        <Param>
+
+          <DataModel ref="Wifi:HandshakeMessage1"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="KeyMessage3">
+        <Param>
+          <DataModel ref="Wifi:HandshakeMessage3"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="DhcpOffer">
+        <Param>
+          <DataModel ref="Wifi:DHCPOffer"/>
+          <Data>
+            <Field name="Payload.IP.Header.DestIP" valueType="ipv4" value="##AssignedIPv4##"/>
+          </Data>
+        </Param>
+      </Action>
+
+      <Action type="call" method="Arp">
+        <Param>
+          <DataModel ref="Wifi:ARP"/>
+        </Param>
+      </Action>
+
+      <Action type="call" method="ArpResponse">
+        <Param>
+          <DataModel ref="Wifi:ARP"/>
+          <Data>
+            <Field name="Payload.ARP.OPcodeRequest" value="2" />
+            <Field name="Payload.ARP.SIAddr" valueType="hex" value="##TargetMAC##" />
+            <Field name="Payload.ARP.GIAddr" valueType="ipv4" value="0.0.0.0" />
+          </Data>
+        </Param>
+      </Action>
+
+      <Action type="call" method="StartApAuth"/>
+
+      <Action type="close"/>
+    </State>
+  </StateModel>
+  
+</Peach>

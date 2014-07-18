@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <Include ns="Wifi" src="file:../_Common/Models/Net/Wifi_State.xml"/>
+
+  <Agent name="Local">
+    
+    <!-- Startup -->
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## mode ad-hoc" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## up" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## mode monitor" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## up" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/iwconfig" />
+      <Param name="Arguments" value="##Interface## chan ##Channel##" />
+      <Param name="StartOnCall" value="Init" />
+    </Monitor>
+    
+    <!-- Shutdown -->
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifconfig" />
+      <Param name="Arguments" value="##Interface## down" />
+      <Param name="When" value="OnEnd" />
+    </Monitor>
+  </Agent>
+  
+  <Agent name="TargetAgent" location="tcp://##TargetAgentIp##:9001">
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/usr/bin/killall" />
+      <Param name="Arguments" value="dhclient" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <Monitor class="RunCommand">
+      <Param name="Command" value="/sbin/ifdown" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Cleanup" />
+    </Monitor>
+    
+    <!-- Connect -->
+    
+    <Monitor class="Process">
+      <Param name="Executable" value="/sbin/ifup" />
+      <Param name="Arguments" value="##TargetInterface##" />
+      <Param name="StartOnCall" value="Connect" />
+      <Param name="NoCpuKill" value="true" />
+      <Param name="WaitForExitTimeout" value="0" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <Exclude xpath="//Radiotap"/>
+    <Exclude xpath="//ReceiverAddress"/>
+    
+    <StateModel ref="Wifi:AP"/>
+    
+    <Agent ref="Local" />
+    <Agent ref="TargetAgent" />
+	
+    <Publisher class="Wifi">
+    	<Param name="Interface" value="##Interface##" />
+      <Param name="TargetMac" value="##TargetMAC##"/>
+      <Param name="SourceMac" value="##SourceMAC##"/>
+      <Param name="Timeout" value="10000"/>
+      <Param name="ApAuthTimeout" value="10000" />
+    </Publisher>
+	
+	<Strategy class="##Strategy##" />
+
+    <Logger class="File">
+      <Param name="Path" value="##LoggerPath##"/>
+    </Logger>
+  </Test>
+</Peach>

@@ -1,0 +1,1469 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <Include ns="DHCPv4" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv4_Data.xml"/>
+
+  <Defaults>
+    <Number endian="little"/>
+  </Defaults>
+
+  <DataModel name="Tag">
+    <Number name="TagNumber" size="8" value="0"/>
+    <Number name="Length" size="8">
+      <Relation type="size" of="Payload"/>
+    </Number>
+    <Block name="Payload"/>
+  </DataModel>
+
+  <DataModel name="MicrosofWMMParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="221"/>
+    <Block name="Payload">
+      <Blob name="OUI" valueType="hex" value="0050f2"/>
+      <Number name="Vendor" size="8" value="2"/>
+      <Number name="WMESubtype" size="8" value="1"/>
+      <Number name="WMEVersion" size="8" value="1"/>
+      <Flags name="WMEQos" size="8">
+        <Flag name="ParameterSetCount" size="4" position="0" value="1"/>
+        <Flag name="Reserved" size="3" position="4" value="0"/>
+        <Flag name="UApsd" size="1" position="7" value="0"/>
+      </Flags>
+      <Number name="Reserved" size="8" value="0"/>
+      <Block name="AcParamsAci0">
+        <Flags name="Aci" size="8">
+          <Flag name="Aifsn" size="4" position="0" value="3"/>
+          <Flag name="Acm" size="1" position="4" value="0"/>
+          <Flag name="Aci" size="2" position="5" value="0"/>
+          <Flag name="Reserved" size="1" position="7" value="0"/>
+        </Flags>
+        <Flags name="Ecw" size="8">
+          <Flag name="EcwMin" size="4" position="0" value="4"/>
+          <Flag name="EcwMax" size="4" position="4" value="10"/>
+        </Flags>
+        <Number name="TxopLimit" size="16" value="0"/>
+      </Block>
+      <Block name="AcParamsAci1">
+        <Flags name="Aci" size="8">
+          <Flag name="Aifsn" size="4" position="0" value="7"/>
+          <Flag name="Acm" size="1" position="4" value="0"/>
+          <Flag name="Aci" size="2" position="5" value="1"/>
+          <Flag name="Reserved" size="1" position="7" value="0"/>
+        </Flags>
+        <Flags name="Ecw" size="8">
+          <Flag name="EcwMin" size="4" position="0" value="4"/>
+          <Flag name="EcwMax" size="4" position="4" value="10"/>
+        </Flags>
+        <Number name="TxopLimit" size="16" value="0"/>
+      </Block>
+      <Block name="AcParamsAci2">
+        <Flags name="Aci" size="8">
+          <Flag name="Aifsn" size="4" position="0" value="2"/>
+          <Flag name="Acm" size="1" position="4" value="0"/>
+          <Flag name="Aci" size="2" position="5" value="2"/>
+          <Flag name="Reserved" size="1" position="7" value="0"/>
+        </Flags>
+        <Flags name="Ecw" size="8">
+          <Flag name="EcwMin" size="4" position="0" value="3"/>
+          <Flag name="EcwMax" size="4" position="4" value="4"/>
+        </Flags>
+        <Number name="TxopLimit" size="16" value="94"/>
+      </Block>
+      <Block name="AcParamsAci3">
+        <Flags name="Aci" size="8">
+          <Flag name="Aifsn" size="4" position="0" value="2"/>
+          <Flag name="Acm" size="1" position="4" value="0"/>
+          <Flag name="Aci" size="2" position="5" value="3"/>
+          <Flag name="Reserved" size="1" position="7" value="0"/>
+        </Flags>
+        <Flags name="Ecw" size="8">
+          <Flag name="EcwMin" size="4" position="0" value="2"/>
+          <Flag name="EcwMax" size="4" position="4" value="3"/>
+        </Flags>
+        <Number name="TxopLimit" size="16" value="47"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="AtherosCAdvancedParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="221"/>
+    <Block name="Payload">
+      <Blob name="OUI" valueType="hex" value="00037f"/>
+      <Number name="Vendor" size="8" value="1"/>
+      <Number name="Type" size="8" value="1"/>
+      <Number name="Subtype" size="8" value="1"/>
+      <Number name="Version" size="8" value="0"/>
+      <Flags name="Capabilities" size="8">
+        <Flag name="TurboPrime" size="1" position="0" value="0"/>
+        <Flag name="Compression" size="1" position="1" value="0"/>
+        <Flag name="FastFrames" size="1" position="2" value="0"/>
+        <Flag name="ExtendedRange" size="1" position="3" value="0"/>
+        <Flag name="AdvancedRadar" size="1" position="4" value="0"/>
+        <Flag name="Burst" size="1" position="5" value="0"/>
+        <Flag name="CwMin" size="1" position="6" value="0"/>
+        <Flag name="Boost" size="1" position="7" value="0"/>
+      </Flags>
+      <Number name="DefaultKeyIndex" size="16" value="0x7fff"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HtInformationParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="61"/>
+    <Block name="Payload">
+      <Number name="PrimaryChannel" size="8" value="##Channel##"/>
+      <Flags name="Subset1" size="8">
+        <Flag name="SecondaryChannelOffset" size="2" position="0" value="3"/>
+        <Flag name="SupportedChannelWidth" size="1" position="2" value="1"/>
+        <Flag name="ReducedInterframeSpacing" size="1" position="3" value="0"/>
+        <Flag name="PowerSaveMultiPoll" size="1" position="4" value="0"/>
+        <Flag name="ShortestServiceInterval" size="3" position="5" value="0"/>
+      </Flags>
+      <Flags name="Subset2" size="16">
+        <Flag name="OperatingModeBss" size="2" position="0" value="1"/>
+        <Flag name="NonGreefieldSta" size="1" position="2" value="0"/>
+        <Flag name="TransmitBurstLimit" size="1" position="3" value="0"/>
+        <Flag name="ObssNonTsSta" size="1" position="4" value="1"/>
+        <Flag name="Reserved" size="11" position="5" value="0"/>
+      </Flags>
+      <Flags name="Subset3" size="16">
+        <Flag name="Reserved" size="6" position="0" value="0"/>
+        <Flag name="DualBeacon" size="1" position="6" value="0"/>
+        <Flag name="DualClearToSend" size="1" position="7" value="0"/>
+        <Flag name="BeaconId" size="1" position="8" value="0"/>
+        <Flag name="LsigTxopProtection" size="1" position="9" value="0"/>
+        <Flag name="Pco1" size="1" position="10" value="0"/>
+        <Flag name="Pco2" size="1" position="11" value="0"/>
+        <Flag name="Reserved2" size="4" position="12" value="0"/>
+      </Flags>
+      <Block name="McsSet">
+        <Flags name="Stream1" size="32">
+          <Flag name="RxBitmaskBits0-7" size="8" position="0" value="0"/>
+          <Flag name="RxBitmaskBits8-15" size="8" position="8" value="0"/>
+          <Flag name="RxBitmaskBits16-23" size="8" position="16" value="0"/>
+          <Flag name="RxBitmaskBits24-31" size="8" position="24" value="0"/>
+        </Flags>
+        <Flags name="Stream2" size="48">
+          <Flag name="RxBitmaskBit32" size="1" position="0" value="0"/>
+          <Flag name="RxBitmaskBits33-38" size="6" position="1" value="0"/>
+          <Flag name="RxBitmaskBits39-52" size="14" position="7" value="0"/>
+          <Flag name="RxBitmaskBits53-76" size="8" position="21" value="0"/>
+        </Flags>
+        <Flags name="HighestSupportedRate" size="16">
+          <Flag name="HighestSupportedRate" size="10" position="0" value="0"/>
+        </Flags>
+        <Flags name="More" size="32">
+          <Flag name="TxSupportedMcs" size="1" position="0" value="0"/>
+          <Flag name="TxandRxMcsSet" size="1" position="1" value="0"/>
+          <Flag name="MaxNumberofTxStreams" size="2" position="2" value="0"/>
+          <Flag name="UnequalModulation" size="1" position="4" value="0"/>
+        </Flags>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HtCapabilitiesParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="45"/>
+    <Block name="Payload">
+      <Flags name="HtCapabilitiesInfo" size="16">
+        <Flag name="LDPC" size="1" position="0" value="0"/>
+        <Flag name="SupportChannelWidth" size="1" position="1" value="1"/>
+        <Flag name="SMPowerSave" size="2" position="2" value="3"/>
+        <Flag name="GreenField" size="1" position="4" value="0"/>
+        <Flag name="ShortGi20" size="1" position="5" value="1"/>
+        <Flag name="ShortGi40" size="1" position="6" value="1"/>
+        <Flag name="TxStbc" size="1" position="7" value="0"/>
+        <Flag name="RxStbc" size="2" position="8" value="0"/>
+        <Flag name="DelayedBlockAck" size="1" position="10" value="0"/>
+        <Flag name="MaxAmsdu" size="1" position="11" value="0"/>
+        <Flag name="DsssCckMode40" size="1" position="12" value="1"/>
+        <Flag name="Psmp" size="1" position="13" value="0"/>
+        <Flag name="FortyMhzIntolerant" size="1" position="14" value="0"/>
+        <Flag name="LsigTxop" size="1" position="15" value="0"/>
+      </Flags>
+      <Flags name="AmpduParameters" size="8">
+        <Flag name="MaxRxAmpduLength" size="2" position="0" value="3"/>
+        <Flag name="MpduDensity" size="3" position="2" value="0"/>
+        <Flag name="Reservered" size="3" position="5" value="0"/>
+      </Flags>
+      <Block name="McsSet">
+        <Flags name="Stream1" size="32">
+          <Flag name="RxBitmaskBits0-7" size="8" position="0" value="255"/>
+          <Flag name="RxBitmaskBits8-15" size="8" position="8" value="0"/>
+          <Flag name="RxBitmaskBits16-23" size="8" position="16" value="0"/>
+          <Flag name="RxBitmaskBits24-31" size="8" position="24" value="0"/>
+        </Flags>
+        <Flags name="Stream2" size="48">
+          <Flag name="RxBitmaskBit32" size="1" position="0" value="0"/>
+          <Flag name="RxBitmaskBits33-38" size="6" position="1" value="0"/>
+          <Flag name="RxBitmaskBits39-52" size="14" position="7" value="0"/>
+          <Flag name="RxBitmaskBits53-76" size="8" position="21" value="0"/>
+        </Flags>
+        <Flags name="HighestSupportedRate" size="16">
+          <Flag name="HighestSupportedRate" size="10" position="0" value="0"/>
+        </Flags>
+        <Flags name="More" size="32">
+          <Flag name="TxSupportedMcs" size="1" position="0" value="0"/>
+          <Flag name="TxandRxMcsSet" size="1" position="1" value="0"/>
+          <Flag name="MaxNumberofTxStreams" size="2" position="2" value="0"/>
+          <Flag name="UnequalModulation" size="1" position="4" value="0"/>
+        </Flags>
+      </Block>
+      <Flags name="HtExtended" size="16"/>
+      <Flags name="TransmitBeamForming" size="32"/>
+      <Flags name="AttenaSelection" size="8"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ApChannelReportParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="51"/>
+    <Block name="Payload">
+      <Number name="RegulatoryClass" size="8" value="110"/>
+      <Number size="8" value="16"/>
+      <Number size="8" value="3"/>
+      <Number size="8" value="255"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+      <Number size="8" value="0"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="NeighborReportParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="52"/>
+    <Block name="Payload">
+      <Blob name="Bssid" length="6" valueType="hex" value="0b0711000000"/>
+      <Flags name="BssidInformation" size="32">
+        <Flag name="ApReachability" size="2" position="0" value="0"/>
+        <Flag name="Security" size="1" position="2" value="0"/>
+        <Flag name="KeyScope" size="1" position="3" value="0"/>
+        <Flag name="SpectrumMgmt" size="1" position="4" value="0"/>
+        <Flag name="QoS" size="1" position="5" value="0"/>
+        <Flag name="Apsd" size="1" position="6" value="0"/>
+        <Flag name="RadioMeasurement" size="1" position="7" value="0"/>
+        <Flag name="DelayedBlockAck" size="1" position="8" value="0"/>
+        <Flag name="ImmediateBlockAck" size="1" position="9" value="0"/>
+        <Flag name="MobilityDomain" size="1" position="10" value="0"/>
+        <Flag name="Htc" size="1" position="11" value="0"/>
+      </Flags>
+      <Number name="RegulatoryClass" size="8" value="0"/>
+      <Number name="ChannelNumber" size="8" value="0"/>
+      <Number name="PhyType" size="8" value="0"/>
+      <Blob name="Data" length="9"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="SupportedRatesParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="1"/>
+    <Block name="Payload">
+      <Number size="8" value="0x82"/>
+      <Number size="8" value="0x84"/>
+      <Number size="8" value="0x8b"/>
+      <Number size="8" value="0x0c"/>
+      <Number size="8" value="0x12"/>
+      <Number size="8" value="0x96"/>
+      <Number size="8" value="0x18"/>
+      <Number size="8" value="0x24"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ExtendedSupportedRatesParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="50"/>
+    <Block name="Payload">
+      <Number size="8" value="6"/>
+      <Number size="8" value="9"/>
+      <Number size="8" value="12"/>
+      <Number size="8" value="18"/>
+      <Number size="8" value="24"/>
+      <Number size="8" value="36"/>
+      <Number size="8" value="48"/>
+      <Number size="8" value="54"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="SsidParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="0"/>
+    <Block name="Payload">
+      <Blob name="SsidValue" value="##Ssid##"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="CurrentChannelParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="3"/>
+    <Number name="Payload" size="8" value="##Channel##"/>
+  </DataModel>
+
+  <DataModel name="TimParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="5"/>
+    <Block name="Payload">
+      <Number name="DTIMCount" size="8" value="0"/>
+      <Number name="DTIMPeriod" size="8" value="1"/>
+      <Flags name="BitmapControl" size="8">
+        <Flag name="Multicast" size="1" position="0"/>
+        <Flag name="BitmapOffset" size="7" position="1"/>
+      </Flags>
+      <Number name="PartialVirtualBitmap" size="8" value="0"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ErpParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="42"/>
+    <Flags name="Payload" size="8">
+      <Flag name="NonERPPreset" size="1" position="0" value="0"/>
+      <Flag name="UseProtection" size="1" position="1" value="0"/>
+      <Flag name="BarkerPreableMode" size="1" position="2" value="0"/>
+      <Flag name="Reservered" size=" 5" position="3" value="0"/>
+    </Flags>
+  </DataModel>
+
+  <DataModel name="RsnAesParameter" ref="Tag">
+    <Number name="TagNumber" size="8" value="48"/>
+    <Block name="Payload">
+      <Number name="Version" size="16" value="1"/>
+      <Block name="GroupCipherSuite">
+        <Blob name="SuiteOUI" valueType="hex" value="000fac"/>
+        <Number name="Type" size="8" value="4"/>
+      </Block>
+      <Number name="CipherSuiteCount" size="16">
+        <Relation type="count" of="PairwiseCipherSuiteList"/>
+      </Number>
+      <Block name="PairwiseCipherSuiteList"  minOccurs="1">
+        <Block name="PairwiseCipherSuite">
+          <Blob name="SuiteOUI" valueType="hex" value="000fac"/>
+          <Number name="Type" size="8" value="4"/>
+        </Block>
+      </Block>
+      <Number name="AKMSuiteCount" size="16">
+        <Relation type="count" of="AKMSuiteList"/>
+      </Number>
+      <Block name="AKMSuiteList"  minOccurs="1">
+        <Block name="AKMSuite">
+          <Blob name="SuiteOUI" valueType="hex" value="000fac"/>
+          <Number name="Type" size="8" value="2"/>
+        </Block>
+      </Block>
+      <Flags name="Capabilities" size="16">
+        <Flag name="Pre-Auth" size="1" position="0" value="0"/>
+        <Flag name="NoPairWise" size="1" position="1" value="0"/>
+        <Flag name="PTKSA" size="2" position="2" value="0"/>
+        <Flag name="GTKSA" size="2" position="4" value="0"/>
+        <Flag name="ProtectionRequired" size="1" position="6" value="0"/>
+        <Flag name="ProtectedCabable" size="1" position="7" value="0"/>
+        <Flag name="PeerKeyEnabled" size="1" position="8" value="0"/>
+      </Flags>
+    </Block>
+  </DataModel>
+
+  <DataModel name="RadiotapHeader">
+    <Number name="Revision" size="8" value="0"/>
+    <Number name="Pad" size="8" value="0"/>
+    <Number name="Length" size="16">
+      <Relation type="size" of="RadiotapHeader"/>
+    </Number>
+    <Flags name="Present" size="32">
+      <Flag name="TSFT" size="1" position="0" value="0"/>
+      <Flag name="Flags" size="1" position="1" value="1"/>
+      <Flag name="Rate" size="1" position="2" value="1"/>
+      <Flag name="Channel" size="1" position="3" value="1"/>
+      <Flag name="FHSS" size="1" position="4" value="0"/>
+      <Flag name="dbMSignal" size="1" position="5" value="0"/>
+      <Flag name="dbMNoise" size="1" position="6" value="0"/>
+      <Flag name="LockQuality" size="1" position="7" value="0"/>
+      <Flag name="Attenuation" size="1" position="8" value="0"/>
+      <Flag name="dBAttenuation" size="1" position="9" value="0"/>
+      <Flag name="dBmPower" size="1" position="10" value="0"/>
+      <Flag name="Antenna" size="1" position="11" value="0"/>
+      <Flag name="dbSignal" size="1" position="12" value="0"/>
+      <Flag name="dbNoise" size="1" position="13" value="0"/>
+      <Flag name="Rxflags" size="1" position="14" value="0"/>
+      <Flag name="Txflags" size="1" position="15" value="1"/>
+      <Flag name="RtsRetries" size="1" position="16" value="0"/>
+      <Flag name="DataRetries" size="1" position="17" value="0"/>
+      <Flag name="Channel+" size="1" position="18" value="0"/>
+      <Flag name="HtInformattion" size="1" position="19" value="0"/>
+      <Flag name="AMDPU" size="1" position="20" value="0"/>
+      <Flag name="VHT" size="1" position="21" value="0"/>
+      <Flag name="Reserved" size="7" position="22" value="0"/>
+      <Flag name="RadiotapNsNext" size="1" position="29" value="0"/>
+      <Flag name="VenderNsNext" size="1" position="30" value="0"/>
+      <Flag name="Ext" size="1" position="31" value="0"/>
+    </Flags>
+    <Flags name="Flags" size="8">
+      <Flag name="CFP" size="1" position="0" value="0"/>
+      <Flag name="Preable" size="1" position="1" value="0"/>
+      <Flag name="WEP" size="1" position="2" value="0"/>
+      <Flag name="Fragmentation" size="1" position="3" value="0"/>
+      <Flag name="CRC" size="1" position="4" value="0"/>
+      <Flag name="DataPad" size="1" position="5" value="0"/>
+      <Flag name="BadFCS" size="1" position="6" value="0"/>
+      <Flag name="ShortGi" size="1" position="7" value="0"/>
+    </Flags>
+    <Number name="DataRate" size="8" value="4"/>
+    <Number name="ChannelFrequency" size="16" value="##ChannelFrequency##"/>
+    <Flags name="ChannelType" size="16">
+      <Flag name="Turbo" size="1" position="4" value="0"/>
+      <Flag name="CCK" size="1" position="5" value="1"/>
+      <Flag name="OFDM" size="1" position="6" value="0"/>
+      <Flag name="2Ghz" size="1" position="7" value="1"/>
+      <Flag name="5Ghz" size="1" position="8" value="0"/>
+      <Flag name="Passive" size="1" position="9" value="0"/>
+      <Flag name="DynamicCCK-OFDM" size="1" position="10" value="0"/>
+      <Flag name="GFSK" size="1" position="11" value="0"/>
+      <Flag name="GMS" size="1" position="12" value="0"/>
+      <Flag name="StaticTurbo" size="1" position="13" value="0"/>
+      <Flag name="HalfRateChannel" size="1" position="14" value="0"/>
+      <Flag name="QuarterRateChannel" size="1" position="15" value="0"/>
+    </Flags>
+    <Flags name="TxFlags" size="16">
+      <Flag name="IEEE80211_RADIOTAP_F_TX_FAIL"   size="1" position="0" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_CTS"    size="1" position="1" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_RTS"    size="1" position="2" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_NOACK"  size="1" position="3" value="0" />
+    </Flags>
+  </DataModel>
+
+  <DataModel name="MacHeader">
+    <Flags name="FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="8"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Number name="Duration" size="16" value="0"/>
+    <Blob name="ReceiverAddress" length="6" valueType="hex" value="ff ff ff ff ff ff"/>
+    <Blob name="TransmitterAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+    <Blob name="BSSId" length="6" valueType="hex" value="##SourceMAC##"/>
+    <Flags name="FragmentSequenceNumber" size="16">
+      <Flag name="FragmentNumber" size="4" position="0" value="0"/>
+      <Flag name="SequenceNumber" size="12" position="4" value="0"/>
+    </Flags>
+    <Block name="QoS"/>
+  </DataModel>
+
+  <DataModel name="ManagementFrame">
+    <Number name="Timestamp" size="64"  value="0x000002D6AFC6614C"/>
+    <Number name="BeaconInterval" size="16" value="100"/>
+    <Flags name="CapabilityInformation" size="16">
+      <Flag name="ESS"          position="0" size="1" value="1" />
+      <Flag name="IBSS"         position="1" size="1" value="0" />
+      <Flag name="CFPollable"   position="2" size="1" value="0" />
+      <Flag name="CFPollRequest"  position="3" size="1" value="0" />
+      <Flag name="Privacy"      position="4" size="1" value="0" />
+      <Flag name="ShortPreamble"  position="5" size="1" value="0" />
+      <Flag name="PBCC"     position="6" size="1" value="0" />
+      <Flag name="ChannelAgility" position="7" size="1" value="0" />
+      <Flag name="SpectrumMgmt" position="8" size="1" value="0" />
+      <Flag name="QoS"      position="9" size="1" value="0" />
+      <Flag name="ShortSlotTime"  position="10" size="1" value="1" />
+      <Flag name="APSD"     position="11" size="1" value="0" />
+      <Flag name="Reserved"   position="12" size="1" value="0" />
+      <Flag name="DSSSOFDM"   position="13" size="1" value="0" />
+      <Flag name="DelayedBlockAck"  position="14" size="1" value="0" />
+      <Flag name="ImmediateBlockAck"  position="15" size="1" value="0" />
+    </Flags>
+    <Block name="TaggedParameters">
+      <Block name="SSID" ref="SsidParameter"/>
+      <Block name="SupportedRates" ref="SupportedRatesParameter"/>
+      <Block name="CurrentChannel" ref="CurrentChannelParameter"/>
+      <Block name="TIM" ref="TimParameter"/>
+      <Block name="ERP" ref="ErpParameter"/>
+      <Block name="ExtendedSupportedRates" ref="ExtendedSupportedRatesParameter"/>
+      <Block name="HtCapabilities" ref="HtCapabilitiesParameter"/>
+      <Block name="HtInformation" ref="HtInformationParameter"/>
+      <Block name="MicrosofWMMP" ref="MicrosofWMMParameter"/>
+      <Block name="AtherosCAdvanced" ref="AtherosCAdvancedParameter"/>
+    </Block>
+  </DataModel>
+  
+  <DataModel name="Packet">
+    <Block name="Radiotap"        ref="RadiotapHeader"/>
+    <Block name="MacHeaderFrame"  ref="MacHeader"/>
+    <Block name="Body"            ref="ManagementFrame"/>
+    <Block name="Payload"/>
+  </DataModel>
+
+  <DataModel name="Beacon" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="8"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+  </DataModel>
+
+  <DataModel name="BeaconWpa2Aes" ref="Beacon">
+    <Flags name="Body.CapabilityInformation" size="16">
+      <Flag name="ESS"      position="0" size="1" value="1" />
+      <Flag name="IBSS"     position="1" size="1" value="0" />
+      <Flag name="CFPollable"   position="2" size="1" value="0" />
+      <Flag name="CFPollRequest"  position="3" size="1" value="0" />
+      <Flag name="Privacy"    position="4" size="1" value="1" />
+      <Flag name="ShortPreamble"  position="5" size="1" value="1" />
+      <Flag name="PBCC"     position="6" size="1" value="0" />
+      <Flag name="ChannelAgility" position="7" size="1" value="0" />
+      <Flag name="SpectrumMgmt" position="8" size="1" value="0" />
+      <Flag name="QoS"      position="9" size="1" value="0" />
+      <Flag name="ShortSlotTime"  position="10" size="1" value="1" />
+      <Flag name="APSD"     position="11" size="1" value="0" />
+      <Flag name="Reserved"   position="12" size="1" value="0" />
+      <Flag name="DSSSOFDM"   position="13" size="1" value="0" />
+      <Flag name="DelayedBlockAck"  position="14" size="1" value="0" />
+      <Flag name="ImmediateBlockAck"  position="15" size="1" value="0" />
+    </Flags>
+    <Block name="Body.TaggedParameters">
+      <Block name="SSID" ref="SsidParameter"/>
+      <Block name="SupportedRates" ref="SupportedRatesParameter"/>
+      <Block name="CurrentChannel" ref="CurrentChannelParameter"/>
+      <Block name="TIM" ref="TimParameter"/>
+      <Block name="ERP" ref="ErpParameter"/>
+      <Block name="Rsn" ref="RsnAesParameter"/>
+      <Block name="ExtendedSupportedRates" ref="ExtendedSupportedRatesParameter"/>
+      <Block name="HtCapabilities" ref="HtCapabilitiesParameter"/>
+      <Block name="HtInformation" ref="HtInformationParameter"/>
+      <Block name="MicrosofWMMP" ref="MicrosofWMMParameter"/>
+      <Block name="AtherosCAdvanced" ref="AtherosCAdvancedParameter"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ClearToSend" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="12"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="0"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="PowerSavePoll" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="10"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="8"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+      <Blob name="BSSId" length="6" valueType="hex" value="##TargetMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="RequestToSend" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="12"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="0"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+      <Blob name="TransmitterAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="CfEndCfAck" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="15"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="22444"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+      <Blob name="TransmitterAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="CfEnd" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="14"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="2694"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+      <Blob name="TransmitterAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="ActionBlockAckReq" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="13"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Flags name="MacHeaderFrame.FragmentSequenceNumber" size="16">
+      <Flag name="FragmentNumber" size="4" position="0" value="0"/>
+      <Flag name="SequenceNumber" size="12" position="4" value="2"/>
+    </Flags>
+    <Block name="Body">
+     <Block name="FixedParameters">
+        <Block name="BlockAck">
+          <Number name="CategoryCode" size="8" value="3"/>
+          <Number name="ActionCode" size="8" value="0"/>
+          <Number name="DialogToken" size="8" value="1"/>
+          <Flags name="Parameters" size="16">
+            <Flag name="A-MSDUs" size="1" position="0" value="1"/>
+            <Flag name="BlockAckPolicy" size="1" position="1" value="1"/>
+            <Flag name="TrafficId" size="4" position="2" value="0"/>
+            <Flag name="NumberofBuffers" size="10" position="6" value="64"/>
+          </Flags>
+          <Number name="Timeout" size="16" value="0"/>
+          <Flags name="SSC" size="16">
+            <Flag name="Fragment" size="4" position="0" value="0"/>
+            <Flag name="StartingSequenceNUmber" size="12" position="4" value="0"/>
+          </Flags>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ActionBlockAckRep" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="13"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Flags name="MacHeaderFrame.FragmentSequenceNumber" size="16">
+      <Flag name="FragmentNumber" size="4" position="0" value="0"/>
+      <Flag name="SequenceNumber" size="12" position="4" value="3"/>
+    </Flags>
+    <Block name="Body">
+     <Block name="FixedParameters">
+        <Block name="BlockAck">
+          <Number name="CategoryCode" size="8" value="3"/>
+          <Number name="ActionCode" size="8" value="1"/>
+          <Number name="DialogToken" size="8" value="0xac"/>
+          <Number name="StatusCode" size="16" value="0"/>
+          <Flags name="Parameters" size="16">
+            <Flag name="A-MSDUs" size="1" position="0" value="1"/>
+            <Flag name="BlockAckPolicy" size="1" position="1" value="1"/>
+            <Flag name="TrafficId" size="4" position="2" value="0"/>
+            <Flag name="NumberofBuffers" size="10" position="6" value="64"/>
+          </Flags>
+          <Number name="Timeout" size="16" value="0"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="Atim" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="9"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Block name="Body">
+      <Blob/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ProbeResponse" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="5"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Block name="Body.TaggedParameters">
+      <Block name="SSID" ref="SsidParameter"/>
+      <Block name="SupportedRates" ref="SupportedRatesParameter"/>
+      <Block name="CurrentChannel" ref="CurrentChannelParameter"/>
+      <Block name="ERP" ref="ErpParameter"/>
+      <Block name="ExtendedSupportedRates" ref="ExtendedSupportedRatesParameter"/>
+      <Block name="HtCapabilities" ref="HtCapabilitiesParameter"/>
+      <Block name="ApChannelReport" ref="ApChannelReportParameter"/>
+      <Block name="HtInformation" ref="HtInformationParameter"/>
+      <Block name="NeighborReport" ref="NeighborReportParameter"/>
+      <Block name="MicrosofWMMParam" ref="MicrosofWMMParameter"/>
+      <Block name="AtherosCAdvanced" ref="AtherosCAdvancedParameter"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="ProbeResponseWpa2Aes" ref="ProbeResponse">
+    <Flags name="Body.CapabilityInformation" size="16">
+      <Flag name="ESS"      position="0" size="1" value="1" />
+      <Flag name="IBSS"     position="1" size="1" value="0" />
+      <Flag name="CFPollable"   position="2" size="1" value="0" />
+      <Flag name="CFPollRequest"  position="3" size="1" value="0" />
+      <Flag name="Privacy"    position="4" size="1" value="1" />
+      <Flag name="ShortPreamble"  position="5" size="1" value="1" />
+      <Flag name="PBCC"     position="6" size="1" value="0" />
+      <Flag name="ChannelAgility" position="7" size="1" value="0" />
+      <Flag name="SpectrumMgmt" position="8" size="1" value="0" />
+      <Flag name="QoS"      position="9" size="1" value="0" />
+      <Flag name="ShortSlotTime"  position="10" size="1" value="1" />
+      <Flag name="APSD"     position="11" size="1" value="0" />
+      <Flag name="Reserved"   position="12" size="1" value="0" />
+      <Flag name="DSSSOFDM"   position="13" size="1" value="0" />
+      <Flag name="DelayedBlockAck"  position="14" size="1" value="0" />
+      <Flag name="ImmediateBlockAck"  position="15" size="1" value="0" />
+    </Flags>
+    <Block name="Body.TaggedParameters">
+      <Block name="SSID" ref="SsidParameter"/>
+      <Block name="SupportedRates" ref="SupportedRatesParameter"/>
+      <Block name="CurrentChannel" ref="CurrentChannelParameter"/>
+      <Block name="ERP" ref="ErpParameter"/>
+      <Block name="RSN" ref="RsnAesParameter"/>
+      <Block name="ExtendedSupportedRates" ref="ExtendedSupportedRatesParameter"/>
+      <Block name="HtCapabilities" ref="HtCapabilitiesParameter"/>
+      <Block name="ApChannelReport" ref="ApChannelReportParameter"/>
+      <Block name="HtInformation" ref="HtInformationParameter"/>
+      <Block name="NeighborReport" ref="NeighborReportParameter"/>
+      <Block name="MicrosofWMMParam" ref="MicrosofWMMParameter"/>
+      <Block name="AtherosCAdvanced" ref="AtherosCAdvancedParameter"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="AuthenticationResponse" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="11"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Number name="MacHeaderFrame.Duration" size="16" value="0x3a01"/>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Flags name="MacHeaderFrame.FragmentSequenceNumber" size="16">
+      <Flag name="FragmentNumber" size="4" position="0" value="0"/>
+      <Flag name="SequenceNumber" size="12" position="4" value="0"/>
+    </Flags>
+    <Block name="Body">
+      <Block name="FixedParameters">
+        <Number name="Algorithm" size="16" value="0"/>
+        <Number name="Seq" size="16" value="2"/>
+        <Number name="Status" size="16" value="0"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="AuthenticationRequest" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="11"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Number name="MacHeaderFrame.Duration" size="16" value="314"/>
+    <Block name="Body">
+      <Block name="FixedParameters">
+        <Number name="Algorithm" size="16" value="0"/>
+        <Number name="Seq" size="16" value="1">
+          <!--<Fixup class="SequenceIncrement"/>-->
+        </Number>
+        <Number name="Status" size="16" value="0"/>
+      </Block>
+      <Block name="TaggedParameters">
+        <Block name="VenderSpecific" ref="Tag">
+          <Number name="TagNumber" size="8" value="221"/>
+          <Block name="Payload">
+            <Blob name="OUI" valueType="hex" value="001018"/>
+            <Number name="OUIType" size="8" value="1"/>
+            <Blob name="Data" valueType="hex" value="010100"/>
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="Acknowledgement" ref="Packet">
+    <Flags name="Radiotap.TxFlags" size="16">
+      <Flag name="IEEE80211_RADIOTAP_F_TX_FAIL"   size="1" position="0" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_CTS"    size="1" position="1" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_RTS"    size="1" position="2" value="0" />
+      <Flag name="IEEE80211_RADIOTAP_F_TX_NOACK"  size="1" position="3" value="1" />
+    </Flags>
+
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="13"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="0"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="AssociationResponse" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="0"/>
+      <Flag name="Subtype" size="4" position="4" value="1"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Number name="MacHeaderFrame.Duration" size="16" value="314"/>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Flags name="MacHeaderFrame.FragmentSequenceNumber" size="16">
+      <Flag name="FragmentNumber" size="4" position="0" value="0"/>
+      <Flag name="SequenceNumber" size="12" position="4" value="1"/>
+    </Flags>
+    <Block name="Body">
+      <Block name="FixedParameters">
+        <Flags name="CapabilityInformation" size="16">
+          <Flag name="ESS"      position="0" size="1" value="1" />
+          <Flag name="IBSS"     position="1" size="1" value="0" />
+          <Flag name="CFPollable"   position="2" size="1" value="0" />
+          <Flag name="CFPollRequest"  position="3" size="1" value="0" />
+          <Flag name="Privacy"    position="4" size="1" value="0" /> <!--0 is open network. 1 is closed network-->
+          <Flag name="ShortPreamble"  position="5" size="1" value="1" />
+          <Flag name="PBCC"     position="6" size="1" value="0" />
+          <Flag name="ChannelAgility" position="7" size="1" value="0" />
+          <Flag name="SpectrumMgmt" position="8" size="1" value="0" />
+          <Flag name="QoS"      position="9" size="1" value="0" />
+          <Flag name="ShortSlotTime"  position="10" size="1" value="1" />
+          <Flag name="APSD"     position="11" size="1" value="0" />
+          <Flag name="Reserved"   position="12" size="1" value="0" />
+          <Flag name="DSSSOFDM"   position="13" size="1" value="0" />
+          <Flag name="DelayedBlockAck"  position="14" size="1" value="0" />
+          <Flag name="ImmediateBlockAck"  position="15" size="1" value="0" />
+        </Flags>
+        <Number name="StatusCode" size="16" value="0"/>
+        <Flags name="AssociationId" size="16">
+          <Flag name="AssociationId" size="14" position="0" value="2"/>
+          <Flag name="Unknown" size="2" position="14" value="3"/>
+        </Flags>
+        <Block name="TaggedParameters">
+          <Block name="SupportedRates" ref="SupportedRatesParameter"/>
+          <Block name="ExtendedSupportedRates" ref="ExtendedSupportedRatesParameter"/>
+          <Block name="HtCapabilities" ref="HtCapabilitiesParameter"/>
+          <Block name="ApChannelReport" ref="ApChannelReportParameter"/>
+          <Block name="HtInformation" ref="HtInformationParameter"/>
+          <Block name="NeighborReport" ref="NeighborReportParameter"/>
+          <Block name="MicrosofWMMParam" ref="MicrosofWMMParameter"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="AssociationResponseWpa" ref="AssociationResponse">
+    <Flags name="Body.FixedParameters.CapabilityInformation" size="16">
+      <Flag name="ESS"      position="0" size="1" value="1" />
+      <Flag name="IBSS"     position="1" size="1" value="0" />
+      <Flag name="CFPollable"   position="2" size="1" value="0" />
+      <Flag name="CFPollRequest"  position="3" size="1" value="0" />
+      <Flag name="Privacy"    position="4" size="1" value="1" />
+      <Flag name="ShortPreamble"  position="5" size="1" value="1" />
+      <Flag name="PBCC"     position="6" size="1" value="0" />
+      <Flag name="ChannelAgility" position="7" size="1" value="0" />
+      <Flag name="SpectrumMgmt" position="8" size="1" value="0" />
+      <Flag name="QoS"      position="9" size="1" value="0" />
+      <Flag name="ShortSlotTime"  position="10" size="1" value="1" />
+      <Flag name="APSD"     position="11" size="1" value="0" />
+      <Flag name="Reserved"   position="12" size="1" value="0" />
+      <Flag name="DSSSOFDM"   position="13" size="1" value="0" />
+      <Flag name="DelayedBlockAck"  position="14" size="1" value="0" />
+      <Flag name="ImmediateBlockAck"  position="15" size="1" value="0" />
+    </Flags>
+  </DataModel>
+
+  <DataModel name="BlockAck" ref="Packet">
+    <Block name="MacHeaderFrame">
+      <Flags name="FrameControlField" size="16">
+        <Flag name="Version" size="2" position="0" value="0"/>
+        <Flag name="Type" size="2" position="2" value="1"/>
+        <Flag name="Subtype" size="4" position="4" value="9"/>
+        <Flag name="DsStatus" size="2" position="8" value="0"/>
+        <Flag name="More" size="1" position="10" value="0"/>
+        <Flag name="Retry" size="1" position="11" value="0"/>
+        <Flag name="PwrMgt" size="1" position="12" value="0"/>
+        <Flag name="MoreData" size="1" position="13" value="0"/>
+        <Flag name="Protected" size="1" position="14" value="0"/>
+        <Flag name="Order" size="1" position="15" value="0"/>
+      </Flags>
+      <Number name="Duration" size="16" value="304"/>
+      <Blob name="ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+      <Blob name="TransmitterAddress" length="6" valueType="hex" value="##SourceMAC##"/>
+      <Flags name="BlockAckRequestControl" size="16">
+        <Flag name="BarAckPolicy" size="1" position="0" value="1"/>
+        <Flag name="MultiTid" size="1" position="1" value="0"/>
+        <Flag name="CompressedBitmap" size="1" position="2" value="1"/>
+        <Flag name="Reserved" size="9" position="3" value="0"/>
+        <Flag name="TID" size="4" position="12" value="0"/>
+      </Flags>
+      <Flags name="BlockAckStartingSequenceControl" size="16">
+        <Flag name="Fragment" size="4" position="0" value="0"/>
+        <Flag name="StartingSequenceNumber" position="4" size="12" value="1"/>
+      </Flags>
+      <Blob name="Bitmap" valueType="hex" length="8" />
+    </Block>
+    <Block name="Body"/>
+  </DataModel>
+
+  <DataModel name="NullData" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="12"/>
+      <Flag name="DsStatus" size="2" position="8" value="0"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Block name="Body">
+      <Blob length="2"/>
+    </Block>
+  </DataModel>
+
+  <DataModel name="LogicalLinkControl">
+    <Number name="Dsap" size="8" value="170"/>
+    <Number name="Ssap" size="8" value="170"/>
+    <Flags name="ControlField" size="8">
+      <Flag name="FrameType" size="2" position="0" value="3"/>
+      <Flag name="Command" size="6" position="2" value="0"/>
+    </Flags>
+    <Number name="OrgCode" size="24" value="0"/>
+    <Number name="Type" size="16" endian="big" value="0x0800"/>
+  </DataModel>
+
+  <DataModel name="HandshakeMessageMessage" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="8"/>
+      <Flag name="DsStatus" size="2" position="8" value="2"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Flags name="MacHeaderFrame.QoS" size="16">
+      <Flag name="TID" size="4" position="0" value="7"/>
+      <Flag name="Eosp" size="1" position="4" value="0"/>
+      <Flag name="AckPolicy" size="2" position="5" value="0"/>
+      <Flag name="PayloadType" size="1" position="7" value="0"/>
+      <Flag name="QapPsBufferState" size="8" position="8" value="0"/>
+    </Flags>
+    <Block name="Body">
+      <Block name="LLC" ref="LogicalLinkControl">
+        <Number name="Type" size="16" endian="big" value="0x888e"/>
+      </Block>
+      <Block name="Authentication">
+        <Number name="Version" size="8" value="2"/>
+        <Number name="Type" size="8" value="3"/>
+        <Number name="Length" endian="big" size="16">
+          <Relation type="size" of="Payload"/>
+        </Number>
+        <Block name="Payload">
+          <Number name="KeyDescriptorType" size="8" value="2"/>
+          <Flags name="KeyInformation" size="16" endian="big">
+            <Flag name="KeyDescriptorVersion" size="3" position="13" value="2"/>
+            <Flag name="KeyType" size="1" position="12" value="1"/>
+            <Flag name="KeyIndex" size="2" position="10" value="0"/>
+            <Flag name="Install" size="1" position="9" value="0"/>
+            <Flag name="KeyAck" size="1" position="8" value="1"/>
+            <Flag name="KeyMic" size="1" position="7" value="0"/>
+            <Flag name="Secure" size="1" position="6" value="0"/>
+            <Flag name="Error" size="1" position="5" value="0"/>
+            <Flag name="Request" size="1" position="4" value="0"/>
+            <Flag name="EncryptedKeyData" size="1" position="3" value="0"/>
+          </Flags>
+          <Number name="KeyLength" size="16" endian="big" value="16"/>
+          <Number name="ReplayCounter" size="64" endian="big" value="1"/>
+          <Blob name="WpaKeyNonce" valueType="hex" length="32" value="f0a8af99b50d6e99433d9a3e0b7ffd9d20616ba59a2805b290cf292277652ef5"/>
+          <Blob name="KeyIV" valueType="hex" length="16" value="00000000000000000000000000000000"/>
+          <Blob name="WpaKeyRcs" valueType="hex" length="8" value="0000000000000000"/>
+          <Blob name="WpaKeyId" valueType="hex" length="8" value="0000000000000000"/>
+          <Blob name="WpaKeyMic" valueType="hex" length="16" value="00000000000000000000000000000000"/>
+          <Number name="WpaKeyDataLength" size="16" endian="big">
+            <Relation type="size" of="WpaKeyData"/>
+          </Number>
+          <Blob name="WpaKeyData" length="0"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HandshakeMessage1" ref="HandshakeMessageMessage"/>
+
+  <DataModel name="HandshakeMessage2" ref="HandshakeMessageMessage">
+    <Block name="Body.Authentication.Payload">
+      <Number name="KeyDescriptorType" size="8" value="254"/>
+      <Flags name="KeyInformation" size="16" endian="big">
+            <Flag name="KeyDescriptorVersion" size="3" position="13" value="2"/>
+            <Flag name="KeyType" size="1" position="12" value="1"/>
+            <Flag name="KeyIndex" size="2" position="10" value="0"/>
+            <Flag name="Install" size="1" position="9" value="0"/>
+            <Flag name="KeyAck" size="1" position="8" value="1"/>
+            <Flag name="KeyMic" size="1" position="7" value="0"/>
+            <Flag name="Secure" size="1" position="6" value="0"/>
+            <Flag name="Error" size="1" position="5" value="0"/>
+            <Flag name="Request" size="1" position="4" value="0"/>
+            <Flag name="EncryptedKeyData" size="1" position="3" value="0"/>
+          </Flags>
+      <Number name="KeyLength" size="16" endian="big" value="0"/>
+      <Number name="ReplayCounter" size="64" endian="big" value="1"/>
+      <Blob name="WpaKeyNonce" valueType="hex" value="233a5f1cb602abb9b327b58bd38a2bc0782d9c90bf426c102cb82308c2ca821a"/>
+      <Blob name="KeyIV" valueType="hex" value="00000000000000000000000000000000"/>
+      <Blob name="WpaKeyRcs" valueType="hex" value="0000000000000000"/>
+      <Blob name="WpaKeyId" valueType="hex" value="0000000000000000"/>
+      <Blob name="WpaKeyMic" valueType="hex" length="16" value="00000000000000000000000000000000"/>
+      <Number name="WpaKeyDataLength" size="16" endian="big">
+        <Relation type="size" of="WpaKeyData"/>
+      </Number>
+      <Block name="WpaKeyData">
+        <Block name="Rsn" ref="RsnAesParameter">
+          <Flags name="Capabilities" size="16">
+            <Flag name="Pre-Auth" size="1" position="0" value="0"/>
+            <Flag name="NoPairWise" size="1" position="1" value="0"/>
+            <Flag name="PTKSA" size="2" position="2" value="3"/>
+            <Flag name="GTKSA" size="2" position="4" value="3"/>
+            <Flag name="ProtectionRequired" size="1" position="6" value="0"/>
+            <Flag name="ProtectedCabable" size="1" position="7" value="0"/>
+            <Flag name="PeerKeyEnabled" size="1" position="8" value="0"/>
+          </Flags>
+          <Number size="16" value="0"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="HandshakeMessage3" ref="HandshakeMessageMessage">
+    <Flags name="Body.Authentication.Payload.KeyInformation" size="16" endian="big">
+      <Flag name="KeyDescriptorVersion" size="3" position="13" value="2"/>
+      <Flag name="KeyType" size="1" position="12" value="1"/>
+      <Flag name="KeyIndex" size="2" position="10" value="0"/>
+      <Flag name="Install" size="1" position="9" value="1"/>
+      <Flag name="KeyAck" size="1" position="8" value="1"/>
+      <Flag name="KeyMic" size="1" position="7" value="1"/>
+      <Flag name="Secure" size="1" position="6" value="1"/>
+      <Flag name="Error" size="1" position="5" value="0"/>
+      <Flag name="Request" size="1" position="4" value="0"/>
+      <Flag name="EncryptedKeyData" size="1" position="3" value="1"/>
+    </Flags>
+    <Number name="Body.Authentication.Payload.ReplayCounter" size="64" endian="big" value="2"/>
+    <Blob name="Body.Authentication.Payload.WpaKeyMic" valueType="hex" length="16" value="00000000000000000000000000000000"/>
+    <Blob name="Body.Authentication.Payload.WpaKeyData" valueType="hex" value="30140100000fac040100000fac040100000fac020c00"/>
+  </DataModel>
+
+  <DataModel name="HandshakeMessage4" ref="HandshakeMessageMessage">
+    <Block name="Body.Authentication.Payload">
+      <Number name="KeyDescriptorType" size="8" value="254"/>
+      <Flags name="KeyInformation" size="16" endian="big">
+            <Flag name="KeyDescriptorVersion" size="3" position="13" value="2"/>
+            <Flag name="KeyType" size="1" position="12" value="1"/>
+            <Flag name="KeyIndex" size="2" position="10" value="0"/>
+            <Flag name="Install" size="1" position="9" value="0"/>
+            <Flag name="KeyAck" size="1" position="8" value="1"/>
+            <Flag name="KeyMic" size="1" position="7" value="0"/>
+            <Flag name="Secure" size="1" position="6" value="0"/>
+            <Flag name="Error" size="1" position="5" value="0"/>
+            <Flag name="Request" size="1" position="4" value="0"/>
+            <Flag name="EncryptedKeyData" size="1" position="3" value="0"/>
+          </Flags>
+      <Number name="KeyLength" size="16" endian="big" value="32"/>
+      <Number name="ReplayCounter" size="64" endian="big" value="1"/>
+      <Blob name="WpaKeyNonce" valueType="hex" value="0000000000000000000000000000000000000000000000000000000000000000"/>
+      <Blob name="KeyIV" valueType="hex" value="00000000000000000000000000000000"/>
+      <Blob name="WpaKeyRcs" valueType="hex" value="0000000000000000"/>
+      <Blob name="WpaKeyId" valueType="hex" value="0000000000000000"/>
+      <Blob name="WpaKeyMic" valueType="hex" length="16" value="00000000000000000000000000000000"/>
+      <Number name="WpaKeyDataLength" size="16" endian="big">
+        <Relation type="size" of="WpaKeyData"/>
+      </Number>
+      <Blob name="WpaKeyData" length="0"/> <!--Needs to be slurpped-->
+    </Block>
+  </DataModel>
+
+  <DataModel name="ARP" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="0"/>
+      <Flag name="DsStatus" size="2" position="8" value="2"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Block name="Body"/>
+    <Block name="Payload">
+      <Block ref="LogicalLinkControl">
+        <Number name="Type" size="16" endian="big" value="0x0806"/>
+      </Block>
+      <Block name="ARP">
+        <Number name="HardwareType" size="16" endian="big" value="1"/>
+          <Number name="ProtocolType" size="16" endian="big" value="0x0800"/>
+          <Number name="Hardwaresize" size="8" value="6"/>
+          <Number name="ProtocolSize" size="8" endian="big" value="4"/>
+          <Number name="OPcodeRequest" size="16"  endian="big" value="1"/>
+          <Blob name="CIAddr" length="6" valueType="hex" value="##SourceMAC##"/>
+          <Blob name="YIAddr" valueType="ipv4" length="4" value="##SourceIPv4##"/>
+          <Blob name="SIAddr" length="6" valueType="hex" value="000000000000"/>
+          <Blob name="GIAddr" valueType="ipv4" length="4" value="##AssignedIPv4##"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="DHCPNak" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="0"/>
+      <Flag name="DsStatus" size="2" position="8" value="2"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Block name="Body"/>
+    <Block name="Payload">
+      <Block ref="LogicalLinkControl"/>
+      <Block name="IP" ref="DHCPv4:Nak">
+        <Block mutable="false" name="Dest" length="0"/>
+        <Block mutable="false" name="Src" length="0"/>
+        <Block mutable="false" name="TypeOrLen" length="0"/>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="DHCPOffer" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="0"/>
+      <Flag name="DsStatus" size="2" position="8" value="2"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Blob name="MacHeaderFrame.ReceiverAddress" length="6" valueType="hex" value="##TargetMAC##"/>
+    <Block name="Body"/>
+    <Block name="Payload">
+      <Block ref="LogicalLinkControl"/>
+      <Block name="IP" ref="DHCPv4:Offer">
+        <Block mutable="false" name="Dest" length="0"/>
+        <Block mutable="false" name="Src" length="0"/>
+        <Block mutable="false" name="TypeOrLen" length="0"/>
+        <!-- Added some extra options -->
+        <Block name="Payload.Payload.UdpPayload.DOptions">
+          <Block name="DhcpMessageType" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" value="53"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="8" value="2"/>
+          </Block>
+          <Block name="SubnetMask" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="1"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" value="##SubnetMask##"/>
+          </Block>
+          <Block name="Router" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="3"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" value="##RouterIP##"/>
+          </Block>
+          <Block name="DNS" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="6"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" value="##RouterIP##"/>
+          </Block>
+          <Block name="DnsName" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="15"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <String name="Value" value="peachfuzzer.org"/>
+          </Block>
+          <Block name="DnsSearch" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="119"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Block name="Value">
+                <Number size="8" value="11"/>
+                <String value="peachfuzzer" />
+                <Number size="8" value="3"/>
+                <String value="org"/>
+                <Blob valueType="hex" value="00" />
+              </Block>
+          </Block>
+          <Block name="RenewalTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="58"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="1800"/>
+          </Block>
+          <Block name="RebindingTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="59"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="3150"/>
+          </Block>
+          <Block name="IpAddressLeaseTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="51"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="3600"/>
+          </Block>
+          <Block name="DhcpServerIdentifier" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" value="54"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
+          </Block>
+          <Number name="End" size="8" value="255"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="DHCPAck" ref="Packet">
+    <Flags name="MacHeaderFrame.FrameControlField" size="16">
+      <Flag name="Version" size="2" position="0" value="0"/>
+      <Flag name="Type" size="2" position="2" value="2"/>
+      <Flag name="Subtype" size="4" position="4" value="0"/>
+      <Flag name="DsStatus" size="2" position="8" value="2"/>
+      <Flag name="More" size="1" position="10" value="0"/>
+      <Flag name="Retry" size="1" position="11" value="0"/>
+      <Flag name="PwrMgt" size="1" position="12" value="0"/>
+      <Flag name="MoreData" size="1" position="13" value="0"/>
+      <Flag name="Protected" size="1" position="14" value="0"/>
+      <Flag name="Order" size="1" position="15" value="0"/>
+    </Flags>
+    <Block name="Body"/>
+    <Block name="Payload">
+      <Block ref="LogicalLinkControl"/>
+      <Block name="IP" ref="DHCPv4:Ack">
+        <Block mutable="false" name="Dest" length="0"/>
+        <Block mutable="false" name="Src" length="0"/>
+        <Block mutable="false" name="TypeOrLen" length="0"/>
+		<Block name="Payload.Payload.UdpPayload.DOptions">
+          <Block name="DhcpMessageType" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" value="53"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="8" value="5"/>
+          </Block>
+          <Block name="SubnetMask" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="1"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" length="4" value="##SubnetMask##"/>
+          </Block>
+          <Block name="Router" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="3"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" length="4" value="##RouterIP##"/>
+          </Block>
+          <Block name="DNS" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="6"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" length="4" value="##RouterIP##"/>
+          </Block>
+          <Block name="DnsName" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="15"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <String name="Value" value="peachfuzzer.org"/>
+          </Block>
+          <Block name="DnsSearch" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="119"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Block name="Value">
+                <Number size="8" value="11"/>
+                <String value="peachfuzzer" />
+                <Number size="8" value="3"/>
+                <String value="org"/>
+                <Blob valueType="hex" value="00" />
+              </Block>
+          </Block>
+          <Block name="RenewalTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="58"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="1800"/>
+          </Block>
+          <Block name="RebindingTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="59"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="3150"/>
+          </Block>
+          <Block name="IpAddressLeaseTime" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" token="true" value="51"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Number name="Value" size="32" value="3600"/>
+          </Block>
+          <Block name="DhcpServerIdentifier" ref="DHCPv4:TLV">
+              <Number name="Type" size="8" value="54"/>
+              <Number name="Length" size="8">
+                  <Relation type="size" of="Value"/>
+              </Number>
+              <Blob name="Value" valueType="ipv4" length="4" value="##DHCPServerIP##"/>
+          </Block>
+          <Number name="End" size="8" value="255"/>
+        </Block>
+      </Block>
+    </Block>
+  </DataModel>
+
+  <DataModel name="Input">
+    <Blob/>
+  </DataModel>
+</Peach>
