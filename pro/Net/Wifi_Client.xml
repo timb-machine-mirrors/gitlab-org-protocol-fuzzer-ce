@@ -2,8 +2,9 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
-  <Include ns="Wifi" src="file:../_Common/Models/Net/Wifi_State.xml"/>
+  <Include ns="Wifi" src="file:##PitLibraryPath##/_Common/Models/Net/Wifi_State.xml"/>
 
+  <!-- DO NOT REMOVE THE LOCAL AGENT -->
   <Agent name="Local">
     
     <!-- Startup -->
@@ -11,37 +12,37 @@
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/ifconfig" />
       <Param name="Arguments" value="##Interface## down" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/iwconfig" />
       <Param name="Arguments" value="##Interface## mode ad-hoc" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/ifconfig" />
       <Param name="Arguments" value="##Interface## up" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/ifconfig" />
       <Param name="Arguments" value="##Interface## down" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/iwconfig" />
       <Param name="Arguments" value="##Interface## mode monitor" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/ifconfig" />
       <Param name="Arguments" value="##Interface## up" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     <Monitor class="RunCommand">
       <Param name="Command" value="/sbin/iwconfig" />
       <Param name="Arguments" value="##Interface## chan ##Channel##" />
-      <Param name="StartOnCall" value="Init" />
+      <Param name="StartOnCall" value="InitializeIterationEvent" />
     </Monitor>
     
     <!-- Shutdown -->
@@ -53,38 +54,14 @@
     </Monitor>
   </Agent>
   
-  <Agent name="TargetAgent" location="tcp://##TargetAgentIp##:9001">
-    <Monitor class="RunCommand">
-      <Param name="Command" value="/usr/bin/killall" />
-      <Param name="Arguments" value="dhclient" />
-      <Param name="StartOnCall" value="Cleanup" />
-    </Monitor>
-    
-    <Monitor class="RunCommand">
-      <Param name="Command" value="/sbin/ifdown" />
-      <Param name="Arguments" value="##TargetInterface##" />
-      <Param name="StartOnCall" value="Cleanup" />
-    </Monitor>
-    
-    <!-- Connect -->
-    
-    <Monitor class="Process">
-      <Param name="Executable" value="/sbin/ifup" />
-      <Param name="Arguments" value="##TargetInterface##" />
-      <Param name="StartOnCall" value="Connect" />
-      <Param name="NoCpuKill" value="true" />
-      <Param name="WaitForExitTimeout" value="0" />
-    </Monitor>
-  </Agent>
-
   <Test name="Default">
     <Exclude xpath="//Radiotap"/>
     <Exclude xpath="//ReceiverAddress"/>
     
     <StateModel ref="Wifi:AP"/>
     
+	<!-- DO NOT REMOVE THE LOCAL AGENT -->
     <Agent ref="Local" />
-    <Agent ref="TargetAgent" />
 	
     <Publisher class="Wifi">
     	<Param name="Interface" value="##Interface##" />
