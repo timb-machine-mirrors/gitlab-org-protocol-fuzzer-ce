@@ -78,22 +78,25 @@ namespace Peach.Enterprise.Publishers
 		DataModel dhcpOffer = null;
 		DataModel arp = null;
 		DataModel arpResponse = null;
-
+		
+		WifiState wifiState = WifiState.Beacon;
+		
 		//WPA2 Data
 		Wpa wpa = null;
 		byte[] aNonce = null;
 		byte[] sNonce = null;
-
+		
 		static byte[] broadcast = new byte[6] { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 		static byte[] target;
 		static byte[] source;
-
-		bool receiveData;
-
+		
+		//bool receiveData;
+		
 		UInt16 sequenceNumber = 0;
-
+		
 		object mutex = new object();
-
+		object beaconMutex = new object();
+		
 		Thread beaconThread = null;
 		bool beaconThreadStop = false;
 		
@@ -171,11 +174,11 @@ namespace Peach.Enterprise.Publishers
 			
 			aNonce = null;
 			sNonce = null;
-
+			
 			sequenceNumber = 0;
-
+			
 			wpa = new Wpa();
-
+			
 			DhcpState = DhcpStates.None;
 		}
 
@@ -185,13 +188,15 @@ namespace Peach.Enterprise.Publishers
 			: base(args)
 		{
 			ParameterParser.Parse(this, args);
-
+			
 			target = TargetMac.Value;
 			source = SourceMac.Value;
 		}
-
+		
 		protected override void OnOpen()
 		{
+			pcap.Open(CaptureMode, 1);
+			
 			ResetState();
 
 			beaconThread = new Thread(BeaconThread);
@@ -226,10 +231,14 @@ namespace Peach.Enterprise.Publishers
 				associateThread = null;
 			}
 			
+			pcap.Close();
 		}
 
+		/*
 		protected override void OnInput()
 		{
+			throw new ApplicationException("Not supported");
+		
 			var timeout = Timeout;
 			var sw = new Stopwatch();
 			sw.Restart();
@@ -269,7 +278,9 @@ namespace Peach.Enterprise.Publishers
 			_recvBuffer.SetLength(0);
 			_recvBuffer.Write(packet.Data, 0, packet.Data.Length);
 			_recvBuffer.Seek(0, SeekOrigin.Begin);
+			
 		}
+		*/
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
@@ -278,244 +289,176 @@ namespace Peach.Enterprise.Publishers
 				DataModel buf = null;
 				if (args.Count > 0)
 					buf = args[0].dataModel;
-
-				if (method.Equals("Beacon"))
-				{
-					lock (mutex)
-					{
-						beacon = buf;
-
-						if (SecurityMode == SecurityModes.WPA2Aes || SecurityMode == SecurityModes.WPA2Tkip)
-						{
-							DataElement ssidElm = args[0].dataModel.find("SsidValue");
-							byte[] ssid;
-							if (ssidElm != null)
-							{
-								var temp = (BitStream)ssidElm.InternalValue;
-								ssid = new BitReader(temp).ReadBytes((int)temp.Length);
-							}
-							else
-							{
-								ssid = System.Text.Encoding.ASCII.GetBytes(Ssid);
-							}
-
-							var p = System.Text.Encoding.ASCII.GetBytes(Password);
-							wpa.GeneratePmk(p, ssid, 4096);
-						}
-					}
-				}
-				else if (method.Equals("AuthenticationResponse"))
-				{
-					lock (mutex)
-					{
-						auth = buf;
-					}
-				}
-				else if (method.Equals("ProbeRequest"))
-				{
-					lock (mutex)
-					{
-						probeRequest = buf;
-					}
-				}
-				else if (method.Equals("ProbeResponse"))
-				{
-					lock (mutex)
-					{
-						probeResponse = buf;
-					}
-				}
-				else if (method.Equals("AssociationRequest"))
-				{
-					lock (mutex)
-					{
-						associationRequest = buf;
-					}
-				}
-				else if (method.Equals("AssociationResponse"))
-				{
-					lock (mutex)
-					{
-						associationResponse = buf;
-					}
-				}
-				else if (method.Equals("ReassociationRequest"))
-				{
-					lock (mutex)
-					{
-						reassociationRequest = buf;
-					}
-				}
-				else if (method.Equals("Atim"))
-				{
-					lock (mutex)
-					{
-						atim = buf;
-					}
-				}
-				else if (method.Equals("PowerSavePoll"))
-				{
-					lock (mutex)
-					{
-						powerSavePoll = buf;
-					}
-				}
-				else if (method.Equals("ReadyToSend"))
-				{
-					lock (mutex)
-					{
-						readyToSend = buf;
-					}
-				}
-				else if (method.Equals("ClearToSend"))
-				{
-					lock (mutex)
-					{
-						clearToSend = buf;
-					}
-				}
-				else if (method.Equals("Acknowledgement"))
-				{
-					lock (mutex)
-					{
-						acknowledgement = buf;
-					}
-				}
-				else if (method.Equals("CfEnd"))
-				{
-					lock (mutex)
-					{
-						cfEnd = buf;
-					}
-				}
-				else if (method.Equals("CfEndCfAck"))
-				{
-					lock (mutex)
-					{
-						cfEndCfAck = buf;
-					}
-				}
-				else if (method.Equals("KeyMessage1"))
-				{
-					lock (mutex)
-					{
-						keymessage1 = buf;
-					}
-				}
-				else if (method.Equals("KeyMessage2"))
-				{
-					lock (mutex)
-					{
-						keymessage2 = buf;
-					}
-				}
-				else if (method.Equals("KeyMessage3"))
-				{
-					lock (mutex)
-					{
-						keymessage3 = buf;
-					}
-				}
-				else if (method.Equals("KeyMessage4"))
-				{
-					lock (mutex)
-					{
-						keymessage4 = buf;
-					}
-				}
-				else if (method.Equals("ActionBlockAckRequest"))
-				{
-					lock (mutex)
-					{
-						actionBlockAckReq = buf;
-					}
-				}
-				else if (method.Equals("ActionBlockAckResponse"))
-				{
-					lock (mutex)
-					{
-						actionBlockAckRep = buf;
-					}
-				}
-				else if (method.Equals("ReassociationResponse"))
-				{
-					lock (mutex)
-					{
-						reassociationResponse = buf;
-					}
-				}
-				else if (method.Equals("StartApAuth"))
-				{
-					associateThread = new Thread(StartAuthState);
-					associateThread.Start();
-					associateThreadReady.WaitOne();
-				}
-				else if (method.Equals("WaitForAssociation"))
-				{
-					associateThread.Join();
 					
-					if(associateException != null)
-						throw associateException;
-				}
-				else if(method.Equals("ReceiveData"))
+				switch(method)
 				{
-					receiveData = true;
-				}
-				else if (method.Equals("BlockAck"))
-				{
-					lock (mutex)
-					{
+					case "Beacon":
+						lock (beaconMutex)
+						{
+							beacon = buf;
+							
+							if (SecurityMode == SecurityModes.WPA2Aes || SecurityMode == SecurityModes.WPA2Tkip)
+							{
+								DataElement ssidElm = args[0].dataModel.find("SsidValue");
+								byte[] ssid;
+								if (ssidElm != null)
+								{
+									var temp = (BitStream)ssidElm.InternalValue;
+									ssid = new BitReader(temp).ReadBytes((int)temp.Length);
+								}
+								else
+								{
+									ssid = System.Text.Encoding.ASCII.GetBytes(Ssid);
+								}
+								
+								var p = System.Text.Encoding.ASCII.GetBytes(Password);
+								wpa.GeneratePmk(p, ssid, 4096);
+							}
+						}
+						break;
+					
+					case "AuthenticationResponse":
+						auth = buf;
+						break;
+					
+					case "ProbeRequest":
+						probeRequest = buf;
+						break;
+					
+					case "ProbeResponse":
+						probeResponse = buf;
+						break;
+					
+					case "AssociationRequest":
+						associationRequest = buf;
+						break;
+					
+					case "AssociationResponse":
+						associationResponse = buf;
+						break;
+					
+					case "ReassociationRequest":
+						reassociationRequest = buf;
+						break;
+					
+					case "Atim":
+						atim = buf;
+						break;
+					
+					case "PowerSavePoll":
+						powerSavePoll = buf;
+						break;
+					
+					case "ReadyToSend":
+						readyToSend = buf;
+						break;
+					
+					case "ClearToSend":
+						clearToSend = buf;
+						break;
+					
+					case "Acknowledgement":
+						acknowledgement = buf;
+						break;
+					
+					case "CfEnd":
+						cfEnd = buf;
+						break;
+					
+					case "CfEndCfAck":
+						cfEndCfAck = buf;
+						break;
+					
+					case "KeyMessage1":
+						keymessage1 = buf;
+						break;
+					
+					case "KeyMessage2":
+						keymessage2 = buf;
+						break;
+					
+					case "KeyMessage3":
+						keymessage3 = buf;
+						break;
+					
+					case "KeyMessage4":
+						keymessage4 = buf;
+						break;
+					
+					case "ActionBlockAckRequest":
+						actionBlockAckReq = buf;
+						break;
+					
+					case "ActionBlockAckResponse":
+						actionBlockAckRep = buf;
+						break;
+					
+					case "ReassociationResponse":
+						reassociationResponse = buf;
+						break;
+					
+					case "StartApAuth":
+						associateThread = new Thread(StartAuthState);
+						associateThread.Start();
+						
+						if(!associateThreadReady.WaitOne(5000))
+							throw new SoftException("Associate thread failed to start in time.");
+						
+						break;
+					
+					case "WaitForAssociation":
+						if(!associateThread.Join(ApAuthTimeout))
+						{
+							associateThreadStop = true;
+							if(!associateThread.Join(5000) || wifiState != WifiState.Associated)
+								throw new SoftException("Unable to complete 802.11 association (timeout).");
+						}
+						
+						if(associateException != null)
+							throw associateException;
+						
+						break;
+					//else if(method.Equals("ReceiveData"))
+					//{
+					//	receiveData = true;
+					//}
+					case "BlockAck":
 						blockAck = buf;
-					}
-				}
-				else if(method.Equals("DhcpNak"))
-				{
-					lock (mutex)
-					{
+						break;
+					
+					case "DhcpNak":
 						dhcpNak = buf;
-					}
-				}
-				else if (method.Equals("DhcpAck"))
-				{
-					lock (mutex)
-					{
+						break;
+					
+					case "DhcpAck":
 						dhcpAck = buf;
-					}
-				}
-				else if (method.Equals("DhcpOffer"))
-				{
-					lock (mutex)
-					{
+						break;
+					
+					case "DhcpOffer":
 						dhcpOffer = buf;
-					}
-				}
-				else if(method.Equals("Arp"))
-				{
-					lock (mutex)
-					{
+						break;
+					
+					case "Arp":
 						arp = buf;
-					}
-				}
-				else if(method.Equals("ArpResponse"))
-				{
-					lock (mutex)
-					{
+						break;
+					
+					case "ArpResponse":
 						arpResponse = buf;
-					}
-				}
-				else if(method.Equals("Cache"))
-				{
-					// Cache values
-					var value = acknowledgement.Value;
-					value = auth.Value;
-					value = associationResponse.Value;
-					value = dhcpNak.Value;
-					value = dhcpAck.Value;
-					value = dhcpOffer.Value;
-				}
-				else
-				{
-					logger.Error("Unknown call method: "+method);
+						break;
+					
+					case "Cache":
+						// Cache values
+						var value = acknowledgement.Value;
+						value = auth.Value;
+						value = associationResponse.Value;
+						value = dhcpNak.Value;
+						value = dhcpAck.Value;
+						value = dhcpOffer.Value;
+						break;
+					
+					default:
+						logger.Error("Unknown call method: "+method);
+						break;
 				}
 			}
 			catch (SoftException)
@@ -553,10 +496,6 @@ namespace Peach.Enterprise.Publishers
 			}
 			
 			var data = model.Value;
-			
-			// Clear receive queue
-			//RawCapture packet;
-			//while(captureQueue.TryDequeue(out packet));
 			
 			// Send data
 			OnOutput(data);
@@ -627,11 +566,6 @@ namespace Peach.Enterprise.Publishers
 			}
 			
 			throw new SoftException("Unable to complete 802.11 association (timeout).");
-			
-			// Is this needed?
-			//_recvBuffer.SetLength(0);
-			//_recvBuffer.Write(packet.Data, 0, packet.Data.Length);
-			//_recvBuffer.Seek(0, SeekOrigin.Begin);
 		}
 		
 		void EmptyPacketQueue()
@@ -640,6 +574,8 @@ namespace Peach.Enterprise.Publishers
 			{
 				if(pcap.GetNextPacket() == null)
 					return;
+				
+				logger.Debug(".");
 			}
 		}
 		
@@ -650,19 +586,36 @@ namespace Peach.Enterprise.Publishers
 			//AuthResponse, - Same as ProbeResponse state
 			AssociateResponse,
 			//ActionRequest,
-			Unknown
+			Associated
 		}
 
 		void StartAuthState()
 		{
+			logger.Debug("> StartAuthState");
+			
 			int off;
 			int type;
 			int subtype;
 			bool associated = false;
-			WifiState wifiState = WifiState.ProbeResponse;
+			wifiState = WifiState.ProbeResponse;
 			
 			RawCapture packet = null;
-			EmptyPacketQueue();
+			
+			try
+			{
+				// In the case EmptyPacketQueue exceptions, we
+				// will not set associateThreadReady.Set.
+				// So eat any exceptions, they should re-occur when
+				// we call ReceivePacket.
+			
+				logger.Debug("> EmptyPacketQueue");
+				EmptyPacketQueue();
+				logger.Debug("< EmptyPacketQueue");
+			}
+			catch
+			{
+				logger.Warn("EmptyPacketQueue Exception");
+			}
 			
 			try
 			{
@@ -696,8 +649,11 @@ namespace Peach.Enterprise.Publishers
 									SendPacket(auth, false, true);
 									wifiState = WifiState.AssociateResponse;
 									
-									// Stop sending beacon until next iteration
-									beacon = null;
+									lock(beaconMutex)
+									{
+										// Stop sending beacon until next iteration
+										beacon = null;
+									}
 									
 									break;
 								}
@@ -737,18 +693,16 @@ namespace Peach.Enterprise.Publishers
 								SendPacket(keymessage1, true, true);
 							}
 							
-							wifiState = WifiState.Unknown;
+							wifiState = WifiState.Associated;
 							
 							break;
 						
-						case WifiState.Unknown:
-							logger.Debug("WifiState.Unknown");
+						case WifiState.Associated:
+							logger.Debug("WifiState.Associated");
 							
 							while(!associateThreadStop)
 							{
 								ReceivePacket(out packet, out off, out type, out subtype);
-								
-								logger.Debug("T: "+ type+" S: "+subtype);
 								
 								if (type == 0)	// Mgmt Frame
 								{
@@ -973,33 +927,36 @@ namespace Peach.Enterprise.Publishers
 		}
 
 		void BeaconThread()
-		{   
+		{  
 			while (!beaconThreadStop)
 			{
 				try
 				{
-					if (beacon != null)
+					lock(beaconMutex)
 					{
-						lock (mutex)
+						if (beacon != null)
 						{
-							sequenceNumber++;
+							lock (mutex)
+							{
+								sequenceNumber++;
+							}
+							
+							// update squence number
+							try
+							{
+								var field = ((beacon["MacHeaderFrame"] as DataElementContainer)
+									["FragmentSequenceNumber"] as DataElementContainer)
+									["SequenceNumber"];
+								field.DefaultValue = new Variant(sequenceNumber);
+							}
+							catch
+							{}
+							
+							pcap.SendPacket(DataModelToBuf(beacon));
 						}
-						
-						// update squence number
-						try
-						{
-							var field = ((beacon["MacHeaderFrame"] as DataElementContainer)
-								["FragmentSequenceNumber"] as DataElementContainer)
-								["SequenceNumber"];
-							field.DefaultValue = new Variant(sequenceNumber);
-						}
-						catch
-						{}
-						
-						pcap.SendPacket(DataModelToBuf(beacon));
-						//SendPacket(beacon, true);
-						Thread.Sleep(125);
 					}
+					
+					Thread.Sleep(125);
 				}
 				catch (SharpPcap.DeviceNotReadyException de)
 				{
