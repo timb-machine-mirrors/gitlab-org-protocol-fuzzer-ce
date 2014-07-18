@@ -1,9 +1,8 @@
 include::Wifi_DataSheet.adoc[]
 
-== b
 === Supported Wireless Adapters
 
-The Wifi Pit supports USB Wireless devices based on the RaLink chipsets. At the time of writing the following devices are known to use the RaLink chipsets and work with the Wifi Pit:
+The Wifi Pit supports USB Wireless devices based on the RaLink chipsets. At the time of writing the following devices are known to use the RaLink chipsets and work with the Wifi Pits:
 
 * Panda Wireless PAU03
 * Protronix 802.11N/G Wireless USB Adapter
@@ -21,7 +20,7 @@ Deja vu Security recommends using Ubuntu Server 14.04 LTS on a physical machine,
 
 === Tested Wireless Stacks
 
-During testing of the Wifi Pit the following devices/stacks were tested for compatability:
+During testing of the Wifi Pit the following devices/stacks were tested for compatibility:
 
 * Windows 8.1
 * Linux (Ubuntu Server 14.04 LTS)
@@ -29,7 +28,7 @@ During testing of the Wifi Pit the following devices/stacks were tested for comp
 * iPhone 5S
 * iPhone 5
 
-It was found during testing that occational timing issues would prevent association from working on the first try. This was most prevelent with Windows 8.1. In the case that the first iteration does not complete, re-running the test typically worked. If association is still failing after five attemps, contact Peach support for assistance.
+It was found during testing that occasional timing issues would prevent association from working on the first try. This was most prevalent with Windows 8.1. In the case that the first iteration does not complete, re-running the test typically worked. If association is still failing after five attempts, contact Peach support for assistance.
 
 === Configuration
 
@@ -283,7 +282,7 @@ Here is the completed _Wifi_Client.xml_ file:
 
 _Wifi_Client.xml.config_
 
-For the Wifi configuration file, the only paramters that must be updated are:
+For the Wifi configuration file, the only parameters that must be updated are:
 
 TargetInterface:: The targets wireless interface name. This configuration value was added with our Agent configuration performed during this example. This configuration option does not ship with the Wifi pit.
 Interface:: Local wireless interface. This must be a supported wireless device.

@@ -1,13 +1,9 @@
 :Doctitle: Wifi (802.11) Pit Data Sheet
 :Description: Wifi (802.11)
 
-= Boo
-
-== REMOVE WARNINGS
-
 * Peach Pit: Wifi
 * Direction: Client
-* Supported Platforms: Linux (Ubuntu 14.04 LTS)
+* Supported Platforms: Linux (Ubuntu Server 14.04 LTS)
 * Supported Wireless Chipsets: RaLink Chipset
 
 IEEE 802.11 is a set of media access control (MAC) and physical layer (PHY) specifications for implementing wireless local area network (WLAN) computer communication in the 2.4, 3.6, 5 and 60 GHz frequency bands.
