@@ -116,15 +116,16 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		private static MD5 md5 = new MD5CryptoServiceProvider();
-
 		private static string MakeGuid(string value)
 		{
-			var bytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value));
-			var sb = new StringBuilder();
-			for (int i = 0; i < bytes.Length; ++i)
-				sb.Append(bytes[i].ToString("x2"));
-			return sb.ToString();
+			using (var md5 = new MD5CryptoServiceProvider())
+			{
+				var bytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value));
+				var sb = new StringBuilder();
+				for (int i = 0; i < bytes.Length; ++i)
+					sb.Append(bytes[i].ToString("x2"));
+				return sb.ToString();
+			}
 		}
 
 		private static Models.PeachVersion peachVer = MakePeachVer();
