@@ -52,7 +52,9 @@
 			"type": "choice",
 			"choice":[
 				{ "value": 0, "a":"Detect whether a process or service has misbehaved (such as early exit, crashes, and interesting exceptions).", "next":1100 },
-				{ "value": 1, "a":"Detect the availability of a remote device.", "next":4100 }
+				{ "value": 1, "a":"Detect the availability of a remote device.", "next":4100 },
+				{ "value": 2, "a":"Detect an error message via the serial port.", "next":4300 },
+				{ "value": 3, "a":"Detect an error message via syslog.", "next":4400 }
 			]
 		},
 		{
@@ -243,6 +245,115 @@
 				{ "value":true,"a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing." },
 				{ "value":false,"a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
 			]
+		},
+		{
+			"id":4300,
+			"q":"What is the serial port the target is connected to?",
+			"type":"string",
+			"key":"SerialPortPort",
+			"next":4301,
+			"required":true
+		},
+		{
+			"id":4301,
+			"q":"What baud rate should be used to communicate with the target?",
+			"key":"SerialPortBaudRate",
+			"type":"range",
+			"rangeMin":1,
+			"rangeMax":999999,
+			"value":115200,
+			"next":4302,
+			"required": true
+		},
+		{
+			"id":4302,
+			"q":"What is the number of data bits per byte?",
+			"key":"SerialPortDataBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"8","a":"8","next":4303 },
+				{ "value":"7","a":"7","next":4303 },
+				{ "value":"6","a":"6","next":4303 },
+				{ "value":"5","a":"5","next":4303 }
+			],
+			"value":"8",
+			"required": true
+		},
+		{
+			"id":4303,
+			"q":"What is the parity-checking protocol to use?",
+			"key":"SerialPortParity",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None","next":4304 },
+				{ "value":"Odd","a":"Odd","next":4304 },
+				{ "value":"Even","a":"Even","next":4304 },
+				{ "value":"Mark","a":"Mark","next":4304 },
+				{ "value":"Space","a":"Space","next":4304 }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4304,
+			"q":"What is the number of stop bits per byte?",
+			"key":"SerialPortStopBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"One","a":"1","next":4305 },
+				{ "value":"OnePointFive","a":"1.5","next":4305 },
+				{ "value":"Two","a":"2","next":4305 }
+			],
+			"value":"One",
+			"required": true
+		},
+		{
+			"id":4305,
+			"q":"What flow control algoruthm should be used?",
+			"key":"SerialPortHandshake",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None","next":4306 },
+				{ "value":"XOnXoff","a":"XON/XOFF","next":4306 },
+				{ "value":"RequestToSend","a":"RTS/CTS","next":4306 },
+				{ "value":"RequestToSendXOnXOff","a":"RTS/CTS & XON/XOFF","next":4306 }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4306,
+			"q":"What regular expression should be used?  A fault will occur whenever the regular expression matches.",
+			"key":"SerialPortFaultRegex",
+			"type":"string",
+			"required": true
+		},
+		{
+			"id":4400,
+			"q":"What IP address should be used to listen for syslog messages?",
+			"type":"ipv4",
+			"key":"SyslogInterface",
+			"value":"0.0.0.0",
+			"next":4401,
+			"required":true
+		},
+		{
+			"id":4401,
+			"q":"What port should be used to listen for syslog messages?",
+			"key":"SyslogPort",
+			"type":"range",
+			"rangeMin":1,
+			"rangeMax":65535,
+			"value":514,
+			"next":4402,
+			"required": true
+		},
+		{
+			"id":4402,
+			"q":"What regular expression should be used?  A fault will occur whenever the regular expression matches.",
+			"key":"SyslogFaultRegex",
+			"type":"string",
+			"required": true
 		}
 	],
 	"monitors": [
@@ -307,6 +418,30 @@
 				{ "key":"ProcessFaultOnEarlyExit","param":"FaultOnEarlyExit" }
 			],
 			"description": "Collect information about processes starting and stopping. "
+		},
+		{
+			"monitorClass":"SerialPort",
+			"path": [4300],
+			"map": [
+				{ "key":"SerialPortPort","param":"Port" },
+				{ "key":"SerialPortBaudRate","param":"BaudRate" },
+				{ "key":"SerialPortDataBits","param":"DataBits" },
+				{ "key":"SerialPortParity","param":"Parity" },
+				{ "key":"SerialPortStopBits","param":"StopBits" },
+				{ "key":"SerialPortHandshake","param":"Handshake" },
+				{ "key":"SerialPortFaultRegex","param":"FaultRegex" }
+			],
+			"description": "Look for error messages via the serial port. "
+		},
+		{
+			"monitorClass":"Syslog",
+			"path": [4400],
+			"map": [
+				{ "key":"SyslogInterface","param":"Interface" },
+				{ "key":"SyslogPort","param":"Port" },
+				{ "key":"SyslogFaultRegex","param":"FaultRegex" }
+			],
+			"description": "Look for error messages via syslog. "
 		}
 	]
 
