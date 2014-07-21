@@ -54,7 +54,9 @@
 			"choice": [
 				{ "value": 0, "a": "Take a network capture of traffic that occurs during the fuzzing iteration.", "next":4100 },
 				{ "value": 1, "a": "Save a file generated locally to the machine performing data collection.","next":4200 },
-				{ "value": 2, "a": "Save a remote file via SSH.","next":4300 }
+				{ "value": 2, "a": "Save a remote file via SSH.","next":4300 },
+				{ "value": 3, "a": "Save log messages collected via the serial port.", "next":4400 },
+				{ "value": 4, "a": "Save log messaages collected via syslog.", "next":4500 }
 			]
 		},
 		{
@@ -150,6 +152,100 @@
 				{"value":true, "a":"Yes, remove the file after downloading it." },
 				{"value": false, "a":"No, do not remove the file."}
 				]
+		},
+		{
+			"id":4400,
+			"q":"What is the serial port the target is connected to?",
+			"type":"string",
+			"key":"SerialPortPort",
+			"next":4401,
+			"required":true
+		},
+		{
+			"id":4401,
+			"q":"What baud rate should be used to communicate with the target?",
+			"key":"SerialPortBaudRate",
+			"type":"range",
+			"rangeMin":1,
+			"rangeMax":999999,
+			"value":115200,
+			"next":4402,
+			"required": true
+		},
+		{
+			"id":4402,
+			"q":"What is the number of data bits per byte?",
+			"key":"SerialPortDataBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"8","a":"8","next":4403 },
+				{ "value":"7","a":"7","next":4403 },
+				{ "value":"6","a":"6","next":4403 },
+				{ "value":"5","a":"5","next":4403 }
+			],
+			"value":"8",
+			"required": true
+		},
+		{
+			"id":4403,
+			"q":"What is the parity-checking protocol to use?",
+			"key":"SerialPortParity",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None","next":4404 },
+				{ "value":"Odd","a":"Odd","next":4404 },
+				{ "value":"Even","a":"Even","next":4404 },
+				{ "value":"Mark","a":"Mark","next":4404 },
+				{ "value":"Space","a":"Space","next":4404 }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4404,
+			"q":"What is the number of stop bits per byte?",
+			"key":"SerialPortStopBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"One","a":"1","next":4405 },
+				{ "value":"OnePointFive","a":"1.5","next":4405 },
+				{ "value":"Two","a":"2","next":4405 }
+			],
+			"value":"One",
+			"required": true
+		},
+		{
+			"id":4405,
+			"q":"What flow control algoruthm should be used?",
+			"key":"SerialPortHandshake",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None" },
+				{ "value":"XOnXoff","a":"XON/XOFF" },
+				{ "value":"RequestToSend","a":"RTS/CTS" },
+				{ "value":"RequestToSendXOnXOff","a":"RTS/CTS & XON/XOFF" }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4500,
+			"q":"What IP address should be used to listen for syslog messages?",
+			"type":"ipv4",
+			"key":"SyslogInterface",
+			"value":"0.0.0.0",
+			"next":4501,
+			"required":true
+		},
+		{
+			"id":4501,
+			"q":"What port should be used to listen for syslog messages?",
+			"key":"SyslogPort",
+			"type":"range",
+			"rangeMin":1,
+			"rangeMax":65535,
+			"value":514,
+			"required": true
 		}
 	],
 	"monitors": [
@@ -183,6 +279,28 @@
 				{"key":"SshDownloaderRemove", "param":"Remove" }
 			],
 			"description": "Save a specified file as part of the logged data when a fault occurs. "
+		},
+		{
+			"monitorClass":"SerialPort",
+			"path": [4400],
+			"map": [
+				{ "key":"SerialPortPort","param":"Port" },
+				{ "key":"SerialPortBaudRate","param":"BaudRate" },
+				{ "key":"SerialPortDataBits","param":"DataBits" },
+				{ "key":"SerialPortParity","param":"Parity" },
+				{ "key":"SerialPortStopBits","param":"StopBits" },
+				{ "key":"SerialPortHandshake","param":"Handshake" }
+			],
+			"description": "Save log messages collected via the serial port. "
+		},
+		{
+			"monitorClass":"Syslog",
+			"path": [4500],
+			"map": [
+				{ "key":"SyslogInterface","param":"Interface" },
+				{ "key":"SyslogPort","param":"Port" }
+			],
+			"description": "Save log messages collected via syslog. "
 		}
 	]
 }
