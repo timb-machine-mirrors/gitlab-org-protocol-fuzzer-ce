@@ -53,7 +53,8 @@
 			"type": "choice",
 			"choice": [
 				{ "value":  0, "a": "Interface with a CanaKit Relay board connected to the machine performing automation tasks.", "next":4100 },
-				{ "value":  1, "a": "Control a process running locally on the machine performing automation tasks.","next":4200 }
+				{ "value":  1, "a": "Control a process running locally on the machine performing automation tasks.","next":4200 },
+				{ "value":  2, "a": "Wait for a specific log message to occur via the serial port.","next":4300 }
 			]
 		},
 		{
@@ -143,6 +144,104 @@
 				{ "value":true,"a":"Yes, if my process exists early, record that as a fault. This is common for network fuzzing." },
 				{ "value":false, "a":"No, it's okay if my process/service exits early. This is common for file fuzzing." }
 			]
+		},
+		{
+			"id":4300,
+			"q":"What is the serial port the target is connected to?",
+			"type":"string",
+			"key":"SerialPortPort",
+			"next":4301,
+			"required":true
+		},
+		{
+			"id":4301,
+			"q":"What baud rate should be used to communicate with the target?",
+			"key":"SerialPortBaudRate",
+			"type":"range",
+			"rangeMin":1,
+			"rangeMax":999999,
+			"value":115200,
+			"next":4302,
+			"required": true
+		},
+		{
+			"id":4302,
+			"q":"What is the number of data bits per byte?",
+			"key":"SerialPortDataBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"8","a":"8","next":4303 },
+				{ "value":"7","a":"7","next":4303 },
+				{ "value":"6","a":"6","next":4303 },
+				{ "value":"5","a":"5","next":4303 }
+			],
+			"value":"8",
+			"required": true
+		},
+		{
+			"id":4303,
+			"q":"What is the parity-checking protocol to use?",
+			"key":"SerialPortParity",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None","next":4304 },
+				{ "value":"Odd","a":"Odd","next":4304 },
+				{ "value":"Even","a":"Even","next":4304 },
+				{ "value":"Mark","a":"Mark","next":4304 },
+				{ "value":"Space","a":"Space","next":4304 }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4304,
+			"q":"What is the number of stop bits per byte?",
+			"key":"SerialPortStopBits",
+			"type":"choice",
+			"choice":[
+				{ "value":"One","a":"1","next":4305 },
+				{ "value":"OnePointFive","a":"1.5","next":4305 },
+				{ "value":"Two","a":"2","next":4305 }
+			],
+			"value":"One",
+			"required": true
+		},
+		{
+			"id":4305,
+			"q":"What flow control algoruthm should be used?",
+			"key":"SerialPortHandshake",
+			"type":"choice",
+			"choice":[
+				{ "value":"None","a":"None","next":4306 },
+				{ "value":"XOnXoff","a":"XON/XOFF","next":4306 },
+				{ "value":"RequestToSend","a":"RTS/CTS","next":4306 },
+				{ "value":"RequestToSendXOnXOff","a":"RTS/CTS & XON/XOFF","next":4306 }
+			],
+			"value":"None",
+			"required": true
+		},
+		{
+			"id":4306,
+			"q":"When should Peach wait for the log message to occur.",
+			"key":"SerialPortWaitForWhen",
+			"type":"choice",
+			"choice":[
+				{ "value":"OnStart","a":"At the beginning of a fuzzing session.","next":4307 },
+				{ "value":"OnEnd","a":"At the end of a fuzzing session.","next":4307 },
+				{ "value":"OnIterationStart","a":"At the beginning of each fuzzing iteration.","next":4307 },
+				{ "value":"OnIterationEnd","a":"At the end of each fuzzing iteration.","next":4307 },
+				{ "value":"OnFault","a":"When a fault is detected.","next":4307 },
+				{ "value":"OnIterationStartAfterFault","a":"When a fault is detected, at the beginning of the next fuzzing iteration.","next":4307 }
+			],
+			"value":"OnStart",
+			"required": true
+		},
+		{
+			"id":4307,
+			"q":"What is the regular expression Peach should use to find the log message.  Peach will continue fuzzing when the log message is found.",
+			"key":"SerialPortWaitForRegex",
+			"type":"string",
+			"required": true
 		}
 	],
 	"monitors": [
@@ -169,6 +268,21 @@
 				{ "key":"ProcessFaultOnEarlyExit",	"param":"FaultOnEarlyExit" }
 			],
 			"description": "Control a process. "
+		},
+		{
+			"monitorClass":"SerialPort",
+			"path": [4300],
+			"map": [
+				{ "key":"SerialPortPort","param":"Port" },
+				{ "key":"SerialPortBaudRate","param":"BaudRate" },
+				{ "key":"SerialPortDataBits","param":"DataBits" },
+				{ "key":"SerialPortParity","param":"Parity" },
+				{ "key":"SerialPortStopBits","param":"StopBits" },
+				{ "key":"SerialPortHandshake","param":"Handshake" },
+				{ "key":"SerialPortWaitForRegex","param":"WaitForRegex" },
+				{ "key":"SerialPortWaitForWhen","param":"WaitForWhen" }
+			],
+			"description": "Save log messages collected via the serial port. "
 		}
 	]
 
