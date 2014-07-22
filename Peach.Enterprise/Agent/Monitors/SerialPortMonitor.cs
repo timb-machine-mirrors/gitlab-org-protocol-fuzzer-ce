@@ -148,6 +148,12 @@ namespace Peach.Enterprise.Agent.Monitors
 
 				if (_waitForRegex.IsMatch(str))
 					break;
+
+				// TODO: Wait for more data to arrive before continuing
+				// instead of arbitrarily sleeping.  Also, there should
+				// be a maximum timeout that peach will error/fault when
+				// waiting fails.
+				System.Threading.Thread.Sleep(1000);
 			}
 		}
 
