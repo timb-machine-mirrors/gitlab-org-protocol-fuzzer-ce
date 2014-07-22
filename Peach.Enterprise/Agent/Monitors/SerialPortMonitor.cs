@@ -147,7 +147,7 @@ namespace Peach.Enterprise.Agent.Monitors
 				var str = System.Text.UnicodeEncoding.UTF8.GetString(buff);
 
 				if (_waitForRegex.IsMatch(str))
-					continue;
+					break;
 			}
 		}
 
