@@ -637,11 +637,18 @@ class vsnode_cs_target(msvs.vsnode_project):
 			y.post()
 			tsk = getattr(y, 'link_task', None)
 			if not tsk:
-				self.bld.fatal('cs task has no link task for ide_use %r' % self)
+				self.tg.bld.fatal('cs task has no link task for ide_use %r' % self.tg)
 
 			src = y.link_task.outputs[0]
 			dst = out_node.make_node(src.name)
 			ide_use.append((src, dst))
+
+			# We might not have run collect_sources() yet
+			if not hasattr(y, 'uuid'):
+				y = self.ctx.make_project(y)
+				if not hasattr(y, 'uuid'):
+					self.tg.bld.fatal('cs tgen link task has no uuid for ide_use %r' % self.tg)
+
 			guid = '{%s}' % y.uuid
 			self.project_dependencies[guid] = guid
 
@@ -932,6 +939,18 @@ class idegen(msvs.msvs_generator):
 	def add_aliases(self):
 		pass
 
+	def make_project(self, tg):
+		if 'fake_lib' in getattr(tg, 'features', ''):
+			return None
+		elif hasattr(tg, 'link_task'):
+			return self.vsnode_target(self, tg)
+		elif hasattr(tg, 'cs_task'):
+			return self.vsnode_cs_target(self, tg)
+		elif hasattr(tg, 'ide_website'):
+			return self.vsnode_web_target(self, tg)
+		else:
+			return None
+
 	def collect_targets(self):
 		"""
 		Process the list of task generators
@@ -949,15 +968,8 @@ class idegen(msvs.msvs_generator):
 
 				tg.post()
 
-				if 'fake_lib' in getattr(tg, 'features', ''):
-					continue
-				elif hasattr(tg, 'link_task'):
-					p = self.vsnode_target(self, tg)
-				elif hasattr(tg, 'cs_task'):
-					p = self.vsnode_cs_target(self, tg)
-				elif hasattr(tg, 'ide_website'):
-					p = self.vsnode_web_target(self, tg)
-				else:
+				p = self.make_project(tg)
+				if not p:
 					continue
 
 				p.collect_source() # delegate this processing
