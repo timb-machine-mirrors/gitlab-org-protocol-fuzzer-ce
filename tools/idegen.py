@@ -116,6 +116,22 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   ${endif}
   ${endfor}
 
+  ${for props in project.build_properties}
+  ${if getattr(props, 'references', [])}
+  <ItemGroup>
+    ${for v in props.references}
+    ${if v.path}
+    <Reference Include="${v.name}"  Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_tgt}' ">
+      <HintPath>${v.path}</HintPath>
+    </Reference>
+    ${else}
+    <Reference Include="${v.name}"  Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_tgt}' " />
+    ${endif}
+    ${endfor}
+  </ItemGroup>
+  ${endif}
+  ${endfor}
+
   ${if project.project_refs}
   <ItemGroup>
     ${for r in project.project_refs}
