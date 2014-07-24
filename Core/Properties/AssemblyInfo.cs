@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PeachCore")]
+[assembly: AssemblyTitle("Peach.Core")]
 [assembly: AssemblyDescription("Peach Fuzzing Platform")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Deja vu Security")]
-[assembly: AssemblyProduct("PeachCore")]
-[assembly: AssemblyCopyright("Copyright © Michael Eddington")]
+[assembly: AssemblyProduct("Peach.Core")]
+[assembly: AssemblyCopyright("Copyright © Deja vu Security")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("05db9fce-c4e3-4260-a401-6d215e849df5")]
+[assembly: Guid("DCF91B53-7703-4FB2-8877-B2DAF201AB74")]
 
 // Version information for an assembly consists of the following four values:
 //

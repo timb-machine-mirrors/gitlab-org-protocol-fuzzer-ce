@@ -93,39 +93,6 @@ namespace Peach.Core
 			return _os;
 		}
 
-		public static void LoadAssembly()
-		{
-			//if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
-			//	throw new PeachException("Error: Cannot use the 32bit version of Peach 3 on a 64bit operating system.");
-
-			//if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
-			//	throw new PeachException("Error: Cannot use the 64bit version of Peach 3 on a 32bit operating system.");
-
-			string osAssembly = null;
-
-			switch (Platform.GetOS())
-			{
-				case Platform.OS.OSX:
-					osAssembly = "Peach.Core.OS.OSX.dll";
-					break;
-				case Platform.OS.Linux:
-					osAssembly = "Peach.Core.OS.Linux.dll";
-					break;
-				case Platform.OS.Windows:
-					osAssembly = "Peach.Core.OS.Windows.dll";
-					break;
-			}
-
-			try
-			{
-				ClassLoader.LoadAssembly(osAssembly);
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException(string.Format("Error, could not load platform assembly '{0}'.  {1}", osAssembly, ex.Message), ex);
-			}
-		}
-
 		static Architecture _arch = _GetArch();
 
 		static Architecture _GetArch()

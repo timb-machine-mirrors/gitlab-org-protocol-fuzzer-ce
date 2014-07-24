@@ -39,6 +39,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using NLog;
+using NLog.Targets;
+using NLog.Config;
 using System.Security;
 using System.Security.Policy;
 
@@ -242,6 +244,47 @@ namespace Peach.Core
 	/// </summary>
 	public class Utilities
 	{
+		/// <summary>
+		/// Configure NLog.
+		/// </summary>
+		/// <remarks>
+		/// Level &lt; 0 --&gt; Clear Config
+		/// Level = 0 --&gt; Do nothing
+		/// Level = 1 --&gt; Debug
+		/// Leven &gt; 1 --&gt; Trace
+		/// </remarks>
+		/// <param name="level"></param>
+		public static void ConfigureLogging(int level)
+		{
+			if (level < 0)
+			{
+				// Need to reset configuration to null for NLog 2.0 on mono
+				// so we don't hang on exit.
+				LogManager.Flush();
+				LogManager.Configuration = null;
+				return;
+			}
+
+			if (level == 0)
+				return;
+
+			if (LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0)
+			{
+				Console.WriteLine("Logging was configured by a .config file, not changing the configuration.");
+				return;
+			}
+
+			var nconfig = new LoggingConfiguration();
+			var consoleTarget = new ConsoleTarget();
+			nconfig.AddTarget("console", consoleTarget);
+			consoleTarget.Layout = "${logger} ${message}";
+
+			var rule = new LoggingRule("*", level == 1 ? LogLevel.Debug : LogLevel.Trace, consoleTarget);
+			nconfig.LoggingRules.Add(rule);
+
+			LogManager.Configuration = nconfig;
+		}
+
 		public static string FindProgram(string path, string program, string parameter)
 		{
 			var paths = path == null ? Environment.GetEnvironmentVariable("PATH") : path;
@@ -549,59 +592,6 @@ namespace Peach.Core
 			if (bytes > 1024)
 				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
 			return bytes.ToString() + " Bytes";
-		}
-	}
-
-	/// <summary>
-	/// Extention of WebClient that supports cookies
-	/// </summary>
-	class WebClientEx : WebClient
-	{
-		public WebClientEx()
-		{
-			this.container = new CookieContainer();
-		}
-
-		public WebClientEx(CookieContainer container)
-		{
-			this.container = container;
-		}
-
-		private readonly CookieContainer container = new CookieContainer();
-
-		protected override WebRequest GetWebRequest(Uri address)
-		{
-			WebRequest r = base.GetWebRequest(address);
-			var request = r as HttpWebRequest;
-			if (request != null)
-			{
-				request.CookieContainer = container;
-			}
-			return r;
-		}
-
-		protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
-		{
-			WebResponse response = base.GetWebResponse(request, result);
-			ReadCookies(response);
-			return response;
-		}
-
-		protected override WebResponse GetWebResponse(WebRequest request)
-		{
-			WebResponse response = base.GetWebResponse(request);
-			ReadCookies(response);
-			return response;
-		}
-
-		private void ReadCookies(WebResponse r)
-		{
-			var response = r as HttpWebResponse;
-			if (response != null)
-			{
-				CookieCollection cookies = response.Cookies;
-				container.Add(cookies);
-			}
 		}
 	}
 }

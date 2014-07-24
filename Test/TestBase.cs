@@ -19,7 +19,7 @@ using System.Text.RegularExpressions;
 
 namespace Peach
 {
-	public class AssertTestFail : System.Diagnostics.TraceListener
+	class AssertTestFail : System.Diagnostics.TraceListener
 	{
 		public override void Write(string message)
 		{
@@ -38,17 +38,8 @@ namespace Peach
 	}
 
 	[SetUpFixture]
-	public class TestBase
+	class TestBase
 	{
-		public static ushort MakePort(ushort min, ushort max)
-		{
-			int pid = System.Diagnostics.Process.GetCurrentProcess().Id;
-			int seed = Environment.TickCount * pid;
-			var rng = new Peach.Core.Random((uint)seed);
-			var ret = (ushort)rng.Next(min, max);
-			return ret;
-		}
-
 		[SetUp]
 		public void Initialize()
 		{
@@ -64,8 +55,6 @@ namespace Peach
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;
-
-			Peach.Core.Platform.LoadAssembly();
 		}
 
 		[TearDown]

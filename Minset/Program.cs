@@ -42,19 +42,6 @@ namespace PeachMinset
 {
 	class Program
 	{
-		class SyntaxException : Exception
-		{
-			public SyntaxException()
-				: base("")
-			{
-			}
-
-			public SyntaxException(string message)
-				: base(message)
-			{
-			}
-		}
-
 		static void Main(string[] args)
 		{
 			try
@@ -82,7 +69,7 @@ namespace PeachMinset
 			finally
 			{
 				// HACK - Required on Mono with NLog 2.0
-				Peach.Core.Runtime.Program.ConfigureLogging(-1);
+				Utilities.ConfigureLogging(-1);
 			}
 		}
 
@@ -132,7 +119,7 @@ namespace PeachMinset
 			if (executable != null && arguments.IndexOf("%s") == -1)
 				throw new SyntaxException("Error, command argument missing '%s'.");
 
-			Peach.Core.Runtime.Program.ConfigureLogging(verbose);
+			Utilities.ConfigureLogging(verbose);
 
 			var sampleFiles = GetFiles(samples, "sample");
 

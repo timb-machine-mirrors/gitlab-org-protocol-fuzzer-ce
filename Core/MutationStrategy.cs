@@ -31,7 +31,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
-using Peach.Core.MutationStrategies;
 using Peach.Core.Dom;
 
 using NLog;

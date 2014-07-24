@@ -15,7 +15,7 @@ def make_bld(tgt, variant):
 		includes = '.',
 		target=tgt,
 		env=clone,
-		ide_path='Peach.Core.Analysis.Pin.BasicBlocks',
+		ide_path='BasicBlocks',
 	)
 
 if bld.env.DEST_OS is 'win32':

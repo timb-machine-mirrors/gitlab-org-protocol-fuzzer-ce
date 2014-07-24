@@ -3,7 +3,7 @@
 subdirs = [
 	'BasicBlocks',
 	'Core',
-	'CoverageEdge',
+	'CoveredEdge',
 	'Minset',
 	'Test',
 ]

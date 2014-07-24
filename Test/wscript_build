@@ -12,9 +12,6 @@ deps = [
 	'Microsoft.Scripting.Metadata.dll',
 	'IronPython.dll',
 	'IronPython.Modules.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',
-	'Renci.SshNet.dll',
 ]
 
 bld(
@@ -22,5 +19,4 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.Core.Test.dll',
-	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',
 )

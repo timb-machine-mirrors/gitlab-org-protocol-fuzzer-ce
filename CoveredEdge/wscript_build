@@ -14,7 +14,7 @@ def make_bld(tgt, variant):
 		source = 'cedge.cpp',
 		target=tgt,
 		env=clone,
-		ide_path='Peach.Core.Analysis.Pin.CoveredEdge',
+		ide_path='CoveredEdge',
 	)
 
 if bld.env.DEST_OS is 'win32':
