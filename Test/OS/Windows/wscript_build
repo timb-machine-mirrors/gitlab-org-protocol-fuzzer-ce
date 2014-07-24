@@ -10,7 +10,7 @@ deps = [
 	'System.ServiceProcess.dll',
 	'Microsoft.CSharp.dll',
 	'Peach.Core.dll',
-	'Peach.Core.OS.Windows.dll',
+	'Peach.Community.OS.Windows.dll',
 	'Peach.Core.Test.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	
@@ -23,5 +23,6 @@ bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.Core.Test.OS.Windows.dll',
+	name = 'Peach.Community.Test.OS.Windows.dll',
+	ide_path = '../',
 )

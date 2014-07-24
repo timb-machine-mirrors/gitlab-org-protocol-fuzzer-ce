@@ -33,6 +33,7 @@ using System.Text;
 using System.Xml;
 using System.Windows.Forms;
 
+using Peach.Core.Runtime;
 using Peach.Core.Xml;
 using System.Reflection;
 
@@ -170,10 +171,6 @@ Example:
 ";
 			Console.WriteLine(syntax);
 			throw new SyntaxException();
-		}
-
-		public class SyntaxException : Exception
-		{
 		}
 	}
 }

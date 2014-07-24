@@ -5,6 +5,7 @@ deps = [
 	'System.Windows.Forms.dll',
 	'System.ServiceProcess.dll',
 	'Peach.Core.dll',
+	'Peach.Community.dll',
 	'NLog.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	

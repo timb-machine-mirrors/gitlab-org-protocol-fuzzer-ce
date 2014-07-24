@@ -16,11 +16,22 @@ namespace Peach.Core.Publishers
 	[Parameter("Interface", typeof(string), "Name of interface to bind to")]
 	[Parameter("Protocol", typeof(EtherProto), "Ethernet protocol to use", "ETH_P_ALL")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
-	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", SocketPublisher.DefaultMinMTU)]
-	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", SocketPublisher.DefaultMaxMTU)]
+	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
+	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class RawEtherPublisher : Publisher
 	{
-#region Ethernet Protocols
+		#region MTU Related Declarations
+
+		// Max IP len is 65535, ensure we can fit that plus ip header plus ethernet header.
+		// In order to account for Jumbograms which are > 65535, max MTU is double 65535
+		// MinMTU is 1280 so that IPv6 info isn't lost if MTU is fuzzed
+
+		public const string DefaultMinMTU = "1280";
+		public const string DefaultMaxMTU = "131070"; // 65535 * 2
+
+		#endregion
+
+		#region Ethernet Protocols
 
 		public enum EtherProto : ushort
 		{
@@ -100,9 +111,9 @@ namespace Peach.Core.Publishers
 			ETH_P_CAIF       = 0x00F7, // ST-Ericsson CAIF protocol
 		}
 
-#endregion
+		#endregion
 
-#region P/Invokes
+		#region P/Invokes
 
 		const int AF_PACKET  = 17;
 		const int SOCK_RAW   = 3;
@@ -148,7 +159,7 @@ namespace Peach.Core.Publishers
 		[DllImport("libc", SetLastError = true)]
 		private static extern int ioctl(int fd, int request, ref ifreq mtu);
 
-#endregion
+		#endregion
 
 		public string Interface { get; set; }
 		public EtherProto Protocol { get; set; }

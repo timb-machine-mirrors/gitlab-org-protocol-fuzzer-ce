@@ -5,7 +5,7 @@ deps = [
 	'System.Core.dll',
 	'System.Runtime.Remoting.dll',
 	'Peach.Core.dll',
-	'Peach.Core.OS.Windows.dll',
+	'Peach.Community.OS.Windows.dll',
 	'NLog.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	
@@ -15,6 +15,6 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='Peach.Core.WindowsDebugInstance.exe',
+	name='Peach.Community.WindowsDebugInstance.exe',
 )
 

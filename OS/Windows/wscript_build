@@ -3,8 +3,6 @@
 deps = [
 	'NLog.dll',
 	'Peach.Core.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',	
 	'System.Runtime.Remoting.dll',
 	'System.dll',
 	'System.Management.dll',
@@ -19,7 +17,8 @@ asm = bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.Core.OS.Windows.dll',
+	name = 'Peach.Community.OS.Windows.dll',
+	ide_path = '../',
 )
 
 if 'win' in bld.env['supported_features']:

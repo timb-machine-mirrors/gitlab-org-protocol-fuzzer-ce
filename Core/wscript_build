@@ -15,7 +15,7 @@ deps = [
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
 	'Ionic.Zip.dll',
-	
+
 	'IronPython.dll',
 	'IronRuby.dll',
 	'IronRuby.Libraries.dll',
@@ -32,6 +32,8 @@ deps = [
 	'SuperSocket.SocketBase.dll',
 	'SuperWebSocket.dll',
 	'log4net.dll',
+
+	'Peach.Core.dll',
 ]
 
 bld(
@@ -40,6 +42,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = 'xmltests.zip',
 	content = 'IronPython.StdLib',
-	install_644 = 'NLog.config.template',
-	name = 'Peach.Core.dll',
+	name = 'Peach.Community.dll',
 )

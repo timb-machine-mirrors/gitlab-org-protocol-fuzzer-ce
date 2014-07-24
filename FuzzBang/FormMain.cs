@@ -67,7 +67,7 @@ namespace PeachFuzzBang
 		{
 			try
 			{
-				Platform.LoadAssembly();
+				Peach.Core.Runtime.Program.LoadPlatformAssembly();
 				hasPlatformAsm = true;
 			}
 			catch (Exception ex)

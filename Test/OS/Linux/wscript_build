@@ -7,7 +7,7 @@ deps = [
 	'nunit.framework.dll',
 	'NLog.dll',
 	'Peach.Core.dll',
-	'Peach.Core.OS.Linux.dll',
+	'Peach.Community.OS.Linux.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	
 ]
@@ -16,5 +16,6 @@ bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.Core.Test.OS.Linux.dll',
+	name = 'Peach.Community.Test.OS.Linux.dll',
+	ide_path = '../',
 )

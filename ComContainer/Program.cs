@@ -53,11 +53,11 @@ namespace Peach.Core.ComContainer
 
 			if (args.Length == 1 && args[0] == "-h")
 			{
-				Console.WriteLine("> Peach.Core.ComContainer");
+				Console.WriteLine("> Peach.Community.ComContainer");
 				Console.WriteLine("> Copyright (c) Deja vu Security\n");
 
 				Console.WriteLine("Syntax:");
-				Console.WriteLine(" Peach.Core.ComContainer.exe IPC_CHANNEL_NAME\n\n");
+				Console.WriteLine(" Peach.Community.ComContainer.exe IPC_CHANNEL_NAME\n\n");
 
 				return;
 			}

@@ -2,8 +2,7 @@
 
 deps = [
 	'Peach.Core.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',	
+	'Peach.Community.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Data.dll',

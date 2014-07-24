@@ -7,13 +7,12 @@ deps = [
 	'System.Xml.dll',
 	'NLog.dll',
 	'Mono.Posix.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',	
 ]
 
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='Peach.Core.OS.OSX.dll',
+	name = 'Peach.Community.OS.OSX.dll',
+	ide_path = '../',
 )

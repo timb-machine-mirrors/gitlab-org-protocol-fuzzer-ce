@@ -54,11 +54,11 @@ namespace Peach.Core.WindowsDebugInstance
 
 		static void Syntax()
 		{
-			Console.WriteLine("> Peach.Core.WindowsDebugInstance");
+			Console.WriteLine("> Peach.Community.WindowsDebugInstance");
 			Console.WriteLine("> Copyright (c) Deja vu Security\n");
 
 			Console.WriteLine("Syntax:");
-			Console.WriteLine(" Peach.Core.WindowsDebugInstance.exe [--debug] IPC_CHANNEL_NAME\n\n");
+			Console.WriteLine(" Peach.Community.WindowsDebugInstance.exe [--debug] IPC_CHANNEL_NAME\n\n");
 
 			throw new SyntaxException();
 		}
