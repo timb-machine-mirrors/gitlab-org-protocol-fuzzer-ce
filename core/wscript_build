@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+subdirs = [
+	'BasicBlocks',
+	'Core',
+	'CoveredEdge',
+	'Minset',
+	'Test',
+]
+
+bld.recurse(subdirs)

@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+deps = [
+	'NLog.dll',
+
+	'System.dll',
+	'System.Core.dll',
+	'System.Xml.dll',
+
+	'IronPython.dll',
+	'IronRuby.dll',
+	'IronRuby.Libraries.dll',
+	'IronRuby.Libraries.Yaml.dll',
+
+	'Microsoft.Dynamic.dll',
+	'Microsoft.CSharp.dll',
+	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	install_644 = 'NLog.config.template',
+	name = 'Peach.Core.dll',
+)
