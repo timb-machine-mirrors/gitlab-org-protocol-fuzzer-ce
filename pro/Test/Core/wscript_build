@@ -9,7 +9,7 @@ deps = [
 	'System.Xml.dll',
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
-	'Peach.Community.dll',
+	'Peach.Pro.dll',
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 	'IronPython.dll',
@@ -23,7 +23,7 @@ bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.Community.Test.dll',
+	name = 'Peach.Pro.Test.dll',
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',
 	ide_path = '../',
 )

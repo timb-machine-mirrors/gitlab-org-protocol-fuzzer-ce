@@ -18,8 +18,8 @@ deps = [
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 	'Peach.Core.dll',
-	'Peach.Community.dll',
-	'Peach.Community.OS.Windows.dll',
+	'Peach.Pro.dll',
+	'Peach.Pro.OS.Windows.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	
 ]
@@ -28,5 +28,5 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name='Peach.Community.ComContainer.exe',
+	name='Peach.Pro.ComContainer.exe',
 )

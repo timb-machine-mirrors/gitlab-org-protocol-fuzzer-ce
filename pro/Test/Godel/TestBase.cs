@@ -12,7 +12,7 @@ using NUnit.Framework.Constraints;
 
 namespace Godel
 {
-	public class AssertTestFail : System.Diagnostics.TraceListener
+	class AssertTestFail : System.Diagnostics.TraceListener
 	{
 		public override void Write(string message)
 		{
@@ -31,7 +31,7 @@ namespace Godel
 	}
 
 	[SetUpFixture]
-	public class TestBase
+	class TestBase
 	{
 		[SetUp]
 		public void Initialize()
@@ -48,8 +48,6 @@ namespace Godel
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;
-
-			Peach.Core.Platform.LoadAssembly();
 		}
 	}
 }

@@ -1,30 +1,34 @@
 #!/usr/bin/env python
 
-# Import wscript contents from Peach/build/tools/wscript.py
+# Import wscript contents from build/tools/wscript.py
 
-import os.path, sys
+import os.path
 from tools import wscript
 
+# build temp directory
 out = 'slag'
+
+# build output directory
 inst = 'output'
+
+# How deep to scan for wscript_build files
+maxdepth = 1
+
+# appname should be the name of this build project, eg: 'Peach'
 appname = 'EPeach'
-maxdepth = 2
+
+# peach should be the path to the Peach submodule, eg: '.'
+peach = '.'
+
+# Branch suffix to use as last portion of build tag
 branch = 1
 
-# Path to peach community
-peach = 'Peach'
+# blacklist wscripts inside any of the following subdirectories
+ignore = []
 
-# Ignore peach commuinity Peach.exe
-ignore = [ 'Peach/Peach' ]
-
-def add_tools(tools):
-	for i in ['win', 'linux', 'osx']:
-		__import__('config.%s' % i)
-		mod = sys.modules['config.%s' % i]
-		mod.tools.extend(tools)
-
+# Returns true if the variant should be supported
 def supported_variant(name):
-	return True
+	return True;
 
 def init(ctx):
 	wscript.init(ctx)
@@ -33,8 +37,6 @@ def options(opt):
 	wscript.options(opt)
 
 def configure(ctx):
-	add_tools(['sign', 'tsc'])
-
 	wscript.configure(ctx)
 
 def build(ctx):

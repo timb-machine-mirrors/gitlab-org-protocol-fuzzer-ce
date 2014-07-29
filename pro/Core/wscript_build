@@ -42,5 +42,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = 'xmltests.zip',
 	content = 'IronPython.StdLib',
-	name = 'Peach.Community.dll',
+	name = 'Peach.Pro.dll',
 )

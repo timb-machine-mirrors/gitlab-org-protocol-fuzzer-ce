@@ -2,7 +2,7 @@
 
 deps = [
 	'Peach.Core.dll',
-	'Peach.Community.dll',
+	'Peach.Pro.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Data.dll',
