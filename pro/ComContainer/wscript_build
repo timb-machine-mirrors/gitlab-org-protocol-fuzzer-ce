@@ -21,7 +21,7 @@ deps = [
 	'Peach.Pro.dll',
 	'Peach.Pro.OS.Windows.dll',
 	'SharpPcap.dll',
-	'PacketDotNet.dll',	
+	'PacketDotNet.dll',
 ]
 
 bld(

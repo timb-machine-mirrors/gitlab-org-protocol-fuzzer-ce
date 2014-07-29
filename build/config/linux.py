@@ -19,6 +19,7 @@ tools = [
 	'tools.xcompile',
 	'tools.mdoc',
 	'tools.zip',
+	'tools.tsc',
 ]
 
 def prepare(conf):

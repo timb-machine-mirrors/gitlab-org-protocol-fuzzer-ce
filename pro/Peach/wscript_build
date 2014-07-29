@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from waflib import Utils
 
 deps = [
 	'NLog.dll',
@@ -8,7 +7,9 @@ deps = [
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'System.dll',
+	'System.Core.dll',
 	'System.Xml.dll',
+	'Portable.Licensing.dll',
 ]
 
 app = bld(
@@ -22,3 +23,72 @@ app = bld(
 
 if bld.env.MCS and bld.env.DEST_OS != 'win32':
 	app.install_755 = 'peach'
+
+'''
+community_deps = [
+	# Peach Executable
+	'Peach.exe',
+
+	# Peach Core
+	'Peach.Core.dll',
+	'Peach.Core.OS.Windows.dll',
+	'Peach.Core.OS.Linux.dll',
+	'Peach.Core.OS.OSX.dll',
+
+	# Unit Tests
+	'Peach.Core.Test.dll',
+	'Peach.Core.Test.OS.Windows.dll',
+	'Peach.Core.Test.OS.Linux.dll',
+	'Peach.Core.Test.OS.OSX.dll',
+
+	# Linux core file monitor
+	'PeachLinuxCrashHandler.exe',
+
+	# Windows side-process helpers
+	'Peach.Core.ComContainer.exe',
+	'Peach.Core.WindowsDebugInstance.exe',
+
+	# Helper Programs
+	'PeachValidator.exe',
+	'PeachFuzzBang.exe',
+	'PeachMinset.exe',
+
+	# Basic Block Pin Tool
+	'bblocks',
+	'bblocks32',
+	'bblocks64',
+
+	# Test Programs
+	'ComTest',
+	'CrashableServer',
+	'CrashingFileConsumer',
+	'CrashingProgram',
+
+	'IronPython.StdLib', # Python Standard Library
+	'pin',               # Pin Binaries
+	'VMware-VIX',        # VMWare VIX API
+	'CrashWrangler',     # CrashWrangler
+]
+
+pro_deps = [
+	'Godel.Core.dll',
+	'Godel.Test.dll',
+	'Peach.Enterprise.dll',
+	'Peach.Enterprise.Web',
+	'Peach.Enterprise.OS.Windows.dll',
+	'Peach.Enterprise.Test.dll',
+	'PeachSampleNinja.exe',
+	'peach-sdk',
+	'peach-doc',
+]
+
+tgt = [ 'peach-pro', bld.env.BUILDTAG, bld.env.TARGET, bld.env.SUBARCH, bld.env.VARIANT ]
+tgt = '-'.join([ x for x in tgt if x])
+
+bld(
+	features = 'foo zip',
+	name = tgt,
+	use = community_deps + pro_deps,
+	install_path = '${OUTPUT}',
+)
+'''

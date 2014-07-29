@@ -37,7 +37,7 @@ namespace PitTester
 			if (extra.Count != 1)
 				Syntax();
 
-			Peach.Core.Runtime.Program.ConfigureLogging(LogLevel);
+			Peach.Core.Utilities.ConfigureLogging(LogLevel);
 
 			var libraryPath = args[0];
 			var lib = new PitDatabase();

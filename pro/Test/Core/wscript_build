@@ -17,6 +17,9 @@ deps = [
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
 	'Renci.SshNet.dll',
+	'BouncyCastle.Crypto.dll',
+	'Ionic.Zip.dll',
+	'Newtonsoft.Json.dll',
 ]
 
 bld(
@@ -24,6 +27,6 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.Pro.Test.dll',
+	resource = 'google.der',
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',
-	ide_path = '../',
 )

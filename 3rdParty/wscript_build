@@ -2,11 +2,6 @@
 
 """
 subdirs = [
-	'Portable.Licensing',
-	'TotalPhase-5.13',
-	'Managed.AndroidDebugBridge',
-	'Nancy.Serialization.JsonNet-0.22.2',
-	'SyslogSharp-1.0.07',
 ]
 
 bld.recurse(subdirs)
@@ -39,6 +34,11 @@ subdirs = [
 	'pin',
 #	'Json50r8',
 #	'Renci.SshNet',
+#	'Nancy.Serialization.JsonNet-0.22.2',
+	'Portable.Licensing',
+	'TotalPhase-5.13',
+	'Managed.AndroidDebugBridge',
+	'SyslogSharp-1.0.07',
 	'VMware-VIX-1.12.1-894247',
 ]
 

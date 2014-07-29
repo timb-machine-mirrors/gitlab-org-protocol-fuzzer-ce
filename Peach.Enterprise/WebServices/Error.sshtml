@@ -1,6 +1,0 @@
-<h1>@!Model.ErrorMessage</h1>
-@If.HasDetails
-<hr>
-<h3>Details:</h3>
-<pre>@!Model.FullException</pre>
-@EndIf

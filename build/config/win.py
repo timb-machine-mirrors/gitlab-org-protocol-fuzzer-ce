@@ -20,6 +20,7 @@ tools = [
 	'tools.mdoc',
 	'tools.wix',
 	'tools.zip',
+	'tools.tsc',
 ]
 
 def prepare(conf):

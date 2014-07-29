@@ -9,16 +9,17 @@ deps = [
 	'System.Core.dll',
 	'System.Xml.dll',
 	'Godel.Core.dll',
-	'Peach.Enterprise.dll',
-	'Peach.Enterprise.Test.dll',
+	'Peach.Pro.dll',
+	'Peach.Pro.Test.dll',
 ]
+
+pits = bld.path.find_node('../pits/pro') or bld.path
 
 bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PitTester.exe',
-	ut_cwd = bld.path.find_node('../pits/pro').abspath(),
+	ut_cwd = pits.abspath(),
 	ut_args = '.',
-	ide_path = 'Peach Enterprise',
 )

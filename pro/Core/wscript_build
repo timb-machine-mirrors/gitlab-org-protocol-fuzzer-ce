@@ -7,6 +7,7 @@ deps = [
 	'System.Xml.dll',
 	'System.Core.dll',
 	'System.Data.dll',
+	'System.Drawing.dll',
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
@@ -34,7 +35,26 @@ deps = [
 	'log4net.dll',
 
 	'Peach.Core.dll',
+	'Godel.Core.dll',
+
+	'Nancy.dll',
+	'Nancy.Hosting.Self.dll',
+	'Nancy.Serialization.JsonNet.dll',
+
+	'Managed.Adb.dll',
+	'BouncyCastle.Crypto.dll',
+	'Syslog.Server.dll',
+	'aardvark_net.dll',
 ]
+
+if bld.env.TARGET == 'win':
+	deps.extend([
+		'System.Data.SQLite.dll',
+	])
+else:
+	deps.extend([
+		'Mono.Data.Sqlite.dll',
+	])
 
 bld(
 	features = 'cs',
