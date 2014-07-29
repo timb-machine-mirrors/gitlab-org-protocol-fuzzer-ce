@@ -15,7 +15,7 @@ inst = 'output'
 maxdepth = 1
 
 # appname should be the name of this build project, eg: 'Peach'
-appname = 'EPeach'
+appname = 'Peach'
 
 # peach should be the path to the Peach submodule, eg: '.'
 peach = '.'
