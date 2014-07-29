@@ -39,10 +39,10 @@ test-results/
 # This allows bin/obj folders to not be ignored in 3rdParty
 /*/[Bb]in/
 /*/[Oo]bj/
-/PeachFarm/*/*/[Bb]in/
-/PeachFarm/*/*/[Oo]bj/
-/PeachFarm/*/[Bb]in/
-/PeachFarm/*/[Oo]bj/
+/farm/*/*/[Bb]in/
+/farm/*/*/[Oo]bj/
+/farm/*/[Bb]in/
+/farm/*/[Oo]bj/
 
 # User-specific files
 *.user
