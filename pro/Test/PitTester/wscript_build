@@ -13,7 +13,7 @@ deps = [
 	'Peach.Pro.Test.dll',
 ]
 
-pits = bld.path.find_node('../pits/pro') or bld.path
+pits = bld.path.find_node('../../pits/pro') or bld.path
 
 bld(
 	features = 'cs test',

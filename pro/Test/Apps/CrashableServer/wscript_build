@@ -4,6 +4,5 @@ bld(
 	features = 'cxx cxxprogram debug network',
 	source = 'CrashableServer.cpp',
 	target='CrashableServer',
-	ide_path='Test Programs',
 )
 

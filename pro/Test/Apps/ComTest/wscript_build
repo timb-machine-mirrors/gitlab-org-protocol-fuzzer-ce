@@ -6,5 +6,4 @@ bld(
 	target = 'ComTest',
 	defs = 'ComTest.def',
 	includes = '.',
-	ide_path='Test Programs',
 )
