@@ -1,5 +1,22 @@
 ﻿body {
     font-family: 'Segoe UI', sans-serif;
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+}
+
+div#main-container {
+	position: absolute;
+	left: 0;
+	top: 50px;
+	right: 0;
+	bottom: 0;
+}
+
+div.main-container-inner {
+	height: 100%;
 }
 
 .gridStyle {
@@ -32,4 +49,16 @@ a.disabled {
 	top: 0;
 	right: 0;
 	bottom: 0;
+}
+
+.nav-tabs > li {
+	cursor: pointer
+}
+
+div.tabs-left#metricstabs {
+	position: relative;
+	bottom: 0;
+	top: 0;
+	right: 0;
+	left: 0;
 }

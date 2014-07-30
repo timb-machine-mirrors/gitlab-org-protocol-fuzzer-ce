@@ -23,7 +23,8 @@ module DashApp {
 		"ngGrid",
 		"ngRoute",
 		"ui.bootstrap",
-		"treeControl"
+		"treeControl",
+		"angles"
 	]).service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
 		.service("pitConfiguratorService", ["poller", "peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
 		.config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
@@ -40,6 +41,10 @@ module DashApp {
 				.when("/configurator/intro", {
 					templateUrl: "/partials/configurator-intro.html",
 					controller: WizardController
+				})
+				.when("/metrics", {
+					templateUrl: "/partials/metrics.html", 
+					controller: MetricsController
 				})
 				.when("/configurator/test", {
 					templateUrl: "/partials/configurator-test.html",
