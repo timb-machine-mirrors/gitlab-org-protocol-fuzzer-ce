@@ -510,4 +510,56 @@ module DashApp.Models {
 	}
 
 	//#endregion
+
+	//#region Metrics Models
+	export interface BucketTimelineMetric {
+		label: string;
+		iteration: number;
+		time: Date;
+		type: string;
+		majorHash: string;
+		faultCount: number;
+	}
+
+	export interface MutatorMetric {
+		mutator: string;
+		elementCount: number;
+		iterationCount: number;
+		bucketCount: number;
+		faultCount: number;
+	}
+
+	export interface ElementMetric {
+		element: string;
+		state: string;
+		action: string;
+		dataset: string;
+		mutationCount: number;
+		bucketCount: number;
+		faultCount: number;
+	}
+
+	export interface StateMetric {
+		state: string;
+		executionCount: number;
+	}
+
+	export interface DatasetMetric {
+		dataset: string;
+		iterationCount: number;
+		bucketCount: number;
+		faultCount: number;
+	}
+
+	export interface BucketMetric {
+		bucket: string;
+		mutator: string;
+		dataset: string;
+		state: string;
+		action: string;
+		element: string;
+		iterationCount: number;
+		faultCount: number;
+	}
+	//#endregion
 }
