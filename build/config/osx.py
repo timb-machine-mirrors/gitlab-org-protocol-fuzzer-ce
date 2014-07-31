@@ -108,6 +108,7 @@ def configure(conf):
 	env = conf.env
 
 	env.append_value('supported_features', [
+		'peach',
 		'osx',
 		'c',
 		'cstlib',

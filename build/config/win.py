@@ -122,6 +122,7 @@ def configure(conf):
 	env.ASS_ST = '/reference:%s%s%%s' % (env.REFERENCE_ASSEMBLIES, os.sep)
 
 	env.append_value('supported_features', [
+		'peach',
 		'win',
 		'c',
 		'cstlib',

@@ -74,6 +74,7 @@ def prepare(conf):
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
 
 	env.append_value('supported_features', [
+		'peach',
 		'linux',
 		'c',
 		'cstlib',
