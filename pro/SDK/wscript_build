@@ -2,6 +2,7 @@
 
 bld(
 	name='peach-sdk',
+	features = 'peach',
 	install_path = '${BINDIR}/sdk',
 	install_644 = bld.path.ant_glob('**/*', excl='wscript_build')
 )
