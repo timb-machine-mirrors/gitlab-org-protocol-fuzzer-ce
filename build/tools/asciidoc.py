@@ -1,52 +1,77 @@
-from waflib.TaskGen import feature, before_method, after_method
+from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task
+from waflib import Utils, Errors
+import os
 import re
-"""
+
 def configure(conf):
-	#conf.find_program('a2x', var='A2X')
-	#conf.find_program('dia', var='DIA')
-	#conf.find_program('convert', var='CONVERT')
-	#conf.find_program('dot')
-	conf.find_program('source-highlight', var='SOURCE_HIGHLIGHT')
-	conf.find_program('asciidoc', var='ADOC')
-	conf.env['ADOCOPTS'] = [ '--backend=xhtml11' ]
+	j = os.path.join
+	pub = j(conf.path.abspath(), 'docs', 'publishing')
+
+	conf.find_program('ruby')
+	conf.find_program('perl')
+	conf.find_program('java')
+	conf.find_program('xmllint')
+
+	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
+	conf.find_program('fopub', path_list = [ j(pub, 'asciidoctor-fopub') ])
+
+	conf.env['ASCIIDOCTOR_OPTS'] = [
+		'-v',
+		'-b', 'docbook45',
+		'-d', 'article',
+	]
+
+	conf.env['FOPUB_OPTS'] = [
+		'-param', 'paper.type', 'USletter',
+		'-param', 'header.column.widths', '0 1 0',
+		'-param', 'footer.column.widths', '0 1 0',
+	]
+
+	conf.env['XMLLINT_OPTS'] = [
+		'--noout',
+		'--valid',
+	]
 
 @feature('asciidoc')
 def apply_asciidoc(self):
-	self.source = self.to_nodes(getattr(self, 'source', []))
-	if not self.source:
-		return
+	pass
 
-	conf = self.to_nodes(getattr(self, 'conf', []))
-	if conf:
-		conf = conf[0]
-		self.env.append_value('ADOCOPTS', [ '--conf-file=%s' % conf.bldpath()])
+@extension('.adoc')
+def adoc_hook(self, node):
+	xml = node.change_ext('.xml')
+	pdf = xml.change_ext('.pdf')
 
-	tsks = []
-	outputs = []
-	for src in self.source:
-		tsk = self.create_task('asciidoc', src, src.change_ext(".html"))
-		tsks.append(tsk)
-		outputs.extend(tsk.outputs)
+	adoc = self.create_task('asciidoctor', node, xml)
+	lint = self.create_task('xmllint', xml)
+	fopub = self.create_task('fopub', xml, pdf)
 
-	if conf:
-		for src in self.source:
-			self.bld.add_manual_dependency(src, conf)
+	# ensure fopub runs after xmllint
+	fopub.set_run_after(lint)
 
-	self.relative_trick = getattr(self, 'relative_trick', False)
+	# Set path to images relative to xml file
+	images = getattr(self, 'images', None)
+	if images:
+		if isinstance(images, str):
+			img = self.path.find_dir(images)
+		else:
+			img = images
+		if not img:
+			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
+		adoc.env.append_value('ASCIIDOCTOR_OPTS', [ '-a', 'images=%s' % img.path_from(xml.parent) ])
 
-	try:
-		inst_to = self.install_path
-	except AttributeError:
-		inst_to = tsks[0].__class__.inst_to
-	if inst_to:
-		self.bld.install_files(inst_to, outputs, cwd = self.path.get_bld(), env = self.env, relative_trick = self.relative_trick)
+	# Install pdf to bin directory
+	self.install_as('${BINDIR}/%s' % self.name, pdf, chmod=Utils.O644)
 
-	self.source = []
+#	try:
+#		self.compiled_tasks.append(task)
+#	except AttributeError:
+#		self.compiled_tasks = [task]
+#	return task
 
-re_xi = re.compile('''^(include|image)::([^.]*.(txt|\\{PIC\\}))\[''', re.M)
+re_xi = re.compile('''^(include|image)::([^.]*.(adoc|png))\[''', re.M)
 
-def ascii_doc_scan(self):
+def asciidoc_scan(self):
 	p = self.inputs[0].parent
 	node_lst = [self.inputs[0]]
 	seen = []
@@ -59,26 +84,25 @@ def ascii_doc_scan(self):
 		code = nd.read()
 		for m in re_xi.finditer(code):
 			name = m.group(2)
-			if m.group(3) == '{PIC}':
-
-				ext = '.eps'
-				if self.generator.rule.rfind('A2X') > 0:
-					ext = '.png'
-
-				k = p.find_resource(name.replace('{PIC}', ext))
-				if k:
-					depnodes.append(k)
-			else:
-				k = p.find_resource(name)
-				if k:
-					depnodes.append(k)
-					node_lst.append(k)
+			k = p.find_resource(name)
+			if k:
+				depnodes.append(k)
+				node_lst.append(k)
 	return [depnodes, ()]
 
-class asciidoc(Task): 
-	run_str = '${ADOC} ${ADOCOPTS} -o ${TGT} ${SRC}'
+
+class asciidoctor(Task): 
+	run_str = '${RUBY} -I. ${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
 	color   = 'PINK'
-	vars    = ['ADOCOPTS']
-	scan    = ascii_doc_scan
-	inst_to = '${DOCDIR}'
-"""
+	vars    = ['ASCIIDOCTOR_OPTS']
+	scan    = asciidoc_scan
+
+class xmllint(Task): 
+	run_str = '${XMLLINT} ${XMLLINT_OPTS} ${SRC}'
+	color   = 'PINK'
+	vars    = ['XMLLINT_OPTS']
+
+class fopub(Task): 
+	run_str = '${FOPUB} ${SRC} ${FOPUB_OPTS}'
+	color   = 'PINK'
+	vars    = ['FOPUB_OPTS']
