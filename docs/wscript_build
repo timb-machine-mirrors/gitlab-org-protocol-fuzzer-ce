@@ -14,22 +14,10 @@ pits = bld(
 	pits = '../pits/pro',
 )
 '''
+
 bld(
 	features = 'webhelp',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
 	name = 'webhelp',
 )
-#pits.create_task('make_library', pits.to_nodes('src.pro/library.adoc')
-
-# xsltproc
-# ..\..\..\..\..\docs\publishing\asciidoctor-fopub\build\fopub\docbook\webhelp\xsl\webhelp.xsl
-# ..\book.xml
-
-# webhelp/docs => all generated docs
-# webhelp/docs/images => all images
-
-# cp -R src.pro/images/* out.pro/webhelp/docs/images/.
-# cp -R publishing/webhelp/docbook-xsl-1.78.1/webhelp/template/* out.pro/webhelp/docs/.
-
-# define images to images when building
