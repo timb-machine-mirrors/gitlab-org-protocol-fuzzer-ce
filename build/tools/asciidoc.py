@@ -1,8 +1,7 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task
 from waflib import Utils, Errors
-import os
-import re
+import os, shutil, re
 
 def configure(conf):
 	j = os.path.join
@@ -12,6 +11,7 @@ def configure(conf):
 	conf.find_program('perl')
 	conf.find_program('java')
 	conf.find_program('xmllint')
+	conf.find_program('xsltproc')
 
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
 	conf.find_program('fopub', path_list = [ j(pub, 'asciidoctor-fopub') ])
@@ -33,21 +33,24 @@ def configure(conf):
 		'--valid',
 	]
 
+	webhelp = j(pub, 'asciidoctor-fopub', 'build', 'fopub', 'docbook', 'webhelp')
+	conf.env['WEBHELP_DIR'] = webhelp
+	conf.env['WEBHELP_XSL'] = j(webhelp, 'xsl', 'webhelp.xsl')
+
 @feature('asciidoc')
+@after_method('process_source')
 def apply_asciidoc(self):
-	pass
+	# Turn all docbook xml to pdf
+	for adoc,lint in getattr(self, 'compiled_tasks', []):
+		xml = adoc.outputs[0]
+		pdf = xml.change_ext('.pdf')
+		fopub = self.create_task('fopub', xml, pdf)
 
-@extension('.adoc')
-def adoc_hook(self, node):
-	xml = node.change_ext('.xml')
-	pdf = xml.change_ext('.pdf')
+		# ensure fopub runs after xmllint
+		#fopub.set_run_after(lint)
 
-	adoc = self.create_task('asciidoctor', node, xml)
-	lint = self.create_task('xmllint', xml)
-	fopub = self.create_task('fopub', xml, pdf)
-
-	# ensure fopub runs after xmllint
-	fopub.set_run_after(lint)
+		# Install pdf to bin directory
+		self.install_as('${BINDIR}/%s' % self.name, pdf, chmod=Utils.O644)
 
 	# Set path to images relative to xml file
 	images = getattr(self, 'images', None)
@@ -60,14 +63,33 @@ def adoc_hook(self, node):
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
 		adoc.env.append_value('ASCIIDOCTOR_OPTS', [ '-a', 'images=%s' % img.path_from(xml.parent) ])
 
-	# Install pdf to bin directory
-	self.install_as('${BINDIR}/%s' % self.name, pdf, chmod=Utils.O644)
 
-#	try:
-#		self.compiled_tasks.append(task)
-#	except AttributeError:
-#		self.compiled_tasks = [task]
-#	return task
+@feature('webhelp')
+def apply_webhelp(self):
+	for adoc,lint in getattr(self, 'compiled_tasks', []):
+		xml = adoc.outputs[0]
+
+		xsl = self.create_task('webhelp', xml)
+		#xsl.env.XSLTPROC_OPTS = xsl.env.WEBHELP_XSL
+		#xsl.set_run_after(lint)
+
+		# xsltproc outputs to cwd
+		xsl.output_dir = xml.parent.find_dir(self.name)
+		if not xsl.output_dir:
+			xsl.output_dir = xml.parent.find_or_declare(self.name)
+
+@extension('.adoc')
+def adoc_hook(self, node):
+	xml = node.change_ext('.%d.xml' % self.idx)
+
+	adoc = self.create_task('asciidoctor', node, xml)
+	lint = self.create_task('xmllint', xml)
+
+	try:
+		self.compiled_tasks.append((adoc,lint))
+	except AttributeError:
+		self.compiled_tasks = [(adoc,lint)]
+	return adoc
 
 re_xi = re.compile('''^(include|image)::([^.]*.(adoc|png))\[''', re.M)
 
@@ -91,18 +113,47 @@ def asciidoc_scan(self):
 	return [depnodes, ()]
 
 
-class asciidoctor(Task): 
+class asciidoctor(Task):
 	run_str = '${RUBY} -I. ${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
 	color   = 'PINK'
 	vars    = ['ASCIIDOCTOR_OPTS']
 	scan    = asciidoc_scan
 
-class xmllint(Task): 
+class xmllint(Task):
 	run_str = '${XMLLINT} ${XMLLINT_OPTS} ${SRC}'
 	color   = 'PINK'
-	vars    = ['XMLLINT_OPTS']
+	before  = [ 'fopub', 'webhelp' ]
+	vars    = [ 'XMLLINT_OPTS' ]
+
+class webhelp(Task):
+	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'
+	color   = 'PINK'
+	vars    = [ 'WEBHELP_XSL' ]
+	after   = [ 'xmllint' ]
+	
+	def exec_command(self, cmd, **kw):
+		# webhelp outputs all files in cwd
+		self.cwd = self.output_dir.abspath()
+
+		if os.path.exists(self.cwd):
+			try:
+				shutil.rmtree(self.cwd)
+			except OSError:
+				pass
+
+		os.makedirs(self.cwd)
+
+		Task.exec_command(self, cmd, **kw)
+
+	def post_run(self):
+		nodes = self.output_dir.ant_glob('**/*', quiet=True)
+		for x in nodes:
+			x.sig = Utils.h_file(x.abspath())
+		self.outputs += nodes
+		return Task.post_run(self)
 
 class fopub(Task): 
 	run_str = '${FOPUB} ${SRC} ${FOPUB_OPTS}'
 	color   = 'PINK'
-	vars    = ['FOPUB_OPTS']
+	vars    = [ 'FOPUB_OPTS' ]
+	after   = [ 'xmllint' ]
