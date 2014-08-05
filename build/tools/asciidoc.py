@@ -154,7 +154,7 @@ def apply_webhelp(self):
 
 	# Install favicon to BINDIR
 	ico = self.bld.root.find_resource(self.env.WEBHELP_ICO)
-	inst = self.bld.install_files('${BINDIR}/%s' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
+	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
 
