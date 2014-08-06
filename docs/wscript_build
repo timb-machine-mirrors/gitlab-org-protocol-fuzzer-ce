@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+from waflib.Task import Task
+from waflib.Errors import WafError
+import re
 
 book = bld(
 	features = 'asciidoc',
@@ -7,17 +10,53 @@ book = bld(
 	name = 'Peach_Professional.pdf',
 )
 
-'''
-pits = bld(
-	features = 'asciidoc',
-	name = 'Pit_Library.pdf',
-	pits = '../pits/pro',
-)
-'''
-
 bld(
 	features = 'webhelp',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
 	name = 'webhelp',
 )
+
+# The interpolated adoc file containing includes to all usages
+library = bld.path.find_or_declare('library_joined.adoc')
+
+# The adoc file to append included usages to
+srcs = [ bld.path.find_or_declare('src.pro/library.adoc') ]
+
+# The list of all usage files to include
+srcs.extend( bld.path.find_dir('../pits/pro').ant_glob('**/*_Usage.adoc') )
+
+class join_usage(Task):
+	re_data = re.compile('^include::(.*_DataSheet.adoc)', re.M)
+	re_desc = re.compile('^:Description: (.*)', re.M)
+
+	def run(self):
+		lines = [ self.inputs[0].read() ]
+
+		for f in self.inputs[1:]:
+			try:
+				inc = f.parent.find_or_declare('%s' % self.re_data.search(f.read()).group(1))
+			except AttributeError, e:
+				raise WafError("Missing datasheet include in '%s'" % f.abspath(), e)
+
+			try:
+				datasheet = inc.read()
+			except IOError, e:
+				raise WafError("Error opening datasheet '%s' included from '%s'" % (inc.abspath(), f.abspath()), e)
+
+			try:
+				desc = self.re_desc.search(datasheet).group(1)
+			except AttributeError, e:
+				raise WafError("Missing :Description: in datasheet '%s'" % inc.abspath(), e)
+
+			lines.append( '<<<\n== %s\ninclude::%s[]\n' % (desc, f.path_from(self.outputs[0].parent)) )
+
+		self.outputs[0].write( '\n'.join(lines) )
+
+pits = bld(
+	features = 'asciidoc',
+	name = 'Pit_Library.pdf',
+	source = library,
+)
+
+pits.create_task('join_usage', srcs, library)
