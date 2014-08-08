@@ -13,19 +13,19 @@ module DashApp {
 			$scope.vm = this;
 		}
 
-		public metrics_faultsOverTime_data = [
-			{ x: new Date(2014, 4, 5, 1, 1, 0, 1), y: 1 },
-			{ x: new Date(2014, 4, 5, 2, 1, 0, 1), y: 2 },
-			{ x: new Date(2014, 4, 5, 3, 1, 0, 1), y: 1 },
-			{ x: new Date(2014, 4, 5, 4, 1, 0, 1), y: 3 },
-			{ x: new Date(2014, 4, 5, 5, 1, 0, 1), y: 1 },
-			{ x: new Date(2014, 4, 5, 6, 1, 0, 1), y: 1 }];
+		public metrics_faultsOverTime_data: Models.FaultTimelineMetric[] = [
+			{ time: new Date(2014, 4, 5, 1, 1, 0, 1), faultCount: 1 },
+			{ time: new Date(2014, 4, 5, 2, 1, 0, 1), faultCount: 2 },
+			{ time: new Date(2014, 4, 5, 3, 1, 0, 1), faultCount: 1 },
+			{ time: new Date(2014, 4, 5, 4, 1, 0, 1), faultCount: 3 },
+			{ time: new Date(2014, 4, 5, 5, 1, 0, 1), faultCount: 1 },
+			{ time: new Date(2014, 4, 5, 6, 1, 0, 1), faultCount: 1 }];
 
 
 		// this.metrics_faultsOverTime_data.map(i => i.x)
 		// this.metrics_faultsOverTime_data.map(i => i.y)
 		public metrics_faultsOverTime_chart = {
-			labels: this.metrics_faultsOverTime_data.map(i => moment(i.x).format("h:mm:ss a")),
+			labels: this.metrics_faultsOverTime_data.map(i => moment(i.time).format("h:mm:ss a")),
 			datasets: [
 				{
 					label: "My First dataset",
@@ -35,7 +35,7 @@ module DashApp {
 					pointStrokeColor: "#fff",
 					pointHighlightFill: "#fff",
 					pointHighlightStroke: "rgba(220,220,220,1)",
-					data: this.metrics_faultsOverTime_data.map(i => i.y)
+					data: this.metrics_faultsOverTime_data.map(i => i.faultCount)
 				}
 			]
 		};
@@ -106,7 +106,7 @@ module DashApp {
 
 			// ** Required if scaleOverride is true **
 			// Number - The number of steps in a hard coded scale
-			scaleSteps: this.getMaxOfArray(this.metrics_faultsOverTime_data.map(i => i.y)),
+			scaleSteps: this.getMaxOfArray(this.metrics_faultsOverTime_data.map(i => i.faultCount)),
 			// Number - The value jump in the hard coded scale
 			scaleStepWidth: 1,
 			// Number - The scale starting value

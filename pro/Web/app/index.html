@@ -59,6 +59,7 @@
 	<script src="js/Controllers/pittest.js"></script>
 	<script src="js/Controllers/wizard.js"></script>
 	<script src="js/Controllers/metrics.js"></script>
+	<script src="js/Controllers/startjob.js"></script>
 	<script src="js/app.js"></script>
 
 </head>
@@ -92,6 +93,12 @@
 								<a ng-click="vm.showPitSelector()" style="cursor: pointer">
 									<!-- <i class="icon-cog"></i> -->
 									Select another Pit
+								</a>
+							</li>
+							<li>
+								<a ng-click="vm.exportPit()" style="cursor: pointer">
+									<!-- <i class="icon-cog"></i> -->
+									Export Pit
 								</a>
 							</li>
 						</ul>

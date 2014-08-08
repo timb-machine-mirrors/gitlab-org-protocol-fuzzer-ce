@@ -16,6 +16,8 @@
 
 	<div class="modal-footer">
 		<span class="label label-danger" ng-class="{hidden: vm.notAPit == false}" style="margin-right: 20px">Please select a Pit, not a Library or Category.</span>
+		<button class="btn btn-default" ng-click="vm.cancel()" ng-class="{hidden: vm.CanCancel == false}">Cancel</button>
+		<button class="btn" ng-click="vm.exportPit()" ng-class="{disabled: vm.notAPit == true}">Export</button>
 		<button class="btn btn-primary" ng-click="vm.selectPit()" ng-class="{disabled: vm.notAPit == true}">Select</button>
 	</div>
 </div>
