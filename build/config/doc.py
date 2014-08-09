@@ -20,6 +20,7 @@ def configure(conf):
 
 	env.append_value('supported_features', [
 		'asciidoc',
+		'webhelp',
 		'emit',
 		'subst',
 	])
