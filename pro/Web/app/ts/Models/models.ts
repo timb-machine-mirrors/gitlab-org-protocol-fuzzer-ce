@@ -234,6 +234,9 @@ module DashApp.Models {
 
 		groups?: any[];
 
+		iterationStart?: number;
+		iterationEnd?: number;
+
 		// Optional field. We can set this to null for now
 		//"/p/targets/targetID/configs/configID",
 		//configUrl: string;
@@ -512,6 +515,11 @@ module DashApp.Models {
 	//#endregion
 
 	//#region Metrics Models
+	export interface FaultTimelineMetric {
+		time: Date;
+		faultCount: number;
+	}
+
 	export interface BucketTimelineMetric {
 		label: string;
 		iteration: number;
@@ -560,6 +568,26 @@ module DashApp.Models {
 		element: string;
 		iterationCount: number;
 		faultCount: number;
+	}
+
+	export interface VisualizerData {
+		iteration: number;
+		mutatedElements: string[];
+		models: VisualizerModel[];
+	}
+
+	export interface VisualizerModel {
+		original: string;
+		fuzzed: string;
+		name: string;
+		type: string;
+		children: VisualizerModelChild[];
+	}
+
+	export interface VisualizerModelChild {
+		name: string;
+		type: string;
+		children: VisualizerModelChild[];
 	}
 	//#endregion
 }

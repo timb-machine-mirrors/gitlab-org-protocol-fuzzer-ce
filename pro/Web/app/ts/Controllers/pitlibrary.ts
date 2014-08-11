@@ -23,9 +23,10 @@ module DashApp {
 		
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
-		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, peachsvc: Services.IPeachService) {
+		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, peachsvc: Services.IPeachService, canCancel: boolean) {
 			$scope.vm = this;
 			this.modalInstance = $modalInstance;
+			this.CanCancel = canCancel;
 
 			peachsvc.GetLibraries((data: Models.PitLibrary[]) => {
 				if (data != undefined && data.length > 0) {
@@ -34,17 +35,29 @@ module DashApp {
 			});
 		}
 
-		changeSelection(pitUrl: string) {
+		public CanCancel: boolean;
+
+		public changeSelection(pitUrl: string) {
 			this.notAPit = pitUrl == undefined;
 			if (pitUrl != undefined)
 				this.selectedPit = pitUrl;
 		}
 
-		selectPit() {
+		public selectPit() {
 			if (this.selectedPit == undefined) {
 				this.notAPit = true;
 			} else {
 				this.modalInstance.close(this.selectedPit);
+			}
+		}
+
+		public exportPit() {
+
+		}
+
+		public cancel() {
+			if (this.CanCancel) {
+				this.modalInstance.dismiss();
 			}
 		}
 	}

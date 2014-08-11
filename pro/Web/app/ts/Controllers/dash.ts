@@ -12,6 +12,7 @@ module DashApp {
 
 		private location: ng.ILocationService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
+		private modal: ng.ui.bootstrap.IModalService;
 
 		public get pit(): Models.Pit {
 			if (this.pitConfigSvc != undefined && this.pitConfigSvc.Pit != undefined) {
@@ -55,6 +56,19 @@ module DashApp {
 			this.pitConfigSvc.StartJob();
 		}
 
+		public StartWithOptions() {
+			this.modal.open({
+				templateUrl: "../partials/startjob.html",
+				keyboard: false,
+				backdrop: "static",
+				controller: StartJobController
+			})
+			.result.then((job: Models.Job) => {
+				//this.pitConfigSvc.StartJob(job);
+				console.info(JSON.stringify(job));
+			});
+		}
+
 		public Pause() {
 			this.pitConfigSvc.PauseJob();
 		}
@@ -84,11 +98,12 @@ module DashApp {
 		
 		public recentFaults: Models.Fault[] = [];
 
-		static $inject = ["$scope", "pitConfiguratorService", "$location"];
+		static $inject = ["$scope", "pitConfiguratorService", "$location", "$modal"];
 
-		constructor($scope: ViewModelScope, pitConfiguratorService: Services.IPitConfiguratorService, $location: ng.ILocationService) {
+		constructor($scope: ViewModelScope, pitConfiguratorService: Services.IPitConfiguratorService, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService) {
 			this.pitConfigSvc = pitConfiguratorService;
 			this.location = $location;
+			this.modal = $modal;
 			$scope.vm = this;
 
 			$scope.$watch("vm.job.faultCount", () => {

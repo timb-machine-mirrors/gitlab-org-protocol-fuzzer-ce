@@ -119,11 +119,20 @@
 
 			<div class="row">
 				<div class="col-sm-7" style="text-align: center">
-					<button class="btn btn-lg btn-primary" ng-click="vm.Start()"
-									ng-class="{disabled: vm.CanStart == false}">
-						START
-					</button>
-
+					<div class="btn-group">
+						<button class="btn btn-lg btn-primary" ng-click="vm.Start()" ng-class="{disabled: vm.CanStart == false}">START</button>
+						<button class="btn btn-lg btn-primary dropdown-toggle" data-toggle="dropdown" ng-class="{disabled: vm.CanStart == false}">
+							<span class="icon-caret-down icon-only"></span>
+						</button>
+						<ul class="dropdown-menu dropdown-success">
+							<li>
+								<a ng-click="vm.Start()">Start Now</a>
+							</li>
+							<li>
+								<a ng-click="vm.StartWithOptions()">Start with options</a>
+							</li>
+						</ul>
+					</div>
 					<button class="btn btn-lg btn-danger" ng-click="vm.Stop()"
 									ng-class="{disabled: vm.CanStop == false}">
 						STOP

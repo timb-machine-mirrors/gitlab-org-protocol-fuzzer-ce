@@ -1,0 +1,48 @@
+﻿<div>
+	<div class="modal-header">
+		<h3 class="modal-title">Start a Job</h3>
+	</div>
+	<div class="modal-body">
+		<table>
+			<tr>
+				<td>Seed:</td>
+				<td>
+					<input ng-model="vm.Job.seed"
+								 step="1" ng-min="1"
+								 ng-max="4294967295"
+								 type="number"
+								 placeholder="Random"
+								 integer />
+				</td>
+			</tr>
+			<tr>
+				<td>Iteration Start:</td>
+				<td>
+					<input ng-model="vm.Job.iterationStart"
+								 step="1" ng-min="1"
+								 type="number"
+								 placeholder="Default"
+								 integer />
+				</td>
+			</tr>
+			<tr>
+				<td>Iteration End:</td>
+				<td>
+					<input ng-model="vm.Job.iterationEnd"
+								 step="1"
+								 ng-min="1"
+								 type="number"
+								 placeholder="Default"
+								 integer />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="modal-footer">
+		<!--
+		<span class="label label-danger" ng-class="" style="margin-right: 20px">Please select a Pit, not a Library or Category.</span>
+		-->
+		<button class="btn btn-default" ng-click="vm.cancel()">Cancel</button>
+		<button class="btn btn-primary" ng-click="vm.startJob()">START</button>
+	</div>
+</div>
