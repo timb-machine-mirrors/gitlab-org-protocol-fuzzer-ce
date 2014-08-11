@@ -33,16 +33,16 @@ using Peach.Core.Dom;
 
 namespace Peach.Core.Mutators
 {
-	[Mutator("StringMutator")]
+	[Mutator("StringStatic")]
 	[Description("Perform common string mutations")]
-	public partial class StringMutator : Mutator
+	public partial class StringStatic : Mutator
 	{
 		uint pos = 0;
 
 		public StringMutator(DataElement obj)
 		{
 			pos = 0;
-			name = "StringMutator";
+			name = "StringStatic";
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
