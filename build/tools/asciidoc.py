@@ -33,7 +33,7 @@ def configure(conf):
 		'--valid',
 	]
 
-	docbook = j('docs', 'publishing', 'asciidoctor-fopub', 'build', 'fopub', 'docbook')
+	docbook = j('docs', 'publishing', 'docbook-xsl-1.78.1')
 	conf.env['WEBHELP_ICO'] = j('docs', 'publishing', 'favicon.ico')
 	conf.env['WEBHELP_DIR'] = j(docbook, 'webhelp')
 	conf.env['WEBHELP_XSL'] = j(conf.path.abspath(), docbook, 'webhelp', 'xsl', 'webhelp.xsl')
