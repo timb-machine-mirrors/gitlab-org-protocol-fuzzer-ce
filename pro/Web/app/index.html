@@ -18,13 +18,13 @@
 	<link rel="stylesheet" href="../Content/css/ace-skins.min.css" />
 	<link rel="stylesheet" href="../Content/css/ng-grid.min.css" />
 	<link rel="stylesheet" href="../Content/css/visualizer.css" />
-
+	<link href="../Content/visjs/vis.min.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="../Content/css/datepicker.css" />
 
 	<link rel="stylesheet" href="css/app.css" />
 
-	<script type="text/javascript" src="../Scripts/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="../Scripts/jquery-2.1.1.js"></script>
 	<script src="../Content/js/bootstrap.min.js"></script>
 
 	<script type="text/javascript" src="../Scripts/angular.js"></script>
@@ -40,7 +40,9 @@
 	<script src="../Scripts/ng-grid.min.js"></script>
 	<script src="../Scripts/ng-grid-flexible-height.js"></script>
 
-	<!-- <script src="../Content/js/line-chart.min.js"></script> -->
+	<script src="../Content/visjs/vis.js"></script>
+	<script src="../Content/js/ng-vis.js"></script>
+
 	<script src="../Content/js/typeahead-bs2.min.js"></script>
 	<script src="../Content/js/ace-elements.min.js"></script>
 	<script src="../Content/js/ace.min.js"></script>
@@ -133,13 +135,6 @@
 						</a>
 					</li>
 					<!--
-					<li ng-class="{active: vm.location.path() == '/metrics'}">
-						<a href="#/metrics">
-							<i class="icon-signal"></i>
-							<span class="menu-text"> Metrics </span>
-						</a>
-					</li>
-
 					<li ng-class="{active: vm.location.path() == '/visualizer'}">
 						<a href="#/visualizer">
 							<i class="icon-eye-open"></i>
@@ -155,6 +150,57 @@
 								<span class="badge badge-primary ">{{vm.job.faultCount}}</span>
 							</span>
 						</a>
+					</li>
+					<li ng-class="{active: vm.location.path() == '/metrics'}">
+						<a class="dropdown-toggle" href="#">
+							<i class="icon-signal"></i>
+							<span class="menu-text"> Metrics </span>
+							<b class="arrow icon-angle-down"></b>
+						</a>
+						<ul class="submenu" style="display:none">
+							<li ng-class="{active: vm.location.path() == '/metrics/bucketTimeline'}">
+								<a href="#/metrics/bucketTimeline">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Bucket Timeline</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/faultsOverTime'}">
+								<a href="#/metrics/faultsOverTime">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Faults Over Time</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/mutators'}">
+								<a href="#/metrics/mutators">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Mutators</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/elements'}">
+								<a href="#/metrics/elements">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Elements</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/states'}">
+								<a href="#/metrics/states">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">States</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/datasets'}">
+								<a href="#/metrics/datasets">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Datasets</span>
+								</a>
+							</li>
+							<li ng-class="{active: vm.location.path() == '/metrics/buckets'}">
+								<a href="#/metrics/buckets">
+									<i class="icon-double-angle-right"></i>
+									<span class="menu-text">Buckets</span>
+								</a>
+							</li>
+						</ul>
 					</li>
 					<li class="tooltip-warning" data-original-title="{{vm.jobRunningTooltip}}" data-rel="tooltip" data-placement="right" ng-class="{'disabled': vm.CanConfigurePit == false}">
 						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.CanConfigurePit == false}">
@@ -263,6 +309,12 @@
 	</div>
 
 	<script type="text/javascript">
+		window.onerror = function (message, url, lineNo) {
+			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);
+
+			return true;
+		}
+
 		var version = getHtmlVer();
 		if (version < 5) {
 			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version");
