@@ -42,22 +42,21 @@ SUCH DAMAGE.
        description="Fuzz an SNMP client"
        version="0.0.2">
 
-  <Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
+	<Include ns="SNMP" src="file:##PitLibraryPath##/_Common/Models/Net/SNMP_State.xml"/>
 
-  <Test name="Default">
-    <StateModel ref="SNMP:Server"/>
+	<Test name="Default">
+		<StateModel ref="SNMP:Server"/>
 
-    <Publisher class="Udp">
-      <Param name="SrcPort" value="##SourcePort##"/>
-      <Param name="Host" value="##SourceIPv4##"/>
-      <Param name="Timeout" value="5000"/>
-    </Publisher>
+		<Publisher class="Udp">
+			<Param name="Host" value="##SourceIPv4##"/>
+			<Param name="SrcPort" value="##SourcePort##"/>
+			<Param name="Timeout" value="5000"/>
+		</Publisher>
 
-    <Strategy class="##Strategy##"/>
+		<Strategy class="##Strategy##"/>
 
-    <Logger class="File">
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-  </Test>
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
 </Peach>
-

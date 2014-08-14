@@ -37,7 +37,7 @@ SUCH DAMAGE.
 -->
 <Peach xmlns="http://peachfuzzer.com/2012/Peach"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach c:\peach\output\win_x64_debug\bin\peach.xsd"
        author="Deja Vu Security, LLC"
  description="Simple Network Management Protocol PIT StateModels" version="0.0.2">
 
@@ -89,11 +89,11 @@ SUCH DAMAGE.
       <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
       <Action name="GetRequest" type="input">
-        <DataModel ref="SNMP:SNMPHeaderV2_"/>
+        <DataModel ref="SNMP:SNMPHeaderV2"/>
       </Action>
 
-			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//GetRequest//RequestId//Value" setXpath="//Response//RequestId"/>
-			<Action name="ConnHandleSlurp2" type="slurp" valueXpath="//GetRequest//Community//Value" setXpath="//Response//SnmpCommunity"/>
+			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//GetRequest//RequestId/Value" setXpath="//Response//RequestId/Value"/>
+			<Action name="ConnHandleSlurp2" type="slurp" valueXpath="//GetRequest//Community/Value" setXpath="//Response//Community/Value"/>
 
 			<Action name="Response" type="output">
 				<DataModel ref="SNMP:SnmpResponse"/>
