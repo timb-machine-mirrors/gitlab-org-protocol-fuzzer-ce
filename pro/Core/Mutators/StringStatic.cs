@@ -39,7 +39,7 @@ namespace Peach.Core.Mutators
 	{
 		uint pos = 0;
 
-		public StringMutator(DataElement obj)
+		public StringStatic(DataElement obj)
 		{
 			pos = 0;
 			name = "StringStatic";

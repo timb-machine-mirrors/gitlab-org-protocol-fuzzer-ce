@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using Peach.Core.Dom;
 
+#if DISABLED
 namespace Peach.Core.Mutators
 {
     [Mutator("StringCaseMutator")]
     [Description("Changes the case of a string")]
-    public class StringCaseMutator : Mutator
+    public class StringCaseUpper : Mutator
     {
         // members
         //
@@ -17,7 +18,7 @@ namespace Peach.Core.Mutators
 
         // CTOR
         //
-        public StringCaseMutator(DataElement obj)
+		public StringCaseUpper(DataElement obj)
         {
             index = 0;
             name = "StringCaseMutator";
@@ -147,5 +148,5 @@ namespace Peach.Core.Mutators
         }
     }
 }
-
+#endif
 // end

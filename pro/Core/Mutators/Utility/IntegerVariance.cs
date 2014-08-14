@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Peach.Enterprise;
 using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators.Utility
+namespace Peach.Core.Mutators.Utility
 {
 	public class IntegerVariance
 	{
