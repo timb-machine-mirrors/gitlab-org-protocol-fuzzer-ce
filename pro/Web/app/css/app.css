@@ -62,3 +62,7 @@ div.tabs-left#metricstabs {
 	right: 0;
 	left: 0;
 }
+
+.timeline.vis .box.item {
+	cursor: pointer;
+}

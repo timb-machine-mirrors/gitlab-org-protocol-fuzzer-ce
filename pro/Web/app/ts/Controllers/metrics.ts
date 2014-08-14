@@ -5,13 +5,160 @@
 module DashApp {
 	"use strict"; 
 
+	export interface MetricsParams extends ng.route.IRouteParamsService {
+		metric: string;
+	}
+
 	export class MetricsController {
+		private scope: ViewModelScope;
 
-		static $inject = ["$scope"];
+		static $inject = ["$scope", "$routeParams"];
 
-		constructor($scope: ViewModelScope) {
+		constructor($scope: ViewModelScope, $routeParams: MetricsParams) {
 			$scope.vm = this;
+			this.scope = $scope;
+			this.metric = $routeParams.metric;
 		}
+		private debug = true;
+
+		public metric: string;
+
+		public bucketTimelineData = [
+			{id: 1, content: 'bucket 1', start: '8/12/2014 0:00', url: "/p/jobs/blah"},
+			{ id: 2, content: 'bucket 2', start: '8/12/2014 1:00', url: "/p/jobs/blah"},
+			{ id: 3, content: 'bucket 3', start: '8/12/2014 2:00', url: "/p/jobs/blah"},
+			{ id: 4, content: 'bucket 4', start: '8/12/2014 3:00', url: "/p/jobs/blah"},
+			{ id: 5, content: 'bucket 5', start: '8/12/2014 4:00', url: "/p/jobs/blah"},
+			{ id: 6, content: 'bucket 6', start: '8/12/2014 5:00', url: "/p/jobs/blah"}
+		];
+
+		private simplifyItems (items) {
+			var simplified = [];
+
+			angular.forEach(items, function (group, label) {
+				angular.forEach(group, function (item) {
+					item.group = label;
+
+					simplified.push(item);
+				});
+			});
+
+			return simplified;
+		}
+
+		public timeline = {
+			select: (selected) => {
+				if (this.debug) {
+					console.log('selected items: ', selected.items);
+				}
+
+				var selecteditem = $.grep(this.bucketTimelineData, (e) => {
+					return e.id == selected.items[0];
+				})[0];
+				
+				var items = this.simplifyItems(this.bucketTimelineData);
+
+				var format = 'YYYY-MM-DDTHH:mm';
+
+				angular.forEach(items, function (item) {
+					if (item.id == selected.items[0]) {
+						this.scope.slot = {
+							id: item.id,
+							start: moment(item.start).format(format),
+							end: (item.end) ? moment(item.end).format(format) : null,
+							content: item.content
+						};
+
+						this.scope.$apply();
+					}
+				});
+			},
+
+			range: {},
+
+			rangeChange: (period) => {
+				this.timeline.range = this.scope.vm.timeline.getWindow();
+
+				if (!this.scope.$$phase) {
+					this.scope.$apply();
+				}
+
+				if (this.debug) {
+					console.log('rangeChange: start-> ', period.start, ' end-> ', period.end);
+				}
+			},
+
+			rangeChanged: function (period) {
+				if (this.debug) {
+					console.log('rangeChange(d): start-> ', period.start, ' end-> ', period.end);
+				}
+			},
+
+			customTime: null,
+
+			timeChange: (period) => {
+				if (this.debug) {
+					console.log('timeChange: ', period.time);
+				}
+
+				this.scope.$apply(
+					function () {
+						this.scope.timeline.customTime = period.time;
+					}
+				);
+			},
+
+			timeChanged: (period) => {
+				if (this.debug) {
+					console.log('timeChange(d): ', period.time);
+				}
+			},
+
+			slot: {
+				add: (item, callback) => {
+					item.content = prompt('Enter text content for new item:', item.content);
+
+					if (item.content != null) {
+						callback(item); // send back adjusted new item
+					}
+					else {
+						callback(null); // cancel item creation
+					}
+				},
+
+				move: (item, callback) => {
+					if (confirm(
+						'Do you really want to move the item to\n' +
+						'start: ' + item.start + '\n' +
+						'end: ' + item.end + '?')) {
+						callback(item); // send back item as confirmation (can be changed
+					}
+					else {
+						callback(null); // cancel editing item
+					}
+				},
+
+				update: (item, callback) => {
+					item.content = prompt('Edit items text:', item.content);
+
+					if (item.content != null) {
+						callback(item); // send back adjusted item
+					}
+					else {
+						callback(null); // cancel updating the item
+					}
+				},
+				remove: (item, callback) => {
+				//	if (confirm('Remove item ' + item.content + '?')) {
+				//		callback(item); // confirm deletion
+				//	}
+				//	else {
+				//		callback(null); // cancel deletion
+				//	}
+				}
+			}
+		};
+
 
 		public metrics_faultsOverTime_data: Models.FaultTimelineMetric[] = [
 			{ time: new Date(2014, 4, 5, 1, 1, 0, 1), faultCount: 1 },
@@ -19,7 +166,8 @@ module DashApp {
 			{ time: new Date(2014, 4, 5, 3, 1, 0, 1), faultCount: 1 },
 			{ time: new Date(2014, 4, 5, 4, 1, 0, 1), faultCount: 3 },
 			{ time: new Date(2014, 4, 5, 5, 1, 0, 1), faultCount: 1 },
-			{ time: new Date(2014, 4, 5, 6, 1, 0, 1), faultCount: 1 }];
+			{ time: new Date(2014, 4, 5, 6, 1, 0, 1), faultCount: 1 }
+		];
 
 
 		// this.metrics_faultsOverTime_data.map(i => i.x)
