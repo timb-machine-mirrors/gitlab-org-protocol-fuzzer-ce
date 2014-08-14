@@ -9,6 +9,7 @@
 /// <reference path="Controllers/pitlibrary.ts" />
 /// <reference path="Controllers/pittest.ts" />
 /// <reference path="Controllers/wizard.ts" />
+/// <reference path="Controllers/startjob.ts" />
 
 
 module DashApp {
