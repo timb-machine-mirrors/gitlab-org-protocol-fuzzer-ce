@@ -1,6 +1,7 @@
 /// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
 /// <reference path="../Services/pitconfigurator.ts" />
 /// <reference path="main.ts" />
+/// <reference path="startjob.ts" />
 
 
 module DashApp {
