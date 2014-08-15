@@ -49,8 +49,8 @@ SUCH DAMAGE.
 	<DataModel name="SNMPHeaderV2">
 		<Asn1Type name="SnmpAll" class="0" pc="1" tag="16">
 			<Block name="Value">
-				<Asn1Type tag="2">
-					<Number name="Version" size="8" value="1" token="true"/>
+				<Asn1Type name="Version" tag="2">
+					<Number name="Value" size="8" value="1" token="true"/>
 				</Asn1Type>
 
 				<Asn1Type name="Community" tag="4">
@@ -62,15 +62,17 @@ SUCH DAMAGE.
 						<Asn1Type name="RequestId" tag="2">
 							<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
 						</Asn1Type>
-						<Asn1Type tag="2">
-							<Number name="ErrorStatus" size="8" signed="false" value="0"/>
+						<Asn1Type name="ErrorStatus" tag="2">
+							<Number name="Value" size="8" signed="false" value="0"/>
 						</Asn1Type>
-						<Asn1Type tag="2">
-							<Number name="ErrorIndex" size="8" signed="false" value="0"/>
+						<Asn1Type name="ErrorIndex" tag="2">
+							<Number name="Value" size="8" signed="false" value="0"/>
 						</Asn1Type>
 
 						<Asn1Type name="VariableBindingsList" pc="1" tag="16">
-							<Asn1Type name="VariableBindings" pc="1" tag="16" />
+							<Asn1Type name="Value" pc="1" tag="16">
+								<Blob name="Value" />
+							</Asn1Type>
 						</Asn1Type>
 					</Block>
 				</Asn1Type>
@@ -85,11 +87,11 @@ SUCH DAMAGE.
 				<Asn1Type name="RequestId" tag="2">
 					<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorStatus" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorStatus" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorIndex" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorIndex" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
@@ -116,11 +118,11 @@ SUCH DAMAGE.
 				<Asn1Type name="RequestId" tag="2">
 					<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorStatus" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorStatus" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorIndex" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorIndex" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
@@ -147,11 +149,11 @@ SUCH DAMAGE.
 				<Asn1Type name="RequestId" tag="2">
 					<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="NonRepeaters" size="8" signed="false" value="0"/>
+				<Asn1Type name="NonRepeaters" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="MaxRepetitions" size="8" signed="false" value="50"/>
+				<Asn1Type name="MaxRepetitions" tag="2">
+					<Number name="Value" size="8" signed="false" value="50"/>
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
@@ -208,11 +210,11 @@ SUCH DAMAGE.
 				<Asn1Type name="RequestId" tag="2">
 					<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorStatus" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorStatus" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
-				<Asn1Type tag="2">
-					<Number name="ErrorIndex" size="8" signed="false" value="0"/>
+				<Asn1Type name="ErrorIndex" tag="2">
+					<Number name="Value" size="8" signed="false" value="0"/>
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
@@ -279,6 +281,7 @@ SUCH DAMAGE.
 										<Blob valueType="hex" value="2b0601020119010500"/>
 									</Asn1Type>
 									<Asn1Type name="EndOfMib" class="2" pc="0" tag="2">
+										<Blob name="Value" />
 									</Asn1Type>
 								</Block>
 							</Choice>

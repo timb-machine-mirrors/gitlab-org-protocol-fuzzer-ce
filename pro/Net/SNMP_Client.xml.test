@@ -11,20 +11,133 @@
 
 	<Test name="Default">
 		<Open action="SNMP:Server.LaunchClient.Action" publisher="Pub"/>
-		<Input action="SNMP:Server.LaunchClient.GetRequest" publisher="Pub">
-<![CDATA[
-0000   30 29 02 01 01 04 06 70 75 62 6c 69 63 a0 1c 02  0).....public...
-0010   04 72 a0 20 a6 02 01 00 02 01 00 30 0e 30 0c 06  .r. .......0.0..
-0020   08 2b 06 01 02 01 01 04 00 05 00                 .+.........
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest1" publisher="Pub">
+			<![CDATA[
+0000 30 26 02 01  01 04 06 70  75 62 6C 69  63 A1 19 02    0&.....public...
+0016 04 16 36 1B  6D 02 01 00  02 01 00 30  0B 30 09 06    ..6.m......0.0..
+0032 05 2B 06 01  02 01 05 00                              .+......
 ]]>
 		</Input>
 
-		<Output action="SNMP:Server.LaunchClient.Response" publisher="Pub">
-<![CDATA[
-0000   30 3c 02 01 01 04 06 70 75 62 6c 69 63 a2 2f 02  0<.....public./.
-0010   04 72 a0 20 a6 02 01 00 02 01 00 30 21 30 1f 06  .r. .......0!0..
-0020   08 2b 06 01 02 01 01 04 00 04 13 4d 65 20 3c 6d  .+.........Me <m
-0030   65 40 65 78 61 6d 70 6c 65 2e 6f 72 67 3e        e@example.org>
+		<Output action="SNMP:Server.LaunchClient.ResponseString" publisher="Pub">
+			<![CDATA[
+0000 30 3C 02 01  01 04 06 70  75 62 6C 69  63 A2 2F 02    0<.....public./.
+0016 04 16 36 1B  6D 02 01 00  02 01 00 30  21 30 1F 06    ..6.m......0!0..
+0032 08 2B 06 01  02 01 01 01  00 04 13 4D  65 20 3C 6D    .+.........Me <m
+0048 65 40 65 78  61 6D 70 6C  65 2E 6F 72  67 3E          e@example.org>
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest2" publisher="Pub">
+			<![CDATA[
+0000 30 29 02 01  01 04 06 70  75 62 6C 69  63 A1 1C 02    0).....public...
+0016 04 16 36 1B  6E 02 01 00  02 01 00 30  0E 30 0C 06    ..6.n......0.0..
+0032 08 2B 06 01  02 01 01 01  00 05 00                    .+.........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseOid" publisher="Pub">
+			<![CDATA[
+0000 30 3B 02 01  01 04 06 70  75 62 6C 69  63 A2 2E 02    0;.....public...
+0016 04 16 36 1B  6E 02 01 00  02 01 00 30  20 30 1E 06    ..6.n......0 0..
+0032 08 2B 06 01  02 01 01 02  00 06 12 32  62 30 36 30    .+.........2b060
+0048 31 30 36 30  33 31 30 30  32 30 32 30  31             1060310020201
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest3" publisher="Pub">
+			<![CDATA[
+0000 30 29 02 01  01 04 06 70  75 62 6C 69  63 A1 1C 02    0).....public...
+0016 04 16 36 1B  6F 02 01 00  02 01 00 30  0E 30 0C 06    ..6.o......0.0..
+0032 08 2B 06 01  02 01 01 02  00 05 00                    .+.........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseTimeticks" publisher="Pub">
+			<![CDATA[
+0000 30 2C 02 01  01 04 06 70  75 62 6C 69  63 A2 1F 02    0,.....public...
+0016 04 16 36 1B  6F 02 01 00  02 01 00 30  11 30 0F 06    ..6.o......0.0..
+0032 08 2B 06 01  02 01 01 03  00 04 03 1A  84 E5          .+............
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest4" publisher="Pub">
+			<![CDATA[
+0000 30 29 02 01  01 04 06 70  75 62 6C 69  63 A1 1C 02    0).....public...
+0016 04 16 36 1B  70 02 01 00  02 01 00 30  0E 30 0C 06    ..6.p......0.0..
+0032 08 2B 06 01  02 01 01 03  00 05 00                    .+.........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseInteger32" publisher="Pub">
+			<![CDATA[
+0000 30 2D 02 01  01 04 06 70  75 62 6C 69  63 A2 20 02    0-.....public. .
+0016 04 16 36 1B  70 02 01 00  02 01 00 30  12 30 10 06    ..6.p......0.0..
+0032 08 2B 06 01  02 01 01 07  00 02 04 00  00 06 00       .+.............
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest5" publisher="Pub">
+			<![CDATA[
+0000 30 29 02 01  01 04 06 70  75 62 6C 69  63 A1 1C 02    0).....public...
+0016 04 16 36 1B  71 02 01 00  02 01 00 30  0E 30 0C 06    ..6.q......0.0..
+0032 08 2B 06 01  02 01 01 07  00 05 00                    .+.........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseHexString" publisher="Pub">
+			<![CDATA[
+0000 30 35 02 01  01 04 06 70  75 62 6C 69  63 A2 28 02    05.....public.(.
+0016 04 16 36 1B  71 02 01 00  02 01 00 30  1A 30 18 06    ..6.q......0.0..
+0032 09 2B 06 01  02 01 19 01  04 00 04 0B  07 DE 08 0E    .+..............
+0048 0F 2E 16 00  2D 07 00                                 ....-..
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest6" publisher="Pub">
+			<![CDATA[
+0000 30 2A 02 01  01 04 06 70  75 62 6C 69  63 A1 1D 02    0*.....public...
+0016 04 16 36 1B  72 02 01 00  02 01 00 30  0F 30 0D 06    ..6.r......0.0..
+0032 09 2B 06 01  02 01 19 01  04 00 05 00                 .+..........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseGuage32" publisher="Pub">
+			<![CDATA[
+0000 30 2B 02 01  01 04 06 70  75 62 6C 69  63 A2 1E 02    0+.....public...
+0016 04 16 36 1B  72 02 01 00  02 01 00 30  10 30 0E 06    ..6.r......0.0..
+0032 09 2B 06 01  02 01 19 01  05 00 42 01  03             .+........B..
+]]>
+		</Output>
+
+		<!-- ===================================== -->
+
+		<Input action="SNMP:Server.LaunchClient.GetRequest7" publisher="Pub">
+			<![CDATA[
+0000 30 2A 02 01  01 04 06 70  75 62 6C 69  63 A1 1D 02    0*.....public...
+0016 04 16 36 1B  73 02 01 00  02 01 00 30  0F 30 0D 06    ..6.s......0.0..
+0032 09 2B 06 01  02 01 19 01  05 00 05 00                 .+..........
+]]>
+		</Input>
+
+		<Output action="SNMP:Server.LaunchClient.ResponseEndOfMib" publisher="Pub">
+			<![CDATA[
+0000 30 2A 02 01  01 04 06 70  75 62 6C 69  63 A2 1D 02    0*.....public...
+0016 04 16 36 1B  73 02 01 00  02 01 00 30  0F 30 0D 06    ..6.s......0.0..
+0032 09 2B 06 01  02 01 19 01  05 00 82 00                 .+..........
 ]]>
 		</Output>
 
