@@ -46,61 +46,148 @@ SUCH DAMAGE.
 	<Import import="SNMP"/>
 
 	<!-- Client State Model -->
-  <StateModel name="Client" initialState="Initial">
-    <State name="Initial">
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+	<StateModel name="Client" initialState="Initial">
+		<State name="Initial">
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
-      <!-- generate snmp get request packet -->
-      <Action name="GetRequest" type="output">
-        <DataModel ref="SNMP:SnmpGet"/>
-      </Action>
+			<!-- generate snmp get request packet -->
+			<Action name="GetRequest" type="output">
+				<DataModel ref="SNMP:SnmpGet"/>
+			</Action>
 
-      <Action name="GetResponse" type="input">
-        <DataModel ref="SNMP:SnmpResponse"/>
-      </Action>
+			<Action name="GetResponse" type="input">
+				<DataModel ref="SNMP:SnmpResponse"/>
+			</Action>
 
-      <!-- generate snmp next request packet -->
-      <Action name="GetNextRequest" type="output">
-        <DataModel ref="SNMP:SnmpNext"/>
-      </Action>
+			<!-- generate snmp next request packet -->
+			<Action name="GetNextRequest" type="output">
+				<DataModel ref="SNMP:SnmpNext"/>
+			</Action>
 
-      <Action name="GetNextResponse" type="input">
-        <DataModel ref="SNMP:SnmpResponse"/>
-      </Action>
+			<Action name="GetNextResponse" type="input">
+				<DataModel ref="SNMP:SnmpResponse"/>
+			</Action>
 
-      <!-- generate snmp bulk request packet -->
-      <Action name="GetBulkRequest" type="output">
-        <DataModel ref="SNMP:SnmpBulk"/>
-      </Action>
+			<!-- generate snmp bulk request packet -->
+			<Action name="GetBulkRequest" type="output">
+				<DataModel ref="SNMP:SnmpBulk"/>
+			</Action>
 
-      <Action name="GetBulkResponse" type="input">
-        <DataModel ref="SNMP:SnmpResponse"/>
-      </Action>
+			<Action name="GetBulkResponse" type="input">
+				<DataModel ref="SNMP:SnmpResponse"/>
+			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+		</State>
+	</StateModel>
 
 	<!-- Server State Model -->
-  <StateModel name="Server" initialState="LaunchClient">
-    <State name="LaunchClient">
-      <Action type="open"/>
-      
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+	<StateModel name="Server" initialState="LaunchClient">
+		<State name="LaunchClient">
+			<Action type="open"/>
 
-      <Action name="GetRequest" type="input">
-        <DataModel ref="SNMP:SNMPHeaderV2"/>
-      </Action>
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
-			<Action name="ConnHandleSlurp" type="slurp" valueXpath="//GetRequest//RequestId/Value" setXpath="//Response//RequestId/Value"/>
-			<Action name="ConnHandleSlurp2" type="slurp" valueXpath="//GetRequest//Community/Value" setXpath="//Response//Community/Value"/>
+			<Action name="GetRequest1" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
 
-			<Action name="Response" type="output">
+			<Action type="slurp" valueXpath="//GetRequest1//RequestId/Value" setXpath="//ResponseString//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest1//Community/Value" setXpath="//ResponseString//Community/Value"/>
+
+			<Action name="ResponseString" type="output">
 				<DataModel ref="SNMP:SnmpResponse"/>
-      </Action>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.String" value=""/>
+				</Data>
+			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
+			<Action name="GetRequest2" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest2//RequestId/Value" setXpath="//ResponseOid//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest2//Community/Value" setXpath="//ResponseOid//Community/Value"/>
+
+			<Action name="ResponseOid" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.OID" value=""/>
+				</Data>
+			</Action>
+
+			<Action name="GetRequest3" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest3//RequestId/Value" setXpath="//ResponseTimeticks//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest3//Community/Value" setXpath="//ResponseTimeticks//Community/Value"/>
+
+			<Action name="ResponseTimeticks" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.Timeticks" value=""/>
+				</Data>
+			</Action>
+
+			<Action name="GetRequest4" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest4//RequestId/Value" setXpath="//ResponseInteger32//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest4//Community/Value" setXpath="//ResponseInteger32//Community/Value"/>
+
+			<Action name="ResponseInteger32" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.Integer32" value=""/>
+				</Data>
+			</Action>
+
+			<Action name="GetRequest5" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest5//RequestId/Value" setXpath="//ResponseHexString//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest5//Community/Value" setXpath="//ResponseHexString//Community/Value"/>
+
+			<Action name="ResponseHexString" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.HexString" value=""/>
+				</Data>
+			</Action>
+
+			<Action name="GetRequest6" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest6//RequestId/Value" setXpath="//ResponseGuage32//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest6//Community/Value" setXpath="//ResponseGuage32//Community/Value"/>
+
+			<Action name="ResponseGuage32" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.Guage32" value=""/>
+				</Data>
+			</Action>
+
+			<Action name="GetRequest7" type="input">
+				<DataModel ref="SNMP:SNMPHeaderV2"/>
+			</Action>
+
+			<Action type="slurp" valueXpath="//GetRequest7//RequestId/Value" setXpath="//ResponseEndOfMib//RequestId/Value"/>
+			<Action type="slurp" valueXpath="//GetRequest7//Community/Value" setXpath="//ResponseEndOfMib//Community/Value"/>
+
+			<Action name="ResponseEndOfMib" type="output">
+				<DataModel ref="SNMP:SnmpResponse"/>
+				<Data>
+					<Field name="SnmpAll.Value.Request.Value.VariableBindings.Value.Value.Type.EndOfMib" value=""/>
+				</Data>
+			</Action>
+
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+		</State>
+	</StateModel>
 </Peach>
 <!--End-->

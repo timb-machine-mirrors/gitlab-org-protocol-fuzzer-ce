@@ -93,7 +93,7 @@ SUCH DAMAGE.
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
-					<Asn1Type name="VariableBindings" pc="1" tag="16">
+					<Asn1Type name="Value" pc="1" tag="16">
 						<Block name="Value">
 							<Asn1Type name="OID" tag="6">
 								<!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
@@ -124,7 +124,7 @@ SUCH DAMAGE.
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
-					<Asn1Type name="VariableBindings" pc="1" tag="16">
+					<Asn1Type name="Value" pc="1" tag="16">
 						<Block name="Value">
 							<Asn1Type name="OID" tag="6">
 								<!-- 1.3.6.1.2.1.25.1.7.0 -->
@@ -155,7 +155,7 @@ SUCH DAMAGE.
 				</Asn1Type>
 
 				<Asn1Type name="VariableBindings" pc="1" tag="16">
-					<Asn1Type name="VariableBindings" pc="1" tag="16">
+					<Asn1Type name="Value" pc="1" tag="16">
 						<Block name="Value">
 							<Asn1Type name="OID" tag="6">
 								<!-- Object Name: 1.3.6.1.2.1.1.4.0 (iso.3.6.1.2.1.1.4.0) -->
@@ -173,7 +173,7 @@ SUCH DAMAGE.
 	</DataModel>
 
 	<!-- Simple Network Management Protocol: Response data model... -->
-	<DataModel name="SnmpResponse" ref="SNMPHeaderV2">
+	<!--<DataModel name="SnmpResponse" ref="SNMPHeaderV2">
 		<Asn1Type name="SnmpAll.Value.Request" class="2" pc="1" tag="0">
 			<Block name="Value">
 				<Asn1Type name="RequestId" tag="2">
@@ -195,6 +195,93 @@ SUCH DAMAGE.
 							<Asn1Type name="Null" tag="4">
 								<String name="Value" value="Me &lt;me@example.org&gt;"/>
 							</Asn1Type>
+						</Block>
+					</Asn1Type>
+				</Asn1Type>
+			</Block>
+		</Asn1Type>
+	</DataModel>-->
+	
+	<DataModel name="SnmpResponse" ref="SNMPHeaderV2">
+		<Asn1Type name="SnmpAll.Value.Request" class="2" pc="1" tag="2">
+			<Block name="Value">
+				<Asn1Type name="RequestId" tag="2">
+					<Number name="Value" size="32" signed="false" value="0x72a020a6"/>
+				</Asn1Type>
+				<Asn1Type tag="2">
+					<Number name="ErrorStatus" size="8" signed="false" value="0"/>
+				</Asn1Type>
+				<Asn1Type tag="2">
+					<Number name="ErrorIndex" size="8" signed="false" value="0"/>
+				</Asn1Type>
+
+				<Asn1Type name="VariableBindings" pc="1" tag="16">
+					<Asn1Type name="Value" pc="1" tag="16">
+						<Block name="Value">
+							<Choice name="Type">
+								<Block name="String">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b06010201010100"/>
+									</Asn1Type>
+									<Asn1Type name="Null" tag="4">
+										<String name="Value" value="Me &lt;me@example.org&gt;"/>
+									</Asn1Type>
+								</Block>
+
+								<Block name="OID">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b06010201010200"/>
+									</Asn1Type>
+									<Asn1Type name="Null" tag="6">
+										<Blob name="Value" value="2b0601060310020201"/>
+									</Asn1Type>
+								</Block>
+
+								<Block name="Timeticks">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b06010201010300"/>
+									</Asn1Type>
+									<Asn1Type name="Null" tag="4">
+										<Blob name="Value" valueType="hex" value="1a84e5" />
+									</Asn1Type>
+								</Block>
+							
+								<Block name="Integer32">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b06010201010700"/>
+									</Asn1Type>
+									<Asn1Type name="Integer32" tag="2">
+										<Number name="Value" size="32" value="1536" />
+									</Asn1Type>
+								</Block>
+							
+								<Block name="HexString">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b0601020119010400"/>
+									</Asn1Type>
+									<Asn1Type name="HexString" tag="4">
+										<Blob name="Value" valueType="hex" value="07de080e0f2e16002d0700"/>
+									</Asn1Type>
+								</Block>
+
+								<Block name="Guage32">
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b0601020119010500"/>
+									</Asn1Type>
+									<Asn1Type name="Guage32" class="1" pc="0" tag="2">
+										<!-- 10 00010 -->
+										<Blob name="Value" valueType="hex" value="03" />
+									</Asn1Type>
+								</Block>
+								
+								<Block name="EndOfMib"> <!-- 100 00010 -->
+									<Asn1Type name="OID" tag="6">
+										<Blob valueType="hex" value="2b0601020119010500"/>
+									</Asn1Type>
+									<Asn1Type name="EndOfMib" class="2" pc="0" tag="2">
+									</Asn1Type>
+								</Block>
+							</Choice>
 						</Block>
 					</Asn1Type>
 				</Asn1Type>
