@@ -165,7 +165,7 @@ SUCH DAMAGE.
 								<Blob name="SnmpName" valueType="hex" value="2b 06 01"/>
 							</Asn1Type>
 							<Asn1Type name="Null" tag="5">
-								<Blob />
+								<Blob name="Value" />
 							</Asn1Type>
 						</Block>
 					</Asn1Type>
