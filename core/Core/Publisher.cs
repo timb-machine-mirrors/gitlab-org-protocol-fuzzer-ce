@@ -42,6 +42,10 @@ using System.Net;
 namespace Peach.Core
 {
 	/// <summary>
+	/// Publishers are I/O interfaces called by actions in the state model. They
+	/// perform stream or call based interactions with external entities.
+	/// </summary>
+	/// <remarks>
 	/// Publishers are I/O interfaces for Peach.  They glue the actions
 	/// in a state model to the target interface.  Publishers can be 
 	/// stream based such as files or sockets, and also call based like
@@ -49,9 +53,9 @@ namespace Peach.Core
 	/// stream and call based methods to make more complex publishers.
 	/// 
 	/// Multiple publishers can be used in a single state model to allow
-	/// for more complex opertions such as writeing to the registry and
+	/// for more complex operations such as writing to the registry and
 	/// then calling an RPC method.
-	/// </summary>
+	/// </remarks>
 	public abstract class Publisher : Stream
 	{
 		protected abstract NLog.Logger Logger { get; }
@@ -129,6 +133,12 @@ namespace Peach.Core
 		/// Open or connect to a resource.  Will be called
 		/// automatically if not called specifically.
 		/// </summary>
+		/// <remarks>
+		/// OnOpen will automatically get called if an input or output action
+		/// is performed from the state model. In the case where only a call
+		/// action is performed, there is no automatic open or close.
+		/// </remarks>
+		/// <seealso cref="OnClose"/>
 		protected virtual void OnOpen()
 		{
 		}
@@ -138,6 +148,13 @@ namespace Peach.Core
 		/// state model exists.  Can also be called explicitly when
 		/// needed.
 		/// </summary>
+		/// <remarks>
+		/// This method will not be called unless OnOpen has also been called.
+		/// OnOpen will automatically get called if an input or output action
+		/// is performed from the state model. In the case where only a call
+		/// action is performed, there is no automatic open or close.
+		/// </remarks>
+		/// <seealso cref="OnOpen"/>
 		protected virtual void OnClose()
 		{
 		}
