@@ -100,7 +100,7 @@ module DashApp {
 				if (this.debug) {
 					console.log('timeChange: ', period.time);
 				}
-
+				
 				this.scope.$apply(
 					function () {
 						this.scope.timeline.customTime = period.time;

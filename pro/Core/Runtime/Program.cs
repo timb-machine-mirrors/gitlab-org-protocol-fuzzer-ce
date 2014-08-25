@@ -75,13 +75,13 @@ namespace Peach.Core.Runtime
 			switch (Platform.GetOS())
 			{
 				case Platform.OS.OSX:
-					osAssembly = "Peach.Community.OS.OSX.dll";
+					osAssembly = "Peach.Pro.OS.OSX.dll";
 					break;
 				case Platform.OS.Linux:
-					osAssembly = "Peach.Community.OS.Linux.dll";
+					osAssembly = "Peach.Pro.OS.Linux.dll";
 					break;
 				case Platform.OS.Windows:
-					osAssembly = "Peach.Community.OS.Windows.dll";
+					osAssembly = "Peach.Pro.OS.Windows.dll";
 					break;
 			}
 
