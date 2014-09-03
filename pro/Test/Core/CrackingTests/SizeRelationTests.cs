@@ -549,6 +549,46 @@ namespace Peach.Core.Test.CrackingTests
 
 			Assert.AreEqual("abc", (string)dom.dataModels[0][2].DefaultValue);
 		}
+
+		[Test]
+		public void SizeRefParentParent()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Header'>
+			<Number size='16' endian='big' />
+
+			<Block name='Contents'>
+				<Number name='Length' size='16' endian='big'>
+					<Relation type='size' of='Header' />
+				</Number>
+
+				<Number size='8' />
+				<Number size='24' />
+
+				<Block name='Array' minOccurs='1'>
+					<Number size='32' endian='big' />
+				</Block>
+			</Block>
+		</Block>
+
+		<Number size='32' endian='big' />
+	</DataModel>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var data = Bits.Fmt("{0:B16}{1:B16}{2:B8}{3:B24}{4:B32}{5:B32}{6:B32}",
+				(uint)0xffff, 0x0010, 0, 0x414141, 1, 2, 3);
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[0], new BitStream(data));
+
+			Assert.AreEqual(3, (int)dom.dataModels[0][1].DefaultValue);
+		}
 	}
 }
 
