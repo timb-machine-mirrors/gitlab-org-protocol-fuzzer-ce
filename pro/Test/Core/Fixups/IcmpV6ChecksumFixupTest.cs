@@ -67,6 +67,45 @@ namespace Peach.Core.Test.Fixups
 			Assert.AreEqual(precalcChecksum, values[0].ToArray());
 		}
 
+		[Test]
+		public void TestPacket()
+		{
+			// Wireshark sample
+			// http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=v6.pcap
+			// Packet #3
+			// Source: fe80::200:86ff:fe05:80da (fe80::200:86ff:fe05:80da)
+			// Destination: fe80::260:97ff:fe07:69ea (fe80::260:97ff:fe07:69ea)
+			// Packet: 8700 68bd 00000000fe80000000000000026097fffe0769ea01010000860580da
+			// Expected checksum: 0x68bd
+
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='icmpv6'>
+			<Number name='type' size='8' signed='false' value='0x87'/>
+			<Number name='code' size='8' signed='false' />
+			<Number name='csum' size='16' signed='false'>
+				<Fixup class='IcmpV6ChecksumFixup'>
+					<Param name='ref' value='icmpv6'/>
+					<Param name='src' value='fe80::200:86ff:fe05:80da'/>
+					<Param name='dst' value='fe80::260:97ff:fe07:69ea'/>
+				</Fixup>
+			</Number>
+			<Blob valueType='hex' value='00000000fe80000000000000026097fffe0769ea01010000860580da'/>
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var csum = ((Block)dom.dataModels[0][0])[2];
+			Assert.AreEqual("csum", csum.name);
+
+			var val = csum.InternalValue;
+			Assert.AreEqual(0x68bd, (int)val);
+		}
 	}
 }
 
