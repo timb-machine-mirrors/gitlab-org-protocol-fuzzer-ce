@@ -1,160 +1,126 @@
-﻿
-//
+﻿//
 // Copyright (c) Deja vu Security
 //
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators.Utility
+namespace Peach.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generate integer edge cases. The numbers produced are distributed 
 	/// over a bell curve with the edge case as the center.
 	/// </summary>
-	public class IntegerEdgeCases
+	public abstract class IntegerEdgeCases : Mutator
 	{
-		long[] longEdges;
-		ulong[] ulongEdges;
+		Func<long> sequential;
+		Func<long> random;
+		int space;
+		long min;
+		ulong max;
 
-		long minValue;
-		ulong maxValue;
-
-		bool isULong;
-
-		public IntegerEdgeCases(long minValue, ulong maxValue)
+		public IntegerEdgeCases(DataElement obj)
 		{
-			isULong = maxValue > long.MaxValue;
-			this.maxValue = maxValue;
-			this.minValue = minValue;
+			GetLimits(obj, out min, out max);
 
-			if(!isULong)
+			var delta = unchecked((long)max - min);
+
+			if (delta >= 0 && delta <= 0xff)
 			{
-				var edgeCases = new long[] { 
-					long.MinValue,
-					int.MinValue,
-					short.MinValue, 
-					sbyte.MinValue, 
-					0, 
-					sbyte.MaxValue,
-					byte.MaxValue, 
-					short.MaxValue, 
-					ushort.MaxValue,
-					int.MaxValue,
-					uint.MaxValue, 
-					long.MaxValue 
-				};
-
-				var edges = new List<long>();
-
-				foreach(var l in edgeCases)
-				{
-					if (l >= minValue && l <= (long)maxValue)
-					{
-						edges.Add(l);
-					}
-				}
-
-				longEdges = edges.ToArray();
+				// We are <= a single byte, set the space size of the range
+				space = (int)delta + 1;
+				sequential = () => min + mutation;
+				random = () => context.Random.Next(min, (long)max + 1);
 			}
 			else
 			{
-				ulong[] edgeCases = new ulong[] { 
-					0, 
-					(ulong)sbyte.MaxValue,
-					byte.MaxValue, 
-					(ulong)short.MaxValue, 
-					ushort.MaxValue,
-					int.MaxValue,
-					uint.MaxValue, 
-					long.MaxValue,
-					ulong.MaxValue
-				};
+				// For more than a single byte, use edge case generator
+				var gen = new EdgeCaseGenerator(min, max);
 
-				var edges = new List<ulong>();
+				// Random is same as sequential in this case
+				sequential = random = () => gen.Next(context.Random);
 
-				foreach (ulong l in edgeCases)
-				{
-					if (l <= maxValue)
-						edges.Add(l);
-				}
-
-				ulongEdges = edges.ToArray();
+				// Set the count to be a portion of the range space of the generator
+				for (var i = 0; i < gen.Edges.Count; ++i)
+					space += (int)Math.Sqrt(gen.Range(i));
 			}
 		}
 
 		/// <summary>
-		/// Get the range of values to produce. The range is defined as the 
-		/// distance between the prior edge to current edge again as much. For example,
-		/// if the chosen edge case is 255, the range is 127->255+127.
+		/// The logger to use.
 		/// </summary>
-		/// <param name="edgeIndex"></param>
-		/// <returns></returns>
-		public object Range(int edgeIndex)
+		protected abstract NLog.Logger Logger
 		{
-			if (isULong)
-			{
-				var minValue = edgeIndex > 0 ? ulongEdges[edgeIndex - 1] : ulong.MinValue;
-				return (ulongEdges[edgeIndex] - minValue) * 2;
-			}
-			else
-			{
-				if (longEdges[edgeIndex] >= 0)
-				{
-					var minValue = edgeIndex > 0 ? longEdges[edgeIndex - 1] : long.MinValue;
-					return Math.Abs((longEdges[edgeIndex] - minValue) * 2);
-				}
-				else
-				{
-					var minValue = longEdges[edgeIndex + 1];
-					return Math.Abs((longEdges[edgeIndex] - minValue) * 2);
-				}
-			}
+			get;
 		}
 
 		/// <summary>
-		/// Produce next edge case number.
+		/// Get the minimum and maximum values to generate edge cases for.
 		/// </summary>
-		/// <param name="random"></param>
-		/// <returns></returns>
-		public object Next(Peach.Core.Random random)
+		/// <param name="obj">The element this mutator is bound to.</param>
+		/// <param name="min">The minimum value of the number space.</param>
+		/// <param name="max">The maximum value of the number space.</param>
+		protected abstract void GetLimits(DataElement obj, out long min, out ulong max);
+
+		/// <summary>
+		/// Mutate the data element.
+		/// </summary>
+		/// <param name="obj">The element to mutate.</param>
+		/// <param name="value">The value to use when mutating.</param>
+		protected abstract void performMutation(DataElement obj, long value);
+
+		/// <summary>
+		/// Mutate the data element.  This is called when the value to be used
+		/// for mutation is larger than long.MaxValue.
+		/// </summary>
+		/// <param name="obj">The element to mutate.</param>
+		/// <param name="value">The value to use when mutating.</param>
+		protected abstract void performMutation(DataElement obj, ulong value);
+
+		public override uint mutation
 		{
-			if (isULong)
+			get;
+			set;
+		}
+
+		public override int count
+		{
+			get
 			{
-				var edgeIndex = random.Next(0, ulongEdges.Length);
-				var edge = ulongEdges[edgeIndex];
-				var range = (ulong) Range(edgeIndex);
-				ulong ulValue = 0;
+				return space;
+			}
+		}
 
-				do
-				{
-					ulValue = (ulong)(random.NextGaussian(edge, (range / 2) / 3));
-				}
-				while (ulValue > maxValue || ulValue < (ulong)minValue);
+		public override void sequentialMutation(DataElement obj)
+		{
+			doMutation(obj, sequential());
+		}
 
-				return ulValue;
+		public override void randomMutation(DataElement obj)
+		{
+			doMutation(obj, random());
+		}
+
+		void doMutation(DataElement obj, long value)
+		{
+			// EdgeCaseGenerator gurantees value is between min/max
+			// Promote to ulong if appropriate
+			if (value < 0 && min >= 0)
+			{
+				var asUlong = unchecked((ulong)value);
+				Logger.Trace("performMutation(value={0}", asUlong);
+				performMutation(obj, asUlong);
 			}
 			else
 			{
-				var edgeIndex = random.Next(0, longEdges.Length);
-				var edge = longEdges[edgeIndex];
-				var range = (long)Range(edgeIndex);
-				long lValue = 0;
-
-				do
-				{
-					lValue = (long)(random.NextGaussian(edge, (range / 2) / 3));
-				}
-				while (lValue > (long)maxValue || lValue < minValue);
-
-				return lValue;
+				Logger.Trace("performMutation(value={0}", value);
+				performMutation(obj, value);
 			}
 		}
 	}
 }
 
-// end
