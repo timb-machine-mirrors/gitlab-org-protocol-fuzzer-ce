@@ -193,6 +193,30 @@ namespace Peach.Enterprise.WebServices
 				var dom = parser.asParser(args, config.pitFile);
 				var engine = new Engine(webLogger);
 
+				#region add MetricsLogger to all tests if it doesn't exist
+				var metricsargs = new Dictionary<string, Peach.Core.Variant>();
+				metricsargs.Add("Path", new Peach.Core.Variant("jobtmp/" + this.Guid));
+				var metricslogger = new Loggers.MetricsLogger(metricsargs);
+
+				foreach (var test in dom.tests)
+				{
+					bool found = false;
+					foreach (var logger in test.loggers)
+					{
+						if (logger.GetType() == typeof(Loggers.MetricsLogger))
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						test.loggers.Add(metricslogger);
+					}
+				}
+				#endregion
+
 				// hook up the stop event
 				config.shouldStop = shouldStop;
 
