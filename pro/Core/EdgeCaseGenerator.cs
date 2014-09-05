@@ -28,6 +28,9 @@ namespace Peach.Core
 			long.MaxValue,
 		};
 
+		// The maximum range to pick numbers around each edge
+		const ulong maxRange = (ulong)short.MaxValue;
+
 		long minValue;
 		ulong maxValue;
 
@@ -88,6 +91,9 @@ namespace Peach.Core
 					// If edge > 0, it is the distance to the previous edge
 					v = unchecked((ulong)(edge - edges[i - 1]));
 				}
+
+				// Cap the +/- range to a maximum
+				v = Math.Min(v, maxRange);
 
 				range.Add(v);
 
