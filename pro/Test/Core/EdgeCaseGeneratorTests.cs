@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -155,54 +156,17 @@ namespace Peach.Core.Test
 			// Range 7: 0x7fffffffffffffff
 			Assert.AreEqual(0x7fffffffffffffff - 0xffffffff, e1.Range(7));
 			// Range 8: 0xffffffffffffffff
-			Assert.AreEqual(-1 - 0x7fffffffffffffff, e1.Range(8));
-
-			// Ensure casts to ulong properly
-			var asUlong = (ulong)0x8000000000000000;
-			Assert.AreEqual(asUlong, unchecked((ulong)e1.Range(8)));
+			Assert.AreEqual(0x8000000000000000, e1.Range(8));
 		}
 
-		[Test]
-		public void Random()
+		public void HitsEdges(long minValue, ulong maxValue)
 		{
 			var rng = new Random(0);
-			var e = new EdgeCaseGenerator(sbyte.MinValue, (ulong)sbyte.MaxValue);
-
-			bool gotMin = false;
-			bool gotMax = false;
-			bool gotZero = false;
-
-			for (int i = 0; i < 1000; ++i)
-			{
-				var x = e.Next(rng);
-
-				Assert.GreaterOrEqual(x, sbyte.MinValue);
-				Assert.LessOrEqual(x, sbyte.MaxValue);
-
-				gotMin |= x == sbyte.MinValue;
-				gotMax |= x == sbyte.MaxValue;
-				gotZero |= x == 0;
-			}
-
-			Assert.True(gotMin);
-			Assert.True(gotMax);
-			Assert.True(gotZero);
-
-			// We expect calls to Next() to generate random numbers
-			// that are outside of the valid range a couple of times.
-			Assert.Greater(e.BadRandom, 500);
-			Assert.Less(e.BadRandom, 1000);
-		}
-
-		[Test]
-		public void IntRandom()
-		{
-			var rng = new Random(0);
-			var e = new EdgeCaseGenerator(int.MinValue, (ulong)int.MaxValue);
+			var e = new EdgeCaseGenerator(minValue, maxValue);
 
 			var hits = new bool[e.Edges.Count];
 
-			for (long i = 0; i < 2000000; ++i)
+			for (ulong i = 0; i < 10 * e.Deviation; ++i)
 			{
 				var x = e.Next(rng);
 
@@ -224,7 +188,80 @@ namespace Peach.Core.Test
 
 			// We should have never had to generate more than one
 			// random number for a call to Next()
-			Assert.AreEqual(0, e.BadRandom);
+			//Assert.AreEqual(0, e.BadRandom);
+		}
+
+		[Test]
+		public void HitsEdges()
+		{
+			HitsEdges(short.MinValue, (ulong)short.MaxValue);
+			HitsEdges(int.MinValue, (ulong)int.MaxValue);
+			//HitsEdges(long.MinValue, (ulong)long.MaxValue);
+		}
+
+		[Test]
+		public void Random()
+		{
+			var rng = new Random(0);
+			var e = new EdgeCaseGenerator(sbyte.MinValue, (ulong)sbyte.MaxValue);
+
+			bool gotMin = false;
+			bool gotMax = false;
+			bool gotZero = false;
+
+			for (int i = 0; i < 500; ++i)
+			{
+				var x = e.Next(rng);
+
+				Assert.GreaterOrEqual(x, sbyte.MinValue);
+				Assert.LessOrEqual(x, sbyte.MaxValue);
+
+				gotMin |= x == sbyte.MinValue;
+				gotMax |= x == sbyte.MaxValue;
+				gotZero |= x == 0;
+			}
+
+			Assert.True(gotMin);
+			Assert.True(gotMax);
+			Assert.True(gotZero);
+
+			// We expect calls to Next() to generate random numbers
+			// that are outside of the valid range a couple of times.
+			Assert.Greater(e.BadRandom, 0);
+			Assert.Less(e.BadRandom, 1000);
+		}
+
+		[Test]
+		public void IntRandom()
+		{
+			var rng = new Random(0);
+			var e = new EdgeCaseGenerator(int.MinValue, (ulong)int.MaxValue);
+
+			var hits = new bool[e.Edges.Count];
+
+			for (long i = 0; i < 10000000; ++i)
+			{
+				var x = e.Next(rng);
+
+				for (int j = 0; j < hits.Length; ++j)
+					hits[j] |= x == e.Edges[j];
+			}
+
+			var sb = new StringBuilder();
+
+			for (int j = 0; j < hits.Length; ++j)
+			{
+				if (!hits[j])
+					sb.AppendFormat("{0} ", e.Edges[j]);
+			}
+
+			var missed = sb.ToString();
+			if (!string.IsNullOrEmpty(missed))
+				Assert.Fail("Missed edges: {0}".Fmt(missed));
+
+			// We should have had to generate more than one
+			// random number for a call to Next()
+			//Assert.Greater(0, e.BadRandom);
 		}
 
 		[Test]
@@ -235,7 +272,7 @@ namespace Peach.Core.Test
 
 			var hits = new bool[e.Edges.Count];
 
-			for (long i = 0; i < 500000; ++i)
+			for (long i = 0; i < 10000000; ++i)
 			{
 				var x = e.Next(rng);
 
@@ -267,14 +304,22 @@ namespace Peach.Core.Test
 			var e = new EdgeCaseGenerator(0, ulong.MaxValue);
 
 			var hits = new bool[e.Edges.Count];
+			var dict = new Dictionary<ulong, int>();
 
-			for (long i = 0; i < 500000; ++i)
+			for (long i = 0; i < 10000000; ++i)
 			{
 				var x = (ulong)e.Next(rng);
 
 				for (int j = 0; j < hits.Length - 1; ++j)
 					hits[j] |= x < (ulong)e.Edges[j + 1];
+
+				int cnt;
+				var k = unchecked((ulong)x);
+				dict.TryGetValue(k, out cnt);
+				dict[k] = cnt + 1;
 			}
+
+			File.WriteAllText("C:\\work\\numbers2.csv", string.Join("\n", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value))));
 
 			var sb = new StringBuilder();
 

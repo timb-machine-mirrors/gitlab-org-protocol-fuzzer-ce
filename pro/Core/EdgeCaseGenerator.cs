@@ -30,7 +30,11 @@ namespace Peach.Core
 
 		long minValue;
 		ulong maxValue;
+
 		List<long> edges = new List<long>();
+		List<ulong> range = new List<ulong>();
+		List<ulong> stddev = new List<ulong>();
+		List<double> weights = new List<double>();
 
 		internal ulong BadRandom
 		{
@@ -66,6 +70,54 @@ namespace Peach.Core
 
 			// Last edge case is 'max'
 			edges.Add(unchecked((long)maxValue));
+
+			// Compute range and standard deviation
+			for (int i = 0; i < edges.Count; ++i)
+			{
+				var edge = edges[i];
+
+				ulong v;
+
+				if (edge <= 0 && edge != unchecked((long)maxValue))
+				{
+					// If edge <= 0, it is the distance to next edge
+					v = unchecked((ulong)(edges[i + 1] - edge));
+				}
+				else
+				{
+					// If edge > 0, it is the distance to the previous edge
+					v = unchecked((ulong)(edge - edges[i - 1]));
+				}
+
+				range.Add(v);
+
+				// We want the distribution to be a bell curve over
+				// 2x the range.  This means stddev should be 2*range / 6
+				// since 99% of the numbers will be 3 stddev away from the mean
+				var s = v / 3;
+
+				stddev.Add(s);
+
+				Deviation += s;
+			}
+
+			// Weight each edge based on its range.
+			ulong sum = 0;
+
+			for (int i = 0; i < edges.Count; ++i)
+			{
+				var weight = 1.0 - (1.0 * sum / Deviation);
+
+				System.Diagnostics.Debug.Assert(weight <= 1);
+				System.Diagnostics.Debug.Assert(weight > 0);
+
+				weights.Add(weight);
+				sum += stddev[i];
+			}
+
+			// Set the minimum count to be a portion of the range
+			// Set the count to be a portion of the range space of the generator
+			Count = (int)Math.Sqrt(Deviation);
 		}
 
 		/// <summary>
@@ -77,6 +129,24 @@ namespace Peach.Core
 			{
 				return edges.AsReadOnly();
 			}
+		}
+
+		/// <summary>
+		/// The sum of all the standard deviations at each edge case
+		/// </summary>
+		public ulong Deviation
+		{
+			get;
+			private set;
+		}
+
+		/// <summary>
+		/// The minimum number of random numbers that sohuld be generated.
+		/// </summary>
+		public int Count
+		{
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -93,26 +163,9 @@ namespace Peach.Core
 		/// </remarks>
 		/// <param name="edgeIndex">The edge index to computer the range for.</param>
 		/// <returns>The range to generate values in.</returns>
-		public long Range(int edgeIndex)
+		public ulong Range(int edgeIndex)
 		{
-			if (edgeIndex < 0)
-				throw new ArgumentOutOfRangeException("edgeIndex", "Parameter must be greater than or equal to zero.");
-
-			if (edgeIndex >= edges.Count)
-				throw new ArgumentOutOfRangeException("edgeIndex", "Parameter must be smaller than one less than the number of edges.");
-
-			var edge = edges[edgeIndex];
-
-			if (edge <= 0 && edge != unchecked((long)maxValue))
-			{
-				// If edge <= 0, it is the distance to next edge
-				return edges[edgeIndex + 1] - edge;
-			}
-			else
-			{
-				// If edge > 0, it is the distance to the previous edge
-				return edge - edges[edgeIndex - 1];
-			}
+			return range[edgeIndex];
 		}
 
 		/// <summary>
@@ -124,11 +177,11 @@ namespace Peach.Core
 		public long Next(Random random, int edgeIndex)
 		{
 			var edge = edges[edgeIndex];
-			var range = Range(edgeIndex);
+			var sigma = stddev[edgeIndex];
 
 			while (true)
 			{
-				var ret = (long)random.NextGaussian(edge, range / 3.0);
+				var ret = (long)random.NextGaussian(edge, sigma);
 
 				if (unchecked(maxValue - (ulong)ret < maxValue))
 				{
@@ -155,9 +208,16 @@ namespace Peach.Core
 		/// <returns>A random number.</returns>
 		public long Next(Random random)
 		{
-			var edgeIndex = random.Next(0, edges.Count);
+			var r = random.NextDouble();
 
-			return Next(random, edgeIndex);
+			int i = weights.Count - 1;
+
+			// Weights are [ 1.0, 0.5 ], r is 0.5, expect i == 0
+			// Since weights[0] is always 1.0 and random never returns 1.0
+			while (weights[i] <= r)
+				--i;
+
+			return Next(random, i);
 		}
 
 		[Conditional("DEBUG")]

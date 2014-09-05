@@ -45,8 +45,7 @@ namespace Peach.Core.Mutators.Utility
 				sequential = random = () => gen.Next(context.Random);
 
 				// Set the count to be a portion of the range space of the generator
-				for (var i = 0; i < gen.Edges.Count; ++i)
-					space += (int)Math.Sqrt(gen.Range(i));
+				space = gen.Count;
 			}
 		}
 
