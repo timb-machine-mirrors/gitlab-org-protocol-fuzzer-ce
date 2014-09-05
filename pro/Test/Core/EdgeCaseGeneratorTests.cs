@@ -225,10 +225,7 @@ namespace Peach.Core.Test
 			Assert.True(gotMax);
 			Assert.True(gotZero);
 
-			// We expect calls to Next() to generate random numbers
-			// that are outside of the valid range a couple of times.
-			Assert.Greater(e.BadRandom, 0);
-			Assert.Less(e.BadRandom, 1000);
+			Assert.AreEqual(0, e.BadRandom);
 		}
 
 		[Test]
@@ -304,7 +301,6 @@ namespace Peach.Core.Test
 			var e = new EdgeCaseGenerator(0, ulong.MaxValue);
 
 			var hits = new bool[e.Edges.Count];
-			var dict = new Dictionary<ulong, int>();
 
 			for (long i = 0; i < 10000000; ++i)
 			{
@@ -312,14 +308,7 @@ namespace Peach.Core.Test
 
 				for (int j = 0; j < hits.Length - 1; ++j)
 					hits[j] |= x < (ulong)e.Edges[j + 1];
-
-				int cnt;
-				var k = unchecked((ulong)x);
-				dict.TryGetValue(k, out cnt);
-				dict[k] = cnt + 1;
 			}
-
-			File.WriteAllText("C:\\work\\numbers2.csv", string.Join("\n", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value))));
 
 			var sb = new StringBuilder();
 
@@ -336,6 +325,62 @@ namespace Peach.Core.Test
 			// We should have never had to generate more than one
 			// random number for a call to Next()
 			Assert.AreEqual(0, e.BadRandom);
+		}
+
+		//[Test]
+		public void MakeCsv()
+		{
+			var rng = new Random(0);
+			//var e = new EdgeCaseGenerator(long.MinValue, long.MaxValue);
+			var e = new EdgeCaseGenerator(0, ulong.MaxValue);
+
+			var dict = new Dictionary<long, int>();
+
+			{
+				int j = 0;
+
+				for (long i = 0; i < 10000000; ++i)
+				{
+					var x = e.NextEdge(rng, out j);
+
+					if (e.Edges[j] == long.MinValue)
+					{
+						x -= long.MinValue;
+						x -= (8 * 32767); 
+					}
+					else if (e.Edges[j] == long.MaxValue)
+					{
+						x -= long.MaxValue;
+						x += (8 * 32767);
+					}
+					else if (e.Edges[j] == int.MinValue)
+					{
+						x -= int.MinValue;
+						x -= (4 * 32767);
+					}
+					else if (e.Edges[j] == int.MaxValue)
+					{
+						x -= int.MaxValue;
+						x += (4 * 32767);
+					}
+					else if (e.Edges[j] == uint.MaxValue)
+					{
+						x -= uint.MaxValue;
+						x += (6 * 32767);
+					}
+					else if (e.Edges[j] == -1)
+					{
+						x += (10 * 32767);
+					}
+
+					int cnt;
+					dict.TryGetValue(x, out cnt);
+					dict[x] = cnt + 1;
+				}
+
+//				File.WriteAllLines("test_edge.{0}.csv".Fmt("all"), dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
+			}
+			//File.WriteAllLines("test_edge.u.{0}.csv".Fmt("all"), dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
 		}
 	}
 }

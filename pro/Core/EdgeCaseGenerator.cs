@@ -100,9 +100,17 @@ namespace Peach.Core
 				// We want the distribution to be a bell curve over
 				// 2x the range.  This means stddev should be 2*range / 6
 				// since 99% of the numbers will be 3 stddev away from the mean
-				var s = v / 3;
+
+				// In practice, dividing by 6 produces better curves in the range
+				// Also, round up so if v is < 6, we get at least 1
+				var s = (v + 5) / 6;
 
 				stddev.Add(s);
+
+				// The 1st and last edge get 1/2 the deviation since they are half curves
+				// We still store the full deviation but do an abs() of the next rng
+				if (i == 0 || i == edges.Count - 1)
+					s = (s + 1) / 2; // Round up so we always have a valid stddev
 
 				Deviation += s;
 			}
@@ -118,7 +126,15 @@ namespace Peach.Core
 				System.Diagnostics.Debug.Assert(weight > 0);
 
 				weights.Add(weight);
-				sum += stddev[i];
+
+				var s = stddev[i];
+
+				// The 1st and last edge get 1/2 the weight since they are half curves
+				// We still store the full deviation but do an abs() of the next rng
+				if (i == 0 || i == edges.Count - 1)
+					s /= 2;
+
+				sum += s;
 			}
 
 			// Set the minimum count to be a portion of the range
@@ -187,7 +203,19 @@ namespace Peach.Core
 
 			while (true)
 			{
-				var ret = (long)random.NextGaussian(edge, sigma);
+				var num = random.NextGaussian();
+
+				// The min/max edge are only half bell curves
+				if ((num < 0 && edge == minValue) || (num > 0 && unchecked((ulong)edge) == maxValue))
+					num *= -1;
+
+				// Expand to full range here, as double can't represent
+				// all numbers > 2^53, and we need to go 2^64
+				// Keep centered at 0 to make sure the number is not
+				// too small or too large based on the edge
+				var asLong = (long)(num * sigma);
+
+				var ret = edge + asLong;
 
 				if (unchecked(maxValue - (ulong)ret < maxValue))
 				{
