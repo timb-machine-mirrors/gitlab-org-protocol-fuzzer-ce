@@ -242,6 +242,18 @@ namespace Peach.Core
 		/// <returns>A random number.</returns>
 		public long Next(Random random)
 		{
+			int i;
+			return NextEdge(random, out i);
+		}
+
+		/// <summary>
+		/// Produce next edge case number for a randomly selected edge index.
+		/// </summary>
+		/// <param name="random">Random number generator to use.</param>
+		/// <param name="edgeIndex">The index of the picked edge.</param>
+		/// <returns>A random number.</returns>
+		internal long NextEdge(Random random, out int edgeIndex)
+		{
 			var r = random.NextDouble();
 
 			int i = weights.Count - 1;
@@ -251,7 +263,9 @@ namespace Peach.Core
 			while (weights[i] <= r)
 				--i;
 
-			return Next(random, i);
+			edgeIndex = i;
+
+			return Next(random, edgeIndex);
 		}
 
 		[Conditional("DEBUG")]
