@@ -211,8 +211,18 @@ namespace Peach.Core
 				// all numbers > 2^53, and we need to go 2^64
 				// Keep centered at 0 to make sure the number is not
 				// too small or too large based on the edge
-				// Also, round the number, don't just cast it!
-				var asLong = (long)Math.Round(num * sigma);
+
+				long asLong;
+
+				// If we are producing a whole curve, round to nearest integer
+				// but if we are producing the min/max half curves, round
+				// down to the next smallest integer
+				if (edge == minValue)
+					asLong = (long)Math.Floor(num * sigma);
+				else if (unchecked((ulong)edge) == maxValue)
+					asLong = (long)Math.Ceiling(num * sigma);
+				else
+					asLong = (long)Math.Round(num * sigma);
 
 				var ret = edge + asLong;
 
