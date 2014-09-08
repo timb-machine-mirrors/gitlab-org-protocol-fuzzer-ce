@@ -83,13 +83,13 @@ namespace Peach.Core
 
 			if (r < weight)
 				// Ignore rhs 0 when a left curve exists
-				return Next(random, sigmaRhs);
+				return Next(random, sigmaRhs, sigmaLhs == 0);
 			else
 				// Ignore lhs 0 when right curve exists
-				return Next(random, sigmaLhs);
+				return Next(random, sigmaLhs, sigmaRhs == 0);
 		}
 
-		long Next(Random random, long sigma)
+		long Next(Random random, long sigma, bool floor)
 		{
 			while (true)
 			{
@@ -102,7 +102,19 @@ namespace Peach.Core
 				// all numbers > 2^53, and we need to go 2^64
 				// Keep centered at 0 to make sure the number is not
 				// too small or too large based on the edge
-				var asLong = (long)Math.Round(num * sigma);
+				// Use the floor function since we are only
+				// computing half curves.
+				long asLong;
+				
+				// If we have a left and right side, we just round to the
+				// nearest integer.  If we are at an edge we want to round
+				// down since there is only a single curve.
+				if (!floor)
+					asLong = (long)Math.Round(num * sigma);
+				else if (sigma < 0)
+					asLong = (long)Math.Ceiling(num * sigma);
+				else
+					asLong = (long)Math.Floor(num * sigma);
 
 				// If we are on the right side curve, make sure we don't
 				// overflow max when shifting to be centered at value
