@@ -29,7 +29,7 @@ namespace Peach.Core
 		};
 
 		// The maximum range to pick numbers around each edge
-		const ulong maxRange = (ulong)short.MaxValue;
+		const ulong maxRange = 0x4000;
 
 		long minValue;
 		ulong maxValue;
@@ -100,10 +100,8 @@ namespace Peach.Core
 				// We want the distribution to be a bell curve over
 				// 2x the range.  This means stddev should be 2*range / 6
 				// since 99% of the numbers will be 3 stddev away from the mean
-
-				// In practice, dividing by 6 produces better curves in the range
-				// Also, round up so if v is < 6, we get at least 1
-				var s = (v + 5) / 6;
+				// Also, round up so if v is < 3, we get at least 1
+				var s = (v + 2) / 3;
 
 				stddev.Add(s);
 
