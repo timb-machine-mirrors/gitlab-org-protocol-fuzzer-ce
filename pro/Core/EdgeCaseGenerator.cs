@@ -213,7 +213,8 @@ namespace Peach.Core
 				// all numbers > 2^53, and we need to go 2^64
 				// Keep centered at 0 to make sure the number is not
 				// too small or too large based on the edge
-				var asLong = (long)(num * sigma);
+				// Also, round the number, don't just cast it!
+				var asLong = (long)Math.Round(num * sigma);
 
 				var ret = edge + asLong;
 

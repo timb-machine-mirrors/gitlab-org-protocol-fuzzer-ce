@@ -200,6 +200,36 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void BasicCurve()
+		{
+			var rng = new Random(0);
+			var e = new EdgeCaseGenerator(int.MinValue, int.MaxValue);
+
+			Assert.AreEqual(0, e.Edges[3]);
+
+			var dict = new Dictionary<long, int>();
+
+			for (int i = 0; i < 1000000; ++i)
+			{
+				var x = e.Next(rng, 3);
+
+				int cnt;
+				dict.TryGetValue(x, out cnt);
+				dict[x] = cnt + 1;
+			}
+
+			var pctRhs = 1.0 * dict[0] / (dict[0] + dict[1]);
+			var pctLhs = 1.0 * dict[0] / (dict[0] + dict[-1]);
+
+			File.WriteAllLines("c:\\work\\test_edge.simple.csv", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
+
+			Assert.LessOrEqual(pctLhs, 0.51);
+			Assert.LessOrEqual(pctRhs, 0.51);
+			Assert.Greater(pctLhs, 0.50);
+			Assert.Greater(pctRhs, 0.50);
+		}
+
+		[Test]
 		public void Random()
 		{
 			var rng = new Random(0);
