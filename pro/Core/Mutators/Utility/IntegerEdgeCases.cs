@@ -80,13 +80,13 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="value">The value to use when mutating.</param>
 		protected abstract void performMutation(DataElement obj, ulong value);
 
-		public override uint mutation
+		public sealed override uint mutation
 		{
 			get;
 			set;
 		}
 
-		public override int count
+		public sealed override int count
 		{
 			get
 			{
@@ -94,18 +94,23 @@ namespace Peach.Core.Mutators.Utility
 			}
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		public sealed override void sequentialMutation(DataElement obj)
 		{
-			doMutation(obj, sequential());
+			performMutation(obj, sequential);
 		}
 
-		public override void randomMutation(DataElement obj)
+		public sealed override void randomMutation(DataElement obj)
 		{
-			doMutation(obj, random());
+			performMutation(obj, random);
 		}
 
-		void doMutation(DataElement obj, long value)
+		void performMutation(DataElement obj, Func<long> gen)
 		{
+			var value = gen();
+
+			// Mark the element as mutated
+			obj.mutationFlags = MutateOverride.Default;
+
 			// EdgeCaseGenerator gurantees value is between min/max
 			// Promote to ulong if appropriate
 			if (value < 0 && min >= 0)

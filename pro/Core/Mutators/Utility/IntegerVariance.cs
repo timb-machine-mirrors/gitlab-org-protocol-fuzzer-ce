@@ -59,13 +59,13 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="value">The value to use when mutating.</param>
 		protected abstract void performMutation(DataElement obj, ulong value);
 
-		public override uint mutation
+		public sealed override uint mutation
 		{
 			get;
 			set;
 		}
 
-		public override int count
+		public sealed override int count
 		{
 			get
 			{
@@ -73,13 +73,13 @@ namespace Peach.Core.Mutators.Utility
 			}
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		public sealed override void sequentialMutation(DataElement obj)
 		{
 			// sequential is the same as random
 			randomMutation(obj);
 		}
 
-		public override void randomMutation(DataElement obj)
+		public sealed override void randomMutation(DataElement obj)
 		{
 			while (true)
 			{
