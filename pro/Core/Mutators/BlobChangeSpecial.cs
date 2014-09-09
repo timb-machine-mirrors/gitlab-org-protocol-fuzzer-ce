@@ -11,17 +11,19 @@ using Peach.Core.IO;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Expand the blob by a random size between 1 and 255.
+	/// Alter the blob by a random number of bytes between 1 and 255.
 	/// Pick a random start position in the blob.
-	/// Pick a random value between 0 and 255.
-	/// Add size bytes starting at position where each byte is the
-	/// single randomly selected value.
+	/// Alter size bytes starting at position where each byte is
+	/// changed to different randomly selected value from the
+	/// special set of { 0x00, 0x01, 0xFE, 0xFF }.
 	/// </summary>
-	[Mutator("BlobExpandSingleRandom")]
-	[Description("Expand the blob by filling it with a single random value")]
-	public class BlobExpandSingleRandom : Utility.BlobMutator
+	[Mutator("BlobChangeSpecial")]
+	[Description("Change the blob by replacing bytes with special bytes")]
+	public class BlobChangeSpecial : Utility.BlobMutator
 	{
-		public BlobExpandSingleRandom(DataElement obj)
+		static byte[] special = new byte[] { 0x00, 0x01, 0xFE, 0xFF };
+
+		public BlobChangeSpecial(DataElement obj)
 			: base(obj)
 		{
 		}
@@ -30,7 +32,7 @@ namespace Peach.Core.Mutators
 		{
 			get
 			{
-				return byte.MaxValue;
+				return 100;
 			}
 		}
 
@@ -38,7 +40,7 @@ namespace Peach.Core.Mutators
 		{
 			get
 			{
-				return false;
+				return true;
 			}
 		}
 
@@ -50,14 +52,16 @@ namespace Peach.Core.Mutators
 			if (start > 0)
 				ret.Add(data.SliceBits(start * 8));
 
-			// Add length bytes where each byte is the same random value
-			var val = (byte)context.Random.Next(0, 256);
+			// Add length bytes of special values
 			var buf = new byte[length];
 			for (int i = 0; i < buf.Length; ++i)
-				buf[i] = val;
+				buf[i] = context.Random.Choice(special);
 			ret.Add(new BitStream(buf));
 
-			// Slice off from start to end
+			// Skip length bytes from data
+			data.Seek(length, SeekOrigin.Current);
+
+			// Slice off from start + length to end
 			var remain = data.Length - data.Position;
 			if (remain > 0)
 				ret.Add(data.SliceBits(remain * 8));

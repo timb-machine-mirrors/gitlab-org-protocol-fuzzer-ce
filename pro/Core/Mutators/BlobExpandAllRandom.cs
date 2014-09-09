@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) Deja vu Security
 //
 
@@ -13,15 +13,14 @@ namespace Peach.Core.Mutators
 	/// <summary>
 	/// Expand the blob by a random size between 1 and 255.
 	/// Pick a random start position in the blob.
-	/// Pick a random value between 0 and 255.
-	/// Add size bytes starting at position where each byte is the
-	/// single randomly selected value.
+	/// Add size bytes starting at position where each byte is a
+	/// different randomly selected value.
 	/// </summary>
-	[Mutator("BlobExpandSingleRandom")]
-	[Description("Expand the blob by filling it with a single random value")]
-	public class BlobExpandSingleRandom : Utility.BlobMutator
+	[Mutator("BlobExpandAllRandom")]
+	[Description("Expand the blob by filling it with randomly selected values")]
+	public class BlobExpandAllRandom : Utility.BlobMutator
 	{
-		public BlobExpandSingleRandom(DataElement obj)
+		public BlobExpandAllRandom(DataElement obj)
 			: base(obj)
 		{
 		}
@@ -50,11 +49,11 @@ namespace Peach.Core.Mutators
 			if (start > 0)
 				ret.Add(data.SliceBits(start * 8));
 
-			// Add length bytes where each byte is the same random value
+			// Add length bytes where each byte is a new random value
 			var val = (byte)context.Random.Next(0, 256);
 			var buf = new byte[length];
 			for (int i = 0; i < buf.Length; ++i)
-				buf[i] = val;
+				buf[i] = (byte)context.Random.Next(0, 256);
 			ret.Add(new BitStream(buf));
 
 			// Slice off from start to end

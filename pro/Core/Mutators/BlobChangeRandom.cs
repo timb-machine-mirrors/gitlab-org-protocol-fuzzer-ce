@@ -11,13 +11,16 @@ using Peach.Core.IO;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Picks a random range of bytes inside the blob and removes it.
+	/// Alter the blob by a random number of bytes between 1 and 255.
+	/// Pick a random start position in the blob.
+	/// Alter size bytes starting at position where each byte is
+	/// changed to different randomly selected value.
 	/// </summary>
-	[Mutator("BlobReduce")]
-	[Description("Reduce the size of a blob")]
-	public class BlobReduce : Utility.BlobMutator
+	[Mutator("BlobChangeRandom")]
+	[Description("Change the blob by replacing bytes with random bytes")]
+	public class BlobChangeRandom : Utility.BlobMutator
 	{
-		public BlobReduce(DataElement obj)
+		public BlobChangeRandom(DataElement obj)
 			: base(obj)
 		{
 		}
@@ -26,7 +29,7 @@ namespace Peach.Core.Mutators
 		{
 			get
 			{
-				return long.MaxValue;
+				return 100;
 			}
 		}
 
@@ -42,14 +45,20 @@ namespace Peach.Core.Mutators
 		{
 			var ret = new BitStreamList();
 
-			// Slice off up to start
+			// Slice off data up to start
 			if (start > 0)
 				ret.Add(data.SliceBits(start * 8));
 
-			// Slip next length bytes
+			// Add length bytes of random values
+			var buf = new byte[length];
+			for (int i = 0; i < buf.Length; ++i)
+				buf[i] = (byte)context.Random.Next(0, 256);
+			ret.Add(new BitStream(buf));
+
+			// Skip length bytes from data
 			data.Seek(length, SeekOrigin.Current);
 
-			// Slice off end
+			// Slice off from start + length to end
 			var remain = data.Length - data.Position;
 			if (remain > 0)
 				ret.Add(data.SliceBits(remain * 8));
@@ -58,3 +67,4 @@ namespace Peach.Core.Mutators
 		}
 	}
 }
+

@@ -26,6 +26,7 @@
 
 // $Id$
 
+#if DISABLED
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ namespace Peach.Core.Mutators
         public BlobMutator(DataElement obj)
             : base(obj)
         {
-            name = "BlobMutator";
+            //name = "BlobMutator";
             pos = 0;
 
             How how = 0;
@@ -406,4 +407,5 @@ namespace Peach.Core.Mutators
     }
 }
 
+#endif
 // end
