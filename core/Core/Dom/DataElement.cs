@@ -892,6 +892,19 @@ namespace Peach.Core.Dom
 			return parent[priorIndex];
 		}
 
+		public void BeginUpdate()
+		{
+			// Prevent calls to invalidate from propigating
+			_invalidated = true;
+		}
+
+		public void EndUpdate()
+		{
+			_invalidated = false;
+
+			Invalidate();
+		}
+
 		/// <summary>
 		/// Call to invalidate current element and cause rebuilding
 		/// of data elements dependent on this element.
