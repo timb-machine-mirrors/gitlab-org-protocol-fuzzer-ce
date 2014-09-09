@@ -23,7 +23,7 @@ namespace Peach.Core.Mutators
             current = 0;
             n = getN(obj, 20);
             length = obj.Value.LengthBits;
-            name = "BlobBitFlipperMutator";
+            //name = "BlobBitFlipperMutator";
 
             if (n != 0)
                 countMax = (int)((length) * (n / 100.0));
