@@ -26,6 +26,7 @@
 
 // $Id$
 
+#if DISABLED
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -141,4 +142,5 @@ namespace Peach.Core.Mutators
     }
 }
 
+#endif
 // end
