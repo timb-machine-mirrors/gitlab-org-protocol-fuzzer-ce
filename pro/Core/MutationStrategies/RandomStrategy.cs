@@ -294,12 +294,16 @@ namespace Peach.Core.MutationStrategies
 					return;
 
 				// Don't switch files if we are only using a single file :)
-				if (val.Options.Count < 2)
+				if (val.Options.Where(x => !x.Ignore).Count() < 2)
 					return;
 
 				do
 				{
 					var opt = _randomDataSet.Choice(val.Options);
+
+					// If data set was determined to be bad, ignore it
+					if (opt.Ignore)
+						continue;
 
 					try
 					{
@@ -316,10 +320,13 @@ namespace Peach.Core.MutationStrategies
 					{
 						logger.Debug(ex.Message);
 						logger.Debug("Unable to apply data '{0}', removing from sample list.", opt.name);
-						val.Options.Remove(opt);
+
+						// Mark data set as ignored.
+						// This is so skip-to will still be deterministic
+						opt.Ignore = true;
 					}
 				}
-				while (val.Options.Count > 0);
+				while (val.Options.Where(x => !x.Ignore).Any());
 
 				throw new PeachException("Error, RandomStrategy was unable to apply data for \"" + item.dataModel.fullName + "\"");
 			}
