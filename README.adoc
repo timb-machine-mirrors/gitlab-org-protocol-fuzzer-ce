@@ -1,0 +1,22 @@
+= Peach Professional Development
+
+This is the current bleading edge repo for Peach Professional.
+
+Current Repo's:
+
+peach-pro:: Peach Professional Master
+peach-core::
+  INVISIBLE DO NOT DIRECTLY MODIFY.
+  This repro is mapped into peach-pro/core. All edits and changes should be made to the peach-pro repo.
+  Only Seth is allowed to migrate changes to peach-core.
+pits:: 
+  INVISIBLE DO NOT DIRECTLY MODIFY.
+  This repo is mapped into peach-pro/pits. All edits and changes should be made to the peach-pro repo.
+  
+epeach::
+  DEPRICATED. End of life with feature-14Q2 release.
+  Starting with feature-14Q3, make use of peach-pro repo.
+
+peach::
+  master -- new repo layout with peach-core mapped to master/core
+  v3.1 -- sub-module of epeach. DEPRICATED.
