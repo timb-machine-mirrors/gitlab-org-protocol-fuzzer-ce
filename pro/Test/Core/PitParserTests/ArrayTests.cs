@@ -227,5 +227,201 @@ namespace Peach.Core.Test.PitParserTests
 			DoOccurs("maxOccurs=\"0\"", Encoding.ASCII.GetBytes("XYZ"));
 
 		}
+
+		[Test]
+		public void TestArrayFields()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='1'>
+			<String name='Value' value='***' />
+		</Block>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Items[0].Value' value='xxx'/>
+					<Field name='Items[2].Value' value='zzz'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = new Engine(null);
+			var c = new RunConfiguration() { singleIteration = true };
+
+			e.startFuzzing(dom, c);
+
+			var model = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+			var final = model.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("xxx***zzz", asStr);
+
+			var names = model.PreOrderTraverse().Select(x => x.fullName).ToArray();
+			var exp = new string[] {
+				"DM",
+				"DM.Items",
+				"DM.Items.Items",
+				"DM.Items.Items.Value",
+				"DM.Items.Items_1",
+				"DM.Items.Items_1.Value",
+				"DM.Items.Items_2",
+				"DM.Items.Items_2.Value",
+			};
+
+			Assert.AreEqual(names, exp);
+		}
+
+		[Test]
+		public void TestArrayArrayFields()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='1'>
+			<Block name='SubItems' minOccurs='0'>
+				<String name='Value' value='Value' />
+			</Block>
+		</Block>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Items[1].SubItems[1].Value' value='zzz'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = new Engine(null);
+			var c = new RunConfiguration() { singleIteration = true };
+
+			e.startFuzzing(dom, c);
+
+			var model = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+			var final = model.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("Valuezzz", asStr);
+
+			var names = model.PreOrderTraverse().Select(x => x.fullName).ToArray();
+			var exp = new string[] {
+				"DM",
+				"DM.Items",
+				"DM.Items.Items",
+				"DM.Items.Items.SubItems",
+				"DM.Items.Items.SubItems.SubItems",
+				"DM.Items.Items.SubItems.SubItems.Value",
+				"DM.Items.Items_1",
+				"DM.Items.Items_1.SubItems",
+				"DM.Items.Items_1.SubItems.SubItems",
+				"DM.Items.Items_1.SubItems.SubItems.Value",
+				"DM.Items.Items_1.SubItems.SubItems_1",
+				"DM.Items.Items_1.SubItems.SubItems_1.Value",
+			};
+
+			Assert.AreEqual(names, exp);
+		}
+
+		[Test]
+		public void TestArrayChoiceFields()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='Items' minOccurs='1'>
+			<Block name='One'>
+				<String name='Value' value='Value One' />
+			</Block>
+			<Block name='Two'>
+				<String name='Value' value='Value One' />
+			</Block>
+			<Block name='Three'>
+				<String name='Value' value='Value One' />
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Items[0].Two.Value' value='xxx'/>
+					<Field name='Items[1].Three.Value' value='yyy'/>
+					<Field name='Items[2].One.Value' value='zzz'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = new Engine(null);
+			var c = new RunConfiguration() { singleIteration = true };
+
+			e.startFuzzing(dom, c);
+
+			var model = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+			var final = model.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("xxxyyyzzz", asStr);
+
+			var names = model.PreOrderTraverse().Select(x => x.fullName).ToArray();
+			var exp = new string[] {
+				"DM",
+				"DM.Items",
+				"DM.Items.Items",
+				"DM.Items.Items.Two",
+				"DM.Items.Items.Two.Value",
+				"DM.Items.Items_1",
+				"DM.Items.Items_1.Three",
+				"DM.Items.Items_1.Three.Value",
+				"DM.Items.Items_2",
+				"DM.Items.Items_2.One",
+				"DM.Items.Items_2.One.Value",
+			};
+
+			Assert.AreEqual(names, exp);
+		}
 	}
 }

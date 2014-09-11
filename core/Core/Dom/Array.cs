@@ -304,10 +304,6 @@ namespace Peach.Core.Dom
 		{
 			System.Diagnostics.Debug.Assert(Count > 0 || OriginalElement != null);
 
-			// If we are empty, start by adding our OriginalElement
-			for (int i = Count; i < 1 && i < count; ++i)
-				Add(OriginalElement);
-
 			// Add clones of our original element for the remainder
 			for (int i = Count; i < count; ++i)
 				Add(MakeElement(i));
