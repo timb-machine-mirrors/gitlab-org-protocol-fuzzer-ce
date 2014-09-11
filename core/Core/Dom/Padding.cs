@@ -111,6 +111,11 @@ namespace Peach.Core.Dom
 
 			return padding;
 		}
+		public override void WritePit(XmlWriter pit)
+		{
+			throw new NotImplementedException();
+		}
+
 
 		/// <summary>
 		/// Byte alignment (8, 16, etc).

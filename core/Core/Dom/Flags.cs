@@ -169,6 +169,12 @@ namespace Peach.Core.Dom
 			return flags;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			throw new NotImplementedException();
+		}
+
+
 		public bool LittleEndian
 		{
 			get { return _isLittleEndian; }

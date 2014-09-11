@@ -143,6 +143,24 @@ namespace Peach.Core.Dom
 			return num;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Number");
+
+			pit.WriteAttributeString("size", lengthAsBits.ToString());
+			pit.WriteAttributeString("signed", Signed.ToString().ToLower());
+
+			if (!LittleEndian)
+				pit.WriteAttributeString("endian", "big");
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonValue(pit);
+			WritePitCommonChildren(pit);
+
+			pit.WriteEndElement();
+		}
+
+
 		public override long length
 		{
 			get

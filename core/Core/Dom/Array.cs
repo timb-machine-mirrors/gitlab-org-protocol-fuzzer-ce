@@ -125,6 +125,11 @@ namespace Peach.Core.Dom
 		{
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			originalElement.WritePit(pit);
+		}
+
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them

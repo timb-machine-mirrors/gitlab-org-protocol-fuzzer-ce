@@ -165,10 +165,10 @@ namespace Peach.Core.Dom
 						var newState = context.test.strategy.MutateChangingState(ase.changeToState);
 						
 						if(newState == ase.changeToState)
-							logger.Debug("Run(): Changing to state \"" + newState.name + "\".");
+							logger.Debug("Run(): Changing to state \"{0}\".", newState.name);
 						else
-							logger.Debug("Run(): Changing state mutated.  Switching to \"" + newState.name + 
-								"\" instead of \""+ase.changeToState+"\".");
+							logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".", 
+								newState.name, ase.changeToState);
 
 						context.OnStateChanging(currentState, newState);
 						currentState = newState;

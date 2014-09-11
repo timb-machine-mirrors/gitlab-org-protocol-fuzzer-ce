@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using Peach.Core;
 
 namespace Peach.Core.Dom
@@ -42,7 +43,7 @@ namespace Peach.Core.Dom
 	[DataElement("Placement", DataElementTypes.None)]
 	[Parameter("after", typeof(string), "Place after this element", "")]
 	[Parameter("before", typeof(string), "Place before this element", "")]
-	public class Placement
+	public class Placement: IPitSerializable
 	{
 		public Placement(Dictionary<string, Variant> args)
 		{
@@ -65,6 +66,18 @@ namespace Peach.Core.Dom
 		{
 			get;
 			set;
+		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Placement");
+
+			if(after != null)
+				pit.WriteAttributeString("after", after);
+			if(before != null)
+				pit.WriteAttributeString("before", before);
+
+			pit.WriteEndElement();
 		}
 	}
 }

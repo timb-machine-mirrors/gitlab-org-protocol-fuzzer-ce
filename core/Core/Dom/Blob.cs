@@ -117,6 +117,16 @@ namespace Peach.Core.Dom
 
 			return blob;
 		}
+
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Blob");
+			pit.WriteAttributeString("name", name);
+			WritePitCommonAttributes(pit);
+			WritePitCommonValue(pit);
+			WritePitCommonChildren(pit);
+			pit.WriteEndElement();
+		}
 	}
 }
 

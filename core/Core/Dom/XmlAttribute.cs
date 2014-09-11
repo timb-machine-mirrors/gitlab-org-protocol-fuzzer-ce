@@ -83,6 +83,23 @@ namespace Peach.Core.Dom
 			return xmlAttribute;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("XmlAttribute");
+
+			pit.WriteAttributeString("attributeName", attributeName);
+			if (!string.IsNullOrEmpty(ns))
+				pit.WriteAttributeString("ns", ns);
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
+
+			foreach (var child in this)
+				child.WritePit(pit);
+
+			pit.WriteEndElement();
+		}
+
 		/// <summary>
 		/// XML attribute name
 		/// </summary>

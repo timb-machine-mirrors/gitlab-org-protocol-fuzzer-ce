@@ -45,7 +45,7 @@ namespace Peach.Core.Dom
 	/// Base class for all data element relations
 	/// </summary>
 	[Serializable]
-	public abstract class Relation : Binding
+	public abstract class Relation : Binding, IPitSerializable
 	{
 		protected string _expressionGet = null;
 		protected string _expressionSet = null;
@@ -54,6 +54,8 @@ namespace Peach.Core.Dom
 			: base(parent)
 		{
 		}
+
+		public abstract void WritePit(XmlWriter xml);
 
 		/// <summary>
 		/// Expression that is run when getting the value.

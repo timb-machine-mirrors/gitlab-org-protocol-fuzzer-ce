@@ -77,6 +77,111 @@ namespace Peach.Core.Dom
 		{
 		}
 
+		#region Choice Token Cache
+
+		/// <summary>
+		/// Contianer for cache entries.
+		/// </summary>
+		[Serializable]
+		class ChoiceCache
+		{
+			/// <summary>
+			/// Offset to Token in bits
+			/// </summary>
+			public long Offset;
+
+			/// <summary>
+			/// Token
+			/// </summary>
+			public BitwiseStream Token;
+		}
+
+		/// <summary>
+		/// Cache of tokens for fast choice cracking
+		/// </summary>
+		Dictionary<string, ChoiceCache> _choiceCache = new Dictionary<string, ChoiceCache>();
+
+		public IEnumerable<DataElement> EnumerateAllElementsDown(DataElementContainer start)
+		{
+			foreach (var child in start)
+			{
+				if (child is DataElementContainer)
+				{
+					foreach (var cchild in EnumerateAllElementsDown(child as DataElementContainer))
+						yield return cchild;
+				}
+				else
+				{
+					yield return child;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Build cache of tokens to speed up choice cracking
+		/// </summary>
+		public void BuildCache()
+		{
+			foreach (var elem in choiceElements.Values)
+			{
+				var cont = elem as DataElementContainer;
+				if (cont != null)
+				{
+					long offset = 0;
+					foreach (var child in EnumerateAllElementsDown(cont))
+					{
+						if (child.isToken)
+						{
+							_choiceCache[elem.name] = new ChoiceCache() { Offset = offset, Token = child.Value };
+							break;
+						}
+
+						else if (child.hasLength)
+							offset += child.lengthAsBits;
+
+						else if (child.isDeterministic)
+							continue;
+					}
+				}
+				else if(elem.isToken)
+					_choiceCache[elem.name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
+			}
+		}
+
+		/// <summary>
+		/// Check of cached token is in our data stream.
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="tok"></param>
+		/// <param name="startPosition"></param>
+		/// <returns></returns>
+		bool TokenCheck(BitStream data, ChoiceCache tok, long startPosition)
+		{
+			// Enough data?
+			if ((startPosition + tok.Offset + tok.Token.LengthBits) > data.LengthBits)
+				return false;
+
+			data.PositionBits = startPosition + tok.Offset;
+			tok.Token.PositionBits = 0;
+
+			for (int b = 0; (b = tok.Token.ReadByte()) > -1; )
+			{
+				var bb = data.ReadByte();
+				if (bb != b)
+					return false;
+			}
+
+			for (int b = 0; (b = tok.Token.ReadBit()) > -1; )
+			{
+				if (data.ReadBit() != b)
+					return false;
+			}
+
+			return true;
+		}
+
+		#endregion
+
 		public override void Crack(DataCracker context, BitStream data, long? size)
 		{
 			BitStream sizedData = ReadSizedData(data, size);
@@ -85,31 +190,72 @@ namespace Peach.Core.Dom
 			Clear();
 			_selectedElement = null;
 
+			// Try our cache (if any) first.
+			foreach (var item in _choiceCache)
+			{
+				if (TokenCheck(data, item.Value, startPosition))
+				{
+					var child = choiceElements[item.Key];
+
+					try
+					{
+						logger.Debug("handleChoice: Cache hit for child: {0}", child.debugName);
+
+						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
+						context.CrackData(child, sizedData);
+						SelectedElement = child;
+
+						logger.Debug("handleChoice: Keeping child: {0}", child.debugName);
+						return;
+					}
+					catch (CrackingFailure)
+					{
+						logger.Debug("handleChoice: Failed to crack child: {0}", child.debugName);
+						throw;
+					}
+					catch (Exception ex)
+					{
+						logger.Debug("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
+						throw;
+					}
+				}
+			}
+
+			// Now try it the slow way
 			foreach (DataElement child in choiceElements.Values)
 			{
+				// Skip any cache entries, already tried them
+				if(_choiceCache.ContainsKey(child.name))
+					continue;
+
 				try
 				{
-					logger.Debug("handleChoice: Trying child: " + child.debugName);
+					logger.Debug("handleChoice: Trying child: {0}", child.debugName);
 
 					sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 					context.CrackData(child, sizedData);
 					SelectedElement = child;
 
-					logger.Debug("handleChoice: Keeping child: " + child.debugName);
+					logger.Debug("handleChoice: Keeping child: {0}", child.debugName);
 					return;
 				}
 				catch (CrackingFailure)
 				{
-					logger.Debug("handleChoice: Failed to crack child: " + child.debugName);
+					logger.Debug("handleChoice: Failed to crack child: {0}", child.debugName);
 				}
 				catch (Exception ex)
 				{
-					logger.Debug("handleChoice: Child threw exception: " + child.debugName + ": " + ex.Message);
+					logger.Debug("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
 					throw;
 				}
 			}
 
 			throw new CrackingFailure(debugName + " has no valid children.", this, data);
+		}
+
+		public override void WritePit(XmlWriter pit)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void SelectDefault()
@@ -139,6 +285,7 @@ namespace Peach.Core.Dom
 			}
 
 			choice.Clear();
+			choice.BuildCache();
 
 			return choice;
 		}

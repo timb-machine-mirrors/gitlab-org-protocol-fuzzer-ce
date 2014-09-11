@@ -295,7 +295,7 @@ namespace Peach.Core.Dom
 				{
 					if (!context.test.publishers.ContainsKey(this.publisher))
 					{
-						logger.Debug("Run: Publisher '" + this.publisher + "' not found!");
+						logger.Debug("Run: Publisher '{0}' not found!", this.publisher);
 						throw new PeachException("Error, Action '" + name + "' couldn't find publisher named '" + this.publisher + "'.");
 					}
 

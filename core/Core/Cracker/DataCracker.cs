@@ -504,7 +504,7 @@ namespace Peach.Core.Cracker
 
 		void handleConstraint(DataElement element, BitStream data)
 		{
-			logger.Debug("Running constraint [" + element.constraint + "]");
+			logger.Debug("Running constraint [{0}]", element.constraint);
 
 			Dictionary<string, object> scope = new Dictionary<string, object>();
 			scope["element"] = element;
@@ -526,7 +526,7 @@ namespace Peach.Core.Cracker
 			else
 			{
 				scope["value"] = (string)iv;
-				logger.Debug("Constraint, value=[" + (string)iv + "].");
+				logger.Debug("Constraint, value=[{0}].", (string)iv);
 			}
 
 			object oReturn = element.EvalExpression(element.constraint, scope);
