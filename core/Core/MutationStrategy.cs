@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
+using Peach.Core.MutationStrategies;
 using Peach.Core.Dom;
 
 using NLog;
@@ -178,11 +179,11 @@ namespace Peach.Core
 			}
 		}
 
-		protected Mutator GetMutatorInstance(Type t, State obj)
+		protected Mutator GetMutatorInstance(Type t, StateModel obj)
 		{
 			try
 			{
-				Mutator mutator = (Mutator)t.GetConstructor(new Type[] { typeof(State) }).Invoke(new object[] { obj });
+				Mutator mutator = (Mutator)t.GetConstructor(new Type[] { typeof(StateModel) }).Invoke(new object[] { obj });
 				mutator.context = this;
 				return mutator;
 			}

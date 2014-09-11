@@ -36,8 +36,49 @@ namespace Peach.Core
 	/// <summary>
 	/// Base class for Mutators.
 	/// </summary>
+	/// <remarks>
+	/// There are two modes of operation for mutators, state model and data model. State model mutators
+	/// will affect the flow of the state model and actions in the state model. Data model mutators will
+	/// affect the data produced during the current test case.
+	/// 
+	/// The operation of the mutator is as follows:
+	/// 
+	/// 1. Your static constructor will correct set the "affectStateModel" and "affectDataModel"
+	/// variables. These static variables determine in which modes your mutator will operate.
+	/// 
+	/// 2. affectDataModel: During record iterations your supportedDataElement static method
+	/// will be called to check if your mutator supports a specific dataelement. If true 
+	/// an instance of your mutator will be created with the origional instance of the data element
+	/// passed in. For every data element in the model you will be queried and asked and an
+	/// instance created for that specific element.
+	/// 
+	///    affectStateModel: A single instance of your mutator will be created and passed a 
+	/// the origional state model instance.
+	/// 
+	/// 3. affectDataModel: During mutation your sequentialMutation or randomMutation methods
+	/// will get called with a cloned instance of the origional data element. Each call to these
+	/// methods will be passed a new cloned instance that can be modified in any way. In face the
+	/// entire model could be modified in any way desired.
+	/// 
+	///    affectStateModel: During mutation your sequentialMutation or randomMutation methods
+	/// will get called with a cloned instance of the origional state model. Each call to these
+	/// methods will be passed a new cloned instance that can be modified in any way.
+	/// 
+	///    affectStateModel: When a changeState action occurs the changeState method is called
+	/// to provide an opertunity to modify the state that will be switched to.
+	/// </remarks>
 	public abstract class Mutator : IWeighted
 	{
+		/// <summary>
+		/// Is this mutator able to affect the state model?
+		/// </summary>
+		public static bool affectStateModel = false;
+
+		/// <summary>
+		/// Is this mutator able to affect the data model?
+		/// </summary>
+		public static bool affectDataModel = true;
+
 		/// <summary>
 		/// Instance of current mutation strategy
 		/// </summary>
@@ -61,7 +102,7 @@ namespace Peach.Core
 		{
 		}
 
-		public Mutator(State obj)
+		public Mutator(StateModel obj)
 		{
 		}
 
@@ -77,17 +118,6 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Check to see if State is supported by this 
-		/// mutator.
-		/// </summary>
-		/// <param name="obj">State to check</param>
-		/// <returns>True if object is supported, else False</returns>
-		public static bool supportedState(State obj)
-		{
-			return false;
-		}
-
-		/// <summary>
 		/// Returns the total number of mutations this
 		/// mutator is able to perform.
 		/// </summary>
@@ -97,6 +127,14 @@ namespace Peach.Core
 			get;
 		}
 
+		/// <summary>
+		/// Called to set the mutation to return. Applies only to sequencial mutation.
+		/// </summary>
+		/// <remarks>
+		/// This value will range form 0 to count. The same mutation number must always
+		/// produce the same mutation form sequencialMutation(). It does not apply to 
+		/// randomMutation.
+		/// </remarks>
 		public abstract uint mutation
 		{
 			get;
@@ -104,16 +142,42 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Perform a sequential mutation.
+		/// Perform a sequential mutation on a data element
 		/// </summary>
-		/// <param name="obj"></param>
+		/// <param name="obj">Instance of DataElement for this specific iteration. Each iteration a new instance
+		/// of the same object is passed in to be modified.</param>
+		/// <remarks>
+		/// This method performs mutation algorithm on a specific
+		/// data element.
+		/// </remarks>
 		public abstract void sequentialMutation(DataElement obj);
 
 		/// <summary>
-		/// Perform a random mutation.
+		/// Perform a random mutation on a data element
+		/// </summary>
+		/// <param name="obj">Instance of DataElement for this specific iteration. Each iteration a new instance
+		/// of the same object is passed in to be modified.</param>
+		public abstract void randomMutation(DataElement obj);
+
+		/// <summary>
+		/// Perform a sequential mutation on state model
 		/// </summary>
 		/// <param name="obj"></param>
-		public abstract void randomMutation(DataElement obj);
+		/// <returns></returns>
+		public virtual void sequentialMutation(Core.Dom.StateModel obj)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Perform a random mutation on state model
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public virtual void randomMutation(Core.Dom.StateModel obj)
+		{
+			throw new NotImplementedException();
+		}
 
 		/// <summary>
 		/// Allow changing which state we change to.
