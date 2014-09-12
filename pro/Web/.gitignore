@@ -5,6 +5,8 @@
 # This allows bin/obj folders to not be ignored in 3rdParty
 /*/[Bb]in/
 /*/[Oo]bj/
+/[Bb]in/
+/[Oo]bj/
 
 # User-specific files
 *.user

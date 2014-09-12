@@ -516,16 +516,15 @@ module DashApp.Models {
 
 	//#region Metrics Models
 	export interface FaultTimelineMetric {
-		time: Date;
+		date: Date;
 		faultCount: number;
 	}
 
 	export interface BucketTimelineMetric {
+		id: number;
 		label: string;
 		iteration: number;
 		time: Date;
-		type: string;
-		majorHash: string;
 		faultCount: number;
 	}
 
@@ -539,9 +538,9 @@ module DashApp.Models {
 
 	export interface ElementMetric {
 		element: string;
-		state: string;
-		action: string;
-		dataset: string;
+		//state: string;
+		//action: string;
+		//dataset: string;
 		mutationCount: number;
 		bucketCount: number;
 		faultCount: number;

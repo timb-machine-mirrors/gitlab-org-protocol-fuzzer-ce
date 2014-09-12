@@ -9,28 +9,229 @@ module DashApp {
 		metric: string;
 	}
 
+	export interface TimelineItem {
+		className?: string;
+		content: string;
+		end?: Date;
+		group?: any;
+		id?: number;
+		start: Date;
+		title?: string;
+		type: string;
+		data?: Models.BucketTimelineMetric
+	}
+
 	export class MetricsController {
 		private scope: ViewModelScope;
-
-		static $inject = ["$scope", "$routeParams"];
-
-		constructor($scope: ViewModelScope, $routeParams: MetricsParams) {
-			$scope.vm = this;
-			this.scope = $scope;
-			this.metric = $routeParams.metric;
-		}
 		private debug = true;
+		private peachSvc: Services.IPeachService;
+		private pitConfigSvc: Services.IPitConfiguratorService;
 
 		public metric: string;
 
-		public bucketTimelineData = [
-			{id: 1, content: 'bucket 1', start: '8/12/2014 0:00', url: "/p/jobs/blah"},
-			{ id: 2, content: 'bucket 2', start: '8/12/2014 1:00', url: "/p/jobs/blah"},
-			{ id: 3, content: 'bucket 3', start: '8/12/2014 2:00', url: "/p/jobs/blah"},
-			{ id: 4, content: 'bucket 4', start: '8/12/2014 3:00', url: "/p/jobs/blah"},
-			{ id: 5, content: 'bucket 5', start: '8/12/2014 4:00', url: "/p/jobs/blah"},
-			{ id: 6, content: 'bucket 6', start: '8/12/2014 5:00', url: "/p/jobs/blah"}
-		];
+		//public bucketTimelineData: Models.BucketTimelineMetric[] = [];
+		public bucketTimelineData: TimelineItem[] = [];
+		
+		public mutatorData: Models.MutatorMetric[] = [];
+		public elementData: Models.ElementMetric[] = [];
+		public datasetData: Models.DatasetMetric[] = [];
+		public stateData: Models.StateMetric[] = [];
+		public bucketData: Models.BucketMetric[] = [];
+
+		static $inject = ["$scope", "$routeParams", "pitConfiguratorService", "peachService"];
+
+		constructor($scope: ViewModelScope, $routeParams: MetricsParams, pitConfiguratorService: Services.IPitConfiguratorService, peachService: Services.IPeachService) {
+			$scope.vm = this;
+			this.scope = $scope;
+			this.metric = $routeParams.metric;
+			this.pitConfigSvc = pitConfiguratorService;
+			this.peachSvc = peachService;
+			this.initializeData();
+		}
+
+		private initializeData() {
+			this.peachSvc.GetJob((data: Models.Job) => {
+				var jobUrl = data.jobUrl;
+
+				switch(this.metric)
+				{
+					case "bucketTimeline":
+						this.peachSvc.GetBucketTimeline(jobUrl, (data: Models.BucketTimelineMetric[]) => {
+							for (var i = 0; i < data.length; i++) {
+								this.bucketTimelineData.push({
+									type: "box",
+									content: "",
+									data: data[i],
+									start: data[i].time
+								});
+							}
+						});
+						break;
+					case "faultsOverTime":
+						this.peachSvc.GetFaultTimeline(jobUrl, (data: Models.FaultTimelineMetric[]) => {
+							this.faultTimelineData = data;
+
+							this.metrics_faultsOverTime_chart = {
+								labels: this.faultTimelineData.map(i => moment(i.date).format("M/D h a")),
+								datasets: [
+									{
+														label: "My First dataset",
+														fillColor: "rgba(220,220,220,0.2)",
+														strokeColor: "rgba(220,220,220,1)",
+														pointColor: "rgba(220,220,220,1)",
+														pointStrokeColor: "#fff",
+														pointHighlightFill: "#fff",
+														pointHighlightStroke: "rgba(220,220,220,1)",
+														data: this.faultTimelineData.map(i => i.faultCount)
+									}
+								]
+							};
+
+							this. metrics_faultsOverTime_options = {
+								// Boolean - whether or not the chart should be responsive and resize when the browser does.
+								responsive: true,
+
+								// Boolean - Determines whether to draw tooltips on the canvas or not
+								showTooltips: true,
+
+								// Array - Array of string names to attach tooltip events
+								tooltipEvents: ["mousemove", "touchstart", "touchmove"],
+
+								// String - Tooltip background colour
+								tooltipFillColor: "rgba(0,0,0,0.8)",
+
+								// String - Tooltip label font declaration for the scale label
+								tooltipFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+
+								// Number - Tooltip label font size in pixels
+								tooltipFontSize: 14,
+
+								// String - Tooltip font weight style
+								tooltipFontStyle: "normal",
+
+								// String - Tooltip label font colour
+								tooltipFontColor: "#fff",
+
+								// String - Tooltip title font declaration for the scale label
+								tooltipTitleFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+
+								// Number - Tooltip title font size in pixels
+								tooltipTitleFontSize: 14,
+
+								// String - Tooltip title font weight style
+								tooltipTitleFontStyle: "bold",
+
+								// String - Tooltip title font colour
+								tooltipTitleFontColor: "#fff",
+
+								// Number - pixel width of padding around tooltip text
+								tooltipYPadding: 6,
+
+								// Number - pixel width of padding around tooltip text
+								tooltipXPadding: 6,
+
+								// Number - Size of the caret on the tooltip
+								tooltipCaretSize: 8,
+
+								// Number - Pixel radius of the tooltip border
+								tooltipCornerRadius: 6,
+
+								// Number - Pixel offset from point x to tooltip edge
+								tooltipXOffset: 10,
+
+								// String - Template string for single tooltips
+								tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
+
+								// String - Template string for single tooltips
+								multiTooltipTemplate: "<%= value %>",
+
+								// Boolean - If we should show the scale at all
+								showScale: true,
+
+								// Boolean - If we want to override with a hard coded scale
+								scaleOverride: true,
+
+								// ** Required if scaleOverride is true **
+								// Number - The number of steps in a hard coded scale
+								scaleSteps: this.getMaxOfArray(this.faultTimelineData.map(i => i.faultCount)),
+								// Number - The value jump in the hard coded scale
+								scaleStepWidth: 1,
+								// Number - The scale starting value
+								scaleStartValue: 0,
+
+								///Boolean - Whether grid lines are shown across the chart
+								scaleShowGridLines: true,
+
+								//String - Colour of the grid lines
+								scaleGridLineColor: "rgba(0,0,0,.05)",
+
+								//Number - Width of the grid lines
+								scaleGridLineWidth: 1,
+
+								//Boolean - Whether the line is curved between points
+								bezierCurve: true,
+
+								//Number - Tension of the bezier curve between points
+								bezierCurveTension: 0.4,
+
+								//Boolean - Whether to show a dot for each point
+								pointDot: true,
+
+								//Number - Radius of each point dot in pixels
+								pointDotRadius: 4,
+
+								//Number - Pixel width of point dot stroke
+								pointDotStrokeWidth: 1,
+
+								//Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+								pointHitDetectionRadius: 20,
+
+								//Boolean - Whether to show a stroke for datasets
+								datasetStroke: true,
+
+								//Number - Pixel width of dataset stroke
+								datasetStrokeWidth: 2,
+
+								//Boolean - Whether to fill the dataset with a colour
+								datasetFill: true,
+
+								//String - A legend template
+								legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+							};
+
+
+						});
+						break;
+					case "mutators":
+						this.peachSvc.GetMutatorMetrics(jobUrl, (data: Models.MutatorMetric[]) => {
+							this.mutatorData = data;
+						});
+						break;
+					case "elements":
+						this.peachSvc.GetElementMetrics(jobUrl, (data: Models.ElementMetric[]) => {
+							this.elementData = data;
+						});
+						break;
+					case "datasets":
+						this.peachSvc.GetDatasetMetrics(jobUrl, (data: Models.DatasetMetric[]) => {
+							this.datasetData = data;
+						});
+						break;
+					case "states":
+						this.peachSvc.GetStateMetrics(jobUrl, (data: Models.StateMetric[]) => {
+							this.stateData = data;
+						});
+						break;
+					case "buckets":
+						this.peachSvc.GetBucketMetrics(jobUrl, (data: Models.BucketMetric[]) => {
+							this.bucketData = data;
+						});
+						break;
+				}
+			});
+			
+
+		}
 
 		private simplifyItems (items) {
 			var simplified = [];
@@ -46,33 +247,34 @@ module DashApp {
 			return simplified;
 		}
 
+		// #region timeline
 		public timeline = {
-			select: (selected) => {
-				if (this.debug) {
-					console.log('selected items: ', selected.items);
-				}
+			//select: (selected) => {
+			//	if (this.debug) {
+			//		console.log('selected items: ', selected.items);
+			//	}
 
-				var selecteditem = $.grep(this.bucketTimelineData, (e) => {
-					return e.id == selected.items[0];
-				})[0];
+			//	var selecteditem = $.grep(this.bucketTimelineData, (e) => {
+			//		return e.id == selected.items[0];
+			//	})[0];
 				
-				var items = this.simplifyItems(this.bucketTimelineData);
+			//	var items = this.simplifyItems(this.bucketTimelineData);
 
-				var format = 'YYYY-MM-DDTHH:mm';
+			//	var format = 'YYYY-MM-DDTHH:mm'; 
 
-				angular.forEach(items, function (item) {
-					if (item.id == selected.items[0]) {
-						this.scope.slot = {
-							id: item.id,
-							start: moment(item.start).format(format),
-							end: (item.end) ? moment(item.end).format(format) : null,
-							content: item.content
-						};
+			//	angular.forEach(items, function (item) {
+			//		if (item.id == selected.items[0]) {
+			//			this.scope.slot = {
+			//				id: item.id,
+			//				start: moment(item.start).format(format),
+			//				end: (item.end) ? moment(item.end).format(format) : null,
+			//				content: item.content
+			//			};
 
-						this.scope.$apply();
-					}
-				});
-			},
+			//			this.scope.$apply();
+			//		}
+			//	});
+			//},
 
 			range: {},
 
@@ -100,10 +302,10 @@ module DashApp {
 				if (this.debug) {
 					console.log('timeChange: ', period.time);
 				}
-
+				
 				this.scope.$apply(
 					function () {
-						this.scope.timeline.customTime = period.time;
+						this.scope.vm.timeline.customTime = period.time;
 					}
 				);
 			},
@@ -159,187 +361,22 @@ module DashApp {
 			}
 		};
 
+		//#endregion
 
-		public metrics_faultsOverTime_data: Models.FaultTimelineMetric[] = [
-			{ time: new Date(2014, 4, 5, 1, 1, 0, 1), faultCount: 1 },
-			{ time: new Date(2014, 4, 5, 2, 1, 0, 1), faultCount: 2 },
-			{ time: new Date(2014, 4, 5, 3, 1, 0, 1), faultCount: 1 },
-			{ time: new Date(2014, 4, 5, 4, 1, 0, 1), faultCount: 3 },
-			{ time: new Date(2014, 4, 5, 5, 1, 0, 1), faultCount: 1 },
-			{ time: new Date(2014, 4, 5, 6, 1, 0, 1), faultCount: 1 }
-		];
+		private faultTimelineData: Models.FaultTimelineMetric[] = [];
 
+		//labels: this.faultTimelineData.map(i => moment(i.date).format("h:mm:ss a")),
 
-		// this.metrics_faultsOverTime_data.map(i => i.x)
-		// this.metrics_faultsOverTime_data.map(i => i.y)
-		public metrics_faultsOverTime_chart = {
-			labels: this.metrics_faultsOverTime_data.map(i => moment(i.time).format("h:mm:ss a")),
-			datasets: [
-				{
-					label: "My First dataset",
-					fillColor: "rgba(220,220,220,0.2)",
-					strokeColor: "rgba(220,220,220,1)",
-					pointColor: "rgba(220,220,220,1)",
-					pointStrokeColor: "#fff",
-					pointHighlightFill: "#fff",
-					pointHighlightStroke: "rgba(220,220,220,1)",
-					data: this.metrics_faultsOverTime_data.map(i => i.faultCount)
-				}
-			]
-		};
+		public metrics_faultsOverTime_chart = {};
 
-		public metrics_faultsOverTime_options = { 
-			// Boolean - whether or not the chart should be responsive and resize when the browser does.
-			responsive: true,
+		// #region metrics_faultsOverTime_options
 
-			// Boolean - Determines whether to draw tooltips on the canvas or not
-			showTooltips: true,
+		public metrics_faultsOverTime_options = {};
+		//#endregion
 
-			// Array - Array of string names to attach tooltip events
-			tooltipEvents: ["mousemove", "touchstart", "touchmove"],
-
-			// String - Tooltip background colour
-			tooltipFillColor: "rgba(0,0,0,0.8)",
-
-			// String - Tooltip label font declaration for the scale label
-			tooltipFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-
-			// Number - Tooltip label font size in pixels
-			tooltipFontSize: 14,
-
-			// String - Tooltip font weight style
-			tooltipFontStyle: "normal",
-
-			// String - Tooltip label font colour
-			tooltipFontColor: "#fff",
-
-			// String - Tooltip title font declaration for the scale label
-			tooltipTitleFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-
-			// Number - Tooltip title font size in pixels
-			tooltipTitleFontSize: 14,
-
-			// String - Tooltip title font weight style
-			tooltipTitleFontStyle: "bold",
-
-			// String - Tooltip title font colour
-			tooltipTitleFontColor: "#fff",
-
-			// Number - pixel width of padding around tooltip text
-			tooltipYPadding: 6,
-
-			// Number - pixel width of padding around tooltip text
-			tooltipXPadding: 6,
-
-			// Number - Size of the caret on the tooltip
-			tooltipCaretSize: 8,
-
-			// Number - Pixel radius of the tooltip border
-			tooltipCornerRadius: 6,
-
-			// Number - Pixel offset from point x to tooltip edge
-			tooltipXOffset: 10,
-
-			// String - Template string for single tooltips
-			tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
-
-			// String - Template string for single tooltips
-			multiTooltipTemplate: "<%= value %>",
-
-			// Boolean - If we should show the scale at all
-			showScale: true,
-
-			// Boolean - If we want to override with a hard coded scale
-			scaleOverride: true,
-
-			// ** Required if scaleOverride is true **
-			// Number - The number of steps in a hard coded scale
-			scaleSteps: this.getMaxOfArray(this.metrics_faultsOverTime_data.map(i => i.faultCount)),
-			// Number - The value jump in the hard coded scale
-			scaleStepWidth: 1,
-			// Number - The scale starting value
-			scaleStartValue: 0,
-
-			///Boolean - Whether grid lines are shown across the chart
-			scaleShowGridLines: true,
-
-			//String - Colour of the grid lines
-			scaleGridLineColor: "rgba(0,0,0,.05)",
-
-			//Number - Width of the grid lines
-			scaleGridLineWidth: 1,
-
-			//Boolean - Whether the line is curved between points
-			bezierCurve: true,
-
-			//Number - Tension of the bezier curve between points
-			bezierCurveTension: 0.4,
-
-			//Boolean - Whether to show a dot for each point
-			pointDot: true,
-
-			//Number - Radius of each point dot in pixels
-			pointDotRadius: 4,
-
-			//Number - Pixel width of point dot stroke
-			pointDotStrokeWidth: 1,
-
-			//Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-			pointHitDetectionRadius: 20,
-
-			//Boolean - Whether to show a stroke for datasets
-			datasetStroke: true,
-
-			//Number - Pixel width of dataset stroke
-			datasetStrokeWidth: 2,
-
-			//Boolean - Whether to fill the dataset with a colour
-			datasetFill: true,
-
-			//String - A legend template
-			legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-		};
-
-		public dataMetricsMutator: Models.MutatorMetric[] = [
-			{
-				mutator: "StringMutator",
-				elementCount: 10,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				mutator: "StringMutator",
-				elementCount: 10,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				mutator: "StringMutator",
-				elementCount: 10,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				mutator: "StringMutator",
-				elementCount: 10,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				mutator: "StringMutator",
-				elementCount: 10,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-		];
 
 		public gridMetricsMutator = {
-			data: "vm.dataMetricsMutator",
+			data: "vm.mutatorData",
 			sortInfo: { fields: ["mutator"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "mutator", displayName: "Mutator" },
@@ -350,47 +387,9 @@ module DashApp {
 			]
 		};
 
-		public dataMetricsElement: Models.ElementMetric[] = [
-			{
-				dataset: "dataset",
-				state: "state",
-				action: "action",
-				element: "element1",
-				mutationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "dataset",
-				state: "state",
-				action: "action",
-				element: "element1",
-				mutationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "dataset",
-				state: "state",
-				action: "action",
-				element: "element1",
-				mutationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "dataset",
-				state: "state",
-				action: "action",
-				element: "element1",
-				mutationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			}
-		];
 
 		public gridMetricsElement = {
-			data: "vm.dataMetricsElement",
+			data: "vm.elementData",
 			sortInfo: { fields: ["element"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "element", displayName: "Element" },
@@ -404,31 +403,8 @@ module DashApp {
 			]
 		};
 
-		public dataMetricsState: Models.StateMetric[] = [
-			{
-				state: "State 1",
-				executionCount: 5000
-			},
-			{
-				state: "State 2",
-				executionCount: 5000
-			},
-			{
-				state: "State 3",
-				executionCount: 5000
-			},
-			{
-				state: "State 4",
-				executionCount: 5000
-			},
-			{
-				state: "State 5",
-				executionCount: 5000
-			},
-		];
-
 		public gridMetricsState = {
-			data: "vm.dataMetricsState",
+			data: "vm.stateData",
 			sortInfo: { fields: ["state"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "state", displayName: "State" },
@@ -436,51 +412,8 @@ module DashApp {
 			]
 		};
 
-		public dataMetricsData: Models.DatasetMetric[] = [
-			{
-				dataset: "Dataset",
-				element: "FooData",
-				mutatorCount: 3,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "Dataset",
-				element: "FooData",
-				mutatorCount: 3,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "Dataset",
-				element: "FooData",
-				mutatorCount: 3,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "Dataset",
-				element: "FooData",
-				mutatorCount: 3,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			},
-			{
-				dataset: "Dataset",
-				element: "FooData",
-				mutatorCount: 3,
-				iterationCount: 5000,
-				bucketCount: 3,
-				faultCount: 200
-			}
-		];
-
 		public gridMetricsDataset = {
-			data: "vm.dataMetricsData",
+			data: "vm.datasetData",
 			sortInfo: { fields: ["dataset"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "dataset", displayName: "Data Set" },
@@ -492,61 +425,8 @@ module DashApp {
 			]
 		};
 
-		public dataMetricsBucket: Models.BucketMetric[] = [
-			{
-				bucket: "Bucket 1",
-				mutator: "Mutator",
-				dataset: "Dataset",
-				action: "Action",
-				element: "Element",
-				state: "State",
-				iterationCount: 5000,
-				faultCount: 200
-			},
-			{
-				bucket: "Bucket 2",
-				mutator: "Mutator",
-				dataset: "Dataset",
-				action: "Action",
-				element: "Element",
-				state: "State",
-				iterationCount: 5000,
-				faultCount: 200
-			},
-			{
-				bucket: "Bucket 3",
-				mutator: "Mutator",
-				dataset: "Dataset",
-				action: "Action",
-				element: "Element",
-				state: "State",
-				iterationCount: 5000,
-				faultCount: 200
-			},
-			{
-				bucket: "Bucket 4",
-				mutator: "Mutator",
-				dataset: "Dataset",
-				action: "Action",
-				element: "Element",
-				state: "State",
-				iterationCount: 5000,
-				faultCount: 200
-			},
-			{
-				bucket: "Bucket 5",
-				mutator: "Mutator",
-				dataset: "Dataset",
-				action: "Action",
-				element: "Element",
-				state: "State",
-				iterationCount: 5000,
-				faultCount: 200
-			},
-		];
-
 		public gridMetricsBucket = {
-			data: "vm.dataMetricsBucket",
+			data: "vm.bucketData",
 			sortInfo: { fields: ["bucket"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "bucket", displayName: "Fault Bucket" },
