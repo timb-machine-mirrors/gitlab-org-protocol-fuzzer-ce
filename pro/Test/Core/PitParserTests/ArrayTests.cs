@@ -53,6 +53,11 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				throw new NotImplementedException();
 			}
+
+			public override void WritePit(System.Xml.XmlWriter pit)
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		[Test]
