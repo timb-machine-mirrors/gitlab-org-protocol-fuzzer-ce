@@ -11,34 +11,20 @@ using Peach.Core.IO;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Alter the blob by a random number of bytes between 1 and 255.
+	/// Alter the blob by a random number of bytes between 1 and 100.
 	/// Pick a random start position in the blob.
 	/// Alter size bytes starting at position where each null byte is
 	/// changed to different randomly selected non-null value.
 	/// </summary>
 	[Mutator("BlobChangeFromNull")]
 	[Description("Change the blob by replacing nulls with non-nulls")]
+	[Hint("BlobChangeFromNull-N", "Standard deviation of number of bytes to change")]
+	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobChangeFromNull : Utility.BlobMutator
 	{
 		public BlobChangeFromNull(DataElement obj)
-			: base(obj)
+			: base(obj, 100, true)
 		{
-		}
-
-		protected override long MaxLength
-		{
-			get
-			{
-				return 100;
-			}
-		}
-
-		protected override bool ClampLength
-		{
-			get
-			{
-				return true;
-			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)
