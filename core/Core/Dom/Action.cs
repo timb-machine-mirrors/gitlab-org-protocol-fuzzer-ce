@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Diagnostics;
 
 using NLog;
 
@@ -55,6 +56,7 @@ namespace Peach.Core.Dom
 	/// <summary>
 	/// Base class for state model actions such as sending output, calling a method, etc.
 	/// </summary>
+	[DebuggerDisplay("{name}: {type}")]
 	[Serializable]
 	public abstract class Action : INamed
 	{

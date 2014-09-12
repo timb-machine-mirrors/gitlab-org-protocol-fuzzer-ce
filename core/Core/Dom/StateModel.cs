@@ -145,14 +145,24 @@ namespace Peach.Core.Dom
 				// Update all data model to clones of origionalDataModel
 				// before we start down the state path.
 				foreach (State state in states)
-				{
 					state.UpdateToOriginalDataModel();
-				}
 
 				State currentState = initialState;
 
 				context.OnStateModelStarting(this);
 
+				// Allow mutating the initial state
+				var newState = context.test.strategy.MutateChangingState(currentState);
+
+				if (newState == currentState)
+					logger.Debug("Run(): Changing to state \"{0}\".", newState.name);
+				else
+					logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".",
+						newState.name, currentState);
+
+				currentState = newState;
+
+				// Main execution loop
 				while (true)
 				{
 					try
@@ -162,7 +172,7 @@ namespace Peach.Core.Dom
 					}
 					catch (ActionChangeStateException ase)
 					{
-						var newState = context.test.strategy.MutateChangingState(ase.changeToState);
+						newState = context.test.strategy.MutateChangingState(ase.changeToState);
 						
 						if(newState == ase.changeToState)
 							logger.Debug("Run(): Changing to state \"{0}\".", newState.name);

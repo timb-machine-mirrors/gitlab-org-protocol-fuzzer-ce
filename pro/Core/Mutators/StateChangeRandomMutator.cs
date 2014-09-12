@@ -11,7 +11,7 @@ using Peach.Core.Dom;
 namespace Peach.Enterprise.Mutators
 {
 	[Mutator("StateChangeRandom")]
-	[Description("Causes state changes to be random.")]
+	[Description("Causes state changes to be random. The chance a state change will be modified is based on the number of states.")]
 	public class StateChangeRandomMutator : Mutator
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -26,9 +26,12 @@ namespace Peach.Enterprise.Mutators
 		uint _mutation = 0;
 		int _stateCount = 0;
 		Peach.Core.Random _random;
+		Core.Dom.StateModel _model;
 
 		public StateChangeRandomMutator(StateModel model)
 		{
+			name = "StateChangeRandom";
+
 			_count = model.states.Count * model.states.Count;
 			_stateCount = model.states.Count;
 		}
@@ -64,24 +67,26 @@ namespace Peach.Enterprise.Mutators
 		{
 			// TODO: Verify this is correct!
 			_random = new Core.Random(_mutation);
+			_model = obj;
 		}
 
 		public override void randomMutation(Core.Dom.StateModel obj)
 		{
 			_random = context.Random;
+			_model = obj;
 		}
 
-		public override Core.Dom.State changeState(Core.Dom.State obj)
+		public override Core.Dom.State changeState(Core.Dom.State currentState, Core.Dom.Action currentAction, Core.Dom.State nextState)
 		{
 			if (_random.NextInt32() % _stateCount == 0)
 			{
-				var newState = _random.Choice(obj.parent.states);
+				var newState = _random.Choice(_model.states);
 
-				logger.Trace("changeState: Swap {0} for {1}.", obj.name, newState.name);
+				logger.Trace("changeState: Swap {0} for {1}.", nextState.name, newState.name);
 				return newState;
 			}
 
-			return obj;
+			return nextState;
 		}
 	}
 }

@@ -31,7 +31,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
-using Peach.Core.MutationStrategies;
 using Peach.Core.Dom;
 
 using NLog;
@@ -126,6 +125,18 @@ namespace Peach.Core
 		public virtual State MutateChangingState(State state)
 		{
 			return state;
+		}
+
+		/// <summary>
+		/// Allows mutation strategy to affect state change.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <param name="lastAction"></param>
+		/// <param name="nextAction"></param>
+		/// <returns></returns>
+		public virtual Dom.Action NextAction(State state, Dom.Action lastAction, Dom.Action nextAction)
+		{
+			return nextAction;
 		}
 
 		/// <summary>
