@@ -4,8 +4,15 @@ using System.Collections.Generic;
 
 namespace Peach.Enterprise.WebServices.Models
 {
+	public class FaultTimelineMetric
+	{
+		public DateTime Date { get; set; }
+		public uint FaultCount { get; set; }
+	}
+
 	public class BucketTimelineMetric
 	{
+		public uint ID { get; set; }
 		public string Label { get; set; }
 		public uint Iteration { get; set; }
 		public DateTime Time { get; set; }
@@ -26,10 +33,8 @@ namespace Peach.Enterprise.WebServices.Models
 
 	public class ElementMetric
 	{
-		public string Dataset { get; set; }
-		public string State { get; set; }
-		public string Action { get; set; }
 		public string Element { get; set; }
+		public uint IterationCount { get; set; }
 		public uint MutationCount { get; set; }
 		public uint BucketCount { get; set; }
 		public uint FaultCount { get; set; }
@@ -59,5 +64,16 @@ namespace Peach.Enterprise.WebServices.Models
 		public string Element { get; set; }
 		public uint IterationCount { get; set; }
 		public uint FaultCount { get; set; }
+	}
+
+	public class IterationMetric
+	{
+		public string State { get; set; }
+		public string Action { get; set; }
+		public string Parameter { get; set; }
+		public string Element { get; set; }
+		public string Mutator { get; set; }
+		public string Dataset { get; set; }
+		public uint IterationCount { get; set; }
 	}
 }

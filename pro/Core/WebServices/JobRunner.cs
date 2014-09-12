@@ -191,7 +191,7 @@ namespace Peach.Enterprise.WebServices
 
 				var parser = new Godel.Core.GodelPitParser();
 				var dom = parser.asParser(args, config.pitFile);
-				var engine = new Engine(webLogger);
+
 
 				#region add MetricsLogger to all tests if it doesn't exist
 				var metricsargs = new Dictionary<string, Peach.Core.Variant>();
@@ -216,6 +216,10 @@ namespace Peach.Enterprise.WebServices
 					}
 				}
 				#endregion
+
+
+				var engine = new Engine(webLogger);
+
 
 				// hook up the stop event
 				config.shouldStop = shouldStop;
