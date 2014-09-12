@@ -166,8 +166,8 @@ namespace Peach.Core.MutationStrategies
 		{
 			base.Finalize(context, engine);
 
-			context.ActionStarting += ActionStarting;
-			context.StateStarting += StateStarting;
+			context.ActionStarting -= ActionStarting;
+			context.StateStarting -= StateStarting;
 			engine.IterationStarting -= engine_IterationStarting;
 		}
 
