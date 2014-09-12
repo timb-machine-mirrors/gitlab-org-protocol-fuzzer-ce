@@ -11,31 +11,17 @@ using Peach.Core.IO;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Picks a random range of bytes inside the blob and removes it.
+	/// Picks a random range of bytes up to 255 inside the blob and removes it.
 	/// </summary>
 	[Mutator("BlobReduce")]
 	[Description("Reduce the size of a blob")]
+	[Hint("BlobReduce-N", "Standard deviation of number of bytes to change")]
+	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobReduce : Utility.BlobMutator
 	{
 		public BlobReduce(DataElement obj)
-			: base(obj)
+			: base(obj, 255, true)
 		{
-		}
-
-		protected override long MaxLength
-		{
-			get
-			{
-				return long.MaxValue;
-			}
-		}
-
-		protected override bool ClampLength
-		{
-			get
-			{
-				return true;
-			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)

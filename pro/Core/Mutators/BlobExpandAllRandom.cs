@@ -18,27 +18,13 @@ namespace Peach.Core.Mutators
 	/// </summary>
 	[Mutator("BlobExpandAllRandom")]
 	[Description("Expand the blob by filling it with randomly selected values")]
+	[Hint("BlobExpandAllRandom-N", "Standard deviation of number of bytes to change")]
+	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobExpandAllRandom : Utility.BlobMutator
 	{
 		public BlobExpandAllRandom(DataElement obj)
-			: base(obj)
+			: base(obj, 255, false)
 		{
-		}
-
-		protected override long MaxLength
-		{
-			get
-			{
-				return byte.MaxValue;
-			}
-		}
-
-		protected override bool ClampLength
-		{
-			get
-			{
-				return false;
-			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)

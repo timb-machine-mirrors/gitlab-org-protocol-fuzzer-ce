@@ -17,27 +17,13 @@ namespace Peach.Core.Mutators
 	/// </summary>
 	[Mutator("BlobExpandZero")]
 	[Description("Expand the blob by filling it with nulls")]
+	[Hint("BlobExpandZero-N", "Standard deviation of number of bytes to change")]
+	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobExpandZero : Utility.BlobMutator
 	{
 		public BlobExpandZero(DataElement obj)
-			: base(obj)
+			: base(obj, 255, false)
 		{
-		}
-
-		protected override long MaxLength
-		{
-			get
-			{
-				return byte.MaxValue;
-			}
-		}
-
-		protected override bool ClampLength
-		{
-			get
-			{
-				return false;
-			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)
