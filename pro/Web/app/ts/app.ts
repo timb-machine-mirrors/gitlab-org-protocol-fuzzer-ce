@@ -36,6 +36,10 @@ module DashApp {
 					templateUrl: "/partials/dash.html",
 					controller: DashController
 				})
+				.when("/faults/:bucket", {
+					templateUrl: "/partials/faults.html",
+					controller: FaultsController
+				})
 				.when("/faults", {
 					templateUrl: "/partials/faults.html",
 					controller: FaultsController
@@ -92,7 +96,7 @@ module DashApp {
 		})
 		.directive('ngEnter', function () {
 			return {
-				link: function (scope, element, attrs, ctrl) {
+				link: function (scope, element, attrs: IEnterAttributes, ctrl) {
 					element.bind("keydown keypress", function (event) {
 						if (event.which === 13) {
 							scope.$apply(function () {
@@ -109,7 +113,7 @@ module DashApp {
 			return {
 				restrict: 'A',
 				require: 'ngModel',
-				link: function (scope, elem, attr, ctrl) {
+				link: function (scope, elem, attr: IMinAttributes, ctrl) {
 					scope.$watch(attr.ngMin, function () {
 						ctrl.$setViewValue(ctrl.$viewValue);
 					});
@@ -132,7 +136,7 @@ module DashApp {
 		.directive('ngMax', function () {
 			return {
 				require: 'ngModel',
-				link: function (scope, elem, attr, ctrl) {
+				link: function (scope, elem, attr: IMaxAttributes, ctrl) {
 					scope.$watch(attr.ngMax, function () {
 						ctrl.$setViewValue(ctrl.$viewValue);
 					});
@@ -161,6 +165,18 @@ module DashApp {
 		});
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
+	}
+
+	interface IEnterAttributes extends ng.IAttributes {
+		ngEnter: any;
+	}
+
+	interface IMinAttributes extends ng.IAttributes {
+		ngMin: any;
+	}
+
+	interface IMaxAttributes extends ng.IAttributes {
+		ngMax: any;
 	}
 }
 
