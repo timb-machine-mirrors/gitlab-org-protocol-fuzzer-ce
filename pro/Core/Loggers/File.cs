@@ -96,6 +96,10 @@ namespace Peach.Core.Loggers
 			foreach (var kv in fault.collectedData)
 			{
 				var fileName = System.IO.Path.Combine(subDir, kv.Key);
+
+				// Store the physical location for use by others
+				kv.Path = fileName;
+
 				SaveFile(category, fileName, kv.Value);
 				files.Add(fileName);
 			}
@@ -437,6 +441,9 @@ namespace Peach.Core.Loggers
 			return GetLogPath(context, Path);
 		}
 
+		public delegate void FaultSavedEvent(Fault fault);
+		public event FaultSavedEvent FaultSaved;
+
 		protected virtual void OnFaultSaved(Category category, Fault fault, string[] dataFiles)
 		{
 			if (category != Category.Reproducing)
@@ -456,6 +463,9 @@ namespace Peach.Core.Loggers
 					}
 				}
 			}
+
+			if (FaultSaved != null)
+				FaultSaved(fault);
 		}
 
 		protected virtual void SaveFile(Category category, string fullPath, byte[] contents)

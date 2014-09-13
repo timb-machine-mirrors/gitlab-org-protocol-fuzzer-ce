@@ -39,6 +39,12 @@ namespace Peach.Core
 
 			public string Key { get; set; }
 			public byte[] Value { get; set; }
+
+			/// <summary>
+			/// Set by FileLogger with the location on disk
+			/// of this file.
+			/// </summary>
+			public string Path { get; set; }
 		}
 
 		[Serializable]
