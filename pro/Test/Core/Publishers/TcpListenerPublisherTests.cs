@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace Peach.Core.Test.Publishers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class TcpListenerPublisherTests : DataModelCollector
 	{
 		[Test]

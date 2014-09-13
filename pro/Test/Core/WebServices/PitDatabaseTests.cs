@@ -10,7 +10,7 @@ using Peach.Core;
 
 namespace Peach.Enterprise.Test.WebServices
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class PitDatabaseTests
 	{
 		string root;

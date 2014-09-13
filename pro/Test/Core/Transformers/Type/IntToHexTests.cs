@@ -11,7 +11,7 @@ using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Transformers.Type
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class IntToHexTests : DataModelCollector
     {
         [Test]

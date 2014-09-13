@@ -12,7 +12,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Monitors
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class ReplayMonitorTests : DataModelCollector
     {
         [Test]

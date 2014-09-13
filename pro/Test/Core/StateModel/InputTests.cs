@@ -20,7 +20,7 @@ using Peach.Core.Publishers;
 
 namespace Peach.Core.Test.StateModel
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class InputTests
 	{
 		[Test]

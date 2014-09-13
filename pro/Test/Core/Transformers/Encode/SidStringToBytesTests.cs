@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Transformers.Encode
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class SidStringToBytesTests : DataModelCollector
     {
         [Test]

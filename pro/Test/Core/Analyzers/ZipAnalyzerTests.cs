@@ -9,7 +9,7 @@ using Ionic.Zip;
 
 namespace Peach.Enterprise.Test.Analyzers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ZipAnalyzerTests
 	{
 		[Test]

@@ -41,7 +41,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.OutputTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class SizeRelationTests
 	{
 		[Test]

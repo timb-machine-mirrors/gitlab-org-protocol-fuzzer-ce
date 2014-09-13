@@ -44,7 +44,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Analyzers
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     internal class StringTokenTests
     {
         [Test]

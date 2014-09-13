@@ -9,7 +9,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class CleanupFolderMonitorTests
 	{
 		bool madeTempFiles;

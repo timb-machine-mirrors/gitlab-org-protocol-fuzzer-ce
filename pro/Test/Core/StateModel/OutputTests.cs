@@ -32,7 +32,7 @@ namespace Peach.Core.Test.StateModel
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class OutputTests : DataModelCollector
 	{
 		[Test]
@@ -238,7 +238,6 @@ namespace Peach.Core.Test.StateModel
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-
 			Assert.AreEqual(110, dataModels.Count);
 
 			for (int i = 1; i < 10; i+=2)
@@ -262,6 +261,8 @@ namespace Peach.Core.Test.StateModel
 						++count;
 					if (str2 != "Foo Data Model")
 						++count;
+
+					Assert.IsTrue(true);
 				}
 				Assert.AreEqual(1, count);
 			}

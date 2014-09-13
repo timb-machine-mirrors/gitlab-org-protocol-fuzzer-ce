@@ -40,7 +40,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RelationCountTests
 	{
 		[Test]

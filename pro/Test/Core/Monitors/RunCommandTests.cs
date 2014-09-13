@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RunCommandTests
 	{
 		string MakeXml(string[] options)

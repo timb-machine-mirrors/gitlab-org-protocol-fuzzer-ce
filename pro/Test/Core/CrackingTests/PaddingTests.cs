@@ -41,7 +41,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.CrackingTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class PaddingTests
 	{
 		static string template = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +

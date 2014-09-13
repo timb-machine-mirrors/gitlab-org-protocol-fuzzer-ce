@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace Peach.Core.Test.Agent.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class CrashWranglerTest
 	{
 		[Test]

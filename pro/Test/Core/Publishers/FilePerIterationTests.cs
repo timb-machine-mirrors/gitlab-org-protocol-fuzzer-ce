@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Peach.Core.Test.Publishers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class FilePerIterationTests
 	{
 		void RunTest(string tempFile, uint stop)

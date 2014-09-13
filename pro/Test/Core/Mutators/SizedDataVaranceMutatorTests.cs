@@ -11,7 +11,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Mutators
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class SizedDataVaranceMutatorTests : DataModelCollector
     {
         [Test]

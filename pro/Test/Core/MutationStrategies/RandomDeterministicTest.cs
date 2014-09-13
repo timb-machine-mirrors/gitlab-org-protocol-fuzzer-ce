@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace Peach.Core.Test.MutationStrategies
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RandomDeterministicTest : DataModelCollector
 	{
 		[Test]

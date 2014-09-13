@@ -18,7 +18,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Agent
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class AgentTests
 	{
 		SingleInstance si;

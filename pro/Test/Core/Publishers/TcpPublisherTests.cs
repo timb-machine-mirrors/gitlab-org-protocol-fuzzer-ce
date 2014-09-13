@@ -208,7 +208,7 @@ namespace Peach.Core.Test.Publishers
 	}
 
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class TcpPublisherTests : DataModelCollector
 	{
 		public string template = @"

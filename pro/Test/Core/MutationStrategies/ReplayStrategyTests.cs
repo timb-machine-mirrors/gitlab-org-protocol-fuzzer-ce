@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Peach.Enterprise.Test.MutationStrategies
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ReplayStrategyTests
 	{
 		public void Test1()

@@ -15,7 +15,7 @@ using Peach.Core.Publishers;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RunTests
 	{
 		DateTime iterationStarted = DateTime.MinValue;

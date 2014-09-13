@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Peach.Core.Test.Publishers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RemotePublisherTests
 	{
 		string template = @"<?xml version=""1.0"" encoding=""utf-8""?>

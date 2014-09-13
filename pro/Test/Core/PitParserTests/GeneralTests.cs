@@ -49,7 +49,7 @@ namespace Peach.Core.Test.PitParserTests
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class GeneralTests
 	{
 		//[Test]

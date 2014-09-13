@@ -40,7 +40,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class NumberTests
 	{
 		[Test]

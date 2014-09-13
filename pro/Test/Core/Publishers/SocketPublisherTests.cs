@@ -153,7 +153,7 @@ namespace Peach.Core.Test.Publishers
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class SocketPublisherTests : DataModelCollector
 	{
 		private static Tuple<string, IPAddress> GetFirstInterface(AddressFamily af)
