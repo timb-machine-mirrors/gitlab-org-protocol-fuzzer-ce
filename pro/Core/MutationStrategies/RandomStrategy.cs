@@ -247,7 +247,7 @@ namespace Peach.Core.MutationStrategies
 						logger.Trace("SCOPE: All");
 				}
 
-				if (Random.NextInt32() % context.test.stateModel.states.Count == 0)
+				if (context.test.stateModel.states.Count > 1 && Random.NextInt32() % context.test.stateModel.states.Count == 0)
 					_stateModelMutation = Random.Choice(_stateMutators);
 			}
 		}
