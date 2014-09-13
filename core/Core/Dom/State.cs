@@ -146,6 +146,20 @@ namespace Peach.Core.Dom
 			return actions[index];
 		}
 
+		/// <summary>
+		/// Will move forward one action in execution.
+		/// </summary>
+		/// <remarks>
+		/// This method can be called by state model mutators.
+		/// If this method is not called and a different action is returned by the
+		/// mutator, the current action scheduled for execution will be tried again 
+		/// on the next step through.
+		/// </remarks>
+		public void MoveToNextAction()
+		{
+			_actionIndex++;
+		}
+
 		public void Run(RunContext context)
 		{
 			try
@@ -191,7 +205,7 @@ namespace Peach.Core.Dom
 					lastAction = currentAction;
 
 					if (currentAction == NextAction())
-						_actionIndex++;
+						MoveToNextAction();
 				}
 
 				// onComplete script run from finally.
