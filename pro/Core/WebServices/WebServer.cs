@@ -102,7 +102,8 @@ namespace Peach.Enterprise.WebServices
 
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(GetType().Assembly, "Peach.Enterprise.WebServices");
+			if(!ResourceViewLocationProvider.RootNamespaces.ContainsKey(GetType().Assembly))
+				ResourceViewLocationProvider.RootNamespaces.Add(GetType().Assembly, "Peach.Enterprise.WebServices");
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
