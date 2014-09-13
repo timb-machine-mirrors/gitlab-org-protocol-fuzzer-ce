@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class BitwiseStreamTest
 	{
 		[Test]

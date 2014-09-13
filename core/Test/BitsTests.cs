@@ -237,7 +237,7 @@ namespace Peach
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class BitsTests
 	{
 		[Test]
