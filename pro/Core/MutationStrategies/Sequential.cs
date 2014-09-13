@@ -75,7 +75,13 @@ namespace Peach.Core.MutationStrategies
 			context.engine.IterationFinished += new Engine.IterationFinishedEventHandler(engine_IterationFinished);
 			context.engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
 			_mutators = new List<Type>();
-			_mutators.AddRange(EnumerateValidMutators());
+
+			_mutators.AddRange(EnumerateValidMutators().Where(
+	v => (bool)v.GetField(
+			"affectDataModel",
+			BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
+				.GetValue(null)));
+
 		}
 
 		void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
