@@ -116,6 +116,9 @@ Protocol::
 ProtocolTimeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
 MinMTU:: Minimum 1280. Defaults to 1280.
 MaxMTU:: Default: 131070. Defaults to 131070.
+Filter::
+    Filter received frames using a libpcap style filter string. For more information
+    about libpcap syle filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
