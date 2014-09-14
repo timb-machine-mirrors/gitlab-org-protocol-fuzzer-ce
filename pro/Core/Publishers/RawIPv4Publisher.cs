@@ -37,7 +37,11 @@ using System.Net;
 using Peach.Core.Dom;
 using NLog;
 
-namespace Peach.Core.Publishers
+using Peach.Core;
+using Peach.Core.Publishers;
+using Peach.Core.IO;
+
+namespace Peach.Pro.Publishers
 {
 	internal static class RawHelpers
 	{
@@ -76,7 +80,8 @@ namespace Peach.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class RawV4Publisher : SocketPublisher
+	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
+	public class RawV4Publisher : SocketWritePcapReadPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -128,7 +133,8 @@ namespace Peach.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class RawIPv4Publisher : SocketPublisher
+	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
+	public class RawIPv4Publisher : SocketWritePcapReadPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
