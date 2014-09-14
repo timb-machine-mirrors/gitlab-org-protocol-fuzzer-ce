@@ -49,8 +49,10 @@ namespace Peach.Pro.Test.Monitors
 		{
 		}
 
+		uint currentIteration = 0;
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
+			currentIteration = iterationCount;
 		}
 
 		public override bool IterationFinished()
@@ -60,6 +62,10 @@ namespace Peach.Pro.Test.Monitors
 
 		public override bool DetectedFault()
 		{
+			// Avoid faulting on first iteration
+			if (currentIteration < 2)
+				return false;
+
 			if (rnd.Next() % Fault == 0)
 				return true;
 
@@ -80,7 +86,7 @@ namespace Peach.Pro.Test.Monitors
 
 				fault.majorHash = buckets[0];
 				fault.minorHash = buckets[1];
-				fault.exploitability = severity[rnd.Next(severity.Length + 1)];
+				fault.exploitability = severity[rnd.Next(severity.Length)];
 
 				fault.title = "Rando Faulter Funbag";
 				fault.description = @"CUPERTINO, CA—Ending weeks of anticipation and intense speculation, tech giant Apple unveiled a short and fleeting moment of excitement to the general public Tuesday during a media event at its corporate headquarters. “With this groundbreaking new release, Apple has completely revolutionized the way we experience an ephemeral sense of wonder lasting no longer than several moments,” said Wired writer Gary Turnham, who added that the company has once again proved why it’s the global leader in developing exhilarating sensations that only temporarily mask one’s underlying feelings before dissolving away. “Even before today’s announcement, people across the country were lining up to be among the first to get their hands on this new short-lived and non-renewable flash of satisfaction. And they won’t be disappointed; this already vanishing glimmer of pleasure is exactly what we’ve come to expect from Apple.” According to Turnham, rumors are already swirling that Apple engineers are working on a slimmer, briefer moment of excitement projected for release next fall.";
