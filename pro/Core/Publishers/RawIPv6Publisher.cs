@@ -53,7 +53,7 @@ namespace Peach.Pro.Publishers
 	[Publisher("Raw6")]
 	[Publisher("raw.Raw6")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
-	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to", "")]
+	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Protocol", typeof(byte), "IP protocol to use")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]

@@ -48,8 +48,7 @@ namespace Peach.Pro.Publishers
 			}
 
 			if (_device == null)
-				throw new ArgumentException("Unable to locate network device with mac '{0}'.", 
-					macAddress.ToString());
+				throw new ArgumentException("Unable to locate network device with mac '"+macAddress.ToString()+"'.");
 
 			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
@@ -68,7 +67,7 @@ namespace Peach.Pro.Publishers
 			}
 
 			if (_device == null)
-				throw new ArgumentException("Unable to locate network device '{0}'.", deviceName);
+				throw new ArgumentException("Unable to locate network device '"+deviceName+"'.");
 
 			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
@@ -107,8 +106,8 @@ namespace Peach.Pro.Publishers
 			}
 
 			if (_device == null)
-				throw new ArgumentException("Unable to locate network device with mac '{0}'.",
-					macAddress.ToString());
+				throw new ArgumentException(string.Format("Unable to locate network device with mac '{0}'.",
+					macAddress.ToString()));
 
 			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
