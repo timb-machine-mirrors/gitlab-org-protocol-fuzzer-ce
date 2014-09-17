@@ -34,8 +34,9 @@ namespace Peach.Core.Test
 					if (value == null)
 					{
 						runner.Iteration = (uint)mutation + 1;
-						value = runner.Element.Clone();
-						Mutate(runner.Mutator, value);
+						runner.Mutator.mutation = (uint)mutation;
+						value = runner.Element.root.Clone();
+						Mutate(runner.Mutator, value.find(runner.Element.fullName));
 					}
 
 					return value.Value;
