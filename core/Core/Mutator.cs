@@ -133,5 +133,33 @@ namespace Peach.Core
 		}
 
 		#endregion
+
+		protected bool getN(DataElement obj, out uint n)
+		{
+			return getN(obj, GetType().Name, out n);
+		}
+
+		protected bool getN(DataElement obj, string prefix, out uint n)
+		{
+			Hint h;
+			if (!obj.Hints.TryGetValue(prefix + "-N", out h))
+			{
+				n = 0;
+				return false;
+			}
+
+			if (!uint.TryParse(h.Value, out n))
+				throw new PeachException("{0} hint '{1}' has invalid value '{2}'.".Fmt(obj.debugName, h.Name, h.Value));
+
+			return true;
+		}
+
+		protected uint getN(DataElement obj, uint defaultValue)
+		{
+			uint ret;
+			if (!getN(obj, out ret))
+				ret = defaultValue;
+			return ret;
+		}
 	}
 }

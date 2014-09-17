@@ -20,10 +20,6 @@ namespace Peach.Core.Mutators.Utility
 		bool clamp;
 		double stddev;
 
-		public BlobMutator(DataElement obj)
-		{
-		}
-
 		/// <summary>
 		/// Construct base blob mutator
 		/// </summary>
@@ -34,20 +30,11 @@ namespace Peach.Core.Mutators.Utility
 		{
 			this.clamp = clamp;
 
-			Hint h;
-
-			if (obj.Hints.TryGetValue("{0}-N".Fmt(GetType().Name), out h))
-			{
-				this.variance = long.Parse(h.Value);
-			}
-			else if (obj.Hints.TryGetValue("BlobMutator-N", out h))
-			{
-				this.variance = long.Parse(h.Value);
-			}
+			uint hint;
+			if (getN(obj, out hint) || getN(obj, "BlobMutator", out hint))
+				this.variance = hint;
 			else
-			{
 				this.variance = variance;
-			}
 
 			if (clamp)
 				this.variance = Math.Min(variance, ((BitStream)obj.InternalValue).Length);
@@ -76,18 +63,8 @@ namespace Peach.Core.Mutators.Utility
 		{
 			get
 			{
-				return (int)this.variance;
+				return (int)variance;
 			}
-		}
-
-		protected virtual long MaxLength
-		{
-			get { return 0; }
-		}
-
-		protected virtual bool ClampLength
-		{
-			get { return false; }
 		}
 
 		public sealed override void sequentialMutation(DataElement obj)
@@ -153,6 +130,7 @@ namespace Peach.Core.Mutators.Utility
 		{
 			++BadRandom;
 		}
+
 		/// <summary>
 		/// Perform mutation of a sequence of bytes.
 		/// </summary>
