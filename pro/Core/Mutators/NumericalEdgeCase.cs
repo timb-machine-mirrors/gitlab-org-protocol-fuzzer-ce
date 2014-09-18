@@ -1,96 +1,71 @@
-﻿
-//
+﻿//
 // Copyright (c) Deja vu Security
 //
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-using Peach.Enterprise.Mutators.Utility;
-using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+using NLog;
+
+namespace Peach.Core.Mutators
 {
 	[Mutator("NumericalEdgeCase")]
 	[Description("Produce Gaussian distributed numbers around numerical edge cases.")]
-	public class NumericalEdgeCase : Mutator
+	public class NumericalEdgeCase : Utility.IntegerEdgeCases
 	{
-		long minValue;
-		ulong maxValue;
-		bool signed;
-		bool isULong;
-
-		IntegerEdgeCases edgeCases;
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		public NumericalEdgeCase(DataElement obj)
+			: base(obj)
 		{
-			name = "NumericalEdgeCase";
-			isULong = false;
-
-			if (obj is Peach.Core.Dom.String)
-			{
-				signed = true;
-				minValue = Int64.MinValue;
-				maxValue = Int64.MaxValue;
-			}
-			else if (obj is Number || obj is Flag)
-			{
-				signed = ((Number)obj).Signed;
-				minValue = ((Number)obj).MinValue;
-				maxValue = ((Number)obj).MaxValue;
-
-				if (((Number)obj).MaxValue > long.MaxValue)
-					isULong = true;
-			}
-
-			edgeCases = new IntegerEdgeCases(minValue, maxValue);
 		}
 
-		public override uint mutation
+		protected override NLog.Logger Logger
 		{
-			// TODO - Make this work :)
-			get { return 0; }
-			set { }
-		}
-
-		public override int count
-		{
-			// TODO - Make this work :)
 			get
-			{ return 1000; }
+			{
+				return logger;
+			}
+		}
+
+		protected override void GetLimits(DataElement obj, out long min, out ulong max)
+		{
+			var asNum = obj as Dom.Number;
+			if (asNum != null)
+			{
+				min = asNum.MinValue;
+				max = asNum.MaxValue;
+			}
+			else
+			{
+				System.Diagnostics.Debug.Assert(obj is Dom.String);
+
+				min = long.MinValue;
+				max = long.MaxValue;
+			}
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.String && obj.isMutable)
-			{
-				if (obj.Hints.ContainsKey("NumericalString"))
-					return true;
-			}
+			if (obj is Dom.String && obj.isMutable)
+				return obj.Hints.ContainsKey("NumericalString");
 
-			if ((obj is Peach.Core.Dom.Number || obj is Peach.Core.Dom.Flag) && obj.isMutable)
-				return true;
-
-			return false;
+			// Ignore numbers <= 8 bits, they will be mutated
+			// with the NumericalVariance mutator
+			return obj is Dom.Number && obj.isMutable && obj.lengthAsBits > 8;
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, long value)
 		{
-			throw new NotSupportedException("TODO - Make this work");
+			obj.MutatedValue = new Variant(value);
+			obj.mutationFlags = MutateOverride.Default;
 		}
 
-		public override void randomMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, ulong value)
 		{
-			if(isULong)
-				obj.MutatedValue = new Variant((ulong)edgeCases.Next(context.Random));
-			else
-				obj.MutatedValue = new Variant((long)edgeCases.Next(context.Random));
-
+			obj.MutatedValue = new Variant(value);
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}
 }
-
-// end

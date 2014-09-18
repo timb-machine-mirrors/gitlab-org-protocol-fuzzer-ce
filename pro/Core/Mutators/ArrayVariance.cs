@@ -1,5 +1,4 @@
-﻿
-//
+﻿//
 // Copyright (c) Deja vu Security
 //
 
@@ -76,5 +75,3 @@ namespace Peach.Core.Mutators
 		}
 	}
 }
-
-// end

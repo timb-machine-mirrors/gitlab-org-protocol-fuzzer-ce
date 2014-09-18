@@ -1,105 +1,72 @@
-﻿
-//
+﻿//
 // Copyright (c) Deja vu Security
 //
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-using Peach.Core.Mutators.Utility;
-using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+using NLog;
+
+namespace Peach.Core.Mutators
 {
 	[Mutator("NumericalVariance")]
-	[Description("Produce numbers that are defaultValue - N to defaultValue + N")]
-	//[Hint("NumericalVariance-N", "Gets N by checking node for hint, or returns default (50).")]
-	public class NumericalVarianceMutator : Mutator
+	public class NumericalVariance : Utility.IntegerVariance
 	{
-		long minValue;
-		ulong maxValue;
-		bool signed;
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		IntegerVariance variance;
-
-		public NumericalVarianceMutator(DataElement obj)
+		public NumericalVariance(DataElement obj)
+			: base(obj)
 		{
-			name = "NumericalVariance";
+		}
 
-			if (obj is Peach.Core.Dom.String)
+		protected override NLog.Logger Logger
+		{
+			get
 			{
+				return logger;
+			}
+		}
+
+		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
+		{
+			var asNum = obj as Dom.Number;
+			if (asNum != null)
+			{
+				signed = asNum.Signed;
+				min = asNum.MinValue;
+				max = (long)asNum.MaxValue;
+				value = signed ? (long)asNum.DefaultValue : (long)(ulong)asNum.DefaultValue;
+			}
+			else
+			{
+				System.Diagnostics.Debug.Assert(obj is Dom.String);
+
 				signed = true;
-				minValue = Int64.MinValue;
-				maxValue = UInt64.MaxValue;
+				min = long.MinValue;
+				max = long.MaxValue;
+				value = (long)asNum.DefaultValue;
 			}
-			else if (obj is Number)
-			{
-				signed = ((Number)obj).Signed;
-				minValue = ((Number)obj).MinValue;
-				maxValue = ((Number)obj).MaxValue;
-			}
-			else if (obj is Flag)
-			{
-				signed = false;
-				minValue = 0;
-				maxValue = UInt64.MaxValue; // TODO Get value from parent;
-			}
-
-			variance = new IntegerVariance(obj.Value, minValue, maxValue, signed);
-		}
-
-		public override uint mutation
-		{
-			// TODO - Make this work :)
-			get { return 0; }
-			set {  }
-		}
-
-		public override int count
-		{
-			// TODO - Make this work :)
-			get { return 1000;  }
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.String && obj.isMutable)
-				if (obj.Hints.ContainsKey("NumericalString"))
-					return true;
+			if (obj is Dom.String && obj.isMutable)
+				return obj.Hints.ContainsKey("NumericalString");
 
-			// Ignore numbers <= 8 bits, they will be mutated with the
-			// NumericalEdgeCaseMutator
-
-			if (obj is Number && obj.isMutable)
-				if (((Number)obj).lengthAsBits > 8)
-					return true;
-
-			if (obj is Flag && obj.isMutable)
-				if (((Flag)obj).lengthAsBits > 8)
-					return true;
-
-			return false;
+			return obj is Dom.Number && obj.isMutable;
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, long value)
 		{
-			randomMutation(obj);
+			obj.MutatedValue = new Variant(value);
+			obj.mutationFlags = MutateOverride.Default;
 		}
 
-		public override void randomMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, ulong value)
 		{
-			if (obj is Peach.Core.Dom.String)
-				obj.MutatedValue = new Variant(variance.Next(context.Random).ToString());
-			else if (maxValue > long.MaxValue)
-				obj.MutatedValue = new Variant((ulong)variance.Next(context.Random));
-			else
-				obj.MutatedValue = new Variant((long)variance.Next(context.Random));
-
+			obj.MutatedValue = new Variant(value);
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}
 }
-
-// end

@@ -1,58 +1,74 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+namespace Peach.Core.Mutators
 {
-	[Mutator("ChoiceMutator")]
+	[Mutator("ChoiceSwitch")]
 	[Description("Changes which element is selected in a Choice statement.")]
-	public class ChoiceMutator : Mutator
+	public class ChoiceSwitch : Mutator
 	{
-		uint pos = 0;
-		int _count = 0;
+		List<int> options = new List<int>();
 
-		public ChoiceMutator(DataElement obj)
+		public ChoiceSwitch(DataElement obj)
 		{
-			pos = 0;
-			name = "ChoiceMutator";
+			var asChoice = (Choice)obj;
 
-			Choice choice = obj as Choice;
-			_count = choice.choiceElements.Count;
+			System.Diagnostics.Debug.Assert(asChoice.SelectedElement != null);
+
+			for (int i = 0; i < asChoice.choiceElements.Count; ++i)
+			{
+				// Don't mutate to our currently selected choice
+				if (asChoice.choiceElements[i] != asChoice.SelectedElement)
+					options.Add(i);
+			}
 		}
 
 		public override uint mutation
 		{
-			get { return pos; }
-			set { pos = value; }
+			get;
+			set;
 		}
 
-		public override int count { get { return _count; } }
+		public override int count
+		{
+			get
+			{
+				return options.Count;
+			}
+		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			return (obj is Choice && obj.isMutable);
+			var asChoice = obj as Choice;
+			if (asChoice != null && asChoice.isMutable && asChoice.choiceElements.Count > 1)
+				return true;
+
+			return false;
 		}
 
 		public override void sequentialMutation(DataElement obj)
 		{
-			Choice choice = obj as Choice;
-
-			choice.SelectedElement = choice.choiceElements[0];
-			obj.mutationFlags = MutateOverride.Default;
+			performMutation(obj, (int)mutation);
 		}
 
 		public override void randomMutation(DataElement obj)
 		{
-			Choice choice = obj as Choice;
+			performMutation(obj, context.Random.Next(0, options.Count));
+		}
 
-			choice.SelectedElement = context.Random.Choice(choice.choiceElements.Values);
+		void performMutation(DataElement obj, int idx)
+		{
+			var asChoice = (Choice)obj;
+			var selection = options[idx];
+
+			asChoice.SelectedElement = asChoice.choiceElements[selection];
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}
 }
-
-// end
