@@ -11,6 +11,15 @@ namespace Peach.Core.Test
 	class VarianceGeneratorTests
 	{
 		[Test]
+		public void TestThreeBit()
+		{
+			var rng = new Random(0);
+			var g = new VarianceGenerator(0, -2, 1);
+
+			Assert.AreEqual(new[] { -2, -1, 1 }, g.Values);
+		}
+
+		[Test]
 		public void TestSbyte()
 		{
 			var rng = new Random(0);
@@ -130,6 +139,12 @@ namespace Peach.Core.Test
 			var rng = new Random(0);
 			var g = new VarianceGenerator(0, long.MinValue, long.MaxValue);
 
+			Assert.AreEqual(100, g.Values.Length);
+			for (int i = 0; i < g.Values.Length / 2; ++i)
+				Assert.AreEqual(-50 + i, g.Values[i]);
+			for (int i = g.Values.Length / 2; i < g.Values.Length; ++i)
+				Assert.AreEqual(-50 + 1 + i, g.Values[i]);
+
 			for (int i = 0; i < 1000000; ++i)
 			{
 				var x = g.Next(rng);
@@ -146,6 +161,12 @@ namespace Peach.Core.Test
 			var rng = new Random(0);
 			var g = new VarianceGenerator(long.MinValue + 255, long.MinValue, long.MaxValue);
 
+			Assert.AreEqual(100, g.Values.Length);
+			for (int i = 0; i < g.Values.Length / 2; ++i)
+				Assert.AreEqual(long.MinValue + 255 - 50 + i, g.Values[i]);
+			for (int i = g.Values.Length / 2; i < g.Values.Length; ++i)
+				Assert.AreEqual(long.MinValue + 255 - 50 + 1 + i, g.Values[i]);
+
 			for (int i = 0; i < 1000000; ++i)
 			{
 				var x = g.Next(rng);
@@ -160,6 +181,12 @@ namespace Peach.Core.Test
 		{
 			var rng = new Random(0);
 			var g = new VarianceGenerator(long.MaxValue - 255, long.MinValue, long.MaxValue);
+
+			Assert.AreEqual(100, g.Values.Length);
+			for (int i = 0; i < g.Values.Length / 2; ++i)
+				Assert.AreEqual(long.MaxValue - 255 - 50 + i, g.Values[i]);
+			for (int i = g.Values.Length / 2; i < g.Values.Length; ++i)
+				Assert.AreEqual(long.MaxValue - 255 - 50 + 1 + i, g.Values[i]);
 
 			for (int i = 0; i < 1000000; ++i)
 			{
@@ -177,6 +204,10 @@ namespace Peach.Core.Test
 			var rng = new Random(0);
 			var g = new VarianceGenerator(0, ulong.MinValue, ulong.MaxValue);
 
+			Assert.AreEqual(50, g.Values.Length);
+			for (int i = 0; i < g.Values.Length; ++i)
+				Assert.AreEqual(1 + i, g.Values[i]);
+
 			for (int i = 0; i < 1000000; ++i)
 			{
 				var x = (ulong)g.Next(rng);
@@ -192,6 +223,12 @@ namespace Peach.Core.Test
 			var rng = new Random(0);
 			var g = new VarianceGenerator(255, ulong.MinValue, ulong.MaxValue);
 
+			Assert.AreEqual(100, g.Values.Length);
+			for (int i = 0; i < g.Values.Length / 2; ++i)
+				Assert.AreEqual(255 - 50 + i, g.Values[i]);
+			for (int i = g.Values.Length / 2; i < g.Values.Length; ++i)
+				Assert.AreEqual(255 - 50 + 1 + i, g.Values[i]);
+
 			for (int i = 0; i < 1000000; ++i)
 			{
 				var x = (ulong)g.Next(rng);
@@ -202,10 +239,35 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void TestULongLarge()
+		{
+			var rng = new Random(0);
+			var g = new VarianceGenerator(ulong.MaxValue - 255, ulong.MinValue, ulong.MaxValue);
+
+			Assert.AreEqual(100, g.Values.Length);
+			for (uint i = 0; i < g.Values.Length / 2; ++i)
+				Assert.AreEqual(ulong.MaxValue - 255 - 50 + i, (ulong)g.Values[i]);
+			for (uint i = (uint)g.Values.Length / 2; i < g.Values.Length; ++i)
+				Assert.AreEqual(ulong.MaxValue - 255 - 50 + 1 + i, (ulong)g.Values[i]);
+
+			for (int i = 0; i < 1000000; ++i)
+			{
+				var x = (ulong)g.Next(rng);
+
+				// Long should not produce any values +/- about 3 * 327667
+				Assert.GreaterOrEqual(x, ulong.MaxValue - (3 * short.MaxValue));
+			}
+		}
+
+		[Test]
 		public void TestULongMax()
 		{
 			var rng = new Random(0);
 			var g = new VarianceGenerator(ulong.MaxValue, ulong.MinValue, ulong.MaxValue);
+
+			Assert.AreEqual(50, g.Values.Length);
+			for (uint i = 0; i < g.Values.Length; ++i)
+				Assert.AreEqual(ulong.MaxValue - 50 + i, (ulong)g.Values[i]);
 
 			for (int i = 0; i < 1000000; ++i)
 			{

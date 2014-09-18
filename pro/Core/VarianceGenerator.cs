@@ -16,6 +16,7 @@ namespace Peach.Core
 	public class VarianceGenerator
 	{
 		const long maxRange = 0x4000;
+		const long delta = 50;
 
 		long value;
 		long min;
@@ -68,7 +69,7 @@ namespace Peach.Core
 		/// <summary>
 		/// The minimum number of random numbers that sohuld be generated.
 		/// </summary>
-		public int Count
+		public long[] Values
 		{
 			get;
 			private set;
@@ -151,10 +152,6 @@ namespace Peach.Core
 
 			Deviation = unchecked((ulong)(sigmaLhs + sigmaRhs));
 
-			// Set the minimum count to be a portion of the range
-			// Set the count to be a portion of the range space of the generator
-			Count = (int)Math.Sqrt(Deviation);
-
 			if (sigmaLhs == 0)
 				weight = 1;
 			else if (sigmaRhs == 0)
@@ -164,6 +161,21 @@ namespace Peach.Core
 
 			// Make left hand side negative
 			sigmaLhs *= -1;
+
+			var vals = new List<long>();
+
+			// populate fixed values
+			var val = value - (long)Math.Min((ulong)delta, (ulong)(value - min));
+			var end = value + (long)Math.Min((ulong)delta, (ulong)(max - value));
+
+			do
+			{
+				if (val != value)
+					vals.Add(val);
+			}
+			while (val++ != end);
+
+			Values = vals.ToArray();
 		}
 
 		long GetSigma(long upper, long lower)
