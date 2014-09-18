@@ -423,5 +423,68 @@ namespace Peach.Core.Test.PitParserTests
 
 			Assert.AreEqual(names, exp);
 		}
+
+		[Test]
+		public void TestArrayRefFields()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='Content'>
+		<Block name='Items' minOccurs='1'>
+			<String name='Value' />
+		</Block>
+	</DataModel>
+
+	<DataModel name='DM'>
+		<Block name='Content' ref='Content' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Content.Items[0].Value' value='xxx'/>
+					<Field name='Content.Items[1].Value' value='yyy'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = new Engine(null);
+			var c = new RunConfiguration() { singleIteration = true };
+
+			e.startFuzzing(dom, c);
+
+			var model = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+			var final = model.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("xxxyyy", asStr);
+
+			var names = model.PreOrderTraverse().Select(x => x.fullName).ToArray();
+			var exp = new string[] {
+				"DM",
+				"DM.Content",
+				"DM.Content.Items",
+				"DM.Content.Items.Items",
+				"DM.Content.Items.Items.Value",
+				"DM.Content.Items.Items_1",
+				"DM.Content.Items.Items_1.Value",
+			};
+
+			Assert.AreEqual(names, exp);
+		}
 	}
 }
