@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace Peach.Core
 {
-
 	/// <summary>
 	/// https://bitbucket.org/Superbest/superbest-random
 	/// </summary>
@@ -81,7 +80,7 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Returns n unique random numbers in the range [1, n], inclusive. 
+		/// Returns min(n,k) unique random numbers in the range [1, n], inclusive. 
 		/// This is equivalent to getting the first n numbers of some random permutation of 
 		/// the sequential numbers from 1 to max. 
 		/// Runs in O(k^2) time.
@@ -94,8 +93,9 @@ namespace Peach.Core
 		{
 			var result = new List<int>();
 			var sorted = new SortedSet<int>();
+			var cnt = Math.Min(n, k);
 
-			for (var i = 0; i < k; i++)
+			for (var i = 0; i < cnt; i++)
 			{
 				var r = rand.Next(1, n + 1 - i);
 
@@ -110,5 +110,3 @@ namespace Peach.Core
 		}
 	}
 }
-
-// end
