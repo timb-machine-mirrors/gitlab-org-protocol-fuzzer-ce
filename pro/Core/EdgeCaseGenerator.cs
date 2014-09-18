@@ -30,6 +30,7 @@ namespace Peach.Core
 
 		// The maximum range to pick numbers around each edge
 		const ulong maxRange = 0x4000;
+		const ulong delta = 50;
 
 		long minValue;
 		ulong maxValue;
@@ -135,9 +136,27 @@ namespace Peach.Core
 				sum += s;
 			}
 
-			// Set the minimum count to be a portion of the range
-			// Set the count to be a portion of the range space of the generator
-			Count = (int)Math.Sqrt(Deviation);
+			// Compute a list of +/- delta around each edge
+			var vals = new List<long>();
+
+			for (int i = 0; i < edges.Count; ++i)
+			{
+				if (i != 0)
+				{
+					for (int j = -50; j < 0; ++j)
+						vals.Add(edges[i] + j);
+				}
+
+				vals.Add(edges[i]);
+
+				if (i != edges.Count - 1)
+				{
+					for (int j = 1; j <= 50; ++j)
+						vals.Add(edges[i] + j);
+				}
+			}
+
+			Values = vals.ToArray();
 		}
 
 		/// <summary>
@@ -161,9 +180,9 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// The minimum number of random numbers that sohuld be generated.
+		/// Precomputed list of values to use.
 		/// </summary>
-		public int Count
+		public long[] Values
 		{
 			get;
 			private set;

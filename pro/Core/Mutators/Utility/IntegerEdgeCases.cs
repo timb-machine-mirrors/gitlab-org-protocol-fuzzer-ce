@@ -41,11 +41,9 @@ namespace Peach.Core.Mutators.Utility
 				// For more than a single byte, use edge case generator
 				var gen = new EdgeCaseGenerator(min, max);
 
-				// Random is same as sequential in this case
-				sequential = random = () => gen.Next(context.Random);
-
-				// Set the count to be a portion of the range space of the generator
-				space = gen.Count;
+				space = gen.Values.Length;
+				sequential = () => gen.Values[mutation];
+				random = () => gen.Next(context.Random);
 			}
 		}
 
