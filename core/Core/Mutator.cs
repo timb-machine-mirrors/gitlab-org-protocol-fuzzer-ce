@@ -36,7 +36,7 @@ namespace Peach.Core
 	/// <summary>
 	/// Base class for Mutators.
 	/// </summary>
-	public abstract class Mutator : IWeighted
+	public abstract class Mutator : IWeighted, INamed
 	{
 		/// <summary>
 		/// Instance of current mutation strategy
@@ -48,11 +48,6 @@ namespace Peach.Core
 		/// </summary>
 		public int weight = 1;
 
-		/// <summary>
-		/// Name of this mutator
-		/// </summary>
-		public string name = "Unknown";
-
 		public Mutator()
 		{
 		}
@@ -63,6 +58,17 @@ namespace Peach.Core
 
 		public Mutator(State obj)
 		{
+		}
+
+		/// <summary>
+		/// The name of the mutator
+		/// </summary>
+		public virtual string name
+		{
+			get
+			{
+				return GetType().Name;
+			}
 		}
 
 		/// <summary>
