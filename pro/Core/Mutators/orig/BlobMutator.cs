@@ -1,4 +1,5 @@
-﻿
+﻿#if DISABLED
+
 //
 // Copyright (c) Michael Eddington
 //
@@ -26,7 +27,6 @@
 
 // $Id$
 
-#if DISABLED
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -407,5 +407,5 @@ namespace Peach.Core.Mutators
     }
 }
 
-#endif
 // end
+#endif

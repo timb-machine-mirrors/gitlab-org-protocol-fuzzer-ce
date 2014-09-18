@@ -1,4 +1,5 @@
-﻿
+﻿#if DISABLED
+
 //
 // Copyright (c) Michael Eddington
 //
@@ -92,3 +93,4 @@ namespace Peach.Core.Mutators
 }
 
 // end
+#endif

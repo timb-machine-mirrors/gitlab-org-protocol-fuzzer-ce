@@ -1,9 +1,9 @@
-﻿using System;
+﻿#if DISABLED
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Peach.Core.Dom;
 
-#if DISABLED
 namespace Peach.Core.Mutators
 {
     [Mutator("StringCaseMutator")]
@@ -148,5 +148,5 @@ namespace Peach.Core.Mutators
         }
     }
 }
-#endif
 // end
+#endif
