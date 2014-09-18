@@ -119,7 +119,7 @@ namespace Peach.Core.Test
 			// 6 edges
 			Assert.AreEqual(6, e1.Edges.Count);
 			// Range 0: -32768 ====> 32640
-			Assert.AreEqual(-128 - -32768, e1.Range(0));
+			Assert.AreEqual(Math.Min(16384, -128 - -32768), e1.Range(0));
 			// Range 1: -128 ====> 128
 			Assert.AreEqual(0 - -128, e1.Range(1));
 			// Range 2: 0 ====> 127
@@ -129,7 +129,7 @@ namespace Peach.Core.Test
 			// Range 4: 255 ====> 128
 			Assert.AreEqual(255 - 127, e1.Range(4));
 			// Range 5: 32767 ====> 32512
-			Assert.AreEqual(32767 - 255, e1.Range(5));
+			Assert.AreEqual(Math.Min(16384, 32767 - 255), e1.Range(5));
 		}
 
 		[Test]
@@ -146,17 +146,17 @@ namespace Peach.Core.Test
 			// Range 2: 0xff
 			Assert.AreEqual(0xff - 0x7f, e1.Range(2));
 			// Range 3: 0x7fff
-			Assert.AreEqual(0x7fff - 0xff, e1.Range(3));
+			Assert.AreEqual(Math.Min(16384, 0x7fff - 0xff), e1.Range(3));
 			// Range 4: 0xffff
-			Assert.AreEqual(0xffff - 0x7fff, e1.Range(4));
+			Assert.AreEqual(Math.Min(16384, 0xffff - 0x7fff), e1.Range(4));
 			// Range 5: 0x7fffffff
-			Assert.AreEqual(0x7fffffff - 0xffff, e1.Range(5));
+			Assert.AreEqual(Math.Min(16384, 0x7fffffff - 0xffff), e1.Range(5));
 			// Range 6: 0xffffffff
-			Assert.AreEqual(0xffffffff - 0x7fffffff, e1.Range(6));
+			Assert.AreEqual(Math.Min(16384, 0xffffffff - 0x7fffffff), e1.Range(6));
 			// Range 7: 0x7fffffffffffffff
-			Assert.AreEqual(0x7fffffffffffffff - 0xffffffff, e1.Range(7));
+			Assert.AreEqual(Math.Min(16384, 0x7fffffffffffffff - 0xffffffff), e1.Range(7));
 			// Range 8: 0xffffffffffffffff
-			Assert.AreEqual(0x8000000000000000, e1.Range(8));
+			Assert.AreEqual(Math.Min(16384, 0x8000000000000000), e1.Range(8));
 		}
 
 		public void HitsEdges(long minValue, ulong maxValue)
@@ -166,7 +166,7 @@ namespace Peach.Core.Test
 
 			var hits = new bool[e.Edges.Count];
 
-			for (ulong i = 0; i < 10 * e.Deviation; ++i)
+			for (ulong i = 0; i < 20 * e.Deviation; ++i)
 			{
 				var x = e.Next(rng);
 
@@ -221,7 +221,7 @@ namespace Peach.Core.Test
 			var pctRhs = 1.0 * dict[0] / (dict[0] + dict[1]);
 			var pctLhs = 1.0 * dict[0] / (dict[0] + dict[-1]);
 
-			File.WriteAllLines("c:\\work\\test_edge.simple.csv", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
+			File.WriteAllLines("test_edge.simple.csv", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
 
 			Assert.LessOrEqual(pctLhs, 0.51);
 			Assert.LessOrEqual(pctRhs, 0.51);
@@ -239,7 +239,7 @@ namespace Peach.Core.Test
 			bool gotMax = false;
 			bool gotZero = false;
 
-			for (int i = 0; i < 500; ++i)
+			for (int i = 0; i < 1000; ++i)
 			{
 				var x = e.Next(rng);
 
