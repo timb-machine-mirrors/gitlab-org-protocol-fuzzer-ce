@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Peach.Core.Dom;
 
@@ -6,8 +7,9 @@ namespace Peach.Core.Mutators.Utility
 {
 	public abstract class IntegerVariance : Mutator
 	{
-		VarianceGenerator gen;
-
+		Func<long> sequential;
+		Func<long> random;
+		int space;
 		bool signed;
 		long value;
 		long min;
@@ -17,10 +19,37 @@ namespace Peach.Core.Mutators.Utility
 		{
 			GetLimits(obj, out signed, out value, out min, out max);
 
-			if (!signed)
-				gen = new VarianceGenerator((ulong)value, (ulong)min, (ulong)max);
+			var delta = max - min;
+
+			// delta is 3, value is 1, want -2, -1, 0
+			// delta is 3, value is 0, want -2, -1, 1
+			if (delta >= 0 && delta <= 0xff)
+			{
+				// We are <= a single byte, just use every value in the range
+				var vals = new List<long>();
+
+				for (var i = min; i <= max; ++i)
+					if (i != value)
+						vals.Add(i);
+
+				space = vals.Count;
+				sequential = () => vals[(int)mutation];
+				random = () => vals[context.Random.Next(space)];
+			}
 			else
-				gen = new VarianceGenerator(value, min, max);
+			{
+				// For more than a single byte, use edge case generator
+				VarianceGenerator gen;
+
+				if (!signed)
+					gen = new VarianceGenerator((ulong)value, (ulong)min, (ulong)max);
+				else
+					gen = new VarianceGenerator(value, min, max);
+
+				space = gen.Values.Length;
+				sequential = () => gen.Values[mutation];
+				random = () => gen.Next(context.Random);
+			}
 		}
 
 		/// <summary>
@@ -69,21 +98,25 @@ namespace Peach.Core.Mutators.Utility
 		{
 			get
 			{
-				return gen.Count;
+				return space;
 			}
 		}
 
 		public sealed override void sequentialMutation(DataElement obj)
 		{
-			// sequential is the same as random
-			randomMutation(obj);
+			performMutation(obj, sequential);
 		}
 
 		public sealed override void randomMutation(DataElement obj)
 		{
+			performMutation(obj, random);
+		}
+
+		private void performMutation(DataElement obj, Func<long> gen)
+		{
 			while (true)
 			{
-				var value = gen.Next(context.Random);
+				var value = gen();
 
 				// If we get our default value, pick again as that
 				// is not really a mutation
