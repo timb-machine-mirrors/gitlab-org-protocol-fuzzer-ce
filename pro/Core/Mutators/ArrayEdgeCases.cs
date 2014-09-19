@@ -63,7 +63,8 @@ namespace Peach.Core.Mutators
 				// add some items, but do it by replicating
 				// the last item over and over to save memory
 				// find random spot and replicate that item over and over
-				objAsArray.ExpandTo((int)num);
+				objAsArray.CountOverride = (int)num;
+				//objAsArray.ExpandTo((int)num);
 			}
 		}
 
