@@ -1,48 +1,39 @@
-﻿
-//
+﻿//
 // Copyright (c) Deja vu Security
 //
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 
-using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+using NLog;
+
+namespace Peach.Core.Mutators
 {
 	[Mutator("StringLengthEdgeCase")]
 	[Description("Produce Gaussian distributed string lengths around numerical edge cases.")]
-	public class StringLengthEdgeCase : Mutator
+	public class StringLengthEdgeCase : Utility.IntegerEdgeCases
 	{
-		long minValue;
-		ulong maxValue;
-
-		IntegerEdgeCases edgeCases;
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		public StringLengthEdgeCase(DataElement obj)
+			: base(obj)
 		{
-			name = "StringLengthEdgeCase";
-			// TODO - Allow for 64 bit values!
-			minValue = 0;
-			maxValue = UInt16.MaxValue;
-
-			edgeCases = new IntegerEdgeCases(minValue, maxValue);
 		}
 
-		public override uint mutation
+		protected override NLog.Logger Logger
 		{
-			// TODO - Make this work :)
-			get { return 0; }
-			set { }
-		}
-
-		public override int count
-		{
-			// TODO - Make this work :)
 			get
-			{ return 1000; }
+			{
+				return logger;
+			}
+		}
+
+		protected override void GetLimits(DataElement obj, out long min, out ulong max)
+		{
+			min = 0;
+			max = ushort.MaxValue;
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -53,33 +44,45 @@ namespace Peach.Enterprise.Mutators
 			return false;
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, long value)
 		{
-			throw new NotSupportedException("TODO - Make this work");
+			Mutate(obj, value);
 		}
 
-		public override void randomMutation(DataElement obj)
+		protected override void performMutation(DataElement obj, ulong value)
 		{
-			long len = (long)edgeCases.Next(context.Random);
-			string value = (string) obj.DefaultValue;
+			// Should never get a ulong
+			throw new NotImplementedException();
+		}
 
-			if (value.Length == len)
-				return;
+		internal static void Mutate(DataElement obj, long value)
+		{
+			var src = (string)obj.InternalValue;
+			var dst = ExpandTo(src, value);
 
-			if (value.Length < len)
-				obj.MutatedValue = new Variant(value.Substring(0, (int)len));
-			else
+			obj.MutatedValue = new Variant(dst);
+			obj.mutationFlags = MutateOverride.Default;
+		}
+
+		private static string ExpandTo(string value, long length)
+		{
+			if (string.IsNullOrEmpty(value))
 			{
-				var sb = new StringBuilder((int)len);
-				while ((sb.Length + value.Length) <= len)
-					sb.Append(value);
-
-				sb.Append(value.Substring(0, (int)len - sb.Length));
+				return new string('A', (int)length);
+			}
+			else if (value.Length >= length)
+			{
+				return value.Substring(0, (int)length);
 			}
 
-			obj.mutationFlags = MutateOverride.Default;
+			var sb = new StringBuilder();
+
+			while (sb.Length + value.Length < length)
+				sb.Append(value);
+
+			sb.Append(value.Substring(0, (int)(length - sb.Length)));
+
+			return sb.ToString();
 		}
 	}
 }
-
-// end

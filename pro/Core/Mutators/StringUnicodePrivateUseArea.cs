@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿//
+// Copyright (c) Deja vu Security
+//
 
-namespace Peach.Enterprise.Mutators
+using System;
+
+using Peach.Core.Dom;
+
+namespace Peach.Core.Mutators
 {
 	/// <summary>
 	/// Private Use Area: U+E000..U+F8FF (6,400 characters)
 	/// </summary>
-	class StringUnicodePrivateUseArea
+	[Mutator("StringUnicodePrivateUseArea")]
+	[Description("Produce a random string from the Unicode private use area character set.")]
+	public class StringUnicodePrivateUseArea : Utility.StringMutator
 	{
+		public StringUnicodePrivateUseArea(DataElement obj)
+			: base(obj, 0xE000, 0xF8FF)
+		{
+		}
 	}
 }

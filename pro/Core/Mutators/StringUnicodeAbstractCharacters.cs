@@ -1,11 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿//
+// Copyright (c) Deja vu Security
+//
 
-namespace Peach.Enterprise.Mutators
+using System;
+
+using Peach.Core.Dom;
+
+namespace Peach.Core.Mutators
 {
-	class StringUnicodeAbstractCharacters
+	[Mutator("StringUnicodeAbstractCharacters")]
+	[Description("Produce string comprised of unicode abstract characters.")]
+	public class StringUnicodeAbstractCharacters : Utility.StringMutator
 	{
+		// TODO: Populate this with something
+		static readonly int[] codePoints = new int[0];
+
+		public StringUnicodeAbstractCharacters(DataElement obj)
+			: base(obj, codePoints)
+		{
+		}
+
+		public new static bool supportedDataElement(DataElement obj)
+		{
+			// TODO: Remove this override once codePoints is populated
+			return false;
+		}
 	}
 }

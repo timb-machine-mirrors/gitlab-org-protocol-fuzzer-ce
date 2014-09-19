@@ -1,18 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+using System;
+
 using Peach.Core.Dom;
-using Peach.Core.IO;
-using NLog;
 
 namespace Peach.Core.Mutators
 {
-    [Mutator("BlobBitFlipperMutator")]
-    [Description("Flip a % of total bits in a blob. Default is 20%.")]
-    [Hint("BlobBitFlipperMutator-N", "Gets N by checking node for hint, or returns default (20).")]
-    public class BlobBitFlipperMutator : Mutator
-    {
+	[Mutator("DataElementBitFlipper")]
+	[Description("Flip a % of total bits in a blob. Default is 20%.")]
+	[Hint("DataElementBitFlipper-N", "Gets N by checking node for hint, or returns default (20).")]
+	public class DataElementBitFlipper : Mutator
+	{
+		public override int count
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public override uint mutation
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public override void sequentialMutation(DataElement obj)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void randomMutation(DataElement obj)
+		{
+			throw new NotImplementedException();
+		}
+
+#if DISABLED
         int n;
         int countMax;
         uint current;
@@ -106,7 +134,6 @@ namespace Peach.Core.Mutators
             obj.mutationFlags = MutateOverride.Default;
             obj.mutationFlags |= MutateOverride.TypeTransform;
         }
-    }
+#endif
+	}
 }
-
-// end

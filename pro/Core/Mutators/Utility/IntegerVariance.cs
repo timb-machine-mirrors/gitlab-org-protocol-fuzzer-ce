@@ -1,4 +1,8 @@
-﻿using System;
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+using System;
 using System.Collections.Generic;
 
 using Peach.Core.Dom;

@@ -147,4 +147,3 @@ namespace Peach.Core.Mutators.Utility
 		protected abstract BitwiseStream PerformMutation(BitStream data, long start, long length);
 	}
 }
-
