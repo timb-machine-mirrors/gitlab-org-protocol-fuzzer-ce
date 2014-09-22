@@ -82,5 +82,14 @@ namespace Peach.Core.Test
 				Assert.AreEqual(new byte[0], val);
 			}
 		}
+
+		[Test]
+		public void TestArrayVariance()
+		{
+			Assert.Fail("Not implemented");
+
+			// Ensure things work if we remove the only array item and
+			// the array variance mutator runs on the array
+		}
 	}
 }

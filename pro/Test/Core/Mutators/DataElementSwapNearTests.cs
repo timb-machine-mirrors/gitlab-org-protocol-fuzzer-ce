@@ -25,9 +25,20 @@ namespace Peach.Core.Test
 			dm.Add(blob1);
 			dm.Add(blob2);
 
+			var flags = new Flags("Flags") { lengthType = LengthType.Bits, length = 32 };
+			var flag = new Flag("Flag") { length = 8, position = 0 };
+			flags.Add(flag);
+
 			Assert.False(runner.IsSupported(dm));
 			Assert.True(runner.IsSupported(blob1));
 			Assert.False(runner.IsSupported(blob2));
+
+			dm.Add(flags);
+			dm.Add(new Blob("Blob3"));
+
+			Assert.True(runner.IsSupported(blob2));
+			Assert.True(runner.IsSupported(flags));
+			Assert.False(runner.IsSupported(flag));
 		}
 
 		[Test]
