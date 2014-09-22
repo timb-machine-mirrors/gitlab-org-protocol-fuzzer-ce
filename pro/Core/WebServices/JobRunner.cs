@@ -28,6 +28,9 @@ namespace Peach.Enterprise.WebServices
 		public DateTime StartDate { get; private set; }
 		public DateTime StopDate { get; private set; }
 		public JobStatus Status { get; private set; }
+		public bool Range { get; private set; }
+		public uint RangeStart { get; private set; }
+		public uint RangeStop { get; private set; }
 
 		public TimeSpan Runtime
 		{
@@ -103,9 +106,27 @@ namespace Peach.Enterprise.WebServices
 			return true;
 		}
 
-		public static JobRunner Run(WebLogger webLogger, string pitLibraryPath, string pitFile, string pitUrl)
+		public static JobRunner Run(WebLogger webLogger, string pitLibraryPath, string pitFile, string pitUrl, uint seed, uint rangeStart, uint rangeStop)
 		{
-			var config = new RunConfiguration() { pitFile = pitFile };
+			var config = new RunConfiguration()
+			{ 
+				pitFile = pitFile,
+			};
+
+			if (seed > 0)
+				config.randomSeed = seed;
+
+			if (rangeStart > 0)
+			{
+				config.range = true;
+				config.rangeStart = rangeStart;
+			}
+
+			if(rangeStop > 0)
+			{
+				config.range = true;
+				config.rangeStop = rangeStop;
+			}
 
 			var ret = new JobRunner()
 			{
@@ -115,6 +136,9 @@ namespace Peach.Enterprise.WebServices
 				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.StartPending,
 				PitUrl = pitUrl,
+				Range = config.range,
+				RangeStart = config.rangeStart,
+				RangeStop = config.rangeStop
 			};
 
 			ret.stopwatch = new Stopwatch();

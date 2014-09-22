@@ -79,9 +79,9 @@ namespace Peach.Enterprise.WebServices
 			context.StartTest(pit.Versions[0].Files[0].Name);
 		}
 
-		protected void StartJob(Models.Pit pit)
+		protected void StartJob(Models.Pit pit, uint seed, uint rangeStart, uint rangeStop)
 		{
-			context.StartJob(pit.Versions[0].Files[0].Name, pit.PitUrl);
+			context.StartJob(pit.Versions[0].Files[0].Name, pit.PitUrl, seed, rangeStart, rangeStop);
 		}
 	}
 }

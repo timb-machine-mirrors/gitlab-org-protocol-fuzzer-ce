@@ -122,7 +122,8 @@
 					<div class="btn-group">
 						<button class="btn btn-lg btn-primary" ng-click="vm.Start()" ng-class="{disabled: vm.CanStart == false}">START</button>
 						<button class="btn btn-lg btn-primary dropdown-toggle" data-toggle="dropdown" ng-class="{disabled: vm.CanStart == false}">
-							<span class="icon-caret-down icon-only"></span>
+							<i class="icon-caret-down"></i>
+							<!-- <span class="icon-caret-down icon-only"></span> -->
 						</button>
 						<ul class="dropdown-menu dropdown-success">
 							<li>
@@ -133,6 +134,8 @@
 							</li>
 						</ul>
 					</div>
+
+
 					<button class="btn btn-lg btn-danger" ng-click="vm.Stop()"
 									ng-class="{disabled: vm.CanStop == false}">
 						STOP
