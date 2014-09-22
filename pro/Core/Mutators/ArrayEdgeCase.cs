@@ -10,13 +10,13 @@ using NLog;
 
 namespace Peach.Core.Mutators
 {
-	[Mutator("ArrayEdgeCases")]
+	[Mutator("ArrayEdgeCase")]
 	[Description("Change the length of arrays to integer edge cases")]
-	public class ArrayEdgeCases : Utility.IntegerEdgeCases
+	public class ArrayEdgeCase : Utility.IntegerEdgeCases
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public ArrayEdgeCases(DataElement obj)
+		public ArrayEdgeCase(DataElement obj)
 			: base(obj)
 		{
 		}
