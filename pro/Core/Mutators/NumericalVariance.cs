@@ -45,7 +45,7 @@ namespace Peach.Core.Mutators
 				signed = true;
 				min = long.MinValue;
 				max = long.MaxValue;
-				value = (long)asNum.DefaultValue;
+				value = (long)obj.DefaultValue;
 			}
 		}
 

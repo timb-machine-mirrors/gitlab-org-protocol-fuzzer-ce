@@ -13,6 +13,11 @@ namespace Peach.Core.Mutators
 	[Hint("DataElementBitFlipper-N", "Gets N by checking node for hint, or returns default (20).")]
 	public class DataElementBitFlipper : Mutator
 	{
+		public DataElementBitFlipper(DataElement obj)
+			: base(obj)
+		{
+		}
+
 		public override int count
 		{
 			get { throw new NotImplementedException(); }

@@ -16,6 +16,7 @@ namespace Peach.Core.Mutators
 		List<int> options = new List<int>();
 
 		public ChoiceSwitch(DataElement obj)
+			: base(obj)
 		{
 			var asChoice = (Choice)obj;
 

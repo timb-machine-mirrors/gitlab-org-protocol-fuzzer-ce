@@ -12,6 +12,11 @@ namespace Peach.Core.Mutators
 	[Description("Change the string to be all lowercase.")]
 	public class StringCaseLower : Mutator
 	{
+		public StringCaseLower(DataElement obj)
+			: base(obj)
+		{
+		}
+
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			if (obj is Dom.String && obj.isMutable)
