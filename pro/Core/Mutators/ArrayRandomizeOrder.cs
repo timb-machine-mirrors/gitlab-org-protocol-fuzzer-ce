@@ -14,9 +14,32 @@ namespace Peach.Core.Mutators
 	[Description("Randomize the order of the array")]
 	public class ArrayRandomizeOrder : Mutator
 	{
+		int combinations;
+
 		public ArrayRandomizeOrder(DataElement obj)
 			: base(obj)
 		{
+			var asArray = (Dom.Array)obj;
+
+			// for small count, use factorial, otherwise cap at 100
+			switch (asArray.Count)
+			{
+				case 0:
+				case 1:
+					throw new ArgumentException();
+				case 2:
+					combinations = 2;
+					break;
+				case 3:
+					combinations = 6;
+					break;
+				case 4:
+					combinations = 24;
+					break;
+				default:
+					combinations = 100;
+					break;
+			}
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -33,9 +56,7 @@ namespace Peach.Core.Mutators
 		{
 			get
 			{
-				// TODO: Make this reasonable
-				// Should probably be array count factorial capped at a reasonable limit
-				return 50;
+				return combinations;
 			}
 		}
 
