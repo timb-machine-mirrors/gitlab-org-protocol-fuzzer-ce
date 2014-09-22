@@ -1,0 +1,150 @@
+
+<DataModel name="DomainName">
+	<Asn1Type name="Value" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="name" type="IA5String">
+				<String name="Value" />
+			</Asn1Type>
+			<Asn1Type name="portNumber" type="INTEGER" minOccurs="0" maxOccurs="1">
+				<Number name="Value" size="16" />
+			</Asn1Type>
+		</Block>
+	</Asn1Type>
+</DataModel>
+
+<DataModel name="IP4Address">
+	<Asn1Type name="Value" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="address" type="OCTET STRING">
+				<Blob name="Value" length="4" />
+			</Asn1Type>
+			<Asn1Type name="portNumber" type="INTEGER" minOccurs="0" maxOccurs="1">
+				<Number name="Value" size="16" />
+			</Asn1Type>
+		</Block>
+	</Asn1Type>
+</DataModel>
+
+<DataModel name="IP6Address">
+	<Asn1Type name="Value" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="address" type="OCTET STRING">
+				<Blob name="Value" length="16" />
+			</Asn1Type>
+			<Asn1Type name="portNumber" type="INTEGER" minOccurs="0" maxOccurs="1">
+				<Number name="Value" size="16" />
+			</Asn1Type>
+		</Block>
+	</Asn1Type>
+</DataModel>
+
+<DataModel name="ErrorDescriptor">
+	<Asn1Type name="Value" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="errorCode" type="INTEGER">
+				<Number name="Value" size="16" />
+			</Asn1Type>
+			<Asn1Type name="ErrorText" type="IA5String" minOccurs="0">
+				<String name="Value" />
+			</Asn1Type>
+		</Block>
+	</Asn1Type>
+</DataModel>
+
+<DataModel name="ActionRequest">
+	<Asn1Type name="Value" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="contextId" type="INTEGER">
+				<Number name="Value" size="32" />
+			</Asn1Type>
+		</Block>
+		<!-- LEAVING OFF HERE -->
+	</Asn1Type>
+</DataModel>
+
+<DataModel name="Transaction">
+	<Choice name="TransactionChoice">
+		<Asn1Type name="transactionRequest" type="SEQUENCE">
+			<Block name="Value">
+				<Asn1Type name="transactionId" type="INTEGER">
+					<Number name="Value" size="32" />
+				</Asn1Type>
+				<Block name="actions" ref="ActionRequest" maxOccurs="1024" />
+			</Block>
+		</Asn1Type>
+		
+		<Asn1Type name="transactionPending" type="SEQUENCE">
+			<Asn1Type name="transactionId" type="INTEGER">
+				<Number name="Value" size="32" />
+			</Asn1Type>
+		</Asn1Type>
+		
+		<Asn1Type name="transactionReply" type="SEQUENCE">
+			<Block name="Value">
+				<Asn1Type name="transactionId" type="INTEGER">
+					<Number name="Value" size="32" />
+				</Asn1Type>
+				<Asn1Type name="immAckRequired" type="NULL" minOccurs="0" />
+				<Choice name="transactionResult">
+					<Block name="transactionError" ref="ErrorDescriptor" />
+					<Asn1Type name="actionReplies" type="SEQUENCE">
+						<Block name="Value" ref="ActionReply" maxOccurs="1024" />
+					</Asn1Type>
+				</Choice>
+			</Block>
+		</Asn1Type>
+		<Asn1Type name="transactionResponseAck" type="SEQUENCE">
+			<Asn1Type name="TransactionAck" type="SEQUENCE">
+				<Block name="Value">
+					<Asn1Type name="firstAck" type="INTEGER">
+						<Number name="Value" size="32" />
+					</Asn1Type>
+					<Asn1Type name="lastAck" type="INTEGER" minOccurs="0">
+						<Number name="Value" size="32" />
+					</Asn1Type>
+				</Block>
+			</Asn1Type>
+		</Asn1Type>
+	</Choice>
+</DataModel>
+
+<DataModel name="MagacoMessage">
+	<!-- Optional -->
+	<Asn1Type name="AuthenticationHeader" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="SecurityParamIndex" type="OCTET STRING">
+				<Blob length="4" />
+			</Asn1Type>
+			<Asn1Type name="SequenceNum" type="OCTET STRING">
+				<Blob length="4" />
+			</Asn1Type>
+			<Asn1Type name="AuthData" type="OCTET STRING">
+				<Blob />
+			</Asn1Type>
+		</Block>
+	</Asn1Type>
+	
+	<Asn1Type name="Message" type="SEQUENCE">
+		<Block name="Value">
+			<Asn1Type name="Version" type="INTEGER">
+				<Number name="Value" size="8" value="1" />
+			</Asn1Type>
+			<Choice name="MId">
+				<Block name="ip4Address" ref="IP4Address"/>
+				<Block name="ip6Address" ref="IP6Address"/>
+				<Block name="domainName" ref="DomainName" />
+				<Block name="deviceName" ref="DeviceName" />
+				<Asn1Type name="mtpAddress" type="OCTET STRING">
+					<Blob />
+				</Asn1Type>
+			</Choice>
+			<Choice name="messageBody">
+				<Block name="messageError" ref="ErrorDescriptor"/>
+				<Asn1Type name="transactions" type="SEQUENCE">
+					<Block name="Value" ref="Transaction" maxOccurs="1024"/>
+				</Asn1Type>
+			</Choice>
+		</Block>
+	</Asn1Type>
+
+</DataModel>
