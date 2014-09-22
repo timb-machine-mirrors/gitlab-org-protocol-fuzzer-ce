@@ -9,12 +9,17 @@ using System.Collections.Generic;
 namespace Peach.Core.Test
 {
 	[TestFixture]
-	class NumericalVarianceTests
+	class NumberVarianceTests
 	{
+		// TODO: Numerical string test
+		// TODO: Sequential is +/- 50
+		// TODO: Never get DefaultValue
+		// TODO: If default value is 3 and unsigned, mutated value is 0 to 53
+
 		[Test]
 		public void TestSupported()
 		{
-			var runner = new MutatorRunner("NumericalVariance");
+			var runner = new MutatorRunner("NumberVariance");
 
 			Assert.False(runner.IsSupported(new Blob()));
 

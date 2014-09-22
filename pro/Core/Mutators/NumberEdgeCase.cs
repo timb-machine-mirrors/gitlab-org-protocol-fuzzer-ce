@@ -10,13 +10,13 @@ using NLog;
 
 namespace Peach.Core.Mutators
 {
-	[Mutator("NumericalEdgeCase")]
+	[Mutator("NumberEdgeCase")]
 	[Description("Produce Gaussian distributed numbers around numerical edge cases.")]
-	public class NumericalEdgeCase : Utility.IntegerEdgeCases
+	public class NumberEdgeCase : Utility.IntegerEdgeCases
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public NumericalEdgeCase(DataElement obj)
+		public NumberEdgeCase(DataElement obj)
 			: base(obj)
 		{
 		}

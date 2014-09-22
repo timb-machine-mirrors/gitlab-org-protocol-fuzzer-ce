@@ -9,12 +9,12 @@ using System.Collections.Generic;
 namespace Peach.Core.Test
 {
 	[TestFixture]
-	class NumericalEdgeCaseTests
+	class NumberEdgeCaseTests
 	{
 		[Test]
 		public void TestSupported()
 		{
-			var runner = new MutatorRunner("NumericalEdgeCase");
+			var runner = new MutatorRunner("NumberEdgeCase");
 
 			Assert.False(runner.IsSupported(new Blob()));
 

@@ -10,12 +10,12 @@ using NLog;
 
 namespace Peach.Core.Mutators
 {
-	[Mutator("NumericalVariance")]
-	public class NumericalVariance : Utility.IntegerVariance
+	[Mutator("NumberVariance")]
+	public class NumberVariance : Utility.IntegerVariance
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public NumericalVariance(DataElement obj)
+		public NumberVariance(DataElement obj)
 			: base(obj)
 		{
 		}
