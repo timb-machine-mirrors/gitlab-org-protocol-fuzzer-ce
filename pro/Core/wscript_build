@@ -63,4 +63,5 @@ bld(
 	resource = 'xmltests.zip',
 	content = 'IronPython.StdLib',
 	name = 'Peach.Pro.dll',
+	namespace = 'Peach.Core',
 )
