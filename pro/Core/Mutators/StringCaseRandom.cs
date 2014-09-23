@@ -9,25 +9,24 @@ using Peach.Core.Dom;
 
 namespace Peach.Core.Mutators
 {
+	/// <summary>
+	/// Picks a gaussian random number X centered on 1, with a
+	/// sigma of 1/3 the string length.
+	/// Then, pick X random indices in the string.
+	/// At each selected index, toggle the case of the character.
+	/// </summary>
 	[Mutator("StringCaseRandom")]
-	[Description("Change the string to be a random case.")]
+	[Description("Change the case of random characters in the string.")]
 	public class StringCaseRandom : Mutator
 	{
-		int mutations;
+		int total;
 
 		public StringCaseRandom(DataElement obj)
 		{
 			var str = (string)obj.InternalValue;
 
-			// For strings <= 20, the unique mutations is 2^n
-			// For strings > 20, the unique permutations is
-			// n! / (20! * (n - 20)!)
-			// and each permutation has 2^20 mutations
-
-			if (str.Length <= 16)
-				mutations = 1 << str.Length;
-			else
-				mutations = ushort.MaxValue + 1;
+			// For sequential, use the length total number of mutations
+			total = str.Length;
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -52,7 +51,7 @@ namespace Peach.Core.Mutators
 		{
 			get
 			{
-				return mutations;
+				return total;
 			}
 		}
 
@@ -71,23 +70,32 @@ namespace Peach.Core.Mutators
 		{
 			var sb = new StringBuilder((string)obj.InternalValue);
 
-			// Legacy implementation:
-			// if str.Length <= 20, randomly flip all characters
-			// if str.Length > 20, pick 20 characters and randomly flip them
+			// Pick gaussian from 1 to string length
+			var stddev = sb.Length / 3;
+			var cnt = 0;
 
-			var indices = context.Random.Permutation(sb.Length, 20);
+			do
+			{
+				cnt = (int)Math.Round(Math.Abs(context.Random.NextGaussian(0, stddev))) + 1;
+			}
+			while (cnt > sb.Length);
+
+			// Pick cnt indices
+			var indices = context.Random.Permutation(sb.Length, cnt);
 
 			for (int i = 0; i < indices.Length; ++i)
 			{
 				// Permutation is [1,Length] inclusive
 				var idx = indices[i] - 1;
 
-				// TODO: Should we do a case toggle?
+				var ch = sb[idx];
+				var upper = char.ToUpper(ch);
 
-				if (context.Random.NextBoolean())
-					sb[idx] = char.ToUpper(sb[idx]);
+				// Toggle the case at the picked indices
+				if (ch != upper)
+					sb[idx] = upper;
 				else
-					sb[idx] = char.ToLower(sb[idx]);
+					sb[idx] = char.ToLower(ch);
 			}
 
 			obj.MutatedValue = new Variant(sb.ToString());
