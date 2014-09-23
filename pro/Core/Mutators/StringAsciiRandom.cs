@@ -8,20 +8,13 @@ using Peach.Core.Dom;
 
 namespace Peach.Core.Mutators
 {
-	[Mutator("StringRandom")]
-	[Description("Produce random ascii strings of random lengths.")]
-	public class StringRandom : Utility.StringMutator
+	[Mutator("StringAsciiRandom")]
+	[Description("Produce random strings using the ascii character set.")]
+	public class StringAsciiRandom : Utility.StringMutator
 	{
-		public StringRandom(DataElement obj)
+		public StringAsciiRandom(DataElement obj)
 			: base(obj, 0x00, 0x7f)
 		{
-		}
-
-		protected override int GetMutatedLength(DataElement obj)
-		{
-			// TODO: Is there something nicer we could do for
-			// coming up with the length of the mutated string?
-			return context.Random.Next(0, ushort.MaxValue + 1);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
