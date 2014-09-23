@@ -61,7 +61,7 @@ SUCH DAMAGE.
 	<DataModel name="InIPv4Packet" ref="IPv4:Packet">
 		<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06" token="true"/>
 		<Block name="Payload" ref="Packet">
-			<!--<Block name="Header.OptionsAndPadding" /> -->
+			<Block name="Header.OptionsAndPadding" /> 
 		</Block>
 	</DataModel>
 	
@@ -70,7 +70,7 @@ SUCH DAMAGE.
 			<Block name="InIPv4Packet" ref="IPv4:Packet">
 				<Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06" token="true"/>
 				<Block name="Payload" ref="TCP:Packet">
-					<!--<Block name="Header.OptionsAndPadding" /> -->
+					<Block name="Header.OptionsAndPadding" /> 
 				</Block>
 			</Block>
 			
