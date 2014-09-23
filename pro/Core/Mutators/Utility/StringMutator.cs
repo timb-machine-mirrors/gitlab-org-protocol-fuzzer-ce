@@ -6,7 +6,8 @@ using System;
 using System.Text;
 
 using Peach.Core.Dom;
-using System.Collections.Generic;
+
+using NLog;
 
 namespace Peach.Core.Mutators.Utility
 {
@@ -15,10 +16,11 @@ namespace Peach.Core.Mutators.Utility
 	/// from the specified range.  By default this mutator only
 	/// supports unicode strings.
 	/// </summary>
-	public abstract class StringMutator : Mutator
+	public abstract class StringMutator : Utility.IntegerVariance
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		Func<int> gen;
-		int numMutations;
 
 		/// <summary>
 		/// Construct base string mutator
@@ -27,11 +29,9 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="minCodePoint">Minimum unicode code point to select.</param>
 		/// <param name="maxCodePoint">Maximum unicode code point to select.</param>
 		public StringMutator(DataElement obj, int minCodePoint, int maxCodePoint)
+			: base(obj)
 		{
 			gen = () => context.Random.Next(minCodePoint, maxCodePoint + 1);
-
-			// TODO: Do something better with numMutations
-			this.numMutations = maxCodePoint - minCodePoint;
 		}
 
 		/// <summary>
@@ -40,11 +40,9 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="obj">Data element to attach to.</param>
 		/// <param name="codePoints">List of code points to select from.</param>
 		public StringMutator(DataElement obj, int[] codePoints)
+			: base(obj)
 		{
 			gen = () => codePoints[context.Random.Next(0, codePoints.Length)];
-
-			// TODO: Do something better with numMutations
-			this.numMutations = codePoints.Length;
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -56,45 +54,30 @@ namespace Peach.Core.Mutators.Utility
 			return false;
 		}
 
-		public sealed override uint mutation
+		protected override NLog.Logger Logger
 		{
-			get;
-			set;
+			get { return logger; }
 		}
 
-		public sealed override int count
-		{
-			get
-			{
-				return numMutations;
-			}
-		}
-
-		/// <summary>
-		/// Returns the length to use when generating the mutated string.
-		/// </summary>
-		/// <param name="obj">Data element the mutation is part of.</param>
-		/// <returns>How long the mutated string should be.</returns>
-		protected virtual int GetMutatedLength(DataElement obj)
+		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
 			var str = (string)obj.InternalValue;
-			var len = string.IsNullOrEmpty(str) ? 1 : str.Length;
+			var len = (long)str.Length;
 
-			return len;
+			signed = false;
+			min = 1;
+			max = ushort.MaxValue;
+			value = Math.Min(len, max);
+			value = Math.Max(min, value);
 		}
 
-		public sealed override void sequentialMutation(DataElement obj)
+		protected sealed override void performMutation(DataElement obj, long value)
 		{
-			// Sequential is the same as random
-			randomMutation(obj);
-		}
+			System.Diagnostics.Debug.Assert(value <= int.MaxValue);
 
-		public sealed override void randomMutation(DataElement obj)
-		{
-			var len = GetMutatedLength(obj);
-			var sb = new StringBuilder(len);
+			var sb = new StringBuilder((int)value);
 
-			for (int i = 0; i < len; ++i)
+			for (long i = 0; i < value; ++i)
 			{
 				var cp = gen();
 				var ch = char.ConvertFromUtf32(cp);
@@ -104,6 +87,12 @@ namespace Peach.Core.Mutators.Utility
 
 			obj.MutatedValue = new Variant(sb.ToString());
 			obj.mutationFlags = MutateOverride.Default;
+		}
+
+		protected override void performMutation(DataElement obj, ulong value)
+		{
+			// Should never get a ulong
+			throw new NotImplementedException();
 		}
 	}
 }
