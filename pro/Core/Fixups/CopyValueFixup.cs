@@ -50,7 +50,9 @@ namespace Peach.Core.Fixups
 		protected override Variant fixupImpl()
 		{
 			var elem = elements["ref"];
-			return new Variant(elem.Value);
+
+			// Use InternalValue so type information is preserved
+			return elem.InternalValue;
 		}
 	}
 }
