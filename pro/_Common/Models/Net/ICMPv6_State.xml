@@ -37,104 +37,108 @@ SUCH DAMAGE.
 -->
 <Peach xmlns="http://peachfuzzer.com/2012/Peach"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
  description="Internet Control Message Protocol Version 6 PIT StateModels" version="0.0.2">
 
-  <Include ns="ICMPv6" src="file:##PitLibraryPath##/_Common/Models/Net/ICMPv6_Data.xml"/>
-  <Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_Data.xml"/>
+	<Include ns="ICMPv6" src="file:##PitLibraryPath##/_Common/Models/Net/ICMPv6_Data.xml"/>
+	<Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_Data.xml"/>
+
+	<Import import="time" />
+
+	<DataModel name="IPv6inDestinationUnreachable" ref="ICMPv6:DestinationUnreachable">
+		<Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
+	</DataModel>
+
+	<DataModel name="IPv6inPacketTooBig" ref="ICMPv6:PacketTooBig">
+		<Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
+	</DataModel>
+
+	<DataModel name="IPv6inTimeExceeded" ref="ICMPv6:TimeExceeded">
+		<Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
+	</DataModel>
+
+	<DataModel name="IPv6inParameterProblem" ref="ICMPv6:ParameterProblem">
+		<Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
+	</DataModel>
+
+	<StateModel name="Echo" initialState="Initial">
+		<State name="Initial">
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
+			<Action name="EchoRequest" type="output">
+				<DataModel ref="ICMPv6:EchoRequest"/>
+			</Action>
+
+			<Action name="EchoReply" type="input">
+				<DataModel ref="ICMPv6:EchoReply"/>
+			</Action>
 
 
-  <DataModel name="IPv6inDestinationUnreachable" ref="ICMPv6:DestinationUnreachable">
-    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
-  </DataModel>
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+		</State>
+	</StateModel>
 
-  <DataModel name="IPv6inPacketTooBig" ref="ICMPv6:PacketTooBig">
-    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
-  </DataModel>
-
-  <DataModel name="IPv6inTimeExceeded" ref="ICMPv6:TimeExceeded">
-    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
-  </DataModel>
-
-  <DataModel name="IPv6inParameterProblem" ref="ICMPv6:ParameterProblem">
-    <Block name="Content.Payload.Data" ref="IPv6:IPv6Header" />
-  </DataModel>
-
-  <StateModel name="Echo" initialState="Initial">
-    <State name="Initial">
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
-
-      <Action name="EchoRequest" type="output">
-        <DataModel ref="ICMPv6:EchoRequest"/>
-      </Action>
-
-      <Action name="EchoReply" type="input">
-        <DataModel ref="ICMPv6:EchoReply"/>
-      </Action>
+	<StateModel name="NeighborSolicitation" initialState="Initial">
+		<State name="Initial">
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
+			<Action name="NeighborSolicitation" type="output">
+				<DataModel ref="ICMPv6:NeighborSolicitation"/>
+			</Action>
 
-  <StateModel name="NeighborSolicitation" initialState="Initial">
-    <State name="Initial">
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
-
-
-      <Action name="NeighborSolicitation" type="output">
-        <DataModel ref="ICMPv6:NeighborSolicitation"/>
-      </Action>
-
-      <Action name="NeighborAdvertisement" type="input">
-        <DataModel ref="ICMPv6:NeighborAdvertisement"/>
-      </Action>
+			<Action name="NeighborAdvertisement" type="input">
+				<DataModel ref="ICMPv6:NeighborAdvertisement"/>
+			</Action>
 
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
-    </State>
-  </StateModel>
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+		</State>
+	</StateModel>
 
-  <StateModel name="Transmit" initialState="Initial">
-    <State name="Initial">
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+	<StateModel name="Transmit" initialState="Initial">
+		<State name="Initial">
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 
 
-      <Action name="EchoRequest" type="output">
-        <DataModel ref="ICMPv6:EchoRequest"/>
-      </Action>
+			<Action name="EchoRequest" type="output">
+				<DataModel ref="ICMPv6:EchoRequest"/>
+			</Action>
 
-      <Action name="EchoReply" type="output">
-        <DataModel ref="ICMPv6:EchoReply"/>
-      </Action>
+			<Action name="EchoReply" type="output">
+				<DataModel ref="ICMPv6:EchoReply"/>
+			</Action>
 
-      <Action name="DestinationUnreachable" type="output"><!--Not Displaying on Wireshark?-->
-        <DataModel ref="IPv6inDestinationUnreachable" />
-      </Action>
+			<Action name="DestinationUnreachable" type="output">
+				<!--Not Displaying on Wireshark?-->
+				<DataModel ref="IPv6inDestinationUnreachable" />
+			</Action>
 
-      <Action name="PacketTooBig" type="output">
-        <DataModel ref="IPv6inPacketTooBig" />
-      </Action>
+			<Action name="PacketTooBig" type="output">
+				<DataModel ref="IPv6inPacketTooBig" />
+			</Action>
 
-      <Action name="TimeExceeded" type="output">
-        <DataModel ref="IPv6inTimeExceeded" />
-      </Action>
+			<Action name="TimeExceeded" type="output">
+				<DataModel ref="IPv6inTimeExceeded" />
+			</Action>
 
-      <Action name="ParameterProblem" type="output"><!--Not Displaying on Wireshark?-->
-        <DataModel ref="IPv6inParameterProblem" />
-      </Action>
+			<Action name="ParameterProblem" type="output">
+				<!--Not Displaying on Wireshark?-->
+				<DataModel ref="IPv6inParameterProblem" />
+			</Action>
 
-		<Action name="NeighborSolicitation" type="output">
-			<DataModel ref="ICMPv6:NeighborSolicitation"/>
-		</Action>
+			<Action name="NeighborSolicitation" type="output">
+				<DataModel ref="ICMPv6:NeighborSolicitation"/>
+			</Action>
 
-		<Action name="NeighborAdvertisement" type="input">
-			<DataModel ref="ICMPv6:NeighborAdvertisement"/>
-		</Action>
+			<!-- Sleeping to slow the spew of packets down -->
+			<Action name="NeighborAdvertisement" type="output" onComplete="time.sleep(0.25)">
+				<DataModel ref="ICMPv6:NeighborAdvertisement"/>
+			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
-	</State>
-  </StateModel>
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+		</State>
+	</StateModel>
 </Peach>
 <!--END-->
