@@ -12,7 +12,7 @@ namespace Peach.Core.Test
 {
 	public class DataModelCollector : Watcher
 	{
-		protected static Dom.Dom ParsePit(string xml)
+		public static Dom.Dom ParsePit(string xml)
 		{
 			return new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 		}
