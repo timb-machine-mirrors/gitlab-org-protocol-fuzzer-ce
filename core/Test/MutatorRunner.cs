@@ -13,6 +13,7 @@ namespace Peach.Core.Test
 		public interface Mutation
 		{
 			BitwiseStream Value { get; }
+			Variant InternalValue { get; }
 		}
 
 		class SequentialMutation : Mutation
@@ -32,15 +33,29 @@ namespace Peach.Core.Test
 				get
 				{
 					if (value == null)
-					{
-						runner.Iteration = (uint)mutation + 1;
-						runner.Mutator.mutation = (uint)mutation;
-						value = runner.Element.root.Clone();
-						Mutate(runner.Mutator, value.find(runner.Element.fullName));
-					}
+						MakeValue();
 
 					return value.Value;
 				}
+			}
+
+			public Variant InternalValue
+			{
+				get
+				{
+					if (value == null)
+						MakeValue();
+
+					return value.InternalValue;
+				}
+			}
+
+			private void MakeValue()
+			{
+				runner.Iteration = (uint)mutation + 1;
+				runner.Mutator.mutation = (uint)mutation;
+				value = runner.Element.root.Clone();
+				Mutate(runner.Mutator, value.find(runner.Element.fullName));
 			}
 
 			protected virtual void Mutate(Mutator mutator, DataElement obj)
