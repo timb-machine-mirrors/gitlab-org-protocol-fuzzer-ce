@@ -150,18 +150,42 @@ namespace Peach.Core.Test
 
 		public IEnumerable<Mutation> Sequential(DataElement element)
 		{
+			return Sequential(element, null);
+		}
+
+		public IEnumerable<Mutation> Sequential(DataElement element, System.Action cb)
+		{
 			var strategy = new Runner(type, element);
 
+			if (cb != null)
+				cb();
+
+			var ret = new List<Mutation>();
+
 			for (int i = 0; i < strategy.Mutator.count; ++i)
-				yield return new SequentialMutation(strategy, i);
+				ret.Add(new SequentialMutation(strategy, i));
+
+			return ret;
 		}
 
 		public IEnumerable<Mutation> Random(int count, DataElement element)
 		{
+			return Random(count, element, null);
+		}
+
+		public IEnumerable<Mutation> Random(int count, DataElement element, System.Action cb)
+		{
 			var strategy = new Runner(type, element);
 
+			if (cb != null)
+				cb();
+
+			var ret = new List<Mutation>();
+
 			for (int i = 0; i < count; ++i)
-				yield return new RandomMutation(strategy, i);
+				ret.Add(new RandomMutation(strategy, i));
+
+			return ret;
 		}
 	}
 }
