@@ -6,12 +6,16 @@ using System;
 
 using Peach.Core.Dom;
 
+using NLog;
+
 namespace Peach.Core.Mutators
 {
 	[Mutator("StringCaseUpper")]
 	[Description("Change the string to be all uppercase.")]
 	public class StringCaseUpper : Mutator
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		public StringCaseUpper(DataElement obj)
 			: base(obj)
 		{
@@ -48,10 +52,17 @@ namespace Peach.Core.Mutators
 
 		public override void sequentialMutation(DataElement obj)
 		{
-			var str = (string)obj.InternalValue;
+			try
+			{
+				var str = (string)obj.InternalValue;
 
-			obj.MutatedValue = new Variant(str.ToUpper());
-			obj.mutationFlags = MutateOverride.Default;
+				obj.MutatedValue = new Variant(str.ToUpper());
+				obj.mutationFlags = MutateOverride.Default;
+			}
+			catch (NotSupportedException ex)
+			{
+				logger.Debug("Skipping mutation of {0}, {1}", obj.debugName, ex.Message);
+			}
 		}
 
 		public override void randomMutation(DataElement obj)

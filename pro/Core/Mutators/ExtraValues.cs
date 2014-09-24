@@ -18,6 +18,7 @@ namespace Peach.Core.Mutators
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		string[] values;
+		Func<string, Variant> variant;
 
 		public ExtraValues(DataElement obj)
 			: base(obj)
@@ -33,11 +34,16 @@ namespace Peach.Core.Mutators
 			}
 
 			values = str.Split(';');
+
+			if (obj is Dom.Blob)
+				variant = s => new Variant(Encoding.UTF8.GetBytes(s));
+			else
+				variant = s => new Variant(s);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (!(obj is DataElementContainer) && obj.isMutable)
+			if ((obj is Dom.String || obj is Dom.Number || obj is Blob) && obj.isMutable)
 			{
 				if (!string.IsNullOrEmpty(getHint(obj, "ExtraValues")))
 					return true;
@@ -77,7 +83,7 @@ namespace Peach.Core.Mutators
 
 		void performMutation(DataElement obj, int index)
 		{
-			obj.MutatedValue = new Variant(values[index]);
+			obj.MutatedValue = variant(values[index]);
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}

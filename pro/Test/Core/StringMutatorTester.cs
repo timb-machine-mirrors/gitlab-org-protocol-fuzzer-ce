@@ -12,6 +12,8 @@ namespace Peach.Core.Test
 	{
 		MutatorRunner runner;
 
+		protected bool VerifyLength { get; set; }
+
 		StringType[] encodings = new StringType[]
 		{
 			StringType.ascii,
@@ -75,8 +77,8 @@ namespace Peach.Core.Test
 				// For counts, the count is string length +/- 50 with a min of 0
 
 				// Len = 0 has [1,51]
-				var m1 = runner.Sequential(str);
 				str.DefaultValue = new Variant("");
+				var m1 = runner.Sequential(str);
 				Verify(m1, 1, 51);
 
 				// Len = 5 has [1,55]
@@ -153,7 +155,7 @@ namespace Peach.Core.Test
 				// Should produce a valid string
 				Assert.NotNull(asStr);
 
-				if (asStr.Length != i)
+				if (VerifyLength && asStr.Length != i)
 				{
 					// C# is utf16, so we need the length in text elements
 					var info = new StringInfo(asStr);

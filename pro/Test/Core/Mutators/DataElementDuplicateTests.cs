@@ -93,7 +93,7 @@ namespace Peach.Core.Test
 
 			Assert.AreEqual(new byte[] { 0x01 }, dm.Value.ToArray());
 
-			var m = runner.Random(1000, blob);
+			var m = runner.Random(5000, blob);
 
 			var lengths = new Dictionary<int, int>();
 

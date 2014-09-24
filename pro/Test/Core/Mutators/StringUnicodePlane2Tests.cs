@@ -1,17 +1,24 @@
 using System;
-
+using System.Collections.Generic;
+using Peach.Core.Dom;
 using NUnit.Framework;
 
 namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
-	class StringAsciiRandomTests : StringMutatorTester
+	class StringUnicodePlane2Tests : StringMutatorTester
 	{
-		public StringAsciiRandomTests()
-			: base("StringAsciiRandom")
+		public StringUnicodePlane2Tests()
+			: base("StringUnicodePlane2")
 		{
-			// Verify fuzzed string lengths for sequential
-			VerifyLength = true;
+		}
+
+		protected override IEnumerable<StringType> InvalidEncodings
+		{
+			get
+			{
+				yield return StringType.ascii;
+			}
 		}
 
 		[Test]

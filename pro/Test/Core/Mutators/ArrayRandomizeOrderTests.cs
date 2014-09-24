@@ -55,8 +55,8 @@ namespace Peach.Core.Test.Mutators
 
 			var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
 
-			// For 6 mutations, expect 4 unique
-			Assert.GreaterOrEqual(totals.Count, 4);
+			// For 6 mutations, expect at least 3 unique
+			Assert.GreaterOrEqual(totals.Count, 3);
 		}
 
 		[Test]

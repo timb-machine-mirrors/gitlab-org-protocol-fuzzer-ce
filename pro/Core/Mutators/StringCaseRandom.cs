@@ -7,6 +7,8 @@ using System.Text;
 
 using Peach.Core.Dom;
 
+using NLog;
+
 namespace Peach.Core.Mutators
 {
 	/// <summary>
@@ -19,6 +21,8 @@ namespace Peach.Core.Mutators
 	[Description("Change the case of random characters in the string.")]
 	public class StringCaseRandom : Mutator
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		int total;
 
 		public StringCaseRandom(DataElement obj)
@@ -68,7 +72,19 @@ namespace Peach.Core.Mutators
 
 		public override void randomMutation(DataElement obj)
 		{
-			var sb = new StringBuilder((string)obj.InternalValue);
+			string asStr;
+
+			try
+			{
+				asStr = (string)obj.InternalValue;
+			}
+			catch (NotSupportedException ex)
+			{
+				logger.Debug("Skipping mutation of {0}, {1}", obj.debugName, ex.Message);
+				return;
+			}
+
+			var sb = new StringBuilder(asStr);
 
 			// Pick gaussian from 1 to string length
 			var stddev = sb.Length / 3;

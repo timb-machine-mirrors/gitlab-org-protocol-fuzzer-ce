@@ -92,6 +92,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			var num = new Number("num") { length = size, Signed = signed };
 
 			var tester = new Tester(num);
+			var blob = new Blob();
 
 			Assert.AreEqual(count, tester.count);
 
@@ -103,7 +104,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			for (i = 0; i < tester.count; ++i)
 			{
 				tester.mutation = i;
-				tester.sequentialMutation(null);
+				tester.sequentialMutation(blob);
 			}
 		}
 
@@ -123,6 +124,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			var num = new Number("num") { length = size, Signed = signed };
 
 			var tester = new Tester(num);
+			var blob = new Blob();
 
 			Assert.AreEqual(count, tester.count);
 
@@ -137,7 +139,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			for (i = 1; i < 10 * tester.count; ++i)
 			{
 				tester.context.Iteration = i;
-				tester.randomMutation(null);
+				tester.randomMutation(blob);
 			}
 
 			// Ensure that for more than half of the mutations,
@@ -195,11 +197,13 @@ namespace Peach.Core.Test.Mutators.Utility
 
 			tester.ULongMutation = v => Assert.Fail();
 
+			var elem = new Blob("blob");
+
 			// Run 10 times the count
-			for (i = 1; i < tester.count; ++i)
+			for (i = 1; i < tester.count * 1000; ++i)
 			{
 				tester.context.Iteration = i;
-				tester.randomMutation(null);
+				tester.randomMutation(elem);
 			}
 
 			var sb = new StringBuilder();

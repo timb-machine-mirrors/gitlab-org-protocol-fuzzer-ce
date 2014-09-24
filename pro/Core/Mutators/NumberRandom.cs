@@ -26,19 +26,19 @@ namespace Peach.Core.Mutators
 			{
 				System.Diagnostics.Debug.Assert(obj is Dom.String);
 
-				total = 64; // Log(ulong.MaxValue, 2)
+				total = 64;
 				gen = () => new Variant(context.Random.Next(long.MinValue, long.MaxValue).ToString());
 			}
 			else if (asNum.Signed)
 			{
-				total = (int)Math.Round(Math.Log((ulong)((long)asNum.MaxValue - asNum.MinValue), 2));
+				total = (int)asNum.lengthAsBits;
  
 				if (asNum.lengthAsBits < 32)
-					gen = () => new Variant(context.Random.Next((int)asNum.MinValue, (int)asNum.MaxValue));
+					gen = () => new Variant(context.Random.Next((int)asNum.MinValue, (int)asNum.MaxValue + 1));
 				else if (asNum.lengthAsBits == 32)
 					gen = () => new Variant(context.Random.NextInt32());
 				else if (asNum.lengthAsBits < 64)
-					gen = () => new Variant(context.Random.Next((long)asNum.MinValue, (long)asNum.MaxValue));
+					gen = () => new Variant(context.Random.Next((long)asNum.MinValue, (long)asNum.MaxValue + 1));
 				else if (asNum.lengthAsBits == 64)
 					gen = () => new Variant(context.Random.NextInt64());
 				else
@@ -46,14 +46,14 @@ namespace Peach.Core.Mutators
 			}
 			else
 			{
-				total = (int)Math.Round(Math.Log(asNum.MaxValue, 2));
+				total = (int)asNum.lengthAsBits;
 
 				if (asNum.lengthAsBits < 32)
-					gen = () => new Variant(context.Random.Next((uint)asNum.MinValue, (uint)asNum.MaxValue));
+					gen = () => new Variant(context.Random.Next((uint)asNum.MinValue, (uint)asNum.MaxValue + 1));
 				else if (asNum.lengthAsBits == 32)
 					gen = () => new Variant(context.Random.NextUInt32());
 				else if (asNum.lengthAsBits < 64)
-					gen = () => new Variant(context.Random.Next((ulong)asNum.MinValue, (ulong)asNum.MaxValue));
+					gen = () => new Variant(context.Random.Next((ulong)asNum.MinValue, (ulong)asNum.MaxValue + 1));
 				else if (asNum.lengthAsBits == 64)
 					gen = () => new Variant(context.Random.NextUInt64());
 				else

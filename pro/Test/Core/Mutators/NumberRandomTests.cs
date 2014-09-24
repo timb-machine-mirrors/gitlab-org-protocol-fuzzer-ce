@@ -9,12 +9,12 @@ using System.Collections.Generic;
 namespace Peach.Core.Test
 {
 	[TestFixture]
-	class NumberEdgeCaseTests
+	class NumberRandomTests
 	{
 		[Test]
 		public void TestSupported()
 		{
-			var runner = new MutatorRunner("NumberEdgeCase");
+			var runner = new MutatorRunner("NumberRandom");
 
 			Assert.False(runner.IsSupported(new Blob()));
 
@@ -37,6 +37,24 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestCounts()
 		{
+			var runner = new MutatorRunner("NumberRandom");
+			var signed = new bool[] { false, true };
+
+			foreach (var s in signed)
+			{
+				for (int len = 9; len <= 64; ++len)
+				{
+					var n = new Dom.Number("num") { length = len, Signed = s };
+
+					var m = runner.Sequential(n);
+
+					Assert.AreEqual(len, m.Count());
+				}
+			}
+
+			var str = new Dom.String("str") { DefaultValue = new Variant("1") };
+			var cnt = runner.Sequential(str).Count();
+			Assert.AreEqual(64, cnt);
 		}
 
 		[Test]

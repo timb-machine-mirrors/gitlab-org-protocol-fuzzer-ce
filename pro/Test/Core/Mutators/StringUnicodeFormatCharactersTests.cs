@@ -6,13 +6,11 @@ using NUnit.Framework;
 namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
-	class StringUnicodePlane0Tests : StringMutatorTester
+	class StringUnicodeFormatCharactersTests : StringMutatorTester
 	{
-		public StringUnicodePlane0Tests()
-			: base("StringUnicodePlane0")
+		public StringUnicodeFormatCharactersTests()
+			: base("StringUnicodeFormatCharacters")
 		{
-			// Verify fuzzed string lengths for sequential
-			VerifyLength = true;
 		}
 
 		protected override IEnumerable<StringType> InvalidEncodings

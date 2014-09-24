@@ -128,9 +128,9 @@ namespace Peach.Core.Test.Mutators.Utility
 			if (useValue)
 			{
 				var v = totals[value];
-				// Allow default value to be within 10% of next values
-				Assert.GreaterOrEqual(1.1 * v, totals[value - 1]);
-				Assert.GreaterOrEqual(1.1 * v, totals[value + 1]);
+				// Allow default value to be within 20% of next values
+				Assert.GreaterOrEqual(1.2 * v, totals[value - 1]);
+				Assert.GreaterOrEqual(1.2 * v, totals[value + 1]);
 			}
 			else
 			{
