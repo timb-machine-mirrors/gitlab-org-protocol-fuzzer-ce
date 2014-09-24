@@ -55,7 +55,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			public Action<ulong> ULongMutation;
 
 			public Tester(Number obj)
-				: base(obj)
+				: base(obj, false)
 			{
 				this.context = new Strategy();
 			}

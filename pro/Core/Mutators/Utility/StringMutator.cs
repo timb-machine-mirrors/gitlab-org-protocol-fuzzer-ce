@@ -20,29 +20,13 @@ namespace Peach.Core.Mutators.Utility
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		Func<int> gen;
-
 		/// <summary>
 		/// Construct base string mutator
 		/// </summary>
 		/// <param name="obj">Data element to attach to.</param>
-		/// <param name="minCodePoint">Minimum unicode code point to select.</param>
-		/// <param name="maxCodePoint">Maximum unicode code point to select.</param>
-		public StringMutator(DataElement obj, int minCodePoint, int maxCodePoint)
-			: base(obj)
+		public StringMutator(DataElement obj)
+			: base(obj, true)
 		{
-			gen = () => context.Random.Next(minCodePoint, maxCodePoint + 1);
-		}
-
-		/// <summary>
-		/// Construct base string mutator
-		/// </summary>
-		/// <param name="obj">Data element to attach to.</param>
-		/// <param name="codePoints">List of code points to select from.</param>
-		public StringMutator(DataElement obj, int[] codePoints)
-			: base(obj)
-		{
-			gen = () => codePoints[context.Random.Next(0, codePoints.Length)];
 		}
 
 		public new static bool supportedDataElement(DataElement obj)

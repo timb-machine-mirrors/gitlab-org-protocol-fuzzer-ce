@@ -32,7 +32,7 @@ namespace Peach.Core
 			private set;
 		}
 
-		public VarianceGenerator(ulong value, ulong min, ulong max)
+		public VarianceGenerator(ulong value, ulong min, ulong max, bool useValue)
 		{
 			if (min > max)
 				throw new ArgumentOutOfRangeException("min", "Parameter cannot be greater than max.");
@@ -42,10 +42,10 @@ namespace Peach.Core
 				throw new ArgumentOutOfRangeException("value", "Parameter cannot be less than min.");
 
 
-			Initialize(unchecked((long)value), unchecked((long)min), unchecked((long)max));
+			Initialize(unchecked((long)value), unchecked((long)min), unchecked((long)max), useValue);
 		}
 
-		public VarianceGenerator(long value, long min, long max)
+		public VarianceGenerator(long value, long min, long max, bool useValue)
 		{
 			if (min > max)
 				throw new ArgumentOutOfRangeException("min", "Parameter cannot be greater than max.");
@@ -54,7 +54,7 @@ namespace Peach.Core
 			if (value < min)
 				throw new ArgumentOutOfRangeException("value", "Parameter cannot be less than min.");
 
-			Initialize(value, min, max);
+			Initialize(value, min, max, useValue);
 		}
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace Peach.Core
 			}
 		}
 
-		void Initialize(long value, long min, long max)
+		void Initialize(long value, long min, long max, bool useValue)
 		{
 			this.value = value;
 			this.min = min;
@@ -170,7 +170,7 @@ namespace Peach.Core
 
 			do
 			{
-				if (val != value)
+				if (useValue || val != value)
 					vals.Add(val);
 			}
 			while (val++ != end);

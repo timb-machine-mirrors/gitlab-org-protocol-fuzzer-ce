@@ -14,16 +14,20 @@ namespace Peach.Core.Test
 		public void TestThreeBit()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(0, -2, 1);
+			var g = new VarianceGenerator(0, -2, 1, false);
 
 			Assert.AreEqual(new[] { -2, -1, 1 }, g.Values);
+
+			g = new VarianceGenerator(0, -2, 1, true);
+
+			Assert.AreEqual(new[] { -2, -1, 0, 1 }, g.Values);
 		}
 
 		[Test]
 		public void TestSbyte()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(0, sbyte.MinValue, sbyte.MaxValue);
+			var g = new VarianceGenerator(0, sbyte.MinValue, sbyte.MaxValue, false);
 
 			var hits = new int[256];
 
@@ -63,7 +67,7 @@ namespace Peach.Core.Test
 		public void TestByteMin()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(byte.MinValue, byte.MinValue, byte.MaxValue);
+			var g = new VarianceGenerator(byte.MinValue, byte.MinValue, byte.MaxValue, false);
 
 			var hits = new int[256];
 
@@ -100,7 +104,7 @@ namespace Peach.Core.Test
 		public void TestByteMax()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(byte.MaxValue, byte.MinValue, byte.MaxValue);
+			var g = new VarianceGenerator(byte.MaxValue, byte.MinValue, byte.MaxValue, false);
 
 			var hits = new int[256];
 
@@ -137,7 +141,7 @@ namespace Peach.Core.Test
 		public void TestLongZero()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(0, long.MinValue, long.MaxValue);
+			var g = new VarianceGenerator(0, long.MinValue, long.MaxValue, false);
 
 			Assert.AreEqual(100, g.Values.Length);
 			for (int i = 0; i < g.Values.Length / 2; ++i)
@@ -159,7 +163,7 @@ namespace Peach.Core.Test
 		public void TestLongMin()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(long.MinValue + 255, long.MinValue, long.MaxValue);
+			var g = new VarianceGenerator(long.MinValue + 255, long.MinValue, long.MaxValue, false);
 
 			Assert.AreEqual(100, g.Values.Length);
 			for (int i = 0; i < g.Values.Length / 2; ++i)
@@ -180,7 +184,7 @@ namespace Peach.Core.Test
 		public void TestLongMax()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(long.MaxValue - 255, long.MinValue, long.MaxValue);
+			var g = new VarianceGenerator(long.MaxValue - 255, long.MinValue, long.MaxValue, false);
 
 			Assert.AreEqual(100, g.Values.Length);
 			for (int i = 0; i < g.Values.Length / 2; ++i)
@@ -202,7 +206,7 @@ namespace Peach.Core.Test
 		public void TestULongZero()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(0, ulong.MinValue, ulong.MaxValue);
+			var g = new VarianceGenerator(0, ulong.MinValue, ulong.MaxValue, false);
 
 			Assert.AreEqual(50, g.Values.Length);
 			for (int i = 0; i < g.Values.Length; ++i)
@@ -221,7 +225,7 @@ namespace Peach.Core.Test
 		public void TestULongMin()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(255, ulong.MinValue, ulong.MaxValue);
+			var g = new VarianceGenerator(255, ulong.MinValue, ulong.MaxValue, false);
 
 			Assert.AreEqual(100, g.Values.Length);
 			for (int i = 0; i < g.Values.Length / 2; ++i)
@@ -242,7 +246,7 @@ namespace Peach.Core.Test
 		public void TestULongLarge()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(ulong.MaxValue - 255, ulong.MinValue, ulong.MaxValue);
+			var g = new VarianceGenerator(ulong.MaxValue - 255, ulong.MinValue, ulong.MaxValue, false);
 
 			Assert.AreEqual(100, g.Values.Length);
 			for (uint i = 0; i < g.Values.Length / 2; ++i)
@@ -263,7 +267,7 @@ namespace Peach.Core.Test
 		public void TestULongMax()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(ulong.MaxValue, ulong.MinValue, ulong.MaxValue);
+			var g = new VarianceGenerator(ulong.MaxValue, ulong.MinValue, ulong.MaxValue, false);
 
 			Assert.AreEqual(50, g.Values.Length);
 			for (uint i = 0; i < g.Values.Length; ++i)
@@ -282,7 +286,7 @@ namespace Peach.Core.Test
 		public void MakeCsv()
 		{
 			var rng = new Random(0);
-			var g = new VarianceGenerator(ulong.MaxValue - (4 * 4096), ulong.MinValue, ulong.MaxValue);
+			var g = new VarianceGenerator(ulong.MaxValue - (4 * 4096), ulong.MinValue, ulong.MaxValue, false);
 
 			var dict = new Dictionary<ulong, int>();
 

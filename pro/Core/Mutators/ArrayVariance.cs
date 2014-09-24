@@ -17,7 +17,7 @@ namespace Peach.Core.Mutators
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		public ArrayVariance(DataElement obj)
-			: base(obj)
+			: base(obj, false)
 		{
 		}
 

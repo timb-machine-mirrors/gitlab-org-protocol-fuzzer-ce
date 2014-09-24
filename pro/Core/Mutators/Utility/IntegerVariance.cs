@@ -18,9 +18,17 @@ namespace Peach.Core.Mutators.Utility
 		long value;
 		long min;
 		long max;
+		bool useValue;
 
-		public IntegerVariance(DataElement obj)
+		/// <summary>
+		/// Base class for mutations that use integer variance around the default value.
+		/// </summary>
+		/// <param name="obj">Element the mutator is attached to.</param>
+		/// <param name="useValue">Should the default value be included in the variance.</param>
+		public IntegerVariance(DataElement obj, bool useValue)
 		{
+			this.useValue = useValue;
+
 			GetLimits(obj, out signed, out value, out min, out max);
 
 			var delta = max - min;
@@ -33,7 +41,7 @@ namespace Peach.Core.Mutators.Utility
 				var vals = new List<long>();
 
 				for (var i = min; i <= max; ++i)
-					if (i != value)
+					if (useValue || i != value)
 						vals.Add(i);
 
 				space = vals.Count;
@@ -46,9 +54,9 @@ namespace Peach.Core.Mutators.Utility
 				VarianceGenerator gen;
 
 				if (!signed)
-					gen = new VarianceGenerator((ulong)value, (ulong)min, (ulong)max);
+					gen = new VarianceGenerator((ulong)value, (ulong)min, (ulong)max, useValue);
 				else
-					gen = new VarianceGenerator(value, min, max);
+					gen = new VarianceGenerator(value, min, max, useValue);
 
 				space = gen.Values.Length;
 				sequential = () => gen.Values[mutation];
@@ -124,7 +132,7 @@ namespace Peach.Core.Mutators.Utility
 
 				// If we get our default value, pick again as that
 				// is not really a mutation
-				if (value == this.value)
+				if (!useValue && value == this.value)
 					continue;
 
 				// VarianceGenerator gurantees value is between min/max
