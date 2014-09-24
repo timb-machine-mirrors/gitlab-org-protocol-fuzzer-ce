@@ -37,7 +37,7 @@ SUCH DAMAGE.
 -->
 <Peach xmlns="http://peachfuzzer.com/2012/Peach"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
        author="Deja Vu Security, LLC"
  description="Transport Control Protocol Version 6 PIT StateModels" version="0.0.2">
 
@@ -51,37 +51,64 @@ SUCH DAMAGE.
 	<!-- Currenlty supports fuzzing a listener, not acting as a listener -->
 
 	<StateModel name="Listener" initialState="Initial">
-  
-    <State name="Initial">
-      <Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
+
+		<State name="Initial">
+			<Action type="call" method="StartIterationEvent" publisher="Peach.Agent" />
 			<Action type="changeState" ref="SendSyn" />
-    </State>
+		</State>
 
 		<State name="SendSyn" >
-
-			<!-- http://tools.ietf.org/html/rfc793#page-30 -->
+			<!-- http://tools.ietf.org/html/rfc793#section-3.4 -->
 			<!-- Does not support sync connections or half-open recovery -->
 			<Action type="output"
-							onStart="TCP.init_seq(self)"
+							onStart="TCP.init_seq(Context, self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:SYN"/>
 				<DataModel name="Packet" ref="TCPv6:Packet"/>
 			</Action>
-			<Action name="Read" type="changeState" ref="SynSent" />
+			<Action name="Read" type="changeState" ref="SynWait" />
+			<!-- Listener can respond with either a SYN or a SYN,ACK -->
 		</State>
 
-		<State name="SynSent">
+		<State name="SynWait">
 			<Action name="GetPacket" type="input"
 							onComplete="TCP.store_next_acknum(self)">
+				<DataModel name="Packet" ref="TCPv6:InPacket"/>
+			</Action>
+
+			<!-- If the listener responds to the inital SYN with a SYN,ACK
+			     then we're in SYN RCVD. We need to ACK the SYN,ACK.  -->
+			<Action name="GoToSynRecieved"
+							type="changeState" ref="SynRecieved"
+							when="TCP.get_if_ack_for_me(self.parent.actions[0].dataModel) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+
+			<!-- If the listener responds to the inital SYN with a ACK then
+			     we're in SYN SENT. We need to ACK the SYN -->
+			<Action name="GoToSynSent"
+							type="changeState" ref="SynSent"
+							when="TCP.get_if_ack_for_me(self.parent.actions[0].dataModel) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+
+			<Action name="ReadMore" type="changeState" ref="SynWait" />
+		</State>
+
+		<State name="SynSent" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_store(self)" >
+				<Data ref="TCP:SYNACK"/>
 				<DataModel name="Packet" ref="TCPv6:Packet"/>
 			</Action>
-			<Action name="GoToSend"
-							type="changeState" ref="SynRecieved"
-							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
-			<Action name="GoToSend2"
+			<Action type="changeState" ref="SynAckWait"/>
+		</State>
+
+		<State name="SynAckWait">
+			<Action name="GetPacket" type="input"
+							onComplete="TCP.store_next_acknum(self)">
+				<DataModel name="Packet" ref="TCPv6:InPacket"/>
+			</Action>
+			<Action name="GoToEstablished"
 							type="changeState" ref="Established"
-							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
-			<Action name="ReadMore" type="changeState" ref="SynSent" />
+							when="TCP.get_if_ack_for_me(self.parent.actions[0].dataModel) and not bool(int(self.parent.actions[0].dataModel.find('SYN').InternalValue))"/>
+			<Action name="ReadMore" type="changeState" ref="SynAckWait" />
 		</State>
 
 		<State name="SynRecieved" >
@@ -93,20 +120,59 @@ SUCH DAMAGE.
 			<Action type="changeState" ref="Established"/>
 		</State>
 
-		<State name="Established" >
-            <!--<Action type="changeState" ref="WaitServerClose"/>-->
-			 <Action type="changeState" ref="SendTestPayload"/> 
-			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
+		<State name="SendFinAck" >
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_store(self)">
+				<Data ref="TCP:ACK"/>
+				<DataModel name="Packet" ref="TCPv6:Packet"/>
+			</Action>
+			<Action type="changeState" ref="SendTestPayload"/>
+		</State>
+
+		<!--
+		Connection is established:
+		
+			1. Ready any outstanding data from the client.
+			2. Goto send packet
+			
+		-->
+
+		<State name="Established">
+
+			<Action name="Receive" type="input"
+					onStart="TCP.enableZeroRead(Context)"
+					onComplete="TCP.disableZeroRead(Context)">
+				<DataModel name="Packet" ref="TCPv6:InPacketOrNone"/>
+			</Action>
+
+			<Action name="Loop" type="changeState"
+					ref="Established"
+					when="TCP.store_next_acknum(self.parent.actions['Receive'])" />
+
+			<Action name="GoToSendFinAck" type="changeState"
+					ref="SendFinalFinAck"
+			 		when="TCP.is_fin_ack(self.parent.actions['Receive'].dataModel) and TCP.store_next_acknum(self.parent.actions['Receive'])"/>
+
+			<!-- Send Ack, send message -->
+			<Action name="SendAck" type="output"
+							onStart="TCP.sync_from_lastack(self) and TCP.sync_from_store(self)"
+							when="not self.parent.actions['Receive'].dataModel.find('Packet')">
+				<Data ref="TCP:ACK" />
+				<DataModel name="Packet" ref="TCPv6:Packet"/>
+			</Action>
+
+			<Action name="SendTestPayload" type="changeState" ref="SendTestPayload" />
+
 		</State>
 
 		<State name="WaitServerClose">
 			<Action name="GetPacket" type="input"
 							onComplete="TCP.store_next_acknum(self)">
-				<DataModel name="Packet" ref="TCPv6:Packet"/>
+				<DataModel name="Packet" ref="TCPv6:InPacket"/>
 			</Action>
 			<Action name="GoToSendTestPayload"
 							type="changeState" ref="SendTestPayloadToClosedServer"
-							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.get_if_ack_for_me(self.parent.actions[0].dataModel) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
 			<Action  name="ReadMore" type="changeState" ref="WaitServerClose" />
 		</State>
 
@@ -131,33 +197,36 @@ SUCH DAMAGE.
 		</State>
 
 		<State name="WaitForAck">
-			<Action name="GetPacket" type="input" >
-							<!-- onComplete="TCP.store_next_acknum(self)"> -->
-				<DataModel name="Packet" ref="TCPv6:Packet"/>
+			<Action name="GetPacket" type="input">
+				<DataModel name="Packet" ref="TCPv6:InPacket"/>
 			</Action>
+
+			<Action name="GoToSendFinalAck"
+							type="changeState" ref="SendFinalFinAck"
+							when="TCP.is_fin_ack(self.parent.actions[0].dataModel) and TCP.store_next_acknum(self.parent.actions[0])"/>
+
 			<Action name="GoToClose"
 							type="changeState" ref="BeginClose"
-							when="TCP.get_if_ack_for_me(self) and not bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
-			<Action name="GoToSendFinalAck"
-							type="changeState" ref="SendFinalAck"
-							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
-			<Action  name="ReadMore" type="changeState" ref="WaitForAck" />
+							when="TCP.get_if_ack_for_me(self.parent.actions[0].dataModel)"/>
+
+			<Action  name="Loop" type="changeState" ref="WaitForAck"
+					 onStart="TCP.store_next_acknum(self.parent.actions[0])"/>
 		</State>
 
 		<!-- http://tools.ietf.org/html/rfc793#section-3.5 -->
 		<State name="BeginClose" >
+			<!-- <Action type="changeState" ref="ImmediateClose"/> -->
 			<Action type="changeState" ref="Close"/>
 		</State>
 
 		<State name="SyncClose">
 			<Action name="Close" type="output"
-							onStart="TCP.sync_from_store(self)"
-							onComplete="TCP.set_next_seq(self)">
+							onStart="TCP.sync_from_store(self)">
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="Packet" ref="TCPv6:Packet"/>
 			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="ImmediateClose">
@@ -171,23 +240,41 @@ SUCH DAMAGE.
 		</State>
 
 		<State name="Close">
+
+			<Action name="Receive" type="input"
+					onStart="TCP.enableZeroRead(Context)"
+					onComplete="TCP.disableZeroRead(Context)">
+				<DataModel name="Packet" ref="TCPv6:InPacketOrNone"/>
+			</Action>
+
+			<Action name="Loop" type="changeState"
+					ref="Established"
+					when="TCP.store_next_acknum(self.parent.actions['Receive'])" />
+
+			<Action name="GoToSendFinAck" type="changeState"
+					ref="SendFinalFinAck"
+			 		when="TCP.is_fin_ack(self.parent.actions['Receive'].dataModel)"/>
+
 			<Action name="Close" type="output"
 							onStart="TCP.sync_from_store(self)"
 							onComplete="TCP.set_next_seq(self)">
 				<Data ref="TCP:FINACK"/>
 				<DataModel name="Packet" ref="TCPv6:Packet"/>
 			</Action>
+
 			<Action type="changeState" ref="WaitingForFinAck"/>
 		</State>
 
 		<State name="WaitingForFinAck">
 			<Action name="GetPacket" type="input"
 							onComplete="TCP.store_next_acknum(self)">
-				<DataModel name="Packet" ref="TCPv6:Packet"/>
+				<DataModel name="Packet" ref="TCPv6:InPacket"/>
 			</Action>
+
 			<Action name="GoToSend"
 							type="changeState" ref="SendFinalFinAck"
-							when="TCP.get_if_ack_for_me(self) and bool(int(self.parent.actions[0].dataModel.find('FIN').InternalValue))"/>
+							when="TCP.is_fin_ack(self.parent.actions[0].dataModel)"/>
+
 			<Action  name="ReadMore" type="changeState" ref="WaitingForFinAck" />
 		</State>
 
@@ -198,7 +285,7 @@ SUCH DAMAGE.
 				<DataModel name="FINACKPacket" ref="TCPv6:Packet"/>
 			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="SendFinalAck">
@@ -208,7 +295,7 @@ SUCH DAMAGE.
 				<DataModel name="ACKPacket" ref="TCPv6:Packet"/>
 			</Action>
 
-      <Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
+			<Action type="call" method="ExitIterationEvent" publisher="Peach.Agent" />
 		</State>
 
 		<State name="Recovery">
@@ -221,6 +308,5 @@ SUCH DAMAGE.
 		</State>
 
 	</StateModel>
-
-	</Peach>
+</Peach>
 <!--END-->
