@@ -30,15 +30,10 @@ namespace Peach.Core.Mutators
 			var ret = new List<int>();
 
 			for (int i = 0xFDD0; i <= 0xFDEF; ++i)
-			{
 				ret.Add(i);
-			}
 
 			for (int i = 0xFFFE; i <= 0x10FFFE; i += 0x10000)
-			{
-				ret.Add(i);
-				ret.Add(i + 1);
-			}
+				ret.AddRange(new int[] { i, i + 1 });
 
 			// Supposed to be 66 noncharacter codepoints
 			System.Diagnostics.Debug.Assert(ret.Count == 66);
@@ -47,8 +42,14 @@ namespace Peach.Core.Mutators
 		}
 
 		public StringUnicodeNonCharacters(DataElement obj)
-			: base(obj, codePoints)
+			: base(obj)
 		{
+		}
+
+		protected override int GetCodePoint()
+		{
+			var idx = context.Random.Next(codePoints.Length);
+			return codePoints[idx];
 		}
 	}
 }

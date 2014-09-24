@@ -16,8 +16,30 @@ namespace Peach.Core.Mutators
 	public class StringUnicodePlane0 : Utility.StringMutator
 	{
 		public StringUnicodePlane0(DataElement obj)
-			: base(obj, 0x0000, 0xFFFF)
+			: base(obj)
 		{
+		}
+
+		protected override int GetCodePoint()
+		{
+			while (true)
+			{
+				var cp = context.Random.Next(0x0000, 0xFFFD + 1);
+
+				// Ignore low and high surrogate code points
+				if (cp >= 0xD800 && cp <= 0xDFFF)
+					continue;
+
+				// Ignore noncharacter code points
+				if (cp >= 0xFDD0 && cp <= 0xFDFE)
+					continue;
+
+				// Ignore private use
+				if (cp >= 0xE000 && cp <= 0xF8FF)
+					continue;
+
+				return cp;
+			}
 		}
 	}
 }

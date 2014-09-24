@@ -16,8 +16,13 @@ namespace Peach.Core.Mutators
 	public class StringUnicodePrivateUseArea : Utility.StringMutator
 	{
 		public StringUnicodePrivateUseArea(DataElement obj)
-			: base(obj, 0xE000, 0xF8FF)
+			: base(obj)
 		{
+		}
+
+		protected override int GetCodePoint()
+		{
+			return context.Random.Next(0xE000, 0xF8FF + 1);
 		}
 	}
 }

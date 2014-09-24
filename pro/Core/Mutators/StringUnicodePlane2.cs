@@ -16,8 +16,13 @@ namespace Peach.Core.Mutators
 	public class StringUnicodePlane2 : Utility.StringMutator
 	{
 		public StringUnicodePlane2(DataElement obj)
-			: base(obj, 0x20000, 0x2FFFF)
+			: base(obj)
 		{
+		}
+
+		protected override int GetCodePoint()
+		{
+			return context.Random.Next(0x20000, 0x2FFFD + 1);
 		}
 	}
 }

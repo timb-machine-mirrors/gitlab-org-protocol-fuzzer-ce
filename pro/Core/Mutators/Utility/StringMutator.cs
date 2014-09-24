@@ -55,19 +55,24 @@ namespace Peach.Core.Mutators.Utility
 			value = Math.Max(min, value);
 		}
 
-		protected sealed override void performMutation(DataElement obj, long value)
+		protected abstract int GetCodePoint();
+
+		protected virtual string GetChar()
+		{
+			var cp = GetCodePoint();
+			var ch = char.ConvertFromUtf32(cp);
+
+			return ch;
+		}
+
+		protected override void performMutation(DataElement obj, long value)
 		{
 			System.Diagnostics.Debug.Assert(value <= int.MaxValue);
 
 			var sb = new StringBuilder((int)value);
 
-			for (long i = 0; i < value; ++i)
-			{
-				var cp = gen();
-				var ch = char.ConvertFromUtf32(cp);
-
-				sb.Append(ch);
-			}
+			while (sb.Length < value)
+				sb.Append(GetChar());
 
 			obj.MutatedValue = new Variant(sb.ToString());
 			obj.mutationFlags = MutateOverride.Default;

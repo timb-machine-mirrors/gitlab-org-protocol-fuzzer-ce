@@ -13,8 +13,13 @@ namespace Peach.Core.Mutators
 	public class StringAsciiRandom : Utility.StringMutator
 	{
 		public StringAsciiRandom(DataElement obj)
-			: base(obj, 0x00, 0x7f)
+			: base(obj)
 		{
+		}
+
+		protected override int GetCodePoint()
+		{
+			return context.Random.Next(0x00, 0x7F + 1);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
