@@ -54,8 +54,8 @@ namespace Peach.Core.Test.Mutators.Utility
 			public Action<long> LongMutation;
 			public Action<ulong> ULongMutation;
 
-			public Tester(Number obj)
-				: base(obj, false)
+			public Tester(Number obj, bool useValue)
+				: base(obj, useValue)
 			{
 				this.context = new Strategy();
 			}
@@ -88,11 +88,11 @@ namespace Peach.Core.Test.Mutators.Utility
 			}
 		}
 
-		void TestVariance(int size, bool signed, long value, int count)
+		void TestVariance(int size, bool signed, long value, int count, bool useValue)
 		{
 			var num = new Number("num") { length = size, Signed = signed, DefaultValue = new Variant(value) };
 
-			var tester = new Tester(num);
+			var tester = new Tester(num, useValue);
 
 			var totals = new Dictionary<long, int>();
 
@@ -116,7 +116,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			var sb = new StringBuilder();
 
 			foreach (var kv in totals)
-				if (kv.Value == 0 && kv.Key != value)
+				if (kv.Value == 0 && (useValue || kv.Key != value))
 					sb.AppendFormat("{0} ", kv.Key);
 
 			// Make sure after 10x the number space, we hit all the
@@ -125,13 +125,29 @@ namespace Peach.Core.Test.Mutators.Utility
 			if (!string.IsNullOrEmpty(str))
 				Assert.Fail("Missed numbers: {0}", str);
 
-			Assert.AreEqual(0, totals[value]);
+			if (useValue)
+			{
+				var v = totals[value];
+				// Allow default value to be within 10% of next values
+				Assert.GreaterOrEqual(1.1 * v, totals[value - 1]);
+				Assert.GreaterOrEqual(1.1 * v, totals[value + 1]);
+			}
+			else
+			{
+				Assert.AreEqual(0, totals[value]);
+			}
 		}
 
 		[Test]
-		public void Test()
+		public void TestSkipValue()
 		{
-			TestVariance(8, true, 0, 100000);
+			TestVariance(8, true, 0, 10000, false);
+		}
+
+		[Test]
+		public void TestIncludeValue()
+		{
+			TestVariance(8, true, 0, 100000, true);
 		}
 	}
 }
