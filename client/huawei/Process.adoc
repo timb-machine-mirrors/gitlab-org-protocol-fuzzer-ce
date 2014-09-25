@@ -1,0 +1,51 @@
+= Protocol Development Process
+
+This document outlines the basic process for building each protocol.
+
+
+. Read and research protocol
+. Search http://pcapr.net[pcapr] for protocol captures. Place in _Captures_ folder with "pcapr_" prefix.
+. If possible, create test environment using eNSP or open source programs
+. Start development of protocol definition
+
+== Deliverables
+
+_Common/Models/Net/protocol_Data.xml::
+    Protocol data models.
+    All of the data models created for this protocol live in this file.
+
+_Common/Models/Net/protocol_State.xml::
+    Protocol state models.
+    All of the state models created for this protocol live in this file.
+
+Net/protocol.xml::
+    Top level definition.
+    This file contains the _Test_ element.
+
+Net/protocol.xml.config::
+    Configuration file.
+    This file contains any configurable settings such as ip addresses.
+
+Net/protocol.xml.test::
+    Unit test for this protocol.
+    Used by the PitTester.
+    
+Net/protocol_DataSheet.adoc::
+    General information about the protocol and our fuzzing definition.
+    
+Net/protocol_Usage.adoc::
+    Usage guide for the definition. Should provide a description of 
+    each configuration setting and a working example of usage.
+    
+Net/protocol_Huawei.adoc::
+    Customer specific usage guide with example of usage in the Huawei provided
+    test environment.
+
+== Protocol Definition
+
+
+
+== Tools
+
+eNSP:: Huawei network simulator. Contains virtual machines for different routers and switches.
+PitTester:: Internal tool for unit testing fuzzing definitions.
