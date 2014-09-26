@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Peach.Core
 {
@@ -107,6 +108,66 @@ namespace Peach.Core
 			}
 
 			return result.ToArray();
+		}
+
+		/// <summary>
+		/// Returns min(n,k) unique random numbers in the range [1, n], inclusive. 
+		/// This is equivalent to getting the first n numbers of some random permutation of 
+		/// the sequential numbers from 1 to max. 
+		/// Runs in O(k^2) time.
+		/// </summary>
+		/// <param name="rand"></param>
+		/// <param name="n">Maximum number possible.</param>
+		/// <param name="k">How many numbers to return.</param>
+		/// <returns></returns>
+		public static long[] Permutation(this Random rand, long n, long k)
+		{
+			var result = new List<long>();
+			var sorted = new SortedSet<long>();
+			var cnt = Math.Min(n, k);
+
+			for (long i = 0; i < cnt; i++)
+			{
+				var r = rand.Next(1, n + 1 - i);
+
+				foreach (var q in sorted)
+					if (r >= q) r++;
+
+				result.Add(r);
+				sorted.Add(r);
+			}
+
+			return result.ToArray();
+		}
+
+		/// <summary>
+		/// Returns min(n,k) unique random numbers in the range [1, n], inclusive. 
+		/// This is equivalent to getting the first n numbers of some random permutation of 
+		/// the sequential numbers from 1 to max. 
+		/// Runs in O(k^2) time.
+		/// </summary>
+		/// <param name="rand"></param>
+		/// <param name="n">Maximum number possible.</param>
+		/// <param name="k">How many numbers to return.</param>
+		/// <returns></returns>
+		public static long[] SortedPermutation(this Random rand, long n, long k)
+		{
+			var result = new List<long>();
+			var sorted = new SortedSet<long>();
+			var cnt = Math.Min(n, k);
+
+			for (long i = 0; i < cnt; i++)
+			{
+				var r = rand.Next(1, n + 1 - i);
+
+				foreach (var q in sorted)
+					if (r >= q) r++;
+
+				result.Add(r);
+				sorted.Add(r);
+			}
+
+			return sorted.ToArray();
 		}
 	}
 }
