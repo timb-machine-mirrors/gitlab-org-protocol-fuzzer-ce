@@ -150,6 +150,23 @@ namespace Peach.Core
 			return h.Value;
 		}
 
+		protected static bool getTypeTransformHint(DataElement obj)
+		{
+			var name = "Peach.TypeTransform";
+			var value = getHint(obj, name);
+
+			// Defaults to supporting type transforms
+			if (string.IsNullOrEmpty(value))
+				return true;
+
+			bool ret;
+
+			if (!bool.TryParse(value.ToLower(), out ret))
+				throw new PeachException("{0} hint '{1}' has invalid value '{2}'.".Fmt(obj.debugName, name, value));
+			
+			return ret;
+		}
+
 		protected bool getN(DataElement obj, out uint n)
 		{
 			return getN(obj, GetType().Name, out n);

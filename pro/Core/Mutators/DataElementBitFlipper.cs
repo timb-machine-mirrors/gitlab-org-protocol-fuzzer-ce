@@ -43,7 +43,12 @@ namespace Peach.Core.Mutators
 			// Attach to all non-container elements and take the
 			// pre-transformed value and flip the bits randomly
 			if (!(obj is DataElementContainer))
-				return true;
+			{
+				if (getTypeTransformHint(obj))
+					return true;
+
+				return false;
+			}
 
 			// Attach to all container elements that have a transformer and take
 			// the post-transformed value and flip the bits randomly

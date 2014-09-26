@@ -40,6 +40,9 @@ namespace Peach.Core.Test
 			var str = new Dom.String("String");
 			Assert.True(runner.IsSupported(str));
 
+			str.Hints["Peach.TypeTransform"] = new Hint("Peach.TypeTransform", "false");
+			Assert.False(runner.IsSupported(str));
+
 			var num = new Dom.Number("Number");
 			Assert.True(runner.IsSupported(num));
 
