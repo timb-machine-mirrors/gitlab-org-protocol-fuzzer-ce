@@ -96,7 +96,7 @@ namespace Peach.Core.Test
 			var src = Encoding.ASCII.GetBytes("Hello World");
 			var blob = new Blob("Blob") { DefaultValue = new Variant(src) };
 
-			var m = runner.Random(200, blob);
+			var m = runner.Random(400, blob);
 
 			var flipped = new byte[src.Length];
 

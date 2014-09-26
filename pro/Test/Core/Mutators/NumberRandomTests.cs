@@ -48,13 +48,18 @@ namespace Peach.Core.Test
 
 					var m = runner.Sequential(n);
 
-					Assert.AreEqual(len, m.Count());
+					// Count should be sqrt of max space, capped at 5000
+					var range = (ulong)((long)n.MaxValue - n.MinValue);
+					var sqrt = (ulong)Math.Sqrt(range);
+					var count = Math.Min(sqrt, 5000);
+
+					Assert.AreEqual(count, m.Count());
 				}
 			}
 
 			var str = new Dom.String("str") { DefaultValue = new Variant("1") };
 			var cnt = runner.Sequential(str).Count();
-			Assert.AreEqual(64, cnt);
+			Assert.AreEqual(5000, cnt);
 		}
 
 		[Test]

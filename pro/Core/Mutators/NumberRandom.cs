@@ -14,6 +14,8 @@ namespace Peach.Core.Mutators
 	[Description("Produce random number in range of underlying element.")]
 	public class NumberRandom : Mutator
 	{
+		const int maxCount = 5000; // Maximum count is 5000
+
 		int total;
 		Func<Variant> gen;
 
@@ -26,12 +28,13 @@ namespace Peach.Core.Mutators
 			{
 				System.Diagnostics.Debug.Assert(obj is Dom.String);
 
-				total = 64;
+				total = maxCount;
 				gen = () => new Variant(context.Random.Next(long.MinValue, long.MaxValue).ToString());
 			}
 			else if (asNum.Signed)
 			{
-				total = (int)asNum.lengthAsBits;
+				// Square root of number space, capped at maxCount
+				total = (int)Math.Min((ulong)Math.Sqrt((ulong)((long)asNum.MaxValue - asNum.MinValue)), maxCount);
  
 				if (asNum.lengthAsBits < 32)
 					gen = () => new Variant(context.Random.Next((int)asNum.MinValue, (int)asNum.MaxValue + 1));
@@ -46,7 +49,8 @@ namespace Peach.Core.Mutators
 			}
 			else
 			{
-				total = (int)asNum.lengthAsBits;
+				// Square root of number space, capped at maxCount
+				total = (int)Math.Min((ulong)Math.Sqrt((ulong)((long)asNum.MaxValue - asNum.MinValue)), maxCount);
 
 				if (asNum.lengthAsBits < 32)
 					gen = () => new Variant(context.Random.Next((uint)asNum.MinValue, (uint)asNum.MaxValue + 1));
