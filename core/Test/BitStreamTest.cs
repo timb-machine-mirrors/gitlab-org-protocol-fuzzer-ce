@@ -759,10 +759,10 @@ namespace Peach.Core.Test
 			var bs = new BitStream();
 			bs.Write(new byte[] { 0x11, 0x27, 0x33, 0x44, 0x55 }, 0, 5);
 			bs.SeekBits(0, SeekOrigin.Begin);
-			BitStream in1 = bs.SliceBits(8 + 4);
-			BitStream in2 = bs.SliceBits(2);
-			BitStream in3 = bs.SliceBits(2 + 16 + 4);
-			BitStream in4 = in3.SliceBits(16);
+			var in1 = bs.SliceBits(8 + 4);
+			var in2 = bs.SliceBits(2);
+			var in3 = bs.SliceBits(2 + 16 + 4);
+			var in4 = in3.SliceBits(16);
 
 			Assert.AreEqual(new byte[] { 0x11, 0x20 }, in1.ToArray());
 			Assert.AreEqual(new byte[] { 0x40 }, in2.ToArray());

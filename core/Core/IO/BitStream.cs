@@ -127,10 +127,10 @@ namespace Peach.Core.IO
 			}
 		}
 
-		public BitStream SliceBits(long length)
+		public override BitwiseStream SliceBits(long length)
 		{
 			if (length < 0 || (_position + length) > _length)
-				throw new ArgumentOutOfRangeException("lengthInBits");
+				throw new ArgumentOutOfRangeException("length");
 
 			var ret = new BitStream(_stream, 0, length, _position + _offset, false);
 

@@ -29,6 +29,7 @@ namespace Peach.Core.IO
 		public abstract int ReadBits(out ulong bits, int count);
 		public abstract void SetLengthBits(long value);
 		public abstract void WriteBits(ulong bits, int count);
+		public abstract BitwiseStream SliceBits(long length);
 
 		#endregion
 
