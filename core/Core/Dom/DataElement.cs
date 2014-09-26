@@ -1093,6 +1093,26 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		/// <summary>
+		/// Returns the final value without any transformers being applied
+		/// </summary>
+		public BitwiseStream PreTransformedValue
+		{
+			get
+			{
+				// TODO: Should this be cached?
+				// Alternatively, transformers could be be a different
+				// type of data element so InternalValue is pre-transformed
+				// and Value is post-transformed
+				if (_transformer != null)
+					return Value;
+				else if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.TypeTransform))
+					return (BitwiseStream)_mutatedValue;
+				else
+					return InternalValueToBitStream();
+			}
+		}
+
         /// <summary>
         /// Get the final Value of this data element
         /// </summary>
