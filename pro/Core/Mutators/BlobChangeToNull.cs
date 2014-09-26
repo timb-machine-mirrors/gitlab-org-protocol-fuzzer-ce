@@ -22,7 +22,7 @@ namespace Peach.Core.Mutators
 	public class BlobChangeToNull : Utility.BlobMutator
 	{
 		public BlobChangeToNull(DataElement obj)
-			: base(obj, 100, false)
+			: base(obj, 100, true)
 		{
 		}
 

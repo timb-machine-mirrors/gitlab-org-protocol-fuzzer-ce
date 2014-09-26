@@ -11,6 +11,9 @@ namespace Peach.Core.Test
 	[TestFixture]
 	class NumberEdgeCaseTests
 	{
+		// TODO: Numerical string test
+		// TODO: Sequential is +/- 50 at each edge
+
 		[Test]
 		public void TestSupported()
 		{
