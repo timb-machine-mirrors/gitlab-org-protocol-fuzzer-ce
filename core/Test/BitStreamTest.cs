@@ -819,5 +819,82 @@ namespace Peach.Core.Test
 				Assert.AreEqual("Couldn't convert last 3 bytes into string.", ex.Message);
 			}
 		}
+
+		[Test]
+		public void ReadWriteBit()
+		{
+			var bs = new BitStream();
+			bs.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
+
+			bs.Seek(0, SeekOrigin.Begin);
+
+			for (int i = 0; i < bs.LengthBits; ++i)
+			{
+				int b = bs.ReadBit();
+				Assert.AreEqual(0, b);
+				Assert.AreEqual(i + 1, bs.PositionBits);
+				Assert.AreEqual(bs.PositionBits / 8, bs.Position);
+			}
+
+			bs.Seek(0, SeekOrigin.Begin);
+
+			for (int i = 0; i < bs.LengthBits; ++i)
+			{
+				var bit = bs.ReadBit();
+
+				bs.SeekBits(-1, SeekOrigin.Current);
+				bs.WriteBit(1);
+
+				Assert.AreEqual(i + 1, bs.PositionBits);
+				Assert.AreEqual(bs.PositionBits / 8, bs.Position);
+
+				bs.Seek(i / 8, SeekOrigin.Begin);
+
+				var b = bs.ReadByte();
+
+				bs.SeekBits(i + 1, SeekOrigin.Begin);
+
+				var shift = 7 - (i % 8);
+				var exp = 0xff & (~((1 << shift) - 1));
+
+				// Bits should start filling in, 1 at a time, left to right
+				Assert.AreEqual(exp, b);
+			}
+
+			bs.SeekBits(46, SeekOrigin.Begin);
+
+			bs.WriteBit(1);
+
+			Assert.AreEqual(47, bs.PositionBits);
+			Assert.AreEqual(47, bs.LengthBits);
+			Assert.AreEqual(47/8, bs.Position);
+
+			bs.WriteBit(1);
+
+			Assert.AreEqual(48, bs.PositionBits);
+			Assert.AreEqual(48, bs.LengthBits);
+			Assert.AreEqual(6, bs.Position);
+			Assert.AreEqual(6, bs.Length);
+
+			bs.Seek(-1, SeekOrigin.Current);
+
+			var b1 = bs.ReadByte();
+			Assert.AreEqual(3, b1);
+
+			var lst = new BitStreamList();
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+
+			for (int i = 0; i < lst.LengthBits; ++i)
+			{
+				var b = lst.ReadBit();
+				Assert.AreEqual(1, b);
+				Assert.AreEqual(i + 1, lst.PositionBits);
+			}
+
+			Assert.AreEqual(lst.LengthBits, lst.PositionBits);
+		}
 	}
 }

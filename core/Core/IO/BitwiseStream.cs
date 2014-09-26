@@ -27,8 +27,10 @@ namespace Peach.Core.IO
 		public abstract long PositionBits { get; set; }
 		public abstract long SeekBits(long offset, SeekOrigin origin);
 		public abstract int ReadBits(out ulong bits, int count);
+		public abstract int ReadBit();
 		public abstract void SetLengthBits(long value);
 		public abstract void WriteBits(ulong bits, int count);
+		public abstract void WriteBit(int value);
 		public abstract BitwiseStream SliceBits(long length);
 
 		#endregion
@@ -156,33 +158,6 @@ namespace Peach.Core.IO
 
 			SeekBits(pos, SeekOrigin.Begin);
 			return ret;
-		}
-
-		/// <summary>
-		/// Reads the next bit from the BitwiseStream.
-		/// </summary>
-		/// <returns>Returns the next bit, or -1 if there are no bits left.</returns>
-		public int ReadBit()
-		{
-			ulong bits;
-			int len = ReadBits(out bits, 1);
-
-			if (len == 0)
-				return -1;
-
-			return (int)bits;
-		}
-
-		/// <summary>
-		/// Write a bit into the BitwiseStream
-		/// </summary>
-		/// <param name="value">The bit value to write.</param>
-		public void WriteBit(int value)
-		{
-			if (value != 0 && value != 1)
-				throw new ArgumentOutOfRangeException("value");
-
-			WriteBits((ulong)value, 1);
 		}
 
 		#endregion

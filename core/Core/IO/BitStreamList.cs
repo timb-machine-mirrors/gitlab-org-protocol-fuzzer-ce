@@ -93,6 +93,31 @@ namespace Peach.Core.IO
 			return PositionBits;
 		}
 
+
+		public override int ReadBit()
+		{
+			long pos = 0;
+
+			foreach (var item in this)
+			{
+				long next = pos + item.LengthBits;
+
+				if (next > PositionBits)
+				{
+					var offset = item.PositionBits;
+					item.PositionBits = PositionBits - pos;
+					var ret = item.ReadBit();
+					item.PositionBits = offset;
+					++PositionBits;
+					return ret;
+				}
+
+				pos = next;
+			}
+
+			return -1;
+		}
+
 		public override int ReadBits(out ulong bits, int count)
 		{
 			if (count > 64 || count < 0)
@@ -131,6 +156,11 @@ namespace Peach.Core.IO
 		}
 
 		public override void SetLengthBits(long value)
+		{
+			throw new NotSupportedException("Stream does not support writing.");
+		}
+
+		public override void WriteBit(int value)
 		{
 			throw new NotSupportedException("Stream does not support writing.");
 		}
