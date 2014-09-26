@@ -43,7 +43,7 @@ namespace Peach.Core.Mutators
 			signed = false;
 			value = (long)obj.InternalValue;
 			min = 0;
-			max = long.MaxValue;
+			max = ushort.MaxValue;
 
 			// If we are a number, make sure our max is not larger than max long
 			// since stream lengths are tracked as longs

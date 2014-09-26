@@ -99,7 +99,6 @@ namespace Peach.Core.Test.CrackingTests
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<Import import=\"re\"/>" +
-				"	<Import import=\"code\"/>" +
 				"	<DataModel name=\"TheDataModel\">" +
 				"		<String constraint=\"re.search('^\\w+$', value) != None\"/>" +
 				"	</DataModel>" +

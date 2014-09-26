@@ -63,7 +63,7 @@ namespace Peach.Core.Test.CrackingTests
 			pub.Stream.Seek(0, SeekOrigin.Begin);
 			string results = Encoding.ASCII.GetString(pub.Stream.ToArray());
 			Assert.NotNull(results);
-			string expected = "00000000   00 00 48 65 6C 6C 6F 20  57 6F 72 6C 64            ??Hello World   " + Environment.NewLine;
+			string expected = "00000000   00 00 48 65 6C 6C 6F 20  57 6F 72 6C 64            ..Hello World   " + Environment.NewLine;
 			Assert.AreEqual(expected, results);
 		}
 

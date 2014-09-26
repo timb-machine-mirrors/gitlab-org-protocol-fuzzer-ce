@@ -8,7 +8,7 @@ using Peach.Core.Analyzers;
 using System.IO;
 using System.Linq;
 
-namespace Peach.Core.Tests.Analyzers
+namespace Peach.Core.Test.Analyzers
 {
 	public class AnalyzerTests : DataModelCollector
 	{

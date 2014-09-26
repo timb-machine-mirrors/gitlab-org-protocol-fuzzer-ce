@@ -18,14 +18,14 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asStr = obj as Dom.String;
+			//var asStr = obj as Dom.String;
 
-			if (asStr == null || !asStr.isMutable)
-				return false;
+			//if (asStr == null || !asStr.isMutable)
+			//	return false;
 
-			// Attach to ascii and utf8, since most ascii parsers are utf8
-			if (asStr.stringType == StringType.ascii || asStr.stringType == StringType.utf8)
-				return true;
+			//// Attach to ascii and utf8, since most ascii parsers are utf8
+			//if (asStr.stringType == StringType.ascii || asStr.stringType == StringType.utf8)
+			//	return true;
 
 			return false;
 		}

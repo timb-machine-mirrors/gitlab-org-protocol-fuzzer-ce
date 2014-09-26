@@ -6,7 +6,7 @@ using Peach.Core.Dom;
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace Peach.Core.Test
+namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
 	class NumberRandomTests

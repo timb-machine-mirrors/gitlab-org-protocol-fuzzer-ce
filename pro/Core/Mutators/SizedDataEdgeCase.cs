@@ -41,7 +41,7 @@ namespace Peach.Core.Mutators
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
 			min = 0;
-			max = long.MaxValue;
+			max = ushort.MaxValue;
 
 			// If we are a number, make sure our max is not larger than max long
 			// since stream lengths are tracked as longs

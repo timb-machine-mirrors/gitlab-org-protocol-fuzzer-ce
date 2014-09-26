@@ -7,7 +7,7 @@ using Peach.Core.Dom;
 using NUnit.Framework;
 using Peach.Core.IO;
 
-namespace Peach.Core.Test
+namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
 	class StringListTests

@@ -5,7 +5,7 @@ using Peach.Core.Dom;
 
 using NUnit.Framework;
 
-namespace Peach.Core.Test
+namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
 	class BlobChangeFromNullTests
