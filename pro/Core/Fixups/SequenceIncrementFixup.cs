@@ -43,16 +43,24 @@ namespace Peach.Core.Fixups
 	[Fixup("sequence.SequenceIncrementFixup")]
 	[Parameter("Offset", typeof(uint?), "Sets the per-iteration initial value to Offset * (Iteration - 1)", "")]
 	[Parameter("Once", typeof(bool), "Only increment once per iteration", "false")]
+	[Parameter("Group", typeof(string), "Name of group to increment", "")]
 	[Serializable]
 	public class SequenceIncrementFixup : VolatileFixup
 	{
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }
+		public string Group { get; private set; }
+
+		string _stateKey = null;
 
 		public SequenceIncrementFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
+			if(string.IsNullOrEmpty(Group))
+				_stateKey = "Peach.SequenceIncrementFixup." + parent.fullName;
+			else
+				_stateKey = "Peach.SequenceIncrementFixup.Group." + Group;
 		}
 
 		protected override Variant OnActionRun(RunContext ctx)
@@ -65,12 +73,10 @@ namespace Peach.Core.Fixups
 			ulong value = 0;
 			object obj = null;
 
-			string key = "SequenceIncrementFixup." + parent.fullName;
-
-			if (ctx.stateStore.TryGetValue(key, out obj))
+			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
 				value = (ulong)obj;
 
-			if (ctx.iterationStateStore.ContainsKey(key))
+			if (ctx.iterationStateStore.ContainsKey(_stateKey))
 				increment &= !Once;
 			else if (Offset.HasValue)
 				value = (ulong)Offset.Value * (ctx.currentIteration - 1);
@@ -89,8 +95,8 @@ namespace Peach.Core.Fixups
 				if (++value > max)
 					value -= max;
 
-				ctx.stateStore[key] = value;
-				ctx.iterationStateStore[key] = value;
+				ctx.stateStore[_stateKey] = value;
+				ctx.iterationStateStore[_stateKey] = value;
 			}
 
 			return new Variant(value);

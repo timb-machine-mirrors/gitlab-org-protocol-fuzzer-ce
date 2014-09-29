@@ -12,7 +12,7 @@ using TheAgent = Peach.Core.Agent.Agent;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ProcessMonitorTests
 	{
 		string MakeXml(string folder)

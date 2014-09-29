@@ -10,7 +10,7 @@ using System.IO;
 using NLog;
 namespace Peach.Core.Test.Publishers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ParameterTests
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();

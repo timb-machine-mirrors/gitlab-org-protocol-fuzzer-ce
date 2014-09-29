@@ -66,7 +66,7 @@ namespace Peach
 	}
 
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class AssertTest
 	{
 		[Test]

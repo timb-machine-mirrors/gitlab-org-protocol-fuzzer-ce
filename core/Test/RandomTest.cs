@@ -8,7 +8,7 @@ using Peach.Core;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RandomTest
 	{
 		// Precomputed values for a seed of 0

@@ -11,7 +11,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class MiscTests
 	{
 		// Pit caused a System.StackOverflowException, see #89

@@ -6,7 +6,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Enterprise.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class StreamTests
 	{
 		/*

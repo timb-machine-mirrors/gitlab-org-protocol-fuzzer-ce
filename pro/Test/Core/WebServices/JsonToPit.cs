@@ -13,7 +13,7 @@ using Peach.Enterprise.WebServices;
 
 namespace Peach.Enterprise.Test.WebServices
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class JsonToPit
 	{
 		[Test]

@@ -59,7 +59,7 @@ namespace Peach.Core.Dom
 	[Parameter("maxOccurs", typeof(int), "Maximum occurances", "1")]
 	[Parameter("occurs", typeof(int), "Actual occurances", "1")]
 	[Serializable]
-	public class Block : DataElementContainer
+	public class Block : DataElementContainer, IPitSerializable
 	{
 		public Block()
 		{
@@ -111,6 +111,22 @@ namespace Peach.Core.Dom
 			context.handleDataElementContainer(node, block);
 
 			return block;
+		}
+
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement(elementType);
+
+			pit.WriteAttributeString("name", name);
+			if(referenceName != null)
+				pit.WriteAttributeString("ref", referenceName);
+
+			WritePitCommonAttributes(pit);
+
+			foreach (var obj in this)
+				obj.WritePit(pit);
+
+			pit.WriteEndElement();
 		}
 
 		protected override Variant GenerateDefaultValue()

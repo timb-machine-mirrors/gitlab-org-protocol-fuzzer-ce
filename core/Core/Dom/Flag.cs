@@ -127,6 +127,12 @@ namespace Peach.Core.Dom
 			return flag;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			throw new NotImplementedException();
+		}
+
+
 		public int position
 		{
 			get { return _position; }

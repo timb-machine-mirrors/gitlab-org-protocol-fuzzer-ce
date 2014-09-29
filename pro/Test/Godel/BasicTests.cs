@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Godel.Tests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class BasicTests
 	{
 		[Test]

@@ -500,7 +500,7 @@ namespace Peach.Enterprise.WebServices
 				Versions = new List<Models.LibraryVersion>(),
 				Groups = new List<Models.Group>(),
 				User = Environment.UserName,
-				Timestamp = Directory.GetCreationTime(path),
+				Timestamp = string.IsNullOrEmpty(path) ? new DateTime(0) : Directory.GetCreationTime(path),
 			};
 
 			var ver = new Models.LibraryVersion()

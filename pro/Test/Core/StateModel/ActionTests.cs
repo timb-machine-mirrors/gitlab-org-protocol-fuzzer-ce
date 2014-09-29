@@ -52,7 +52,7 @@ namespace Peach.Core.Test.StateModel
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ActionTests
 	{
 		bool started;

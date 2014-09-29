@@ -93,6 +93,24 @@ namespace Peach.Core.Dom
 			return xmlElement;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("XmlElement");
+
+			pit.WriteAttributeString("elementName", elementName);
+			if(!string.IsNullOrEmpty(ns))
+				pit.WriteAttributeString("ns", ns);
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
+
+			foreach (var child in this)
+				child.WritePit(pit);
+
+			pit.WriteEndElement();
+		}
+
+
 		/// <summary>
 		/// XML Element tag name
 		/// </summary>

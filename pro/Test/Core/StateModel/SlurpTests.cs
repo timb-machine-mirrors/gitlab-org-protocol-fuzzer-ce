@@ -19,7 +19,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.StateModel
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class SlurpTests
 	{
 		[Test]

@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Transformers.Compress
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class Bz2DecompressTests : DataModelCollector
     {
         [Test]

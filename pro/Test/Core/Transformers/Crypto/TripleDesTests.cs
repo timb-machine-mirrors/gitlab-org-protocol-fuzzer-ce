@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Transformers.Crypto
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class TripleDesTests : DataModelCollector
     {
         [Test]

@@ -20,7 +20,7 @@ using System.Threading;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class MemoryMonitorTests
 	{
 		class Params : Dictionary<string, string> { }

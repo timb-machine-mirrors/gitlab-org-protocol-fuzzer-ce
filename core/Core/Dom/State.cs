@@ -135,6 +135,31 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		int _actionIndex = -1;
+		
+		public Action NextAction()
+		{
+			var index = _actionIndex+1;
+			if (index >= actions.Count)
+				return null;
+
+			return actions[index];
+		}
+
+		/// <summary>
+		/// Will move forward one action in execution.
+		/// </summary>
+		/// <remarks>
+		/// This method can be called by state model mutators.
+		/// If this method is not called and a different action is returned by the
+		/// mutator, the current action scheduled for execution will be tried again 
+		/// on the next step through.
+		/// </remarks>
+		public void MoveToNextAction()
+		{
+			_actionIndex++;
+		}
+
 		public void Run(RunContext context)
 		{
 			try
@@ -166,8 +191,22 @@ namespace Peach.Core.Dom
 
 				RunScript(onStart);
 
-				foreach (Action action in actions)
-					action.Run(context);
+				Action lastAction = null;
+				_actionIndex = -1;
+
+				while (true)
+				{
+					var currentAction = context.test.strategy.NextAction(this, lastAction, NextAction());
+					if (currentAction == null)
+						break;
+
+					currentAction.Run(context);
+
+					lastAction = currentAction;
+
+					if (currentAction == NextAction())
+						MoveToNextAction();
+				}
 
 				// onComplete script run from finally.
 			}

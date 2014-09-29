@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ProcessKillerMonitorTests
 	{
 		SingleInstance si;

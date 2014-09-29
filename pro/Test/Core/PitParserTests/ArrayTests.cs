@@ -39,7 +39,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ArrayTests
 	{
 		class Resetter : DataElement
@@ -50,6 +50,11 @@ namespace Peach.Core.Test.PitParserTests
 			}
 
 			public override void Crack(Cracker.DataCracker context, IO.BitStream data, long? size)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void WritePit(System.Xml.XmlWriter pit)
 			{
 				throw new NotImplementedException();
 			}

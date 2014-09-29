@@ -3,5 +3,7 @@
 		Bucket Timeline
 	</h1>
 </div>
-<div data="vm.bucketTimelineData" timeline="vm.timeline"></div>
-<div ng-include="'../partials/faults.html'" ng-controller="FaultsController" />
+<vis ng-transclude>
+	<time-line data="vm.bucketTimelineData" options="vm.bucketTimelineOptions" events="vm.bucketTimelineEvents"></time-line>
+</vis>
+

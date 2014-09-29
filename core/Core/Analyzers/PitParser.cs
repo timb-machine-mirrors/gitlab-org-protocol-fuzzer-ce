@@ -194,6 +194,11 @@ namespace Peach.Core.Analyzers
 			{
 				DataElement._uniqueName = 0;
 			}
+
+			public override void WritePit(XmlWriter pit)
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		protected virtual Dom.Dom CreateDom()

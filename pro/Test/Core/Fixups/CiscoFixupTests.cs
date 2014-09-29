@@ -12,7 +12,7 @@ using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Fixups
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class CiscoFixupTests : DataModelCollector
 	{
 		[Test]

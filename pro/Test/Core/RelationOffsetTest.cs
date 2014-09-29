@@ -43,7 +43,7 @@ using NUnit.Framework.Constraints;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RelationOffsetTest : DataModelCollector
 	{
 		[Test]

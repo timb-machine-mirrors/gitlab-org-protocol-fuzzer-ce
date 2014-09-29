@@ -11,7 +11,7 @@ using Peach.Core.MutationStrategies;
 
 namespace Peach.Core.Test.MutationStrategies
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class SequentialTest : DataModelCollector
 	{
 		static readonly string xml = @"

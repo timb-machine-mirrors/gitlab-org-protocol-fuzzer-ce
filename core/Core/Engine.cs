@@ -312,15 +312,15 @@ namespace Peach.Core
 					if (context.config.parallel)
 						throw new PeachException("range is not supported when parallel is used");
 
-					logger.Debug("runTest: context.config.range == true, start: " +
-						context.config.rangeStart + ", stop: " + context.config.rangeStop);
+					logger.Debug("runTest: context.config.range == true, start: {0}, stop: {1}",
+						context.config.rangeStart, context.config.rangeStop);
 
 					iterationStart = context.config.rangeStart;
 					iterationStop = context.config.rangeStop;
 				}
 				else if (context.config.skipToIteration > 1)
 				{
-					logger.Debug("runTest: context.config.skipToIteration == " +
+					logger.Debug("runTest: context.config.skipToIteration == ",
 						context.config.skipToIteration);
 
 					iterationStart = context.config.skipToIteration;
@@ -450,8 +450,7 @@ namespace Peach.Core
 						{
 							logger.Debug(ex.Message);
 							logger.Debug(ex.StackTrace);
-							logger.Debug("runTest: " +
-								"Warning: Iteration ended due to out of memory exception.  Continuing to next iteration.");
+							logger.Debug("runTest: Warning: Iteration ended due to out of memory exception.  Continuing to next iteration.");
 
 							throw new SoftException("Out of memory");
 						}
@@ -539,7 +538,7 @@ to execute same as initial control.  State " + state.name + "was not performed."
 
 						if (context.faults.Count > 0)
 						{
-							logger.Debug("runTest: detected fault on iteration " + iterationCount);
+							logger.Debug("runTest: detected fault on iteration {0}", iterationCount);
 
 							foreach (Fault fault in context.faults)
 							{
@@ -577,7 +576,7 @@ to execute same as initial control.  State " + state.name + "was not performed."
 								context.reproducingFault = false;
 								context.reproducingIterationJumpCount = 1;
 
-								logger.Debug("runTest: Reproduced fault, continuing fuzzing at iteration " + iterationCount);
+								logger.Debug("runTest: Reproduced fault, continuing fuzzing at iteration {0}", iterationCount);
 							}
 							else if (test.replayEnabled)
 							{
@@ -619,8 +618,7 @@ to execute same as initial control.  State " + state.name + "was not performed."
 								uint delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
 								iterationCount = (uint)context.reproducingInitialIteration - delta - 1;
 
-								logger.Debug("runTest: " +
-									"Moving backwards " + delta + " iterations to reproduce fault.");
+								logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
 							}
 
 							// Make next jump larger
@@ -675,7 +673,7 @@ to execute same as initial control.  State " + state.name + "was not performed."
 					}
 					catch (RedoIterationException rte)
 					{
-						logger.Debug("runTest: redoing test iteration for the " + redoCount + " time.");
+						logger.Debug("runTest: redoing test iteration for the {0} time.", redoCount);
 
 						// Repeat the same iteration unless
 						// we have already retried 3 times.

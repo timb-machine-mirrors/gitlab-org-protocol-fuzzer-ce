@@ -258,6 +258,27 @@ namespace Peach.Core.Dom
 			return str;
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("String");
+			
+			if(padCharacter != '\0')
+				pit.WriteAttributeString("padCharacter", padCharacter.ToString());
+
+			if(stringType != StringType.ascii)
+				pit.WriteAttributeString("type", stringType.ToString().ToLower());
+
+			if(nullTerminated)
+				pit.WriteAttributeString("nullTerminated", "true");
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonValue(pit);
+			WritePitCommonChildren(pit);
+
+			pit.WriteEndElement();
+		}
+
+
 		public override Variant DefaultValue
 		{
 			get

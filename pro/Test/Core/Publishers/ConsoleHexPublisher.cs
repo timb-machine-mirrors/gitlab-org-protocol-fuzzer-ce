@@ -34,7 +34,7 @@ namespace Peach.Core.Test.Publishers
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ConsoleHexPublisher
 	{
 		[Test]

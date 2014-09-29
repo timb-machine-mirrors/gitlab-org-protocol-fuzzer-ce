@@ -43,7 +43,7 @@ using NUnit.Framework.Constraints;
 
 namespace Peach.Core.Test.CrackingTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class TokenTests
 	{
 

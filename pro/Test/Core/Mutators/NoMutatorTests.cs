@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Peach.Core.Test.Mutators
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class NoutatorTests : DataModelCollector
 	{
 		[Test]

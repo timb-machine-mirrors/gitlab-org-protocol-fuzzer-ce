@@ -14,9 +14,14 @@ namespace Peach.Core.Transformers.Crypto
     [Transformer("crypto.TripleDes")]
     [Parameter("Key", typeof(HexString), "Secret Key")]
     [Parameter("IV", typeof(HexString), "Initialization Vector")]
+	[Parameter("CipherMode", typeof(CipherMode), "Cipher Mode, CBC, ECB, CFB, CTS, OFB", "CBC")]
+	[Parameter("PaddingMode", typeof(PaddingMode), "Padding Mode: Zeros, None, PKCS7, ANSIX923, ISO101026", "Zeros")]
     [Serializable]
     public class TripleDes : SymmetricAlgorithmTransformer
     {
+		public CipherMode CipherMode { get; set; }
+		public PaddingMode PaddingMode { get; set; }
+
         public TripleDes(DataElement parent, Dictionary<string, Variant> args)
             : base(parent, args)
         {
@@ -25,8 +30,8 @@ namespace Peach.Core.Transformers.Crypto
         protected override SymmetricAlgorithm GetEncryptionAlgorithm()
         {
             TripleDES tdes = TripleDES.Create();
-            tdes.Mode = CipherMode.CBC;
-            tdes.Padding = PaddingMode.Zeros;
+            tdes.Mode = CipherMode;
+            tdes.Padding = PaddingMode;
             tdes.Key = Key.Value;
             tdes.IV = IV.Value;
             return tdes;

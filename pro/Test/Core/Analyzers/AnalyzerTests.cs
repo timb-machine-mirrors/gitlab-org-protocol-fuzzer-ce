@@ -13,6 +13,7 @@ namespace Peach.Core.Test.Analyzers
 	public class AnalyzerTests : DataModelCollector
 	{
 		[Test]
+		[Category("Peach")]
 		public void TestFieldData()
 		{
 			string xml = @"

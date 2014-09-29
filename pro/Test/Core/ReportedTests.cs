@@ -44,7 +44,7 @@ using Peach.Core.Dom.XPath;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ReportedTests
 	{
 		/// <summary>

@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Peach.Core.Test.OS.Linux.Agent.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class LinuxDebuggerTests
 	{
 		[Test]

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Peach.Core.Test.Agent.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class CrashReporterTest
 	{
 		[Test]

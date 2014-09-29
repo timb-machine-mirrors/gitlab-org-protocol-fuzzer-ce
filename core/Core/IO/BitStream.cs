@@ -30,6 +30,7 @@
 using System;
 using System.IO;
 using System.Diagnostics;
+//using System.Runtime.InteropServices;
 
 namespace Peach.Core.IO
 {
@@ -94,6 +95,57 @@ namespace Peach.Core.IO
 		}
 
 		#endregion
+
+		//[DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+		//public static extern IntPtr memcpy(IntPtr dest, IntPtr src, UIntPtr count);
+
+		// MIKE: This is causing to many issues.
+		//public override void CopyTo(BitwiseStream destination, int bufferSize)
+		//{
+		//	if (destination == null)
+		//		throw new ArgumentNullException("destination");
+		//	if (!CanRead)
+		//		throw new NotSupportedException("This stream does not support reading");
+		//	if (!destination.CanWrite)
+		//		throw new NotSupportedException("This destination stream does not support writing");
+		//	if (bufferSize <= 0)
+		//		throw new ArgumentOutOfRangeException("bufferSize");
+
+		//	int nread;
+		//	if(destination.LengthBits < LengthBits)
+		//		destination.SetLengthBits(LengthBits);
+
+		//	destination.Position = 0;
+
+		//	if (LengthBits >= 8 && destination is BitStream && ((BitStream)this).BaseStream is MemoryStream && ((BitStream)destination).BaseStream is MemoryStream)
+		//	{
+		//		var destBase = (MemoryStream)((BitStream)destination).BaseStream;
+
+		//		unsafe
+		//		{
+		//			fixed (byte* dest = destBase.GetBuffer())
+		//			fixed (byte* source = ((MemoryStream)((BitStream)this).BaseStream).GetBuffer())
+		//			{
+		//				var offset = (_position + _offset) / 8;
+		//				memcpy(new IntPtr(dest), new IntPtr(new IntPtr(source).ToInt64()+offset), new UIntPtr((ulong)this.Length));
+		//			}
+		//		}
+
+		//		destination.Position = Length;
+		//		Position = Length;
+		//	}
+		//	else
+		//	{
+		//		var buffer = new byte[bufferSize];
+		//		while ((nread = Read(buffer, 0, bufferSize)) != 0)
+		//			destination.Write(buffer, 0, nread);
+		//	}
+
+		//	ulong bits;
+		//	nread = ReadBits(out bits, 7);
+		//	destination.WriteBits(bits, nread);
+		//}
+
 
 		#region Utility Functions
 

@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Peach.Enterprise.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class PitDefinesTests
 	{
 		[Test]

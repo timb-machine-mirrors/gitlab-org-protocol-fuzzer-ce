@@ -12,7 +12,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Transformers.Encode
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class Base64DecodeTests : DataModelCollector
     {
         [Test]

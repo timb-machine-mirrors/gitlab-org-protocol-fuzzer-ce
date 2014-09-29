@@ -34,6 +34,7 @@ using System.Runtime.InteropServices;
 using System.Runtime;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Xml;
 
 using NLog;
 
@@ -57,6 +58,21 @@ namespace Peach.Core.Dom
 			: base(parent)
 		{
 		}
+
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Relation");
+			pit.WriteAttributeString("type", "offset");
+			pit.WriteAttributeString("of", OfName);
+
+			if (ExpressionGet != null)
+				pit.WriteAttributeString("expressionGet", ExpressionGet);
+			if (ExpressionSet != null)
+				pit.WriteAttributeString("expressionSet", ExpressionSet);
+
+			pit.WriteEndElement();
+		}
+
 
 		public override long GetValue()
 		{

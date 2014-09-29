@@ -112,7 +112,7 @@ namespace Peach.Core.Test.Monitors
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class PcapMonitorTests
 	{
 		List<string> testResults = new List<string>();

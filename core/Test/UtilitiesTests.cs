@@ -11,7 +11,7 @@ using Peach.Core;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class UtilitiesTests
 	{
 		[Test]

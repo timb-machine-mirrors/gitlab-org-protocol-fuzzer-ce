@@ -103,7 +103,7 @@ namespace Peach.Core.Test.Publishers
 	}
 
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class HttpPublisherTests : DataModelCollector
 	{
 		public string send_recv_template = @"
