@@ -363,14 +363,14 @@ namespace Peach.Core.Test
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(2380, dataModels.Count);
+			Assert.AreEqual(1660, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -424,14 +424,14 @@ namespace Peach.Core.Test
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(4759, dataModels.Count);
+			Assert.AreEqual(3319, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -488,14 +488,14 @@ namespace Peach.Core.Test
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(4759, dataModels.Count);
+			Assert.AreEqual(3319, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -554,14 +554,14 @@ namespace Peach.Core.Test
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(4759, dataModels.Count);
+			Assert.AreEqual(3319, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
