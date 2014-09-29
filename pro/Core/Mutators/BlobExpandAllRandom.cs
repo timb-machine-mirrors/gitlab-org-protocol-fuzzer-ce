@@ -36,7 +36,6 @@ namespace Peach.Core.Mutators
 				ret.Add(data.SliceBits(start * 8));
 
 			// Add length bytes where each byte is a new random value
-			var val = (byte)context.Random.Next(0, 256);
 			var buf = new byte[length];
 			for (int i = 0; i < buf.Length; ++i)
 				buf[i] = (byte)context.Random.Next(0, 256);

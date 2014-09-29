@@ -116,7 +116,7 @@ namespace Peach.Core.Test.Mutators
 
 			var v2 = m2.Select(i => Endian.Big.GetInt32(i.Value.ToArray(), 32)).ToArray();
 			var e2 = new int[] { 111, 222, 333, 444 };
-			Assert.AreEqual(e1, v1);
+			Assert.AreEqual(e2, v2);
 
 			var blob = new Dom.Blob();
 			blob.Hints[hint.Name] = hint;

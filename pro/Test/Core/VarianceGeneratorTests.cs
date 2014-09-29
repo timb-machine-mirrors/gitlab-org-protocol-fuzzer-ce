@@ -13,7 +13,6 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestThreeBit()
 		{
-			var rng = new Random(0);
 			var g = new VarianceGenerator(0, -2, 1, false);
 
 			Assert.AreEqual(new[] { -2, -1, 1 }, g.Values);

@@ -841,6 +841,7 @@ namespace Peach.Core.Test
 			for (int i = 0; i < bs.LengthBits; ++i)
 			{
 				var bit = bs.ReadBit();
+				Assert.AreNotEqual(-1, bit);
 
 				bs.SeekBits(-1, SeekOrigin.Current);
 				bs.WriteBit(1);
