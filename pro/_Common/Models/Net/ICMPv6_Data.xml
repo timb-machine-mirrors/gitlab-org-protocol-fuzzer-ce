@@ -41,11 +41,21 @@ SUCH DAMAGE.
        author="Deja Vu Security, LLC"
  description="Internet Control Message Protocol v6 PIT DataModels" version="0.0.2">
 
+ 	<Include ns="IPv6" src="file:##PitLibraryPath##/_Common/Models/Net/IPv6_Data.xml"/>
+	<Include ns="Ethernet" src="file:##PitLibraryPath##/_Common/Models/Net/Ethernet_Data.xml"/>
+
   <Defaults>
     <Number endian="big"/>
   </Defaults>
 
   <DataModel name="Packet">
+		<Block name="Frame" ref="EthernetFrame"/>
+		<Block name="Ipv6" ref="IPv6:IPv6Header">
+			<Number name="PayloadLength" size="16" endian="big">
+				<Relation type="size" of="Payload" />
+			</Number>
+			<Number name="NextHeader" size="8" value="58"/>
+		</Block>
     <Block name="Content">
       <Number name="Type" size="8"/>
       <Number name="Code" size="8"/>
@@ -98,39 +108,45 @@ SUCH DAMAGE.
     <Blob name="Content.Payload.Data" value="Hello Peach World"/>
   </DataModel>
 
-  <DataModel name="MobileICMP">
-    <Number name="Type" size="8" />
-    <Number name="Code" size="8" />
-    <Number name="Checksum" size="16" >
-    </Number>
-    <Number name="Identifier" size="16" />
-    <Block name="Reserved"/>
+  <DataModel name="MobileICMP" ref="Packet">
+    <Block name="Content">
+      <Number name="Type" size="8" />
+      <Number name="Code" size="8" />
+      <Number name="Checksum" size="16" >
+      </Number>
+      <Number name="Identifier" size="16" />
+      <Block name="Reserved"/>
+    </Block>
   </DataModel>
 
-  <DataModel name="NeighborSolicitation">
-    <Number name="Type" size="8" value="135" token="true"/>
-    <Number name="Code" size="8"/>
-      <Number name="Checksum"   size="16">
-        <Fixup class="IcmpV6ChecksumFixup">
-          <Param name="ref" value="NeighborSolicitation" />
-          <Param name="src" value="##SourceIPv6##" />
-          <Param name="dst" value="##TargetIPv6##" />
-        </Fixup>
-      </Number>
-    <Block name="Payload">
-      <Number name="Reserved" size="32"/>
-      <Blob name="TargetIPv6Address" length="16" valueType="ipv6" value="##TargetIPv6##"/>
-      <Block name="Options">
-        <Number name="Type" size="8" value="1"/>
-        <Number name="Length" size="8">
-          <Relation type="size" of="Options" expressionSet="(size + 7) / 8" expressionGet="size * 8"/>
+  <DataModel name="NeighborSolicitation" ref="Packet">
+    <Number name="Ipv6.HopLimit" size="8" endian="big" valueType="hex" value="ff"/>
+    <Block name="Content">
+      <Number name="Type" size="8" value="135" token="true"/>
+      <Number name="Code" size="8"/>
+        <Number name="Checksum"   size="16">
+          <Fixup class="IcmpV6ChecksumFixup">
+            <Param name="ref" value="NeighborSolicitation" />
+            <Param name="src" value="##SourceIPv6##" />
+            <Param name="dst" value="##TargetIPv6##" />
+          </Fixup>
         </Number>
-        <Blob name="Value" valueType="hex" value="##SourceMAC##"/>
+      <Block name="Payload">
+        <Number name="Reserved" size="32"/>
+        <Blob name="TargetIPv6Address" length="16" valueType="ipv6" value="##TargetIPv6##"/>
+        <Block name="Options">
+          <Number name="Type" size="8" value="1"/>
+          <Number name="Length" size="8">
+            <Relation type="size" of="Options" expressionSet="(size + 7) / 8" expressionGet="size * 8"/>
+          </Number>
+          <Blob name="Value" valueType="hex" value="##SourceMAC##"/>
+        </Block>
       </Block>
     </Block>
   </DataModel>
 
   <DataModel name="NeighborAdvertisement" ref="Packet">
+    <Number name="Ipv6.HopLimit" size="8" endian="big" valueType="hex" value="ff"/>
     <Number name="Content.Type" size="8" value="136" token="true"/>
     <Block name="Content.Payload">
       <Flags name="Flags" size="32">
@@ -149,8 +165,8 @@ SUCH DAMAGE.
     </Block>
   </DataModel>
 
-  <DataModel name="MobileICMPHomeAgentAddressDiscoveryRequest">
-    <Block name="Payload">
+  <DataModel name="MobileICMPHomeAgentAddressDiscoveryRequest" ref="Packet">
+    <Block name="Content">
       <Block ref="Packet">
         <Number name="Type" size="8"  value="144"/>
         <Number name="Code" size="8"  value="0"/>
@@ -168,8 +184,8 @@ SUCH DAMAGE.
     </Block>
   </DataModel>
 
-  <DataModel name="MobileICMPHomeAgentAddressDiscoveryReply">
-    <Block name="Payload">
+  <DataModel name="MobileICMPHomeAgentAddressDiscoveryReply" ref="Packet">
+    <Block name="Content">
       <Block ref="Packet">
         <Number name="Type" size="8"  value="145"/>
         <Number name="Code" size="8"  value="0"/>
@@ -191,8 +207,8 @@ SUCH DAMAGE.
     </Block>
   </DataModel>
 
-  <DataModel name="MobileICMPPrefixSolicitation">
-    <Block name="Payload">
+  <DataModel name="MobileICMPPrefixSolicitation" ref="Packet">
+    <Block name="Content">
       <Block ref="Packet">
         <Number name="Type" size="8"  value="146"/>
         <Number name="Code" size="8"  value="0"/>
@@ -210,8 +226,8 @@ SUCH DAMAGE.
     </Block>
   </DataModel>
 
-  <DataModel name="MobileICMPPrefixAdvertisement">
-    <Block name="Payload">
+  <DataModel name="MobileICMPPrefixAdvertisement" ref="Packet">
+    <Block name="Content">
       <Block ref="Packet">
         <Number name="Type" size="8"  value="147"/>
         <Number name="Code" size="8"  value="0"/>
@@ -235,8 +251,8 @@ SUCH DAMAGE.
     </Block>
   </DataModel>
 
-  <DataModel name="MobileICMPRouterAdvertisement">
-    <Block name="Payload">
+  <DataModel name="MobileICMPRouterAdvertisement" ref="Packet">
+    <Block name="Content">
       <Block ref="Packet">
         <Number name="Type" size="8"  value="134"/>
         <Number name="Code" size="8"  value="0"/>

@@ -47,10 +47,14 @@ SUCH DAMAGE.
   <Test name="Default">
     <StateModel ref="ICMPv6:Transmit"/>
 
-    <Publisher class="RawV6">
+    <!--<Publisher class="RawV6">
       <Param name="Host" value="##TargetIPv6##"/>
       <Param name="Interface" value="##SourceIPv6##"/>
       <Param name="Protocol" value="58"/>
+    </Publisher> -->
+    <Publisher class="RawEther">
+      <Param name="Interface" value="##Interface##"/>
+      <Param name="Protocol" value="ETH_P_IPV6"/>
     </Publisher>
 
     <Strategy class="##Strategy##"/>
