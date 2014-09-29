@@ -12,11 +12,11 @@ namespace Peach.Enterprise.Mutators
 {
 	[Mutator("StateChangeRandom")]
 	[Description("Causes state changes to be random. The chance a state change will be modified is based on the number of states.")]
-	public class StateChangeRandomMutator : Mutator
+	public class StateChangeRandom : Mutator
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static StateChangeRandomMutator()
+		static StateChangeRandom()
 		{
 			affectDataModel = false;
 			affectStateModel = true;
@@ -28,10 +28,8 @@ namespace Peach.Enterprise.Mutators
 		Peach.Core.Random _random;
 		Core.Dom.StateModel _model;
 
-		public StateChangeRandomMutator(StateModel model)
+		public StateChangeRandom(StateModel model)
 		{
-			name = "StateChangeRandom";
-
 			_count = model.states.Count * model.states.Count;
 			_stateCount = model.states.Count;
 		}

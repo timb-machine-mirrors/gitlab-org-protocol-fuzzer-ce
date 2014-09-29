@@ -180,7 +180,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Perform a sequential mutation on state model
 		/// </summary>
-		/// <seealso cref="randomMutation(Core.Dom.StateModel)"/>
+		/// <seealso cref="!:Peach.Core.Mutator.randomMutation(Peach.Core.Dom.StateModel)"/>
 		/// <seealso cref="nextAction"/>
 		/// <seealso cref="changeState"/>
 		/// <param name="model"></param>
@@ -200,7 +200,7 @@ namespace Peach.Core
 		/// the strategy. They should cause the mutator to produce this type of test case.
 		/// The actual methods that perform the mutation are <c>changeState</c> and <c>changeAction</c>.
 		/// </remarks>
-		/// <seealso cref="sequentialMutation(Core.Dom.StateModel)"/>
+		/// <seealso cref="!:Peach.Core.Mutator.sequentialMutation(Peach.Core.Dom.StateModel)"/>
 		/// <seealso cref="nextAction"/>
 		/// <seealso cref="changeState"/>
 		/// <param name="model"></param>

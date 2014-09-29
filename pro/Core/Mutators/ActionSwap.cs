@@ -35,8 +35,6 @@ namespace Peach.Enterprise.Mutators
 
 		public ActionSwap(StateModel model)
 		{
-			name = "ActionSwap";
-
 			foreach (var state in model.states)
 			{
 				_actionCount += state.actions.Count;

@@ -69,11 +69,6 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Hint");
 
-			var fixup = this.GetType()
-				.GetAttributes<FixupAttribute>(null)
-				.Where(a => a.IsDefault)
-				.FirstOrDefault();
-
 			pit.WriteAttributeString("name", Name);
 			pit.WriteAttributeString("value", Value);
 

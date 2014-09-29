@@ -35,8 +35,6 @@ namespace Peach.Enterprise.Mutators
 
 		public ActionRemove(StateModel model)
 		{
-			name = "ActionRemove";
-
 			foreach (var state in model.states)
 			{
 				_actionCount += state.actions.Count;

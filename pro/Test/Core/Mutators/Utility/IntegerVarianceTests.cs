@@ -110,7 +110,7 @@ namespace Peach.Core.Test.Mutators.Utility
 			for (uint i = 1; i < count; ++i)
 			{
 				tester.context.Iteration = i;
-				tester.randomMutation(null);
+				tester.randomMutation((DataElement)null);
 			}
 
 			var sb = new StringBuilder();
