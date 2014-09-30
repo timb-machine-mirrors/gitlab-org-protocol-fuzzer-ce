@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach  xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 Version 2 PIT"
+        version="0.0.1">
+    <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+    <!-- Requires Peach 3 Linux for RawIP selected protocol fuzzing -->
+
+    <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
+
+    <Agent name="TheAgent">
+    </Agent>
+    <!--
+    <Publisher class="Tcp">
+        <Param name="Host" value="127.0.0.1" />
+        <Param name="Port" value="8080" />
+    </Publisher>
+    -->
+</Peach>
