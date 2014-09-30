@@ -42,23 +42,25 @@ SUCH DAMAGE.
        description="Fuzz a DHCPv4 server"
        version="0.0.2">
 
-  <Include ns="DHCPv4" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv4_State.xml"/>
+	<Include ns="DHCPv4" src="file:##PitLibraryPath##/_Common/Models/Net/DHCPv4_State.xml"/>
 
-  <Test name="Default" controlIteration="2">
-    <StateModel ref="DHCPv4:Client"/>
+	<Test name="Default" controlIteration="2">
+		<StateModel ref="DHCPv4:Client"/>
 
-    <Exclude xpath="//Payload"/>
-    <Include xpath="//UdpPayload"/>
+		<Exclude xpath="//Payload"/>
+		<Include xpath="//UdpPayload"/>
 
-    <Publisher class="RawEther">
-      <Param name="Interface" value="##Interface##"/>
-      <Param name="Protocol" value="ETH_P_IP"/>
-    </Publisher>
+		<Publisher class="RawEther">
+			<Param name="Interface" value="##Interface##"/>
+			<Param name="Protocol" value="ETH_P_IP"/>
+			<Param name="Filter" value="port 68 and udp"/>
+			<Param name="Timeout" value="4000" />
+		</Publisher>
 
-    <Strategy class="##Strategy##"/>
+		<Strategy class="##Strategy##"/>
 
-    <Logger class="File">
-      <Param name="Path" value="##LoggerPath##"/>
-    </Logger>
-  </Test>
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
 </Peach>
