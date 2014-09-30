@@ -1,0 +1,15 @@
+<<<
+[[Mutators_BlobReduce]]
+== BlobReduce
+
+This mutator will produce test cases for xref:Blob[Blob] elements.
+It picks a random range of bytes up to 255 inside the blob and removes it.
+
+=== Supported Elements
+
+ * xref:Blob[Blob]
+
+=== Hints
+
+BlobReduce-N:: Standard deviation of number of bytes to change.
+BlobMutator-N:: Standard deviation of number of bytes to change. Will affect other Blob mutators.
