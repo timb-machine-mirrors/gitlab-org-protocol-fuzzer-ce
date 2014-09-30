@@ -51,6 +51,7 @@ namespace Peach.Core.MutationStrategies
 	[MutationStrategy("RandomStrategy")]
 	[Parameter("SwitchCount", typeof(int), "Number of iterations to perform per-mutator befor switching.", "200")]
 	[Parameter("MaxFieldsToMutate", typeof(int), "Maximum fields to mutate at once.", "6")]
+	[Parameter("StateMutation", typeof(bool), "Enable state mutations.", "false")]
 	public class RandomStrategy : MutationStrategy
 	{
 		protected class ElementId
@@ -105,7 +106,7 @@ namespace Peach.Core.MutationStrategies
 		/// <summary>
 		/// Mutators that affect the state model
 		/// </summary>
-		List<Mutator> _stateMutators = new List<Mutator>();
+		List<Mutator> _stateMutators;
 
 		/// <summary>
 		/// Elements across all states and actions
@@ -161,6 +162,8 @@ namespace Peach.Core.MutationStrategies
 		/// </summary>
 		int maxFieldsToMutate = 6;
 
+		bool stateMutations = false;
+
 		public RandomStrategy(Dictionary<string, Variant> args)
 			: base(args)
 		{
@@ -168,6 +171,8 @@ namespace Peach.Core.MutationStrategies
 				switchCount = int.Parse((string)args["SwitchCount"]);
 			if (args.ContainsKey("MaxFieldsToMutate"))
 				maxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
+			if (args.ContainsKey("StateMutations"))
+				stateMutations = bool.Parse((string)args["StateMutations"]);
 		}
 
 		public override void Initialize(RunContext context, Engine engine)
@@ -178,26 +183,27 @@ namespace Peach.Core.MutationStrategies
 			context.StateStarting += StateStarting;
 			engine.IterationStarting += engine_IterationStarting;
 			engine.IterationFinished += engine_IterationFinished;
-			engine.TestStarting += engine_TestStarting;
 			context.StateModelStarting += context_StateModelStarting;
 			_mutators = new List<Type>();
-			_mutators.AddRange(EnumerateValidMutators().Where(
-				v => (bool)v.GetField(
-						"affectDataModel", 
-						BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
-							.GetValue(null)));
+			_stateMutators = new List<Mutator>();
 
-		}
-
-		void engine_TestStarting(RunContext context)
-		{
-			// TODO - Make this not suck
-			foreach (var type in EnumerateValidMutators().Where(v => v.Name.StartsWith("State") || v.Name.StartsWith("Action")))
+			foreach (var m in EnumerateValidMutators())
 			{
-				//type.GetField("affectStateModel",
-				//	BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.CreateInstance).GetValue(null);
+				var affectDataModel = (bool)m.GetField(
+					"affectDataModel",
+					BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy
+				).GetValue(null);
 
-				_stateMutators.Add(GetMutatorInstance(type, context.test.stateModel));
+				if (affectDataModel)
+					_mutators.Add(m);
+
+				var affectStateModel = (bool)m.GetField(
+					"affectStateModel",
+					BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy
+				).GetValue(null);
+
+				if (affectStateModel && stateMutations)
+					_stateMutators.Add(GetMutatorInstance(m, context.test.stateModel));
 			}
 		}
 
@@ -210,8 +216,13 @@ namespace Peach.Core.MutationStrategies
 				// If we have one state and one action we will add
 				// the same iterations a few times. this is okay.
 				_allIterations.Clear();
-				_allIterations.AddRange(_iterationsByState.Values);
-				_allIterations.AddRange(_iterationsByAction.Values);
+
+				if (stateMutations)
+				{
+					_allIterations.AddRange(_iterationsByState.Values);
+					_allIterations.AddRange(_iterationsByAction.Values);
+				}
+
 				_allIterations.Add(_iterations);
 			}
 		}
@@ -247,8 +258,13 @@ namespace Peach.Core.MutationStrategies
 						logger.Trace("SCOPE: All");
 				}
 
-				if (context.test.stateModel.states.Count > 1 && Random.NextInt32() % context.test.stateModel.states.Count == 0)
-					_stateModelMutation = Random.Choice(_stateMutators);
+				if (context.test.stateModel.states.Count > 1 && _stateMutators.Count > 0)
+				{
+					var rnd = Random.Next(context.test.stateModel.states.Count);
+					// TODO: weight state mutations better
+					if (rnd == 0)
+						_stateModelMutation = Random.Choice(_stateMutators);
+				}
 			}
 		}
 
@@ -260,7 +276,6 @@ namespace Peach.Core.MutationStrategies
 			context.StateStarting -= StateStarting;
 			engine.IterationStarting -= engine_IterationStarting;
 			engine.IterationFinished -= engine_IterationFinished;
-			engine.TestStarting -= engine_TestStarting;
 			context.StateModelStarting -= context_StateModelStarting;
 		}
 

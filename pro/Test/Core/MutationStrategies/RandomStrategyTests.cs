@@ -16,6 +16,11 @@ namespace Peach.Core.Test.MutationStrategies
 	[TestFixture] [Category("Peach")]
 	class RandomStrategyTests : DataModelCollector
 	{
+		public RandomStrategyTests()
+		{
+			cloneActions = true;
+		}
+
 		[Test]
 		public void Test1()
 		{
@@ -664,7 +669,6 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(32, dataModels.Count);
 		}
 
-
 		[Test]
 		public void TwoStates()
 		{
@@ -846,10 +850,11 @@ namespace Peach.Core.Test.MutationStrategies
 				var oldDataModel = oldActions[i].dataModel;
 				var dataModel = actions[i].dataModel;
 
-				Assert.AreEqual(4, oldDataModel.Count);
-				Assert.AreEqual(4, dataModel.Count);
+				//Assert.AreEqual(4, oldDataModel.Count);
+				//Assert.AreEqual(4, dataModel.Count);
+				Assert.AreEqual(oldDataModel.Count, dataModel.Count);
 
-				for (int j = 0; j < 4; ++j)
+				for (int j = 0; j < oldDataModel.Count; ++j)
 				{
 					var lhs = oldDataModel[j].Value.ToArray();
 					var rhs = dataModel[j].Value.ToArray();

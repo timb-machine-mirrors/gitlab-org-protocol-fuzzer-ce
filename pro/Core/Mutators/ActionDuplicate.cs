@@ -16,11 +16,8 @@ namespace Peach.Enterprise.Mutators
 	{
 		//static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static ActionDuplicate()
-		{
-			affectDataModel = false;
-			affectStateModel = true;
-		}
+		public static new readonly bool affectDataModel = false;
+		public static new readonly bool affectStateModel = true;
 
 		/// <summary>
 		/// Maximum number of repetitions to perform

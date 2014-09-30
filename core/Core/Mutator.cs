@@ -81,7 +81,7 @@ namespace Peach.Core
 		/// <remarks>
 		/// This static variable should be set through a static constructor in the sub-class.
 		/// </remarks>
-		public static bool affectStateModel = false;
+		public static readonly bool affectStateModel = false;
 
 		/// <summary>
 		/// Is this mutator able to affect the data model?
@@ -89,7 +89,7 @@ namespace Peach.Core
 		/// <remarks>
 		/// This static variable should be set through a static constructor in the sub-class.
 		/// </remarks>
-		public static bool affectDataModel = true;
+		public static readonly bool affectDataModel = true;
 
 		/// <summary>
 		/// Instance of current mutation strategy

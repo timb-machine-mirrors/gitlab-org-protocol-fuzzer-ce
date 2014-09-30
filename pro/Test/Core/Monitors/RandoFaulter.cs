@@ -10,7 +10,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Test.Monitors
 {
-	[Monitor("RandoFaulter", IsTest = true)]
+	[Monitor("RandoFaulter", true, IsTest = true)]
 	[Description("Generate random faults for metrics testing")]
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]

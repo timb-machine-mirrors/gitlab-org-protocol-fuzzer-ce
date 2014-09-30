@@ -16,11 +16,8 @@ namespace Peach.Enterprise.Mutators
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static StateChangeRandom()
-		{
-			affectDataModel = false;
-			affectStateModel = true;
-		}
+		public static new readonly bool affectDataModel = false;
+		public static new readonly bool affectStateModel = true;
 
 		int _count = 0;
 		uint _mutation = 0;

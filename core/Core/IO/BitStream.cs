@@ -429,7 +429,7 @@ namespace Peach.Core.IO
 
 		public override int ReadBit()
 		{
-			if (_length < _position)
+			if (_length <= _position)
 				return -1;
 
 			int pos = (int)((_position + _offset) & 0x7);
@@ -458,7 +458,7 @@ namespace Peach.Core.IO
 
 			bits = 0;
 
-			if (_length < _position)
+			if (_length <= _position)
 				return 0;
 
 			int pos = (int)((_position + _offset) & 0x7);

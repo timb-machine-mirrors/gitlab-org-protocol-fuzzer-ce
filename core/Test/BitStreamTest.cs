@@ -768,6 +768,35 @@ namespace Peach.Core.Test
 			Assert.AreEqual(new byte[] { 0x40 }, in2.ToArray());
 			Assert.AreEqual(new byte[] { 0xcc, 0xd1, 0x14 }, in3.ToArray());
 			Assert.AreEqual(new byte[] { 0xcc, 0xd1 }, in4.ToArray());
+
+			bs.Seek(1, SeekOrigin.Begin);
+			var s1 = bs.SliceBits(24);
+
+			var b1 = s1.ReadByte();
+			Assert.AreEqual(0x27, b1);
+
+			var b2 = s1.ReadByte();
+			Assert.AreEqual(0x33, b2);
+
+			var b3 = s1.ReadByte();
+			Assert.AreEqual(0x44, b3);
+
+			var b4 = s1.ReadByte();
+			Assert.AreEqual(-1, b4);
+
+			s1.SeekBits(-1, SeekOrigin.End);
+
+			var b5 = s1.ReadBit();
+			Assert.AreNotEqual(-1, b5);
+
+			var b6 = s1.ReadBit();
+			Assert.AreEqual(-1, b6);
+
+			s1.SeekBits(0, SeekOrigin.End);
+
+			ulong bits;
+			var cnt = s1.ReadBits(out bits, 1);
+			Assert.AreEqual(0, cnt);
 		}
 
 		[Test]
