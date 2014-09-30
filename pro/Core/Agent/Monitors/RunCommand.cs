@@ -16,7 +16,7 @@ namespace Peach.Core.Agent.Monitors
 	[Monitor("RunCommand", true)]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
-	[Parameter("When", typeof(When), "Period _When the command should be ran", "OnCall")]
+	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]
 	[Parameter("StartOnCall", typeof(string), "Run when signaled by the state machine", "")]
 	[Parameter("FaultOnNonZeroExit", typeof(bool), "Fault if exit code is non-zero", "false")]
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than Timeout seconds where -1 is infinite timeout ", "-1")]
