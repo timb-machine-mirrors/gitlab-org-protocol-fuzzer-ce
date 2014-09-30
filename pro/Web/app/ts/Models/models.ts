@@ -234,8 +234,8 @@ module DashApp.Models {
 
 		groups?: any[];
 
-		iterationStart?: number;
-		iterationEnd?: number;
+		rangeStart?: number;
+		rangeStop?: number;
 
 		// Optional field. We can set this to null for now
 		//"/p/targets/targetID/configs/configID",

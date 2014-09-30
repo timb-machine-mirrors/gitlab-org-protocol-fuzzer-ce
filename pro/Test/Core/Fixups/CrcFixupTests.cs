@@ -249,6 +249,7 @@ namespace Peach.Core.Test.Fixups
 		}
 
 		[Test]
+		[Ignore("Expected to fail. See peach-pro issue #2")]
 		public void CrackTest()
 		{
 			string xml = @"

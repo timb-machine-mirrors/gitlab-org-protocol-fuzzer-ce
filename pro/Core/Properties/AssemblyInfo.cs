@@ -33,3 +33,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("0.0.0.0")]
 [assembly: AssemblyFileVersion("0.0.0.0")]
+
+// Allow internal functions to be accessed by the unit tests
+[assembly: InternalsVisibleTo("Peach.Pro.Test")]

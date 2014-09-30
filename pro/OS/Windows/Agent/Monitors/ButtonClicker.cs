@@ -3,12 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using System.Windows.Automation;
 using System.Linq;
 using Peach.Core;
 using Peach.Core.Agent;
 using NLog;
 using System.Runtime.InteropServices;
+
+#if !MONO
+
+using System.Windows.Automation;
+
+#endif
 
 namespace Peach.Enterprise.Agent.Monitors
 {
@@ -24,7 +29,7 @@ namespace Peach.Enterprise.Agent.Monitors
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
-		static readonly int BM_CLICK = 0x00F5;
+		const int BM_CLICK = 0x00F5;
 
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -36,6 +41,8 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			ParameterParser.Parse(this, args);
 		}
+
+#if !MONO
 
 		static AutomationElement Find(AutomationElement elem, Condition cond, string text)
 		{
@@ -111,6 +118,19 @@ namespace Peach.Enterprise.Agent.Monitors
 				TreeScope.Descendants,
 				OnPopup);
 		}
+
+#else
+
+		public override void StopMonitor()
+		{
+		}
+
+		public override void SessionStarting()
+		{
+			throw new PeachException("The ButtonClicker monitor is not supported on mono.");
+		}
+
+#endif
 
 		public override void SessionFinished()
 		{

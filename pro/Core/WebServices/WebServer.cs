@@ -15,6 +15,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading;
 
 namespace Peach.Enterprise.WebServices
@@ -96,14 +97,16 @@ namespace Peach.Enterprise.WebServices
 	{
 		WebContext context;
 
+		static Bootstrapper()
+		{
+			// Do this here since RootNamespaces is static, and
+			// ConfigureApplicationContainer can be called more than once.
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Enterprise.WebServices");
+		}
+
 		public Bootstrapper(WebContext context)
 		{
 			this.context = context;
-
-			// Do this here since RootNamespaces is static, and
-			// ConfigureApplicationContainer can be called more than once.
-			if(!ResourceViewLocationProvider.RootNamespaces.ContainsKey(GetType().Assembly))
-				ResourceViewLocationProvider.RootNamespaces.Add(GetType().Assembly, "Peach.Enterprise.WebServices");
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)

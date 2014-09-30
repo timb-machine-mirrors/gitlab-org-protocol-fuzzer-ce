@@ -108,12 +108,6 @@ namespace Peach.Core.Cracker
 		Dictionary<DataElement, SizedPosition> _sizedElements;
 
 		/// <summary>
-		/// List of all unresolved size relations.
-		/// This occurs when the 'Of' is cracked before the 'From'.
-		/// </summary>
-		List<SizeRelation> _sizeRelations;
-
-		/// <summary>
 		/// Stack of all BitStream objects passed to CrackData().
 		/// This is used for determining absolute locations from relative offsets.
 		/// </summary>
@@ -285,7 +279,6 @@ namespace Peach.Core.Cracker
 		void handleRoot(DataElement element, BitStream data)
 		{
 			_sizedElements = new Dictionary<DataElement, SizedPosition>();
-			_sizeRelations = new List<SizeRelation>();
 			_elementsWithAnalyzer = new List<DataElement>();
 
 			// We want at least 1 byte before we begin
@@ -484,7 +477,6 @@ namespace Peach.Core.Cracker
 		void handleException(DataElement elem, BitStream data, Exception e)
 		{
 			_sizedElements.Remove(elem);
-			_sizeRelations.RemoveAll(r => r.Of == elem);
 
 			CrackingFailure ex = e as CrackingFailure;
 			if (ex != null)
@@ -549,14 +541,6 @@ namespace Peach.Core.Cracker
 
 			_sizedElements.Add(elem, pos);
 
-			// If this element does not have a size but has a size relation,
-			// keep track of the relation for evaluation in the future
-			if (!size.HasValue)
-			{
-				var rel = elem.relations.Of<SizeRelation>();
-				_sizeRelations.AddRange(rel);
-			}
-
 			OnEnterHandleNodeEvent(elem, pos.begin, data);
 
 			return pos;
@@ -567,13 +551,12 @@ namespace Peach.Core.Cracker
 			// Completing this element might allow us to evaluate
 			// outstanding size reation computations.
 
-			for (int i = _sizeRelations.Count - 1; i >= 0; --i)
+			foreach (var rel in elem.relations.From<SizeRelation>())
 			{
-				var rel = _sizeRelations[i];
+				SizedPosition other;
 
-				if (elem == rel.From)
+				if (_sizedElements.TryGetValue(rel.Of, out other))
 				{
-					var other = _sizedElements[rel.Of];
 					long size = rel.GetValue();
 
 					if (other.size.HasValue)
@@ -584,19 +567,6 @@ namespace Peach.Core.Cracker
 							rel.Of.debugName, size);
 
 					other.size = size;
-					_sizeRelations.RemoveAt(i);
-				}
-
-				var cont = elem as DataElementContainer;
-				if (cont != null && cont.isParentOf(rel.From))
-				{
-					// If we have finished cracking the parent of the From half of
-					// an outstanding size relation, this means we never cracked
-					// the From element. This can happen when the From half is in
-					// a choice. Just stop tracking the incomplete relation and
-					// keep going.
-
-					_sizeRelations.RemoveAt(i);
 				}
 			}
 

@@ -26,45 +26,59 @@ module DashApp {
 		private debug = true;
 		private peachSvc: Services.IPeachService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
+		private visDataSet;
 
 		public metric: string;
 
 		//public bucketTimelineData: Models.BucketTimelineMetric[] = [];
-		public bucketTimelineData: TimelineItem[] = [];
-		
+		public bucketTimelineData = {};
+
 		public mutatorData: Models.MutatorMetric[] = [];
 		public elementData: Models.ElementMetric[] = [];
 		public datasetData: Models.DatasetMetric[] = [];
 		public stateData: Models.StateMetric[] = [];
 		public bucketData: Models.BucketMetric[] = [];
 
-		static $inject = ["$scope", "$routeParams", "pitConfiguratorService", "peachService"];
+		private jobStartDate: Date = new Date();
 
-		constructor($scope: ViewModelScope, $routeParams: MetricsParams, pitConfiguratorService: Services.IPitConfiguratorService, peachService: Services.IPeachService) {
+		static $inject = ["$scope", "$routeParams", "pitConfiguratorService", "peachService", "visDataSet"];
+
+		constructor($scope: ViewModelScope, $routeParams: MetricsParams, pitConfiguratorService: Services.IPitConfiguratorService, peachService: Services.IPeachService, visDataSet) {
 			$scope.vm = this;
 			this.scope = $scope;
 			this.metric = $routeParams.metric;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.peachSvc = peachService;
+			//this.jobStartDate = this.pitConfigSvc.Job.startDate; 
+			this.visDataSet = visDataSet;
 			this.initializeData();
+
+
+			this.testData = this.sampleData();
+			//this.testOptions = angular.extend(options, {});
 		}
+		
 
 		private initializeData() {
 			this.peachSvc.GetJob((data: Models.Job) => {
 				var jobUrl = data.jobUrl;
 
-				switch(this.metric)
-				{
+				switch (this.metric) {
 					case "bucketTimeline":
 						this.peachSvc.GetBucketTimeline(jobUrl, (data: Models.BucketTimelineMetric[]) => {
-							for (var i = 0; i < data.length; i++) {
-								this.bucketTimelineData.push({
-									type: "box",
+							var timelineData = [];
+							data.forEach((item) => {
+								timelineData.push({
+									id: item.id,
+									type: "point",
 									content: "",
-									data: data[i],
-									start: data[i].time
+									data: item,
+									start: item.time
 								});
-							}
+							});
+							var dataset = this.visDataSet(timelineData);
+							this.bucketTimelineData = dataset;
+							//this.bucketTimelineData = timelineData;
 						});
 						break;
 					case "faultsOverTime":
@@ -75,19 +89,20 @@ module DashApp {
 								labels: this.faultTimelineData.map(i => moment(i.date).format("M/D h a")),
 								datasets: [
 									{
-														label: "My First dataset",
-														fillColor: "rgba(220,220,220,0.2)",
-														strokeColor: "rgba(220,220,220,1)",
-														pointColor: "rgba(220,220,220,1)",
-														pointStrokeColor: "#fff",
-														pointHighlightFill: "#fff",
-														pointHighlightStroke: "rgba(220,220,220,1)",
-														data: this.faultTimelineData.map(i => i.faultCount)
+										label: "My First dataset",
+										fillColor: "rgba(220,220,220,0.2)",
+										strokeColor: "rgba(220,220,220,1)",
+										pointColor: "rgba(220,220,220,1)",
+										pointStrokeColor: "#fff",
+										pointHighlightFill: "#fff",
+										pointHighlightStroke: "rgba(220,220,220,1)",
+										data: this.faultTimelineData.map(i => i.faultCount)
 									}
 								]
 							};
 
-							this. metrics_faultsOverTime_options = {
+
+							this.metrics_faultsOverTime_options = {
 								// Boolean - whether or not the chart should be responsive and resize when the browser does.
 								responsive: true,
 
@@ -149,13 +164,13 @@ module DashApp {
 								showScale: true,
 
 								// Boolean - If we want to override with a hard coded scale
-								scaleOverride: true,
+								scaleOverride: false,
 
 								// ** Required if scaleOverride is true **
 								// Number - The number of steps in a hard coded scale
-								scaleSteps: this.getMaxOfArray(this.faultTimelineData.map(i => i.faultCount)),
+								//scaleSteps: this.getMaxOfArray(this.faultTimelineData.map(i => i.faultCount)),
 								// Number - The value jump in the hard coded scale
-								scaleStepWidth: 1,
+								//scaleStepWidth: max,
 								// Number - The scale starting value
 								scaleStartValue: 0,
 
@@ -227,13 +242,13 @@ module DashApp {
 							this.bucketData = data;
 						});
 						break;
-				}
+				} 
 			});
-			
+
 
 		}
 
-		private simplifyItems (items) {
+		private simplifyItems(items) {
 			var simplified = [];
 
 			angular.forEach(items, function (group, label) {
@@ -247,8 +262,126 @@ module DashApp {
 			return simplified;
 		}
 
+
+		// #region test timeline
+	public testOptions = {
+		align: 'center', // left | right (String)
+		autoResize: true, // false (Boolean)
+		editable: true,
+		selectable: true,
+		// start: null,
+		// end: null,
+		// height: null,
+		// width: '100%',
+		// margin: {
+		//   axis: 20,
+		//   item: 10
+		// },
+		// min: null,
+		// max: null,
+		// maxHeight: null,
+		orientation: 'bottom',
+		// padding: 5,
+		showCurrentTime: true,
+		showCustomTime: true,
+		showMajorLabels: true,
+		showMinorLabels: true
+		// type: 'box', // dot | point
+		// zoomMin: 1000,
+		// zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
+		// groupOrder: 'content'
+	};
+
+	private sampleData = function () {
+		return this.visDataSet([
+			{
+				id: 1,
+				content: '<i class="fi-flag"></i> item 1',
+				start: moment().add('days', 1),
+				className: 'magenta'
+			},
+			{
+				id: 2,
+				content: '<a href="http://visjs.org" target="_blank">visjs.org</a>',
+				start: moment().add('days', 2)
+			},
+			{
+				id: 3,
+				content: 'item 3',
+				start: moment().add('days', -2)
+			},
+			{
+				id: 4,
+				content: 'item 4',
+				start: moment().add('days', 1),
+				end: moment().add('days', 3),
+				type: 'range'
+			},
+			{
+				id: 7,
+				content: '<i class="fi-anchor"></i> item 7',
+				start: moment().add('days', -3),
+				end: moment().add('days', -2),
+				type: 'range',
+				className: 'orange'
+			},
+			{
+				id: 5,
+				content: 'item 5',
+				start: moment().add('days', -1),
+				type: 'point'
+			},
+			{
+				id: 6,
+				content: 'item 6',
+				start: moment().add('days', 4),
+				type: 'point'
+			}
+		]);
+	};
+
+		public testData = {};
+
+		// #endregion
+
+
+
 		// #region timeline
-		public timeline = {
+		public bucketTimelineOptions = {
+			debug: false,
+			align: 'center',
+			autoResize: true,
+			editable: false,
+			start: null,
+			end: null,
+			height: null,
+			width: '100%',
+			margin: {
+				axis: 20,
+				item: 10
+			},
+			//min: this.jobStartDate,
+			//max: new Date(),
+			maxHeight: null,
+			orientation: 'top',
+			padding: 5,
+			selectable: false,
+			showCurrentTime: true,
+			showCustomTime: true,
+			showMajorLabels: true,
+			showMinorLabels: true,
+			type: 'box', // dot | point
+			zoomMin: 1000,
+			zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
+			groupOrder: 'content',
+			template: function (item) {
+				return "<a ng-click=\"$event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" ><b>" + item.data.label + "</b></a><br />" +
+					"Faults: " + item.data.faultCount + "<br />" +
+					"1st Iteration: " + item.data.iteration + "<br />"; 
+			}
+		};
+
+		public bucketTimelineEvents = {
 			//select: (selected) => {
 			//	if (this.debug) {
 			//		console.log('selected items: ', selected.items);
@@ -257,7 +390,7 @@ module DashApp {
 			//	var selecteditem = $.grep(this.bucketTimelineData, (e) => {
 			//		return e.id == selected.items[0];
 			//	})[0];
-				
+
 			//	var items = this.simplifyItems(this.bucketTimelineData);
 
 			//	var format = 'YYYY-MM-DDTHH:mm'; 
@@ -279,7 +412,7 @@ module DashApp {
 			range: {},
 
 			rangeChange: (period) => {
-				this.timeline.range = this.scope.vm.timeline.getWindow();
+				this.bucketTimelineEvents.range = this.scope.vm.timeline.getWindow();
 
 				if (!this.scope.$$phase) {
 					this.scope.$apply();
@@ -302,12 +435,12 @@ module DashApp {
 				if (this.debug) {
 					console.log('timeChange: ', period.time);
 				}
-				
+
 				this.scope.$apply(
 					function () {
 						this.scope.vm.timeline.customTime = period.time;
 					}
-				);
+					);
 			},
 
 			timeChanged: (period) => {
@@ -351,12 +484,12 @@ module DashApp {
 					}
 				},
 				remove: (item, callback) => {
-				//	if (confirm('Remove item ' + item.content + '?')) {
-				//		callback(item); // confirm deletion
-				//	}
-				//	else {
-				//		callback(null); // cancel deletion
-				//	}
+					//	if (confirm('Remove item ' + item.content + '?')) {
+					//		callback(item); // confirm deletion
+					//	}
+					//	else {
+					//		callback(null); // cancel deletion
+					//	}
 				}
 			}
 		};
@@ -440,9 +573,8 @@ module DashApp {
 			]
 		};
 
-		private getMaxOfArray(numArray: number[]) {
+		private getMaxOfArray(numArray: number[]): number {
 			return Math.max.apply(null, numArray);
 		}
-
 	}
 }

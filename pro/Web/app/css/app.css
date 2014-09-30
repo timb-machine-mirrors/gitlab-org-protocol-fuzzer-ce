@@ -55,6 +55,10 @@ a.disabled {
 	cursor: pointer
 }
 
+.dropdown-menu > li {
+	cursor: pointer
+}
+
 div.tabs-left#metricstabs {
 	position: relative;
 	bottom: 0;

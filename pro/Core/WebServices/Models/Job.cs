@@ -156,5 +156,15 @@ namespace Peach.Enterprise.WebServices.Models
 		/// ACL for this job
 		/// </summary>
 		public List<Group> Groups { get; set; }
+
+		/// <summary>
+		/// Optional starting iteration number
+		/// </summary>
+		public uint RangeStart { get; set; }
+
+		/// <summary>
+		/// Optional ending iteration number
+		/// </summary>
+		public uint RangeStop { get; set; }
 	}
 }

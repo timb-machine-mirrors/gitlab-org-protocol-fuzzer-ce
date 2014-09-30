@@ -60,7 +60,8 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	resource = 'xmltests.zip',
+	resource = 'xmltests.zip NamedSequences.txt',
 	content = 'IronPython.StdLib',
 	name = 'Peach.Pro.dll',
+	namespace = 'Peach.Core',
 )

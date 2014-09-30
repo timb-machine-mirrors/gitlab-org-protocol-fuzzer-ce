@@ -65,8 +65,7 @@ module DashApp {
 				controller: StartJobController
 			})
 			.result.then((job: Models.Job) => {
-				//this.pitConfigSvc.StartJob(job);
-				console.info(JSON.stringify(job));
+				this.pitConfigSvc.StartJob(job);
 			});
 		}
 

@@ -285,7 +285,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("ref", item.Item1);
 			Assert.AreEqual("TheDataModel.TheString", item.Item2);
 			Assert.AreEqual("HELLO WORLD", (string)dom.dataModels[0][0].DefaultValue);
-			Assert.AreEqual("HELLO WORLD", dom.dataModels[0][2].InternalValue.BitsToString());
+			Assert.AreEqual("HELLO WORLD", (string)dom.dataModels[0][2].InternalValue);
 		}
 
 		[Test]
@@ -342,12 +342,12 @@ namespace Peach.Core.Test.CrackingTests
 				"	<DataModel name=\"TheDataModel\">" +
 				"		<Block name=\"Block1\" occurs=\"2\">" +
 				"			<String name=\"TheString\" length=\"5\"/>" +
-				"			<Blob name=\"TheCopy\" length=\"5\">" +
+				"			<String name=\"TheCopy\" length=\"5\">" +
 				"				<Placement before=\"Marker\"/>" +
 				"				<Fixup class=\"CopyValue\">" +
 				"					<Param name=\"ref\" value=\"TheString\"/>" +
 				"				</Fixup>" +
-				"			</Blob>" +
+				"			</String>" +
 				"		</Block>" +
 				"		<Block name=\"Marker\"/>" +
 				"	</DataModel>" +

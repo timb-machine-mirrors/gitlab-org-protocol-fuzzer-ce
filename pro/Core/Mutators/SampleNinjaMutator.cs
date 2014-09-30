@@ -1,9 +1,9 @@
-﻿
+﻿//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using System.Security.Cryptography;
 
 #if MONO
 using Mono.Data.Sqlite;
@@ -16,15 +16,14 @@ using System.Data.SQLite;
 #endif
 
 using Peach.Core.Dom;
-using Peach.Core;
 
 using NLog;
 
-namespace Peach.Enterprise.Mutators
+namespace Peach.Core.Mutators
 {
-	[Mutator("SampleNinjaMutator")]
+	[Mutator("SampleNinja")]
 	[Description("Will use existing samples to generate mutated files.")]
-	public class SampleNinjaMutator : Mutator
+	public class SampleNinja : Mutator
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -34,22 +33,20 @@ namespace Peach.Enterprise.Mutators
 
 		string NinjaDB = null;
 
-		public SampleNinjaMutator(DataElement obj)
+		public SampleNinja(DataElement obj)
 			: base(obj)
-        {
-            name = "SampleNinja";
-
+		{
 			var pitFile = GetPitFile(obj);
 			NinjaDB = Path.GetFullPath(pitFile) + ".ninja";
 
-            using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
-            {
-                Connection.Open();
+			using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
+			{
+				Connection.Open();
 
-                // Get the total number of elements we can generate for this data element.
-                using (var cmd = new SQLiteCommand(Connection))
-                {
-                    cmd.CommandText = @"
+				// Get the total number of elements we can generate for this data element.
+				using (var cmd = new SQLiteCommand(Connection))
+				{
+					cmd.CommandText = @"
 select from count('x'), se.elementid
 	from definition d, sample s, samplelement se, element e
 	where d.Name = ?
@@ -59,10 +56,10 @@ select from count('x'), se.elementid
 	and se.elementid = e.elementid
 ";
 
-                    cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-                    cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
+					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
+					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
 					cmd.Parameters[0].Value = GetPitFile(obj);
-                    cmd.Parameters[1].Value = obj.fullName;
+					cmd.Parameters[1].Value = obj.fullName;
 
 					using (var reader = cmd.ExecuteReader())
 					{
@@ -70,9 +67,9 @@ select from count('x'), se.elementid
 						_count = reader.GetInt32(0);
 						ElementId = reader.GetGuid(1);
 					}
-                }
-            }
-        }
+				}
+			}
+		}
 
 		public override uint mutation
 		{
@@ -188,5 +185,3 @@ select count('x')
 		}
 	}
 }
-
-// end

@@ -1,15 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Peach.Core.IO;
 using Peach.Core.Dom;
+using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test
 {
 	public class DataModelCollector : Watcher
 	{
+		public static Dom.Dom ParsePit(string xml)
+		{
+			return new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+		}
+
+		protected void RunEngine(string xml)
+		{
+			RunEngine(ParsePit(xml));
+		}
+
+		protected void RunEngine(Dom.Dom dom)
+		{
+			var e = new Engine(this);
+
+			var cfg = new RunConfiguration();
+
+			e.startFuzzing(dom, cfg);
+		}
+
 		protected List<Variant> mutations = null;
 		protected List<BitwiseStream> values = null;
 		protected List<Dom.DataModel> dataModels = null;

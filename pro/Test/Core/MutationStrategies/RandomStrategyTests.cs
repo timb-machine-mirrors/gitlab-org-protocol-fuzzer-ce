@@ -16,31 +16,36 @@ namespace Peach.Core.Test.MutationStrategies
 	[TestFixture] [Category("Peach")]
 	class RandomStrategyTests : DataModelCollector
 	{
+		public RandomStrategyTests()
+		{
+			cloneActions = true;
+		}
+
 		[Test]
 		public void Test1()
 		{
 			// Test fuzzing does something
 
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel\">" +
-				"       <Number name=\"num1\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<Number name='num1' size='32' value='100' signed='false'/>
+	</DataModel>
 
-				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-				"       <State name=\"Initial\">" +
-				"           <Action type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
 
-				"   <Test name=\"Default\">" +
-				"       <StateModel ref=\"TheState\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"RandomStrategy\"/>" +
-				"   </Test>" +
-				"</Peach>";
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'/>
+	</Test>
+</Peach>";
 
 			RunEngine(xml, 1, 999);
 
@@ -52,41 +57,43 @@ namespace Peach.Core.Test.MutationStrategies
 		[Test]
 		public void Test2()
 		{
-			// Random strategy picks a list of elements across all models, make sure this is working
+			// Random strategy picks a list of elements across all models
+			// so make sure this is working
 
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel1\">" +
-				"       <Number name=\"num1\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel1'>
+		<Number name='num1' size='32' value='100' signed='false'/>
+	</DataModel>
 
-				"   <DataModel name=\"TheDataModel2\">" +
-				"       <Number name=\"num1\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"   </DataModel>" +
+	<DataModel name='TheDataModel2'>
+		<Number name='num1' size='32' value='100' signed='false'/>
+	</DataModel>
 
-				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-				"       <State name=\"Initial\">" +
-				"           <Action name=\"Action1\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel1\"/>" +
-				"           </Action>" +
-				"           <Action name=\"Action2\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel2\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
+			<Action name='Action2' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
+		</State>
+	</StateModel>
 
-				"   <Test name=\"Default\" controlIteration=\"200\">" +
-				"       <StateModel ref=\"TheState\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"RandomStrategy\"/>" +
-				"   </Test>" +
-				"</Peach>";
+	<Test name='Default' controlIteration='200'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'/>
+	</Test>
+</Peach>";
 
 			RunEngine(xml, 1, 999);
 
 			// verify values
-			int dm1 = 0;
-			int dm2 = 0;
+			var dm1 = 0;
+			var dm2 = 0;
+
 			foreach (var item in allStrategies)
 			{
 				if (item.Contains("TheDataModel1"))
@@ -100,7 +107,7 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(allStrategies.Count, dm1 + dm2);
 
 			// Make sure each data model was fuzzed about the same number of times
-			int diff = dm1 - dm2;
+			var diff = dm1 - dm2;
 			Assert.Greater(diff, -10);
 			Assert.Less(diff, 10);
 		}
@@ -108,39 +115,40 @@ namespace Peach.Core.Test.MutationStrategies
 		[Test]
 		public void Test3()
 		{
-			// Test strategy only mutates a random number between 1 and MaxFieldsToMutate every iteration
+			// Test strategy only mutates a random number
+			// between 1 and MaxFieldsToMutate every iteration
 
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel\">" +
-				"       <Number name=\"num1\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num2\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num3\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num4\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num5\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num6\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num7\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num8\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num9\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"       <Number name=\"num10\" size=\"32\" value=\"100\" signed=\"false\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<Number name='num1' size='32' value='100' signed='false'/>
+		<Number name='num2' size='32' value='100' signed='false'/>
+		<Number name='num3' size='32' value='100' signed='false'/>
+		<Number name='num4' size='32' value='100' signed='false'/>
+		<Number name='num5' size='32' value='100' signed='false'/>
+		<Number name='num6' size='32' value='100' signed='false'/>
+		<Number name='num7' size='32' value='100' signed='false'/>
+		<Number name='num8' size='32' value='100' signed='false'/>
+		<Number name='num9' size='32' value='100' signed='false'/>
+		<Number name='num10' size='32' value='100' signed='false'/>
+	</DataModel>
 
-				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-				"       <State name=\"Initial\">" +
-				"           <Action type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
 
-				"   <Test name=\"Default\" controlIteration=\"200\">" +
-				"       <StateModel ref=\"TheState\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"RandomStrategy\">" +
-				"           <Param name=\"MaxFieldsToMutate\" value=\"5\"/>" +
-				"       </Strategy>" +
-				"   </Test>" +
-				"</Peach>";
+	<Test name='Default' controlIteration='200'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='5'/>
+		</Strategy>
+	</Test>
+</Peach>";
 
 			RunEngine(xml, 1, 1000);
 
@@ -453,26 +461,14 @@ namespace Peach.Core.Test.MutationStrategies
 
 			for (int i = 2; i < oldDm.Count; ++i)
 			{
-				Assert.AreEqual(1, oldDm[i].Count);
-				Assert.AreEqual(1, newDm[i].Count);
+				var oldVal = oldDm[i].Value.ToArray();
+				var newVal = newDm[i].Value.ToArray();
 
-				Dom.Array item = newDm[i][0] as Dom.Array;
-				Dom.Array oldItem = oldDm[i][0] as Dom.Array;
+				Assert.AreEqual(oldVal.Length, newVal.Length);
 
-				Assert.AreNotEqual(null, item);
-				Assert.AreNotEqual(null, oldItem);
-
-				Assert.AreEqual(item.Count, oldItem.Count);
-
-				for (int j = 0; j < item.Count; ++j)
-				{
-					Dom.String str = item[j] as Dom.String;
-					Dom.String oldStr = oldItem[j] as Dom.String;
-
-					Assert.AreNotEqual(null, str);
-					Assert.AreNotEqual(null, oldStr);
-					Assert.AreEqual((string)str.InternalValue, (string)oldStr.InternalValue);
-				}
+				for (int j = 0; j < oldVal.Length; ++j)
+					if (oldVal[j] != newVal[j])
+						Assert.Fail("Values differ at index: " + j.ToString());
 			}
 		}
 
@@ -595,6 +591,10 @@ namespace Peach.Core.Test.MutationStrategies
 		<Strategy class='Random'>
 			<Param name='MaxFieldsToMutate' value='1'/>
 		</Strategy>
+		<Mutators mode='include'>
+			<Mutator class='StringCaseLower' />
+			<Mutator class='StringCaseUpper' />
+		</Mutators>
 	</Test>
 </Peach>";
 
@@ -669,7 +669,6 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(32, dataModels.Count);
 		}
 
-
 		[Test]
 		public void TwoStates()
 		{
@@ -699,6 +698,9 @@ namespace Peach.Core.Test.MutationStrategies
 		<Strategy class='Random'>
 			<Param name='MaxFieldsToMutate' value='2'/>
 		</Strategy>
+		<Mutators mode='include'>
+			<Mutator class='StringCaseLower' />
+		</Mutators>
 	</Test>
 </Peach>";
 
@@ -768,6 +770,10 @@ namespace Peach.Core.Test.MutationStrategies
 		<Strategy class='Random'>
 			<Param name='SwitchCount' value='2'/>
 		</Strategy>
+		<Mutators mode='include'>
+			<Mutator class='StringCaseLower' />
+			<Mutator class='StringCaseUpper' />
+		</Mutators>
 	</Test>
 </Peach>".Fmt(temp4);
 
@@ -816,8 +822,6 @@ namespace Peach.Core.Test.MutationStrategies
 			PitParser parser = new PitParser();
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
 			RunConfiguration config = new RunConfiguration();
 			config.rangeStart = start;
@@ -846,34 +850,30 @@ namespace Peach.Core.Test.MutationStrategies
 				var oldDataModel = oldActions[i].dataModel;
 				var dataModel = actions[i].dataModel;
 
-				Assert.AreEqual(4, oldDataModel.Count);
-				Assert.AreEqual(4, dataModel.Count);
+				//Assert.AreEqual(4, oldDataModel.Count);
+				//Assert.AreEqual(4, dataModel.Count);
+				Assert.AreEqual(oldDataModel.Count, dataModel.Count);
 
-				for (int j = 0; j < 4; ++j)
+				for (int j = 0; j < oldDataModel.Count; ++j)
 				{
-					var lhs = oldDataModel[j].InternalValue;
-					var rhs = dataModel[j].InternalValue;
-					Assert.AreEqual((string)lhs, (string)rhs);
+					var lhs = oldDataModel[j].Value.ToArray();
+					var rhs = dataModel[j].Value.ToArray();
+					Assert.AreEqual(lhs, rhs);
 				}
 			}
 		}
 
 		private void RunEngine(string xml, uint start, uint stop)
 		{
-			PitParser parser = new PitParser();
+			var dom = ParsePit(xml);
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("NumericalVarianceMutator");
-			dom.tests[0].includedMutators.Add("NumericalEdgeCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.rangeStart = start;
 			config.rangeStop = stop;
 			config.range = true;
 			config.randomSeed = 12345;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 

@@ -16,11 +16,8 @@ namespace Peach.Enterprise.Mutators
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static ActionRemove()
-		{
-			affectDataModel = false;
-			affectStateModel = true;
-		}
+		public static new readonly bool affectDataModel = false;
+		public static new readonly bool affectStateModel = true;
 
 		/// <summary>
 		/// Count is actions * N
@@ -35,8 +32,6 @@ namespace Peach.Enterprise.Mutators
 
 		public ActionRemove(StateModel model)
 		{
-			name = "ActionRemove";
-
 			foreach (var state in model.states)
 			{
 				_actionCount += state.actions.Count;

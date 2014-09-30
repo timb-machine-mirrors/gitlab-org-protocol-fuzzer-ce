@@ -43,7 +43,7 @@ namespace Peach.Enterprise.WebServices
 				if (IsEngineRunning)
 					return HttpStatusCode.Forbidden;
 
-				StartJob(pit);
+				StartJob(pit, job.Seed, job.RangeStart, job.RangeStop);
 
 				return MakeJob();
 			}

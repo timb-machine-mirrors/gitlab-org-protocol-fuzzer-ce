@@ -12,7 +12,7 @@ namespace Peach.Core.IO
 	{
 		#region Private Members
 
-		private List<BitwiseStream> _streams;
+		private IList<BitwiseStream> _streams;
 		private long _position;
 
 		#endregion
@@ -93,6 +93,31 @@ namespace Peach.Core.IO
 			return PositionBits;
 		}
 
+
+		public override int ReadBit()
+		{
+			long pos = 0;
+
+			foreach (var item in this)
+			{
+				long next = pos + item.LengthBits;
+
+				if (next > PositionBits)
+				{
+					var offset = item.PositionBits;
+					item.PositionBits = PositionBits - pos;
+					var ret = item.ReadBit();
+					item.PositionBits = offset;
+					++PositionBits;
+					return ret;
+				}
+
+				pos = next;
+			}
+
+			return -1;
+		}
+
 		public override int ReadBits(out ulong bits, int count)
 		{
 			if (count > 64 || count < 0)
@@ -135,9 +160,98 @@ namespace Peach.Core.IO
 			throw new NotSupportedException("Stream does not support writing.");
 		}
 
+		public override void WriteBit(int value)
+		{
+			throw new NotSupportedException("Stream does not support writing.");
+		}
+
 		public override void WriteBits(ulong bits, int count)
 		{
 			throw new NotSupportedException("Stream does not support writing.");
+		}
+
+		IEnumerable<BitStream> Walk()
+		{
+			var toVisit = new Stack<BitwiseStream>();
+			toVisit.Push(null);
+
+			BitwiseStream elem = this;
+
+			while (elem != null)
+			{
+				var asList = elem as BitStreamList;
+
+				if (asList != null)
+				{
+					for (int i = asList.Count - 1; i >= 0; --i)
+						toVisit.Push(asList[i]);
+				}
+				else
+				{
+					yield return (BitStream)elem;
+				}
+
+				elem = toVisit.Pop();
+			}
+		}
+
+		public override BitwiseStream SliceBits(long length)
+		{
+			if (length < 0)
+				throw new ArgumentOutOfRangeException("length");
+
+			long pos = 0;
+
+			// Recursively walk the bitstream lists looking
+			// for the BitStream that is at 'position'
+
+			var needed = length;
+
+			var ret = new BitStreamList();
+
+			var offset = pos;
+
+			// Skip until we find the 1st element at our position
+			var seq = Walk().SkipWhile(e => (PositionBits >= (pos += e.LengthBits)));
+
+			foreach (var e in seq)
+			{
+				if (pos != 0)
+				{
+					offset = e.LengthBits - (pos - PositionBits);
+					pos = 0;
+
+					// First time thru, we should always have at least 1 bit to read
+					System.Diagnostics.Debug.Assert((e.LengthBits - offset) > 0);
+				}
+
+				var toWrite = Math.Min(e.LengthBits - offset, needed);
+
+				if (toWrite > 0)
+				{
+					var cur = e.PositionBits;
+					e.SeekBits(offset, SeekOrigin.Begin);
+					ret.Add(e.SliceBits(toWrite));
+					e.SeekBits(cur, SeekOrigin.Begin);
+				}
+
+				needed -= toWrite;
+				offset = 0;
+
+				if (needed == 0)
+					break;
+			}
+
+			if (needed != 0)
+				throw new ArgumentException("length");
+
+			// mark list as read only
+			ret._streams = ((List<BitwiseStream>)ret._streams).AsReadOnly();
+
+			// Update our position
+			SeekBits(length, SeekOrigin.Current);
+
+			return ret;
 		}
 
 		#endregion
@@ -363,7 +477,7 @@ namespace Peach.Core.IO
 
 		public bool IsReadOnly
 		{
-			get { return false; }
+			get { return _streams.IsReadOnly; }
 		}
 
 		public bool Remove(BitwiseStream item)

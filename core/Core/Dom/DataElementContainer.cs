@@ -181,7 +181,7 @@ namespace Peach.Core.Dom
 			// Always return a slice of data.  This way, if data
 			// is a stream publisher, it will be presented as having a fixed length.
 
-			var ret = data.SliceBits(needed);
+			var ret = (BitStream)data.SliceBits(needed);
 			System.Diagnostics.Debug.Assert(ret != null);
 
 			return ret;

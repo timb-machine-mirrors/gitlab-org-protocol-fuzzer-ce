@@ -327,10 +327,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 		self.base = getattr(ctx, 'projects_dir', None) or tg.path
 		if getattr(ctx, 'csproj_in_tree', True):
 			self.base = tg.path
-		namespace = getattr(tg, 'namespace', os.path.splitext(tg.gen)[0])
-		node = self.base.make_node(namespace + '.csproj') # the project file as a Node
+
+		name = getattr(tg, 'ide_name', os.path.splitext(tg.gen)[0])
+		node = self.base.make_node(name + '.csproj') # the project file as a Node
 		msvs.vsnode_project.__init__(self, ctx, node)
-		self.name = namespace
+		self.name = name
 		self.tg = tg # task generators
 
 		# Note: Must use ordered dict so order is preserved
@@ -380,7 +381,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				continue
 
 			base = self.base == tg.path and y.path or self.base
-			name = os.path.splitext(getattr(y, 'namespace', y.name))[0]
+			name = os.path.splitext(y.name)[0]
 			other = base.make_node(name + '.csproj')
 			
 			dep = msvs.build_property()
@@ -585,7 +586,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		# g['UseHostCompilerIfAvailable'] = base == tg.path
 
 		g['AppDesignerFolder'] = 'Properties'
-		g['RootNamespace'] = self.name
+		g['RootNamespace'] = getattr(tg, 'namespace', asm_name)
 		g['AssemblyName'] = asm_name
 		g['TargetFrameworkVersion'] = tg.env.TARGET_FRAMEWORK
 		g['TargetFrameworkProfile'] = os.linesep + '    '

@@ -491,7 +491,7 @@ namespace Peach.Core.Test.Publishers
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("DataElementDuplicateMutator");
+			dom.tests[0].includedMutators.Add("DataElementDuplicate");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
