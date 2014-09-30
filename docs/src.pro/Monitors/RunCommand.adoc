@@ -16,16 +16,17 @@ _Optional:_
 
 Arguments:: Optional command line arguments
 When::
-	Period when the command should be run. Defaults to +OnCall+.
-	+
-	[horizontal]
-	OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
-	OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
-	OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
-	OnIterationStart;; Run command at start of each iteration.
-	OnIterationEnd;; Run command at end of each iteration.
-	OnFault;; Run command when a fault occurs.
-	OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
++
+Period when the command should be run. Defaults to +OnCall+.
++
+[horizontal]
+OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
+OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
+OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
+OnIterationStart;; Run command at start of each iteration.
+OnIterationEnd;; Run command at end of each iteration.
+OnFault;; Run command when a fault occurs.
+OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
 
 StartOnCall:: Run when signaled by the state machine
 FaultOnNonZeroExit:: Fault if exit code is non-zero, defaults to false.

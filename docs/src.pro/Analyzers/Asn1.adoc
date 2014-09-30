@@ -2,7 +2,11 @@
 
 == ASN.1 Analyzer
 
-Converts Abstract Syntax Notation One (ASN.1) into a full DataModel. This analyzer can convert from BER, CER, and DER type ASN.1 encodings. 
+Converts Abstract Syntax Notation One (ASN.1) into a full DataModel.
+The analyzer supports BER, CER, and DER ASN.1 encodings.
+This analyzer support usage in data models and also via the command line. 
+In both instances the ASN.1 data is walked and data elements created. 
+When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
 
 IMPORTANT: The ASN.1 analyzer can only be used on Blob data types.  
 
@@ -14,6 +18,18 @@ IMPORTANT: The ASN.1 analyzer can only be used on Blob data types.
 	<Analyzer class="Asn1" />
 </Blob>
 ----
+
+=== Command Line Syntax
+
+----
+peach --analyzer=Asn1 <input file> <output file>
+----
+
+input file::
+    File containing ASN.1 structured data.
+
+output file::
+    File creating containing generated data model
 
 === Attributes
 

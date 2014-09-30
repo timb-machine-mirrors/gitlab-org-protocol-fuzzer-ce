@@ -1,0 +1,271 @@
+<<<
+[[Monitors_TcpPort]]
+== TcpPort Monitor
+
+The _TcpPort_ detects state changes on TCP ports. A state change is going from Open to Closed or Closed to Open. The monitor can be configured as an automation task (wait until correct state reached), fault detection (fault on specific state), or data collection (report current state). The mointor can also be configured as to when the automation will occur.
+
+=== Parameters
+
+_Required:_
+
+Host:: Hostname or IP address of remote host
+Port:: Port number to monitor
+
+_Optional:_
+
+Action::
++
+Action to take (Automation, Data, Fault). Defaults to _Automation_.
++
+[horizontal]
+Automation;; Wait for port to be in selected state. _When_ parameter is used to dictate when the monitor will wait. Maximum waittime can se configured by setting _Timeout_ parameter.
+Data;; On fault report state of fault at end of iteration.
+Fault;; Generate a fault based on state of port at end of iteration.
+
+When::
++
+When to perform monitoring. Default to _OnCall_.
++
+[horizontal]
+OnCall;; When triggered by message from state machine.
+OnStart;; Once at the start of the fuzzing session.
+OnEnd;; Once at the end of our fuzzing session.
+OnIterationStart;; At the start of every iteration.
+OnIterationEnd;; At the end of every iteration.
+OnFault;; When a fault occurs.
+OnIterationStartAfterFault;; At the start of the next iteration after a fault was detected.
+
+WaitOnCall:: Call message to trigger monitor. Only applicable when _When_ is set to _OnCall_.
+State:: 
++
+State to monitor for. Defaults to _Open_.
++
+[horizontal]
+Open;;
+Closed;;
+
+Timeout:: Length of time to wait for incoming connection in milliseconds, or -1 for no timeout. Defaults to -1 (no timeout). 
+
+=== Examples
+
+.Wait for port to be open
+===============================
+In this example the call action will cause Peach to wait until the remote port is in an open state. Since no timeout is provided, Peach will wait forever.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+      
+      <Actio type="call" method="WaitForPort" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+	<Monitor class="TcpPort">
+        <Param name="Host" value="192.168.133.4" />
+        <Param name="Port" value="502" />
+        <Param name="WaitOnCall" value="WaitForPort" />
+	</Monitor>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+TODO
+----
+
+===============================
+
+.Wait for port to be closed
+===============================
+In this example the call action will cause Peach to wait until the remote port is in a closed state. Since no timeout is provided, Peach will wait forever.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+      
+      <Actio type="call" method="WaitForPort" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+	<Monitor class="TcpPort">
+        <Param name="Host" value="192.168.133.4" />
+        <Param name="Port" value="502" />
+        <param name="State" value="Closed" />
+        <Param name="WaitOnCall" value="WaitForPort" />
+	</Monitor>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+TODO
+----
+
+===============================
+
+.Fault if port closed
+===============================
+In this example Peach will fault if the port is in the closed state at the end of an iteration.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+	<Monitor class="TcpPort">
+        <Param name="Host" value="192.168.133.4" />
+        <Param name="Port" value="502" />
+        <Param name="Action" value="Fault" />
+        <param name="State" value="Closed" />
+	</Monitor>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+TODO
+----
+
+===============================
+
+.Report port state on fault
+===============================
+In this example, if a fault is triggered by another monitor, the TcpPort monitor will report the state of the port when the fault occured.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <!-- Fault detection -->
+    <Monitor class="LinuxDebugger">
+      <Param name="Executable" value="/usr/bin/curl"/>
+      <Param name="Arguments" value="http://localhost"/>
+      <Param name="StartOnCall" value="ScoobySnacks"/>
+    </Monitor>
+
+    <!-- Data collection -->
+	<Monitor class="TcpPort">
+        <Param name="Host" value="192.168.133.4" />
+        <Param name="Port" value="502" />
+        <Param name="Action" value="Data" />
+	</Monitor>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+TODO
+----
+
+===============================

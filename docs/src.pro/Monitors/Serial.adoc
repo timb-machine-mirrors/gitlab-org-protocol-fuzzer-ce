@@ -17,12 +17,50 @@ _Optional:_
 
 BaudRate:: The baud rate (standard only). Defaults to 115200.
 DataBits:: The data bits value. Defaults to 8.
-Parity:: Specifies the parity bit. One of: Even, Mark, None, Odd, Space. Defaults to None.
-StopBits:: Specifies the number of stop bits used. One of: None, One, OnePointFive, or Two. Defaults to None.
-Handshake:: Specifies the control protocol used in establishing a serial port communication. One of: None, RequestToSend, RequestToSendXOnXOff, or XOnXOff. Defaults to None.
+Parity::
++
+Specifies the parity bit. Defaults to None.
++
+[horizontal]
+Even;;
+Mark;;
+None;;
+Odd;;
+Space;;
+
+StopBits::
++
+Specifies the number of stop bits used. Defaults to One.
++
+[horizontal]
+One;;
+OnePointFive;;
+Two;;
+
+Handshake::
++
+Specifies the control protocol used in establishing a serial port communication. Defaults to None.
++
+[horizontal]
+None;;
+RequestToSend;;
+RequestToSendXOnXOff;;
+XOnXOff;;
+
 FaultRegex:: Fault when regular expression matches.
 WaitForRegex:: Wait until regex matches received data.
-WaitForWhen:: When to wait. One of: OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, or OnIterationStartAfterFault. Defaults to OnStart.
+WaitForWhen:: 
++
+When to wait. Defaults to OnStart.
++
+[horizontal]
+OnCall;; When triggered by message from state machine.
+OnStart;; Once at the start of the fuzzing session.
+OnEnd;; Once at the end of our fuzzing session.
+OnIterationStart;; At the start of every iteration.
+OnIterationEnd;; At the end of every iteration.
+OnFault;; When a fault occurs.
+OnIterationStartAfterFault;; At the start of the next iteration after a fault was detected.
 
 === Examples
 

@@ -68,6 +68,7 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_RawV4[RawV4]
  * xref:Publishers_RawV6[RawV6]
  * xref:Publishers_Remote[Remote]
+ * xref:Publishers_Rest[Rest]
  * xref:Publishers_SerialPort[SerialPort] 
  * xref:Publishers_Ssl[SslClient] 
  * xref:Publishers_SslListener[SslListener] 

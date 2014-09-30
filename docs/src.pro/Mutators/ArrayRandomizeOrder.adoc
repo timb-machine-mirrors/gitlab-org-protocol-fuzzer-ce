@@ -1,0 +1,28 @@
+<<<
+[[Mutators_ArrayRandomizeOrderMutator]]
+== ArrayRandomizeOrder
+
+This mutator will randomize the order of items in an array.
+
+_Operation with deterministic strategies_
+
+With deterministic strategies the number of test cases generated is the array count factorial with a cap at 100 test cases per array. A variation in the fuzzing job's seed will produce a different set of randomized array orders.
+
+_Operation with non-deterministic strategies_
+
+With non-deterministic strategies, each call to this mutator will product a randomized order of the elements.
+The weighting of this mutator is based the array count factorial with a cap at 100. 
+
+=== Supported Elements
+
+This mutator supports any array element. Array elements are those that have the _occurs_, _minOccurs_, or _maxOccurs_ attributes set.
+
+ * xref:occurs[occurs] attribute
+ * xref:minOccurs[minOccurs] attribute
+ * xref:maxOccurs[maxOccurs] attribute
+
+=== Hints
+
+This mutator does not support any hints.
+
+NOTE: The an version of this mutator did support a hint. This hint is nolonger required as the underlying algorithm has been contructed to not require it.
