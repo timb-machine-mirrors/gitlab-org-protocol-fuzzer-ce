@@ -107,9 +107,9 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(allStrategies.Count, dm1 + dm2);
 
 			// Make sure each data model was fuzzed about the same number of times
-			var diff = dm1 - dm2;
-			Assert.Greater(diff, -10);
-			Assert.Less(diff, 10);
+			var diff = (1.0 * dm1) / (dm1 + dm2);
+			Assert.Greater(diff, 0.45);
+			Assert.Less(diff, 0.55);
 		}
 
 		[Test]
@@ -704,9 +704,9 @@ namespace Peach.Core.Test.MutationStrategies
 	</Test>
 </Peach>";
 
-			RunSwitchTest(xml, 1, 10);
+			RunSwitchTest(xml, 1, 20);
 
-			Assert.AreEqual(22, dataModels.Count);
+			Assert.AreEqual(42, dataModels.Count);
 
 			Assert.AreEqual("Hello", (string)dataModels[0][0].InternalValue);
 			Assert.AreEqual("Hello", (string)dataModels[1][0].InternalValue);
