@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+    <!--
+    <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
+    -->
+
+    <!-- TODO: Include Capability support
+         https://www.iana.org/assignments/capability-codes/capability-codes.xhtml
+    -->
+
+    <!-- BEGIN BGP4 Packet Definition -->
+    
+    <DataModel name="BGP4Message">
+        <!-- TODO: TCP-MD5 for auth https://tools.ietf.org/html/rfc2385 -->
+        <Blob name="BGP4Marker" length="16" valueType="hex" token="true"
+            value="FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF"/>
+        <Number name="PacketLength" size="16" endian="big">
+            <Relation type="size" of="BGP4Message"/>
+        </Number>
+        <Number name="MessageType" size="8"/>
+        <Block name="MessageData"/>
+    </DataModel>
+    <!-- END BGP4 Packet Definition -->
+
+    <DataModel name="BGP4Capability">
+        <Number name="CapabilityType" size="8"/>
+        <Number name="CapabilityLength" size="8">
+            <Relation type="size" of="CapabilityValue"/>
+        </Number>
+        <Block name="CapabilityValue"/>
+    </DataModel>
+
+    <DataModel name="BGP4OptParam">
+        <Number name="ParamType" size="8"/>
+        <Number name="ParamLength" size="8">
+            <Relation type="size" of="ParamValue"/>
+        </Number>
+        <Block name="ParamValue"/>
+    </DataModel>
+
+    <DataModel name="BGP4PathAttr"> 
+        <!-- NEED_DOC: Is position high or low order -->
+        <Block name="AttrFlags"> 
+            <Number name="Optional" size="1"/>
+            <Number name="Transitive" size="1"/>
+            <Number name="Partial" size="1"/>
+            <Number name="ExtendedLength" size="1"/>
+            <!--
+                If the Extended Length bit of the Attribute Flags octet is set
+                to 0, the third octet of the Path Attribute contains the length
+                of the attribute data in octets.
+        
+                If the Extended Length bit of the Attribute Flags octet is set
+                to 1, the third and fourth octets of the path attribute contain
+                the length of the attribute data in octets.
+            -->
+            <Padding name="padding" alignment="8"/>
+        </Block>
+        <Number name="TypeCode" size="8"/>
+        <Choice name="LengthType">
+            <Number name="Length" size="8"
+                    constraint="int(element.find('ExtendedLength').InternalValue) == 0">
+                <Relation type="size" of="Value"/>
+            </Number>
+            <Number name="XLength" size="16" endian="big"
+                    constraint="int(element.find('ExtendedLength').InternalValue) == 1">
+                <Relation type="size" of="Value"/>
+            </Number>
+        </Choice>
+        <Block name="Value"/>
+    </DataModel>
+
+</Peach>

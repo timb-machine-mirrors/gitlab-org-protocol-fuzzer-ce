@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+
+    <DataModel name="UNKNOWN" ref="Base:BGP4PathAttr">
+        <Block name="Value">
+            <Blob name="Data"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ORIGIN" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="1" constraint="int(value) == 1"/>
+        <Block name="Value">
+            <Choice name="Type">
+                <Number name="IGP" size="8"
+                        value="0" constraint="int(value) == 0"/>
+                <Number name="EGP" size="8"
+                        value="1" constraint="int(value) == 1"/>
+                <Number name="INCOMPLETE" size="8"
+                        value="2" constraint="int(value) == 2"/>
+                <Number name="UNKNOWN" size="8"/>
+            </Choice>
+        </Block>
+    </DataModel>
+
+    <DataModel name="AS_PATH" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="2" constraint="int(value) == 2"/>
+        <Block name="Value">
+            <Block name="PathSegments" minOccurs="0" maxOccurs="-1">
+                <Choice name="Type">
+                    <Number name="AS_SET" size="8"
+                            value="1" constraint="int(value) == 1"/>
+                    <Number name="AS_SEQUENCE" size="8"
+                            value="1" constraint="int(value) == 1"/>
+                    <Number name="UNKNOWN" size="8"/>
+                </Choice>
+                <Number name="NumASs" size="8">
+                    <Relation type="count" of="ASs"/>
+                </Number>
+                <Number name="ASs" size="16" endian="big" minOccurs="0" maxOccurs="255"/>
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="NEXT_HOP" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="3" constraint="int(value) == 3"/>
+        <Block name="Value">
+            <!-- Presumably a 4 octet IP address? -->
+            <Number size="32" endian="big"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="MULTI_EXIT_DISC" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="4" constraint="int(value) == 4"/>
+        <Block name="Value">
+            <Number size="32" endian="big"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="LOCAL_PREF" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="5" constraint="int(value) == 5"/>
+        <Block name="Value">
+            <Number size="32" endian="big"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ATOMIC_AGGREGATE" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="6" constraint="int(value) == 6"/>
+        <Block name="Value">
+            <!-- Empty -->
+        </Block>
+    </DataModel>
+
+    <DataModel name="AGGREGATOR" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="7" constraint="int(value) == 7"/>
+        <Block name="Value">
+            <Number name="ASN" size="16" endian="big"/>
+            <Number name="IP"  size="32" endian="big"/>
+        </Block>
+    </DataModel>
+</Peach>
+

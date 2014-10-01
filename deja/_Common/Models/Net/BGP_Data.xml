@@ -11,118 +11,88 @@
     <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
     -->
 
-    <!-- TODO: Include Capability support
-         https://www.iana.org/assignments/capability-codes/capability-codes.xhtml
-    -->
+    <Include ns="rfc1997" src="file:##Path##/_Common/Models/Net/BGP_rfc1997.xml"/>
+    <Include ns="rfc2858" src="file:##Path##/_Common/Models/Net/BGP_rfc2858.xml"/>
+    <Include ns="rfc2918" src="file:##Path##/_Common/Models/Net/BGP_rfc2918.xml"/>
+    <Include ns="rfc4456" src="file:##Path##/_Common/Models/Net/BGP_rfc4456.xml"/>
+    <Include ns="rfc5291" src="file:##Path##/_Common/Models/Net/BGP_rfc5291.xml"/>
+    <Include ns="PathAttrs" src="file:##Path##/_Common/Models/Net/BGP_PathAttrs.xml"/>
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
 
-    <!-- BEGIN BGP4 Packet Definition -->
-    
-    <DataModel name="BGP4">
-        <!-- TODO: TCP-MD5 for auth https://tools.ietf.org/html/rfc2385 -->
-        <Block name="BGP4Message">
-            <Blob name="BGP4Marker" length="16" valueType="hex" token="true"
-                value="FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF"/>
-            <Number name="BGP4PacketLength" size="16" endian="big">
-                <Relation type="size" of="BGP4Message"/>
-            </Number>
-            <Number name="BGP4Type" size="8"/>
-            <Block name="BGP4Data"/>
-        </Block>
-    </DataModel>
-    <!-- END BGP4 Packet Definition -->
 
-    <!-- BEGIN BGP4 Update Message Definitions -->
-    <DataModel name="BGP4RegularPathAttrib">
-        <Block name="AttrType">
-            <Block name="AttrFlags">
-                <!-- NEED_DOC: Is position high or low order -->
-                <Number name="Optional" size="1"/>
-                <Number name="Transitive" size="1"/>
-                <Number name="Partial" size="1"/>
-                <Number name="ExtendedLength" size="1" constraint="int(value) == 0"/>
-                <!--
-                    If the Extended Length bit of the Attribute Flags octet is set
-                    to 0, the third octet of the Path Attribute contains the length
-                    of the attribute data in octets.
-            
-                    If the Extended Length bit of the Attribute Flags octet is set
-                    to 1, the third and fourth octets of the path attribute contain
-                    the length of the attribute data in octets.
-                -->
-                <Padding alignment="8"/>
-            </Block>
-            <Number name="AttrTypeCode" size="8"/>
-        </Block>
-        <Number name="AttrLength" size="8">
-            <Relation type="size" of="AttrValue"/>
+    <!-- BEGIN BGP4 OptParam Definitions -->
+    <DataModel name="BGP4Capabilities" ref="Base:BGP4OptParam">
+        <Number name="ParamType" size="8" value="2" constraint="int(value) == 2"/>
+        <Number name="ParamLength" size="8">
+            <Relation type="size" of="ParamValue"/>
         </Number>
-        <Blob name="AttrValue"/>
-    </DataModel>
+        <Block name="ParamValue">
+            <!-- https://www.iana.org/assignments/capability-codes/capability-codes.xhtml -->
+            <Choice name="CapabilityTypes">
+                <Block name="MultiProtocol_Capability" ref="rfc2858:Capability"/>
+                <!-- Quaga says that cisco's old route-refresh cap was 128 -->
+                <Block name="RouteRefresh_Capability" ref="rfc2918:Capability"/>
+                <!-- Quaga says that cisco's old ORF cap was 130 -->
+                <Block name="OutboundRouteFilter_Capability" ref="rfc5291:Capability"/>
 
-    <DataModel name="BGP4ExtendedPathAttrib">
-        <Block name="AttrType">
-            <Block name="AttrFlags"> 
-                <!-- NEED_DOC: Is position high or low order -->
-                <Number name="Optional" size="1"/>
-                <Number name="Transitive" size="1"/>
-                <Number name="Partial" size="1"/>
-                <Number name="ExtendedLength" size="1" constraint="int(value) == 1"/>
-                <!--
-                    If the Extended Length bit of the Attribute Flags octet is set
-                    to 0, the third octet of the Path Attribute contains the length
-                    of the attribute data in octets.
-            
-                    If the Extended Length bit of the Attribute Flags octet is set
-                    to 1, the third and fourth octets of the path attribute contain
-                    the length of the attribute data in octets.
-                -->
-                <Padding alignment="8"/>
-            </Block>
-            <Number name="AttrTypeCode" size="8"/>
-        </Block>
-        <Number name="AttrLength" size="16">
-            <Relation type="size" of="AttrValue"/>
-        </Number>
-        <Blob name="AttrValue"/>
-    </DataModel>
+                <!-- TODO: Graceful Restart Capability [RFC4724] -->
+                <!-- TODO: Support for 4-octet AS number capability [RFC6793] -->
+                <!-- TODO: Support for Dynamic Capability (capability specific)
+                                [draft-ietf-idr-dynamic-cap] -->
 
-    <DataModel name="BGP4PathAttrib">
-        <!-- Ref: https://tools.ietf.org/html/rfc4271#section-5 -->
-        <Block name="PathAttrib">
-            <Choice name="PathAttribTypes">
-                <Block name="ExtendedPathAttrib" ref="BGP4ExtendedPathAttrib"/>
-                <Block name="RegularPathAttrib" ref="BGP4RegularPathAttrib"/>
+                <!-- BEGIN quagga unsupported -->
+                <!-- TODO: Multiple routes to a destination capability [RFC3107] -->
+                <!-- TODO: Extended Next Hop Encoding [RFC5549] -->
+                <!-- TODO: Multisession BGP Capability  [draft-ietf-idr-bgp-multisession] -->
+                <!-- TODO: ADD-PATH Capability  [draft-ietf-idr-add-paths] -->
+                <!-- TODO: Enhanced Route Refresh Capability   [RFC7313] -->
+                <!-- TODO: Long-Lived Graceful Restart (LLGR) Capability 
+                                [draft-uttaro-idr-bgp-persistence] -->
+                <!-- END quagga unsupported -->
+
+                <Block name="UnknownCapability" ref="Base:BGP4Capability">
+                    <Block name="CapabilityValue">
+                        <Blob name="Data"/>
+                    </Block>
+                </Block>
             </Choice>
-        </Block> 
+        </Block>
     </DataModel>
-    <!-- END BGP4 Update Message Definitions -->
 
+    <DataModel name="BGP4UnknownOptParam" ref="Base:BGP4OptParam">
+        <Block name="ParamValue">
+            <Blob name="Data"/>
+        </Block>
+    </DataModel>
+
+    <!-- END BGP4 Capabilities Definitions -->
 
     <!-- BEGIN BGP4 Message Types -->
-    <DataModel name="BGP4Open" ref="BGP4">
+    <DataModel name="BGP4Open" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.2 -->
-        <Number name="BGP4Message.BGP4Type" size="8" value="01"/>
-        <Block name="BGP4Message.BGP4Data">
+        <Number name="MessageType" size="8" value="1" constraint="int(value) == 1"/>
+        <Block name="MessageData">
             <Number name="Version" size="8" value="4"/>
             <Number name="MyASN" size="16" endian="big" value="##MyASN##"/>
             <Number name="HoldTime" size="16" endian="big" value="##HoldTime##"/>
             <Number name="BGPIdentifier" size="32" endian="big" value="##BGPIdentifier##"/>
             <Number name="OptParamLen" size="8">
-                <Relation type="size" of="BGP4OptParam"/>
+                <Relation type="size" of="OptParams"/>
             </Number>
-            <Block name="BGP4OptParam" minOccurs="0" maxOccurs="-1">
-                <Number name="ParamLength" size="8">
-                    <Relation type="size" of="ParamValue"/>
-                </Number>
-                <Blob name="ParamValue"/>
-            </Block>
+            <Choice name="OptParams"
+                    minOccurs="0" maxOccurs="-1">
+                <!-- TODO: BGP Authentication (Quagga Unsupported) -->
+                <Block name="Capability" ref="BGP4Capabilities"/>
+                <Block name="Unknown" ref="BGP4UnknownOptParam"/>
+            </Choice>
         </Block>
     </DataModel>
 
-    <DataModel name="BGP4Update" ref="BGP4">
+
+    <DataModel name="BGP4Update" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.3 -->
-        <Number name="BGP4Message.BGP4Type" size="8" endian="big" value="02"/>
-        <Block name="BGP4Message.BGP4Data">
+        <Number name="MessageType" size="8" value="2" constraint="int(value) == 2"/>
+        <Block name="MessageData">
 
             <Number name="WithdrawnRoutesLen" size="16" endian="big">
                 <Relation type="size" of="WithdrawnRoutes"/>
@@ -139,9 +109,50 @@
                 <Relation type="size" of="PathAttribs"/>
             </Number>
             <!--TODO: Ensure that reference is proper -->
-            <Block name="PathAttribs">
-                <Block name="PathAttrib" ref="BGP4PathAttrib.PathAttrib"
-                       minOccurs="0" maxOccurs="-1"/>
+            <Block name="PathAttribs" minOccurs="0" maxOccurs="-1">
+                <Choice name="PathAttribTypes">
+                    <Block name="ORIGIN" ref="PathAttrs:ORIGIN"/>
+                    <Block name="AS_PATH" ref="PathAttrs:AS_PATH"/>
+                    <Block name="NEXT_HOP" ref="PathAttrs:NEXT_HOP"/>
+                    <Block name="MULTI_EXIT_DISC" ref="PathAttrs:MULTI_EXIT_DISC"/>
+                    <Block name="LOCAL_PREF" ref="PathAttrs:LOCAL_PREF"/>
+                    <Block name="ATOMIC_AGGREGATE" ref="PathAttrs:ATOMIC_AGGREGATE"/>
+                    <Block name="AGGREGATOR" ref="PathAttrs:AGGREGATOR"/>
+                    <Block name="COMMUNITY" ref="rfc1997:COMMUNITY"/>
+                    <Block name="ORIGINATOR_ID" ref="rfc4456:ORIGINATOR_ID"/>
+                    <Block name="CLUSTER_LIST" ref="rfc4456:CLUSTER_LIST"/>
+
+                    <!-- TODO: DPA (deprecated) [RFC6938] -->
+                    <!-- TODO: ADVERTISER (historic) (deprecated) [RFC1863][RFC4223][RFC6938] -->
+                    <!-- TODO: RCID_PATH / CLUSTER_ID (Historic) (deprecated)
+                                    [RFC1863][RFC4223][RFC6938] -->
+                    <!-- TODO: MP_REACH_NLRI [RFC4760] -->
+                    <!-- TODO: MP_UNREACH_NLRI [RFC4760] -->
+                    <!-- TODO: EXTENDED COMMUNITIES [Eric_Rosen]
+                                    [draft-ramachandra-bgp-ext-communities-00][RFC4360] -->
+                    <!-- TODO: AS4_PATH [RFC6793] -->
+                    <!-- TODO: AS4_AGGREGATOR [RFC6793] -->
+                    <!-- TODO: AS_PATHLIMIT (deprecated) [draft-ietf-idr-as-pathlimit] -->
+
+                    <!-- BEGIN Quagga unsupported -->
+                    <!-- TODO: SAFI Specific Attribute (SSA) (deprecated)  [Gargi_Nalawade]
+                                    [draft-kapoor-nalawade-idr-bgp-ssa-00]
+                                    [draft-nalawade-idr-mdt-safi-00]
+                                    [draft-wijnands-mt-discovery-00] -->
+                    <!-- TODO: Connector Attribute (deprecated) [RFC6037] -->
+                    <!-- TODO: PMSI_TUNNEL [RFC6514] -->
+                    <!-- TODO: Tunnel Encapsulation Attribute [RFC5512] -->
+                    <!-- TODO: Traffic Engineering  [RFC5543] -->
+                    <!-- TODO: IPv6 Address Specific Extended Community [RFC5701] -->
+                    <!-- TODO: AIGP [RFC7311] -->
+                    <!-- TODO: PE Distinguisher Labels [RFC6514] -->
+                    <!-- TODO: BGP Entropy Label Capability Attribute [RFC6790] -->
+                    <!-- TODO: BGP-LS Attribute (TEMPORARY - expires 2015-03-11) 
+                                    [draft-ietf-idr-ls-distribution] -->
+                    <!-- TODO: ATTR_SET [RFC6368] -->
+                    <!-- END Quagga unsupported -->
+                    <Block name="UNKNOWN" ref="PathAttrs:UNKNOWN"/>
+                </Choice>
             </Block>
 
             <Block name="NetworkLayerReachability" minOccurs="0" maxOccurs="-1">
@@ -155,30 +166,42 @@
         </Block>
     </DataModel>
 
-    <DataModel name="BGP4Notification" ref="BGP4">
+    <DataModel name="BGP4Notification" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.5 -->
-        <Number name="BGP4Message.BGP4Type" size="8" value="03"/>
-        <Block name="BGP4Message.BGP4Data">
+        <Number name="MessageType" size="8" value="3" constraint="int(value) == 3"/>
+        <Block name="MessageData">
             <Number name="ErrorCode" size="8"/>
             <Number name="ErrorSubCode" size="8"/>
             <Blob name="MessageData"/>
         </Block>
     </DataModel>
 
-    <DataModel name="BGP4Keepalive" ref="BGP4">
+    <DataModel name="BGP4Keepalive" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.4 -->
-        <Number name="BGP4Message.BGP4Type" size="8" endian="big" value="04"/>
-        <Block name="BGP4Message.BGP4Data">
+        <Number name="MessageType" size="8" value="4" constraint="int(value) == 4"/>
+        <Block name="MessageData">
             <!-- Purposefully Empty -->
         </Block>
     </DataModel>
 
-    <DataModel name="BGP4RouteRefresh" ref="BGP4">
-        <!-- Ref: https://tools.ietf.org/html/rfc2918 -->
-        <Number name="BGP4Message.BGP4Type" size="8" endian="big" value="05"/>
-        <Number name="AFI" size="16" endian="big"/>
-        <Number name="reserved" size="8" value="0x00"/>
-        <Number name="SAFI" size="8"/>
-    </DataModel>
     <!-- END BGP4 Message Types -->
+
+    <!-- BEGIN BGP4 Packet Definition -->
+
+    <DataModel name="BGP4">
+        <!-- TODO: TCP-MD5 for auth https://tools.ietf.org/html/rfc2385 -->
+        <Block name="BGP4Packet">
+            <Choice name="BGP4MessageTypes">
+                <Block name="Open" ref="BGP4Open"/>
+                <Block name="Update" ref="BGP4Update"/>
+                <Block name="Notification" ref="BGP4Notification"/>
+                <Block name="Keepalive" ref="BGP4Keepalive"/>
+                <Block name="RouteRefresh" ref="rfc2918:Message"/>
+                <Block name="RouteRefreshWithORF" ref="rfc5291:Message"/>
+                <!--TODO: Quagga supports BGP_MSG_CAPABILITY = 6 -->
+            </Choice>
+        </Block>
+    </DataModel>
+    <!-- END BGP4 Packet Definition -->
+
 </Peach>
