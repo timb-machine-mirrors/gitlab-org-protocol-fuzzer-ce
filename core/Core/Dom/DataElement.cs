@@ -663,6 +663,10 @@ namespace Peach.Core.Dom
 				pit.WriteAttributeString("valueType", "hex");
 				pit.WriteAttributeString("value", sb.ToString());
 			}
+			else if (DefaultValue.GetVariantType() == Variant.VariantType.String)
+			{
+				pit.WriteAttributeString("value", (string)DefaultValue);
+			}
 			else
 			{
 				pit.WriteAttributeString("value", DefaultValue.ToString());

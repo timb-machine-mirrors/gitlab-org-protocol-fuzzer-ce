@@ -120,6 +120,11 @@ namespace Peach.Core.Runtime
 		/// </summary>
 		public int exitCode = 1;
 
+		/// <summary>
+		/// Extra arguments passed on command line
+		/// </summary>
+		public List<string> extra = null;
+
 		#region Public Properties
 
 		/// <summary>
@@ -201,7 +206,7 @@ namespace Peach.Core.Runtime
 
 				AddCustomOptions(p);
 
-				List<string> extra = p.Parse(args);
+				extra = p.Parse(args);
 
 				// Enable debugging if asked for
 				// If configuration was already done by a .config file, nothing will be changed
@@ -298,7 +303,11 @@ namespace Peach.Core.Runtime
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
 
-			analyzerInstance.asCommandLine(new Dictionary<string, string>());
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			analyzerInstance.asCommandLine(args);
 		}
 
 		/// <summary>
@@ -448,7 +457,15 @@ Syntax:
   -D/define=KEY=VALUE        Define a substitution value.  In your PIT you can
                              ##KEY## and it will be replaced for VALUE.
   --config=FILENAME          XML file containing defined values
+  --pits=PIT_LIBRARY_PATH    The path to the pit library.
+  --noweb                    Disable the Peach web interface.
 
+Peach Web Interface
+
+  Syntax: peach
+
+  Starts up peach and provides a web site for configuring and starting
+  a fuzzing job from the Peach Pit Library.
 
 Peach Agent
 

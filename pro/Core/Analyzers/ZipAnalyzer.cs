@@ -1,12 +1,17 @@
 using System;
+using System.Xml;
+using System.Xml.Schema;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.IO;
+using System.Reflection;
+
+using Peach.Core.Dom;
+using Peach.Core.IO;
 using Peach.Core;
 using Peach.Core.Cracker;
-using Peach.Core.Dom;
 using Ionic.Zip;
-using Peach.Core.IO;
-using System.Text.RegularExpressions;
 
 namespace Peach.Enterprise.Analyzers
 {
@@ -20,13 +25,10 @@ namespace Peach.Enterprise.Analyzers
 
 		protected Dictionary<string, string> mappings = new Dictionary<string, string>();
 
-		static ZipAnalyzer()
-		{
-			supportParser = false;
-			supportDataElement = true;
-			supportCommandLine = false;
-			supportTopLevel = false;
-		}
+		public new static readonly bool supportParser = false;
+		public new static readonly bool supportDataElement = true;
+		public new static readonly bool supportCommandLine = false;
+		public new static readonly bool supportTopLevel = false;
 
 		public ZipAnalyzer()
 		{

@@ -9,7 +9,7 @@ using Peach.Core.Dom;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Picks a random range of bytes up to 255 inside the blob and removes it.
+	/// Swap current element with neighbor.
 	/// </summary>
 	[Mutator("DataElementSwapNear")]
 	[Description("Swap a data element with its next sibling")]

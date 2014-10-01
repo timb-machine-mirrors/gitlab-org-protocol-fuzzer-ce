@@ -11,7 +11,7 @@ using Peach.Core.IO;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Picks a random range of bytes up to 255 inside the blob and removes it.
+	/// Duplicate an element upto N times using a guassian distribution. Default N is 50..
 	/// </summary>
 	[Mutator("DataElementDuplicate")]
 	[Description("Duplicate an element up to N times")]
