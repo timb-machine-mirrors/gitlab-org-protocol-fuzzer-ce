@@ -26,6 +26,7 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="obj">Element the mutator is attached to.</param>
 		/// <param name="useValue">Should the default value be included in the variance.</param>
 		public IntegerVariance(DataElement obj, bool useValue)
+			: base(obj)
 		{
 			this.useValue = useValue;
 

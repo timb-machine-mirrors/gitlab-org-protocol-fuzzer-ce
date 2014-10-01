@@ -22,6 +22,7 @@ namespace Peach.Core.Mutators
 		double stddev;
 
 		public DataElementDuplicate(DataElement obj)
+			: base(obj)
 		{
 			variance = getN(obj, 50);
 

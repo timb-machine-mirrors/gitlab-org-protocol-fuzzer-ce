@@ -36,6 +36,7 @@ namespace Peach.Enterprise.Mutators
 		int _actionCount = 0;
 
 		public ActionDuplicate(StateModel model)
+			: base(model)
 		{
 			foreach (var state in model.states)
 				_actionCount += state.actions.Count;

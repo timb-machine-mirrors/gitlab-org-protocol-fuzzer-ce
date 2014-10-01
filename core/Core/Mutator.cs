@@ -101,10 +101,6 @@ namespace Peach.Core
 		/// </summary>
 		public int weight = 1;
 
-		public Mutator()
-		{
-		}
-
 		public Mutator(DataElement obj)
 		{
 		}

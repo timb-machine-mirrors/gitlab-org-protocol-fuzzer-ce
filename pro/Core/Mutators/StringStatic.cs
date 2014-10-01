@@ -13,6 +13,7 @@ namespace Peach.Core.Mutators
 	public partial class StringStatic : Mutator
 	{
 		public StringStatic(DataElement obj)
+			: base(obj)
 		{
 		}
 

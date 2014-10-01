@@ -24,6 +24,7 @@ namespace Peach.Core.Mutators.Utility
 		ulong max;
 
 		public IntegerEdgeCases(DataElement obj)
+			: base(obj)
 		{
 			GetLimits(obj, out min, out max);
 

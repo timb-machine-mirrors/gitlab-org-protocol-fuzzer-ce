@@ -13,6 +13,7 @@ namespace Peach.Core.Mutators
 	public partial class StringUtf8ExtraBytes : Mutator
 	{
 		public StringUtf8ExtraBytes(DataElement obj)
+			: base(obj)
 		{
 		}
 

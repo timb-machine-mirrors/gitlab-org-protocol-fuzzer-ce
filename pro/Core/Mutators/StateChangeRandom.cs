@@ -25,6 +25,7 @@ namespace Peach.Enterprise.Mutators
 		Core.Dom.StateModel _model;
 
 		public StateChangeRandom(StateModel model)
+			: base(model)
 		{
 			_count = model.states.Count * model.states.Count;
 			_stateCount = model.states.Count;

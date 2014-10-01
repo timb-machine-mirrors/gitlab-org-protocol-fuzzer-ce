@@ -31,6 +31,7 @@ namespace Peach.Enterprise.Mutators
 		int _actionCount = 0;
 
 		public ActionSwap(StateModel model)
+			: base(model)
 		{
 			foreach (var state in model.states)
 			{

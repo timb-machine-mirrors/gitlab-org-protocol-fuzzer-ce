@@ -26,6 +26,7 @@ namespace Peach.Core.Mutators
 		int total;
 
 		public StringCaseRandom(DataElement obj)
+			: base(obj)
 		{
 			var str = (string)obj.InternalValue;
 
