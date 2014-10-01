@@ -9,7 +9,7 @@ using Peach.Core.Dom;
 namespace Peach.Core.Mutators
 {
 	/// <summary>
-	/// Picks a random range of bytes up to 255 inside the blob and removes it.
+	/// Generates a single test cases by removing a data element.
 	/// </summary>
 	[Mutator("DataElementRemove")]
 	[Description("Removes an element from the data model")]
