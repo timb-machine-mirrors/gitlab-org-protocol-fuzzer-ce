@@ -67,9 +67,19 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public bool HasOf()
+		{
+			return this.Where(i => i.Of == parent).Any();
+		}
+
 		public bool HasOf<T>() where T : Binding
 		{
 			return Of<T>().Any();
+		}
+
+		public bool HasFrom()
+		{
+			return this.Where(i => i.From == parent).Any();
 		}
 
 		public bool HasFrom<T>() where T : Binding
