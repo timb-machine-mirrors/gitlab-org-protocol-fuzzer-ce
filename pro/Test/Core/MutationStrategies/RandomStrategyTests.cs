@@ -922,6 +922,45 @@ namespace Peach.Core.Test.MutationStrategies
 			// 20 iterations, 1 control, 2 data models per iteration
 			Assert.AreEqual(42, dataModels.Count);
 		}
+
+		[Test]
+		public void StateMutations()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+			<Action type='changeState' ref='Second'/>
+		</State>
+		<State name='Second'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='StateMutation' value='true'/>
+		</Strategy>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 20);
+
+			// Normally there are 40 fuzzed outputs.
+			// With state/action mutations there should be more.
+			Assert.AreEqual(115, dataModels.Count);
+		}
 	}
 }
 

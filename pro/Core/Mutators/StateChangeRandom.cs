@@ -22,7 +22,6 @@ namespace Peach.Enterprise.Mutators
 		int _count = 0;
 		uint _mutation = 0;
 		int _stateCount = 0;
-		Peach.Core.Random _random;
 		Core.Dom.StateModel _model;
 
 		public StateChangeRandom(StateModel model)
@@ -60,22 +59,19 @@ namespace Peach.Enterprise.Mutators
 
 		public override void sequentialMutation(Core.Dom.StateModel obj)
 		{
-			// TODO: Verify this is correct!
-			_random = new Core.Random(_mutation);
 			_model = obj;
 		}
 
 		public override void randomMutation(Core.Dom.StateModel obj)
 		{
-			_random = context.Random;
 			_model = obj;
 		}
 
 		public override Core.Dom.State changeState(Core.Dom.State currentState, Core.Dom.Action currentAction, Core.Dom.State nextState)
 		{
-			if (_random.NextInt32() % _stateCount == 0)
+			if (context.Random.NextInt32() % _stateCount == 0)
 			{
-				var newState = _random.Choice(_model.states);
+				var newState = context.Random.Choice(_model.states);
 
 				logger.Trace("changeState: Swap {0} for {1}.", nextState.name, newState.name);
 				return newState;

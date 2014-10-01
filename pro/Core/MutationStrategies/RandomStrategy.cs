@@ -55,43 +55,21 @@ namespace Peach.Core.MutationStrategies
 	[Parameter("StateMutation", typeof(bool), "Enable state mutations.", "false")]
 	public class RandomStrategy : MutationStrategy
 	{
-		protected class ElementId
-		{
-			public ElementId(string InstanceName, string ElementName)
-			{
-				this.Mutators = new List<Mutator>();
-				this.InstanceName = InstanceName;
-				this.ElementName = ElementName;
-			}
-
-			public string InstanceName { get; private set; }
-			public string ElementName { get; private set; }
-			public List<Mutator> Mutators { get; private set; }
-		}
-
-		protected class Iterations : KeyedCollection<string, ElementId>
-		{
-			protected override string GetKeyForItem(ElementId item)
-			{
-				return item.InstanceName + item.ElementName;
-			}
-		}
-
 		[DebuggerDisplay("{InstanceName} {ElementName} Mutators = {Mutators.Count}")]
 		protected class MutableItem : INamed
 		{
-			//public MutableItem(string instanceName)
-			//{
-			//	InstanceName = instanceName;
-			//	ElementName = "";
-			//	Mutators = new List<Mutator>();
-			//}
-
 			public MutableItem(string instanceName, string elementName)
 			{
 				InstanceName = instanceName;
 				ElementName = elementName;
 				Mutators = new List<Mutator>();
+			}
+
+			public MutableItem(string instanceName, string elementName, ICollection<Mutator> mutators)
+			{
+				InstanceName = instanceName;
+				ElementName = elementName;
+				Mutators = new List<Mutator>(mutators);
 			}
 
 			public string name { get { return InstanceName; } }
@@ -121,6 +99,12 @@ namespace Peach.Core.MutationStrategies
 			}
 
 			public MutationScope(string name)
+			{
+				Name = name;
+			}
+
+			public MutationScope(string name, IEnumerable<MutableItem> collection)
+				: base(collection)
 			{
 				Name = name;
 			}
@@ -218,56 +202,31 @@ namespace Peach.Core.MutationStrategies
 		/// </summary>
 		List<MutationScope> mutableItems = new List<MutationScope>();
 
-		//List<List<MutableItem>> mutableByState
-		List<NamedCollection<MutableItem>> mutationsByState = new List<NamedCollection<MutableItem>>();
-
+		/// <summary>
+		/// The selected mutations for a given fuzzing iteration
+		/// </summary>
 		MutableItem[] mutations;
 
-		//List<string> scope = new List<string>();
-
-#if DISABLED
 		/// <summary>
-		/// Elements across all states and actions
+		/// The currently selected state model mutator.
+		/// Null if no state model mutator is selected.
 		/// </summary>
-		//Iterations _iterations;
+		Mutator stateModelMutation;
 
 		/// <summary>
-		/// Elements for a single state
+		/// The most recent state that has started.
 		/// </summary>
-		//Dictionary<string, Iterations> _iterationsByState;
+		Dom.State currentState;
 
 		/// <summary>
-		/// Elements for a single action. Key is "state.action".
+		/// The most recent action that was started.
 		/// </summary>
-		//Dictionary<string, Iterations> _iterationsByAction;
+		Dom.Action currentAction;
 
 		/// <summary>
-		/// All available iterations.
+		/// Current fuzzing iteration number
 		/// </summary>
-		//List<Iterations> _allIterations = new List<Iterations>();
-
-		/// <summary>
-		/// Iterations collection for currently selected scope. This
-		/// collection issued to select elements and mutators for a
-		/// test case.
-		/// </summary>
-		//Iterations _iterationsInCurrentScope;
-
-		/// <summary>
-		/// container also contains states if we have mutations
-		/// we can apply to them.  State names are prefixed with "STATE_" to avoid
-		/// conflicting with data model names.
-		/// Use a list to maintain the order this strategy learns about data models
-		/// </summary>
-		//ElementId[] _mutations;
-
-		/// <summary>
-		/// State model mutation selected (or null for none).
-		/// </summary>
-		//Mutator _stateModelMutation = null;
-#endif
-
-		uint _iteration;
+		uint iteration;
 
 		/// <summary>
 		/// Maximum number of fields to mutate at once.
@@ -283,8 +242,8 @@ namespace Peach.Core.MutationStrategies
 				switchCount = uint.Parse((string)args["SwitchCount"]);
 			if (args.ContainsKey("MaxFieldsToMutate"))
 				maxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
-			if (args.ContainsKey("StateMutations"))
-				stateMutations = bool.Parse((string)args["StateMutations"]);
+			if (args.ContainsKey("StateMutation"))
+				stateMutations = bool.Parse((string)args["StateMutation"]);
 		}
 
 		#region Mutation Strategy Overrides
@@ -304,7 +263,7 @@ namespace Peach.Core.MutationStrategies
 				if (m.GetStaticField<bool>("affectDataModel"))
 					dataMutators.Add(m);
 
-				if (m.GetStaticField<bool>("affectStateModel"))
+				if (stateMutations && m.GetStaticField<bool>("affectStateModel"))
 					stateMutators.Add(GetMutatorInstance(m, context.test.stateModel));
 			}
 		}
@@ -340,11 +299,11 @@ namespace Peach.Core.MutationStrategies
 		{
 			get
 			{
-				return _iteration;
+				return iteration;
 			}
 			set
 			{
-				_iteration = value;
+				iteration = value;
 				SeedRandom();
 				SeedRandomDataSet();
 			}
@@ -362,10 +321,14 @@ namespace Peach.Core.MutationStrategies
 
 		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
+			// Reset per-iteration state
+			mutations = null;
+			stateModelMutation = null;
+			currentAction = null;
+			currentState = null;
+
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				mutations = null;
-
 				dataSets.Clear();
 				mutableItems.Clear();
 
@@ -427,6 +390,14 @@ namespace Peach.Core.MutationStrategies
 					mutableItems.Sort();
 				}
 
+				// If there are state model mutators, add those.
+				if (stateMutators.Count > 0)
+				{
+					mutableItems.Insert(0, new MutationScope("StateModel", new[] {
+						new MutableItem(context.test.stateModel.name, "", stateMutators),
+					}));
+				}
+
 				// Add global scope 1st
 				mutableItems.Insert(0, mutationScopeGlobal);
 
@@ -441,16 +412,25 @@ namespace Peach.Core.MutationStrategies
 
 		void StateModelStarting(RunContext context, StateModel stateModel)
 		{
-			//if (_stateModelMutation != null)
-			//	_stateModelMutation.randomMutation(stateModel);
-		}
+			if (!context.controlIteration)
+			{
+				// All state mutations are in the same scope.
+				// When state model mutation is selected, there should only
+				// be a single picked mutation.
+				var m = mutations[0];
 
-		//Dom.Action _currentAction;
-		//string _currentActionName;
+				if (m.InstanceName == stateModel.name)
+				{
+					System.Diagnostics.Debug.Assert(mutations.Length == 1);
+					stateModelMutation = Random.Choice(m.Mutators);
+					stateModelMutation.randomMutation(stateModel);
+				}
+			}
+		}
 
 		void ActionStarting(RunContext context, Dom.Action action)
 		{
-			//_currentAction = action;
+			currentAction = action;
 
 			// Is this a supported action?
 			if (!action.outputData.Any())
@@ -458,9 +438,6 @@ namespace Peach.Core.MutationStrategies
 
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				//_currentActionName = _currentState.name + "." + _currentAction.name;
-				//_iterationsByAction[_currentActionName] = new Iterations();
-				
 				RecordDataSet(action);
 				SyncDataSet(action);
 				RecordDataModel(action);
@@ -471,11 +448,9 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		//State _currentState;
-
 		void StateStarting(RunContext context, State state)
 		{
-			//_currentState = state;
+			currentState = state;
 
 			if (context.controlIteration && _context.controlRecordingIteration)
 			{
@@ -483,8 +458,6 @@ namespace Peach.Core.MutationStrategies
 				var scope = new MutationScope(name);
 				mutationScopeState.Add(scope);
 			}
-
-//			_iterationsByState[state.name] = new Iterations();
 		}
 
 		#region DataSet Tracking And Switching
@@ -673,28 +646,30 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		public override State MutateChangingState(State state)
+		public override State MutateChangingState(State nextState)
 		{
-	////		if (_context.controlIteration)
-	//			return state;
+			if (stateModelMutation != null)
+			{
+				System.Diagnostics.Debug.Assert(!Context.controlIteration);
 
-	//		if(_stateModelMutation != null)
-	//		{
-	//			Context.OnStateMutating(state, _stateModelMutation);
+				Context.OnStateMutating(nextState, stateModelMutation);
 
-	//			logger.Debug("MutateChangingState: Fuzzing state change: {0}", state.name);
-	//			logger.Debug("MutateChangingState: Mutator: {0}", _stateModelMutation.name);
+				logger.Debug("MutateChangingState: Fuzzing state change: {0}", nextState.name);
+				logger.Debug("MutateChangingState: Mutator: {0}", stateModelMutation.name);
 
-	//			return _stateModelMutation.changeState(_currentState, _currentAction, state);
-	//		}
+				return stateModelMutation.changeState(currentState, currentAction, nextState);
+			}
 
-			return state;
+			return nextState;
 		}
 
 		public override Dom.Action NextAction(State state, Dom.Action lastAction, Dom.Action nextAction)
 		{
-	//		if (_stateModelMutation != null)
-	//			return _stateModelMutation.nextAction(state, lastAction, nextAction);
+			if (stateModelMutation != null)
+			{
+				System.Diagnostics.Debug.Assert(!Context.controlIteration);
+				return stateModelMutation.nextAction(state, lastAction, nextAction);
+			}
 
 			return nextAction;
 		}
