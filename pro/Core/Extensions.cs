@@ -12,5 +12,16 @@ namespace Peach.Core
 			var ret = (T)field.GetValue(null);
 			return ret;
 		}
+
+		public static T WeightedChoice<T>(this Random rng, WeightedList<T> list) where T : IWeighted
+		{
+			// returns between 0 <= x < UpperBound
+			var val = rng.Next(list.Max);
+
+			// Finds first element with sum-weight greater than value
+			var ret = list.UpperBound(val);
+
+			return ret;
+		}
 	}
 }
