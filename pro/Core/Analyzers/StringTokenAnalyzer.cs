@@ -91,7 +91,7 @@ namespace Peach.Core.Analyzers
 			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
 
 			model.Add(new Peach.Core.Dom.String());
-			model[0].DefaultValue = new Variant(File.ReadAllText(inFile));
+			model[0].DefaultValue = new Variant(data);
 
 			asDataElement(model[0], null);
 

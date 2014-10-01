@@ -97,14 +97,12 @@ namespace Peach.Core.Agent.Monitors
 				}
 				else if (_faulOnRegex != null)
 				{
-					Match match;
-
-					if ((match = _faulOnRegex.Match(stdout)).Success)
+					if (_faulOnRegex.Match(stdout).Success)
 					{
 						_fault.description = "Process output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
 						_fault.type = FaultType.Fault;
 					}
-					else if ((match = _faulOnRegex.Match(stderr)).Success)
+					else if (_faulOnRegex.Match(stderr).Success)
 					{
 						_fault.description = "Process error output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
 						_fault.type = FaultType.Fault;
