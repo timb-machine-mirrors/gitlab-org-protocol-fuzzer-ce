@@ -33,6 +33,7 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Security.Cryptography;
 using System.IO;
+using System.Xml;
 
 namespace Peach.Core
 {
@@ -40,7 +41,7 @@ namespace Peach.Core
 	/// Transformers perform static transforms of data.
 	/// </summary>
 	[Serializable]
-	public abstract class Transformer : IOwned<DataElement>
+	public abstract class Transformer : IOwned<DataElement>, IPitSerializable
 	{
 		public DataElement parent { get; set; }
 
@@ -50,6 +51,34 @@ namespace Peach.Core
 		{
 			this.parent = parent;
 		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Transformer");
+
+			foreach (var attrib in this.GetType().GetAttributes<TransformerAttribute>(null))
+			{
+				if (attrib.IsDefault)
+					pit.WriteAttributeString("class", attrib.Name);
+			}
+
+			foreach (var param in this.GetType().GetAttributes<ParameterAttribute>(null))
+			{
+				pit.WriteStartElement("Param");
+				pit.WriteAttributeString("name", param.name);
+
+				var prop = this.GetType().GetProperty(param.name);
+				var value = prop.GetValue(this, null).ToString();
+
+				pit.WriteAttributeString("value", value);
+			}
+
+			if (anotherTransformer != null)
+				anotherTransformer.WritePit(pit);
+
+			pit.WriteEndElement();
+		}
+
 
 		/// <summary>
 		/// Encode data, will properly call any chained transformers.

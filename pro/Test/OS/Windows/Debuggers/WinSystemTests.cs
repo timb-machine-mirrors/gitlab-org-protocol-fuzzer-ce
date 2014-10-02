@@ -45,7 +45,7 @@ using NLog;
 
 namespace Peach.Core.Test.Debuggers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class WinSystemTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

@@ -7,9 +7,9 @@ using Peach.Core.Cracker;
 using Peach.Core;
 using Ionic.Zip;
 
-namespace Peach.Enterprise.Test.Analyzers
+namespace Peach.Core.Test.Analyzers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ZipAnalyzerTests
 	{
 		[Test]

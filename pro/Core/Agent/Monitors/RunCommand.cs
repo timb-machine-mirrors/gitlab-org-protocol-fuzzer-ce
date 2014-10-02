@@ -16,9 +16,12 @@ namespace Peach.Core.Agent.Monitors
 	[Monitor("RunCommand", true)]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
-	[Parameter("When", typeof(When), "Period _When the command should be ran", "OnCall")]
+	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]
 	[Parameter("StartOnCall", typeof(string), "Run when signaled by the state machine", "")]
+	[Parameter("FaultOnExitCode", typeof(bool), "Fault when FaultExitCode matches exit code", "false")]
+	[Parameter("FaultExitCode", typeof(int), "Exit code to fault on", "1")]
 	[Parameter("FaultOnNonZeroExit", typeof(bool), "Fault if exit code is non-zero", "false")]
+	[Parameter("FaultOnRegex", typeof(string), "Fault if regex matches", "")]
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than Timeout seconds where -1 is infinite timeout ", "-1")]
 	public class RunCommand  : Monitor
 	{
@@ -31,6 +34,11 @@ namespace Peach.Core.Agent.Monitors
 		public string CheckValue { get; protected set; }
 		public int Timeout { get; private set; }
 		public bool FaultOnNonZeroExit { get; protected set; }
+		public int FaultExitCode { get; protected set; }
+		public bool FaultOnExitCode { get; protected set; }
+		public string FaultOnRegex { get; protected set; }
+
+		Regex _faulOnRegex = null;
 
 		private Fault _fault = null;
 		private bool _lastWasFault = false;
@@ -41,6 +49,9 @@ namespace Peach.Core.Agent.Monitors
 			: base(agent, name, args)
 		{
 			ParameterParser.Parse(this, args);
+
+			if (!string.IsNullOrWhiteSpace(FaultOnRegex))
+				_faulOnRegex = new Regex(FaultOnRegex);
 		}
 
 		void _Start()
@@ -66,18 +77,36 @@ namespace Peach.Core.Agent.Monitors
 				_fault = new Fault();
 				_fault.detectionSource = "RunCommand";
 				_fault.folderName = "RunCommand";
-				_fault.collectedData.Add(new Fault.Data("stdout", Encoding.ASCII.GetBytes(stdout)));
-				_fault.collectedData.Add(new Fault.Data("stderr", Encoding.ASCII.GetBytes(stderr)));
+				_fault.collectedData.Add(new Fault.Data("stdout", System.Text.Encoding.ASCII.GetBytes(stdout)));
+				_fault.collectedData.Add(new Fault.Data("stderr", System.Text.Encoding.ASCII.GetBytes(stderr)));
 
 				if (p.Timeout)
 				{
 					_fault.description = "Process failed to exit in allotted time.";
 					_fault.type = FaultType.Fault;
 				}
+				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
+				{
+					_fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_fault.type = FaultType.Fault;
+				}
 				else if (FaultOnNonZeroExit && p.ExitCode != 0)
 				{
 					_fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
 					_fault.type = FaultType.Fault;
+				}
+				else if (_faulOnRegex != null)
+				{
+					if (_faulOnRegex.Match(stdout).Success)
+					{
+						_fault.description = "Process output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_fault.type = FaultType.Fault;
+					}
+					else if (_faulOnRegex.Match(stderr).Success)
+					{
+						_fault.description = "Process error output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_fault.type = FaultType.Fault;
+					}
 				}
 				else
 				{

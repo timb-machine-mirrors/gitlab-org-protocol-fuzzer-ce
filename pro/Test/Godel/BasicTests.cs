@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Godel.Tests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class BasicTests
 	{
 		[Test]
@@ -273,7 +273,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -318,7 +318,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -363,7 +363,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -410,7 +410,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -457,7 +457,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -504,7 +504,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>
@@ -566,7 +566,7 @@ namespace Godel.Tests
 		<Publisher class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
-			<Mutator class='StringMutator'/>
+			<Mutator class='StringStatic'/>
 		</Mutators>
 	</Test>
 </Peach>

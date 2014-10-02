@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using System.Xml;
 using Peach.Core;
 
 namespace Peach.Core.Dom
@@ -42,7 +43,7 @@ namespace Peach.Core.Dom
 	[Serializable]
 	[Parameter("Name", typeof(string), "Name of hint")]
 	[Parameter("Value", typeof(string), "Value of hint")]
-	public class Hint
+	public class Hint: IPitSerializable
 	{
 		public Hint(string name, string value)
 		{
@@ -63,6 +64,17 @@ namespace Peach.Core.Dom
 			get;
 			set;
 		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Hint");
+
+			pit.WriteAttributeString("name", Name);
+			pit.WriteAttributeString("value", Value);
+
+			pit.WriteEndElement();
+		}
+
 	}
 
 	/// <summary>

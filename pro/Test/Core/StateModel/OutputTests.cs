@@ -32,7 +32,7 @@ namespace Peach.Core.Test.StateModel
 		}
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class OutputTests : DataModelCollector
 	{
 		[Test]
@@ -134,7 +134,7 @@ namespace Peach.Core.Test.StateModel
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -228,7 +228,7 @@ namespace Peach.Core.Test.StateModel
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -237,7 +237,6 @@ namespace Peach.Core.Test.StateModel
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);
-
 
 			Assert.AreEqual(110, dataModels.Count);
 
@@ -262,6 +261,8 @@ namespace Peach.Core.Test.StateModel
 						++count;
 					if (str2 != "Foo Data Model")
 						++count;
+
+					Assert.IsTrue(true);
 				}
 				Assert.AreEqual(1, count);
 			}

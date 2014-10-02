@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Transformers
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class EvalTests : DataModelCollector
     {
         [Test]

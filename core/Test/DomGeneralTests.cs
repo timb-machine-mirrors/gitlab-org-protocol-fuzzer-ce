@@ -11,7 +11,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class DomGeneralTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

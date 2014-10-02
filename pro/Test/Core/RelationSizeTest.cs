@@ -43,7 +43,7 @@ using NUnit.Framework.Constraints;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RelationSizeTest : DataModelCollector
 	{
 		[Test]
@@ -350,7 +350,7 @@ namespace Peach.Core.Test
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("DataElementRemoveMutator");
+			dom.tests[0].includedMutators.Add("DataElementRemove");
 
 			RunConfiguration config = new RunConfiguration();
 

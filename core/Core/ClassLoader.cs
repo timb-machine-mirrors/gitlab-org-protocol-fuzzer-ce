@@ -47,6 +47,93 @@ namespace Peach.Core
 		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
 		static string[] searchPath = GetSearchPath();
 
+		#region Exclude List
+
+		static readonly string[] excludeList = new string[] {
+			"aardvark.dll", 
+			"aardvark_net.dll", 
+			"Aga.Controls.dll", 
+			"Be.Windows.Forms.HexBox.dll", 
+			"BouncyCastle.Crypto.dll", 
+			"ComTest.dll", 
+			"EasyHook.dll", 
+			//"Godel.Tests.dll", 
+			//"Godel.Tests.WebService.dll", 
+			"Ionic.Zip.dll", 
+			"IronPython.dll", 
+			"IronPython.Modules.dll", 
+			"IronRuby.dll", 
+			"IronRuby.Libraries.dll", 
+			"IronRuby.Libraries.Yaml.dll", 
+			"Irony.dll", 
+			"Irony.Interpreter.dll",
+			"log4net.dll", 
+			"Managed.Adb.dll", 
+			"Microsoft.Dynamic.dll", 
+			"Microsoft.Scripting.dll", 
+			"Microsoft.Scripting.Metadata.dll", 
+			"MongoDB.Bson.dll", 
+			"MongoDB.Driver.dll", 
+			"Mono.Posix.dll", 
+			"MySql.Data.dll", 
+			"Nancy.dll", 
+			"Nancy.Hosting.Self.dll", 
+			"Nancy.Serialization.JsonNet.dll", 
+			"Newtonsoft.Json.dll", 
+			"NLog.dll", 
+			"nunit.core.dll", 
+			"nunit.framework.dll", 
+			"PacketDotNet.dll", 
+			//"Peach.Core.Test.dll", 
+			//"Peach.Core.Test.OS.Linux.dll", 
+			//"Peach.Core.Test.OS.OSX.dll", 
+			//"Peach.Core.Test.OS.Windows.dll", 
+			//"Peach.Enterprise.Test.dll", 
+			"PeachFarm.Admin.dll", 
+			"PeachFarm.Common.dll", 
+			"PeachFarm.Controller.dll", 
+			"PeachFarm.Node.dll", 
+			"PeachFarm.Reporting.dll", 
+			"PeachFarm.Reporting.Reports.dll", 
+			"PeachFarmMonitor.dll", 
+			"PeachHooker.File.dll", 
+			"PeachHooker.Network.dll", 
+			"Portable.Licensing.dll", 
+			"RabbitMQ.Client.dll", 
+			"Renci.SshNet.dll", 
+			"SharpPcap.dll", 
+			"SuperSocket.Common.dll", 
+			"SuperSocket.SocketBase.dll", 
+			"SuperWebSocket.dll", 
+			"Syslog.Server.dll", 
+			"System.Data.SQLite.dll", 
+			"Telerik.Reporting.dll", 
+			"Telerik.Web.UI.dll", 
+			"VixAllProducts.dll", 
+			"CrashableServer.exe", 
+			"CrashingFileConsumer.exe", 
+			"CrashingProgram.exe", 
+			"Peach.Core.ComContainer.exe", 
+			"Peach.Core.WindowsDebugInstance.exe", 
+			"Peach.exe", 
+			"PeachAssemblyFuzzer.exe", 
+			"PeachFarm.Reporting.Service.exe", 
+			"PeachFuzzBang.exe", 
+			"PeachHooker.exe", 
+			"PeachLinuxCrashHandler.exe", 
+			"PeachMinset.exe", 
+			"PeachNetworkFuzzer.exe", 
+			"PeachSampleNinja.exe", 
+			"PeachValidator.exe", 
+			"PeachXmlGenerator.exe", 
+			"pf_admin.exe", 
+			"pf_controller.exe", 
+			"pf_node.exe", 
+			"PitTester.exe" 
+		};
+
+		#endregion
+
 		static string[] GetSearchPath()
 		{
 			var ret = new List<string> {
@@ -66,6 +153,9 @@ namespace Peach.Core
 					if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
 						continue;
 
+					if (excludeList.Contains(Path.GetFileName(file)))
+						continue;
+
 					if (AssemblyCache.ContainsKey(file))
 						continue;
 
@@ -77,7 +167,7 @@ namespace Peach.Core
 					}
 					catch (Exception ex)
 					{
-						logger.Debug("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
+						logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
 					}
 				}
 			}
@@ -100,7 +190,7 @@ namespace Peach.Core
 				// http://mikehadlow.blogspot.com/2011/07/detecting-and-changing-files-internet.html
 				var zone = Zone.CreateFromUrl(fullPath);
 				if (zone.SecurityZone > SecurityZone.MyComputer)
-					throw new SecurityException("The assemly is part of the " + zone.SecurityZone + " Security Zone and loading has been blocked.", ex);
+					throw new SecurityException("The assembly is part of the " + zone.SecurityZone + " Security Zone and loading has been blocked.", ex);
 
 				throw;
 			}
@@ -221,12 +311,12 @@ namespace Peach.Core
 		{
 			foreach (var asm in ClassLoader.AssemblyCache.Values)
 			{
-				if (asm.IsDynamic)
-					continue;
+				//if (asm.IsDynamic)
+				//	continue;
 
-				foreach (var type in asm.GetExportedTypes())
+				foreach (var type in asm.GetTypes())
 				{
-					if (!type.IsClass)
+					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
 						continue;
 
 					foreach (var x in type.GetAttributes<A>(predicate))
@@ -285,14 +375,14 @@ namespace Peach.Core
 		{
 			foreach (var asm in ClassLoader.AssemblyCache.Values)
 			{
-				if (asm.IsDynamic)
-					continue;
+				//if (asm.IsDynamic)
+				//	continue;
 
 				Type type = asm.GetType(name);
 				if (type == null)
 					continue;
 
-				if (!type.IsClass)
+				if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
 					continue;
 
 				if (!type.IsSubclassOf(type))

@@ -16,7 +16,7 @@ namespace Peach.Core.Test
 		public Parent parent { get; set; }
 	}
 
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class CollectionTests
 	{
 		[Test]

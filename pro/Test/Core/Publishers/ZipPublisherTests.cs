@@ -8,7 +8,7 @@ using Ionic.Zip;
 
 namespace Peach.Enterprise.Test.Publishers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ZipPublisherTests
 	{
 		[Test]

@@ -133,6 +133,7 @@ module DashApp {
 		}
 
 		public showPitSelector() {
+			var that = this;
 			this.modal.open({
 				templateUrl: "../partials/pitlibrary.html",
 				keyboard: false,
@@ -140,7 +141,10 @@ module DashApp {
 				controller: PitLibraryController,
 				resolve: {
 					peachsvc: () => {
-						return this.peachSvc;
+						return that.peachSvc;
+					},
+					canCancel: () => {
+						return that.pitConfigSvc.Pit !== undefined;
 					}
 				}
 			})
@@ -158,6 +162,10 @@ module DashApp {
 					}
 				});
 			});
+		}
+
+		public exportPit() {
+
 		}
 
 		public showPitCopier(pit: Models.Pit) {

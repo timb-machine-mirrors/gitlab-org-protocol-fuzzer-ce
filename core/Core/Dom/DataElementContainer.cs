@@ -181,7 +181,7 @@ namespace Peach.Core.Dom
 			// Always return a slice of data.  This way, if data
 			// is a stream publisher, it will be presented as having a fixed length.
 
-			var ret = data.SliceBits(needed);
+			var ret = (BitStream)data.SliceBits(needed);
 			System.Diagnostics.Debug.Assert(ret != null);
 
 			return ret;
@@ -377,9 +377,23 @@ namespace Peach.Core.Dom
 
 		public void Add(DataElement item)
 		{
+			try
+			{
 			// Add throws if key already exists
 			_childrenDict.Add(item.name, item);
 			_childrenList.Add(item);
+			}
+			catch (System.ArgumentException ex)
+			{
+				if (ex.Message.Contains("same key"))
+				{
+					throw new PeachException(string.Format(
+						"Error: Detected duplicate child name of '{0}' on element '{1}'.",
+						item.name, this.fullName));
+				}
+
+				throw;
+			}
 
 			OnInsertItem(item);
 		}

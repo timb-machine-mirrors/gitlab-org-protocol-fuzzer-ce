@@ -11,7 +11,7 @@ using Peach.Core;
 
 namespace Peach.Core.Test.Fixups
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class ScriptFixupTests : DataModelCollector
     {
         [Test]

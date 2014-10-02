@@ -59,6 +59,9 @@ Interface:: IP of interface to bind to. Defaults to auto select.
 Timeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
 MaxMTU:: Maximum allowable MTU property value. Only needed when fuzzing MTU. Defaults to 131,070.
 MinMTU:: Minimum allowable MTU property value. Only needed when fuzzing MTU. Defaults to 1,280.
+Filter::
+    Filter received frames using a libpcap style filter string. For more information
+    about libpcap syle filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 

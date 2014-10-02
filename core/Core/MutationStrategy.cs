@@ -128,6 +128,18 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Allows mutation strategy to affect state change.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <param name="lastAction"></param>
+		/// <param name="nextAction"></param>
+		/// <returns></returns>
+		public virtual Dom.Action NextAction(State state, Dom.Action lastAction, Dom.Action nextAction)
+		{
+			return nextAction;
+		}
+
+		/// <summary>
 		/// Call supportedDataElement method on Mutator type.
 		/// </summary>
 		/// <param name="mutator"></param>
@@ -178,11 +190,11 @@ namespace Peach.Core
 			}
 		}
 
-		protected Mutator GetMutatorInstance(Type t, State obj)
+		protected Mutator GetMutatorInstance(Type t, StateModel obj)
 		{
 			try
 			{
-				Mutator mutator = (Mutator)t.GetConstructor(new Type[] { typeof(State) }).Invoke(new object[] { obj });
+				Mutator mutator = (Mutator)t.GetConstructor(new Type[] { typeof(StateModel) }).Invoke(new object[] { obj });
 				mutator.context = this;
 				return mutator;
 			}

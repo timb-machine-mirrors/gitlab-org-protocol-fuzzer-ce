@@ -9,7 +9,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class PingMonitorTests
 	{
 		class Params : Dictionary<string, string> { }
@@ -172,7 +172,8 @@ namespace Peach.Core.Test.Monitors
 		[Test]
 		public void TestBadHost()
 		{
-			Run(new Params { { "Host", "some.bad.host" } }, true);
+			// .host is a valid tld and some guy bought bad.host
+			Run(new Params { { "Host", "some.bad.host.fdshfdo" } }, true);
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);

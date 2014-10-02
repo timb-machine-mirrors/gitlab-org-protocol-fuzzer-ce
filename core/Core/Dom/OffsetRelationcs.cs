@@ -34,6 +34,7 @@ using System.Runtime.InteropServices;
 using System.Runtime;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Xml;
 
 using Peach.Core;
 using Peach.Core.IO;
@@ -107,6 +108,26 @@ namespace Peach.Core.Dom
 			parent.relations.Add(commonAncestor);
 			parent.relations.Add(relativeElement);
 		}
+
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Relation");
+			pit.WriteAttributeString("type", "offset");
+			pit.WriteAttributeString("of", OfName);
+
+			if (ExpressionGet != null)
+				pit.WriteAttributeString("expressionGet", ExpressionGet);
+			if (ExpressionSet != null)
+				pit.WriteAttributeString("expressionSet", ExpressionSet);
+
+			if(isRelativeOffset)
+				pit.WriteAttributeString("relative", "true");
+			if (relativeTo != null)
+				pit.WriteAttributeString("relativeTo", relativeTo);
+
+			pit.WriteEndElement();
+		}
+
 
 		protected override void OnResolve()
 		{

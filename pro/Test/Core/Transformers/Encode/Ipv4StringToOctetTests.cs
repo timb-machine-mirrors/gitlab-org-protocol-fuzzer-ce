@@ -12,7 +12,7 @@ using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Transformers.Encode
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class Ipv4StringToOctetTests : DataModelCollector
     {
         [Test]

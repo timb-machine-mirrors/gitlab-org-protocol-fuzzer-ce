@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class BitwiseStreamTest
 	{
 		[Test]
@@ -535,6 +535,67 @@ namespace Peach.Core.Test
 			Assert.AreEqual(Encoding.ASCII.GetBytes("ld!"), buf);
 			Assert.AreEqual(lst.Length, lst.Position);
 			Assert.AreEqual(lst.LengthBits, lst.PositionBits);
+		}
+
+		[Test]
+		public void TestListSlice()
+		{
+			var lst = new BitStreamList() { Name = "outter" };
+			var inner1 = new BitStreamList() { Name = "inner1" };
+			var inner2 = new BitStreamList() { Name = "inner2" };
+
+			lst.Add(new BitStream() { Name = "empty1" });
+			lst.Add(new BitStream() { Name = "empty2" });
+			inner2.Add(new BitStream(new MemoryStream(new byte[] { 0xff })) { Name = "val1" });
+			inner1.Add(inner2);
+			inner1.Add(new BitStream(new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })) { Name = "val2" });
+			lst.Add(inner1);
+			lst.Add(new BitStream() { Name = "empty3" });
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0x0a, 0x0b })) { Name = "val3" });
+
+			// List : [ 0, 0, [ [ 1 ], 3 ], 0, 2]
+
+			lst.SeekBits(4, SeekOrigin.Begin);
+
+			var slice = lst.SliceBits(5 * 8);
+
+			Assert.NotNull(slice);
+			Assert.AreEqual(5 * 8 + 4, lst.PositionBits);
+
+			Assert.AreEqual(5 * 8, slice.LengthBits);
+			Assert.AreEqual(0, slice.PositionBits);
+
+			var buf = slice.ToArray();
+			var exp = new byte[] { 0xf0, 0x10, 0x20, 0x30, 0xa0 };
+			Assert.AreEqual(exp, buf);
+
+			Assert.Null(slice.Name);
+
+			long pos;
+
+			foreach (var x in new[] { "outter", "inner1", "inner2", "empty1", "empty2", "val1", "val2", "empty3", "val3" })
+			{
+				// None of the positions should be available in the slice
+				Assert.False(slice.TryGetPosition(x, out pos));
+			}
+
+			var asList = slice as BitStreamList;
+			Assert.NotNull(asList);
+
+			Assert.True(asList.IsReadOnly);
+			Assert.AreEqual(3, asList.Count); // Strip out empty bitstreams when slicing
+
+			lst = new BitStreamList();
+			lst.Add(new BitStream(new MemoryStream(Encoding.ASCII.GetBytes("Hello"))));
+			lst.Add(new BitStream(new MemoryStream(Encoding.ASCII.GetBytes("World"))));
+
+			var s1 = lst.SliceBits(80);
+			Assert.AreEqual(80, s1.LengthBits);
+
+			lst.SeekBits(32, SeekOrigin.Begin);
+
+			var s2 = lst.SliceBits(80 - 32);
+			Assert.AreEqual(80 - 32, s2.LengthBits);
 		}
 
 		[Test]

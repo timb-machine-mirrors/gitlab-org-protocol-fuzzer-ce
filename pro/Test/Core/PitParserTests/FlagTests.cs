@@ -39,7 +39,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class FlagTests
 	{
 		[Test]

@@ -15,7 +15,7 @@ using Peach.Core.Publishers;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RunTests
 	{
 		DateTime iterationStarted = DateTime.MinValue;
@@ -51,7 +51,7 @@ namespace Peach.Core.Test
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("BlobMutator");
+			dom.tests[0].includedMutators.Add("BlobExpandAllRandom");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -123,7 +123,9 @@ namespace Peach.Core.Test
 			PitParser parser = new PitParser();
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
+			dom.tests[0].includedMutators.Add("StringCaseUpper");
+			dom.tests[0].includedMutators.Add("StringCaseLower");
+			dom.tests[0].includedMutators.Add("DataElementRemove");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

@@ -41,7 +41,7 @@ using System.Net;
 
 namespace Peach.Core.Test.PitParserTests
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class BlobTests
 	{
 		[Test]

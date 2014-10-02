@@ -12,7 +12,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Monitors
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class ReplayMonitorTests : DataModelCollector
     {
         [Test]
@@ -51,7 +51,8 @@ namespace Peach.Core.Test.Monitors
 
             Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
             dom.tests[0].includedMutators = new List<string>();
-            dom.tests[0].includedMutators.Add("StringCaseMutator");
+            dom.tests[0].includedMutators.Add("StringCaseUpper");
+            dom.tests[0].includedMutators.Add("StringCaseLower");
 
             RunConfiguration config = new RunConfiguration();
 
@@ -59,10 +60,9 @@ namespace Peach.Core.Test.Monitors
             e.startFuzzing(dom, config);
 
             // verify values
-            Assert.AreEqual(6, mutations.Count);
+            Assert.AreEqual(4, mutations.Count);
             Assert.AreEqual((string)mutations[0], (string)mutations[1]);
             Assert.AreEqual((string)mutations[2], (string)mutations[3]);
-            Assert.AreEqual((string)mutations[4], (string)mutations[5]);
         }
 
 

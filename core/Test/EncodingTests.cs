@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class EncodingTests
 	{
 		static byte[] AppendByte(byte[] buf, int val = -1)

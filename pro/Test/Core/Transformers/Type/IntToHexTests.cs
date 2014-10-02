@@ -11,7 +11,7 @@ using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Transformers.Type
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class IntToHexTests : DataModelCollector
     {
         [Test]
@@ -136,7 +136,7 @@ namespace Peach.Core.Test.Transformers.Type
 
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringMutator");
+			dom.tests[0].includedMutators.Add("StringStatic");
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

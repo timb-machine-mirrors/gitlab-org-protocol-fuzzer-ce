@@ -53,6 +53,11 @@ namespace Peach.Core.Analyzers
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
+		public new static readonly bool supportParser = true;
+		public new static readonly bool supportDataElement = false;
+		public new static readonly bool supportCommandLine = false;
+		public new static readonly bool supportTopLevel = false;
+
 		/// <summary>
 		/// args key for passing a dictionary of defined values to replace.
 		/// </summary>
@@ -74,8 +79,6 @@ namespace Peach.Core.Analyzers
 
 		static PitParser()
 		{
-			PitParser.supportParser = true;
-
 			populatePitParsable();
 
 			Analyzer.defaultParser = new PitParser();
@@ -193,6 +196,11 @@ namespace Peach.Core.Analyzers
 			public static void Reset()
 			{
 				DataElement._uniqueName = 0;
+			}
+
+			public override void WritePit(XmlWriter pit)
+			{
+				throw new NotImplementedException();
 			}
 		}
 

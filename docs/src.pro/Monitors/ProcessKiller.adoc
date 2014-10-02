@@ -8,7 +8,10 @@ The _ProcessKiller_ monitor will kill (terminate) specified processes after each
 
 _Required:_
 
-ProcessNames:: Comma separated list of process to kill.
+ProcessNames:: 
+    Comma separated list of process to kill. Note that the process name is usually the executable
+    with out the +.exe+. For example, +notepad.exe+ will be +Notepad+ or +notepad+. For Windows
+    operating systems the process name can be found by using the +tasklist.exe+ command.
 
 _Optional:_
 

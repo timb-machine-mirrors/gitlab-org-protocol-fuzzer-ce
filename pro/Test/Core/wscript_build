@@ -25,7 +25,7 @@ deps = [
 bld(
 	features = 'cs test',
 	use = deps,
-	source = bld.path.ant_glob('**/*.cs'),
+	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name = 'Peach.Pro.Test.dll',
 	resource = 'google.der',
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',

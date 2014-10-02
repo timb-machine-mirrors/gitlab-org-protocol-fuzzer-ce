@@ -1,0 +1,34 @@
+<<<
+[[Mutators_ExtraValues]]
+== ExtraValues
+
+This mutator allows the user to supply additional test values to be used. The values provided will be used as test cases, but will not themselves be mutated. The number of test cases this mutator will generate is the same as the number of extra values provided by the _ExtraValues_ hint. If the _ExtraValues_ hint is not provided, this mutator will not be used.
+
+NOTE: This mutator replaced the ValidValues mutator from earlier versions of Peach. The old hint will get used if found, but should be converted to using the new hint name _ExtraValues_.
+
+=== Supported Elements
+
+ * xref::String
+ * xref::Number
+ * xref::Blob
+
+=== Hints
+
+ExtraValues:: Semicolon seperated list of values to use for mutations.
+
+=== Examples
+
+.Providing Extra Values for a String
+=================
+
+In this example, three test cases are added to the string _FirstName_.
+
+[source,xml]
+----
+<String name="FirstName" value="Josh">
+    <!-- This will add three test cases -->
+    <Hint name="ExtraValues" value="O'Brian;O-Brian;Josh III" />
+</String>
+----
+
+=================

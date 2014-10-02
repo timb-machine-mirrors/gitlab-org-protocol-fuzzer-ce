@@ -13,7 +13,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.CrackingTests
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class CountRelationTests
     {
         [Test]

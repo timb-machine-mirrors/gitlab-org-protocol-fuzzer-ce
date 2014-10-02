@@ -47,13 +47,10 @@ namespace Peach.Core.Analyzers
 	[Serializable]
 	public class XmlAnalyzer : Analyzer
 	{
-		static XmlAnalyzer()
-		{
-			supportParser = false;
-			supportDataElement = true;
-			supportCommandLine = false;
-			supportTopLevel = false;
-		}
+		public new static readonly bool supportParser = false;
+		public new static readonly bool supportDataElement = true;
+		public new static readonly bool supportCommandLine = true;
+		public new static readonly bool supportTopLevel = false;
 
 		public XmlAnalyzer()
 		{
@@ -61,6 +58,45 @@ namespace Peach.Core.Analyzers
 
 		public XmlAnalyzer(Dictionary<string, Variant> args)
 		{
+		}
+
+		public override void asCommandLine(Dictionary<string, string> args)
+		{
+			var extra = new List<string>();
+			for (int i = 0; i < args.Count; i++)
+				extra.Add(args[i.ToString()]);
+
+			if (extra.Count < 2)
+			{
+				Console.WriteLine("Syntax: <infile> <outfile>");
+				return;
+			}
+
+			var inFile = extra[0];
+			var outFile = extra[1];
+			var data = new BitStream(File.ReadAllBytes(inFile));
+			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
+
+			model.Add(new Peach.Core.Dom.String());
+			model[0].DefaultValue = new Variant(data);
+
+			asDataElement(model[0], null);
+
+			var settings = new XmlWriterSettings();
+			settings.Encoding = System.Text.UTF8Encoding.UTF8;
+			settings.Indent = true;
+
+			using (var sout = new FileStream(outFile, FileMode.Create))
+			using (var xml = XmlWriter.Create(sout, settings))
+			{
+				xml.WriteStartDocument();
+				xml.WriteStartElement("Peach");
+
+				model.WritePit(xml);
+
+				xml.WriteEndElement();
+				xml.WriteEndDocument();
+			}
 		}
 
 		public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)

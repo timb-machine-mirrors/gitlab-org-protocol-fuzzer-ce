@@ -185,7 +185,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[Serializable]
 	[DebuggerDisplay("{debugName}")]
-	public abstract class DataElement : INamed, IOwned<DataElementContainer>
+	public abstract class DataElement : INamed, IOwned<DataElementContainer>, IPitSerializable
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -637,6 +637,105 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public abstract void WritePit(XmlWriter pit);
+
+		public void WritePitCommonValue(XmlWriter pit)
+		{
+			if (DefaultValue.GetVariantType() == Variant.VariantType.ByteString)
+			{
+				var sb = new StringBuilder();
+				foreach(var b in (byte[])DefaultValue)
+					sb.Append(b.ToString("x2"));
+
+				pit.WriteAttributeString("valueType", "hex");
+				pit.WriteAttributeString("value", sb.ToString());
+			}
+			else if(DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+			{
+				var stream = (BitStream)DefaultValue;
+				var sb = new StringBuilder();
+				var pos = stream.Position;
+
+				for (int i = 0; i < stream.Length; i++)
+					sb.Append(stream.ReadByte().ToString("x2"));
+
+				stream.Position = pos;
+				pit.WriteAttributeString("valueType", "hex");
+				pit.WriteAttributeString("value", sb.ToString());
+			}
+			else if (DefaultValue.GetVariantType() == Variant.VariantType.String)
+			{
+				pit.WriteAttributeString("value", (string)DefaultValue);
+			}
+			else
+			{
+				pit.WriteAttributeString("value", DefaultValue.ToString());
+			}
+		}
+
+		/// <summary>
+		/// Write out common data element children such as relations
+		/// </summary>
+		/// <param name="pit"></param>
+		public void WritePitCommonChildren(XmlWriter pit)
+		{
+			foreach (Relation obj in relations)
+				obj.WritePit(pit);
+
+			if (fixup != null)
+				fixup.WritePit(pit);
+
+			if (transformer != null)
+				transformer.WritePit(pit);
+
+			foreach (var obj in hints.Values.Where(c => c.Name != "NumericalString"))
+				obj.WritePit(pit);
+
+			if (analyzer != null)
+				analyzer.WritePit(pit);
+
+			if (placement != null)
+				placement.WritePit(pit);
+
+		}
+
+		/// <summary>
+		/// Write out common data element attributes.
+		/// </summary>
+		/// <param name="pit"></param>
+		public void WritePitCommonAttributes(XmlWriter pit)
+		{
+			if (isToken)
+				pit.WriteAttributeString("token", "true");
+
+			if (!isMutable)
+				pit.WriteAttributeString("mutable", "false");
+
+			if (constraint != null)
+				pit.WriteAttributeString("constraint", constraint);
+
+			if (hasLength && !(this is Number))
+			{
+				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
+				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
+			}
+
+			if (parent != null && parent is Peach.Core.Dom.Array)
+			{
+				var array = parent as Peach.Core.Dom.Array;
+
+				if (array.occurs != 1)
+					pit.WriteAttributeString("occurs", array.occurs.ToString());
+				else
+				{
+					if (array.minOccurs != 1)
+						pit.WriteAttributeString("minOccurs", array.minOccurs.ToString());
+					if (array.maxOccurs != 1)
+						pit.WriteAttributeString("maxOccurs", array.maxOccurs.ToString());
+				}
+			}
+		}
+
 		protected void OnInvalidated(EventArgs e)
 		{
 			// Prevent infinite loops
@@ -892,6 +991,19 @@ namespace Peach.Core.Dom
 			return parent[priorIndex];
 		}
 
+		public void BeginUpdate()
+		{
+			// Prevent calls to invalidate from propigating
+			_invalidated = true;
+		}
+
+		public void EndUpdate()
+		{
+			_invalidated = false;
+
+			Invalidate();
+		}
+
 		/// <summary>
 		/// Call to invalidate current element and cause rebuilding
 		/// of data elements dependent on this element.
@@ -1077,6 +1189,26 @@ namespace Peach.Core.Dom
 				}
 
 				return _internalValue;
+			}
+		}
+
+		/// <summary>
+		/// Returns the final value without any transformers being applied
+		/// </summary>
+		public BitwiseStream PreTransformedValue
+		{
+			get
+			{
+				// TODO: Should this be cached?
+				// Alternatively, transformers could be be a different
+				// type of data element so InternalValue is pre-transformed
+				// and Value is post-transformed
+				if (_transformer != null)
+					return Value;
+				else if (_mutatedValue != null && mutationFlags.HasFlag(MutateOverride.TypeTransform))
+					return (BitwiseStream)_mutatedValue;
+				else
+					return InternalValueToBitStream();
 			}
 		}
 

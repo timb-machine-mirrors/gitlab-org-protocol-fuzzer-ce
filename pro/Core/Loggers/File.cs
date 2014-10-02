@@ -96,11 +96,15 @@ namespace Peach.Core.Loggers
 			foreach (var kv in fault.collectedData)
 			{
 				var fileName = System.IO.Path.Combine(subDir, kv.Key);
+
+				// Store the physical location for use by others
+				kv.Path = fileName;
+
 				SaveFile(category, fileName, kv.Value);
 				files.Add(fileName);
 			}
 
-			OnFaultSaved(category, fault, files.ToArray());
+			OnFaultSaved(category, fault, files.ToArray(), subDir);
 
 			log.Flush();
 		}
@@ -437,7 +441,15 @@ namespace Peach.Core.Loggers
 			return GetLogPath(context, Path);
 		}
 
-		protected virtual void OnFaultSaved(Category category, Fault fault, string[] dataFiles)
+		/// <summary>
+		/// Delegate for FaultSaved event.
+		/// </summary>
+		/// <param name="fault">Fault object that was saved</param>
+		/// <param name="path">Fault folder</param>
+		public delegate void FaultSavedEvent(Fault fault, string path);
+		public event FaultSavedEvent FaultSaved;
+
+		protected virtual void OnFaultSaved(Category category, Fault fault, string[] dataFiles, string path)
 		{
 			if (category != Category.Reproducing)
 			{
@@ -456,6 +468,9 @@ namespace Peach.Core.Loggers
 					}
 				}
 			}
+
+			if (FaultSaved != null)
+				FaultSaved(fault, path);
 		}
 
 		protected virtual void SaveFile(Category category, string fullPath, byte[] contents)

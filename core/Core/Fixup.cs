@@ -32,11 +32,12 @@ using System.Text;
 using System.Linq;
 using Peach.Core.Dom;
 using System.Runtime.Serialization;
+using System.Xml;
 
 namespace Peach.Core
 {
 	[Serializable]
-	public abstract class Fixup
+	public abstract class Fixup : IPitSerializable
 	{
 		protected Dictionary<string, Variant> args;
 		protected bool isRecursing = false;
@@ -45,6 +46,36 @@ namespace Peach.Core
 		protected Dictionary<string, DataElement> elements = null;
 
 		private Dictionary<string, string> refs = new Dictionary<string,string>();
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Fixup");
+
+			var fixup = this.GetType()
+				.GetAttributes<FixupAttribute>(null)
+				.Where(a => a.IsDefault)
+				.FirstOrDefault();
+
+			pit.WriteAttributeString("class", fixup.Name);
+
+			foreach(var param in this.GetType().GetAttributes<ParameterAttribute>(null))
+			{
+				pit.WriteStartElement("Param");
+				pit.WriteAttributeString("name", param.name);
+
+				if(refs.ContainsKey(param.name))
+					pit.WriteAttributeString("value", refs[param.name]);
+				else
+				{
+					var prop = this.GetType().GetProperty(param.name);
+					var value = prop.GetValue(this, null).ToString();
+
+					pit.WriteAttributeString("value", value);
+				}
+			}
+
+			pit.WriteEndElement();
+		}
 
 		/// <summary>
 		/// Returns mapping of ref key to ref value, eg: ("ref1", "DataModel.Emenent_0")

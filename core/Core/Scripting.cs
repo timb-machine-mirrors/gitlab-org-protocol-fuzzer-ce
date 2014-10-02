@@ -39,6 +39,7 @@ using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.Reflection;
 using System.IO;
+using NLog;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -138,17 +139,80 @@ namespace Peach.Core
 
 		#endregion
 
-		#region Exec & Eval
-
-		public ScriptScope CreateScope()
+		#region Error Listener
+		class ScriptErrorListener : ErrorListener
 		{
-			var scope = engine.CreateScope();
+			static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-			Apply(scope, modules);
-
-			return scope;
+			public override void ErrorReported(ScriptSource source, string message, SourceSpan span, int errorCode, Severity severity)
+			{
+				switch (severity)
+				{
+					case Severity.FatalError:
+					case Severity.Error:
+						logger.Error("Error: {0} lines {1}: {2}",
+							message,
+							span.Start,
+							source.MapLine(span));
+						break;
+					case Severity.Warning:
+					case Severity.Ignore:
+						logger.Warn("Warning: {0} lines {1}: {2}",
+							message,
+							span.Start,
+							source.MapLine(span));
+						break;
+				}
+			}
 		}
 
+		ScriptErrorListener _errorListener = new ScriptErrorListener();
+		#endregion
+
+
+		#region Compile
+
+		Dictionary<string, CompiledCode> _scriptCache = new Dictionary<string, CompiledCode>();
+
+		public void Compile(string code, SourceCodeKind kind = SourceCodeKind.Expression)
+		{
+			if (_scriptCache.ContainsKey(code))
+				return;
+
+			var compiled = this.engine.CreateScriptSourceFromString(code, kind);
+			_scriptCache[code] = compiled.Compile();
+		}
+
+		#endregion
+
+		#region Exec & Eval
+
+		/// <summary>
+		/// Global scope for this instance of scripting
+		/// </summary>
+		ScriptScope _scope = null;
+
+		/// <summary>
+		/// Create the global scope, or return existing one
+		/// </summary>
+		/// <returns></returns>
+		public ScriptScope CreateScope()
+		{
+			if (_scope == null)
+			{
+				_scope = engine.CreateScope();
+
+				Apply(_scope, modules);
+			}
+
+			return _scope;
+		}
+
+		/// <summary>
+		/// Execute a scripting program. Not cached.
+		/// </summary>
+		/// <param name="code"></param>
+		/// <param name="localScope"></param>
 		public void Exec(string code, Dictionary<string, object> localScope)
 		{
 			var scope = CreateScope(localScope);
@@ -163,18 +227,35 @@ namespace Peach.Core
 			}
 			finally
 			{
-				CleanupScope(scope);
+				CleanupScope(scope, localScope);
 			}
 		}
 
-		public object Eval(string code, Dictionary<string, object> localScope)
+		/// <summary>
+		/// Evaluate an expression. Pre-compiled expressions are cached by default.
+		/// </summary>
+		/// <param name="code">Expression to evaluate</param>
+		/// <param name="localScope">Local scope for expression</param>
+		/// <param name="cache">Cache compiled script for re-use (defaults to true)</param>
+		/// <returns>Result from expression</returns>
+		public object Eval(string code, Dictionary<string, object> localScope, bool cache = true)
 		{
 			var scope = CreateScope(localScope);
 
 			try
 			{
+				CompiledCode compiled;
+
+				if (!_scriptCache.TryGetValue(code, out compiled))
+				{
 				var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
-				var obj = source.Execute(scope);
+					compiled = source.Compile(_errorListener);
+
+					if (cache)
+						_scriptCache[code] = compiled;
+				}
+
+				var obj = compiled.Execute(scope);
 
 				if (obj != null && obj.GetType() == typeof(BigInteger))
 				{
@@ -206,7 +287,8 @@ namespace Peach.Core
 			}
 			finally
 			{
-				CleanupScope(scope);
+				// Make this happen once per-iteration at the end.
+				//CleanupScope(scope, localScope);
 			}
 		}
 
@@ -214,6 +296,11 @@ namespace Peach.Core
 
 		#region Private Helpers
 
+		/// <summary>
+		/// Returns the global scope with localScope added in.
+		/// </summary>
+		/// <param name="localScope"></param>
+		/// <returns></returns>
 		private ScriptScope CreateScope(Dictionary<string, object> localScope)
 		{
 			var scope = CreateScope();
@@ -223,11 +310,26 @@ namespace Peach.Core
 			return scope;
 		}
 
+		/// <summary>
+		/// Clear out our scope object. This is very slow!
+		/// </summary>
+		/// <param name="scope"></param>
 		private void CleanupScope(ScriptScope scope)
 		{
 			// Clean up any internal state created by the scope
 			var names = scope.GetVariableNames().ToList();
 			foreach (var name in names)
+				scope.RemoveVariable(name);
+		}
+
+		/// <summary>
+		/// Remove local scope items from global scope. This is quick.
+		/// </summary>
+		/// <param name="scope"></param>
+		/// <param name="localScope"></param>
+		private void CleanupScope(ScriptScope scope, Dictionary<string, object> localScope)
+		{
+			foreach (var name in localScope.Keys)
 				scope.RemoveVariable(name);
 		}
 

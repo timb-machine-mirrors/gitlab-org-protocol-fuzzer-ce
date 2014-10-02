@@ -1,0 +1,13 @@
+<<<
+[[Mutators_DataElementSwapNear]]
+== DataElementSwapNear
+
+This mutator will produce a single test case for all data elements by swapping the element with it's neigbor.
+
+=== Supported Elements
+
+All data elements are supported.
+
+=== Hints
+
+This mutator does not support any hints.

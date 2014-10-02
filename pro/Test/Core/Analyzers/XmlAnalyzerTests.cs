@@ -43,7 +43,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Analyzers
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class XmlAnalyzerTests : DataModelCollector
     {
         [Test]
@@ -276,30 +276,32 @@ namespace Peach.Core.Test.Analyzers
 			string payload = @"<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance""><Foo xsi:type=""Bar"">Text</Foo></Peach>";
 			File.WriteAllText(tmp, payload);
 
-			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			RunEngine(xml);
 
-			uint count = 0;
+			// Ran at least 9000 iterations
+			Assert.Greater(dataModels.Count, 9000);
 
-			var config = new RunConfiguration();
-			var e = new Engine(this);
-			e.IterationStarting += (ctx, curr, total) => ++count;
-			e.startFuzzing(dom, config);
+			var initial = dataModels[0];
 
-			Assert.Greater(count, 0);
-			Assert.AreEqual(count, dataModels.Count);
+			// For the analyzed data model, ensure
+			// the string type is propigated as well as the
+			// Peach.TypeTransform=false hint
 
-			var hasString = strategies.Where(a => a.StartsWith("StringMutator")).Any();
-			var hasUnicode = strategies.Where(a => a.StartsWith("UnicodeStringsMutator")).Any();
-			var hasThreeChar = strategies.Where(a => a.StartsWith("UnicodeUtf8ThreeCharMutator")).Any();
-			var hasBom = strategies.Where(a => a.StartsWith("UnicodeBomMutator")).Any();
-			var hasUtf8 = strategies.Where(a => a.StartsWith("UnicodeBadUtf8Mutator")).Any();
+			foreach (var item in initial.PreOrderTraverse())
+			{
+				var asStr = item as Dom.String;
+				if (asStr != null)
+				{
+					Assert.AreEqual(StringType.utf8, asStr.stringType);
+					Assert.True(asStr.isMutable);
+					Assert.True(asStr.Hints.ContainsKey("Peach.TypeTransform"));
 
-			Assert.True(hasString);
-			Assert.True(hasUnicode);
-			Assert.False(hasThreeChar);
-			Assert.False(hasBom);
-			Assert.False(hasUtf8);
+					var h = asStr.Hints["Peach.TypeTransform"];
+
+					Assert.AreEqual("Peach.TypeTransform", h.Name);
+					Assert.AreEqual("false", h.Value);
+				}
+			}
 		}
 
 		[Test]
@@ -354,12 +356,16 @@ namespace Peach.Core.Test.Analyzers
 			{
 				var final = Encoding.ISOLatin1.GetString(dataModels[i].Value.ToArray());
 				if (final == payload)
+				{
+					var strategy = this.iterStrategies[i];
+					Assert.NotNull(strategy);
 					++same;
+				}
 			}
 
-			Assert.Greater(count, 0);
+			Assert.Greater(count, 9000);
 			Assert.AreEqual(count, dataModels.Count);
-			Assert.AreEqual(3, same);
+			Assert.Less(same, 10);
 		}
 	}
 }

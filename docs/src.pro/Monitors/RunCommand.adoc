@@ -2,9 +2,11 @@
 [[Monitors_RunCommand]]
 == Run Command
 
-The _RunCommand_ monitor will run a specified command to perform some utility function. 
+The _RunCommand_ monitor will run a specified command to perform some utility function. The console output will be
+captured and logged in the event a fault is detected. Additionally, this monitor can be configured to detect faults
+by monitoring the exit code of the application, or by matching on output from the application.
 
-You can configure _RunCommand_ to tell it when to run.
+The _RunCommand_ monitor can be configured to run at specific times using the _When_ and _StartOnCall_ parameters.
 
 === Parameters
 
@@ -16,19 +18,26 @@ _Optional:_
 
 Arguments:: Optional command line arguments
 When::
-	Period when the command should be run. Defaults to +OnCall+.
-	+
-	[horizontal]
-	OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
-	OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
-	OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
-	OnIterationStart;; Run command at start of each iteration.
-	OnIterationEnd;; Run command at end of each iteration.
-	OnFault;; Run command when a fault occurs.
-	OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
++
+Period when the command should be run. Defaults to +OnCall+.
++
+[horizontal]
+OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
+OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
+OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
+OnIterationStart;; Run command at start of each iteration.
+OnIterationEnd;; Run command at end of each iteration.
+OnFault;; Run command when a fault occurs.
+OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
 
+FaultOnExitCode:: Fault when FaultExitCode matches exit code. Defaults to false.
+FaultExitCode:: Exit code to fault on. Defaults to 1.
 StartOnCall:: Run when signaled by the state machine
 FaultOnNonZeroExit:: Fault if exit code is non-zero, defaults to false.
+FaultOnRegex::
+    Fault if regular expression matches. Defaults to no regular expression.
+    To use, supply a valid regular expression using the Microsoft .NET syntax.
+
 Timeout:: Fault if process takes more than Timeout seconds where -1 is infinite timeout. Defaults to -1.
 
 === Examples

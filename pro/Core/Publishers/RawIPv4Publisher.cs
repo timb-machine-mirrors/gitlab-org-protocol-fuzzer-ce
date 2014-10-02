@@ -37,7 +37,11 @@ using System.Net;
 using Peach.Core.Dom;
 using NLog;
 
-namespace Peach.Core.Publishers
+using Peach.Core;
+using Peach.Core.Publishers;
+using Peach.Core.IO;
+
+namespace Peach.Pro.Publishers
 {
 	internal static class RawHelpers
 	{

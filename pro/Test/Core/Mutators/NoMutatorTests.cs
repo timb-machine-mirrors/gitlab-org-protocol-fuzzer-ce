@@ -1,58 +1,45 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
 
 namespace Peach.Core.Test.Mutators
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class NoutatorTests : DataModelCollector
 	{
 		[Test]
-		public void Test1()
+		public void Test()
 		{
 			// Verify only control iteration runs when no mutations are available
 
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel\">" +
-				"       <String name=\"str1\" value=\"Hello, World!\" mutable=\"false\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String name='str1' value='Hello, World!' mutable='false' />
+	</DataModel>
 
-				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-				"       <State name=\"Initial\">" +
-				"           <Action type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel' />
+			</Action>
+		</State>
+	</StateModel>
 
-				"   <Test name=\"Default\">" +
-				"       <StateModel ref=\"TheState\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"Sequential\"/>" +
-				"   </Test>" +
-				"</Peach>";
+	<Test name='Default'>
+		<StateModel ref='TheState' />
+		<Publisher class='Null' />
+		<Strategy class='Sequential' />
+	</Test>
+</Peach>";
 
-			PitParser parser = new PitParser();
+			RunEngine(xml);
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(this);
-			e.startFuzzing(dom, config);
-
+			// Only ran 1 iteration
 			Assert.AreEqual(1, values.Count);
+
+			// Performed zero mutations
 			Assert.AreEqual(0, mutations.Count);
 		}
 	}
 }
-
-// end

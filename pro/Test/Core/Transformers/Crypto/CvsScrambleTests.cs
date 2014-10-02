@@ -12,7 +12,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Transformers.Crypto
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class CvsScrambleTests : DataModelCollector
     {
         [Test]

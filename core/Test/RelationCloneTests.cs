@@ -14,7 +14,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Peach.Core.Test
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class RelationCloneTests
 	{
 		[Test]

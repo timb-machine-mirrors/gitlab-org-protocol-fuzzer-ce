@@ -56,13 +56,10 @@ namespace Peach.Core.Analyzers
         protected Dictionary<string, Variant> args = null;
         protected bool analyzeStrings = true;
 
-        static Binary()
-        {
-            supportParser = false;
-            supportDataElement = true;
-            supportCommandLine = false;
-            supportTopLevel = false;
-        }
+		public new static readonly bool supportParser = false;
+		public new static readonly bool supportDataElement = true;
+		public new static readonly bool supportCommandLine = false;
+		public new static readonly bool supportTopLevel = false;
 
         public Binary()
         {

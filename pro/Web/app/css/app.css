@@ -55,10 +55,18 @@ a.disabled {
 	cursor: pointer
 }
 
+.dropdown-menu > li {
+	cursor: pointer
+}
+
 div.tabs-left#metricstabs {
 	position: relative;
 	bottom: 0;
 	top: 0;
 	right: 0;
 	left: 0;
+}
+
+.timeline.vis .box.item {
+	cursor: pointer;
 }

@@ -18,7 +18,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.Agent
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class AgentTests
 	{
 		SingleInstance si;
@@ -251,8 +251,8 @@ namespace Peach.Core.Test.Agent
 
 				RunConfiguration config = new RunConfiguration();
 				config.range = true;
-				config.rangeStart = 1;
-				config.rangeStop = 6;
+				config.rangeStart = 25;
+				config.rangeStop = 28;
 
 				Engine e = new Engine(null);
 				e.Fault += new Engine.FaultEventHandler(e_Fault);
@@ -262,20 +262,16 @@ namespace Peach.Core.Test.Agent
 
 				var contents = File.ReadAllLines(tmp);
 				var expected = new string[] {
-// Iteration 1 (Control & Record)
-"SessionStarting", "IterationStarting 1 false", "IterationFinished", "DetectedFault", "MustStop", 
-// Iteration 1 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
-"IterationStarting 1 false", "IterationFinished", 
+// Iteration 25 (Control & Record)
+"SessionStarting", "IterationStarting 25 false", "IterationFinished", "DetectedFault", "MustStop", 
+// Iteration 25 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
+"IterationStarting 25 false", "IterationFinished", 
 // Agent is restarted & fault is not detected
-"SessionStarting", "IterationStarting 2 false", "IterationFinished", "DetectedFault", "MustStop", 
+"SessionStarting", "IterationStarting 26 false", "IterationFinished", "DetectedFault", "MustStop", 
 // Agent is killed
-"IterationStarting 3 false", "IterationFinished", 
-// Agent is restarted & fault is not detected
-"SessionStarting", "IterationStarting 4 false", "IterationFinished", "DetectedFault", "MustStop", 
-// Agent is killed
-"IterationStarting 5 false", "IterationFinished", 
+"IterationStarting 27 false", "IterationFinished", 
 // Agent is restarted & fault is detected
-"SessionStarting", "IterationStarting 6 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+"SessionStarting", "IterationStarting 28 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Fussing stops
 "SessionFinished", "StopMonitor"
 				};
@@ -377,7 +373,7 @@ namespace Peach.Core.Test.Agent
 				RunConfiguration config = new RunConfiguration();
 				config.range = true;
 				config.rangeStart = 1;
-				config.rangeStop = 5;
+				config.rangeStop = 10;
 
 				Engine e = new Engine(null);
 				e.Fault += new Engine.FaultEventHandler(e_Fault);

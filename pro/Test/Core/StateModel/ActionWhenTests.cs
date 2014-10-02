@@ -19,7 +19,7 @@ using Peach.Core.IO;
 
 namespace Peach.Core.Test.StateModel
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class ActionWhenTests : DataModelCollector
 	{
 		[Test]
@@ -95,7 +95,9 @@ namespace Peach.Core.Test.StateModel
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
+			dom.tests[0].includedMutators.Add("StringCaseLower");
+			dom.tests[0].includedMutators.Add("StringCaseUpper");
+			dom.tests[0].includedMutators.Add("DataElementRemove");
 
 			RunConfiguration config = new RunConfiguration();
 

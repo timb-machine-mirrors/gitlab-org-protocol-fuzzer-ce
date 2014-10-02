@@ -1,0 +1,114 @@
+[[Analyzers_Regex]]
+== Regex Analyzer
+
+The Regex Analyzer will break up a string into sub-strings with optional names using a regular expression. Regular expressions are quick ways to pattern match string based data. When used with the Regex Analyzer, any group in the expression will become
+a separate string. Using named groups, the strings can also be named.
+When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
+
+NOTE: The regular expression syntax is that used by Microsoft.NET. See the http://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[quick reference] for more information.
+
+=== Syntax
+
+[source,xml]
+----
+<String name="Value" value="http://www.google.com/q?q=kitty">
+  <Analyzer class="Regex">
+    <!-- (?<protocol>\w+)(://)(?<host>[^/?]+)(?<path>[^?]+)(\?)(?<query>.*) -->
+    <Param name="Regex" value="(?&lt;protocol&gt;\w+)(://)(?&lt;host&gt;[^/?]+)(?&lt;path&gt;[^?]+)(\?)(?&lt;query&gt;.*)"/>
+  </Analyzer>
+</String>
+----
+
+----
+peach --analyzer=Regex "(\w+)(.)" input.txt output.xml
+----
+
+=== Attributes
+
+_Required:_
+
+There are no required attributes.
+
+_Optional:_
+
+There are no optional attributes.
+
+=== Parameters
+
+Regex::
+    Regular expression. Only groups will be kept. Group names will be used to name specific 
+    elements and cannot be duplicated.
+
+=== Examples
+
+.Simple HTTP GET Url Example
+==========================
+This example uses the string tokenizer on an inline value.  
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <String name="Value" value="http://www.google.com/q?q=kitty">
+      <Analyzer class="Regex">
+        <!-- (?<protocol>\w+)(://)(?<host>[^/?]+)(?<path>[^?]+)(\?)(?<query>.*) -->
+        <Param name="Regex" value="(?&lt;protocol&gt;\w+)(://)(?&lt;host&gt;[^/?]+)(?&lt;path&gt;[^?]+)(\?)(?&lt;query&gt;.*)"/>
+      </Analyzer>
+    </String>
+  </DataModel>
+
+  <StateModel name="State" initialState="State1" >
+    <State name="State1"  >
+      <Action type="output" >
+        <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Publisher class="Console" />
+  </Test>
+</Peach>
+<!-- end -->
+----
+
+Output from this example.
+----
+> peach -1 --debug RegexAnalyzer.xml  
+                                                                                                                   
+[[ Peach Pro v0.0.0.0                                                                                              
+[[ Copyright (c) Deja vu Security                                                                                  
+
+[*] Web site running at: http://localhost:8889/
+
+[*] Test 'Default' starting with random seed 43577.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.StateModel Run(): Changing to state "State1".
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(31 bytes)
+00000000   68 74 74 70 3A 2F 2F 77  77 77 2E 67 6F 6F 67 6C   http://www.googl
+00000010   65 2E 63 6F 6D 2F 71 3F  71 3D 6B 69 74 74 79      e.com/q?q=kitty
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+---- 
+
+Output in Peach Validator 
+
+.{nbsp}
+image::{images}/RegexAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+
+==========================
+

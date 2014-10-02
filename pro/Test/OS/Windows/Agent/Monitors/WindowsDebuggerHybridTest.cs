@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Peach.Core.Test.Agent.Monitors
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	public class WindowsDebuggerHybridTest
 	{
 		Fault[] faults = null;
@@ -76,6 +76,9 @@ namespace Peach.Core.Test.Agent.Monitors
 			<Param name='Port' value='44444'/>
 		</Publisher>
 		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringLengthEdgeCase' />
+		</Mutators>
 	</Test>
 </Peach>";
 
@@ -111,8 +114,8 @@ namespace Peach.Core.Test.Agent.Monitors
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
-			config.rangeStart = 83;
-			config.rangeStop = 83;
+			config.rangeStart = 300;
+			config.rangeStop = 300;
 
 			Engine e = new Engine(null);
 			e.Fault += _Fault;

@@ -7,9 +7,7 @@ using System.IO;
 using System.Reflection;
 
 using Peach.Core.Dom;
-using Peach.Core.Fixups;
 using Peach.Core.IO;
-using Peach.Core;
 
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Tls;
@@ -17,7 +15,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Engines;
 
-namespace Peach.Enterprise.Fixups
+namespace Peach.Core.Fixups
 {
 	[Description("Tls")]
 	[Fixup("Tls", true, IsTest=true)]

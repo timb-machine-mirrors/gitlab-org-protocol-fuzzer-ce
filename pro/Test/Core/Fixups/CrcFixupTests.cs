@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Fixups
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class CrcFixupTests : DataModelCollector
 	{
 		[Test]
@@ -246,6 +246,37 @@ namespace Peach.Core.Test.Fixups
 			byte[] precalcChecksum = new byte[] { 0xDA, 0xDA };
 			Assert.AreEqual(1, values.Count);
 			Assert.AreEqual(precalcChecksum, values[0].ToArray());
+		}
+
+		[Test]
+		[Ignore("Expected to fail. See peach-pro issue #2")]
+		public void CrackTest()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number name='CRC' signed='false' endian='big' size='16'>
+			<Fixup class='Crc'>
+				<Param name='ref' value='DM'/>
+				<Param name='type' value='CRC16'/>
+			</Fixup>
+		</Number>
+		<Blob name='Value' valueType='hex' value='ffff'/>
+	</DataModel>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var initial = dom.dataModels[0].Value.ToArray();
+			Assert.AreEqual(new byte[] { 0xb0, 0x01, 0xff, 0xff }, initial);
+
+			var cracker = new Peach.Core.Cracker.DataCracker();
+			cracker.CrackData(dom.dataModels[0], new BitStream(initial));
+
+			var final = dom.dataModels[0].Value.ToArray();
+			Assert.AreEqual(initial, final);
 		}
 
 	}

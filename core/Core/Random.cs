@@ -110,6 +110,12 @@ namespace Peach.Core
 			return ((ulong)_prng.GenerateUInt() << 32 | _prng.GenerateUInt());
 		}
 
+		// 0 <= X < 1.0
+		public double NextDouble()
+		{
+			return _prng.Sample();
+		}
+
 		public T Choice<T>(IEnumerable<T> list)
 		{
 			return ElementAt<T>(list, Next(0, list.Count()));

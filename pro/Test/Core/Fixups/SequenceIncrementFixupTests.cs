@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Fixups
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class SequenceIncrementFixupTests : DataModelCollector
 	{
 		[Test]
@@ -1179,8 +1179,8 @@ namespace Peach.Core.Test.Fixups
 
 	<Test name='Default'>
 		<Mutators mode='include'>
-			<Mutator class='DataElementRemoveMutator'/>
-			<Mutator class='DataElementDuplicateMutator'/>
+			<Mutator class='DataElementRemove'/>
+			<Mutator class='DataElementDuplicate'/>
 		</Mutators>
 
 		<Strategy class='Random'/>
@@ -1203,7 +1203,7 @@ namespace Peach.Core.Test.Fixups
 			e.startFuzzing(dom, config);
 
 			// Ensure we don't crash if the element was removed
-			Assert.True(this.allStrategies.Contains("DataElementRemoveMutator | DM.num"));
+			Assert.True(this.allStrategies.Contains("DataElementRemove | DM.num"));
 		}
 
 	}

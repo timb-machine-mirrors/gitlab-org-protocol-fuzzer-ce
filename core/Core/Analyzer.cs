@@ -31,18 +31,20 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.IO;
+using System.Xml;
+
 using Peach.Core.Dom;
 using Peach.Core.Cracker;
 
 namespace Peach.Core
 {
 	[Serializable]
-	public abstract class Analyzer
+	public abstract class Analyzer: IPitSerializable
 	{
-		public static bool supportParser = false;
-		public static bool supportDataElement = false;
-		public static bool supportCommandLine = false;
-		public static bool supportTopLevel = false;
+		public static readonly bool supportParser = false;
+		public static readonly bool supportDataElement = false;
+		public static readonly bool supportCommandLine = false;
+		public static readonly bool supportTopLevel = false;
 
 		public static Analyzer defaultParser = null;
 
@@ -97,6 +99,31 @@ namespace Peach.Core
 				throw new PeachException("Error, " + notSupportedException.Message, notSupportedException);
 			}
 		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Analyzer");
+
+			foreach (var attrib in this.GetType().GetAttributes<AnalyzerAttribute>(null))
+			{
+				if (attrib.IsDefault)
+					pit.WriteAttributeString("class", attrib.Name);
+			}
+
+			foreach (var param in this.GetType().GetAttributes<ParameterAttribute>(null))
+			{
+				pit.WriteStartElement("Param");
+				pit.WriteAttributeString("name", param.name);
+
+				var prop = this.GetType().GetProperty(param.name);
+				var value = prop.GetValue(this, null).ToString();
+
+				pit.WriteAttributeString("value", value);
+			}
+
+			pit.WriteEndElement();
+		}
+
 
 		/// <summary>
 		/// 

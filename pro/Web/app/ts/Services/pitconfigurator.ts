@@ -45,6 +45,7 @@ module DashApp.Services {
 		LoadData(data);
 
 		StartJob();
+		StartJob(job: Models.Job);
 		PauseJob();
 		StopJob();
 
@@ -263,21 +264,29 @@ module DashApp.Services {
 		private get isKnownPit() {
 			return (this.Pit != undefined && this.Pit.pitUrl != undefined && this.Pit.pitUrl.length > 0 && this.Pit.configured);
 		}
-
-
-		public StartJob() {
+		
+		public StartJob(job?: Models.Job) {
 			if (this.CanStartJob) {
-				this.peachSvc.StartJob(this.Pit.pitUrl, (job: Models.Job) => {
-					this.Job = job;
-				}, (response) => {
-					alert("Peach is busy with another task. Can't create Job.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
-					this._job = undefined;
-				});
+				if (job == undefined) {
+					this.peachSvc.StartJob({ pitUrl: this.Pit.pitUrl }, (job: Models.Job) => this.StartJobSuccess(job), (response) => this.StartJobFail);
+				} else {
+					job.pitUrl = this.Pit.pitUrl;
+					this.peachSvc.StartJob(job, (job: Models.Job) => this.StartJobSuccess(job), (response) => this.StartJobFail);
+				}
 			}
 			else if (this.CanContinueJob) {
 				this._job.status = Models.JobStatuses.ActionPending;
 				this.peachSvc.ContinueJob(this._job.jobUrl);
 			}
+		}
+
+		private StartJobSuccess(job: Models.Job) {
+			this.Job = job;
+		}
+
+		private StartJobFail(response) {
+			alert("Peach is busy with another task. Can't create Job.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
+			this._job = undefined;
 		}
 
 		public PauseJob() {

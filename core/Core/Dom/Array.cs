@@ -125,6 +125,11 @@ namespace Peach.Core.Dom
 		{
 		}
 
+		public override void WritePit(XmlWriter pit)
+		{
+			originalElement.WritePit(pit);
+		}
+
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them
@@ -303,10 +308,6 @@ namespace Peach.Core.Dom
 		public void ExpandTo(int count)
 		{
 			System.Diagnostics.Debug.Assert(Count > 0 || OriginalElement != null);
-
-			// If we are empty, start by adding our OriginalElement
-			for (int i = Count; i < 1 && i < count; ++i)
-				Add(OriginalElement);
 
 			// Add clones of our original element for the remainder
 			for (int i = Count; i < count; ++i)

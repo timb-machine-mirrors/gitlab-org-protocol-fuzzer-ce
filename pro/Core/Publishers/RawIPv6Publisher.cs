@@ -34,10 +34,14 @@ using System.IO;
 using System.Threading;
 using System.Net.Sockets;
 using System.Net;
+
 using Peach.Core.Dom;
+using Peach.Core.Publishers;
+using Peach.Core;
+
 using NLog;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Publishers
 {
 	/// <summary>
 	/// Allows for input/output of raw IP packets.

@@ -11,7 +11,7 @@ using Peach.Core.Cracker;
 
 namespace Peach.Core.Test.Transformers
 {
-	[TestFixture]
+	[TestFixture] [Category("Peach")]
 	class TransformerTests
 	{
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, multiple transformers are defined on element 'str'.")]

@@ -10,7 +10,7 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Fixups
 {
-    [TestFixture]
+    [TestFixture] [Category("Peach")]
     class MD5FixupTests : DataModelCollector
     {
         [Test]
