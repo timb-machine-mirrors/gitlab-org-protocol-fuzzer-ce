@@ -23,28 +23,44 @@ namespace Peach.Core
 			// Finds first element with sum-weight greater than value
 			var ret = list.UpperBound(val);
 
-			return ret;
+			return ret.Value;
 		}
 
 		public static T[] WeightedSample<T>(this Random rng, WeightedList<T> list, int count) where T : IWeighted
 		{
-			if (list.Count <= count)
-				return list.ToArray();
+			// Shrink count so that we return the list
+			// in a weighted order.
+			if (count > list.Count)
+				count = list.Count;
 
+			var max = list.Max;
 			var ret = new List<T>();
+			var conversions = new Stack<Func<long, long>>();
 
 			for (int i = 0; i < count; ++i)
 			{
-				// returns between 0 <= x < UpperBound
-				var val = rng.Next(list.Max);
+				var rand = rng.Next(max);
 
-				// Finds first element with sum-weight greater than value
-				var item = list.UpperBound(val);
-				if (!ret.Contains(item))
-					ret.Add(item);
+				foreach (var c in conversions)
+					rand = c(rand);
+
+				var kv = list.UpperBound(rand);
+				var item = kv.Value;
+				var lowerBound = kv.Key - item.SelectionWeight;
+
+				conversions.Push( (c) => {
+					if (c >= lowerBound)
+						return c + item.SelectionWeight;
+					else
+						return c;
+				});
+
+				ret.Add(item);
+				max -= item.SelectionWeight;
 			}
 
 			return ret.ToArray();
 		}
+
 	}
 }

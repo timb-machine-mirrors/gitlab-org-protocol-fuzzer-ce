@@ -72,8 +72,8 @@ namespace Peach.Core
 		/// Returns the first element in the list with a key greater than value.
 		/// </summary>
 		/// <param name="value">A number greater than or equal to 0 and less than Max.</param>
-		/// <returns>Returns the first element in the list with a key greater than value.</returns>
-		public T UpperBound(long value)
+		/// <returns>A key value pair of the upper bound and the element.</returns>
+		public KeyValuePair<long, T> UpperBound(long value)
 		{
 			if (value < 0 || value >= Max)
 				throw new ArgumentOutOfRangeException("bound");
@@ -94,7 +94,7 @@ namespace Peach.Core
 			if (keys[low] <= value)
 				++low;
 
-			return items.Values[low];
+			return new KeyValuePair<long,T>(items.Keys[low], items.Values[low]);
 		}
 
 		/// <summary>
