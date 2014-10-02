@@ -57,5 +57,11 @@ namespace Peach.Core.Mutators
 
 			return ret;
 		}
+
+		public new static bool supportedDataElement(DataElement obj)
+		{
+			// Don't attach to elements that are empty
+			return Utility.BlobMutator.supportedNonEmptyDataElement(obj);
+		}
 	}
 }

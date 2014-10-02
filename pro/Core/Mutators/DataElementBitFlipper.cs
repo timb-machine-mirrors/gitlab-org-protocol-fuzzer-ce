@@ -45,7 +45,7 @@ namespace Peach.Core.Mutators
 			if (!(obj is DataElementContainer))
 			{
 				if (getTypeTransformHint(obj))
-					return true;
+					return obj.PreTransformedValue.LengthBits > 0;
 
 				return false;
 			}
@@ -53,7 +53,7 @@ namespace Peach.Core.Mutators
 			// Attach to all container elements that have a transformer and take
 			// the post-transformed value and flip the bits randomly
 			if (obj.transformer != null)
-				return true;
+				return obj.Value.LengthBits > 0;
 
 			return false;
 		}

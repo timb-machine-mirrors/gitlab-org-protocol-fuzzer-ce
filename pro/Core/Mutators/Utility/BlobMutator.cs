@@ -54,6 +54,14 @@ namespace Peach.Core.Mutators.Utility
 			return false;
 		}
 
+		protected static bool supportedNonEmptyDataElement(DataElement obj)
+		{
+			if (obj is Dom.Blob && obj.isMutable)
+				return ((BitwiseStream)obj.InternalValue).Length > 0;
+
+			return false;
+		}
+
 		public sealed override uint mutation
 		{
 			get;

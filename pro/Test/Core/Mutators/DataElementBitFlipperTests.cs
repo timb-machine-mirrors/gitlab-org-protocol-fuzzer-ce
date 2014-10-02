@@ -20,7 +20,7 @@ namespace Peach.Core.Test.Mutators
 
 			protected override IO.BitwiseStream internalEncode(IO.BitwiseStream data)
 			{
-				throw new NotImplementedException();
+				return data;
 			}
 
 			protected override IO.BitStream internalDecode(IO.BitStream data)
@@ -35,9 +35,15 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("DataElementBitFlipper");
 
 			var blob = new Dom.Blob("Blob");
+			Assert.False(runner.IsSupported(blob));
+
+			blob.DefaultValue = new Variant(new byte[] { 0x01 });
 			Assert.True(runner.IsSupported(blob));
 
 			var str = new Dom.String("String");
+			Assert.False(runner.IsSupported(str));
+
+			str.DefaultValue = new Variant("Hello");
 			Assert.True(runner.IsSupported(str));
 
 			str.Hints["Peach.TypeTransform"] = new Hint("Peach.TypeTransform", "false");
@@ -53,6 +59,9 @@ namespace Peach.Core.Test.Mutators
 			Assert.False(runner.IsSupported(blk));
 
 			blk.transformer = new DummyTransformer(blk, null);
+			Assert.False(runner.IsSupported(blk));
+
+			blk.Add(str);
 			Assert.True(runner.IsSupported(blk));
 		}
 

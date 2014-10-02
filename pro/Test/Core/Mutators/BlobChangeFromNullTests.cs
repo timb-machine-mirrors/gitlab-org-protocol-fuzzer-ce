@@ -15,12 +15,14 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("BlobChangeFromNull");
 
+			Assert.False(runner.IsSupported(new Blob()));
+
 			Assert.True(runner.IsSupported(new Blob()
 			{
 				DefaultValue = new Variant(Encoding.ASCII.GetBytes("Hello")),
 			}));
 
-			Assert.True(runner.IsSupported(new Blob()
+			Assert.False(runner.IsSupported(new Blob()
 			{
 				DefaultValue = new Variant(new byte[0]),
 			}));
