@@ -16,6 +16,7 @@ namespace Peach.Core.Mutators
 	public class DataElementRemove : Mutator
 	{
 		public DataElementRemove(DataElement obj)
+			: base(obj)
 		{
 		}
 

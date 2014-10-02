@@ -16,6 +16,7 @@ namespace Peach.Core.Mutators
 	public class DataElementSwapNear : Mutator
 	{
 		public DataElementSwapNear(DataElement obj)
+			: base(obj)
 		{
 		}
 

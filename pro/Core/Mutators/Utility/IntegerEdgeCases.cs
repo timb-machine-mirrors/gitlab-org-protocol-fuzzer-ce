@@ -20,10 +20,12 @@ namespace Peach.Core.Mutators.Utility
 		Func<long> sequential;
 		Func<long> random;
 		int space;
+		int fullSpace;
 		long min;
 		ulong max;
 
 		public IntegerEdgeCases(DataElement obj)
+			: base(obj)
 		{
 			GetLimits(obj, out min, out max);
 
@@ -33,6 +35,7 @@ namespace Peach.Core.Mutators.Utility
 			{
 				// We are <= a single byte, set the space size of the range
 				space = (int)delta + 1;
+				fullSpace = space;
 				sequential = () => min + mutation;
 				random = () => context.Random.Next(min, (long)max + 1);
 			}
@@ -42,6 +45,7 @@ namespace Peach.Core.Mutators.Utility
 				var gen = new EdgeCaseGenerator(min, max);
 
 				space = gen.Values.Length;
+				fullSpace = (int)Math.Min((ulong)int.MaxValue, gen.Deviation);
 				sequential = () => gen.Values[mutation];
 				random = () => gen.Next(context.Random);
 			}
@@ -89,6 +93,14 @@ namespace Peach.Core.Mutators.Utility
 			get
 			{
 				return space;
+			}
+		}
+
+		public sealed override int weight
+		{
+			get
+			{
+				return fullSpace;
 			}
 		}
 

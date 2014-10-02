@@ -107,9 +107,9 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(allStrategies.Count, dm1 + dm2);
 
 			// Make sure each data model was fuzzed about the same number of times
-			var diff = dm1 - dm2;
-			Assert.Greater(diff, -10);
-			Assert.Less(diff, 10);
+			var diff = (1.0 * dm1) / (dm1 + dm2);
+			Assert.Greater(diff, 0.45);
+			Assert.Less(diff, 0.55);
 		}
 
 		[Test]
@@ -156,7 +156,7 @@ namespace Peach.Core.Test.MutationStrategies
 			// 1000 mutations, control on iteration 1, 201, 401, 601, 801 = 1005 actions
 			// Random number between 1 and 5 is on average 3, for 1000 iterations is 3000 mutations
 			Assert.AreEqual(1005, actions.Count);
-			Assert.Greater(allStrategies.Count, 2900);
+			Assert.Greater(allStrategies.Count, 2500);
 			Assert.Less(allStrategies.Count, 3100);
 		}
 
@@ -704,9 +704,9 @@ namespace Peach.Core.Test.MutationStrategies
 	</Test>
 </Peach>";
 
-			RunSwitchTest(xml, 1, 10);
+			RunSwitchTest(xml, 1, 20);
 
-			Assert.AreEqual(22, dataModels.Count);
+			Assert.AreEqual(42, dataModels.Count);
 
 			Assert.AreEqual("Hello", (string)dataModels[0][0].InternalValue);
 			Assert.AreEqual("Hello", (string)dataModels[1][0].InternalValue);
@@ -921,6 +921,156 @@ namespace Peach.Core.Test.MutationStrategies
 
 			// 20 iterations, 1 control, 2 data models per iteration
 			Assert.AreEqual(42, dataModels.Count);
+		}
+
+		[Test]
+		public void StateMutations()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+			<Action type='changeState' ref='Second'/>
+		</State>
+		<State name='Second'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='StateMutation' value='true'/>
+		</Strategy>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 20);
+
+			// Normally there are 40 fuzzed outputs.
+			// With state/action mutations there should be more.
+			Assert.AreEqual(48, dataModels.Count);
+		}
+
+		[Test]
+		public void TestEqualWeights()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'/>
+		<Mutators mode='include'>
+			<Mutator class='StringCaseLower' />
+			<Mutator class='StringCaseUpper' />
+		</Mutators>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 500);
+
+			// 1 control, 500 mutations
+			Assert.AreEqual(501, iterStrategies.Count);
+
+			int numUpper = 0;
+			int numLower = 0;
+			int numOther = 0;
+
+			foreach (var item in iterStrategies)
+			{
+				if (item.StartsWith("StringCaseLower"))
+					++numLower;
+				else if (item.StartsWith("StringCaseUpper"))
+					++numUpper;
+				else
+					++numOther;
+			}
+
+			Assert.AreEqual(1, numOther); // control iteration
+
+			var pct = (1.0 * numUpper) / (numUpper + numLower);
+
+			Assert.Greater(pct, 0.47);
+			Assert.Less(pct, 0.53);
+		}
+
+		[Test]
+		public void TestUnequalWeights()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'/>
+		<Mutators mode='include'>
+			<Mutator class='StringCaseLower' />
+			<Mutator class='StringStatic' />
+		</Mutators>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 2000);
+
+			// 1 control, 2000 mutations
+			Assert.AreEqual(2001, iterStrategies.Count);
+
+			int numStatic = 0;
+			int numLower = 0;
+			int numOther = 0;
+
+			foreach (var item in iterStrategies)
+			{
+				if (item.StartsWith("StringCaseLower"))
+					++numLower;
+				else if (item.StartsWith("StringStatic"))
+					++numStatic;
+				else
+					++numOther;
+			}
+
+			Assert.AreEqual(1, numOther); // control iteration
+
+			// StringStatic has 1659, StringCaseLower has 1
+			// In 2000 iterations, it should only once
+
+			Assert.AreEqual(1, numLower);
+			Assert.AreEqual(2000 - numLower, numStatic);
 		}
 	}
 }

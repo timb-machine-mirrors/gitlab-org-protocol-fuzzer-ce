@@ -27,6 +27,7 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="variance">Variance for mutation length.</param>
 		/// <param name="clamp">Keep mutation length less than element length.</param>
 		public BlobMutator(DataElement obj, long variance, bool clamp)
+			: base(obj)
 		{
 			this.clamp = clamp;
 

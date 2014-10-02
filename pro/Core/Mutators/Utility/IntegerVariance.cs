@@ -14,6 +14,7 @@ namespace Peach.Core.Mutators.Utility
 		Func<long> sequential;
 		Func<long> random;
 		int space;
+		int fullSpace;
 		bool signed;
 		long value;
 		long min;
@@ -26,6 +27,7 @@ namespace Peach.Core.Mutators.Utility
 		/// <param name="obj">Element the mutator is attached to.</param>
 		/// <param name="useValue">Should the default value be included in the variance.</param>
 		public IntegerVariance(DataElement obj, bool useValue)
+			: base(obj)
 		{
 			this.useValue = useValue;
 
@@ -45,6 +47,7 @@ namespace Peach.Core.Mutators.Utility
 						vals.Add(i);
 
 				space = vals.Count;
+				fullSpace = space;
 				sequential = () => vals[(int)mutation];
 				random = () => vals[context.Random.Next(space)];
 			}
@@ -59,6 +62,7 @@ namespace Peach.Core.Mutators.Utility
 					gen = new VarianceGenerator(value, min, max, useValue);
 
 				space = gen.Values.Length;
+				fullSpace = (int)Math.Min((ulong)int.MaxValue, gen.Deviation);
 				sequential = () => gen.Values[mutation];
 				random = () => gen.Next(context.Random);
 			}
@@ -111,6 +115,14 @@ namespace Peach.Core.Mutators.Utility
 			get
 			{
 				return space;
+			}
+		}
+
+		public sealed override int weight
+		{
+			get
+			{
+				return fullSpace;
 			}
 		}
 

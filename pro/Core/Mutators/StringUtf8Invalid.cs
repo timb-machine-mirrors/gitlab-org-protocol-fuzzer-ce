@@ -13,6 +13,7 @@ namespace Peach.Core.Mutators
 	public partial class StringUtf8Invalid : Mutator
 	{
 		public StringUtf8Invalid(DataElement obj)
+			: base(obj)
 		{
 		}
 

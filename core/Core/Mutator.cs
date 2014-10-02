@@ -96,17 +96,13 @@ namespace Peach.Core
 		/// </summary>
 		public MutationStrategy context = null;
 
-		/// <summary>
-		/// Weight this mutator will get chosen in random mutation mode.
-		/// </summary>
-		public int weight = 1;
-
-		public Mutator()
-		{
-		}
+		bool hasRelation;
+		bool hasFixup;
 
 		public Mutator(DataElement obj)
 		{
+			hasRelation = obj.relations.HasOf();
+			hasFixup = obj.fixup != null;
 		}
 
 		public Mutator(StateModel obj)
@@ -143,6 +139,16 @@ namespace Peach.Core
 		public abstract int count
 		{
 			get;
+		}
+
+		/// <summary>
+		/// Raw weight this mutator will get chosen in random mutation mode.
+		/// The selection weight will also take into account if the element
+		/// being mutated has a fixup or relation on it.
+		/// </summary>
+		public virtual int weight
+		{
+			get { return count; }
 		}
 
 		/// <summary>
@@ -240,9 +246,16 @@ namespace Peach.Core
 
 		#region IWeighted Members
 
-		public int SelectionWeight
+		public virtual int SelectionWeight
 		{
-			get { return weight; }
+			get
+			{
+				// TODO: How do we want to weight down elements with fixups & relations
+				if (hasFixup || hasRelation)
+					return (int)(Math.Sqrt(weight));
+
+				return weight;
+			}
 		}
 
 		#endregion
