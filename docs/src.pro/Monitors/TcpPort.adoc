@@ -94,12 +94,6 @@ In this example the call action will cause Peach to wait until the remote port i
 </Peach>
 ----
 
-Output for this example.
-
-----
-TODO
-----
-
 ===============================
 
 .Wait for port to be closed
@@ -149,11 +143,6 @@ In this example the call action will cause Peach to wait until the remote port i
 </Peach>
 ----
 
-Output for this example.
-
-----
-TODO
-----
 
 ===============================
 
@@ -202,11 +191,7 @@ In this example Peach will fault if the port is in the closed state at the end o
 </Peach>
 ----
 
-Output for this example.
 
-----
-TODO
-----
 
 ===============================
 
@@ -260,12 +245,6 @@ In this example, if a fault is triggered by another monitor, the TcpPort monitor
     </Logger>
   </Test>
 </Peach>
-----
-
-Output for this example.
-
-----
-TODO
 ----
 
 ===============================

@@ -48,8 +48,9 @@ RequestToSendXOnXOff;;
 XOnXOff;;
 
 FaultRegex:: Fault when regular expression matches.
-WaitForRegex:: Wait until regex matches received data.
-WaitForWhen:: 
+WaitRegex:: Wait until regex matches received data.
+WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
+WaitWhen:: 
 +
 When to wait. Defaults to OnStart.
 +
@@ -191,8 +192,8 @@ This example might be used when fuzzing a network device such as a router. Peach
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitForRegex" value="Bootup completed" />
-      <Param name="WaitForWhen" value="OnIterationAfterFault" />
+      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
   </Agent>
 
@@ -255,8 +256,8 @@ This example might be used when fuzzing a network device such as a router. Peach
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitForRegex" value="Bootup completed" />
-      <Param name="WaitForWhen" value="OnIterationAfterFault" />
+      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
   </Agent>
 
@@ -314,8 +315,8 @@ This example hooks up to a console port and also a debug port on a device. The d
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitForRegex" value="Bootup completed" />
-      <Param name="WaitForWhen" value="OnIterationAfterFault" />
+      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
     
     <!-- Debug port -->
