@@ -167,7 +167,10 @@ namespace Peach
 			bs.SeekBits(0, SeekOrigin.Begin);
 
 			int len = 0;
-			int count = (int)((bs.LengthBits + 7) / 8);
+			var longCount = (long)((bs.LengthBits + 7) / 8);
+			if (longCount > int.MaxValue)
+				throw new NotSupportedException();
+			int count = (int)longCount;
 			int offset = 0;
 			byte[] buffer = new byte[count];
 

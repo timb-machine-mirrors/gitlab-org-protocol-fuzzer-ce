@@ -377,7 +377,7 @@ namespace Peach.Core.IO
 
 						offset += len;
 						needed -= len;
-						PositionBits += (len * 8);
+						PositionBits += ((long)len * 8);
 
 						// Ensure we read any leftover bits
 						if (needed > 0)
