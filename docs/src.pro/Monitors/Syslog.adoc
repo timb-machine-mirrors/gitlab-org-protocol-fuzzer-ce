@@ -15,6 +15,20 @@ _Optional:_
 Port:: Port number to listen on. Defaults to 514.
 Interface:: Interface to listen on. Defaults to 0.0.0.0 (all interfaces).
 FaultRegex:: Fault when regular expression matches.
+WaitRegex:: Wait until regex matches received data
+WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
+WaitWhen::
++
+When to wait. Defaults to OnStart.
++
+[horizontal]
+OnCall;; When triggered by message from state machine.
+OnStart;; Once at the start of the fuzzing session.
+OnEnd;; Once at the end of our fuzzing session.
+OnIterationStart;; At the start of every iteration.
+OnIterationEnd;; At the end of every iteration.
+OnFault;; When a fault occurs.
+OnIterationStartAfterFault;; At the start of the next iteration after a fault was detected.
 
 === Examples
 
