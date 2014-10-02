@@ -5,6 +5,22 @@ using System.Linq;
 
 namespace Peach.Core
 {
+	class WeightedListDebugView<T> where T : IWeighted
+	{
+		WeightedList<T> obj;
+
+		public WeightedListDebugView(WeightedList<T> obj)
+		{
+			this.obj = obj;
+		}
+
+		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+		public KeyValuePair<long, T>[] Items
+		{
+			get { return obj.items.ToArray(); }
+		}
+	}
+
 	/// <summary>
 	/// A collection of IWeighted items.
 	/// The collection tracks the sum total weights allowing for random
@@ -19,26 +35,10 @@ namespace Peach.Core
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	[DebuggerDisplay("Count = {Count}, Max = {Max}")]
-	[DebuggerTypeProxy(typeof(WeightedList<>.DebugView))]
+	[DebuggerTypeProxy(typeof(WeightedListDebugView<>))]
 	public class WeightedList<T> : ICollection<T>, IWeighted where T : IWeighted
 	{
-		class DebugView
-		{
-			WeightedList<T> obj;
-
-			public DebugView(WeightedList<T> obj)
-			{
-				this.obj = obj;
-			}
-
-			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public KeyValuePair<long, T>[] Items
-			{
-				get { return obj.items.ToArray(); }
-			}
-		}
-
-		SortedList<long, T> items = new SortedList<long, T>();
+		internal SortedList<long, T> items = new SortedList<long, T>();
 
 		/// <summary>
 		/// The sum of all weights of contained elements.
