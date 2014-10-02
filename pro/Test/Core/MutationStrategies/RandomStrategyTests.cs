@@ -959,7 +959,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			// Normally there are 40 fuzzed outputs.
 			// With state/action mutations there should be more.
-			Assert.AreEqual(48, dataModels.Count);
+			Assert.AreEqual(58, dataModels.Count);
 		}
 
 		[Test]
@@ -1037,7 +1037,9 @@ namespace Peach.Core.Test.MutationStrategies
 	<Test name='Default'>
 		<StateModel ref='SM'/>
 		<Publisher class='Null'/>
-		<Strategy class='Random'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
 		<Mutators mode='include'>
 			<Mutator class='StringCaseLower' />
 			<Mutator class='StringStatic' />
