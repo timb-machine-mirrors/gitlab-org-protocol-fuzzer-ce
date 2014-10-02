@@ -56,31 +56,30 @@ namespace Peach.Core.MutationStrategies
 	public class RandomStrategy : MutationStrategy
 	{
 		[DebuggerDisplay("{InstanceName} {ElementName} Mutators = {Mutators.Count}")]
-		protected class MutableItem : INamed
+		protected class MutableItem : INamed, IWeighted
 		{
 			public MutableItem(string instanceName, string elementName)
+				: this(instanceName, elementName, new Mutator[0])
 			{
-				InstanceName = instanceName;
-				ElementName = elementName;
-				Mutators = new List<Mutator>();
 			}
 
 			public MutableItem(string instanceName, string elementName, ICollection<Mutator> mutators)
 			{
 				InstanceName = instanceName;
 				ElementName = elementName;
-				Mutators = new List<Mutator>(mutators);
+				Mutators = new WeightedList<Mutator>(mutators);
 			}
 
 			public string name { get { return InstanceName; } }
 			public string InstanceName { get; private set; }
 			public string ElementName { get; private set; }
-			public List<Mutator> Mutators { get; private set; }
+			public WeightedList<Mutator> Mutators { get; private set; }
+			public int SelectionWeight { get { return Mutators.SelectionWeight; } }
 		}
 
 		[DebuggerDisplay("{Name} Count = {Count}")]
 		[DebuggerTypeProxy(typeof(DebugView))]
-		protected class MutationScope : List<MutableItem>, IComparable<MutationScope>
+		protected class MutationScope : WeightedList<MutableItem>
 		{
 			class DebugView
 			{
@@ -119,11 +118,6 @@ namespace Peach.Core.MutationStrategies
 			{
 				get;
 				set;
-			}
-
-			public int CompareTo(MutationScope other)
-			{
-				return string.CompareOrdinal(Name, other.Name);
 			}
 		}
 
@@ -200,7 +194,7 @@ namespace Peach.Core.MutationStrategies
 		/// <summary>
 		/// List of all mutable items at each mutation scope.
 		/// </summary>
-		List<MutationScope> mutableItems = new List<MutationScope>();
+		WeightedList<MutationScope> mutableItems = new WeightedList<MutationScope>();
 
 		/// <summary>
 		/// The selected mutations for a given fuzzing iteration
@@ -341,22 +335,22 @@ namespace Peach.Core.MutationStrategies
 				// Random.Next() Doesn't include max and we want it to
 				var fieldsToMutate = Random.Next(1, maxFieldsToMutate + 1);
 
-				// Our scope choice should auto-weight to Action, State, All
-				// the more states and actions the less All will get chosen
-				// might need to improve this in the future.
-				var scope = Random.Choice(mutableItems);
+				if (mutableItems.Count == 0)
+				{
+					logger.Trace("No mutable items.");
+					mutations = new MutableItem[0];
+				}
+				else
+				{
+					// Our scope choice should auto-weight to Action, State, All
+					// the more states and actions the less All will get chosen
+					// might need to improve this in the future.
+					var scope = Random.WeightedChoice(mutableItems);
 
-				logger.Trace("SCOPE: {0}", scope.Name);
+					logger.Trace("SCOPE: {0}", scope.Name);
 
-				mutations = Random.Sample(scope, fieldsToMutate);
-
-				//if (context.test.stateModel.states.Count > 1 && stateMutators.Count > 0)
-				//{
-				//	var rnd = Random.Next(context.test.stateModel.states.Count);
-				//	// TODO: weight state mutations better
-				//	if (rnd == 0)
-				//		_stateModelMutation = Random.Choice(stateMutators);
-				//}
+					mutations = Random.WeightedSample(scope, fieldsToMutate);
+				}
 			}
 		}
 
@@ -364,6 +358,10 @@ namespace Peach.Core.MutationStrategies
 		{
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
+				// Build the final list of mutable items
+				// NOTE: We can't alter the contents of a scope after adding it to
+				// mutableItems because the weights won't be updated.
+
 				// Add mutations scoped by state, where there is at least one available
 				// mutation and more than one action scopes.  If there is only one action
 				// scope then the state scope and action scope are identical.
@@ -384,29 +382,23 @@ namespace Peach.Core.MutationStrategies
 					// Clear mutable items since global is the same as the single action
 					mutableItems.Clear();
 				}
-				else
-				{
-					// Sort the list
-					mutableItems.Sort();
-				}
 
 				// If there are state model mutators, add those.
 				if (stateMutators.Count > 0)
 				{
-					mutableItems.Insert(0, new MutationScope("StateModel", new[] {
+					mutableItems.Add(new MutationScope("StateModel", new[] {
 						new MutableItem(context.test.stateModel.name, "", stateMutators),
 					}));
 				}
 
 				// Add global scope 1st
-				mutableItems.Insert(0, mutationScopeGlobal);
+				if (mutationScopeGlobal.Count > 0)
+					mutableItems.Add(mutationScopeGlobal);
 
 				// Cleanup containers used to collect the different scopes
 				mutationScopeGlobal = null;
 				mutationScopeAction = null;
 				mutationScopeState = null;
-
-				// TODO: Calculate weights of mutations at each scope
 			}
 		}
 
@@ -417,12 +409,12 @@ namespace Peach.Core.MutationStrategies
 				// All state mutations are in the same scope.
 				// When state model mutation is selected, there should only
 				// be a single picked mutation.
-				var m = mutations[0];
+				var m = mutations.Where(i => i.InstanceName == stateModel.name).FirstOrDefault();
 
-				if (m.InstanceName == stateModel.name)
+				if (m != null)
 				{
 					System.Diagnostics.Debug.Assert(mutations.Length == 1);
-					stateModelMutation = Random.Choice(m.Mutators);
+					stateModelMutation = Random.WeightedChoice(m.Mutators);
 					stateModelMutation.randomMutation(stateModel);
 				}
 			}
@@ -622,7 +614,7 @@ namespace Peach.Core.MutationStrategies
 				var elem = data.dataModel.find(item.ElementName);
 				if (elem != null && elem.mutationFlags == MutateOverride.None)
 				{
-					var mutator = Random.Choice(item.Mutators);
+					var mutator = Random.WeightedChoice(item.Mutators);
 					Context.OnDataMutating(data, elem, mutator);
 					logger.Debug("Action_Starting: Fuzzing: {0}", item.ElementName);
 					logger.Debug("Action_Starting: Mutator: {0}", mutator.name);

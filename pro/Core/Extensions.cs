@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Peach.Core
@@ -22,6 +24,27 @@ namespace Peach.Core
 			var ret = list.UpperBound(val);
 
 			return ret;
+		}
+
+		public static T[] WeightedSample<T>(this Random rng, WeightedList<T> list, int count) where T : IWeighted
+		{
+			if (list.Count <= count)
+				return list.ToArray();
+
+			var ret = new List<T>();
+
+			for (int i = 0; i < count; ++i)
+			{
+				// returns between 0 <= x < UpperBound
+				var val = rng.Next(list.Max);
+
+				// Finds first element with sum-weight greater than value
+				var item = list.UpperBound(val);
+				if (!ret.Contains(item))
+					ret.Add(item);
+			}
+
+			return ret.ToArray();
 		}
 	}
 }

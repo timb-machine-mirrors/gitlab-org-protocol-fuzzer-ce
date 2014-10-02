@@ -20,7 +20,7 @@ namespace Peach.Core
 	/// <typeparam name="T"></typeparam>
 	[DebuggerDisplay("Count = {Count}, Max = {Max}")]
 	[DebuggerTypeProxy(typeof(WeightedList<>.DebugView))]
-	public class WeightedList<T> : ICollection<T> where T : IWeighted
+	public class WeightedList<T> : ICollection<T>, IWeighted where T : IWeighted
 	{
 		class DebugView
 		{
@@ -117,7 +117,18 @@ namespace Peach.Core
 		public void AddRange(IEnumerable<T> collection)
 		{
 			foreach (var i in collection)
-				items.Add(i.SelectionWeight, i);
+				Add(i);
+		}
+
+		/// <summary>
+		/// The selection weight for this collection.
+		/// </summary>
+		public int SelectionWeight
+		{
+			get
+			{
+				return (int)Math.Min(int.MaxValue, Max);
+			}
 		}
 
 		#region ICollection<T>
