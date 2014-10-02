@@ -1,5 +1,5 @@
 <<<
-[[Monitors_Ssh]]
+[[Monitors_SshCommand]]
 == SshCommand Monitor
 
 The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell) and waits for it's exit.

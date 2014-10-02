@@ -86,6 +86,7 @@ This example will expect a single parameter: +GET /product/{0}+
 +
 This example will expect two parameters: +GET /invoices?start_date={0}&end_date={1}+
 
+///////////////////////////
 === Examples
 
 .Calling Rest Services
@@ -94,3 +95,4 @@ This example will expect two parameters: +GET /invoices?start_date={0}&end_date=
 TODO -- Call public rest api (google?)
 ----
 
+///////////////////////////

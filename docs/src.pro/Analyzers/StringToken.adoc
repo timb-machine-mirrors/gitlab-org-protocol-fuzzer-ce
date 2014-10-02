@@ -19,6 +19,7 @@ Root --+
 
 
 This allows Peach to perform mutations that can expose bugs in parsers. 
+When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
 
 IMPORTANT: The String Token Analyzer only works at runtime when attached to a DataElement.
 
@@ -29,6 +30,10 @@ IMPORTANT: The String Token Analyzer only works at runtime when attached to a Da
 <String value="GET /index.html?name=peach&amp;testing=true&amp;admin=false&amp;debug=1" />  
   <Analyzer class="StringToken" />
 </String>
+----
+
+----
+peach --analyzer=Xml input.txt output.xml
 ----
 
 === Attributes

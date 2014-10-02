@@ -3,6 +3,7 @@
 
 The Regex Analyzer will break up a string into sub-strings with optional names using a regular expression. Regular expressions are quick ways to pattern match string based data. When used with the Regex Analyzer, any group in the expression will become
 a separate string. Using named groups, the strings can also be named.
+When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
 
 NOTE: The regular expression syntax is that used by Microsoft.NET. See the http://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[quick reference] for more information.
 
@@ -18,6 +19,9 @@ NOTE: The regular expression syntax is that used by Microsoft.NET. See the http:
 </String>
 ----
 
+----
+peach --analyzer=Regex "(\w+)(.)" input.txt output.xml
+----
 
 === Attributes
 
