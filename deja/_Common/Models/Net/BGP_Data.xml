@@ -187,6 +187,9 @@
         </Block>
     </DataModel>
 
+    <DataModel name="BGP4RouteRefresh" ref="rfc2918:Message"/>
+    <DataModel name="BGP4RouteRefreshWithORF" ref="rfc5291:Message"/>
+    <DataModel name="BGP4DynamicCapbility" ref="draft-dynamic-cap:Message"/>
     <!-- END BGP4 Message Types -->
 
     <!-- BEGIN BGP4 Packet Definition -->
@@ -199,9 +202,9 @@
                 <Block name="Update" ref="BGP4Update"/>
                 <Block name="Notification" ref="BGP4Notification"/>
                 <Block name="Keepalive" ref="BGP4Keepalive"/>
-                <Block name="RouteRefresh" ref="rfc2918:Message"/>
-                <Block name="RouteRefreshWithORF" ref="rfc5291:Message"/>
-                <Block name="DynamicCapbility" ref="draft-dynamic-cap:Message"/>
+                <Block name="RouteRefresh" ref="BGP4RouteRefresh"/>
+                <Block name="RouteRefreshWithORF" ref="BGP4RouteRefreshWithORF"/>
+                <Block name="DynamicCapbility" ref="BGP4DynamicCapbility"/>
             </Choice>
         </Block>
     </DataModel>

@@ -7,6 +7,7 @@
        version="0.0.1">
 
     <!-- rfc4724  Graceful Restart Mechanism http://tools.ietf.org/html/rfc4724 -->
+
     <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
 
     <Include ns="PathAttrs" src="file:##Path##/_Common/Models/Net/BGP_PathAttrs.xml"/>
@@ -15,7 +16,7 @@
         <Number name="CapabilityType"
                 size="8" value="65" constraint="int(value) == 65"/>
         <Block name="CapabilityValue">
-            <Number name="MyASN" size="32" endian="big"/>
+            <Number name="MyASN4" size="32" endian="big" value="##MyASN4##"/>
         </Block>
     </DataModel>
 

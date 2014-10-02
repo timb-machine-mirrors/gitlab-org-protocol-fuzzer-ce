@@ -10,11 +10,83 @@
 
     <Include ns="DataModels" src="file:##Path##/_Common/Models/Net/BGP_Data.xml"/>
 
-    <StateModel name="StateModel" initialState="initial">
-        <State name="initial">
-            <Action name="BGP4Open" type="input" publisher="TcpBGP">
-                <DataModel ref="DataModels:BGP4Open"/>
-            </Action>
+    <StateModel name="BGP_FSM" initialState="idle">
+        <State name="Idle">
+            <Action type="changeState" ref="Connect"/>
         </State>
+
+
+
+        <State name="Connect">
+            <Action name="BGP4Open" type="output">
+                <DataModel ref="DataModels:BGP4Open"/>
+                <Data filename="file:##Path##/_Common/Samples/Net/OPEN"/>
+            </Action>
+            <Action type="changeState" ref="OpenSent"/>
+        </State>
+        
+
+        <!-- Active state for TCP Errors Connect implies proper connectivity -->
+        
+        
+        <State name="OpenSent">
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="DataModels:BGP4"/>
+            </Action>
+            <Action type="changeState" ref="Idle"
+                    when="False"/> <!-- TODO: When message type is not open -->
+
+            <Action name="BGP4SendKeepalive" type="output">
+                <DataModel ref="DataModels:BGP4Keepalive"/>
+                <!-- Constant, no user data -->
+            </Action>
+
+            <Action type="changeState" ref="OpenConfirm"/>
+        </State>
+        
+        
+        <State name="OpenConfirm">
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="DataModels:BGP4"/>
+            </Action>
+            <Action type="changeState" ref="Idle"
+                    when="False"/> <!-- TODO: When message type is not keepalive -->
+
+            <Action type="changeState" ref="Established"/>
+        </State>
+        
+        
+        <State name="Established">
+            <Action name="BGP4Send" type="output">
+                <DataModel name="Packet">
+                    <Choice name="Types">
+                        <Block name="Update" ref="DataModels:BGP4Update"/>
+                        <Block name="Notification" ref="DataModels:BGP4Update"/>
+                        <Block name="Keepalive" ref="DataModels:BGP4Update"/>
+                        <Block name="RouteRefresh" ref="DataModels:BGP4RouteRefresh"/>
+                        <Block name="RouteRefreshWithORF" ref="DataModels:BGP4RouteRefreshWithORF"/>
+                        <Block name="DynamicCapbility" ref="DataModels:BGP4DynamicCapbility"/>
+                    </Choice>
+                </DataModel>
+                <Data filename="file:##Path##/_Common/Samples/Net/Established"/>
+            </Action>
+
+            <!-- <Action name="BGP4Recv -->
+        </State>
+
+
     </StateModel>
+
+    <Agent name="QuaggaAgent">
+    </Agent>
+
+    <Test name="Default">
+        <Agent ref="QuaggaAgent" />
+        <Statemodel ref="BGP_FSM"/>
+        <!-- SCTP instead of TCP possibility draft-zhiyfang-fecai-bgp-over-sctp-00 -->
+        <Publisher name="TcpBGP" class="Tcp">
+            <Param name="Host" value="127.0.0.1" />
+            <Param name="Port" value="31337" />
+        </Publisher>
+    </Test>
 </Peach>
