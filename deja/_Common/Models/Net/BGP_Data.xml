@@ -14,8 +14,12 @@
     <Include ns="rfc1997" src="file:##Path##/_Common/Models/Net/BGP_rfc1997.xml"/>
     <Include ns="rfc2858" src="file:##Path##/_Common/Models/Net/BGP_rfc2858.xml"/>
     <Include ns="rfc2918" src="file:##Path##/_Common/Models/Net/BGP_rfc2918.xml"/>
+    <Include ns="rfc4360" src="file:##Path##/_Common/Models/Net/BGP_rfc4360.xml"/>
     <Include ns="rfc4456" src="file:##Path##/_Common/Models/Net/BGP_rfc4456.xml"/>
+    <Include ns="rfc4724" src="file:##Path##/_Common/Models/Net/BGP_rfc4724.xml"/>
     <Include ns="rfc5291" src="file:##Path##/_Common/Models/Net/BGP_rfc5291.xml"/>
+    <Include ns="rfc6793" src="file:##Path##/_Common/Models/Net/BGP_rfc6793.xml"/>
+    <Include ns="draft-dynamic-cap" src="file:##Path##/_Common/Models/Net/BGP_draft-dynamic-cap.xml"/>
     <Include ns="PathAttrs" src="file:##Path##/_Common/Models/Net/BGP_PathAttrs.xml"/>
     <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
 
@@ -28,29 +32,28 @@
         </Number>
         <Block name="ParamValue">
             <!-- https://www.iana.org/assignments/capability-codes/capability-codes.xhtml -->
-            <Choice name="CapabilityTypes">
-                <Block name="MultiProtocol_Capability" ref="rfc2858:Capability"/>
-                <!-- Quaga says that cisco's old route-refresh cap was 128 -->
-                <Block name="RouteRefresh_Capability" ref="rfc2918:Capability"/>
+            <Choice name="CapType">
+                <!-- UPDATE BGP_draft-dynamic-cap.xml with new capabilities -->
+                <Block name="MultiProtocol" ref="rfc2858:Capability"/>
+                <Block name="RouteRefresh" ref="rfc2918:Capability"/>
+                <Block name="OldRouteRefresh" ref="rfc2918:OldCapability"/>
                 <!-- Quaga says that cisco's old ORF cap was 130 -->
-                <Block name="OutboundRouteFilter_Capability" ref="rfc5291:Capability"/>
-
-                <!-- TODO: Graceful Restart Capability [RFC4724] -->
-                <!-- TODO: Support for 4-octet AS number capability [RFC6793] -->
-                <!-- TODO: Support for Dynamic Capability (capability specific)
-                                [draft-ietf-idr-dynamic-cap] -->
+                <Block name="OutboundRouteFilter" ref="rfc5291:Capability"/>
+                <Block name="GracefulRestart" ref="rfc4724:Capability"/>
+                <Block name="AS4" ref="rfc6793:Capability"/>
+                <Block name="DynamicCap" ref="draft-dynamic-cap:Capability"/>
 
                 <!-- BEGIN quagga unsupported -->
                 <!-- TODO: Multiple routes to a destination capability [RFC3107] -->
                 <!-- TODO: Extended Next Hop Encoding [RFC5549] -->
-                <!-- TODO: Multisession BGP Capability  [draft-ietf-idr-bgp-multisession] -->
+                <!-- TODO: CapCode131 - Multisession BGP Capability  [draft-ietf-idr-bgp-multisession] -->
                 <!-- TODO: ADD-PATH Capability  [draft-ietf-idr-add-paths] -->
                 <!-- TODO: Enhanced Route Refresh Capability   [RFC7313] -->
                 <!-- TODO: Long-Lived Graceful Restart (LLGR) Capability 
                                 [draft-uttaro-idr-bgp-persistence] -->
                 <!-- END quagga unsupported -->
 
-                <Block name="UnknownCapability" ref="Base:BGP4Capability">
+                <Block name="Unknown" ref="Base:BGP4Capability">
                     <Block name="CapabilityValue">
                         <Blob name="Data"/>
                     </Block>
@@ -119,20 +122,20 @@
                     <Block name="ATOMIC_AGGREGATE" ref="PathAttrs:ATOMIC_AGGREGATE"/>
                     <Block name="AGGREGATOR" ref="PathAttrs:AGGREGATOR"/>
                     <Block name="COMMUNITY" ref="rfc1997:COMMUNITY"/>
-                    <Block name="ORIGINATOR_ID" ref="rfc4456:ORIGINATOR_ID"/>
-                    <Block name="CLUSTER_LIST" ref="rfc4456:CLUSTER_LIST"/>
+                    <Block name="AS4_PATH" ref="rfc6793:AS4_PATH"/>
+                    <Block name="AS4_AGGREGATOR" ref="rfc6793:AS4_AGGREGATOR"/>
+                    <Block name="EXT_COMMUNITY" ref="rfc4360:EXT_COMMUNITY"/>
 
+                    <!-- TODO: MP_REACH_NLRI [RFC4760] -->
+                    <!-- TODO: MP_UNREACH_NLRI [RFC4760] -->
+
+                    <!-- BEGIN Quagga Unparsed -->
                     <!-- TODO: DPA (deprecated) [RFC6938] -->
                     <!-- TODO: ADVERTISER (historic) (deprecated) [RFC1863][RFC4223][RFC6938] -->
                     <!-- TODO: RCID_PATH / CLUSTER_ID (Historic) (deprecated)
                                     [RFC1863][RFC4223][RFC6938] -->
-                    <!-- TODO: MP_REACH_NLRI [RFC4760] -->
-                    <!-- TODO: MP_UNREACH_NLRI [RFC4760] -->
-                    <!-- TODO: EXTENDED COMMUNITIES [Eric_Rosen]
-                                    [draft-ramachandra-bgp-ext-communities-00][RFC4360] -->
-                    <!-- TODO: AS4_PATH [RFC6793] -->
-                    <!-- TODO: AS4_AGGREGATOR [RFC6793] -->
                     <!-- TODO: AS_PATHLIMIT (deprecated) [draft-ietf-idr-as-pathlimit] -->
+                    <!-- END Quagga Unparsed -->
 
                     <!-- BEGIN Quagga unsupported -->
                     <!-- TODO: SAFI Specific Attribute (SSA) (deprecated)  [Gargi_Nalawade]
@@ -198,9 +201,12 @@
                 <Block name="Keepalive" ref="BGP4Keepalive"/>
                 <Block name="RouteRefresh" ref="rfc2918:Message"/>
                 <Block name="RouteRefreshWithORF" ref="rfc5291:Message"/>
-                <!--TODO: Quagga supports BGP_MSG_CAPABILITY = 6 -->
+                <Block name="DynamicCapbility" ref="draft-dynamic-cap:Message"/>
             </Choice>
         </Block>
+    </DataModel>
+    <DataModel name="BGP4Stream">
+        <Block name="BGP4Packet" ref="BGP4.BGP4Packet" minOccurs="0" maxOccurs="-1"/>
     </DataModel>
     <!-- END BGP4 Packet Definition -->
 

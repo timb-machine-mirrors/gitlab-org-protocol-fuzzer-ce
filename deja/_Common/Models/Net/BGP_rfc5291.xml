@@ -9,6 +9,7 @@
     <!-- rfc2918 Route Refresh Capability for BGP-4
          tools.ietf.org/html/rfc2918 -->
     <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+    <Include ns="IANA" src="file:##Path##/_Common/Models/Net/BGP_IANA.xml"/>
 
     <DataModel name="ORFTypes">
         <Block name="Reserved">
@@ -26,12 +27,13 @@
     </DataModel>
 
     <DataModel name="Capability" ref="Base:BGP4Capability">
+        <!-- Quaga says that cisco's old ORF CapNumber was 130 -->
         <Number name="CapabilityType"
                 size="8" value="3" constraint="int(value) == 3"/>
         <Block name="CapabilityValue">
-            <Number name="AFI" size="16" endian="big"/>
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
             <Number name="reserved" size="8" value="0x00"/>
-            <Number name="SAFI" size="8"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
             <Number name="numORFs" size="8">
                 <Relation type="count" of="ORFs"/>
             </Number>
@@ -128,9 +130,9 @@
         <Number name="PacketLength" size="16"
                 value="72" constraint="int(value) > 72"/>
         <Block name="MessageData">
-            <Number name="AFI" size="16" endian="big"/>
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
             <Number name="reserved" size="8" value="0x00"/>
-            <Number name="SAFI" size="8"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
             <Number name="Refresh" size="8"/>
             <Choice name="ORFs" minOccurs="0" maxOccurs="-1">
                 <Block name="ReservedORF" ref="ReservedORFEntry"/>

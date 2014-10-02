@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC"
+       description="BGP4 PIT"
+       version="0.0.1">
+
+    <!-- rfc4724  Graceful Restart Mechanism http://tools.ietf.org/html/rfc4724 -->
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+
+    <Include ns="PathAttrs" src="file:##Path##/_Common/Models/Net/BGP_PathAttrs.xml"/>
+
+    <DataModel name="Capability" ref="Base:BGP4Capability">
+        <Number name="CapabilityType"
+                size="8" value="65" constraint="int(value) == 65"/>
+        <Block name="CapabilityValue">
+            <Number name="MyASN" size="32" endian="big"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="AS4_PATH" ref="PathAttrs:AS_PATH">
+        <Number name="TypeCode" size="8"
+               value="17" constraint="int(value) == 17"/>
+        <Number name="Value.PathSegments.ASs"
+               size="32" endian="big" minOccurs="0" maxOccurs="255"/>
+    </DataModel>
+
+    <DataModel name="AS4_AGGREGATOR" ref="PathAttrs:AGGREGATOR">
+        <Number name="TypeCode" size="8"
+                value="18" constraint="int(value) == 18"/>
+        <Number name="Value.ASN" size="32" endian="big"/>
+    </DataModel>
+
+</Peach>
+

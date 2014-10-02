@@ -39,7 +39,8 @@
                     <Number name="AS_SET" size="8"
                             value="1" constraint="int(value) == 1"/>
                     <Number name="AS_SEQUENCE" size="8"
-                            value="1" constraint="int(value) == 1"/>
+                            value="2" constraint="int(value) == 2"/>
+                        <!-- TODO: AS_CONFED_SEQUENCE AS_CONFED_SET [rfc5065] -->
                     <Number name="UNKNOWN" size="8"/>
                 </Choice>
                 <Number name="NumASs" size="8">

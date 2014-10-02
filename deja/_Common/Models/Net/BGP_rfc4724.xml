@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+       author="Deja Vu Security, LLC"
+       description="BGP4 PIT"
+       version="0.0.1">
+
+    <!-- rfc4724  Graceful Restart Mechanism http://tools.ietf.org/html/rfc4724 -->
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+    <Include ns="IANA" src="file:##Path##/_Common/Models/Net/BGP_IANA.xml"/>
+
+    <DataModel name="Capability" ref="Base:BGP4Capability">
+        <Number name="CapabilityType"
+                size="8" value="64" constraint="int(value) == 64"/>
+        <Block name="CapabilityValue">
+            <Block name="RestartFlags">
+                <Number name="RestartState" size="1"/>
+                <Number name="Reserved" size="3" value="0"/>
+            </Block>
+            <Number name="RestartTime" endian="big" size="12"/>
+            <!-- Spec says max 63 occurances
+                 Fuzzing dictates not adhering to the spec -->
+            <Block name="AFSets" minOccurs="0" maxOccurs="-1">
+                <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+                <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+                <Block name="AF_Flags">
+                    <Number name="ForwardingState" size="1"/>
+                    <Number name="Reserved" size="7" value="0"/>
+                </Block>
+            </Block>
+        </Block>
+    </DataModel>
+
+    <!-- TODO: Changes to the FSM -->
+</Peach>
