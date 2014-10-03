@@ -230,11 +230,11 @@ namespace Peach.Core.Runtime
 
 				exitCode = 0;
 			}
-            catch (ArgumentException ae)
-            {
-                Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
-                Console.WriteLine("Use -h for help");
-            }
+            		catch (ArgumentException ae)
+            		{
+                		Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
+                		Console.WriteLine("Use -h for help");
+            		}
 			catch (SyntaxException)
 			{
 				// Ignore, thrown by syntax()
