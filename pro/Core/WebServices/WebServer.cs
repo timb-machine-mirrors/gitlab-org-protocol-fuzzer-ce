@@ -43,7 +43,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => MediaRange.FromString(o.Item1)).ToList();
+			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => (new MediaRange(o.Item1))).ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))
@@ -138,6 +138,8 @@ namespace Peach.Enterprise.WebServices
 			// Need to go before the default '/Content' handler in nancy
 			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
 			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/docs", @"docs"));
+
+			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/api-docs", @"swagger-ui"));
 		}
 
 		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
