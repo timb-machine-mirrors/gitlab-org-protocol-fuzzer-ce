@@ -70,7 +70,7 @@ module DashApp {
 							data.forEach((item) => {
 								timelineData.push({
 									id: item.id,
-									type: "point",
+									type: "box",
 									content: "",
 									data: item,
 									start: item.time
