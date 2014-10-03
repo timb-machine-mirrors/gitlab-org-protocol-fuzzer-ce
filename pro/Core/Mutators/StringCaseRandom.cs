@@ -1,153 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+using System;
 using System.Text;
+
 using Peach.Core.Dom;
 
-#if DISABLED
+using NLog;
+
 namespace Peach.Core.Mutators
 {
-    [Mutator("StringCaseMutator")]
-    [Description("Changes the case of a string")]
-    public class StringCaseMutator : Mutator
-    {
-        // members
-        //
-        public delegate void mutationType(DataElement obj);
-        mutationType[] mutations = new mutationType[3];
-        uint index;
+	/// <summary>
+	/// Picks a gaussian random number X centered on 1, with a
+	/// sigma of 1/3 the string length.
+	/// Then, pick X random indices in the string.
+	/// At each selected index, toggle the case of the character.
+	/// </summary>
+	[Mutator("StringCaseRandom")]
+	[Description("Change the case of random characters in the string.")]
+	public class StringCaseRandom : Mutator
+	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-        // CTOR
-        //
-        public StringCaseMutator(DataElement obj)
-        {
-            index = 0;
-            name = "StringCaseMutator";
-            mutations[0] = new mutationType(mutationLowerCase);
-            mutations[1] = new mutationType(mutationUpperCase);
-            mutations[2] = new mutationType(mutationRandomCase);
-        }
+		int total;
 
-        // COUNT
-        //
-        public override int count
-        {
-            get { return mutations.Length; }
-        }
+		public StringCaseRandom(DataElement obj)
+			: base(obj)
+		{
+			var str = (string)obj.InternalValue;
 
-        public override uint mutation
-        {
-            get { return index; }
-            set { index = value; }
-        }
+			// For sequential, use the length total number of mutations
+			total = str.Length;
+		}
 
-        // SUPPORTED
-        //
-        public new static bool supportedDataElement(DataElement obj)
-        {
-            if (obj is Dom.String && obj.isMutable)
-                return true;
+		public new static bool supportedDataElement(DataElement obj)
+		{
+			if (obj is Dom.String && obj.isMutable)
+			{
+				// Esure the string changes when changing the case.
+				// TODO: Investigate if it is faster to go 1 char at a time.
+				var str = (string)obj.InternalValue;
 
-            return false;
-        }
+				if (str != str.ToUpper())
+					return true;
 
-        // SEQUENTIAL_MUTATION
-        //
-        public override void sequentialMutation(DataElement obj)
-        {
-            // Only called via the Sequential mutation strategy, which should always have a consistent seed
-            obj.mutationFlags = MutateOverride.Default;
-            mutations[index](obj);
-        }
+				if (str != str.ToLower())
+					return true;
+			}
 
-        // RANDOM_MUTATION
-        //
-        public override void randomMutation(DataElement obj)
-        {
-            if (obj.mutationFlags.HasFlag(MutateOverride.TypeTransform))
-                return;
+			return false;
+		}
 
-            obj.mutationFlags = MutateOverride.Default;
-            context.Random.Choice(mutations)(obj);
-        }
+		public override int count
+		{
+			get
+			{
+				return total;
+			}
+		}
 
-        // MUTATION_LOWER_CASE
-        //
-        public void mutationLowerCase(DataElement obj)
-        {
-            string str = (string)obj.InternalValue;
-            obj.MutatedValue = new Variant(str.ToLower());
-        }
+		public override uint mutation
+		{
+			get;
+			set;
+		}
 
-        // MUTATION_UPPER_CASE
-        //
-        public void mutationUpperCase(DataElement obj)
-        {
-            string str = (string)obj.InternalValue;
-            obj.MutatedValue = new Variant(str.ToUpper());
-        }
+		public override void sequentialMutation(DataElement obj)
+		{
+			randomMutation(obj);
+		}
 
-        // MUTATION_RANDOM_CASE
-        //
-        public void mutationRandomCase(DataElement obj)
-        {
-            StringBuilder builder = new StringBuilder((string)obj.InternalValue);
-            char[] cases = new char[2];
-            char c;
+		public override void randomMutation(DataElement obj)
+		{
+			string asStr;
 
-            foreach (int i in Sample(builder.Length))
-            {
-                c = builder[i];
-                cases[0] = Char.ToLower(c);
-                cases[1] = Char.ToUpper(c);
+			try
+			{
+				asStr = (string)obj.InternalValue;
+			}
+			catch (NotSupportedException ex)
+			{
+				logger.Debug("Skipping mutation of {0}, {1}", obj.debugName, ex.Message);
+				return;
+			}
 
-                builder[i] = context.Random.Choice(cases);
-            }
+			var sb = new StringBuilder(asStr);
 
-            obj.MutatedValue = new Variant(builder.ToString());
-            return;
-        }
+			// Pick gaussian from 1 to string length
+			var stddev = sb.Length / 3;
+			var cnt = 0;
 
-        /// <summary>
-        /// Return a sampling of indexes based on max index.
-        /// </summary>
-        /// <remarks>
-        /// For indexes &lt; 20 we return all indexes.  When
-        /// over 20 we return a max of 20 samples.
-        /// </remarks>
-        /// <param name="max">Max index</param>
-        /// <returns></returns>
-        private int[] Sample(int max)
-        {
-            if (max < 20)
-            {
-                int[] ret = new int[max];
+			do
+			{
+				cnt = (int)Math.Round(Math.Abs(context.Random.NextGaussian(0, stddev))) + 1;
+			}
+			while (cnt > sb.Length);
 
-                for (int i = 0; i < ret.Length; i++)
-                    ret[i] = i;
+			// Pick cnt indices
+			var indices = context.Random.Permutation(sb.Length, cnt);
 
-                return ret;
-            }
-            else
-            {
-                List<int> ret = new List<int>();
-                int index;
+			for (int i = 0; i < indices.Length; ++i)
+			{
+				// Permutation is [1,Length] inclusive
+				var idx = indices[i] - 1;
 
-                for (int i = 0; i < 20; ++i)
-                {
-                    do
-                    {
-                        index = context.Random.Next(max);
-                    }
-                    while (ret.Contains(index));
+				var ch = sb[idx];
+				var upper = char.ToUpper(ch);
 
-                    ret.Add(index);
-                }
+				// Toggle the case at the picked indices
+				if (ch != upper)
+					sb[idx] = upper;
+				else
+					sb[idx] = char.ToLower(ch);
+			}
 
-                return ret.ToArray();
-            }
-        }
-    }
+			obj.MutatedValue = new Variant(sb.ToString());
+			obj.mutationFlags = MutateOverride.Default;
+		}
+	}
 }
-#endif
-
-// end

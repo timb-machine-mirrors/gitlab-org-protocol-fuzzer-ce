@@ -9,6 +9,7 @@ using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
 
+#if DISABLED
 namespace Peach.Core.Test.Mutators
 {
     [TestFixture] [Category("Peach")]
@@ -182,3 +183,4 @@ namespace Peach.Core.Test.Mutators
 }
 
 // end
+#endif

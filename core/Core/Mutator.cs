@@ -73,7 +73,7 @@ namespace Peach.Core
 	/// </item>
 	/// </list>
 	/// </remarks>
-	public abstract class Mutator : IWeighted
+	public abstract class Mutator : IWeighted, INamed
 	{
 		/// <summary>
 		/// Is this mutator able to affect the state model?
@@ -81,7 +81,7 @@ namespace Peach.Core
 		/// <remarks>
 		/// This static variable should be set through a static constructor in the sub-class.
 		/// </remarks>
-		public static bool affectStateModel = false;
+		public static readonly bool affectStateModel = false;
 
 		/// <summary>
 		/// Is this mutator able to affect the data model?
@@ -89,33 +89,35 @@ namespace Peach.Core
 		/// <remarks>
 		/// This static variable should be set through a static constructor in the sub-class.
 		/// </remarks>
-		public static bool affectDataModel = true;
+		public static readonly bool affectDataModel = true;
 
 		/// <summary>
 		/// Instance of current mutation strategy
 		/// </summary>
 		public MutationStrategy context = null;
 
-		/// <summary>
-		/// Weight this mutator will get chosen in random mutation mode.
-		/// </summary>
-		public int weight = 1;
-
-		/// <summary>
-		/// Name of this mutator
-		/// </summary>
-		public string name = "Unknown";
-
-		public Mutator()
-		{
-		}
+		bool hasRelation;
+		bool hasFixup;
 
 		public Mutator(DataElement obj)
 		{
+			hasRelation = obj.relations.HasOf();
+			hasFixup = obj.fixup != null;
 		}
 
 		public Mutator(StateModel obj)
 		{
+		}
+
+		/// <summary>
+		/// The name of the mutator
+		/// </summary>
+		public virtual string name
+		{
+			get
+			{
+				return GetType().Name;
+			}
 		}
 
 		/// <summary>
@@ -137,6 +139,16 @@ namespace Peach.Core
 		public abstract int count
 		{
 			get;
+		}
+
+		/// <summary>
+		/// Raw weight this mutator will get chosen in random mutation mode.
+		/// The selection weight will also take into account if the element
+		/// being mutated has a fixup or relation on it.
+		/// </summary>
+		public virtual int weight
+		{
+			get { return count; }
 		}
 
 		/// <summary>
@@ -174,7 +186,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Perform a sequential mutation on state model
 		/// </summary>
-		/// <seealso cref="randomMutation(Core.Dom.StateModel)"/>
+		/// <seealso cref="!:Peach.Core.Mutator.randomMutation(Peach.Core.Dom.StateModel)"/>
 		/// <seealso cref="nextAction"/>
 		/// <seealso cref="changeState"/>
 		/// <param name="model"></param>
@@ -194,7 +206,7 @@ namespace Peach.Core
 		/// the strategy. They should cause the mutator to produce this type of test case.
 		/// The actual methods that perform the mutation are <c>changeState</c> and <c>changeAction</c>.
 		/// </remarks>
-		/// <seealso cref="sequentialMutation(Core.Dom.StateModel)"/>
+		/// <seealso cref="!:Peach.Core.Mutator.sequentialMutation(Peach.Core.Dom.StateModel)"/>
 		/// <seealso cref="nextAction"/>
 		/// <seealso cref="changeState"/>
 		/// <param name="model"></param>
@@ -234,11 +246,75 @@ namespace Peach.Core
 
 		#region IWeighted Members
 
-		public int SelectionWeight
+		public virtual int SelectionWeight
 		{
-			get { return weight; }
+			get
+			{
+				// TODO: How do we want to weight down elements with fixups & relations
+				if (hasFixup || hasRelation)
+					return (int)(Math.Sqrt(weight));
+
+				return weight;
+			}
 		}
 
 		#endregion
+
+		protected static string getHint(DataElement obj, string name)
+		{
+			Hint h;
+
+			if (!obj.Hints.TryGetValue(name, out h))
+				return null;
+
+			return h.Value;
+		}
+
+		protected static bool getTypeTransformHint(DataElement obj)
+		{
+			var name = "Peach.TypeTransform";
+			var value = getHint(obj, name);
+
+			// Defaults to supporting type transforms
+			if (string.IsNullOrEmpty(value))
+				return true;
+
+			bool ret;
+
+			if (!bool.TryParse(value.ToLower(), out ret))
+				throw new PeachException("{0} hint '{1}' has invalid value '{2}'.".Fmt(obj.debugName, name, value));
+			
+			return ret;
+		}
+
+		protected bool getN(DataElement obj, out uint n)
+		{
+			return getN(obj, GetType().Name, out n);
+		}
+
+		protected bool getN(DataElement obj, string prefix, out uint n)
+		{
+			var name = prefix + "-N";
+			var value = getHint(obj, name);
+
+			if (string.IsNullOrEmpty(value))
+			{
+				n = 0;
+				return false;
+			}
+
+			if (!uint.TryParse(value, out n))
+				throw new PeachException("{0} hint '{1}' has invalid value '{2}'.".Fmt(obj.debugName, name, value));
+
+			return true;
+		}
+
+		protected uint getN(DataElement obj, uint defaultValue)
+		{
+			uint ret;
+			if (!getN(obj, out ret))
+				ret = defaultValue;
+			return ret;
+		}
 	}
 }

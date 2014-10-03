@@ -8,6 +8,20 @@ namespace Peach.Core.Test
 {
 	public static class Helpers
 	{
+		public static Dictionary<T, int> Total<T>(this IEnumerable<T> seq)
+		{
+			var dict = new Dictionary<T, int>();
+
+			foreach (var item in seq)
+			{
+				int val;
+				dict.TryGetValue(item, out val);
+				dict[item] = val + 1;
+			}
+
+			return dict;
+		}
+
 		public static Process StartAgent()
 		{
 			var startEvent = new ManualResetEvent(false);

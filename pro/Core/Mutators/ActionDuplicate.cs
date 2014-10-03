@@ -14,13 +14,10 @@ namespace Peach.Enterprise.Mutators
 	[Description("Causes Actions to be repeated. Will not repeat actions with publisher of Peach.Agent.")]
 	public class ActionDuplicate: Mutator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		//static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static ActionDuplicate()
-		{
-			affectDataModel = false;
-			affectStateModel = true;
-		}
+		public static new readonly bool affectDataModel = false;
+		public static new readonly bool affectStateModel = true;
 
 		/// <summary>
 		/// Maximum number of repetitions to perform
@@ -39,9 +36,8 @@ namespace Peach.Enterprise.Mutators
 		int _actionCount = 0;
 
 		public ActionDuplicate(StateModel model)
+			: base(model)
 		{
-			name = "ActionDuplicate";
-
 			foreach (var state in model.states)
 				_actionCount += state.actions.Count;
 

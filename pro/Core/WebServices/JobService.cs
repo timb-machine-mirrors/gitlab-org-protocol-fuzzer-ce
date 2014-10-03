@@ -14,18 +14,18 @@ namespace Peach.Enterprise.WebServices
 		public JobService(WebContext context)
 			: base(context, Prefix)
 		{
-			Get[""] = _ => GetJobs();
-			Get["/{id}"] = _ => GetJob(_.id);
-			Get["/{id}/nodes"] = _ => GetNodes(_.id);
-			Get["/{id}/faults"] = _ => GetFaults(_.id);
-			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
+			Get["GetJobs", ""] = _ => GetJobs();
+			Get["GetJob", "/{id}"] = _ => GetJob(_.id);
+			Get["GetJobNodes", "/{id}/nodes"] = _ => GetNodes(_.id);
+			Get["GetJobFaults", "/{id}/faults"] = _ => GetFaults(_.id);
+			Get["GetJobVisualizer", "/{id}/visualizer"] = _ => GetVisualizer(_.id);
 
-			Post[""] = _ => CreateJob();
+			Post["PostJob", ""] = _ => CreateJob();
 
-			Get["/{id}/continue"] = _ => ContinueJob(_.id);
-			Get["/{id}/pause"] = _ => PauseJob(_.id);
-			Get["/{id}/stop"] = _ => StopJob(_.id);
-			Get["/{id}/kill"] = _ => KillJob(_.id);
+			Get["GetJobContinue", "/{id}/continue"] = _ => ContinueJob(_.id);
+			Get["GetJobPause", "/{id}/pause"] = _ => PauseJob(_.id);
+			Get["GetJobStop", "/{id}/stop"] = _ => StopJob(_.id);
+			Get["GetJobKill", "/{id}/kill"] = _ => KillJob(_.id);
 		}
 
 		object CreateJob()

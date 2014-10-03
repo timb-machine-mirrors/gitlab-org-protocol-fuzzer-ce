@@ -1,4 +1,5 @@
-﻿
+﻿#if DISABLED
+
 //
 // Copyright (c) Michael Eddington
 //
@@ -70,7 +71,7 @@ namespace Peach.Core.Mutators
         public BlobMutator(DataElement obj)
             : base(obj)
         {
-            name = "BlobMutator";
+            //name = "BlobMutator";
             pos = 0;
 
             How how = 0;
@@ -407,3 +408,4 @@ namespace Peach.Core.Mutators
 }
 
 // end
+#endif

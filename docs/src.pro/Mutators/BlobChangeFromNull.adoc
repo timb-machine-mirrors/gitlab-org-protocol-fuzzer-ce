@@ -1,0 +1,14 @@
+<<<
+[[Mutators_BlobChangeFromNull]]
+== BlobChangeFromNull
+
+This mutator will produce test cases in which null bytes in a xref:Blob[Blob] element are changed to a non-null value. The mutator operates by picking a slice of bytes, between 1 and 100, to operate on. Each null byte is changed to a different randomly selected non-null value.
+
+=== Supported Elements
+
+ * xref:Blob[Blob]
+
+=== Hints
+
+BlobChangeFromNull-N:: Standard deviation of number of bytes to change.
+BlobMutator-N:: Standard deviation of number of bytes to change. Will affect other Blob mutators.

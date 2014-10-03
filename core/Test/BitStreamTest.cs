@@ -759,15 +759,44 @@ namespace Peach.Core.Test
 			var bs = new BitStream();
 			bs.Write(new byte[] { 0x11, 0x27, 0x33, 0x44, 0x55 }, 0, 5);
 			bs.SeekBits(0, SeekOrigin.Begin);
-			BitStream in1 = bs.SliceBits(8 + 4);
-			BitStream in2 = bs.SliceBits(2);
-			BitStream in3 = bs.SliceBits(2 + 16 + 4);
-			BitStream in4 = in3.SliceBits(16);
+			var in1 = bs.SliceBits(8 + 4);
+			var in2 = bs.SliceBits(2);
+			var in3 = bs.SliceBits(2 + 16 + 4);
+			var in4 = in3.SliceBits(16);
 
 			Assert.AreEqual(new byte[] { 0x11, 0x20 }, in1.ToArray());
 			Assert.AreEqual(new byte[] { 0x40 }, in2.ToArray());
 			Assert.AreEqual(new byte[] { 0xcc, 0xd1, 0x14 }, in3.ToArray());
 			Assert.AreEqual(new byte[] { 0xcc, 0xd1 }, in4.ToArray());
+
+			bs.Seek(1, SeekOrigin.Begin);
+			var s1 = bs.SliceBits(24);
+
+			var b1 = s1.ReadByte();
+			Assert.AreEqual(0x27, b1);
+
+			var b2 = s1.ReadByte();
+			Assert.AreEqual(0x33, b2);
+
+			var b3 = s1.ReadByte();
+			Assert.AreEqual(0x44, b3);
+
+			var b4 = s1.ReadByte();
+			Assert.AreEqual(-1, b4);
+
+			s1.SeekBits(-1, SeekOrigin.End);
+
+			var b5 = s1.ReadBit();
+			Assert.AreNotEqual(-1, b5);
+
+			var b6 = s1.ReadBit();
+			Assert.AreEqual(-1, b6);
+
+			s1.SeekBits(0, SeekOrigin.End);
+
+			ulong bits;
+			var cnt = s1.ReadBits(out bits, 1);
+			Assert.AreEqual(0, cnt);
 		}
 
 		[Test]
@@ -818,6 +847,84 @@ namespace Peach.Core.Test
 			{
 				Assert.AreEqual("Couldn't convert last 3 bytes into string.", ex.Message);
 			}
+		}
+
+		[Test]
+		public void ReadWriteBit()
+		{
+			var bs = new BitStream();
+			bs.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
+
+			bs.Seek(0, SeekOrigin.Begin);
+
+			for (int i = 0; i < bs.LengthBits; ++i)
+			{
+				int b = bs.ReadBit();
+				Assert.AreEqual(0, b);
+				Assert.AreEqual(i + 1, bs.PositionBits);
+				Assert.AreEqual(bs.PositionBits / 8, bs.Position);
+			}
+
+			bs.Seek(0, SeekOrigin.Begin);
+
+			for (int i = 0; i < bs.LengthBits; ++i)
+			{
+				var bit = bs.ReadBit();
+				Assert.AreNotEqual(-1, bit);
+
+				bs.SeekBits(-1, SeekOrigin.Current);
+				bs.WriteBit(1);
+
+				Assert.AreEqual(i + 1, bs.PositionBits);
+				Assert.AreEqual(bs.PositionBits / 8, bs.Position);
+
+				bs.Seek(i / 8, SeekOrigin.Begin);
+
+				var b = bs.ReadByte();
+
+				bs.SeekBits(i + 1, SeekOrigin.Begin);
+
+				var shift = 7 - (i % 8);
+				var exp = 0xff & (~((1 << shift) - 1));
+
+				// Bits should start filling in, 1 at a time, left to right
+				Assert.AreEqual(exp, b);
+			}
+
+			bs.SeekBits(46, SeekOrigin.Begin);
+
+			bs.WriteBit(1);
+
+			Assert.AreEqual(47, bs.PositionBits);
+			Assert.AreEqual(47, bs.LengthBits);
+			Assert.AreEqual(47/8, bs.Position);
+
+			bs.WriteBit(1);
+
+			Assert.AreEqual(48, bs.PositionBits);
+			Assert.AreEqual(48, bs.LengthBits);
+			Assert.AreEqual(6, bs.Position);
+			Assert.AreEqual(6, bs.Length);
+
+			bs.Seek(-1, SeekOrigin.Current);
+
+			var b1 = bs.ReadByte();
+			Assert.AreEqual(3, b1);
+
+			var lst = new BitStreamList();
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+			lst.Add(new BitStream(new MemoryStream(new byte[] { 0xff })));
+
+			for (int i = 0; i < lst.LengthBits; ++i)
+			{
+				var b = lst.ReadBit();
+				Assert.AreEqual(1, b);
+				Assert.AreEqual(i + 1, lst.PositionBits);
+			}
+
+			Assert.AreEqual(lst.LengthBits, lst.PositionBits);
 		}
 	}
 }

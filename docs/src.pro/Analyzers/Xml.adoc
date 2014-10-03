@@ -2,6 +2,7 @@
 == Xml Analyzer
 
 The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. 
+When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
 
 This analyzer can be attached to a string. 
 
@@ -14,6 +15,10 @@ TIP: XML special characters (< = &lt;, > = &gt;, " = &quot;, & = &amp;) must be 
 <String  value="&lt;Root&gt;HelloWorld!&lt;/Root&gt;">
 	<Analyzer class="Xml" />
 </String>
+----
+
+----
+peach --analyzer=Xml input.xml output.xml
 ----
 
 === Attributes

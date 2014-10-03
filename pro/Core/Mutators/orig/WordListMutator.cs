@@ -1,4 +1,5 @@
-﻿//
+﻿#if DISABLED
+//
 // Copyright (c) Mick Ayzenberg
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -125,3 +126,4 @@ namespace Peach.Core.Mutators
 }
 
 // end
+#endif

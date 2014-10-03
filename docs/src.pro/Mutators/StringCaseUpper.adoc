@@ -1,0 +1,13 @@
+<<<
+[[Mutators_StringCaseUpper]]
+== StringCaseUpper
+
+This mutator produces a single test case by making the case in the string all uppercase. It is not enabled for strings that contain all uppercase data.
+
+=== Supported Elements
+
+* xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

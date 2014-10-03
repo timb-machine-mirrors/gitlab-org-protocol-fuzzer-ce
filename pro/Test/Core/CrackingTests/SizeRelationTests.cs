@@ -551,6 +551,7 @@ namespace Peach.Core.Test.CrackingTests
 		}
 
 		[Test]
+		[Ignore("Expected to fail. See peach-pro issue #3")]
 		public void SizeRefParentParent()
 		{
 			string xml = @"

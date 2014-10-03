@@ -52,6 +52,53 @@ c:\peach3> peach.exe -a tcp
 
 ----
 
+===== Multiple Interfaces on Agent Machine
+
+There is a bug in the Microsoft.NET remoting framework that causes default network adapters IP address to be used, event when communication occurs over a secondary interface.
+
+When running a Peach Agent on a machine that has muliple network interfaces, the interface can be explicitly bound to using a configuration setting. This configuration setting is only required for the Peach Agent process.
+
+The following XML can be added to the +Peach.exe.config+ file inside of the _configuration_ element:
+
+[source,xml]
+----
+<appSettings>
+    <add key="AgentBindIp" value="INTERFACE_IP"/>
+</appSettings>
+----
+
+.Peach.exe.config Example
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+	<configSections>
+		<section name="nlog" type="NLog.Config.ConfigSectionHandler, NLog" />
+	</configSections>
+	<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<!-- go to https://github.com/nlog/NLog/wiki/Configuration-file#wiki-include-files for more information -->
+		<include file="${basedir}/NLog.config" ignoreErrors="true" />
+	</nlog>
+	<startup>
+		<supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0" />
+	</startup>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="log4net" publicKeyToken="669e0ddf0bb1aa2a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-1.2.13.0" newVersion="1.2.13.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+  
+  <appSettings>
+    <!-- Force agent to use correct interface address -->
+    <add key="AgentBindIp" value="192.168.64.135"/>
+  </appSettings>
+
+</configuration>
+----
+
 ==== REST JSON Agent
 
 // TODO - Document each rest call

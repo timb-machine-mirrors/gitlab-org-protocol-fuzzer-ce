@@ -45,6 +45,12 @@ namespace Peach.Core.Dom
 		/// </summary>
 		/// <param name="model"></param>
 		void Apply(DataModel model);
+
+		/// <summary>
+		/// Will this data set be ignored by the engine when
+		/// looking for a new data set to switch to.
+		/// </summary>
+		bool Ignore { get; set; }
 	}
 
 	/// <summary>
@@ -100,6 +106,12 @@ namespace Peach.Core.Dom
 			get;
 			private set;
 		}
+
+		public bool Ignore
+		{
+			get;
+			set;
+		}
 	}
 
 	/// <summary>
@@ -140,6 +152,12 @@ namespace Peach.Core.Dom
 		{
 			get;
 			private set;
+		}
+
+		public bool Ignore
+		{
+			get;
+			set;
 		}
 
 		public void Apply(DataModel model)

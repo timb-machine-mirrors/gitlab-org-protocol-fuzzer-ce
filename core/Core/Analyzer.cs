@@ -41,10 +41,10 @@ namespace Peach.Core
 	[Serializable]
 	public abstract class Analyzer: IPitSerializable
 	{
-		public static bool supportParser = false;
-		public static bool supportDataElement = false;
-		public static bool supportCommandLine = false;
-		public static bool supportTopLevel = false;
+		public static readonly bool supportParser = false;
+		public static readonly bool supportDataElement = false;
+		public static readonly bool supportCommandLine = false;
+		public static readonly bool supportTopLevel = false;
 
 		public static Analyzer defaultParser = null;
 

@@ -179,10 +179,10 @@ namespace Peach.Core.IO
 			}
 		}
 
-		public BitStream SliceBits(long length)
+		public override BitwiseStream SliceBits(long length)
 		{
 			if (length < 0 || (_position + length) > _length)
-				throw new ArgumentOutOfRangeException("lengthInBits");
+				throw new ArgumentOutOfRangeException("length");
 
 			var ret = new BitStream(_stream, 0, length, _position + _offset, false);
 
@@ -427,6 +427,30 @@ namespace Peach.Core.IO
 			}
 		}
 
+		public override int ReadBit()
+		{
+			if (_length <= _position)
+				return -1;
+
+			int pos = (int)((_position + _offset) & 0x7);
+
+			// Ensure stream is in the right place
+			_stream.Seek((_position + _offset) / 8, SeekOrigin.Begin);
+
+			int cur = _stream.ReadByte();
+			System.Diagnostics.Debug.Assert(cur != -1);
+
+			cur >>= (8 - pos - 1);
+			cur &= 1;
+
+			++_position;
+
+			// Ensure stream is in the right place
+			_stream.Seek((_position + _offset) / 8, SeekOrigin.Begin);
+
+			return cur;
+		}
+
 		public override int ReadBits(out ulong bits, int count)
 		{
 			if (count > 64 || count < 0)
@@ -434,7 +458,7 @@ namespace Peach.Core.IO
 
 			bits = 0;
 
-			if (_length < _position)
+			if (_length <= _position)
 				return 0;
 
 			int pos = (int)((_position + _offset) & 0x7);
@@ -512,6 +536,38 @@ namespace Peach.Core.IO
 				_position = value;
 				_stream.Position = _position / 8;
 			}
+		}
+
+		public override void WriteBit(int value)
+		{
+			int pos = (int)(_position & 0x7);
+
+			// Ensure stream is in the right place
+			_stream.Seek((_position + _offset) / 8, SeekOrigin.Begin);
+
+			var shift = 8 - pos - 1;
+			var next = (byte)value;
+			next &= 1;
+			next <<= shift;
+
+			int cur = _stream.ReadByte();
+			if (cur != -1)
+			{
+				_stream.Seek(-1, SeekOrigin.Current);
+				int mask = ~(1 << shift);
+				cur &= mask;
+				next |= (byte)cur;
+			}
+
+			_stream.WriteByte(next);
+
+			++_position;
+
+			// Ensure stream is in the right place
+			_stream.Seek((_position + _offset) / 8, SeekOrigin.Begin);
+
+			if (_position > _length)
+				_length = _position;
 		}
 
 		public override void WriteBits(ulong bits, int count)

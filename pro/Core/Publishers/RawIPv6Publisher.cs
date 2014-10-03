@@ -53,13 +53,12 @@ namespace Peach.Pro.Publishers
 	[Publisher("Raw6")]
 	[Publisher("raw.Raw6")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
-	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
+	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to", "")]
 	[Parameter("Protocol", typeof(byte), "IP protocol to use")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
-	public class RawV6Publisher : SocketWritePcapReadPublisher
+	public class RawV6Publisher : SocketPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -78,11 +77,6 @@ namespace Peach.Pro.Publishers
 		{
 			Socket s = OpenRawSocket(AddressFamily.InterNetworkV6, Protocol);
 			return s;
-		}
-
-		protected override bool TryInterpretData(SharpPcap.RawCapture capture, out byte[] data)
-		{
-			return PcapListener.TryAsIpv6(capture, out data);
 		}
 	}
 }

@@ -74,7 +74,7 @@ namespace Peach.Pro.Publishers
 
 		public PcapListener(System.Net.IPAddress Interface)
 		{
-			var globalip = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+			//var globalip = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
 			System.Net.NetworkInformation.PhysicalAddress macAddress = null;
 
 			foreach (var adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
@@ -232,6 +232,8 @@ namespace Peach.Pro.Publishers
 				var packet = Packet.ParsePacket(LinkLayers.Ethernet, capture.Data);
 				var ip = packet.PayloadPacket;
 				var tcp = (TcpPacket)ip.PayloadPacket;
+
+				System.Diagnostics.Debug.Assert(tcp != null);
 
 				data = new byte[ip.Bytes.Length];
 				Array.Copy(ip.Bytes, data, data.Length);

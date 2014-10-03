@@ -1,65 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿//
+// Copyright (c) Deja vu Security
+//
 
-using Peach.Core;
+using System;
+
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+namespace Peach.Core.Mutators
 {
 	/// <summary>
 	/// Generate string with random unicode characters in them from plane 0 (0 - 0xffff).
 	/// </summary>
 	[Mutator("StringUnicodePlane0")]
 	[Description("Produce a random string from the Unicode Plane 0 character set.")]
-	public class StringUnicodePlane0 : Mutator
+	public class StringUnicodePlane0 : Utility.StringMutator
 	{
-		uint currentCount = 0;
-
 		public StringUnicodePlane0(DataElement obj)
+			: base(obj)
 		{
-			name = "StringUnicodePlane0";
 		}
 
-       public override uint mutation
-        {
-            get { return currentCount; }
-            set { currentCount = value; }
-        }
-
-        public override int count
-        {
-            get { return 1000; }
-        }
-		public new static bool supportedDataElement(DataElement obj)
+		protected override int GetCodePoint()
 		{
-			// Only attach to strings that support unicode characters
-			if (obj is Core.Dom.String && obj.isMutable && 
-				(obj as Core.Dom.String).stringType != StringType.ascii)
-				return true;
+			while (true)
+			{
+				var cp = context.Random.Next(0x0000, 0xFFFD + 1);
 
-			return false;
-		}
+				// Ignore low and high surrogate code points
+				if (cp >= 0xD800 && cp <= 0xDFFF)
+					continue;
 
-		public override void sequentialMutation(DataElement obj)
-		{
-			randomMutation(obj);
-		}
+				// Ignore noncharacter code points
+				if (cp >= 0xFDD0 && cp <= 0xFDFE)
+					continue;
 
-		public override void randomMutation(DataElement obj)
-		{
-			int len = 1;
-			var str = "";
+				// Ignore private use
+				if (cp >= 0xE000 && cp <= 0xF8FF)
+					continue;
 
-			if(obj.DefaultValue != null)
-				len = ((string)obj.DefaultValue).Length > 0 ? ((string)obj.DefaultValue).Length : 1;
-
-			for(; len > 0; len--)
-				str = str + char.ConvertFromUtf32(context.Random.Next(0, 0xFFFF));
-
-			obj.MutatedValue = new Variant(str);
-			obj.mutationFlags = MutateOverride.Default;
+				return cp;
+			}
 		}
 	}
 }
