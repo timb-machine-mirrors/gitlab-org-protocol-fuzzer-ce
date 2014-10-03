@@ -105,6 +105,9 @@ namespace Peach.Core.Dom
 		{
 			foreach (var child in start)
 			{
+				if (child is Choice)
+					throw new Exception("CHOICE");
+
 				if (child is DataElementContainer)
 				{
 					foreach (var cchild in EnumerateAllElementsDown(child as DataElementContainer))
@@ -124,27 +127,34 @@ namespace Peach.Core.Dom
 		{
 			foreach (var elem in choiceElements.Values)
 			{
-				var cont = elem as DataElementContainer;
-				if (cont != null)
+				try
 				{
-					long offset = 0;
-					foreach (var child in EnumerateAllElementsDown(cont))
+					var cont = elem as DataElementContainer;
+					if (cont != null)
 					{
-						if (child.isToken)
+						long offset = 0;
+						foreach (var child in EnumerateAllElementsDown(cont))
 						{
-							_choiceCache[elem.name] = new ChoiceCache() { Offset = offset, Token = child.Value };
-							break;
+							if (child.isToken)
+							{
+								_choiceCache[elem.name] = new ChoiceCache() { Offset = offset, Token = child.Value };
+								break;
+							}
+
+							else if (child.hasLength)
+								offset += child.lengthAsBits;
+
+							else if (child.isDeterministic)
+								continue;
 						}
-
-						else if (child.hasLength)
-							offset += child.lengthAsBits;
-
-						else if (child.isDeterministic)
-							continue;
 					}
+					else if (elem.isToken)
+						_choiceCache[elem.name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
 				}
-				else if(elem.isToken)
-					_choiceCache[elem.name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
+				catch
+				{
+					// we end up here if we run info a choice element
+				}
 			}
 		}
 
