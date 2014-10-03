@@ -40,9 +40,6 @@ deps = [
 	'Nancy.dll',
 	'Nancy.Hosting.Self.dll',
 	'Nancy.Serialization.JsonNet.dll',
-  'Nancy.Metadata.Module.dll',
-  'Nancy.Swagger.dll',
-  'Swagger.ObjectModel.dll',
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
