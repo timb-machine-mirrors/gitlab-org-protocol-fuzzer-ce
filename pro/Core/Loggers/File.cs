@@ -82,7 +82,7 @@ namespace Peach.Core.Loggers
 			private set;
 		}
 
-		protected enum Category { Faults, Reproducing, NonReproducable }
+		public enum Category { Faults, Reproducing, NonReproducable }
 
 		protected void SaveFault(Category category, Fault fault)
 		{
@@ -445,8 +445,10 @@ namespace Peach.Core.Loggers
 		/// Delegate for FaultSaved event.
 		/// </summary>
 		/// <param name="fault">Fault object that was saved</param>
+		/// <param name="category">Category of fault</param>
+		/// <param name="dataFiles">Collected Files</param>
 		/// <param name="path">Fault folder</param>
-		public delegate void FaultSavedEvent(Fault fault, string path);
+		public delegate void FaultSavedEvent(Category category, Fault fault, string[] dataFiles, string path);
 		public event FaultSavedEvent FaultSaved;
 
 		protected virtual void OnFaultSaved(Category category, Fault fault, string[] dataFiles, string path)
@@ -470,7 +472,7 @@ namespace Peach.Core.Loggers
 			}
 
 			if (FaultSaved != null)
-				FaultSaved(fault, path);
+				FaultSaved(category, fault, dataFiles, path);
 		}
 
 		protected virtual void SaveFile(Category category, string fullPath, byte[] contents)

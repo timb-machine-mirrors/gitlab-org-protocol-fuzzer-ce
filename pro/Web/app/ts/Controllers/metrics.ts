@@ -70,7 +70,7 @@ module DashApp {
 							data.forEach((item) => {
 								timelineData.push({
 									id: item.id,
-									type: "point",
+									type: "box",
 									content: "",
 									data: item,
 									start: item.time
@@ -525,14 +525,14 @@ module DashApp {
 			data: "vm.elementData",
 			sortInfo: { fields: ["element"], directions: ["asc"] },
 			columnDefs: [
-				{ field: "element", displayName: "Element" },
-				{ field: "dataset", displayName: "Dataset" },
 				{ field: "state", displayName: "State" },
 				{ field: "action", displayName: "Action" },
-				{ field: "mutatorCount", displayName: "Mutator Count" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "bucketCount", displayName: "Bucket Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
+				{ field: "parameter", displayName: "Parameter" },
+				{ field: "element", displayName: "Element" },
+				{ field: "iterationCount", displayName: "Iterations" },
+				{ field: "mutationCount", displayName: "Mutations" },
+				{ field: "bucketCount", displayName: "Buckets" },
+				{ field: "faultCount", displayName: "Faults" }
 			]
 		};
 
@@ -541,7 +541,7 @@ module DashApp {
 			sortInfo: { fields: ["state"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "state", displayName: "State" },
-				{ field: "executionCount", displayName: "Execution Count" }
+				{ field: "executionCount", displayName: "Executions" }
 			]
 		};
 
@@ -550,11 +550,9 @@ module DashApp {
 			sortInfo: { fields: ["dataset"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "dataset", displayName: "Data Set" },
-				{ field: "element", displayName: "Element" },
-				{ field: "mutatorCount", displayName: "Mutator Count" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "bucketCount", displayName: "Bucket Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
+				{ field: "iterationCount", displayName: "Iterations" },
+				{ field: "bucketCount", displayName: "Buckets" },
+				{ field: "faultCount", displayName: "Faults" }
 			]
 		};
 
@@ -564,14 +562,18 @@ module DashApp {
 			columnDefs: [
 				{ field: "bucket", displayName: "Fault Bucket" },
 				{ field: "mutator", displayName: "Mutator" },
-				{ field: "dataset", displayName: "Data Set" },
-				{ field: "action", displayName: "Action" },
-				{ field: "element", displayName: "Element" },
 				{ field: "state", displayName: "State" },
 				{ field: "iterationCount", displayName: "Iteration Count" },
 				{ field: "faultCount", displayName: "Fault Count" }
 			]
 		};
+
+		/*
+		 		{ field: "dataset", displayName: "Data Set" },
+				{ field: "action", displayName: "Action" },
+				{ field: "element", displayName: "Element" },
+
+		 */
 
 		private getMaxOfArray(numArray: number[]): number {
 			return Math.max.apply(null, numArray);
