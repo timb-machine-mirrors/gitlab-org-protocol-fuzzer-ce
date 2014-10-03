@@ -1197,7 +1197,7 @@ namespace Peach.Core.Test.Fixups
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 0;
-			config.rangeStop = 10;
+			config.rangeStop = 100;
 
 			Engine e = new Engine(this);
 			e.startFuzzing(dom, config);

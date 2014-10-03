@@ -148,8 +148,8 @@ namespace Peach.Core.Test.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 
-			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1.str1").DefaultValue);
-			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1.str2").DefaultValue);
+			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_0.str1").DefaultValue);
+			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_0.str2").DefaultValue);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_1.str1").DefaultValue);
 			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_1.str2").DefaultValue);
 			Assert.AreEqual("!", (string)dom.dataModels[0].find("str3").DefaultValue);
@@ -182,8 +182,8 @@ namespace Peach.Core.Test.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 
-			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1.str1").DefaultValue);
-			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1.str2").DefaultValue);
+			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_0.str1").DefaultValue);
+			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_0.str2").DefaultValue);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_1.str1").DefaultValue);
 			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_1.str2").DefaultValue);
 			Assert.AreEqual("!", (string)dom.dataModels[0].find("str3").DefaultValue);
@@ -218,8 +218,8 @@ namespace Peach.Core.Test.CrackingTests
 
 
 			Assert.AreEqual(".....", (string)dom.dataModels[0].find("unsized").DefaultValue);
-			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1.str1").DefaultValue);
-			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1.str2").DefaultValue);
+			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_0.str1").DefaultValue);
+			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_0.str2").DefaultValue);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0].find("b1_1.str1").DefaultValue);
 			Assert.AreEqual("World", (string)dom.dataModels[0].find("b1_1.str2").DefaultValue);
 			Assert.AreEqual("!", (string)dom.dataModels[0].find("str3").DefaultValue);

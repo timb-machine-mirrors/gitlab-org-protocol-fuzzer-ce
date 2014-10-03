@@ -943,8 +943,9 @@ namespace Peach.Core.Analyzers
 					// Set the original element
 					array.OriginalElement = elem;
 
-					// Expand the array to the correct size
-					array.ExpandTo(array.occurs);
+					// NOTE: the array will auto expand the 1st time .Value is called
+					// Deferring expansion lets future references to this element
+					// adjust the array's OriginalElement
 
 					// Copy over hints, some may be for array
 					foreach (var key in elem.Hints.Keys)

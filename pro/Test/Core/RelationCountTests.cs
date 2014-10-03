@@ -58,6 +58,8 @@ namespace Peach.Core.Test
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
+			Assert.NotNull(dom.dataModels[0].Value);
+
 			Number num = dom.dataModels[0][0] as Number;
 
 			Assert.AreEqual(1, (int)num.InternalValue);
@@ -86,6 +88,11 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+
+			Assert.AreEqual(new byte[] { 2, (byte)'1' }, val.ToArray());
 
 			Number num = dom.dataModels[0][0] as Number;
 

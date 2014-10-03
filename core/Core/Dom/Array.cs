@@ -76,19 +76,27 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public int occurs = 1;
 
+		private bool expanded;
+
 		private int? countOverride;
 
 		public int? CountOverride
 		{
-			get
-			{
-				return countOverride;
-			}
 			set
 			{
 				countOverride = value;
 				Invalidate();
 			}
+		}
+
+		public int GetCountOverride()
+		{
+			// Called from CountRelation to get our size.
+			// Ensure we have expanded before checking this.Count
+			if (!expanded)
+				ExpandTo(occurs);
+
+			return countOverride.GetValueOrDefault(Count);
 		}
 
 		private DataElement originalElement;
@@ -101,9 +109,6 @@ namespace Peach.Core.Dom
 		{
 			get
 			{
-				if (originalElement == null && Count > 0)
-					originalElement = this[0];
-
 				return originalElement;
 			}
 			set
@@ -133,7 +138,7 @@ namespace Peach.Core.Dom
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them
-			if (Count > 0)
+			if (expanded)
 				return this;
 
 			// If we don't have entries, just return our original element
@@ -144,15 +149,17 @@ namespace Peach.Core.Dom
 			return new DataElement[0];
 		}
 
-		protected override void OnRemoveItem(DataElement item)
+		protected override DataElement GetChild(string name)
 		{
-			base.OnRemoveItem(item);
+			// If we already expanded, just search our children
+			if (expanded)
+				return base.GetChild(name);
 
-			if (item == originalElement)
-				originalElement = null;
+			// If we haven't expanded, just check our original element
+			if (OriginalElement.name == name)
+				return OriginalElement;
 
-			if (this.Count == 0 && OriginalElement == null)
-				parent.Remove(this);
+			return null;
 		}
 
 		public override void Crack(DataCracker context, BitStream data, long? size)
@@ -163,7 +170,18 @@ namespace Peach.Core.Dom
 			if (OriginalElement == null)
 				throw new CrackingFailure("{0} has no original element.".Fmt(debugName), this, data);
 
-			Clear();
+			//Clear();
+
+			// Use remove to undo any relation bindings on array elements
+			BeginUpdate();
+
+			while (Count > 0)
+				RemoveAt(0);
+
+			EndUpdate();
+
+			// Mark that we have expanded since cracking will create our children
+			expanded = true;
 
 			long min = minOccurs;
 			long max = maxOccurs;
@@ -233,7 +251,10 @@ namespace Peach.Core.Dom
 
 		protected override Variant GenerateDefaultValue()
 		{
-			int remain = CountOverride.GetValueOrDefault(Count);
+			if (!expanded)
+				ExpandTo(occurs);
+
+			int remain = countOverride.GetValueOrDefault(Count);
 
 			var stream = new BitStreamList() { Name = fullName };
 
@@ -275,10 +296,7 @@ namespace Peach.Core.Dom
 		{
 			var clone = OriginalElement;
 
-			if (index == 0)
-				OriginalElement = clone.Clone();
-			else
-				clone = clone.Clone("{0}_{1}".Fmt(clone.name, index));
+			clone = clone.Clone("{0}_{1}".Fmt(clone.name, index));
 
 			return clone;
 		}
@@ -290,10 +308,10 @@ namespace Peach.Core.Dom
 
 			if (ctx != null)
 			{
-				// If we are being renamed and our 1st child has the same name
+				// If we are being renamed and our original element has the same name
 				// as us, it needs to be renamed as well
-				if (ctx.rename.Contains(this) && Count > 0 && name == this[0].name)
-					ctx.rename.Add(this[0]);
+				if (ctx.rename.Contains(this) && OriginalElement != null)
+					ctx.rename.Add(OriginalElement);
 			}
 
 			return true;
@@ -307,13 +325,17 @@ namespace Peach.Core.Dom
 		/// <param name="count">The total size the array should be.</param>
 		public void ExpandTo(int count)
 		{
-			System.Diagnostics.Debug.Assert(Count > 0 || OriginalElement != null);
+			System.Diagnostics.Debug.Assert(OriginalElement != null);
 
-			// Add clones of our original element for the remainder
+			// Once this has been called mark the array as having been expanded
+			expanded = true;
+
+			BeginUpdate();
+
 			for (int i = Count; i < count; ++i)
 				Add(MakeElement(i));
 
-			Invalidate();
+			EndUpdate();
 		}
 	}
 }

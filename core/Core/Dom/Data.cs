@@ -206,8 +206,14 @@ namespace Peach.Core.Dom
 						if (array.minOccurs > 0)
 							throw new PeachException("Error, cannot set array to zero elements when minOccurs > 0. Field: " + field + " Element: " + array.fullName);
 
-						// Remove all children
-						array.Clear();
+						// Mark array as expanded
+						array.ExpandTo(0);
+
+						// The field should be applied to a template data model so
+						// the array should have never had any elements in it.
+						// Only the original element should be set.
+						System.Diagnostics.Debug.Assert(array.Count == 0);
+
 						return;
 					}
 

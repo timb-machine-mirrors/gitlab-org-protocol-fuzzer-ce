@@ -179,23 +179,47 @@ namespace Peach.Core.Test
 
 			Assert.NotNull(array);
 			Assert.AreEqual("Length", array.name);
-			Assert.AreEqual(100, array.Count);
-			Assert.AreEqual("Length", array[0].name);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual(0, array.relations.Count);
-			Assert.AreEqual(1, array[0].relations.Count);
-			Assert.AreEqual(100, array[0].relations[0].Of.relations.Count);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual("Length", array.OriginalElement.name);
+			Assert.AreEqual(1, array.OriginalElement.relations.Count);
+			Assert.AreEqual(1, array.OriginalElement.relations[0].Of.relations.Count);
 
 			Dom.Array clone = array.Clone("NewLength") as Dom.Array;
 			Assert.NotNull(clone);
 			Assert.AreEqual("NewLength", clone.name);
-			Assert.AreEqual(100, clone.Count);
-			Assert.AreEqual("NewLength", clone[0].name);
+			Assert.AreEqual(0, clone.Count);
 			Assert.AreEqual(0, clone.relations.Count);
-			Assert.AreEqual(1, clone[0].relations.Count);
-			Assert.AreEqual("Data", clone[0].relations[0].OfName);
-			Assert.AreEqual("NewLength", clone[0].relations[0].FromName);
-			Assert.AreEqual(200, clone[0].relations[0].Of.relations.Count);
-			Assert.True(clone[0].relations[0].Of.relations.Contains(clone[0].relations[0]));
+			Assert.NotNull(clone.OriginalElement);
+			Assert.AreEqual("NewLength", clone.OriginalElement.name);
+			Assert.AreEqual(1, clone.OriginalElement.relations.Count);
+			Assert.AreEqual("Data", clone.OriginalElement.relations[0].OfName);
+			Assert.AreEqual("NewLength", clone.OriginalElement.relations[0].FromName);
+			Assert.AreEqual(2, clone.OriginalElement.relations[0].Of.relations.Count);
+			Assert.True(clone.OriginalElement.relations[0].Of.relations.Contains(clone.OriginalElement.relations[0]));
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
+
+			// Relation gets applied to every array item
+			foreach (var item in array)
+			{
+				Assert.AreEqual(1, item.relations.Count);
+				Assert.AreEqual(102, item.relations[0].Of.relations.Count);
+			}
+
+			var val2 = clone.Value;
+			Assert.NotNull(val2);
+			Assert.AreEqual(100, clone.Count);
+
+			foreach (var item in clone)
+			{
+				Assert.AreEqual(1, item.relations.Count);
+				Assert.AreEqual(202, item.relations[0].Of.relations.Count);
+			}
 		}
 
 		[Test]

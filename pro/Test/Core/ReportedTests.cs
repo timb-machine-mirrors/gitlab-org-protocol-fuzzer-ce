@@ -311,6 +311,9 @@ namespace Peach.Core.Test
 			PitParser parser = new PitParser();
 			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
+			var model = dom.tests[0].stateModel.states["State1"].actions[0].dataModel.Value;
+			Assert.NotNull(model);
+
 			Dom.Array array = dom.tests[0].stateModel.states["State1"].actions[0].dataModel[1] as Dom.Array;
 			array.CountOverride = 50;
 
@@ -347,7 +350,7 @@ namespace Peach.Core.Test
 			// over and over, so there are really only 1 elements in the array...
 			Assert.AreEqual(1, count);
 			Assert.AreEqual(1, array.Count);
-			Assert.AreEqual(50, array.CountOverride);
+			Assert.AreEqual(50, array.GetCountOverride());
 
 			var val = array.InternalValue.BitsToString();
 			var exp = new string('A', 50);

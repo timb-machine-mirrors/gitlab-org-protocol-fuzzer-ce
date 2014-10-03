@@ -308,7 +308,7 @@ namespace Peach.Core.Test.StateModel
 			e.startFuzzing(dom, config);
 
 			foreach (var item in allStrategies)
-				Assert.True(item.EndsWith(".num3"));
+				Assert.True(item.EndsWith(".num3") || item.EndsWith(".num3_0"));
 		}
 
 	}

@@ -76,11 +76,29 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
+			Assert.NotNull(array.OriginalElement);
 
 			Assert.NotNull(array.Hints);
 			Assert.AreEqual(1, array.Hints.Count);
 			Assert.AreEqual("World", array.Hints["Hello"].Value);
+
+			Assert.NotNull(array.OriginalElement.Hints);
+			Assert.AreEqual(1, array.OriginalElement.Hints.Count);
+			Assert.AreEqual("World", array.OriginalElement.Hints["Hello"].Value);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
+
+			// Hint gets applied to every array item
+			foreach (var item in array)
+			{
+				Assert.NotNull(item.Hints);
+				Assert.AreEqual(1, item.Hints.Count);
+				Assert.AreEqual("World", item.Hints["Hello"].Value);
+			}
 		}
 
 		[Test]
@@ -97,11 +115,19 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual("TheDataModel.stuff", array.fullName);
-			Assert.AreEqual("TheDataModel.stuff.stuff", array[0].fullName);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual("TheDataModel.stuff.stuff", array.OriginalElement.fullName);
+			Assert.AreEqual(array, array.OriginalElement.parent);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
+
+			Assert.AreEqual("TheDataModel.stuff.stuff_0", array[0].fullName);
 			Assert.AreEqual("TheDataModel.stuff.stuff_1", array[1].fullName);
-			Assert.AreEqual(array, array[0].parent);
 		}
 
 		[Test]
@@ -120,9 +146,18 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual("TheDataModel.DataElement_0", array.fullName);
-			Assert.AreEqual("TheDataModel.DataElement_0.DataElement_0", array[0].fullName);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual("TheDataModel.DataElement_0.DataElement_0", array.OriginalElement.fullName);
+			Assert.AreEqual(array, array.OriginalElement.parent);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
+
+			Assert.AreEqual("TheDataModel.DataElement_0.DataElement_0_0", array[0].fullName);
 			Assert.AreEqual("TheDataModel.DataElement_0.DataElement_0_1", array[1].fullName);
 		}
 
@@ -143,9 +178,15 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual(1, array.relations.Count);
-			Assert.AreEqual(0, array[0].relations.Count);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual(0, array.OriginalElement.relations.Count);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
 		}
 
 		[Test]
@@ -165,9 +206,15 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual(0, array.relations.Count);
-			Assert.AreEqual(1, array[0].relations.Count);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual(1, array.OriginalElement.relations.Count);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = dom.dataModels[0].Value;
+			Assert.NotNull(val);
+			Assert.AreEqual(100, array.Count);
 		}
 
 		[Test]
@@ -187,16 +234,28 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual(100, array.Count);
+			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual("Data", array.name);
-			Assert.AreEqual("Data", array[0].name);
+			Assert.NotNull(array.OriginalElement);
+			Assert.AreEqual("Data", array.OriginalElement.name);
 
 			var clone = array.Clone("NewData") as Dom.Array;
 
 			Assert.NotNull(clone);
-			Assert.AreEqual(100, clone.Count);
+			Assert.AreEqual(0, clone.Count);
 			Assert.AreEqual("NewData", clone.name);
-			Assert.AreEqual("NewData", clone[0].name);
+			Assert.NotNull(clone.OriginalElement);
+			Assert.AreEqual("NewData", clone.OriginalElement.name);
+
+			// Array expansion doesn't happen until .Value is called
+			var val = clone.Value;
+			Assert.NotNull(val);
+
+			Assert.AreEqual(100, clone.Count);
+			for (int i = 0; i < clone.Count; ++i)
+			{
+				Assert.AreEqual("NewData_" + i.ToString(), clone[i].name);
+			}
 		}
 
 		private void DoOccurs(string occurs, byte[] expected)
@@ -230,7 +289,6 @@ namespace Peach.Core.Test.PitParserTests
 			DoOccurs("maxOccurs=\"5\"", Encoding.ASCII.GetBytes("XYZ"));
 			DoOccurs("maxOccurs=\"1\"", Encoding.ASCII.GetBytes("XYZ"));
 			DoOccurs("maxOccurs=\"0\"", Encoding.ASCII.GetBytes("XYZ"));
-
 		}
 
 		[Test]
@@ -281,8 +339,8 @@ namespace Peach.Core.Test.PitParserTests
 			var exp = new string[] {
 				"DM",
 				"DM.Items",
-				"DM.Items.Items",
-				"DM.Items.Items.Value",
+				"DM.Items.Items_0",
+				"DM.Items.Items_0.Value",
 				"DM.Items.Items_1",
 				"DM.Items.Items_1.Value",
 				"DM.Items.Items_2",
@@ -342,19 +400,17 @@ namespace Peach.Core.Test.PitParserTests
 			var exp = new string[] {
 				"DM",
 				"DM.Items",
-				"DM.Items.Items",
-				"DM.Items.Items.SubItems",
-				"DM.Items.Items.SubItems.SubItems",
-				"DM.Items.Items.SubItems.SubItems.Value",
+				"DM.Items.Items_0",
+				"DM.Items.Items_0.SubItems",
 				"DM.Items.Items_1",
 				"DM.Items.Items_1.SubItems",
-				"DM.Items.Items_1.SubItems.SubItems",
-				"DM.Items.Items_1.SubItems.SubItems.Value",
+				"DM.Items.Items_1.SubItems.SubItems_0",
+				"DM.Items.Items_1.SubItems.SubItems_0.Value",
 				"DM.Items.Items_1.SubItems.SubItems_1",
 				"DM.Items.Items_1.SubItems.SubItems_1.Value",
 			};
 
-			Assert.AreEqual(names, exp);
+			Assert.AreEqual(exp, names);
 		}
 
 		[Test]
@@ -415,9 +471,9 @@ namespace Peach.Core.Test.PitParserTests
 			var exp = new string[] {
 				"DM",
 				"DM.Items",
-				"DM.Items.Items",
-				"DM.Items.Items.Two",
-				"DM.Items.Items.Two.Value",
+				"DM.Items.Items_0",
+				"DM.Items.Items_0.Two",
+				"DM.Items.Items_0.Two.Value",
 				"DM.Items.Items_1",
 				"DM.Items.Items_1.Three",
 				"DM.Items.Items_1.Three.Value",
@@ -483,10 +539,84 @@ namespace Peach.Core.Test.PitParserTests
 				"DM",
 				"DM.Content",
 				"DM.Content.Items",
-				"DM.Content.Items.Items",
-				"DM.Content.Items.Items.Value",
+				"DM.Content.Items.Items_0",
+				"DM.Content.Items.Items_0.Value",
 				"DM.Content.Items.Items_1",
 				"DM.Content.Items.Items_1.Value",
+			};
+
+			Assert.AreEqual(names, exp);
+		}
+
+		[Test]
+		public void TestArrayOverrideTemplate()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='Content'>
+		<Block name='Items' minOccurs='2'>
+			<String name='str1' value='Value1' />
+			<String name='str2' value='Value2' />
+		</Block>
+	</DataModel>
+
+	<DataModel name='DM'>
+		<Block name='Content' ref='Content'>
+			<String name='Items.Items.str1' value='New1'/>
+			<String name='Items.Items.str3' value='Value3'/>
+		</Block>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Content.Items[2].str1' value='xxx'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var e = new Engine(null);
+			var c = new RunConfiguration() { singleIteration = true };
+
+			e.startFuzzing(dom, c);
+
+			var model = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+			var final = model.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("New1Value2Value3New1Value2Value3xxxValue2Value3", asStr);
+
+			var names = model.PreOrderTraverse().Select(x => x.fullName).ToArray();
+			var exp = new string[] {
+				"DM",
+				"DM.Content",
+				"DM.Content.Items",
+				"DM.Content.Items.Items_0",
+				"DM.Content.Items.Items_0.str1",
+				"DM.Content.Items.Items_0.str2",
+				"DM.Content.Items.Items_0.str3",
+				"DM.Content.Items.Items_1",
+				"DM.Content.Items.Items_1.str1",
+				"DM.Content.Items.Items_1.str2",
+				"DM.Content.Items.Items_1.str3",
+				"DM.Content.Items.Items_2",
+				"DM.Content.Items.Items_2.str1",
+				"DM.Content.Items.Items_2.str2",
+				"DM.Content.Items.Items_2.str3",
 			};
 
 			Assert.AreEqual(names, exp);

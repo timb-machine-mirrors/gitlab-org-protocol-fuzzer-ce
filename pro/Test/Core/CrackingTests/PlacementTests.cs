@@ -369,7 +369,7 @@ namespace Peach.Core.Test.CrackingTests
 
 			var f1 = dom.dataModels[0][1].fixup.references.First();
 			Assert.AreEqual("ref", f1.Item1);
-			Assert.AreEqual("TheDataModel.Block1.Block1.TheString", f1.Item2);
+			Assert.AreEqual("TheDataModel.Block1.Block1_0.TheString", f1.Item2);
 
 			var f2 = dom.dataModels[0][2].fixup.references.First();
 			Assert.AreEqual("ref", f2.Item1);

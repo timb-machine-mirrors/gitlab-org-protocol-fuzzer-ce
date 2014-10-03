@@ -190,6 +190,9 @@ namespace Peach.Core.Test.PitParserTests
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
+			Assert.NotNull(dom.dataModels[0].Value);
+			Assert.NotNull(dom.dataModels[1].Value);
+
 			Assert.AreEqual(1, dom.dataModels[0].Count);
 			var a1 = dom.dataModels[0][0] as Dom.Array;
 			Assert.NotNull(a1);

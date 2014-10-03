@@ -130,7 +130,7 @@ namespace Peach.Core.Dom
 					return null;
 				}
 
-				int count = OfArray.CountOverride.GetValueOrDefault(OfArray.Count);
+				int count = OfArray.GetCountOverride();
 
 				if (_expressionSet != null)
 				{
