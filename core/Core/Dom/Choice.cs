@@ -105,8 +105,8 @@ namespace Peach.Core.Dom
 		{
 			foreach (var child in start)
 			{
-				if (child is Choice)
-					throw new Exception("CHOICE");
+				if (child is Choice || child is Array)
+					throw new Exception();
 
 				if (child is DataElementContainer)
 				{
