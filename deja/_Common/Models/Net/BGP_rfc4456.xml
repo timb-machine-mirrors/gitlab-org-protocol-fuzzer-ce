@@ -10,15 +10,15 @@
 
     <DataModel name="ORIGINATOR_ID" ref="Base:BGP4PathAttr">
         <Number name="TypeCode" size="8"
-                value="9" constraint="int(value) == 9"/>
+                value="9" token="true"/>
         <Block name="Value">
-            <Number name="BGPIdentifier" size="32" endian="big"/>
+            <Number name="BGPIdentifier" size="32" endian="big" value="##BGPIdentifier##"/>
         </Block>
     </DataModel>
 
     <DataModel name="CLUSTER_LIST" ref="Base:BGP4PathAttr">
         <Number name="TypeCode" size="8"
-                value="10" constraint="int(value) == 10"/>
+                value="10" token="true"/>
         <Block name="Value">
             <Number name="ClusterID" size="32" minOccurs="0" maxOccurs="-1"/>
         </Block>

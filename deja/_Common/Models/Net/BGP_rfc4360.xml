@@ -13,7 +13,7 @@
     -->
     <DataModel name="EXT_COMMUNITY" ref="Base:BGP4PathAttr">
         <Number name="TypeCode" size="8"
-                value="16" constraint="int(value) == 16"/>
+                value="16" token="true"/>
         <Block name="Value">
             <Number name="IANA_Authority" size="1"/>
             <Number name="NonTransitive" size="1"/>
@@ -23,24 +23,24 @@
                     <Blob name="Value" length="7"/>
                 </Block>
                 <Block name="AS2Specific">
-                    <Number name="Type" size="6" value="0" constraint="int(value) == 0"/>
+                    <Number name="Type" size="6" value="0" token="true"/>
                     <Number name="SubType" size="8"/>
                     <Number name="GlobalAdminASN" size="16" endian="big"/>
                     <Blob   name="LocalAdmin" length="4"/>
                 </Block>
                 <Block name="IPV4Specific">
-                    <Number name="Type" size="6" value="1" constraint="int(value) == 1"/>
+                    <Number name="Type" size="6" value="1" token="true"/>
                     <Number name="SubType" size="8"/>
                     <Number name="GlobalAdminIP" size="32" endian="big"/>
                     <Blob   name="LocalAdmin" length="2"/>
                 </Block>
                 <Block name="AS4Specific">
-                    <Number name="Type" size="6" value="2" constraint="int(value) == 2"/>
+                    <Number name="Type" size="6" value="2" token="true"/>
                     <Number name="SubType" size="8"/>
                     <Blob name="Value" length="6"/>
                 </Block>
                 <Block name="Opaque">
-                    <Number name="Type" size="6" value="3" constraint="int(value) == 3"/>
+                    <Number name="Type" size="6" value="3" token="true"/>
                     <Number name="SubType" size="8"/>
                     <Blob name="Value" length="6"/>
                 </Block>

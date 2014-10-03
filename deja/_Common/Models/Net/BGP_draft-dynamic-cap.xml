@@ -18,14 +18,14 @@
 
     <DataModel name="Capability" ref="Base:BGP4Capability">
         <Number name="CapabilityType"
-                size="8" value="67" constraint="int(value) == 67"/>
+                size="8" value="67" token="true"/>
         <Block name="CapabilityValue">
             <!-- Empty? -->
         </Block>
     </DataModel>
 
     <DataModel name="Message" ref="Base:BGP4Message">
-        <Number name="MessageType" size="8" value="6" constraint="int(value) == 6"/>
+        <Number name="MessageType" size="8" value="6" token="true"/>
         <Block name="MessageData">
             <Number name="InitAck" size="1"/>
             <Number name="AckRequest" size="1"/>

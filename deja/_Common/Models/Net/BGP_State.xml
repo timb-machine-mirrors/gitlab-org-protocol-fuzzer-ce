@@ -10,7 +10,7 @@
 
     <Include ns="DataModels" src="file:##Path##/_Common/Models/Net/BGP_Data.xml"/>
 
-    <StateModel name="BGP_FSM" initialState="idle">
+    <StateModel name="BGP_FSM" initialState="Idle">
         <State name="Idle">
             <Action type="changeState" ref="Connect"/>
         </State>
@@ -20,7 +20,7 @@
         <State name="Connect">
             <Action name="BGP4Open" type="output">
                 <DataModel ref="DataModels:BGP4Open"/>
-                <Data filename="file:##Path##/_Common/Samples/Net/OPEN"/>
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/Connect/"/>
             </Action>
             <Action type="changeState" ref="OpenSent"/>
         </State>
@@ -60,33 +60,59 @@
             <Action name="BGP4Send" type="output">
                 <DataModel name="Packet">
                     <Choice name="Types">
-                        <Block name="Update" ref="DataModels:BGP4Update"/>
+                        <Block name="Update" ref="DataModels:BGP4Update">
+                        </Block>
                         <Block name="Notification" ref="DataModels:BGP4Update"/>
-                        <Block name="Keepalive" ref="DataModels:BGP4Update"/>
+                        <Block name="Keepalive" ref="DataModels:BGP4Keepalive"/>
                         <Block name="RouteRefresh" ref="DataModels:BGP4RouteRefresh"/>
                         <Block name="RouteRefreshWithORF" ref="DataModels:BGP4RouteRefreshWithORF"/>
                         <Block name="DynamicCapbility" ref="DataModels:BGP4DynamicCapbility"/>
                     </Choice>
                 </DataModel>
-                <Data filename="file:##Path##/_Common/Samples/Net/Established"/>
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/Established"/>
+                <!--
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/Established">
+                    <Field name="BGP4Update.MessageData.PathAttribs.PathAttribTypes.ORIGINATOR_ID.Value.BGPIdentifier" value="##BGPIdentifier##"/>
+                    <Field name="BGP4Open.MessageData.BGPIdentifier" value="##BGPIdentifier##"/>
+                </Data>
+                -->
             </Action>
 
-            <!-- <Action name="BGP4Recv -->
+            <!-- Blindly send input -->
+            <!-- TODO: peek at input
+
+            def TCP.enableZeroRead(Context):
+                context.test.publishers[0].setProperty("Timeout", Peach.Core.Variant(0))
+                context.test.publishers[0].setProperty("NoReadException", Peach.Core.Variant('true'))
+
+            def TCP.disableZeroRead(context):
+                context.test.publishers[0].setProperty("Timeout", Peach.Core.Variant(3000))
+                context.test.publishers[0].setProperty("NoReadException", Peach.Core.Variant('false'))
+
+            <Action name="Receive" type="input"
+                    onStart="TCP.enableZeroRead(Context)"
+                    onComplete="TCP.disableZeroRead(Context)">
+                <DataModel name="Packet" ref="TCPv4:InIPv4PacketOrNone"/>
+            </Action>
+
+            <DataModel name="InIPv4PacketOrNone">
+                <Choice name="PacketOrNone">
+                    <Block name="InIPv4Packet" ref="IPv4:Packet">
+                        <Number name="Header.Protocol" size="8" endian="big" valueType="hex" value="06" token="true"/>
+                        <Block name="Payload" ref="TCP:Packet">
+                            <Block name="Header.OptionsAndPadding" />
+                        </Block>
+                    </Block>
+
+                    <Block name="None" />
+                </Choice>
+            </DataModel>
+-->
+
+
         </State>
 
 
     </StateModel>
 
-    <Agent name="QuaggaAgent">
-    </Agent>
-
-    <Test name="Default">
-        <Agent ref="QuaggaAgent" />
-        <Statemodel ref="BGP_FSM"/>
-        <!-- SCTP instead of TCP possibility draft-zhiyfang-fecai-bgp-over-sctp-00 -->
-        <Publisher name="TcpBGP" class="Tcp">
-            <Param name="Host" value="127.0.0.1" />
-            <Param name="Port" value="31337" />
-        </Publisher>
-    </Test>
 </Peach>

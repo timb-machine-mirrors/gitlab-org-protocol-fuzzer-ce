@@ -26,7 +26,7 @@
 
     <!-- BEGIN BGP4 OptParam Definitions -->
     <DataModel name="BGP4Capabilities" ref="Base:BGP4OptParam">
-        <Number name="ParamType" size="8" value="2" constraint="int(value) == 2"/>
+        <Number name="ParamType" size="8" value="2" token="true"/>
         <Number name="ParamLength" size="8">
             <Relation type="size" of="ParamValue"/>
         </Number>
@@ -73,12 +73,12 @@
     <!-- BEGIN BGP4 Message Types -->
     <DataModel name="BGP4Open" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.2 -->
-        <Number name="MessageType" size="8" value="1" constraint="int(value) == 1"/>
+        <Number name="MessageType" size="8" value="1" token="true"/>
         <Block name="MessageData">
             <Number name="Version" size="8" value="4"/>
             <Number name="MyASN" size="16" endian="big" value="##MyASN##"/>
             <Number name="HoldTime" size="16" endian="big" value="##HoldTime##"/>
-            <Number name="BGPIdentifier" size="32" endian="big" value="##BGPIdentifier##"/>
+            <Number name="BGPIdentifier" size="32" endian="big" value="##BGPIdentifier##" mutable="false"/>
             <Number name="OptParamLen" size="8">
                 <Relation type="size" of="OptParams"/>
             </Number>
@@ -94,7 +94,7 @@
 
     <DataModel name="BGP4Update" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.3 -->
-        <Number name="MessageType" size="8" value="2" constraint="int(value) == 2"/>
+        <Number name="MessageType" size="8" value="2" token="true"/>
         <Block name="MessageData">
 
             <Number name="WithdrawnRoutesLen" size="16" endian="big">
@@ -125,6 +125,8 @@
                     <Block name="AS4_PATH" ref="rfc6793:AS4_PATH"/>
                     <Block name="AS4_AGGREGATOR" ref="rfc6793:AS4_AGGREGATOR"/>
                     <Block name="EXT_COMMUNITY" ref="rfc4360:EXT_COMMUNITY"/>
+                    <Block name="ORIGINATOR_ID" ref="rfc4456:ORIGINATOR_ID"/>
+                    <Block name="CLUSTER_LIST" ref="rfc4456:CLUSTER_LIST"/>
 
                     <!-- TODO: MP_REACH_NLRI [RFC4760] -->
                     <!-- TODO: MP_UNREACH_NLRI [RFC4760] -->
@@ -171,7 +173,7 @@
 
     <DataModel name="BGP4Notification" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.5 -->
-        <Number name="MessageType" size="8" value="3" constraint="int(value) == 3"/>
+        <Number name="MessageType" size="8" value="3" token="true"/>
         <Block name="MessageData">
             <Number name="ErrorCode" size="8"/>
             <Number name="ErrorSubCode" size="8"/>
@@ -181,7 +183,7 @@
 
     <DataModel name="BGP4Keepalive" ref="Base:BGP4Message">
         <!-- Ref: https://tools.ietf.org/html/rfc4271#section-4.4 -->
-        <Number name="MessageType" size="8" value="4" constraint="int(value) == 4"/>
+        <Number name="MessageType" size="8" value="4" token="true"/>
         <Block name="MessageData">
             <!-- Purposefully Empty -->
         </Block>

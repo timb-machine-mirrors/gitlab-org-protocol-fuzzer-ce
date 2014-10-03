@@ -11,8 +11,7 @@
     <Include ns="IANA" src="file:##Path##/_Common/Models/Net/BGP_IANA.xml"/>
 
     <DataModel name="Capability" ref="Base:BGP4Capability">
-        <Number name="CapabilityType"
-                size="8" value="64" constraint="int(value) == 64"/>
+        <Number name="CapabilityType" size="8" value="64" token="true"/>
         <Block name="CapabilityValue">
             <Block name="RestartFlags">
                 <Number name="RestartState" size="1"/>

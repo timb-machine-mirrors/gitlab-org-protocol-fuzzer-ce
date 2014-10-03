@@ -11,7 +11,7 @@
 
     <DataModel name="MP_REACH_NLRI" ref="Base:BGP4PathAttr">
         <Number name="TypeCode" size="8"
-                value="14" constraint="int(value) == 14"/>
+                value="14" token="true"/>
         <Block name="Value">
             <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
             <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
@@ -32,7 +32,7 @@
 
     <DataModel name="MP_UNREACH_NLRI" ref="Base:BGP4PathAttr">
         <Number name="TypeCode" size="8"
-                value="15" constraint="int(value) == 15"/>
+                value="15" token="true"/>
 
         <Block name="Value">
             <Block name="AFI" ref="IANA:AddressFamily.AFI"/>

@@ -13,13 +13,13 @@
 
     <DataModel name="ORFTypes">
         <Block name="Reserved">
-            <Number size="8" value="0" constraint="int(value) == 0"/>
+            <Number size="8" value="0" token="true"/>
         </Block>
         <Block name="AddressPrefixORF">
-            <Number size="8" value="64" constraint="int(value) == 64"/>
+            <Number size="8" value="64" token="true"/>
         </Block>
         <Block name="CP-ORF">
-            <Number size="8" value="65" constraint="int(value) == 65"/>
+            <Number size="8" value="65" token="true"/>
         </Block>
         <Block name="UNKNOWN">
             <Number size="8"/>
@@ -28,8 +28,7 @@
 
     <DataModel name="Capability" ref="Base:BGP4Capability">
         <!-- Quaga says that cisco's old ORF CapNumber was 130 -->
-        <Number name="CapabilityType"
-                size="8" value="3" constraint="int(value) == 3"/>
+        <Number name="CapabilityType" size="8" value="3" token="true"/>
         <Block name="CapabilityValue">
             <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
             <Number name="reserved" size="8" value="0x00"/>
@@ -46,11 +45,11 @@
                 </Choice>
                 <Choice name="SendRecieve">
                     <Number name="Recieve"
-                            size="8" value="1" constraint="int(value) == 1"/>
+                            size="8" value="1" token="true"/>
                     <Number name="Send"
-                            size="8" value="2" constraint="int(value) == 2"/>
+                            size="8" value="2" token="true"/>
                     <Number name="Send/Recieve" 
-                            size="8" value="2" constraint="int(value) == 3"/>
+                            size="8" value="2" token="true"/>
                 </Choice>
             </Block>
         </Block>
@@ -125,7 +124,7 @@
 
     <DataModel name="Message" ref="Base:BGP4Message">
         <!-- MessageType same as Route-Refresh -->
-        <Number name="MessageType" size="8" value="5" constraint="int(value) == 5"/>
+        <Number name="MessageType" size="8" value="5" token="true"/>
         <!-- PacketLength constraint set due to overloading of RouteRefresh in rfc5291 (ORF) -->
         <Number name="PacketLength" size="16"
                 value="72" constraint="int(value) > 72"/>

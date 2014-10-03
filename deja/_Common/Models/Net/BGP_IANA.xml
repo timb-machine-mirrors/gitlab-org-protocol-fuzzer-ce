@@ -11,78 +11,78 @@
     <DataModel name="AddressFamily">
         <Block name="AFI">
             <Choice name="Code">
-                <Number name="Reserved" size="16" endian="big" value="0" constraint="int(value) == 0"/>
-                <Number name="IPv4" size="16" endian="big" value="1" constraint="int(value) == 1"/>
-                <Number name="IPv6" size="16" endian="big" value="2" constraint="int(value) == 2"/>
-                <Number name="NSAP" size="16" endian="big" value="3" constraint="int(value) == 3"/>
-                <Number name="HDLC" size="16" endian="big" value="4" constraint="int(value) == 4"/>
-                <Number name="BBN_1822" size="16" endian="big" value="5" constraint="int(value) == 5"/>
-                <Number name="802" size="16" endian="big" value="6" constraint="int(value) == 6"/>
-                <Number name="E_163" size="16" endian="big" value="7" constraint="int(value) == 7"/>
-                <Number name="E_164" size="16" endian="big" value="8" constraint="int(value) == 8"/>
-                <Number name="F_69" size="16" endian="big" value="9" constraint="int(value) == 9"/>
-                <Number name="X_121" size="16" endian="big" value="10" constraint="int(value) == 10"/>
-                <Number name="IPX" size="16" endian="big" value="11" constraint="int(value) == 11"/>
-                <Number name="Appletalk" size="16" endian="big" value="12" constraint="int(value) == 12"/>
-                <Number name="Decnet_IV" size="16" endian="big" value="13" constraint="int(value) == 13"/>
-                <Number name="Banyan_Vines" size="16" endian="big" value="14" constraint="int(value) == 14"/>
-                <Number name="E_164_NSAP" size="16" endian="big" value="15" constraint="int(value) == 15"/>
-                <Number name="DNS" size="16" endian="big" value="16" constraint="int(value) == 16"/>
-                <Number name="DN" size="16" endian="big" value="17" constraint="int(value) == 17"/>
-                <Number name="ASN" size="16" endian="big" value="18" constraint="int(value) == 18"/>
-                <Number name="XTP_IPv4" size="16" endian="big" value="19" constraint="int(value) == 19"/>
-                <Number name="XTP_IPv6" size="16" endian="big" value="20" constraint="int(value) == 20"/>
-                <Number name="XTP_native" size="16" endian="big" value="21" constraint="int(value) == 21"/>
-                <Number name="FibreChannel_Port" size="16" endian="big" value="22" constraint="int(value) == 22"/>
-                <Number name="FibreChannel_Node" size="16" endian="big" value="23" constraint="int(value) == 23"/>
-                <Number name="GWID" size="16" endian="big" value="24" constraint="int(value) == 24"/>
-                <Number name="AFI" size="16" endian="big" value="25" constraint="int(value) == 25"/>
-                <Number name="MPLS-TP_Section" size="16" endian="big" value="26" constraint="int(value) == 26"/>
-                <Number name="MPLS-TP_LSP" size="16" endian="big" value="27" constraint="int(value) == 27"/>
-                <Number name="MPLS-TP_Pseudowire" size="16" endian="big" value="28" constraint="int(value) == 28"/>
-                <Number name="MT_IP" size="16" endian="big" value="29" constraint="int(value) == 29"/>
-                <Number name="MT_IPv6" size="16" endian="big" value="30" constraint="int(value) == 30"/>
-                <Number name="EIGRP_Common" size="16" endian="big" value="16384" constraint="int(value) == 16384"/>
-                <Number name="EIGRP_IPv4" size="16" endian="big" value="16385" constraint="int(value) == 16385"/>
-                <Number name="EIGRP_IPv6" size="16" endian="big" value="16386" constraint="int(value) == 16386"/>
-                <Number name="LCAF" size="16" endian="big" value="16387" constraint="int(value) == 16387"/>
-                <Number name="BGP-LS" size="16" endian="big" value="16388" constraint="int(value) == 16388"/>
-                <Number name="48bit_MAC" size="16" endian="big" value="16389" constraint="int(value) == 16389"/>
-                <Number name="64bit_MAC" size="16" endian="big" value="16390" constraint="int(value) == 16390"/>
-                <Number name="OUI" size="16" endian="big" value="16391" constraint="int(value) == 16391"/>
-                <Number name="MAC_24" size="16" endian="big" value="16392" constraint="int(value) == 16392"/>
-                <Number name="MAC_40" size="16" endian="big" value="16393" constraint="int(value) == 16393"/>
-                <Number name="IPv6_64" size="16" endian="big" value="16394" constraint="int(value) == 16394"/>
-                <Number name="RBridge_Port_ID" size="16" endian="big" value="16395" constraint="int(value) == 16395"/>
-                <Number name="TRILL_Nickname" size="16" endian="big" value="16396" constraint="int(value) == 16396"/>
+                <Number name="Reserved" size="16" endian="big" value="0" token="true"/>
+                <Number name="IPv4" size="16" endian="big" value="1" token="true"/>
+                <Number name="IPv6" size="16" endian="big" value="2" token="true"/>
+                <Number name="NSAP" size="16" endian="big" value="3" token="true"/>
+                <Number name="HDLC" size="16" endian="big" value="4" token="true"/>
+                <Number name="BBN_1822" size="16" endian="big" value="5" token="true"/>
+                <Number name="802" size="16" endian="big" value="6" token="true"/>
+                <Number name="E_163" size="16" endian="big" value="7" token="true"/>
+                <Number name="E_164" size="16" endian="big" value="8" token="true"/>
+                <Number name="F_69" size="16" endian="big" value="9" token="true"/>
+                <Number name="X_121" size="16" endian="big" value="10" token="true"/>
+                <Number name="IPX" size="16" endian="big" value="11" token="true"/>
+                <Number name="Appletalk" size="16" endian="big" value="12" token="true"/>
+                <Number name="Decnet_IV" size="16" endian="big" value="13" token="true"/>
+                <Number name="Banyan_Vines" size="16" endian="big" value="14" token="true"/>
+                <Number name="E_164_NSAP" size="16" endian="big" value="15" token="true"/>
+                <Number name="DNS" size="16" endian="big" value="16" token="true"/>
+                <Number name="DN" size="16" endian="big" value="17" token="true"/>
+                <Number name="ASN" size="16" endian="big" value="18" token="true"/>
+                <Number name="XTP_IPv4" size="16" endian="big" value="19" token="true"/>
+                <Number name="XTP_IPv6" size="16" endian="big" value="20" token="true"/>
+                <Number name="XTP_native" size="16" endian="big" value="21" token="true"/>
+                <Number name="FibreChannel_Port" size="16" endian="big" value="22" token="true"/>
+                <Number name="FibreChannel_Node" size="16" endian="big" value="23" token="true"/>
+                <Number name="GWID" size="16" endian="big" value="24" token="true"/>
+                <Number name="AFI" size="16" endian="big" value="25" token="true"/>
+                <Number name="MPLS-TP_Section" size="16" endian="big" value="26" token="true"/>
+                <Number name="MPLS-TP_LSP" size="16" endian="big" value="27" token="true"/>
+                <Number name="MPLS-TP_Pseudowire" size="16" endian="big" value="28" token="true"/>
+                <Number name="MT_IP" size="16" endian="big" value="29" token="true"/>
+                <Number name="MT_IPv6" size="16" endian="big" value="30" token="true"/>
+                <Number name="EIGRP_Common" size="16" endian="big" value="16384" token="true"/>
+                <Number name="EIGRP_IPv4" size="16" endian="big" value="16385" token="true"/>
+                <Number name="EIGRP_IPv6" size="16" endian="big" value="16386" token="true"/>
+                <Number name="LCAF" size="16" endian="big" value="16387" token="true"/>
+                <Number name="BGP-LS" size="16" endian="big" value="16388" token="true"/>
+                <Number name="48bit_MAC" size="16" endian="big" value="16389" token="true"/>
+                <Number name="64bit_MAC" size="16" endian="big" value="16390" token="true"/>
+                <Number name="OUI" size="16" endian="big" value="16391" token="true"/>
+                <Number name="MAC_24" size="16" endian="big" value="16392" token="true"/>
+                <Number name="MAC_40" size="16" endian="big" value="16393" token="true"/>
+                <Number name="IPv6_64" size="16" endian="big" value="16394" token="true"/>
+                <Number name="RBridge_Port_ID" size="16" endian="big" value="16395" token="true"/>
+                <Number name="TRILL_Nickname" size="16" endian="big" value="16396" token="true"/>
                 <Number name="UNKNOWN" size="16" endian="big"/>
             </Choice>
         </Block>
         <Block name="SAFI">
             <Choice name="Code">
-                <Number name="Reserved" size="8" value="0" constraint="int(value) == 0"/>
-                <Number name="NLRI_UCAST" size="8" value="1" constraint="int(value) == 1"/>
-                <Number name="NLRI_MCAST" size="8" value="2" constraint="int(value) == 2"/>
-                <Number name="NLRI_MCAST_UCAST" size="8" value="3" constraint="int(value) == 3"/>
-                <Number name="NLRI_MPLS" size="8" value="4" constraint="int(value) == 4"/>
-                <Number name="MCAST_VPN" size="8" value="5" constraint="int(value) == 5"/>
-                <Number name="NLRI_DynamicPsuedowire" size="8" value="6" constraint="int(value) == 6"/>
-                <Number name="Encapsulation" size="8" value="7" constraint="int(value) == 7"/>
-                <Number name="MCAST_VPLS" size="8" value="8" constraint="int(value) == 8"/>
-                <Number name="Tunnel" size="8" value="64" constraint="int(value) == 64"/>
-                <Number name="VPLS" size="8" value="65" constraint="int(value) == 65"/>
-                <Number name="BGP_MDT" size="8" value="66" constraint="int(value) == 66"/>
-                <Number name="BGP_4over6" size="8" value="67" constraint="int(value) == 67"/>
-                <Number name="BGP_6over4" size="8" value="68" constraint="int(value) == 68"/>
-                <Number name="L1_VPN_AutoDiscovery" size="8" value="69" constraint="int(value) == 69"/>
-                <Number name="BGP_EVPNs" size="8" value="70" constraint="int(value) == 70"/>
-                <Number name="BGP_LS" size="8" value="71" constraint="int(value) == 71"/>
-                <Number name="MPLS_VPN" size="8" value="128" constraint="int(value) == 128"/>
-                <Number name="MCAST_MPLS_VPN" size="8" value="129" constraint="int(value) == 129"/>
-                <Number name="RouteTargetConstrains" size="8" value="132" constraint="int(value) == 132"/>
-                <Number name="IPv4_FlowRules" size="8" value="133" constraint="int(value) == 133"/>
-                <Number name="VPNv4_FlowRules" size="8" value="134" constraint="int(value) == 134"/>
-                <Number name="VPN_AutoDiscovery" size="8" value="140" constraint="int(value) == 140"/>
+                <Number name="Reserved" size="8" value="0" token="true"/>
+                <Number name="NLRI_UCAST" size="8" value="1" token="true"/>
+                <Number name="NLRI_MCAST" size="8" value="2" token="true"/>
+                <Number name="NLRI_MCAST_UCAST" size="8" value="3" token="true"/>
+                <Number name="NLRI_MPLS" size="8" value="4" token="true"/>
+                <Number name="MCAST_VPN" size="8" value="5" token="true"/>
+                <Number name="NLRI_DynamicPsuedowire" size="8" value="6" token="true"/>
+                <Number name="Encapsulation" size="8" value="7" token="true"/>
+                <Number name="MCAST_VPLS" size="8" value="8" token="true"/>
+                <Number name="Tunnel" size="8" value="64" token="true"/>
+                <Number name="VPLS" size="8" value="65" token="true"/>
+                <Number name="BGP_MDT" size="8" value="66" token="true"/>
+                <Number name="BGP_4over6" size="8" value="67" token="true"/>
+                <Number name="BGP_6over4" size="8" value="68" token="true"/>
+                <Number name="L1_VPN_AutoDiscovery" size="8" value="69" token="true"/>
+                <Number name="BGP_EVPNs" size="8" value="70" token="true"/>
+                <Number name="BGP_LS" size="8" value="71" token="true"/>
+                <Number name="MPLS_VPN" size="8" value="128" token="true"/>
+                <Number name="MCAST_MPLS_VPN" size="8" value="129" token="true"/>
+                <Number name="RouteTargetConstrains" size="8" value="132" token="true"/>
+                <Number name="IPv4_FlowRules" size="8" value="133" token="true"/>
+                <Number name="VPNv4_FlowRules" size="8" value="134" token="true"/>
+                <Number name="VPN_AutoDiscovery" size="8" value="140" token="true"/>
                 <Number name="UNKNOWN" size="8"/>
             </Choice>
         </Block>

@@ -12,10 +12,22 @@
 
     <Agent name="TheAgent">
     </Agent>
-    <!--
-    <Publisher class="Tcp">
-        <Param name="Host" value="127.0.0.1" />
-        <Param name="Port" value="8080" />
-    </Publisher>
-    -->
+
+
+    <Agent name="QuaggaAgent">
+    </Agent>
+
+    <Agent name="CiscoAgent">
+    </Agent>
+
+    <Test name="Default">
+        <!-- SCTP instead of TCP possibility draft-zhiyfang-fecai-bgp-over-sctp-00 -->
+        <Publisher name="TcpBGP" class="Tcp">
+            <Param name="Host" value="##TargetHost##" />
+            <Param name="Port" value="179" />
+        </Publisher>
+        <Agent ref="QuaggaAgent" />
+        <StateModel ref="States:BGP_FSM"/>
+        <Strategy class="Random"/>
+    </Test>
 </Peach>
