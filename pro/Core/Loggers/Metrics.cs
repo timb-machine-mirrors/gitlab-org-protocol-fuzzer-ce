@@ -90,7 +90,7 @@ CREATE TABLE metrics_faults (
  mutator INTEGER,
  dataset INTEGER,
  bucket INTEGER,
- faultcount INTEGER,
+ faultnumber INTEGER,
  FOREIGN KEY(state) REFERENCES states(id),
  FOREIGN KEY(action) REFERENCES actions(id),
  FOREIGN KEY(parameter) REFERENCES parameters(id),
@@ -150,7 +150,7 @@ CREATE INDEX metrics_element_index on metrics_iterations (element);
 CREATE INDEX metrics_dataset_index on metrics_iterations (dataset);
 
 
-CREATE UNIQUE INDEX faults_index ON metrics_faults (
+CREATE INDEX faults_index ON metrics_faults(
  state,
  action,
  parameter,
@@ -159,6 +159,7 @@ CREATE UNIQUE INDEX faults_index ON metrics_faults (
  dataset,
  bucket
 );
+
 
 CREATE INDEX faults_mutator_index ON metrics_faults(mutator);
 CREATE INDEX faults_element_index ON metrics_faults(element);
@@ -177,7 +178,7 @@ CREATE UNIQUE INDEX faultsbyhour_index on metrics_faultsbyhour (
 CREATE VIEW view_metrics_states AS 
 SELECT
 	s.name as state,
-	mi.count
+	mi.count as iterationcount
 FROM metrics_states AS mi
 JOIN states AS s
 on s.id = mi.state;
@@ -190,7 +191,7 @@ SELECT
 	e.name as element,
 	m.name as mutator,
 	ds.name as dataset,
-	mi.count
+	mi.count as iterationcount
 FROM metrics_iterations AS mi
 JOIN states AS s
 on s.id = mi.state
@@ -214,7 +215,7 @@ SELECT
 	m.name as mutator,
 	ds.name as dataset,
   b.name as bucket,
-	mf.faultcount
+	count(distinct mf.faultnumber) as faultcount
 FROM metrics_faults AS mf
 JOIN states AS s
 on s.id = mf.state
@@ -229,7 +230,21 @@ on m.id = mf.mutator
 JOIN datasets AS ds
 on ds.id = mf.dataset
 JOIN buckets AS b
-ON b.id = mf.bucket;
+ON b.id = mf.bucket
+group by
+	mf.state
+	,mf.action
+	,mf.parameter
+	,mf.element
+	,mf.mutator
+	,mf.bucket
+order by
+	mf.state
+	,mf.action
+	,mf.parameter
+	,mf.element
+	,mf.mutator
+	,mf.bucket;
 
 CREATE VIEW view_buckets AS
 SELECT
@@ -238,7 +253,7 @@ SELECT
 	m.name as mutator, 
 	s.name + '.' + a.name + '.' + p.name + '.' + e.name as state, 
 	sum(mi.count) as iterationcount, 
-	sum(mf.faultcount) as faultcount
+	count(distinct(mf.faultnumber)) as faultcount
 FROM metrics_faults AS mf
 JOIN metrics_iterations AS mi ON 
 	mi.state = mf.state AND
@@ -265,7 +280,7 @@ GROUP BY
 	mf.action, 
 	mf.parameter, 
 	mf.element
-ORDER BY sum(mf.faultcount) DESC;
+ORDER BY count(distinct(mf.faultnumber)) DESC;
 
 CREATE VIEW view_buckettimeline AS
 SELECT
@@ -280,48 +295,154 @@ SELECT
 FROM buckets AS b
 WHERE b.type = 'minorHash';
 
-CREATE VIEW view_mutators AS
+CREATE VIEW view_distincts AS
+	SELECT DISTINCT
+		mutator
+		,state
+		,action
+		,parameter
+		,element
+	FROM metrics_iterations;
+
+CREATE VIEW view_mutator_elementcount AS
 SELECT 
-	m.name as mutator, 
-	count(distinct(mi.element)) as elementcount, 
-	sum(mi.count) as iterationcount, 
-	count(distinct(mf.bucket)) as bucketcount, 
-	sum(mf.faultcount) as faultcount
-FROM metrics_iterations AS mi
-JOIN metrics_faults AS mf ON
-	mf.mutator = mi.mutator
-JOIN mutators AS m ON 
-	m.id = mf.mutator
+	mutator
+	, count(*) as count
+FROM view_distincts
+GROUP BY mutator;
+
+CREATE VIEW view_buckets_major AS
+SELECT id
+FROM buckets
+WHERE type = 'majorHash';
+
+CREATE VIEW view_buckets_minor AS
+SELECT id
+FROM buckets
+WHERE type = 'minorHash';
+
+CREATE VIEW view_mutators_faults AS
+SELECT 
+	mf.mutator, 
+	count(distinct mf.bucket) as bucketcount, 
+	count(distinct mf.faultnumber) as faultcount
+FROM metrics_faults AS mf
+WHERE mf.bucket in (SELECT id FROM view_buckets_major)
+GROUP BY mf.mutator;
+
+CREATE VIEW view_mutators_iterations AS
+SELECT 
+    mi.mutator, 
+	ec.count as elementcount,
+	sum(mi.count) as iterationcount
+FROM view_mutator_elementcount AS ec
+JOIN metrics_iterations AS mi ON
+	ec.mutator = mi.mutator
 GROUP BY mi.mutator;
+
+CREATE VIEW view_mutators AS
+SELECT
+      m.name as mutator,
+      mi.elementcount,
+      mi.iterationcount,
+      mf.bucketcount,
+      mf.faultcount
+FROM view_mutators_iterations AS mi
+JOIN view_mutators_faults AS mf
+ON mf.mutator = mi.mutator
+JOIN mutators AS m
+ON m.id = mi.mutator;
+
+CREATE VIEW view_elements_iterations AS
+SELECT
+      state
+      ,action
+      ,parameter
+      ,dataset 
+      ,element
+      ,count(mutator) as mutationcount
+      ,sum(count) as iterationcount
+FROM metrics_iterations
+GROUP BY state,action,parameter,dataset,element;
+
+CREATE VIEW view_elements_faults AS
+SELECT
+      state
+      ,action
+      ,parameter
+      ,dataset
+      ,element
+      ,count(distinct(bucket)) as bucketcount
+      ,count(distinct(faultnumber)) as faultcount
+FROM metrics_faults
+WHERE bucket in (SELECT id FROM view_buckets_major)
+GROUP BY state,action,parameter,dataset,element;
 
 CREATE VIEW view_elements AS
 SELECT 
-	e.name as element, 
-	sum(mi.count) as iterationcount, 
-	count(distinct(mi.mutator)) as mutatorcount,
-	count(distinct(mf.bucket)) as bucketcount,
-	sum(mf.faultcount) as faultcount
-FROM metrics_iterations AS mi
-JOIN metrics_faults AS mf ON
-	mf.element = mi.element
-JOIN elements AS e ON
-	e.id = mi.element
-GROUP BY mi.element;
+	s.name as state
+	,a.name as action
+	,p.name as parameter
+	,d.name as dataset
+	,e.name as element 
+	,ei.iterationcount
+	,ei.mutationcount
+	,ef.bucketcount
+	,ef.faultcount
+FROM view_elements_iterations AS ei
+JOIN view_elements_faults AS ef ON
+	ef.element = ei.element
+	AND ef.state = ei.state
+	AND ef.action = ei.action
+	AND ef.parameter = ei.parameter
+	AND ef.dataset = ei.dataset
+JOIN elements AS e ON	e.id = ei.element
+JOIN states AS s ON s.id = ei.state
+JOIN actions AS a ON a.id = ei.action
+JOIN parameters AS p ON p.id = ei.parameter
+JOIN datasets AS d ON d.id = ei.dataset
+WHERE ef.faultcount > 0
+ORDER BY ef.faultcount DESC;
+
+CREATE VIEW view_datasets_iterations AS
+SELECT
+	dataset
+	,sum(count) as iterationcount
+FROM metrics_iterations
+GROUP BY dataset;
+
+CREATE VIEW view_datasets_faults AS
+SELECT
+	dataset
+	,count(distinct(bucket)) as bucketcount
+	,count(distinct(faultnumber)) as faultcount
+FROM metrics_faults
+WHERE bucket in (SELECT id FROM view_buckets_major)
+GROUP BY dataset;
 
 CREATE VIEW view_datasets AS
 SELECT
-	d.name as dataset,
-	sum(mi.count) as iterationcount,
-	count(distinct(mf.bucket)) as bucketcount,
-	sum(mf.faultcount) as faultcount
-FROM metrics_iterations AS mi
-JOIN metrics_faults AS mf ON
-	mf.dataset = mi.dataset
-JOIN datasets AS d ON
-	d.id = mi.dataset
-GROUP BY mi.dataset;
+	d.name as dataset
+	,di.iterationcount
+	,df.bucketcount
+	,df.faultcount
+FROM view_datasets_iterations AS di
+JOIN view_datasets_faults as df
+ON df.dataset = di.dataset
+JOIN datasets AS d ON d.id = di.dataset
+WHERE df.faultcount > 0
+ORDER BY df.bucketcount DESC
+LIMIT 20;
+
 
 ";
+/*
+	,case when length(p.name) > 0 then
+		s.name || '.' || a.name || '.' || p.name || '.' || e.name
+	else
+		s.name || '.' || a.name || '.' || e.name
+	end as element
+*/
 		#endregion
 
 		#region foreign key queries
@@ -399,17 +520,6 @@ UPDATE buckets SET faultcount = faultcount + 1 WHERE id = :id;
 		#endregion
 
 		#region fault queries
-		static string select_fault = @"
-SELECT id FROM metrics_faults WHERE
-	state = :state AND
-	action = :action AND
-	parameter = :parameter AND
-	element = :element AND
-	mutator = :mutator AND
-	dataset = :dataset AND
-	bucket = :bucket;
-";
-
 		static string insert_fault = @"
 INSERT INTO metrics_faults (
 	state,
@@ -419,7 +529,7 @@ INSERT INTO metrics_faults (
 	mutator,
 	dataset,
 	bucket,
-	faultcount
+	faultnumber
 ) VALUES (
 	:state,
 	:action,
@@ -428,14 +538,8 @@ INSERT INTO metrics_faults (
 	:mutator,
 	:dataset,
 	:bucket,
-	1
+	:faultnumber
 );
-
-SELECT last_insert_rowid();
-";
-
-		static string update_fault = @"
-UPDATE metrics_faults SET faultcount = faultcount + 1 WHERE id = :id;
 ";
 
 		static string select_faultsbyhour = @"
@@ -474,7 +578,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		static string[] foreignKeys = { "state", "action", "parameter", "element", "mutator", "dataset", "bucket" };
 
-		protected SQLiteConnection db;
+		public SQLiteConnection db;
 		Sample sample;
 		bool reproducingFault;
 
@@ -486,9 +590,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		SQLiteCommand select_state_cmd;
 		SQLiteCommand insert_state_cmd;
 		SQLiteCommand update_state_cmd;
-		SQLiteCommand select_fault_cmd;
 		SQLiteCommand insert_fault_cmd;
-		SQLiteCommand update_fault_cmd;
 		SQLiteCommand select_bucket_cmd;
 		SQLiteCommand insert_bucket_cmd;
 		SQLiteCommand update_bucket_cmd;
@@ -566,8 +668,14 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		public string ConnectionString { get; private set; }
 
+		private Peach.Core.Loggers.FileLogger fileLogger;
+
 		protected override void Engine_TestStarting(RunContext context)
 		{
+			fileLogger = (from l in context.test.loggers where l.GetType() == typeof(Peach.Core.Loggers.FileLogger) select l).First() as Peach.Core.Loggers.FileLogger;
+			fileLogger.FaultSaved += FaultSaved;
+
+
 			var dir = GetLogPath(context, Path);
 			System.IO.Directory.CreateDirectory(dir);
 			var path = System.IO.Path.Combine(dir, fileName);
@@ -640,16 +748,6 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			update_bucket_cmd.CommandText = update_bucket;
 			update_bucket_cmd.Parameters.Add(new SQLiteParameter("id"));
 
-			select_fault_cmd = new SQLiteCommand(db);
-			select_fault_cmd.CommandText = select_fault;
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("state"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("action"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("parameter"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("element"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("mutator"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("dataset"));
-			select_fault_cmd.Parameters.Add(new SQLiteParameter("bucket"));
-
 			insert_fault_cmd = new SQLiteCommand(db);
 			insert_fault_cmd.CommandText = insert_fault;
 			insert_fault_cmd.Parameters.Add(new SQLiteParameter("state"));
@@ -659,10 +757,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			insert_fault_cmd.Parameters.Add(new SQLiteParameter("mutator"));
 			insert_fault_cmd.Parameters.Add(new SQLiteParameter("dataset"));
 			insert_fault_cmd.Parameters.Add(new SQLiteParameter("bucket"));
-
-			update_fault_cmd = new SQLiteCommand(db);
-			update_fault_cmd.CommandText = update_fault;
-			update_fault_cmd.Parameters.Add(new SQLiteParameter("id"));
+			insert_fault_cmd.Parameters.Add(new SQLiteParameter("faultnumber"));
 
 			select_faultsbyhour_cmd = new SQLiteCommand(db);
 			select_faultsbyhour_cmd.CommandText = select_faultsbyhour;
@@ -681,6 +776,8 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
+			fileLogger.FaultSaved -= FaultSaved;
+
 			if (update_iteration_cmd != null)
 			{
 				update_iteration_cmd.Dispose();
@@ -735,22 +832,10 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				update_bucket_cmd = null;
 			}
 
-			if (select_fault_cmd != null)
-			{
-				select_fault_cmd.Dispose();
-				select_fault_cmd = null;
-			}
-
 			if (insert_fault_cmd != null)
 			{
 				insert_fault_cmd.Dispose();
 				insert_fault_cmd = null;
-			}
-
-			if (update_fault_cmd != null)
-			{
-				update_fault_cmd.Dispose();
-				update_fault_cmd = null;
 			}
 
 			if(select_faultsbyhour_cmd != null)
@@ -784,16 +869,14 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			}
 		}
 
+
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
+
 			reproducingFault = context.reproducingFault;
 
 			//TODO: Clear Sample list
 			samples.Clear();
-		}
-
-		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
-		{
 		}
 
 		protected override void StateStarting(RunContext context, Core.Dom.State state)
@@ -895,25 +978,18 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				trans.Commit();
 			}
 		}
-		protected override void Engine_ReproFault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faultData)
-		{
-			LogFaultMetrics(faultData);
-		}
 
-		protected override void Engine_Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faultData)
+		private uint faultCount = 0;
+
+		private void FaultSaved(Peach.Core.Loggers.FileLogger.Category category, Fault fault, string[] dataFiles, string path)
 		{
-			LogFaultMetrics(faultData);
-		}
+			if (category == Core.Loggers.FileLogger.Category.Reproducing)
+				return;
 
 
-		private void LogFaultMetrics(Fault[] faultData) 
-		{
 			var bucketdelimiter = @"_";
 			using (var trans = db.BeginTransaction())
 			{
-
-				// parsing faultData... find first entry with faultType = FAULT
-				var fault = (from f in faultData where f.type == FaultType.Fault select f).First();
 
 				var now = DateTime.Now;
 
@@ -942,7 +1018,8 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				buckets.Add(fault.majorHash + bucketdelimiter + fault.minorHash);
 
 				object bucketid;
-				object faultid;
+
+				faultCount++;
 
 				foreach (var bucket in buckets)
 				{
@@ -967,34 +1044,21 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 					}
 
 					//TODO: Add row to metrics_faults for each Sample in Sample list using keys from both metrics_buckets entries, add row or increment
+					//* // I really dunno about this...
 					foreach (var s in samples)
 					{ 
-						select_fault_cmd.Parameters["state"].Value = keyTracker["state"].Get(s.State);
-						select_fault_cmd.Parameters["action"].Value = keyTracker["action"].Get(s.Action);
-						select_fault_cmd.Parameters["parameter"].Value = keyTracker["parameter"].Get(s.Parameter);
-						select_fault_cmd.Parameters["element"].Value = keyTracker["element"].Get(s.Element);
-						select_fault_cmd.Parameters["mutator"].Value = keyTracker["mutator"].Get(s.Mutator);
-						select_fault_cmd.Parameters["dataset"].Value = keyTracker["dataset"].Get(s.DataSet);
-						select_fault_cmd.Parameters["bucket"].Value = bucketid;
-						faultid = select_fault_cmd.ExecuteScalar();
-
-						if(faultid == null)
-						{
-							insert_fault_cmd.Parameters["state"].Value = keyTracker["state"].Get(s.State);
-							insert_fault_cmd.Parameters["action"].Value = keyTracker["action"].Get(s.Action);
-							insert_fault_cmd.Parameters["parameter"].Value = keyTracker["parameter"].Get(s.Parameter);
-							insert_fault_cmd.Parameters["element"].Value = keyTracker["element"].Get(s.Element);
-							insert_fault_cmd.Parameters["mutator"].Value = keyTracker["mutator"].Get(s.Mutator);
-							insert_fault_cmd.Parameters["dataset"].Value = keyTracker["dataset"].Get(s.DataSet);
-							insert_fault_cmd.Parameters["bucket"].Value = bucketid;
-							faultid = insert_fault_cmd.ExecuteScalar();
-						}
-						else
-						{
-							update_fault_cmd.Parameters["id"].Value = faultid;
-							update_fault_cmd.ExecuteNonQuery();
-						}
+						insert_fault_cmd.Parameters["state"].Value = keyTracker["state"].Get(s.State);
+						insert_fault_cmd.Parameters["action"].Value = keyTracker["action"].Get(s.Action);
+						insert_fault_cmd.Parameters["parameter"].Value = keyTracker["parameter"].Get(s.Parameter);
+						insert_fault_cmd.Parameters["element"].Value = keyTracker["element"].Get(s.Element);
+						insert_fault_cmd.Parameters["mutator"].Value = keyTracker["mutator"].Get(s.Mutator);
+						insert_fault_cmd.Parameters["dataset"].Value = keyTracker["dataset"].Get(s.DataSet);
+						insert_fault_cmd.Parameters["bucket"].Value = bucketid;
+						insert_fault_cmd.Parameters["faultnumber"].Value = faultCount;
+						insert_fault_cmd.ExecuteNonQuery();
 					}
+					//*/
+
 				}
 
 				trans.Commit();

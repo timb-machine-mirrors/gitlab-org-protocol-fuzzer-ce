@@ -537,10 +537,11 @@ module DashApp.Models {
 	}
 
 	export interface ElementMetric {
+		state: string;
+		action: string;
+		parameter: string;
 		element: string;
-		//state: string;
-		//action: string;
-		//dataset: string;
+		iterationCount: number;
 		mutationCount: number;
 		bucketCount: number;
 		faultCount: number;
