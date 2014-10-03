@@ -35,28 +35,32 @@ namespace Peach.Core
 
 			var max = list.Max;
 			var ret = new List<T>();
-			var conversions = new Stack<Func<long, long>>();
+			var conversions = new SortedList<long, Func<long, long>>();
 
 			for (int i = 0; i < count; ++i)
 			{
 				var rand = rng.Next(max);
 
 				foreach (var c in conversions)
-					rand = c(rand);
+					rand = c.Value(rand);
 
 				var kv = list.UpperBound(rand);
 				var item = kv.Value;
-				var lowerBound = kv.Key - item.SelectionWeight;
+				var weight = item.SelectionWeight;
+				var lowerBound = kv.Key - weight;
 
-				conversions.Push( (c) => {
+				conversions.Add(kv.Key, (c) => {
 					if (c >= lowerBound)
-						return c + item.SelectionWeight;
+						return c + weight;
 					else
 						return c;
 				});
 
+				System.Diagnostics.Debug.Assert(!ret.Contains(item));
+				System.Diagnostics.Debug.Assert(max >= weight);
+
 				ret.Add(item);
-				max -= item.SelectionWeight;
+				max -= weight;
 			}
 
 			return ret.ToArray();

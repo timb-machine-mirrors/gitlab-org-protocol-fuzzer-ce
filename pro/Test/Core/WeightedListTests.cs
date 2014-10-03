@@ -131,5 +131,24 @@ namespace Peach.Core.Test
 			Assert.AreEqual("4", samples[3].Name);
 		}
 
+		[Test]
+		public void TestRandomSample2()
+		{
+			var lst = new WeightedList<Item>();
+
+			lst.Add(new Item("1", 200));
+			lst.Add(new Item("2", 100));
+			lst.Add(new Item("3", 10));
+			lst.Add(new Item("4", 1));
+
+			var rng = new Random(0);
+			var samples = rng.WeightedSample(lst, 4);
+
+			Assert.AreEqual(4, samples.Length);
+			Assert.AreEqual("1", samples[0].Name);
+			Assert.AreEqual("2", samples[1].Name);
+			Assert.AreEqual("3", samples[2].Name);
+			Assert.AreEqual("4", samples[3].Name);
+		}
 	}
 }
