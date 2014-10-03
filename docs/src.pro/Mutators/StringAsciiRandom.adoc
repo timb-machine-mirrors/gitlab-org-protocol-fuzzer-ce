@@ -1,0 +1,13 @@
+<<<
+[[Mutators_StringAsciiRandom]]
+== StringAsciiRandom
+
+This mutator produces test cases by generating random ASCII strings. The string length is a distribution centered on the current length of the string with a min of 0 and max of 65k.
+
+=== Supported Elements
+
+* xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.
