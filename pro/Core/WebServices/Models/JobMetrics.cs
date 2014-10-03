@@ -33,6 +33,9 @@ namespace Peach.Enterprise.WebServices.Models
 
 	public class ElementMetric
 	{
+		public string State { get; set; }
+		public string Action { get; set; }
+		public string Parameter { get; set; }
 		public string Element { get; set; }
 		public uint IterationCount { get; set; }
 		public uint MutationCount { get; set; }

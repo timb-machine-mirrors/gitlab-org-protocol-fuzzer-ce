@@ -23,6 +23,8 @@ namespace Peach.Pro.Test.Monitors
 		public int NewMajor { get; set; }
 		public int NewMinor { get; set; }
 
+		bool isControl = false;
+
 		string fmt = "X8";
 
 		List<string> majors = new List<string>();
@@ -65,8 +67,8 @@ namespace Peach.Pro.Test.Monitors
 			// Avoid faulting on first iteration
 			if (currentIteration < 2)
 				return false;
-
-			if (rnd.Next() % Fault == 0)
+			 
+			if (!isControl && rnd.Next() % Fault == 0)
 				return true;
 
 			return false;
@@ -150,6 +152,18 @@ namespace Peach.Pro.Test.Monitors
 
 		public override Variant Message(string name, Variant data)
 		{
+
+			switch(((string)data).ToLower())
+			{
+				case "true":
+					isControl = true;
+					break;
+				case "false":
+					isControl = false;
+					break;
+				default:
+					break;
+			}
 			return null;
 		}
 	}

@@ -105,8 +105,6 @@ namespace Peach.Pro.Analyzers
 				var value = data.Substring(group.Index, group.Length);
                 str.DefaultValue = new Variant(value);
                 sorted[group.Index] = str;
-
-				Console.WriteLine("[[" + value + "]]");
             }
 
             // Add elements in order they appeared in string

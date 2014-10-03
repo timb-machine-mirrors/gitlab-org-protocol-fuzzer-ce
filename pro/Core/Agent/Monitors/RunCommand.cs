@@ -22,6 +22,7 @@ namespace Peach.Core.Agent.Monitors
 	[Parameter("FaultExitCode", typeof(int), "Exit code to fault on", "1")]
 	[Parameter("FaultOnNonZeroExit", typeof(bool), "Fault if exit code is non-zero", "false")]
 	[Parameter("FaultOnRegex", typeof(string), "Fault if regex matches", "")]
+	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than Timeout seconds where -1 is infinite timeout ", "-1")]
 	public class RunCommand  : Monitor
 	{
@@ -37,6 +38,12 @@ namespace Peach.Core.Agent.Monitors
 		public int FaultExitCode { get; protected set; }
 		public bool FaultOnExitCode { get; protected set; }
 		public string FaultOnRegex { get; protected set; }
+		public bool AddressSanitizer { get; protected set; }
+
+		readonly Regex asanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
+		readonly Regex asanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
+		readonly Regex asanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)");
+		readonly Regex asanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
 
 		Regex _faulOnRegex = null;
 
@@ -82,31 +89,47 @@ namespace Peach.Core.Agent.Monitors
 
 				if (p.Timeout)
 				{
-					_fault.description = "Process failed to exit in allotted time.";
+					_fault.title = _fault.description = "Process failed to exit in allotted time.";
 					_fault.type = FaultType.Fault;
 				}
 				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
 				{
-					_fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_fault.title = _fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
 					_fault.type = FaultType.Fault;
 				}
 				else if (FaultOnNonZeroExit && p.ExitCode != 0)
 				{
-					_fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_fault.title = _fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
 					_fault.type = FaultType.Fault;
 				}
 				else if (_faulOnRegex != null)
 				{
 					if (_faulOnRegex.Match(stdout).Success)
 					{
-						_fault.description = "Process output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_fault.title = _fault.description = "Process output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
 						_fault.type = FaultType.Fault;
 					}
 					else if (_faulOnRegex.Match(stderr).Success)
 					{
-						_fault.description = "Process error output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_fault.title = _fault.description = "Process error output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
 						_fault.type = FaultType.Fault;
 					}
+				}
+				else if (AddressSanitizer && asanMatch.IsMatch(stderr))
+				{
+					_fault.type = FaultType.Fault;
+					_fault.folderName = null;
+
+					var match = asanBucket.Match(stderr);
+					_fault.exploitability = match.Groups[1].Value;
+					_fault.majorHash = match.Groups[3].Value;
+					_fault.minorHash = match.Groups[2].Value;
+
+					match = asanTitle.Match(stderr);
+					_fault.title = match.Groups[1].Value;
+
+					match = asanMessage.Match(stderr);
+					_fault.description = stderr.Substring(match.Groups[1].Index, match.Groups[1].Length);
 				}
 				else
 				{
@@ -119,7 +142,6 @@ namespace Peach.Core.Agent.Monitors
 				throw new PeachException("Could not run command '" + Command + "'.  " + ex.Message + ".", ex);
 			}
 		}
-
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
