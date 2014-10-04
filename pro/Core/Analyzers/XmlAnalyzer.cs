@@ -77,7 +77,7 @@ namespace Peach.Core.Analyzers
 			var data = new BitStream(File.ReadAllBytes(inFile));
 			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
 
-			model.Add(new Peach.Core.Dom.String());
+			model.Add(new Peach.Core.Dom.String() { stringType = StringType.utf8 });
 			model[0].DefaultValue = new Variant(data);
 
 			asDataElement(model[0], null);
@@ -105,15 +105,22 @@ namespace Peach.Core.Analyzers
 			if (strElement == null)
 				throw new PeachException("Error, XmlAnalyzer analyzer only operates on String elements!");
 
-			var value = (string)strElement.InternalValue;
-			if (string.IsNullOrEmpty(value))
-				return;
-
 			var doc = new XmlDocument();
 
 			try
 			{
-				doc.LoadXml(value);
+				try
+				{
+					var stream = (BitStream)strElement.Value;
+					if (stream.Length == 0)
+						return;
+
+					doc.Load(stream);
+				}
+				catch
+				{
+					doc.LoadXml((string)strElement.InternalValue);
+				}
 			}
 			catch (Exception ex)
 			{
