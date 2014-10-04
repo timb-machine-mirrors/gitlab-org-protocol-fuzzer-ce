@@ -86,10 +86,34 @@ namespace Peach.Core.Test.Mutators
 		[Test]
 		public void TestArrayVariance()
 		{
-			Assert.Fail("Not implemented");
+			// Make sure this mutator doesn't cause issues with ArrayVariance mutations
+			// that use the CountOverride functionality of array.
 
-			// Ensure things work if we remove the only array item and
-			// the array variance mutator runs on the array
+			var runner = new MutatorRunner("DataElementRemove");
+
+			var array = new Dom.Array("Array") { occurs = 1 };
+			array.OriginalElement = new Dom.String("Array") { DefaultValue = new Variant("Hello") };
+
+			Assert.AreEqual(Encoding.ASCII.GetBytes("Hello"), array.Value.ToArray());
+			Assert.AreEqual(1, array.Count);
+
+			array[0].DefaultValue = new Variant("Foo");
+			array.CountOverride = 2;
+
+			// Count override replicates the last element
+			Assert.AreEqual(Encoding.ASCII.GetBytes("FooFoo"), array.Value.ToArray());
+
+			var m = runner.Sequential(array[0]);
+			Assert.AreEqual(1, m.Count());
+
+			foreach (var item in m)
+			{
+				var val = item.Value.ToArray();
+
+				// Even though we mutated, CountOverride will stil produce 2 values
+				// using original element
+				Assert.AreEqual(Encoding.ASCII.GetBytes("HelloHello"), val);
+			}
 		}
 	}
 }
