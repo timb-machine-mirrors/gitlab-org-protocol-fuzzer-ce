@@ -38,6 +38,7 @@ FaultOnRegex::
     Fault if regular expression matches. Defaults to no regular expression.
     To use, supply a valid regular expression using the Microsoft .NET syntax.
 
+AddressSanitizer:: Enable Google AddressSanitizer (ASan) support. Defaults to false.
 Timeout:: Fault if process takes more than Timeout seconds where -1 is infinite timeout. Defaults to -1.
 
 === Examples
