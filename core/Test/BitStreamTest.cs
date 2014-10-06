@@ -800,6 +800,29 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void TestSlice()
+		{
+			var bs = new BitStream();
+			bs.SetLength(100);
+
+			Assert.AreEqual(0, bs.Position);
+			bs.Position = 75;
+
+			var bs2 = bs.SliceBits(25 * 8);
+			Assert.AreEqual(100, bs.Position);
+			Assert.AreEqual(0, bs2.Position);
+			Assert.AreEqual(25, bs2.Length);
+
+			bs2.Position = 20;
+
+			var bs3 = bs2.SliceBits(5 * 8);
+			Assert.AreEqual(25, bs2.Position);
+			Assert.AreEqual(0, bs3.Position);
+			Assert.AreEqual(5, bs3.Length);
+
+		}
+
+		[Test]
 		public void ReadString()
 		{
 			var bs = new BitStream();
