@@ -348,6 +348,7 @@ module DashApp {
 
 		// #region timeline
 		public bucketTimelineOptions = {
+			selectable: false,
 			debug: false,
 			align: 'center',
 			autoResize: true,
@@ -360,54 +361,27 @@ module DashApp {
 				axis: 20,
 				item: 10
 			},
-			//min: this.jobStartDate,
-			//max: new Date(),
 			maxHeight: null,
 			orientation: 'top',
 			padding: 5,
-			selectable: false,
 			showCurrentTime: true,
 			showCustomTime: true,
 			showMajorLabels: true,
 			showMinorLabels: true,
-			type: 'box', // dot | point
+			type: 'box',
 			zoomMin: 1000,
 			zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
-			groupOrder: 'content',
 			template: function (item) {
-				return "<a ng-click=\"$event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" ><b>" + item.data.label + "</b></a><br />" +
+				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
 					"Faults: " + item.data.faultCount + "<br />" +
-					"1st Iteration: " + item.data.iteration + "<br />"; 
+					"1st Iteration: " + item.data.iteration + "<br /></div>"; 
 			}
 		};
 
 		public bucketTimelineEvents = {
-			//select: (selected) => {
-			//	if (this.debug) {
-			//		console.log('selected items: ', selected.items);
-			//	}
-
-			//	var selecteditem = $.grep(this.bucketTimelineData, (e) => {
-			//		return e.id == selected.items[0];
-			//	})[0];
-
-			//	var items = this.simplifyItems(this.bucketTimelineData);
-
-			//	var format = 'YYYY-MM-DDTHH:mm'; 
-
-			//	angular.forEach(items, function (item) {
-			//		if (item.id == selected.items[0]) {
-			//			this.scope.slot = {
-			//				id: item.id,
-			//				start: moment(item.start).format(format),
-			//				end: (item.end) ? moment(item.end).format(format) : null,
-			//				content: item.content
-			//			};
-
-			//			this.scope.$apply();
-			//		}
-			//	});
-			//},
+			select: (selected) => {
+				console.log(selected);
+			},
 
 			range: {},
 
