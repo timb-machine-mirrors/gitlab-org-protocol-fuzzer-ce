@@ -23,9 +23,19 @@ namespace Peach.Core.Mutators
 	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobExpandSingleRandom : Utility.BlobMutator
 	{
+		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
 		public BlobExpandSingleRandom(DataElement obj)
 			: base(obj, 255, false)
 		{
+		}
+
+		protected override NLog.Logger Logger
+		{
+			get
+			{
+				return logger;
+			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)

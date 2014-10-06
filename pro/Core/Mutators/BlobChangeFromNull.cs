@@ -22,9 +22,19 @@ namespace Peach.Core.Mutators
 	[Hint("BlobMutator-N", "Standard deviation of number of bytes to change")]
 	public class BlobChangeFromNull : Utility.BlobMutator
 	{
+		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
 		public BlobChangeFromNull(DataElement obj)
 			: base(obj, 100, true)
 		{
+		}
+
+		protected override NLog.Logger Logger
+		{
+			get
+			{
+				return logger;
+			}
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)

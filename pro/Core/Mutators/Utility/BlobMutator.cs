@@ -46,6 +46,14 @@ namespace Peach.Core.Mutators.Utility
 			this.stddev = this.variance / 3.0;
 		}
 
+		/// <summary>
+		/// The logger to use.
+		/// </summary>
+		protected abstract NLog.Logger Logger
+		{
+			get;
+		}
+
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			if (obj is Dom.Blob && obj.isMutable)
@@ -101,6 +109,8 @@ namespace Peach.Core.Mutators.Utility
 
 		bool performMutation(DataElement obj, long length)
 		{
+			Logger.Trace("performMutation(value={0}", length);
+
 			var data = (BitStream)obj.InternalValue;
 
 			long start;
