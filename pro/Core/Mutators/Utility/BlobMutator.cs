@@ -130,6 +130,8 @@ namespace Peach.Core.Mutators.Utility
 				start = context.Random.Next(0, data.Length);
 			}
 
+			data.Seek(0, System.IO.SeekOrigin.Begin);
+
 			var bs = PerformMutation(data, start, length);
 
 			obj.mutationFlags = MutateOverride.Default;
