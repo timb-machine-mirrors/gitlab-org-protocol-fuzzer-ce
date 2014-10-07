@@ -981,7 +981,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		private uint faultCount = 0;
 
-		private void FaultSaved(Peach.Core.Loggers.FileLogger.Category category, Fault fault, string[] dataFiles, string path)
+		private void FaultSaved(Peach.Core.Loggers.FileLogger.Category category, Fault fault, string rootPath)
 		{
 			if (category == Core.Loggers.FileLogger.Category.Reproducing)
 				return;
