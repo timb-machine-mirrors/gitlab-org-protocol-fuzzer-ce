@@ -32,7 +32,7 @@ bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
 subdirs = [
 	'pin',
-#	'Json50r8',
+	'Newtonsoft.Json',
 #	'Renci.SshNet',
 #	'Nancy.Serialization.JsonNet-0.22.2',
 	'Portable.Licensing',
