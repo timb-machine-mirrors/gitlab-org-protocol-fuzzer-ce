@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 using Peach.Core.OS.Linux.Agent.Monitors;
 using System.Threading;
+using System.Reflection;
 
 namespace Peach.Core.Test.OS.Linux.Agent.Monitors
 {
@@ -15,9 +16,11 @@ namespace Peach.Core.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestFault()
 		{
+			var self = Assembly.GetExecutingAssembly().Location;
+
 			var args = new Dictionary<string, Variant>();
 			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["Arguments"] = new Variant("Peach.Core.Test.OS.Linux.dll");
+			args["Arguments"] = new Variant(self);
 			args["RestartOnEachTest"] = new Variant("true");
 
 			var m = new LinuxDebugger(null, null, args);
