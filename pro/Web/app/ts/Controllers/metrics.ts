@@ -534,6 +534,7 @@ module DashApp {
 		public gridMetricsMutator = {
 			data: "vm.mutatorData",
 			sortInfo: { fields: ["mutator"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "mutator", displayName: "Mutator" },
 				{ field: "elementCount", displayName: "Element Count" },
@@ -547,6 +548,7 @@ module DashApp {
 		public gridMetricsElement = {
 			data: "vm.elementData",
 			sortInfo: { fields: ["element"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "state", displayName: "State" },
 				{ field: "action", displayName: "Action" },
@@ -562,6 +564,7 @@ module DashApp {
 		public gridMetricsState = {
 			data: "vm.stateData",
 			sortInfo: { fields: ["state"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "state", displayName: "State" },
 				{ field: "executionCount", displayName: "Executions" }
@@ -571,6 +574,7 @@ module DashApp {
 		public gridMetricsDataset = {
 			data: "vm.datasetData",
 			sortInfo: { fields: ["dataset"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "dataset", displayName: "Data Set" },
 				{ field: "iterationCount", displayName: "Iterations" },
@@ -582,10 +586,11 @@ module DashApp {
 		public gridMetricsBucket = {
 			data: "vm.bucketData",
 			sortInfo: { fields: ["bucket"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "bucket", displayName: "Fault Bucket" },
 				{ field: "mutator", displayName: "Mutator" },
-				{ field: "state", displayName: "State" },
+				{ field: "element", displayName: "Element" },
 				{ field: "iterationCount", displayName: "Iteration Count" },
 				{ field: "faultCount", displayName: "Fault Count" }
 			]
