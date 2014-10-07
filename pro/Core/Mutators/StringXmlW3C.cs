@@ -16,6 +16,7 @@ namespace Peach.Core.Mutators
 {
 	[Mutator("StringXmlW3C")]
 	[Description("Performs the W3C parser tests. Only works on <String> elements with a <Hint name=\"type\" value=\"xml\">")]
+	[Hint("XML", "Enable XML W2C test cases")]
 	public class StringXmlW3C : Mutator
 	{
 		static string[] values;
@@ -55,7 +56,7 @@ namespace Peach.Core.Mutators
 			if (obj is Dom.String && obj.isMutable)
 			{
 				Hint h = null;
-				if (obj.Hints.TryGetValue("XMLhint", out h))
+				if (obj.Hints.TryGetValue("XML", out h))
 				{
 					if (h.Value == "xml")
 						return true;
