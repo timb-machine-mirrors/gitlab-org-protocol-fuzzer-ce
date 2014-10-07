@@ -34,7 +34,7 @@ subdirs = [
 	'pin',
 	'Newtonsoft.Json',
 #	'Renci.SshNet',
-#	'Nancy.Serialization.JsonNet-0.22.2',
+	'Nancy.Serialization.JsonNet',
 	'Portable.Licensing',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
