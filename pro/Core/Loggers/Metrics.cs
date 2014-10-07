@@ -367,7 +367,6 @@ SELECT
       ,parameter
       ,dataset 
       ,element
-      ,count(mutator) as mutationcount
       ,sum(count) as iterationcount
 FROM metrics_iterations
 GROUP BY state,action,parameter,dataset,element;
@@ -393,7 +392,6 @@ SELECT
 	,d.name as dataset
 	,e.name as element 
 	,ei.iterationcount
-	,ei.mutationcount
 	,ef.bucketcount
 	,ef.faultcount
 FROM view_elements_iterations AS ei
