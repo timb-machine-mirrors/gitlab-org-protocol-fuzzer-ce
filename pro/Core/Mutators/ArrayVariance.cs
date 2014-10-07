@@ -64,7 +64,7 @@ namespace Peach.Core.Mutators
 			{
 				// add some items, but do it by replicating
 				// the last item over and over to save memory
-				objAsArray.ExpandTo((int)num);
+				objAsArray.CountOverride = (int)num;
 			}
 		}
 

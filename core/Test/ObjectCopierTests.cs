@@ -127,6 +127,21 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void OnlyCloneChildren()
+		{
+			var str1 = new Dom.String("str1");
+			var model = new DataModel("DM");
+			model.Add(str1);
+
+			var str2 = str1.Clone("str2");
+
+			Assert.AreEqual(1, model.Count);
+			Assert.AreEqual(model, str2.parent);
+			Assert.AreEqual(model.GetHashCode(), str2.parent.GetHashCode());
+
+		}
+
+		[Test]
 		public void ValidateRelations3()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
