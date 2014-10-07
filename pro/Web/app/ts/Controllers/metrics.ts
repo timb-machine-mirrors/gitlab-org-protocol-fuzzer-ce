@@ -555,7 +555,6 @@ module DashApp {
 				{ field: "parameter", displayName: "Parameter" },
 				{ field: "element", displayName: "Element" },
 				{ field: "iterationCount", displayName: "Iterations" },
-				{ field: "mutationCount", displayName: "Mutations" },
 				{ field: "bucketCount", displayName: "Buckets" },
 				{ field: "faultCount", displayName: "Faults" }
 			]
