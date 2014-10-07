@@ -8,9 +8,9 @@ NOTE: This mutator replaced the ValidValues mutator from earlier versions of Pea
 
 === Supported Elements
 
- * xref::String
- * xref::Number
- * xref::Blob
+ * xref:String[String]
+ * xref:Number[Number]
+ * xref:Blob[Blob]
 
 === Hints
 

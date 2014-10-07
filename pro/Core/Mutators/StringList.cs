@@ -11,6 +11,7 @@ namespace Peach.Core.Mutators
 {
 	[Mutator("StringList")]
 	[Description("Mutates string using a lines from a user defined file.")]
+	[Hint("StringList", "Filename with one string per line to use as test cases")]
 	public class StringList : Mutator
 	{
 		string[] values;

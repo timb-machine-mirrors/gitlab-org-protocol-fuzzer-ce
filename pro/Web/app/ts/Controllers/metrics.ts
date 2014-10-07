@@ -21,6 +21,44 @@ module DashApp {
 		data?: Models.BucketTimelineMetric
 	}
 
+	export interface TimelineOptions {
+		align?: string;
+		autoResize?: boolean;
+		clickToUse?: boolean;
+		dataAttributes?: string[];
+		editable?: any;
+		end?: any;
+		groupOrder?: any;
+		height?: any;
+		locale?: string;
+		locales?: Object;
+		margin?: Object;
+		max?: any;
+		maxHeight?: any;
+		min?: any;
+		minHeight?: any;
+		onAdd?: Function;
+		onUpdate?: Function;
+		onMove?: Function;
+		onMoving?: Function;
+		onRemove?: Function;
+		orientation?: string;
+		padding?: number;
+		selectable?: boolean;
+		showCurrentTime?: boolean;
+		showCustomTime?: boolean;
+		showMajorLabels?: boolean;
+		showMinorLabels?: boolean;
+		stack?: boolean;
+		start?: any;
+		template?: Function;
+		type?: string;
+		width?: string;
+		zoomable?: boolean;
+		zoomMax?: number;
+		zoomMin?: number;
+	}
+
 	export class MetricsController {
 		private scope: ViewModelScope;
 		private debug = true;
@@ -79,6 +117,8 @@ module DashApp {
 							var dataset = this.visDataSet(timelineData);
 							this.bucketTimelineData = dataset;
 							//this.bucketTimelineData = timelineData;
+
+							this.bucketTimelineOptions = { selectable: false };
 						});
 						break;
 					case "faultsOverTime":
@@ -347,6 +387,15 @@ module DashApp {
 
 
 		// #region timeline
+		public bucketTimelineOptions: TimelineOptions = {
+			selectable: false,
+			template: function (item) {
+				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
+					"Faults: " + item.data.faultCount + "<br />" +
+					"1st Iteration: " + item.data.iteration + "<br /></div>";
+			}
+		};
+		/*
 		public bucketTimelineOptions = {
 			selectable: false,
 			debug: false,
@@ -377,7 +426,7 @@ module DashApp {
 					"1st Iteration: " + item.data.iteration + "<br /></div>"; 
 			}
 		};
-
+		//*/
 		public bucketTimelineEvents = {
 			select: (selected) => {
 				console.log(selected);
@@ -485,6 +534,7 @@ module DashApp {
 		public gridMetricsMutator = {
 			data: "vm.mutatorData",
 			sortInfo: { fields: ["mutator"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "mutator", displayName: "Mutator" },
 				{ field: "elementCount", displayName: "Element Count" },
@@ -498,6 +548,7 @@ module DashApp {
 		public gridMetricsElement = {
 			data: "vm.elementData",
 			sortInfo: { fields: ["element"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "state", displayName: "State" },
 				{ field: "action", displayName: "Action" },
@@ -513,6 +564,7 @@ module DashApp {
 		public gridMetricsState = {
 			data: "vm.stateData",
 			sortInfo: { fields: ["state"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "state", displayName: "State" },
 				{ field: "executionCount", displayName: "Executions" }
@@ -522,6 +574,7 @@ module DashApp {
 		public gridMetricsDataset = {
 			data: "vm.datasetData",
 			sortInfo: { fields: ["dataset"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "dataset", displayName: "Data Set" },
 				{ field: "iterationCount", displayName: "Iterations" },
@@ -533,10 +586,11 @@ module DashApp {
 		public gridMetricsBucket = {
 			data: "vm.bucketData",
 			sortInfo: { fields: ["bucket"], directions: ["asc"] },
+			enableColumnResize: true,
 			columnDefs: [
 				{ field: "bucket", displayName: "Fault Bucket" },
 				{ field: "mutator", displayName: "Mutator" },
-				{ field: "state", displayName: "State" },
+				{ field: "element", displayName: "Element" },
 				{ field: "iterationCount", displayName: "Iteration Count" },
 				{ field: "faultCount", displayName: "Fault Count" }
 			]

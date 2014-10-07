@@ -1,0 +1,13 @@
+<<<
+[[Mutators_StringUnicodeInvalid]]
+== StringUnicodeInvalid
+
+This mutator produces test cases for String elements by selecting a random set of invalid Unicode characters. These are characters that are in the Uncode space, but are not currently used, or specifically exluded. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.
