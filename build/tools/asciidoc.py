@@ -146,14 +146,16 @@ def apply_webhelp(self):
 	if inst:
 		self.install_extras.append(inst)
 
+	root = self.bld.launch_node()
+
 	# Install template files to BINDIR
-	template = self.bld.root.find_dir(os.path.join(self.env.WEBHELP_DIR, 'template'))
+	template = root.find_dir(os.path.join(self.env.WEBHELP_DIR, 'template'))
 	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
 
 	# Install favicon to BINDIR
-	ico = self.bld.root.find_resource(self.env.WEBHELP_ICO)
+	ico = root.find_resource(self.env.WEBHELP_ICO)
 	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
