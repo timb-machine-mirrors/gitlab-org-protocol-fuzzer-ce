@@ -6,8 +6,8 @@ This mutator produces test cases for Number and String elements. String elements
 
 === Supported Elements
 
- * xref::String
- * xref::Number
+ * xref:String[String]
+ * xref:Number[Number]
 
 === Hints
 

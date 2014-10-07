@@ -1,0 +1,13 @@
+<<<
+[[Mutators_StringUnicodePlane15And16]]
+== StringUnicodePlane15And16
+
+This mutator produces test cases for String elements by selecting a random set of Unicode plane 15 and 16 (private use area planes) characters. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

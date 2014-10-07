@@ -1,0 +1,15 @@
+<<<
+[[Mutators_StringUnicodeAbstractCharacters]]
+== StringUnicodeAbstractCharacters
+
+This mutator produces test cases for String elements by selecting a random set of Unicode format characters. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+
+TIP: Format characters are characters that do not have a visible appearance, but may have an effect on the appearance or behavior of neighboring characters. For example, U+200C ZERO WIDTH NON-JOINER and U+200D ZERO WIDTH JOINER may be used to change the default shaping behavior of adjacent characters (e.g. to inhibit ligatures or request ligature formation). There are 152 format characters in Unicode 7.0.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+This mutator does not support any hints.

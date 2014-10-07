@@ -1,8 +1,8 @@
 <<<
-[[Mutators_SizedDataEdgeCase]]
-== SizedDataEdgeCase
+[[Mutators_SizedDataVariance]]
+== SizedDataVariance
 
-This mutator produces test cases elements that are part of a size relationship. This mutator is similar to the xref:Mutators_NumberVariance[NumberVariance] mutator, except it will cause the sized element to expand such that the relationship is still valid. The test cases are produced using a guassian distribution with the current default value as the cetner of the distribution.
+This mutator produces test cases elements that are part of a size relationship. This mutator is similar to the xref:Mutators_NumberVariance[NumberVariance] mutator, except it will cause the sized element to expand such that the relationship is invalid. Only the data portion of the relationship is modified while the size is kept static. The test cases are produced using a guassian distribution with the current default value as the cetner of the distribution.
 
 Values chosen will never be larger than the maximum size the size provider can handle.
 
