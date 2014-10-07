@@ -148,6 +148,18 @@ namespace Peach.Core.Test
 			return runner.IsSupported(type, element);
 		}
 
+		public uint LastSeed
+		{
+			get;
+			private set;
+		}
+
+		public uint? SeedOverride
+		{
+			get;
+			set;
+		}
+
 		public IEnumerable<Mutation> Sequential(DataElement element)
 		{
 			return Sequential(element, null);
@@ -156,6 +168,11 @@ namespace Peach.Core.Test
 		public IEnumerable<Mutation> Sequential(DataElement element, System.Action cb)
 		{
 			var strategy = new Runner(type, element);
+
+			if (SeedOverride.HasValue)
+				strategy.Context.config.randomSeed = SeedOverride.Value;
+
+			LastSeed = strategy.Context.config.randomSeed;
 
 			if (cb != null)
 				cb();
@@ -176,6 +193,11 @@ namespace Peach.Core.Test
 		public IEnumerable<Mutation> Random(int count, DataElement element, System.Action cb)
 		{
 			var strategy = new Runner(type, element);
+
+			if (SeedOverride.HasValue)
+				strategy.Context.config.randomSeed = SeedOverride.Value;
+
+			LastSeed = strategy.Context.config.randomSeed;
 
 			if (cb != null)
 				cb();
