@@ -159,18 +159,23 @@ namespace Peach.Core.Test.Mutators
 			var orig = dom.dataModels[0].Value.ToArray();
 			var last = orig;
 
+			runner.SeedOverride = 0;
 			var m = runner.Random(500, dom.dataModels[0]);
+
 
 			foreach (var item in m)
 			{
 				var val = item.Value;
 				var buf = val.ToArray();
 
-				if (lengthSame)
-					Assert.AreEqual(orig.Length * 8, val.LengthBits);
-				else
-					Assert.AreNotEqual(last, buf);
+				// Length should always be the same as original
+				// since we flip bits on post-transformed value
+				Assert.AreEqual(orig.Length * 8, val.LengthBits);
 
+				// Should not be the same as last mutation
+				Assert.AreNotEqual(last, buf);
+
+				// Should not be the same as the original value
 				Assert.AreNotEqual(orig, buf);
 
 				last = buf;

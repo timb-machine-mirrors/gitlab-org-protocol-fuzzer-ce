@@ -21,14 +21,21 @@ namespace Peach.Core.Mutators
 	{
 		int total;
 		Func<DataElement, BitwiseStream> getData;
+		MutateOverride flags;
 
 		public DataElementBitFlipper(DataElement obj)
 			: base(obj)
 		{
 			if (obj is DataElementContainer)
+			{
+				flags = MutateOverride.Default | MutateOverride.TypeTransform | MutateOverride.Transformer;
 				getData = e => e.Value;
+			}
 			else
+			{
+				flags = MutateOverride.Default | MutateOverride.TypeTransform;
 				getData = e => e.PreTransformedValue;
+			}
 
 			// For sequential, use the length of the data
 			total = (int)Math.Min(int.MaxValue, getData(obj).LengthBits);
@@ -124,7 +131,7 @@ namespace Peach.Core.Mutators
 				ret.Add(data.SliceBits(remain));
 
 			obj.MutatedValue = new Variant(ret);
-			obj.mutationFlags = MutateOverride.Default | MutateOverride.TypeTransform;
+			obj.mutationFlags = flags;
 		}
 	}
 }
