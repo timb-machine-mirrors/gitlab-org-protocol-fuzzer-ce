@@ -39,6 +39,8 @@ namespace Peach.Core.Test.OS.Linux
 			{
 				var si = new ProcessStartInfo();
 				si.FileName = "/bin/ls";
+				si.UseShellExecute = false;
+				si.RedirectStandardOutput = true;
 				p.StartInfo = si;
 				p.Start();
 				p.WaitForExit();
