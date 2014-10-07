@@ -68,8 +68,6 @@ namespace Peach.Pro.Publishers
 
 			if (_device == null)
 				throw new ArgumentException("Unable to locate network device '"+deviceName+"'.");
-
-			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
 
 		public PcapListener(System.Net.IPAddress Interface)
@@ -113,19 +111,28 @@ namespace Peach.Pro.Publishers
 		}
 
 		/// <summary>
-		/// Capture filter. Follows the libpcap format.
+		/// Start capturing packets
 		/// </summary>
-		public string Filter { get { return _device.Filter; } set { _device.Filter = value; } }
+		public void Start()
+		{
+			Start("");
+		}
 
 		/// <summary>
 		/// Start capturing packets
 		/// </summary>
-		public void Start()
+		/// <param name="filter">Capture filter. Follows the libpcap format.</param>
+		public void Start(string filter)
 		{
 			Logger.Debug("Starting capture");
 			PacketQueue = new ConcurrentQueue<RawCapture>();
 
 			_device.Open(DeviceMode.Promiscuous);
+
+			_device.Filter = filter;
+
+			_device.OnPacketArrival += _device_OnPacketArrival;
+
 			_device.StartCapture();
 		}
 
@@ -136,6 +143,9 @@ namespace Peach.Pro.Publishers
 		{
 			Logger.Debug("Stopping capture");
 			_device.StopCapture();
+
+			_device.OnPacketArrival -= _device_OnPacketArrival;
+
 			_device.Close();
 			_device = null;
 
