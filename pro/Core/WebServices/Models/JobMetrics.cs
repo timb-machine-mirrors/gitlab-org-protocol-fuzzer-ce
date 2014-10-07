@@ -61,9 +61,6 @@ namespace Peach.Enterprise.WebServices.Models
 	{
 		public string Bucket { get; set; }
 		public string Mutator { get; set; }
-		public string Dataset { get; set; }
-		public string State { get; set; }
-		public string Action { get; set; }
 		public string Element { get; set; }
 		public uint IterationCount { get; set; }
 		public uint FaultCount { get; set; }

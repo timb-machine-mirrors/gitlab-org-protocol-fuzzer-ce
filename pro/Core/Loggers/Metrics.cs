@@ -251,12 +251,16 @@ order by
 
 CREATE VIEW view_buckets AS
 SELECT
-	b.id,
-	b.name as bucket, 
-	m.name as mutator, 
-	s.name + '.' + a.name + '.' + p.name + '.' + e.name as state, 
-	sum(mi.count) as iterationcount, 
-	count(distinct(mf.faultnumber)) as faultcount
+	b.id
+	,b.name as bucket
+	,m.name as mutator
+	,case when length(p.name) > 0 then
+		s.name || '.' || a.name || '.' || p.name || '.' || e.name
+	else
+		s.name || '.' || a.name || '.' || e.name
+	end as element
+	,sum(mi.count) as iterationcount
+	,count(distinct(mf.faultnumber)) as faultcount
 FROM metrics_faults AS mf
 JOIN metrics_iterations AS mi ON 
 	mi.state = mf.state AND
