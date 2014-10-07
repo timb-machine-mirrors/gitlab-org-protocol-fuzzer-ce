@@ -21,6 +21,44 @@ module DashApp {
 		data?: Models.BucketTimelineMetric
 	}
 
+	export interface TimelineOptions {
+		align?: string;
+		autoResize?: boolean;
+		clickToUse?: boolean;
+		dataAttributes?: string[];
+		editable?: any;
+		end?: any;
+		groupOrder?: any;
+		height?: any;
+		locale?: string;
+		locales?: Object;
+		margin?: Object;
+		max?: any;
+		maxHeight?: any;
+		min?: any;
+		minHeight?: any;
+		onAdd?: Function;
+		onUpdate?: Function;
+		onMove?: Function;
+		onMoving?: Function;
+		onRemove?: Function;
+		orientation?: string;
+		padding?: number;
+		selectable?: boolean;
+		showCurrentTime?: boolean;
+		showCustomTime?: boolean;
+		showMajorLabels?: boolean;
+		showMinorLabels?: boolean;
+		stack?: boolean;
+		start?: any;
+		template?: Function;
+		type?: string;
+		width?: string;
+		zoomable?: boolean;
+		zoomMax?: number;
+		zoomMin?: number;
+	}
+
 	export class MetricsController {
 		private scope: ViewModelScope;
 		private debug = true;
@@ -80,10 +118,7 @@ module DashApp {
 							this.bucketTimelineData = dataset;
 							//this.bucketTimelineData = timelineData;
 
-							this.bucketTimelineOptions = {
-								selectable: false,
-
-							};
+							this.bucketTimelineOptions = { selectable: false };
 						});
 						break;
 					case "faultsOverTime":
@@ -352,7 +387,8 @@ module DashApp {
 
 
 		// #region timeline
-		public bucketTimelineOptions = {
+		public bucketTimelineOptions: TimelineOptions = {
+			selectable: false,
 			template: function (item) {
 				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
 					"Faults: " + item.data.faultCount + "<br />" +
