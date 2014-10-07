@@ -40,10 +40,6 @@ module DashApp {
 					templateUrl: "/partials/faults.html",
 					controller: FaultsController
 				})
-				.when("/faults", {
-					templateUrl: "/partials/faults.html",
-					controller: FaultsController
-				})
 				.when("/configurator/intro", {
 					templateUrl: "/partials/configurator-intro.html",
 					controller: WizardController

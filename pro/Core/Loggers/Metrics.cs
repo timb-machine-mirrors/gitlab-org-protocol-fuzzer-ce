@@ -27,6 +27,8 @@ namespace Peach.Enterprise.Loggers
 
 		#region create tables query
 		static string create_table = @"
+PRAGMA automatic_index = false;
+
 CREATE TABLE states (
  id INTEGER PRIMARY KEY,
  name TEXT NOT NULL
@@ -150,19 +152,20 @@ CREATE INDEX metrics_element_index on metrics_iterations (element);
 CREATE INDEX metrics_dataset_index on metrics_iterations (dataset);
 
 
-CREATE INDEX faults_index ON metrics_faults(
+CREATE UNIQUE INDEX faults_index ON metrics_faults(
  state,
  action,
  parameter,
  element,
  mutator,
  dataset,
- bucket
+ bucket,
+ faultnumber
 );
 
 
-CREATE INDEX faults_mutator_index ON metrics_faults(mutator);
-CREATE INDEX faults_element_index ON metrics_faults(element);
+CREATE INDEX faults_mutator_index ON metrics_faults (mutator);
+CREATE INDEX faults_element_index ON metrics_faults (element);
 CREATE INDEX faults_dataset_index on metrics_faults (dataset);
 
 CREATE UNIQUE INDEX faultsbyhour_index on metrics_faultsbyhour (

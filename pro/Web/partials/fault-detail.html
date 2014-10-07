@@ -30,8 +30,21 @@
 			<td>{{vm.currentFault.minorHash}}</td>
 		</tr>
 		<tr>
-			<td>Generated Files:</td>
-			<td><a href="{{vm.urlPrefix}}{{vm.currentFault.faultUrl}}/archive/fault.zip">Download</a></td>
+			<td valign="top">Generated Files:</td>
+			<td>
+				<table>
+					<tr>
+						<td>
+							<a href="{{vm.urlPrefix}}{{vm.currentFault.faultUrl}}/archive/fault.zip">Full Archive</a>
+						</td>
+					</tr>
+					<tr ng-repeat="file in vm.currentFault.files">
+						<td>
+							<a href="{{vm.urlPrefix}}{{file.fileUrl}}/{{file.name}}">{{file.name}}</a>
+						</td>
+					</tr>
+				</table>
+			</td>
 		</tr>
 		<tr>
 			<td colspan="2">Description:</td>
