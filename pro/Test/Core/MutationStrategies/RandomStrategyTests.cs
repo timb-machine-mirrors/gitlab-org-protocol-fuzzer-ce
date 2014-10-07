@@ -549,6 +549,63 @@ namespace Peach.Core.Test.MutationStrategies
 		}
 
 		[Test]
+		public void TestSwitchValueTypeHex()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' mutable='false' />
+		<Blob name='blb' mutable='false' />
+		<Number name='num' size='32' mutable='false' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='str' valueType='hex' value='41 42 43 44'/>
+					<Field name='blb' valueType='hex' value='45 46 47 48'/>
+					<Field name='num' valueType='hex' value='49 4a 4b 4c'/>
+				</Data>
+				<Data>
+					<Field name='str' valueType='hex' value='61 62 63 64'/>
+					<Field name='blb' valueType='hex' value='65 66 67 68'/>
+					<Field name='num' valueType='hex' value='69 6a 6b 6c'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomStrategy'>
+			<Param name='SwitchCount' value='2'/>
+		</Strategy>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 100);
+
+			Assert.AreEqual(150, dataModels.Count);
+
+			var res = new Dictionary<string, int>();
+			for (int i = 0; i < dataModels.Count; ++i)
+			{
+				var dm = dataModels[i];
+				var key = dm.InternalValue.BitsToString();
+				int val = 0;
+				res.TryGetValue(key, out val);
+				res[key] = ++val;
+			}
+
+			Assert.AreEqual(2, res.Count);
+			Assert.GreaterOrEqual(res["ABCDEFGHIJKL"], 70);
+			Assert.GreaterOrEqual(res["abcdefghijkl"], 70);
+		}
+
+		[Test]
 		public void ReEnterState()
 		{
 			string xml = @"
