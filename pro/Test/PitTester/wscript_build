@@ -13,13 +13,16 @@ deps = [
 	'Peach.Pro.Test.dll',
 ]
 
-pits = bld.path.find_node('../../pits/pro') or bld.path
+def run_test(self):
+	if self.env.CS_NAME == 'mono':
+		self.ut_exec.insert(0, 'mono')
 
 bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PitTester.exe',
-	ut_cwd = pits.abspath(),
+	ut_cwd = bld.path.find_node('../../../pits/pro').abspath(),
 	ut_args = '.',
+	ut_fun = run_test,
 )
