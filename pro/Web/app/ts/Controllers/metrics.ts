@@ -79,6 +79,11 @@ module DashApp {
 							var dataset = this.visDataSet(timelineData);
 							this.bucketTimelineData = dataset;
 							//this.bucketTimelineData = timelineData;
+
+							this.bucketTimelineOptions = {
+								selectable: false,
+
+							};
 						});
 						break;
 					case "faultsOverTime":
@@ -348,6 +353,14 @@ module DashApp {
 
 		// #region timeline
 		public bucketTimelineOptions = {
+			template: function (item) {
+				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
+					"Faults: " + item.data.faultCount + "<br />" +
+					"1st Iteration: " + item.data.iteration + "<br /></div>";
+			}
+		};
+		/*
+		public bucketTimelineOptions = {
 			selectable: false,
 			debug: false,
 			align: 'center',
@@ -377,7 +390,7 @@ module DashApp {
 					"1st Iteration: " + item.data.iteration + "<br /></div>"; 
 			}
 		};
-
+		//*/
 		public bucketTimelineEvents = {
 			select: (selected) => {
 				console.log(selected);
