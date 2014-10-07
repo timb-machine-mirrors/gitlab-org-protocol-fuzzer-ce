@@ -91,20 +91,14 @@ namespace Peach.Core.Loggers
 			// root/category/bucket/iteration
 			var subDir = System.IO.Path.Combine(RootDir, category.ToString(), fault.folderName, fault.iteration.ToString());
 
-			var files = new List<string>();
-
-			foreach (var kv in fault.collectedData)
+			foreach (var kv in fault.toSave)
 			{
 				var fileName = System.IO.Path.Combine(subDir, kv.Key);
 
-				// Store the physical location for use by others
-				kv.Path = fileName;
-
 				SaveFile(category, fileName, kv.Value);
-				files.Add(fileName);
 			}
 
-			OnFaultSaved(category, fault, files.ToArray(), subDir);
+			OnFaultSaved(category, fault, subDir);
 
 			log.Flush();
 		}
@@ -131,11 +125,11 @@ namespace Peach.Core.Loggers
 
 			if (reproFault != null)
 			{
-				// Save reproFault collectedData in fault
-				foreach (var kv in reproFault.collectedData)
+				// Save reproFault toSave in fault
+				foreach (var kv in reproFault.toSave)
 				{
 					var key = System.IO.Path.Combine("Initial", reproFault.iteration.ToString(), kv.Key);
-					fault.collectedData.Add(new Fault.Data(key, kv.Value));
+					fault.toSave.Add(key, kv.Value);
 				}
 
 				reproFault = null;
@@ -184,7 +178,8 @@ namespace Peach.Core.Loggers
 
 		private Fault combineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
-			Fault ret = new Fault();
+			// The combined fault will use toSave and not collectedData
+			Fault ret = new Fault() { collectedData = null };
 
 			Fault coreFault = null;
 			List<Fault> dataFaults = new List<Fault>();
@@ -208,7 +203,7 @@ namespace Peach.Core.Loggers
 			foreach (var item in stateModel.dataActions)
 			{
 				logger.Debug("Saving action: " + item.Key);
-				ret.collectedData.Add(new Fault.Data(item.Key, ToByteArray(item.Value)));
+				ret.toSave.Add(item.Key, item.Value);
 			}
 
 			// Write out all collected data information
@@ -219,13 +214,13 @@ namespace Peach.Core.Loggers
 				foreach (var kv in fault.collectedData)
 				{
 					string fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, kv.Key }.Where(a => !string.IsNullOrEmpty(a)));
-					ret.collectedData.Add(new Fault.Data(fileName, kv.Value));
+					ret.toSave.Add(fileName, new MemoryStream(kv.Value));
 				}
 
 				if (!string.IsNullOrEmpty(fault.description))
 				{
 					string fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, "description.txt" }.Where(a => !string.IsNullOrEmpty(a)));
-					ret.collectedData.Add(new Fault.Data(fileName, Encoding.UTF8.GetBytes(fault.description)));
+					ret.toSave.Add(fileName, new MemoryStream(Encoding.UTF8.GetBytes(fault.description)));
 				}
 			}
 
@@ -273,7 +268,7 @@ namespace Peach.Core.Loggers
 
 			var dataSets = sb.ToString();
 			if (!string.IsNullOrEmpty(dataSets))
-				ret.collectedData.Add(new Fault.Data("dataSets.txt", Encoding.UTF8.GetBytes(dataSets)));
+				ret.toSave.Add("dataSets.txt", new MemoryStream(Encoding.UTF8.GetBytes(dataSets)));
 
 			ret.controlIteration = coreFault.controlIteration;
 			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
@@ -446,12 +441,11 @@ namespace Peach.Core.Loggers
 		/// </summary>
 		/// <param name="fault">Fault object that was saved</param>
 		/// <param name="category">Category of fault</param>
-		/// <param name="dataFiles">Collected Files</param>
-		/// <param name="path">Fault folder</param>
-		public delegate void FaultSavedEvent(Category category, Fault fault, string[] dataFiles, string path);
+		/// <param name="rootPath">Fault root folder</param>
+		public delegate void FaultSavedEvent(Category category, Fault fault, string rootPath);
 		public event FaultSavedEvent FaultSaved;
 
-		protected virtual void OnFaultSaved(Category category, Fault fault, string[] dataFiles, string path)
+		protected virtual void OnFaultSaved(Category category, Fault fault, string rootPath)
 		{
 			if (category != Category.Reproducing)
 			{
@@ -472,16 +466,22 @@ namespace Peach.Core.Loggers
 			}
 
 			if (FaultSaved != null)
-				FaultSaved(category, fault, dataFiles, path);
+				FaultSaved(category, fault, rootPath);
 		}
 
-		protected virtual void SaveFile(Category category, string fullPath, byte[] contents)
+		protected virtual void SaveFile(Category category, string fullPath, Stream contents)
 		{
 			try
 			{
 				string dir = System.IO.Path.GetDirectoryName(fullPath);
 				Directory.CreateDirectory(dir);
-				File.WriteAllBytes(fullPath, contents);
+
+				contents.Seek(0, SeekOrigin.Begin);
+
+				using (var f = new FileStream(fullPath, FileMode.CreateNew))
+				{
+					contents.CopyTo(f, BitStream.BlockCopySize);
+				}
 			}
 			catch (Exception e)
 			{
