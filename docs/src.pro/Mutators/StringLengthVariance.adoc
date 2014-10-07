@@ -6,7 +6,7 @@ This mutator produces test cases for String elements. The test cases produced ar
 
 === Supported Elements
 
- * xref::String
+ * xref:String[String]
 
 === Hints
 

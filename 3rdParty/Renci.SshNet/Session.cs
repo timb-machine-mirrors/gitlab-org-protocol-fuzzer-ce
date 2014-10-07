@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,7 +24,7 @@ namespace Renci.SshNet
     /// <summary>
     /// Provides functionality to connect and interact with SSH server.
     /// </summary>
-    public partial class Session : IDisposable
+    public partial class Session : IDisposable, ISession
     {
         /// <summary>
         /// Specifies maximum packet size defined by the protocol.
@@ -294,7 +295,7 @@ namespace Renci.SshNet
         public event EventHandler<ExceptionEventArgs> ErrorOccured;
 
         /// <summary>
-        /// Occurs when session has been disconnected form the server.
+        /// Occurs when session has been disconnected from the server.
         /// </summary>
         public event EventHandler<EventArgs> Disconnected;
 
@@ -302,6 +303,11 @@ namespace Renci.SshNet
         /// Occurs when host key received.
         /// </summary>
         public event EventHandler<HostKeyEventArgs> HostKeyReceived;
+
+        /// <summary>
+        /// Occurs when <see cref="BannerMessage"/> message is received from the server.
+        /// </summary>
+        public event EventHandler<MessageEventArgs<BannerMessage>> UserAuthenticationBannerReceived;
 
         #region Message events
 
@@ -359,11 +365,6 @@ namespace Renci.SshNet
         /// Occurs when <see cref="SuccessMessage"/> message received
         /// </summary>
         internal event EventHandler<MessageEventArgs<SuccessMessage>> UserAuthenticationSuccessReceived;
-
-        /// <summary>
-        /// Occurs when <see cref="BannerMessage"/> message received
-        /// </summary>
-        internal event EventHandler<MessageEventArgs<BannerMessage>> UserAuthenticationBannerReceived;
 
         /// <summary>
         /// Occurs when <see cref="GlobalRequestMessage"/> message received
@@ -695,10 +696,30 @@ namespace Renci.SshNet
         /// <remarks>
         /// When neither handles are signaled in time and the session is not closing, then the
         /// session is disconnected.
-        /// 
         /// </remarks>
         internal void WaitOnHandle(WaitHandle waitHandle)
         {
+            WaitOnHandle(waitHandle, ConnectionInfo.Timeout);
+        }
+
+        /// <summary>
+        /// Waits for the specified handle or the exception handle for the receive thread
+        /// to signal within the specified timeout.
+        /// </summary>
+        /// <param name="waitHandle">The wait handle.</param>
+        /// <param name="timeout">The time to wait for any of the handles to become signaled.</param>
+        /// <exception cref="SshConnectionException">A received package was invalid or failed the message integrity check.</exception>
+        /// <exception cref="SshOperationTimeoutException">None of the handles are signaled in time and the session is not disconnecting.</exception>
+        /// <exception cref="SocketException">A socket error was signaled while receiving messages from the server.</exception>
+        /// <remarks>
+        /// When neither handles are signaled in time and the session is not closing, then the
+        /// session is disconnected.
+        /// </remarks>
+        internal void WaitOnHandle(WaitHandle waitHandle, TimeSpan timeout)
+        {
+            if (waitHandle == null)
+                throw new ArgumentNullException("waitHandle");
+
             var waitHandles = new[]
                 {
                     this._exceptionWaitHandle,
@@ -706,7 +727,7 @@ namespace Renci.SshNet
                     waitHandle
                 };
 
-            switch (WaitHandle.WaitAny(waitHandles, ConnectionInfo.Timeout))
+            switch (WaitHandle.WaitAny(waitHandles, timeout))
             {
                 case 0:
                     throw this._exception;

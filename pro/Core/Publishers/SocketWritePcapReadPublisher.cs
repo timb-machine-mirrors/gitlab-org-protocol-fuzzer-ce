@@ -35,15 +35,14 @@ namespace Peach.Pro.Publishers
 		public SocketWritePcapReadPublisher(string name, Dictionary<string, Variant> args)
 			: base(name, args)
 		{
-			_listener = new PcapListener(Interface);
-			_listener.Filter = Filter;
 		}
 
 		public string Filter { get; set; }
 
 		protected override void OnStart()
 		{
-			_listener.Start();
+			_listener = new PcapListener(Interface);
+			_listener.Start(Filter);
 			base.OnStart();
 		}
 

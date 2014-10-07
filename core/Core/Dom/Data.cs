@@ -247,7 +247,12 @@ namespace Peach.Core.Dom
 			}
 
 			if (!(elem is DataElementContainer))
+			{
+				if (value.GetVariantType() == Variant.VariantType.BitStream)
+					((BitwiseStream)value).Seek(0, SeekOrigin.Begin);
+
 				elem.DefaultValue = value;
+			}
 		}
 	}
 }

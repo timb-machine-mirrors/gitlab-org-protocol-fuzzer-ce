@@ -104,7 +104,6 @@ namespace Peach.Core.Agent.Monitors
 
 		DebuggerInstance _debugger = null;
 		SystemDebuggerInstance _systemDebugger = null;
-		IpcChannel _ipcChannel = null;
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
@@ -196,10 +195,6 @@ namespace Peach.Core.Agent.Monitors
 				_faultOnEarlyExit = true;
 			if (args.ContainsKey("CpuPollInterval"))
 				_cpuPollInterval = Convert.ToInt32((string)args["CpuPollInterval"]);
-
-			// Register IPC Channel for connecting to debug process
-			//_ipcChannel = new IpcChannel("Peach.Core_" + (new Random().Next().ToString()));
-			//ChannelServices.RegisterChannel(_ipcChannel, false);
 		}
 
 		/// <summary>
@@ -217,17 +212,28 @@ namespace Peach.Core.Agent.Monitors
 		{
 			try
 			{
-				while (_ipcChannel != null && 
-					_debugger != null &&
-					_ipcHeartBeatMutex.WaitOne(10 * 1000) == false)
+				while (true)
 				{
-					logger.Trace("_debugger.HeartBeat");
+					if (_debugger == null)
+					{
+						logger.Trace("Exiting heartbeat thread, debugger is null.");
+						return;
+					}
+
+					if (_ipcHeartBeatMutex.WaitOne(10 * 1000))
+					{
+						logger.Trace("Exiting heartbeat thread, mutex acquired.");
+						return;
+					}
+
+					logger.Trace("Sending debugger heartbeat.");
 					_debugger.HeartBeat();
 				}
 			}
 			catch(Exception ex)
 			{
 				logger.Warn("Exception while sending heartbeat: " + ex.Message);
+				logger.Debug(ex);
 			}
 		}
 
@@ -325,10 +331,6 @@ namespace Peach.Core.Agent.Monitors
 			_StopDebugger();
 			_FinishDebugger();
 
-			if(_ipcChannel != null)
-				ChannelServices.UnregisterChannel(_ipcChannel);
-			
-			_ipcChannel = null;
 			_debugger = null;
 			_systemDebugger = null;
 		}

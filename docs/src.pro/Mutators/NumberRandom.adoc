@@ -8,8 +8,8 @@ For weighting purposes, and for deterministic strategies, this mutator reports t
 
 === Supported Elements
 
- * xref::String
- * xref::Number
+ * xref:String[String]
+ * xref:Number[Number]
 
 === Hints
 

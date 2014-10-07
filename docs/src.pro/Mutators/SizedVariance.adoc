@@ -1,0 +1,15 @@
+<<<
+[[Mutators_SizedVariance]]
+== SizedVariance
+
+This mutator produces test cases elements that are part of a size relationship. This mutator is similar to the xref:Mutators_NumberVariance[NumberVariance] mutator, except it will cause the sized element to expand such that the relationship is still valid. The test cases are produced using a guassian distribution with the current default value as the cetner of the distribution.
+
+Values chosen will never be larger than the maximum size the size provider can handle.
+
+=== Supported Elements
+
+Elements part of a size relationship.
+
+=== Hints
+
+This mutator does not support any hints.

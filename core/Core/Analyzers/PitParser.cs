@@ -1875,7 +1875,7 @@ namespace Peach.Core.Analyzers
 					throw new PeachException(string.Format(
 						"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
 						pluginType, cls, e.InnerException.Message
-					));
+					), e);
 				}
 
 				throw new PeachException(string.Format(

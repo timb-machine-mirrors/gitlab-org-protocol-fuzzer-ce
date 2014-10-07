@@ -8,7 +8,7 @@ The maximum sized string generated is 65K characters.
 
 === Supported Elements
 
- * xref::String
+ * xref:String[String]
 
 === Hints
 
