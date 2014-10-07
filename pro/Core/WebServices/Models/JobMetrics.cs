@@ -38,7 +38,6 @@ namespace Peach.Enterprise.WebServices.Models
 		public string Parameter { get; set; }
 		public string Element { get; set; }
 		public uint IterationCount { get; set; }
-		public uint MutationCount { get; set; }
 		public uint BucketCount { get; set; }
 		public uint FaultCount { get; set; }
 	}
