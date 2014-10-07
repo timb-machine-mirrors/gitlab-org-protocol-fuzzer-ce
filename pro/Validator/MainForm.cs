@@ -21,10 +21,10 @@ namespace PeachValidator
 	public partial class MainForm : Form
 	{
 		public Dictionary<string, string> DefinedValues = new Dictionary<string, string>();
-		string windowTitle = "Peach Validator v3.0";
-		string windowTitlePit = "Peach Validator v3.0 - {0}";
-		string windowTitlePitSample = "Peach Validator v3.0 - {0} - {1}";
-		string windowTitleSample = "Peach Validator v3.0 - None - {0}";
+		string windowTitle = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version;
+		string windowTitlePit = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0}";
+		string windowTitlePitSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0} - {1}";
+		string windowTitleSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - None - {0}";
 		public string sampleFileName = null;
 		public string pitFileName = null;
 		Dictionary<string, object> parserArgs = new Dictionary<string, object>();
@@ -35,7 +35,7 @@ namespace PeachValidator
 		{
 			InitializeComponent();
 
-			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+			setTitle();
 			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
 		}
 
@@ -224,6 +224,10 @@ namespace PeachValidator
 
 			pitFileName = ofd.FileName;
 			setTitle();
+
+			Environment.CurrentDirectory = Path.GetDirectoryName(Path.GetFullPath(pitFileName));
+			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+
 
 			Regex re = new Regex("##\\w+##");
 			if (File.Exists(pitFileName) && re.IsMatch(File.ReadAllText(pitFileName)))
