@@ -5,8 +5,14 @@ This document outlines the basic process for building each protocol.
 
 . Read and research protocol
 . Search http://pcapr.net[pcapr] for protocol captures. Place in _Captures_ folder with "pcapr_" prefix.
+.. Captures from Huawei are prefixed with +huawei_+
 . If possible, create test environment using eNSP or open source programs
 . Start development of protocol definition
+.. Create a PROTOCOL.xml.test file (see https://github/dejavu/pits/blob/master/pittester.adoc[pittestet] docs)
+.. Start writing your PROTOCOL.xml(.config) files using the pittester tool to validate.
+.. Once protocol is working, split up into the files under deliverables.
+.. Create datasheet/userguide documents using AsciiDoc markup (+.adoc+ suffix)
+
 
 == Deliverables
 
