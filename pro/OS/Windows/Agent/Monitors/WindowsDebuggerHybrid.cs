@@ -580,7 +580,7 @@ namespace Peach.Core.Agent.Monitors
 				_debuggerProcess.StartInfo.Arguments = _debuggerChannelName;
 				_debuggerProcess.StartInfo.FileName = Path.Combine(
 					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-					"Peach.Community.WindowsDebugInstance.exe");
+					"Peach.Pro.WindowsDebugInstance.exe");
 
 				if (logger.IsTraceEnabled)
 				{
@@ -677,7 +677,7 @@ namespace Peach.Core.Agent.Monitors
 				_debuggerProcess.StartInfo.Arguments = _debuggerChannelName;
 				_debuggerProcess.StartInfo.FileName = Path.Combine(
 					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-					"Peach.Community.WindowsDebugInstance.exe");
+					"Peach.Pro.WindowsDebugInstance.exe");
 
 				if (logger.IsTraceEnabled)
 				{

@@ -37,7 +37,7 @@ namespace Peach
 			LogManager.Configuration = config;
 
 			// Ensure only 1 instance of the platform tests runs at a time
-			si = SingleInstance.CreateInstance("Peach.Community.Test.OS.OSX.dll");
+			si = SingleInstance.CreateInstance("Peach.Pro.Test.OS.OSX.dll");
 			si.Lock();
 		}
 

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Peach.Community.Test.OS.Linux")]
+[assembly: AssemblyTitle("Peach.Pro.Test.OS.Linux")]
 [assembly: AssemblyDescription("Peach Fuzzing Platform")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Deja vu Security")]
-[assembly: AssemblyProduct("Peach.Community.Test.OS.Linux")]
+[assembly: AssemblyProduct("Peach.Pro.Test.OS.Linux")]
 [assembly: AssemblyCopyright("Copyright © Deja vu Security")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
