@@ -33,7 +33,7 @@ namespace Peach.Core.Test.Agent.Monitors
 		{
 			Assert.Null(this.faults);
 			Assert.True(context.reproducingFault);
-			Assert.AreEqual(83, context.reproducingInitialIteration);
+			Assert.AreEqual(330, context.reproducingInitialIteration);
 			this.faults = faults;
 		}
 
@@ -114,8 +114,8 @@ namespace Peach.Core.Test.Agent.Monitors
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
-			config.rangeStart = 300;
-			config.rangeStop = 300;
+			config.rangeStart = 330;
+			config.rangeStop = 330;
 
 			Engine e = new Engine(null);
 			e.Fault += _Fault;
