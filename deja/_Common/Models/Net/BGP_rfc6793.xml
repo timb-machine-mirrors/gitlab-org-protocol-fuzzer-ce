@@ -16,7 +16,12 @@
         <Number name="CapabilityType"
                 size="8" value="65" token="true"/>
         <Block name="CapabilityValue">
-            <Number name="MyASN4" size="32" endian="big" value="##MyASN4##"/>
+            <Number name="PeachASN4" size="32" endian="big">
+                <Fixup class="Expression">
+                    <Param name="ref" value="PeachASN4"/>
+                    <Param name="expression" value="struct.pack('>L',##PeachASN4##)"/>
+                </Fixup>
+            </Number>
         </Block>
     </DataModel>
 

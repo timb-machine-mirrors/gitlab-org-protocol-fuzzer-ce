@@ -10,9 +10,10 @@
     <!--
     <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
     -->
+    <Import import="struct"/>
+    <Import import="socket"/>
 
     <Include ns="rfc1997" src="file:##Path##/_Common/Models/Net/BGP_rfc1997.xml"/>
-    <Include ns="rfc2858" src="file:##Path##/_Common/Models/Net/BGP_rfc2858.xml"/>
     <Include ns="rfc2918" src="file:##Path##/_Common/Models/Net/BGP_rfc2918.xml"/>
     <Include ns="rfc4360" src="file:##Path##/_Common/Models/Net/BGP_rfc4360.xml"/>
     <Include ns="rfc4456" src="file:##Path##/_Common/Models/Net/BGP_rfc4456.xml"/>
@@ -22,7 +23,6 @@
     <Include ns="draft-dynamic-cap" src="file:##Path##/_Common/Models/Net/BGP_draft-dynamic-cap.xml"/>
     <Include ns="PathAttrs" src="file:##Path##/_Common/Models/Net/BGP_PathAttrs.xml"/>
     <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
-
 
     <!-- BEGIN BGP4 OptParam Definitions -->
     <DataModel name="BGP4Capabilities" ref="Base:BGP4OptParam">
@@ -34,7 +34,7 @@
             <!-- https://www.iana.org/assignments/capability-codes/capability-codes.xhtml -->
             <Choice name="CapType">
                 <!-- UPDATE BGP_draft-dynamic-cap.xml with new capabilities -->
-                <Block name="MultiProtocol" ref="rfc2858:Capability"/>
+                <Block name="MultiProtocol" ref="rfc4760:Capability"/>
                 <Block name="RouteRefresh" ref="rfc2918:Capability"/>
                 <Block name="OldRouteRefresh" ref="rfc2918:OldCapability"/>
                 <!-- Quaga says that cisco's old ORF cap was 130 -->
@@ -76,9 +76,20 @@
         <Number name="MessageType" size="8" value="1" token="true"/>
         <Block name="MessageData">
             <Number name="Version" size="8" value="4"/>
-            <Number name="MyASN" size="16" endian="big" value="##MyASN##"/>
+            <Number name="PeachASN" size="16" endian="big">
+                <Fixup class="Expression">
+                    <Param name="ref" value="PeachASN"/>
+                    <Param name="expression" value="struct.pack('>H',##PeachASN##)"/>
+                </Fixup>
+            </Number>
             <Number name="HoldTime" size="16" endian="big" value="##HoldTime##"/>
-            <Number name="BGPIdentifier" size="32" endian="big" value="##BGPIdentifier##" mutable="false"/>
+            <Number name="BGPIdentifier" size="32" endian="big">
+                <Fixup class="Expression">
+                    <Param name="ref" value="BGPIdentifier"/>
+                    <Param name="expression"
+                           value="struct.pack('!L',socket.inet_aton('##PeachIP##'))"/>
+                </Fixup>
+            </Number>
             <Number name="OptParamLen" size="8">
                 <Relation type="size" of="OptParams"/>
             </Number>
@@ -90,6 +101,31 @@
             </Choice>
         </Block>
     </DataModel>
+
+    <DataModel name="BGP4OpenImmutable">
+        <Blob name="Header" length="20" mutable="false"/>
+        <Number name="PeachASN" size="16" endian="big" mutable="false">
+            <Fixup class="Expression">
+                <Param name="ref" value="PeachASN"/>
+                <Param name="expression" value="struct.pack('>H',##PeachASN##)"/>
+            </Fixup>
+        </Number>
+        <Number name="HoldTime" size="16" endian="big" value="##HoldTime##" mutable="false"/>
+        <Number name="BGPIdentifier" size="32" endian="big" mutable="false">
+            <Fixup class="Expression">
+                <Param name="ref" value="BGPIdentifier"/>
+                <Param name="expression" value="struct.pack('>L',##BGPIdentifier##)"/>
+            </Fixup>
+        </Number>
+        <Blob name="OptParams" mutable="false"/>
+        <Number name="PeachASN4" size="32" endian="big" mutable="false">
+            <Fixup class="Expression">
+                <Param name="ref" value="PeachASN"/>
+                <Param name="expression" value="struct.pack('>L',##PeachASN4##)"/>
+            </Fixup>
+        </Number>
+    </DataModel>
+
 
 
     <DataModel name="BGP4Update" ref="Base:BGP4Message">
@@ -127,6 +163,8 @@
                     <Block name="EXT_COMMUNITY" ref="rfc4360:EXT_COMMUNITY"/>
                     <Block name="ORIGINATOR_ID" ref="rfc4456:ORIGINATOR_ID"/>
                     <Block name="CLUSTER_LIST" ref="rfc4456:CLUSTER_LIST"/>
+                    <Block name="MP_REACH_NLRI" ref="rfc4760:MP_REACH_NLRI"/>
+                    <Block name="MP_UNREACH_NLRI" ref="rfc4760:MP_UNREACH_NLRI"/>
 
                     <!-- TODO: MP_REACH_NLRI [RFC4760] -->
                     <!-- TODO: MP_UNREACH_NLRI [RFC4760] -->

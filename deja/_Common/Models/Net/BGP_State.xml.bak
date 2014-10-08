@@ -29,11 +29,18 @@
         </State>
     </StateModel>
 
-    <StateModel name="BGP_Client" initialState="Connect">
+    <StateModel name="BGP_Server" initialState="Idle">
         <State name="Idle">
-            <Action type="close"/>
-            <Action type="open" onStart="time.sleep(3)"/>
-            <Action type="changeState" ref="Connect"/>
+            <Action type="accept" publisher="BGPServer"/>
+
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="BGPPacketOrNone"/>
+            </Action>
+
+            <Action type="changeState" ref="Connect"
+               when="self.parent.actions['BGP4Recv'].dataModel.find('Open') is not None"/> 
+
+            <Action type="changeState" ref="Close"/>
         </State>
 
         <State name="Connect">
@@ -55,8 +62,7 @@
             </Action>
 
             <Action type="changeState" ref="Idle"
-                onStart="print self.parent.actions['BGP4Recv'].dataModel.find('BGPPacket') is None"
-                    when="self.parent.actions['BGP4Recv'].dataModel.find('BGPPacket') is None"/>
+                    when="not self.parent.actions['BGP4Recv'].dataModel.find('BGPPacket')"/> 
 
             <Action name="BGP4SendKeepalive" type="output">
                 <DataModel ref="DataModels:BGP4Keepalive"/>
@@ -72,7 +78,7 @@
                 <DataModel ref="DataModels:BGP4"/>
             </Action>
             <Action type="changeState" ref="Close"
-                  when="not self.parent.actions['BGP4Recv'].dataModel.find('Keepalive')"/>
+                    when="False"/> <!-- TODO: When message type is not keepalive -->
 
             <Action type="changeState" ref="Established"/>
         </State>
@@ -106,9 +112,18 @@
             </Action>
 
 
-            <!-- Close connection regardless to update iteration -->
+            <!-- Close connection regardless to update iteration, and test the full state
+            <Action type="changeState" ref="Established"
+                    when="self.parent.actions['BGP4Recv'].dataModel.find('Update') is not None"/> 
             <Action type="changeState" ref="Close"
-                    onStart="print self.parent.actions['BGP4Send']"/>
+                    when="self.parent.actions['BGP4Recv'].dataModel.find('None') is not None"/> 
+            -->
+            <Action type="changeState" ref="Close"
+                onStart="print self.parent.actions['BGP4Send']" />
+                <!--
+                    when="context.controlIteration"/>
+                -->
+            <Action type="changeState" ref="Established"/>
         </State>
         <State name="Close">
             <Action type="close"/>
