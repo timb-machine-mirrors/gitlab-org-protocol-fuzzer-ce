@@ -10,10 +10,10 @@
          https://tools.ietf.org/html/draft-ietf-idr-dynamic-cap-14 -->
 
     <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
-    <Include ns="rfc2858" src="file:##Path##/_Common/Models/Net/BGP_rfc2858.xml"/>
     <Include ns="rfc2918" src="file:##Path##/_Common/Models/Net/BGP_rfc2918.xml"/>
     <Include ns="rfc5291" src="file:##Path##/_Common/Models/Net/BGP_rfc5291.xml"/>
     <Include ns="rfc4724" src="file:##Path##/_Common/Models/Net/BGP_rfc4724.xml"/>
+    <Include ns="rfc4760" src="file:##Path##/_Common/Models/Net/BGP_rfc4760.xml"/>
     <Include ns="rfc6793" src="file:##Path##/_Common/Models/Net/BGP_rfc6793.xml"/>
 
     <DataModel name="Capability" ref="Base:BGP4Capability">
@@ -33,7 +33,7 @@
             <Number name="Action" size="1"/>
             <Number name="SequenceNo" size="32" endian="big"/>
             <Choice name="CapType">
-                <Block name="MultiProtocol" ref="rfc2858:Capability">
+                <Block name="MultiProtocol" ref="rfc4760:Capability">
                     <Number name="CapabilityLength" size="16" endian="big">
                         <Relation type="size" of="CapabilityValue"/>
                     </Number>

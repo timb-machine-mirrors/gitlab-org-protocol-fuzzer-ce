@@ -18,6 +18,7 @@
     <Include ns="rfc4360" src="file:##Path##/_Common/Models/Net/BGP_rfc4360.xml"/>
     <Include ns="rfc4456" src="file:##Path##/_Common/Models/Net/BGP_rfc4456.xml"/>
     <Include ns="rfc4724" src="file:##Path##/_Common/Models/Net/BGP_rfc4724.xml"/>
+    <Include ns="rfc4760" src="file:##Path##/_Common/Models/Net/BGP_rfc4760.xml"/>
     <Include ns="rfc5291" src="file:##Path##/_Common/Models/Net/BGP_rfc5291.xml"/>
     <Include ns="rfc6793" src="file:##Path##/_Common/Models/Net/BGP_rfc6793.xml"/>
     <Include ns="draft-dynamic-cap" src="file:##Path##/_Common/Models/Net/BGP_draft-dynamic-cap.xml"/>
@@ -87,7 +88,7 @@
                 <Fixup class="Expression">
                     <Param name="ref" value="BGPIdentifier"/>
                     <Param name="expression"
-                           value="struct.pack('!L',socket.inet_aton('##PeachIP##'))"/>
+                           value="socket.inet_aton('##PeachIP##')"/>
                 </Fixup>
             </Number>
             <Number name="OptParamLen" size="8">
@@ -114,7 +115,8 @@
         <Number name="BGPIdentifier" size="32" endian="big" mutable="false">
             <Fixup class="Expression">
                 <Param name="ref" value="BGPIdentifier"/>
-                <Param name="expression" value="struct.pack('>L',##BGPIdentifier##)"/>
+                <Param name="expression"
+                       value="socket.inet_aton('##PeachIP##')"/>
             </Fixup>
         </Number>
         <Blob name="OptParams" mutable="false"/>

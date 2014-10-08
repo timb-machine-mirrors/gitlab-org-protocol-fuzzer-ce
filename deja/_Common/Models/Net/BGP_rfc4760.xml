@@ -27,9 +27,9 @@
             <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
             <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
             <Number name="NextHopAddrLen" size="8">
-                <Relation type="size" of="NextHopAddr"/>
+                <Relation type="count" of="NextHopAddr"/>
             </Number>
-            <Number name="NextHopAddr"/>
+            <Number name="NextHopAddr" size="8"/> 
     
             <!--
                 <Number name="reserved" size="8" value="0"/>
@@ -39,6 +39,7 @@
             <Number name="NumSPNAs" size="8">
                 <Relation type="count" of="SPNAs"/>
             </Number>
+
             <Block name="SPNAs" minOccurs="0" maxOccurs="255">
                 <Number name="SPNAlen" size="8">
                     <Relation type="count" of="SPNA"/>
@@ -52,7 +53,7 @@
                     <Relation type="count" of="Prefix"/>
                 </Number>
                 <Number name="Prefix" size="1" minOccurs="0" maxOccurs="255"/>
-                <Padding allignment="8"/>
+                <Padding alignment="8"/>
             </Block>
         </Block>
     </DataModel>
@@ -69,7 +70,7 @@
                     <Relation type="count" of="Prefix"/>
                 </Number>
                 <Number name="Prefix" size="1" minOccurs="0" maxOccurs="255"/>
-                <Padding allignment="8"/>
+                <Padding alignment="8"/>
             </Block>
         </Block>
     </DataModel>

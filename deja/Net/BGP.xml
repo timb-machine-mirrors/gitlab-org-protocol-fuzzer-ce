@@ -10,7 +10,7 @@
 
     <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
 
-    <Agent name="QuaggaAgent" location="tcp://##TargetHost##:9001">
+    <Agent name="QuaggaAgent" location="tcp://##RouterIP##:9001">
         <Monitor class="LinuxDebugger">
             <Param name="Executable" value="/usr/lib/quagga/bgpd"/>
             <Param name="Arguments" value="-A 127.0.0.1 -f /etc/quagga/bgpd.conf"/>
@@ -41,10 +41,10 @@
     </Agent>
 
     <Agent name="CiscoAgent">
+        <!--
         <Monitor class="Syslog">
             <Param name="Interface" value="172.16.1.2" />
         </Monitor>
-        <!--
         <Monitor class="Process">
             <Param name="Executable" value="" />
             <Param name="Arguments" value="fuzzed.txt" />
@@ -56,7 +56,7 @@
     <Test name="Client">
 
         <Publisher name="BGPClient" class="Tcp">
-            <Param name="Host" value="##TargetHost##" />
+            <Param name="Host" value="##RouterIP##" />
             <Param name="Port" value="179" />
             <Param name="Timeout" value="50" />
         </Publisher>
