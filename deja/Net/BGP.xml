@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach  xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 Version 2 PIT"
+        version="0.0.1">
+    <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+    <!-- Requires Peach 3 Linux for RawIP selected protocol fuzzing -->
+
+    <Include ns="States" src="file:##Path##/_Common/Models/Net/BGP_State.xml"/>
+
+    <Agent name="QuaggaAgent" location="tcp://##RouterIP##:9001">
+        <Monitor class="LinuxDebugger">
+            <Param name="Executable" value="/usr/lib/quagga/bgpd"/>
+            <Param name="Arguments" value="-A 127.0.0.1 -f /etc/quagga/bgpd.conf"/>
+            <Param name="NoCpuKill" value="true"/>
+            <Param name="FaultOnEarlyExit" value="true"/>
+        </Monitor>
+        <!--
+        <Monitor class="LinuxCrashMonitor"/>
+        -->
+    </Agent>
+    <Agent name="LocalMonitor">
+        <Monitor class="Pcap">
+            <Param name="Device" value="vboxnet0" />
+            <Param name="Filter" value="port 179" />
+        </Monitor>
+        <!--
+        <Monitor class="RunCommand">
+            <Param name="Command" value="tcpdump"/>
+            <Param name="Arguments" value="-c 1 tcp port bgp and src host ##TargetHost##"/>
+            <Param name="When" value="OnStart"/>
+        </Monitor>
+        <Monitor class="RunCommand">
+            <Param name="Command" value="tcpdump"/>
+            <Param name="Arguments" value="-c 1 tcp port bgp and src host ##TargetHost##"/>
+            <Param name="When" value="OnIterationStartAfterFault"/>
+        </Monitor>
+        -->
+    </Agent>
+
+    <Agent name="CiscoAgent">
+        <!--
+        <Monitor class="Syslog">
+            <Param name="Interface" value="172.16.1.2" />
+        </Monitor>
+        <Monitor class="Process">
+            <Param name="Executable" value="" />
+            <Param name="Arguments" value="fuzzed.txt" />
+        </Monitor>
+           -->
+    </Agent>
+
+    <!-- SCTP instead of TCP possibility draft-zhiyfang-fecai-bgp-over-sctp-00 -->
+    <Test name="Client">
+
+        <Publisher name="BGPClient" class="Tcp">
+            <Param name="Host" value="##RouterIP##" />
+            <Param name="Port" value="179" />
+            <Param name="Timeout" value="50" />
+        </Publisher>
+
+        <!--
+        <Publisher name="BGPServer" class="TcpListener">
+            <Param name="Interface" value="0.0.0.0" />
+            <Param name="Port" value="179" />
+            <Param name="Timeout" value="500" />
+            <Param name="AcceptTimeout" value="30000" />
+        </Publisher>
+        -->
+
+        <Agent ref="CiscoAgent" />
+        <Agent ref="LocalMonitor" />
+        <StateModel ref="States:BGP_Client"/>
+        <Strategy class="Random"/>
+        <Logger class="Filesystem">
+            <Param name="Path" value="##Path##/logtest" />
+        </Logger>
+    </Test>
+</Peach>

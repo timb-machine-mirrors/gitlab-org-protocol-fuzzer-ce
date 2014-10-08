@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+    <Include ns="IANA" src="file:##Path##/_Common/Models/Net/BGP_IANA.xml"/>
+
+
+    <DataModel name="Capability" ref="Base:BGP4Capability">
+        <Number name="CapabilityType"
+                size="8" value="1" token="true"/>
+        <Block name="CapabilityValue">
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+            <Number name="reserved" size="8" value="0"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="MP_REACH_NLRI" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="14" token="true"/>
+        <Block name="Value">
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+            <Number name="NextHopAddrLen" size="8">
+                <Relation type="count" of="NextHopAddr"/>
+            </Number>
+            <Number name="NextHopAddr" size="8"/> 
+    
+            <!--
+                <Number name="reserved" size="8" value="0"/>
+                defined in prior rfc2858 as numSPNAs, but currently defined in
+                rfc4760 as reserved Going with the more complex variant -->
+
+            <Number name="NumSPNAs" size="8">
+                <Relation type="count" of="SPNAs"/>
+            </Number>
+
+            <Block name="SPNAs" minOccurs="0" maxOccurs="255">
+                <Number name="SPNAlen" size="8">
+                    <Relation type="count" of="SPNA"/>
+                </Number>
+                <Number name="SPNA" size="4" minOccurs="0" maxOccurs="255"/>
+                <Padding alignment="8"/>
+            </Block>
+
+            <Block name="NLRI" minOccurs="0" maxOccurs="-1"> 
+                <Number name="Length" size="8">
+                    <Relation type="count" of="Prefix"/>
+                </Number>
+                <Number name="Prefix" size="1" minOccurs="0" maxOccurs="255"/>
+                <Padding alignment="8"/>
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="MP_UNREACH_NLRI" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="15" token="true"/>
+
+        <Block name="Value">
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+            <Block name="WithdrawnRoutes" minOccurs="0" maxOccurs="-1"> 
+                <Number name="Length" size="8">
+                    <Relation type="count" of="Prefix"/>
+                </Number>
+                <Number name="Prefix" size="1" minOccurs="0" maxOccurs="255"/>
+                <Padding alignment="8"/>
+            </Block>
+        </Block>
+    </DataModel>
+</Peach>
+
