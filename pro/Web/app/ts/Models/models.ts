@@ -237,6 +237,8 @@ module DashApp.Models {
 		rangeStart?: number;
 		rangeStop?: number;
 
+		hasMetrics?: boolean;
+
 		// Optional field. We can set this to null for now
 		//"/p/targets/targetID/configs/configID",
 		//configUrl: string;

@@ -31,6 +31,7 @@ namespace Peach.Enterprise.WebServices
 		public bool Range { get; private set; }
 		public uint RangeStart { get; private set; }
 		public uint RangeStop { get; private set; }
+		public bool HasMetrics { get; private set; }
 
 		public TimeSpan Runtime
 		{
@@ -138,7 +139,8 @@ namespace Peach.Enterprise.WebServices
 				PitUrl = pitUrl,
 				Range = config.range,
 				RangeStart = config.rangeStart,
-				RangeStop = config.rangeStop
+				RangeStop = config.rangeStop,
+				HasMetrics = true
 			};
 
 			ret.stopwatch = new Stopwatch();
@@ -153,6 +155,7 @@ namespace Peach.Enterprise.WebServices
 
 		public static JobRunner Attach(RunConfiguration config)
 		{
+			//TODO: fix HasMetrics
 			var ret = new JobRunner()
 			{
 				Guid = System.Guid.NewGuid().ToString().ToLower(),
@@ -161,6 +164,7 @@ namespace Peach.Enterprise.WebServices
 				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.Running,
 				PitUrl = string.Empty,
+				HasMetrics = false
 			};
 
 			return ret;
