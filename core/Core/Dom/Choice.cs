@@ -137,6 +137,7 @@ namespace Peach.Core.Dom
 						{
 							if (child.isToken)
 							{
+								logger.Trace("BuildCache: Adding '{0}' as token offset: {1}", child.fullName, offset);
 								_choiceCache[elem.name] = new ChoiceCache() { Offset = offset, Token = child.Value };
 								break;
 							}
@@ -144,8 +145,8 @@ namespace Peach.Core.Dom
 							else if (child.hasLength)
 								offset += child.lengthAsBits;
 
-							else if (child.isDeterministic)
-								continue;
+							else 
+								throw new Exception("BAIL!");
 						}
 					}
 					else if (elem.isToken)
