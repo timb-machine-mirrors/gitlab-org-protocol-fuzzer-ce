@@ -166,5 +166,10 @@ namespace Peach.Enterprise.WebServices.Models
 		/// Optional ending iteration number
 		/// </summary>
 		public uint RangeStop { get; set; }
+
+		/// <summary>
+		/// Indicates if metrics are being collected for the job
+		/// </summary>
+		public bool HasMetrics { get; set; }
 	}
 }
