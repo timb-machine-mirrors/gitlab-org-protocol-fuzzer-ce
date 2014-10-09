@@ -58,9 +58,9 @@ namespace Peach.Core.Dom
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
-	[Parameter("minOccurs", typeof(int), "Minimum occurances", "1")]
-	[Parameter("maxOccurs", typeof(int), "Maximum occurances", "1")]
-	[Parameter("occurs", typeof(int), "Actual occurances", "1")]
+	[Parameter("minOccurs", typeof(int), "Minimum occurrences", "1")]
+	[Parameter("maxOccurs", typeof(int), "Maximum occurrences", "1")]
+	[Parameter("occurs", typeof(int), "Actual occurrences", "1")]
 	[Serializable]
 	public class Choice : DataElementContainer
 	{
