@@ -232,43 +232,10 @@ namespace Peach.Core.Loggers
 			else
 				ret.folderName = string.Format("{0}_{1}_{2}", coreFault.exploitability, coreFault.majorHash, coreFault.minorHash);
 
-			// Collect the data sets used by peach
-			var sb = new StringBuilder();
-			var visited = new HashSet<string>();
-			foreach (var state in SafeEnum(states))
-			{
-				// Don't worry about re-entered states, they will always use the same data set selection
-				if (!visited.Add(state.name))
-					continue;
-
-				foreach (var action in SafeEnum(state.actions))
-				{
-					foreach (var model in SafeEnum(action.models))
-					{
-						if (!string.IsNullOrEmpty(model.dataSet))
-						{
-							sb.Append(state.name);
-							sb.Append(".");
-							sb.Append(action.name);
-							sb.Append(".");
-
-							if (!string.IsNullOrEmpty(model.parameter))
-							{
-								sb.Append(model.parameter);
-								sb.Append(".");
-							}
-
-							sb.Append(model.name);
-							sb.Append(": ");
-							sb.AppendLine(model.dataSet);
-						}
-					}
-				}
-			}
-
-			var dataSets = sb.ToString();
-			if (!string.IsNullOrEmpty(dataSets))
-				ret.toSave.Add("dataSets.txt", new MemoryStream(Encoding.UTF8.GetBytes(dataSets)));
+			// Save all states, actions, data sets, mutations
+			var settings = new JsonSerializerSettings() { DefaultValueHandling = DefaultValueHandling.Ignore };
+			var json = JsonConvert.SerializeObject(new { States = states }, Formatting.Indented, settings);
+			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
 
 			ret.controlIteration = coreFault.controlIteration;
 			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
