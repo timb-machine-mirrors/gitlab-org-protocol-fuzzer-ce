@@ -17,7 +17,7 @@ This document outlines the basic process for building each protocol.
 
 * Use the "pits" repo (this one)
 * Use branch "client-huawei"
-* Add deliverable files (files in the "Deliverables" section) to a +Delivery+ folder
+* Add deliverable files (files in the "Deliverables" section) to a +Deliverables+ folder
 
 == Deliverables
 
