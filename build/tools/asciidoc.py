@@ -6,6 +6,7 @@ import os, shutil, re
 def configure(conf):
 	j = os.path.join
 	pub = j(conf.path.abspath(), 'docs', 'publishing')
+	fopub = j(pub, 'asciidoctor-fopub')
 
 	conf.find_program('ruby')
 	conf.find_program('perl')
@@ -14,7 +15,10 @@ def configure(conf):
 	conf.find_program('xsltproc')
 
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
-	conf.find_program('fopub', path_list = [ j(pub, 'asciidoctor-fopub') ])
+	conf.find_program('fopub', path_list = [ fopub ])
+
+	# Ensure fopub is initialized
+	conf.cmd_and_log([conf.env.FOPUB, '-h'], cwd = fopub)
 
 	conf.env['ASCIIDOCTOR_OPTS'] = [
 		'-v',
