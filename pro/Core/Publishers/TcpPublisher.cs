@@ -39,7 +39,7 @@ namespace Peach.Core.Publishers
 {
 	public abstract class TcpPublisher : BufferedStreamPublisher
 	{
-		public ushort Port { get; set; }
+		public ushort Port { get; protected set; }
 		
 		protected TcpClient _tcp = null;
 		protected EndPoint _localEp = null;

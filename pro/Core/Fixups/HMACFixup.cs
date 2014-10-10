@@ -47,15 +47,10 @@ namespace Peach.Core.Fixups
     [Serializable]
     public class HMACFixup : Fixup
     {
-        static void Parse(string str, out DataElement val)
-        {
-            val = null;
-        }
-
         public HexString Key { get; protected set; }
         public Algorithms Hash { get; protected set; }
         public int Length { get; protected set; }
-        protected DataElement _ref { get; set; }
+        public DataElement _ref { get; protected set; }
 
         public enum Algorithms { HMACSHA1, HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES  };
 

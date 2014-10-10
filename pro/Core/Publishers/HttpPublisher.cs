@@ -56,15 +56,15 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string Url { get; set; }
-		public string Method { get; set; }
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public string Domain { get; set; }
-		public string BaseUrl { get; set; }
-		public bool Cookies { get; set; }
-		public bool CookiesAcrossIterations { get; set; }
-		public bool IgnoreCertErrors { get; set; }
+		public string Url { get; protected set; }
+		public string Method { get; protected set; }
+		public string Username { get; protected set; }
+		public string Password { get; protected set; }
+		public string Domain { get; protected set; }
+		public string BaseUrl { get; protected set; }
+		public bool Cookies { get; protected set; }
+		public bool CookiesAcrossIterations { get; protected set; }
+		public bool IgnoreCertErrors { get; protected set; }
 
 		protected CookieContainer CookieJar = new CookieContainer();
 		protected HttpWebResponse Response { get; set; }

@@ -31,11 +31,11 @@ namespace Peach.Core.Publishers
         private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
         protected override NLog.Logger Logger { get { return logger; } }
 
-        public bool VerifyServer { get; set; }
-        public string Host { get; set; }
-		public string Sni { get; set; }
-        public int ConnectTimeout { get; set; }
-        public ushort Port { get; set; }
+        public bool VerifyServer { get; protected set; }
+        public string Host { get; protected set; }
+        public string Sni { get; protected set; }
+        public int ConnectTimeout { get; protected set; }
+        public ushort Port { get; protected set; }
 
         protected TcpClient _tcp = null;
         protected EndPoint _localEp = null;

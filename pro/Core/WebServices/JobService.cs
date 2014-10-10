@@ -152,6 +152,7 @@ namespace Peach.Enterprise.WebServices
 				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),
 				Groups = new List<Group>(new[] { group }),
+				HasMetrics = Runner.HasMetrics
 			};
 
 			return job;

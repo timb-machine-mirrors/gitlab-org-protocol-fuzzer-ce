@@ -49,9 +49,9 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string FileName { get; set; }
-		public bool Overwrite { get; set; }
-		public bool Append { get; set; }
+		public string FileName { get; protected set; }
+		public bool Overwrite { get; protected set; }
+		public bool Append { get; protected set; }
 
 		private static int maxOpenAttempts = 10;
 		private FileMode fileMode = FileMode.OpenOrCreate;

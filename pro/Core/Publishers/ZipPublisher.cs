@@ -18,9 +18,9 @@ namespace Peach.Enterprise.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string FileName { get; set; }
+		public string FileName { get; protected set; }
 
-		private static int maxOpenAttempts = 10;
+		const int maxOpenAttempts = 10;
 
 		private Stream fileStream;
 		private ZipFile zipFile;

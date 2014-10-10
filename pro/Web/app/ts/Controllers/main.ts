@@ -38,8 +38,17 @@ module DashApp {
 		}
 
 		public get jobNotRunningTooltip(): string {
-			if (this.IsJobRunning)
+			if (!this.IsJobRunning)
 				return "Disabled while not running a Job";
+			else
+				return "";
+		}
+
+		public get metricsUnavailableTooltip(): string {
+			if (this.IsJobRunning == false)
+				return this.jobNotRunningTooltip;
+			else if (this.IsJobRunning && this.job.hasMetrics == false)
+				return "Metrics unavailable for this Job.";
 			else
 				return "";
 		}
@@ -100,6 +109,10 @@ module DashApp {
 
 		public get CanViewFaults() {
 			return (this.job != undefined);
+		}
+
+		public get CanViewMetrics(): boolean {
+			return (this.IsJobRunning && this.job.hasMetrics);
 		}
 
 

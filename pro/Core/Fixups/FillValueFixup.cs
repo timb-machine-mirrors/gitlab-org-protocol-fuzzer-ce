@@ -45,15 +45,9 @@ namespace Peach.Core.Fixups
 	public class FillValueFixup : Fixup
 	{
 		// Needed for ParameterParser to work
-		static void Parse(string str, out DataElement val)
-		{
-			val = null;
-		}
-
-		// Needed for ParameterParser to work
-		protected byte start { get; set; }
-		protected byte stop { get; set; }
-		protected DataElement _ref { get; set; }
+		public byte start { get; protected set; }
+		public byte stop { get; protected set; }
+		public DataElement _ref { get; protected set; }
 
 		public FillValueFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args, "ref")

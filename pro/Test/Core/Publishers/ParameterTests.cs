@@ -186,12 +186,12 @@ namespace Peach.Core.Test.Publishers
 			{
 			}
 
-			static void Parse(string str, out IPAddress val)
+			public static void Parse(string str, out IPAddress val)
 			{
 				val = IPAddress.Parse(str);
 			}
 
-			static void Parse(string str, out CustomType val)
+			public static void Parse(string str, out CustomType val)
 			{
 				val = new CustomType();
 				val.Message = str;
@@ -220,7 +220,7 @@ namespace Peach.Core.Test.Publishers
 		{
 			protected override NLog.Logger Logger { get { return logger; } }
 
-			private string param { get; set; }
+			public string param { get; set; }
 			public string param1 { get; private set; }
 
 			public string GetParam { get { return param; } }
@@ -253,7 +253,7 @@ namespace Peach.Core.Test.Publishers
 
 			private string _val;
 
-			private string param { set { _val = value; } }
+			public string param { set { _val = value; } }
 
 			public string GetParam { get { return _val; } }
 
@@ -435,7 +435,7 @@ namespace Peach.Core.Test.Publishers
 
 		abstract class MyBaseClass
 		{
-			static void Parse(string str, out MyCustomType val)
+			public static void Parse(string str, out MyCustomType val)
 			{
 				val = new MyCustomType(str);
 			}

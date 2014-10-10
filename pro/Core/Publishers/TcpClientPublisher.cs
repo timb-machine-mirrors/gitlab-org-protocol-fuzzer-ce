@@ -54,8 +54,8 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string Host { get; set; }
-		public int ConnectTimeout { get; set; }
+		public string Host { get; protected set; }
+		public int ConnectTimeout { get; protected set; }
 
 		public TcpClientPublisher(Dictionary<string, Variant> args)
 			: base(args)

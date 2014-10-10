@@ -51,7 +51,7 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public string clsid { get; set; }
+		public string clsid { get; protected set; }
 
 		private IComContainer _proxy = null;
 

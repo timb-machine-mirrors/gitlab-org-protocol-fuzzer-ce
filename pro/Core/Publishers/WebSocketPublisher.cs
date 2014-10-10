@@ -56,11 +56,11 @@ namespace Peach.Core.Publishers
 		AutoResetEvent _evaluated = new AutoResetEvent(false);
 		AutoResetEvent _msgReceived = new AutoResetEvent(false);
 
-		public int Port { get; set; }
-		public string Template { get; set; }
-		public string Publish { get; set; }
-		public string DataToken { get; set; }
-		public int Timeout { get; set; }
+		public int Port { get; protected set; }
+		public string Template { get; protected set; }
+		public string Publish { get; protected set; }
+		public string DataToken { get; protected set; }
+		public int Timeout { get; protected set; }
 
 		string _template;
 

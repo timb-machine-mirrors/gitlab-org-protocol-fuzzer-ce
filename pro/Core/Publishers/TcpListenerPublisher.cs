@@ -23,8 +23,8 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public IPAddress Interface { get; set; }
-		public int AcceptTimeout { get; set; }
+		public IPAddress Interface { get; protected set; }
+		public int AcceptTimeout { get; protected set; }
 
 		protected TcpListener _listener = null;
 

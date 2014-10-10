@@ -267,7 +267,8 @@ JOIN metrics_iterations AS mi ON
 	mi.action = mf.action AND
 	mi.parameter = mf.parameter AND
 	mi.element = mf.element AND
-	mi.mutator = mf.mutator
+	mi.mutator = mf.mutator AND
+	mi.dataset = mf.dataset
 JOIN buckets AS b
 	on b.id = mf.bucket
 JOIN states AS s
@@ -286,7 +287,8 @@ GROUP BY
 	mf.state, 
 	mf.action, 
 	mf.parameter, 
-	mf.element
+	mf.element,
+	mf.dataset
 ORDER BY count(distinct(mf.faultnumber)) DESC;
 
 CREATE VIEW view_buckettimeline AS
@@ -355,7 +357,7 @@ SELECT
       mf.bucketcount,
       mf.faultcount
 FROM view_mutators_iterations AS mi
-JOIN view_mutators_faults AS mf
+LEFT JOIN view_mutators_faults AS mf
 ON mf.mutator = mi.mutator
 JOIN mutators AS m
 ON m.id = mi.mutator;
@@ -395,7 +397,7 @@ SELECT
 	,ef.bucketcount
 	,ef.faultcount
 FROM view_elements_iterations AS ei
-JOIN view_elements_faults AS ef ON
+LEFT JOIN view_elements_faults AS ef ON
 	ef.element = ei.element
 	AND ef.state = ei.state
 	AND ef.action = ei.action
@@ -432,7 +434,7 @@ SELECT
 	,df.bucketcount
 	,df.faultcount
 FROM view_datasets_iterations AS di
-JOIN view_datasets_faults as df
+LEFT JOIN view_datasets_faults as df
 ON df.dataset = di.dataset
 JOIN datasets AS d ON d.id = di.dataset
 WHERE df.faultcount > 0

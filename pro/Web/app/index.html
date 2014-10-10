@@ -151,8 +151,8 @@
 							</span>
 						</a>
 					</li>
-					<li ng-class="{active: vm.location.path() == '/metrics'}">
-						<a class="dropdown-toggle" href="#">
+					<li data-original-title="{{vm.metricsUnavailableTooltip}}" class="tooltip-warning" data-rel="tooltip" data-placement="right" ng-class="{active: vm.location.path() == '/metrics','disabled': vm.CanViewMetrics == false}">
+						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.CanViewMetrics == false}">
 							<i class="icon-signal"></i>
 							<span class="menu-text"> Metrics </span>
 							<b class="arrow icon-angle-down"></b>

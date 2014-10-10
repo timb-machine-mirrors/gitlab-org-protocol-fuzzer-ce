@@ -4,6 +4,8 @@
 #define _WIN32_WINNT 0x0501
 #endif
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <stdio.h>
 #include <winsock2.h>
 #include <tchar.h>

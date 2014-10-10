@@ -50,15 +50,9 @@ namespace Peach.Core.Fixups.Libraries
 	public abstract class InternetFixup : Fixup
 	{
 		// Needed for ParameterParser to work
-		static void Parse(string str, out DataElement val)
-		{
-			val = null;
-		}
-
-		// Needed for ParameterParser to work
-		protected IPAddress src { get; set; }
-		protected IPAddress dst { get; set; }
-		protected DataElement _ref { get; set; }
+		public IPAddress src { get; protected set; }
+		public IPAddress dst { get; protected set; }
+		public DataElement _ref { get; protected set; }
 
 		protected byte[] srcAddress;
 		protected byte[] dstAddress;
