@@ -32,7 +32,11 @@ def configure(conf):
 		'-param', 'footer.column.widths', '0 1 0',
 	]
 
+	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
+
 	conf.env['XMLLINT_OPTS'] = [
+		'--catalogs',
+		'--nonet',
 		'--noout',
 		'--valid',
 	]
@@ -210,6 +214,13 @@ class xmllint(Task):
 	color   = 'PINK'
 	before  = [ 'fopub', 'webhelp' ]
 	vars    = [ 'XMLLINT_OPTS' ]
+
+	def exec_command(self, *k, **kw):
+		env = dict(self.env.env or os.environ)
+		env.update(SGML_CATALOG_FILES = ';'.join(self.env['SGML_CATALOG_FILES']))
+		kw['env'] = env
+
+		return super(xmllint, self).exec_command(*k, **kw)
 
 class webhelp(Task):
 	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'
