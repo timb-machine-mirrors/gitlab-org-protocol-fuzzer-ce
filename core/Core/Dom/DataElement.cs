@@ -187,6 +187,14 @@ namespace Peach.Core.Dom
 	[DebuggerDisplay("{debugName}")]
 	public abstract class DataElement : INamed, IOwned<DataElementContainer>, IPitSerializable
 	{
+		/// <summary>
+		/// This exists so the ParameterParser can parse 'ref' parameters.
+		/// </summary>
+		public static DataElement Parse(string str)
+		{
+			return null;
+		}
+
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		#region Clone

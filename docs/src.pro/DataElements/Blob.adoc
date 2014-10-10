@@ -72,26 +72,42 @@ xref:Transformer[Transformer]:: Static transformations such as compression or en
 
 The following mutators will operate on this element type.
 
-xref:Mutators_BlobBitFlipperMutator[BlobBitFlipperMutator]:: Flips a percentage of the bits in a blob
-xref:Mutators_BlobDWORDSliderMutator[BlobDWORDSliderMutator]:: This mutator will slide a DWORD through the blob
-xref:Mutators_BlobMutator[BlobMutator]:: Grows, shrinks, and performs complex manipulations of data in blobs
-xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
-xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
-xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]::
-	Swaps two nodes in the data model that are neighboring each other
 
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]::
-	Uses the xref:SampleNinja[Sample Ninja] database to swap elements between different sample files
+_Enabled when element is marked as an array_
 
-xref:Mutators_SizedDataNumericalEdgeCasesMutator[SizedDataNumericalEdgeCasesMutator]::
-	Change the length of the size of a data	element to a range around numerical edge cases
-	
-	This mutator is only applied when element is part of a size relationship.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
 
-xref:Mutators_SizedDataVarianceMutator[SizedDataVarianceMutator]::
-	Change the length of the size of a data element that contains a size relation to a range around numerical edge cases and changes the data element that the relation points to size to match that value.
-	
-	This mutator is only applied when element is part of a size relationship.
+_Used for all data elements_
+
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+
+_Enabled when element is part of a size relation_
+
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+
+_Specific to this element type_
+
+xref:Mutators_BlobChangeFromNull[BlobChangeFromNull]:: This mutator will produce test cases in which null bytes in a xref:Blob[Blob] element are changed to a non-null value.
+xref:Mutators_BlobChangeRandom[BlobChangeRandom]:: This mutator will produce test cases by changing random selections of bytes to random value.
+xref:Mutators_BlobChangeSpecial[BlobChangeSpecial]:: This mutator will produce test cases by changing random selections of bytes to one of 0x00, 0x01, 0xFE, 0xFF.
+xref:Mutators_BlobChangeToNull[BlobChangeToNull]:: This mutator will produce test cases by changing a random number of bytes to 0x00.
+xref:Mutators_BlobExpandSingleIncrementing[BlobExpandSingleIncrementing]:: This mutator will produce test cases by expanding the size of the blob using incrementing values.
+xref:Mutators_BlobExpandAllRandom[BlobExpandAllRandom]:: This mutator will produce test cases by expanding the size of the blob using random values.
+xref:Mutators_BlobExpandSingleRandom[BlobExpandSingleRandom]:: This mutator will produce test cases by expanding the size of the blob using a single random byte (repeated as needed).
+xref:Mutators_BlobExpandZero[BlobExpandZero]:: This mutator will produce test cases by expanding the blob using null values.
+xref:Mutators_BlobReduce[BlobReduce]:: This mutator will produce test cases by reducing the size of the blob by a random amount.
+xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra test case values on a per-data element basis.
+
 
 [[Blob_Examples]]
 === Examples

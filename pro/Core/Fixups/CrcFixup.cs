@@ -48,13 +48,8 @@ namespace Peach.Core.Fixups
 	[Serializable]
 	public class CrcFixup : Fixup
 	{
-		static void Parse(string str, out DataElement val)
-		{
-			val = null;
-		}
-
-		protected DataElement _ref { get; set; }
-		protected CRCTool.CRCCode type { get; set; }
+		public DataElement _ref { get; protected set; }
+		public CRCTool.CRCCode type { get; protected set; }
 
 		public CrcFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args, "ref")

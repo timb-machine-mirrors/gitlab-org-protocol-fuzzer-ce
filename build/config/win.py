@@ -110,7 +110,7 @@ def prepare(conf):
 	env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
 
 def configure(conf):
-	conf.ensure_version('CXX', ['16.00.40219.01', '17.00.61030', '18.00.21005.1'])
+	conf.ensure_version('CXX', ['16.00.40219.01', '17.00.61030', '18.00.21005.1', '18.00.30723'])
 
 	env = conf.env
 

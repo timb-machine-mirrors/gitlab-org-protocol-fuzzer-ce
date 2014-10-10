@@ -80,7 +80,7 @@ namespace Peach.Core.Dom
 		#region Choice Token Cache
 
 		/// <summary>
-		/// Contianer for cache entries.
+		/// Container for cache entries.
 		/// </summary>
 		[Serializable]
 		class ChoiceCache
@@ -197,6 +197,7 @@ namespace Peach.Core.Dom
 		{
 			BitStream sizedData = ReadSizedData(data, size);
 			long startPosition = sizedData.PositionBits;
+			bool isTryAfterFailure = false;
 
 			Clear();
 			_selectedElement = null;
@@ -221,8 +222,12 @@ namespace Peach.Core.Dom
 					}
 					catch (CrackingFailure)
 					{
-						logger.Debug("handleChoice: Failed to crack child: {0}", child.debugName);
-						throw;
+						// If we fail to crack the cached option, fall back to the slow method. It's possible
+						// there are two tokens in a row and the first one is not deterministic.
+						logger.Debug("handleChoice: Failed to crack child using cache. Retrying with slow method...: {0}", child.debugName);
+						isTryAfterFailure = true;
+
+						break;
 					}
 					catch (Exception ex)
 					{
@@ -236,7 +241,9 @@ namespace Peach.Core.Dom
 			foreach (DataElement child in choiceElements.Values)
 			{
 				// Skip any cache entries, already tried them
-				if(_choiceCache.ContainsKey(child.name))
+				// Except if our cache choice failed to parse. Then 
+				// try all options.
+				if(!isTryAfterFailure && _choiceCache.ContainsKey(child.name))
 					continue;
 
 				try

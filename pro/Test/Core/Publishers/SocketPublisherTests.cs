@@ -225,6 +225,48 @@ namespace Peach.Core.Test.Publishers
 </Peach>
 ";
 
+		public string template2 = @"
+<Peach>
+
+	<DataModel name=""TheDataModel"">
+		<String name=""str"" value=""{3}""/>
+	</DataModel>
+
+	<DataModel name=""ResponseModel"">
+		<String name=""str"" mutable=""false""/>
+	</DataModel>
+
+	<StateModel name=""TheStateModel"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action name=""Send"" type=""output"">
+				<DataModel ref=""TheDataModel""/>
+			</Action>
+
+			<Action name=""Recv"" type=""input"">
+				<DataModel ref=""ResponseModel""/>
+			</Action>
+
+			<Action name=""Addr"" type=""getProperty"" property=""LastRecvAddr"">
+				<DataModel name=""LastRecvAddr""/>
+			</Action>
+
+		</State>
+	</StateModel>
+
+	<Test name=""Default"">
+		<StateModel ref=""TheStateModel""/>
+		<Publisher class=""{0}"">
+			<Param name=""Host"" value=""{1}""/>
+			<Param name=""Port"" value=""{2}""/>
+			<Param name=""SrcPort"" value=""{4}""/>
+			<Param name=""Interface"" value=""{5}""/>
+		</Publisher>
+		<Strategy class=""RandomDeterministic""/>
+	</Test>
+
+</Peach>
+";
+
 		public string raw_template = @"
 <Peach>
 
@@ -395,12 +437,11 @@ namespace Peach.Core.Test.Publishers
 
 			try
 			{
-				string xml = string.Format(template, "Udp", "ff02::22", srcport.ToString(), "Hello World", dstport.ToString());
+				string xml = string.Format(template2, "Udp", "ff02::22", srcport.ToString(), "Hello World", dstport.ToString(), local.ToString());
 
 				PitParser parser = new PitParser();
 				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Peach.Core.Publishers.UdpPublisher pub = dom.tests[0].publishers[0] as Peach.Core.Publishers.UdpPublisher;
-				pub.Interface = local; 
 
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;

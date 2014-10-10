@@ -6,6 +6,7 @@ import os, shutil, re
 def configure(conf):
 	j = os.path.join
 	pub = j(conf.path.abspath(), 'docs', 'publishing')
+	fopub = j(pub, 'asciidoctor-fopub')
 
 	conf.find_program('ruby')
 	conf.find_program('perl')
@@ -14,7 +15,10 @@ def configure(conf):
 	conf.find_program('xsltproc')
 
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
-	conf.find_program('fopub', path_list = [ j(pub, 'asciidoctor-fopub') ])
+	conf.find_program('fopub', path_list = [ fopub ])
+
+	# Ensure fopub is initialized
+	conf.cmd_and_log([conf.env.FOPUB, '-h'], cwd = fopub)
 
 	conf.env['ASCIIDOCTOR_OPTS'] = [
 		'-v',
@@ -28,7 +32,11 @@ def configure(conf):
 		'-param', 'footer.column.widths', '0 1 0',
 	]
 
+	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
+
 	conf.env['XMLLINT_OPTS'] = [
+		'--catalogs',
+		'--nonet',
 		'--noout',
 		'--valid',
 	]
@@ -206,6 +214,13 @@ class xmllint(Task):
 	color   = 'PINK'
 	before  = [ 'fopub', 'webhelp' ]
 	vars    = [ 'XMLLINT_OPTS' ]
+
+	def exec_command(self, *k, **kw):
+		env = dict(self.env.env or os.environ)
+		env.update(SGML_CATALOG_FILES = ';'.join(self.env['SGML_CATALOG_FILES']))
+		kw['env'] = env
+
+		return super(xmllint, self).exec_command(*k, **kw)
 
 class webhelp(Task):
 	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'

@@ -75,7 +75,7 @@ namespace Peach.Core
 
 			foreach (var attr in obj.GetType().GetAttributes<ParameterAttribute>(null))
 			{
-				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Instance;
 				var prop = obj.GetType().GetProperty(attr.name, bindingAttr, null, attr.type, new Type[0], null);
 				if (prop == null)
 					prop = obj.GetType().GetProperty("_" + attr.name, bindingAttr, null, attr.type, new Type[0], null);
@@ -174,7 +174,7 @@ namespace Peach.Core
 			{
 				// Find a converter on this type with the signature:
 				// static void Parse(string str, out "type" val)
-				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Static;
 				Type[] types = new Type[] { typeof(string), destType.MakeByRefType() };
 				Type level = ownerType;
 

@@ -16,6 +16,10 @@ ver | findstr /i "6\.0\." > nul
 if %ERRORLEVEL% EQU 0 SET TOKEN=tokens=2*
 ver | findstr /i "6\.1\." > nul
 if %ERRORLEVEL% EQU 0 SET TOKEN=tokens=2*
+ver | findstr /i "6\.2\." > nul
+if %ERRORLEVEL% EQU 0 SET TOKEN=tokens=2*
+ver | findstr /i "6\.3\." > nul
+if %ERRORLEVEL% EQU 0 SET TOKEN=tokens=2*
 
 rem Start calculating PYTHON and PYTHON_DIR
 set PYTHON=
