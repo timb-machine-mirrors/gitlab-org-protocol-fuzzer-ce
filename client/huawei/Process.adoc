@@ -13,6 +13,35 @@ This document outlines the basic process for building each protocol.
 .. Once protocol is working, split up into the files under deliverables.
 .. Create datasheet/userguide documents using AsciiDoc markup (+.adoc+ suffix)
 
+== Project Phases
+
+=== Build
+
+* Research and understand protocol
+* Develop all:
+** data models
+** state models
+** supporting data sets
+** extentions
+* Working pittester file
+
+=== Review by Mike
+
+* Review and comment on pit and pit structure
+
+=== Test
+
+* Verify datasheet and usage guide
+* Verify pit against Huawei test environment (if no environment see mike)
+* Verify full coverage of specification
+* Run PIT over night to verify it can fuzz for 12+ hours
+* Create long running test files (see Michael M.)
+* Verify pit usable via Peach web interface
+
+=== Sign off my Mike
+
+* Review testing, final pit, documentation, etc.
+
 == Checking files into repo
 
 * Use the "pits" repo (this one)
