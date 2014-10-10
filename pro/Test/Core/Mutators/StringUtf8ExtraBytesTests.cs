@@ -15,6 +15,10 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("StringUtf8ExtraBytes");
 
 			var str = new Dom.String("String");
+			Assert.False(runner.IsSupported(str));
+
+			str.DefaultValue = new Variant("hello");
+			Assert.True(runner.IsSupported(str));
 
 			str.isMutable = false;
 			Assert.False(runner.IsSupported(str));

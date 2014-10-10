@@ -32,8 +32,8 @@ namespace Peach.Core.Mutators
 		{
 			var asStr = obj as Dom.String;
 
-			// Maje sure we are a mutable string and Peach.TypeTransform hint is not false
-			if (asStr == null || !asStr.isMutable || !getTypeTransformHint(obj))
+			// Make sure we are a mutable string and Peach.TypeTransform hint is not false
+			if (asStr == null || !asStr.isMutable || !getTypeTransformHint(obj) || ((string)asStr.InternalValue).Length == 0)
 				return false;
 
 			// Attach to ascii and utf8, since most ascii parsers are utf8
