@@ -49,29 +49,36 @@ xref:Transformer[Transformer]:: Static transformations such as compression or en
 
 The following mutators will operate on this element type:
 
-xref:Mutators_DataElementDuplicateMutator[DataElementDuplicateMutator]:: Duplicates a node's value from 2x - 50x
-xref:Mutators_DataElementRemoveMutator[DataElementRemoveMutator]:: Removes nodes from the data model
-xref:Mutators_DataElementSwapNearNodesMutator[DataElementSwapNearNodesMutator]:: Swaps two nodes in the data model that are neighbouring each other
 
-xref:Mutators_FiniteRandomNumbersMutator[FiniteRandomNumberMutator]::
-	This mutator produces "random" numbers using a static seed so it will always produce the same random numbers.
-	By default 5,000 numbers are produced for each Number element that is found.
+_Enabled when element is marked as an array_
 
-xref:Mutators_NumericalEdgeCaseMutator[NumericalEdgeCaseMutator]::
-	This mutator will produce values in a range of N - 50 through N + 50 for all numerical edge cases.
-	For example 16-bit numbers have the following edge cases: 0, signed byte (127), unsigned byte (255), signed short, unsigned short.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
 
-xref:Mutators_NumericalVarianceMutator[NumericalVarianceMutator]::
-	This mutator will produce values of default - N through default + N where N defaults to 50 but is controllable via a hint.
-	For example, if the default value of a Number field is 200, by default this mutator will produce all the values between 150 and 250.
+_Used for all data elements_
 
-xref:Mutators_ValidValuesMutator[ValidValuesMutator]::
-	This mutator will allow users to specify additional data for each data element through a hint.
-	Each of these values must be separated with a semicolon.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
 
-xref:Mutators_WordListMutator[WordListMutator]::
-	This mutator will allow users to specify additional data for each data element through a hint.
-	Each of these values must be separated by a newline in a file.
+_Enabled when element is part of a size relation_
+
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+
+_Specific to this element type_
+
+xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra test case values on a per-data element basis.
+xref:Mutators_NumberEdgeCase[NumberEdgeCase]:: This mutator will produce numerical edge cases for integer values.
+xref:Mutators_NumberRandom[NumberRandom]:: This mutator will produce random values from the available numerical space.
+xref:Mutators_NumberVariance[NumberVariance]:: This mutator will produce values near the current value of a number.
+
 
 === Examples
 

@@ -1,11 +1,6 @@
 [[Monitors]]
 == Monitors
 
-//Updated:
-//  - 03/04/2014: Lynn: Added Monitor table.
-
-// - 03/27/2014 Monitor names in table now link to the monitor documentation
-
 xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
  
 .Monitors and Operating Systems 
@@ -35,6 +30,7 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |xref:Monitors_SshCommand[SSH Command Monitor]|X|X|X
 |xref:Monitors_SshDownloader[SSH Downloader Monitor]|X|X|X
 |xref:Monitors_Syslog[Syslog Monitor]|X|X|X
+|xref:Monitors_TcpPort[TcpPort Monitor]|X|X|X
 |xref:Monitors_Vmware[Vmware Control Monitor]|X|X|X
 |xref:Monitors_WindowsDebugger[Windows Debugger Monitor]|||X
 |xref:Monitors_WindowsService[Windows Service Monitor]|||X
@@ -90,6 +86,8 @@ include::Monitors/Ssh.adoc[]
 include::Monitors/SshDownloader.adoc[]
 
 include::Monitors/Syslog.adoc[]
+
+include::Monitors/TcpPort.adoc[]
 
 include::Monitors/Vmware.adoc[]
 

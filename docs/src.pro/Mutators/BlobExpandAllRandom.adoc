@@ -1,5 +1,5 @@
 <<<
-[[Mutators_BlobExpandAlLRandom]]
+[[Mutators_BlobExpandAllRandom]]
 == BlobExpandAlLRandom
 
 This mutator will produce test cases for xref:Blob[Blob] elements.

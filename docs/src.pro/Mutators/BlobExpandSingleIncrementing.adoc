@@ -1,6 +1,6 @@
 <<<
-[[Mutators_BlobExpandAllRandom]]
-== BlobExpandAllRandom
+[[Mutators_BlobExpandSingleIncrementing]]
+== BlobExpandSingleIncrementing
 
 This mutator will produce test cases for xref:Blob[Blob] elements.
 It will expand the blob by a random size between 1 and 255.

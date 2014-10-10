@@ -1,6 +1,6 @@
 <<<
-[[Mutators_StringUnicodeAbstractCharacters]]
-== StringUnicodeAbstractCharacters
+[[Mutators_StringUnicodeFormatCharacters]]
+== StringUnicodeFormatCharacters
 
 This mutator produces test cases for String elements by selecting a random set of Unicode format characters. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
 
