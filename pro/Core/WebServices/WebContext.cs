@@ -44,9 +44,9 @@ namespace Peach.Enterprise.WebServices
 			Runner = JobRunner.Run(Logger, PitLibraryPath, pitFile, pitUrl, seed, rangeStart, rangeStop);
 		}
 
-		public void AttachJob(RunConfiguration config)
+		public void AttachJob(Peach.Core.Dom.Dom dom, RunConfiguration config)
 		{
-			Runner = JobRunner.Attach(config);
+			Runner = JobRunner.Attach(dom, config);
 		}
 	}
 }

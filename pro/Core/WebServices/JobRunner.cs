@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -153,9 +154,8 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		public static JobRunner Attach(RunConfiguration config)
+		public static JobRunner Attach(Peach.Core.Dom.Dom dom, RunConfiguration config)
 		{
-			//TODO: fix HasMetrics
 			var ret = new JobRunner()
 			{
 				Guid = System.Guid.NewGuid().ToString().ToLower(),
@@ -164,7 +164,11 @@ namespace Peach.Enterprise.WebServices
 				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.Running,
 				PitUrl = string.Empty,
-				HasMetrics = false
+				HasMetrics = dom.tests
+					.Where(t => t.name == config.runName)
+					.SelectMany(t => t.loggers)
+					.Where(l => l is Peach.Enterprise.Loggers.MetricsLogger)
+					.Any(),
 			};
 
 			return ret;

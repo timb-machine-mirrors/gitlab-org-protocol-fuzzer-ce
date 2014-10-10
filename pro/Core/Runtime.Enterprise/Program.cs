@@ -107,7 +107,7 @@ namespace Peach.Enterprise.Runtime
 			using (var svc = new WebServices.WebServer(""))
 			{
 				// Tell the web service the job is running off the command line
-				svc.Context.AttachJob(config);
+				svc.Context.AttachJob(this.dom, config);
 
 				svc.Start();
 
