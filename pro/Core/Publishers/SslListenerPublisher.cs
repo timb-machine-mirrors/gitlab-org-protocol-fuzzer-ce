@@ -28,13 +28,13 @@ namespace Peach.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public IPAddress Interface { get; set; }
-        public ushort Port { get; set; }
-		public int AcceptTimeout { get; set; }
-        public string ServerCertPath { get; set; }
-        public string ServerCertPass { get; set; }
-        public bool ClientCertRequired { get; set; }
-        public bool CheckCertRevocation { get; set; }
+		public IPAddress Interface { get; protected set; }
+		public ushort Port { get; protected set; }
+		public int AcceptTimeout { get; protected set; }
+		public string ServerCertPath { get; protected set; }
+		public string ServerCertPass { get; protected set; }
+		public bool ClientCertRequired { get; protected set; }
+		public bool CheckCertRevocation { get; protected set; }
 
 	    protected TcpClient _tcp = null; 
 		protected TcpListener _listener = null;

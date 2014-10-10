@@ -11,7 +11,7 @@ namespace Peach.Core.Publishers
 	[Parameter("BytesPerLine", typeof(int), "How many bytes per row of text", "16")]
 	public class ConsoleHexPublisher : ConsolePublisher
 	{
-		public int BytesPerLine { get; set; }
+		public int BytesPerLine { get; protected set; }
 
 		public ConsoleHexPublisher(Dictionary<string, Variant> args)
 			: base(args)

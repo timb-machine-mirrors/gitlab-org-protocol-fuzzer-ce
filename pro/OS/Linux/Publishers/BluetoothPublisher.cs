@@ -170,8 +170,8 @@ namespace Peach.Core.Publishers
 
 		public const int HCISETRAW = 1074022620;
 
-		public string Interface { get; set; }
-		public int Timeout { get; set; }
+		public string Interface { get; protected set; }
+		public int Timeout { get; protected set; }
 
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
