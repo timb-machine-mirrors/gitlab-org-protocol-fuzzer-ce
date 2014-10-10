@@ -42,6 +42,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
+			runner.SeedOverride = 1;
+
 			var array = new Dom.Array("Array");
 			array.OriginalElement = new Dom.String("Str");
 			array.ExpandTo(3);
