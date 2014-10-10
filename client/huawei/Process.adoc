@@ -13,6 +13,11 @@ This document outlines the basic process for building each protocol.
 .. Once protocol is working, split up into the files under deliverables.
 .. Create datasheet/userguide documents using AsciiDoc markup (+.adoc+ suffix)
 
+== Checking files into repo
+
+* Use the "pits" repo (this one)
+* Use branch "client-huawei"
+* Add deliverable files (files in the "Deliverables" section) to a +Delivery+ folder
 
 == Deliverables
 
