@@ -476,6 +476,11 @@ namespace Peach.Core.Cracker
 
 		void handleException(DataElement elem, BitStream data, Exception e)
 		{
+			var items = _sizedElements.Where(x => x.Key.isChildOf(elem)).ToList();
+
+			foreach (var item in items)
+				_sizedElements.Remove(item.Key);
+
 			_sizedElements.Remove(elem);
 
 			CrackingFailure ex = e as CrackingFailure;
