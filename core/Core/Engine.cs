@@ -463,7 +463,8 @@ namespace Peach.Core
 
 							// If this was a control iteration, verify it againt our origional
 							// recording.
-							if (context.controlRecordingIteration == false &&
+							if (context.faults.Count == 0 &&
+								context.controlRecordingIteration == false &&
 								context.controlIteration &&
 								!test.nonDeterministicActions)
 							{
@@ -488,33 +489,63 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 									OnControlFault(context, iterationCount, description);
 								}
 
+								// Check states first, since actions will always be different if
+								// states are not executed
 								if (context.faults.Count == 0)
 								{
-									foreach (Dom.Action action in context.controlRecordingActionsExecuted)
-									{
-										if (!context.controlActionsExecuted.Contains(action))
-										{
-											string description = @"The Peach control iteration performed failed
-to execute same as initial control.  Action " + action.name + " was not performed.";
+									var missedStates = context.controlRecordingStatesExecuted
+										.Where(s => !context.controlStatesExecuted.Contains(s))
+										.ToList();
 
-											logger.Debug(description);
-											OnControlFault(context, iterationCount, description);
+									if (missedStates.Count > 0)
+									{
+										var sb = new StringBuilder();
+										sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
+
+										if (missedStates.Count == 1)
+										{
+											sb.AppendFormat("State '{0}' was not performed.", missedStates[0].name);
 										}
+										else
+										{
+											sb.AppendLine("The following states were not performed:");
+											foreach (var s in missedStates)
+												sb.AppendLine("\t'{0}'".Fmt(s.name));
+										}
+
+										var description = sb.ToString();
+
+										logger.Debug(description);
+										OnControlFault(context, iterationCount, description);
 									}
 								}
 
 								if (context.faults.Count == 0)
 								{
-									foreach (Dom.State state in context.controlRecordingStatesExecuted)
-									{
-										if (!context.controlStatesExecuted.Contains(state))
-										{
-											string description = @"The Peach control iteration performed failed
-to execute same as initial control.  State " + state.name + "was not performed.";
+									var missedActions = context.controlRecordingActionsExecuted
+										.Where(a => !context.controlActionsExecuted.Contains(a))
+										.ToList();
 
-											logger.Debug(description);
-											OnControlFault(context, iterationCount, description);
+									if (missedActions.Count > 0)
+									{
+										var sb = new StringBuilder();
+										sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
+
+										if (missedActions.Count == 1)
+										{
+											sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.name, missedActions[0].name);
 										}
+										else
+										{
+											sb.AppendLine("The following actions were not performed:");
+											foreach (var a in missedActions)
+												sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.name, a.name));
+										}
+
+										var description = sb.ToString();
+
+										logger.Debug(description);
+										OnControlFault(context, iterationCount, description);
 									}
 								}
 							}
