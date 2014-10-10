@@ -6,6 +6,7 @@ This document outlines the basic process for building each protocol.
 . Read and research protocol
 . Search http://pcapr.net[pcapr] for protocol captures. Place in _Captures_ folder with "pcapr_" prefix.
 .. Captures from Huawei are prefixed with +huawei_+
+.. Captures from Deja are prefixed with +deja_+
 . If possible, create test environment using eNSP or open source programs
 . Start development of protocol definition
 .. Create a PROTOCOL.xml.test file (see https://github/dejavu/pits/blob/master/pittester.adoc[pittestet] docs)
