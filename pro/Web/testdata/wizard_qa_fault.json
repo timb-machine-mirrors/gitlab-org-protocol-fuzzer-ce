@@ -29,9 +29,9 @@
 			"type":"choice",
 			"key":"OS",
 			"choice":[
-				{ "value":"windows", "a":"Windows", "next": 1000 },
-				{ "value":"osx", "a":"Apple OS X", "next": 4200 },
-				{ "value":"linux", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 3100 }
+				{ "value":"windows", "a":"Windows", "next": 100 },
+				{ "value":"osx", "a":"Apple OS X", "next": 101 },
+				{ "value":"linux", "a":"Linux (Ubuntu, Redhat, SUSE, etc.)", "next": 102 }
 			],
 			"next":4
 		},
@@ -41,17 +41,39 @@
 			"type":"jump",
 			"key":"LocalOS",
 			"choice":[
-				{ "value":"windows", "next":1000 },
-				{ "value":"osx", "next":4200 },
-				{ "value":"linux", "next":3100 }
+				{ "value":"windows", "next":100 },
+				{ "value":"osx", "next":101 },
+				{ "value":"linux", "next":102 }
 				]
 		},
 		{
-			"id": 1000,
+			"id": 100,
 			"q": "How would you like to detect a faulting condition in your target?",
 			"type": "choice",
 			"choice":[
 				{ "value": 0, "a":"Detect whether a process or service has misbehaved (such as early exit, crashes, and interesting exceptions).", "next":1100 },
+				{ "value": 1, "a":"Detect the availability of a remote device.", "next":4100 },
+				{ "value": 2, "a":"Detect an error message via the serial port.", "next":4300 },
+				{ "value": 3, "a":"Detect an error message via syslog.", "next":4400 }
+			]
+		},
+		{
+			"id": 101,
+			"q": "How would you like to detect a faulting condition in your target?",
+			"type": "choice",
+			"choice":[
+				{ "value": 0, "a":"Detect whether a process or service has misbehaved (such as early exit, crashes, and interesting exceptions).", "next":4200 },
+				{ "value": 1, "a":"Detect the availability of a remote device.", "next":4100 },
+				{ "value": 2, "a":"Detect an error message via the serial port.", "next":4300 },
+				{ "value": 3, "a":"Detect an error message via syslog.", "next":4400 }
+			]
+		},
+		{
+			"id": 102,
+			"q": "How would you like to detect a faulting condition in your target?",
+			"type": "choice",
+			"choice":[
+				{ "value": 0, "a":"Detect whether a process or service has misbehaved (such as early exit, crashes, and interesting exceptions).", "next":3100 },
 				{ "value": 1, "a":"Detect the availability of a remote device.", "next":4100 },
 				{ "value": 2, "a":"Detect an error message via the serial port.", "next":4300 },
 				{ "value": 3, "a":"Detect an error message via syslog.", "next":4400 }
