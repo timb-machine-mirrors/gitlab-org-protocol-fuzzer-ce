@@ -349,8 +349,19 @@ namespace Peach.Core
 					// Only use agent if on correct platform
 					if ((agent.platform & Platform.GetOS()) != Platform.OS.None)
 					{
-						context.agentManager.AgentConnect(agent);
-						context.agentManager.GetAgent(agent.name).SessionStarting();
+                        try
+                        {
+                            context.agentManager.AgentConnect(agent);
+                            context.agentManager.GetAgent(agent.name).SessionStarting();
+                        }
+                        catch (AgentException ae)
+                        {
+                            throw new PeachException("Agent Failure: " + ae.Message, ae);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new PeachException("General Agent Failure: " + ex.Message, ex);  
+                        }
 
 						// Note: We want to perfrom SessionStarting on each agent
 						//       in turn.  We do this incase the first agent starts
