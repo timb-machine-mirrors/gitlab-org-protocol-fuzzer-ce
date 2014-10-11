@@ -441,8 +441,7 @@ namespace Peach.Core.Test.Publishers
 
 				PitParser parser = new PitParser();
 				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-				Peach.Core.Publishers.UdpPublisher pub = dom.tests[0].publishers[0] as Peach.Core.Publishers.UdpPublisher;
-
+				
 				RunConfiguration config = new RunConfiguration();
 				config.singleIteration = true;
 

@@ -14,14 +14,11 @@ namespace Peach.Core.Mutators
 	[Description("Encode string as UTF-8 with overlong encodings.")]
 	public partial class StringUtf8ExtraBytes : Mutator
 	{
-		Encoding enc;
 		int total;
 
 		public StringUtf8ExtraBytes(DataElement obj)
 			: base(obj)
 		{
-			enc = new UTF8Encoding();
-
 			var str = (string)obj.InternalValue;
 
 			// For sequential, use the length total number of mutations
