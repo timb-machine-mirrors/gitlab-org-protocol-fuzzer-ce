@@ -7,6 +7,7 @@ book = bld(
 	features = 'asciidoc',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
+	cover = 'src.pro/Professional_Cover.pdf',
 	name = 'Peach_Professional.pdf',
 )
 
@@ -56,6 +57,7 @@ class join_usage(Task):
 pits = bld(
 	features = 'asciidoc',
 	name = 'Pit_Library.pdf',
+	cover = 'src.pro/library_cover.pdf',
 	source = library,
 )
 

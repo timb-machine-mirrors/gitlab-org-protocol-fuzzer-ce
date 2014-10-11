@@ -1,10 +1,11 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs
-from waflib import Utils, Errors
+from waflib import Utils, Errors, Logs
 import os, shutil, re
 
 def configure(conf):
 	j = os.path.join
+	v = conf.env
 	pub = j(conf.path.abspath(), 'docs', 'publishing')
 	fopub = j(pub, 'asciidoctor-fopub')
 
@@ -16,6 +17,27 @@ def configure(conf):
 
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
 	conf.find_program('fopub', path_list = [ fopub ])
+
+	try:
+		conf.find_program('gs')
+		v.append_value('supported_features', 'gs')
+	except Exception, e:
+		if Utils.unversioned_sys_platform() == 'win32':
+			# look for ghostscript windows install
+			gs = []
+			for p in [ 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432' ]:
+				gs.append(j(os.environ.get(p), 'gs', 'gs9.15', 'bin'))
+			try:
+				conf.find_program('gswin64c', var='GS', path_list = gs)
+				v.append_value('supported_features', 'gs')
+			except:
+				v.append_value('missing_features', 'gs')
+				if Logs.verbose > 0:
+					Logs.warn('Ghostscript is not available: %s' % (e))
+		else:
+			v.append_value('missing_features', 'gs')
+			if Logs.verbose > 0:
+				Logs.warn('Ghostscript is not available: %s' % (e))
 
 	# Ensure fopub is initialized
 	conf.cmd_and_log([conf.env.FOPUB, '-h'], cwd = fopub)
@@ -69,6 +91,13 @@ def configure(conf):
 		'com.nexwave.nquindexer.IndexerMain',
 	]
 
+	conf.env['GS_OPTS'] = [
+		'-dBATCH',
+		'-dNOPAUSE',
+		'-q',
+		'-sDEVICE=pdfwrite',
+	]
+
 def runnable_status(self):
 	for t in self.run_after:
 		if not t.hasrun:
@@ -92,6 +121,11 @@ def apply_asciidoc(self):
 		xml = adoc.outputs[0]
 		pdf = xml.change_ext('.pdf')
 		fopub = self.create_task('fopub', xml, pdf)
+
+		cover = self.to_nodes(getattr(self, 'cover', []))
+		if cover and 'gs' in self.env['supported_features']:
+			merge = self.create_task('pdfmerge', cover + [ pdf ], pdf.change_ext('.merged.pdf'))
+			pdf = merge.outputs[0]
 
 		# Install pdf to bin directory
 		inst = self.install_as('${BINDIR}/%s' % self.name, pdf, chmod=Utils.O644)
@@ -221,6 +255,25 @@ class xmllint(Task):
 		kw['env'] = env
 
 		return super(xmllint, self).exec_command(*k, **kw)
+
+class pdfmerge(Task):
+	run_str = '${GS} ${GS_OPTS} -sOutputFile= ${TGT} ${SRC}'
+	color   = 'PINK'
+	vars    = [ 'GS_OPTS' ]
+
+	def exec_command(self, cmd, **kw):
+		if isinstance(cmd, list):
+			lst = []
+			carry = ''
+			for a in cmd:
+				if a == '-sOutputFile=':
+					carry = a
+				else:
+					lst.append(carry + a)
+					carry = ''
+			cmd = lst
+
+		Task.exec_command(self, cmd, **kw)
 
 class webhelp(Task):
 	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'
