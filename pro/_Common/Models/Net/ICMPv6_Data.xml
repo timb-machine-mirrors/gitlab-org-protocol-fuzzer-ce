@@ -149,7 +149,7 @@ SUCH DAMAGE.
 				</Block>
 			</Block>
 		</Block>
-	</DataModel>`
+	</DataModel>
 
 	<DataModel name="NeighborAdvertisement" ref="Packet">
 		<Number name="Ipv6.HopLimit" size="8" endian="big" valueType="hex" value="ff"/>
