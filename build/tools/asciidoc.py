@@ -50,8 +50,12 @@ def configure(conf):
 
 	conf.env['FOPUB_OPTS'] = [
 		'-param', 'paper.type', 'USletter',
-		'-param', 'header.column.widths', '0 1 0',
-		'-param', 'footer.column.widths', '0 1 0',
+		'-param', 'header.column.widths', '"0 1 0"',
+		'-param', 'footer.column.widths', '"0 1 0"',
+	]
+
+	conf.env['JAVA_OPTS'] = [
+		'-Xmx2024M',
 	]
 
 	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
@@ -315,5 +319,12 @@ class webindex(Task):
 class fopub(Task): 
 	run_str = '${FOPUB} ${SRC} ${FOPUB_OPTS}'
 	color   = 'PINK'
-	vars    = [ 'FOPUB_OPTS' ]
+	vars    = [ 'FOPUB_OPTS', 'JAVA_OPTS' ]
 	after   = [ 'xmllint' ]
+
+	def exec_command(self, *k, **kw):
+		env = dict(self.env.env or os.environ)
+		env.update(JAVA_OPTS = ' '.join(self.env['JAVA_OPTS']))
+		kw['env'] = env
+
+		return super(fopub, self).exec_command(*k, **kw)
