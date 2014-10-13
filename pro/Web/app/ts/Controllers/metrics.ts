@@ -61,7 +61,6 @@ module DashApp {
 
 	export class MetricsController {
 		private scope: ViewModelScope;
-		private debug = true;
 		private peachSvc: Services.IPeachService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
 		private visDataSet;
@@ -77,7 +76,6 @@ module DashApp {
 		public stateData: Models.StateMetric[] = [];
 		public bucketData: Models.BucketMetric[] = [];
 
-		private jobStartDate: Date = new Date();
 
 		static $inject = ["$scope", "$routeParams", "pitConfiguratorService", "peachService", "visDataSet"];
 
@@ -91,21 +89,239 @@ module DashApp {
 			this.visDataSet = visDataSet;
 			this.initializeData();
 
-
-			this.testData = this.sampleData();
-			//this.testOptions = angular.extend(options, {});
 		}
+
+		public bucketTimelineOptions: TimelineOptions = {
+			selectable: false,
+			template: function (item: TimelineItem) {
+				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
+					"Faults: " + item.data.faultCount + "<br />" +
+					"1st Iteration: " + item.data.iteration + "<br /></div>";
+			}
+		};
 		
 
-		private initializeData() {
-			this.peachSvc.GetJob((data: Models.Job) => {
-				var jobUrl = data.jobUrl;
+
+		// #region timeline
+
+		/*
+		public bucketTimelineOptions = {
+			selectable: false,
+			debug: false,
+			align: 'center',
+			autoResize: true,
+			editable: false,
+			start: null,
+			end: null,
+			height: null,
+			width: '100%',
+			margin: {
+				axis: 20,
+				item: 10
+			},
+			maxHeight: null,
+			orientation: 'top',
+			padding: 5,
+			showCurrentTime: true,
+			showCustomTime: true,
+			showMajorLabels: true,
+			showMinorLabels: true,
+			type: 'box',
+			zoomMin: 1000,
+			zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
+			template: function (item) {
+				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
+					"Faults: " + item.data.faultCount + "<br />" +
+					"1st Iteration: " + item.data.iteration + "<br /></div>"; 
+			}
+		};
+
+		public bucketTimelineEvents = {
+			select: (selected) => {
+				console.log(selected);
+			},
+
+			range: {},
+
+			rangeChange: (period) => {
+				this.bucketTimelineEvents.range = this.scope.vm.timeline.getWindow();
+
+				if (!this.scope.$$phase) {
+					this.scope.$apply();
+				}
+
+				if (this.debug) {
+					console.log('rangeChange: start-> ', period.start, ' end-> ', period.end);
+				}
+			},
+
+			rangeChanged: function (period) {
+				if (this.debug) {
+					console.log('rangeChange(d): start-> ', period.start, ' end-> ', period.end);
+				}
+			},
+
+			customTime: null,
+
+			timeChange: (period) => {
+				if (this.debug) {
+					console.log('timeChange: ', period.time);
+				}
+
+				this.scope.$apply(
+					function () {
+						this.scope.vm.timeline.customTime = period.time;
+					}
+					);
+			},
+
+			timeChanged: (period) => {
+				if (this.debug) {
+					console.log('timeChange(d): ', period.time);
+				}
+			},
+
+			slot: {
+				add: (item, callback) => {
+					item.content = prompt('Enter text content for new item:', item.content);
+
+					if (item.content != null) {
+						callback(item); // send back adjusted new item
+					}
+					else {
+						callback(null); // cancel item creation
+					}
+				},
+
+				move: (item, callback) => {
+					if (confirm(
+						'Do you really want to move the item to\n' +
+						'start: ' + item.start + '\n' +
+						'end: ' + item.end + '?')) {
+						callback(item); // send back item as confirmation (can be changed
+					}
+					else {
+						callback(null); // cancel editing item
+					}
+				},
+
+				update: (item, callback) => {
+					item.content = prompt('Edit items text:', item.content);
+
+					if (item.content != null) {
+						callback(item); // send back adjusted item
+					}
+					else {
+						callback(null); // cancel updating the item
+					}
+				},
+				remove: (item, callback) => {
+					//	if (confirm('Remove item ' + item.content + '?')) {
+					//		callback(item); // confirm deletion
+					//	}
+					//	else {
+					//		callback(null); // cancel deletion
+					//	}
+				}
+			}
+		};
+		//*/
+
+		//#endregion
+
+		private faultTimelineData: Models.FaultTimelineMetric[] = [];
+
+		//labels: this.faultTimelineData.map(i => moment(i.date).format("h:mm:ss a")),
+
+		public metrics_faultsOverTime_chart = {};
+
+		// #region metrics_faultsOverTime_options
+
+		public metrics_faultsOverTime_options = {};
+		//#endregion
+
+
+		public gridMetricsMutator = {
+			data: "vm.mutatorData",
+			sortInfo: { fields: ["mutator"], directions: ["asc"] },
+			enableColumnResize: true,
+			columnDefs: [
+				{ field: "mutator", displayName: "Mutator" },
+				{ field: "elementCount", displayName: "Element Count" },
+				{ field: "iterationCount", displayName: "Iteration Count" },
+				{ field: "bucketCount", displayName: "Bucket Count" },
+				{ field: "faultCount", displayName: "Fault Count" }
+			]
+		};
+
+
+		public gridMetricsElement = {
+			data: "vm.elementData",
+			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
+			enableColumnResize: true,
+			columnDefs: [
+				{ field: "state", displayName: "State" },
+				{ field: "action", displayName: "Action" },
+				{ field: "parameter", displayName: "Parameter" },
+				{ field: "element", displayName: "Element" },
+				{ field: "iterationCount", displayName: "Iterations" },
+				{ field: "bucketCount", displayName: "Buckets" },
+				{ field: "faultCount", displayName: "Faults" }
+			]
+		};
+
+		public gridMetricsState = {
+			data: "vm.stateData",
+			sortInfo: { fields: ["state"], directions: ["asc"] },
+			enableColumnResize: true,
+			columnDefs: [
+				{ field: "state", displayName: "State" },
+				{ field: "executionCount", displayName: "Executions" }
+			]
+		};
+
+		public gridMetricsDataset = {
+			data: "vm.datasetData",
+			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
+			enableColumnResize: true,
+			columnDefs: [
+				{ field: "dataset", displayName: "Data Set" },
+				{ field: "iterationCount", displayName: "Iterations" },
+				{ field: "bucketCount", displayName: "Buckets" },
+				{ field: "faultCount", displayName: "Faults" }
+			]
+		};
+
+		public gridMetricsBucket = {
+			data: "vm.bucketData",
+			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
+			enableColumnResize: true,
+			columnDefs: [
+				{ field: "bucket", displayName: "Fault Bucket" },
+				{ field: "mutator", displayName: "Mutator" },
+				{ field: "element", displayName: "Element" },
+				{ field: "iterationCount", displayName: "Iteration Count" },
+				{ field: "faultCount", displayName: "Fault Count" }
+			]
+		};
+
+		/*
+		 		{ field: "dataset", displayName: "Data Set" },
+				{ field: "action", displayName: "Action" },
+				{ field: "element", displayName: "Element" },
+
+		 */
+
+		private initializeData(): void {
+			this.peachSvc.GetJob((job: Models.Job) => {
+				var jobUrl = job.jobUrl;
+				var jobStart = job.startDate;
 
 				switch (this.metric) {
 					case "bucketTimeline":
 						this.peachSvc.GetBucketTimeline(jobUrl, (data: Models.BucketTimelineMetric[]) => {
 							var timelineData = [];
-							data.forEach((item) => {
+							data.forEach((item: Models.BucketTimelineMetric) => {
 								timelineData.push({
 									id: item.id,
 									type: "box",
@@ -118,7 +334,7 @@ module DashApp {
 							this.bucketTimelineData = dataset;
 							//this.bucketTimelineData = timelineData;
 
-							this.bucketTimelineOptions = { selectable: false };
+							this.bucketTimelineOptions = { selectable: false, start: jobStart };
 						});
 						break;
 					case "faultsOverTime":
@@ -282,328 +498,12 @@ module DashApp {
 							this.bucketData = data;
 						});
 						break;
-				} 
+				}
 			});
 
 
 		}
 
-		private simplifyItems(items) {
-			var simplified = [];
 
-			angular.forEach(items, function (group, label) {
-				angular.forEach(group, function (item) {
-					item.group = label;
-
-					simplified.push(item);
-				});
-			});
-
-			return simplified;
-		}
-
-
-		// #region test timeline
-	public testOptions = {
-		align: 'center', // left | right (String)
-		autoResize: true, // false (Boolean)
-		editable: true,
-		selectable: true,
-		// start: null,
-		// end: null,
-		// height: null,
-		// width: '100%',
-		// margin: {
-		//   axis: 20,
-		//   item: 10
-		// },
-		// min: null,
-		// max: null,
-		// maxHeight: null,
-		orientation: 'bottom',
-		// padding: 5,
-		showCurrentTime: true,
-		showCustomTime: true,
-		showMajorLabels: true,
-		showMinorLabels: true
-		// type: 'box', // dot | point
-		// zoomMin: 1000,
-		// zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
-		// groupOrder: 'content'
-	};
-
-	private sampleData = function () {
-		return this.visDataSet([
-			{
-				id: 1,
-				content: '<i class="fi-flag"></i> item 1',
-				start: moment().add('days', 1),
-				className: 'magenta'
-			},
-			{
-				id: 2,
-				content: '<a href="http://visjs.org" target="_blank">visjs.org</a>',
-				start: moment().add('days', 2)
-			},
-			{
-				id: 3,
-				content: 'item 3',
-				start: moment().add('days', -2)
-			},
-			{
-				id: 4,
-				content: 'item 4',
-				start: moment().add('days', 1),
-				end: moment().add('days', 3),
-				type: 'range'
-			},
-			{
-				id: 7,
-				content: '<i class="fi-anchor"></i> item 7',
-				start: moment().add('days', -3),
-				end: moment().add('days', -2),
-				type: 'range',
-				className: 'orange'
-			},
-			{
-				id: 5,
-				content: 'item 5',
-				start: moment().add('days', -1),
-				type: 'point'
-			},
-			{
-				id: 6,
-				content: 'item 6',
-				start: moment().add('days', 4),
-				type: 'point'
-			}
-		]);
-	};
-
-		public testData = {};
-
-		// #endregion
-
-
-
-		// #region timeline
-		public bucketTimelineOptions: TimelineOptions = {
-			selectable: false,
-			template: function (item) {
-				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
-					"Faults: " + item.data.faultCount + "<br />" +
-					"1st Iteration: " + item.data.iteration + "<br /></div>";
-			}
-		};
-		/*
-		public bucketTimelineOptions = {
-			selectable: false,
-			debug: false,
-			align: 'center',
-			autoResize: true,
-			editable: false,
-			start: null,
-			end: null,
-			height: null,
-			width: '100%',
-			margin: {
-				axis: 20,
-				item: 10
-			},
-			maxHeight: null,
-			orientation: 'top',
-			padding: 5,
-			showCurrentTime: true,
-			showCustomTime: true,
-			showMajorLabels: true,
-			showMinorLabels: true,
-			type: 'box',
-			zoomMin: 1000,
-			zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
-			template: function (item) {
-				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
-					"Faults: " + item.data.faultCount + "<br />" +
-					"1st Iteration: " + item.data.iteration + "<br /></div>"; 
-			}
-		};
-		//*/
-		public bucketTimelineEvents = {
-			select: (selected) => {
-				console.log(selected);
-			},
-
-			range: {},
-
-			rangeChange: (period) => {
-				this.bucketTimelineEvents.range = this.scope.vm.timeline.getWindow();
-
-				if (!this.scope.$$phase) {
-					this.scope.$apply();
-				}
-
-				if (this.debug) {
-					console.log('rangeChange: start-> ', period.start, ' end-> ', period.end);
-				}
-			},
-
-			rangeChanged: function (period) {
-				if (this.debug) {
-					console.log('rangeChange(d): start-> ', period.start, ' end-> ', period.end);
-				}
-			},
-
-			customTime: null,
-
-			timeChange: (period) => {
-				if (this.debug) {
-					console.log('timeChange: ', period.time);
-				}
-
-				this.scope.$apply(
-					function () {
-						this.scope.vm.timeline.customTime = period.time;
-					}
-					);
-			},
-
-			timeChanged: (period) => {
-				if (this.debug) {
-					console.log('timeChange(d): ', period.time);
-				}
-			},
-
-			slot: {
-				add: (item, callback) => {
-					item.content = prompt('Enter text content for new item:', item.content);
-
-					if (item.content != null) {
-						callback(item); // send back adjusted new item
-					}
-					else {
-						callback(null); // cancel item creation
-					}
-				},
-
-				move: (item, callback) => {
-					if (confirm(
-						'Do you really want to move the item to\n' +
-						'start: ' + item.start + '\n' +
-						'end: ' + item.end + '?')) {
-						callback(item); // send back item as confirmation (can be changed
-					}
-					else {
-						callback(null); // cancel editing item
-					}
-				},
-
-				update: (item, callback) => {
-					item.content = prompt('Edit items text:', item.content);
-
-					if (item.content != null) {
-						callback(item); // send back adjusted item
-					}
-					else {
-						callback(null); // cancel updating the item
-					}
-				},
-				remove: (item, callback) => {
-					//	if (confirm('Remove item ' + item.content + '?')) {
-					//		callback(item); // confirm deletion
-					//	}
-					//	else {
-					//		callback(null); // cancel deletion
-					//	}
-				}
-			}
-		};
-
-		//#endregion
-
-		private faultTimelineData: Models.FaultTimelineMetric[] = [];
-
-		//labels: this.faultTimelineData.map(i => moment(i.date).format("h:mm:ss a")),
-
-		public metrics_faultsOverTime_chart = {};
-
-		// #region metrics_faultsOverTime_options
-
-		public metrics_faultsOverTime_options = {};
-		//#endregion
-
-
-		public gridMetricsMutator = {
-			data: "vm.mutatorData",
-			sortInfo: { fields: ["mutator"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "mutator", displayName: "Mutator" },
-				{ field: "elementCount", displayName: "Element Count" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "bucketCount", displayName: "Bucket Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
-			]
-		};
-
-
-		public gridMetricsElement = {
-			data: "vm.elementData",
-			sortInfo: { fields: ["element"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "state", displayName: "State" },
-				{ field: "action", displayName: "Action" },
-				{ field: "parameter", displayName: "Parameter" },
-				{ field: "element", displayName: "Element" },
-				{ field: "iterationCount", displayName: "Iterations" },
-				{ field: "bucketCount", displayName: "Buckets" },
-				{ field: "faultCount", displayName: "Faults" }
-			]
-		};
-
-		public gridMetricsState = {
-			data: "vm.stateData",
-			sortInfo: { fields: ["state"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "state", displayName: "State" },
-				{ field: "executionCount", displayName: "Executions" }
-			]
-		};
-
-		public gridMetricsDataset = {
-			data: "vm.datasetData",
-			sortInfo: { fields: ["dataset"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "dataset", displayName: "Data Set" },
-				{ field: "iterationCount", displayName: "Iterations" },
-				{ field: "bucketCount", displayName: "Buckets" },
-				{ field: "faultCount", displayName: "Faults" }
-			]
-		};
-
-		public gridMetricsBucket = {
-			data: "vm.bucketData",
-			sortInfo: { fields: ["bucket"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "bucket", displayName: "Fault Bucket" },
-				{ field: "mutator", displayName: "Mutator" },
-				{ field: "element", displayName: "Element" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
-			]
-		};
-
-		/*
-		 		{ field: "dataset", displayName: "Data Set" },
-				{ field: "action", displayName: "Action" },
-				{ field: "element", displayName: "Element" },
-
-		 */
-
-		private getMaxOfArray(numArray: number[]): number {
-			return Math.max.apply(null, numArray);
-		}
 	}
 }

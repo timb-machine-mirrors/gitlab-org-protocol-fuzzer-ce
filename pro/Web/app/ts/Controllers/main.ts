@@ -44,9 +44,16 @@ module DashApp {
 				return "";
 		}
 
+		public get faultsUnavailableTooltip(): string {
+			if (this.job == undefined)
+				return "No Job available";
+			else
+				return "";
+		}
+
 		public get metricsUnavailableTooltip(): string {
-			if (this.IsJobRunning == false)
-				return this.jobNotRunningTooltip;
+			if (this.job == undefined)
+				return "No Job available";
 			else if (this.IsJobRunning && this.job.hasMetrics == false)
 				return "Metrics unavailable for this Job.";
 			else
@@ -112,7 +119,7 @@ module DashApp {
 		}
 
 		public get CanViewMetrics(): boolean {
-			return (this.IsJobRunning && this.job.hasMetrics);
+			return (this.job !== undefined && this.job.hasMetrics);
 		}
 
 
