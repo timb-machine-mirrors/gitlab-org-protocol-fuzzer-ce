@@ -40,7 +40,14 @@ def configure(conf):
 				Logs.warn('Ghostscript is not available: %s' % (e))
 
 	# Ensure fopub is initialized
-	conf.cmd_and_log([conf.env.FOPUB, '-h'], cwd = fopub)
+	test = conf.bldnode.make_node('docbook_test.xml')
+	test.write('''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<article lang="en">
+<simpara>Test</simpara>
+</article>''')
+
+	conf.cmd_and_log([conf.env.FOPUB, test.abspath()], cwd = fopub)
 
 	conf.env['ASCIIDOCTOR_OPTS'] = [
 		'-v',
