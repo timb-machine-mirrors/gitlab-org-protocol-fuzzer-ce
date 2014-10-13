@@ -678,6 +678,9 @@ namespace Peach.Core.Test
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, Action 'Action' couldn't find publisher named 'Bad'.")]
 		public void MissingPublisher()
 		{
+			string tmp = Path.GetTempFileName();
+			File.Delete(tmp);
+
 			string xml = @"
 <Peach>
 	<DataModel name='DM'>
@@ -695,17 +698,29 @@ namespace Peach.Core.Test
 	<Test name='Default'>
 		<StateModel ref='SM'/>
 		<Publisher class='Null'/>
+		<Logger class='File'>
+			<Param name='Path' value='{0}'/>
+		</Logger>
 	</Test>
-</Peach>";
+</Peach>".Fmt(tmp);
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration();
+			config.pitFile = "MissingPublisher";
 			config.singleIteration = true;
 
 			var e = new Engine(null);
-			e.startFuzzing(dom, config);
+
+			try
+			{
+				e.startFuzzing(dom, config);
+			}
+			finally
+			{
+				Directory.Delete(tmp, true);
+			}
 		}
 	}
 }

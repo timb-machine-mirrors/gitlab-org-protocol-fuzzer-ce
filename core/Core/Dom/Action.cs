@@ -290,43 +290,43 @@ namespace Peach.Core.Dom
 				}
 			}
 
+			Publisher publisher = null;
+			if (this.publisher != null && this.publisher != "Peach.Agent")
+			{
+				if (!context.test.publishers.ContainsKey(this.publisher))
+				{
+					logger.Debug("Run: Publisher '{0}' not found!", this.publisher);
+					throw new PeachException("Error, Action '" + name + "' couldn't find publisher named '" + this.publisher + "'.");
+				}
+
+				publisher = context.test.publishers[this.publisher];
+			}
+			else
+			{
+				publisher = context.test.publishers[0];
+			}
+
+			if (context.controlIteration && context.controlRecordingIteration)
+			{
+				logger.Debug("Run: Adding action to controlRecordingActionsExecuted");
+				context.controlRecordingActionsExecuted.Add(this);
+			}
+			else if (context.controlIteration)
+			{
+				logger.Debug("Run: Adding action to controlActionsExecuted");
+				context.controlActionsExecuted.Add(this);
+			}
+
+			started = true;
+			finished = false;
+			error = false;
+
+			// Notify the data model the action is about to run
+			foreach (var item in outputData)
+				item.dataModel.Run(context);
+
 			try
 			{
-				Publisher publisher = null;
-				if (this.publisher != null && this.publisher != "Peach.Agent")
-				{
-					if (!context.test.publishers.ContainsKey(this.publisher))
-					{
-						logger.Debug("Run: Publisher '{0}' not found!", this.publisher);
-						throw new PeachException("Error, Action '" + name + "' couldn't find publisher named '" + this.publisher + "'.");
-					}
-
-					publisher = context.test.publishers[this.publisher];
-				}
-				else
-				{
-					publisher = context.test.publishers[0];
-				}
-
-				if (context.controlIteration && context.controlRecordingIteration)
-				{
-					logger.Debug("Run: Adding action to controlRecordingActionsExecuted");
-					context.controlRecordingActionsExecuted.Add(this);
-				}
-				else if (context.controlIteration)
-				{
-					logger.Debug("Run: Adding action to controlActionsExecuted");
-					context.controlActionsExecuted.Add(this);
-				}
-
-				started = true;
-				finished = false;
-				error = false;
-
-				// Notify the data model the action is about to run
-				foreach (var item in outputData)
-					item.dataModel.Run(context);
-
 				context.OnActionStarting(this);
 
 				logger.Debug("ActionType.{0}", GetType().Name.ToString());
