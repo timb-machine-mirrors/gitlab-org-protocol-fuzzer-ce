@@ -16,6 +16,27 @@ namespace Peach.Enterprise.Test.WebServices
 		string root;
 		PitDatabase db;
 
+		static string remoteInclude =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+       author='Deja Vu Security, LLC'
+       description='IMG PIT'
+       version='0.0.1'>
+
+	<Include ns='SM' src='http://foo.com/_Common/Models/Image/IMG_Data.xml' />
+
+	<Test name='Default'>
+		<Agent ref='TheAgent'/>
+		<Strategy class='##Strategy##'/>
+		<StateModel ref='SM:SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+</Peach>
+";
+
 		static string modelExample =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
@@ -553,5 +574,18 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.AreEqual("false", (string)param3["RestartOnEachTest"]);
 		}
 
+		[Test]
+		public void RemoteInclude()
+		{
+			File.WriteAllText(Path.Combine(root, "Image", "Remote.xml"), remoteInclude);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(2, db.Entries.Count());
+
+			var file = db.Entries.Where(e => e.Name == "Remote").FirstOrDefault();
+			Assert.NotNull(file);
+			Assert.AreEqual(1, file.Versions[0].Files.Count);
+		}
 	}
 }
