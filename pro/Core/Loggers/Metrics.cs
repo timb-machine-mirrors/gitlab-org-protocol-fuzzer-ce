@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Peach.Core;
+using Peach.Core.Loggers;
 
 #if MONO
 using Mono.Data.Sqlite;
@@ -651,6 +652,14 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			SQLiteCommand insert_cmd;
 		}
 
+		/// <summary>
+		/// Delegate for database connection event.
+		/// </summary>
+		/// <param name="connection">Database connection</param>
+		public delegate void ConnectionOpenedEvent(SQLiteConnection connection);
+
+		public event ConnectionOpenedEvent ConnectionOpened;
+
 		public MetricsLogger(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
@@ -673,22 +682,18 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			protected set;
 		}
 
-		public string ConnectionString { get; private set; }
-
-		private Peach.Core.Loggers.FileLogger fileLogger;
-
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			fileLogger = (from l in context.test.loggers where l.GetType() == typeof(Peach.Core.Loggers.FileLogger) select l).First() as Peach.Core.Loggers.FileLogger;
-			fileLogger.FaultSaved += FaultSaved;
-
+			var fileLogger = context.test.loggers.OfType<FileLogger>().FirstOrDefault();
+			if (fileLogger != null)
+				fileLogger.FaultSaved += FaultSaved;
 
 			var dir = GetLogPath(context, Path);
 			System.IO.Directory.CreateDirectory(dir);
 			var path = System.IO.Path.Combine(dir, fileName);
-			this.ConnectionString = "Data Source=\"" + path + "\";Foreign Keys=True";
+			var connectionString = "Data Source=\"" + path + "\";Foreign Keys=True";
 
-			db = new SQLiteConnection(this.ConnectionString);
+			db = new SQLiteConnection(connectionString);
 			db.Open();
 
 			using (var trans = db.BeginTransaction())
@@ -779,11 +784,16 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			update_faultsbyhour_cmd = new SQLiteCommand(db);
 			update_faultsbyhour_cmd.CommandText = update_faultsbyhour;
 			update_faultsbyhour_cmd.Parameters.Add(new SQLiteParameter("id"));
+
+			if (ConnectionOpened != null)
+				ConnectionOpened(db);
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			fileLogger.FaultSaved -= FaultSaved;
+			var fileLogger = context.test.loggers.OfType<FileLogger>().FirstOrDefault();
+			if (fileLogger != null)
+				fileLogger.FaultSaved -= FaultSaved;
 
 			if (update_iteration_cmd != null)
 			{
