@@ -235,7 +235,10 @@ namespace Peach.Core.Test.Agent
 			<Param name='Port' value='{0}' />
 		</Publisher>
 		<Publisher name='Killer' class='AgentKiller'/>
-		<Strategy class='RandomDeterministic'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringStatic' />
+		</Mutators>
 	</Test>
 </Peach>".Fmt(port, agent);
 
@@ -251,8 +254,8 @@ namespace Peach.Core.Test.Agent
 
 				RunConfiguration config = new RunConfiguration();
 				config.range = true;
-				config.rangeStart = 25;
-				config.rangeStop = 28;
+				config.rangeStart = 83;
+				config.rangeStop = 86;
 
 				Engine e = new Engine(null);
 				e.Fault += new Engine.FaultEventHandler(e_Fault);
@@ -262,16 +265,16 @@ namespace Peach.Core.Test.Agent
 
 				var contents = File.ReadAllLines(tmp);
 				var expected = new string[] {
-// Iteration 25 (Control & Record)
-"SessionStarting", "IterationStarting 25 false", "IterationFinished", "DetectedFault", "MustStop", 
-// Iteration 25 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
-"IterationStarting 25 false", "IterationFinished", 
+// Iteration 83 (Control & Record)
+"SessionStarting", "IterationStarting 83 false", "IterationFinished", "DetectedFault", "MustStop", 
+// Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
+"IterationStarting 83 false", "IterationFinished", 
 // Agent is restarted & fault is not detected
-"SessionStarting", "IterationStarting 26 false", "IterationFinished", "DetectedFault", "MustStop", 
+"SessionStarting", "IterationStarting 84 false", "IterationFinished", "DetectedFault", "MustStop", 
 // Agent is killed
-"IterationStarting 27 false", "IterationFinished", 
+"IterationStarting 85 false", "IterationFinished", 
 // Agent is restarted & fault is detected
-"SessionStarting", "IterationStarting 28 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+"SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Fussing stops
 "SessionFinished", "StopMonitor"
 				};
@@ -359,7 +362,10 @@ namespace Peach.Core.Test.Agent
 			<Param name='Host' value='127.0.0.1' />
 			<Param name='Port' value='{0}' />
 		</Publisher>
-		<Strategy class='RandomDeterministic'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringStatic' />
+		</Mutators>
 	</Test>
 </Peach>".Fmt(port, agent);
 
@@ -372,8 +378,8 @@ namespace Peach.Core.Test.Agent
 
 				RunConfiguration config = new RunConfiguration();
 				config.range = true;
-				config.rangeStart = 1;
-				config.rangeStop = 10;
+				config.rangeStart = 83;
+				config.rangeStop = 86;
 
 				Engine e = new Engine(null);
 				e.Fault += new Engine.FaultEventHandler(e_Fault);
