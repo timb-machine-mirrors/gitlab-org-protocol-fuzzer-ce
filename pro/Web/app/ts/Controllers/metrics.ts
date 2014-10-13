@@ -334,7 +334,7 @@ module DashApp {
 							this.bucketTimelineData = dataset;
 							//this.bucketTimelineData = timelineData;
 
-							this.bucketTimelineOptions = { selectable: false, start: jobStart };
+							this.bucketTimelineOptions = { selectable: false };
 						});
 						break;
 					case "faultsOverTime":
