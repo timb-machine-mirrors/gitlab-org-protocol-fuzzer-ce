@@ -48,7 +48,7 @@ Port state to monitor. The default value is _Open_.
 +
 [horizontal]
 Open;; The port is available for use.
-Closed;;
+Closed;; The port is not available.
 
 Timeout:: Length of time to wait for an incoming connection to be established. Specify values in milliseconds, or specify -1 to not use a timeout interval. 
 
