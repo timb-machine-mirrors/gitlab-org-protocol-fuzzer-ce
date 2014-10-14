@@ -78,7 +78,7 @@ def apply_zip_srcs(self):
 		self.zip_task = self.create_task('zip', srcs, dest)
 		self.sha_task = self.create_task('sha', self.zip_task.outputs, dest.change_ext('.zip.sha1'))
 
-		inst_to = getattr(self, 'install_path', '${OUTPUT}')
+		inst_to = getattr(self, 'install_path', '${PKGDIR}')
 		self.install_files(inst_to, self.zip_task.outputs + self.sha_task.outputs)
 
 class zip(Task.Task):
