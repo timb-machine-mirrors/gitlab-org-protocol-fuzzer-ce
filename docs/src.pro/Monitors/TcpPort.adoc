@@ -2,13 +2,18 @@
 [[Monitors_TcpPort]]
 == TcpPort Monitor
 
-The _TcpPort_ detects state changes on TCP ports. A state change is going from Open to Closed or Closed to Open. The monitor can be configured as an automation task (wait until correct state reached), fault detection (fault on specific state), or data collection (report current state). The mointor can also be configured as to when the automation will occur.
+The _TcpPort_ monitor detects state changes on TCP ports. A state change is a transition in port status from Open to Closed or from Closed to Open. The _TcpPort_ monitor can be configured in the following ways:
+* as an automation task (wait until a specified state occurs), 
+* fault detection (fault on a specific state), or 
+* data collection (report the current state). 
+
+The monitor includes an event trigger (the _When_ parameter) that you can use to control when automation occurs.
 
 === Parameters
 
 _Required:_
 
-Host:: Hostname or IP address of remote host
+Host:: Hostname or IP address of the remote host
 Port:: Port number to monitor
 
 _Optional:_
@@ -18,39 +23,40 @@ Action::
 Action to take (Automation, Data, Fault). Defaults to _Automation_.
 +
 [horizontal]
-Automation;; Wait for port to be in selected state. _When_ parameter is used to dictate when the monitor will wait. Maximum waittime can se configured by setting _Timeout_ parameter.
-Data;; On fault report state of fault at end of iteration.
-Fault;; Generate a fault based on state of port at end of iteration.
+Automation;; Wait for the port to reach a specified state. The _When_ parameter determines when the monitor will wait. The maximum waiting time can be configured by setting the _Timeout_ parameter.
+Data;; On a fault, report the state of fault at end of the current iteration.
+Fault;; At end of the current iteration, generate a fault if the port is in a specified state.
 
 When::
 +
-When to perform monitoring. Default to _OnCall_.
+Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
 +
 [horizontal]
-OnCall;; When triggered by message from state machine.
-OnStart;; Once at the start of the fuzzing session.
-OnEnd;; Once at the end of our fuzzing session.
-OnIterationStart;; At the start of every iteration.
-OnIterationEnd;; At the end of every iteration.
-OnFault;; When a fault occurs.
-OnIterationStartAfterFault;; At the start of the next iteration after a fault was detected.
+OnCall;; Monitoring begins upon receipt of a message from the state machine.
+OnStart;; Monitoring occurs once at the start of the fuzzing session.
+OnEnd;; Monitoring occurs once at the end of the fuzzing session.
+OnIterationStart;; Monitoring occurs at the start of each iteration.
+OnIterationEnd;; Monitoring occurs at the end of each iteration.
+OnFault;; Monitoring occurs immediatelly following a fault.
+OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
 
-WaitOnCall:: Call message to trigger monitor. Only applicable when _When_ is set to _OnCall_.
+WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
+
 State:: 
 +
-State to monitor for. Defaults to _Open_.
+Port state to monitor. The default value is _Open_.
 +
 [horizontal]
-Open;;
+Open;; The port is available for use.
 Closed;;
 
-Timeout:: Length of time to wait for incoming connection in milliseconds, or -1 for no timeout. Defaults to -1 (no timeout). 
+Timeout:: Length of time to wait for an incoming connection to be established. Specify values in milliseconds, or specify -1 to not use a timeout interval. 
 
 === Examples
 
-.Wait for port to be open
+.Wait for the port to be open
 ===============================
-In this example the call action will cause Peach to wait until the remote port is in an open state. Since no timeout is provided, Peach will wait forever.
+In this example, the call action will cause Peach to wait until the remote port is in an open state. No timeout interval is provided, so Peach will wait forever.
 
 [source,xml]
 ----
@@ -67,7 +73,7 @@ In this example the call action will cause Peach to wait until the remote port i
           <DataModel ref="TheDataModel"/>
       </Action>
       
-      <Actio type="call" method="WaitForPort" publisher="Peach.Agent" />
+      <Action type="call" method="WaitForPort" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -96,9 +102,9 @@ In this example the call action will cause Peach to wait until the remote port i
 
 ===============================
 
-.Wait for port to be closed
+.Wait for the port to be closed
 ===============================
-In this example the call action will cause Peach to wait until the remote port is in a closed state. Since no timeout is provided, Peach will wait forever.
+In this example, the call action will cause Peach to wait until the remote port is in a closed state. Since no timeout is provided, Peach will wait forever.
 
 [source,xml]
 ----
@@ -115,7 +121,7 @@ In this example the call action will cause Peach to wait until the remote port i
           <DataModel ref="TheDataModel"/>
       </Action>
       
-      <Actio type="call" method="WaitForPort" publisher="Peach.Agent" />
+      <Action type="call" method="WaitForPort" publisher="Peach.Agent" />
     </State>
   </StateModel>
 
@@ -146,9 +152,9 @@ In this example the call action will cause Peach to wait until the remote port i
 
 ===============================
 
-.Fault if port closed
+.Fault if the port closed
 ===============================
-In this example Peach will fault if the port is in the closed state at the end of an iteration.
+In this example, Peach will fault if the port is in the closed state at the end of an iteration.
 
 [source,xml]
 ----
@@ -195,7 +201,7 @@ In this example Peach will fault if the port is in the closed state at the end o
 
 ===============================
 
-.Report port state on fault
+.Report the port state on fault
 ===============================
 In this example, if a fault is triggered by another monitor, the TcpPort monitor will report the state of the port when the fault occured.
 
