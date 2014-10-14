@@ -181,7 +181,7 @@ public:
 				// Binary data from Peach
 				std::stringstream data;
 
-				istringstream ifs(GetJsonValue(jsonObject, "data"));
+				istringstream ifs(GetJsonValue(arg, "data"));
 				Poco::Base64Decoder b64in(ifs);
 
 				copy(istreambuf_iterator<char>(b64in),
