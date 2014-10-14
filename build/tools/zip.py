@@ -31,7 +31,9 @@ def get_zip_src(self, tsk):
 	destpath = os.path.relpath(destpath, bindir)
 
 	for src in tsk.source:
-		if not hasattr(tsk, 'relative_trick'):
+		if src.name.endswith('.pdb') or src.name.endswith('.mdb'):
+			continue
+		elif not hasattr(tsk, 'relative_trick'):
 			destfile = destpath
 		elif tsk.relative_trick:
 			destfile = os.path.join(destpath, src.path_from(tsk.path))
