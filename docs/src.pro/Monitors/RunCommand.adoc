@@ -2,44 +2,43 @@
 [[Monitors_RunCommand]]
 == Run Command
 
-The _RunCommand_ monitor will run a specified command to perform some utility function. The console output will be
-captured and logged in the event a fault is detected. Additionally, this monitor can be configured to detect faults
-by monitoring the exit code of the application, or by matching on output from the application.
+The _RunCommand_ monitor launches a specified command to perform some utility function. If a fault occurs, the monitor captures and logs the console output. Additionally, this monitor detact faults in the following ways:
 
-The _RunCommand_ monitor can be configured to run at specific times using the _When_ and _StartOnCall_ parameters.
+* Search for a specific exit code from the launched utility, and when found, the monitor generates a fault.
+* Search the output of the launched utility, and when a specific expression is found, the _RunCommand_ monitor generates a fault.
+
+The _RunCommand_ monitor provideds parameters (_When_ and _StartOnCall_) to specify when to launch the utility command.
 
 === Parameters
 
 _Required:_
 
-Command:: Command to run
+Command:: The command or application to launch.
 
 _Optional:_
 
 Arguments:: Optional command line arguments
 When::
 +
-Period when the command should be run. Defaults to +OnCall+.
+Period when to launch the command. The default setting +OnCall+.
 +
 [horizontal]
-OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
-OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
-OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
-OnIterationStart;; Run command at start of each iteration.
-OnIterationEnd;; Run command at end of each iteration.
-OnFault;; Run command when a fault occurs.
-OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
+OnCall;; Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message.
+OnStart;; Launch the command when the fuzzing session starts. The command will launch once per session.
+OnEnd;; Launch the command when the fuzzing session stops. The command will launch once per session.
+OnIterationStart;; Launch the command at start of each iteration.
+OnIterationEnd;; Launch the command at end of each iteration.
+OnFault;; Launch the command when a fault occurs.
+OnIterationStartAfterFault;; Monitoring occurs faullowing a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
 
-FaultOnExitCode:: Fault when FaultExitCode matches exit code. Defaults to false.
-FaultExitCode:: Exit code to fault on. Defaults to 1.
-StartOnCall:: Run when signaled by the state machine
-FaultOnNonZeroExit:: Fault if exit code is non-zero, defaults to false.
-FaultOnRegex::
-    Fault if regular expression matches. Defaults to no regular expression.
-    To use, supply a valid regular expression using the Microsoft .NET syntax.
+FaultOnExitCode:: Generate a fault when the FaultExitCode matches exit code of the launched command. The default value is false.
+FaultExitCode:: Exit code value to generate a fault. The default value is 1.
+StartOnCall:: Launch the command when the monitor receives aspecified message from  the state machine.
+FaultOnNonZeroExit:: Generate a fault if exit code is non-zero. The default value is false.
+FaultOnRegex:: Fault if regular expression matches the command output. This feature is turned off by default. To use this feature, provide a valid regular expression using the Microsoft .NET syntax.
 
-AddressSanitizer:: Enable Google AddressSanitizer (ASan) support. Defaults to false.
-Timeout:: Fault if process takes more than Timeout seconds where -1 is infinite timeout. Defaults to -1.
+AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is false--turned off--by default.
+Timeout:: Generate a fault if process runs for a duration longer than the value, in seconds, of this feature. This feature is turned off when given the value of -1. The default value also is -1.
 
 === Examples
 
