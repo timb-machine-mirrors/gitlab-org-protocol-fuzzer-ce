@@ -9,7 +9,9 @@ For Windows 7 x64:
  * Java SE Development Kit 8u11 x64 (jdk-8u11-windows-x64.exe)
 
 For Ubuntu 14.04 x64:
- * default-jdk ruby-1.9.1 perl xsltproc xmllint
+ * ruby1.9.1 perl xsltproc libxml2-utils ghostscript
+ * Oracle JDK 1.8
+ * http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html
 '''
 
 host_plat = [ 'win32', 'linux', 'darwin' ]
