@@ -257,6 +257,17 @@ if __name__ == "__main__":
 		shutil.copy(src, dst)
 		shutil.copy(src + '.sha1', dst + '.sha1')
 
+		# Make peach-${name}s-${buildtag}s.zip
+		dst = os.path.join(path, 'peach-%s-%s.zip' % (r['name'], buildtag))
+
+		with zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_STORED) as z:
+			for x in o.files:
+				src = os.path.join(path, x)
+				z.write(src, x)
+
+		sha1sum(dst)
+		o.files.append(os.path.basename(dst))
+
 		with open(rel, 'w') as f:
 			j = to_JSON(o)
 			print j
