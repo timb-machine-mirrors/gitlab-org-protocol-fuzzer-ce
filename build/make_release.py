@@ -220,36 +220,54 @@ if __name__ == "__main__":
 
 	make_pits(os.path.join(reldir, pitfile), toAdd)
 
-	print ''
-	print 'Generating release.json'
-	print ''
-
 	d = datetime.datetime.now()
 
 	names = [ os.path.basename(x) for x in pkgs ]
-	rels = []
 
 	for r in releases:
+		print ''
+		print 'Generating release %s.%s' % (buildtag, r['name'])
+		print ''
+
 		o = Object()
 		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
 		o.pits = pitfile
 		o.product = r['product']
-		o.name = r['name']
 		o.build = buildtag
 		o.nightly = c.nightly
 		o.date = '%s/%s/%s' % (d.day, d.month, d.year)
 
-		rels.append(o)
+		if not o.files:
+			print 'No files found, skipping!'
+			continue
 
-	rel = os.path.join(reldir, 'release.json')
+		path = os.path.join(reldir, '%s.%s' % (buildtag, r['name']))
+		os.mkdir(path)
 
-	try:
-		os.unlink(rel)
-	except Exception:
-		pass
+		rel = os.path.join(path, 'release.json')
 
-	with open(rel, 'w') as f:
-		f.write(to_JSON(rels))
+		for f in o.files:
+			src = os.path.join(reldir, f)
+			dst = os.path.join(path, f)
+			shutil.move(src, dst)
+			shutil.move(src + '.sha1', dst + '.sha1')
+
+		src = os.path.join(reldir, pitfile)
+		dst = os.path.join(path, pitfile)
+		shutil.copy(src, dst)
+		shutil.copy(src + '.sha1', dst + '.sha1')
+
+		with open(rel, 'w') as f:
+			j = to_JSON(o)
+			print j
+			f.write(j)
+
+	for x in pkgs + [ os.path.join(reldir, pitfile) ]:
+		try:
+			os.unlink(x)
+			os.unlink(x + '.sha1')
+		except:
+			pass
 
 	sys.exit(0)
 
