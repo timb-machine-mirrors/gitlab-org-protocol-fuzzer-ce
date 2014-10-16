@@ -66,3 +66,20 @@ bld(
 	name = tgt,
 	use = peach_pro,
 )
+
+farm = [
+	'pf_admin.exe',
+	'pf_controller.exe',
+	'pf_node.exe',
+	'PeachFarmMonitor',
+	'PeachFarm.Reporting.Service.exe',
+]
+
+tgt = '-'.join([ 'peach-dist', bld.env.BUILDTAG, bld.variant ])
+
+bld(
+	features = 'zip',
+	name = tgt,
+	use = peach_pro + farm,
+)
+
