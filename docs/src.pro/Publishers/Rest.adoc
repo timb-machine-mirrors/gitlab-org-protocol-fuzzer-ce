@@ -2,21 +2,19 @@
 [[Publishers_Rest]]
 == Rest Publisher
 
-The _Rest_ Publisher enables a pit to communicate via an SSL over TCP socket.
-
-_Ssl_ is used to fuzz protocols built inside an SSL encrypted channel (such as HTTPS).
+The _Rest_ Publisher enables a pit to communicate to a TCP socket using the Secure Socket Layer (SSL) protocol. Peach uses _Ssl_ to fuzz protocols (such as HTTPS) that are built inside an SSL encrypted channel.
 
 Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
 
-* The _Ssl_ Publisher connects out
-* The _SslListner_ Publisher accepts (inward) connections
+* The _SslListner_ Publisher accepts incoming (inward) connections, as one that listens.
+* The _Ssl_ Publisher connects outbound communications. 
 
 === Syntax
 
 [source,xml]
 ----
 <Publisher class="Rest">
-    <Param nmae="Method" value="GET"/>
+    <Param name="Method" value="GET"/>
     <Param name="Url" value="" />
 </Publisher>
 ----
@@ -65,26 +63,27 @@ _Optional:_
 BaseUrl:: Base URL is used by some authentication types
 Username:: Username for authentication
 Domain:: Domain for authentication
-Cookies:: Enable cookie support. Defaults to true.
-CookiesAcrossIterations:: Track cookies across iterations. Defaults to false.
-Timeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
-IgnoreCertErrors:: Allow HTTPS regardless of cert status. Defaults to false.
+Cookies:: Enable cookie support. The default value is true.
+CookiesAcrossIterations:: Track cookies across iterations. The default value is false.
+Timeout:: How long to wait in milliseconds for data/connection. the default value is 3,000.
+IgnoreCertErrors:: Allow HTTPS regardless of cert status. The default value is false.
 
 === Actions
 
 xref:Action_call[call]::
 +
 Call actions are used to perform REST calls.
-The method attribute will contain both the HTTP method (GET, POST, etc.) and the URL.
+
+The method attribute contains both the HTTP method (GET, POST, etc.) and the URL.
 The URL portion of the method attribute can contain parameter subsitution tokens. 
 These tokens will be replaced with the parameters provided. 
 One additional parameter can be provided that is used for the body of the request.
 +
 The format of the method attribute is: +METHOD URL+
 +
-This example will expect a single parameter: +GET /product/{0}+
+This example places a call that expects to receive a single parameter: +GET /product/{0}+
 +
-This example will expect two parameters: +GET /invoices?start_date={0}&end_date={1}+
+This example places a call that expects to receive two parameters: +GET /invoices?start_date={0}&end_date={1}+
 
 ///////////////////////////
 === Examples
