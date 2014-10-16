@@ -295,7 +295,7 @@ namespace Peach.Core.Agent.Channels
 		[Serializable]
 		public class OnCallResponse : RestProxyPublisherResponse
 		{
-			public Variant value { get; set; }
+			public byte[] value { get; set; }
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
@@ -317,7 +317,7 @@ namespace Peach.Core.Agent.Channels
 			var json = Send("call", JsonConvert.SerializeObject(request));
 			var response = JsonConvert.DeserializeObject<OnCallResponse>(json);
 
-			return response.value;
+			return new Variant(response.value);
 		}
 
 		[Serializable]
