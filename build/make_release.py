@@ -20,9 +20,24 @@ pits = [
 	},
 ]
 
+releases = [
+	{
+		'name' : 'pro',
+		'product' : 'Peach Professional',
+		'filter'  : lambda s: s.startswith('peach-pro'),
+	},
+	{
+		'name' : 'dist',
+		'product' : 'Peach Distributed',
+		'filter'  : lambda s: s.startswith('peach-dist'),
+	},
+]
+
+def to_JSON(self):
+	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
 class Object:
-	def to_JSON(self):
-		return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+	pass
 
 def to_list(sth):
 	if isinstance(sth, str):
@@ -211,13 +226,20 @@ if __name__ == "__main__":
 
 	d = datetime.datetime.now()
 
-	o = Object()
-	o.files = [ x for x in pkgs if 'release' in x ]
-	o.pits = pitfile
-	o.product = 'Peach Professional'
-	o.build = buildtag
-	o.nightly = c.nightly
-	o.date = '%s/%s/%s' % (d.day, d.month, d.year)
+	names = [ os.path.basename(x) for x in pkgs ]
+	rels = []
+
+	for r in releases:
+		o = Object()
+		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
+		o.pits = pitfile
+		o.product = r['product']
+		o.name = r['name']
+		o.build = buildtag
+		o.nightly = c.nightly
+		o.date = '%s/%s/%s' % (d.day, d.month, d.year)
+
+		rels.append(o)
 
 	rel = os.path.join(reldir, 'release.json')
 
@@ -227,7 +249,7 @@ if __name__ == "__main__":
 		pass
 
 	with open(rel, 'w') as f:
-		f.write(o.to_JSON())
+		f.write(to_JSON(rels))
 
 	sys.exit(0)
 
