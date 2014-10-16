@@ -27,9 +27,9 @@ releases = [
 		'filter'  : lambda s: s.startswith('peach-pro'),
 	},
 	{
-		'name' : 'dist',
-		'product' : 'Peach Distributed',
-		'filter'  : lambda s: s.startswith('peach-dist'),
+		'name' : 'ent',
+		'product' : 'Peach Enterprise',
+		'filter'  : lambda s: s.startswith('peach-ent'),
 	},
 ]
 

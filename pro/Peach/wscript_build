@@ -75,7 +75,7 @@ farm = [
 	'PeachFarm.Reporting.Service.exe',
 ]
 
-tgt = '-'.join([ 'peach-dist', bld.env.BUILDTAG, bld.variant ])
+tgt = '-'.join([ 'peach-ent', bld.env.BUILDTAG, bld.variant ])
 
 bld(
 	features = 'zip',
