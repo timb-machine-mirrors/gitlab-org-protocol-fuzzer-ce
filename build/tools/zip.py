@@ -21,12 +21,17 @@ def use_zip_rec(self, name, **kw):
 
 	self.zip_use.append(y)
 
+	# MSI already has its dependencies, so don't recurse
+	if 'msi' in y.features:
+		return
+
 	for x in self.to_list(getattr(y, 'use', [])):
 		self.use_zip_rec(x)
 
 @taskgen_method
 def get_zip_src(self, tsk):
-	destpath = Utils.subst_vars(tsk.dest, tsk.env).replace('/', os.sep)
+	dest = tsk.dest.replace('${PKGDIR}', '${BINDIR}')
+	destpath = Utils.subst_vars(dest, tsk.env).replace('/', os.sep)
 	bindir = Utils.subst_vars('${BINDIR}', tsk.env)
 	destpath = os.path.relpath(destpath, bindir)
 
