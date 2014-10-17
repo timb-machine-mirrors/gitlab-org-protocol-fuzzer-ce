@@ -796,7 +796,14 @@ namespace Peach.Core.Agent.Monitors
 				{
 				}
 
-				_ipcHeartBeatMutex.ReleaseMutex();
+				try
+				{
+					_ipcHeartBeatMutex.ReleaseMutex();
+				}
+				catch
+				{
+				}
+
 				_ipcHeartBeatThread.Join();
 				_ipcHeartBeatThread = null;
 				_ipcHeartBeatMutex = null;
