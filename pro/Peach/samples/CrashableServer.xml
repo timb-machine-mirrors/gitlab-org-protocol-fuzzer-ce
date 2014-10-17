@@ -80,9 +80,9 @@
 		<Logger class="Filesystem">
 			<Param name="Path" value="Logs" />
 		</Logger>
-    <Logger class="Metrics">
-      <Param name="Path" value="Logs" />
-    </Logger>
-  </Test>
+		<Logger class="Metrics">
+			<Param name="Path" value="Logs" />
+		</Logger>
+	</Test>
 </Peach>
 <!-- end -->
