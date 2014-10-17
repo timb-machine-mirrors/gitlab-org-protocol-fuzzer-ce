@@ -22,14 +22,16 @@ pits = [
 
 releases = [
 	{
-		'name' : 'pro',
+		'name'    : 'pro',
+		'all'     : 'peach-pro-%(buildtag)s.zip',
 		'product' : 'Peach Professional',
 		'filter'  : lambda s: s.startswith('peach-pro'),
 	},
 	{
-		'name' : 'ent',
+		'name'    : 'ent',
+		'all'     : 'peach-pro-%(buildtag)s.zip',
 		'product' : 'Peach Enterprise',
-		'filter'  : lambda s: s.startswith('peach-ent'),
+		'filter'  : lambda s: s.startswith('peach-pro'),
 	},
 ]
 
@@ -249,16 +251,16 @@ if __name__ == "__main__":
 		for f in o.files:
 			src = os.path.join(reldir, f)
 			dst = os.path.join(path, f)
-			shutil.move(src, dst)
-			shutil.move(src + '.sha1', dst + '.sha1')
+			shutil.copy(src, dst)
+			shutil.copy(src + '.sha1', dst + '.sha1')
 
 		src = os.path.join(reldir, pitfile)
 		dst = os.path.join(path, pitfile)
 		shutil.copy(src, dst)
 		shutil.copy(src + '.sha1', dst + '.sha1')
 
-		# Make peach-${name}s-${buildtag}s.zip
-		dst = os.path.join(path, 'peach-%s-%s.zip' % (r['name'], buildtag))
+		# Make all zip
+		dst = os.path.join(path, r['all'] % c.__dict__)
 
 		with zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_STORED) as z:
 			for x in o.files:
