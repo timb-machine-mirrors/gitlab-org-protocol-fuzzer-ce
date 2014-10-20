@@ -2,7 +2,7 @@
 [[Mutators_DataElementRemove]]
 == DataElementRemove
 
-This mutator will produce a single test case for all data elements by removing them from the model.
+This mutator produces a single test case by removing all data elements from the model.
 
 === Supported Elements
 
@@ -10,4 +10,4 @@ All data elements are supported.
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
