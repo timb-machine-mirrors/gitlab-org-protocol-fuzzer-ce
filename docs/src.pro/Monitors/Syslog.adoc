@@ -8,22 +8,22 @@ The syslog monitor listens on a specified port for incoming syslog messages. Thi
 
 _Required:_
 
-There are no required parameters for this monitor.
+None.
 
 _Optional:_
 
-Port:: Port number to listen on. Defaults to 514.
-Interface:: Interface to listen on. Defaults to 0.0.0.0 (all interfaces).
-FaultRegex:: Fault when regular expression matches.
+Port:: Port number to listen on. The default value is 514.
+Interface:: Interface to listen on. The default value is 0.0.0.0, which listens on all interfaces.
+FaultRegex:: Generate a fault when the input matches the specified regular expression.
 WaitRegex:: Wait until the regex matches received data.
-WaitOnCall:: Call message to start monitoring. This parameter only applies to the OnCall setting.
+WaitOnCall:: Call message to trigger the start of monitoring. This parameter only applies to the OnCall setting.
 WaitWhen::
 +
-Parameter that specifies when to start monitoring. The default setting is OnStart. The following settings are defined:
+Parameter that specifies when to start monitoring. Choose from the following settings:
 +
 [horizontal]
 OnCall;; Monitoring begins upon receipt of a message from the state machine.
-OnStart;; Monitroing occurs once at the start of the fuzzing session.
+OnStart;; Monitroing occurs once at the start of the fuzzing session. This is the default setting.
 OnEnd;; Monitoring occurs once at the end of the fuzzing session.
 OnIterationStart;; Monitoring occurs at the start of every iteration.
 OnIterationEnd;; Monitoring occurs at the end of every iteration.
@@ -35,7 +35,7 @@ OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that afte
 .Collect Syslog Messages
 ========================
 
-This example shows the Syslog monitor listening on the default port for incoming messages. When a fault occurs all messages will get saved.
+This example shows the Syslog monitor listening on the default port for incoming messages. When a fault occurs all messages will be saved.
 
 [source,xml]
 ----
@@ -78,7 +78,7 @@ This example shows the Syslog monitor listening on the default port for incoming
 .Fault on Syslog Message
 ========================
 
-This example shows the Syslog monitor listening on the default port for incoming messages. The FaultRegex is compared against each incoming message; when it matches a fault is generated and the syslog data is saved.
+This example shows the Syslog monitor listening on the default port for incoming messages. The FaultRegex expression is compared against each incoming message; when a match occurs, the monitor generates a fault and saves the syslog data.
 
 [source,xml]
 ----

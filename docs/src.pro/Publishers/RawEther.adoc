@@ -17,7 +17,7 @@
 
 The _RawEther_ publisher allows sending raw IPv6 packets with IP headers.
 
-NOTE: This publisher only runs on Linux with root privileges
+NOTE: This publisher only runs on Linux with root privileges.
 
 === Syntax
 
@@ -44,14 +44,14 @@ Protocol::
 	+
 	[horizontal]
 	ETH_P_LOOP;; Ethernet Loopback
-	ETH_P_PUP;; Xerox PUP
-	ETH_P_PUPAT;; Xerox PUP Address Translation
+	ETH_P_PUP;; Xerox PARC Universal Packet (Pup)
+	ETH_P_PUPAT;; Xerox Pup Address Translation
 	ETH_P_IP;; Internet Protocol
-	ETH_P_X25;; CCITT X.25
+	ETH_P_X25;; CCITT X.25 
 	ETH_P_ARP;; Address Resolution
 	ETH_P_BPQ;; G8BPQ AX.25 Ethernet
-	ETH_P_IEEEPUP;; Xerox IEEE802.3 PUP
-	ETH_P_IEEEPUPAT Xerox IEEE802.3 PUP Address Translation
+	ETH_P_IEEEPUP;; Xerox IEEE802.3 Pup
+	ETH_P_IEEEPUPAT Xerox IEEE802.3 Pup Address Translation
 	ETH_P_DEC;; DEC Assigned
 	ETH_P_DNA_DL;; DEC DNA Dump/Load
 	ETH_P_DNA_RC;; DEC DNA Remote Console
@@ -113,12 +113,12 @@ Protocol::
 	ETH_P_IEE802154;; IEEE 802.15.4 Frame
 	ETH_P_CAIF;; ST-Ericsson CAIF 
 
-ProtocolTimeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
-MinMTU:: Minimum 1280. Defaults to 1280.
-MaxMTU:: Default: 131070. Defaults to 131070.
+ProtocolTimeout:: Amount of time, in milliseconds, to wait for data or for a connection. The default value is 3,000.
+MinMTU:: Minimum packet size to transmit. The smallest value is 1280, which is the default value.
+MaxMTU:: maximum packet size to transmit. The largest value is 131070, which is the default value.
 Filter::
-    Filter received frames using a libpcap style filter string. For more information
-    about libpcap syle filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
+    Filters received frames using a libpcap-style filter string. For more information
+    about libpcap syle filters, see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
@@ -126,8 +126,8 @@ xref:Action_start[start]:: Implicit Action to start the Publisher.
 xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
 xref:Action_open[open]:: Open and initialize the socket.
 xref:Action_close[close]:: Close and clean up the socket.
-xref:Action_output[output]:: Data sent via output is written to the open socket.
-xref:Action_input[input]:: Data received via input is read from the open socket.
+xref:Action_output[output]:: Writes data through ouput to the open socket.
+xref:Action_input[input]:: Reads data through input from the open socket.
 
 === Examples
 
