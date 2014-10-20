@@ -13,7 +13,7 @@ NOTE: Currently this mutator limits the number of items in an array to 65K.
 
 === Supported Elements
 
-This mutator supports any array element. Array elements are those that have the _occurs_, _minOccurs_, or _maxOccurs_ attributes.
+This mutator supports any array element. Array elements are those that have the _occurs_, _minOccurs_, or _maxOccurs_ attribute.
 
  * xref:occurs[occurs] attribute
  * xref:minOccurs[minOccurs] attribute
