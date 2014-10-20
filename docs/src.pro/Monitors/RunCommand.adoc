@@ -2,10 +2,10 @@
 [[Monitors_RunCommand]]
 == Run Command
 
-The _RunCommand_ monitor launches a specified command to perform some utility function. If a fault occurs, the monitor captures and logs the console output. Additionally, this monitor detact faults in the following ways:
+The _RunCommand_ monitor launches a specified command to perform a utility function. If a fault occurs, the monitor captures and logs the console output. Additionally, this monitor detects faults in the following ways:
 
 * Search for a specific exit code from the launched utility, and when found, the monitor generates a fault.
-* Search the output of the launched utility, and when a specific expression is found, the _RunCommand_ monitor generates a fault.
+* Search the output of the launched utility, and when a specific expression occurs, the _RunCommand_ monitor generates a fault.
 
 The _RunCommand_ monitor provideds parameters (_When_ and _StartOnCall_) to specify when to launch the utility command.
 
@@ -20,31 +20,31 @@ _Optional:_
 Arguments:: Optional command line arguments
 When::
 +
-Period when to launch the command. The default setting +OnCall+.
+Details on when to launch the command. Specify one of the following launch triggers: 
 +
 [horizontal]
-OnCall;; Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message.
-OnStart;; Launch the command when the fuzzing session starts. The command will launch once per session.
-OnEnd;; Launch the command when the fuzzing session stops. The command will launch once per session.
+OnCall;; Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message. This is the default setting.
+OnStart;; Launch the command when the fuzzing session starts. The command launches once per session.
+OnEnd;; Launch the command when the fuzzing session stops. The command launches once per session.
 OnIterationStart;; Launch the command at start of each iteration.
 OnIterationEnd;; Launch the command at end of each iteration.
 OnFault;; Launch the command when a fault occurs.
-OnIterationStartAfterFault;; Monitoring occurs faullowing a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
+OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
 
-FaultOnExitCode:: Generate a fault when the FaultExitCode matches exit code of the launched command. The default value is false.
-FaultExitCode:: Exit code value to generate a fault. The default value is 1.
-StartOnCall:: Launch the command when the monitor receives aspecified message from  the state machine.
-FaultOnNonZeroExit:: Generate a fault if exit code is non-zero. The default value is false.
-FaultOnRegex:: Fault if regular expression matches the command output. This feature is turned off by default. To use this feature, provide a valid regular expression using the Microsoft .NET syntax.
+FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code of the launched command. The default value is false.
+FaultExitCode:: Exit code value of interest. If the specified exit code occurs, the monitor generates a fault. The default exit code value is 1.
+StartOnCall:: Launch the command when the monitor receives a specified message from  the state machine.
+FaultOnNonZeroExit:: Generate a fault if the exit code is non-zero. The default value is false.
+FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature is turned off by default. To use this feature, provide a valid regular expression using the Microsoft .NET syntax.
 
-AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is false--turned off--by default.
-Timeout:: Generate a fault if process runs for a duration longer than the value, in seconds, of this feature. This feature is turned off when given the value of -1. The default value also is -1.
+AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is turned off (set to fales) by default.
+Timeout:: Maximum time period, in seconds, for the process to run. Generate a fault if process runs longer than the specified value. You can turn off this feature by specifying -1 for the time period. The default value also is -1.
 
 === Examples
 
 .Triggering _RunCommand_ from State Model
 =========================================
-_RunCommand_ monitor is used to run a command when the _call_ action sends a message from the state model.
+_RunCommand_ monitor launches a command when the _call_ action sends a message from the state model.
 
 [source,xml]
 ----
@@ -84,10 +84,11 @@ _RunCommand_ monitor is used to run a command when the _call_ action sends a mes
 	</Test>
 </Peach>
 ----
+NOTES
 <1> The _method_ attribute must match the _StartOnCall_ parameter.
 <2> The _StartOnCall_ parameter.
 
-Produces the following output:
+The preceding XML source produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -118,12 +119,13 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+NOTE: 
 <1> Command triggered by action _call_.
 =========================================
 
 .OnStart Example
 =========================================
-_RunCommand_ monitor is used to run a command using a _when_ value of +OnStart+.
+_RunCommand_ monitor launches a command using a _when_ value of +OnStart+.
 
 [source,xml]
 ----
@@ -162,7 +164,7 @@ _RunCommand_ monitor is used to run a command using a _when_ value of +OnStart+.
 </Peach>
 ----
 
-Produces the following output:
+The preceding XML source produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -200,14 +202,14 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+NOTE:
 <1> Command executed
 
-lalalalala
 =========================================
 
 .OnEnd Example
 =========================================
-_RunCommand_ monitor is used to run a command using a _when_ value of +OnEnd+.
+_RunCommand_ monitor launches a command using a _when_ value of +OnEnd+.
 
 [source,xml]
 ----
@@ -246,7 +248,7 @@ _RunCommand_ monitor is used to run a command using a _when_ value of +OnEnd+.
 </Peach>
 ----
 
-Produces the following output:
+The preceding XML produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -284,12 +286,13 @@ Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with argu
 
 [*] Test 'Default' finished.
 ----
+NOTE: 
 <1> Command executed
 =========================================
 
 .OnIterationStart Example
 =========================================
-_RunCommand_ monitor is used to run a command using a _when_ value of +OnIterationStart+.
+_RunCommand_ monitor launches a command using a _when_ value of +OnIterationStart+.
 
 [source,xml]
 ----
@@ -328,7 +331,7 @@ _RunCommand_ monitor is used to run a command using a _when_ value of +OnIterati
 </Peach>
 ----
 
-Produces the following output:
+The preceding XML produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -368,13 +371,14 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+NOTES:
 <1> Command executed
 <2> Command executed
 =========================================
 
 .OnIterationEnd Example
 =========================================
-_RunCommand_ monitor is used to run a command using a _when_ value of +OnIterationEnd+.
+_RunCommand_ monitor launches a command using a _when_ value of +OnIterationEnd+.
 
 [source,xml]
 ----
@@ -413,7 +417,7 @@ _RunCommand_ monitor is used to run a command using a _when_ value of +OnIterati
 </Peach>
 ----
 
-Produces the following output:
+The preceding XML source produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -453,6 +457,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 
 [*] Test 'Default' finished.
 ----
+NOTES:
 <1> Command executed
 <2> Command executed
 =========================================
