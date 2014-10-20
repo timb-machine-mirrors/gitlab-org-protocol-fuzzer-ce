@@ -2,11 +2,9 @@
 [[Mutators_BlobExpandSingleRandom]]
 == BlobExpandSingleRandom
 
-This mutator will produce test cases for xref:Blob[Blob] elements.
-It will expand the blob by a random size between 1 and 255.
-Pick a random start position in the blob.
-Pick a random value between 0 and 255.
-Add size bytes starting at position where each byte is the single randomly selected value.
+This mutator produces test cases in which a random number of contiguous bytes having the same value are inserted in a xref:Blob[Blob]. The location where the insertion starts is randomly-determined as is the number of inserted bytes. The number of inserted bytes range from 1 to 255. 
+
+The value used for the inserted bytes is randomly selected from the range of 0x00 to 0xff.
 
 === Supported Elements
 
@@ -14,5 +12,5 @@ Add size bytes starting at position where each byte is the single randomly selec
 
 === Hints
 
-BlobExpandSingleRandom-N:: Standard deviation of number of bytes to change.
-BlobMutator-N:: Standard deviation of number of bytes to change. Will affect other Blob mutators.
+BlobExpandSingleRandom-N:: Standard deviation of the number of bytes to change.
+BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
