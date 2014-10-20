@@ -2,8 +2,7 @@
 [[Mutators_BlobReduce]]
 == BlobReduce
 
-This mutator will produce test cases for xref:Blob[Blob] elements.
-It picks a random range of bytes up to 255 inside the blob and removes it.
+This mutator produces test cases in which a random number of contiguous bytes are removed from a xref:Blob[Blob]. The location where the deletion starts is randomly-determined as is the number of bytes to delete. The number of deleted bytes range from 1 to 255. 
 
 === Supported Elements
 
@@ -11,5 +10,5 @@ It picks a random range of bytes up to 255 inside the blob and removes it.
 
 === Hints
 
-BlobReduce-N:: Standard deviation of number of bytes to change.
-BlobMutator-N:: Standard deviation of number of bytes to change. Will affect other Blob mutators.
+BlobReduce-N:: Standard deviation of the number of bytes to change.
+BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
