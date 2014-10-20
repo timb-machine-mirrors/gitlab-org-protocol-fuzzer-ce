@@ -2,10 +2,7 @@
 [[Mutators_BlobChangeToNull]]
 == BlobChangeToNull
 
-This mutator will produce test cases for xref:Blob[Blob] elements.
-It will alter the blob by a random number of bytes between 1 and 100.
-Pick a random start position in the blob.
-Alter size bytes starting at positionand set each byte to null.
+This mutator produces test cases in which a random number of contiguous bytes in a xref:Blob[Blob] are individually changed to null. The location where the change occurs is randomly-determined as is the number of bytes altered in the mutation. The number of bytes that receive the null value range from 1 to 100. 
 
 === Supported Elements
 
@@ -13,5 +10,5 @@ Alter size bytes starting at positionand set each byte to null.
 
 === Hints
 
-BlobChangeToNull-N:: Standard deviation of number of bytes to change.
-BlobMutator-N:: Standard deviation of number of bytes to change. Will affect other Blob mutators.
+BlobChangeToNull-N:: Standard deviation of the number of bytes to change.
+BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
