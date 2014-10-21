@@ -2,11 +2,11 @@
 [[Mutators_SampleNinjaMutator]]
 == SampleNinja
 
-The SampleNinjaMutator uses the xref:SampleNinja[Sample Ninja] database to swap elements between different sample files.
+The SampleNinja Mutator swaps elements between different sample files using a xref:SampleNinja[Sample Ninja] database.
 
 More information about the Sample Ninja system is available xref:SampleNinja[here].
 
-NOTE: This mutator is only enabled if a sample ninja database has been created using the sample ninja command line tool.
+NOTE: This mutator is enabled only if a sample ninja database exists. You can use the sample ninja command line tool to create a sample ninja database.
 
 === Supported Elements
 
@@ -14,4 +14,4 @@ All elements are supported.
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
