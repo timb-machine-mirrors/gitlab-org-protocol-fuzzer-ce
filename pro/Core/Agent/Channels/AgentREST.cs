@@ -42,8 +42,6 @@ using Nancy.Responses.Negotiation;
 using Nancy.Serialization.JsonNet;
 using Nancy.TinyIoc;
 using Nancy.ViewEngines;
-using Nancy.Swagger;
-using Nancy.Swagger.Services;
 
 using Newtonsoft;
 using Newtonsoft.Json;

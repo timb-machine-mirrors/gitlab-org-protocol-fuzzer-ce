@@ -13,8 +13,6 @@ using Nancy.Responses.Negotiation;
 using Nancy.Serialization.JsonNet;
 using Nancy.TinyIoc;
 using Nancy.ViewEngines;
-using Nancy.Swagger;
-using Nancy.Swagger.Services;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -36,9 +34,12 @@ namespace Peach.Core.Agent.Channels.RestServer
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
+				string port = "9001";
+				args.TryGetValue("port", out port);
+
 				using (var svc = new RestServer())
 				{
-					svc.Start("localhost", 9000);
+					svc.Start("localhost", int.Parse(port));
 
 					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
@@ -85,7 +86,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => new MediaRange(o.Item1)).ToList();
+			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => MediaRange.FromString(o.Item1)).ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))

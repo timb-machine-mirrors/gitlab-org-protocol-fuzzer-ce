@@ -1,7 +1,5 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
-using Nancy.Metadata.Module;
-using Nancy.Swagger;
 
 using Peach.Core.Agent;
 using Peach.Core.Agent.Monitors;
