@@ -2,7 +2,10 @@
 [[Mutators_StringUnicodeFormatCharacters]]
 == StringUnicodeFormatCharacters
 
-This mutator produces test cases for Unicode String elements by selecting a random set of Unicode format characters. A format character has no visible appearance, but can affect the appearance or behavior of neighboring or subsequent characters. The lengths of the generated strings form a distribution that centers on the current string length and ranges from 1 to 65k Unicode characters.
+
+
+
+This mutator produces test cases for Unicode String elements by generating new strings and then populating the strings with a random set of Unicode format characters. A format character has no visible appearance, but can affect the appearance or behavior of neighboring or subsequent characters. The lengths of the generated strings form a distribution that centers on the current string length and ranges from 1 to 65k Unicode characters.
 
 This mutator requires String elements that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32. 
 
