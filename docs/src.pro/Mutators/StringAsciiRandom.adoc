@@ -2,7 +2,7 @@
 [[Mutators_StringAsciiRandom]]
 == StringAsciiRandom
 
-This mutator produces test cases by generating random ASCII strings. The string length is a distribution centered on the current length of the string with a min of 0 and max of 65k.
+This mutator produces test cases by generating random ASCII strings. The string length is a distribution centered on the current length of the string. The string length can vary from  a minimum of 0 to a maximum of 65k characters.
 
 === Supported Elements
 
@@ -10,4 +10,4 @@ This mutator produces test cases by generating random ASCII strings. The string 
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
