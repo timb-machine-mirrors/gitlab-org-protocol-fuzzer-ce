@@ -2,7 +2,9 @@
 [[Mutators_StringStatic]]
 == StringStatic
 
-This mutator produces test cases for String elements. This mutator contains a static set of strings it rotates through. These strings include special filenames, chacters, numbers, and other strings that have or might cause the data consumer to missbehave. There are currently 1667 unique test cases produced by this mutator.
+This mutator produces test cases for String elements by accessing an internal list of strings that have caused or that might cause a data consumer to misbehave. 
+
+The strings in the list include special filenames, characters, numbers, and other strings. Currently, the list produces 1667 unique test cases. 
 
 === Supported Elements
 
@@ -10,4 +12,4 @@ This mutator produces test cases for String elements. This mutator contains a st
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
