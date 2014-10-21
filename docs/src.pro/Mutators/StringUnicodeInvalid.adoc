@@ -2,7 +2,11 @@
 [[Mutators_StringUnicodeInvalid]]
 == StringUnicodeInvalid
 
-This mutator produces test cases for String elements by selecting a random set of invalid Unicode characters. These are characters that are in the Uncode space, but are not currently used, or specifically exluded. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+This mutator produces test cases for Unicode String elements by selecting a random set of invalid Unicode characters. The codes for these characters are included in the Unicode space, but are currently unused or are specifically excluded. 
+
+The length of the generated strings form a distribution that centers on the current string length and ranges from 1 to 65K Unicode characters.
+
+This mutator requires String elements that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32. 
 
 === Supported Elements
 
@@ -10,4 +14,4 @@ This mutator produces test cases for String elements by selecting a random set o
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
