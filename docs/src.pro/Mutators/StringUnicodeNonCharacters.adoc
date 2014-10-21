@@ -2,7 +2,7 @@
 [[Mutators_StringUnicodeNonCharacters]]
 == StringUnicodeNonCharacters
 
-This mutator produces test cases for Unicode String elements by generating new strings and then populating the strings with randomly-selected values from a set of Unicode code points that do not map to actual characters. The length of the generated strings form a distribution that centers on the length of the current string and ranges from 1 to 65K (ushort max) Unicode characters.
+This mutator produces test cases for Unicode String elements by generating new strings and then populating the strings with randomly-selected values from a set of Unicode code points that do not map to actual characters. The lengths of the generated strings form a distribution that centers on the length of the current string and ranges from 1 to 65K (ushort max) Unicode characters.
 
 This mutator requires String elements that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32.
 
