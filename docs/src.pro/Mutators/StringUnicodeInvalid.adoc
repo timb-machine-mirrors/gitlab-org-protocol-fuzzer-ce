@@ -2,7 +2,7 @@
 [[Mutators_StringUnicodeInvalid]]
 == StringUnicodeInvalid
 
-This mutator produces test cases for Unicode String elements by selecting a random set of invalid Unicode characters. The codes for these characters are included in the Unicode space, but are currently unused or are specifically excluded. 
+This mutator produces test cases for Unicode String elements by generating new strings and then populating the strings with randomly-selected values from a set of invalid Unicode characters. The codes for these characters are included in the Unicode space, but are currently unused or are specifically excluded. 
 
 The length of the generated strings form a distribution that centers on the current string length and ranges from 1 to 65K Unicode characters.
 
