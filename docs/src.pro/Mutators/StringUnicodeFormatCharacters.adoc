@@ -2,9 +2,15 @@
 [[Mutators_StringUnicodeFormatCharacters]]
 == StringUnicodeFormatCharacters
 
-This mutator produces test cases for String elements by selecting a random set of Unicode format characters. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+This mutator produces test cases for Unicode String elements by selecting a random set of Unicode format characters. A format character has no visible appearance, but can affect the appearance or behavior of neighboring or subsequent characters. The lengths of the generated strings form a distribution that centers on the current string length and ranges from 1 to 65k Unicode characters.
 
-TIP: Format characters are characters that do not have a visible appearance, but may have an effect on the appearance or behavior of neighboring characters. For example, U+200C ZERO WIDTH NON-JOINER and U+200D ZERO WIDTH JOINER may be used to change the default shaping behavior of adjacent characters (e.g. to inhibit ligatures or request ligature formation). There are 152 format characters in Unicode 7.0.
+This mutator requires String elements that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32. 
+
+Unicode 7.0 contains 152 format characters. A couple of format character examples follow:
+
+* U+200C ZERO WIDTH NON-JOINER is a format character that inhibits ligatures.
+
+* U+200D ZERO WIDTH JOINER is a formation character that requests a ligature formation. 
 
 === Supported Elements
 
@@ -12,4 +18,4 @@ TIP: Format characters are characters that do not have a visible appearance, but
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
