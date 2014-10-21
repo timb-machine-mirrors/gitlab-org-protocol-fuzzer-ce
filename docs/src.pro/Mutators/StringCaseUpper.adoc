@@ -2,7 +2,7 @@
 [[Mutators_StringCaseUpper]]
 == StringCaseUpper
 
-This mutator produces a single test case by making the case in the string all uppercase. It is not enabled for strings that contain all uppercase data.
+This mutator produces a single test case by making the characters in the string all upper case. This mutator is not enabled for strings that contain all upper case data.
 
 === Supported Elements
 
@@ -10,4 +10,4 @@ This mutator produces a single test case by making the case in the string all up
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
