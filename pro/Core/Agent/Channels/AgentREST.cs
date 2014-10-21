@@ -29,14 +29,36 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
+using System.Web;
+
+using Nancy;
+using Nancy.Bootstrapper;
+using Nancy.Conventions;
+using Nancy.ErrorHandling;
+using Nancy.Hosting.Self;
+using Nancy.Responses;
+using Nancy.Responses.Negotiation;
+using Nancy.Serialization.JsonNet;
+using Nancy.TinyIoc;
+using Nancy.ViewEngines;
+using Nancy.Swagger;
+using Nancy.Swagger.Services;
+
+using Newtonsoft;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Pro.Core.Agent.Channels
+
+namespace Peach.Core.Agent.Channels
 {
 	#region RestProxyPublisher
 
@@ -69,7 +91,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		public RestProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			this.Args = new Dictionary<string,string>();
+			this.Args = new Dictionary<string, string>();
 
 			foreach (var kv in args)
 			{
@@ -230,7 +252,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		}
 
 		[Serializable]
-		public class ResultResponse: RestProxyPublisherResponse
+		public class ResultResponse : RestProxyPublisherResponse
 		{
 			public string result { get; set; }
 		}
@@ -336,14 +358,15 @@ namespace Peach.Pro.Core.Agent.Channels
 		[Serializable]
 		public class OnGetPropertyResponse : RestProxyPublisherResponse
 		{
-			public Variant value { get; set; }
+			public byte[] value { get; set; }
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
-			var json = Send("getProperty");
+			var json = Send("getProperty",
+				JsonConvert.SerializeObject(property));
 			var response = JsonConvert.DeserializeObject<OnGetPropertyResponse>(json);
-			return response.value;
+			return new Variant(response.value);
 		}
 
 		[Serializable]
@@ -743,14 +766,17 @@ namespace Peach.Pro.Core.Agent.Channels
 		{
 			try
 			{
+
 				var httpWebRequest = (HttpWebRequest)WebRequest.Create(serviceUrl + "/" + query);
 				httpWebRequest.ContentType = "text/json";
 				if (string.IsNullOrEmpty(json))
 				{
+					logger.Debug("Send: GET {0}", serviceUrl + "/" + query);
 					httpWebRequest.Method = "GET";
 				}
 				else
 				{
+					logger.Debug("Send: POST {0}", serviceUrl + "/" + query);
 					httpWebRequest.Method = "POST";
 					using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
 					{
@@ -758,9 +784,11 @@ namespace Peach.Pro.Core.Agent.Channels
 					}
 				}
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+				logger.Debug("Send: Got response");
 
 				if (httpResponse.GetResponseStream() != null)
 				{
+					logger.Debug("Send: Readoing to end of stream");
 					using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 					{
 						return streamReader.ReadToEnd();
@@ -768,16 +796,20 @@ namespace Peach.Pro.Core.Agent.Channels
 				}
 				else
 				{
+					logger.Debug("Send: No stream data");
 					return "";
 				}
 			}
 			catch (Exception e)
 			{
+				logger.Debug("Send Failed: {0}", serviceUrl + "/" + query);
+
 				throw new PeachException("Failure communicating with REST Agent", e);
 			}
 		}
 
 		#endregion
 	}
+
 }
 // end
