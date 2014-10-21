@@ -2,7 +2,7 @@
 [[Mutators_StringCaseLower]]
 == StringCaseLower
 
-This mutator produces a single test case by making the case in the string all lower-case. It is not enabled for strings that contain all lowercase data.
+This mutator produces a single test case by making the characters in the string all lower case. This mutator is not enabled for strings that contain all lowercase data.
 
 === Supported Elements
 
@@ -10,4 +10,4 @@ This mutator produces a single test case by making the case in the string all lo
 
 === Hints
 
-This mutator does not support any hints.
+This mutator does not support hints.
