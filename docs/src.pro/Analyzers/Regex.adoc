@@ -1,11 +1,15 @@
 [[Analyzers_Regex]]
 == Regex Analyzer
 
-The Regex Analyzer will break up a string into sub-strings with optional names using a regular expression. Regular expressions are quick ways to pattern match string based data. When used with the Regex Analyzer, any group in the expression will become
-a separate string. Using named groups, the strings can also be named.
-When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
+The Regex Analyzer parses a string and breaks it into substrings using a regular expression to define parsing details. This analyzer provides a quick way to parse string-based data.
 
-NOTE: The regular expression syntax is that used by Microsoft.NET. See the http://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[quick reference] for more information.
+A regular expression provides a pattern that the parser attempts to match while walking through the input string data. A pattern can consist of a single specification. Or, a pattern can consist of groups where each group describes a substring or a part of the overall pattern. With Peach, if a group is named, you can optionally name the corresponding substring.
+
+When used in the DataModel section of a Peach Pit, the Fuzzer walks the input string data and creates the appropriate substrings.
+
+When used from the command line, the Fuzzer walks the input string data, creates the appropriate substrings, and saves the results of the generated model to disk. Once saved, you can use and modify the results as needed.
+
+NOTE: The regular expression syntax is consistent with the regular expression parser used by Microsoft.NET. For more information, see the http://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[quick reference].
 
 === Syntax
 
@@ -27,11 +31,11 @@ peach --analyzer=Regex "(\w+)(.)" input.txt output.xml
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-There are no optional attributes.
+None.
 
 === Parameters
 
@@ -77,7 +81,7 @@ This example uses the string tokenizer on an inline value.
 <!-- end -->
 ----
 
-Output from this example.
+Output from the example using the string tokenizer and an inline value.
 ----
 > peach -1 --debug RegexAnalyzer.xml  
                                                                                                                    
