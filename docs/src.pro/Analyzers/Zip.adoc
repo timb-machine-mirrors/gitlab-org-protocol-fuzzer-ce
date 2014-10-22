@@ -1,17 +1,17 @@
 [[Analyzers_Zip]]
 == Zip Analyzer
 
-The Zip Analyzer will consume a zip compressed archive and convert it into a sequence of xref:Stream[Stream] elements.
+The Zip Analyzer consumes a zip compressed archive and converts it into a sequence of xref:Stream[Stream] elements.
 
 The analyzer creates a xref:Stream[Stream] element for each file in the zip archive.
 The name of the stream element corresponds to the name of the file in the zip archive.
-The content of stream element corresponds to the content of the file in the zip archive.
+The content of a stream element corresponds to the content of the file in the zip archive.
 
-The Zip Analyzer allows the content of each file in the zip archive to be mapped to a xref:DataModel[DataModel].
-This allows Peach to further decompose the contents of a file in a zip archive instead of just treating the contents as a xref:Blob[Blob].
-The mapping is controlled by the +Map+ parameter to the analyzer.
+The Zip Analyzer allows the content of each file in the zip archive to map to a xref:DataModel[DataModel].
+Using a file and the corresponding data model, Peach can further decompose the contents of a file in a zip archive instead of just treating the contents as an xref:Blob[Blob].
+The +Map+ parameter to the analyzer controls mapping for the data model.
 
-This analyzer can be attached to a blob.
+You can attach this analyzer to a blob.
 
 === Syntax
 
@@ -26,19 +26,19 @@ This analyzer can be attached to a blob.
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-There are no optional attributes.
+None.
 
 === Parameters
 
-Map:: Controls the stream name to data model mappings.
-This parameter is a comma separated list of mappings.
-Each mapping is a tuple containing a regular expression match and a DataModel name.
-The tuple is delineated with a forward slash character, similar to the substitution regular expression pattern.
-When the regular expression matches the file name in the zip archive the corresponding DataModel will be used for the file contents.
+Map:: Controls mapping of stream names to the corresponding data models. 
+This parameter consists of a comma-separated list of mappings. Each mapping consists of a tuple containing a regular expression and a corresponding DataModel name. The parts of a tuple are delineated with a forward slash character, similar to the substitution regular expression pattern.
+
+When the regular expression matches the file name in the zip archive, Peach uses the corresponding DataModel on the file contents.
+
 For example, to use the data model +TextModel+ for all files ending in +.txt+ the parameter's value will be +/.txt$/TextModel/+.
 
 
@@ -82,7 +82,7 @@ This example uses the zip analyzer to decompose a .docx file into its underlying
 </Peach>
 ----
 
-Output from this example.
+Output from the example that decomposes a .docx file into its underlying streams. 
 ----
 >peach -1 --debug example.xml 
 
@@ -364,7 +364,7 @@ This example also maps all '.xml' files to the data model 'XmlModel' that furthe
 </Peach>
 ----
 
-Output from this example.
+Output from the example that decomposes a .docx file into its underlying streams and maps all '.xml' files to the data model 'XmlModel'.
 ----
 
 [[ Peach Pro v3.1.0.0
