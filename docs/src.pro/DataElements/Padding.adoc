@@ -15,7 +15,7 @@ When cracking data into a model that contains the padding element, the pad data 
 <DataModel name="NumberExample1">
  <String name="VariableSizeString" />
 
- <Padding aligned="true"/>
+ <Padding />
 </DataModel>
 ----
 
