@@ -2,7 +2,9 @@
 [[Mutators_StringUnicodePrivateUseArea]]
 == StringUnicodePrivateUseArea
 
-This mutator produces test cases for String elements by selecting a random set of Unicode points between 0xE000 - 0xF8FF (private use area) characters. This mutator will only work with Strings that have a Unicode encoding type such as UTF8. The length of the String generated will be a distribution centered on the current length with an upper maximum of 65K (ushort max) and lower bounds of 1.
+This mutator produces test cases for Unicode String elements by generating new strings and populating the strings with randomly-selected values from characters U+E000 – U+F8FF of Unicode plane 0 (private use area of the BMP). The lengths of the generated strings form a distribution that centers on the length of the current string and ranges from 1 to 65K (ushort max) Unicode characters.
+
+This mutator requires String elements that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32.
 
 === Supported Elements
 
