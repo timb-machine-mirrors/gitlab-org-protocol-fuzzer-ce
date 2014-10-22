@@ -2,11 +2,11 @@
 
 == Binary Analyzer
 
-The Binary analyzer is applied to Blob data elements.  It is an easy way to improve fuzzing of unknown binary data.
+The Binary analyzer applies to Blob data elements and provides an easy way to improve fuzzing of unknown binary data.
 
-The analyzer will look for known types inside of the Blob value (such as strings) and crack the Blob into a DataModel. If a string type is, found Peach will run the StringToken analyzer on each string. 
+The analyzer searches for known types (such as strings) in the Blob data and constructs a DataModel of the Blob. If a string type occurs in the Blob data, Peach runs the StringToken analyzer on each string found. 
 
-IMPORTANT: The Binary analyzer can only be used on Blob data types. 
+IMPORTANT: The Binary analyzer requires data from a Blob data type. 
 
 === Syntax
 
@@ -21,22 +21,22 @@ IMPORTANT: The Binary analyzer can only be used on Blob data types.
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-There are no optional attributes.
+None.
 
 === Parameters
 
 Tokens:: List of characters to pass to the StringToken analyzer. 
-AnalyzeStrings:: Call the StringToken analyzer on string elements. Default true. 
+AnalyzeStrings:: Calls the StringToken analyzer on string elements. The default value is true. 
 
 === Examples
 
 .Simple Hello World Example
 ==========================
-This example uses the binary analyzer on an inline value.  
+This example uses the binary analyzer on inline Blob data.  
 
 [source,xml]
 ----
@@ -68,7 +68,7 @@ This example uses the binary analyzer on an inline value.
 </Peach>
 ----
 
-Output from this example.
+Output from the inline Blob data example.
 
 ----
 > peach -1 --debug example.xml
@@ -108,7 +108,7 @@ image::{images}/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Outp
 
 .Load From File Example 
 ==========================
-This example uses the binary analyzer on a value loaded from a file.  
+This example uses the binary analyzer on an external file of Blob data (example.bin).
 
 [source,xml]
 ----
@@ -141,7 +141,7 @@ This example uses the binary analyzer on a value loaded from a file.
 </Peach>
 ----
 
-Output from this example.
+Output from the Blob data file example.
 
 ----
 > peach -1 --debug example.xml
@@ -236,7 +236,7 @@ This example uses the binary analyzer on a value with a custom set of tokens def
 </Peach>
 ----
 
-Output from this example.
+Output from the example that uses custom tokens.
 ----
 > peach -1 --debug example.xml
 
