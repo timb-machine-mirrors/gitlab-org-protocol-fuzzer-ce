@@ -1,12 +1,13 @@
 [[Analyzers_Xml]]
 == Xml Analyzer
 
-The XML Analyzer will consume an XML document or fragment and convert it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. 
-When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
+The XML Analyzer consumes an XML document or fragment and converts it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. 
+
+When run using the command line, the results of the generated model are saved to disk. Once saved, you can use and modify the results as needed.
 
 This analyzer can be attached to a string. 
 
-TIP: XML special characters (< = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values . 
+TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values. 
 
 === Syntax
 
@@ -25,7 +26,7 @@ peach --analyzer=Xml input.xml output.xml
 
 _Required:_
 
-There are no required attributes.
+None.
 
 
 ==== Examples
@@ -64,7 +65,7 @@ This example uses the XML analyzer on an inline value.
 </Peach>
 ----
 
-Output from this example.
+Output of the example using an inline value.
 ----
 >peach -1 --debug example.xml 
 
@@ -130,7 +131,7 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 </Peach>
 ----
 
-Output from this example.
+Output from the example using an inline value with encoded Xml characters.
 ----
 >peach -1 --debug example.xml 
 
@@ -198,7 +199,7 @@ This example uses the Xml analyzer on itself.
 </Peach>
 ----
 
-Output from this example.
+Output from the example that uses the Xml analyzer on itself.
 ----
 >peach -1 --debug example.xml 
 
