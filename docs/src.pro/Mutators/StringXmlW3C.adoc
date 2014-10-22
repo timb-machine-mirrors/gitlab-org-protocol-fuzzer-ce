@@ -2,7 +2,9 @@
 [[Mutators_StringXmlW3C]]
 == StringXmlW3C
 
-This mutator produces test cases for String elements with the XMLhint hint. This enables all of the W3C XML parser test cases.
+This mutator produces XML parser test cases for String elements. The test cases are defined in xref:"XML W3C Conformance Test Suite"[http://www.w3.org/XML/Test/].
+
+This mutator is enabled for String elements that have the +XML+ hint.
 
 === Supported Elements
 
@@ -10,5 +12,5 @@ This mutator produces test cases for String elements with the XMLhint hint. This
 
 === Hints
 
-XML:: Enables W3X XML tests.
+XML:: Enables W3C XML tests.  The hint name is "XML". The hint value is "xml".
 
