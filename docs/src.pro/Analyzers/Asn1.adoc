@@ -2,13 +2,17 @@
 
 == ASN.1 Analyzer
 
-Converts Abstract Syntax Notation One (ASN.1) into a full DataModel.
-The analyzer supports BER, CER, and DER ASN.1 encodings.
-This analyzer support usage in data models and also via the command line. 
-In both instances the ASN.1 data is walked and data elements created. 
-When run via the command line, the results of the generatd model are saved to disk for custom modification and use.
+This analyzer converts the Abstract Syntax Notation One (ASN.1) specification into a full data model. This analyzer can convert the following parts of the ASN.1 specification:
 
-IMPORTANT: The ASN.1 analyzer can only be used on Blob data types.  
+* Basic Encoding Rules (BER)
+* Canonical Encoding Rules (CER)
+* Distinguished Encoding Rules (DER)
+
+When used in the DataModel section of a Peach Pit, the Fuzzer walks the ASN.1 data and creates the appropriate elements. 
+
+When used from the command line, the Fuzzer walks the ASN.1 data, creates the appropriate elements, and saves the results of the generated model to disk. Once saved, you can use and modify the results as needed. 
+
+IMPORTANT: The ASN.1 analyzer requires data from a Blob data type. 
 
 === Syntax
 
@@ -49,7 +53,7 @@ There are no optional attributes.
 
 .Certificate Inline Example
 ==========================
-This example uses the Asn.1 analyzer on an inline value. 
+This example uses the Asn.1 analyzer on inline Blob data. 
 
 [source,xml]
 ----
@@ -79,7 +83,7 @@ This example uses the Asn.1 analyzer on an inline value.
 </Peach>
 ----
 
-Output from this example.
+Output from inline Blob data example.
 ----
 > peach -1 --debug example.xml
 
@@ -169,7 +173,7 @@ image::{images}/Asn1AnalyzerOutput.png["Validator Output", alt="Validator Output
 
 .Certificate From File Example
 ==========================
-This example uses the Asn.1 analyzer on an inline value. 
+This example uses the Asn.1 analyzer on an external file of Blob data (Cert.der). 
 
 [source,xml]
 ----
@@ -199,7 +203,7 @@ This example uses the Asn.1 analyzer on an inline value.
 </Peach>
 ----
 
-Output from this example.
+Output from the Blob data file example.
 ----
 > peach -1 --debug example.xml
 
