@@ -13,4 +13,4 @@ Each altered value randomly receives one of the following replacement values: 0x
 === Hints
 
 BlobChangeSpecial-N:: Standard deviation of the number of bytes to change.
-BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
+BlobMutator-N:: Standard deviation of the number of bytes to change. The value of this Hint affects other Blob mutators.
