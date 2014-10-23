@@ -11,4 +11,4 @@ This mutator produces test cases in which a random number of contiguous bytes in
 === Hints
 
 BlobChangeRandom-N:: Standard deviation of the number of bytes to change.
-BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
+BlobMutator-N:: Standard deviation of the number of bytes to change. The value of this Hint affects other Blob mutators.
