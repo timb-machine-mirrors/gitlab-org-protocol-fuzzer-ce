@@ -18,7 +18,7 @@ The lone exception: a data element that will not perform a type transformation o
 
 * A Number element that packs its value into a binary format 
 
-* A String element that encodes the characters into a representation such as ASCII or UTF8
+* A String element that encodes the characters into a representation such as ASCII or UTF-8
 
 
 === Hints
