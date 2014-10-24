@@ -108,8 +108,18 @@ namespace Peach.Enterprise.WebServices
 	{
 		private static PeachElement Parse(string fileName)
 		{
+			var settingsRdr = new XmlReaderSettings();
+			settingsRdr.ValidationType = ValidationType.Schema;
+			settingsRdr.NameTable = new NameTable();
+
+			// Default the namespace to peach
+			var nsMgrRdr = new XmlNamespaceManager(settingsRdr.NameTable);
+			nsMgrRdr.AddNamespace("", PeachElement.Namespace);
+
+			var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
+
 			var s = new XmlSerializer(typeof(PeachElement));
-			using (var rdr = XmlReader.Create(fileName))
+			using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
 			{
 				var elem = (PeachElement)s.Deserialize(rdr);
 				return elem;
