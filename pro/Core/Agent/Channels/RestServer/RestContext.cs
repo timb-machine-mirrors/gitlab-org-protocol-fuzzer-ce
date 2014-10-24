@@ -15,7 +15,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 	{
 		public RestContext()
 		{
-			Dispatcher.Start();
+			//Dispatcher.Start();
 		}
 
 		public Agent Agent = new Agent();
