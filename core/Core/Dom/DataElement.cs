@@ -689,7 +689,10 @@ namespace Peach.Core.Dom
 		public void WritePitCommonChildren(XmlWriter pit)
 		{
 			foreach (Relation obj in relations)
-				obj.WritePit(pit);
+			{
+				if(obj.From == this)
+					obj.WritePit(pit);
+			}
 
 			if (fixup != null)
 				fixup.WritePit(pit);
@@ -723,7 +726,7 @@ namespace Peach.Core.Dom
 			if (constraint != null)
 				pit.WriteAttributeString("constraint", constraint);
 
-			if (hasLength && !(this is Number))
+			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag))
 			{
 				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
 				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
@@ -747,6 +750,8 @@ namespace Peach.Core.Dom
 
 		protected void OnInvalidated(EventArgs e)
 		{
+			logger.Trace("OnInvalidated: {0}", name);
+
 			// Prevent infinite loops
 			if (_invalidated)
 				return;
