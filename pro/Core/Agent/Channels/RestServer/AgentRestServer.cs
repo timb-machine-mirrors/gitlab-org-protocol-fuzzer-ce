@@ -34,11 +34,13 @@ namespace Peach.Core.Agent.Channels.RestServer
 			{
 				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
 
-				string port = "9001";
-				args.TryGetValue("port", out port);
+				string port;
+				if (!args.TryGetValue("port", out port))
+					port = "9001";
 
 				using (var svc = new RestServer())
 				{
+					svc.Context.Dispatcher.Start();
 					svc.Start("localhost", int.Parse(port));
 
 					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
@@ -58,6 +60,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 					}
 
 					svc.Stop();
+					svc.Context.Dispatcher.Stop();
 				}
 			}
 		}
