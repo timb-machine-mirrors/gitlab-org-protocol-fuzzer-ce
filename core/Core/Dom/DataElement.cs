@@ -570,6 +570,7 @@ namespace Peach.Core.Dom
 		protected Transformer _transformer = null;
 		protected Placement _placement = null;
 
+		private uint _rootRecursion = 0;
 		private uint _recursionDepth = 0;
 		private uint _intRecursionDepth = 0;
 		private bool _readValueCache = true;
@@ -1183,6 +1184,20 @@ namespace Peach.Core.Dom
 			{
 				if (_internalValue == null || _invalidated || !_readValueCache)
 				{
+					// If this is not invoked by calling .Value
+					// on the root, then mark all elements up to the
+					// root so they don't cache any values computed
+					// if recursion occurs.
+					if (root._rootRecursion++ == 0)
+					{
+						var e = parent;
+						while (e != null)
+						{
+							e._recursionDepth++;
+							e = e.parent;
+						}
+					}
+
 					_intRecursionDepth++;
 
 					var internalValue = GenerateInternalValue();
@@ -1192,6 +1207,15 @@ namespace Peach.Core.Dom
 					if (CacheValue)
 						_internalValue = internalValue;
 
+					if (--root._rootRecursion == 0)
+					{
+						var e = parent;
+						while (e != null)
+						{
+							e._recursionDepth--;
+							e = e.parent;
+						}
+					}
 
 					return internalValue;
 				}

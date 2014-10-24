@@ -184,6 +184,108 @@ namespace Peach.Core.Test.OutputTests
 		}
 
 
+		[Test]
+		public void RelationAndFixup()
+		{
+			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach ../peach.xsd'>
+
+	<DataModel name='DM1'>
+		<Block name='ToSize'>
+			<Block name='ToCrc'>
+				<Number name='Length' size='32'>
+					<Relation type='size' of='ToSize'/>
+				</Number>
+				<Number name='Checksum' size='32'>
+					<Fixup class='Crc'>
+						<Param name='ref' value='ToCrc' />
+					</Fixup>
+				</Number>
+			</Block>
+			<Number name='Data' size='32' value='0'/>
+		</Block>
+	</DataModel>
+
+	<StateModel name='State' initialState='State1' >
+		<State name='State1'  >
+			<Action name='A1' type='output'>
+				<DataModel ref='DM1'/>
+			</Action>
+			<Action type='slurp' valueXpath='//A1//Data' setXpath='//A2//Data' />
+			<Action name='A2' type='output'>
+					<DataModel ref='DM1'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='State'/>
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var c = new RunConfiguration();
+			c.singleIteration = true;
+
+			var e = new Engine(null);
+			e.startFuzzing(dom, c);
+
+			var m1 = dom.tests[0].stateModel.states[0].actions[0].dataModel.Value.ToArray();
+			var m2 = dom.tests[0].stateModel.states[0].actions[2].dataModel.Value.ToArray();
+
+			Assert.AreEqual(m1, m2);
+		}
+
+		[Test]
+		public void TestInvalidate()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Block name='ToSize'>
+			<Block name='ToCrc'>
+				<Number name='Length' size='32'>
+					<Relation type='size' of='ToSize'/>
+				</Number>
+				<Number name='Checksum' size='32'>
+					<Fixup class='Crc'>
+						<Param name='ref' value='ToCrc' />
+					</Fixup>
+				</Number>
+			</Block>
+			<Number name='Data' size='32' value='0'/>
+		</Block>
+	</DataModel>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var val = dom.dataModels[0].Value.ToArray();
+
+			dom.dataModels[0].find("Data").Invalidate();
+
+			var iv = dom.dataModels[0].find("Length").InternalValue;
+			Assert.AreEqual(12, (int)iv);
+
+			var val2 = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(val, val2);
+
+			dom.dataModels[0].find("Data").Invalidate();
+
+			var csum = dom.dataModels[0].find("Checksum").Value;
+			Assert.NotNull(csum);
+
+			var val3 = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(val2, val3);
+		}
 	}
 }
 
