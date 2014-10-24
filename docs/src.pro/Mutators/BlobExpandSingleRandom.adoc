@@ -13,4 +13,4 @@ The value used for the inserted bytes is randomly selected from the range of 0x0
 === Hints
 
 BlobExpandSingleRandom-N:: Standard deviation of the number of bytes to change.
-BlobMutator-N:: Standard deviation of the number of bytes to change. This setting affects other Blob mutators.
+BlobMutator-N:: Standard deviation of the number of bytes to change. The value of this Hint affects other Blob mutators.
