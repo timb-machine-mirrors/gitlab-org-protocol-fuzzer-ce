@@ -163,8 +163,6 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestMulticast()
 		{
-			var ip = System.Net.IPAddress.Any;
-
 			Assert.False(System.Net.IPAddress.Any.IsMulticast());
 			Assert.False(System.Net.IPAddress.Loopback.IsMulticast());
 			Assert.False(System.Net.IPAddress.Broadcast.IsMulticast());
