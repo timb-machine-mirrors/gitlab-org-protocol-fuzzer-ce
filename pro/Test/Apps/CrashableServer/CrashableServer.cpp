@@ -13,6 +13,9 @@
 
 typedef int socklen_t;
 
+// FD_SET uses while(0) so disable conitional expression is constant warning
+#pragma warning(disable:4127)
+
 #else
 
 #include <stdio.h>
@@ -188,7 +191,7 @@ SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote, int timeout)
 		int ret;
 
 		FD_ZERO(&set);
-		FD_SET((int)listener, &set);
+		FD_SET(listener, &set);
 
 		tv.tv_sec = timeout;
 		tv.tv_usec = 0;
