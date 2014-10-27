@@ -40,7 +40,7 @@ struct WSAData {};
 inline int closesocket(int s) { return close(s); }
 inline void WSACleanup() {}
 inline int WSAGetLastError() { return errno; }
-inline int WSASetLastError(int err) { errno = err; }
+inline void WSASetLastError(int err) { errno = err; }
 
 #define WSAETIMEDOUT ETIMEDOUT
 
@@ -188,7 +188,7 @@ SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote, int timeout)
 		int ret;
 
 		FD_ZERO(&set);
-		FD_SET(listener, &set);
+		FD_SET((int)listener, &set);
 
 		tv.tv_sec = timeout;
 		tv.tv_usec = 0;
