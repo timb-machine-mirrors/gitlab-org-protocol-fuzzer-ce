@@ -206,8 +206,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 			{
 				Task = _ =>
 				{
-					this.context.Agent.IterationFinished();
-					return null;
+					return this.context.Agent.IterationFinished();
 				}
 			};
 
@@ -216,10 +215,10 @@ namespace Peach.Core.Agent.Channels.RestServer
 
 			Console.Error.WriteLine("<<IterationFinished");
 
-			return new JsonResponse()
+			return Response.AsJson(new JsonResponse()
 			{
 				Status = task.Result.ToString()
-			};
+			});
 		}
 
 		object DetectedFault()
@@ -235,10 +234,10 @@ namespace Peach.Core.Agent.Channels.RestServer
 			context.Dispatcher.QueueTask(task);
 			task.Completed.WaitOne();
 
-			return new JsonResponse()
+			return Response.AsJson(new JsonResponse()
 			{
 				Status = task.Result.ToString()
-			};
+			});
 		}
 
 		object GetMonitorData()
@@ -254,10 +253,10 @@ namespace Peach.Core.Agent.Channels.RestServer
 			context.Dispatcher.QueueTask(task);
 			task.Completed.WaitOne();
 
-			return new JsonFaultResponse()
+			return Response.AsJson(new JsonFaultResponse()
 			{
 				Results = (Fault[])task.Result
-			};
+			});
 		}
 
 		object MustStop()
@@ -273,10 +272,10 @@ namespace Peach.Core.Agent.Channels.RestServer
 			context.Dispatcher.QueueTask(task);
 			task.Completed.WaitOne();
 
-			return new JsonResponse()
+			return Response.AsJson(new JsonResponse()
 			{
 				Status = task.Result.ToString()
-			};
+			});
 		}
 
 		object Message()
