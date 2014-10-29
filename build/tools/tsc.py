@@ -97,12 +97,12 @@ class tsc(Task.Task):
 
 @extension('.ts')
 def tsc_hook(self, node):
-	task = self.create_task('tsc', node)
+	self.tsc = self.create_task('tsc', node)
 
-	parse_tsc(task)
+	parse_tsc(self.tsc)
 
 	try:
-		self.compiled_tasks.append(task)
+		self.compiled_tasks.append(self.tsc)
 	except AttributeError:
-		self.compiled_tasks = [task]
-	return task
+		self.compiled_tasks = [self.tsc]
+	return self.tsc

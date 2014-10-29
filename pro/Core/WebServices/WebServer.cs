@@ -315,7 +315,10 @@ namespace Peach.Enterprise.WebServices
 
 					try
 					{
-						System.Diagnostics.Process.Start(svc.Uri.ToString());
+						if (!System.Diagnostics.Debugger.IsAttached)
+						{
+							System.Diagnostics.Process.Start(svc.Uri.ToString());
+						}
 					}
 					catch
 					{
