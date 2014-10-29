@@ -31,8 +31,8 @@ deps = [
 	'Newtonsoft.Json.dll',
 	'SuperSocket.Common.dll',
 	'SuperSocket.SocketBase.dll',
+	'SuperSocket.SocketEngine.dll',
 	'SuperWebSocket.dll',
-	'log4net.dll',
 
 	'Peach.Core.dll',
 	'Godel.Core.dll',

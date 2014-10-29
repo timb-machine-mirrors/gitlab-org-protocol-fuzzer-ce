@@ -40,6 +40,8 @@ subdirs = [
 	'Managed.AndroidDebugBridge',
 	'SyslogSharp-1.0.07',
 	'VMware-VIX-1.12.1-894247',
+	'SuperSocket',
+	'SuperWebSocket',
 ]
 
 bld.recurse(subdirs)
