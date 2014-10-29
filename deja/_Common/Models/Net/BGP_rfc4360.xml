@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+
+    <!-- IANA Assignment
+         https://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml 
+    -->
+    <DataModel name="EXT_COMMUNITY" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="16" token="true"/>
+        <Block name="Value">
+            <Number name="IANA_Authority" size="1"/>
+            <Number name="NonTransitive" size="1"/>
+            <Choice name="CommunityType">
+                <Block name="Regular">
+                    <Number name="Type" size="6"/>
+                    <Blob name="Value" length="7"/>
+                </Block>
+                <Block name="AS2Specific">
+                    <Number name="Type" size="6" value="0" token="true"/>
+                    <Number name="SubType" size="8"/>
+                    <Number name="GlobalAdminASN" size="16" endian="big"/>
+                    <Blob   name="LocalAdmin" length="4"/>
+                </Block>
+                <Block name="IPV4Specific">
+                    <Number name="Type" size="6" value="1" token="true"/>
+                    <Number name="SubType" size="8"/>
+                    <Number name="GlobalAdminIP" size="32" endian="big"/>
+                    <Blob   name="LocalAdmin" length="2"/>
+                </Block>
+                <Block name="AS4Specific">
+                    <Number name="Type" size="6" value="2" token="true"/>
+                    <Number name="SubType" size="8"/>
+                    <Blob name="Value" length="6"/>
+                </Block>
+                <Block name="Opaque">
+                    <Number name="Type" size="6" value="3" token="true"/>
+                    <Number name="SubType" size="8"/>
+                    <Blob name="Value" length="6"/>
+                </Block>
+                <Block name="Unknown">
+                    <Number name="SubType" size="8"/>
+                    <Blob name="Value" length="6"/>
+                </Block>
+            </Choice>
+        </Block>
+    </DataModel>
+</Peach>

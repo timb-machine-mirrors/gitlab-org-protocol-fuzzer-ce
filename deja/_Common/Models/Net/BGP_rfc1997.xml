@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+
+    <DataModel name="COMMUNITY" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="8" token="true"/>
+        <Block name="Value">
+            <Choice name="Community" minOccurs="0" maxOccurs="-1">
+                <Number name="NO_EXPORT" size="32" endian="big"
+                        value="0xFFFFFF01" token="true"/>
+                <Number name="NO_ADVERTISE" size="32" endian="big"
+                        value="0xFFFFFF02" token="true"/>
+                <Number name="NO_EXPORT_SUBCONFED" size="32" endian="big"
+                        value="0xFFFFFF03" token="true"/>
+
+                <Block name="reserved_low">
+                    <Number name="ReservedASN" size="16" endian="big"
+                            value="0x0000" token="true"/>
+                    <Number name="ID" size="16" endian="big"/>
+                </Block>
+                <Block name="reserved_high">
+                    <Number name="ReservedASN" size="16" endian="big"
+                            value="0xFFFF" token="true"/>
+                    <Number name="ID" size="16" endian="big"/>
+                </Block>
+                <Block name="unassigned">
+                    <Number name="ASN" size="16" endian="big"/>
+                    <Number name="ID" size="16" endian="big"/>
+                </Block>
+            </Choice>
+        </Block>
+    </DataModel>
+</Peach>

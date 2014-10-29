@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach  xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT StateModels"
+        version="0.0.1">
+
+    <!-- Copyright (c) Deja Vu Security, LLC 2014 -->
+    <Import import="struct"/>
+    <Import import="time"/>
+
+    <Include ns="DataModels" src="file:##Path##/_Common/Models/Net/BGP_Data.xml"/>
+
+    <DataModel name="BGPPacketOrNone">
+        <Choice name="PacketOrNone">
+            <Block name="BGPPacket" ref="DataModels:BGP4"/>
+            <Block name="None"/>
+        </Choice>
+    </DataModel>
+
+    <StateModel name="BGP_OPEN" initialState="Connect">
+        <State name="Connect">
+            <Action name="BGP4Open" type="output">
+                <DataModel ref="DataModels:BGP4Open"/>
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/Connect/"/>
+            </Action>
+            <Action type="changeState" ref="OpenSent"/>
+        </State>
+    </StateModel>
+
+    <StateModel name="BGP_Server" initialState="Idle">
+        <State name="Idle">
+            <Action type="accept" publisher="BGPServer"/>
+
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="BGPPacketOrNone"/>
+            </Action>
+
+            <Action type="changeState" ref="Connect"
+               when="self.parent.actions['BGP4Recv'].dataModel.find('Open') is not None"/> 
+
+            <Action type="changeState" ref="Close"/>
+        </State>
+
+        <State name="Connect">
+            <Action name="BGP4Open" type="output">
+                <!-- Don't fuzz Open in this state model -->
+                <DataModel ref="DataModels:BGP4OpenImmutable"/>
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/OPEN-VALID.sample"/>
+            </Action>
+            <Action type="changeState" ref="OpenSent"/>
+        </State>
+        
+
+        <!-- Active state for TCP Errors Connect implies proper connectivity -->
+        
+        
+        <State name="OpenSent">
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="BGPPacketOrNone"/>
+            </Action>
+
+            <Action type="changeState" ref="Idle"
+                    when="not self.parent.actions['BGP4Recv'].dataModel.find('BGPPacket')"/> 
+
+            <Action name="BGP4SendKeepalive" type="output">
+                <DataModel ref="DataModels:BGP4Keepalive"/>
+                <!-- Constant, no user data -->
+            </Action>
+
+            <Action type="changeState" ref="OpenConfirm"/>
+        </State>
+        
+        
+        <State name="OpenConfirm">
+            <Action name="BGP4Recv" type="input">
+                <DataModel ref="DataModels:BGP4"/>
+            </Action>
+            <Action type="changeState" ref="Close"
+                    when="False"/> <!-- TODO: When message type is not keepalive -->
+
+            <Action type="changeState" ref="Established"/>
+        </State>
+
+        <State name="KeepaliveReply">
+            <Action name="BGP4SendKeepalive" type="output">
+                <DataModel ref="DataModels:BGP4Keepalive"/>
+            </Action>
+            <Action type="changeState" ref="Established"/>
+        </State>
+        
+        
+        <State name="Established">
+            <Action name="BGP4Recv" type="input">
+                <DataModel name="Packet" ref="BGPPacketOrNone"/>
+            </Action>
+
+            <Action type="changeState" ref="KeepaliveReply"
+                    when="self.parent.actions['BGP4Recv'].dataModel.find('Keepalive') is not None"/> 
+            <Action name="BGP4Send" type="output">
+                <DataModel name="Packet">
+                    <Choice name="Types">
+                        <Block name="Update" ref="DataModels:BGP4Update"/>
+                        <Block name="Notification" ref="DataModels:BGP4Notification"/>
+                        <Block name="RouteRefresh" ref="DataModels:BGP4RouteRefresh"/>
+                        <Block name="RouteRefreshWithORF" ref="DataModels:BGP4RouteRefreshWithORF"/>
+                        <Block name="DynamicCapbility" ref="DataModels:BGP4DynamicCapbility"/>
+                    </Choice>
+                </DataModel>
+                <Data fileName="##Path##/_Common/Samples/Net/BGP/Established"/>
+            </Action>
+
+
+            <!-- Close connection regardless to update iteration, and test the full state
+            <Action type="changeState" ref="Established"
+                    when="self.parent.actions['BGP4Recv'].dataModel.find('Update') is not None"/> 
+            <Action type="changeState" ref="Close"
+                    when="self.parent.actions['BGP4Recv'].dataModel.find('None') is not None"/> 
+            -->
+            <Action type="changeState" ref="Close"
+                onStart="print self.parent.actions['BGP4Send']" />
+                <!--
+                    when="context.controlIteration"/>
+                -->
+            <Action type="changeState" ref="Established"/>
+        </State>
+        <State name="Close">
+            <Action type="close"/>
+        </State>
+    </StateModel>
+</Peach>

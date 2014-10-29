@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+
+    <DataModel name="ORIGINATOR_ID" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="9" token="true"/>
+        <Block name="Value">
+            <Number name="BGPIdentifier" size="32" endian="big">
+                <Fixup class="Expression">
+                    <Param name="ref" value="BGPIdentifier"/>
+                    <Param name="expression" value="struct.pack('>L',##BGPIdentifier##)"/>
+                </Fixup>
+            </Number>
+        </Block>
+    </DataModel>
+
+    <DataModel name="CLUSTER_LIST" ref="Base:BGP4PathAttr">
+        <Number name="TypeCode" size="8"
+                value="10" token="true"/>
+        <Block name="Value">
+            <Number name="ClusterID" size="32" minOccurs="0" maxOccurs="-1"/>
+        </Block>
+    </DataModel>
+</Peach>

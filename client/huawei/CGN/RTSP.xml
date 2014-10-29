@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+
+COPYRIGHT
+Copyright © 2011-2014 2014 Déjà vu Security, LLC.
+All rights reserved.
+
+Déjà vu Security is the sole proprietary owner of Peach Pits and related
+definition files and documentation.
+
+User may only use, copy, or modify Peach Pits and related definition files and
+documentation for internal business purposes only, provided that this entire
+notice and following disclaimer appear in all copies or modifications, and
+subject to the following conditions:
+
+(1) User maintains a current subscription to the Peach Pit library.
+(2) User's use is restricted to commercially licensed version of Peach Fuzzer
+    only. Running Peach Pits with the Peach Fuzzer Community edition or any
+    other solution is strictly prohibited.
+(3) The sale, transfer, or distribution of Peach Pits and related definition
+    files and documentation, in any form, is not permitted, without Déjà vu
+    Security's express permission.
+
+Legal Disclaimer
+PEACH PITS AND RELATED DEFINTIION FILES AND DOCUMENTATION ARE PROVIDED "AS IS",
+DÉJÀ VU SECURITY DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE. DÉJÀ VU SECURITY HAS NO OBLIGATION TO PROVIDE MAINTENANCE,
+SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+IN NO EVENT SHALL DÉJÀ VU SECURITY BE LIABLE TO ANY PARTY FOR ANY DIRECT,
+INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF USE,
+DATA, OR PROFITS), ARISING OUT OF ANY USE OF PEACH PITS AND RELATED
+DOCUMENTATION, EVEN IF DÉJÀ VU SECURITY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach c:\peach\output\win_x64_debug\bin\peach.xsd"
+       author="Deja Vu Security, LLC"
+       description="RTSP"
+       version="0.0.1">
+
+	<DataModel name="Header">
+		<String name="Header" />
+		<String value=": " token="true" />
+		<String name="Value">
+			<Analyzer class="StringToken" />
+		</String>
+		<String value="\r\n" token="true" />
+	</DataModel>
+	
+	<DataModel name="HttpRequest">
+
+		<String name="Method"/>
+		<String value=" " token="true" />
+		<String name="Url">
+			<Analyzer class="StringToken"/>
+		</String>
+		<String value=" " token="true" />
+		<String name="Protocol" value="RTSP" />
+		<String value="/" token="true" />
+		<String name="Version" value="1.0" />
+		<String value="\r\n" token="true" />
+
+		<Choice name="Headers" minOccurs="0" maxOccurs="1024">
+			<Block name="CSeq" ref="Header">
+				<String name="Header" value="CSeq" />
+				<String name="Value" value="0">
+					<Fixup class="SequenceIncrementEx">
+						<Param name="Group" value="RTSP"/>
+					</Fixup>
+				</String>
+			</Block>
+			<Block name="Custom" ref="Header" />
+		</Choice>
+
+		<String value="\r\n" token="true" />
+		<Blob name="Body" />
+		
+	</DataModel>
+
+	<DataModel name="HttpResponse">
+		<String name="Protocol" value="RTSP/1.0 " token="true" />
+		<String name="Status" />
+		<String value=" " token="true"/>
+		<String name="StatusMessage" />
+		<String value="\r\n" token="true" />
+
+		<Choice name="Headers">
+			<Block name="Session" ref="Header">
+				<String name="Header" value="Session" token="true" />
+				<String name="Value" value="662821751501597776;timeout=60">
+					<Analyzer class="Regex">
+						<Param name="Regex" value="(?&lt;SessionId&gt;\d+)(.*)"/>
+					</Analyzer>
+				</String>
+			</Block>
+			
+			<Block name="Unknown" ref="Header" />
+		</Choice>
+	</DataModel>
+
+	<StateModel name="StateModel" initialState="Initial">
+		<State name="Initial">
+			<Action name="Open" type="open"/>
+			<Action name="Describe" type="output">
+				<DataModel ref="HttpRequest"/>
+				<Data>
+					<Field name="Method" value="DESCRIBE"/>
+					<Field name="Url" value="rtsp://26.0.0.235/100.wmv"/>
+					<Field name="Headers[0].Custom.Header" value="User-Agent"/>
+					<Field name="Headers[0].Custom.Value" value="WMPlayer/11.0.5721.5145 guid/3300AD50-2C39-46C0-AE0A-17FCEB2EB019"/>
+					<Field name="Headers[1].Custom.Header" value="Accept"/>
+					<Field name="Headers[1].Custom.Value" value="application/sdp"/>
+					<Field name="Headers[2].Custom.Header" value="Accept-Charset"/>
+					<Field name="Headers[2].Custom.Value" value="UTF-8, *;q=0.1"/>
+					<Field name="Headers[3].Custom.Header" value="X-Accept-Authentication"/>
+					<Field name="Headers[3].Custom.Value" value="Negotiate, NTLM, Digest, Basic"/>
+					<Field name="Headers[4].Custom.Header" value="Accept-Language"/>
+					<Field name="Headers[4].Custom.Value" value="zh-CN, *;q=0.1"/>
+					<Field name="Headers[5].CSeq" value=""/>
+					<Field name="Headers[6].Custom.Header" value="Supported"/>
+					<Field name="Headers[6].Custom.Value" value="com.microsoft.wm.srvppair, com.microsoft.wm.sswitch, com.microsoft.wm.eosmsg, com.microsoft.wm.predstrm, com.microsoft.wm.startupprofile"/>
+				</Data>
+			</Action>
+
+			<Action name="Setup" type="output">
+				<DataModel ref="HttpRequest" />
+				<Data>
+					<Field name="Method" value="SETUP"/>
+					<Field name="Url" value="rtsp://26.0.0.235/100.wmv/rtx"/>
+					<Field name="Headers[0].Custom.Header" value="User-Agent"/>
+					<Field name="Headers[0].Custom.Value" value="WMPlayer/11.0.5721.5145 guid/3300AD50-2C39-46C0-AE0A-17FCEB2EB019"/>
+					<Field name="Headers[1].Custom.Header" value="Accept-Charset"/>
+					<Field name="Headers[1].Custom.Value" value="UTF-8, *;q=0.1"/>
+					<Field name="Headers[2].Custom.Header" value="X-Accept-Authentication"/>
+					<Field name="Headers[2].Custom.Value" value="Negotiate, NTLM, Digest, Basic"/>
+					<Field name="Headers[3].Custom.Header" value="Accept-Language"/>
+					<Field name="Headers[3].Custom.Value" value="zh-CN, *;q=0.1"/>
+					<Field name="Headers[4].CSeq" value=""/>
+					<Field name="Headers[5].Custom.Header" value="X-Playlist-Gen-Id"/>
+					<Field name="Headers[5].Custom.Value" value="42"/>
+					<Field name="Headers[6].Custom.Header" value="Transport"/>
+					<Field name="Headers[6].Custom.Value" value="RTP/AVP/UDP;unicast;client_port=7000-7001;ssrc=1024f8f8;mode=PLAY"/>
+
+				</Data>
+			</Action>
+
+			<Action name="SetupReply" type="input">
+				<DataModel ref="HttpResponse" />				
+			</Action>
+		</State>
+	</StateModel>
+	
+	<Test name="Default">
+		<StateModel ref="StateModel"/>
+
+		<Publisher class="File">
+			<Param name="FileName" value="fuzzed.bin"/>
+		</Publisher>
+
+		<!--<Publisher class="Tcp">
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Port" value="##TargetPort##"/>
+		</Publisher>-->
+
+		<Strategy class="##Strategy##"/>
+		
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+</Peach>

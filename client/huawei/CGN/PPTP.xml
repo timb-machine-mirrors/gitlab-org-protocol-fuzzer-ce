@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+
+COPYRIGHT
+Copyright © 2011-2014 2014 Déjà vu Security, LLC.
+All rights reserved.
+
+Déjà vu Security is the sole proprietary owner of Peach Pits and related
+definition files and documentation.
+
+User may only use, copy, or modify Peach Pits and related definition files and
+documentation for internal business purposes only, provided that this entire
+notice and following disclaimer appear in all copies or modifications, and
+subject to the following conditions:
+
+(1) User maintains a current subscription to the Peach Pit library.
+(2) User's use is restricted to commercially licensed version of Peach Fuzzer
+    only. Running Peach Pits with the Peach Fuzzer Community edition or any
+    other solution is strictly prohibited.
+(3) The sale, transfer, or distribution of Peach Pits and related definition
+    files and documentation, in any form, is not permitted, without Déjà vu
+    Security's express permission.
+
+Legal Disclaimer
+PEACH PITS AND RELATED DEFINTIION FILES AND DOCUMENTATION ARE PROVIDED "AS IS",
+DÉJÀ VU SECURITY DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT
+NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE. DÉJÀ VU SECURITY HAS NO OBLIGATION TO PROVIDE MAINTENANCE,
+SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+IN NO EVENT SHALL DÉJÀ VU SECURITY BE LIABLE TO ANY PARTY FOR ANY DIRECT,
+INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF USE,
+DATA, OR PROFITS), ARISING OUT OF ANY USE OF PEACH PITS AND RELATED
+DOCUMENTATION, EVEN IF DÉJÀ VU SECURITY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://peachfuzzer.com/2012/Peach c:\peach\output\win_x64_debug\bin\peach.xsd"
+       author="Deja Vu Security, LLC"
+       description="RTSP"
+       version="0.0.1">
+
+	<Defaults>
+		<Number signed="false" endian="network"/>
+	</Defaults>
+	
+	<DataModel name="Response">
+		<Number name="Length" size="16">
+			<Relation type="size" of="Response"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Blob/>
+	</DataModel>
+
+	<DataModel name="StartControlConnectionRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="StartControlConnectionRequest"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="1" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="ProtocolVersionMajor" size="8" value="1" />
+		<Number name="ProtocolVersionMinor" size="8" value="0" />
+		<Number name="Reserved1" size="16" value="0" />
+		<Number name="FramingCapabilities" size="32" value="1"/>
+		<Number name="BearerCapabilities" size="32" value="1"/>
+		<Number name="MaximumChannels" size="16" />
+		<Number name="FirmwareRevision" size="16" value="2600" />
+		<String name="HostName" length="64" />
+		<String name="VendorString" length="64" />
+	</DataModel>
+
+	<DataModel name="StartControlConnectionReply">
+		<Number name="Length" size="16">
+			<Relation type="size" of="StartControlConnectionReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="2" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="ProtocolVersionMajor" size="8" value="1" />
+		<Number name="ProtocolVersionMinor" size="8" value="0" />
+		<Number name="ResultCode" size="8" value="1" />
+		<Number name="ErrorCode" size="8" value="0" />
+		<Number name="FramingCapabilities" size="32" value="1"/>
+		<Number name="BearerCapabilities" size="32" value="1"/>
+		<Number name="MaximumChannels" size="16" />
+		<Number name="FirmwareRevision" size="16" value="2600" />
+		<String name="HostName" length="64" />
+		<String name="VendorString" length="64" />
+	</DataModel>
+
+	<DataModel name="StopControlConnectionRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="StopControlConnectionRequest"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="3" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="Reason" size="8" value="1" />
+		<Number name="Reserved1" size="8" value="0" />
+		<Number name="Reserved2" size="16" value="0" />
+	</DataModel>
+
+	<DataModel name="StopControlConnectionReply">
+		<Number name="Length" size="16">
+			<Relation type="size" of="StopControlConnectionReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="4" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="ResultCode" size="8" value="1" />
+		<Number name="ErrorCode" size="8" value="0" />
+		<Number name="Reserved1" size="16" value="0"/>
+	</DataModel>
+
+	<DataModel name="EchoRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="EchoRequest"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="6" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="Identifier" size="32" value="0" />
+	</DataModel>
+
+	<DataModel name="EchoReply">
+		<Number name="Length" size="16">
+			<Relation type="size" of="EchoReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="4" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="Identifier" size="32" value="0" />
+		<Number name="ResultCode" size="8" value="1" />
+		<Number name="ErrorCode" size="8" value="0" />
+		<Number name="Reserved1" size="16" value="0"/>
+	</DataModel>
+
+	<DataModel name="OutgoingCallRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallRequest"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="7" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="CallSerialNumber" size="16" />
+		<Number name="MinimumBps" size="32" />
+		<Number name="MaximumBps" size="32" />
+		<Number name="BearerType" size="32" />
+		<Number name="FrameingType" size="32" />
+		<Number name="WindowSize" size="16" />
+		<Number name="ProcessingDelay" size="16" />
+		<Number name="PhoneNumberLength" size="16" />
+		<Number name="Reserved1" size="16" />
+		<String name="PhoneNumber" length="64" />
+		<String name="Subaddress" length="64" />
+	</DataModel>
+
+	<DataModel name="OutgoingCallReply">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="8" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="PeerCallId" size="16" />
+		<Number name="ResultCode" size="8" value="1" />
+		<Number name="ErrorCode" size="8" value="0" />
+		<Number name="CauseCode" size="16" value="0"/>
+		<Number name="ConnectSpeed" size="32" />
+		<Number name="WindowSize" size="16" />
+		<Number name="Delay" size="16" />
+		<Number name="ChannelId" size="32" />
+	</DataModel>
+
+	<DataModel name="IncomingCallRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="9" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="CallSerialNumber" size="16" />
+		<Number name="CallBearerType" size="32" />
+		<Number name="ChannelId" size="32" />
+		<Number name="DialedNumberLength" size="16" />
+		<Number name="DialingNumberLength" size="16" />
+		<String name="DialedNumber" length="64" />
+		<String name="DialingNumber" length="64" />
+		<String name="Subaddress" length="64" />
+	</DataModel>
+
+	<DataModel name="IncomingCallReply">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="10" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="PeersCallId" size="16" />
+		<Number name="ResultCode" size="8" />
+		<Number name="ErrorCode" size="8" />
+		<Number name="WindowSize" size="16" />
+		<Number name="TransmitDelay" size="16" />
+		<Number name="Reserved1" size="16" />
+	</DataModel>
+
+	<DataModel name="IncomingCallConnected">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="11" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="PeerCallId" size="16" />
+		<Number name="Reserved1" size="16" />
+		<Number name="ConnectSpeed" size="32" />
+		<Number name="WindowSize" size="16" />
+		<Number name="Delay" size="16" />
+		<Number name="FramingType" size="32" />
+	</DataModel>
+
+	<DataModel name="CallClearRequest">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="12" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="Reserved1" size="16" />
+	</DataModel>
+
+	<DataModel name="CallDisconnectNotify">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="13" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="CallId" size="16" />
+		<Number name="ResultCode" size="8" />
+		<Number name="ErrorCode" size="8" />
+		<Number name="CauseCode" size="16" />
+		<Number name="Reserved1" size="16" />
+		<String name="CallStatistics" length="128" />
+	</DataModel>
+
+	<DataModel name="WanErrorNotify">
+		<Number name="Length" size="16">
+			<Relation type="size" of="OutgoingCallReply"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="14" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="PeerCallId" size="16" />
+		<Number name="CrcErrors" size="32" />
+		<Number name="FramingErrors" size="32" />
+		<Number name="HardwareOverruns" size="32" />
+		<Number name="BufferOverruns" size="32" />
+		<Number name="TimeoutErrors" size="32" />
+		<Number name="AlignmentErrors" size="32" />
+	</DataModel>
+
+	<DataModel name="SetLinkInfo">
+		<Number name="Length" size="16">
+			<Relation type="size" of="SetLinkInfo"/>
+		</Number>
+		<Number name="PptpMessageType" size="16" value="1" token="true" />
+		<Blob name="MagicCookie" valueType="hex" value="1A2B3C4D" token="true" />
+		<Number name="ControlMessageType" size="16" value="15" token="true" />
+		<Number name="Reserved0" size="16" value="0" />
+		<Number name="PeerCallId" size="16" />
+		<Number name="Reserved1" size="16" value="0" />
+		<Number name="SendAacm" size="32" />
+		<Number name="ReceiveAacm" size="32"/>
+	</DataModel>
+	
+	<DataModel name="Gre">
+		<Block name="Flags">
+			<Number name="Checksum" size="1" value="0" />
+			<Number name="Routing" size="1" value="0" />
+			<Number name="Key" size="1" value="1" />
+			<Number name="SequenceNumber" size="1" value="1" />
+			<Number name="StrictSourceRoute" size="1" value="0"/>
+			<Number name="RecursionControl" size="3" value="0"/>
+			<Number name="Ack" size="1" value="0" />
+			<Number name="Flags" size="4" value="0" />
+			<Number name="Version" size="3" value="1" />
+		</Block>
+		<Number name="ProtocolType" size="16" />
+		<Number name="PayloadLength" size="16">
+			<Relation type="size" of="Payload"/>
+		</Number>
+		<Number name="CallId" size="16" />
+		<Number name="SequenceNumber" size="32" />
+		
+		<Choice name="Ack">
+			<Number name="Ack" size="32" constraint="int(element.find('Flags.Ack').DefaultValue) == 1" />
+			<Block name="Off" />
+		</Choice>
+		
+		<Blob name="Payload" />
+	</DataModel>
+
+	<DataModel name="Data" ref="Gre">
+		<Block name="Payload">
+			<Number name="Address" size="8" />
+			<Number name="Control" size="8" value="3" />
+			<Number name="Protocol" size="16" />
+			<Blob name="Body"/>
+		</Block>
+	</DataModel>
+	
+	<StateModel name="StateModel" initialState="Initial">
+		<State name="Initial">
+			<Action name="Open" type="open"/>
+			<Action name="StartControlConnectionRequest" type="output">
+				<DataModel ref="StartControlConnectionRequest"/>
+				<Data>
+					<Field name="VendorString" value="Microsoft Windows NT"/>
+				</Data>
+			</Action>
+			
+			<Action name="StartControlConnectionReply" type="input">
+				<DataModel ref="Response" />
+			</Action>
+			
+			<Action name="OutgoingCallRequest" type="output">
+				<DataModel ref="OutgoingCallRequest" />
+				<Data>
+					<Field name="CallId" value="16384"/>
+					<Field name="CallSerialNumber" value="36917"/>
+					<Field name="MinimumBps" value="300"/>
+					<Field name="MaximumBps" value="100000000"/>
+					<Field name="BearerType" value="3"/>
+					<Field name="FrameingType" value="3"/>
+					<Field name="WindowSize" value="64"/>
+					<Field name="ProcessingDelay" value="0"/>
+					<Field name="PhoneNumberLength" value="0"/>
+					<Field name="PhoneNumber" value=""/>
+					<Field name="Subaddress" value=""/>
+				</Data>
+			</Action>
+			<Action name="OutgoingCallReply" type="input">
+				<DataModel ref="Response" />
+			</Action>
+
+			<Action name="SetLinkInfo" type="output">
+				<DataModel ref="SetLinkInfo"/>
+				<Data>
+					<Field name="PeerCallId" value="9"/>
+					<Field name="SendAacm" value="0xffffffff"/>
+					<Field name="ReceiveAacm" value="0xffffffff"/>
+				</Data>
+			</Action>
+
+			<Action name="Data" type="output">
+				<DataModel ref="Data"/>
+				<Data fileName="pptp_data.bin"/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="StateModel"/>
+
+		<Publisher class="File">
+			<Param name="FileName" value="fuzzed.bin"/>
+		</Publisher>
+
+		<!--<Publisher class="Tcp">
+			<Param name="Host" value="##TargetIPv4##"/>
+			<Param name="Port" value="##TargetPort##"/>
+		</Publisher>-->
+
+		<Strategy class="##Strategy##"/>
+
+		<Logger class="File">
+			<Param name="Path" value="##LoggerPath##"/>
+		</Logger>
+	</Test>
+</Peach>

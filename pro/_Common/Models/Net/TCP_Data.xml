@@ -229,7 +229,7 @@ SUCH DAMAGE.
 			<Number name="UrgentPointer" size="16" endian="big"/>
 			<Block name="OptionsAndPadding" ref="OptionsAndPadding" />
 		</Block>
-		<Block name="TcpPayload"/>
+		<Blob name="TcpPayload"/>
 	</DataModel>
 
 	<DataModel name="PacketWithData" ref="Packet">
