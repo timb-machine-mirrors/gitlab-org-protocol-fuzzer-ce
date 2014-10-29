@@ -25,8 +25,6 @@ namespace Peach.Core.Dom.XPath
 	/// </remarks>
 	public class PeachXPathNavigator : XPathNavigator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
 		protected List<object> moveToHistory = new List<object>();
 
 		/// <summary>
@@ -158,7 +156,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveTo(XPathNavigator other)
 		{
-			logger.Trace("MoveTo");
+			//logger.Trace("MoveTo");
 
 			var otherXpath = other as PeachXPathNavigator;
 			if(otherXpath == null)
@@ -174,7 +172,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstAttribute()
 		{
-			logger.Trace("MoveToFirstAttribute");
+			//logger.Trace("MoveToFirstAttribute");
 
 			iteratingAttributes = true;
 			attributeIndex = 0;
@@ -183,7 +181,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstChild()
 		{
-			logger.Trace("MoveToFirstChild(" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToFirstChild(" + ((INamed)currentNode).name + ")");
 
 			if (currentNode is DataElementContainer)
 			{
@@ -259,21 +257,21 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstNamespace(XPathNamespaceScope namespaceScope)
 		{
-			logger.Trace("MoveToFirstNamespace");
+			//logger.Trace("MoveToFirstNamespace");
 
 			return false;
 		}
 
 		public override bool MoveToId(string id)
 		{
-			logger.Trace("MoveToId");
+			//logger.Trace("MoveToId");
 
 			return false;
 		}
 
 		public override bool MoveToNext()
 		{
-			logger.Trace("MoveToNext(" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToNext(" + ((INamed)currentNode).name + ")");
 
 			if (currentNodeType == PeachXPathNodeType.Root)
 				return false;
@@ -384,7 +382,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNextAttribute()
 		{
-			logger.Trace("MoveToNextAttribute");
+			//logger.Trace("MoveToNextAttribute");
 
 			if (GetCurrentNodeAttributeMatrix().Length <= (attributeIndex + 1))
 				return false;
@@ -407,14 +405,14 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNextNamespace(XPathNamespaceScope namespaceScope)
 		{
-			logger.Trace("MoveToNextNamespace");
+			//logger.Trace("MoveToNextNamespace");
 
 			return false;
 		}
 
 		public override bool MoveToParent()
 		{
-			logger.Trace("MoveToParent(" +currentNode.GetType() + ":" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToParent({0}:{1})", currentNode.GetType(), ((INamed)currentNode).name);
 
 			if (iteratingAttributes)
 			{
@@ -454,7 +452,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToPrevious()
 		{
-			logger.Trace("MoveToPrevious");
+			//logger.Trace("MoveToPrevious");
 
 			throw new NotImplementedException();
 		}
