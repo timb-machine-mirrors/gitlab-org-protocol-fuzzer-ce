@@ -60,3 +60,6 @@ _Resharper*
 # package, bower, and karma configs can pull it all down
 /Peach.Enterprise.Web.TS/bower_components
 /Peach.Enterprise.Web.TS/node_modules
+
+# vim temporary files
+*.swp
