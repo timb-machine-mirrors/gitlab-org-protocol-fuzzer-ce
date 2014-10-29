@@ -1,0 +1,8 @@
+[[ FROM STACK OVERFLOW]]
+
+There is a small tool called pcaputil - it is part of the pjsip project. It should be able to decode pcap files with RTP (G.711, G.722, speex and other codecs are supported) into wav files.
+
+Compile pjsip and find pcaputil inside pjsip-apps/bin/samples/[architecture]/.
+
+
+http://www.pjsip.org/

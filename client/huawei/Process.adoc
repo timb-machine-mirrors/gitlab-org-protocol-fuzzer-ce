@@ -1,0 +1,92 @@
+= Protocol Development Process
+
+This document outlines the basic process for building each protocol.
+
+
+. Read and research protocol
+. Search http://pcapr.net[pcapr] for protocol captures. Place in _Captures_ folder with "pcapr_" prefix.
+.. Captures from Huawei are prefixed with +huawei_+
+.. Captures from Deja are prefixed with +deja_+
+. If possible, create test environment using eNSP or open source programs
+. Start development of protocol definition
+.. Create a PROTOCOL.xml.test file (see https://github/dejavu/pits/blob/master/pittester.adoc[pittestet] docs)
+.. Start writing your PROTOCOL.xml(.config) files using the pittester tool to validate.
+.. Once protocol is working, split up into the files under deliverables.
+.. Create datasheet/userguide documents using AsciiDoc markup (+.adoc+ suffix)
+
+== Project Phases
+
+=== Build
+
+* Research and understand protocol
+* Develop all:
+** data models
+** state models
+** supporting data sets
+** extentions
+* Working pittester file
+
+=== Review by Mike
+
+* Review and comment on pit and pit structure
+
+=== Test
+
+* Verify datasheet and usage guide
+* Verify pit against Huawei test environment (if no environment see mike)
+* Verify full coverage of specification
+* Run PIT over night to verify it can fuzz for 12+ hours
+* Create long running test files (see Michael M.)
+* Verify pit usable via Peach web interface
+
+=== Sign off my Mike
+
+* Review testing, final pit, documentation, etc.
+
+== Checking files into repo
+
+* Use the "pits" repo (this one)
+* Use branch "client-huawei"
+* Add deliverable files (files in the "Deliverables" section) to a +Deliverables+ folder
+
+== Deliverables
+
+_Common/Models/Net/protocol_Data.xml::
+    Protocol data models.
+    All of the data models created for this protocol live in this file.
+
+_Common/Models/Net/protocol_State.xml::
+    Protocol state models.
+    All of the state models created for this protocol live in this file.
+
+Net/protocol.xml::
+    Top level definition.
+    This file contains the _Test_ element.
+
+Net/protocol.xml.config::
+    Configuration file.
+    This file contains any configurable settings such as ip addresses.
+
+Net/protocol.xml.test::
+    Unit test for this protocol.
+    Used by the PitTester.
+    
+Net/protocol_DataSheet.adoc::
+    General information about the protocol and our fuzzing definition.
+    
+Net/protocol_Usage.adoc::
+    Usage guide for the definition. Should provide a description of 
+    each configuration setting and a working example of usage.
+    
+Net/protocol_Huawei.adoc::
+    Customer specific usage guide with example of usage in the Huawei provided
+    test environment.
+
+== Protocol Definition
+
+
+
+== Tools
+
+eNSP:: Huawei network simulator. Contains virtual machines for different routers and switches.
+PitTester:: Internal tool for unit testing fuzzing definitions.

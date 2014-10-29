@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <!-- Copyright (c) Deja Vu Security, LLC 2013 -->
+
+    <DataModel name="AddressFamily">
+        <Block name="AFI">
+            <Choice name="Code">
+                <Number name="Reserved" size="16" endian="big" value="0" token="true"/>
+                <Number name="IPv4" size="16" endian="big" value="1" token="true"/>
+                <Number name="IPv6" size="16" endian="big" value="2" token="true"/>
+                <Number name="NSAP" size="16" endian="big" value="3" token="true"/>
+                <Number name="HDLC" size="16" endian="big" value="4" token="true"/>
+                <Number name="BBN_1822" size="16" endian="big" value="5" token="true"/>
+                <Number name="802" size="16" endian="big" value="6" token="true"/>
+                <Number name="E_163" size="16" endian="big" value="7" token="true"/>
+                <Number name="E_164" size="16" endian="big" value="8" token="true"/>
+                <Number name="F_69" size="16" endian="big" value="9" token="true"/>
+                <Number name="X_121" size="16" endian="big" value="10" token="true"/>
+                <Number name="IPX" size="16" endian="big" value="11" token="true"/>
+                <Number name="Appletalk" size="16" endian="big" value="12" token="true"/>
+                <Number name="Decnet_IV" size="16" endian="big" value="13" token="true"/>
+                <Number name="Banyan_Vines" size="16" endian="big" value="14" token="true"/>
+                <Number name="E_164_NSAP" size="16" endian="big" value="15" token="true"/>
+                <Number name="DNS" size="16" endian="big" value="16" token="true"/>
+                <Number name="DN" size="16" endian="big" value="17" token="true"/>
+                <Number name="ASN" size="16" endian="big" value="18" token="true"/>
+                <Number name="XTP_IPv4" size="16" endian="big" value="19" token="true"/>
+                <Number name="XTP_IPv6" size="16" endian="big" value="20" token="true"/>
+                <Number name="XTP_native" size="16" endian="big" value="21" token="true"/>
+                <Number name="FibreChannel_Port" size="16" endian="big" value="22" token="true"/>
+                <Number name="FibreChannel_Node" size="16" endian="big" value="23" token="true"/>
+                <Number name="GWID" size="16" endian="big" value="24" token="true"/>
+                <Number name="AFI" size="16" endian="big" value="25" token="true"/>
+                <Number name="MPLS-TP_Section" size="16" endian="big" value="26" token="true"/>
+                <Number name="MPLS-TP_LSP" size="16" endian="big" value="27" token="true"/>
+                <Number name="MPLS-TP_Pseudowire" size="16" endian="big" value="28" token="true"/>
+                <Number name="MT_IP" size="16" endian="big" value="29" token="true"/>
+                <Number name="MT_IPv6" size="16" endian="big" value="30" token="true"/>
+                <Number name="EIGRP_Common" size="16" endian="big" value="16384" token="true"/>
+                <Number name="EIGRP_IPv4" size="16" endian="big" value="16385" token="true"/>
+                <Number name="EIGRP_IPv6" size="16" endian="big" value="16386" token="true"/>
+                <Number name="LCAF" size="16" endian="big" value="16387" token="true"/>
+                <Number name="BGP-LS" size="16" endian="big" value="16388" token="true"/>
+                <Number name="48bit_MAC" size="16" endian="big" value="16389" token="true"/>
+                <Number name="64bit_MAC" size="16" endian="big" value="16390" token="true"/>
+                <Number name="OUI" size="16" endian="big" value="16391" token="true"/>
+                <Number name="MAC_24" size="16" endian="big" value="16392" token="true"/>
+                <Number name="MAC_40" size="16" endian="big" value="16393" token="true"/>
+                <Number name="IPv6_64" size="16" endian="big" value="16394" token="true"/>
+                <Number name="RBridge_Port_ID" size="16" endian="big" value="16395" token="true"/>
+                <Number name="TRILL_Nickname" size="16" endian="big" value="16396" token="true"/>
+                <Number name="UNKNOWN" size="16" endian="big"/>
+            </Choice>
+        </Block>
+        <Block name="SAFI">
+            <Choice name="Code">
+                <Number name="Reserved" size="8" value="0" token="true"/>
+                <Number name="NLRI_UCAST" size="8" value="1" token="true"/>
+                <Number name="NLRI_MCAST" size="8" value="2" token="true"/>
+                <Number name="NLRI_MCAST_UCAST" size="8" value="3" token="true"/>
+                <Number name="NLRI_MPLS" size="8" value="4" token="true"/>
+                <Number name="MCAST_VPN" size="8" value="5" token="true"/>
+                <Number name="NLRI_DynamicPsuedowire" size="8" value="6" token="true"/>
+                <Number name="Encapsulation" size="8" value="7" token="true"/>
+                <Number name="MCAST_VPLS" size="8" value="8" token="true"/>
+                <Number name="Tunnel" size="8" value="64" token="true"/>
+                <Number name="VPLS" size="8" value="65" token="true"/>
+                <Number name="BGP_MDT" size="8" value="66" token="true"/>
+                <Number name="BGP_4over6" size="8" value="67" token="true"/>
+                <Number name="BGP_6over4" size="8" value="68" token="true"/>
+                <Number name="L1_VPN_AutoDiscovery" size="8" value="69" token="true"/>
+                <Number name="BGP_EVPNs" size="8" value="70" token="true"/>
+                <Number name="BGP_LS" size="8" value="71" token="true"/>
+                <Number name="MPLS_VPN" size="8" value="128" token="true"/>
+                <Number name="MCAST_MPLS_VPN" size="8" value="129" token="true"/>
+                <Number name="RouteTargetConstrains" size="8" value="132" token="true"/>
+                <Number name="IPv4_FlowRules" size="8" value="133" token="true"/>
+                <Number name="VPNv4_FlowRules" size="8" value="134" token="true"/>
+                <Number name="VPN_AutoDiscovery" size="8" value="140" token="true"/>
+                <Number name="UNKNOWN" size="8"/>
+            </Choice>
+        </Block>
+    </DataModel>
+
+</Peach>

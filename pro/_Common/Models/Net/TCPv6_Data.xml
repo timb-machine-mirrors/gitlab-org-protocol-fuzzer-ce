@@ -39,17 +39,17 @@ SUCH DAMAGE.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"  
        author="Deja Vu Security, LLC"
- description="Transport Control Protocol PIT DataModels" version="0.0.2">
+       description="Transport Control Protocol PIT DataModels" version="0.0.2">
 	
 	<Include ns="TCP" src="file:##PitLibraryPath##/_Common/Models/Net/TCP_Data.xml"/>
 
 	<DataModel name="Packet" ref="TCP:Packet">
 		<Number name="Header.CheckSum" size="16" endian="big">
 			<Fixup class="TCPChecksumFixup">
-					<Param name="ref" value="Packet" />
-					<Param name="src" value="##SourceIPv6##" />
-					<Param name="dst" value="##TargetIPv6##" />
-				</Fixup>
+				<Param name="ref" value="Packet" />
+				<Param name="src" value="##SourceIPv6##" />
+				<Param name="dst" value="##TargetIPv6##" />
+			</Fixup>
 		</Number>
 	</DataModel>
 
@@ -57,4 +57,20 @@ SUCH DAMAGE.
 		<Blob name="TcpPayload" value="this is a packet.\n"/>
 	</DataModel>
 
+	<!-- For incoming packets, don't parse the options & padding section -->
+	<DataModel name="InPacket" ref="Packet">
+		<Block name="Header.OptionsAndPadding" />
+	</DataModel>
+
+	<!-- For incoming packets, don't parse the options & padding section -->
+	<!-- Also allow for zero byte input (no data waiting) -->
+	<DataModel name="InPacketOrNone">
+		<Choice name="PacketOrNone">
+			<Block name="Packet" ref="Packet">
+				<Block name="Header.OptionsAndPadding" />
+			</Block>
+
+			<Block name="None" />
+		</Choice>
+	</DataModel>
 </Peach>

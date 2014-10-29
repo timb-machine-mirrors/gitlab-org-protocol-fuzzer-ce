@@ -1,0 +1,6 @@
+== SSH File Transfer Protocol
+
+* Implement only SSH channel portion
+* Write publisher for SSH Channel using SSH.NET
+** Has ability to add new channels
+* Actual FTP portion of protocol is "easy" looking TLV

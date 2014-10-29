@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd"
+        author="Deja Vu Security, LLC"
+        description="BGP4 PIT"
+        version="0.0.1">
+
+    <!-- rfc2918 Route Refresh Capability for BGP-4
+         tools.ietf.org/html/rfc2918 -->
+    <Include ns="Base" src="file:##Path##/_Common/Models/Net/BGP_BaseTypes.xml"/>
+    <Include ns="IANA" src="file:##Path##/_Common/Models/Net/BGP_IANA.xml"/>
+
+    <DataModel name="ORFTypes">
+        <Block name="Reserved">
+            <Number size="8" value="0" token="true"/>
+        </Block>
+        <Block name="AddressPrefixORF">
+            <Number size="8" value="64" token="true"/>
+        </Block>
+        <Block name="CP-ORF">
+            <Number size="8" value="65" token="true"/>
+        </Block>
+        <Block name="UNKNOWN">
+            <Number size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="Capability" ref="Base:BGP4Capability">
+        <!-- Quaga says that cisco's old ORF CapNumber was 130 -->
+        <Number name="CapabilityType" size="8" value="3" token="true"/>
+        <Block name="CapabilityValue">
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+            <Number name="reserved" size="8" value="0x00"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+            <Number name="numORFs" size="8">
+                <Relation type="count" of="ORFs"/>
+            </Number>
+            <Block name="ORFs" minOccurs="0" maxOccurs="1">
+                <Choice name="ORFType">
+                    <Block ref="ORFTypes.Reserved"/>
+                    <Block ref="ORFTypes.AddressPrefixORF"/>
+                    <Block ref="ORFTypes.CP-ORF"/>
+                    <Block ref="ORFTypes.UNKNOWN"/>
+                </Choice>
+                <Choice name="SendRecieve">
+                    <Number name="Recieve"
+                            size="8" value="1" token="true"/>
+                    <Number name="Send"
+                            size="8" value="2" token="true"/>
+                    <Number name="Send/Recieve" 
+                            size="8" value="2" token="true"/>
+                </Choice>
+            </Block>
+        </Block>
+    </DataModel>
+
+
+    <DataModel name="ORFEntry">
+        <Number name="Action" size="2"/>
+        <Number name="Match" size="2"/>
+        <Number name="Reserved" size="5"/>
+        <Block name="ORFData"/>
+    </DataModel>
+
+    <DataModel name="ORFTypeEntry">
+        <Block name="Type"/>
+        <Number name="EntryLen" size="16" endian="big">
+            <Relation type="size" of="Entry"/>
+        </Number>
+        <Block name="Entry" ref="ORFEntry" minOccurs="0" maxOccurs="-1"/>
+    </DataModel>
+
+    <DataModel name="ReservedORFEntry" ref="ORFTypeEntry">
+        <Block name="Type" ref="ORFTypes.Reserved"/>
+        <Block name="Entry.ORFData">
+            <Blob name="UnknownData"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="UnknownORFEntry" ref="ORFTypeEntry">
+        <Block name="Type" ref="ORFTypes.UNKNOWN"/>
+        <Block name="Entry.ORFData">
+            <Blob name="UnknownData"/>
+        </Block>
+    </DataModel>
+
+    <!-- BEGIN rfc5292 -->
+    <DataModel name="AddressPrefixORFEntry" ref="ORFTypeEntry">
+        <Block name="Type" ref="ORFTypes.AddressPrefixORF"/>
+        <Block name="Entry.ORFData" minOccurs="0" maxOccurs="-1">
+            <Number name="Sequence" size="32" endian="big"/>
+            <Number name="MinLen" size="8"/>
+            <Number name="MaxLen" size="8"/>
+            <Number name="Length" size="8">
+                <Relation type="count" of="Prefix"/>
+            </Number>
+            <Number name="Prefix" size="1" minOccurs="0" maxOccurs="255"/>
+        </Block>
+    </DataModel>
+    <!-- END 5292 -->
+
+    <!-- BEGIN draft-ietf-l3vpn-orf-covering-prefixes-02 -->
+
+    <!-- TODO: Complex HostAddress selection criteria -->
+    <DataModel name="CP-ORFEntry" ref="ORFTypeEntry">
+        <Block name="Type" ref="ORFTypes.AddressPrefixORF"/>
+        <Block name="Entry.ORFData" minOccurs="0" maxOccurs="-1">
+            <Number name="Sequence" size="32" endian="big"/>
+            <Number name="MinLen" size="8"/>
+            <Number name="MaxLen" size="8"/>
+            <Number name="VPNRouteTarget" size="64"/>
+            <Number name="ImportRouteTarget" size="64"/>
+            <Number name="RouteType" size="8"/>
+            <Choice name="HostAddress">
+                <Block name="0bit"/>
+                <Number name="32bit" size="32" endian="big"/>
+                <Number name="48bit" size="48" endian="big"/>
+                <Blob name="128bit" length="16"/>
+            </Choice>
+        </Block>
+    </DataModel>
+    <!-- END draft-ietf-l3vpn-orf-covering-prefixes-02 -->
+
+    <DataModel name="Message" ref="Base:BGP4Message">
+        <!-- MessageType same as Route-Refresh -->
+        <Number name="MessageType" size="8" value="5" token="true"/>
+        <!-- PacketLength constraint set due to overloading of RouteRefresh in rfc5291 (ORF) -->
+        <Number name="PacketLength" size="16"
+                value="72" constraint="int(value) > 72"/>
+        <Block name="MessageData">
+            <Block name="AFI" ref="IANA:AddressFamily.AFI"/>
+            <Number name="reserved" size="8" value="0x00"/>
+            <Block name="SAFI" ref="IANA:AddressFamily.SAFI"/>
+            <Number name="Refresh" size="8"/>
+            <Choice name="ORFs" minOccurs="0" maxOccurs="-1">
+                <Block name="ReservedORF" ref="ReservedORFEntry"/>
+                <Block name="CP-ORF" ref="CP-ORFEntry"/>
+                <Block name="AddressPrefixORF" ref="AddressPrefixORFEntry"/>
+                <Block name="UnknownORF" ref="UnknownORFEntry"/>
+            </Choice>
+        </Block>
+    </DataModel>
+
+</Peach>

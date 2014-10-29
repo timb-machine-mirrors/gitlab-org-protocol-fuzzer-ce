@@ -8,6 +8,9 @@ A target machine with ICMPv6 enabled.  A firewall must not block ICMPv6 messages
 ==== Required Pit Configuration Changes
 TargetIPv6:: IP address of the target host machine.
 SourceIPv6:: IP address of the interface on the local machine.
+SourceMAC:: MAC address on local machine.
+TargetMAC:: MAC address of target machine.
+Interface:: Name of local interface.
 
 ==== Optional Pit Configuration Changes.
 Strategy:: Fuzzing strategy Peach will use for testing.
@@ -61,17 +64,22 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
 <PitDefines>
 	<All>
 		<Hwaddr key="SourceMAC"
-				value="000000000000"
+				value="00:0c:29:16:ef:8b"
 				name="Source MAC Address"
 				description="Hardware address of the network interface on machine running Peach Fuzzer. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."/>
 
 		<Ipv6 key="SourceIPv6"
-			  value="::1"
+			  value="fde4:8dba:82e1::2"
 			  name="Source IPv6 Address"
 			  description="The IPv6 address of the machine running Peach Fuzzer. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
 
+		<Hwaddr key="TargetMAC"
+				value="00:0c:29:4c:4e:b2"
+				name="Target MAC Address"
+				description="Hardware address of the network interface on target machine or device. To find the hardware address on Windows, run 'ipconfig /all' and look for the 'Physical Address' field. For Linux run 'ifconfig' and look for the 'HWaddr' field. For OS X run 'ifconfig' and look for the 'ether' field."  />
+
 		<Ipv6 key="TargetIPv6"
-			  value="::1"
+			  value="fde4:8dba:82e1::1"
 			  name="Target IPv6 Address"
 			  description="The IPv6 address of the target machine or device. The IPv6 address can be found on Windows by running 'ipconfig' and looking for the 'IPv6 Address' field. For Linux run 'ifconfig' and look for 'inet6 addr' field. For OS X run 'ifconfig' and look for the 'inet6' field."/>
 
@@ -90,6 +98,22 @@ File and Printer Sharing (Echo Request - ICMPv6-In)
 				name="Pit Library Path"
 				description="The path to the root of the pit library."/>
 	</All>
+
+	<Linux>
+		<Iface key="Interface"
+			   value="eth0"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+	</Linux>
+
+	<OSX>
+		<Iface key="Interface"
+			   value="en0"
+			   name="Network Interface"
+			   description="The network interface to transmit packets over. For Windows, the network interfaces can be shown by running 'ipconfig'. On Linux and OS X, the network interfaces can be shown by running the command 'ifconfig'."/>
+	</OSX>
+
 </PitDefines>
+
 ----
 ==========================

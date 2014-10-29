@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach c:\peach-pro\output\win_x64_debug\bin\peach.xsd">
+
+	<Import import="randofaulter"/>
+	
+	<!-- Create a simple data template containing a single string -->
+	<DataModel name="TheDataModel">
+		<Block name="Headers">
+			<Number name="Width" size="32" />
+			<Number name="Height" size="32" />
+			<Number name="Depth" size="32" />
+			<Flags name="Options" size="8">
+				<Flag name="Opt1" size="1" position="0" />
+				<Flag name="Opt2" size="1" position="1" />
+				<Flag name="Opt3" size="1" position="2" />
+				<Flag name="Opt4" size="1" position="3" />
+				<Flag name="Opt5" size="1" position="4" />
+			</Flags>
+		</Block>
+		<Number name="Length" size="32">
+			<Relation type="size" of="Data"/>
+		</Number>
+		<Block name="Data">
+			<String name="Type" value="IHDR" />
+			<Number name="Count" size="16">
+				<Relation type="count" of="DataSegment"/>
+			</Number>
+			<Blob name="DataSegment" valueType="hex"  value="aaaaaaaaaa" minOccurs="0" />
+		</Block>
+	</DataModel>
+	
+	<StateModel name="State" initialState="S1" >
+		<State name="S1">
+		  <!-- Inform monitor about control iterations -->
+			<Action type="call" method="oops" publisher="Peach.Agent" onStart="randofaulter.UpdateMethod(self, Context)"/>
+			
+			<Action name="A1" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="bbbbbbbbbb"/>
+				</Data>
+			</Action>
+			<Action name="A2" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="bbbbbbbbbb"/>
+				</Data>
+			</Action>
+			<Action name="A3" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="bbbbbbbbbb"/>
+				</Data>
+			</Action>
+			<Action name="A4" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="bbbbbbbbbb"/>
+				</Data>
+			</Action>
+			<Action name="ACALL" type="call" method="call_method">
+				<Param name="P1">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="bbbbbbbbbb"/>
+					</Data>
+				</Param>
+				<Param name="P2">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P3">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+			</Action>
+			
+			<Action name="A5" type="changeState" ref="S2" />
+		</State>
+		<State name="S2">
+			<Action name="A1" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A2" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A3" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A4" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="ACALL" type="call" method="call_method">
+				<Param name="P1">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P2">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P3">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+			</Action>
+			<Action name="A5" type="changeState" ref="S3" />
+		</State>
+		<State name="S3">
+			<Action name="A1" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A2" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A3" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A4" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="ACALL" type="call" method="call_method">
+				<Param name="P1">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P2">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P3">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+			</Action>
+			<Action name="A5" type="changeState" ref="S4" />
+		</State>
+		<State name="S4">
+			<Action name="A1" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A2" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A3" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="A4" type="output" >
+				<DataModel ref="TheDataModel"/>
+				<Data>
+					<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+				</Data>
+			</Action>
+			<Action name="ACALL" type="call" method="call_method">
+				<Param name="P1">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P2">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+				<Param name="P3">
+					<DataModel ref="TheDataModel"/>
+					<Data>
+						<Field name="Data.DataSegment[10]" valueType="hex"  value="aaaaaaaaaa"/>
+					</Data>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="LocalAgent">
+		<Monitor class="RandoFaulter"/>
+	</Agent>
+
+	<!-- Our Test element will link together our state model and publisher -->
+	<Test name="Default" replayEnabled="false">
+		<Agent ref="LocalAgent"/>
+		<StateModel ref="State"/>
+		<Strategy class="Random">
+			<Param name="SwitchCount" value="10" />
+		</Strategy>
+		<Publisher class="Null">
+<!-- 			<Param name="FileName" value="rando.bin"/>
+ -->		</Publisher>
+		<Logger class="File">
+			<Param name="Path" value="..\Logs" />
+		</Logger>
+		<Logger class="Metrics">
+			<Param name="Path" value="..\Logs" />
+		</Logger>
+	</Test>
+</Peach>
+<!-- end -->

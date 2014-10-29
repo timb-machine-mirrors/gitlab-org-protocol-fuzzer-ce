@@ -1,0 +1,535 @@
+= PitTester Documentation
+
+PitTester is an internal application used to run unittests for pits. The PitTester consumes _pit.xml.test_ files that contain pre-recorded input and expected output for each action in the pits state model. This system is also used during development of the protocol definitions for a test-driven development methodology.
+
+== Test file format
+
+The test file format has parts, the first is the definition os configuration values needed for the pit to run. The second
+part of the test file format is mapping of expected input to output.
+
+
+=== Reference
+
+==== TestData element
+
+This is the root elements of the pit test.
+
+===== Syntax
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="Seed" value="*.bmp"/>
+	<Define key="Strategy" value="Random"/>
+	<Define key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Image"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Output action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Close  action="BMP:FileWriteAndLaunch.Initial.CloseFile"           publisher="writer"/>
+	</Test>
+</TestData>
+----
+
+====== Attributes
+
+No child elements are supported.
+
+====== Child Elements
+
+The following are permitted child elements.
+
+xref:Ref_Define[Define]:: Define a configuration value
+xref:Ref_Slurp[Slurp]:: Slurp actions required for valid input/output
+xref:Ref_Test[Test]:: Provide input and expected output for a corresponding _Test_ element in the pit file.
+
+[[Ref_Define]]
+==== Define Element
+
+The +Define+ xml element is used to define configuration elements required for testing of the pit.
+
+===== Syntax
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="Seed" value="*.bmp"/>
+	<Define key="Strategy" value="Random"/>
+	<Define key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Image"/>
+	<!-- PitLibraryPath is set by the tester -->
+    
+</TestData>
+----
+
+===== Attributes
+
+key:: Name of the configuration field to set
+value:: Value of the configuration field
+
+===== Child Elements
+
+No child elements are supported.
+
+[[Ref_Slurp]]
+==== Slurp Element
+
+===== Syntax
+
+[source,xml]
+----
+<Slurp setXpath="//TransactionId" valueType="hex" value="e7fb58"/>
+----
+
+===== Attributes
+
+setXpath::
+valueXpath::
+value::
+
+===== Child Elements
+
+No child elements are supported.
+
+[[Ref_Test]]
+==== Test Element
+
+The _Test_ element is a child of _TestData_. It matches a _Test_ element defined in the pit file being tested.
+
+===== Syntax
+
+[source,xml]
+----
+<Test name="Default">
+    <Open   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+    <Output action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+    <Close  action="BMP:FileWriteAndLaunch.Initial.CloseFile"           publisher="writer"/>
+</Test>
+----
+
+===== Attributes
+
+name:: Name of the corresponding _Test_ element in the pit file
+
+===== Child Elements
+
+The following are permitted child elements. Actions from the pit state model must have corresponding 
+elements.
+
+xref:Ref_Start[Start]:: 
+xref:Ref_Start[Stop]:: 
+xref:Ref_Start[Open]::
+xref:Ref_Start[Accept]::
+xref:Ref_Start[Close]::
+xref:Ref_Start[Input]::
+xref:Ref_Start[Output]::
+xref:Ref_Start[Call]::
+xref:Ref_Start[GetProperty]::
+xref:Ref_Start[SetProperty]::
+
+//////////////////////////////////////
+//////////////////////////////////////
+
+[[Ref_Start]]
+==== Start Element
+
+===== Syntax
+
+[source,xml]
+----
+<Start   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+No child elements are supported.
+
+[[Ref_Stop]]
+==== Stop Element
+
+===== Syntax
+
+[source,xml]
+----
+<Stop   action="BMP:FileWriteAndLaunch.Initial.Stop" publisher="writer"/>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+No child elements are supported.
+
+[[Ref_Open]]
+==== Open Element
+
+===== Syntax
+
+[source,xml]
+----
+<Open   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+No child elements are supported.
+
+==== Accept Element
+
+===== Syntax
+
+[source,xml]
+----
+<Accept   action="TCP:TcpServer.Initial.Accept" publisher="writer"/>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+No child elements are supported.
+
+[[Ref_Close]]
+==== Close Element
+
+===== Syntax
+
+[source,xml]
+----
+<Close  action="BMP:FileWriteAndLaunch.Initial.CloseFile"           publisher="writer"/>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+No child elements are supported.
+
+// //////////////////////////////////////
+
+[[Ref_Input]]
+==== Input Element
+
+===== Syntax
+
+[source,xml]
+----
+		<Input action="DHCPv6:Client.Initial.Advertise" publisher="Pub">
+<![CDATA[
+0000   02 e7 fb 58 00 01 00 0e 00 01 00 01 17 5f fd 1b  ...X........._..
+0010   00 0c 29 e9 b4 3b 00 02 00 0e 00 01 00 01 19 97  ..)..;..........
+0020   97 65 00 0c 29 ff dd a1 00 03 00 28 0e 00 0c 29  .e..)......(...)
+0030   00 00 07 08 00 00 0b 40 00 05 00 18 20 01 04 70  .......@.... ..p
+0040   68 03 07 31 00 01 00 00 00 00 00 01 00 00 0e 10  h..1............
+0050   00 00 0e 10 00 17 00 10 20 01 04 70 68 03 07 31  ........ ..ph..1
+0060   00 00 00 00 00 00 02 53 00 18 00 12 04 61 73 37  .......S.....as7
+0070   33 07 69 6e 65 74 73 69 78 03 6e 65 74 00        3.inetsix.net.
+]]>
+        </Input>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+_Optional_
+
+datagram:: Is the publisher a datagram style publisher (udp, etc.) in which unused data should be discarded. True or false, defaults to false.
+
+===== Child Elements
+
+CData::
++
+This elements supports a cdata section that contains the expected input.
++
+----
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+----
+
+[[Ref_Output]]
+==== Output Element
+
+===== Syntax
+
+[source,xml]
+----
+		<Output action="DHCPv6:Client.Initial.Solicit" publisher="Pub">
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+		</Output>
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+CData::
++
+This elements supports a cdata section that contains the expected output.
++
+----
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+----
+
+[[Ref_Call]]
+==== Call Element
+
+WARNING: This action type is not fully implemented.
+
+===== Syntax
+
+[source,xml]
+----
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+CData::
++
+This elements supports a cdata section that contains the expected output.
+
+CData::
++
+This elements supports a cdata section that contains the expected input.
++
+----
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+----
+
+[[Ref_GetProperty]]
+==== GetProperty Element
+
+WARNING: This action type is not fully implemented.
+
+
+===== Syntax
+
+[source,xml]
+----
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+CData::
++
+This elements supports a cdata section that contains the expected output.
+
+CData::
++
+This elements supports a cdata section that contains the expected input.
++
+----
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+----
+
+[[Ref_SetProperty]]
+==== SetProperty Element
+
+WARNING: This action type is not fully implemented.
+
+
+===== Syntax
+
+[source,xml]
+----
+----
+
+===== Attributes
+
+action:: Full name of the action this element maps to in the state model.
+publisher:: Name of publisher this element targets.
+
+===== Child Elements
+
+CData::
++
+This elements supports a cdata section that contains the expected output.
+
+CData::
++
+This elements supports a cdata section that contains the expected input.
++
+----
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+----
+
+=== Examples
+
+.BMP Example
+========================
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="Seed" value="*.bmp"/>
+	<Define key="Strategy" value="Random"/>
+	<Define key="SamplePath" value="##PitLibraryPath##/_Common/Samples/Image"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Test name="Default">
+		<Open   action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Output action="BMP:FileWriteAndLaunch.Initial.WriteFileFromSample" publisher="writer"/>
+		<Close  action="BMP:FileWriteAndLaunch.Initial.CloseFile"           publisher="writer"/>
+	</Test>
+</TestData>
+----
+
+========================
+
+.DHCPv6 Server Example
+========================
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<TestData>
+
+	<Define key="SourcePort"       value="546"/>
+	<Define key="MulticastDHCP"    value="ff02::1:2"/>
+	<Define key="SourceMAC"        value="000c29e9b43b"/>
+	<Define key="TargetMAC"        value="000c29ffdda1"/>
+	<Define key="TargetPort"       value="547"/>
+	<Define key="Strategy"         value="Random"/>
+	<Define key="LoggerPath"       value="logs/dhcpV6/"/>
+	<!-- PitLibraryPath is set by the tester -->
+
+	<Slurp setXpath="//TransactionId" valueType="hex" value="e7fb58"/>
+	<Slurp setXpath="//Solicit/DHCPv6:Solicit/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
+	<Slurp setXpath="//Request/DHCPv6:Request/Options/ClientIdentifier/Value/DuidTime" value="392166683"/>
+	<Slurp setXpath="//Domain" value="TSE-MANAGEMENT"/>
+
+	<Test name="Default">
+		<Open action="DHCPv6:Client.Initial.Solicit" publisher="Pub"/>
+		<Output action="DHCPv6:Client.Initial.Solicit" publisher="Pub">
+<![CDATA[
+0000   01 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 03 00 0c  ..._....)..;....
+0020   0e 00 0c 29 00 00 00 00 00 00 00 00 00 27 00 10  ...).........'..
+0030   00 0e 54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54  ..TSE-MANAGEMENT
+0040   00 10 00 0e 00 00 01 37 00 08 4d 53 46 54 20 35  .......7..MSFT 5
+0050   2e 30 00 06 00 08 00 18 00 17 00 11 00 27        .0...........'
+]]>
+		</Output>
+		<Input action="DHCPv6:Client.Initial.Advertise" publisher="Pub">
+<![CDATA[
+0000   02 e7 fb 58 00 01 00 0e 00 01 00 01 17 5f fd 1b  ...X........._..
+0010   00 0c 29 e9 b4 3b 00 02 00 0e 00 01 00 01 19 97  ..)..;..........
+0020   97 65 00 0c 29 ff dd a1 00 03 00 28 0e 00 0c 29  .e..)......(...)
+0030   00 00 07 08 00 00 0b 40 00 05 00 18 20 01 04 70  .......@.... ..p
+0040   68 03 07 31 00 01 00 00 00 00 00 01 00 00 0e 10  h..1............
+0050   00 00 0e 10 00 17 00 10 20 01 04 70 68 03 07 31  ........ ..ph..1
+0060   00 00 00 00 00 00 02 53 00 18 00 12 04 61 73 37  .......S.....as7
+0070   33 07 69 6e 65 74 73 69 78 03 6e 65 74 00        3.inetsix.net.
+]]>
+		</Input>
+		<Output action="DHCPv6:Client.Initial.Request" publisher="Pub">
+<![CDATA[
+0000   03 e7 fb 58 00 08 00 02 00 00 00 01 00 0e 00 01  ...X............
+0010   00 01 17 5f fd 1b 00 0c 29 e9 b4 3b 00 02 00 0e  ..._....)..;....
+0020   00 01 00 01 19 97 97 65 00 0c 29 ff dd a1 00 03  .......e..).....
+0030   00 28 0e 00 0c 29 00 00 07 08 00 00 0b 40 00 05  .(...).......@..
+0040   00 18 20 01 04 70 68 03 07 31 00 01 00 00 00 00  .. ..ph..1......
+0050   00 01 00 00 0e 10 00 00 0e 10 00 27 00 10 00 0e  ...........'....
+0060   54 53 45 2d 4d 41 4e 41 47 45 4d 45 4e 54 00 10  TSE-MANAGEMENT..
+0070   00 0e 00 00 01 37 00 08 4d 53 46 54 20 35 2e 30  .....7..MSFT 5.0
+0080   00 06 00 08 00 18 00 17 00 11 00 27              ...........'
+]]>
+		</Output>
+		<Input action="DHCPv6:Client.Initial.Reply" publisher="Pub">
+<![CDATA[
+0000   07 e7 fb 58 00 01 00 0e 00 01 00 01 17 5f fd 1b  ...X........._..
+0010   00 0c 29 e9 b4 3b 00 02 00 0e 00 01 00 01 19 97  ..)..;..........
+0020   97 65 00 0c 29 ff dd a1 00 03 00 28 0e 00 0c 29  .e..)......(...)
+0030   00 00 07 08 00 00 0b 40 00 05 00 18 20 01 04 70  .......@.... ..p
+0040   68 03 07 31 00 01 00 00 00 00 00 01 00 00 0e 10  h..1............
+0050   00 00 0e 10 00 17 00 10 20 01 04 70 68 03 07 31  ........ ..ph..1
+0060   00 00 00 00 00 00 02 53 00 18 00 12 04 61 73 37  .......S.....as7
+0070   33 07 69 6e 65 74 73 69 78 03 6e 65 74 00        3.inetsix.net.
+]]>
+		</Input>
+	</Test>
+
+</TestData>
+----
+
+========================
