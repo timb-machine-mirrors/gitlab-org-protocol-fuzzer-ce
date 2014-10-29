@@ -52,7 +52,6 @@ namespace Peach.Core.Test.Publishers
 
 			try
 			{
-				var parser = new PitParser();
 				var dom = DataModelCollector.ParsePit(xml);
 
 				var config = new RunConfiguration()

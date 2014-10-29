@@ -25,8 +25,6 @@ namespace Peach.Core.Dom.XPath
 	/// </remarks>
 	public class PeachXPathNavigator : XPathNavigator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
 		protected List<object> moveToHistory = new List<object>();
 
 		/// <summary>
