@@ -60,9 +60,9 @@ MONO_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 
 CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  ${if getattr(project, 'csproj_imports', None)}
-  ${project.csproj_imports}
-  ${endif}
+  ${for x in project.csproj_imports}
+  ${x}
+  ${endfor}
 
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">${project.build_properties[0].configuration}</Configuration>
@@ -196,6 +196,18 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   </PropertyGroup>
   ${endif}
 
+  ${if project.global_props}
+  <PropertyGroup>
+  ${for k,v in project.global_props.iteritems()}
+    <${k}>${str(v)}</${k}>
+  ${endfor}
+  </PropertyGroup>
+  ${endif}
+
+  ${for x in project.csproj_post_imports}
+  ${x}
+  ${endfor}
+
 </Project>'''
 
 # Note, no newline at end of template file!
@@ -328,7 +340,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 		if getattr(ctx, 'csproj_in_tree', True):
 			self.base = tg.path
 
-		name = getattr(tg, 'ide_name', os.path.splitext(tg.gen)[0])
+		name = getattr(tg, 'ide_name', None)
+		if not name:
+			if hasattr(tg, 'gen'):
+				name = os.path.splitext(tg.gen)[0]
+			else:
+				name = tg.name
 		node = self.base.make_node(name + '.csproj') # the project file as a Node
 		msvs.vsnode_project.__init__(self, ctx, node)
 		self.name = name
@@ -339,11 +356,22 @@ class vsnode_cs_target(msvs.vsnode_project):
 		self.properties   = OrderedDict()
 		self.references   = OrderedDict() # Name -> HintPath
 		self.source_files = OrderedDict() # Abspath -> Record
+		self.global_props = OrderedDict()
 		self.project_refs = [] # uuid
 		self.proj_configs = OrderedDict() # Variant -> build_property
 		self.project_dependencies = OrderedDict() # List of UUID
 		self.project_sections = OrderedDict() # sln sections, like 'ProjectDependencies'
 		self.project_sections[('ProjectDependencies', 'postProject')] = self.project_dependencies
+
+		self.csproj_imports = []
+		self.csproj_post_imports = []
+		if hasattr(tg, 'tsc'):
+			self.csproj_imports = [
+				'''<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />''',
+			]
+			self.csproj_post_imports = [
+				'''<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />''',
+			]
 
 	def combine_flags(self, flag):
 		tg = self.tg
@@ -415,7 +443,21 @@ class vsnode_cs_target(msvs.vsnode_project):
 		lst = self.source_files
 
 		# Process compiled sources
-		srcs = tg.to_nodes(tg.cs_task.inputs, [])
+		if hasattr(tg, 'cs_task'):
+			srcs = tg.to_nodes(tg.cs_task.inputs, [])
+			for x in srcs:
+				lst[x.abspath()] = source_file('Compile', self, x)
+
+		if hasattr(tg, 'tsc'):
+			srcs = tg.to_nodes(tg.tsc.inputs, [])
+			for x in srcs:
+				lst[x.abspath()] = source_file('TypeScriptCompile', self, x)
+
+			for x in tg.tsc.tsc_deps[0]:
+				lst[x.abspath()] = source_file('TypeScriptCompile', self, x)				
+
+		# extra sources if you want
+		srcs = tg.to_nodes(getattr(tg, 'ide_source', []))
 		for x in srcs:
 			lst[x.abspath()] = source_file('Compile', self, x)
 
@@ -559,7 +601,10 @@ class vsnode_cs_target(msvs.vsnode_project):
 		tg = self.tg
 		g = self.globals
 
-		asm_name = os.path.splitext(tg.cs_task.outputs[0].name)[0]
+		if hasattr(tg, 'cs_task'):
+			asm_name = os.path.splitext(tg.cs_task.outputs[0].name)[0]
+		else:
+			asm_name = tg.name
 		base = getattr(self.ctx, 'projects_dir', None) or tg.path
 
 		env = tg.env
@@ -577,7 +622,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 		g['ProjectGuid'] = '{%s}' % self.uuid
 		if getattr(tg, 'ide_aspnet', False):
 			g['ProjectTypeGuids'] = '{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}'
-		g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
+			g['OutputType'] = 'library'
+		else:
+			g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
 		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.base)
 
 		# This should get rid of the obj/<arch>/<cfg>/TempPE folder
@@ -628,6 +675,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p['DocumentationFile'] = getattr(tg, 'csdoc', tg.env.CSDOC) and out + os.sep + asm_name + '.xml' or ''
 		p['AllowUnsafeBlocks'] = getattr(tg, 'unsafe', False)
 
+		if getattr(tg, 'tsc', False):
+			self.global_props['TypeScriptOutDir'] = 'app\\js'
+
 		# Add ide_use task generator outputs as post build copy
 		# Using abspath since macros like $(ProjectDir) don't seem to work
 
@@ -660,7 +710,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 class vsnode_cs_target2012(vsnode_cs_target):
 	def __init__(self, ctx, tg):
 		vsnode_cs_target.__init__(self, ctx, tg)
-		self.csproj_imports = '''<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />'''
+		self.csproj_imports.append(
+			'''<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />'''
+		)
 
 class idegen(msvs.msvs_generator):
 	'''generates a visual studio 2010 solution'''
@@ -945,7 +997,7 @@ class idegen(msvs.msvs_generator):
 			return None
 		elif hasattr(tg, 'link_task'):
 			return self.vsnode_target(self, tg)
-		elif hasattr(tg, 'cs_task'):
+		elif hasattr(tg, 'cs_task') or hasattr(tg, 'tsc'):
 			return self.vsnode_cs_target(self, tg)
 		elif hasattr(tg, 'ide_website'):
 			return self.vsnode_web_target(self, tg)
