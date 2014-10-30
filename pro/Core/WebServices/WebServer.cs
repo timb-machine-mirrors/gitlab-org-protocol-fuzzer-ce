@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -101,7 +102,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Enterprise.WebServices");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Core.WebServices.Views");
 		}
 
 		public Bootstrapper(WebContext context)
@@ -143,13 +144,27 @@ namespace Peach.Enterprise.WebServices
 
 		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
 		{
+			// NOTE: The pipelies do not get called when serving static content.
+			// Need to investigate disabling this if we want the back end to do
+			// global redirects to the EULA.
+			// https://github.com/NancyFx/Nancy/pull/982
+
+			base.RequestStartup(container, pipelines, context);
+
+			// Ensure these get insterted after all default handlers
+			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
+			{
+				if (!Peach.Core.License.ShownEula && ctx.Request.Path != "/eula")
+					return new RedirectResponse("/eula");
+
+				return null;
+			});
+
 			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) =>
 			{
 				// Wrap all exceptions in an error response
 				return ErrorResponse.FromException(ex);
 			});
-
-			base.RequestStartup(container, pipelines, context);
 		}
 
 		protected override NancyInternalConfiguration InternalConfiguration
