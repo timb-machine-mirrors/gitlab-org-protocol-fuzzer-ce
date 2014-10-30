@@ -315,8 +315,8 @@ module DashApp.Services {
 				this.jobPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: Models.Job) => {
-						this.updateJob(data);
-					});
+					this.updateJob(data);
+				});
 			}
 			else {
 				throw "jobPoller, wasn't what I was expecting";
