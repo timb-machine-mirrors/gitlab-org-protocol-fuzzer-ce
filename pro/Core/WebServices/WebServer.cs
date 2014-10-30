@@ -151,10 +151,13 @@ namespace Peach.Enterprise.WebServices
 
 			base.RequestStartup(container, pipelines, context);
 
+			// Enable static content
+			StaticContent.Enable(pipelines);
+
 			// Ensure these get insterted after all default handlers
 			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
 			{
-				if (!Peach.Core.License.ShownEula && ctx.Request.Path != "/eula")
+				if (!Peach.Core.License.EulaAccepted && ctx.Request.Path != "/eula")
 					return new RedirectResponse("/eula");
 
 				return null;
@@ -171,9 +174,18 @@ namespace Peach.Enterprise.WebServices
 		{
 			get
 			{
-				// Tell Nancy views are embedded resources
-				return NancyInternalConfiguration.WithOverrides(c => c.ViewLocationProvider = typeof(ResourceViewLocationProvider));
+				// Allow overriding default nancy configuration
+				return NancyInternalConfiguration.WithOverrides(OnConfigurationBuilder);
 			}
+		}
+
+		void OnConfigurationBuilder(NancyInternalConfiguration c)
+		{
+			// Tell Nancy views are embedded resources
+			c.ViewLocationProvider = typeof(ResourceViewLocationProvider);
+
+			// Tell nancy to send all sttic content thru the request pipeline
+			c.StaticContentProvider = typeof(DisabledStaticContentProvider);
 		}
 	}
 

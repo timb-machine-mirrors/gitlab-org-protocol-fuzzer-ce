@@ -30,7 +30,7 @@ namespace Peach.Core
 		public static bool IsValid { get; private set; }
 		public static Feature Version { get; private set; }
 
-		public static bool ShownEula { get; set; }
+		public static bool EulaAccepted { get; set; }
 
 		static string Read()
 		{
