@@ -12,6 +12,8 @@ deps = [
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
 
+	'Portable.Licensing.dll',
+
 	'NLog.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
