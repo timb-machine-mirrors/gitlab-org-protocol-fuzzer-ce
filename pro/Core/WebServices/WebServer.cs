@@ -101,7 +101,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Enterprise.WebServices");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Core.WebServices");
 		}
 
 		public Bootstrapper(WebContext context)
