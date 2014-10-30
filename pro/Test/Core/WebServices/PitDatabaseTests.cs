@@ -587,5 +587,48 @@ namespace Peach.Enterprise.Test.WebServices
 			Assert.NotNull(file);
 			Assert.AreEqual(1, file.Versions[0].Files.Count);
 		}
+
+		[Test]
+		public void IncludeWithoutXmlns()
+		{
+			string data =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='DM'>
+		<String/>
+	</DataModel>
+</Peach>
+";
+			string pit =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/My_Data.xml' />
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='##Strategy##'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+			File.WriteAllText(Path.Combine(root, "_Common", "Models", "Image", "My_Data.xml"), data);
+			File.WriteAllText(Path.Combine(root, "Image", "My.xml"), pit);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(2, db.Entries.Count());
+
+			var file = db.Entries.Where(e => e.Name == "My").FirstOrDefault();
+			Assert.NotNull(file);
+			Assert.AreEqual(2, file.Versions[0].Files.Count);
+		}
 	}
 }

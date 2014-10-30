@@ -36,7 +36,7 @@ namespace Peach.Core
 			byte[] buf = ip.GetAddressBytes();
 
 			if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-				return (buf[0] & 0xe0) == 0xe0;
+				return (buf[0] & 0xf0) == 0xe0;
 			else
 				return (buf[0] == 0xff);
 		}

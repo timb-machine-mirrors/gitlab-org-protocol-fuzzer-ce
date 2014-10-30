@@ -259,7 +259,7 @@ namespace Peach.Core.Dom
 
 		public void Run(RunContext context)
 		{
-			logger.Trace("Run({0}): {1}", name, GetType().Name);
+			logger.Debug("Run({0}): {1}", name, GetType().Name);
 
 			// Setup scope for any scripting expressions
 			scope["context"] = context;
@@ -328,8 +328,6 @@ namespace Peach.Core.Dom
 			try
 			{
 				context.OnActionStarting(this);
-
-				logger.Debug("ActionType.{0}", GetType().Name.ToString());
 
 				RunScript(onStart);
 

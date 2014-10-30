@@ -93,6 +93,8 @@ namespace Peach.Core.Test.Mutators
 
 			Assert.AreEqual(new byte[] { 0x01 }, dm.Value.ToArray());
 
+			runner.SeedOverride = 1;
+
 			var m = runner.Random(5000, blob);
 
 			var lengths = new Dictionary<int, int>();

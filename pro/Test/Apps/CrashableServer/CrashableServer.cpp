@@ -13,6 +13,9 @@
 
 typedef int socklen_t;
 
+// FD_SET uses while(0) so disable conitional expression is constant warning
+#pragma warning(disable:4127)
+
 #else
 
 #include <stdio.h>
@@ -40,6 +43,9 @@ struct WSAData {};
 inline int closesocket(int s) { return close(s); }
 inline void WSACleanup() {}
 inline int WSAGetLastError() { return errno; }
+inline void WSASetLastError(int err) { errno = err; }
+
+#define WSAETIMEDOUT ETIMEDOUT
 
 #endif
 
@@ -47,9 +53,9 @@ const int kDefaultServerPort = 4242;
 const int kBufferSize = 1024;
 
 SOCKET SetUpListener(const char* host, int port);
-SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote);
+SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote, int timeout);
 bool EchoIncomingPackets(SOCKET socket);
-int Run(const char* host, int port);
+int Run(const char* host, int port, int timeout);
 
 int main(int argc, char* argv[])
 {
@@ -57,19 +63,21 @@ int main(int argc, char* argv[])
 	int ret;
 	const char* host;
 	int port;
+	int timeout;
 	int retval = 0;
 
 	// Do we have enough command line arguments?
 	if (argc < 2) {
-		fprintf(stderr, "usage: %s <server-address> [server-port]\n", argv[0]);
+		fprintf(stderr, "usage: %s <server-address> [server-port] [timeout]\n", argv[0]);
 		fprintf(stderr, "\tIf you don't pass server-port, it defaults to %d.\n", kDefaultServerPort);
 		return 1;
 	}
 
 	host = argv[1];
 	port = (argc >= 3) ? atoi(argv[2]) : kDefaultServerPort;
+	timeout = (argc >= 4) ? atoi(argv[3]) : -1;
 
-	if (argc > 3) {
+	if (argc > 4) {
 		fprintf(stderr, "%d extra argument%s ignored.  FYI.\n", argc - 3, argc == 4 ? "" : "s");
 	}
 
@@ -80,7 +88,7 @@ int main(int argc, char* argv[])
 
 	__try
 	{
-		retval = Run(host, port);
+		retval = Run(host, port, timeout);
 	}
 	__except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION)
 	{
@@ -91,7 +99,7 @@ int main(int argc, char* argv[])
 	return retval;
 }
 
-int Run(const char* host, int port)
+int Run(const char* host, int port, int timeout)
 {
 	SOCKET listener;
 
@@ -109,9 +117,14 @@ int Run(const char* host, int port)
 
 		printf("Waiting for a connection...\n");
 
-		socket = AcceptConnection(listener, &remote);
+		socket = AcceptConnection(listener, &remote, timeout);
 		if (socket == INVALID_SOCKET) {
-			fprintf(stderr, "\naccept connection error: %d\n", WSAGetLastError());
+			if (WSAETIMEDOUT != WSAGetLastError()) {
+				fprintf(stderr, "\naccept connection error: %d\n", WSAGetLastError());
+			}
+			else {
+				fprintf(stderr, "\nTimed out waiting for connection\n");
+			}
 			return 3;
 		}
 
@@ -168,9 +181,31 @@ SOCKET SetUpListener(const char* host, int port)
 	return listener;
 }
 
-SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote)
+SOCKET AcceptConnection(SOCKET listener, sockaddr_in* remote, int timeout)
 {
 	socklen_t size = sizeof(*remote);
+
+	if (timeout >= 0) {
+		struct timeval tv;
+		fd_set set;
+		int ret;
+
+		FD_ZERO(&set);
+		FD_SET(listener, &set);
+
+		tv.tv_sec = timeout;
+		tv.tv_usec = 0;
+
+		ret = select((int)listener + 1, &set, NULL, NULL, &tv);
+		if (ret == 1) {
+			return INVALID_SOCKET;
+		}
+		else if (ret == 0) {
+			WSASetLastError(WSAETIMEDOUT);
+			return INVALID_SOCKET;
+		}
+	}
+
 	return accept(listener, (sockaddr*)remote, &size);
 }
 

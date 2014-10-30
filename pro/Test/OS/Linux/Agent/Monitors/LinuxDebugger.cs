@@ -124,5 +124,68 @@ namespace Peach.Core.Test.OS.Linux.Agent.Monitors
 			Assert.GreaterOrEqual(span.TotalSeconds, 0.0);
 			Assert.LessOrEqual(span.TotalSeconds, 0.5);
 		}
+
+		[Test]
+		public void TestNoCpuKill()
+		{
+			var args = new Dictionary<string, Variant>();
+			args["Executable"] = new Variant("CrashableServer");
+			args["Arguments"] = new Variant("127.0.0.1 0 5");
+			args["StartOnCall"] = new Variant("Foo");
+			args["NoCpuKill"] = new Variant("true");
+
+			var m = new LinuxDebugger(null, null, args);
+			m.SessionStarting();
+			m.IterationStarting(1, false);
+
+			m.Message("Action.Call", new Variant("Foo"));
+			Thread.Sleep(1000);
+
+			var sw = new System.Diagnostics.Stopwatch();
+			sw.Start();
+			m.IterationFinished();
+			sw.Stop();
+
+			var span = sw.Elapsed;
+
+			Assert.AreEqual(false, m.DetectedFault());
+			m.SessionFinished();
+			m.StopMonitor();
+
+			Assert.GreaterOrEqual(span.TotalSeconds, 4);
+			Assert.LessOrEqual(span.TotalSeconds, 6);
+		}
+
+		[Test]
+		public void TestNoCpuKillWaitFail()
+		{
+			var args = new Dictionary<string, Variant>();
+			args["Executable"] = new Variant("CrashableServer");
+			args["Arguments"] = new Variant("127.0.0.1 0 5");
+			args["StartOnCall"] = new Variant("Foo");
+			args["NoCpuKill"] = new Variant("true");
+			args["WaitForExitTimeout"] = new Variant("1000");
+
+			var m = new LinuxDebugger(null, null, args);
+			m.SessionStarting();
+			m.IterationStarting(1, false);
+
+			m.Message("Action.Call", new Variant("Foo"));
+			Thread.Sleep(1000);
+
+			var sw = new System.Diagnostics.Stopwatch();
+			sw.Start();
+			m.IterationFinished();
+			sw.Stop();
+
+			var span = sw.Elapsed;
+
+			Assert.AreEqual(false, m.DetectedFault());
+			m.SessionFinished();
+			m.StopMonitor();
+
+			Assert.GreaterOrEqual(span.TotalSeconds, 0.5);
+			Assert.LessOrEqual(span.TotalSeconds, 1.5);
+		}
 	}
 }

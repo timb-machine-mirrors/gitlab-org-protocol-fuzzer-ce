@@ -570,6 +570,7 @@ namespace Peach.Core.Dom
 		protected Transformer _transformer = null;
 		protected Placement _placement = null;
 
+		private uint _rootRecursion = 0;
 		private uint _recursionDepth = 0;
 		private uint _intRecursionDepth = 0;
 		private bool _readValueCache = true;
@@ -688,7 +689,10 @@ namespace Peach.Core.Dom
 		public void WritePitCommonChildren(XmlWriter pit)
 		{
 			foreach (Relation obj in relations)
-				obj.WritePit(pit);
+			{
+				if(obj.From == this)
+					obj.WritePit(pit);
+			}
 
 			if (fixup != null)
 				fixup.WritePit(pit);
@@ -722,7 +726,7 @@ namespace Peach.Core.Dom
 			if (constraint != null)
 				pit.WriteAttributeString("constraint", constraint);
 
-			if (hasLength && !(this is Number))
+			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag))
 			{
 				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
 				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
@@ -746,6 +750,8 @@ namespace Peach.Core.Dom
 
 		protected void OnInvalidated(EventArgs e)
 		{
+			logger.Trace("OnInvalidated: {0}", name);
+
 			// Prevent infinite loops
 			if (_invalidated)
 				return;
@@ -1183,6 +1189,20 @@ namespace Peach.Core.Dom
 			{
 				if (_internalValue == null || _invalidated || !_readValueCache)
 				{
+					// If this is not invoked by calling .Value
+					// on the root, then mark all elements up to the
+					// root so they don't cache any values computed
+					// if recursion occurs.
+					if (root._rootRecursion++ == 0)
+					{
+						var e = parent;
+						while (e != null)
+						{
+							e._recursionDepth++;
+							e = e.parent;
+						}
+					}
+
 					_intRecursionDepth++;
 
 					var internalValue = GenerateInternalValue();
@@ -1192,6 +1212,15 @@ namespace Peach.Core.Dom
 					if (CacheValue)
 						_internalValue = internalValue;
 
+					if (--root._rootRecursion == 0)
+					{
+						var e = parent;
+						while (e != null)
+						{
+							e._recursionDepth--;
+							e = e.parent;
+						}
+					}
 
 					return internalValue;
 				}

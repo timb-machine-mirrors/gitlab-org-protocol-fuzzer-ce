@@ -159,5 +159,16 @@ namespace Peach.Core.Test
 			Assert.AreEqual(expected, str);
 
 		}
+
+		[Test]
+		public void TestMulticast()
+		{
+			Assert.False(System.Net.IPAddress.Any.IsMulticast());
+			Assert.False(System.Net.IPAddress.Loopback.IsMulticast());
+			Assert.False(System.Net.IPAddress.Broadcast.IsMulticast());
+
+			Assert.True(System.Net.IPAddress.Parse("224.0.0.1").IsMulticast());
+			Assert.True(System.Net.IPAddress.Parse("239.255.255.255").IsMulticast());
+		}
 	}
 }

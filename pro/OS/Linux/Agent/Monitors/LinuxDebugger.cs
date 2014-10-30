@@ -15,6 +15,9 @@ using System.ComponentModel;
 using System.Collections;
 using System.Text.RegularExpressions;
 
+using Native =  Mono.Unix.Native;
+using Mono.Unix;
+
 namespace Peach.Core.OS.Linux.Agent.Monitors
 {
 	[Monitor("LinuxDebugger", true)]
@@ -148,7 +151,7 @@ quit
 
 			// Wait for pid file to exist, open it up and read it
 			while (!File.Exists(_gdbPid) && !_procHandler.HasExited)
-				Thread.Sleep(250);
+				Thread.Sleep(10);
 
 			if (!File.Exists(_gdbPid) && _procHandler.HasExited)
 				throw new PeachException("GDB was unable to start '" + Executable + "'.");
@@ -178,21 +181,14 @@ quit
 				if (!_procCommand.HasExited)
 				{
 					logger.Debug("_Stop(): Stopping process");
-					_procCommand.CloseMainWindow();
-					_procCommand.WaitForExit(500);
+					Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGTERM);
 
-					if (!_procCommand.HasExited)
+					if (!WaitForExit(_procCommand, 500))
 					{
-						try
-						{
-							logger.Debug("_Stop(): Killing process");
-							_procCommand.Kill();
-						}
-						catch (InvalidOperationException)
-						{
-							// Already exited between HasExited and Kill()
-						}
-						_procCommand.WaitForExit();
+						logger.Debug("_Stop(): Killing process");
+						Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGKILL);
+
+						WaitForExit(_procCommand, -1);
 					}
 				}
 
@@ -255,8 +251,10 @@ quit
 			{
 				logger.Debug("WaitForExit({0})", WaitForExitTimeout == -1 ? "INFINITE" : WaitForExitTimeout.ToString());
 
-				if (!_procCommand.WaitForExit(WaitForExitTimeout))
+				if (!WaitForExit(_procCommand, WaitForExitTimeout))
 				{
+					logger.Trace("Process failed to exit before timeout expired");
+
 					if (!useCpuKill)
 					{
 						logger.Debug("FAULT, WaitForExit ran out of time!");
@@ -264,7 +262,26 @@ quit
 						this.Agent.QueryMonitors("CanaKitRelay_Reset");
 					}
 				}
+				else
+				{
+					logger.Trace("Finished waiting for process to exit");
+				}
 			}
+		}
+
+		static bool WaitForExit(Process p, int timeout)
+		{
+			// Process.WaitForExit doesn't work on processes
+			// that were not started from within mono.
+			// waitpid returns ECHILD
+
+			var sw = new System.Diagnostics.Stopwatch();
+			sw.Start();
+
+			while (!p.HasExited && timeout > 0 && sw.ElapsedMilliseconds < timeout)
+				System.Threading.Thread.Sleep(10);
+
+			return true;
 		}
 
 		bool _IsRunning()

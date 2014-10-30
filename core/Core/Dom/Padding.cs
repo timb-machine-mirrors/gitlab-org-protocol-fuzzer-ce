@@ -111,11 +111,25 @@ namespace Peach.Core.Dom
 
 			return padding;
 		}
+
 		public override void WritePit(XmlWriter pit)
 		{
-			throw new NotImplementedException();
-		}
+			pit.WriteStartElement("Padding");
+			pit.WriteAttributeString("name", name);
 
+			if (alignment != 8)
+				pit.WriteAttributeString("alignment", alignment.ToString());
+
+			if (alignedTo != null)
+				pit.WriteAttributeString("alignedTo", alignedTo.fullName);
+
+			if (minSize != 0)
+				pit.WriteAttributeString("minSize", minSize.ToString());
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
+			pit.WriteEndElement();
+		}
 
 		/// <summary>
 		/// Byte alignment (8, 16, etc).
