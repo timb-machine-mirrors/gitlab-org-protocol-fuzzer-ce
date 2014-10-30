@@ -1,15 +1,29 @@
 #!/usr/bin/env python
 
+deps = [
+	'System.dll',
+	'System.Web.dll',
+]
+
 extras = []
-dirs = [ 'app', 'Content', 'partials', 'Scripts', 'testdata' ]
+dirs = [ 
+	'app', 
+	'Content', 
+	'partials', 
+	'Scripts', 
+	'testdata' 
+]
 
 for d in dirs:
 	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = ['app/js/*', '**/*.ts']))
 
 bld(
 	features = 'tsc',
-	name='Peach.Pro.Web',
+	name ='Peach.Pro.Web',
 	source = 'app/ts/app.ts',
 	install_path = '${BINDIR}/web',
 	install_644 = extras,
+	ide_source = 'ReverseProxy.cs',
+	ide_aspnet = True,
+	use = deps,
 )
