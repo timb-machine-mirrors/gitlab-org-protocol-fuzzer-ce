@@ -52,6 +52,9 @@ namespace Peach.Core.Mutators
 				max = (long)Math.Min((ulong)max, asNum.MaxValue);
 			else
 				System.Diagnostics.Debug.Assert(obj is Dom.String);
+
+			// Since we cap max at ushort.MaxValue, make sure value is not larger!
+			value = Math.Min(value, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
