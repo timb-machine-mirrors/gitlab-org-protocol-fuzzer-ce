@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,10 @@ namespace Peach.Core
 {
 	public static class License
 	{
+		static readonly string EulaConfig = "eulaAccepted";
+		static bool? eulaAccepted;
+		static object mutex = new object();
+
 		public enum Feature
 		{
 			Enterprise,
@@ -30,7 +35,45 @@ namespace Peach.Core
 		public static bool IsValid { get; private set; }
 		public static Feature Version { get; private set; }
 
-		public static bool EulaAccepted { get; set; }
+		public static bool EulaAccepted
+		{
+			get
+			{
+				lock (mutex)
+				{
+					if (!eulaAccepted.HasValue)
+					{
+						var str = ConfigurationManager.AppSettings.Get(EulaConfig);
+						bool val;
+
+						eulaAccepted = bool.TryParse(str, out val);
+						eulaAccepted &= val;
+					}
+					return eulaAccepted.Value;
+				}
+			}
+			set
+			{
+				lock (mutex)
+				{
+					if (eulaAccepted.HasValue && eulaAccepted.Value == value)
+						return;
+
+					var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+					var settings = config.AppSettings.Settings;
+
+					if (settings[EulaConfig] == null)
+						settings.Add(EulaConfig, value.ToString());
+					else
+						settings[EulaConfig].Value = value.ToString();
+
+					config.Save(ConfigurationSaveMode.Modified);
+					ConfigurationManager.RefreshSection(config.AppSettings.SectionInformation.Name);
+
+					eulaAccepted = value;
+				}
+			}
+		}
 
 		static string Read()
 		{
