@@ -31,10 +31,13 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
+			var asArray = (Dom.Array)obj;
+			var limit = Utility.SizedHelpers.MaxDuplication(asArray.OriginalElement);
+
 			signed = false;
-			value = ((Core.Dom.Array)obj).Count;
-			min = uint.MinValue;
-			max = uint.MaxValue;
+			min = 0;
+			max = limit;
+			value = Math.Min(asArray.Count, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)

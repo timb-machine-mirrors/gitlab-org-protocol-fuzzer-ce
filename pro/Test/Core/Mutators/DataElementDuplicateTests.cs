@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Peach.Core.Test.Mutators
 {
 	[TestFixture]
-	class DataElementDuplicateTests
+	class DataElementDuplicateTests : DataModelCollector
 	{
 		[Test]
 		public void TestSupported()
@@ -169,6 +169,41 @@ namespace Peach.Core.Test.Mutators
 					Assert.AreEqual(exp, val);
 				}
 			}
+		}
+
+		[Test]
+		public void TestMaxOutputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='100'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='DataElementDuplicate' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Size is 11 bytes, max is 100, default is 11 bytes
+			// (100 - 11)/11 = 8
+			Assert.AreEqual(8, mutatedDataModels.Count);
 		}
 	}
 }

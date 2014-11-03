@@ -40,5 +40,41 @@ namespace Peach.Core.Test.Mutators
 			array.isMutable = false;
 			Assert.False(runner.IsSupported(array));
 		}
+
+		[Test]
+		public void TestMaxOutputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World' minOccurs='1' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='1024'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='ArrayEdgeCase' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Size is 11 bytes, max is 1024, default is 11 bytes
+			// (1024 - 11)/11 = 92 (expansions)
+			// plus 1 reduce for 93 mutations total
+			Assert.AreEqual(93, mutatedDataModels.Count);
+		}
 	}
 }
