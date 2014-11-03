@@ -32,11 +32,10 @@ namespace Peach.Core.Mutators
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
 			var asArray = (Dom.Array)obj;
-			var limit = Utility.SizedHelpers.MaxDuplication(asArray.OriginalElement);
 
 			signed = false;
 			min = 0;
-			max = limit;
+			max = Utility.SizedHelpers.MaxDuplication(asArray.OriginalElement); ;
 			value = Math.Min(asArray.Count, max);
 		}
 
@@ -51,6 +50,17 @@ namespace Peach.Core.Mutators
 		protected override void performMutation(DataElement obj, long num)
 		{
 			var objAsArray = (Core.Dom.Array)obj;
+
+			if (num > 0)
+			{
+				var limit = Utility.SizedHelpers.MaxDuplication(objAsArray.OriginalElement);
+
+				if (num > limit)
+				{
+					logger.Info("Skipping mutation, duplication by {0} would exceed max output size.", num);
+					return;
+				}
+			}
 
 			if (num < objAsArray.Count)
 			{
