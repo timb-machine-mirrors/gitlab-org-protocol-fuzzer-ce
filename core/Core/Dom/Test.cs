@@ -173,6 +173,13 @@ namespace Peach.Core.Dom
 		[DefaultValue(false)]
 		public bool nonDeterministicActions { get; set; }
 
+		/// <summary>
+		/// The maximum data size to generate for output actions.
+		/// </summary>
+		[XmlAttribute]
+		[DefaultValue(0)]
+		public ulong maxOutputSize { get; set; }
+
 		#endregion
 
 		[OnCloning]

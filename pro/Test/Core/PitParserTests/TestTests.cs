@@ -391,5 +391,103 @@ namespace Peach.Core.Test.PitParserTests
 
 			Assert.True(dom.tests[0].nonDeterministicActions);
 		}
+
+		[Test]
+		public void DefaultMaxOuptputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'/>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' nonDeterministicActions='true'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			Assert.AreEqual(0, dom.tests[0].maxOutputSize);
+
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
+			var count = 0;
+			e.TestStarting += (c) =>
+			{
+				c.ActionStarting += (ctx, act) =>
+				{
+					foreach (var i in act.allData)
+					{
+						++count;
+						Assert.AreEqual(0, i.MaxOutputSize);
+					}
+				};
+			};
+
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, count);
+		}
+
+		[Test]
+		public void MaxOuptputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'/>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' nonDeterministicActions='true' maxOutputSize='65535'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			Assert.AreEqual(65535, dom.tests[0].maxOutputSize);
+
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
+			var count = 0;
+			e.TestStarting += (c) =>
+			{
+				c.ActionStarting += (ctx, act) =>
+				{
+					foreach (var i in act.allData)
+					{
+						++count;
+						Assert.AreEqual(65535, i.MaxOutputSize);
+					}
+				};
+			};
+
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, count);
+		}
 	}
 }
