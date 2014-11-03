@@ -178,6 +178,31 @@ namespace Peach.Core.Mutators.Utility
 		}
 
 		/// <summary>
+		/// Returns the maximum number of bytes the element can be
+		/// and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxSize(DataElement obj)
+		{
+			var root = (DataModel)obj.root;
+
+			// This should only be called on elements inside of a
+			// data model that is a child of an Action, not a top
+			// level DataModel.
+			System.Diagnostics.Debug.Assert(root.actionData != null);
+
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return long.MaxValue;
+
+			var used = (ulong)root.Value.Length;
+			var size = (ulong)obj.Value.Length;
+
+			return (long)Math.Min((ulong)long.MaxValue, max - used + size);
+		}
+
+		/// <summary>
 		/// Returns the maximum number of bytes the element can be expanded
 		/// by and still be under the limit of the MaxOutputSize attribute.
 		/// </summary>
