@@ -42,6 +42,9 @@
 						<td>
 							<a href="{{vm.urlPrefix}}{{file.fileUrl}}/{{file.name}}">{{file.fullName}}</a>
 						</td>
+                        <td>
+                            {{file.size | filesize:2}}
+                        </td>
 					</tr>
 				</table>
 			</td>
