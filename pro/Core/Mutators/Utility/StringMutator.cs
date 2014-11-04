@@ -50,8 +50,8 @@ namespace Peach.Core.Mutators.Utility
 
 			signed = false;
 			min = 1;
-			max = ushort.MaxValue;
-			value = Math.Min(len, max);
+			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxExpansion(obj));
+			value = Math.Min(str.Length, max);
 			value = Math.Max(min, value);
 		}
 
