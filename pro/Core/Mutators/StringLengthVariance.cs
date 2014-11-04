@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Utility.SizedHelpers.MaxExpansion(obj);
+			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxExpansion(obj));
 			value = Math.Min(str.Length, max);
 		}
 
