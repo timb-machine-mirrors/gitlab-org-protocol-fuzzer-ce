@@ -33,7 +33,7 @@ namespace Peach.Core.Mutators
 		{
 			var asArray = (Dom.Array)obj;
 			min = ushort.MinValue;
-			max = (ulong)Utility.SizedHelpers.MaxDuplication(asArray.OriginalElement);
+			max = (ulong)Utility.SizedHelpers.MaxDuplication(LastElement(asArray));
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -50,7 +50,7 @@ namespace Peach.Core.Mutators
 
 			if (num > 0)
 			{
-				var limit = Utility.SizedHelpers.MaxDuplication(objAsArray.OriginalElement);
+				var limit = Utility.SizedHelpers.MaxDuplication(LastElement(objAsArray));
 
 				if (num > limit)
 				{
@@ -84,6 +84,14 @@ namespace Peach.Core.Mutators
 		{
 			// Should never get a ulong
 			throw new NotImplementedException();
+		}
+
+		static DataElement LastElement(Dom.Array asArray)
+		{
+			if (asArray.Count == 0)
+				return asArray.OriginalElement;
+
+			return asArray[asArray.Count - 1];
 		}
 	}
 }

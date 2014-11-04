@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Utility.SizedHelpers.MaxDuplication(asArray.OriginalElement); ;
+			max = Utility.SizedHelpers.MaxDuplication(LastElement(asArray)); ;
 			value = Math.Min(asArray.Count, max);
 		}
 
@@ -53,7 +53,7 @@ namespace Peach.Core.Mutators
 
 			if (num > 0)
 			{
-				var limit = Utility.SizedHelpers.MaxDuplication(objAsArray.OriginalElement);
+				var limit = Utility.SizedHelpers.MaxDuplication(LastElement(objAsArray));
 
 				if (num > limit)
 				{
@@ -85,6 +85,14 @@ namespace Peach.Core.Mutators
 		{
 			// Should never get a ulong
 			throw new NotImplementedException();
+		}
+
+		static DataElement LastElement(Dom.Array asArray)
+		{
+			if (asArray.Count == 0)
+				return asArray.OriginalElement;
+
+			return asArray[asArray.Count - 1];
 		}
 	}
 }
