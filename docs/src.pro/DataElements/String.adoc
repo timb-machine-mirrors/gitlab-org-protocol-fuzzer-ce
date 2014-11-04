@@ -53,7 +53,7 @@ There are no required attributes.
 
 _Optional:_
 
-xref:name[name]:: Name of the data model
+xref:name[name]:: Name of the string 
 
 xref:length[length]:: Length in characters of the string
 xref:lengthType[lengthType]:: Units of the length attribute (defaults to bytes)
@@ -163,7 +163,7 @@ xref:Mutators_StringXmlW3C[StringXmlW3C]:: This mutator provides the W3C XML par
 .Simple ASCII String
 ====================
 
-This example will output a string with the default options. It will be encoded to 7-bit ASCII.
+This example will output a string with the default options. The string will consist of 7-bit ASCII characters.
 
 [source,xml]
 ----
@@ -224,7 +224,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String with UTF-16 Encoding
 ====================
 
-This example will output a string with UTF-16 encoding. UTF-16 is a two byte encoding that is commonly used for in memory storage of Unicode strings. UTF-16 is also commonly known as the WCHAR type on Windows.
+This example will output a string consisting of characters represented with the Unicode UTF-16 encoding. UTF-16 is a two-byte character encoding that supports latin and non-latin character sets. Also, UTF-16 is the WCHAR type on the Windows operating systems.
 
 [source,xml]
 ----
@@ -347,7 +347,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String Padded with Default Character
 ====================
 
-This example will output a string that is shorter than the required length. The string will get padded out to the full length. The default pad character is null (0x00).
+This example will output a string that is shorter than the required length. The string will receive one or more pad characters to reach its required length. The default pad character is null (0x00).
 
 [source,xml]
 ----
@@ -409,7 +409,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String Padded with Specified Character
 ====================
 
-This example will output a string that is shorter than the required length. The string will get padded out to the full length. Unlike the earlier example we will override the default pad character with '_'.
+This example will output a string that is shorter than the required length. The string will receive one or more pad characters to reach its required length. Unlike the earlier example, we will define the pad character as '_', thus overriding the default pad character.
 
 [source,xml]
 ----
@@ -471,7 +471,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String with Backslash Characters
 ====================
 
-This example will output a string that contains returns and line feeds using the +\n+ and +\r+ notation. It will also include a +\+ character.
+This example will output a string that contains carriage return and line feed characters using the +\r+ and +\n+ notation. Also, the output string will  include a backslash character (+\+).
 
 [source,xml]
 ----
@@ -603,7 +603,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Using token Attribute to Crack Strings
 ====================
-In this example we will parse a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string we are going to parse is comprised of three strings, the key, the token separator, and a value. The key and value could potentially be any arbitrary size, so cracking this sample string requiring knowing about the token separator. In our pit file we will mark our token string with the _token_ attribute to indicate it must be found in the incoming data stream. This will allow the data cracker to figure out the length of both key and value.
+In this example we will parse a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string we are going to parse consists of three parts: 1) the key, 2) the token separator, and 3) a value. Potentially, the key and value can be any arbitrary size, so cracking this sample string requires knowledge about the token separator. In our pit file, we will mark our token string with the _token_ attribute to indicate that the token must be present in the incoming data stream. This will allow the data cracker to figure out the length of both key and value.
 
 Peach will still fuzz elements marked as _token_.
 
