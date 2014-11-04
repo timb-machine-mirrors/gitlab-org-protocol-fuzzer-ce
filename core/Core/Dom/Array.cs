@@ -263,8 +263,37 @@ namespace Peach.Core.Dom
 
 			var elem = Count == 0 ? OriginalElement : this[Count - 1];
 
-			while (remain-- > 0)
-				stream.Add(elem.Value);
+			if (remain == 0)
+				return new Variant(stream);
+
+			var halves = new Stack<Tuple<long, bool>>();
+			halves.Push(null);
+
+			while (remain > 1)
+			{
+				bool carry = remain % 2 == 1;
+				remain /= 2;
+				halves.Push(new Tuple<long, bool>(remain, carry));
+			}
+
+			var value = elem.Value;
+			var toAdd = value;
+
+			var item = halves.Pop();
+
+			while (item != null)
+			{
+				var lst = new BitStreamList();
+				lst.Add(toAdd);
+				lst.Add(toAdd);
+				if (item.Item2)
+					lst.Add(value);
+
+				toAdd = lst;
+				item = halves.Pop();
+			}
+
+			stream.Add(toAdd);
 
 			return new Variant(stream);
 		}
