@@ -185,12 +185,12 @@ namespace Peach.Core.Mutators.Utility
 		/// <returns></returns>
 		public static long MaxSize(DataElement obj)
 		{
-			var root = (DataModel)obj.root;
-
-			// This should only be called on elements inside of a
-			// data model that is a child of an Action, not a top
-			// level DataModel.
-			System.Diagnostics.Debug.Assert(root.actionData != null);
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
@@ -211,12 +211,12 @@ namespace Peach.Core.Mutators.Utility
 		/// <returns></returns>
 		public static long MaxExpansion(DataElement obj)
 		{
-			var root = (DataModel)obj.root;
-
-			// This should only be called on elements inside of a
-			// data model that is a child of an Action, not a top
-			// level DataModel.
-			System.Diagnostics.Debug.Assert(root.actionData != null);
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
@@ -236,12 +236,12 @@ namespace Peach.Core.Mutators.Utility
 		/// <returns></returns>
 		public static long MaxDuplication(DataElement obj)
 		{
-			var root = (DataModel)obj.root;
-
-			// This should only be called on elements inside of a
-			// data model that is a child of an Action, not a top
-			// level DataModel.
-			System.Diagnostics.Debug.Assert(root.actionData != null);
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
