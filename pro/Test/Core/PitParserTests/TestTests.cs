@@ -418,8 +418,9 @@ namespace Peach.Core.Test.PitParserTests
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var exp = 1024 * 1024 * 1024;
 
-			Assert.AreEqual(0, dom.tests[0].maxOutputSize);
+			Assert.AreEqual(exp, dom.tests[0].maxOutputSize);
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var e = new Engine(null);
@@ -431,7 +432,7 @@ namespace Peach.Core.Test.PitParserTests
 					foreach (var i in act.allData)
 					{
 						++count;
-						Assert.AreEqual(0, i.MaxOutputSize);
+						Assert.AreEqual(exp, i.MaxOutputSize);
 					}
 				};
 			};
