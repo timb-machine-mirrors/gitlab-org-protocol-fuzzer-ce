@@ -49,6 +49,18 @@ namespace Peach.Core.Agent
 			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
 		}
 
+		public enum When
+		{
+			DetectFault,
+			OnCall,
+			OnStart,
+			OnEnd,
+			OnIterationStart,
+			OnIterationEnd,
+			OnFault,
+			OnIterationStartAfterFault
+		};
+
 		/// <summary>
 		/// The agent that is running this monitor.
 		/// </summary>
@@ -91,7 +103,6 @@ namespace Peach.Core.Agent
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
 		public abstract bool IterationFinished();
-
 
 		/// <summary>
 		/// Was a fault detected during current iteration?
