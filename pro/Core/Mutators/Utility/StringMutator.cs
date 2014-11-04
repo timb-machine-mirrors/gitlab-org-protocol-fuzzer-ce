@@ -68,6 +68,13 @@ namespace Peach.Core.Mutators.Utility
 		{
 			System.Diagnostics.Debug.Assert(value <= int.MaxValue);
 
+			var limit = Utility.SizedHelpers.MaxExpansion(obj);
+			if (value > limit)
+			{
+				logger.Info("Skipping mutation, expansion by {0} would exceed max output size.", value);
+				return;
+			}
+
 			var sb = new StringBuilder((int)value);
 
 			while (sb.Length < value)
