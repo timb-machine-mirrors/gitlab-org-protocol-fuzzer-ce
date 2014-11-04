@@ -57,7 +57,7 @@ namespace Peach.Core.Mutators
 
 				if (num > limit)
 				{
-					logger.Info("Skipping mutation, duplication by {0} would exceed max output size.", num);
+					logger.Trace("Skipping mutation, duplication by {0} would exceed max output size.", num);
 					return;
 				}
 			}

@@ -72,7 +72,7 @@ namespace Peach.Core.Mutators
 				var limit = Utility.SizedHelpers.MaxSize(rel.Of);
 				if (value > limit)
 				{
-					logger.Info("Skipping mutation, expansion to {0} would exceed max output size.", value);
+					logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
 					return;
 				}
 			}
