@@ -64,7 +64,7 @@ def configure(conf):
 	]
 
 	conf.env['JAVA_OPTS'] = [
-		'-Xmx2024M',
+		'-Xmx3000M',
 	]
 
 	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
