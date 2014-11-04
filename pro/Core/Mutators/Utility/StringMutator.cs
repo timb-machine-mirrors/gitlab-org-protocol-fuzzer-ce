@@ -46,7 +46,6 @@ namespace Peach.Core.Mutators.Utility
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
 			var str = (string)obj.InternalValue;
-			var len = (long)str.Length;
 
 			signed = false;
 			min = 1;
