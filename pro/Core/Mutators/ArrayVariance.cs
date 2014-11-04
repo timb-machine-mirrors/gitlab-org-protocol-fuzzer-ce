@@ -31,10 +31,12 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
+			var asArray = (Dom.Array)obj;
+
 			signed = false;
-			value = ((Core.Dom.Array)obj).Count;
-			min = uint.MinValue;
-			max = uint.MaxValue;
+			min = 0;
+			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxDuplication(LastElement(asArray)));
+			value = Math.Min(asArray.Count, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -48,6 +50,17 @@ namespace Peach.Core.Mutators
 		protected override void performMutation(DataElement obj, long num)
 		{
 			var objAsArray = (Core.Dom.Array)obj;
+
+			if (num > 0)
+			{
+				var limit = Utility.SizedHelpers.MaxDuplication(LastElement(objAsArray));
+
+				if (num > limit)
+				{
+					logger.Info("Skipping mutation, duplication by {0} would exceed max output size.", num);
+					return;
+				}
+			}
 
 			if (num < objAsArray.Count)
 			{
@@ -72,6 +85,14 @@ namespace Peach.Core.Mutators
 		{
 			// Should never get a ulong
 			throw new NotImplementedException();
+		}
+
+		static DataElement LastElement(Dom.Array asArray)
+		{
+			if (asArray.Count == 0)
+				return asArray.OriginalElement;
+
+			return asArray[asArray.Count - 1];
 		}
 	}
 }

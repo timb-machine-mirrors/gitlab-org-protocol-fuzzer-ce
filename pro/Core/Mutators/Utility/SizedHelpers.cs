@@ -176,5 +176,87 @@ namespace Peach.Core.Mutators.Utility
 
 			return data;
 		}
+
+		/// <summary>
+		/// Returns the maximum number of bytes the element can be
+		/// and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxSize(DataElement obj)
+		{
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
+
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return long.MaxValue;
+
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
+			var limit = ((8 * max) - used + size + 7) / 8;
+
+			return (long)Math.Min((ulong)long.MaxValue, limit);
+		}
+
+		/// <summary>
+		/// Returns the maximum number of bytes the element can be expanded
+		/// by and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxExpansion(DataElement obj)
+		{
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
+
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return long.MaxValue;
+
+			var used = (ulong)root.Value.LengthBits;
+			var limit = ((8 * max) - used + 7) / 8;
+
+			return (long)Math.Min((ulong)long.MaxValue, limit);
+		}
+
+		/// <summary>
+		/// Returns the maximum number of times the element can be duplicated
+		/// by and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxDuplication(DataElement obj)
+		{
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return long.MaxValue;
+			if (root.actionData == null)
+				return long.MaxValue;
+
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return long.MaxValue;
+
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
+
+			if (size == 0)
+				return long.MaxValue;
+
+			var avail = (8 * max) - used;
+			var ret = avail / size;
+
+			return (long)Math.Min((ulong)long.MaxValue, ret);
+		}
 	}
 }
