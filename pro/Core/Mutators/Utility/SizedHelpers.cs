@@ -196,10 +196,11 @@ namespace Peach.Core.Mutators.Utility
 			if (max == 0)
 				return long.MaxValue;
 
-			var used = (ulong)root.Value.Length;
-			var size = (ulong)obj.Value.Length;
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
+			var limit = (max - used + size + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, max - used + size);
+			return (long)Math.Min((ulong)long.MaxValue, limit);
 		}
 
 		/// <summary>
@@ -221,9 +222,10 @@ namespace Peach.Core.Mutators.Utility
 			if (max == 0)
 				return long.MaxValue;
 
-			var used = (ulong)root.Value.Length;
+			var used = (ulong)root.Value.LengthBits;
+			var limit = (max - used + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, max - used);
+			return (long)Math.Min((ulong)long.MaxValue, limit);
 		}
 
 		/// <summary>
@@ -245,8 +247,8 @@ namespace Peach.Core.Mutators.Utility
 			if (max == 0)
 				return long.MaxValue;
 
-			var used = (ulong)root.Value.Length;
-			var size = (ulong)obj.Value.Length;
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
 
 			var avail = max - used;
 			var ret = avail / size;
