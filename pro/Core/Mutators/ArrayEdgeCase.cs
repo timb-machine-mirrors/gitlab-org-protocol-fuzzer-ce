@@ -33,7 +33,7 @@ namespace Peach.Core.Mutators
 		{
 			var asArray = (Dom.Array)obj;
 			min = ushort.MinValue;
-			max = (ulong)Utility.SizedHelpers.MaxDuplication(LastElement(asArray));
+			max = (ulong)Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxDuplication(LastElement(asArray)));
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
