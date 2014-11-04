@@ -36,7 +36,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj.isMutable && obj.parent != null && !(obj is Flag) && !(obj is XmlAttribute))
+			if (obj.isMutable && obj.parent != null && !(obj is Flag) && !(obj is XmlAttribute) && obj.Value.LengthBits > 0)
 				return true;
 
 			return false;

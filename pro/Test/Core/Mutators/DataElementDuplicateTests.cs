@@ -23,6 +23,9 @@ namespace Peach.Core.Test.Mutators
 			dm.Add(blob);
 
 			Assert.False(runner.IsSupported(dm));
+			Assert.False(runner.IsSupported(blob));
+
+			blob.DefaultValue = new Variant(Encoding.ASCII.GetBytes("Hello"));
 			Assert.True(runner.IsSupported(blob));
 		}
 
