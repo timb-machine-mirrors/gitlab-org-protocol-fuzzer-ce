@@ -51,131 +51,18 @@ namespace Peach.Core.Mutators.Utility
 			var data = objOf.Value;
 
 			if (sizeRelation.lengthType == LengthType.Bytes)
-				data = GrowBytes(data, length);
+				data = data.GrowTo(length);
 			else
-				data = GrowBits(data, length);
+				data = data.GrowToBits(length);
 
 			objOf.MutatedValue = new Variant(data);
 
 		}
 
-		static BitwiseStream GrowBytes(BitwiseStream data, long tgtLen)
-		{
-			var dataLen = data.Length;
-
-			if (tgtLen <= 0)
-			{
-				// Return empty if size is negative
-				data = new BitStream();
-			}
-			else if (data.Length == 0)
-			{
-				// If objOf is a block, data is a BitStreamList
-				data = new BitStream();
-
-				// Fill with 'A' if we don't have any data
-				while (--tgtLen > 0)
-					data.WriteByte((byte)'A');
-
-				// Ensure we are at the start of the stream
-				data.Seek(0, SeekOrigin.Begin);
-			}
-			else
-			{
-				// Loop data over and over until we get to our target length
-				var lst = new BitStreamList();
-
-				while (tgtLen > dataLen)
-				{
-					lst.Add(data);
-					tgtLen -= dataLen;
-				}
-
-				var buf = new byte[BitwiseStream.BlockCopySize];
-				var dst = new BitStream();
-
-				data.Seek(0, System.IO.SeekOrigin.Begin);
-
-				while (tgtLen > 0)
-				{
-					int len = (int)Math.Min(tgtLen, buf.Length);
-					len = data.Read(buf, 0, len);
-
-					if (len == 0)
-						data.Seek(0, System.IO.SeekOrigin.Begin);
-					else
-						dst.Write(buf, 0, len);
-
-					tgtLen -= len;
-				}
-
-				lst.Add(dst);
-
-				data = lst;
-			}
-
-			return data;
-		}
-
-		static BitwiseStream GrowBits(BitwiseStream data, long tgtLen)
-		{
-			var dataLen = data.LengthBits;
-
-			if (tgtLen <= 0)
-			{
-				// Return empty if size is negative
-				data = new BitStream();
-			}
-			else if (data.LengthBits == 0)
-			{
-				// If objOf is a block, data is a BitStreamList
-				data = new BitStream();
-
-				// Fill with 'A' if we don't have any data
-				for (long i = data.LengthBits + 7 / 8; i > 0; --i)
-					data.WriteByte((byte)'A');
-
-				// Truncate to the correct bit length
-				data.SetLengthBits(tgtLen);
-
-				// Ensure we are at the start of the stream
-				data.SeekBits(0, SeekOrigin.Begin);
-			}
-			else
-			{
-				// Loop data over and over until we get to our target length
-				var lst = new BitStreamList();
-
-				while (tgtLen > dataLen)
-				{
-					lst.Add(data);
-					tgtLen -= dataLen;
-				}
-
-				var dst = new BitStream();
-
-				data.Seek(0, System.IO.SeekOrigin.Begin);
-
-				while (tgtLen > 0)
-				{
-					ulong bits;
-					int len = data.ReadBits(out bits, (int)Math.Min(tgtLen, 64));
-
-					if (len == 0)
-						data.Seek(0, System.IO.SeekOrigin.Begin);
-					else
-						dst.WriteBits(bits, len);
-
-					tgtLen -= len;
-				}
-
-				lst.Add(dst);
-
-				data = lst;
-			}
-
-			return data;
-		}
+		// Artificially limit the maximum expansion to be 65k
+		// This is to work around OutOfMemoryExceptions when
+		// we try and do BitStream.GrowBy((uint/MaxValue / 4) - 1)
+		const long maxExpansion = ushort.MaxValue;
 
 		/// <summary>
 		/// Returns the maximum number of bytes the element can be
@@ -188,19 +75,19 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var size = (ulong)obj.Value.LengthBits;
 			var limit = ((8 * max) - used + size + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, limit);
+			return (long)Math.Min(maxExpansion, limit);
 		}
 
 		/// <summary>
@@ -214,18 +101,18 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var limit = ((8 * max) - used + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, limit);
+			return (long)Math.Min(maxExpansion, limit);
 		}
 
 		/// <summary>
@@ -239,24 +126,24 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var size = (ulong)obj.Value.LengthBits;
 
 			if (size == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var avail = (8 * max) - used;
 			var ret = avail / size;
 
-			return (long)Math.Min((ulong)long.MaxValue, ret);
+			return (long)Math.Min(maxExpansion, ret);
 		}
 	}
 }

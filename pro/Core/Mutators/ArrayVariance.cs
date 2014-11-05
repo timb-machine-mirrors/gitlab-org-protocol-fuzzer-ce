@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxDuplication(LastElement(asArray)));
+			max = Utility.SizedHelpers.MaxDuplication(LastElement(asArray));
 			value = Math.Min(asArray.Count, max);
 		}
 
@@ -57,7 +57,7 @@ namespace Peach.Core.Mutators
 
 				if (num > limit)
 				{
-					logger.Info("Skipping mutation, duplication by {0} would exceed max output size.", num);
+					logger.Trace("Skipping mutation, duplication by {0} would exceed max output size.", num);
 					return;
 				}
 			}

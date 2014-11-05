@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxExpansion(obj));
+			max = Utility.SizedHelpers.MaxExpansion(obj);
 			value = Math.Min(str.Length, max);
 		}
 
@@ -52,7 +52,7 @@ namespace Peach.Core.Mutators
 			var limit = Utility.SizedHelpers.MaxExpansion(obj);
 			if (value > limit)
 			{
-				logger.Info("Skipping mutation, expansion by {0} would exceed max output size.", value);
+				logger.Trace("Skipping mutation, expansion by {0} would exceed max output size.", value);
 				return;
 			}
 
