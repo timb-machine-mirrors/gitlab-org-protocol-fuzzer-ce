@@ -27,5 +27,14 @@ namespace Peach.Enterprise.WebServices.Models
 		/// "/p/files/{guid}"
 		/// </example>
 		public string FileUrl { get; set; }
+
+
+		/// <summary>
+		/// The size of the contents of the file.
+		/// </summary>
+		/// <example>
+		/// 1024
+		/// </example>
+		public long Size { get; set; }
 	}
 }

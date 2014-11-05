@@ -13,13 +13,12 @@ namespace Peach.Core.Agent.Monitors
 	[Parameter("Filename", typeof(string), "File to save on fault")]
 	public class SaveFileMonitor : Monitor
 	{
-		string _fileName = null;
+		public string Filename { get; private set; }
 
 		public SaveFileMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
-			if (args.ContainsKey("Filename"))
-				_fileName = (string)args["Filename"];
+			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()
@@ -52,9 +51,12 @@ namespace Peach.Core.Agent.Monitors
 		{
 			Fault fault = new Fault();
 			fault.type = FaultType.Data;
-			fault.title = "Save File \"" + _fileName + "\"";
+			fault.title = "Save File \"" + Filename + "\"";
 			fault.detectionSource = "SaveFileMonitor";
-			fault.collectedData.Add(new Fault.Data(Path.GetFileName(_fileName), File.ReadAllBytes(_fileName)));
+			fault.collectedData.Add(new Fault.Data(
+				Path.GetFileName(Filename),
+				File.ReadAllBytes(Filename)
+			));
 
 			return fault;
 		}
