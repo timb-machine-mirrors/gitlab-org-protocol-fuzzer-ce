@@ -31,7 +31,7 @@ namespace Peach.Pro.Test.Monitors
 		Dictionary<string, List<string>> minors = new Dictionary<string, List<string>>();
 		//Dictionary<string, Dictionary<string, string>> severities = new Dictionary<string, Dictionary<string, string>>();
 
-		string[] severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNWON" };
+		string[] severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
 
 		public RandoFaulter(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)

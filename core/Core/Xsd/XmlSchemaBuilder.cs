@@ -1030,6 +1030,12 @@ namespace Peach.Core.Xsd
 			if (type == typeof(int))
 				return new XmlQualifiedName("int", XmlSchema.Namespace);
 
+			if (type == typeof(ulong)) // Linux doesn't recognize unsignedLong
+				return new XmlQualifiedName("unsignedInt", XmlSchema.Namespace);
+
+			if (type == typeof(long)) // Linux doesn't recognize long
+				return new XmlQualifiedName("int", XmlSchema.Namespace);
+
 			if (type == typeof(decimal))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 

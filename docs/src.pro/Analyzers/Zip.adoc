@@ -9,7 +9,7 @@ The content of a stream element corresponds to the content of the file in the zi
 
 The Zip Analyzer allows the content of each file in the zip archive to map to a xref:DataModel[DataModel].
 Using a file and the corresponding data model, Peach can further decompose the contents of a file in a zip archive instead of just treating the contents as an xref:Blob[Blob].
-The +Map+ parameter to the analyzer controls mapping for the data model.
+The +Map+ parameter of this element defines the mappings for the streams in the zip files and the associated  data models.
 
 You can attach this analyzer to a blob.
 

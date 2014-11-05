@@ -46,12 +46,11 @@ namespace Peach.Core.Mutators.Utility
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
 			var str = (string)obj.InternalValue;
-			var len = (long)str.Length;
 
 			signed = false;
 			min = 1;
-			max = ushort.MaxValue;
-			value = Math.Min(len, max);
+			max = Utility.SizedHelpers.MaxExpansion(obj);
+			value = Math.Min(str.Length, max);
 			value = Math.Max(min, value);
 		}
 
@@ -68,6 +67,13 @@ namespace Peach.Core.Mutators.Utility
 		protected override void performMutation(DataElement obj, long value)
 		{
 			System.Diagnostics.Debug.Assert(value <= int.MaxValue);
+
+			var limit = Utility.SizedHelpers.MaxExpansion(obj);
+			if (value > limit)
+			{
+				logger.Trace("Skipping mutation, expansion by {0} would exceed max output size.", value);
+				return;
+			}
 
 			var sb = new StringBuilder((int)value);
 

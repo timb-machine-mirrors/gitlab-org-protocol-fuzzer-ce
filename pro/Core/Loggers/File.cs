@@ -376,7 +376,7 @@ namespace Peach.Core.Loggers
 
 			log.WriteLine("Seed: " + context.config.randomSeed);
 
-			log.WriteLine("Command line: " + context.config.commandLine);
+			log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
 			log.WriteLine("Pit File: " + context.config.pitFile);
 			log.WriteLine(". Test starting: " + context.test.name);
 			log.WriteLine("");

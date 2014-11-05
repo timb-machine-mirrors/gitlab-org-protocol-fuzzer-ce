@@ -1691,6 +1691,9 @@ namespace Peach.Core.Analyzers
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");
 
+			if (node.hasAttr("maxOutputSize"))
+				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
+
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Logger")

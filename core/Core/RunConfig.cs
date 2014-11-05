@@ -91,7 +91,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Command line if any (used by logger)
 		/// </summary>
-		public string[] commandLine = null;
+		public string[] commandLine = new string[0];
 
 		/// <summary>
 		/// Date and time of run (used by logger)
