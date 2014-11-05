@@ -59,6 +59,11 @@ namespace Peach.Core.Mutators.Utility
 
 		}
 
+		// Artificially limit the maximum expansion to be 65k
+		// This is to work around OutOfMemoryExceptions when
+		// we try and do BitStream.GrowBy((uint/MaxValue / 4) - 1)
+		const long maxExpansion = ushort.MaxValue;
+
 		/// <summary>
 		/// Returns the maximum number of bytes the element can be
 		/// and still be under the limit of the MaxOutputSize attribute.
@@ -70,19 +75,19 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var size = (ulong)obj.Value.LengthBits;
 			var limit = ((8 * max) - used + size + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, limit);
+			return (long)Math.Min(maxExpansion, limit);
 		}
 
 		/// <summary>
@@ -96,18 +101,18 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var limit = ((8 * max) - used + 7) / 8;
 
-			return (long)Math.Min((ulong)long.MaxValue, limit);
+			return (long)Math.Min(maxExpansion, limit);
 		}
 
 		/// <summary>
@@ -121,24 +126,24 @@ namespace Peach.Core.Mutators.Utility
 			// For testing.  Figure out a way to not have this check in here
 			var root = obj.root as DataModel;
 			if (root == null)
-				return long.MaxValue;
+				return maxExpansion;
 			if (root.actionData == null)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var max = root.actionData.MaxOutputSize;
 			if (max == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var used = (ulong)root.Value.LengthBits;
 			var size = (ulong)obj.Value.LengthBits;
 
 			if (size == 0)
-				return long.MaxValue;
+				return maxExpansion;
 
 			var avail = (8 * max) - used;
 			var ret = avail / size;
 
-			return (long)Math.Min((ulong)long.MaxValue, ret);
+			return (long)Math.Min(maxExpansion, ret);
 		}
 	}
 }

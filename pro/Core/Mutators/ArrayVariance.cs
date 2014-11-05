@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Math.Min(ushort.MaxValue, Utility.SizedHelpers.MaxDuplication(LastElement(asArray)));
+			max = Utility.SizedHelpers.MaxDuplication(LastElement(asArray));
 			value = Math.Min(asArray.Count, max);
 		}
 

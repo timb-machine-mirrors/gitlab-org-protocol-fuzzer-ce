@@ -33,8 +33,7 @@ namespace Peach.Core.Mutators
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
 			min = 0;
-			max = Math.Min(ushort.MaxValue, (ulong)Utility.SizedHelpers.MaxExpansion(obj));
-			//max = ((ulong)Utility.SizedHelpers.MaxExpansion(obj));
+			max = (ulong)Utility.SizedHelpers.MaxExpansion(obj);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
