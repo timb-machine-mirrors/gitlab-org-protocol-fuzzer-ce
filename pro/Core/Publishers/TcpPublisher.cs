@@ -39,7 +39,8 @@ namespace Peach.Core.Publishers
 {
 	public abstract class TcpPublisher : BufferedStreamPublisher
 	{
-		public ushort Port { get; protected set; }
+		// Leave the setter public, it's used by pits.
+		public ushort Port { get; set; }
 		
 		protected TcpClient _tcp = null;
 		protected EndPoint _localEp = null;
