@@ -57,7 +57,7 @@ namespace Peach.Core.Mutators
 			}
 
 			// Same as edge case except for how value is picked
-			StringLengthEdgeCase.Mutate(obj, value);
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)
