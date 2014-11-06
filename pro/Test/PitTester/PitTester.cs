@@ -1,3 +1,7 @@
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Dom.XPath;
+using Peach.Core.IO;
 using Peach.Enterprise;
 using Peach.Enterprise.WebServices;
 using System;
@@ -12,15 +16,130 @@ namespace PitTester
 {
 	public class PitTester
 	{
+		public static event Peach.Core.Engine.IterationStartingEventHandler IterationStarting;
+
+		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
+		{
+			if (IterationStarting != null)
+				IterationStarting(context, currentIteration, totalIterations);
+		}
+
 		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
 				throw new FileNotFoundException();
 
-			var pitName = GetRelativePath(libraryPath, pitFile);
+			//var pitName = GetRelativePath(libraryPath, pitFile);
 
-			Peach.Enterprise.Test.PitTester.TestPit(libraryPath, pitName, null, singleIteration, seed);
+			//var fileName = Path.Combine(pitLibrary, pitName);
+
+			//var defines = PitDefines.Parse(fileName + ".config");
+			var testData = TestData.Parse(testFile);
+
+			var defs = new List<KeyValuePair<string, string>>();
+			foreach (var item in testData.Defines)
+				if (item.Key != "PitLibraryPath")
+					defs.Add(new KeyValuePair<string, string>(item.Key, item.Value));
+			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+
+			var args = new Dictionary<string, object>();
+			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+			var parser = new Peach.Core.Analyzers.PitParser();
+
+			var dom = parser.asParser(args, pitFile);
+
+			foreach (var test in dom.tests)
+			{
+				// Don't run extra control iterations...
+				test.controlIteration = 0;
+
+				test.agents.Clear();
+
+				var data = testData.Tests.Where(t => t.Name == test.name).First();
+
+				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
+
+				test.loggers.Clear();
+				test.loggers.Add(logger);
+
+				foreach (var key in test.publishers.Keys)
+					test.publishers[key] = new TestPublisher(key, logger);
+			}
+
+			if (testData.Slurps.Count > 0)
+			{
+				var doc = new XmlDocument();
+				var resolver = new PeachXmlNamespaceResolver();
+				var navi = new PeachXPathNavigator(dom);
+
+				foreach (var slurp in testData.Slurps)
+				{
+					var iter = navi.Select(slurp.SetXpath, resolver);
+					if (!iter.MoveNext())
+						throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
+
+					var n = doc.CreateElement("Foo");
+					n.SetAttribute("valueType", slurp.ValueType);
+					n.SetAttribute("value", slurp.Value);
+
+					var blob = new Blob();
+					new Peach.Core.Analyzers.PitParser().handleCommonDataElementValue(n, blob);
+
+					do
+					{
+						var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+						if (setElement == null)
+							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
+
+						setElement.DefaultValue = blob.DefaultValue;
+
+						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+							((BitwiseStream)blob.DefaultValue).Position = 0;
+					}
+					while (iter.MoveNext());
+
+					//ApplySlurp(dom, slurp);
+				}
+			}
+
+			var config = new RunConfiguration();
+			config.range = true;
+			config.rangeStart = 0;
+			config.rangeStop = 500;
+			config.pitFile = Path.GetFileName(pitFile);
+			config.runName = "Default";
+			config.singleIteration = singleIteration;
+
+			if (seed.HasValue)
+				config.randomSeed = seed.Value;
+
+			var q = testData.Tests.Where(i => i.Name == config.runName).First();
+			if (!string.IsNullOrEmpty(q.Seed))
+			{
+				uint s;
+				if (!uint.TryParse(q.Seed, out s))
+					throw new PeachException("Error, could not parse test seed '{0}' as an unsigned integer.".Fmt(q.Seed));
+
+				config.randomSeed = s;
+			}
+
+
+			var e = new Engine(null);
+
+			try
+			{
+				e.startFuzzing(dom, config);
+			}
+			catch (Exception ex)
+			{
+				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
+					e.context.currentIteration,
+					config.randomSeed,
+					ex.Message);
+				throw new PeachException(msg, ex);
+			}
 		}
 
 		public static void VerifyPitConfig(string fileName)
