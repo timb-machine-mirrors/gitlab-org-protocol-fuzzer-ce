@@ -665,6 +665,8 @@ namespace Peach.Core.Dom
 				var sb = new StringBuilder();
 				var pos = stream.Position;
 
+				stream.Seek(0, SeekOrigin.Begin);
+
 				for (int i = 0; i < stream.Length; i++)
 					sb.Append(stream.ReadByte().ToString("x2"));
 
