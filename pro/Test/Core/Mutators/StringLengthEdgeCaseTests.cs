@@ -99,9 +99,11 @@ namespace Peach.Core.Test.Mutators
 
 			RunEngine(xml);
 
-			// Size is 11 bytes, max is 50
-			// (50 - 11)  + 1 = 40 expansions
-			Assert.AreEqual(40, mutatedDataModels.Count);
+			// Sizes 0 to 50 is 51 mutations
+			Assert.AreEqual(51, mutatedDataModels.Count);
+
+			foreach (var m in mutatedDataModels)
+				Assert.LessOrEqual(m.Value.Length, 50);
 		}
 	}
 }
