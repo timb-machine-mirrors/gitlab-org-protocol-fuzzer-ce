@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace Peach.Core.Test
 {
-	internal class StringMutatorTester
+	internal class StringMutatorTester : DataModelCollector
 	{
 		MutatorRunner runner;
 
