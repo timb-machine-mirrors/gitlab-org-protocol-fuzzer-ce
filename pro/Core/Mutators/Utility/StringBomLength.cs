@@ -18,7 +18,10 @@ namespace Peach.Core.Mutators.Utility
 			get;
 		}
 
-		protected abstract byte[] BOM
+		/// <summary>
+		/// Returns an array of BOM characters to inject during mutation.
+		/// </summary>
+		protected abstract byte[][] BOM
 		{
 			get;
 		}
@@ -31,9 +34,8 @@ namespace Peach.Core.Mutators.Utility
 			if (obj.mutationFlags == MutateOverride.None)
 				return;
 
-			var val = obj.PreTransformedValue;
+			var val = StringBomStatic.InjectBom(context.Random, obj.PreTransformedValue, BOM);
 
-			// TODO: slice up and inject this.BOM and return a BitStreamList
 			obj.MutatedValue = new Variant(val);
 			obj.mutationFlags |= MutateOverride.TypeTransform;
 		}

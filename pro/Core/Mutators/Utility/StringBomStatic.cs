@@ -1,5 +1,7 @@
 using Peach.Core.Dom;
+using Peach.Core.IO;
 using System;
+using System.IO;
 
 namespace Peach.Core.Mutators.Utility
 {
@@ -13,7 +15,10 @@ namespace Peach.Core.Mutators.Utility
 		{
 		}
 
-		protected abstract byte[] BOM
+		/// <summary>
+		/// Returns an array of BOM characters to inject during mutation.
+		/// </summary>
+		protected abstract byte[][] BOM
 		{
 			get;
 		}
@@ -26,11 +31,53 @@ namespace Peach.Core.Mutators.Utility
 			if (obj.mutationFlags == MutateOverride.None)
 				return;
 
-			var val = obj.PreTransformedValue;
+			var val = StringBomStatic.InjectBom(context.Random, obj.PreTransformedValue, BOM);
 
-			// TODO: slice up and inject this.BOM and return a BitStreamList
 			obj.MutatedValue = new Variant(val);
 			obj.mutationFlags |= MutateOverride.TypeTransform;
+		}
+
+		/// <summary>
+		/// Picks a gaussian number N from centered at 1, up to 6.
+		/// Picks N indices in data
+		/// For each index, injects a randomly selected array of BOm characters.
+		/// </summary>
+		/// <param name="rng">Random number generator to use.</param>
+		/// <param name="data">Source data.</param>
+		/// <param name="bom">Array of BOM characters.</param>
+		/// <returns>BitwiseStream containing injected BOM characters.</returns>
+		internal static BitwiseStream InjectBom(Random rng, BitwiseStream data, byte[][] bom)
+		{
+			var num = rng.PickSix();
+			var indices = rng.SortedPermutation(data.Length, num);
+
+			// Inject bom byte sequence indices
+
+			data.Seek(0, SeekOrigin.Begin);
+
+			var ret = new BitStreamList();
+
+			for (int i = 0; i < indices.Length; ++i)
+			{
+				// Permutation is [1,Length] inclusive and alsos orted
+				var idx = indices[i];
+
+				var len = idx - data.Position - 1;
+
+				if (len > 0)
+					ret.Add(data.SliceBits(len * 8));
+
+				var r = rng.Next(0, bom.Length);
+				var bs = new BitStream(bom[r]);
+
+				ret.Add(bs);
+			}
+
+			var remain = data.LengthBits - data.PositionBits;
+			if (remain > 0)
+				ret.Add(data.SliceBits(remain));
+
+			return ret;
 		}
 	}
 }
