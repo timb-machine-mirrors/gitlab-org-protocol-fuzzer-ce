@@ -38,7 +38,7 @@ _Attributes:_
 
 _Required:_
 
-xref:name[name]:: Name of parameter
+xref:name[name]:: Name of parameter.
 xref:value[value]:: Default value.
 
 _Optional:_
@@ -75,9 +75,9 @@ _Required:_
 
 xref:name[name]:: Name of parameter
 
-_Optiona:_
+_Optional:_
 
-There are no optional attributes for this element.
+None.
 
 ==== Child Elements
 
