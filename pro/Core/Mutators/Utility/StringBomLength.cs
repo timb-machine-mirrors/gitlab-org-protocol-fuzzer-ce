@@ -1,3 +1,7 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using Peach.Core.Dom;
 using System;
 
