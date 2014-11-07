@@ -55,6 +55,12 @@ namespace Peach.Core.Mutators.Utility
 			var num = rng.PickSix();
 			var indices = rng.SortedPermutation(data.Length, num);
 
+			if (indices.Length == 0)
+			{
+				System.Diagnostics.Debug.Assert(data.Length == 0);
+				indices = new long[] { 1 };
+			}
+
 			// Inject bom byte sequence indices
 
 			data.Seek(0, SeekOrigin.Begin);
