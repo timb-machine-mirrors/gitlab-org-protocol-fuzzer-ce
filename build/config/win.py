@@ -55,10 +55,10 @@ def prepare(conf):
 			'CXXFLAGS'  : [ '/MT' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
-		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
-			'DEFINES' : [ '_WINDLL' ],
-		},
+		# 'com' : {
+		# 	'HEADERS' : [ 'atlbase.h' ],
+		# 	'DEFINES' : [ '_WINDLL' ],
+		# },
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
 			'STLIB'   : [ 'ws2_32' ],
@@ -86,10 +86,10 @@ def prepare(conf):
 			'CXXFLAGS'  : [ '/MT' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
-		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
-			'DEFINES' : [ '_WINDLL' ],
-		},
+		# 'com' : {
+		# 	'HEADERS' : [ 'atlbase.h' ],
+		# 	'DEFINES' : [ '_WINDLL' ],
+		# },
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
 			'STLIB'   : [ 'ws2_32' ],
