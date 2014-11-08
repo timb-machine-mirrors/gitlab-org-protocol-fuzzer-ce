@@ -35,7 +35,7 @@ namespace Peach.Core.Test
 			else
 			{
 				List<string> paths = new List<string>();
-				paths.Add(Environment.CurrentDirectory);
+				paths.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 				paths.AddRange(process.StartInfo.EnvironmentVariables["PATH"].Split(Path.PathSeparator));
 				string peach = "Peach.exe";
 				foreach (var dir in paths)
