@@ -10,7 +10,8 @@ using System.IO;
 
 namespace Peach.Core.Test.Publishers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class RemotePublisherTests
 	{
 		string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -158,6 +159,7 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
+		[Ignore]
 		public void TestRaw()
 		{
 			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)

@@ -17,7 +17,7 @@ namespace Peach.Core.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		public string Host    { get; private set; }
+		public string Host { get; private set; }
 		public int Timeout { get; private set; }
 		public int RetryCount { get; private set; }
 		public string Data { get; private set; }
@@ -138,7 +138,7 @@ namespace Peach.Core.Agent.Monitors
 			{
 				case IPStatus.Success:
 					StringBuilder sb = new StringBuilder();
-					sb.AppendFormat("Address: {0}", reply.Address.ToString ());
+					sb.AppendFormat("Address: {0}", reply.Address.ToString());
 					sb.AppendLine();
 					sb.AppendFormat("RoundTrip time: {0}", reply.RoundtripTime);
 					sb.AppendLine();
