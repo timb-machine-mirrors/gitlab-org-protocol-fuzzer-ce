@@ -12,6 +12,7 @@ namespace Peach.Core.Test.Publishers
 {
 	[TestFixture]
 	[Category("Peach")]
+	[Ignore]
 	class RemotePublisherTests
 	{
 		string template = @"<?xml version=""1.0"" encoding=""utf-8""?>

@@ -11,7 +11,6 @@ namespace Peach.Core.Test.Monitors
 {
 	[TestFixture]
 	[Category("Peach")]
-	[Ignore]
 	class PingMonitorTests
 	{
 		class Params : Dictionary<string, string> { }
