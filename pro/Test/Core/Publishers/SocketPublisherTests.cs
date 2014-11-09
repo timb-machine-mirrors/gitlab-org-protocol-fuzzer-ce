@@ -427,7 +427,6 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		[Ignore]
 		public void MulticastUdp6Test()
 		{
 			ushort dstport = TestBase.MakePort(53000, 54000);
@@ -770,7 +769,6 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		[Ignore]
 		public void TestMtuInterface()
 		{
 			IPAddress self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
@@ -778,7 +776,6 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		[Ignore]
 		public void TestMtuLoopback()
 		{
 			try
