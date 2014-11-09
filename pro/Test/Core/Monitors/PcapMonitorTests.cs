@@ -114,6 +114,7 @@ namespace Peach.Core.Test.Monitors
 
 	[TestFixture]
 	[Category("Peach")]
+	[Ignore]
 	class PcapMonitorTests
 	{
 		List<string> testResults = new List<string>();
