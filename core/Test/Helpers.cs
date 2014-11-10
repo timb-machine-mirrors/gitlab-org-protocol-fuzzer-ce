@@ -29,9 +29,7 @@ namespace Peach.Core.Test
 			var startEvent = new ManualResetEvent(false);
 			var process = new Process();
 
-			NLog.Logger logger = LogManager.GetCurrentClassLogger();
 			var peach = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Peach.exe");
-			logger.Error("Peach.exe: {0}", peach);
 
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{

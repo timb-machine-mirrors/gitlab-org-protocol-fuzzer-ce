@@ -159,7 +159,6 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		[Ignore]
 		public void TestRaw()
 		{
 			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
