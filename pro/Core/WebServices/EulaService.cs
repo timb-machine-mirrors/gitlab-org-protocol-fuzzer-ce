@@ -14,7 +14,12 @@ namespace Peach.Enterprise.WebServices
 				if (Peach.Core.License.EulaAccepted)
 					return Response.AsRedirect("/app/index.html");
 
-				return View["Eula", new { Rejected = false, Version = Peach.Core.License.Version, EulaText = "Eula Goes Here!" }];
+				return View["Eula", new
+				{
+					Rejected = false,
+					Version = Peach.Core.License.Version,
+					EulaText = Peach.Core.License.EulaText()
+				}];
 			};
 
 			Post["/eula", (ctx) => Accepted(Eula(ctx))] = _ =>
