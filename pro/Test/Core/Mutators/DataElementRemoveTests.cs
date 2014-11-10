@@ -111,8 +111,8 @@ namespace Peach.Core.Test.Mutators
 				var val = item.Value.ToArray();
 
 				// Even though we mutated, CountOverride will stil produce 2 values
-				// using original element
-				Assert.AreEqual(Encoding.ASCII.GetBytes("HelloHello"), val);
+				// using the element Foo that was deleted
+				Assert.AreEqual(Encoding.ASCII.GetBytes("FooFoo"), val);
 			}
 		}
 	}

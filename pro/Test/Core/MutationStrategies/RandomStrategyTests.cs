@@ -1131,6 +1131,35 @@ namespace Peach.Core.Test.MutationStrategies
 			Assert.AreEqual(1, numLower);
 			Assert.AreEqual(2000 - numLower, numStatic);
 		}
+
+		[Test]
+		public void TestCombinationExpansion()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello' minOccurs='1'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65000'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'>
+			<Param name='MaxOutputSize' value='100000' />
+		</Publisher>
+		<Strategy class='Random'/>
+	</Test>
+</Peach>";
+
+			RunSwitchTest(xml, 1, 100);
+		}
 	}
 }
 

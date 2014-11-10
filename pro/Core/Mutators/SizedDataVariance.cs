@@ -40,10 +40,11 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
+			var other = obj.relations.From<SizeRelation>().First().Of;
+
 			signed = false;
-			value = (long)obj.InternalValue;
 			min = 0;
-			max = ushort.MaxValue;
+			max = Utility.SizedHelpers.MaxSize(other);
 
 			// If we are a number, make sure our max is not larger than max long
 			// since stream lengths are tracked as longs
@@ -54,7 +55,7 @@ namespace Peach.Core.Mutators
 				System.Diagnostics.Debug.Assert(obj is Dom.String);
 
 			// Since we cap max at ushort.MaxValue, make sure value is not larger!
-			value = Math.Min(value, max);
+			value = Math.Min((long)obj.InternalValue, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -68,6 +69,18 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
+			var rel = obj.relations.From<SizeRelation>().FirstOrDefault();
+
+			if (rel != null)
+			{
+				var limit = Utility.SizedHelpers.MaxSize(rel.Of);
+				if (value > limit)
+				{
+					logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
+					return;
+				}
+			}
+
 			Utility.SizedHelpers.ExpandTo(obj, value, OverrideRelation);
 		}
 

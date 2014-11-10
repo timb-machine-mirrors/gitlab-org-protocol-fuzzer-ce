@@ -263,6 +263,11 @@ namespace Peach.Core
 
 		#region Public Helpers
 
+		public abstract byte[] ByteOrderMark
+		{
+			get;
+		}
+
 		public System.Text.Encoding RawEncoding
 		{
 			get
@@ -584,6 +589,8 @@ namespace Peach.Core
 	[Serializable]
 	public class ASCIIEncoding : Encoding
 	{
+		static byte[] byteOrderMark = new byte[0];
+
 		const int BytesPerChar = 1;
 		const int MaxCodePoint = byte.MaxValue;
 
@@ -615,6 +622,11 @@ namespace Peach.Core
 
 			return len;
 		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { return byteOrderMark; }
+		}
 	}
 
 	#endregion
@@ -638,6 +650,11 @@ namespace Peach.Core
 		{
 			return encoding.GetBytes(chars, charIndex, charCount, bytes, byteIndex);
 		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { throw new NotImplementedException(); }
+		}
 	}
 
 	#endregion
@@ -647,6 +664,8 @@ namespace Peach.Core
 	[Serializable]
 	public class UTF8Encoding : Encoding
 	{
+		static byte[] byteOrderMark = new byte[] { 0xEF, 0xBB, 0xBF };
+
 		const int MinBytesPerChar = 1;
 
 		public UTF8Encoding()
@@ -734,6 +753,11 @@ namespace Peach.Core
 
 			return len;
 		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { return byteOrderMark; }
+		}
 	}
 
 	#endregion
@@ -743,15 +767,20 @@ namespace Peach.Core
 	[Serializable]
 	public class UnicodeEncoding : Encoding
 	{
+		static byte[] byteOrderMarkBE = new byte[] { 0xFE, 0xFF };
+		static byte[] byteOrderMarkLE = new byte[] { 0xFF, 0xFE };
+
 		const int BytesPerChar = 2;
 		const int MaxCodePoint = ushort.MaxValue;
 
 		private bool bigEndian;
+		private byte[] byteOrderMark;
 
 		public UnicodeEncoding(bool bigEndian)
 			: base(new System.Text.UnicodeEncoding(bigEndian, false, true), BytesPerChar)
 		{
 			this.bigEndian = bigEndian;
+			this.byteOrderMark = bigEndian ? byteOrderMarkBE : byteOrderMarkLE;
 		}
 
 		public override int GetRawByteCount(char[] chars, int index, int count)
@@ -787,6 +816,11 @@ namespace Peach.Core
 
 			return len;
 		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { return byteOrderMark; }
+		}
 	}
 
 	#endregion
@@ -796,15 +830,20 @@ namespace Peach.Core
 	[Serializable]
 	public class UTF32Encoding : Encoding
 	{
+		static byte[] byteOrderMarkBE = new byte[] { 0x00, 0x00, 0xFE, 0xFF };
+		static byte[] byteOrderMarkLE = new byte[] { 0xFF, 0xFE, 0x00, 0x00 };
+
 		const int BytesPerChar = 4;
 		const int MaxCodePoint = int.MaxValue;
 
 		private bool bigEndian;
+		private byte[] byteOrderMark;
 
 		public UTF32Encoding(bool bigEndian)
 			: base(new System.Text.UTF32Encoding(bigEndian, false, true), BytesPerChar)
 		{
 			this.bigEndian = bigEndian;
+			this.byteOrderMark = bigEndian ? byteOrderMarkBE : byteOrderMarkLE;
 		}
 
 		public override int GetRawByteCount(char[] chars, int index, int count)
@@ -850,6 +889,11 @@ namespace Peach.Core
 
 			return len;
 		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { return byteOrderMark; }
+		}
 	}
 
 	#endregion
@@ -859,6 +903,8 @@ namespace Peach.Core
 	[Serializable]
 	public class Latin1Encoding : Encoding
 	{
+		static byte[] byteOrderMark = new byte[0];
+
 		const int BytesPerChar = 1;
 		const int MaxCodePoint = byte.MaxValue;
 
@@ -889,6 +935,11 @@ namespace Peach.Core
 			}
 
 			return len;
+		}
+
+		public override byte[] ByteOrderMark
+		{
+			get { return byteOrderMark; }
 		}
 	}
 

@@ -160,6 +160,110 @@ namespace Peach.Core.IO
 			return ret;
 		}
 
+		/// <summary>
+		/// Create a new BitwiseSteam be replicating a source BitwiseStream over and over.
+		/// </summary>
+		/// <param name="len">How many bytes long the returned stream should be</param>
+		/// <returns></returns>
+		public BitwiseStream GrowTo(long len)
+		{
+			var data = this;
+
+			if (len < 0)
+				return new BitStream();
+
+			// If there is no source data, replicate 'A'
+			if (data.Length == 0)
+				data = new BitStream(Encoding.ASCII.GetBytes("A"));
+
+			if (data.Length > len)
+			{
+				var pos = data.PositionBits;
+				data.PositionBits = 0;
+				var ret = data.SliceBits(len * 8);
+				data.PositionBits = pos;
+				return ret;
+			}
+
+			var item = data;
+			var cnt = data.Length;
+			var remain = len - cnt;
+
+			while (remain > 0)
+			{
+				var lst = new BitStreamList();
+				lst.Add(item);
+				lst.Add(item);
+
+				remain -= cnt;
+				cnt *= 2;
+
+				item = lst;
+			}
+
+			{
+				// Always slice, to ensure trailing bits get lopped off
+				var pos = item.PositionBits;
+				item.PositionBits = 0;
+				var ret = item.SliceBits(len * 8);
+				item.PositionBits = pos;
+
+				return ret;
+			}
+		}
+
+		/// <summary>
+		/// Create a new BitwiseSteam be replicating a source BitwiseStream over and over.
+		/// </summary>
+		/// <param name="len">How many bits long the returned stream should be</param>
+		/// <returns></returns>
+		public BitwiseStream GrowToBits(long len)
+		{
+			var data = this;
+
+			if (len < 0)
+				return new BitStream();
+
+			// If there is no source data, replicate 'A'
+			if (data.Length == 0)
+				data = new BitStream(Encoding.ASCII.GetBytes("A"));
+
+			if (data.LengthBits > len)
+			{
+				var pos = data.PositionBits;
+				data.PositionBits = 0;
+				var ret = data.SliceBits(len);
+				data.PositionBits = pos;
+				return ret;
+			}
+
+			var item = data;
+			var cnt = data.LengthBits;
+			var remain = len - cnt;
+
+			while (remain > 0)
+			{
+				var lst = new BitStreamList();
+				lst.Add(item);
+				lst.Add(item);
+
+				remain -= cnt;
+				cnt *= 2;
+
+				item = lst;
+			}
+
+			{
+				// Always slice, to ensure trailing bits get lopped off
+				var pos = item.PositionBits;
+				item.PositionBits = 0;
+				var ret = item.SliceBits(len);
+				item.PositionBits = pos;
+
+				return ret;
+			}
+		}
+
 		#endregion
 	}
 }

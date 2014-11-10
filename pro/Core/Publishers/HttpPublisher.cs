@@ -103,8 +103,16 @@ namespace Peach.Core.Publishers
 		{
 			data.Seek(0, SeekOrigin.Begin);
 			var rdr = new BitReader(data);
-			var str = rdr.ReadString(Encoding.UTF8);
-			return str;
+			try
+			{
+				var str = rdr.ReadString(Encoding.UTF8);
+				return str;
+			}
+			catch (Exception ex)
+			{
+				// Eat up encoding exception.
+				throw new SoftException("HTTP Publisher skips test cases with incorrect UTF8", ex);
+			}
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
@@ -116,11 +124,41 @@ namespace Peach.Core.Publishers
 					Query = ReadString(args[0].dataModel.Value);
 					break;
 				case "Header":
-					Headers[ReadString(args[0].dataModel.Value)] = ReadString(args[1].dataModel.Value);
+					var key = CleanHeaderValue(ReadString(args[0].dataModel.Value));
+					var value =  CleanHeaderValue(ReadString(args[1].dataModel.Value));
+					Headers[key] = value;
 					break;
 			}
 
 			return null;
+		}
+
+		char [] InvalidParamChars = new char[] { 
+        '(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '\'', '/', '[', ']', '?', '=', 
+        '{', '}', ' ', '\t', '\r', '\n'
+		};
+
+
+		/// <summary>
+		/// Remove characters not allowed in header fields.
+		/// </summary>
+		/// <param name="str"></param>
+		/// <returns></returns>
+		protected string CleanHeaderValue(string str)
+		{
+			var sb = new StringBuilder(str.Length);
+
+			for(int i = 0; i<str.Length;i++)
+			{
+				//char c = (char)('\x00ff' & str[i]);
+				char c = (char)str[i];
+				if (System.Array.IndexOf(InvalidParamChars, str[i]) == -1 && !((c == '\x007f') || ((c < ' ') && (c != '\t'))))
+				{
+					sb.Append(str[i]);
+				}
+			}
+
+			return sb.ToString();
 		}
 
 		protected override void OnInput()
@@ -155,9 +193,18 @@ namespace Peach.Core.Publishers
 			}
 
 			// Send request with data as body.
-			Uri url = new Uri(Url);
-			if (!string.IsNullOrWhiteSpace(Query))
-				url = new Uri(Url + "?" + Query);
+			Uri url = null;
+
+			try
+			{
+				url = new Uri(Url);
+				if (!string.IsNullOrWhiteSpace(Query))
+					url = new Uri(Url + "?" + Query);
+			}
+			catch (System.UriFormatException ex)
+			{
+				throw new SoftException(ex);
+			}
 
 			var request = (HttpWebRequest)HttpWebRequest.Create(url);
 			request.Method = Method;
@@ -169,7 +216,8 @@ namespace Peach.Core.Publishers
 				request.Credentials = credentials;
 
 			foreach (var header in Headers.Keys)
-				request.Headers[header] = Headers[header];
+				if(!string.IsNullOrWhiteSpace(header))
+					request.Headers[header] = Headers[header];
 
 			if (data != null)
 			{
