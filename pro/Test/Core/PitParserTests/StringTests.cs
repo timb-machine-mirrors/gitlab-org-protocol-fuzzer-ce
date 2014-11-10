@@ -186,7 +186,7 @@ namespace Peach.Core.Test.PitParserTests
 			Dom.String str = dom.dataModels[0][0] as Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf32, str.stringType);
+			Assert.AreEqual(Dom.StringType.utf32be, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
