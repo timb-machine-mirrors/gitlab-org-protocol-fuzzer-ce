@@ -50,8 +50,6 @@ namespace Peach.Core.Agent.Monitors
 		private Fault _fault = null;
 		private bool _lastWasFault = false;
 
-		public enum When { OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault };
-
 		public RunCommand(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{

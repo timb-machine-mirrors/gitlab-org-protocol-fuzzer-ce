@@ -611,7 +611,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		platform = tg.env.CSPLATFORM
 		config = self.ctx.get_config(tg.bld, tg.env)
 
-		out_node = base.make_node(['bin', platform, config])
+		out_node = base.make_node(['bin', '%s_%s' % (config, platform)])
 
 		if getattr(tg, 'ide_aspnet', False):
 			out = 'bin'

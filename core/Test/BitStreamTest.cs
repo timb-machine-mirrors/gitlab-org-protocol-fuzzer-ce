@@ -343,6 +343,47 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void ExponentialAdd()
+		{
+			int remain = 10000;
+			//int remain = 6;
+			var value = new BitStream(Encoding.ASCII.GetBytes("H"));
+
+			//var lst = new BitStreamList();
+			//lst.Add(value);
+
+			var foo = new Stack<Tuple<long, bool>>();
+			foo.Push(null);
+
+			while (remain > 1)
+			{
+				bool carry = remain % 2 == 1;
+				remain /= 2;
+				foo.Push(new Tuple<long, bool>(remain, carry));
+			}
+
+			var asElem = (BitwiseStream)value;
+
+			var item = foo.Pop();
+
+			while (item != null)
+			{
+				var newList = new BitStreamList();
+				newList.Add(asElem);
+				newList.Add(asElem);
+				if (item.Item2)
+					newList.Add(value);
+
+				asElem = newList;
+				item = foo.Pop();
+			}
+
+
+			var len = asElem.Length;
+			Assert.AreEqual(10000, len);
+		}
+
+		[Test]
 		public void ReadWriteNumbersOddOffset()
 		{
 			BitStream bs = new BitStream();

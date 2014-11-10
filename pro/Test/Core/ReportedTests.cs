@@ -315,7 +315,6 @@ namespace Peach.Core.Test
 			Assert.NotNull(model);
 
 			Dom.Array array = dom.tests[0].stateModel.states["State1"].actions[0].dataModel[1] as Dom.Array;
-			array.CountOverride = 50;
 
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
 			var iter = navi.Select("//str");
@@ -350,6 +349,8 @@ namespace Peach.Core.Test
 			// over and over, so there are really only 1 elements in the array...
 			Assert.AreEqual(1, count);
 			Assert.AreEqual(1, array.Count);
+
+			array.CountOverride = 50;
 			Assert.AreEqual(50, array.GetCountOverride());
 
 			var val = array.InternalValue.BitsToString();

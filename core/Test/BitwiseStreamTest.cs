@@ -113,6 +113,69 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void TestGrow()
+		{
+			var src = new BitStream();
+			var dst = src.GrowTo(100);
+			Assert.AreEqual(100, dst.Length);
+
+			var expected = Encoding.ASCII.GetBytes(new string('A', 100));
+
+			Assert.AreEqual(expected, dst.ToArray());
+
+			src = new BitStream(Encoding.ASCII.GetBytes("ABC"));
+			dst = src.GrowTo(2);
+			Assert.AreEqual(2, dst.Length);
+			expected = Encoding.ASCII.GetBytes("AB");
+			Assert.AreEqual(expected, dst.ToArray());
+
+			dst = src.GrowTo(-1);
+			Assert.AreEqual(0, dst.Length);
+			expected = new byte[0];
+			Assert.AreEqual(expected, dst.ToArray());
+
+			dst = src.GrowTo(0);
+			Assert.AreEqual(0, dst.Length);
+			expected = new byte[0];
+			Assert.AreEqual(expected, dst.ToArray());
+
+			dst = src.GrowTo(3);
+			Assert.AreEqual(3, dst.Length);
+			Assert.AreNotEqual(src.GetHashCode(), dst.GetHashCode());
+			Assert.AreEqual(src.ToArray(), dst.ToArray());
+
+			src = new BitStream();
+			src.WriteBits(0xfffff, 20);
+			src.Position = 0;
+
+			dst = src.GrowToBits(28);
+			Assert.AreEqual(28, dst.LengthBits);
+
+			ulong b;
+			int l = dst.ReadBits(out b, 28);
+			Assert.AreEqual(28, l);
+			Assert.AreEqual(0xfffffff, b);
+
+			dst = src.GrowToBits(-1);
+			Assert.AreEqual(0, dst.LengthBits);
+			expected = new byte[0];
+			Assert.AreEqual(expected, dst.ToArray());
+
+			dst = src.GrowToBits(0);
+			Assert.AreEqual(0, dst.LengthBits);
+			expected = new byte[0];
+			Assert.AreEqual(expected, dst.ToArray());
+
+			dst = src.GrowToBits(20);
+			Assert.AreEqual(20, dst.LengthBits);
+			Assert.AreNotEqual(src.GetHashCode(), dst.GetHashCode());
+
+			l = dst.ReadBits(out b, 28);
+			Assert.AreEqual(20, l);
+			Assert.AreEqual(0xfffff, b);
+		}
+
+		[Test]
 		public void CopyToStream()
 		{
 			// Extra bits need to be copied off to a real stream

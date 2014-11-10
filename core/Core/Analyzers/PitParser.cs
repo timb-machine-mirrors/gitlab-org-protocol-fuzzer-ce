@@ -1691,6 +1691,9 @@ namespace Peach.Core.Analyzers
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");
 
+			if (node.hasAttr("maxOutputSize"))
+				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
+
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Logger")
@@ -1880,7 +1883,7 @@ namespace Peach.Core.Analyzers
 
 				throw new PeachException(string.Format(
 					"Error, unable to create instance of '{0}' named '{1}'.\nExtended error: Exception during object creation: {2}",
-					pluginType, cls, e.InnerException.Message
+					pluginType, cls, e.Message
 				), e);
 			}
 		}

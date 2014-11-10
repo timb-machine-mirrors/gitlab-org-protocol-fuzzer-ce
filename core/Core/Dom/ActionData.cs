@@ -103,6 +103,12 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public ulong MaxOutputSize
+		{
+			get;
+			private set;
+		}
+
 		/// <summary>
 		/// Initialize dataModel to its original state.
 		/// If this is the first time through and a dataSet exists,
@@ -115,6 +121,9 @@ namespace Peach.Core.Dom
 			// If is the first time through we need to cache a clean data model
 			if (originalDataModel == null)
 			{
+				// Store off the max output size
+				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+
 				// Apply data samples
 				var option = allData.FirstOrDefault();
 				if (option != null)

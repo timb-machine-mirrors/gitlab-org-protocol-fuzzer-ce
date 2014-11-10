@@ -48,7 +48,7 @@ module DashApp {
 					controller: WizardController
 				})
 				.when("/metrics/:metric", {
-					templateUrl: "/partials/metrics.html", 
+					templateUrl: "/partials/metrics.html",
 					controller: MetricsController
 				})
 				.when("/quickstart/test", {
@@ -165,6 +165,40 @@ module DashApp {
 					ctrl.$parsers.push(maxValidator);
 					ctrl.$formatters.push(maxValidator);
 				}
+			};
+		})
+		.filter('filesize', function () {
+			var units = [
+				'bytes',
+				'KB',
+				'MB',
+				'GB',
+				'TB',
+				'PB'
+			];
+
+			return function (bytes, precision) {
+				if (bytes === 0) {
+					return '0 bytes';
+				}
+
+				if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) {
+					return "?";
+				}
+
+				if (typeof precision === 'undefined') {
+					precision = 1;
+				}
+
+				var unit = 0;
+
+				while (bytes >= 1024) {
+					bytes /= 1024;
+					unit++;
+				}
+
+				var value = bytes.toFixed(precision);
+				return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 			};
 		})
 		.run(function ($rootScope, $templateCache) {

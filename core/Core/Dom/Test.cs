@@ -173,6 +173,13 @@ namespace Peach.Core.Dom
 		[DefaultValue(false)]
 		public bool nonDeterministicActions { get; set; }
 
+		/// <summary>
+		/// The maximum data size to generate for output actions.
+		/// </summary>
+		[XmlAttribute]
+		[DefaultValue(1073741824)]
+		public ulong maxOutputSize { get; set; }
+
 		#endregion
 
 		[OnCloning]
@@ -265,6 +272,7 @@ namespace Peach.Core.Dom
 			replayEnabled = true;
 			waitTime = 0;
 			faultWaitTime = 2;
+			maxOutputSize = 1073741824; // 1024 * 1024 * 1024 (1Gb)
 
 			loggers = new List<Logger>();
 			mutables = new List<MarkMutable>();

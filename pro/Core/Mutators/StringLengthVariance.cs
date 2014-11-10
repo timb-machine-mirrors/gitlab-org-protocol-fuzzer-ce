@@ -34,9 +34,9 @@ namespace Peach.Core.Mutators
 			var str = (string)obj.InternalValue;
 
 			signed = false;
-			value = str.Length;
 			min = 0;
-			max = long.MaxValue;
+			max = Utility.SizedHelpers.MaxSize(obj);
+			value = Math.Min(str.Length, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -49,8 +49,15 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
+			var limit = Utility.SizedHelpers.MaxSize(obj);
+			if (value > limit)
+			{
+				logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
+				return;
+			}
+
 			// Same as edge case except for how value is picked
-			StringLengthEdgeCase.Mutate(obj, value);
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)

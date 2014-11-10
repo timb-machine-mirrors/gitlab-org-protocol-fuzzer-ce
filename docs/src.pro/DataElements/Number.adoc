@@ -269,7 +269,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 <1> The 16 bit little endian value 5
 
 *NOTE:* Numbers use the `size` attribute which is, by default, the size in
-*bytes*. `Number` elements do not accept `length` attribute used by other elements.
+*bits*. `Number` elements do not accept `length` attribute used by other elements.
 ==========================
 
 .Byte Alignment
