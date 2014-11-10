@@ -75,6 +75,19 @@ namespace Peach.Core
 			}
 		}
 
+		public static string EulaText(Feature version)
+		{
+			var res = "Peach.Core.Resources.Eula.{0}.txt".Fmt(version);
+
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(res))
+			{
+				using (var rdr = new StreamReader(stream))
+				{
+					return rdr.ReadToEnd();
+				}
+			}
+		}
+
 		static string Read()
 		{
 			var fileName = "Peach.license";
