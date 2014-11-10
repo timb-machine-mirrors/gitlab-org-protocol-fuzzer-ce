@@ -28,16 +28,16 @@ namespace Peach.Core.Test.Mutators
 			Assert.True(runner.IsSupported(str));
 
 			str.stringType = StringType.utf16;
-			Assert.False(runner.IsSupported(str));
+			Assert.True(runner.IsSupported(str));
 
 			str.stringType = StringType.utf16be;
-			Assert.False(runner.IsSupported(str));
+			Assert.True(runner.IsSupported(str));
 
 			str.stringType = StringType.utf32;
-			Assert.False(runner.IsSupported(str));
+			Assert.True(runner.IsSupported(str));
 
 			str.stringType = StringType.utf7;
-			Assert.False(runner.IsSupported(str));
+			Assert.True(runner.IsSupported(str));
 
 			str.stringType = StringType.utf8;
 			Assert.True(runner.IsSupported(str));

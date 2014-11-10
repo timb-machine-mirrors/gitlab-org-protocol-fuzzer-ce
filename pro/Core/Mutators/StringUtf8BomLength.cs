@@ -51,11 +51,8 @@ namespace Peach.Core.Mutators
 			if (asStr == null || !asStr.isMutable || !getTypeTransformHint(asStr))
 				return false;
 
-			// Attach to ascii and utf8, since most ascii parsers are utf8
-			if (asStr.stringType == StringType.ascii || asStr.stringType == StringType.utf8)
-				return true;
-
-			return false;
+			// Attach to ascii and unicode, since most ascii parsers are utf8
+			return true;
 		}
 	}
 }
