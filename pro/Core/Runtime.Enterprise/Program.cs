@@ -82,6 +82,13 @@ namespace Peach.Enterprise.Runtime
 			if (extra.Count > 0)
 			{
 				// Pit was specified on the command line, do normal behavior
+				// Ensure the EULA has been accepted before running a job
+				// on the command line.  The WebUI will present a EULA
+				// in the later case.
+
+				if (!License.EulaAccepted)
+					ShowEula();
+
 				base.OnRunJob(test, extra);
 			}
 			else if (!noweb)
@@ -246,6 +253,33 @@ Debug Peach XML File
 					throw new PeachException("The specified Peach Pit Library location '{0}' does not exist.".Fmt(pitLibraryPath));
 
 				return pitLibraryPath;
+			}
+		}
+
+		private void ShowEula()
+		{
+			Console.WriteLine();
+			Console.WriteLine(License.EulaText());
+
+			while (true)
+			{
+				Console.WriteLine("Do you accept the end user license agreement?");
+
+				Console.Write("(yes/no) ");
+				var answer = Console.ReadLine();
+				Console.WriteLine();
+
+				if (answer == "no")
+					Environment.Exit(-1);
+
+				if (answer == "yes")
+				{
+					License.EulaAccepted = true;
+					return;
+				}
+
+				Console.WriteLine("The answer \"{0}\" is invalid. It must be one of \"yes\" or \"no\".", answer);
+				Console.WriteLine();
 			}
 		}
 	}
