@@ -309,13 +309,13 @@ module DashApp {
 		//#region Step Functions
 		public completeIntro() {
 			this.pitConfigSvc.IntroComplete = true;
-			this.location.path("/configurator/setvars");
+			this.location.path("/quickstart/setvars");
 		}
 
 		public submitSetVarsInfo() {
 			this.pitConfigSvc.SetVarsComplete = true;
 			this.pitConfigSvc.Defines.LoadValuesFromStateBag(this.pitConfigSvc.StateBag);
-			this.location.path("/configurator/fault");
+			this.location.path("/quickstart/fault");
 		}
 
 		public restartFaultDetection() {
@@ -327,7 +327,7 @@ module DashApp {
 
 		public submitFaultInfo() {
 			this.pitConfigSvc.FaultMonitorsComplete = true;
-			this.location.path("/configurator/data");
+			this.location.path("/quickstart/data");
 		}
 
 		public addNewDataInfo() {
@@ -338,7 +338,7 @@ module DashApp {
 
 		public submitDataInfo() {
 			this.pitConfigSvc.DataMonitorsComplete = true;
-			this.location.path("/configurator/auto");
+			this.location.path("/quickstart/auto");
 		}
 
 		public addNewAutoInfo() {
@@ -349,7 +349,7 @@ module DashApp {
 
 		public submitAutoInfo() {
 			this.pitConfigSvc.AutoMonitorsComplete = true;
-			this.location.path("/configurator/test");
+			this.location.path("/quickstart/test");
 		}
 
 		public removeMonitor(index: number) {

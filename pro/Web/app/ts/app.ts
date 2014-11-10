@@ -10,6 +10,9 @@
 /// <reference path="Controllers/pittest.ts" />
 /// <reference path="Controllers/wizard.ts" />
 /// <reference path="Controllers/startjob.ts" />
+/// <reference path="Controllers/config-monitors.ts" />
+/// <reference path="Controllers/config-test.ts" />
+/// <reference path="Controllers/config-variables.ts" />
 
 
 module DashApp {
@@ -40,7 +43,7 @@ module DashApp {
 					templateUrl: "/partials/faults.html",
 					controller: FaultsController
 				})
-				.when("/configurator/intro", {
+				.when("/quickstart/intro", {
 					templateUrl: "/partials/configurator-intro.html",
 					controller: WizardController
 				})
@@ -48,17 +51,29 @@ module DashApp {
 					templateUrl: "/partials/metrics.html", 
 					controller: MetricsController
 				})
-				.when("/configurator/test", {
+				.when("/quickstart/test", {
 					templateUrl: "/partials/configurator-test.html",
 					controller: PitTestController
 				})
-				.when("/configurator/done", {
+				.when("/quickstart/done", {
 					templateUrl: "/partials/configurator-done.html",
 					controller: WizardController
 				})
-				.when("/configurator/:step", {
+				.when("/quickstart/:step", {
 					templateUrl: "/partials/wizard.html",
 					controller: WizardController
+				})
+				.when("/configuration/monitors", {
+					templateUrl: "/partials/configuration-monitors.html",
+					controller: ConfigurationMonitorsController
+				})
+				.when("/configuration/variables", {
+					templateUrl: "/partials/configuration-variables.html",
+					controller: ConfigurationVariablesController
+				})
+				.when("/configuration/test", {
+					templateUrl: "/partials/configuration-test.html",
+					controller: ConfigurationTestController
 				})
 				.otherwise({
 					redirectTo: "/"

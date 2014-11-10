@@ -127,20 +127,24 @@ module DashApp.Models {
 		agentUrl: string = "";
 		monitors: Monitor[] = [];
 		description: string = "";
-	}
+		name: string = "";
+ 	}
 
 	export interface Monitor {
 		monitorClass: string;
 		path: number[];
 		map: ParameterMap[];
 		description: string;
+		name: string;
 	}
 
 	export interface ParameterMap {
 		key: string;
 		param: string;
-		value: any;
-		//optional: boolean;
+		type: string; 
+		value: any; 
+		enumValues: string[];
+		required: boolean;
 	}
 
 	export class QuestionTypes {
