@@ -157,8 +157,14 @@ namespace Peach.Enterprise.WebServices
 			// Ensure these get insterted after all default handlers
 			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
 			{
-				if (!Peach.Core.License.EulaAccepted && ctx.Request.Path != "/eula")
-					return new RedirectResponse("/eula");
+				if (!Peach.Core.License.EulaAccepted)
+				{
+					if (ctx.Request.Path == "/favicon.ico")
+						return null;
+
+					if (ctx.Request.Path != "/eula")
+						return new RedirectResponse("/eula");
+				}
 
 				return null;
 			});
