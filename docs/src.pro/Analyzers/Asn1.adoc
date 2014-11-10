@@ -2,7 +2,7 @@
 
 == ASN.1 Analyzer
 
-This analyzer converts the Abstract Syntax Notation One (ASN.1) specification into a full data model. This analyzer can convert the following parts of the ASN.1 specification:
+This analyzer converts the Abstract Syntax Notation One (ASN.1) specification into a full data model. This analyzer includes the following parts of the ASN.1 specification in the data model:
 
 * Basic Encoding Rules (BER)
 * Canonical Encoding Rules (CER)
