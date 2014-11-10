@@ -75,6 +75,11 @@ namespace Peach.Core
 			}
 		}
 
+		public static string EulaText()
+		{
+			return EulaText(Version);
+		}
+
 		public static string EulaText(Feature version)
 		{
 			var res = "Peach.Core.Resources.Eula.{0}.txt".Fmt(version);
