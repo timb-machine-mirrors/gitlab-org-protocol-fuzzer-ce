@@ -28,7 +28,7 @@ namespace PitTester
 
 		static UnitTests()
 		{
-			LibraryPath = "..\\..\\..\\..\\pits\\pro";
+			LibraryPath = "../../../pits/pro".Replace('/', Path.DirectorySeparatorChar);
 
 			var lib = new PitDatabase(LibraryPath);
 			var errors = new StringBuilder();
