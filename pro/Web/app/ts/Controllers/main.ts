@@ -177,7 +177,7 @@ module DashApp {
 					else {
 						this.pitConfigSvc.Pit = new Models.Pit(data);
 						if (data.configured == false) {
-							this.location.path("#/configurator/intro");
+							this.location.path("#/quickstart/intro");
 						}
 					}
 				});
@@ -208,7 +208,7 @@ module DashApp {
 			}).result.then((pit: Models.Pit) => {
 				this.pitConfigSvc.Pit = new Models.Pit(pit);
 				if (this.pitConfigSvc.Pit.configured == false) {
-					this.location.path("/configurator/intro");
+					this.location.path("/quickstart/intro");
 				}
 			});
 		}

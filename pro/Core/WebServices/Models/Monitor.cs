@@ -31,6 +31,24 @@ namespace Peach.Enterprise.WebServices.Models
 		/// "Local Area Connection"
 		/// </example>
 		public string Value { get; set; }
+
+		/// <summary>
+		/// The type of the parameter
+		/// </summary>
+		/// <example>
+		/// "string"
+		/// </example>
+		public string Type { get; set; }
+
+		/// <summary>
+		/// List of values for enum types
+		/// </summary>
+		public List<string> EnumValues { get; set; }
+
+		/// <summary>
+		/// Is this parameter required?
+		/// </summary>
+		public bool Required { get; set; }
 	}
 
 	/// <summary>

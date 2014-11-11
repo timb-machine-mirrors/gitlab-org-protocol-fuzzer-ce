@@ -120,7 +120,7 @@ module DashApp {
 
 		public submitAllInfo() {
 			this.pitConfigSvc.TestComplete = true;
-			this.location.path("/configurator/done");
+			this.location.path("/quickstart/done");
 		}
 
 		private startTestPoller(testUrl: string) {
