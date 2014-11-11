@@ -24,7 +24,6 @@ bld.read_csshlib('EasyHook.dll', paths=['EasyHook-2.6'])
 
 bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
 bld.read_all_csshlibs('Telerik ASP.NET AJAX/Bin40')
-bld.read_all_csshlibs('NUnit.Runners.2.6.3/tools/lib')
 #bld.read_all_csshlibs('RadControls for WPF Q3 2012/Binaries/WPF40')
 #bld.read_all_csshlibs('Actipro-WPF-Controls-12.2.0570/Assemblies')
 
@@ -50,6 +49,14 @@ bld.recurse(subdirs)
 if bld.env.CS_NAME == 'csc':
 	# Allow for compilation of all c# on windows
 	bld.read_csshlib('Mono.Posix.dll', paths=['Mono.2.10.9'])
+
+if bld.env.MCS:
+	# Needed to run remote agent tests
+	bld(
+		name = 'nunit.core.dll',
+		install_path = '${BINDIR}',
+		install_755 = { bld.path.find_node('NUnit.Runners.2.6.3/tools/lib') : 'nunit.core.dll' },
+	)
 
 if bld.env.BASENAME == 'osx':
 	bld(
