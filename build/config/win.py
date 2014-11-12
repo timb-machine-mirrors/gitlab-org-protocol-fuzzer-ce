@@ -33,6 +33,7 @@ def prepare(conf):
 	env['PIN_VER'] = 'pin-2.13-61206-msvc10-windows'
 
 	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
+	ddk = 'c:\\WinDDK\\7600.16385.1\\inc\\atl71'
 
 	env['EXTERNALS_x86'] = {
 		'pin' : {
@@ -55,10 +56,11 @@ def prepare(conf):
 			'CXXFLAGS'  : [ '/MT' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
-		# 'com' : {
-		# 	'HEADERS' : [ 'atlbase.h' ],
-		# 	'DEFINES' : [ '_WINDLL' ],
-		# },
+		'com' : {
+			'INCLUDES' : [ ddk ],
+			'HEADERS' : [ 'atlbase.h' ],
+			'DEFINES' : [ '_WINDLL' ],
+		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
 			'STLIB'   : [ 'ws2_32' ],
@@ -86,10 +88,11 @@ def prepare(conf):
 			'CXXFLAGS'  : [ '/MT' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
-		# 'com' : {
-		# 	'HEADERS' : [ 'atlbase.h' ],
-		# 	'DEFINES' : [ '_WINDLL' ],
-		# },
+		'com' : {
+			'INCLUDES' : [ ddk ],
+			'HEADERS' : [ 'atlbase.h' ],
+			'DEFINES' : [ '_WINDLL' ],
+		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
 			'STLIB'   : [ 'ws2_32' ],
