@@ -7,3 +7,4 @@ bld(
 	defs = 'ComTest.def',
 	includes = '.',
 )
+
