@@ -75,7 +75,12 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Multibyte unicode characters encoded in UTF-32.
 		/// </summary>
-		utf32
+		utf32,
+
+		/// <summary>
+		/// Multibyte unicode characters encoded in UTF-32 nig endian.
+		/// </summary>
+		utf32be,
 	}
 	
 	/// <summary>

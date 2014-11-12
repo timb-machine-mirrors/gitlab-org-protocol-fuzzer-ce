@@ -10,6 +10,7 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 
 using NLog;
+using System.Text;
 
 namespace Peach.Core.Mutators.Utility
 {
@@ -144,6 +145,36 @@ namespace Peach.Core.Mutators.Utility
 			var ret = avail / size;
 
 			return (long)Math.Min(maxExpansion, ret);
+		}
+
+		public static void ExpandStringTo(DataElement obj, long value)
+		{
+			var src = (string)obj.InternalValue;
+			var dst = ExpandTo(src, value);
+
+			obj.MutatedValue = new Variant(dst);
+			obj.mutationFlags = MutateOverride.Default;
+		}
+
+		static string ExpandTo(string value, long length)
+		{
+			if (string.IsNullOrEmpty(value))
+			{
+				return new string('A', (int)length);
+			}
+			else if (value.Length >= length)
+			{
+				return value.Substring(0, (int)length);
+			}
+
+			var sb = new StringBuilder();
+
+			while (sb.Length + value.Length < length)
+				sb.Append(value);
+
+			sb.Append(value.Substring(0, (int)(length - sb.Length)));
+
+			return sb.ToString();
 		}
 	}
 }

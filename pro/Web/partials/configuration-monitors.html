@@ -1,0 +1,126 @@
+﻿<form name="advConfigForm">
+	<div>
+		<div style="float: right">
+			<button class="btn btn-sm btn-danger" ng-click="vm.Save()" ng-disabled="advConfigForm.$pristine == true || advConfigForm.$dirty == false || advConfigForm.$invalid">
+				Save
+			</button>
+			<button class="btn btn-sm btn-danger" ng-click="vm.AddAgent()">
+				Add Agent
+				<i class="icon-plus icon-on-right"></i>
+			</button>
+		</div>
+	</div>
+	<div ng-show="advConfigForm.$dirty == false && advConfigForm.$pristine == false" class="green">Saved successfully.</div>
+	<div ng-show="advConfigForm.$invalid == true && advConfigForm.$dirty == true" class="red">You have some validation issues to correct.</div>
+	<div id="agentsaccordion" class="accordion-style1 panel-group" style="overflow: visible">
+		<div ng-repeat="agent in vm.Agents track by $index" class="panel panel-default" style="overflow: visible">
+			<div class="panel-heading" style="overflow: visible">
+				<table cellpadding="0" cellspacing="0" border="0" width="100%">
+					<tr>
+						<td>
+							<h4 class="panel-title">
+								<span class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#agentsaccordion" href="#agentcollapse{{$index}}">
+									<i class="icon-angle-down bigger-110" data-icon-hide="icon-angle-down" data-icon-show="icon-angle-right"></i>
+									&nbsp;{{agent.name || 'New Agent'}} ({{agent.agentUrl || 'local'}})
+								</span>
+
+							</h4>
+						</td>
+						<td align="right">
+							<button class="btn btn-sm btn-danger" ng-click="vm.AgentUp($parent.$index, $index)" ng-disabled="$index == 0">
+								U
+							</button>
+							<button class="btn btn-sm btn-danger" ng-click="vm.AgentDown($parent.$index, $index)" ng-disabled="$index == vm.Agents.length - 1">
+								D
+							</button>
+							<div class="btn-group">
+								<button data-toggle="dropdown" class="btn btn-sm btn-danger dropdown-toggle">
+									Add Monitor
+									<i class="icon-plus icon-on-right"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-danger pull-right dropdown-light-blue">
+									<li ng-repeat="monitor in vm.AvailableMonitors">
+										<div ng-click="vm.AddMonitor(agent,monitor)">{{monitor.monitorClass}}</div>
+									</li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="panel-collapse collapse" id="agentcollapse{{$index}}">
+				<div class="panel-body">
+					<table>
+						<tr>
+							<td align="right">Name:</td>
+							<td><input type="text" ng-model="agent.name" placeholder="New Agent" style="width: 300px" /></td>
+						</tr>
+						<tr>
+							<td align="right">Location:</td>
+							<td><input type="text" ng-model="agent.agentUrl" placeholder="local" style="width: 300px" /></td>
+						</tr>
+					</table>
+					<div id="monitorsaccordion{{$index}}" class="accordion-style1 panel-group">
+						<div ng-repeat="monitor in agent.monitors track by $index" class="panel panel-default">
+							<div class="panel-heading">
+								<table>
+									<tr>
+										<td>
+											<h4 class="panel-title">
+												<span class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#monitorsaccordion{{$parent.$index}}" href="#monitorcollapse{{$parent.$index}}{{$index}}">
+													<i class="icon-angle-down bigger-110" data-icon-hide="icon-angle-down" data-icon-show="icon-angle-right"></i>
+													&nbsp;{{monitor.name || 'New Monitor'}} ({{monitor.monitorClass}})
+												</span>
+											</h4>
+										</td>
+										<td align="right">
+											<button class="btn btn-sm btn-danger" ng-click="vm.MonitorUp($parent.$index, $index)" ng-disabled="$index == 0">
+												U
+											</button>
+											<button class="btn btn-sm btn-danger" ng-click="vm.MonitorDown($parent.$index, $index)" ng-disabled="$index == agent.monitors.length - 1">
+												D
+											</button>
+
+										</td>
+									</tr>
+								</table>
+
+							</div>
+							<div class="panel-collapse collapse" id="monitorcollapse{{$parent.$index}}{{$index}}">
+
+								<table>
+									<tr>
+										<td>&nbsp;</td>
+										<td><span class="red bolder">*</span> <span class="red">denotes required field</span></td>
+									</tr>
+									<tr>
+										<td align="right">Name:</td>
+										<td><input type="text" ng-model="monitor.name" style="width: 300px" placeholder="New Monitor" /></td>
+									</tr>
+									<tr ng-repeat="mapitem in monitor.map">
+										<td style="text-align: right">
+											{{mapitem.param}}:
+										</td>
+										<td>
+											<div>
+												<span ng-switch="mapitem.type">
+													<input ng-switch-default ng-model="mapitem.value" type="text" style="width: 300px" ng-required="mapitem.required" />
+													<input ng-switch-when="int" ng-model="mapitem.value" step="1" type="number" integer ng-required="mapitem.required" />
+													<div class="checkbox" ng-switch-when="bool"><input type="checkbox" ng-model="mapitem.value" ng-checked="mapitem.value" /></div>
+													<select ng-switch-when="enum" class="form-control" ng-model="mapitem.value" ng-options="item for item in mapitem.enumValues" ng-required="mapitem.required" />
+												</span>
+												<span class="red bolder" ng-show="mapitem.required">*</span>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+

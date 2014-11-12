@@ -35,7 +35,7 @@ namespace Peach.Core.Mutators
 
 			signed = false;
 			min = 0;
-			max = Utility.SizedHelpers.MaxExpansion(obj);
+			max = Utility.SizedHelpers.MaxSize(obj);
 			value = Math.Min(str.Length, max);
 		}
 
@@ -49,15 +49,15 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
-			var limit = Utility.SizedHelpers.MaxExpansion(obj);
+			var limit = Utility.SizedHelpers.MaxSize(obj);
 			if (value > limit)
 			{
-				logger.Trace("Skipping mutation, expansion by {0} would exceed max output size.", value);
+				logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
 				return;
 			}
 
 			// Same as edge case except for how value is picked
-			StringLengthEdgeCase.Mutate(obj, value);
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)

@@ -173,6 +173,27 @@ namespace Peach.Core.Test.PitParserTests
 		}
 
 		[Test]
+		public void Utf32BeTest()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<String name=\"TheString\" type=\"utf32be\" value=\"abc\"/>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Dom.String str = dom.dataModels[0][0] as Dom.String;
+
+			Assert.AreNotEqual(null, str);
+			Assert.AreEqual(Dom.StringType.utf32be, str.stringType);
+			Assert.AreEqual("abc", (string)str.DefaultValue);
+
+			BitwiseStream value = str.Value;
+			Assert.AreEqual(Encoding.BigEndianUTF32.GetBytes("abc"), value.ToArray());
+		}
+
+		[Test]
 		public void HexStringTest()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
