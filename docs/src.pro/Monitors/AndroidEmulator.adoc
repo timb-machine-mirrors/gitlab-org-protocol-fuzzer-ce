@@ -15,6 +15,7 @@ Avd:: Android virtual device.
 _Optional:_
 
 EmulatorPath:: Directory containing the emulator. Will attempt to find automatically if not provided.
+Headless:: If true, runs the emulator with -no-window. Defaults to false.
 RestartAfterFault:: Restart emulator after a fault. Defaults to true.
 RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
 StartOnCall:: Start the emulator when notified by the state machine.
@@ -32,7 +33,7 @@ To run the Android emulator, set your AdbPath to the directory containing the ad
 The Avd parameter must also be the name of a valid AVD (Android Virtual Device). To create a new AVD:
 
 . Open the 'android.bat' file located in the adb SDK tools directory. 
-. From the resulting GUI, click on 'Tools' in the menu bar then click on 'Manage AVDS...'. 
+. From the resulting GUI, click on 'Tools' in the menu bar then click on 'Manage AVDs...'. 
 . From the window that opens up click 'New...' and create a new AVD.
 
 [source,xml]
