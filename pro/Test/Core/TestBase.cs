@@ -50,30 +50,30 @@ namespace Peach
 			return ret;
 		}
 
-		[SetUp]
-		public void Initialize()
+		static TestBase()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
-			var consoleTarget = new ConsoleTarget();
-			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
+			{
+				var consoleTarget = new ConsoleTarget();
+				consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
 
-			var config = new LoggingConfiguration();
-			config.AddTarget("console", consoleTarget);
+				var config = new LoggingConfiguration();
+				config.AddTarget("console", consoleTarget);
 
-			var rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
-			config.LoggingRules.Add(rule);
+				var rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+				config.LoggingRules.Add(rule);
 
-			LogManager.Configuration = config;
+				LogManager.Configuration = config;
+			}
 
 			Peach.Core.Runtime.Program.LoadPlatformAssembly();
 		}
 
-		[TearDown]
-		public void TearDown()
+		[SetUp]
+		public void Initialize()
 		{
-			LogManager.Flush();
-			LogManager.Configuration = null;
 		}
 	}
 
