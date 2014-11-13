@@ -269,7 +269,7 @@ namespace Peach.Core.IO
 
 				// First read the high bits
 				int cur = _stream.ReadByte();
-				System.Diagnostics.Debug.Assert(cur != -1);
+				Debug.Assert(cur != -1);
 
 				int end = offset + avail;
 				for (int i = offset; i < end; ++i)
@@ -281,7 +281,7 @@ namespace Peach.Core.IO
 
 					// Read the low bits from the next byte
 					cur = _stream.ReadByte();
-					System.Diagnostics.Debug.Assert(cur != -1);
+					Debug.Assert(cur != -1);
 
 					// Shift the low bits into place
 					next |= (byte)((cur >> shift) & BitsMask[pos]);
@@ -438,7 +438,7 @@ namespace Peach.Core.IO
 			_stream.Seek((_position + _offset) / 8, SeekOrigin.Begin);
 
 			int cur = _stream.ReadByte();
-			System.Diagnostics.Debug.Assert(cur != -1);
+			Debug.Assert(cur != -1);
 
 			cur >>= (8 - pos - 1);
 			cur &= 1;
@@ -472,7 +472,7 @@ namespace Peach.Core.IO
 			{
 				int len = Math.Min(8 - pos, remain);
 				int cur = _stream.ReadByte();
-				System.Diagnostics.Debug.Assert(cur != -1);
+				Debug.Assert(cur != -1);
 
 				if (len != 8)
 				{
