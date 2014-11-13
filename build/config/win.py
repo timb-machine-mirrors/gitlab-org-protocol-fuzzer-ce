@@ -203,6 +203,7 @@ def configure(conf):
 		'/DEBUG',
 		'/INCREMENTAL:NO',
 		'/WX',
+		'/MACHINE:%s' % env.SUBARCH,
 	])
 
 	env['CSPLATFORM'] = env.SUBARCH
