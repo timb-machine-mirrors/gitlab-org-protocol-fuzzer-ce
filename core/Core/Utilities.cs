@@ -30,19 +30,11 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Text.RegularExpressions;
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.Security;
-using System.Security.Policy;
 
 namespace Peach.Core
 {
@@ -298,6 +290,16 @@ namespace Peach.Core
 
 			throw new PeachException("Error, unable to locate '{0}'{1} '{2}' parameter.".Fmt(
 				program, path != null ? " in specified" : ", please specify using", parameter));
+		}
+
+		public static string ExecutionDirectory
+		{
+			get { return AppDomain.CurrentDomain.BaseDirectory; }
+		}
+
+		public static string GetAppResourcePath(string resource)
+		{
+			return Path.Combine(ExecutionDirectory, resource);
 		}
 
         public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)

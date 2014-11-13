@@ -1,9 +1,6 @@
-using NLog;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 
 namespace Peach.Core.Test
@@ -28,8 +25,7 @@ namespace Peach.Core.Test
 		{
 			var startEvent = new ManualResetEvent(false);
 			var process = new Process();
-
-			var peach = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Peach.exe");
+			var peach = Utilities.GetAppResourcePath("Peach.exe");
 
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{
@@ -71,11 +67,6 @@ namespace Peach.Core.Test
 
 				return process;
 			}
-			catch
-			{
-				process = null;
-				throw;
-			}
 			finally
 			{
 				startEvent.Dispose();
@@ -92,7 +83,6 @@ namespace Peach.Core.Test
 			}
 
 			process.Close();
-			process = null;
 		}
 	}
 }

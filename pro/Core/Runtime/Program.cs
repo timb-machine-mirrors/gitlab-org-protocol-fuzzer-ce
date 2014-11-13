@@ -28,22 +28,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using System.IO;
-using System.Xml;
-
-using System.Linq;
-
-using Peach.Core.Dom;
-using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 
 using SharpPcap;
-using NLog;
-using NLog.Targets;
-using NLog.Config;
 using System.Threading;
 
 namespace Peach.Core.Runtime
