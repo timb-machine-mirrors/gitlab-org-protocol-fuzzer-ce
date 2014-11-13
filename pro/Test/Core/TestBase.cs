@@ -1,23 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-
-using NLog;
-using NLog.Targets;
-using NLog.Config;
-
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.IO;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using NUnit.Framework;
 
+// ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach
 {
 	class AssertTestFail : TraceListener
@@ -43,9 +31,9 @@ namespace Peach
 	{
 		public static ushort MakePort(ushort min, ushort max)
 		{
-			int pid = Process.GetCurrentProcess().Id;
-			int seed = Environment.TickCount * pid;
-			var rng = new Peach.Core.Random((uint)seed);
+			var pid = Process.GetCurrentProcess().Id;
+			var seed = Environment.TickCount * pid;
+			var rng = new Core.Random((uint)seed);
 			var ret = (ushort)rng.Next(min, max);
 			return ret;
 		}
@@ -56,8 +44,7 @@ namespace Peach
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget();
-				consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+				var consoleTarget = new ConsoleTarget {Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"};
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
@@ -68,7 +55,7 @@ namespace Peach
 				LogManager.Configuration = config;
 			}
 
-			Peach.Core.Runtime.Program.LoadPlatformAssembly();
+			Core.Runtime.Program.LoadPlatformAssembly();
 		}
 
 		[SetUp]
@@ -86,10 +73,7 @@ namespace Peach
 		public void TestAssert()
 		{
 #if DEBUG
-			Assert.Throws<AssertionException>(delegate()
-			{
-				Debug.Assert(false);
-			});
+			Assert.Throws<AssertionException>(() => Debug.Assert(false));
 #else
 			Debug.Assert(false);
 #endif

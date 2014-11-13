@@ -279,7 +279,7 @@ namespace Peach.Core
 
 		public static string FindProgram(string path, string program, string parameter)
 		{
-			var paths = path == null ? Environment.GetEnvironmentVariable("PATH") : path;
+			var paths = path ?? Environment.GetEnvironmentVariable("PATH");
 			var dirs = paths.Split(Path.PathSeparator);
 			foreach (var dir in dirs)
 			{

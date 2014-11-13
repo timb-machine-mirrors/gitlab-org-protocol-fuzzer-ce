@@ -7,6 +7,7 @@ using NUnit.Framework.Constraints;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using System.IO;
+using Peach.Pro.Test;
 
 namespace Peach.Core.Test.Publishers
 {

@@ -10,6 +10,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Net;
 using System.Diagnostics;
+using Peach.Pro.Test;
 
 namespace Peach.Core.Test.Publishers
 {
