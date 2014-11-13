@@ -1,7 +1,5 @@
-using System;
 using System.Text;
 using System.Linq;
-using System.Collections.Generic;
 using NUnit.Framework;
 
 using Enc = System.Text.Encoding;
@@ -22,7 +20,7 @@ namespace Peach.Core.Test
 			return list.ToArray();
 		}
 
-		static Enc latin1 = Enc.GetEncoding(1252);
+		static readonly Enc latin1 = Enc.GetEncoding(1252);
 
 		[Test]
 		public void TestBaseEncodings()
@@ -95,9 +93,7 @@ namespace Peach.Core.Test
 			var buf7 = Encoding.UTF7.GetBytes("\u00abX");
 			Assert.AreEqual(6, buf7.Length);
 
-			string str;
-
-			str = Encoding.ASCII.GetString(buf);
+			var str = Encoding.ASCII.GetString(buf);
 			Assert.AreEqual("Hello", str);
 			str = Encoding.ISOLatin1.GetString(bufD);
 			Assert.AreEqual("\x80", str);
@@ -112,39 +108,21 @@ namespace Peach.Core.Test
 			str = Encoding.UTF32.GetString(buf32);
 			Assert.AreEqual("\u00abX", str);
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.ASCII.GetString(AppendByte(buf, 0xff));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.ASCII.GetString(AppendByte(buf, 0xff)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.Unicode.GetString(AppendByte(buf16));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.Unicode.GetString(AppendByte(buf16)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.BigEndianUnicode.GetString(AppendByte(buf16be));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.BigEndianUnicode.GetString(AppendByte(buf16be)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF32.GetString(AppendByte(buf32));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF32.GetString(AppendByte(buf32)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF8.GetString(AppendByte(buf8));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF8.GetString(AppendByte(buf8)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF7.GetString(AppendByte(buf7));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF7.GetString(AppendByte(buf7)));
 		}
 
 		[Test]
-		public void PartialUTF7()
+		public void PartialUtf7()
 		{
 			var buf7 = Encoding.UTF7.GetBytes("\u00abX");
 
