@@ -33,7 +33,6 @@ def prepare(conf):
 	env['PIN_VER'] = 'pin-2.13-61206-msvc10-windows'
 
 	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
-	ddk = 'c:\\WinDDK\\7600.16385.1'
 
 	env['EXTERNALS_x86'] = {
 		'pin' : {
@@ -57,8 +56,6 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
 		'com' : {
-			'INCLUDES' : [ j(ddk, 'inc', 'api') ],
-			'HEADERS' : [ 'winres.h' ],
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},
@@ -90,8 +87,6 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
 		'com' : {
-			'INCLUDES' : [ j(ddk, 'inc', 'api') ],
-			'HEADERS' : [ 'winres.h' ],
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},

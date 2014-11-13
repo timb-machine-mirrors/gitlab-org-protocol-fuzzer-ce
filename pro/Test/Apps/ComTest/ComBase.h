@@ -8,9 +8,6 @@ template <class Interface>
 class ComBase : public Interface
 {
 public:
-	static long* p_ObjCount;
-
-public:
 	ComBase()
 		: m_cRef(0)
 	{

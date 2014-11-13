@@ -1,7 +1,6 @@
 // dllmain.cpp : Implementation of DllMain.
 
 #include "stdafx.h"
-#include "resource.h"
 #include "ComTest_i.h"
 #include "ClassFactory.h"
 #include "PeachComTest.h"
@@ -39,7 +38,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppvOut)
 	*ppvOut = NULL;
 	if (IsEqualIID(rclsid, CLSID_PeachComTest))
 	{
-		ClassFactory<CPeachComTest>* pcf = new  ClassFactory<CPeachComTest>;
+		ClassFactory<CPeachComTest>* pcf = new ClassFactory<CPeachComTest>;
 		return pcf->QueryInterface(riid, ppvOut);
 	}
 	return CLASS_E_CLASSNOTAVAILABLE;

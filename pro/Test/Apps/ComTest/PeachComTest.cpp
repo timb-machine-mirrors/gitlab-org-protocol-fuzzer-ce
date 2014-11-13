@@ -25,11 +25,8 @@ CPeachComTest::CPeachComTest()
 	if (!dwLen)
 		return;
 
-	std::wstring str(szModule);
-	str += L".DLL\\3";
-
 	ITypeLib* pTypeLib = NULL;
-	HRESULT hr = LoadTypeLib(str.c_str(), &pTypeLib);
+	HRESULT hr = LoadTypeLib(szModule, &pTypeLib);
 	if (FAILED(hr))
 		return;
 
