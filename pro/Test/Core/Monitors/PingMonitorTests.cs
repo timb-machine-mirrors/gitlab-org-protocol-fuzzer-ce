@@ -9,7 +9,8 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class PingMonitorTests
 	{
 		class Params : Dictionary<string, string> { }

@@ -98,7 +98,7 @@ namespace Peach.Core.Test.Monitors
 
 		public override Fault GetMonitorData()
 		{
-            return null;
+			return null;
 		}
 
 		public override bool MustStop()
@@ -112,7 +112,8 @@ namespace Peach.Core.Test.Monitors
 		}
 	}
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class PcapMonitorTests
 	{
 		List<string> testResults = new List<string>();
@@ -153,14 +154,14 @@ namespace Peach.Core.Test.Monitors
 			throw new Exception("Couldn't find a valid network adapter");
 		}
 
-		private static string pre_xml = 
+		private static string pre_xml =
 			"<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
 			"<Peach>" +
 			"	<DataModel name=\"TheDataModel\">" +
 			"		<String value=\"Hello World\" />" +
 			"	</DataModel>";
 
-		private static string post_xml = 
+		private static string post_xml =
 			"	<StateModel name=\"TheState\" initialState=\"Initial\">" +
 			"		<State name=\"Initial\">" +
 			"			<Action type=\"output\">" +
@@ -247,7 +248,7 @@ namespace Peach.Core.Test.Monitors
 			RunTest(agent_xml, 10, null);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage="Error, PcapMonitor was unable to locate device 'Some Unknown Device'.")]
+		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, PcapMonitor was unable to locate device 'Some Unknown Device'.")]
 		public void BadDeviceTest()
 		{
 			string agent_xml =

@@ -76,7 +76,6 @@ namespace Peach.Core.Test.Mutators
 			foreach (var item in m4)
 			{
 				var bs = item.Value;
-				var a = bs.ToArray();
 				var i = bs.IndexOf(token, 0);
 
 				// The utf8 bom should always be found

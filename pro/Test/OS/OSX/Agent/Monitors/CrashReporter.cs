@@ -1,28 +1,30 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Peach.Core;
-using Peach.Core.Agent.Monitors;
-using NUnit.Framework;
 using System.Threading;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.OS.OSX.Agent.Monitors;
 
-namespace Peach.Core.Test.Agent.Monitors
+namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	public class CrashReporterTest
 	{
+		static string CrashingProcess
+		{
+			get { return Utilities.GetAppResourcePath("CrashingProgram"); }
+		}
+
 		[Test]
 		public void NoProcessNoFault()
 		{
 			// ProcessName argument not provided to the monitor
 			// When no crashing program is run, the monitor should not detect a fault
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			string peach = "";
-			string process = null;
-			bool shouldFault = false;
+			var args = new Dictionary<string, Variant>();
+			const string peach = "";
+			const bool shouldFault = false;
 
-			RunProcess(peach, process, shouldFault, args);
+			RunProcess(peach, null, shouldFault, args);
 		}
 
 		[Test]
@@ -31,12 +33,11 @@ namespace Peach.Core.Test.Agent.Monitors
 			// ProcessName argument not provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			string peach = "qwertyuiopasdfghjklzxcvbnm";
-			string process = "CrashingProgram";
-			bool shouldFault = true;
+			var args = new Dictionary<string, Variant>();
+			const string peach = "qwertyuiopasdfghjklzxcvbnm";
+			const bool shouldFault = true;
 
-			Fault fault = RunProcess(peach, process, shouldFault, args);
+			var fault = RunProcess(peach, CrashingProcess, shouldFault, args);
 
 			Assert.NotNull(fault);
 			Assert.Greater(fault.collectedData.Count, 0);
@@ -53,13 +54,12 @@ namespace Peach.Core.Test.Agent.Monitors
 			// Correct ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, Variant>();
 			args["ProcessName"] = new Variant("CrashingProgram");
-			string peach = "qwertyuiopasdfghjklzxcvbnm";
-			string process = "CrashingProgram";
-			bool shouldFault = true;
+			const string peach = "qwertyuiopasdfghjklzxcvbnm";
+			const bool shouldFault = true;
 
-			Fault fault = RunProcess(peach, process, shouldFault, args);
+			var fault = RunProcess(peach, CrashingProcess, shouldFault, args);
 
 			Assert.NotNull(fault);
 			Assert.Greater(fault.collectedData.Count, 0);
@@ -76,23 +76,22 @@ namespace Peach.Core.Test.Agent.Monitors
 			// Incorrect ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should not detect a fault
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, Variant>();
 			args["ProcessName"] = new Variant("WrongCrashingProgram");
-			string peach = "qwertyuiopasdfghjklzxcvbnm";
-			string process = "CrashingProgram";
-			bool shouldFault = false;
+			const string peach = "qwertyuiopasdfghjklzxcvbnm";
+			const bool shouldFault = false;
 
-			RunProcess(peach, process, shouldFault, args);
+			RunProcess(peach, CrashingProcess, shouldFault, args);
 		}
 
 		private static Fault RunProcess(string peach, string process, bool shouldFault, Dictionary<string, Variant> args)
 		{
-			CrashReporter reporter = new CrashReporter(null, "name", args);
+			var reporter = new CrashReporter(null, "name", args);
 			reporter.SessionStarting();
 			reporter.IterationStarting(0, false);
 			if (process != null)
 			{
-				using (System.Diagnostics.Process p = new System.Diagnostics.Process())
+				using (var p = new System.Diagnostics.Process())
 				{
 					p.StartInfo = new System.Diagnostics.ProcessStartInfo();
 					p.StartInfo.EnvironmentVariables["PEACH"] = peach;
@@ -104,7 +103,7 @@ namespace Peach.Core.Test.Agent.Monitors
 			Thread.Sleep(2000);
 			reporter.IterationFinished();
 			Assert.AreEqual(shouldFault, reporter.DetectedFault());
-			Fault fault = reporter.GetMonitorData();
+			var fault = reporter.GetMonitorData();
 			reporter.StopMonitor();
 			return fault;
 		}

@@ -1,8 +1,7 @@
-using System;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;	
+using System.Threading;
 
 namespace Peach.Core.Test
 {
@@ -26,28 +25,15 @@ namespace Peach.Core.Test
 		{
 			var startEvent = new ManualResetEvent(false);
 			var process = new Process();
+			var peach = Utilities.GetAppResourcePath("Peach.exe");
 
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{
-				process.StartInfo.FileName = "Peach.exe";
+				process.StartInfo.FileName = peach;
 				process.StartInfo.Arguments = "-a tcp";
 			}
 			else
 			{
-				List<string> paths = new List<string>();
-				paths.Add(Environment.CurrentDirectory);
-				paths.AddRange(process.StartInfo.EnvironmentVariables["PATH"].Split(Path.PathSeparator));
-				string peach = "Peach.exe";
-				foreach (var dir in paths)
-				{
-					var candidate = Path.Combine(dir, peach);
-					if (File.Exists(candidate))
-					{
-						peach = candidate;
-						break;
-					}
-				}
-
 				process.StartInfo.FileName = "mono";
 				process.StartInfo.Arguments = "--debug {0} -a tcp".Fmt(peach);
 			}
@@ -56,11 +42,13 @@ namespace Peach.Core.Test
 			process.StartInfo.RedirectStandardInput = true;
 			process.StartInfo.RedirectStandardOutput = true;
 			process.StartInfo.UseShellExecute = false;
+			var output = new List<string>();
 			process.OutputDataReceived += (sender, e) =>
 			{
 				if (e.Data == null)
 					return;
 
+				output.Add(e.Data);
 				if (e.Data.Contains("Press ENTER to quit agent"))
 					startEvent.Set();
 			};
@@ -68,17 +56,16 @@ namespace Peach.Core.Test
 			try
 			{
 				process.Start();
-				if (Platform.GetOS() == Platform.OS.Windows)
-					process.BeginOutputReadLine();
+				process.BeginOutputReadLine();
 
-				startEvent.WaitOne(5000);
+				if (!startEvent.WaitOne(5000))
+				{
+					Assert.Fail(string.Join("\n", output.ToArray()));
+				}
+
+				process.CancelOutputRead();
 
 				return process;
-			}
-			catch
-			{
-				process = null;
-				throw;
 			}
 			finally
 			{
@@ -96,7 +83,6 @@ namespace Peach.Core.Test
 			}
 
 			process.Close();
-			process = null;
 		}
 	}
 }

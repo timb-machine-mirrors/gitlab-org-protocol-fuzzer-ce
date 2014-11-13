@@ -21,6 +21,7 @@ packages/
 # MonoDevelop files
 *.pidb
 Peach.net.userprefs
+Peach.userprefs
 test-results/
 *.resources
 

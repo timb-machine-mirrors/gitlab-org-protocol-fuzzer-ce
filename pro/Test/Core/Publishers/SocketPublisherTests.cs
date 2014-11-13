@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Analyzers;
 using System.IO;
-using System.Net.Sockets;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Publishers
 {
 	class SocketEcho
 	{
@@ -46,7 +45,7 @@ namespace Peach.Core.Test.Publishers
 			if (remote.IsIPv6Multicast && Platform.GetOS() == Platform.OS.OSX)
 			{
 				Assert.AreEqual(localIp, IPAddress.IPv6Loopback);
-				IntPtr ptr = new IntPtr(if_nametoindex("lo0"));
+				var ptr = new IntPtr(if_nametoindex("lo0"));
 				setsockopt(Socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ptr, Marshal.SizeOf(typeof(IntPtr)));
 			}
 
@@ -131,7 +130,7 @@ namespace Peach.Core.Test.Publishers
 			{
 				var len = Socket.EndReceiveFrom(ar, ref remoteEP);
 
-				byte[] response = Encoding.ASCII.GetBytes(string.Format("Recv {0} bytes!", len));
+				var response = Encoding.ASCII.GetBytes(string.Format("Recv {0} bytes!", len));
 				Socket.SendTo(response, remoteEP);
 			}
 			catch (Exception)
@@ -153,7 +152,8 @@ namespace Peach.Core.Test.Publishers
 		}
 	}
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class SocketPublisherTests : DataModelCollector
 	{
 		private static Tuple<string, IPAddress> GetFirstInterface(AddressFamily af)
@@ -162,21 +162,17 @@ namespace Peach.Core.Test.Publishers
 			{
 				if (af == AddressFamily.InterNetwork)
 					return new Tuple<string, IPAddress>("lo", IPAddress.Parse("127.0.0.1"));
-				else
-					return new Tuple<string, IPAddress>("lo", IPAddress.IPv6Loopback);
+				return new Tuple<string, IPAddress>("lo", IPAddress.IPv6Loopback);
 			}
 
-			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-			foreach (NetworkInterface adapter in nics)
+			var adapters = NetworkInterface.GetAllNetworkInterfaces();
+			foreach (var adapter in adapters)
 			{
 				if (adapter.OperationalStatus != OperationalStatus.Up)
 					continue;
 
-				foreach (var addr in adapter.GetIPProperties().UnicastAddresses)
+				foreach (var addr in adapter.GetIPProperties().UnicastAddresses.Where(addr => addr.Address.AddressFamily == af))
 				{
-					if (addr.Address.AddressFamily != af)
-						continue;
-
 					return new Tuple<string, IPAddress>(adapter.Name, addr.Address);
 				}
 			}
@@ -349,19 +345,19 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void UdpTest()
 		{
-			SocketEcho echo = new SocketEcho();
+			var echo = new SocketEcho();
 			echo.Start(IPAddress.Loopback);
-			IPEndPoint ep = echo.Socket.LocalEndPoint as IPEndPoint;
+			var ep = echo.Socket.LocalEndPoint as IPEndPoint;
 
-			string xml = string.Format(template, "Udp", IPAddress.Loopback, ep.Port, "Hello World", "0");
+			var xml = string.Format(template, "Udp", IPAddress.Loopback, ep.Port, "Hello World", "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, actions.Count);
@@ -371,8 +367,8 @@ namespace Peach.Core.Test.Publishers
 			var de2 = actions[1].dataModel.find("ResponseModel.str");
 			Assert.NotNull(de2);
 
-			string send = (string)de1.DefaultValue;
-			string recv = (string)de2.DefaultValue;
+			var send = (string)de1.DefaultValue;
+			var recv = (string)de2.DefaultValue;
 
 			Assert.AreEqual("Hello World", send);
 			Assert.AreEqual("Recv 11 bytes!", recv);
@@ -381,23 +377,23 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void MulticastUdpTest()
 		{
-			ushort dstport = TestBase.MakePort(53000, 54000);
-			ushort srcport = TestBase.MakePort(54000, 55000);
+			var dstport = TestBase.MakePort(53000, 54000);
+			var srcport = TestBase.MakePort(54000, 55000);
 
-			SocketEcho echo = new SocketEcho();
+			var echo = new SocketEcho();
 			echo.SendOnly(IPAddress.Parse("234.5.6.7"), dstport);
 
 			try
 			{
-				string xml = string.Format(template, "Udp", "234.5.6.7", srcport.ToString(), "Hello World", dstport.ToString());
+				var xml = string.Format(template, "Udp", "234.5.6.7", srcport.ToString(), "Hello World", dstport.ToString());
 
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
+				var config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(this);
+				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(3, actions.Count);
@@ -409,11 +405,11 @@ namespace Peach.Core.Test.Publishers
 				var addr = actions[2].dataModel.DefaultValue;
 				Assert.NotNull(addr);
 
-				IPAddress ip = new IPAddress(addr.BitsToArray());
+				var ip = new IPAddress(addr.BitsToArray());
 				Assert.NotNull(ip);
 
-				string send = (string)de1.DefaultValue;
-				string recv = (string)de2.DefaultValue;
+				var send = (string)de1.DefaultValue;
+				var recv = (string)de2.DefaultValue;
 
 				Assert.AreEqual("Hello World", send);
 				Assert.AreEqual("SendOnly!", recv);
@@ -428,24 +424,24 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void MulticastUdp6Test()
 		{
-			ushort dstport = TestBase.MakePort(53000, 54000);
-			ushort srcport = TestBase.MakePort(54000, 55000);
+			var dstport = TestBase.MakePort(53000, 54000);
+			var srcport = TestBase.MakePort(54000, 55000);
 			var local = GetFirstInterface(AddressFamily.InterNetworkV6).Item2;
 
-			SocketEcho echo = new SocketEcho() { localIp = local };
+			var echo = new SocketEcho() { localIp = local };
 			echo.SendOnly(IPAddress.Parse("ff02::22"), dstport);
 
 			try
 			{
-				string xml = string.Format(template2, "Udp", "ff02::22", srcport.ToString(), "Hello World", dstport.ToString(), local.ToString());
+				var xml = string.Format(template2, "Udp", "ff02::22", srcport.ToString(), "Hello World", dstport.ToString(), local.ToString());
 
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-				
-				RunConfiguration config = new RunConfiguration();
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+				var config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(this);
+				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(3, actions.Count);
@@ -455,8 +451,8 @@ namespace Peach.Core.Test.Publishers
 				var de2 = actions[1].dataModel.find("ResponseModel.str");
 				Assert.NotNull(de2);
 
-				string send = (string)de1.DefaultValue;
-				string recv = (string)de2.DefaultValue;
+				var send = (string)de1.DefaultValue;
+				var recv = (string)de2.DefaultValue;
 
 				Assert.AreEqual("Hello World", send);
 				Assert.AreEqual("SendOnly!", recv);
@@ -470,19 +466,19 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void Udp6Test()
 		{
-			SocketEcho echo = new SocketEcho();
+			var echo = new SocketEcho();
 			echo.Start(IPAddress.IPv6Loopback);
-			IPEndPoint ep = echo.Socket.LocalEndPoint as IPEndPoint;
+			var ep = echo.Socket.LocalEndPoint as IPEndPoint;
 
-			string xml = string.Format(template, "Udp", IPAddress.IPv6Loopback, ep.Port, "Hello World", "0");
+			var xml = string.Format(template, "Udp", IPAddress.IPv6Loopback, ep.Port, "Hello World", "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, actions.Count);
@@ -492,8 +488,8 @@ namespace Peach.Core.Test.Publishers
 			var de2 = actions[1].dataModel.find("ResponseModel.str");
 			Assert.NotNull(de2);
 
-			string send = (string)de1.DefaultValue;
-			string recv = (string)de2.DefaultValue;
+			var send = (string)de1.DefaultValue;
+			var recv = (string)de2.DefaultValue;
 
 			Assert.AreEqual("Hello World", send);
 			Assert.AreEqual("Recv 11 bytes!", recv);
@@ -504,15 +500,15 @@ namespace Peach.Core.Test.Publishers
 		public void UdpSizeTest()
 		{
 			// If the data model is too large, the publisher should throw a PeachException
-			string xml = string.Format(template, "Udp", IPAddress.Loopback, 1000, new string('a', 70000), "0");
+			var xml = string.Format(template, "Udp", IPAddress.Loopback, 1000, new string('a', 70000), "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			Assert.Throws<PeachException>(delegate() { e.startFuzzing(dom, config); });
 		}
 
@@ -522,56 +518,56 @@ namespace Peach.Core.Test.Publishers
 		{
 			// If mutation makes the output too large, the socket publisher should skip iteration
 
-			SocketEcho echo = new SocketEcho();
+			var echo = new SocketEcho();
 			echo.Start(IPAddress.Loopback, 2);
-			IPEndPoint ep = echo.Socket.LocalEndPoint as IPEndPoint;
+			var ep = echo.Socket.LocalEndPoint as IPEndPoint;
 
-			string xml = string.Format(template, "Udp", IPAddress.Loopback, ep.Port, new string('a', 40000), "0");
+			var xml = string.Format(template, "Udp", IPAddress.Loopback, ep.Port, new string('a', 40000), "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("DataElementDuplicate");
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 0;
 			config.rangeStop = 1;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(4, dataModels.Count);
 
 			var de1 = dataModels[1].find("ResponseModel.str");
 			Assert.NotNull(de1);
-			string recv1 = (string)de1.DefaultValue;
+			var recv1 = (string)de1.DefaultValue;
 			Assert.AreEqual("Recv 40000 bytes!", recv1);
 		}
 
 		[Test]
 		public void RawIPv4Test()
 		{
-			SocketEcho echo = new SocketEcho();
-			IPAddress self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
+			var echo = new SocketEcho();
+			var self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
 			echo.SendRaw(self);
 
 			try
 			{
-				string xml = string.Format(raw_template, "RawIPv4", self, "IpStateModel", "12");
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var xml = string.Format(raw_template, "RawIPv4", self, "IpStateModel", "12");
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
+				var config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(this);
+				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(2, actions.Count);
 				var de = actions[0].dataModel.find("ip_packet.str.str");
 				Assert.NotNull(de);
-				string str = (string)de.DefaultValue;
+				var str = (string)de.DefaultValue;
 				Assert.AreEqual("SendOnly!", str);
 			}
 			finally
@@ -583,26 +579,26 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void RawTest()
 		{
-			SocketEcho echo = new SocketEcho();
-			IPAddress self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
+			var echo = new SocketEcho();
+			var self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
 			echo.SendRaw(self);
 
 			try
 			{
-				string xml = string.Format(raw_template, "RawV4", self, "PupStateModel", "12");
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var xml = string.Format(raw_template, "RawV4", self, "PupStateModel", "12");
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
+				var config = new RunConfiguration();
 				config.singleIteration = true;
 
-				Engine e = new Engine(this);
+				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(2, actions.Count);
 				var de = actions[0].dataModel.find("ip_packet.str.str");
 				Assert.NotNull(de);
-				string str = (string)de.DefaultValue;
+				var str = (string)de.DefaultValue;
 				Assert.AreEqual("SendOnly!", str);
 			}
 			finally
@@ -615,21 +611,21 @@ namespace Peach.Core.Test.Publishers
 		public void BadAddressFamily()
 		{
 			// Tests what happens when we give an ipv4 address to an ipv6 publisher.
-			string xml = string.Format(raw_template, "RawV6", IPAddress.Loopback, "PupStateModel", "17");
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var xml = string.Format(raw_template, "RawV6", IPAddress.Loopback, "PupStateModel", "17");
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
 		static IPAddress GetLinkLocalIPv6()
 		{
-			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-			foreach (NetworkInterface adapter in nics)
+			var nics = NetworkInterface.GetAllNetworkInterfaces();
+			foreach (var adapter in nics)
 			{
 				if (adapter.OperationalStatus != OperationalStatus.Up)
 					continue;
@@ -680,7 +676,7 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestUdp6Send()
 		{
-			IPAddress ip = GetLinkLocalIPv6();
+			var ip = GetLinkLocalIPv6();
 
 			if (ip == null)
 				Assert.Ignore("No interface with a link-locak IPv6 address was found.");
@@ -688,15 +684,15 @@ namespace Peach.Core.Test.Publishers
 			Assert.AreNotEqual(0, ip.ScopeId);
 			ip.ScopeId = 0;
 
-			string xml = string.Format(udp6_xml_template, ip);
+			var xml = string.Format(udp6_xml_template, ip);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, actions.Count);
@@ -706,21 +702,21 @@ namespace Peach.Core.Test.Publishers
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not resolve scope id for interface with address 'fe80::'.")]
 		public void TestBadUdp6Send()
 		{
-			string xml = string.Format(udp6_xml_template, "fe80::");
+			var xml = string.Format(udp6_xml_template, "fe80::");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 		}
 
 		public void TestMtu(string iface, int mtu)
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<Number size=""16"" value=""{1}""/>
@@ -754,13 +750,13 @@ namespace Peach.Core.Test.Publishers
 
 			xml = xml.Fmt(iface, mtu);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3, this.actions.Count);
@@ -770,7 +766,7 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestMtuInterface()
 		{
-			IPAddress self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
+			var self = GetFirstInterface(AddressFamily.InterNetwork).Item2;
 			TestMtu(self.ToString(), 1280);
 		}
 
@@ -799,15 +795,15 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestUdpNoPortSend()
 		{
-			string xml = string.Format(template, "Udp", IPAddress.Loopback, 0, "Hello World", "0");
+			var xml = string.Format(template, "Udp", IPAddress.Loopback, 0, "Hello World", "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 
 			try
 			{
@@ -823,9 +819,9 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestUdpNoPort()
 		{
-			ushort srcport = TestBase.MakePort(24000, 25000);
+			var srcport = TestBase.MakePort(24000, 25000);
 
-			string xml = @"
+			var xml = @"
 <Peach>
 
 	<DataModel name=""TheDataModel"">
@@ -866,30 +862,32 @@ namespace Peach.Core.Test.Publishers
 
 			this.cloneActions = true;
 
-			SocketEcho echo1 = new SocketEcho() { WaitTime = 100 };
+			var echo1 = new SocketEcho() { WaitTime = 100 };
 			echo1.SendOnly(IPAddress.Loopback, srcport, "Echo1");
 
-			SocketEcho echo2 = new SocketEcho() { WaitTime = 66 };
+			var echo2 = new SocketEcho() { WaitTime = 66 };
 			echo2.SendOnly(IPAddress.Loopback, srcport, "Echo2");
 
 			try
 			{
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
-				config.range = true;
-				config.rangeStart = 1;
-				config.rangeStop = 200;
+				var config = new RunConfiguration
+				{
+					range = true, 
+					rangeStart = 1, 
+					rangeStop = 200
+				};
 
-				Engine e = new Engine(this);
-				e.IterationFinished += new Engine.IterationFinishedEventHandler(e_IterationFinished);
+				var e = new Engine(this);
+				e.IterationFinished += e_IterationFinished;
 				e.startFuzzing(dom, config);
 
-				int num1 = 0;
-				int num2 = 0;
+				var num1 = 0;
+				var num2 = 0;
 
-				for (int i = 0; i < this.actions.Count; i += 4)
+				for (var i = 0; i < this.actions.Count; i += 4)
 				{
 					var exp = (string)actions[i + 0].dataModel[0].DefaultValue;
 					if (exp != "Echo1")
@@ -947,7 +945,7 @@ namespace Peach.Core.Test.Publishers
 		[Test, Ignore("Issue #493")]
 		public void UdpGetPropertyCrackTest()
 		{
-			string getproptemplate = @"
+			var getproptemplate = @"
 <Peach>
 
 	<DataModel name=""IPv4Addr"">
@@ -980,19 +978,19 @@ namespace Peach.Core.Test.Publishers
 </Peach>
 ";
 
-			SocketEcho echo = new SocketEcho();
+			var echo = new SocketEcho();
 			echo.Start(IPAddress.Loopback);
-			IPEndPoint ep = echo.Socket.LocalEndPoint as IPEndPoint;
+			var ep = echo.Socket.LocalEndPoint as IPEndPoint;
 
-			string xml = string.Format(getproptemplate, "Udp", IPAddress.Loopback, ep.Port, "0");
+			var xml = string.Format(getproptemplate, "Udp", IPAddress.Loopback, ep.Port, "0");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, actions.Count);
@@ -1015,6 +1013,4 @@ namespace Peach.Core.Test.Publishers
 
 		}
 	}
-
-
 }

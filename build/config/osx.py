@@ -44,8 +44,13 @@ def prepare(conf):
 	env['CC']   = 'clang'
 	env['CXX']  = 'clang++'
 
-	env['SYSROOT'] = find_directory( [ 'MacOSX10.8.sdk', 'MacOSX10.7.sdk', 'MacOSX10.6.sdk' ],
-	[
+	env['SYSROOT'] = find_directory([ 
+		'MacOSX10.10.sdk', 
+		'MacOSX10.9.sdk', 
+		'MacOSX10.8.sdk', 
+		'MacOSX10.7.sdk', 
+		'MacOSX10.6.sdk' 
+	], [
 		'/Developer/SDKs',
 		'/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs',
 	])
