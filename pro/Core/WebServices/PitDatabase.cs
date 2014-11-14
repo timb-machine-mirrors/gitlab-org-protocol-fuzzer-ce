@@ -183,7 +183,7 @@ namespace Peach.Enterprise.WebServices
 
 
 			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
-			AddDefine(defs, "Peach.Pwd", Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddDefine(defs, "Peach.Pwd", Utilities.ExecutionDirectory);
 			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
 
 			var final = PitDefines.Evaluate(defs);

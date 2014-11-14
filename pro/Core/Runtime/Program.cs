@@ -220,18 +220,18 @@ namespace Peach.Core.Runtime
 
 				exitCode = 0;
 			}
-            		catch (ArgumentException ae)
-            		{
-                		Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
-                		Console.WriteLine("Use -h for help");
-            		}
+			catch (ArgumentException ae)
+			{
+				Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
+				Console.WriteLine("Use -h for help");
+			}
 			catch (SyntaxException)
 			{
 				// Ignore, thrown by syntax()
 			}
 			catch (OptionException oe)
 			{
-					Console.WriteLine(oe.Message +"\n"); 
+				Console.WriteLine(oe.Message + "\n");
 			}
 			catch (PeachException ee)
 			{
@@ -293,7 +293,7 @@ namespace Peach.Core.Runtime
 			if ((bool)field.GetValue(null) == false)
 				throw new PeachException("Error, analyzer not configured to run from command line.");
 
-			var analyzerInstance = Activator.CreateInstance(analyzerType) as Analyzer;
+			var analyzerInstance = (Analyzer)Activator.CreateInstance(analyzerType);
 
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
@@ -315,7 +315,7 @@ namespace Peach.Core.Runtime
 			if (agentType == null)
 				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
 
-			var agentServer = Activator.CreateInstance(agentType) as IAgentServer;
+			var agentServer = (IAgentServer)Activator.CreateInstance(agentType);
 
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
@@ -330,7 +330,7 @@ namespace Peach.Core.Runtime
 		/// <param name="extra">Extra command line options</param>
 		protected virtual void OnRunJob(bool test, List<string> extra)
 		{
-			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+			Console.CancelKeyPress += Console_CancelKeyPress;
 
 			if (extra.Count == 0)
 				Syntax();
@@ -342,7 +342,7 @@ namespace Peach.Core.Runtime
 				config.runName = extra[1];
 
 			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
 
 			// Do we have pit.xml.config file?
 			// If so load it as the first defines file.
