@@ -53,7 +53,7 @@ namespace Peach.Core.Test
 				Assert.AreEqual(2, Enc.Unicode.GetMaxByteCount(1), "Unicode");
 				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
 				Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
-				Assert.AreEqual(8, Enc.UTF32.GetMaxByteCount(1), "UTF32");
+				Assert.AreEqual(4, Enc.UTF32.GetMaxByteCount(1), "UTF32");
 			}
 		}
 
