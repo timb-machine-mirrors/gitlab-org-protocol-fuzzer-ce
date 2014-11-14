@@ -722,5 +722,53 @@ namespace Peach.Core.Test
 				Directory.Delete(tmp, true);
 			}
 		}
+
+		[Test]
+		public void SingleIterationSkipTo()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Blob/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+				skipToIteration = 7,
+			};
+
+			var ran = false;
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (c, i, t) =>
+			{
+				ran = true;
+				Assert.AreEqual(7, i);
+				Assert.True(c.controlIteration);
+			};
+
+			e.startFuzzing(dom, config);
+
+			Assert.True(ran);
+		}
 	}
 }
