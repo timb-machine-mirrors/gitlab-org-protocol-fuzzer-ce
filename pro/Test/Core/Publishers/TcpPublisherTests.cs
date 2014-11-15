@@ -511,7 +511,7 @@ namespace Peach.Pro.Test.Publishers
 			var xml = @"
 <Peach>
 	<DataModel name='output'>
-		<String length='1000000' occurs='1000'/>
+		<String length='1000000' occurs='10'/>
 	</DataModel>
 
 	<StateModel name=""SM"" initialState=""InitialState"">
