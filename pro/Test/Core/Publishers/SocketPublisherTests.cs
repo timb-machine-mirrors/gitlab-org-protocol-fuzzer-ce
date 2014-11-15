@@ -648,7 +648,7 @@ namespace Peach.Pro.Test.Publishers
 			return null;
 		}
 
-		private string udp6_xml_template = @"
+		private const string udp6_xml_template = @"
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<String name=""str"" value=""Hello World""/>
@@ -700,14 +700,28 @@ namespace Peach.Pro.Test.Publishers
 		}
 
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not resolve scope id for interface with address 'fe80::'.")]
-		public void TestBadUdp6Send()
+		public void TestMissingLocalScopeId()
 		{
-			var xml = string.Format(udp6_xml_template, "fe80::");
+			var xml = udp6_xml_template.Fmt("fe80::%1", "fe80::");
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration {singleIteration = true};
+
+			var e = new Engine(this);
+			e.startFuzzing(dom, config);
+		}
+
+		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "IPv6 scope id required for resolving link local address: 'fe80::'.")]
+		public void TestMissingRemoteScopeId()
+		{
+			var xml = udp6_xml_template.Fmt("fe80::", "fe80::");
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration { singleIteration = true };
 
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
