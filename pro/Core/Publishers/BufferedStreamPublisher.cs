@@ -299,7 +299,6 @@ namespace Peach.Core.Publishers
 				Logger.Error("output: Error during send.  " + ex.Message);
 				throw new SoftException(ex);
 			}
-
 		}
 
 		public override void WantBytes(long count)
