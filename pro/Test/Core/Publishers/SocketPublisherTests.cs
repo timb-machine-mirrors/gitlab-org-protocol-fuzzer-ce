@@ -667,7 +667,7 @@ namespace Peach.Pro.Test.Publishers
 		<Publisher class=""Udp"">
 			<Param name=""Host"" value=""{0}""/>
 			<Param name=""Port"" value=""8080""/>
-			<Param name=""Interface"" value=""{0}""/>
+			<Param name=""Interface"" value=""{1}""/>
 		</Publisher>
 	</Test>
 </Peach>
@@ -676,21 +676,21 @@ namespace Peach.Pro.Test.Publishers
 		[Test]
 		public void TestUdp6Send()
 		{
-			var ip = GetLinkLocalIPv6();
+			var remote = GetLinkLocalIPv6();
 
-			if (ip == null)
+			if (remote == null)
 				Assert.Ignore("No interface with a link-locak IPv6 address was found.");
 
-			Assert.AreNotEqual(0, ip.ScopeId);
-			ip.ScopeId = 0;
+			Assert.AreNotEqual(0, remote.ScopeId);
+			var local = new IPAddress(remote.GetAddressBytes(), 0);
+			Assert.AreEqual(0, local.ScopeId);
 
-			var xml = string.Format(udp6_xml_template, ip);
+			var xml = udp6_xml_template.Fmt(remote, local);
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
@@ -705,10 +705,9 @@ namespace Peach.Pro.Test.Publishers
 			var xml = string.Format(udp6_xml_template, "fe80::");
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
