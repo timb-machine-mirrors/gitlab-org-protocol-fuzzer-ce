@@ -31,7 +31,7 @@ namespace Peach.Core.Publishers
 		protected MemoryStream _buffer = null;
 		protected bool _timeout = false;
 
-		public BufferedStreamPublisher(Dictionary<string, Variant> args)
+		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}

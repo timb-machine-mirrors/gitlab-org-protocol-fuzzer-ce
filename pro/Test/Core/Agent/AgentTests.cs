@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Publishers;
 using Peach.Core.Test;
 using Encoding = Peach.Core.Encoding;
+using Logger = NLog.Logger;
+using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Test.Agent
 {
@@ -37,7 +41,7 @@ namespace Peach.Pro.Test.Agent
 		public Process process;
 
 		[Monitor("TestLogFunctions", true, IsTest = true)]
-		public class TestLogMonitor : Core.Agent.Monitor
+		public class TestLogMonitor : Monitor
 		{
 			readonly string fileName;
 
@@ -107,18 +111,18 @@ namespace Peach.Pro.Test.Agent
 		}
 
 		[Publisher("AgentKiller", true, IsTest = true)]
-		public class AgentKillerPublisher : Peach.Core.Publisher
+		public class AgentKillerPublisher : Publisher
 		{
 			public AgentTests owner;
 
-			static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+			static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 			public AgentKillerPublisher(Dictionary<string, Variant> args)
 				: base(args)
 			{
 			}
 
-			protected override NLog.Logger Logger
+			protected override Logger Logger
 			{
 				get { return logger; }
 			}
@@ -127,7 +131,7 @@ namespace Peach.Pro.Test.Agent
 			{
 				get
 				{
-					var dom = this.Test.parent as Core.Dom.Dom;
+					var dom = Test.parent;
 					return dom.context;
 				}
 			}
@@ -136,7 +140,7 @@ namespace Peach.Pro.Test.Agent
 			{
 				base.OnOpen();
 
-				if (!this.IsControlIteration && (this.Iteration % 2) == 1)
+				if (!IsControlIteration && (Iteration % 2) == 1)
 				{
 					// Lame hack to make sure CrashableServer gets stopped
 					Context.agentManager.IterationFinished();
@@ -255,7 +259,7 @@ namespace Peach.Pro.Test.Agent
 				Assert.Greater(faults.Count, 0);
 
 				var contents = File.ReadAllLines(tmp);
-				var expected = new string[] {
+				var expected = new[] {
 // Iteration 83 (Control & Record)
 "SessionStarting", "IterationStarting 83 false", "IterationFinished", "DetectedFault", "MustStop", 
 // Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
@@ -283,7 +287,7 @@ namespace Peach.Pro.Test.Agent
 
 		readonly Dictionary<uint, Fault[]> faults = new Dictionary<uint, Fault[]>();
 
-		void e_Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faultData)
+		void e_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
 		{
 			faults[currentIteration] = faultData;
 		}
@@ -343,7 +347,7 @@ namespace Peach.Pro.Test.Agent
 				var config = new RunConfiguration { range = true, rangeStart = 83, rangeStop = 86 };
 
 				var e = new Engine(null);
-				e.Fault += new Engine.FaultEventHandler(e_Fault);
+				e.Fault += e_Fault;
 				e.startFuzzing(dom, config);
 
 				Assert.Greater(faults.Count, 0);
@@ -421,7 +425,7 @@ namespace Peach.Pro.Test.Agent
 		}
 
 		[Monitor("LoggingMonitor", true, IsTest = true)]
-		public class LoggingMonitor : Peach.Core.Agent.Monitor
+		public class LoggingMonitor : Monitor
 		{
 			public LoggingMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 				: base(agent, name, args)
@@ -522,8 +526,7 @@ namespace Peach.Pro.Test.Agent
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
 			var e = new Engine(null);
 			e.startFuzzing(dom, config);
@@ -574,10 +577,10 @@ namespace Peach.Pro.Test.Agent
 
 		[Publisher("TestRemoteFile", true, IsTest = true)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
-		public class TestRemoteFilePublisher : Peach.Core.Publishers.StreamPublisher
+		public class TestRemoteFilePublisher : StreamPublisher
 		{
-			private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-			protected override NLog.Logger Logger { get { return logger; } }
+			private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+			protected override Logger Logger { get { return logger; } }
 
 			public string FileName { get; set; }
 
@@ -798,7 +801,7 @@ namespace Peach.Pro.Test.Agent
 				e.startFuzzing(dom, config);
 
 				var contents = File.ReadAllLines(tmp);
-				var expected = new string[] {
+				var expected = new[] {
 					"OnStart",
 					"OnOpen",
 					"OnOutput 5/40",

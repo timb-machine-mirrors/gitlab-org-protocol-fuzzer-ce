@@ -1,22 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
 using Peach.Core.Analyzers;
-using System.IO;
-using System.Net.Sockets;
-using System.Net;
-using System.Diagnostics;
-using Peach.Pro.Test;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Publishers
 {
 	class SimpleTcpClient
 	{
-		private EndPoint localEP;
+		private readonly EndPoint localEP;
 		private Socket Socket;
 		private bool Graceful;
 		public string Result = null;
@@ -43,8 +39,8 @@ namespace Peach.Core.Test.Publishers
 				Socket.EndConnect(ar);
 
 				Socket.Send(Encoding.ASCII.GetBytes("Test buffer"));
-				byte[] recv = new byte[1024];
-				int len = Socket.Receive(recv);
+				var recv = new byte[1024];
+				var len = Socket.Receive(recv);
 				Result = Encoding.ASCII.GetString(recv, 0, len);
 				if (Graceful)
 				{
@@ -82,7 +78,7 @@ namespace Peach.Core.Test.Publishers
 
 	class SimpleTcpEcho : IDisposable
 	{
-		private EndPoint localEP;
+		private readonly EndPoint localEP;
 		private Socket Socket;
 		private Socket DataSocket;
 
@@ -112,8 +108,8 @@ namespace Peach.Core.Test.Publishers
 
 				while (true)
 				{
-					byte[] recv = new byte[1024];
-					int len = DataSocket.Receive(recv);
+					var recv = new byte[1024];
+					var len = DataSocket.Receive(recv);
 
 					System.Threading.Thread.Sleep(500);
 
@@ -169,12 +165,12 @@ namespace Peach.Core.Test.Publishers
 		{
 			try
 			{
-				Socket cli = Socket.EndAccept(ar);
+				var cli = Socket.EndAccept(ar);
 
 				if (Send)
 					cli.Send(Encoding.ASCII.GetBytes("Test buffer"));
-				byte[] recv = new byte[1024];
-				int len = cli.Receive(recv);
+				var recv = new byte[1024];
+				var len = cli.Receive(recv);
 				Result = Encoding.ASCII.GetString(recv, 0, len);
 				if (Graceful)
 				{
@@ -189,7 +185,6 @@ namespace Peach.Core.Test.Publishers
 					while (len > 0);
 				}
 				cli.Close();
-				cli = null;
 				Socket.Close();
 				Socket = null;
 			}
@@ -261,19 +256,18 @@ namespace Peach.Core.Test.Publishers
 ";
 		public void TcpServer(bool clientShutdown)
 		{
-			ushort port = TestBase.MakePort(55000, 56000);
-			SimpleTcpClient cli = new SimpleTcpClient(port, clientShutdown);
+			var port = TestBase.MakePort(55000, 56000);
+			var cli = new SimpleTcpClient(port, clientShutdown);
 			cli.Start();
 
-			string xml = string.Format(template, "ListenState", "TcpListener", "Interface", port);
+			var xml = string.Format(template, "ListenState", "TcpListener", "Interface", port);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -283,8 +277,8 @@ namespace Peach.Core.Test.Publishers
 			var de2 = actions[1].dataModel.find("TheDataModel2.str");
 			Assert.NotNull(de2);
 
-			string send = (string)de2.DefaultValue;
-			string recv = (string)de1.DefaultValue;
+			var send = (string)de2.DefaultValue;
+			var recv = (string)de1.DefaultValue;
 
 			Assert.AreEqual("Hello World", send);
 			Assert.AreEqual("Test buffer", recv);
@@ -294,14 +288,14 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		public void TcpListenShutdownClient()
+		public void TestListenShutdownClient()
 		{
 			// Test TcpListener deals with client initiating shutdown
 			TcpServer(true);
 		}
 
 		[Test]
-		public void TcpListenShutdownServer()
+		public void TestListenShutdownServer()
 		{
 			// Test TcpListener deals with it initiating shutdown
 			TcpServer(false);
@@ -309,19 +303,18 @@ namespace Peach.Core.Test.Publishers
 
 		public void TcpClient(bool serverShutdown)
 		{
-			ushort port = TestBase.MakePort(56000, 57000);
-			SimpleTcpServer cli = new SimpleTcpServer(port, serverShutdown);
+			var port = TestBase.MakePort(56000, 57000);
+			var cli = new SimpleTcpServer(port, serverShutdown);
 			cli.Start();
 
-			string xml = string.Format(template, "ClientState", "TcpClient", "Host", port);
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", port);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(2, actions.Count);
@@ -331,8 +324,8 @@ namespace Peach.Core.Test.Publishers
 			var de2 = actions[1].dataModel.find("TheDataModel2.str");
 			Assert.NotNull(de2);
 
-			string send = (string)de2.DefaultValue;
-			string recv = (string)de1.DefaultValue;
+			var send = (string)de2.DefaultValue;
+			var recv = (string)de1.DefaultValue;
 
 			Assert.AreEqual("Hello World", send);
 			Assert.AreEqual("Test buffer", recv);
@@ -342,36 +335,35 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		public void TcpClientShutdownClient()
+		public void TestClientShutdownClient()
 		{
 			// Test TcpClient deals with itself initiating shutdown
 			TcpClient(false);
 		}
 
 		[Test]
-		public void TcpClientShutdownServer()
+		public void TestClientShutdownServer()
 		{
 			// Test TcpListener deals with client initiating shutdown
 			TcpClient(true);
 		}
 
 		[Test]
-		public void TcpConnectRetry()
+		public void TestConnectRetry()
 		{
 			// Should throw PeachException if unable to connect during a control iteration
-			string xml = string.Format(template, "ClientState", "TcpClient", "Host", 20);
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", 20);
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
 
-			Assert.Throws<PeachException>(delegate() { e.startFuzzing(dom, config); });
+			Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
 
 			sw.Stop();
 
@@ -382,13 +374,13 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		public void TcpTimeout()
+		public void TestRecvTimeout()
 		{
-			ushort port = TestBase.MakePort(45000, 46000);
+			var port = TestBase.MakePort(45000, 46000);
 			var cli = new SimpleTcpServer(port, false, false);
 			cli.Start();
 
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<Choice>
@@ -424,13 +416,10 @@ namespace Peach.Core.Test.Publishers
 	</Test>
 </Peach>".Fmt(port);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(this);
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration {singleIteration = true};
+			var e = new Engine(this);
 
 			var sw = new Stopwatch();
 			sw.Start();
@@ -441,11 +430,10 @@ namespace Peach.Core.Test.Publishers
 
 			Assert.Less(delta, 2000);
 			Assert.Greater(delta, 1000);
-
 		}
 
 		[Test]
-		public void TcpTimeout2()
+		public void TestResetRecvTimeout()
 		{
 			/*
 			 * Use a lazy echo server that waits 1/2 sec to reply.
@@ -454,7 +442,7 @@ namespace Peach.Core.Test.Publishers
 			 */
 			using (var cli = new SimpleTcpEcho())
 			{
-				string xml = @"
+				var xml = @"
 <Peach>
 	<DataModel name=""input"">
 		<Choice>
@@ -500,13 +488,10 @@ namespace Peach.Core.Test.Publishers
 	</Test>
 </Peach>".Fmt(cli.LocalPort);
 
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-				RunConfiguration config = new RunConfiguration();
-				config.singleIteration = true;
-
-				Engine e = new Engine(this);
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+				var config = new RunConfiguration {singleIteration = true};
+				var e = new Engine(this);
 
 				e.startFuzzing(dom, config);
 
@@ -518,15 +503,15 @@ namespace Peach.Core.Test.Publishers
 		}
 
 		[Test]
-		public void TcpTimeout3()
+		public void TestSendTimeout()
 		{
 			var listener = new TcpListener(IPAddress.Loopback, 0);
 			listener.Start();
 
-			string xml = @"
+			var xml = @"
 <Peach>
-	<DataModel name=""output"">
-		<String length=""1000000""/>
+	<DataModel name='output'>
+		<String length='1000000' occurs='100'/>
 	</DataModel>
 
 	<StateModel name=""SM"" initialState=""InitialState"">
@@ -549,13 +534,10 @@ namespace Peach.Core.Test.Publishers
 
 			try
 			{
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-				RunConfiguration config = new RunConfiguration();
-				config.singleIteration = true;
-
-				Engine e = new Engine(this);
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+				var config = new RunConfiguration {singleIteration = true};
+				var e = new Engine(this);
 
 				e.startFuzzing(dom, config);
 
