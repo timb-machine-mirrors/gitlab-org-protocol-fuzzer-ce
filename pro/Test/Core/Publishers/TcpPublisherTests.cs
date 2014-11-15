@@ -511,7 +511,7 @@ namespace Peach.Pro.Test.Publishers
 			var xml = @"
 <Peach>
 	<DataModel name='output'>
-		<String length='1000000' occurs='10'/>
+		<String length='1000000'/>
 	</DataModel>
 
 	<StateModel name=""SM"" initialState=""InitialState"">
@@ -545,7 +545,7 @@ namespace Peach.Pro.Test.Publishers
 			}
 			catch (PeachException ex)
 			{
-				Assert.True(ex.Message.Contains("The operation has timed"));
+				StringAssert.Contains("The operation has timed", ex.Message);
 			}
 			finally
 			{
