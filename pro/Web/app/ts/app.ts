@@ -44,7 +44,7 @@ module DashApp {
 					controller: FaultsController
 				})
 				.when("/quickstart/intro", {
-					templateUrl: "/partials/configurator-intro.html",
+					templateUrl: "/partials/quickstart-intro.html",
 					controller: WizardController
 				})
 				.when("/metrics/:metric", {
@@ -52,11 +52,11 @@ module DashApp {
 					controller: MetricsController
 				})
 				.when("/quickstart/test", {
-					templateUrl: "/partials/configurator-test.html",
+					templateUrl: "/partials/quickstart-test.html",
 					controller: PitTestController
 				})
 				.when("/quickstart/done", {
-					templateUrl: "/partials/configurator-done.html",
+					templateUrl: "/partials/quickstart-done.html",
 					controller: WizardController
 				})
 				.when("/quickstart/:step", {

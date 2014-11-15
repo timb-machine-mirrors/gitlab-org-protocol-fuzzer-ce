@@ -40,6 +40,10 @@ module DashApp {
 			this.Agents.push(new Models.Agent());
 		}
 
+		public RemoveAgent(agentIndex: number): void {
+			this.Agents.splice(agentIndex, 1);
+		}
+
 		public AgentUp(agentIndex: number): void {
 			this.timeout(() => {
 				this.Agents = this.ArrayItemUp(this.Agents, agentIndex);
@@ -67,6 +71,10 @@ module DashApp {
 			agent.monitors.push(monitor);
 		}
 
+		public RemoveMonitor(agentIndex: number, monitorIndex: number): void {
+			this.Agents[agentIndex].monitors.splice(monitorIndex, 1);
+		}
+
 		public MonitorUp(agentIndex: number, monitorIndex: number): void {
 			this.timeout(() => {
 				this.Agents[agentIndex].monitors = this.ArrayItemUp(this.Agents[agentIndex].monitors, monitorIndex);
@@ -79,9 +87,9 @@ module DashApp {
 			});
 		}
 
-		public Save(): void {
+		public Save(form: ng.IFormController): void {
 			this.peach.PostMonitors(this.pitconfig.Pit.pitUrl, this.Agents).success(() => {
-				this.IsDirty = false;
+				form.$dirty = false;
 			});
 		}
 

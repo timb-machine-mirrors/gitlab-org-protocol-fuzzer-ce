@@ -140,10 +140,11 @@ module DashApp.Models {
 	export interface ParameterMap {
 		key: string;
 		param: string;
-		type: string; 
-		value: any; 
+		type: string;
+		value: any;
 		enumValues: string[];
 		required: boolean;
+		description: string;
 	}
 
 	export class QuestionTypes {
