@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -62,120 +63,120 @@ namespace Peach.Core
 		}
 	}
 
-    /// <summary>
-    /// A simple number generation class.
-    /// </summary>
-    public static class NumberGenerator
-    {
-        /// <summary>
-        /// Generate a list of numbers around size edge cases.
-        /// </summary>
-        /// <param name="size">The size (in bits) of the data</param>
-        /// <param name="n">The +/- range number</param>
-        /// <returns>Returns a list of all sizes to be used</returns>
-        public static long[] GenerateBadNumbers(int size, int n = 50)
-        {
-            if (size == 8)
-                return BadNumbers8(n);
-            else if (size == 16)
-                return BadNumbers16(n);
-            else if (size == 24)
-                return BadNumbers24(n);
-            else if (size == 32)
-                return BadNumbers32(n);
-            else if (size == 64)
-                return BadNumbers64(n);
-            else
-                throw new ArgumentOutOfRangeException("size");
-        }
+	/// <summary>
+	/// A simple number generation class.
+	/// </summary>
+	public static class NumberGenerator
+	{
+		/// <summary>
+		/// Generate a list of numbers around size edge cases.
+		/// </summary>
+		/// <param name="size">The size (in bits) of the data</param>
+		/// <param name="n">The +/- range number</param>
+		/// <returns>Returns a list of all sizes to be used</returns>
+		public static long[] GenerateBadNumbers(int size, int n = 50)
+		{
+			if (size == 8)
+				return BadNumbers8(n);
+			else if (size == 16)
+				return BadNumbers16(n);
+			else if (size == 24)
+				return BadNumbers24(n);
+			else if (size == 32)
+				return BadNumbers32(n);
+			else if (size == 64)
+				return BadNumbers64(n);
+			else
+				throw new ArgumentOutOfRangeException("size");
+		}
 
-        public static long[] GenerateBadPositiveNumbers(int size = 16, int n = 50)
-        {
-            if (size == 16)
-                return BadPositiveNumbers16(n);
-            else
-                return null;
-        }
+		public static long[] GenerateBadPositiveNumbers(int size = 16, int n = 50)
+		{
+			if (size == 16)
+				return BadPositiveNumbers16(n);
+			else
+				return null;
+		}
 
-        public static ulong[] GenerateBadPositiveUInt64(int n = 50)
-        {
-            ulong[] edgeCases = new ulong[] { 50, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807, 18446744073709551615 };
-            List<ulong> temp = new List<ulong>();
+		public static ulong[] GenerateBadPositiveUInt64(int n = 50)
+		{
+			ulong[] edgeCases = new ulong[] { 50, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807, 18446744073709551615 };
+			List<ulong> temp = new List<ulong>();
 
-            ulong start;
-            ulong end;
-            for (int i = 0; i < edgeCases.Length - 1; ++i)
-            {
-                start = edgeCases[i] - (ulong)n;
-                end = edgeCases[i] + (ulong)n;
+			ulong start;
+			ulong end;
+			for (int i = 0; i < edgeCases.Length - 1; ++i)
+			{
+				start = edgeCases[i] - (ulong)n;
+				end = edgeCases[i] + (ulong)n;
 
-                for (ulong j = start; j <= end; ++j)
-                    temp.Add(j);
-            }
+				for (ulong j = start; j <= end; ++j)
+					temp.Add(j);
+			}
 
-            start = edgeCases[8] - (ulong)n;
-            end = edgeCases[8];
-            for (ulong i = start; i < end; ++i)
-                temp.Add(i);
-            temp.Add(end);
+			start = edgeCases[8] - (ulong)n;
+			end = edgeCases[8];
+			for (ulong i = start; i < end; ++i)
+				temp.Add(i);
+			temp.Add(end);
 
-            return temp.ToArray();
-        }
+			return temp.ToArray();
+		}
 
-        private static long[] BadNumbers8(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers8(int n)
+		{
+			long[] edgeCases = new long[] { 0, -128, 127, 255 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers16(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers16(int n)
+		{
+			long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers24(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -8388608, 8388607, 16777215 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers24(int n)
+		{
+			long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -8388608, 8388607, 16777215 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers32(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers32(int n)
+		{
+			long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers64(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295, -9223372036854775808, 9223372036854775807 };    // UInt64.Max = 18446744073709551615;
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers64(int n)
+		{
+			long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295, -9223372036854775808, 9223372036854775807 };    // UInt64.Max = 18446744073709551615;
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadPositiveNumbers16(int n)
-        {
-            long[] edgeCases = new long[] { 50, 127, 255, 32767, 65535 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadPositiveNumbers16(int n)
+		{
+			long[] edgeCases = new long[] { 50, 127, 255, 32767, 65535 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] Populate(long[] values, int n)
-        {
-            List<long> temp = new List<long>();
+		private static long[] Populate(long[] values, int n)
+		{
+			List<long> temp = new List<long>();
 
-            for (int i = 0; i < values.Length; ++i)
-            {
-                long start = values[i] - n;
-                long end = values[i] + n;
+			for (int i = 0; i < values.Length; ++i)
+			{
+				long start = values[i] - n;
+				long end = values[i] + n;
 
-                for (long j = start; j <= end; ++j)
-                    temp.Add(j);
-            }
+				for (long j = start; j <= end; ++j)
+					temp.Add(j);
+			}
 
-            return temp.ToArray();
-        }
-    }
+			return temp.ToArray();
+		}
+	}
 
-    [Serializable]
+	[Serializable]
 	public class HexString
 	{
 		public byte[] Value { get; private set; }
@@ -188,7 +189,7 @@ namespace Peach.Core
 		public static HexString Parse(string s)
 		{
 
-			s = s.Replace(" ", ""); 
+			s = s.Replace(" ", "");
 			if (s.Length % 2 == 0)
 			{
 				var array = ToArray(s);
@@ -279,7 +280,12 @@ namespace Peach.Core
 
 		public static string FindProgram(string path, string program, string parameter)
 		{
-			var paths = path ?? Environment.GetEnvironmentVariable("PATH");
+			var paths = path;
+			if (string.IsNullOrEmpty(path))
+			{
+				paths = Environment.GetEnvironmentVariable("PATH");
+			}
+			Debug.Assert(!string.IsNullOrEmpty((paths)));
 			var dirs = paths.Split(Path.PathSeparator);
 			foreach (var dir in dirs)
 			{
@@ -302,71 +308,71 @@ namespace Peach.Core
 			return Path.Combine(ExecutionDirectory, resource);
 		}
 
-        public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
-        {
-            StringBuilder sb = new StringBuilder();
-            StringBuilder rightSb = new StringBuilder();
-            int lineLength = 15;
-            int groupLength = 7;
-            string gap = "  ";
-            byte b;
+		public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
+		{
+			StringBuilder sb = new StringBuilder();
+			StringBuilder rightSb = new StringBuilder();
+			int lineLength = 15;
+			int groupLength = 7;
+			string gap = "  ";
+			byte b;
 
-            if (length == -1)
-                length = data.Length;
+			if (length == -1)
+				length = data.Length;
 
-            int cnt = 0;
-            for (int i = startPos; i<data.Length && i<length; i++)
-            {
-                b = data[i];
+			int cnt = 0;
+			for (int i = startPos; i < data.Length && i < length; i++)
+			{
+				b = data[i];
 
-                sb.Append(b.ToString("X2"));
+				sb.Append(b.ToString("X2"));
 
-                if (b >= 32 && b < 127)
-                    rightSb.Append(ASCIIEncoding.ASCII.GetString(new byte[] {b}));
-                else
-                    rightSb.Append(".");
+				if (b >= 32 && b < 127)
+					rightSb.Append(ASCIIEncoding.ASCII.GetString(new byte[] { b }));
+				else
+					rightSb.Append(".");
 
 
-                if (cnt == groupLength)
-                {
-                    sb.Append("  ");
-                }
-                else if (cnt == lineLength)
-                {
-                    sb.Append(gap);
-                    sb.Append(rightSb);
-                    sb.Append("\n");
-                    rightSb.Clear();
+				if (cnt == groupLength)
+				{
+					sb.Append("  ");
+				}
+				else if (cnt == lineLength)
+				{
+					sb.Append(gap);
+					sb.Append(rightSb);
+					sb.Append("\n");
+					rightSb.Clear();
 
-                    cnt = -1; // (+1 happens later)
-                }
-                else
-                {
-                    sb.Append(" ");
-                }
+					cnt = -1; // (+1 happens later)
+				}
+				else
+				{
+					sb.Append(" ");
+				}
 
-                cnt++;
-            }
+				cnt++;
+			}
 
-            for (; cnt <= lineLength; cnt++)
-            {
-                sb.Append("  ");
+			for (; cnt <= lineLength; cnt++)
+			{
+				sb.Append("  ");
 
-                if (cnt == groupLength)
-                    sb.Append(" ");
-                else if (cnt < lineLength)
-                {
-                    sb.Append(" ");
-                }
-            }
+				if (cnt == groupLength)
+					sb.Append(" ");
+				else if (cnt < lineLength)
+				{
+					sb.Append(" ");
+				}
+			}
 
-            sb.Append(gap);
-            sb.Append(rightSb);
-            sb.Append("\n");
-            rightSb.Clear();
+			sb.Append(gap);
+			sb.Append(rightSb);
+			sb.Append("\n");
+			rightSb.Clear();
 
-            return sb.ToString();
-        }
+			return sb.ToString();
+		}
 
 		public static bool TcpPortAvailable(int port)
 		{

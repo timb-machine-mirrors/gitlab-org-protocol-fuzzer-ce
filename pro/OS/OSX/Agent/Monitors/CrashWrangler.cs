@@ -211,6 +211,12 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 		public override void SessionStarting()
 		{
+			_execHandler = Utilities.FindProgram(
+				Path.GetDirectoryName(_execHandler),
+				Path.GetFileName(_execHandler),
+				"ExecHandler"
+			);
+
 			if (_startOnCall == null)
 				_StartProcess();
 		}
