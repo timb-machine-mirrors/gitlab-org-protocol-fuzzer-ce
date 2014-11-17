@@ -6,6 +6,7 @@ using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using Peach.Core.Analyzers;
+using Peach.Pro.Test;
 using Proc = System.Diagnostics.Process;
 using Peach.Core.Agent.Monitors;
 using TheAgent = Peach.Core.Agent.Agent;

@@ -8,11 +8,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-
-using Peach.Core;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Xml.XPath;
+
+using Peach.Core;
+using Models = Peach.Enterprise.WebServices.Models;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -34,22 +35,57 @@ namespace Peach.Enterprise.WebServices
 
 		public class TestElement : ChildElement
 		{
-			public class AgentElement
+			public class AgentReferenceElement
 			{
 				[XmlAttribute("ref")]
-				public string reference { get; set; }
+				public string reference { get; set; } 
 			}
 
 			public TestElement()
 			{
-				AgentRefs = new List<AgentElement>();
+				AgentRefs = new List<AgentReferenceElement>();
 			}
 
 			[XmlAttribute]
 			public string name { get; set; }
 
-			[XmlElement("Agent", typeof(AgentElement))]
-			public List<AgentElement> AgentRefs { get; set; }
+			[XmlElement("Agent", typeof(AgentReferenceElement))]
+			public List<AgentReferenceElement> AgentRefs { get; set; }
+
+
+		}
+
+		public class AgentElement: ChildElement
+		{
+			public class MonitorElement : ChildElement
+			{
+				[XmlAttribute("class")]
+				public string Class { get; set; }
+
+				[XmlAttribute("name")]
+				public string Name { get; set; }
+
+				[XmlElement("Param", typeof(ParamElement))]
+				public List<ParamElement> Params { get; set; }
+			}
+
+			[XmlAttribute("name")]
+			public string Name { get; set; }
+
+			[XmlAttribute("location")]
+			public string Location { get; set; }
+
+			[XmlElement("Monitor", typeof(MonitorElement))]
+			public List<MonitorElement> Monitors { get; set; }
+		}
+
+		public class ParamElement : ChildElement
+		{
+			[XmlAttribute("name")]
+			public string Name { get; set; }
+
+			[XmlAttribute("value")]
+			public string Value { get; set; }
 		}
 
 		public class IncludeElement : ChildElement
@@ -75,6 +111,7 @@ namespace Peach.Enterprise.WebServices
 
 		[XmlElement("Include", typeof(IncludeElement))]
 		[XmlElement("Test", typeof(TestElement))]
+		[XmlElement("Agent", typeof(AgentElement))]
 		public List<ChildElement> Children { get; set; }
 	}
 
@@ -183,7 +220,7 @@ namespace Peach.Enterprise.WebServices
 
 
 			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
-			AddDefine(defs, "Peach.Pwd", Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddDefine(defs, "Peach.Pwd", Utilities.ExecutionDirectory);
 			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
 
 			var final = PitDefines.Evaluate(defs);
@@ -327,7 +364,7 @@ namespace Peach.Enterprise.WebServices
 			return item.PitUrl;
 		}
 
-		public static void SaveConfig(Models.Pit pit, List<Models.ConfigItem> config)
+		public static void SaveConfig(Models.Pit pit, List<Models.Parameter> config)
 		{
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 			var defines = PitDefines.Parse(fileName);
@@ -352,6 +389,69 @@ namespace Peach.Enterprise.WebServices
 			};
 
 			XmlTools.Serialize(fileName, final);
+		}
+
+		public List<Models.Agent> GetAgentsById(string guid)
+		{
+			return this.GetAgentsByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public List<Models.Agent> GetAgentsByUrl(string url)
+		{
+			var pit = GetPitByUrl(url);
+
+			if (pit == null)
+				return null;
+
+			var doc = PitDatabase.Parse(pit.Versions[0].Files[0].Name);
+			var agents = (List<Peach.Enterprise.WebServices.PeachElement.AgentElement>)(from c in doc.Children where c is Peach.Enterprise.WebServices.PeachElement.AgentElement select c as Peach.Enterprise.WebServices.PeachElement.AgentElement).ToList();
+			List<Models.Agent> models = new List<Models.Agent>();
+			foreach(var agent in agents)
+			{
+				Models.Agent a = new Models.Agent()
+				{
+					AgentUrl = agent.Location,
+					Name = agent.Name,
+					Monitors = new List<Models.Monitor>()
+				};
+
+				foreach(var monitor in agent.Monitors)
+				{
+					var kvps = Peach.Core.ClassLoader.GetAllByAttribute<Peach.Core.Agent.MonitorAttribute>(null).Where(attr => attr.Key.Name == monitor.Class).ToList();
+					if (kvps.Count > 0)
+					{
+						var monitorattr = kvps[0].Key;
+						var monitortype = kvps[0].Value;
+
+						Models.Monitor m = new Models.Monitor()
+						{
+							Name = monitor.Name,
+							MonitorClass = monitor.Class,
+							Map = new List<Models.Parameter>()
+						};
+
+						var paramattrs = ((Peach.Core.ParameterAttribute[])monitortype.GetCustomAttributes(typeof(Peach.Core.ParameterAttribute), false)).ToList();
+
+						foreach (var paramattr in paramattrs)
+						{
+							Models.Parameter p = this.ParameterAttrToModel(paramattr);
+
+							var matches = monitor.Params.FindAll(fp => fp.Name == paramattr.name);
+							if (matches.Count > 0)
+							{
+								p.Value = matches[0].Value;
+							}
+
+							m.Map.Add(p);
+						}
+						m.Map = m.Map.OrderByDescending(p => p.Required).ToList();
+						a.Monitors.Add(m);
+					}
+				}
+				models.Add(a);
+			}
+
+			return models;
 		}
 
 		public static void SaveMonitors(Models.Pit pit, List<Models.Agent> monitors)
@@ -403,6 +503,8 @@ namespace Peach.Enterprise.WebServices
 				if (!agents.TryGetValue(item.AgentUrl, out w))
 				{
 					var agentName = "Agent" + agents.Count.ToString();
+					if (item.Name != null && item.Name.Length > 0)
+						agentName = item.Name;
 
 					w = test.InsertBefore();
 					w.WriteStartElement("Agent", PeachElement.Namespace);
@@ -424,6 +526,8 @@ namespace Peach.Enterprise.WebServices
 				{
 					w.WriteStartElement("Monitor", PeachElement.Namespace);
 					w.WriteAttributeString("class", m.MonitorClass);
+					if (m.Name != null && m.Name.Length > 0)
+						w.WriteAttributeString("name", m.Name);
 
 					foreach (var p in m.Map)
 					{
@@ -636,7 +740,7 @@ namespace Peach.Enterprise.WebServices
 
 			if (!File.Exists(fileName))
 			{
-				ret.Config = new List<Models.ConfigItem>();
+				ret.Config = new List<Models.Parameter>();
 			}
 			else
 			{
@@ -646,9 +750,9 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		public List<Models.ConfigItem> MakeConfig(List<PitDefines.Define> defines)
+		public List<Models.Parameter> MakeConfig(List<PitDefines.Define> defines)
 		{
-			var ret = new List<Models.ConfigItem>();
+			var ret = new List<Models.Parameter>();
 
 			foreach (var d in defines)
 			{
@@ -656,12 +760,12 @@ namespace Peach.Enterprise.WebServices
 				if (d.Key == "PitLibraryPath")
 					continue;
 
-				var item = new Models.ConfigItem()
+				var item = new Models.Parameter()
 				{
 					Type = d.ConfigType,
 					Key = d.Key,
 					Value = d.Value,
-					Name = d.Name,
+					Param = d.Name,
 					Description = d.Description,
 					Defaults = new List<string>(d.Defaults),
 					Min = d.Min,
@@ -670,24 +774,24 @@ namespace Peach.Enterprise.WebServices
 
 				switch (item.Type)
 				{
-					case Models.ConfigType.Hwaddr:
+					case Models.ParameterType.Hwaddr:
 						item.Defaults.AddRange(
 							Interfaces
 								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
 								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
 								.Where(s => !string.IsNullOrEmpty(s)));
 						break;
-					case Models.ConfigType.Iface:
+					case Models.ParameterType.Iface:
 						item.Defaults.AddRange(Interfaces.Select(i => i.Name));
 						break;
-					case Models.ConfigType.Ipv4:
+					case Models.ParameterType.Ipv4:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
 								.Select(a => a.Address.ToString()));
 						break;
-					case Models.ConfigType.Ipv6:
+					case Models.ParameterType.Ipv6:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
@@ -701,6 +805,68 @@ namespace Peach.Enterprise.WebServices
 
 			return ret;
 		}
+
+		public Models.Parameter ParameterAttrToModel(ParameterAttribute attr)
+		{
+			Models.Parameter p = new Models.Parameter()
+			{
+				Param = attr.name,
+				Value = attr.defaultValue,
+				Required = attr.required,
+				Description = attr.description
+			};
+
+			var key = attr.type.Name;
+			if (attr.type.IsGenericType)
+			{
+				key = attr.type.GetGenericArguments().First().Name;
+			}
+			else if (attr.type.IsEnum)
+			{
+				key = attr.type.BaseType.Name;
+			}
+
+			switch (key)
+			{
+				case "String":
+				case "String[]":
+					p.Type = Models.ParameterType.String;
+					break;
+				case "UInt16":
+					p.Type = Models.ParameterType.Range;
+					p.Max = UInt16.MaxValue;
+					p.Min = UInt16.MinValue;
+					break;
+				case "UInt32":
+					p.Type = Models.ParameterType.Range;
+					p.Max = UInt32.MaxValue;
+					p.Min = UInt32.MinValue;
+					break;
+				case "Int32":
+					p.Type = Models.ParameterType.Range;
+					p.Max = Int32.MaxValue;
+					p.Min = Int32.MinValue;
+					break;
+				case "Boolean":
+					p.Type = Models.ParameterType.Bool;
+					break;
+				case "Enum":
+					p.Type = Models.ParameterType.Enum;
+					p.Defaults = Enum.GetNames(attr.type).ToList();
+					break;
+				case "IPAddress":
+					p.Type = Models.ParameterType.Ipv4;
+					break;
+				default:
+					p.Type = Models.ParameterType.String;
+					if(ValidationEventHandler != null)
+						ValidationEventHandler(this, new ValidationEventArgs(new NotSupportedException("ParameterAttrToModel: Cannot make model type for parameter type " + attr.type.FullName), ""));
+					break;
+			}
+
+			return p;
+		}
+
 
 		private bool IsConfigured(PeachElement elem)
 		{

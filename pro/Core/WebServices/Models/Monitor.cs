@@ -3,6 +3,19 @@ using System.Collections.Generic;
 
 namespace Peach.Enterprise.WebServices.Models
 {
+	public enum ParameterType
+	{
+		String,
+		Hex,
+		Range,
+		Ipv4,
+		Ipv6,
+		Hwaddr,
+		Iface,
+		Enum,
+		Bool
+	}
+
 	/// <summary>
 	/// A configuration parameter passed to a monitor.
 	/// </summary>
@@ -38,17 +51,34 @@ namespace Peach.Enterprise.WebServices.Models
 		/// <example>
 		/// "string"
 		/// </example>
-		public string Type { get; set; }
+		[Newtonsoft.Json.JsonConverter(typeof(CamelCaseStringEnumConverter))]
+		public ParameterType Type { get; set; }
 
 		/// <summary>
 		/// List of values for enum types
 		/// </summary>
-		public List<string> EnumValues { get; set; }
+		public List<string> Defaults { get; set; }
 
 		/// <summary>
 		/// Is this parameter required?
 		/// </summary>
 		public bool Required { get; set; }
+
+		/// <summary>
+		/// Description of the parameter
+		/// </summary>
+		public string Description { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public long? Min { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public ulong? Max { get; set; }
+
 	}
 
 	/// <summary>
@@ -88,6 +118,11 @@ namespace Peach.Enterprise.WebServices.Models
 		/// "Network capture on interface {PcapDevice} using {PcapFilter}"
 		/// </example>
 		public string Description { get; set; }
+
+		/// <summary>
+		/// User friendly name of the monitor instance
+		/// </summary>
+		public string Name { get; set; }
 	}
 
 	/// <summary>
@@ -96,6 +131,11 @@ namespace Peach.Enterprise.WebServices.Models
 	/// </summary>
 	public class Agent
 	{
+		/// <summary>
+		/// Name of the agent for reference in tests
+		/// </summary>
+		public string Name { get; set; }
+
 		/// <summary>
 		/// The agent location including the agent channel
 		/// </summary>

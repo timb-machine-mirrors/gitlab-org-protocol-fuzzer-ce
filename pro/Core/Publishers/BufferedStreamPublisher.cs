@@ -31,7 +31,7 @@ namespace Peach.Core.Publishers
 		protected MemoryStream _buffer = null;
 		protected bool _timeout = false;
 
-		public BufferedStreamPublisher(Dictionary<string, Variant> args)
+		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
@@ -299,7 +299,6 @@ namespace Peach.Core.Publishers
 				Logger.Error("output: Error during send.  " + ex.Message);
 				throw new SoftException(ex);
 			}
-
 		}
 
 		public override void WantBytes(long count)
