@@ -86,19 +86,19 @@ module DashApp {
 			if (this.pitConfigSvc.AutoMonitors !== undefined)
 				agents = agents.concat(this.pitConfigSvc.AutoMonitors);
 
-			var monitorPromise = this.peach.PostMonitors(this.pitConfigSvc.Pit.pitUrl, agents);
-			var configPromise = this.peach.PostConfig(this.pitConfigSvc.Pit.pitUrl, this.pitConfigSvc.Defines.config);
+			//var monitorPromise = this.peach.PostMonitors(this.pitConfigSvc.Pit.pitUrl, agents);
+			//var configPromise = this.peach.PostConfig(this.pitConfigSvc.Pit.pitUrl, this.pitConfigSvc.Defines.config);
 
-			this.q.all([monitorPromise, configPromise]).then((response) => {
-				this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: Models.StartTestResponse) => {
-					this.startTestPoller(data.testUrl);
-					//this.startLogPoller(data.testUrl);
-				}, (response) => {
-						alert("Peach is busy with another task, can not test Pit.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
-					});
-			}, (response) => {
-					console.error(response);
-				});
+			//this.q.all([monitorPromise, configPromise]).then((response) => {
+			//	this.peach.TestConfiguration(this.pitConfigSvc.Pit.pitUrl, (data: Models.StartTestResponse) => {
+			//		this.startTestPoller(data.testUrl);
+			//		//this.startLogPoller(data.testUrl);
+			//	}, (response) => {
+			//			alert("Peach is busy with another task, can not test Pit.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
+			//		});
+			//}, (response) => {
+			//		console.error(response);
+			//	});
 
 		}
 

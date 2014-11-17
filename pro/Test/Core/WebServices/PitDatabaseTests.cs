@@ -375,23 +375,25 @@ namespace Peach.Enterprise.Test.WebServices
 		{
 
 			var monitors = Peach.Core.ClassLoader.GetAllByAttribute<Peach.Core.Agent.MonitorAttribute>(null).Where(m => m.Key.IsDefault == true);
+			bool errored = false;
+			EventHandler<ValidationEventArgs> handler = (s, e) =>
+			{
+				errored = true;
+			};
+			this.db.ValidationEventHandler += handler;
 
 			foreach(var monitor in monitors)
 			{
 				var parameters = (Peach.Core.ParameterAttribute[])monitor.Value.GetCustomAttributes(typeof(Peach.Core.ParameterAttribute), false);
 				foreach(var parameter in parameters)
 				{
-					bool passed = true;
-					EventHandler<ValidationEventArgs> handler = (s, e) =>
-					{
-						passed = false;
-					};
-					this.db.ValidationEventHandler += handler;
+					errored = false;
 					var testobj = this.db.ParameterAttrToModel(parameter);
-					Assert.IsTrue(passed);
-					this.db.ValidationEventHandler -= handler;
+					Assert.IsNotNull(testobj);
+					Assert.IsFalse(errored);
 				}
 			}
+			this.db.ValidationEventHandler -= handler;
 		}
 
 		[Test]
