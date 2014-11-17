@@ -6,7 +6,6 @@ using Nancy.Hosting.Self;
 using Nancy.Responses;
 using Nancy.Responses.Negotiation;
 using Nancy.Serialization.JsonNet;
-using Nancy.Swagger.Modules;
 using Nancy.TinyIoc;
 using Nancy.ViewEngines;
 using Newtonsoft.Json;
@@ -124,7 +123,6 @@ namespace Peach.Enterprise.WebServices
 			container.Register<IndexService>();
 			container.Register<ErrorStatusCodeHandler>();
 			container.Register<ResourceViewLocationProvider>();
-			container.Register<SwaggerModule>();
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
