@@ -28,16 +28,16 @@
 
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Text.RegularExpressions;
+using System.IO;
 using System.Runtime.InteropServices;
-using Peach.Core.Dom;
+using System.Text.RegularExpressions;
+using System.Threading;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.OS.OSX.Agent.Monitors
 {
 	/// <summary>
 	/// Monitor will use OS X's built in CrashReporter (similar to watson)

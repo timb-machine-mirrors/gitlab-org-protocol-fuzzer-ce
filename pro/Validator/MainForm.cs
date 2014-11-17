@@ -36,7 +36,7 @@ namespace PeachValidator
 			InitializeComponent();
 
 			setTitle();
-			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
 		}
 
 		public void AddNewDefine(string value)

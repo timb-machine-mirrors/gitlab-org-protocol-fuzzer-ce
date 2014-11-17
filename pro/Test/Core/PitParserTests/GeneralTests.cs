@@ -420,7 +420,7 @@ namespace Peach.Core.Test.PitParserTests
 
 
 			{
-				string xml = string.Format("<Peach><Data name='data' fileName='*'/></Peach>", tempDir);
+				string xml = "<Peach><Data name='data' fileName='*'/></Peach>";
 				PitParser parser = new PitParser();
 				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);

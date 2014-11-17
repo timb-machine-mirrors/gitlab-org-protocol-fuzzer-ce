@@ -90,7 +90,6 @@ namespace Peach.Core.Test.Mutators
 			foreach (var item in m4)
 			{
 				var bs = item.Value;
-				var a = bs.ToArray();
 
 				bool hasBE = bs.IndexOf(tokenBE, 0) != -1;
 				bool hasLE = bs.IndexOf(tokenLE, 0) != -1;
@@ -132,7 +131,6 @@ namespace Peach.Core.Test.Mutators
 			foreach (var item in m)
 			{
 				var bs = item.Value;
-				var a = bs.ToArray();
 
 				bool hasBE = bs.IndexOf(tokenBE, 0) != -1;
 				bool hasLE = bs.IndexOf(tokenLE, 0) != -1;

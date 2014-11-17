@@ -21,8 +21,8 @@ namespace Peach.Core.Publishers
 		public int Timeout { get; set; }
 
 		protected int _sendLen = 0;
-		protected byte[] _sendBuf = new byte[1024];
-		protected byte[] _recvBuf = new byte[1024];
+		protected byte[] _sendBuf = new byte[0x14000]; // Buffer size Stream.CopyTo uses
+		protected byte[] _recvBuf = new byte[0x14000];
 		protected object _bufferLock = new object();
 		protected object _clientLock = new object();
 		protected string _clientName = null;
@@ -31,7 +31,7 @@ namespace Peach.Core.Publishers
 		protected MemoryStream _buffer = null;
 		protected bool _timeout = false;
 
-		public BufferedStreamPublisher(Dictionary<string, Variant> args)
+		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
@@ -299,7 +299,6 @@ namespace Peach.Core.Publishers
 				Logger.Error("output: Error during send.  " + ex.Message);
 				throw new SoftException(ex);
 			}
-
 		}
 
 		public override void WantBytes(long count)

@@ -423,7 +423,7 @@ namespace Peach.Core.Test.MutationStrategies
 				"       </State>" +
 				"   </StateModel>" +
 
-				"   <Test name=\"Default\">" +
+				"   <Test name=\"Default\" maxOutputSize='65535'>" +
 				"       <StateModel ref=\"TheState\"/>" +
 				"       <Publisher class=\"Null\"/>" +
 				"       <Strategy class=\"RandomStrategy\">" +
