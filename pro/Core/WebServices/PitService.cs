@@ -48,8 +48,8 @@ namespace Peach.Enterprise.WebServices
 		object GetPitAgents(string id)
 		{
 			var agents = PitDatabase.GetAgentsById(id);
-			//if (agents == null || agents.Count == 0)
-			//	return HttpStatusCode.NotFound;
+			if (agents == null)
+				return HttpStatusCode.NotFound;
 			return agents;
 		}
 

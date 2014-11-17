@@ -8,11 +8,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-
-using Peach.Core;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Xml.XPath;
+
+using Peach.Core;
+using Models = Peach.Enterprise.WebServices.Models;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -397,11 +398,11 @@ namespace Peach.Enterprise.WebServices
 
 		public List<Models.Agent> GetAgentsByUrl(string url)
 		{
-			//TODO
-			//Get monitor class names, match to C# classes
-			//Get parameters for C# class, resolve the types, required, default, translate to UI type
-
 			var pit = GetPitByUrl(url);
+
+			if (pit == null)
+				return null;
+
 			var doc = PitDatabase.Parse(pit.Versions[0].Files[0].Name);
 			var agents = (List<Peach.Enterprise.WebServices.PeachElement.AgentElement>)(from c in doc.Children where c is Peach.Enterprise.WebServices.PeachElement.AgentElement select c as Peach.Enterprise.WebServices.PeachElement.AgentElement).ToList();
 			List<Models.Agent> models = new List<Models.Agent>();
@@ -433,7 +434,7 @@ namespace Peach.Enterprise.WebServices
 
 						foreach (var paramattr in paramattrs)
 						{
-							Models.Parameter p = Peach.Core.WebServices.Utility.UtilityFunctions.ParameterAttrToModel(paramattr);
+							Models.Parameter p = this.ParameterAttrToModel(paramattr);
 
 							var matches = monitor.Params.FindAll(fp => fp.Name == paramattr.name);
 							if (matches.Count > 0)
@@ -804,6 +805,68 @@ namespace Peach.Enterprise.WebServices
 
 			return ret;
 		}
+
+		public Models.Parameter ParameterAttrToModel(ParameterAttribute attr)
+		{
+			Models.Parameter p = new Models.Parameter()
+			{
+				Param = attr.name,
+				Value = attr.defaultValue,
+				Required = attr.required,
+				Description = attr.description
+			};
+
+			var key = attr.type.Name;
+			if (attr.type.IsGenericType)
+			{
+				key = attr.type.GetGenericArguments().First().Name;
+			}
+			else if (attr.type.IsEnum)
+			{
+				key = attr.type.BaseType.Name;
+			}
+
+			switch (key)
+			{
+				case "String":
+				case "String[]":
+					p.Type = Models.ParameterType.String;
+					break;
+				case "UInt16":
+					p.Type = Models.ParameterType.Range;
+					p.Max = UInt16.MaxValue;
+					p.Min = UInt16.MinValue;
+					break;
+				case "UInt32":
+					p.Type = Models.ParameterType.Range;
+					p.Max = UInt32.MaxValue;
+					p.Min = UInt32.MinValue;
+					break;
+				case "Int32":
+					p.Type = Models.ParameterType.Range;
+					p.Max = Int32.MaxValue;
+					p.Min = Int32.MinValue;
+					break;
+				case "Boolean":
+					p.Type = Models.ParameterType.Bool;
+					break;
+				case "Enum":
+					p.Type = Models.ParameterType.Enum;
+					p.Defaults = Enum.GetNames(attr.type).ToList();
+					break;
+				case "IPAddress":
+					p.Type = Models.ParameterType.Ipv4;
+					break;
+				default:
+					p.Type = Models.ParameterType.String;
+					if(ValidationEventHandler != null)
+						ValidationEventHandler(this, new ValidationEventArgs(new NotSupportedException("ParameterAttrToModel: Cannot make model type for parameter type " + attr.type.FullName), ""));
+					break;
+			}
+
+			return p;
+		}
+
 
 		private bool IsConfigured(PeachElement elem)
 		{
