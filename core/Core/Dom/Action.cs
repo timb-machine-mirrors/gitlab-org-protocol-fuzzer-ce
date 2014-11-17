@@ -259,7 +259,10 @@ namespace Peach.Core.Dom
 
 		public void Run(RunContext context)
 		{
-			logger.Debug("Run({0}): {1}", name, GetType().Name);
+			// Log entry later if marked with when.
+			// this will make the debug output look nicer.
+			if(when == null)
+				logger.Debug("Run({0}): {1}", name, GetType().Name);
 
 			// Setup scope for any scripting expressions
 			scope["context"] = context;
@@ -279,15 +282,17 @@ namespace Peach.Core.Dom
 				object value = parent.parent.parent.Python.Eval(when, scope);
 				if (!(value is bool))
 				{
-					logger.Debug("Run: action '{0}' when return is not boolean, returned: {1}", name, value);
+					logger.Warn("Run({0}): {1}: When return is not boolean, skipping. Returned: {2}", name, GetType().Name, value);
 					return;
 				}
 
 				if (!(bool)value)
 				{
-					logger.Debug("Run: action '{0}' when returned false", name);
+					logger.Debug("Run({0}): {1}: Skipping, when returned false", name, GetType().Name);
 					return;
 				}
+
+				logger.Debug("Run({0}): {1}", name, GetType().Name);
 			}
 
 			Publisher publisher = null;
