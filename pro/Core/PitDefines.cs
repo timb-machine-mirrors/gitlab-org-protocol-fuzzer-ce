@@ -31,7 +31,7 @@ namespace Peach.Enterprise
 			[DefaultValue("")]
 			public string Description { get; set; }
 
-			public abstract WebServices.Models.ConfigType ConfigType
+			public abstract WebServices.Models.ParameterType ConfigType
 			{
 				get;
 			}
@@ -57,17 +57,17 @@ namespace Peach.Enterprise
 		/// </summary>
 		public class StringDefine : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.String; }
+				get { return WebServices.Models.ParameterType.String; }
 			}
 		}
 
 		public class HexDefine : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Hex; }
+				get { return WebServices.Models.ParameterType.Hex; }
 			}
 		}
 
@@ -79,9 +79,9 @@ namespace Peach.Enterprise
 			[XmlAttribute("max")]
 			public uint MaxValue { get; set; }
 
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Range; }
+				get { return WebServices.Models.ParameterType.Range; }
 			}
 
 			public override int? Min
@@ -97,41 +97,41 @@ namespace Peach.Enterprise
 
 		public class Ipv4Define : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Ipv4; }
+				get { return WebServices.Models.ParameterType.Ipv4; }
 			}
 		}
 
 		public class Ipv6Define : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Ipv6; }
+				get { return WebServices.Models.ParameterType.Ipv6; }
 			}
 		}
 
 		public class HwaddrDefine : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Hwaddr; }
+				get { return WebServices.Models.ParameterType.Hwaddr; }
 			}
 		}
 
 		public class IfaceDefine : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Iface; }
+				get { return WebServices.Models.ParameterType.Iface; }
 			}
 		}
 
 		public class StrategyDefine : Define
 		{
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Enum; }
+				get { return WebServices.Models.ParameterType.Enum; }
 			}
 
 			public override string[] Defaults
@@ -179,9 +179,9 @@ namespace Peach.Enterprise
 				}
 			}
 
-			public override WebServices.Models.ConfigType ConfigType
+			public override WebServices.Models.ParameterType ConfigType
 			{
-				get { return WebServices.Models.ConfigType.Enum; }
+				get { return WebServices.Models.ParameterType.Enum; }
 			}
 
 			public override string[] Defaults

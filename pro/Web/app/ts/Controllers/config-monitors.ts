@@ -88,14 +88,18 @@ module DashApp {
 		}
 
 		public Save(form: ng.IFormController): void {
-			this.peach.PostMonitors(this.pitconfig.Pit.pitUrl, this.Agents).success(() => {
+			this.peach.PostAgents(this.pitconfig.Pit.pitUrl, this.Agents, () => {
 				form.$dirty = false;
-			});
+			})
 		}
 
 		private refreshData(scope: ViewModelScope) {
-			this.peach.GetMonitors((data: Models.Monitor[]) => {
+			this.peach.GetPeachMonitors((data: Models.Monitor[]) => {
 				this.AvailableMonitors = data;
+			});
+
+			this.peach.GetAgents(this.pitconfig.Pit.pitUrl, (data: Models.Agent[]) => {
+				this.Agents = data;
 			});
 		}
 

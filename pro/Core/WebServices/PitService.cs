@@ -17,6 +17,7 @@ namespace Peach.Enterprise.WebServices
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
+			Get["/{id}/agents"] = _ => GetPitAgents(_.id);
 
 			Post[""] = _ => CopyPit();
 		}
@@ -42,6 +43,14 @@ namespace Peach.Enterprise.WebServices
 				return HttpStatusCode.NotFound;
 
 			return cfg;
+		}
+
+		object GetPitAgents(string id)
+		{
+			var agents = PitDatabase.GetAgentsById(id);
+			//if (agents == null || agents.Count == 0)
+			//	return HttpStatusCode.NotFound;
+			return agents;
 		}
 
 		object CopyPit()

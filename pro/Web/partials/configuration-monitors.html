@@ -59,8 +59,9 @@
 											<tr>
 												<td align="right">Name:</td>
 												<td>
-													<input type="text" ng-model="agent.name" placeholder="New Agent" style="width: 300px" />
+													<input type="text" ng-model="agent.name" placeholder="New Agent" style="width: 300px" ng-required="true" />
 													<i class="icon-question blue tooltip-info" data-rel="tooltip" data-placement="right" style="cursor: pointer" data-original-title="Friendly name for your agent"></i>
+													<span class="red bolder">*</span>
 												</td>
 											</tr>
 											<tr>
@@ -81,7 +82,7 @@
 														</button>
 														<ul class="dropdown-menu dropdown-danger pull-right dropdown-light-blue">
 															<li ng-repeat="monitor in vm.AvailableMonitors">
-																<div ng-click="vm.AddMonitor(agent,monitor)">{{monitor.monitorClass}}</div>
+																<div ng-click="vm.AddMonitor(agent,monitor)" style="padding-right: 5px">{{monitor.monitorClass}}</div>
 															</li>
 														</ul>
 													</div>
@@ -139,6 +140,7 @@
 																	<span ng-switch="mapitem.type">
 																		<input ng-switch-default ng-model="mapitem.value" type="text" style="width: 300px" ng-required="mapitem.required" />
 																		<input ng-switch-when="int" ng-model="mapitem.value" step="1" type="number" integer ng-required="mapitem.required" />
+																		<input ng-switch-when="range" ng-model="mapitem.value" step="1" ng-min="mapitem.min" ng-max="mapitem.max" type="number" ng-required="mapitem.required" integer />
 																		<input ng-switch-when="bool" type="checkbox" ng-model="mapitem.value" ng-checked="mapitem.value" />
 																		<select ng-switch-when="enum" ng-model="mapitem.value" ng-options="item for item in mapitem.enumValues" ng-required="mapitem.required" />
 																	</span>
