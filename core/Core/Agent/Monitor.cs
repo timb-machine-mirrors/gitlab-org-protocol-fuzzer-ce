@@ -27,11 +27,8 @@
 // $Id$
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Agent
 {
@@ -42,7 +39,7 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class Monitor
 	{
-		public Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
+		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
 			Agent = agent;
 			Name = name;
