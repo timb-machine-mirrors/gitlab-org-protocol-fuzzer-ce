@@ -35,6 +35,7 @@ namespace Peach.Enterprise.WebServices.Models
 		/// <example>
 		/// "Device"
 		/// </example>
+		/// TODO: Rename this to "Name"
 		public string Param { get; set; }
 
 		/// <summary>
