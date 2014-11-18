@@ -776,6 +776,31 @@ namespace Peach.Core.Test.CrackingTests
 				// and not result in us matching on choice 'Bar'
 			}
 		}
+
+		[Test]
+		public void ChoiceCache()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name=""DM"">
+		<Blob value='ff aa' valueType='hex' token='true' />
+
+		<Choice>
+			<Blob value='ff bb' valueType='hex' token='true' />
+		</Choice>
+
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var data = new BitStream(new byte[] {0xff, 0xaa, 0xff, 0xbb});
+
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+		}
 	}
 }
 

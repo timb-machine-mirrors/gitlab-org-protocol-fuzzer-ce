@@ -306,6 +306,11 @@ namespace Peach.Core.Publishers
 			if (count == 0)
 				return;
 
+			//lock (_bufferLock)
+			//{
+			//	Logger.Debug("WantBytes({0}): Available: {1}", count, _buffer.Length - _buffer.Position);
+			//}
+
 			DateTime start = DateTime.Now;
 
 			// Wait up to Timeout milliseconds to see if count bytes become available
@@ -327,6 +332,7 @@ namespace Peach.Core.Publishers
 
 					if ((DateTime.Now - start) >= TimeSpan.FromMilliseconds(Timeout))
 					{
+						Logger.Debug("WantBytes({0}): Timeout waiting for data", count);
 						_timeout = true;
 						return;
 					}

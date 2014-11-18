@@ -102,7 +102,7 @@ module DashApp {
 			if (this.pitConfigSvc.AutoMonitors !== undefined)
 				agents = agents.concat(this.pitConfigSvc.AutoMonitors);
 
-			var monitorPromise = this.peach.PostMonitors(this.pitConfigSvc.Pit.pitUrl, agents);
+			var monitorPromise = this.peach.PostAgentsPromise(this.pitConfigSvc.Pit.pitUrl, agents);
 			var configPromise = this.peach.PostConfig(this.pitConfigSvc.Pit.pitUrl, this.pitConfigSvc.Defines.config);
 
 			this.q.all([monitorPromise, configPromise]).then((response) => {

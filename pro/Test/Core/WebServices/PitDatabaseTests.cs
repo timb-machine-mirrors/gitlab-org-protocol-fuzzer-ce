@@ -371,6 +371,32 @@ namespace Peach.Enterprise.Test.WebServices
 		}
 
 		[Test]
+		public void TestMonitorParams()
+		{
+
+			var monitors = Peach.Core.ClassLoader.GetAllByAttribute<Peach.Core.Agent.MonitorAttribute>(null).Where(m => m.Key.IsDefault == true);
+			bool errored = false;
+			EventHandler<ValidationEventArgs> handler = (s, e) =>
+			{
+				errored = true;
+			};
+			this.db.ValidationEventHandler += handler;
+
+			foreach(var monitor in monitors)
+			{
+				var parameters = (Peach.Core.ParameterAttribute[])monitor.Value.GetCustomAttributes(typeof(Peach.Core.ParameterAttribute), false);
+				foreach(var parameter in parameters)
+				{
+					errored = false;
+					var testobj = this.db.ParameterAttrToModel(parameter);
+					Assert.IsNotNull(testobj);
+					Assert.IsFalse(errored);
+				}
+			}
+			this.db.ValidationEventHandler -= handler;
+		}
+
+		[Test]
 		public void TestSaveMonitors()
 		{
 			var pit = db.Entries.First();
