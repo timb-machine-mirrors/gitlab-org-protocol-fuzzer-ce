@@ -48,7 +48,7 @@ define log_if_crash
 end
 
 handle all nostop noprint
-handle SIGSEGV EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
+handle SIGSEGV SIGFPE EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
 
 file {1}
 set args {2}
