@@ -56,7 +56,8 @@ set args {2}
 python
 def on_start(evt):
     import tempfile, os
-    tempfilename = tempfile.mkstemp()[1]
+    h,tempfilename = tempfile.mkstemp()
+    os.close(h)
     with open(tempfilename, 'w') as f:
         f.write(str(gdb.inferiors()[0].pid))
     os.renames(tempfilename,'{4}')
