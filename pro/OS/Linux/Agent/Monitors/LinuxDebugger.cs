@@ -48,14 +48,19 @@ define log_if_crash
 end
 
 handle all nostop noprint
-handle SIGSEGV SIGFPE EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
+handle SIGSEGV SIGFPE SIGABRT EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
 
 file {1}
 set args {2}
 
 python
 def on_start(evt):
-    with open('{4}', 'w') as f: f.write(str(gdb.inferiors()[0].pid))
+    import tempfile, os
+    h,tempfilename = tempfile.mkstemp()
+    os.close(h)
+    with open(tempfilename, 'w') as f:
+        f.write(str(gdb.inferiors()[0].pid))
+    os.renames(tempfilename,'{4}')
     gdb.events.cont.disconnect(on_start)
 gdb.events.cont.connect(on_start)
 end
@@ -64,6 +69,7 @@ run
 log_if_crash
 quit
 ";
+
 
 		Process _procHandler;
 		Process _procCommand;
