@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using NUnit.Framework;
+using Peach.Core.Agent;
 using Peach.Enterprise.WebServices;
 using Peach.Core;
 
@@ -58,7 +59,6 @@ namespace Peach.Enterprise.Test.WebServices
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
        author='Deja Vu Security, LLC'
-       description='IMG PIT'
        version='0.0.1'>
 
 	<Agent name='TheAgent'>
@@ -374,26 +374,23 @@ namespace Peach.Enterprise.Test.WebServices
 		public void TestMonitorParams()
 		{
 
-			var monitors = Peach.Core.ClassLoader.GetAllByAttribute<Peach.Core.Agent.MonitorAttribute>(null).Where(m => m.Key.IsDefault == true);
+			var monitors = ClassLoader.GetAllByAttribute<MonitorAttribute>((t,a) => a.IsDefault);
+
 			bool errored = false;
-			EventHandler<ValidationEventArgs> handler = (s, e) =>
+
+			db.ValidationEventHandler += (s, e) =>
 			{
 				errored = true;
 			};
-			this.db.ValidationEventHandler += handler;
 
-			foreach(var monitor in monitors)
+			foreach (var p in monitors.SelectMany(kv => kv.Value.GetAttributes<ParameterAttribute>()))
 			{
-				var parameters = (Peach.Core.ParameterAttribute[])monitor.Value.GetCustomAttributes(typeof(Peach.Core.ParameterAttribute), false);
-				foreach(var parameter in parameters)
-				{
-					errored = false;
-					var testobj = this.db.ParameterAttrToModel(parameter);
-					Assert.IsNotNull(testobj);
-					Assert.IsFalse(errored);
-				}
+				errored = false;
+
+				var testobj = db.ParameterAttrToModel(p);
+				Assert.IsNotNull(testobj);
+				Assert.IsFalse(errored);
 			}
-			this.db.ValidationEventHandler -= handler;
 		}
 
 		[Test]
