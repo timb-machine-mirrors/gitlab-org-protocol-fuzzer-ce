@@ -4,8 +4,6 @@
 module DashApp.Services {
 	"use strict";
 
-	
-
 	export interface IPitConfiguratorService {
 		Job: Models.Job;
 		Pit: Models.Pit;
@@ -436,7 +434,6 @@ module DashApp.Services {
 			this.peachSvc.GetState((data: Models.StateItem[]) => {
 				this.StateBag = new Models.StateBag(data);
 			});
-
 		}
 	}
 }
