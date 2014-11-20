@@ -16,6 +16,11 @@ using System.Xml.XPath;
 
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Enterprise.WebServices.Models;
+using DescriptionAttribute = Peach.Core.DescriptionAttribute;
+using Encoding = System.Text.Encoding;
+using File = System.IO.File;
+using Monitor = Peach.Enterprise.WebServices.Models.Monitor;
 
 namespace Peach.Enterprise.WebServices
 {
@@ -55,8 +60,6 @@ namespace Peach.Enterprise.WebServices
 
 			[XmlElement("Agent", typeof(AgentReferenceElement))]
 			public List<AgentReferenceElement> AgentRefs { get; set; }
-
-
 		}
 
 		public class AgentElement: ChildElement
@@ -136,13 +139,13 @@ namespace Peach.Enterprise.WebServices
 
 	public class LoadEventArgs : EventArgs
 	{
-		public LoadEventArgs(Models.Pit pit, string fileName)
+		public LoadEventArgs(Pit pit, string fileName)
 		{
 			Pit = pit;
 			FileName = fileName;
 		}
 
-		public Models.Pit Pit { get; private set; }
+		public Pit Pit { get; private set; }
 
 		public string FileName { get; private set; }
 	}
@@ -175,7 +178,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			using (var md5 = new MD5CryptoServiceProvider())
 			{
-				var bytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value));
+				var bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
 				var sb = new StringBuilder();
 				foreach (var b in bytes)
 					sb.Append(b.ToString("x2"));
@@ -183,13 +186,13 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		private static readonly Models.PeachVersion Version = MakePeachVer();
+		private static readonly PeachVersion Version = MakePeachVer();
 
-		private static Models.PeachVersion MakePeachVer()
+		private static PeachVersion MakePeachVer()
 		{
 			var ver = Assembly.GetExecutingAssembly().GetName().Version;
 
-			return new Models.PeachVersion
+			return new PeachVersion
 			{
 				PeachUrl = "",
 				Major = ver.Major.ToString(CultureInfo.InvariantCulture),
@@ -236,20 +239,20 @@ namespace Peach.Enterprise.WebServices
 			return final;
 		}
 
-		public List<Models.Monitor> GetAllMonitors()
+		public List<Monitor> GetAllMonitors()
 		{
-			var ret = new List<Models.Monitor>();
+			var ret = new List<Monitor>();
 
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
 			{
 				var attr = kv.Key;
 				var type = kv.Value;
 
-				var m = new Models.Monitor
+				var m = new Monitor
 				{
-					Description = type.GetAttributes<Core.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+					Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
 					MonitorClass = attr.Name,
-					Map = new List<Models.Parameter>(),
+					Map = new List<Parameter>(),
 				};
 
 				foreach (var p in type.GetAttributes<ParameterAttribute>())
@@ -269,8 +272,8 @@ namespace Peach.Enterprise.WebServices
 
 		public PitDatabase()
 		{
-			entries = new Dictionary<string, Models.Pit>();
-			libraries = new Dictionary<string, Models.Library>();
+			entries = new Dictionary<string, Pit>();
+			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 		}
 
@@ -285,8 +288,8 @@ namespace Peach.Enterprise.WebServices
 		public void Load(string path)
 		{
 			roots = new Dictionary<string, LibraryRoot>();
-			entries = new Dictionary<string, Models.Pit>();
-			libraries = new Dictionary<string, Models.Library>();
+			entries = new Dictionary<string, Pit>();
+			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 
 			AddLibrary(path, "", "Peach Pro Library 2014 Q1", true);
@@ -364,7 +367,7 @@ namespace Peach.Enterprise.WebServices
 				var settings = new XmlWriterSettings
 				{
 					Indent = true,
-					Encoding = System.Text.Encoding.UTF8,
+					Encoding = Encoding.UTF8,
 					IndentChars = "  ",
 				};
 
@@ -407,7 +410,7 @@ namespace Peach.Enterprise.WebServices
 			return item.PitUrl;
 		}
 
-		public static void SaveConfig(Models.Pit pit, List<Models.Parameter> config)
+		public static void SaveConfig(Pit pit, List<Parameter> config)
 		{
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 			var defines = PitDefines.Parse(fileName);
@@ -457,36 +460,40 @@ namespace Peach.Enterprise.WebServices
 				{
 					AgentUrl = agent.Location,
 					Name = agent.Name,
-					Monitors = new List<Models.Monitor>()
+					Monitors = new List<Monitor>()
 				};
 
 				foreach(var monitor in agent.Monitors)
 				{
-					var m = new Models.Monitor
+					var m = new Monitor
 					{
 						Name = monitor.Name,
 						MonitorClass = monitor.Class,
-						Map = new List<Models.Parameter>()
+						Map = new List<Parameter>()
 					};
 
-					var type = ClassLoader.GetAllByAttribute<MonitorAttribute>((t, attr) => attr.Name == monitor.Class).Select(kv => kv.Value).FirstOrDefault();
+					var monitor1 = monitor;
+					var type = ClassLoader.GetAllByAttribute<MonitorAttribute>(
+						(t, attr) => attr.Name == monitor1.Class)
+							.Select(kv => kv.Value)
+							.FirstOrDefault();
 					if (type == null)
 					{
 						// No plugin found, make up some reasonable content
 						foreach (var param in monitor.Params)
 						{
-							m.Map.Add(new Models.Parameter
+							m.Map.Add(new Parameter
 							{
 								Param = param.Name,
 								Value = param.Value,
-								Type = Models.ParameterType.String,
+								Type = ParameterType.String,
 							});
 						}
 
 					}
 					else
 					{
-						m.Description = type.GetAttributes<Core.DescriptionAttribute>()
+						m.Description = type.GetAttributes<DescriptionAttribute>()
 							.Select(d => d.Description)
 							.FirstOrDefault() ?? "";
 
@@ -513,7 +520,7 @@ namespace Peach.Enterprise.WebServices
 			return models;
 		}
 
-		private static int ParameterSorter(Models.Parameter lhs, Models.Parameter rhs)
+		private static int ParameterSorter(Parameter lhs, Parameter rhs)
 		{
 			if (lhs.Required == rhs.Required)
 				return string.CompareOrdinal(lhs.Param, rhs.Param);
@@ -521,12 +528,12 @@ namespace Peach.Enterprise.WebServices
 			return lhs.Required ? -1 : 1;
 		}
 
-		private static int MonitorSorter(Models.Monitor lhs, Models.Monitor rhs)
+		private static int MonitorSorter(Monitor lhs, Monitor rhs)
 		{
 			return string.CompareOrdinal(lhs.MonitorClass, rhs.MonitorClass);
 		}
 
-		public static void SaveMonitors(Models.Pit pit, List<Models.Agent> monitors)
+		public static void SaveMonitors(Pit pit, List<Models.Agent> monitors)
 		{
 			var fileName = pit.Versions[0].Files[0].Name;
 			var doc = new XmlDocument();
@@ -652,7 +659,7 @@ namespace Peach.Enterprise.WebServices
 			var settings = new XmlWriterSettings
 			{
 				Indent = true,
-				Encoding = System.Text.Encoding.UTF8,
+				Encoding = Encoding.UTF8,
 				IndentChars = "  ",
 			};
 
@@ -681,33 +688,33 @@ namespace Peach.Enterprise.WebServices
 
 			var guid = MakeGuid(name);
 
-			var lib = new Models.Library
+			var lib = new Library
 			{
 				LibraryUrl = LibraryService.Prefix + "/" + guid,
 				Name = name,
 				Description = name,
 				Locked = locked,
-				Versions = new List<Models.LibraryVersion>(),
-				Groups = new List<Models.Group>(),
+				Versions = new List<LibraryVersion>(),
+				Groups = new List<Group>(),
 				User = Environment.UserName,
 				Timestamp = string.IsNullOrEmpty(path) ? new DateTime(0) : Directory.GetCreationTime(path),
 			};
 
-			var ver = new Models.LibraryVersion
+			var ver = new LibraryVersion
 			{
 				Version = 1,
 				Locked = lib.Locked,
-				Pits = new List<Models.LibraryPit>(),
+				Pits = new List<LibraryPit>(),
 			};
 
-			var group = new Models.Group
+			var group = new Group
 			{
 				GroupUrl = "",
-				Access = Models.GroupAccess.Read,
+				Access = GroupAccess.Read,
 			};
 
 			if (!ver.Locked)
-				group.Access |= Models.GroupAccess.Write;
+				group.Access |= GroupAccess.Write;
 
 			lib.Versions.Add(ver);
 			lib.Groups.Add(group);
@@ -740,7 +747,7 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public IEnumerable<Models.Pit> Entries
+		public IEnumerable<Pit> Entries
 		{
 			get
 			{
@@ -748,7 +755,7 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public IEnumerable<Models.Library> Libraries
+		public IEnumerable<Library> Libraries
 		{
 			get
 			{
@@ -773,36 +780,36 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public Models.Pit GetPitById(string guid)
+		public Pit GetPitById(string guid)
 		{
 			return GetPitByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public Models.Pit GetPitByUrl(string url)
+		public Pit GetPitByUrl(string url)
 		{
-			Models.Pit pit;
+			Pit pit;
 			entries.TryGetValue(url, out pit);
 			return pit;
 		}
 
-		public Models.Library GetLibraryById(string guid)
+		public Library GetLibraryById(string guid)
 		{
 			return GetLibraryByUrl(LibraryService.Prefix + "/" + guid);
 		}
 
-		public Models.Library GetLibraryByUrl(string url)
+		public Library GetLibraryByUrl(string url)
 		{
-			Models.Library library;
+			Library library;
 			libraries.TryGetValue(url, out library);
 			return library;
 		}
 
-		public Models.PitConfig GetConfigById(string guid)
+		public PitConfig GetConfigById(string guid)
 		{
 			return GetConfigByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public Models.PitConfig GetConfigByUrl(string url)
+		public PitConfig GetConfigByUrl(string url)
 		{
 			var pit = GetPitByUrl(url);
 			if (pit == null)
@@ -810,7 +817,7 @@ namespace Peach.Enterprise.WebServices
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
-			var ret = new Models.PitConfig
+			var ret = new PitConfig
 			{
 				PitUrl = pit.PitUrl,
 			};
@@ -818,7 +825,7 @@ namespace Peach.Enterprise.WebServices
 			// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 			if (!File.Exists(fileName))
 			{
-				ret.Config = new List<Models.Parameter>();
+				ret.Config = new List<Parameter>();
 			}
 			else
 			{
@@ -828,9 +835,9 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		public List<Models.Parameter> MakeConfig(List<PitDefines.Define> defines)
+		public List<Parameter> MakeConfig(List<PitDefines.Define> defines)
 		{
-			var ret = new List<Models.Parameter>();
+			var ret = new List<Parameter>();
 
 			foreach (var d in defines)
 			{
@@ -838,7 +845,7 @@ namespace Peach.Enterprise.WebServices
 				if (d.Key == "PitLibraryPath")
 					continue;
 
-				var item = new Models.Parameter
+				var item = new Parameter
 				{
 					Type = d.ConfigType,
 					Key = d.Key,
@@ -852,24 +859,24 @@ namespace Peach.Enterprise.WebServices
 
 				switch (item.Type)
 				{
-					case Models.ParameterType.Hwaddr:
+					case ParameterType.Hwaddr:
 						item.Defaults.AddRange(
 							Interfaces
 								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
 								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
 								.Where(s => !string.IsNullOrEmpty(s)));
 						break;
-					case Models.ParameterType.Iface:
+					case ParameterType.Iface:
 						item.Defaults.AddRange(Interfaces.Select(i => i.Name));
 						break;
-					case Models.ParameterType.Ipv4:
+					case ParameterType.Ipv4:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
 								.Select(a => a.Address.ToString()));
 						break;
-					case Models.ParameterType.Ipv6:
+					case ParameterType.Ipv6:
 						item.Defaults.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
@@ -884,9 +891,9 @@ namespace Peach.Enterprise.WebServices
 			return ret;
 		}
 
-		internal Models.Parameter ParameterAttrToModel(ParameterAttribute attr)
+		internal Parameter ParameterAttrToModel(ParameterAttribute attr)
 		{
-			var p = new Models.Parameter
+			var p = new Parameter
 			{
 				Param = attr.name,
 				Value = attr.defaultValue,
@@ -908,35 +915,35 @@ namespace Peach.Enterprise.WebServices
 			{
 				case "String":
 				case "String[]":
-					p.Type = Models.ParameterType.String;
+					p.Type = ParameterType.String;
 					break;
 				case "UInt16":
-					p.Type = Models.ParameterType.Range;
+					p.Type = ParameterType.Range;
 					p.Max = UInt16.MaxValue;
 					p.Min = UInt16.MinValue;
 					break;
 				case "UInt32":
-					p.Type = Models.ParameterType.Range;
+					p.Type = ParameterType.Range;
 					p.Max = UInt32.MaxValue;
 					p.Min = UInt32.MinValue;
 					break;
 				case "Int32":
-					p.Type = Models.ParameterType.Range;
+					p.Type = ParameterType.Range;
 					p.Max = Int32.MaxValue;
 					p.Min = Int32.MinValue;
 					break;
 				case "Boolean":
-					p.Type = Models.ParameterType.Bool;
+					p.Type = ParameterType.Bool;
 					break;
 				case "Enum":
-					p.Type = Models.ParameterType.Enum;
+					p.Type = ParameterType.Enum;
 					p.Defaults = Enum.GetNames(attr.type).ToList();
 					break;
 				case "IPAddress":
-					p.Type = Models.ParameterType.Ipv4;
+					p.Type = ParameterType.Ipv4;
 					break;
 				default:
-					p.Type = Models.ParameterType.String;
+					p.Type = ParameterType.String;
 
 					if(ValidationEventHandler != null)
 						ValidationEventHandler(this, new ValidationEventArgs(new NotSupportedException("ParameterAttrToModel: Cannot make model type for parameter type " + attr.type.FullName), ""));
@@ -954,29 +961,29 @@ namespace Peach.Enterprise.WebServices
 			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Count > 0);
 		}
 
-		private Models.Pit AddEntry(Models.LibraryVersion lib, string pitLibraryPath, string fileName)
+		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
-			var value = new Models.Pit
+			var value = new Pit
 			{
 				PitUrl = PitService.Prefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.Description,
 				Locked = lib.Locked,
-				Tags = new List<Models.Tag>(),
-				Versions = new List<Models.PitVersion>(),
-				Peaches = new List<Models.PeachVersion>(),
+				Tags = new List<Tag>(),
+				Versions = new List<PitVersion>(),
+				Peaches = new List<PeachVersion>(),
 				User = contents.Author,
 				Timestamp = File.GetLastWriteTime(fileName),
 			};
 
-			var ver = new Models.PitVersion
+			var ver = new PitVersion
 			{
 				Version = 1,
 				Configured = IsConfigured(contents),
 				Locked = value.Locked,
-				Files = new List<Models.PitFile>(),
+				Files = new List<PitFile>(),
 				User = Environment.UserName,
 				Timestamp = value.Timestamp
 			};
@@ -986,7 +993,7 @@ namespace Peach.Enterprise.WebServices
 			value.Versions.Add(ver);
 
 			var dir = (Path.GetDirectoryName(fileName) ?? "").Split(Path.DirectorySeparatorChar).Last();
-			var tag = new Models.Tag
+			var tag = new Tag
 			{
 				Name = "Category." + dir,
 				Values = new List<string>(new[] { "Category", dir }),
@@ -997,7 +1004,7 @@ namespace Peach.Enterprise.WebServices
 
 			entries.Add(value.PitUrl, value);
 
-			lib.Pits.Add(new Models.LibraryPit
+			lib.Pits.Add(new LibraryPit
 			{
 				PitUrl = value.PitUrl,
 				Name = value.Name,
@@ -1008,9 +1015,9 @@ namespace Peach.Enterprise.WebServices
 			return value;
 		}
 
-		private static void AddAllFiles(IList<Models.PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
+		private static void AddAllFiles(ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
 		{
-			list.Add(new Models.PitFile
+			list.Add(new PitFile
 			{
 				Name = fileName,
 				FileUrl = "",
@@ -1046,8 +1053,8 @@ namespace Peach.Enterprise.WebServices
 		}
 
 		private Dictionary<string, LibraryRoot> roots;
-		private Dictionary<string, Models.Pit> entries;
-		private Dictionary<string, Models.Library> libraries;
+		private Dictionary<string, Pit> entries;
+		private Dictionary<string, Library> libraries;
 		private List<NetworkInterface> interfaces;
 	}
 }
