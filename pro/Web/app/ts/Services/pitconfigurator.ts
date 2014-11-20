@@ -407,7 +407,6 @@ module DashApp.Services {
 		private updatePit(pit: Models.Pit) {
 			if (this.Pit.pitUrl != pit.pitUrl) {
 				throw "trying to update a pit with the wrong pit url";
-				return;
 			}
 
 			this.Pit.configured = pit.configured;
@@ -426,9 +425,10 @@ module DashApp.Services {
 
 		private getUserLibrary() {
 			this.peachSvc.GetLibraries((data: Models.PitLibrary[]) => {
-				this.UserPitLibrary = $.grep(data, (e) => {
+				var libs : Models.PitLibrary[] = $.grep(data, (e) => {
 					return e.locked == false;
-				})[0].libraryUrl;
+				});
+				this.UserPitLibrary = libs[0].libraryUrl;
 			});
 		}
 

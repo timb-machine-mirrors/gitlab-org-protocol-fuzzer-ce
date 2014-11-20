@@ -17,11 +17,11 @@
 
 module DashApp {
 	"use strict";
-	
+
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 
-	var peachDash = angular.module("peachDash", [
+	angular.module("peachDash", [
 		"ngResource",
 		"emguo.poller",
 		"ngGrid",
@@ -30,60 +30,73 @@ module DashApp {
 		"treeControl",
 		"angles",
 		"ngVis"
-	]).service("peachService", ["$resource", "$http", ($resource, $http) => new Services.PeachService($resource, $http)])
-		.service("pitConfiguratorService", ["poller", "peachService", (poller, peachService) => new Services.PitConfiguratorService(poller, peachService)])
-		.config(["$routeProvider", "$locationProvider", function ($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) {
-
-			$routeProvider
-				.when("/", {
-					templateUrl: "/partials/dash.html",
-					controller: DashController
-				})
-				.when("/faults/:bucket", {
-					templateUrl: "/partials/faults.html",
-					controller: FaultsController
-				})
-				.when("/quickstart/intro", {
-					templateUrl: "/partials/quickstart-intro.html",
-					controller: WizardController
-				})
-				.when("/metrics/:metric", {
-					templateUrl: "/partials/metrics.html",
-					controller: MetricsController
-				})
-				.when("/quickstart/test", {
-					templateUrl: "/partials/quickstart-test.html",
-					controller: PitTestController
-				})
-				.when("/quickstart/done", {
-					templateUrl: "/partials/quickstart-done.html",
-					controller: WizardController
-				})
-				.when("/quickstart/:step", {
-					templateUrl: "/partials/wizard.html",
-					controller: WizardController
-				})
-				.when("/configuration/monitors", {
-					templateUrl: "/partials/configuration-monitors.html",
-					controller: ConfigurationMonitorsController
-				})
-				.when("/configuration/variables", {
-					templateUrl: "/partials/configuration-variables.html",
-					controller: ConfigurationVariablesController
-				})
-				.when("/configuration/test", {
-					templateUrl: "/partials/configuration-test.html",
-					controller: ConfigurationTestController
-				})
-				.otherwise({
-					redirectTo: "/"
-				});
-		}])
-		.directive('integer', function () {
+	])
+		.service("peachService", [
+			"$resource",
+			"$http",
+			($resource, $http) => new Services.PeachService($resource, $http)
+		])
+		.service("pitConfiguratorService", [
+			"poller",
+			"peachService",
+			(poller, peachService) => new Services.PitConfiguratorService(poller, peachService)
+		])
+		.config([
+			"$routeProvider",
+			"$locationProvider",
+			($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) => {
+				$routeProvider
+					.when("/", {
+						templateUrl: "/partials/dash.html",
+						controller: DashController
+					})
+					.when("/faults/:bucket", {
+						templateUrl: "/partials/faults.html",
+						controller: FaultsController
+					})
+					.when("/quickstart/intro", {
+						templateUrl: "/partials/quickstart-intro.html",
+						controller: WizardController
+					})
+					.when("/metrics/:metric", {
+						templateUrl: "/partials/metrics.html",
+						controller: MetricsController
+					})
+					.when("/quickstart/test", {
+						templateUrl: "/partials/quickstart-test.html",
+						controller: PitTestController
+					})
+					.when("/quickstart/done", {
+						templateUrl: "/partials/quickstart-done.html",
+						controller: WizardController
+					})
+					.when("/quickstart/:step", {
+						templateUrl: "/partials/wizard.html",
+						controller: WizardController
+					})
+					.when("/configuration/monitors", {
+						templateUrl: "/partials/configuration-monitors.html",
+						controller: ConfigurationMonitorsController
+					})
+					.when("/configuration/variables", {
+						templateUrl: "/partials/configuration-variables.html",
+						controller: ConfigurationVariablesController
+					})
+					.when("/configuration/test", {
+						templateUrl: "/partials/configuration-test.html",
+						controller: ConfigurationTestController
+					})
+					.otherwise({
+						redirectTo: "/"
+					})
+				;
+			}
+		])
+		.directive('integer', () => {
 			return {
 				require: 'ngModel',
-				link: function (scope, elm, attrs, ctrl) {
-					ctrl.$parsers.unshift(function (viewValue) {
+				link: (scope, elm, attrs, ctrl) => {
+					ctrl.$parsers.unshift(viewValue => {
 						var isIntValue = INTEGER_REGEXP.test(viewValue);
 						ctrl.$setValidity('integer', isIntValue);
 						if (isIntValue) return viewValue;
@@ -92,11 +105,11 @@ module DashApp {
 				}
 			};
 		})
-		.directive('hexstring', function () {
+		.directive('hexstring', () => {
 			return {
 				require: 'ngModel',
-				link: function (scope, elm, attrs, ctrl) {
-					ctrl.$parsers.unshift(function (viewValue) {
+				link: (scope, elm, attrs, ctrl) => {
+					ctrl.$parsers.unshift(viewValue => {
 						var isHexValue = HEX_REGEXP.test(viewValue);
 						ctrl.$setValidity('hexstring', isHexValue);
 						if (isHexValue) return viewValue;
@@ -105,12 +118,12 @@ module DashApp {
 				}
 			};
 		})
-		.directive('ngEnter', function () {
+		.directive('ngEnter', () => {
 			return {
-				link: function (scope, element, attrs: IEnterAttributes, ctrl) {
-					element.bind("keydown keypress", function (event) {
+				link: (scope, element, attrs: IEnterAttributes, ctrl) => {
+					element.bind("keydown keypress", event => {
 						if (event.which === 13) {
-							scope.$apply(function () {
+							scope.$apply(() => {
 								scope.$eval(attrs.ngEnter);
 							});
 
@@ -118,17 +131,17 @@ module DashApp {
 						}
 					});
 				}
-			}
+			};
 		})
-		.directive('ngMin', function () {
+		.directive('ngMin', () => {
 			return {
 				restrict: 'A',
 				require: 'ngModel',
-				link: function (scope, elem, attr: IMinAttributes, ctrl) {
-					scope.$watch(attr.ngMin, function () {
+				link: (scope, elem, attr: IMinAttributes, ctrl) => {
+					scope.$watch(attr.ngMin, () => {
 						ctrl.$setViewValue(ctrl.$viewValue);
 					});
-					var minValidator = function (value) {
+					var minValidator = value => {
 						var min = scope.$eval(attr.ngMin) || 0;
 						if (!isEmpty(value) && value < min) {
 							ctrl.$setValidity('ngMin', false);
@@ -144,18 +157,18 @@ module DashApp {
 				}
 			};
 		})
-		.directive('ngMax', function () {
+		.directive('ngMax', () => {
 			return {
 				require: 'ngModel',
-				link: function (scope, elem, attr: IMaxAttributes, ctrl) {
-					scope.$watch(attr.ngMax, function () {
+				link: (scope, elem, attr: IMaxAttributes, ctrl) => {
+					scope.$watch(attr.ngMax, () => {
 						ctrl.$setViewValue(ctrl.$viewValue);
 					});
-					var maxValidator = function (value) {
+					var maxValidator = value => {
 						var max = scope.$eval(attr.ngMax) || Infinity;
 						if (!isEmpty(value) && value > max) {
 							ctrl.$setValidity('ngMax', false);
-							return undefined
+							return undefined;
 						} else {
 							ctrl.$setValidity('ngMax', true);
 							return value;
@@ -167,7 +180,7 @@ module DashApp {
 				}
 			};
 		})
-		.filter('filesize', function () {
+		.filter('filesize', () => {
 			var units = [
 				'bytes',
 				'KB',
@@ -177,7 +190,7 @@ module DashApp {
 				'PB'
 			];
 
-			return function (bytes, precision) {
+			return (bytes, precision) => {
 				if (bytes === 0) {
 					return '0 bytes';
 				}
@@ -201,13 +214,14 @@ module DashApp {
 				return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 			};
 		})
-		.run(function ($rootScope, $templateCache) {
-			$rootScope.$on('$routeChangeStart', function (event, next, current) {
-				if (typeof(current) !== 'undefined') {
+		.run(($rootScope, $templateCache) => {
+			$rootScope.$on('$routeChangeStart', (event, next, current) => {
+				if (typeof (current) !== 'undefined') {
 					$templateCache.remove(current.templateUrl);
 				}
 			});
 		});
+
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
 	}

@@ -75,10 +75,6 @@ namespace Peach.Enterprise.WebServices
 			{
 				return HttpStatusCode.BadRequest;
 			}
-			catch (Exception)
-			{
-				throw;
-			}
 
 			var newPit = db.GetPitByUrl(newUrl);
 

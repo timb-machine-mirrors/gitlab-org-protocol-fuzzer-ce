@@ -1,7 +1,4 @@
 using Nancy;
-using Peach.Enterprise.WebServices.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Peach.Enterprise.WebServices
