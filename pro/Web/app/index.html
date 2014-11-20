@@ -139,13 +139,13 @@
 						</a>
 					</li>
 					<!--
-		<li ng-class="{active: vm.location.path() == '/visualizer'}">
-			<a href="#/visualizer">
-				<i class="icon-eye-open"></i>
-				<span class="menu-text"> Visualizer </span>
-			</a>
-		</li>
-		-->
+					<li ng-class="{active: vm.location.path() == '/visualizer'}">
+						<a href="#/visualizer">
+							<i class="icon-eye-open"></i>
+							<span class="menu-text"> Visualizer </span>
+						</a>
+					</li>
+					-->
 					<li ng-class="{active: vm.location.path() == '/faults','disabled': vm.CanViewFaults == false}" data-original-title="{{vm.faultsUnavailableTooltip}}" class="tooltip-warning" data-rel="tooltip" data-placement="right">
 						<a href="#/faults/all">
 							<i class="icon-fire"></i>
@@ -293,29 +293,29 @@
 						</ul>
 					</li>
 
-				<li>
-					<a href="/docs" target="_blank">
-						<i class="icon-book"></i>
-						<span class="menu-text"> Documentation </span>
-					</a>
-				</li>
-				<li>
-					<a href="https://forums.peachfuzzer.com" target="_blank">
-						<i class="icon-bookmark"></i>
-						<span class="menu-text"> Forums </span>
-					</a>
-				</li>
+					<li>
+						<a href="/docs" target="_blank">
+							<i class="icon-book"></i>
+							<span class="menu-text"> Documentation </span>
+						</a>
+					</li>
+					<li>
+						<a href="https://forums.peachfuzzer.com" target="_blank">
+							<i class="icon-bookmark"></i>
+							<span class="menu-text"> Forums </span>
+						</a>
+					</li>
 
-			</ul><!-- /.nav-list -->
+				</ul><!-- /.nav-list -->
 
-			<div class="sidebar-collapse" id="sidebar-collapse">
-				<i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+				<div class="sidebar-collapse" id="sidebar-collapse">
+					<i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+				</div>
+
+				<script type="text/javascript">
+					try { ace.settings.check('sidebar', 'collapsed') } catch (e) { }
+				</script>
 			</div>
-
-			<script type="text/javascript">
-				try { ace.settings.check('sidebar', 'collapsed') } catch (e) { }
-			</script>
-</div>
 
 			<div class="main-content" ng-view>
 

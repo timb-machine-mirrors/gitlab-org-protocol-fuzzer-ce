@@ -9,7 +9,7 @@
 module DashApp {
 	"use strict";
 
-	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void;
 
 	export class PitTestController {
 		private pitConfigSvc: Services.IPitConfiguratorService;
@@ -60,18 +60,18 @@ module DashApp {
 		];
 
 		static $inject = ["$scope", "$q", "$location", "poller", "peachService", "pitConfiguratorService"];
-		
+
 		constructor($scope: ViewModelScope, $q: ng.IQService, $location: ng.ILocationService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService) {
 			$scope.vm = this;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.pollerSvc = poller;
-			this.location = $location; 
+			this.location = $location;
 			this.peach = peachService;
 			this.q = $q;
 		}
 
 		public dataGridOptions: ngGrid.IGridOptions = {
-			data: "vm.testEvents", 
+			data: "vm.testEvents",
 			columnDefs: [
 				{
 					field: "status",
@@ -113,7 +113,7 @@ module DashApp {
 					alert("Peach is busy with another task, can not test Pit.\nConfirm that there aren't multiple browsers accessing the same instance of Peach.");
 				});
 			}, (response) => {
-				console.error(response);  
+				console.error(response);
 			});
 
 		}

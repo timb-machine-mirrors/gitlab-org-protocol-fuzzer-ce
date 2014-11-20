@@ -8,7 +8,6 @@
 module DashApp {
 	"use strict";
 
-
 	export class MainController {
 		private peachSvc: Services.IPeachService;
 		private modal: ng.ui.bootstrap.IModalService;

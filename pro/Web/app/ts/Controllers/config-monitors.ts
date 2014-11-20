@@ -8,7 +8,7 @@
 module DashApp {
 	"use strict";
 
-	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void;
 
 	export class ConfigurationMonitorsController {
 		//#region private variables
@@ -57,7 +57,7 @@ module DashApp {
 		}
 
 		public AddMonitor(agent: Models.Agent, monitor: Models.Monitor): void {
-			
+
 			for (var i = 0; i < monitor.map.length; i++) {
 				switch (monitor.map[i].type) {
 					case "bool":
@@ -107,7 +107,7 @@ module DashApp {
 			console.log(something);
 		}
 
-		private ArrayItemUp<T>(array: T[], i: number): T[]{
+		private ArrayItemUp<T>(array: T[], i: number): T[] {
 			if (i > 0) {
 				var x = array[i - 1];
 				array[i - 1] = array[i];

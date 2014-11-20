@@ -14,7 +14,6 @@
 /// <reference path="Controllers/config-test.ts" />
 /// <reference path="Controllers/config-variables.ts" />
 
-
 module DashApp {
 	"use strict";
 
@@ -238,4 +237,3 @@ module DashApp {
 		ngMax: any;
 	}
 }
-

@@ -35,6 +35,7 @@ using System.Text;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Peach.Pro.OS.Windows.Agent.Monitors;
 
 namespace Peach.Core.Agent.Monitors
 {
