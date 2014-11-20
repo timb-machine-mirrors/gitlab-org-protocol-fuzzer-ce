@@ -1,7 +1,7 @@
-using Nancy;
 using System.Linq;
+using Nancy;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class LibraryService : WebService
 	{

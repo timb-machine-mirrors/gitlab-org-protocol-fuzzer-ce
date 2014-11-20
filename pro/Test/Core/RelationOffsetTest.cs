@@ -26,22 +26,15 @@
 
 // $Id$
 
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
-using Peach.Core.Cracker;
-using Peach.Core.Analyzers;
-
+using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class RelationOffsetTest : DataModelCollector
@@ -68,7 +61,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -105,7 +98,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -136,7 +129,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(1, dom.dataModels.Count);
 
@@ -172,7 +165,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -209,7 +202,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -250,7 +243,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(3, dom.dataModels.Count);
 
@@ -314,7 +307,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -361,7 +354,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 
@@ -422,7 +415,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 
@@ -486,7 +479,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 
@@ -552,7 +545,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 

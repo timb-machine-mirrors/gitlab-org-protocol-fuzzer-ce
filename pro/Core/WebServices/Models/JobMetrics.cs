@@ -1,8 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public class FaultTimelineMetric
 	{

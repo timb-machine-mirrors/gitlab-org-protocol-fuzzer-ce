@@ -29,20 +29,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using Peach.Core.Dom;
 using NLog;
-using System.Net.Sockets;
+using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.IO;
 
-namespace Peach.Core.Agent.Channels
+namespace Peach.Pro.Core.Agent.Channels
 {
 	#region TCP Agent Client
 

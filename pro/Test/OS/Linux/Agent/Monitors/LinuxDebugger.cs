@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.OS.Linux.Agent.Monitors;
+using Peach.Pro.OS.Linux.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {

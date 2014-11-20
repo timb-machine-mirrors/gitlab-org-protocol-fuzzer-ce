@@ -3,12 +3,11 @@
 //
 
 using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ArrayVariance")]
 	[Description("Change the length of arrays to count - N to count + N")]
@@ -31,7 +30,7 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
-			var asArray = (Dom.Array)obj;
+			var asArray = (Peach.Core.Dom.Array)obj;
 
 			signed = false;
 			min = 0;
@@ -41,7 +40,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.Array && obj.isMutable)
+			if (obj is Peach.Core.Dom.Array && obj.isMutable)
 				return true;
 
 			return false;
@@ -49,7 +48,7 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long num)
 		{
-			var objAsArray = (Core.Dom.Array)obj;
+			var objAsArray = (Peach.Core.Dom.Array)obj;
 
 			if (num > 0)
 			{
@@ -87,7 +86,7 @@ namespace Peach.Core.Mutators
 			throw new NotImplementedException();
 		}
 
-		static DataElement LastElement(Dom.Array asArray)
+		static DataElement LastElement(Peach.Core.Dom.Array asArray)
 		{
 			if (asArray.Count == 0)
 				return asArray.OriginalElement;

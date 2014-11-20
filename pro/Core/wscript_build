@@ -67,5 +67,5 @@ bld(
 	resource = bld.path.ant_glob('xmltests.zip NamedSequences.txt WebServices/*.sshtml'),
 	content = 'IronPython.StdLib',
 	name = 'Peach.Pro.dll',
-	namespace = 'Peach.Core',
+	namespace = 'Peach.Pro.Core',
 )

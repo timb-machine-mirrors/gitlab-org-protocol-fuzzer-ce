@@ -28,11 +28,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
     [Description("Encode on output from a string representation of a SID to bytes. (Format: S-1-5-21-2127521184-1604012920-1887927527-1712781)")]
     [Transformer("SidStringToBytes", true)]

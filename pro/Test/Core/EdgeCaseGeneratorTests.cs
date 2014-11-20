@@ -1,11 +1,14 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.Core;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
 	class EdgeCaseGeneratorTests

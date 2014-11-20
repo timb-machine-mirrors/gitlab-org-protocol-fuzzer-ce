@@ -3,12 +3,11 @@
 //
 
 using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringLengthVariance")]
 	[Description("Produce strings with lengths from length - N to length + N.")]

@@ -26,22 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
+using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
-using Peach.Core.IO;
+using Peach.Core.Dom;
 
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
-namespace Peach.Core.Test.CrackingTests
+namespace Peach.Pro.Test.Core.CrackingTests
 {
 	[TestFixture] [Category("Peach")]
 	public class TokenTests
@@ -77,7 +69,7 @@ namespace Peach.Core.Test.CrackingTests
 			// Positive test
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", "?k1=v1&k2=v2&k3=v3");
 
@@ -101,7 +93,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Positive test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0:L16}{1:ascii}", 300, "Hello World");
 
@@ -115,7 +107,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Negative test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0:L16}{1:ascii}", 200, "Hello World");
 
@@ -143,7 +135,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Positive test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0}", "300Hello World");
 
@@ -157,7 +149,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Negative test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0}", "200Hello World");
 
@@ -183,7 +175,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Positive test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0}", "300Hello World");
 
@@ -197,7 +189,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Negative test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0}", "200Hello World");
 
@@ -225,7 +217,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Positive test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0}{1}", (byte)255, "Hello World");
 
@@ -239,7 +231,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Negative test
 
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 				var data = Bits.Fmt("{0:L16}{1}", 0, "Hello World");
 
@@ -280,7 +272,7 @@ namespace Peach.Core.Test.CrackingTests
 				// Positive test
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0:L16}{1:ascii}{2:L16}{3:L16}{4:L16}{5:L16}{6:L16}{7:L16}{8:B8}{9:L8}",
 				1, "Hello World", 2, 3, 4, 5, 6, 7, 0x0d, 0x0a);
@@ -311,7 +303,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", "Hello WorldQQ");
 
@@ -334,7 +326,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", "Hello World");
 
@@ -342,7 +334,7 @@ namespace Peach.Core.Test.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 		}
 
-		public Dom.Dom TokenAfterArrayToken(string value)
+		public Peach.Core.Dom.Dom TokenAfterArrayToken(string value)
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
@@ -356,7 +348,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -375,7 +367,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("aaa", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][1].DefaultValue);
 			Assert.AreEqual("bbb", (string)dom.dataModels[0][2].DefaultValue);
-			Assert.AreEqual(0, ((Dom.Array)dom.dataModels[0][3]).Count);
+			Assert.AreEqual(0, ((Peach.Core.Dom.Array)dom.dataModels[0][3]).Count);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][4].DefaultValue);
 			Assert.AreEqual("ccc", (string)dom.dataModels[0][5].DefaultValue);
 		}
@@ -389,7 +381,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("aaa", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][1].DefaultValue);
 			Assert.AreEqual("bbb", (string)dom.dataModels[0][2].DefaultValue);
-			Assert.AreEqual(1, ((Dom.Array)dom.dataModels[0][3]).Count);
+			Assert.AreEqual(1, ((Peach.Core.Dom.Array)dom.dataModels[0][3]).Count);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][4].DefaultValue);
 			Assert.AreEqual("ccc", (string)dom.dataModels[0][5].DefaultValue);
 		}
@@ -403,12 +395,12 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("aaa", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][1].DefaultValue);
 			Assert.AreEqual("bbb", (string)dom.dataModels[0][2].DefaultValue);
-			Assert.AreEqual(14, ((Dom.Array)dom.dataModels[0][3]).Count);
+			Assert.AreEqual(14, ((Peach.Core.Dom.Array)dom.dataModels[0][3]).Count);
 			Assert.AreEqual(" ", (string)dom.dataModels[0][4].DefaultValue);
 			Assert.AreEqual("ccc", (string)dom.dataModels[0][5].DefaultValue);
 		}
 
-		public Dom.Dom DoCrackArrayToken(string value)
+		public Peach.Core.Dom.Dom DoCrackArrayToken(string value)
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
@@ -421,7 +413,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -437,10 +429,10 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = DoCrackArrayToken("Hello");
 			Assert.AreEqual(1, dom.dataModels.Count);
 			Assert.AreEqual(2, dom.dataModels[0].Count);
-			var str = dom.dataModels[0][0] as Dom.String;
+			var str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 			Assert.NotNull(str);
 			Assert.AreEqual("Hello", (string)str.DefaultValue);
-			var array = dom.dataModels[0][1] as Dom.Array;
+			var array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 		}
@@ -451,14 +443,14 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = DoCrackArrayToken("Hello+World");
 			Assert.AreEqual(1, dom.dataModels.Count);
 			Assert.AreEqual(2, dom.dataModels[0].Count);
-			var str = dom.dataModels[0][0] as Dom.String;
+			var str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 			Assert.NotNull(str);
 			Assert.AreEqual("Hello", (string)str.DefaultValue);
-			var array = dom.dataModels[0][1] as Dom.Array;
+			var array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[0].DefaultValue);
-			Assert.AreEqual("World", (string)((Dom.Block)array[0])[1].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("World", (string)((Peach.Core.Dom.Block)array[0])[1].DefaultValue);
 		}
 
 		[Test]
@@ -467,21 +459,21 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = DoCrackArrayToken("Hello+World+More+Data");
 			Assert.AreEqual(1, dom.dataModels.Count);
 			Assert.AreEqual(2, dom.dataModels[0].Count);
-			var str = dom.dataModels[0][0] as Dom.String;
+			var str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 			Assert.NotNull(str);
 			Assert.AreEqual("Hello", (string)str.DefaultValue);
-			var array = dom.dataModels[0][1] as Dom.Array;
+			var array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(3, array.Count);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[0].DefaultValue);
-			Assert.AreEqual("World", (string)((Dom.Block)array[0])[1].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[1])[0].DefaultValue);
-			Assert.AreEqual("More", (string)((Dom.Block)array[1])[1].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[2])[0].DefaultValue);
-			Assert.AreEqual("Data", (string)((Dom.Block)array[2])[1].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("World", (string)((Peach.Core.Dom.Block)array[0])[1].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[1])[0].DefaultValue);
+			Assert.AreEqual("More", (string)((Peach.Core.Dom.Block)array[1])[1].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[2])[0].DefaultValue);
+			Assert.AreEqual("Data", (string)((Peach.Core.Dom.Block)array[2])[1].DefaultValue);
 		}
 
-		public Dom.Dom DoCrackTokenBeforeArray(string value)
+		public Peach.Core.Dom.Dom DoCrackTokenBeforeArray(string value)
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
@@ -495,7 +487,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -513,7 +505,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("+", (string)dom.dataModels[0][1].DefaultValue);
-			var array = dom.dataModels[0][2] as Dom.Array;
+			var array = dom.dataModels[0][2] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 		}
@@ -526,11 +518,11 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("+", (string)dom.dataModels[0][1].DefaultValue);
-			var array = dom.dataModels[0][2] as Dom.Array;
+			var array = dom.dataModels[0][2] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
-			Assert.AreEqual("World", (string)((Dom.Block)array[0])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[1].DefaultValue);
+			Assert.AreEqual("World", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[1].DefaultValue);
 		}
 
 		[Test]
@@ -541,18 +533,18 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("+", (string)dom.dataModels[0][1].DefaultValue);
-			var array = dom.dataModels[0][2] as Dom.Array;
+			var array = dom.dataModels[0][2] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(3, array.Count);
-			Assert.AreEqual("World", (string)((Dom.Block)array[0])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[1].DefaultValue);
-			Assert.AreEqual("More", (string)((Dom.Block)array[1])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[1])[1].DefaultValue);
-			Assert.AreEqual("Data", (string)((Dom.Block)array[2])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[2])[1].DefaultValue);
+			Assert.AreEqual("World", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[1].DefaultValue);
+			Assert.AreEqual("More", (string)((Peach.Core.Dom.Block)array[1])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[1])[1].DefaultValue);
+			Assert.AreEqual("Data", (string)((Peach.Core.Dom.Block)array[2])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[2])[1].DefaultValue);
 		}
 
-		public Dom.Dom DoCrackTokenArray(string value)
+		public Peach.Core.Dom.Dom DoCrackTokenArray(string value)
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
@@ -565,7 +557,7 @@ namespace Peach.Core.Test.CrackingTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -589,10 +581,10 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("World", (string)dom.dataModels[0][2].DefaultValue);
-			var array = dom.dataModels[0][1] as Dom.Array;
+			var array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
 		}
 
 		[Test]
@@ -603,12 +595,12 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("World", (string)dom.dataModels[0][2].DefaultValue);
-			var array = dom.dataModels[0][1] as Dom.Array;
+			var array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(3, array.Count);
-			Assert.AreEqual("+", (string)((Dom.Block)array[0])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[1])[0].DefaultValue);
-			Assert.AreEqual("+", (string)((Dom.Block)array[2])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[0])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[1])[0].DefaultValue);
+			Assert.AreEqual("+", (string)((Peach.Core.Dom.Block)array[2])[0].DefaultValue);
 		}
 
         [Test]
@@ -629,7 +621,7 @@ namespace Peach.Core.Test.CrackingTests
                "</Peach>";
 
             PitParser parser = new PitParser();
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
             var data = Bits.Fmt("{0}", "!PRE!U1VDQ0VTUw==!POST!");
 
@@ -655,7 +647,7 @@ namespace Peach.Core.Test.CrackingTests
                "</Peach>";
 
             PitParser parser = new PitParser();
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
             var data = Bits.Fmt("{0}", "!PRE!U1VDQ0VTUw==!POST!");
 
@@ -668,7 +660,7 @@ namespace Peach.Core.Test.CrackingTests
 
 
 
-		public Dom.Dom SharedTokensAfterChoiceWithSizedElements(string value)
+		public Peach.Core.Dom.Dom SharedTokensAfterChoiceWithSizedElements(string value)
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 	<Peach>
@@ -697,7 +689,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -713,33 +705,33 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = SharedTokensAfterChoiceWithSizedElements("12foo12bar13baz");
 
 			Assert.AreEqual(2, dom.dataModels[3].Count);
-			var minoccursArray = (Dom.Array)dom.dataModels[3][0];
+			var minoccursArray = (Peach.Core.Dom.Array)dom.dataModels[3][0];
 			Assert.AreEqual(2, minoccursArray.Count);
 
-			var choiceref1 = (Dom.Choice)minoccursArray[0];
+			var choiceref1 = (Peach.Core.Dom.Choice)minoccursArray[0];
 			Assert.AreEqual(1, choiceref1.Count);
-			var blockref1 = (Dom.Block)choiceref1[0];
+			var blockref1 = (Peach.Core.Dom.Block)choiceref1[0];
 			Assert.AreEqual(3, blockref1.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref1[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref1[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("foo", (string)blockref1[2].DefaultValue);
 
-			var choiceref2 = (Dom.Choice)minoccursArray[1];
+			var choiceref2 = (Peach.Core.Dom.Choice)minoccursArray[1];
 			Assert.AreEqual(1, choiceref2.Count);
-			var blockref2 = (Dom.Block)choiceref2[0];
+			var blockref2 = (Peach.Core.Dom.Block)choiceref2[0];
 			Assert.AreEqual(3, blockref2.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref2[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref2[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("bar", (string)blockref2[2].DefaultValue);
 
-			var lastBlock = (Dom.Block)dom.dataModels[3][1];
+			var lastBlock = (Peach.Core.Dom.Block)dom.dataModels[3][1];
 			Assert.AreEqual(3, lastBlock.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)lastBlock[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x33 }, ((Blob)lastBlock[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("baz", (string)lastBlock[2].DefaultValue);
 		}
 
-		public Dom.Dom SharedTokensAfterArrayWithUnsizedElements(string value)
+		public Peach.Core.Dom.Dom SharedTokensAfterArrayWithUnsizedElements(string value)
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 	<Peach>
@@ -767,7 +759,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -783,22 +775,22 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = SharedTokensAfterArrayWithUnsizedElements("12foo12bar13baz");
 
 			Assert.AreEqual(2, dom.dataModels[3].Count);
-			var minoccursArray = (Dom.Array)dom.dataModels[3][0];
+			var minoccursArray = (Peach.Core.Dom.Array)dom.dataModels[3][0];
 			Assert.AreEqual(2, minoccursArray.Count);
 
-			var blockref1 = (Dom.Block)((Dom.Block)minoccursArray[0])[0];
+			var blockref1 = (Peach.Core.Dom.Block)((Peach.Core.Dom.Block)minoccursArray[0])[0];
 			Assert.AreEqual(3, blockref1.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref1[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref1[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("foo", (string)blockref1[2].DefaultValue);
 
-			var blockref2 = (Dom.Block)((Dom.Block)minoccursArray[1])[0];
+			var blockref2 = (Peach.Core.Dom.Block)((Peach.Core.Dom.Block)minoccursArray[1])[0];
 			Assert.AreEqual(3, blockref2.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref2[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref2[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("bar", (string)blockref2[2].DefaultValue);
 
-			var lastBlock = (Dom.Block)dom.dataModels[3][1];
+			var lastBlock = (Peach.Core.Dom.Block)dom.dataModels[3][1];
 			Assert.AreEqual(3, lastBlock.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)lastBlock[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x33 }, ((Blob)lastBlock[1]).DefaultValue.BitsToArray());
@@ -806,7 +798,7 @@ namespace Peach.Core.Test.CrackingTests
 
 		}
 
-		public Dom.Dom SharedTokensAfterChoiceWithUnsizedElements(string value)
+		public Peach.Core.Dom.Dom SharedTokensAfterChoiceWithUnsizedElements(string value)
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 	<Peach>
@@ -835,7 +827,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -851,22 +843,22 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = SharedTokensAfterChoiceWithUnsizedElements("12foo12bar13baz");
 
 			Assert.AreEqual(2, dom.dataModels[3].Count);
-			var minoccursArray = (Dom.Array)dom.dataModels[3][0];
+			var minoccursArray = (Peach.Core.Dom.Array)dom.dataModels[3][0];
 			Assert.AreEqual(2, minoccursArray.Count);
 
-			var blockref1 = (Dom.Block)((Dom.Choice)minoccursArray[0])[0];
+			var blockref1 = (Peach.Core.Dom.Block)((Peach.Core.Dom.Choice)minoccursArray[0])[0];
 			Assert.AreEqual(3, blockref1.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref1[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref1[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("foo", (string)blockref1[2].DefaultValue);
 
-			var blockref2 = (Dom.Block)((Dom.Choice)minoccursArray[1])[0];
+			var blockref2 = (Peach.Core.Dom.Block)((Peach.Core.Dom.Choice)minoccursArray[1])[0];
 			Assert.AreEqual(3, blockref2.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)blockref2[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x32 }, ((Blob)blockref2[1]).DefaultValue.BitsToArray());
 			Assert.AreEqual("bar", (string)blockref2[2].DefaultValue);
 
-			var lastBlock = (Dom.Block)dom.dataModels[3][1];
+			var lastBlock = (Peach.Core.Dom.Block)dom.dataModels[3][1];
 			Assert.AreEqual(3, lastBlock.Count);
 			Assert.AreEqual(new byte[] { 0x31 }, ((Blob)lastBlock[0]).DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[] { 0x33 }, ((Blob)lastBlock[1]).DefaultValue.BitsToArray());
@@ -874,7 +866,7 @@ namespace Peach.Core.Test.CrackingTests
 		}
 
 
-		public Dom.Dom MinMaxZeroWithUnsized(string value)
+		public Peach.Core.Dom.Dom MinMaxZeroWithUnsized(string value)
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 	<Peach>
@@ -888,7 +880,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -904,7 +896,7 @@ namespace Peach.Core.Test.CrackingTests
 			var dom = MinMaxZeroWithUnsized("12foo12bar13baz");
 
 			Assert.AreEqual(2, dom.dataModels[0].Count);
-			var array = dom.dataModels[0][0] as Dom.Array;
+			var array = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
 			var block = array[0] as Block;
@@ -914,7 +906,7 @@ namespace Peach.Core.Test.CrackingTests
 
 		}
 
-		public Dom.Dom TokenAfterSizedArray(string value)
+		public Peach.Core.Dom.Dom TokenAfterSizedArray(string value)
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
@@ -934,7 +926,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -955,7 +947,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("/", (string)dom.dataModels[0][1].DefaultValue);
 			Assert.AreEqual("Steak", (string)dom.dataModels[0][2].DefaultValue);
 			Assert.AreEqual(";", (string)dom.dataModels[0][4].DefaultValue);
-			var array = dom.dataModels[0][3] as Dom.Array;
+			var array = dom.dataModels[0][3] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 		}
@@ -971,7 +963,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("/", (string)dom.dataModels[0][1].DefaultValue);
 			Assert.AreEqual("Steak", (string)dom.dataModels[0][2].DefaultValue);
 			Assert.AreEqual(";", (string)dom.dataModels[0][4].DefaultValue);
-			var array = dom.dataModels[0][3] as Dom.Array;
+			var array = dom.dataModels[0][3] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
 			var block = array[0] as Block;
@@ -1006,7 +998,7 @@ namespace Peach.Core.Test.CrackingTests
 			string value = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: text/html\r\n\r\nabc";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -1016,7 +1008,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(5, dom.dataModels[0].Count);
 			Assert.AreEqual("HTTP/1.1 200 OK", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("abc", (string)dom.dataModels[0][4].DefaultValue);
-			var array = dom.dataModels[0][2] as Dom.Array;
+			var array = dom.dataModels[0][2] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(2, array.Count);
 			Assert.AreEqual("Content-Length", (string)((Block)array[0])[0].DefaultValue);
@@ -1025,7 +1017,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("text/html", (string)((Block)array[1])[2].DefaultValue);
 		}
 
-		Dom.Dom TokenBeforeOptionalArray(string value)
+		Peach.Core.Dom.Dom TokenBeforeOptionalArray(string value)
 		{
 			string xml = @"
 <Peach>
@@ -1048,7 +1040,7 @@ namespace Peach.Core.Test.CrackingTests
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", value);
 
@@ -1066,7 +1058,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(2, dom.dataModels.Count);
 			Assert.AreEqual(2, dom.dataModels[1].Count);
 
-			var blk1 = dom.dataModels[1][0] as Dom.Block;
+			var blk1 = dom.dataModels[1][0] as Peach.Core.Dom.Block;
 			Assert.NotNull(blk1);
 			Assert.AreEqual(4, blk1.Count);
 			Assert.AreEqual("s", (string)blk1[0].DefaultValue);
@@ -1074,7 +1066,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("Cookies", (string)blk1[2].DefaultValue);
 			Assert.AreEqual("\r\n", (string)blk1[3].DefaultValue);
 
-			var array = dom.dataModels[1][1] as Dom.Array;
+			var array = dom.dataModels[1][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
 		}
@@ -1087,7 +1079,7 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual(2, dom.dataModels.Count);
 			Assert.AreEqual(2, dom.dataModels[1].Count);
 
-			var blk1 = dom.dataModels[1][0] as Dom.Block;
+			var blk1 = dom.dataModels[1][0] as Peach.Core.Dom.Block;
 			Assert.NotNull(blk1);
 			Assert.AreEqual(4, blk1.Count);
 			Assert.AreEqual("s", (string)blk1[0].DefaultValue);
@@ -1095,11 +1087,11 @@ namespace Peach.Core.Test.CrackingTests
 			Assert.AreEqual("Cookies", (string)blk1[2].DefaultValue);
 			Assert.AreEqual("\r\n", (string)blk1[3].DefaultValue);
 
-			var array = dom.dataModels[1][1] as Dom.Array;
+			var array = dom.dataModels[1][1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);
 			Assert.AreEqual(1, array.Count);
 
-			var blk2 = array[0] as Dom.Block;
+			var blk2 = array[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(blk2);
 			Assert.AreEqual(4, blk2.Count);
 			Assert.AreEqual("e", (string)blk2[0].DefaultValue);

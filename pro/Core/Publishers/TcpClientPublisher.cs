@@ -28,18 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Net.Sockets;
-
-using Peach.Core.Dom;
-
-using NLog;
 using System.Diagnostics;
+using System.Net.Sockets;
+using System.Threading;
+using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Tcp", true)]
 	[Publisher("TcpClient")]

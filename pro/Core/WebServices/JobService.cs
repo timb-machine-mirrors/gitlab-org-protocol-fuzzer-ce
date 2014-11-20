@@ -1,11 +1,10 @@
-using Nancy;
-using Nancy.ModelBinding;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Nancy;
+using Nancy.ModelBinding;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class JobService : WebService
 	{

@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Peach.Core;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Helper class for creating stream based publishers.

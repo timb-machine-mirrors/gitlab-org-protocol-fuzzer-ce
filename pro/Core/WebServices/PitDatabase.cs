@@ -5,24 +5,23 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Xml.XPath;
-
 using Peach.Core;
 using Peach.Core.Agent;
-using Peach.Enterprise.WebServices.Models;
+using Peach.Pro.Core.WebServices.Models;
 using DescriptionAttribute = Peach.Core.DescriptionAttribute;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
-using Monitor = Peach.Enterprise.WebServices.Models.Monitor;
+using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	#region Peach Pit Xml Elements
 

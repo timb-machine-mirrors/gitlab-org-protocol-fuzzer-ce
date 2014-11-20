@@ -26,18 +26,13 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class DefaultTests
@@ -55,7 +50,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Number num = dom.dataModels[0][0] as Number;
 
 			Assert.IsTrue(num.Signed);
@@ -81,7 +76,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var actual = dom.dataModels[0].Value.ToArray();
 
@@ -103,8 +98,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.IsTrue(str.nullTerminated);
 			Assert.IsTrue(str.stringType == StringType.utf8);
@@ -125,7 +120,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Flags flags = dom.dataModels[0][0] as Flags;
 
 			Assert.IsFalse(flags.LittleEndian);
@@ -144,7 +139,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Blob blob = dom.dataModels[0][0] as Blob;
 
 			Assert.IsTrue(blob.lengthType == LengthType.Bits);

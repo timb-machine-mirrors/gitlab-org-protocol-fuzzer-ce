@@ -1,18 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Agent;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using System.Runtime.InteropServices;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class RunCommandTests
@@ -62,7 +55,7 @@ namespace Peach.Core.Test.Monitors
 			string xml = MakeXml(new string[] {testFile , arguments, testName, faultAgent});
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -138,7 +131,7 @@ namespace Peach.Core.Test.Monitors
 			var xml = string.Format(template, script1, script2, script3);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -217,7 +210,7 @@ namespace Peach.Core.Test.Monitors
 			string xml = MakeXml(new string[] { testFile, "", testName, faultAgent });
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

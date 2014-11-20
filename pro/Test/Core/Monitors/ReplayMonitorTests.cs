@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
     [TestFixture] [Category("Peach")]
     class ReplayMonitorTests : DataModelCollector
@@ -49,7 +44,7 @@ namespace Peach.Core.Test.Monitors
 
             PitParser parser = new PitParser();
 
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
             dom.tests[0].includedMutators = new List<string>();
             dom.tests[0].includedMutators.Add("StringCaseUpper");
             dom.tests[0].includedMutators.Add("StringCaseLower");
@@ -98,7 +93,7 @@ namespace Peach.Core.Test.Monitors
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -127,13 +122,13 @@ namespace Peach.Core.Test.Monitors
 		Fault[] faults = null;
 		Fault[] reproFaults = null;
 
-		void _ReproFault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faultData)
+		void _ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 		{
 			Assert.Null(reproFaults);
 			reproFaults = faultData;
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faultData)
+		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 		{
 			Assert.Null(faults);
 			faults = faultData;

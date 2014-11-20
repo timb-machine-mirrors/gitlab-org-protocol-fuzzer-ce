@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core.Dom;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringUtf8InvalidTests
@@ -14,7 +14,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8Invalid");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			Assert.False(runner.IsSupported(str));
 
 			str.DefaultValue = new Variant("hello");
@@ -51,7 +51,7 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("StringUtf8Invalid");
 
 			var val = "Hello";
-			var str = new Dom.String("String") { DefaultValue = new Variant(val) };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant(val) };
 			var exp = Encoding.UTF8.GetBytes(val);
 
 			var m = runner.Sequential(str);
@@ -77,7 +77,7 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("StringUtf8Invalid");
 
 			var val = "\u7ffffff0\u0088\u4201\u7ffff0\u7ff0";
-			var str = new Dom.String("String") { stringType = StringType.utf8, DefaultValue = new Variant(val) };
+			var str = new Peach.Core.Dom.String("String") { stringType = StringType.utf8, DefaultValue = new Variant(val) };
 			var exp = Encoding.UTF8.GetBytes(val);
 
 			var m = runner.Random(500, str);

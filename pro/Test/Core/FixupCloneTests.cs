@@ -1,18 +1,9 @@
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class FixupCloneTests
@@ -54,7 +45,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(4, dom.dataModels.Count);
 			var dm = dom.dataModels[3];

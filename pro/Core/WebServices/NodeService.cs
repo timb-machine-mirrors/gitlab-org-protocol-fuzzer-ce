@@ -1,11 +1,10 @@
-using Nancy;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using Nancy;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class NodeService : WebService
 	{

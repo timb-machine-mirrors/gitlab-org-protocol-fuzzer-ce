@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	public abstract class BasePythonFixup : Fixup
 	{

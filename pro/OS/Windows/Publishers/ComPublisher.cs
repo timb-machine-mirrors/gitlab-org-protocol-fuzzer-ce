@@ -27,21 +27,17 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting;
+using System.IO;
 using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Channels.Ipc;
-
-using Peach.Core.Dom;
-using Peach.Core.Publishers.Com;
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.OS.Windows.Publishers.Com;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.OS.Windows.Publishers
 {
 	[Publisher("Com", true)]
 	[Publisher("com.Com")]

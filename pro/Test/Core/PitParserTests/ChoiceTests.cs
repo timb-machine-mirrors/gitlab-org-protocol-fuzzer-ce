@@ -26,18 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class ChoiceTests
@@ -56,7 +52,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.IsTrue(dom.dataModels[0].Count == 1);
 			Assert.IsTrue(dom.dataModels[0][0] is Choice);
@@ -77,7 +73,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.IsTrue(dom.dataModels[0].Count == 1);
 			var choice = dom.dataModels[0][0] as Choice;
@@ -123,35 +119,35 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			Assert.AreEqual(1, dom.dataModels[0].Count);
-			var c1 = dom.dataModels[0][0] as Dom.Choice;
+			var c1 = dom.dataModels[0][0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(c1);
 			Assert.AreEqual(3, c1.choiceElements.Count);
-			var c1_b1 = c1.choiceElements[0] as Dom.Block;
+			var c1_b1 = c1.choiceElements[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b1);
 			Assert.AreEqual(1, c1_b1.Count);
 			Assert.AreEqual("Hello", (string)c1_b1[0].DefaultValue);
-			var c1_b2 = c1.choiceElements[1] as Dom.Block;
+			var c1_b2 = c1.choiceElements[1] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b2);
 			Assert.AreEqual(1, c1_b2.Count);
 			Assert.AreEqual("World", (string)c1_b2[0].DefaultValue);
-			var c1_b3 = c1.choiceElements[2] as Dom.Block;
+			var c1_b3 = c1.choiceElements[2] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b3);
 			Assert.AreEqual(1, c1_b3.Count);
 			Assert.AreEqual("!", (string)c1_b3[0].DefaultValue);
 
 			Assert.AreEqual(1, dom.dataModels[1].Count);
-			var c2 = dom.dataModels[1][0] as Dom.Choice;
+			var c2 = dom.dataModels[1][0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(c2);
 			Assert.AreEqual(3, c2.choiceElements.Count);
-			var c2_b1 = c2.choiceElements[0] as Dom.Block;
+			var c2_b1 = c2.choiceElements[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(c2_b1);
 			Assert.AreEqual(1, c2_b1.Count);
 			Assert.AreEqual("World", (string)c2_b1[0].DefaultValue);
-			var c2_b2 = c2.choiceElements[1] as Dom.Block;
+			var c2_b2 = c2.choiceElements[1] as Peach.Core.Dom.Block;
 			Assert.NotNull(c2_b2);
 			Assert.AreEqual(1, c2_b2.Count);
 			Assert.AreEqual("World", (string)c2_b2[0].DefaultValue);
-			var c3_b3 = c2.choiceElements[2] as Dom.String;
+			var c3_b3 = c2.choiceElements[2] as Peach.Core.Dom.String;
 			Assert.NotNull(c3_b3);
 			Assert.AreEqual(".", (string)c3_b3.DefaultValue);
 
@@ -194,47 +190,47 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.NotNull(dom.dataModels[1].Value);
 
 			Assert.AreEqual(1, dom.dataModels[0].Count);
-			var a1 = dom.dataModels[0][0] as Dom.Array;
+			var a1 = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 			Assert.NotNull(a1);
 			Assert.AreEqual(1, a1.Count);
-			var b1 = a1[0] as Dom.Block;
+			var b1 = a1[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(b1);
 			Assert.AreEqual(1, b1.Count);
-			var c1 = b1[0] as Dom.Choice;
+			var c1 = b1[0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(c1);
 			Assert.AreEqual(3, c1.choiceElements.Count);
-			var c1_b1 = c1.choiceElements[0] as Dom.Block;
+			var c1_b1 = c1.choiceElements[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b1);
 			Assert.AreEqual(1, c1_b1.Count);
 			Assert.AreEqual("Hello", (string)c1_b1[0].DefaultValue);
-			var c1_b2 = c1.choiceElements[1] as Dom.Block;
+			var c1_b2 = c1.choiceElements[1] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b2);
 			Assert.AreEqual(1, c1_b2.Count);
 			Assert.AreEqual("World", (string)c1_b2[0].DefaultValue);
-			var c1_b3 = c1.choiceElements[2] as Dom.Block;
+			var c1_b3 = c1.choiceElements[2] as Peach.Core.Dom.Block;
 			Assert.NotNull(c1_b3);
 			Assert.AreEqual(1, c1_b3.Count);
 			Assert.AreEqual("!", (string)c1_b3[0].DefaultValue);
 
 			Assert.AreEqual(1, dom.dataModels[1].Count);
-			var a2 = dom.dataModels[1][0] as Dom.Array;
+			var a2 = dom.dataModels[1][0] as Peach.Core.Dom.Array;
 			Assert.NotNull(a2);
 			Assert.AreEqual(1, a2.Count);
-			var b2 = a2[0] as Dom.Block;
+			var b2 = a2[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(b1);
 			Assert.AreEqual(1, b2.Count);
-			var c2 = b2[0] as Dom.Choice;
+			var c2 = b2[0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(c2);
 			Assert.AreEqual(3, c2.choiceElements.Count);
-			var c2_b1 = c2.choiceElements[0] as Dom.Block;
+			var c2_b1 = c2.choiceElements[0] as Peach.Core.Dom.Block;
 			Assert.NotNull(c2_b1);
 			Assert.AreEqual(1, c2_b1.Count);
 			Assert.AreEqual("World", (string)c2_b1[0].DefaultValue);
-			var c2_b2 = c2.choiceElements[1] as Dom.Block;
+			var c2_b2 = c2.choiceElements[1] as Peach.Core.Dom.Block;
 			Assert.NotNull(c2_b2);
 			Assert.AreEqual(1, c2_b2.Count);
 			Assert.AreEqual("World", (string)c2_b2[0].DefaultValue);
-			var c3_b3 = c2.choiceElements[2] as Dom.String;
+			var c3_b3 = c2.choiceElements[2] as Peach.Core.Dom.String;
 			Assert.NotNull(c3_b3);
 			Assert.AreEqual(".", (string)c3_b3.DefaultValue);
 
@@ -265,11 +261,11 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			Assert.AreEqual(1, dom.dataModels[0].Count);
-			var c1 = dom.dataModels[0][0] as Dom.Choice;
+			var c1 = dom.dataModels[0][0] as Peach.Core.Dom.Choice;
 			Assert.AreEqual(2, c1.choiceElements.Count);
 
 			Assert.AreEqual(1, dom.dataModels[1].Count);
-			var c2 = dom.dataModels[1][0] as Dom.Choice;
+			var c2 = dom.dataModels[1][0] as Peach.Core.Dom.Choice;
 			Assert.AreEqual(3, c2.choiceElements.Count);
 		}
 
@@ -299,7 +295,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var choice = dom.dataModels[0][0] as Choice;
 			Assert.AreEqual(null, choice.SelectedElement);

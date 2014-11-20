@@ -26,18 +26,17 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using NUnit.Framework;
 //using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.PitParserTests
+using System;
+using System.IO;
+using System.Linq;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class ArrayTests
@@ -49,7 +48,7 @@ namespace Peach.Core.Test.PitParserTests
 				DataElement._uniqueName = 0;
 			}
 
-			public override void Crack(Cracker.DataCracker context, IO.BitStream data, long? size)
+			public override void Crack(Peach.Core.Cracker.DataCracker context, Peach.Core.IO.BitStream data, long? size)
 			{
 				throw new NotImplementedException();
 			}
@@ -72,8 +71,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -111,8 +110,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -142,8 +141,8 @@ namespace Peach.Core.Test.PitParserTests
 			Resetter.Reset();
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -174,8 +173,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -202,8 +201,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -230,8 +229,8 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.Array array = dom.dataModels[0][0] as Dom.Array;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Array array = dom.dataModels[0][0] as Peach.Core.Dom.Array;
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
@@ -239,7 +238,7 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.NotNull(array.OriginalElement);
 			Assert.AreEqual("Data", array.OriginalElement.name);
 
-			var clone = array.Clone("NewData") as Dom.Array;
+			var clone = array.Clone("NewData") as Peach.Core.Dom.Array;
 
 			Assert.NotNull(clone);
 			Assert.AreEqual(0, clone.Count);
@@ -270,7 +269,7 @@ namespace Peach.Core.Test.PitParserTests
 			string xml = string.Format(template, occurs);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			var value = dom.dataModels[0].Value.ToArray();
 			Assert.AreEqual(expected, value);
 		}

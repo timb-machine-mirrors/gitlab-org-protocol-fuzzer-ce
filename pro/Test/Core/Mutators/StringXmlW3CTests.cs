@@ -1,9 +1,8 @@
-using System;
 using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringXmlW3CTests
@@ -13,11 +12,11 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringXmlW3C");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			Assert.False(runner.IsSupported(str));
 
-			str.Hints.Add("XML", new Dom.Hint("XML", "xml"));
+			str.Hints.Add("XML", new Peach.Core.Dom.Hint("XML", "xml"));
 
 			Assert.True(runner.IsSupported(str));
 		}
@@ -27,8 +26,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringXmlW3C");
 
-			var str = new Dom.String("String");
-			str.Hints.Add("XML", new Dom.Hint("XML", "xml"));
+			var str = new Peach.Core.Dom.String("String");
+			str.Hints.Add("XML", new Peach.Core.Dom.Hint("XML", "xml"));
 
 			var m = runner.Sequential(str);
 			Assert.AreEqual(1510, m.Count());
@@ -45,8 +44,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringXmlW3C");
 
-			var str = new Dom.String("String");
-			str.Hints.Add("XML", new Dom.Hint("XML", "xml"));
+			var str = new Peach.Core.Dom.String("String");
+			str.Hints.Add("XML", new Peach.Core.Dom.Hint("XML", "xml"));
 
 			var m = runner.Random(2000, str);
 			Assert.AreEqual(2000, m.Count());

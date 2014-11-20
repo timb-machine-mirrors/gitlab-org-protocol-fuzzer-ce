@@ -1,3 +1,9 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Threading;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Conventions;
@@ -11,14 +17,9 @@ using Nancy.ViewEngines;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Threading;
+using Peach.Pro.Core.Runtime;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	internal class CustomJsonSerializer : JsonSerializer
 	{
@@ -101,7 +102,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Core.WebServices");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices");
 		}
 
 		public Bootstrapper(WebContext context)
@@ -323,10 +324,10 @@ namespace Peach.Enterprise.WebServices
 					{
 					}
 
-					Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Web site running at: {0}", svc.Uri);
 
-					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try

@@ -3,12 +3,11 @@
 //
 
 using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ExtraValues")]
 	[Description("Mutates using a user defined list of extra values.")]
@@ -35,7 +34,7 @@ namespace Peach.Core.Mutators
 
 			values = str.Split(';');
 
-			if (obj is Dom.Blob)
+			if (obj is Peach.Core.Dom.Blob)
 				variant = s => new Variant(Encoding.UTF8.GetBytes(s));
 			else
 				variant = s => new Variant(s);
@@ -43,7 +42,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if ((obj is Dom.String || obj is Dom.Number || obj is Blob) && obj.isMutable)
+			if ((obj is Peach.Core.Dom.String || obj is Peach.Core.Dom.Number || obj is Blob) && obj.isMutable)
 			{
 				if (!string.IsNullOrEmpty(getHint(obj, "ExtraValues")))
 					return true;

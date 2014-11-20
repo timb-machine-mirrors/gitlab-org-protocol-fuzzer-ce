@@ -1,24 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
+using System.Linq;
 using NLog;
-using NLog.Targets;
-using NLog.Config;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.Publishers;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.StateModel
+namespace Peach.Pro.Test.Core.StateModel
 {
 	class ParamPublisher : Publisher
 	{
@@ -84,7 +73,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>".Fmt(attr);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -110,13 +99,13 @@ namespace Peach.Core.Test.StateModel
 			Assert.AreEqual(true, finished);
 		}
 
-		void ActionFinished(RunContext context, Dom.Action action)
+		void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			Assert.AreEqual(false, finished);
 			finished = true;
 		}
 
-		void ActionStarting(RunContext context, Dom.Action action)
+		void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			Assert.AreEqual(false, started);
 			started = true;
@@ -158,7 +147,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>".Fmt(action, children, attr);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -501,7 +490,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = new ParamPublisher(new Dictionary<string, Variant>());
 
 			RunConfiguration config = new RunConfiguration();
@@ -510,7 +499,7 @@ namespace Peach.Core.Test.StateModel
 			Engine e = new Engine(null);
 			e.startFuzzing(dom, config);
 
-			var act = dom.tests[0].stateModel.states["Initial"].actions[0] as Dom.Actions.Call;
+			var act = dom.tests[0].stateModel.states["Initial"].actions[0] as Peach.Core.Dom.Actions.Call;
 
 			Assert.NotNull(act.result);
 			Assert.NotNull(act.result.dataModel);

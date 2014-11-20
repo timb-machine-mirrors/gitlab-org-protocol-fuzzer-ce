@@ -1,12 +1,12 @@
-using System;
-using System.Linq;
-
-using Peach.Core.Dom;
-
-using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
+using Peach.Pro.Core.Mutators.Utility;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class DataElementDuplicateTests : DataModelCollector
@@ -131,8 +131,8 @@ namespace Peach.Core.Test.Mutators
 			// value will have the TypTransform mutation flag set.  Ensure the
 			// mutator can handle elements with this flag.
 
-			var num = new Dom.Number("Num");
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var num = new Peach.Core.Dom.Number("Num");
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 			var dm = new DataModel("DM");
 
 			num.relations.Add(new SizeRelation(num) { OfName = "String" });
@@ -143,7 +143,7 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(new byte[] { 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f }, dm.Value.ToArray());
 			
 			// Expand string and override type transform using number relation
-			Peach.Core.Mutators.Utility.SizedHelpers.ExpandTo(num, 128, false);
+			SizedHelpers.ExpandTo(num, 128, false);
 
 			var buf = dm.Value.ToArray();
 			Assert.AreEqual(129, buf.Length);

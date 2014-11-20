@@ -26,20 +26,15 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
+using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Test.CrackingTests
+namespace Peach.Pro.Test.Core.CrackingTests
 {
 	[TestFixture] [Category("Peach")]
 	public class PaddingTests
@@ -60,7 +55,7 @@ namespace Peach.Core.Test.CrackingTests
 			string xml = template.Fmt(1, "00");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 1, 2, 49, 50, 51 });
 
@@ -89,7 +84,7 @@ namespace Peach.Core.Test.CrackingTests
 			string xml = template.Fmt(2, "00 00");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 1, 2, 49, 50, 51 });
 
@@ -118,7 +113,7 @@ namespace Peach.Core.Test.CrackingTests
 			string xml = template.Fmt(1, "00");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = dom.dataModels[0].Value;
 			Assert.AreEqual(16, data.LengthBits);
@@ -137,7 +132,7 @@ namespace Peach.Core.Test.CrackingTests
 			string xml = template.Fmt(0, "");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = dom.dataModels[0].Value;
 			Assert.AreEqual(0, data.LengthBits);
@@ -156,7 +151,7 @@ namespace Peach.Core.Test.CrackingTests
 			string xml = template.Fmt(2, "11 22");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = dom.dataModels[0].Value;
 			Assert.AreEqual(16, data.LengthBits);

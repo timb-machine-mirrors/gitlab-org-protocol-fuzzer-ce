@@ -1,24 +1,19 @@
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
 
-using NLog;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Collections;
-using System.Text.RegularExpressions;
-
-using Native =  Mono.Unix.Native;
-using Mono.Unix;
-
-namespace Peach.Core.OS.Linux.Agent.Monitors
+namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
 	[Monitor("LinuxDebugger", true)]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
@@ -187,12 +182,12 @@ quit
 				if (!_procCommand.HasExited)
 				{
 					logger.Debug("_Stop(): Stopping process");
-					Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGTERM);
+					Mono.Unix.Native.Syscall.kill(_procCommand.Id, Mono.Unix.Native.Signum.SIGTERM);
 
 					if (!WaitForExit(_procCommand, 500))
 					{
 						logger.Debug("_Stop(): Killing process");
-						Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGKILL);
+						Mono.Unix.Native.Syscall.kill(_procCommand.Id, Mono.Unix.Native.Signum.SIGKILL);
 
 						WaitForExit(_procCommand, -1);
 					}

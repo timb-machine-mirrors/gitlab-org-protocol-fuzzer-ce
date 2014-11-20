@@ -1,7 +1,7 @@
-using Nancy;
 using System;
+using Nancy;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public abstract class WebService : NancyModule
 	{

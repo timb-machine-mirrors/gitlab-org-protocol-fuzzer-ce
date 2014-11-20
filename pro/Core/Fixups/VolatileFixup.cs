@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	/// <summary>
 	/// A helper class for fixups that are volatile and need to

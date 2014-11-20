@@ -27,24 +27,18 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Agent;
-using System.Collections;
-using System.Net.NetworkInformation;
+using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Core.Analyzers;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[Monitor("TestMonitor", true, IsTest = true)]
 	public class TestMonitor : Peach.Core.Agent.Monitor
@@ -188,7 +182,7 @@ namespace Peach.Core.Test.Monitors
 			xml = pre_xml + string.Format(xml, iface.Item1, iface.Item2, port1, port2) + post_xml;
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -314,7 +308,7 @@ namespace Peach.Core.Test.Monitors
 			RunTest(agent_xml, 1, new Engine.FaultEventHandler(_Fault));
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.AreEqual(3, faults.Length);
 

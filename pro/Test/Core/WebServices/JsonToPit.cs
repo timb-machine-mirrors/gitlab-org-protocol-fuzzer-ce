@@ -1,17 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Xml;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Peach.Core;
-using System.Xml;
-using System.Net.Sockets;
-using System.Net;
-using Peach.Enterprise.WebServices;
+using Peach.Pro.Core.WebServices;
 
-namespace Peach.Enterprise.Test.WebServices
+namespace Peach.Pro.Test.Core.WebServices
 {
 	[TestFixture] [Category("Peach")]
 	public class JsonToPit
@@ -56,7 +53,7 @@ namespace Peach.Enterprise.Test.WebServices
 </Peach>
 ";
 
-			var agents = JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+			var agents = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
 			Assert.NotNull(agents);
 			Assert.AreEqual(1, agents.Count);
@@ -309,9 +306,7 @@ namespace Peach.Enterprise.Test.WebServices
 			try
 			{
 				listener.Start();
-
 				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-
 				Assert.AreNotEqual(0, port);
 
 				using (var web = new WebServer(""))
@@ -324,9 +319,7 @@ namespace Peach.Enterprise.Test.WebServices
 					using (var web2 = new WebServer(""))
 					{
 						web2.Start("localhost", actualPort);
-
-						var actualPort2 = web2.Uri.Port;
-						Assert.Greater(actualPort2, actualPort);
+						Assert.Greater(web2.Uri.Port, actualPort);
 					}
 				}
 			}
@@ -335,6 +328,5 @@ namespace Peach.Enterprise.Test.WebServices
 				listener.Stop();
 			}
 		}
-
 	}
 }

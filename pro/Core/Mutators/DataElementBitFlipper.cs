@@ -3,12 +3,12 @@
 //
 
 using System;
-
+using System.IO;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Flips bits on thepre-transformed value of non-container elements

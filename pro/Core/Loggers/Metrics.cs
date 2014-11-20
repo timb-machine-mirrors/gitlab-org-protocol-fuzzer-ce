@@ -1,20 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Peach.Core;
-using Peach.Core.Loggers;
-
 #if MONO
 using Mono.Data.Sqlite;
-
 using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
 using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
 #else
 using System.Data.SQLite;
 #endif
+using Peach.Core;
 
-namespace Peach.Enterprise.Loggers
+namespace Peach.Pro.Core.Loggers
 {
 	/// <summary>
 	/// Logs fuzzing metrics to a SQLite database.
@@ -896,7 +893,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			samples.Clear();
 		}
 
-		protected override void StateStarting(RunContext context, Core.Dom.State state)
+		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
 		{
 			sample.State = state.name;
 
@@ -906,12 +903,12 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				OnStateSample(sample.State);
 		}
 
-		protected override void ActionStarting(RunContext context, Core.Dom.Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			sample.Action = action.name;
 		}
 
-		protected override void DataMutating(RunContext context, Core.Dom.ActionData actionData, Core.Dom.DataElement element, Mutator mutator)
+		protected override void DataMutating(RunContext context, Peach.Core.Dom.ActionData actionData, Peach.Core.Dom.DataElement element, Mutator mutator)
 		{
 			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
 			sample.Parameter = actionData.name ?? "";
@@ -998,9 +995,9 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		private uint faultCount = 0;
 
-		private void FaultSaved(Peach.Core.Loggers.FileLogger.Category category, Fault fault, string rootPath)
+		private void FaultSaved(FileLogger.Category category, Fault fault, string rootPath)
 		{
-			if (category == Core.Loggers.FileLogger.Category.Reproducing)
+			if (category == FileLogger.Category.Reproducing)
 				return;
 
 

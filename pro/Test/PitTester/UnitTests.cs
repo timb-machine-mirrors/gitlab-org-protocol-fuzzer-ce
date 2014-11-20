@@ -1,11 +1,11 @@
 using NUnit.Framework;
-using Peach.Enterprise.WebServices;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace PitTester
 {

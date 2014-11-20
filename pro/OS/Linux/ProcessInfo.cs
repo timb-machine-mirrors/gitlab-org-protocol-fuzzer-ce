@@ -1,9 +1,10 @@
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Linux
 {
 	[PlatformImpl(Platform.OS.Linux)]
 	public class ProcessInfoImpl : IProcessInfo

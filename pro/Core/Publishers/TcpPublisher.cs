@@ -24,10 +24,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	public abstract class TcpPublisher : BufferedStreamPublisher
 	{

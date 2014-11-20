@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using System.Net;
 using System.IO;
+using System.Net;
 using NLog;
-namespace Peach.Core.Test.Publishers
+using NUnit.Framework;
+using Peach.Core;
+
+namespace Peach.Pro.Test.Core.Publishers
 {
 	[TestFixture] [Category("Peach")]
 	class ParameterTests

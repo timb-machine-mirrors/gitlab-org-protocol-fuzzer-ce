@@ -28,11 +28,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Peach.Core.Dom;
-using System.Reflection;
+using Peach.Core;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
 	[MutationStrategy("RandomDeterministic", true)]
 	[Serializable]

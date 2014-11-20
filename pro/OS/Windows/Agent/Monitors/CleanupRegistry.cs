@@ -26,16 +26,13 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ServiceProcess;
 using Microsoft.Win32;
-using Peach.Core.Agent;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.OS.Windows.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("CleanupRegistry", true)]
 	[Parameter("Key", typeof(string), "Registry key to remove.")]

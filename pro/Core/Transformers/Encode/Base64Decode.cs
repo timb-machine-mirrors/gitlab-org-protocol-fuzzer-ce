@@ -27,14 +27,13 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Security.Cryptography;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
 	[Description("Decode on output from Base64.")]
 	[Transformer("Base64Decode", true)]

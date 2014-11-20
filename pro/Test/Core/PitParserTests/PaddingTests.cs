@@ -26,19 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-
 using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class PaddingTests
@@ -53,7 +48,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][0] as Padding;
 
 			Assert.AreEqual(0, ((BitStream)padding.DefaultValue).LengthBits);
@@ -70,7 +65,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(8, ((BitStream)padding.DefaultValue).LengthBits);
@@ -102,7 +97,7 @@ namespace Peach.Core.Test.PitParserTests
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var val = dom.dataModels[0].Value;
 			Assert.NotNull(val);
@@ -135,7 +130,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(15, ((BitStream)padding.DefaultValue).LengthBits);
@@ -161,7 +156,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = ((Block)dom.dataModels[0][1])[0] as Padding;
 
 			Assert.AreEqual(8, ((BitStream)padding.DefaultValue).LengthBits);
@@ -194,7 +189,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(8, ((BitStream)padding.DefaultValue).LengthBits);
@@ -212,7 +207,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(24, ((BitStream)padding.DefaultValue).LengthBits);
@@ -230,7 +225,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(8, ((BitStream)padding.DefaultValue).LengthBits);
@@ -248,7 +243,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][1] as Padding;
 
 			Assert.AreEqual(0, ((BitStream)padding.DefaultValue).LengthBits);
@@ -267,7 +262,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][2] as Padding;
 
 			Assert.AreEqual(16, ((BitStream)padding.DefaultValue).LengthBits);
@@ -286,7 +281,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][2] as Padding;
 
 			Assert.AreEqual(40, ((BitStream)padding.DefaultValue).LengthBits);
@@ -305,7 +300,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Padding padding = dom.dataModels[0][2] as Padding;
 
 			Assert.AreEqual(40, ((BitStream)padding.DefaultValue).LengthBits);

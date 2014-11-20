@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core.Dom;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringUtf32BomLengthTests
@@ -15,7 +15,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf32BomLength");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			str.stringType = StringType.utf16;
 
 			Assert.True(runner.IsSupported(str));
@@ -59,7 +59,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf32BomLength");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			str.stringType = StringType.utf16;
 
 			// Default length +/- 50 with a min of 0, not invluding default
@@ -114,7 +114,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf32BomLength");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 			str.stringType = StringType.utf32;
 
 			var m = runner.Random(500, str);

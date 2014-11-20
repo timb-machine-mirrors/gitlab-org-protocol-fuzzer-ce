@@ -37,11 +37,12 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
-using Peach.Core.Debuggers.WindowsSystem;
-using Peach.Core.Agent.Monitors.WindowsDebug;
 using System.Threading;
 using System.ServiceProcess;
 using NLog;
+using Peach.Pro.OS.Windows;
+using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
+using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
 
 namespace Peach.Core.Test.Debuggers
 {
@@ -171,7 +172,7 @@ namespace Peach.Core.Test.Debuggers
 		[Test]
 		public void ServiceTest()
 		{
-			if (!Peach.Core.OS.Windows.Privilege.IsUserAdministrator())
+			if (!Privilege.IsUserAdministrator())
 				Assert.Ignore("User is not an administrator.");
 
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)

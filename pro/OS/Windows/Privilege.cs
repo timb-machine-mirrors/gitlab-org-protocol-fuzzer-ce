@@ -1,10 +1,10 @@
 using System;
-using Peach.Core.Debuggers.WindowsSystem;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
 
-namespace Peach.Core.OS.Windows
+namespace Peach.Pro.OS.Windows
 {
 	public class Privilege : IDisposable
 	{

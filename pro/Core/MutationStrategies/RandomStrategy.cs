@@ -27,25 +27,19 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
-using System.Reflection;
-using System.Linq;
-
-using Peach.Core.IO;
-using Peach.Core.Dom;
-using Peach.Core.Cracker;
-
-using NLog;
 using System.Diagnostics;
+using System.Linq;
+using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Random = Peach.Core.Random;
 
 /*
  * If not 1st iteration, pick fandom data model to change
  * 
  */
-namespace Peach.Core.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
 	[DefaultMutationStrategy]
 	[MutationStrategy("Random", true)]
@@ -210,12 +204,12 @@ namespace Peach.Core.MutationStrategies
 		/// <summary>
 		/// The most recent state that has started.
 		/// </summary>
-		Dom.State currentState;
+		Peach.Core.Dom.State currentState;
 
 		/// <summary>
 		/// The most recent action that was started.
 		/// </summary>
-		Dom.Action currentAction;
+		Peach.Core.Dom.Action currentAction;
 
 		/// <summary>
 		/// Current fuzzing iteration number
@@ -423,7 +417,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		void ActionStarting(RunContext context, Dom.Action action)
+		void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			currentAction = action;
 
@@ -574,7 +568,7 @@ namespace Peach.Core.MutationStrategies
 
 		#endregion
 
-		private void RecordDataModel(Dom.Action action)
+		private void RecordDataModel(Peach.Core.Dom.Action action)
 		{
 			var scopeState = mutationScopeState.Last();
 
@@ -637,7 +631,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void MutateDataModel(Core.Dom.Action action)
+		private void MutateDataModel(Peach.Core.Dom.Action action)
 		{
 			// MutateDataModel should only be called after ParseDataModel
 			System.Diagnostics.Debug.Assert(Iteration > 0);
@@ -665,7 +659,7 @@ namespace Peach.Core.MutationStrategies
 			return nextState;
 		}
 
-		public override Dom.Action NextAction(State state, Dom.Action lastAction, Dom.Action nextAction)
+		public override Peach.Core.Dom.Action NextAction(State state, Peach.Core.Dom.Action lastAction, Peach.Core.Dom.Action nextAction)
 		{
 			if (stateModelMutation != null)
 			{

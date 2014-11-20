@@ -6,7 +6,7 @@ using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Publishers;
+using Peach.Pro.Core.Publishers;
 
 namespace PitTester
 {

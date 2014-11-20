@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Peach.Core;
-using Peach.Core.Agent.Monitors;
 using NUnit.Framework;
 using System.Threading;
 using Peach.Core.Analyzers;

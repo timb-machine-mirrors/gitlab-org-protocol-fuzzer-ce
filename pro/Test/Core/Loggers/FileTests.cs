@@ -1,14 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using NUnit.Framework;
-
 using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Loggers
+namespace Peach.Pro.Test.Core.Loggers
 {
 	[TestFixture]
 	class FileTests
@@ -25,11 +24,11 @@ namespace Peach.Core.Test.Loggers
 				this.engine = engine;
 			}
 
-			protected override void OnOutput(IO.BitwiseStream data)
+			protected override void OnOutput(Peach.Core.IO.BitwiseStream data)
 			{
 			}
 
-			protected override Variant OnCall(string method, List<Dom.ActionParameter> args)
+			protected override Variant OnCall(string method, List<ActionParameter> args)
 			{
 				if (engine.context.controlIteration && !engine.context.controlRecordingIteration)
 				{

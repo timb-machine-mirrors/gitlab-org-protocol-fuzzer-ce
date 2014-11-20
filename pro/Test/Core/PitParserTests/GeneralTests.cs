@@ -26,18 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	public static class Extensions
 	{
@@ -87,7 +83,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(1, dom.dataModels["TheDataModel"].Count);
 			Assert.AreEqual(1, ((DataElementContainer)dom.dataModels["TheDataModel"][0]).Count);
@@ -109,7 +105,7 @@ namespace Peach.Core.Test.PitParserTests
 
 			Assert.Throws<PeachException>(delegate()
 			{
-				new Dom.String("Foo.Bar");
+				new Peach.Core.Dom.String("Foo.Bar");
 			});
 
 			PitParser parser = new PitParser();
@@ -149,7 +145,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(0, dom.tests[0].excludedMutators.Count);
 			Assert.AreEqual(2, dom.tests[0].includedMutators.Count);
@@ -186,7 +182,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(0, dom.tests[0].includedMutators.Count);
 			Assert.AreEqual(2, dom.tests[0].excludedMutators.Count);
@@ -229,7 +225,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -294,7 +290,7 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -312,7 +308,7 @@ namespace Peach.Core.Test.PitParserTests
 			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block.subblock.subnum"));
 			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block.num"));
 
-			var choice = dm["ExcludeMe"] as Dom.Choice;
+			var choice = dm["ExcludeMe"] as Peach.Core.Dom.Choice;
 			choice.SelectedElement = choice.choiceElements[1];
 
 			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block2"));
@@ -352,7 +348,7 @@ namespace Peach.Core.Test.PitParserTests
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			var ds = dom.stateModels[0].states["Initial"].actions[0].allData.First().dataSets;
 			Assert.NotNull(ds);
 			Assert.AreEqual(1, ds.Count);
@@ -395,7 +391,7 @@ namespace Peach.Core.Test.PitParserTests
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			var ds = dom.stateModels[0].states["Initial"].actions[0].allData.First().dataSets;
 			Assert.NotNull(ds);
 			Assert.AreEqual(1, ds.Count);
@@ -422,7 +418,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = "<Peach><Data name='data' fileName='*'/></Peach>";
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -453,7 +449,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = string.Format("<Peach><Data name='data' fileName='{0}/*'/></Peach>", tempDir);
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -463,7 +459,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = string.Format("<Peach><Data name='data' fileName='{0}/*.txt'/></Peach>", tempDir);
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -473,7 +469,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = string.Format("<Peach><Data name='data' fileName='{0}/1.*'/></Peach>", tempDir);
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -483,7 +479,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = string.Format("<Peach><Data name='data' fileName='{0}/2*.txt'/></Peach>", tempDir);
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -493,7 +489,7 @@ namespace Peach.Core.Test.PitParserTests
 			{
 				string xml = string.Format("<Peach><Data name='data' fileName='{0}/*a.*'/></Peach>", tempDir);
 				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
 				var ds = dom.datas["data"];
@@ -538,12 +534,12 @@ namespace Peach.Core.Test.PitParserTests
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 
 			Engine e = new Engine(null);
-			e.Fault += delegate(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faultData)
+			e.Fault += delegate(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 			{
 				Assert.Fail("Fault should not be detected!");
 			};
@@ -642,7 +638,7 @@ namespace Peach.Core.Test.PitParserTests
 			File.WriteAllText(tmp2, xml2);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml3)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml3)));
 
 			var final = dom.dataModels[1].Value.ToArray();
 			var expected = Encoding.ASCII.GetBytes("Hello World");

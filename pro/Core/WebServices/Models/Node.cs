@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum NodeStatus
 	{

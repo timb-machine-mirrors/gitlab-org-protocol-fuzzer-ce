@@ -1,15 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core.IO;
-using Peach.Core.Dom;
+using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Core.Fixups.Libraries;
+using Peach.Core.IO;
+using Peach.Core.Test;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Test.Fixups
+namespace Peach.Pro.Test.Core.Fixups
 {
 	[TestFixture] [Category("Peach")]
 	class FixupRelationsTest : DataModelCollector
@@ -205,7 +203,7 @@ namespace Peach.Core.Test.Fixups
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var actual = dom.dataModels[0].Value.ToArray();
 			byte[] expected = new byte[] { 38, 41, 27, 5, 0, 0, 0, 4 };
@@ -241,7 +239,7 @@ namespace Peach.Core.Test.Fixups
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var actual = dom.dataModels[0].Value.ToArray();
 			byte[] expected = new byte[] { 0, 0, 0, 4, 38, 41, 27, 5 };
@@ -280,7 +278,7 @@ namespace Peach.Core.Test.Fixups
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var actual = dom.dataModels[0].Value.ToArray();
 			byte[] expected = new byte[] { 0, 0, 0, 8, 85, 82, 148, 168 };

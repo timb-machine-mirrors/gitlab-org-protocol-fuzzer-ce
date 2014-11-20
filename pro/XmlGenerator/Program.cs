@@ -34,8 +34,8 @@ using System.Xml;
 using System.Windows.Forms;
 
 using Peach.Core.Runtime;
-using Peach.Core.Xml;
 using System.Reflection;
+using Peach.Pro.Core.Xml;
 
 namespace PeachXmlGenerator
 {

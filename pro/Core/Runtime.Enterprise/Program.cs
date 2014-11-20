@@ -1,12 +1,13 @@
-using Peach.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Peach.Core;
+using Peach.Pro.Core.WebServices;
 
-namespace Peach.Enterprise.Runtime
+namespace Peach.Pro.Core.Runtime.Enterprise
 {
-	public class Program : Peach.Core.Runtime.Program
+	public class Program : Runtime.Program
 	{
 		Uri webUri;
 		string pitLibraryPath;
@@ -17,7 +18,7 @@ namespace Peach.Enterprise.Runtime
 		{
 		}
 
-		protected override void AddCustomOptions(Core.Runtime.OptionSet options)
+		protected override void AddCustomOptions(Peach.Core.Runtime.OptionSet options)
 		{
 			options.Add("pits=", v => pitLibraryPath = v);
 			options.Add("noweb", v => noweb = true);
@@ -45,7 +46,7 @@ namespace Peach.Enterprise.Runtime
 			{
 				if (config.debug > 0)
 				{
-					return new Peach.Core.Runtime.ConsoleWatcher();
+					return new Runtime.ConsoleWatcher();
 				}
 
 				// Ensure console is interactive
@@ -53,12 +54,12 @@ namespace Peach.Enterprise.Runtime
 
 				var title = webUri == null ? "" : " ({0})".Fmt(webUri);
 
-				return new Peach.Enterprise.Runtime.ConsoleWatcher(title);
+				return new ConsoleWatcher(title);
 
 			}
 			catch (IOException)
 			{
-				return new Peach.Core.Runtime.ConsoleWatcher();
+				return new Runtime.ConsoleWatcher();
 			}
 		}
 
@@ -89,7 +90,7 @@ namespace Peach.Enterprise.Runtime
 				// Ensure pit library exists
 				var pits = FindPitLibrary();
 
-				Peach.Enterprise.WebServices.WebServer.Run(pits);
+				WebServer.Run(pits);
 			}
 		}
 
@@ -113,7 +114,7 @@ namespace Peach.Enterprise.Runtime
 
 				webUri = svc.Uri;
 
-				Core.Runtime.ConsoleWatcher.WriteInfoMark();
+				Runtime.ConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
 				// Add the web logger as the 1st logger to each test
@@ -225,7 +226,7 @@ Debug Peach XML File
   debugging as well.
 ";
 			Console.WriteLine(syntax);
-			throw new Core.Runtime.SyntaxException();
+			throw new Peach.Core.Runtime.SyntaxException();
 		}
 
 		private string FindPitLibrary()

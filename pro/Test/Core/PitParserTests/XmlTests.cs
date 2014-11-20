@@ -26,21 +26,16 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Xml;
 using System.Xml.XPath;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
+using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
-using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class XmlTests
@@ -84,12 +79,12 @@ namespace Peach.Core.Test.PitParserTests
                 "</Peach>";
 
             PitParser parser = new PitParser();
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
             var elem = dom.dataModels[0][0];
 
             Assert.NotNull(elem);
-            Assert.IsTrue(elem is Dom.XmlElement);
-            Assert.AreEqual(2, ((Dom.XmlElement)elem).Count);
+            Assert.IsTrue(elem is Peach.Core.Dom.XmlElement);
+            Assert.AreEqual(2, ((Peach.Core.Dom.XmlElement)elem).Count);
         }
 
 		[Test]
@@ -214,7 +209,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 		
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			
 			PeachXPathNavigator nav = new PeachXPathNavigator(dom);
 			XPathNodeIterator it = nav.Select("//TheNumber");
@@ -268,7 +263,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			
 			PeachXPathNavigator nav = new PeachXPathNavigator(dom);
 			XPathNodeIterator it = nav.Select("//String1");

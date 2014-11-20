@@ -1,8 +1,6 @@
-using System;
-
 using NUnit.Framework;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringAsciiRandomTests : StringMutatorTester

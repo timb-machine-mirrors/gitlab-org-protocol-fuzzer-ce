@@ -35,7 +35,7 @@ using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Peach.Core.Agent.Monitors.WindowsDebug;
+using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
 using Monitor = Peach.Core.Agent.Monitor;
 using Random = Peach.Core.Random;
 

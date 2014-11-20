@@ -2,12 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.Collections.Generic;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ChoiceSwitch")]
 	[Description("Changes which element is selected in a Choice statement.")]

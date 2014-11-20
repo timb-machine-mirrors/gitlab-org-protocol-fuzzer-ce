@@ -1,8 +1,6 @@
 using Nancy;
-using Nancy.Responses;
-using System;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class IndexService : NancyModule
 	{

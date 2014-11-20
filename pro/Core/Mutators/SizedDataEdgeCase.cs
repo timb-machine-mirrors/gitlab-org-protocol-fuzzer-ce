@@ -4,12 +4,11 @@
 
 using System;
 using System.Linq;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("SizedDataEdgeCase")]
 	[Description("Change the length of sized data to numerical edge cases")]
@@ -47,11 +46,11 @@ namespace Peach.Core.Mutators
 
 			// If we are a number, make sure our max is not larger than max long
 			// since stream lengths are tracked as longs
-			var asNum = obj as Dom.Number;
+			var asNum = obj as Peach.Core.Dom.Number;
 			if (asNum != null)
 				max = Math.Min(max, asNum.MaxValue);
 			else
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)

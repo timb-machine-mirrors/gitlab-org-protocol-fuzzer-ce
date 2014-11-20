@@ -26,22 +26,15 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
-using Peach.Core.IO;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Analyzers
+namespace Peach.Pro.Test.Core.Analyzers
 {
     [TestFixture] [Category("Peach")]
     class XmlAnalyzerTests : DataModelCollector
@@ -58,11 +51,11 @@ namespace Peach.Core.Test.Analyzers
                 "</Peach>";
 
             PitParser parser = new PitParser();
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-            Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Dom.XmlElement);
+            Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Peach.Core.Dom.XmlElement);
 
-            var elem1 = dom.dataModels["TheDataModel"][0] as Dom.XmlElement;
+            var elem1 = dom.dataModels["TheDataModel"][0] as Peach.Core.Dom.XmlElement;
 
             Assert.AreEqual("Root", elem1.elementName);
         }
@@ -86,11 +79,11 @@ namespace Peach.Core.Test.Analyzers
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Dom.XmlElement);
+			Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Peach.Core.Dom.XmlElement);
 
-			var elem1 = dom.dataModels["TheDataModel"][0] as Dom.XmlElement;
+			var elem1 = dom.dataModels["TheDataModel"][0] as Peach.Core.Dom.XmlElement;
 
 			Assert.AreEqual("Root", elem1.elementName);
 
@@ -117,11 +110,11 @@ namespace Peach.Core.Test.Analyzers
 </Peach>".Fmt("\u0134", "\x0298");
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.UTF8.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.UTF8.GetBytes(xml)));
 
-			Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Dom.XmlElement);
+			Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Peach.Core.Dom.XmlElement);
 
-			var elem1 = dom.dataModels["TheDataModel"][0] as Dom.XmlElement;
+			var elem1 = dom.dataModels["TheDataModel"][0] as Peach.Core.Dom.XmlElement;
 
 			Assert.AreEqual("Root", elem1.elementName);
 
@@ -289,7 +282,7 @@ namespace Peach.Core.Test.Analyzers
 
 			foreach (var item in initial.PreOrderTraverse())
 			{
-				var asStr = item as Dom.String;
+				var asStr = item as Peach.Core.Dom.String;
 				if (asStr != null)
 				{
 					Assert.AreEqual(StringType.utf8, asStr.stringType);

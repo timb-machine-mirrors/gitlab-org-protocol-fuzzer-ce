@@ -2,12 +2,13 @@
 // Copyright (c) Deja vu Security
 //
 
+using System.IO;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System;
-using System.IO;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Extension of StringStatic that injects BOM characters randomly-ish into the strings.

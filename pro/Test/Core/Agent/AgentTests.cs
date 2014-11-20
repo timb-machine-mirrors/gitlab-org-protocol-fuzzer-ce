@@ -10,13 +10,13 @@ using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Publishers;
 using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
 using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Pro.Test.Agent
+namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
 	[Category("Peach")]
@@ -287,7 +287,7 @@ namespace Peach.Pro.Test.Agent
 
 		readonly Dictionary<uint, Fault[]> faults = new Dictionary<uint, Fault[]>();
 
-		void e_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+		void e_Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 		{
 			faults[currentIteration] = faultData;
 		}

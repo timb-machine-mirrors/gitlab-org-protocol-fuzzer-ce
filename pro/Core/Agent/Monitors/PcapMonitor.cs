@@ -27,19 +27,15 @@
 // $Id$
 
 using System;
-using System.Collections;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using Peach.Core.Dom;
+using System.IO;
+using Peach.Core;
+using Peach.Core.Agent;
 using SharpPcap;
 using SharpPcap.LibPcap;
-using SharpPcap.WinPcap;
-using SharpPcap.AirPcap;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Pcap", true)]
 	[Monitor("network.PcapMonitor")]

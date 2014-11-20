@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("TcpListener", true)]
 	[Publisher("tcp.TcpListener")]
