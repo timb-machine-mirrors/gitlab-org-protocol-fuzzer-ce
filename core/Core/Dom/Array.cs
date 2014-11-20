@@ -59,7 +59,7 @@ namespace Peach.Core.Dom
 	[Serializable]
 	[DataElement("Array")]
 	[DataElementParentSupported(null)]
-	public class Array : Block
+	public class Array : Sequence
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -76,27 +76,25 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public int occurs = 1;
 
-		private bool expanded;
+		//private BitwiseStream expandedValue;
+		//private int? countOverride;
 
-		private BitwiseStream expandedValue;
-		private int? countOverride;
+        public override int? CountOverride
+        {
+            set
+            {
+                countOverride = value;
 
-		public int? CountOverride
-		{
-			set
-			{
-				countOverride = value;
+                if (Count == 0)
+                    expandedValue = OriginalElement.Value;
+                else
+                    expandedValue = this[Count - 1].Value;
 
-				if (Count == 0)
-					expandedValue = OriginalElement.Value;
-				else
-					expandedValue = this[Count - 1].Value;
+                Invalidate();
+            }
+        }
 
-				Invalidate();
-			}
-		}
-
-		public int GetCountOverride()
+		public override int GetCountOverride()
 		{
 			// Called from CountRelation to get our size.
 			// Ensure we have expanded before checking this.Count
@@ -112,21 +110,21 @@ namespace Peach.Core.Dom
 		/// The original elements that was marked with the occurs, minOccurs, or maxOccurs
 		/// attributes.
 		/// </summary>
-		public DataElement OriginalElement
-		{
-			get
-			{
-				return originalElement;
-			}
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException("value");
+        public DataElement OriginalElement
+        {
+            get
+            {
+                return originalElement;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
 
-				originalElement = value;
-				originalElement.parent = this;
-			}
-		}
+                originalElement = value;
+                originalElement.parent = this;
+            }
+        }
 
 		public Array()
 		{

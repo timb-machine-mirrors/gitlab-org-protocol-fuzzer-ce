@@ -21,9 +21,9 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asArray = obj as Dom.Array;
+			var asSeq = obj as Dom.Sequence;
 
-			if (asArray != null && asArray.isMutable && asArray.Count > 1)
+			if (asSeq != null && asSeq.isMutable && asSeq.Count > 1)
 				return true;
 
 			return false;
@@ -45,15 +45,15 @@ namespace Peach.Core.Mutators
 
 		public override void sequentialMutation(DataElement obj)
 		{
-			performMutation((Dom.Array)obj);
+            performMutation((Dom.Sequence)obj);
 		}
 
 		public override void randomMutation(DataElement obj)
 		{
-			performMutation((Dom.Array)obj);
+            performMutation((Dom.Sequence)obj);
 		}
 
-		void performMutation(Dom.Array obj)
+        void performMutation(Dom.Sequence obj)
 		{
 			obj.mutationFlags = MutateOverride.Default;
 
