@@ -200,7 +200,7 @@ module DashApp.Services {
 		public TestLog: string = "";
 		public TestTime: string = "";
 
-		
+
 		public ResetAll() {
 			this._defines = undefined;
 			this._faultMonitors = [];
@@ -231,7 +231,7 @@ module DashApp.Services {
 
 		public LoadData(data) {
 			if (data.qa != undefined) {
-				this._qa = Models.Question.CreateQA(<Models.Question[]>data.qa); 
+				this._qa = Models.Question.CreateQA(<Models.Question[]>data.qa);
 			}
 
 			if (data.monitors != undefined)
@@ -262,7 +262,7 @@ module DashApp.Services {
 		private get isKnownPit() {
 			return (this.Pit != undefined && this.Pit.pitUrl != undefined && this.Pit.pitUrl.length > 0 && this.Pit.configured);
 		}
-		
+
 		public StartJob(job?: Models.Job) {
 			if (this.CanStartJob) {
 				if (job == undefined) {
@@ -313,8 +313,8 @@ module DashApp.Services {
 				this.jobPoller.promise.then(null, (e) => {
 					console.error(e);
 				}, (data: Models.Job) => {
-					this.updateJob(data);
-				});
+						this.updateJob(data);
+					});
 			}
 			else {
 				throw "jobPoller, wasn't what I was expecting";
@@ -347,7 +347,7 @@ module DashApp.Services {
 				this.jobPoller.stop();
 				this.jobPoller = undefined;
 				this.faultsPoller.stop();
-				this.faultsPoller = undefined; 
+				this.faultsPoller = undefined;
 			}
 		}
 
@@ -399,7 +399,7 @@ module DashApp.Services {
 		}
 
 		public InitializeSetVars() {
-			this._qa = this.Defines.ToQuestions(); 
+			this._qa = this.Defines.ToQuestions();
 		}
 
 		private updatePit(pit: Models.Pit) {
@@ -423,7 +423,7 @@ module DashApp.Services {
 
 		private getUserLibrary() {
 			this.peachSvc.GetLibraries((data: Models.PitLibrary[]) => {
-				var libs : Models.PitLibrary[] = $.grep(data, (e) => {
+				var libs: Models.PitLibrary[] = $.grep(data, (e) => {
 					return e.locked == false;
 				});
 				this.UserPitLibrary = libs[0].libraryUrl;

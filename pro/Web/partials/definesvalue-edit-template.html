@@ -1,7 +1,30 @@
 ﻿<div ng-switch="row.getProperty('type')">
-	<input ng-switch-default ng-cell-input ng-class="'colt' + $index"  ng-input="COL_FIELD" ng-model="COL_FIELD" type="text" />
-	<input ng-switch-when="int" ng-cell-input ng-class="'colt' + $index" ng-input="COL_FIELD" ng-model="COL_FIELD" step="1" type="number" integer />
-	<input ng-switch-when="bool" ng-cell-input ng-class="'colt' + $index" ng-input="COL_FIELD" type="checkbox" ng-model="COL_FIELD" ng-checked="COL_FIELD" />
-	<select ng-switch-when="enum" ng-cell-input ng-class="'colt' + $index" ng-input="COL_FIELD" ng-model="COL_FIELD" ng-options="item for item in row.getProperty('defaults')" />
+	<input ng-switch-default
+				 ng-cell-input
+				 ng-class="'colt' + $index"
+				 ng-input="COL_FIELD"
+				 ng-model="COL_FIELD"
+				 type="text" />
+	<input ng-switch-when="int"
+				 ng-cell-input
+				 ng-class="'colt' + $index"
+				 ng-input="COL_FIELD"
+				 ng-model="COL_FIELD"
+				 step="1"
+				 type="number"
+				 integer />
+	<input ng-switch-when="bool"
+				 ng-cell-input
+				 ng-class="'colt' + $index"
+				 ng-input="COL_FIELD"
+				 type="checkbox"
+				 ng-model="COL_FIELD"
+				 ng-checked="COL_FIELD" />
+	<select ng-switch-when="enum"
+	        ng-cell-input
+	        ng-class="'colt' + $index"
+	        ng-input="COL_FIELD"
+	        ng-model="COL_FIELD"
+	        ng-options="item for item in row.getProperty('defaults')">
+	</select>
 </div>
-

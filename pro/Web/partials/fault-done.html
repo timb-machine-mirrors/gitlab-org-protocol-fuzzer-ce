@@ -10,15 +10,20 @@
 	</div>
 	<div class="space-6" />
 	<div>
-		<span class="alert-success bigger-120">{{ vm.FaultMonitors.description }}</span>
+		<span class="alert-success bigger-120">
+			{{ vm.FaultMonitors.description }}
+		</span>
 	</div>
 	<div class="space-6" />
 	<div class="row-fluid wizard-actions">
-		<button class="btn btn-prev" ng-click="vm.restartFaultDetection()">
+		<button class="btn btn-prev" 
+						ng-click="vm.restartFaultDetection()">
 			<i class="icon-arrow-left"></i>
 			Redo Fault Detection
 		</button>
-		<button class="btn btn-success btn-next" ng-click="vm.submitFaultInfo()" ng-disabled="configuratorForm.$invalid">
+		<button class="btn btn-success btn-next" 
+		        ng-click="vm.submitFaultInfo()" 
+						ng-disabled="configuratorForm.$invalid">
 			Continue to Data Collection
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

@@ -8,10 +8,8 @@
 module DashApp {
 	"use strict";
 
-	
-	
-	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
-	
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void;
+
 	export interface IWizardParams extends ng.route.IRouteParamsService {
 		step: string;
 	}
@@ -19,8 +17,8 @@ module DashApp {
 	export class WizardController {
 		//#region private variables
 		private params: IWizardParams;
-		private questionPath:number[] = [0];
-		
+		private questionPath: number[] = [0];
+
 		private location: ng.ILocationService;
 		private peach: Services.IPeachService;
 		private pitConfigSvc: Services.IPitConfiguratorService;
@@ -114,7 +112,7 @@ module DashApp {
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
-		public get FaultMonitors(): Models.Agent{
+		public get FaultMonitors(): Models.Agent {
 			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.FaultMonitors[0];
 			else
@@ -136,7 +134,7 @@ module DashApp {
 		}
 
 		public get DefinesSimple(): any[] {
-			if (this.pitConfigSvc != undefined) 
+			if (this.pitConfigSvc != undefined)
 				return this.pitConfigSvc.Defines.config;
 			else
 				return [];
@@ -176,14 +174,14 @@ module DashApp {
 				this.setThisStepIncomplete();
 
 				var q = this.currentQuestion;
-				if (q.type != Models.QuestionTypes.Jump) { 
+				if (q.type != Models.QuestionTypes.Jump) {
 					// push this question id onto the path stack
 					this.questionPath.push(q.id);
 				}
 
 				//store the value in the state bag
 				if (q.key != undefined) {
-					if (q.value == undefined && q.required == false) { 
+					if (q.value == undefined && q.required == false) {
 					}
 					else {
 						this.pitConfigSvc.StateBag.s(q.key, q.value);
@@ -192,10 +190,9 @@ module DashApp {
 
 				var nextid: number;
 
-				if ([ Models.QuestionTypes.Choice, Models.QuestionTypes.Jump ].indexOf(q.type) >= 0) {
+				if ([Models.QuestionTypes.Choice, Models.QuestionTypes.Jump].indexOf(q.type) >= 0) {
 					// get next id from selected choice
-					var choice = $.grep(q.choice, function (e)
-					{
+					var choice = $.grep(q.choice, function (e) {
 						if (e.value == undefined && e.next != undefined)
 							return e.next.toString() == q.value.toString();
 						else if (e.value != undefined && q.value != undefined)
@@ -243,9 +240,8 @@ module DashApp {
 				else {
 					this.currentQuestion = <Models.Question>$.grep(this.qa, function (e) { return e.id == nextid; })[0];
 				}
+			}
 
-			} 
-			
 			//get value from the state bag if necessary
 			if (this.currentQuestion.value == undefined) {
 				this.currentQuestion.value = this.pitConfigSvc.StateBag.g(this.currentQuestion.key);
@@ -288,11 +284,11 @@ module DashApp {
 
 		}
 
-		public back()	{
+		public back() {
 			// pop the path and get the question
 
 			var previousid = 0;
-			if(this.questionPath.length > 0)
+			if (this.questionPath.length > 0)
 				previousid = this.questionPath.pop();
 
 			this.currentQuestion = $.grep(this.qa, function (e) { return e.id == previousid; })[0];
