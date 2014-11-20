@@ -281,7 +281,7 @@ namespace PitTester
 							gotStart = true;
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
-						else
+						else if (!gotStart && !ShouldSkipStart(actions))
 							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
 					}
 
@@ -315,14 +315,10 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
-		static string GetRelativePath(string basePath, string fullPath)
+		private static bool ShouldSkipStart(XPathNodeIterator actions)
 		{
-			if (basePath.LastOrDefault() != Path.DirectorySeparatorChar)
-				basePath += Path.DirectorySeparatorChar;
-
-			var relPath = fullPath.Substring(basePath.Length);
-
-			return relPath;
+			var preceding = actions.Current.SelectSingleNode("preceding-sibling::comment()");
+			return (preceding != null && preceding.Value.Contains("PitTester: Skip_StartIterationEvent"));
 		}
 	}
 }
