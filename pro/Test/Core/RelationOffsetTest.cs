@@ -580,6 +580,64 @@ namespace Peach.Core.Test
 				Assert.AreEqual(len, offset * 8);
 			}
 		}
+
+		[Test]
+		public void TestAbsoluteChoice()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<Number name='len' size='32' signed='false' endian='big'>
+			<Relation type='offset' of='item'/>
+		</Number>
+		<Choice name='c'>
+			<String name='item' value='foo' />
+		</Choice>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+	</Test>
+</Peach>";
+
+			PitParser parser = new PitParser();
+
+			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string>();
+			dom.tests[0].includedMutators.Add("StringStatic");
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(1, dataModels.Count);
+
+			foreach (var dm in dataModels)
+			{
+				var val = dm.Value;
+				var len = val.LengthBits;
+				Assert.GreaterOrEqual(len, 32);
+
+				val.Seek(0, SeekOrigin.Begin);
+				var rdr = new BitReader(val);
+				rdr.BigEndian();
+				uint offset = rdr.ReadUInt32();
+
+				Assert.AreEqual(offset, 4);
+			}
+		}
 	}
 }
 // end
