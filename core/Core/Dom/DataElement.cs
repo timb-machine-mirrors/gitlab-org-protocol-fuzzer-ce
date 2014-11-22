@@ -728,7 +728,7 @@ namespace Peach.Core.Dom
 			if (constraint != null)
 				pit.WriteAttributeString("constraint", constraint);
 
-			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag))
+			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag) && !(this is Double))
 			{
 				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
 				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
