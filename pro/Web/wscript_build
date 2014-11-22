@@ -5,13 +5,19 @@ deps = [
 	'System.Web.dll',
 ]
 
-extras = []
+extras = [
+	'index.html',
+	'package.json',
+	'bower.json',
+	'tsd.json',
+]
+
 dirs = [ 
 	'app', 
 	'Content', 
 	'partials', 
-	'Scripts', 
-	'testdata' 
+	'testdata',
+	'bower_components',
 ]
 
 for d in dirs:
@@ -24,6 +30,7 @@ bld(
 	install_path = '${BINDIR}/web',
 	install_644 = extras,
 	ide_source = 'ReverseProxy.cs',
+	ide_content = bld.path.ant_glob('typings/**/*'),
 	ide_aspnet = True,
 	use = deps,
 )

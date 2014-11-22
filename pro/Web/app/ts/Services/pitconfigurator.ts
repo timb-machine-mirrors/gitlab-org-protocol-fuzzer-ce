@@ -1,5 +1,4 @@
-﻿/// <reference path="../Models/models.ts" />
-/// <reference path="peach.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp.Services {
 	"use strict";

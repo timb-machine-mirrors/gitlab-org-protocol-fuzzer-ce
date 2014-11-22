@@ -1,18 +1,4 @@
-﻿/// <reference path="Models/models.ts" />
-/// <reference path="Services/peach.ts" />
-/// <reference path="Services/pitconfigurator.ts" />
-/// <reference path="Controllers/copypit.ts" />
-/// <reference path="Controllers/dash.ts" />
-/// <reference path="Controllers/faults.ts" />
-/// <reference path="Controllers/main.ts" />
-/// <reference path="Controllers/metrics.ts" />
-/// <reference path="Controllers/pitlibrary.ts" />
-/// <reference path="Controllers/pittest.ts" />
-/// <reference path="Controllers/wizard.ts" />
-/// <reference path="Controllers/startjob.ts" />
-/// <reference path="Controllers/config-monitors.ts" />
-/// <reference path="Controllers/config-test.ts" />
-/// <reference path="Controllers/config-variables.ts" />
+﻿/// <reference path="includes.d.ts" />
 
 module DashApp {
 	"use strict";

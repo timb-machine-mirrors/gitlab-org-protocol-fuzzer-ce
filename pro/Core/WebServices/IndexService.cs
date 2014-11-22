@@ -1,4 +1,5 @@
 using Nancy;
+using Nancy.Responses;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -7,10 +8,9 @@ namespace Peach.Pro.Core.WebServices
 		public IndexService()
 			: base("")
 		{
-			// Redirects
-			Get["/"] = _ => { return Response.AsRedirect("/app/index.html"); };
-			Get["/app"] = _ => { return Response.AsRedirect("/app/index.html"); };
-			Get["/docs"] = _ => { return Response.AsRedirect("/docs/index.html"); };
+			// Default Views
+			Get["/"] = _ => new GenericFileResponse("web/index.html");
+			Get["/docs"] = _ => Response.AsRedirect("/docs/");
 		}
 	}
 }

@@ -1,4 +1,6 @@
-﻿module DashApp {
+﻿/// <reference path="../includes.d.ts" />
+
+module DashApp {
 	export class StartJobController {
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 

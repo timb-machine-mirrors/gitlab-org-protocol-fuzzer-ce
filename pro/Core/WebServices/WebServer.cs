@@ -126,19 +126,17 @@ namespace Peach.Pro.Core.WebServices
 			container.Register<ResourceViewLocationProvider>();
 		}
 
-		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
-		{
-			base.ConfigureRequestContainer(container, context);
-		}
-
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
 		{
 			base.ConfigureConventions(nancyConventions);
 
 			// Need to go before the default '/Content' handler in nancy
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs"));
-
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/", @"web")
+			);
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")
+			);
 		}
 
 		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)

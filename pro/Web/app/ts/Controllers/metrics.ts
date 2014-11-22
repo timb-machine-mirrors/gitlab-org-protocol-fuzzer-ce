@@ -1,6 +1,4 @@
-﻿/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
-/// <reference path="../Services/peach.ts" />
-/// <reference path="../Models/models.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp {
 	"use strict";
@@ -231,7 +229,9 @@ module DashApp {
 
 		//labels: this.faultTimelineData.map(i => moment(i.date).format("h:mm:ss a")),
 
-		public metrics_faultsOverTime_chart = {};
+		public metrics_faultsOverTime_chart = {
+			labels:	[]
+		};
 
 		// #region metrics_faultsOverTime_options
 

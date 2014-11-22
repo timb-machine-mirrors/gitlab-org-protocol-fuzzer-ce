@@ -1,0 +1,39 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "angularjs/angular.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "angularjs/angular-resource.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "angular-ui-bootstrap/angular-ui-bootstrap.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "angular-ui/angular-ui-router.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "moment/moment.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "ng-grid/ng-grid.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "angularjs/angular-route.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "chosen/chosen.jquery.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    },
+    "typeahead/typeahead.d.ts": {
+      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
+    }
+  }
+}
