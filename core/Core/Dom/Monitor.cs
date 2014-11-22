@@ -28,11 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using Peach.Core.Agent;
-using System.Runtime.Serialization;
-using System.Xml;
 
 namespace Peach.Core.Dom
 {

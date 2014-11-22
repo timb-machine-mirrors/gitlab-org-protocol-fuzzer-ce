@@ -28,10 +28,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Peach.Core.Dom;
-using System.Runtime.Serialization;
 using System.Xml;
 
 namespace Peach.Core

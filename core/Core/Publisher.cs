@@ -29,15 +29,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using Peach.Core.Dom;
-using Peach;
 using Peach.Core.IO;
-using System.Reflection;
-using NLog;
-using Action = Peach.Core.Dom.Action;
-using System.Net;
 
 namespace Peach.Core
 {

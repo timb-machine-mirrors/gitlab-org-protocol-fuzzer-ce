@@ -27,11 +27,8 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using NLog;
 
 namespace Peach.Core.Cracker
 {

@@ -40,7 +40,6 @@ using NLog;
 
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Globalization;
 using System.Net;
 
 namespace Peach.Core.Analyzers
