@@ -441,13 +441,13 @@ LIMIT 20;
 
 
 ";
-/*
-	,case when length(p.name) > 0 then
-		s.name || '.' || a.name || '.' || p.name || '.' || e.name
-	else
-		s.name || '.' || a.name || '.' || e.name
-	end as element
-*/
+		/*
+			,case when length(p.name) > 0 then
+				s.name || '.' || a.name || '.' || p.name || '.' || e.name
+			else
+				s.name || '.' || a.name || '.' || e.name
+			end as element
+		*/
 		#endregion
 
 		#region foreign key queries
@@ -581,10 +581,19 @@ INSERT INTO metrics_states ( state, count ) VALUES ( :state, 1 );
 UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		#endregion
 
-		static string[] foreignKeys = { "state", "action", "parameter", "element", "mutator", "dataset", "bucket" };
+		static string[] foreignKeys =
+		{
+			"state", 
+			"action", 
+			"parameter", 
+			"element", 
+			"mutator", 
+			"dataset", 
+			"bucket"
+		};
 
 		public SQLiteConnection db;
-		Sample sample;
+		readonly Sample sample = new Sample();
 		bool reproducingFault;
 
 		Dictionary<string, KeyTracker> keyTracker = new Dictionary<string, KeyTracker>();
@@ -660,17 +669,6 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		public MetricsLogger(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
-
-			sample = new Sample();
-
-			//try
-			//{
-			//	SQLiteLog.Initialize();
-			//}
-			//catch (MissingMethodException)
-			//{
-			//	throw new PeachException("Error, could not find native sqlite library.");
-			//}
 		}
 
 		public string Path
@@ -834,13 +832,13 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				select_bucket_cmd = null;
 			}
 
-			if(insert_bucket_cmd != null)
+			if (insert_bucket_cmd != null)
 			{
 				insert_bucket_cmd.Dispose();
 				insert_bucket_cmd = null;
 			}
 
-			if(update_bucket_cmd != null)
+			if (update_bucket_cmd != null)
 			{
 				update_bucket_cmd.Dispose();
 				update_bucket_cmd = null;
@@ -852,7 +850,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				insert_fault_cmd = null;
 			}
 
-			if(select_faultsbyhour_cmd != null)
+			if (select_faultsbyhour_cmd != null)
 			{
 				select_faultsbyhour_cmd.Dispose();
 				select_faultsbyhour_cmd = null;
@@ -875,7 +873,6 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 			keyTracker.Clear();
 
-			
 			if (db != null)
 			{
 				db.Close();
@@ -883,10 +880,8 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			}
 		}
 
-
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-
 			reproducingFault = context.reproducingFault;
 
 			//TODO: Clear Sample list
@@ -897,7 +892,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		{
 			sample.State = state.name;
 
-			var dom = state.parent.parent as Peach.Core.Dom.Dom;
+			var dom = state.parent.parent;
 
 			if (!reproducingFault && !dom.context.controlIteration && !dom.context.controlRecordingIteration)
 				OnStateSample(sample.State);
@@ -951,7 +946,6 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 		{
 			using (var trans = db.BeginTransaction())
 			{
-
 				object id;
 
 				id = keyTracker["state"].Get(s.State);
@@ -973,7 +967,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 				id = keyTracker["mutator"].Get(s.Mutator);
 				select_iteration_cmd.Parameters["mutator"].Value = id;
 				insert_iteration_cmd.Parameters["mutator"].Value = id;
-				
+
 				id = keyTracker["dataset"].Get(s.DataSet ?? "");
 				select_iteration_cmd.Parameters["dataset"].Value = id;
 				insert_iteration_cmd.Parameters["dataset"].Value = id;
@@ -1000,11 +994,9 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			if (category == FileLogger.Category.Reproducing)
 				return;
 
-
 			var bucketdelimiter = @"_";
 			using (var trans = db.BeginTransaction())
 			{
-
 				var now = DateTime.Now;
 
 				var date = now.Date;
@@ -1060,7 +1052,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 					//TODO: Add row to metrics_faults for each Sample in Sample list using keys from both metrics_buckets entries, add row or increment
 					//* // I really dunno about this...
 					foreach (var s in samples)
-					{ 
+					{
 						insert_fault_cmd.Parameters["state"].Value = keyTracker["state"].Get(s.State);
 						insert_fault_cmd.Parameters["action"].Value = keyTracker["action"].Get(s.Action);
 						insert_fault_cmd.Parameters["parameter"].Value = keyTracker["parameter"].Get(s.Parameter);
@@ -1077,7 +1069,6 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 				trans.Commit();
 			}
-
 		}
 	}
 }
