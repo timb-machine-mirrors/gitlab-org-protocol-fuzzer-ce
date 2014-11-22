@@ -381,7 +381,7 @@ namespace Peach.Core.Dom
 			if (SelectedElement == null)
 				SelectDefault();
 
-			return new Variant(SelectedElement.Value);
+			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
 		}
 	}
 }
