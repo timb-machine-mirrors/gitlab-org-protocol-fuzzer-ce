@@ -78,7 +78,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			return ret;
 		}
 
-		protected override void OnRunJob(bool test, System.Collections.Generic.List<string> extra)
+		protected override void OnRunJob(bool test, List<string> extra)
 		{
 			if (extra.Count > 0)
 			{
