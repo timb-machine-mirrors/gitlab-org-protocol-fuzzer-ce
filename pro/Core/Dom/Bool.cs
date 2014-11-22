@@ -51,6 +51,8 @@ namespace Peach.Enterprise.Dom
             var elem = DataElement.Generate<Bool>(node, parent);
 
             context.handleCommonDataElementAttributes(node, elem);
+            context.handleCommonDataElementChildren(node, elem);
+            context.handleCommonDataElementValue(node, elem);
 
             return elem;
         }
@@ -60,9 +62,10 @@ namespace Peach.Enterprise.Dom
             pit.WriteStartElement("Bool");
 
             pit.WriteAttributeString("name", name);
-            
+
             WritePitCommonAttributes(pit);
             WritePitCommonValue(pit);
+            WritePitCommonChildren(pit);
 
             pit.WriteEndElement();
         }
