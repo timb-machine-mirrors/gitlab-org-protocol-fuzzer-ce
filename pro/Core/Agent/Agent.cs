@@ -118,7 +118,6 @@ namespace Peach.Pro.Core.Agent
 			{
 				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
-
 		}
 
 		public void StopAllMonitors()

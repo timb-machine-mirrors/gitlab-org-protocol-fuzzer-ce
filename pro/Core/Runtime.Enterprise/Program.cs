@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Godel.Core;
 using Peach.Core;
+using Peach.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime.Enterprise
@@ -18,7 +20,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		{
 		}
 
-		protected override void AddCustomOptions(Peach.Core.Runtime.OptionSet options)
+		protected override void AddCustomOptions(OptionSet options)
 		{
 			options.Add("pits=", v => pitLibraryPath = v);
 			options.Add("noweb", v => noweb = true);
@@ -65,7 +67,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		protected override Analyzer GetParser()
 		{
-			var parser = new Godel.Core.GodelPitParser();
+			var parser = new GodelPitParser();
 			Analyzer.defaultParser = parser;
 
 			return base.GetParser();
@@ -105,10 +107,10 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			// Pass an empty pit library path if we are running a job off of
 			// the command line.
 
-			using (var svc = new WebServices.WebServer(""))
+			using (var svc = new WebServer(""))
 			{
 				// Tell the web service the job is running off the command line
-				svc.Context.AttachJob(this.dom, config);
+				svc.Context.AttachJob(dom, config);
 
 				svc.Start();
 
@@ -226,7 +228,7 @@ Debug Peach XML File
   debugging as well.
 ";
 			Console.WriteLine(syntax);
-			throw new Peach.Core.Runtime.SyntaxException();
+			throw new SyntaxException();
 		}
 
 		private string FindPitLibrary()
