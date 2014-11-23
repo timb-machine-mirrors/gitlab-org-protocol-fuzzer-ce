@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-
+﻿using System.Diagnostics;
+using System.Text;
 using NLog;
 using NLog.Targets;
 using NLog.Config;
 
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.IO;
-using System.Text.RegularExpressions;
-
+// ReSharper disable once CheckNamespace
 namespace Peach
 {
-	class AssertTestFail : System.Diagnostics.TraceListener
+	class AssertTestFail : TraceListener
 	{
 		public override void Write(string message)
 		{
@@ -28,10 +18,10 @@ namespace Peach
 
 		public override void WriteLine(string message)
 		{
-			var sb = new System.Text.StringBuilder();
+			var sb = new StringBuilder();
 
 			sb.AppendLine("Assertion " + message);
-			sb.AppendLine(new System.Diagnostics.StackTrace(2, true).ToString());
+			sb.AppendLine(new StackTrace(2, true).ToString());
 
 			Assert.Fail(sb.ToString());
 		}
@@ -43,10 +33,12 @@ namespace Peach
 		[SetUp]
 		public void Initialize()
 		{
-			System.Diagnostics.Debug.Listeners.Insert(0, new AssertTestFail());
+			Debug.Listeners.Insert(0, new AssertTestFail());
 
-			var consoleTarget = new ConsoleTarget();
-			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+			var consoleTarget = new ConsoleTarget
+			{
+				Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+			};
 
 			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
@@ -73,11 +65,9 @@ namespace Peach
 		public void TestAssert()
 		{
 #if DEBUG
-			Assert.Throws<AssertionException>(delegate() {
-				System.Diagnostics.Debug.Assert(false);
-			});
+			Assert.Throws<AssertionException>(() => Debug.Assert(false));
 #else
-			System.Diagnostics.Debug.Assert(false);
+			Debug.Assert(false);
 #endif
 
 		}

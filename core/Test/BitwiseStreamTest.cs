@@ -1,7 +1,6 @@
 using System;
 using Peach.Core.IO;
 using NUnit.Framework;
-using System.Text;
 using System.IO;
 
 namespace Peach.Core.Test
