@@ -6,6 +6,7 @@ using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 using Peach.Pro.Test.Core.Publishers;
 
 namespace Peach.Pro.Test.Core.CrackingTests

@@ -34,6 +34,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {

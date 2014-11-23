@@ -31,6 +31,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {

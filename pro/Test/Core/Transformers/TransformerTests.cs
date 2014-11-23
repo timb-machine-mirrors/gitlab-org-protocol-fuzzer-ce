@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers
 {

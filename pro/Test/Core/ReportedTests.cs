@@ -34,6 +34,7 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {

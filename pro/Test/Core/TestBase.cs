@@ -41,13 +41,14 @@ namespace Peach.Pro.Test.Core
 			return ret;
 		}
 
-		static TestBase()
+		[SetUp]
+		public void Initialize()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget {Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"};
+				var consoleTarget = new ConsoleTarget { Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}" };
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
@@ -59,11 +60,6 @@ namespace Peach.Pro.Test.Core
 			}
 
 			Program.LoadPlatformAssembly();
-		}
-
-		[SetUp]
-		public void Initialize()
-		{
 		}
 	
 		public static MemoryStream LoadResource(string name)
@@ -92,7 +88,6 @@ namespace Peach.Pro.Test.Core
 #else
 			Debug.Assert(false);
 #endif
-
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.StateModel
 {

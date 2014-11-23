@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 
 namespace Peach.Pro.Test.Core
