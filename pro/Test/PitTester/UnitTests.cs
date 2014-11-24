@@ -137,5 +137,74 @@ namespace PitTester
 				Assert.Fail(ex.Message);
 			}
 		}
+
+		[Test]
+		public void TestIgnoreChoice()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='c'>
+			<String name='str1' />
+			<String name='str2' />
+		</Choice>
+		<String value='\r\n' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='c.str1' value='String One' />
+				</Data>
+				<Data>
+					<Field name='c.str2' value='String Two' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Ignore xpath='//str1' />
+	<Ignore xpath='//str2' />
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Output action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000   00 00 00 00 00 00 00 00 00 00 0d 0a              ............
+]]>
+		</Output>
+		<Close  action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
 	}
 }
