@@ -1,8 +1,7 @@
 using Nancy;
-using Nancy.Responses;
-using System;
+using Peach.Core;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class EulaService : NancyModule
 	{
@@ -11,33 +10,27 @@ namespace Peach.Enterprise.WebServices
 		{
 			Get["/eula"] = _ =>
 			{
-				if (Peach.Core.License.EulaAccepted)
-					return Response.AsRedirect("/app/index.html");
+				if (License.EulaAccepted)
+					return Response.AsRedirect("/");
 
 				return View["Eula", new
 				{
 					Rejected = false,
-					Version = Peach.Core.License.Version,
-					EulaText = Peach.Core.License.EulaText()
+					Version = License.Version.ToString(),
+					EulaText = License.EulaText()
 				}];
 			};
 
-			Post["/eula", (ctx) => Accepted(Eula(ctx))] = _ =>
+			Post["/eula", ctx => Accepted(Eula(ctx))] = _ =>
 			{
-				Peach.Core.License.EulaAccepted = true;
+				License.EulaAccepted = true;
 
 				return Response.AsRedirect("/eula");
 			};
 
-			Post["/eula", (ctx) => Rejected(Eula(ctx))] = _ =>
-			{
-				return View["Eula", new { Rejected = true }];
-			};
+			Post["/eula", ctx => Rejected(Eula(ctx))] = _ => View["Eula", new { Rejected = true }];
 
-			Post["/eula", (ctx) => NotFound(Eula(ctx))] = _ =>
-			{
-				return Response.AsRedirect("/eula");
-			};
+			Post["/eula", ctx => NotFound(Eula(ctx))] = _ => Response.AsRedirect("/eula");
 		}
 
 		static bool? Eula(NancyContext ctx)
