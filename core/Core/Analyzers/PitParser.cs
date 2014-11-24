@@ -1688,6 +1688,22 @@ namespace Peach.Core.Analyzers
 			if (node.hasAttr("maxOutputSize"))
 				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
 
+			var lifetime = node.getAttr("targetLifetime", null);
+			if (lifetime != null)
+			{
+				switch (lifetime.ToLower())
+				{
+					case "session":
+						test.TargetLifetime = Test.Lifetime.Session;
+						break;
+					case "iteration":
+						test.TargetLifetime = Test.Lifetime.Iteration;
+						break;
+					default:
+						throw new PeachException("Error, Test '{1}' attribute targetLifetime has invalid value '{0}'.".Fmt(lifetime, test.name));
+				}
+			}
+
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Logger")

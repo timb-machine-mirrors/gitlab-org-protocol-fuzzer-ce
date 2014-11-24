@@ -31,6 +31,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {
@@ -542,6 +543,45 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, count);
+		}
+
+		[Test]
+		public void TestTargetLifetime()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'/>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' {0}>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var dom1 = DataModelCollector.ParsePit(xml.Fmt(""));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Session, dom1.tests[0].TargetLifetime);
+
+			var dom2 = DataModelCollector.ParsePit(xml.Fmt("targetLifetime='session'"));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Session, dom2.tests[0].TargetLifetime);
+
+			var dom3 = DataModelCollector.ParsePit(xml.Fmt("targetLifetime='iteration'"));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Iteration, dom3.tests[0].TargetLifetime);
+
+			var ex = Assert.Throws<PeachException>(() =>
+				DataModelCollector.ParsePit(xml.Fmt("targetLifetime='foo'"))
+			);
+			Assert.That(ex.Message, Is.StringStarting("Error, Pit file failed to validate"));
 		}
 	}
 }
